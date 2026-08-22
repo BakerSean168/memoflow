@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/BakerSean168/memoflow.git"
   },
-  "version": "0.9.0",
+  "version": "0.10.0",
   "type": "commonjs",
   "dependencies": {
     "@memoflow/account": "workspace:*",
