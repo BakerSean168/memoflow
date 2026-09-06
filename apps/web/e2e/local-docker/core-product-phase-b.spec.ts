@@ -256,7 +256,7 @@ test.describe('Local Docker core product Phase B', () => {
 
 function taskCard(page: Page, title: string): Locator {
   return page
-    .getByTestId('draggable-task-card')
+    .getByTestId('task-plan-card')
     .filter({ has: page.getByText(title, { exact: true }) })
     .first();
 }

@@ -286,7 +286,6 @@ describe('TaskTemplateController', () => {
         description: undefined,
         recurrenceRule: undefined,
         importance: undefined,
-        folderId: undefined,
         tags: undefined,
         color: undefined,
       });

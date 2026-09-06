@@ -11,7 +11,6 @@ describe('PrismaTaskTemplateMapper', () => {
   const IDENTITY_ID_1 = aPrefixedUuid('IdentityId', 'task-template-owner-1');
   const IDENTITY_ID_2 = aPrefixedUuid('IdentityId', 'task-template-owner-2');
   const IDENTITY_ID_3 = aPrefixedUuid('IdentityId', 'task-template-owner-3');
-  const FOLDER_ID_1 = aPrefixedUuid('ITaskFolderId', 'task-folder-1');
   const GOAL_ID_1 = aPrefixedUuid('GoalId', 'goal-1');
   const KEY_RESULT_ID_1 = aPrefixedUuid('KeyResultId', 'key-result-1');
 
@@ -23,8 +22,6 @@ describe('PrismaTaskTemplateMapper', () => {
     importance: 'Moderate',
     color: null,
     tags: '[]',
-    folderId: null,
-    parentTaskId: null,
     status: 'Active',
     version: 1,
     createdAt: new Date('2024-01-01T00:00:00Z'),
@@ -59,9 +56,6 @@ describe('PrismaTaskTemplateMapper', () => {
     checklist: null,
     lastGeneratedDate: null,
     generateAheadDays: null,
-    dependencyStatus: 'NONE',
-    isBlocked: false,
-    blockingReason: null,
   });
 
   const createFullRow = (): PrismaTaskTemplate => ({
@@ -72,8 +66,6 @@ describe('PrismaTaskTemplateMapper', () => {
     importance: 'Important',
     color: '#FF5733',
     tags: JSON.stringify(['urgent', 'work']),
-    folderId: FOLDER_ID_1,
-    parentTaskId: TEMPLATE_ID_1,
     status: 'Active',
     version: 2,
     createdAt: new Date('2024-02-01T10:30:45Z'),
@@ -111,9 +103,6 @@ describe('PrismaTaskTemplateMapper', () => {
     ]),
     lastGeneratedDate: new Date('2024-02-29T00:00:00Z'),
     generateAheadDays: 7,
-    dependencyStatus: 'Blocked',
-    isBlocked: true,
-    blockingReason: 'Waiting for approval',
   });
 
   /** Creates a TaskTemplate aggregate from a Prisma row for use with toPersistence */

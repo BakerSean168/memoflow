@@ -148,8 +148,6 @@ describe('goal repository factories surface', () => {
     // reachable from @memoflow/goal; the following value-level assertions pin the
     // field names so a renamed/removed port fails loudly.
     const run = (_t: GoalWriteTransactionRunner) => undefined;
-    const folder = (_t: IGoalFolderRepository) => undefined;
-    const focus = (_t: IFocusModeRepository) => undefined;
     const habit = (_t: IHabitRepository) => undefined;
     const goal = (_t: IGoalRepository) => undefined;
     const record = (_t: IGoalRecordRepository) => undefined;
@@ -157,8 +155,6 @@ describe('goal repository factories surface', () => {
     const wallet = (_t: IWalletRepository) => undefined;
 
     expect(typeof run).toBe('function');
-    expect(typeof folder).toBe('function');
-    expect(typeof focus).toBe('function');
     expect(typeof habit).toBe('function');
     expect(typeof goal).toBe('function');
     expect(typeof record).toBe('function');

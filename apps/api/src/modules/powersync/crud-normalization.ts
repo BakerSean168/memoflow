@@ -15,7 +15,6 @@ export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
   accounts: new Set(['profile', 'settings']),
   user_settings: new Set(['preferences']),
   goals: new Set(['tags']),
-  focus_modes: new Set(['focused_goal_ids']),
   repositories: new Set(['config', 'stats']),
   folders: new Set(['metadata']),
   resources: new Set(['metadata', 'stats']),
@@ -28,8 +27,6 @@ export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
 
 export const BOOLEAN_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
   accounts: new Set(['email_is_verified', 'email_is_primary', 'phone_is_verified']),
-  goal_folders: new Set(['is_system_folder']),
-  focus_modes: new Set(['is_active']),
   task_templates: new Set(['reminder_config_enabled', 'is_blocked']),
   schedules: new Set(['has_conflict']),
   schedule_tasks: new Set(['enabled']),

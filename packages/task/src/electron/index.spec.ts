@@ -55,7 +55,6 @@ function createApiStub(): TaskApplicationPort {
   const noop = vi.fn(() => ok([] as never));
   const templateFn = vi.fn(() => ok([] as never));
   const instanceFn = vi.fn(() => ok([] as never));
-  const dependencyFn = vi.fn(() => ok([] as never));
   return {
     createTaskTemplate: noop,
     updateTaskTemplate: noop,
@@ -68,8 +67,6 @@ function createApiStub(): TaskApplicationPort {
     unbindTaskFromGoal: noop,
     getTaskTemplate: templateFn,
     listTaskTemplates: templateFn,
-    getTaskTemplateGraph: templateFn,
-    listTaskTemplatesByPriority: templateFn,
     completeTaskInstance: instanceFn,
     uncompleteTaskInstance: instanceFn,
     skipTaskInstance: instanceFn,
@@ -81,13 +78,6 @@ function createApiStub(): TaskApplicationPort {
     listTaskInstancesByTemplate: instanceFn,
     listTaskInstancesByStatus: instanceFn,
     getTaskInstancesByDateRange: instanceFn,
-    createTaskDependency: dependencyFn,
-    deleteTaskDependency: dependencyFn,
-    updateTaskDependency: dependencyFn,
-    listTaskDependencies: dependencyFn,
-    listTaskDependents: dependencyFn,
-    getDependencyChain: dependencyFn,
-    validateTaskDependency: dependencyFn,
   } as TaskApplicationPort;
 }
 

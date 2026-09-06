@@ -35,7 +35,7 @@ export type ServerStateInvalidation =
       target: 'task-template';
       identityScope: string;
       source: 'mutation' | 'powersync' | 'reconnect';
-      projection?: 'all' | 'lists' | 'details' | 'graphs';
+      projection?: 'all' | 'lists' | 'details';
       entityId?: string;
       dedupeKey?: string;
     }
@@ -136,18 +136,16 @@ export function createServerStateInvalidationDispatcher(
     const scope = intent.identityScope;
     const projection = intent.projection ?? 'all';
     const keys: QueryKey[] = [];
-    if (projection === 'graphs') {
-      keys.push(taskTemplateQueryKeys.graphs(scope));
-    } else if (projection === 'lists') {
+    if (projection === 'lists') {
       keys.push(taskTemplateQueryKeys.lists(scope));
     } else if (projection === 'details') {
       keys.push(taskTemplateQueryKeys.details(scope));
     } else {
       // 'all' — but mutation semantics differ: mutations must not invalidate the whole details
       // prefix (only the known entity's detail, added below). Non-mutation 'all' (powersync) does.
-      // mutation 语义不同：只失效 lists+graphs（详情只按已知 entity 单独失效），非 mutation 的
+      // mutation 语义不同：只失效 lists（详情只按已知 entity 单独失效），非 mutation 的
       // 'all'（powersync 表变化）才整段失效 details prefix。
-      keys.push(taskTemplateQueryKeys.lists(scope), taskTemplateQueryKeys.graphs(scope));
+      keys.push(taskTemplateQueryKeys.lists(scope));
       if (intent.source !== 'mutation') {
         keys.push(taskTemplateQueryKeys.details(scope));
       }

@@ -1,6 +1,6 @@
 /**
  * Residual 985: sole parseBoolean helper for goal API routes.
- * Goal + goal-folder routes import this; local duals retired.
+ * Goal routes import this; local duals retired.
  * Query string "true"/"false" → boolean; otherwise undefined.
  * Soft residual 1113: data-portability toBoolean keep-boundary (fallback + numbers; no force-merge).
  */

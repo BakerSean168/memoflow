@@ -8,14 +8,14 @@
  * - passes the host taskBindingReadPort through and includes the listener
  *   runtime inside the module runtime contributions
  * - returns an already-bound IApiModule-compatible handle
- * - mounts /goals + /goal-folders and starts the owned instance when registered
+ * - mounts /goals and starts the owned instance when registered
  *
  * 验证 composeGoal()：
  * - 按计划 §3.1 顺序装配目标（repositories → listeners runtime → 基础 runtime 贡献 →
  *   module instance → API module）
  * - 透传宿主 taskBindingReadPort，并把 listener runtime 并入模块运行时贡献
  * - 返回已绑定 instance 的、兼容 IApiModule 的 handle
- * - register() 挂载 /goals 与 /goal-folders 并启动所属实例
+ * - register() 挂载 /goals 并启动所属实例
  *
  * The ingredient factories are wrapped in vi.fn() so the spec can assert assembly
  * order, while delegating to the real implementations so the structural
@@ -140,11 +140,11 @@ describe('composeGoal assembly order', () => {
  *
  * Real factories: Prisma repositories only hold the db reference at construction
  * (no queries), the listener/base runtimes are logging-only, so registering with
- * a fake db succeeds and mounts /goals + /goal-folders.
+ * a fake db succeeds and mounts /goals.
  *
  * 真实工厂下：Prisma repository 构造时只持有 db 引用（无查询），
  * listener/base runtime 仅记录日志，因此用 fake db 注册可成功并挂载
- * /goals 与 /goal-folders。
+ * /goals。
  */
 describe('composeGoal structural registration', () => {
   let routerUse: ReturnType<typeof vi.fn>;

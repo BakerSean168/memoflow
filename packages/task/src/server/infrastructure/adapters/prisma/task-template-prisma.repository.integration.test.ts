@@ -36,7 +36,6 @@ describe('TaskTemplatePrismaRepository integration', () => {
       identityId,
       title: 'Complete Project',
       description: 'Finish the quarterly project',
-      folderId: null,
       importance: ImportanceLevel.Important,
       dueDate: tomorrow,
     });
@@ -71,7 +70,6 @@ describe('TaskTemplatePrismaRepository integration', () => {
       identityId,
       title: 'Weekly Review',
       description: 'Review the week',
-      folderId: null,
       importance: ImportanceLevel.Moderate,
       timeConfig,
       recurrenceRule,

@@ -6,11 +6,6 @@ describe('normalizeCrudData', () => {
     expect(normalizeCrudData('goals', { tags: '["work","focus"]' })).toEqual({
       tags: ['work', 'focus'],
     });
-    expect(
-      normalizeCrudData('focus_modes', {
-        focused_goal_ids: '["goal-1","goal-2"]',
-      }),
-    ).toEqual({ focusedGoalIds: ['goal-1', 'goal-2'] });
   });
 
   it('keeps JSON-looking text when the Prisma column is intentionally a string', () => {

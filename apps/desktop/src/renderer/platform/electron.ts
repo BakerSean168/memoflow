@@ -70,18 +70,13 @@ const TABLE_TO_MODULE: Record<string, string> = {
   accounts: 'account',
   // Goal
   goals: 'goal',
-  goal_folders: 'goal',
   key_results: 'goal',
   goal_records: 'goal',
   goal_reviews: 'goal',
   key_result_weight_snapshots: 'goal',
-  focus_sessions: 'goal',
-  focus_modes: 'goal',
   // Task
   task_templates: 'task',
   task_instances: 'task',
-  task_folders: 'task',
-  task_dependencies: 'task',
   task_template_history: 'task',
   task_statistics: 'task',
   // Schedule
@@ -110,7 +105,6 @@ const TABLE_TO_MODULE: Record<string, string> = {
 /**
  * Module name → Pinia store invalidation function (non-pilot modules keep the legacy path).
  *
- * Pilot tables (notifications / task_templates / task_dependencies / rules / rule_revisions)
  * go through the server-state dispatcher instead; the pilot stores keep no
  * `setInitialized(false)` flag.
  * 非 pilot 模块继续走旧 Pinia invalidator；pilot 表走 dispatcher。
@@ -131,7 +125,6 @@ const MODULE_INVALIDATORS: Record<string, () => void> = {
 const PILOT_TABLES = new Set([
   'notifications',
   'task_templates',
-  'task_dependencies',
   'rules',
   'rule_revisions',
 ]);

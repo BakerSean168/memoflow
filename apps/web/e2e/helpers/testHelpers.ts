@@ -763,111 +763,6 @@ export async function createTask(
 }
 
 /**
- * 创建 Task 依赖
- */
-export async function createTaskDependency(
-  page: Page,
-  options: {
-    targetTaskTitle: string;
-    predecessorTaskTitle: string;
-    dependencyType?: 'finish-to-start' | 'start-to-start' | 'finish-to-finish' | 'start-to-finish';
-  },
-) {
-  console.log(`[Task] 创建依赖: ${options.targetTaskTitle} -> ${options.predecessorTaskTitle}`);
-
-  // 点击目标任务
-  await page.click(`[data-testid="draggable-task-card"]:has-text("${options.targetTaskTitle}")`);
-
-  // 点击添加依赖按钮
-  await page.click('button:has-text("添加依赖"), [data-testid="add-dependency-btn"]');
-
-  // 等待对话框
-  await page.waitForSelector('[role="dialog"]');
-
-  // 选择前置任务
-  await page.selectOption('[name="predecessorTask"], select', {
-    label: options.predecessorTaskTitle,
-  });
-
-  // 选择依赖类型
-  if (options.dependencyType) {
-    await page.selectOption('[name="dependencyType"], select', options.dependencyType);
-  }
-
-  // 保存
-  await page.click('button:has-text("保存"), button:has-text("确定")');
-
-  // 等待完成
-  await page.waitForTimeout(1000);
-
-  console.log('[Task] 依赖创建成功');
-}
-
-/**
- * 通过拖放创建依赖
- */
-export async function dragTaskToCreateDependency(
-  page: Page,
-  sourceTaskTitle: string,
-  targetTaskTitle: string,
-) {
-  console.log(`[Task] 拖放创建依赖: ${sourceTaskTitle} -> ${targetTaskTitle}`);
-
-  const sourceCard = page.locator(
-    `[data-testid="draggable-task-card"]:has-text("${sourceTaskTitle}")`,
-  );
-  const targetCard = page.locator(
-    `[data-testid="draggable-task-card"]:has-text("${targetTaskTitle}")`,
-  );
-
-  // 使用 Playwright 的 dragTo 方法
-  await sourceCard.dragTo(targetCard);
-
-  // 等待动画和 API 调用
-  await page.waitForTimeout(1500);
-
-  console.log('[Task] 拖放依赖创建成功');
-}
-
-/**
- * 打开 Task DAG 可视化
- */
-export async function openTaskDAG(page: Page) {
-  console.log('[Task] 打开 DAG 可视化');
-
-  await page.click('button:has-text("DAG"), button:has-text("依赖关系图")');
-
-  // 等待 DAG 加载
-  await page.waitForSelector('[data-testid="task-dag-visualization"]', { timeout: 5000 });
-  await page.waitForTimeout(1000); // 等待图表渲染
-
-  console.log('[Task] DAG 可视化已打开');
-}
-
-/**
- * 验证依赖关系是否存在
- */
-export async function verifyDependencyExists(
-  page: Page,
-  sourceTaskTitle: string,
-  targetTaskTitle: string,
-): Promise<boolean> {
-  // 方式1: 在任务卡片中查找依赖指示器
-  const targetCard = page.locator(
-    `[data-testid="draggable-task-card"]:has-text("${targetTaskTitle}")`,
-  );
-  await targetCard.click();
-
-  const dependencyText = page.locator(`text=/依赖.*${sourceTaskTitle}/i`);
-  const exists = (await dependencyText.count()) > 0;
-
-  console.log(
-    `[Task] 依赖关系 ${sourceTaskTitle} -> ${targetTaskTitle}: ${exists ? '存在' : '不存在'}`,
-  );
-  return exists;
-}
-
-/**
  * 清理测试任务
  */
 export async function cleanupTask(page: Page, taskTitle: string) {
@@ -876,7 +771,7 @@ export async function cleanupTask(page: Page, taskTitle: string) {
   try {
     await navigateToTasks(page);
 
-    const taskCard = page.locator(`[data-testid="draggable-task-card"]:has-text("${taskTitle}")`);
+    const taskCard = page.locator(`[data-testid="task-plan-card"]:has-text("${taskTitle}")`);
 
     if ((await taskCard.count()) > 0) {
       // 点击删除按钮

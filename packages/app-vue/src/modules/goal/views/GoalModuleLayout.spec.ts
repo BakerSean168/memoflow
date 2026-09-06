@@ -15,18 +15,12 @@ const goalMocks = vi.hoisted(() => ({
   setLabelIdsAll: vi.fn(),
   fetchGoals: vi.fn(async () => undefined),
   getGoalAggregateView: vi.fn(async () => null),
-  fetchFolders: vi.fn(async () => undefined),
-  getCurrentFocusMode: vi.fn(async () => undefined),
-  activateFocusMode: vi.fn(),
 }));
 
 vi.mock('../composables/useGoal', async () => {
   const { ref: vueRef } = await import('vue');
   const state = {
-    goalFolders: vueRef([]),
     goals: vueRef([]),
-    currentFocusMode: vueRef(null),
-    selectedFolderId: vueRef(null),
     labelIdsAll: vueRef([]),
     systemView: vueRef('active'),
     isSaving: vueRef(false),
@@ -149,8 +143,6 @@ describe('GoalModuleLayout', () => {
         stubs: {
           GoalPageToolbar: ToolbarStub,
           GoalDialog: GoalDialogStub,
-          GoalFolderDialog: true,
-          ActivateFocusModeDialog: true,
         },
       },
     });
@@ -185,8 +177,6 @@ describe('GoalModuleLayout', () => {
     );
     await vi.waitFor(() => {
       expect(goalMocks.fetchGoals).toHaveBeenCalledOnce();
-      expect(goalMocks.fetchFolders).not.toHaveBeenCalled();
-      expect(goalMocks.getCurrentFocusMode).not.toHaveBeenCalled();
     });
 
     await wrapper.get('[data-testid="create-goal-entry"]').trigger('click');
@@ -219,8 +209,6 @@ describe('GoalModuleLayout', () => {
         stubs: {
           GoalPageToolbar: ToolbarStub,
           GoalDialog: GoalDialogStub,
-          GoalFolderDialog: true,
-          ActivateFocusModeDialog: true,
         },
       },
     });

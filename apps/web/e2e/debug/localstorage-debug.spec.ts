@@ -34,7 +34,6 @@ test('检查 localStorage 中的 goal-store 数据', async ({ page }) => {
     const parsed = JSON.parse(goalStore);
     console.log('✅ goal-store 存在');
     console.log('Goals 数量:', parsed.goals?.length || 0);
-    console.log('Goal Folders 数量:', parsed.goalFolders?.length || 0);
     console.log('Is Initialized:', parsed.isInitialized);
     console.log('Last Sync Time:', parsed.lastSyncTime);
     console.log('\n完整数据:');

@@ -5,5 +5,4 @@
  */
 
 export { TaskPage } from './TaskPage';
-export { TaskDAGPage } from './TaskDAGPage';
 export { CommandPalettePage } from './CommandPalettePage';

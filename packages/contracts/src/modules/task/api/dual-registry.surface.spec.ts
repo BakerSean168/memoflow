@@ -140,8 +140,7 @@ import { describe, expect, it } from 'vitest';
   /**
    * Residual 831: TaskInstanceClientDTO / ScheduleTaskClientDTO
    * dual bodies retired. Sole *ResponseSchema + z.infer.
-     * Soft residual 837: TaskFolderClientDTO / TaskTemplateHistoryClientDTO duals also retired
-   * via TaskFolderResponseSchema / TaskTemplateHistoryResponseSchema (see task-folder-history-client-dto-dual surface).
+   * TaskFolder transport contracts are retired; TaskTemplateHistory remains independently covered.
    */
   describe('task/schedule client dto duals retired (residual 831)', () => {
     const taskApi = __dirname;

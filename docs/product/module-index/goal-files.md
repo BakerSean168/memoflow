@@ -116,7 +116,6 @@ updated: 2026-08-26T00:00:00
 | [`packages/app-vue/src/modules/goal/index.spec.ts`](../../../packages/app-vue/src/modules/goal/index.spec.ts) | 前端目标模块入口测试 |
 | [`apps/web/e2e/goal/goal-crud.spec.ts`](../../../apps/web/e2e/goal/goal-crud.spec.ts) | Web 目标 CRUD e2e |
 | [`apps/web/e2e/goal/goal-keyresult.spec.ts`](../../../apps/web/e2e/goal/goal-keyresult.spec.ts) | Web 关键结果 e2e |
-| [`apps/web/e2e/goal/goal-focus-mode.spec.ts`](../../../apps/web/e2e/goal/goal-focus-mode.spec.ts) | Web 专注模式 e2e |
 | [`apps/web/e2e/sync/goal-sync-regression.spec.ts`](../../../apps/web/e2e/sync/goal-sync-regression.spec.ts) | 目标同步回归 e2e |
 
 ## 需要重点关注的改动风险

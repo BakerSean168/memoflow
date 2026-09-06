@@ -118,9 +118,6 @@ updated: 2026-08-26T00:00:00
 | [`packages/task/src/api/routes/task-instance.routes.spec.ts`](../../../packages/task/src/api/routes/task-instance.routes.spec.ts)                                                                                                   | 实例 routes 测试        |
 | [`packages/app-vue/src/modules/task/stores/taskStore.spec.ts`](../../../packages/app-vue/src/modules/task/stores/taskStore.spec.ts)                                                                                                 | 任务 store 测试         |
 | [`apps/web/e2e/task/task-template-crud.spec.ts`](../../../apps/web/e2e/task/task-template-crud.spec.ts)                                                                                                                             | Web 模板 CRUD e2e       |
-| [`apps/web/e2e/task/task-dependency-crud.spec.ts`](../../../apps/web/e2e/task/task-dependency-crud.spec.ts)                                                                                                                         | Web 依赖 CRUD e2e       |
-| [`apps/web/e2e/task/task-dag-visualization.spec.ts`](../../../apps/web/e2e/task/task-dag-visualization.spec.ts)                                                                                                                     | Web DAG 可视化 e2e      |
-| [`apps/web/e2e/task/task-critical-path.spec.ts`](../../../apps/web/e2e/task/task-critical-path.spec.ts)                                                                                                                             | Web 关键路径 e2e        |
 
 ## 需要重点关注的改动风险
 

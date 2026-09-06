@@ -97,7 +97,7 @@ test.describe('Local Docker core product Phase A', () => {
     expect(creation.todayInstanceCreated).toBe(true);
 
     const taskCard = page
-      .getByTestId('draggable-task-card')
+      .getByTestId('task-plan-card')
       .filter({ has: page.getByText(taskName, { exact: true }) })
       .first();
     await expect(taskCard).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });

@@ -80,7 +80,7 @@ Still real residuals (code search verified):
 - `ROUTINE-5302`: no Routine method-library/catalog implementation exists;
 - `AI-6101~6103`: Goal/Task draft workflows exist, but `TaskPlanTaskSchema` still exposes retired `folderId`; Routine draft/command tooling and Planner/Notification AI read tooling are absent;
 - `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
-- `CLEAN-6301~6304`: convergence is in progress. By 2026-09-06, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, and ordinary product raw-ScheduleTask mutation surfaces are removed; `CLEAN-6303` is complete, while `CLEAN-6301/6302` still require their full residual legacy audit and `CLEAN-6304` remains the physical-boundary decision;
+- `CLEAN-6301~6304`: convergence is in progress. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, and ordinary product raw-ScheduleTask mutation surfaces are removed; `CLEAN-6301` and `CLEAN-6303` are complete, while `CLEAN-6302` still requires the Reminder naming/control residual audit and `CLEAN-6304` remains the physical-boundary decision;
 - `POC-6401`: pg-boss remains a documented candidate only and is not installed/evaluated against current constraints;
 - `HARD-7101~7105`: final failure matrix, residual cleanup proof and umbrella closure review remain incomplete.
 
@@ -2035,7 +2035,17 @@ old translations/routes/stories
 - added/updated anti-resurrection ownership evidence so Goal HTTP/IPC surfaces must not reintroduce `progress-breakdown` / `PROGRESS_BREAKDOWN`;
 - verification: Goal typecheck green; Goal **80/80 files, 439/439 tests** green; Contracts **67/67 files, 482/482 tests** green; App-Vue typecheck green; focused Goal entry and product-time boundary tests **6/6** green; Goal/Contracts/App-Vue lint **0 errors** (pre-existing warnings remain); `git diff --check` green.
 
-`CLEAN-6301` remains open: GoalFolder/FocusMode residual IDs/test seams plus TaskFolder/DAG/CriticalPath/dependency-demo residuals still require evidence-based deletion or keep-boundary decisions.
+**Implementation evidence — tranche B (2026-09-07): remaining Goal/Task legacy surfaces retired; `CLEAN-6301` complete**
+
+- retired GoalFolder/FocusMode/FocusSession/TaskFolder/TaskDependency/Subtask branded IDs and obsolete PowerSync/API/Desktop table mappings; canonical Prisma/PowerSync schemas already had no such live models;
+- removed Task graph/folder cache identity and graph-only invalidation (`folderId`, `taskTemplateQueryKeys.graph*`, `projection: 'graphs'`, `task_dependencies`), leaving list/detail cache semantics intact;
+- removed stale Goal/Task fixtures that still modeled Folder/Focus/Dependency repositories or graph/priority/dependency application methods, while retaining anti-resurrection tests that require the retired concepts to stay absent;
+- retired Goal Focus/DAG and Task Dependency/DAG/CriticalPath/drag-to-dependency Web E2E suites, the dedicated `TaskDAGPage`, dependency-only helper methods, obsolete audit entries and their locale domains; surviving Core Product E2E uses the current `task-plan-card`;
+- pre-vNext UI analysis documents now explicitly mark Folder/Focus/Comparison/Dependency/DAG/CriticalPath descriptions as historical snapshots, with current product/module docs as truth;
+- production residual audit (excluding tests/docs/generated code) is zero for GoalFolder/FocusMode/FocusSession/MultiGoalComparison/TaskFolder/TaskDependency/DAG/CriticalPath and retired ghost tables; remaining mentions are architectural retirement records or anti-resurrection assertions;
+- verification: Goal/Task/App-Vue/API/Desktop typechecks green; Goal **80/80 files, 439/439 tests**; Task **72/72 files, 732/732 tests**; Contracts **67/67 files, 482/482 tests**; App-Vue focused **10 files / 70 tests**; API focused **2 files / 8 tests**; Desktop focused **2 files / 13 tests**; six-project lint **0 errors** (pre-existing warnings remain); `git diff --check` green.
+
+`CLEAN-6301` is complete. Goal and Task now expose only their vNext owner-domain/product contracts; retired Folder/Focus/Comparison/Dependency/DAG/CriticalPath paths have no ordinary runtime surface.
 
 
 ## CLEAN-6302 — Retire legacy Reminder naming/control paths
@@ -2442,7 +2452,7 @@ Core vNext can close only when all of the following hold:
 - [ ] final cross-domain failure matrix passes (`HARD-7101` pending);
 - [x] API/Desktop/PowerSync/Prisma parity passes for the completed primary product scope;
 - [x] full governance/docs checks green for the completed milestone and current main;
-- [ ] residual grep proves all legacy dual paths removed — raw ScheduleTask product mutations and the SourceModule execution fallback are gone, but CLEAN-6301/6302 still need their complete residual legacy audit;
+- [ ] residual grep proves all legacy dual paths removed — raw ScheduleTask product mutations and the SourceModule execution fallback are gone, and CLEAN-6301 Goal/Task legacy surfaces are gone; CLEAN-6302 Reminder naming/control cleanup still remains;
 - [ ] final residual batch review has no P0/P1 unresolved finding.
 
 ---
@@ -2459,7 +2469,7 @@ A. Product parity (independent lanes)
    MOBILE-6201/6202   parity audit first; current screens already use modern Goal/Task/Notification contracts, implement only proven gaps
 
 B. Scheduling physical convergence (ordered)
-   CLEAN-6301~6303    delete remaining legacy Goal/Task/Reminder naming/control/raw ScheduleTask product paths
+   CLEAN-6302         retire remaining Reminder naming/control compatibility paths (6301/6303 complete)
         ↓
    CLEAN-6304         decide/perform scheduler physical package split only after semantic ownership is clean
         ↓

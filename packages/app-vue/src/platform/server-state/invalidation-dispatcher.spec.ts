@@ -99,7 +99,7 @@ describe('invalidation-dispatcher — key mapping', () => {
     expect(keys).toContainEqual(notificationQueryKeys.detail('id-1', 'n-1'));
   });
 
-  it('task-template mutation invalidates lists + graphs (+ detail(id)) without details prefix', async () => {
+  it('task-template mutation invalidates lists + detail(id) without details prefix', async () => {
     const dispatcher = createServerStateInvalidationDispatcher(queryClient);
     await dispatcher.invalidate({
       target: 'task-template',
@@ -111,12 +111,11 @@ describe('invalidation-dispatcher — key mapping', () => {
 
     const keys = calledQueryKeys();
     expect(keys).toContainEqual(taskTemplateQueryKeys.lists('id-1'));
-    expect(keys).toContainEqual(taskTemplateQueryKeys.graphs('id-1'));
     expect(keys).toContainEqual(taskTemplateQueryKeys.detail('id-1', 't-1'));
     expect(keys).not.toContainEqual(taskTemplateQueryKeys.details('id-1'));
   });
 
-  it('task_templates table change (projection all) invalidates lists + graphs + details prefix', async () => {
+  it('task_templates table change (projection all) invalidates lists + details prefix', async () => {
     const dispatcher = createServerStateInvalidationDispatcher(queryClient);
     await dispatcher.invalidate({
       target: 'task-template',
@@ -128,40 +127,7 @@ describe('invalidation-dispatcher — key mapping', () => {
 
     const keys = calledQueryKeys();
     expect(keys).toContainEqual(taskTemplateQueryKeys.lists('id-1'));
-    expect(keys).toContainEqual(taskTemplateQueryKeys.graphs('id-1'));
     expect(keys).toContainEqual(taskTemplateQueryKeys.details('id-1'));
-  });
-
-  it('task_dependencies table change (projection graphs) invalidates graphs only', async () => {
-    const dispatcher = createServerStateInvalidationDispatcher(queryClient);
-    await dispatcher.invalidate({
-      target: 'task-template',
-      identityScope: 'id-1',
-      source: 'powersync',
-      projection: 'graphs',
-    });
-    await flushTurn();
-
-    const keys = calledQueryKeys();
-    expect(keys).toContainEqual(taskTemplateQueryKeys.graphs('id-1'));
-    expect(keys).not.toContainEqual(taskTemplateQueryKeys.lists('id-1'));
-    expect(keys).not.toContainEqual(taskTemplateQueryKeys.details('id-1'));
-  });
-
-  it('task-template mutation with projection graphs invalidates graphs only (P2-2)', async () => {
-    const dispatcher = createServerStateInvalidationDispatcher(queryClient);
-    await dispatcher.invalidate({
-      target: 'task-template',
-      identityScope: 'id-1',
-      source: 'mutation',
-      projection: 'graphs',
-    });
-    await flushTurn();
-
-    const keys = calledQueryKeys();
-    expect(keys).toContainEqual(taskTemplateQueryKeys.graphs('id-1'));
-    expect(keys).not.toContainEqual(taskTemplateQueryKeys.lists('id-1'));
-    expect(keys).not.toContainEqual(taskTemplateQueryKeys.details('id-1'));
   });
 
   it('task-template mutation with projection lists invalidates lists only', async () => {
@@ -176,25 +142,6 @@ describe('invalidation-dispatcher — key mapping', () => {
 
     const keys = calledQueryKeys();
     expect(keys).toContainEqual(taskTemplateQueryKeys.lists('id-1'));
-    expect(keys).not.toContainEqual(taskTemplateQueryKeys.graphs('id-1'));
-    expect(keys).not.toContainEqual(taskTemplateQueryKeys.details('id-1'));
-  });
-
-  it('task-template mutation projection graphs + entityId invalidates graphs and detail(id)', async () => {
-    const dispatcher = createServerStateInvalidationDispatcher(queryClient);
-    await dispatcher.invalidate({
-      target: 'task-template',
-      identityScope: 'id-1',
-      source: 'mutation',
-      projection: 'graphs',
-      entityId: 't-1',
-    });
-    await flushTurn();
-
-    const keys = calledQueryKeys();
-    expect(keys).toContainEqual(taskTemplateQueryKeys.graphs('id-1'));
-    expect(keys).toContainEqual(taskTemplateQueryKeys.detail('id-1', 't-1'));
-    expect(keys).not.toContainEqual(taskTemplateQueryKeys.lists('id-1'));
     expect(keys).not.toContainEqual(taskTemplateQueryKeys.details('id-1'));
   });
 

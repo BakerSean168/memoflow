@@ -121,30 +121,10 @@ describe('taskTemplateQueryKeys (plan §3.2 frozen shape)', () => {
       'detail',
       't-1',
     ]);
-    expect(taskTemplateQueryKeys.graph('id-1', { page: 1, limit: 20 })).toEqual([
-      'server-state',
-      'task-template',
-      'id-1',
-      'graph',
-      { page: 1, limit: 20 },
-    ]);
   });
 
-  it('separates list / detail / graph projections so they never share a key', () => {
-    const list = taskTemplateQueryKeys.list('id', { page: 1, limit: 20 });
-    const graph = taskTemplateQueryKeys.graph('id', { page: 1, limit: 20 });
-    expect(list).not.toEqual(graph);
-  });
-
-  it('prefix targeting reaches list/graph/details independently', () => {
-    const listPrefix = taskTemplateQueryKeys.lists('id');
-    const graphPrefix = taskTemplateQueryKeys.graphs('id');
-    expect(taskTemplateQueryKeys.list('id', { page: 1, limit: 20 }).slice(0, 3)).toEqual(
-      listPrefix.slice(0, 3),
-    );
-    expect(taskTemplateQueryKeys.graph('id', { page: 1, limit: 20 }).slice(0, 3)).toEqual(
-      graphPrefix.slice(0, 3),
-    );
+  it('keeps list and detail projections distinct', () => {
+    expect(taskTemplateQueryKeys.lists('id')).not.toEqual(taskTemplateQueryKeys.details('id'));
   });
 });
 
@@ -172,7 +152,6 @@ describe('canonicalizeTaskTemplateListQuery', () => {
   it('keeps scalar filters and puts arrays into the frozen field order', () => {
     const canonical = canonicalizeTaskTemplateListQuery({
       goalId: 'g-1',
-      folderId: 'f-1',
       status: ['Active'],
       page: 2,
       tags: ['x'],
@@ -183,7 +162,6 @@ describe('canonicalizeTaskTemplateListQuery', () => {
       'limit',
       'status',
       'goalId',
-      'folderId',
       'tags',
     ]);
   });
