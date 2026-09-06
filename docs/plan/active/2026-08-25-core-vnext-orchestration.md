@@ -80,7 +80,7 @@ Still real residuals (code search verified):
 - `ROUTINE-5302`: no Routine method-library/catalog implementation exists;
 - `AI-6101~6103`: Goal/Task draft workflows exist, but `TaskPlanTaskSchema` still exposes retired `folderId`; Routine draft/command tooling and Planner/Notification AI read tooling are absent;
 - `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
-- `CLEAN-6301~6304`: legacy scheduling seams remain — `packages/reminder/.../schedule-projection-source.ts` still constructs `ScheduleTask`, and `schedule-orchestration/src/execution/router.ts` still contains a `SourceModule` fallback; raw ScheduleTask API/client surfaces also remain;
+- `CLEAN-6301~6304`: convergence is in progress. By 2026-09-06, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, and ordinary product raw-ScheduleTask mutation surfaces are removed; `CLEAN-6303` is complete, while `CLEAN-6301/6302` still require their full residual legacy audit and `CLEAN-6304` remains the physical-boundary decision;
 - `POC-6401`: pg-boss remains a documented candidate only and is not installed/evaluated against current constraints;
 - `HARD-7101~7105`: final failure matrix, residual cleanup proof and umbrella closure review remain incomplete.
 
@@ -2046,6 +2046,15 @@ No ordinary user API/UI should create worker jobs directly.
 
 Keep internal diagnostics/ops API only if genuinely used.
 
+**Implementation evidence (2026-09-06):**
+
+- raw `ScheduleTask` worker jobs are now Scheduler-owned persistence across every ordinary product transport: HTTP publishes only `GET /tasks`, `GET /tasks/due`, and `GET /tasks/:id`; Electron IPC exposes only list/detail/due/source diagnostics; the schedule RPC map keeps only the read query;
+- removed product-client worker mutations from `ScheduleClientPort`, task API ports, HTTP/IPC adapters, and the React/Mobile Schedule surface. Mobile now renders worker status/health as diagnostics only; users change Task/Routine/Planner owner objects instead of pausing/completing/cancelling worker rows;
+- retained CalendarEntry product commands and the audited W7 rebuild timeline/replay/audit operation surface because these are owner/ops capabilities rather than raw worker CRUD;
+- retained Scheduler-internal create/update/pause/resume/complete/cancel/batch use cases and the legacy internal `SchedulingPort` adapter, so temporal execution capability remains intact behind the ownership boundary;
+- anti-resurrection surface tests now assert that raw worker mutation HTTP routes, IPC channels, RPC names, and client methods do not exist; production residual grep finds no retired raw-worker mutation capability outside Scheduler internals;
+- verification: `schedule` 45/45 files, 399/399 tests; `contracts` 67/67 files, 485/485 tests; schedule/app-react/app-vue/api/desktop typechecks green; app-vue production build green through the Desktop dependency chain; schedule/contracts/app-react lint have 0 errors (only pre-existing unrelated test warnings remain); `git diff --check` green.
+
 ## CLEAN-6304 — Scheduler physical package split decision
 
 Only now consider:
@@ -2393,9 +2402,9 @@ Core vNext can close only when all of the following hold:
 
 - [x] EventBus = Emittery fast path; no bus-global drain;
 - [x] standard recurrence engine selected and adapterized;
-- [ ] Goal/Task/Routine no longer construct/own legacy ScheduleTask projection paths — Reminder/Routine projection still calls `ScheduleTask.create(...)`;
+- [x] Goal/Task/Routine no longer construct/own legacy ScheduleTask projection paths — production residual grep now finds `ScheduleTask.create(...)` only inside the Scheduler package itself;
 - [x] stable schedulingKey + atomic reconcile;
-- [ ] HandlerRegistry fully replaces SourceModule execution switch — a domain-neutral legacy fallback remains in `schedule-orchestration/src/execution/router.ts`;
+- [x] HandlerRegistry fully replaces the SourceModule execution switch — the legacy `schedule-orchestration` execution fallback has been removed; remaining `sourceModule` fields are Scheduler metadata, not handler routing authority;
 - [x] wall-clock Routine has one scheduler authority;
 - [x] durable NotificationRequested pipeline exists;
 - [x] Notification Fact and Delivery outcome separated;
@@ -2422,7 +2431,7 @@ Core vNext can close only when all of the following hold:
 - [ ] final cross-domain failure matrix passes (`HARD-7101` pending);
 - [x] API/Desktop/PowerSync/Prisma parity passes for the completed primary product scope;
 - [x] full governance/docs checks green for the completed milestone and current main;
-- [ ] residual grep proves legacy dual paths removed — ScheduleTask/SourceModule/raw schedule surfaces still exist;
+- [ ] residual grep proves all legacy dual paths removed — raw ScheduleTask product mutations and the SourceModule execution fallback are gone, but CLEAN-6301/6302 still need their complete residual legacy audit;
 - [ ] final residual batch review has no P0/P1 unresolved finding.
 
 ---

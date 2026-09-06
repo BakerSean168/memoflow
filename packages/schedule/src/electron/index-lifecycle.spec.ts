@@ -49,35 +49,13 @@ vi.mock('electron', () => ({
 
 import { createScheduleElectronModule } from './index';
 
-const rawTaskMutationChannels = new Set<string>([
-  ScheduleChannels.TASK_CREATE,
-  ScheduleChannels.TASK_CREATE_BATCH,
-  ScheduleChannels.TASK_PAUSE,
-  ScheduleChannels.TASK_RESUME,
-  ScheduleChannels.TASK_COMPLETE,
-  ScheduleChannels.TASK_CANCEL,
-  ScheduleChannels.TASK_DELETE,
-  ScheduleChannels.TASK_DELETE_BATCH,
-  ScheduleChannels.TASK_UPDATE_METADATA,
-]);
-
-const desktopScheduleChannels = Object.values(ScheduleChannels).filter(
-  (channel) => !rawTaskMutationChannels.has(channel),
-);
+const desktopScheduleChannels = Object.values(ScheduleChannels);
 
 function createFakeInstance() {
   const api = {
-    createTask: vi.fn(() => ok(null as never)),
     listTasks: vi.fn(() => ok([] as never)),
     getTask: vi.fn(() => ok(null as never)),
     getDueTasks: vi.fn(() => ok([] as never)),
-    pauseTask: vi.fn(() => ok(null as never)),
-    resumeTask: vi.fn(() => ok(null as never)),
-    completeTask: vi.fn(() => ok(null as never)),
-    cancelTask: vi.fn(() => ok(null as never)),
-    deleteTask: vi.fn(() => ok(null as never)),
-    batchDeleteTasks: vi.fn(() => ok(null as never)),
-    updateTaskMetadata: vi.fn(() => ok(null as never)),
   };
   const eventApi = {
     createEvent: vi.fn(() => ok(null as never)),
@@ -146,9 +124,6 @@ describe('createScheduleElectronModule lifecycle', () => {
 
     for (const channel of desktopScheduleChannels) {
       expect(mocks.handlers.has(channel), `Expected ${channel} to be registered`).toBe(true);
-    }
-    for (const channel of rawTaskMutationChannels) {
-      expect(mocks.handlers.has(channel), `Expected ${channel} to stay internal`).toBe(false);
     }
     expect(mocks.handlers.size).toBe(desktopScheduleChannels.length);
     expect(fake.start).not.toHaveBeenCalled();

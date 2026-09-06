@@ -1,30 +1,15 @@
 /**
- * Schedule Task API Client Port
+ * Read-only ScheduleTask API client port.
  *
- * Transport-agnostic interface for Schedule Task API operations.
- * Implementations: HTTP adapters (web), IPC adapters (desktop)
- *
- * Types imported from @memoflow/contracts/schedule.
+ * Raw ScheduleTask worker jobs are Scheduler-owned persistence. Product
+ * surfaces may inspect them for diagnostics, but mutations must flow through
+ * owner-domain commands -> SchedulingPort.
  */
 
 import type { Result } from '@memoflow/contracts/result';
-import type {
-  SourceModule,
-  ScheduleTaskClientDTO,
-  CreateScheduleTaskRequest,
-  UpdateTaskMetadataRequest,
-  ScheduleBatchOperationResponseDTO,
-} from '@memoflow/contracts/schedule';
+import type { SourceModule, ScheduleTaskClientDTO } from '@memoflow/contracts/schedule';
 
-/**
- * IScheduleTaskApiClient
- *
- * 调度任务 API 客户端接口
- */
 export interface IScheduleTaskApiClient {
-  // ===== Schedule Task CRUD =====
-  createTask(request: CreateScheduleTaskRequest): Promise<Result<ScheduleTaskClientDTO>>;
-  createTasksBatch(tasks: CreateScheduleTaskRequest[]): Promise<Result<ScheduleTaskClientDTO[]>>;
   getTasks(): Promise<Result<ScheduleTaskClientDTO[]>>;
   getTaskById(taskId: string): Promise<Result<ScheduleTaskClientDTO>>;
   getDueTasks(params?: {
@@ -35,13 +20,4 @@ export interface IScheduleTaskApiClient {
     sourceModule: SourceModule,
     sourceEntityId: string,
   ): Promise<Result<ScheduleTaskClientDTO[]>>;
-
-  // ===== Schedule Task Status Management =====
-  pauseTask(taskId: string): Promise<Result<ScheduleTaskClientDTO>>;
-  resumeTask(taskId: string): Promise<Result<ScheduleTaskClientDTO>>;
-  completeTask(taskId: string, reason?: string): Promise<Result<ScheduleTaskClientDTO>>;
-  cancelTask(taskId: string, reason?: string): Promise<Result<ScheduleTaskClientDTO>>;
-  deleteTask(taskId: string): Promise<Result<void>>;
-  deleteTasksBatch(taskIds: string[]): Promise<Result<ScheduleBatchOperationResponseDTO>>;
-  updateTaskMetadata(taskId: string, metadata: UpdateTaskMetadataRequest): Promise<Result<ScheduleTaskClientDTO>>;
 }

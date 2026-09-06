@@ -70,19 +70,17 @@ describe('schedule task ownership surface', () => {
     expect(module).toMatch(/listScheduleTasksBySource\.execute\([\s\S]*ctx\.identityId/);
   });
 
-  it('HTTP mobile-compat mutations stay identity-scoped while Electron raw worker access is read-only', () => {
+  it('product transports expose raw ScheduleTask diagnostics only', () => {
     expect(routes).toContain('controller.getTask(req.params!.id, ctx)');
-    expect(routes).toContain('controller.deleteTask(req.params!.id, ctx)');
-    expect(routes).toContain('controller.pauseTask(req.params!.id, ctx)');
+    expect(routes).not.toContain('controller.deleteTask(');
+    expect(routes).not.toContain('controller.pauseTask(');
+    expect(routes).not.toContain("method: 'delete'");
     expect(electron).toMatch(
       /TASK_GET_BY_ID[\s\S]*taskController\.getTask\(taskId, requestContext\)/,
     );
     expect(electron).not.toMatch(/ipcMain\.handle\(ScheduleChannels\.TASK_DELETE/);
     expect(electron).not.toMatch(/ipcMain\.handle\(ScheduleChannels\.TASK_PAUSE/);
     expect(electron).not.toMatch(/ipcMain\.handle\(ScheduleChannels\.TASK_CREATE/);
-    expect(electron).not.toMatch(
-      /TASK_GET_BY_ID[\s\S]*async \(\) => taskController\.getTask\(taskId\)/,
-    );
   });
 
   it('port deleteBatch requires identityId (residual 155)', () => {

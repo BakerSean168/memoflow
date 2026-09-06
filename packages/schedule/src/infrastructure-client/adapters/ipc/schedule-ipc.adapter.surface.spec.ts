@@ -3,10 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ScheduleChannels } from '@memoflow/contracts/electron';
 
-/**
- * Schedule IPC adapters surface (stage-6 residual):
- * Invokes contracts ScheduleChannels only — no local SCHEDULE_*_CHANNELS dual maps.
- */
+/** Schedule IPC adapters use contract channels; raw worker IPC is read-only. */
 describe('Schedule IPC adapters channel surface', () => {
   const files = ['schedule-event-ipc.adapter.ts', 'schedule-task-ipc.adapter.ts'] as const;
 
@@ -17,13 +14,29 @@ describe('Schedule IPC adapters channel surface', () => {
     expect(source).toContain('ScheduleChannels.');
   });
 
-  it('covers live schedule event and task channels', () => {
+  it('keeps event commands and raw worker diagnostics only', () => {
     const event = readFileSync(resolve(__dirname, 'schedule-event-ipc.adapter.ts'), 'utf8');
     const task = readFileSync(resolve(__dirname, 'schedule-task-ipc.adapter.ts'), 'utf8');
     expect(event).toContain('ScheduleChannels.CREATE');
     expect(event).toContain('ScheduleChannels.RESOLVE_CONFLICT');
-    expect(task).toContain('ScheduleChannels.TASK_CREATE');
-    expect(task).toContain('ScheduleChannels.TASK_UPDATE_METADATA');
-    expect(ScheduleChannels.TASK_LIST).toBe('schedule:task:list');
+    expect(task).toContain('ScheduleChannels.TASK_LIST');
+    expect(task).toContain('ScheduleChannels.TASK_GET_BY_ID');
+    expect(task).toContain('ScheduleChannels.TASK_GET_DUE');
+    expect(task).toContain('ScheduleChannels.TASK_GET_BY_SOURCE');
+
+    for (const channel of [
+      'TASK_CREATE',
+      'TASK_CREATE_BATCH',
+      'TASK_PAUSE',
+      'TASK_RESUME',
+      'TASK_COMPLETE',
+      'TASK_CANCEL',
+      'TASK_DELETE',
+      'TASK_DELETE_BATCH',
+      'TASK_UPDATE_METADATA',
+    ]) {
+      expect(ScheduleChannels).not.toHaveProperty(channel);
+      expect(task).not.toContain(`ScheduleChannels.${channel}`);
+    }
   });
 });

@@ -3,8 +3,8 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Schedule void-success envelope surface (stage-6 residual 93):
- * task/event deletes use z.null()/ok(null).
+ * Calendar event delete still has a void-success envelope. Raw ScheduleTask
+ * delete is no longer a product transport operation.
  */
 describe('schedule void success envelope surface', () => {
   const taskRoutes = readFileSync(resolve(__dirname, './routes.ts'), 'utf8');
@@ -19,19 +19,20 @@ describe('schedule void success envelope surface', () => {
   );
   const electron = readFileSync(resolve(__dirname, '../electron/index.ts'), 'utf8');
 
-  it('OpenAPI void deletes use z.null()', () => {
-    expect(taskRoutes).toContain("successResponse(z.null(), '删除成功')");
+  it('keeps calendar event delete z.null() and removes raw worker delete route', () => {
     expect(eventRoutes).toContain("successResponse(z.null(), '删除成功')");
+    expect(taskRoutes).not.toContain("successResponse(z.null(), '删除成功')");
+    expect(taskRoutes).not.toContain("method: 'delete'");
   });
 
-  it('controllers return ok(null) for deletes', () => {
-    expect(taskController).toMatch(/async deleteTask[\s\S]*?Promise<Result<null>>/);
+  it('keeps event controller void delete and removes raw worker delete controller method', () => {
     expect(eventController).toMatch(/async delete[\s\S]*?Promise<Result<null>>/);
-    expect(taskController).toContain('return ok(null)');
     expect(eventController).toContain('return ok(null)');
+    expect(taskController).not.toMatch(/async deleteTask\b/);
+    expect(taskController).not.toContain('return ok(null)');
   });
 
-  it('Desktop calendar delete normalizes to ok(null) while raw worker delete stays internal', () => {
+  it('Desktop calendar delete remains while raw worker delete stays internal', () => {
     expect(electron).toContain('ScheduleChannels.DELETE');
     expect(electron).not.toContain('ipcMain.handle(ScheduleChannels.TASK_DELETE');
     expect((electron.match(/return ok\(null\)/g) ?? []).length).toBeGreaterThanOrEqual(1);

@@ -189,7 +189,8 @@ import { describe, expect, it } from 'vitest';
         resolve(scheduleApi, '../../../../../schedule/src/api/routes.ts'),
         'utf8',
       );
-      expect(routes).toContain("successResponse(ScheduleTaskResponseSchema, '创建成功')");
+      expect(routes).toContain("successResponse(ScheduleTaskResponseSchema, '获取成功')");
+      expect(routes).not.toContain("successResponse(ScheduleTaskResponseSchema, '创建成功')");
     });
   });
 }

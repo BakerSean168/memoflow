@@ -27,15 +27,10 @@ export type ScheduleRpcMap = {
     CalendarEntryClientDTO,
   ];
 
-  // === Schedule Task Operations ===
-  'schedule-task:create': [unknown, ScheduleTaskClientDTO];
-  'schedule-task:update': [unknown, ScheduleTaskClientDTO];
-  'schedule-task:delete': [{ taskId: ScheduleTaskId }, null];
-  'schedule-task:query': [ScheduleTaskQueryParamsDTO, unknown];
-  'schedule-task:enable': [{ taskId: ScheduleTaskId }, ScheduleTaskClientDTO];
-  'schedule-task:disable': [{ taskId: ScheduleTaskId }, ScheduleTaskClientDTO];
-  'schedule-task:update-config': [unknown, ScheduleTaskClientDTO];
-  'schedule-task:update-metadata': [unknown, ScheduleTaskClientDTO];
+  // === Raw ScheduleTask diagnostics (read-only) ===
+  // Worker-job mutation is internal Scheduler persistence owned through
+  // owner-domain commands -> SchedulingPort.
+  'schedule-task:query': [ScheduleTaskQueryParamsDTO, ScheduleTaskClientDTO[]];
 
   // === Schedule Execution Records ===
   'schedule-execution:query': [

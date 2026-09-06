@@ -1,10 +1,8 @@
 /**
  * Schedule client seam.
  *
- * Public schedule contracts stay centralized in
- * `@memoflow/contracts/schedule`.
- * Callers depend on this seam instead of the old application-client /
- * infrastructure-client layered exports.
+ * Calendar commands remain product-facing. Raw Scheduler worker jobs are
+ * exposed as read-only diagnostics only.
  */
 
 import type { IResultHttpClient } from '@memoflow/http-client';

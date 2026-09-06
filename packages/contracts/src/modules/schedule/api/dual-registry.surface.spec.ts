@@ -40,11 +40,9 @@ import { describe, expect, it } from 'vitest';
       expect(dto).not.toMatch(/export interface BatchOperationResponseDTO\b/);
     });
 
-    it('OpenAPI schedule batch routes use ScheduleBatchOperationResponseSchema', () => {
-      expect(routes).toContain('ScheduleBatchOperationResponseSchema');
-      expect(routes).toContain(
-        'successResponse(ScheduleBatchOperationResponseSchema',
-      );
+    it('keeps the batch response schema internal to Scheduler worker operations', () => {
+      expect(routes).not.toContain('ScheduleBatchOperationResponseSchema');
+      expect(routes).not.toContain('/tasks/batch');
     });
   });
 }
@@ -161,10 +159,10 @@ import { describe, expect, it } from 'vitest';
       expect(requestsIndex).not.toContain('ScheduleErrorResponseDTO');
     });
 
-    it('delete RPC map entries use null void success body', () => {
+    it('keeps event delete null-bodied while raw worker delete is not a public RPC', () => {
       expect(rpcMap).toContain('Residual 631');
       expect(rpcMap).toContain("'schedule:delete': [{ scheduleId: ScheduleId }, null]");
-      expect(rpcMap).toContain("'schedule-task:delete': [{ taskId: ScheduleTaskId }, null]");
+      expect(rpcMap).not.toContain("'schedule-task:delete'");
       expect(rpcMap).not.toContain('ScheduleOperationSuccessResponseDTO');
       expect(rpcMap).not.toContain('common-responses');
     });
@@ -205,7 +203,7 @@ import { describe, expect, it } from 'vitest';
 
   /**
    * Residual 665: schedule batch-delete OpenAPI schema dual retired.
-   * POST /tasks/batch and /tasks/batch/delete both document ScheduleBatchOperationResponseSchema.
+   * Raw ScheduleTask batch mutation routes are no longer part of the product transport.
    */
   describe('schedule batch-delete response schema dual retired (residual 665)', () => {
     const apiDir = __dirname;
@@ -221,13 +219,11 @@ import { describe, expect, it } from 'vitest';
       expect(responseSchemas).toContain('export const ScheduleBatchOperationResponseSchema');
     });
 
-    it('batch and batch-delete routes share ScheduleBatchOperationResponseSchema', () => {
+    it('does not publish raw worker batch or batch-delete HTTP routes', () => {
       expect(routes).not.toContain('BatchDeleteResponseSchema');
-      expect(routes).toContain('ScheduleBatchOperationResponseSchema');
-      const sharedSchemaHits = routes.split(
-        'successResponse(ScheduleBatchOperationResponseSchema',
-      ).length - 1;
-      expect(sharedSchemaHits).toBeGreaterThanOrEqual(2);
+      expect(routes).not.toContain('ScheduleBatchOperationResponseSchema');
+      expect(routes).not.toContain('/tasks/batch');
+      expect(routes).not.toContain('/tasks/batch/delete');
     });
   });
 
@@ -460,11 +456,6 @@ import { describe, expect, it } from 'vitest';
   describe('schedule request dual retired (residual 707)', () => {
     const apiDir = __dirname;
     const requests = readFileSync(resolve(apiDir, 'requests/schedule-requests.ts'), 'utf8');
-    const routes = readFileSync(
-      resolve(apiDir, '../../../../../schedule/src/api/routes.ts'),
-      'utf8',
-    );
-
     it('exports request schemas as sole request shapes', () => {
       expect(requests).toContain('Residual 707');
       expect(requests).toContain('export const CreateScheduleRequestSchema = z.object({');
@@ -647,11 +638,13 @@ import { describe, expect, it } from 'vitest';
       expect(dto).not.toMatch(/export interface ScheduleBatchOperationResponseDTO\b/);
     });
 
-    it('routes and controller use schedule-task request schemas', () => {
-      expect(routes).toContain('CreateScheduleTaskRequestSchema');
-      expect(routes).toContain('UpdateScheduleTaskRequestSchema');
-      expect(routes).toContain('BatchScheduleTaskOperationRequestSchema');
+    it('public routes/controller use query schema only and do not expose raw worker mutations', () => {
+      expect(routes).not.toContain('CreateScheduleTaskRequestSchema');
+      expect(routes).not.toContain('UpdateScheduleTaskRequestSchema');
+      expect(routes).not.toContain('BatchScheduleTaskOperationRequestSchema');
       expect(controller).toContain('ScheduleTaskQueryParamsSchema');
+      expect(controller).not.toContain('CreateScheduleTaskRequestSchema');
+      expect(controller).not.toContain('UpdateScheduleTaskRequestSchema');
     });
   });
 }

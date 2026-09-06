@@ -1,17 +1,15 @@
 /**
  * Schedule Client Service
  *
- * Constructor-injected application service for schedule management.
- * Uses port interfaces directly, returning Result<T> types throughout.
- *
- * @module application-client/schedule-client-service
+ * Constructor-injected product service for calendar management plus read-only
+ * Scheduler worker diagnostics. Raw ScheduleTask mutation is intentionally not
+ * part of this client surface.
  */
 
 import type { Result } from '@memoflow/contracts/result';
 import { map as mapResult } from '@memoflow/contracts/result';
 import type {
   CalendarEntryClientDTO,
-  ScheduleBatchOperationResponseDTO,
   CreateScheduleRequest,
   UpdateScheduleRequest,
   GetSchedulesByTimeRangeRequest,
@@ -20,8 +18,6 @@ import type {
   SourceModule,
   ScheduleTaskClientDTO,
   ScheduleExecutionClientDTO,
-  CreateScheduleTaskRequest,
-  UpdateTaskMetadataRequest,
 } from '@memoflow/contracts/schedule';
 import type { IScheduleEventApiClient } from './ports/schedule-event-api-client.port';
 import type { IScheduleTaskApiClient } from './ports/schedule-task-api-client.port';
@@ -36,8 +32,7 @@ import { ScheduleExecution } from '../domain-client/entities/schedule-execution'
 import { ScheduleTaskId } from '../server/domain/value-objects/schedule-task-id';
 import { ScheduleExecutionId } from '../server/domain/value-objects/schedule-execution-id';
 import { IdentityId } from '@memoflow/domain-shared';
-
-// ===== DTO-to-State Mappers =====
+import type { ScheduleClientPort } from './schedule-client.port';
 
 function scheduleExecutionFromDTO(dto: ScheduleExecutionClientDTO): ScheduleExecution {
   return ScheduleExecution.load({
@@ -78,8 +73,6 @@ function scheduleTaskFromDTO(dto: ScheduleTaskClientDTO): ScheduleTask {
   });
 }
 
-import type { ScheduleClientPort } from './schedule-client.port';
-
 export class ScheduleClientService implements ScheduleClientPort {
   constructor(
     private readonly eventApi: IScheduleEventApiClient,
@@ -95,22 +88,11 @@ export class ScheduleClientService implements ScheduleClientPort {
     this.detectConflicts = this.detectConflicts.bind(this);
     this.createScheduleWithConflictDetection = this.createScheduleWithConflictDetection.bind(this);
     this.resolveConflict = this.resolveConflict.bind(this);
-    this.createTask = this.createTask.bind(this);
-    this.createTasksBatch = this.createTasksBatch.bind(this);
     this.getTasks = this.getTasks.bind(this);
     this.getTaskById = this.getTaskById.bind(this);
     this.getDueTasks = this.getDueTasks.bind(this);
     this.getTaskBySource = this.getTaskBySource.bind(this);
-    this.pauseTask = this.pauseTask.bind(this);
-    this.resumeTask = this.resumeTask.bind(this);
-    this.completeTask = this.completeTask.bind(this);
-    this.cancelTask = this.cancelTask.bind(this);
-    this.deleteTask = this.deleteTask.bind(this);
-    this.deleteTasksBatch = this.deleteTasksBatch.bind(this);
-    this.updateTaskMetadata = this.updateTaskMetadata.bind(this);
   }
-
-  // ===== Schedule Event CRUD =====
 
   async createSchedule(data: CreateScheduleRequest): Promise<Result<CalendarEntryClientDTO>> {
     return this.eventApi.createSchedule(data);
@@ -141,8 +123,6 @@ export class ScheduleClientService implements ScheduleClientPort {
     return this.eventApi.deleteSchedule(id, expectedVersion);
   }
 
-  // ===== Schedule Conflict Detection =====
-
   async getScheduleConflicts(id: string): Promise<Result<ConflictDetectionResult>> {
     return this.eventApi.getScheduleConflicts(id);
   }
@@ -155,12 +135,9 @@ export class ScheduleClientService implements ScheduleClientPort {
     return this.eventApi.detectConflicts(params);
   }
 
-  async createScheduleWithConflictDetection(request: CreateScheduleRequest): Promise<
-    Result<{
-      schedule: CalendarEntryClientDTO;
-      conflicts?: ConflictDetectionResult;
-    }>
-  > {
+  async createScheduleWithConflictDetection(
+    request: CreateScheduleRequest,
+  ): Promise<Result<{ schedule: CalendarEntryClientDTO; conflicts?: ConflictDetectionResult }>> {
     return this.eventApi.createScheduleWithConflictDetection(request);
   }
 
@@ -180,18 +157,6 @@ export class ScheduleClientService implements ScheduleClientPort {
     }>
   > {
     return this.eventApi.resolveConflict(scheduleId, request);
-  }
-
-  // ===== Schedule Task CRUD =====
-
-  async createTask(request: CreateScheduleTaskRequest): Promise<Result<ScheduleTask>> {
-    const result = await this.taskApi.createTask(request);
-    return mapResult(result, (dto) => scheduleTaskFromDTO(dto));
-  }
-
-  async createTasksBatch(tasks: CreateScheduleTaskRequest[]): Promise<Result<ScheduleTask[]>> {
-    const result = await this.taskApi.createTasksBatch(tasks);
-    return mapResult(result, (dtos) => dtos.map((dto) => scheduleTaskFromDTO(dto)));
   }
 
   async getTasks(): Promise<Result<ScheduleTask[]>> {
@@ -219,47 +184,7 @@ export class ScheduleClientService implements ScheduleClientPort {
     const result = await this.taskApi.getTaskBySource(sourceModule, sourceEntityId);
     return mapResult(result, (dtos) => dtos.map((dto) => scheduleTaskFromDTO(dto)));
   }
-
-  // ===== Schedule Task Status Management =====
-
-  async pauseTask(taskId: string): Promise<Result<ScheduleTask>> {
-    const result = await this.taskApi.pauseTask(taskId);
-    return mapResult(result, (dto) => scheduleTaskFromDTO(dto));
-  }
-
-  async resumeTask(taskId: string): Promise<Result<ScheduleTask>> {
-    const result = await this.taskApi.resumeTask(taskId);
-    return mapResult(result, (dto) => scheduleTaskFromDTO(dto));
-  }
-
-  async completeTask(taskId: string, reason?: string): Promise<Result<ScheduleTask>> {
-    const result = await this.taskApi.completeTask(taskId, reason);
-    return mapResult(result, (dto) => scheduleTaskFromDTO(dto));
-  }
-
-  async cancelTask(taskId: string, reason?: string): Promise<Result<ScheduleTask>> {
-    const result = await this.taskApi.cancelTask(taskId, reason);
-    return mapResult(result, (dto) => scheduleTaskFromDTO(dto));
-  }
-
-  async deleteTask(taskId: string): Promise<Result<void>> {
-    return this.taskApi.deleteTask(taskId);
-  }
-
-  async deleteTasksBatch(taskIds: string[]): Promise<Result<ScheduleBatchOperationResponseDTO>> {
-    return this.taskApi.deleteTasksBatch(taskIds);
-  }
-
-  async updateTaskMetadata(
-    taskId: string,
-    metadata: UpdateTaskMetadataRequest,
-  ): Promise<Result<ScheduleTask>> {
-    const result = await this.taskApi.updateTaskMetadata(taskId, metadata);
-    return mapResult(result, (dto) => scheduleTaskFromDTO(dto));
-  }
 }
-
-// ===== Factory =====
 
 export function createScheduleClientService(
   eventApi: IScheduleEventApiClient,

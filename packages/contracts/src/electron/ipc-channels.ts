@@ -71,19 +71,12 @@ export const ScheduleChannels = {
   DETECT_CONFLICTS: 'schedule:detect-conflicts',
   CREATE_WITH_CONFLICT_DETECTION: 'schedule:create-with-conflict-detection',
   RESOLVE_CONFLICT: 'schedule:resolve-conflict',
-  TASK_CREATE: 'schedule:task:create',
-  TASK_CREATE_BATCH: 'schedule:task:create-batch',
+  // Raw ScheduleTask worker jobs are Scheduler-owned persistence. IPC exposes
+  // diagnostics only; product mutations flow through owner-domain commands.
   TASK_LIST: 'schedule:task:list',
   TASK_GET_BY_ID: 'schedule:task:get-by-id',
   TASK_GET_DUE: 'schedule:task:get-due',
   TASK_GET_BY_SOURCE: 'schedule:task:get-by-source',
-  TASK_PAUSE: 'schedule:task:pause',
-  TASK_RESUME: 'schedule:task:resume',
-  TASK_COMPLETE: 'schedule:task:complete',
-  TASK_CANCEL: 'schedule:task:cancel',
-  TASK_DELETE: 'schedule:task:delete',
-  TASK_DELETE_BATCH: 'schedule:task:delete-batch',
-  TASK_UPDATE_METADATA: 'schedule:task:update-metadata',
 } as const;
 
 export const ReminderChannels = {

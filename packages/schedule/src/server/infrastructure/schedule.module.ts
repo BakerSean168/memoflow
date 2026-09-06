@@ -55,12 +55,9 @@ import { OperationTimelineEntrySchema } from '@memoflow/contracts/operations';
 import type { OperationTimelineEntry } from '@memoflow/contracts/operations';
 import type { ScheduleRebuildOutboxDTO } from '../domain/repositories/i-schedule-repository';
 import { eventBus } from '@memoflow/utils/domain';
-import type { RetryPolicyDTO, ScheduleConfigDTO } from '@memoflow/contracts/schedule';
 import type {
   CreateScheduleRequest,
-  CreateScheduleTaskRequest,
   UpdateScheduleRequest,
-  UpdateScheduleTaskRequest,
 } from '@memoflow/contracts/schedule';
 import { ScheduleTaskStatus, SourceModule } from '@memoflow/contracts/schedule';
 import { resultify } from '@memoflow/utils/result';
@@ -183,39 +180,6 @@ function toUpdateSchedulePayload(data: UpdateScheduleRequest) {
   };
 }
 
-function toScheduleConfigDTO(
-  schedule: CreateScheduleTaskRequest['schedule'],
-): ScheduleConfigDTO {
-  return {
-    cronExpression: schedule.cronExpression,
-    timezone: schedule.timezone,
-    startDate: schedule.startDate == null ? null : new Date(schedule.startDate).toISOString(),
-    endDate: schedule.endDate == null ? null : new Date(schedule.endDate).toISOString(),
-    maxExecutions: schedule.maxExecutions ?? null,
-  };
-}
-
-function toPartialScheduleConfigDTO(
-  schedule: UpdateScheduleTaskRequest['schedule'],
-): Partial<ScheduleConfigDTO> | undefined {
-  if (!schedule) {
-    return undefined;
-  }
-
-  const dto: Partial<ScheduleConfigDTO> = {};
-  if (schedule.cronExpression !== undefined) dto.cronExpression = schedule.cronExpression;
-  if (schedule.timezone !== undefined) dto.timezone = schedule.timezone;
-  if (schedule.startDate !== undefined) {
-    dto.startDate =
-      schedule.startDate === null ? null : new Date(schedule.startDate).toISOString();
-  }
-  if (schedule.endDate !== undefined) {
-    dto.endDate = schedule.endDate === null ? null : new Date(schedule.endDate).toISOString();
-  }
-  if (schedule.maxExecutions !== undefined) dto.maxExecutions = schedule.maxExecutions;
-  return dto;
-}
-
 /**
  * Pure assembly helper used by the class facade and tests.
  * 纯组装函数：给定依赖对象，返回已经接好线的 use case 集合。
@@ -329,19 +293,6 @@ export function createScheduleModule(
    * ApplicationPort —— 用 ok()/fail() 包裹 use case，让传输层保持简单无聊。
    */
   const api: ScheduleApplicationPort = {
-    createTask: async (data, ctx) => {
-      return useCases.createScheduleTask.execute({
-        name: data.name,
-        sourceModule: data.sourceModule,
-        sourceId: data.sourceEntityId,
-        scheduleConfig: toScheduleConfigDTO(data.schedule),
-        handlerType: data.sourceModule,
-        description: data.description,
-        retryPolicy: data.retryPolicy as unknown as RetryPolicyDTO,
-        enabled: data.enabled,
-        identityId: ctx.identityId,
-      });
-    },
     listTasks: async (query, ctx) => {
       if (query.status) {
         return useCases.listScheduleTasksByStatus.execute(
@@ -358,33 +309,8 @@ export function createScheduleModule(
         return useCases.listScheduleTasksByAccount.execute(ctx.identityId);
       }
     },
-    updateTask: async (id, data, ctx) => {
-      return useCases.updateScheduleTask.execute(
-        {
-          id,
-          scheduleConfig: toPartialScheduleConfigDTO(data.schedule),
-          retryPolicy: data.retryPolicy as unknown as RetryPolicyDTO,
-          enabled: data.enabled,
-          description: data.description,
-        },
-        ctx.identityId,
-      );
-    },
-    deleteTask: async (id, ctx) => useCases.deleteScheduleTask.execute(id, ctx.identityId),
-    pauseTask: async (id, ctx) => useCases.pauseScheduleTask.execute(id, ctx.identityId),
-    resumeTask: async (id, ctx) => useCases.resumeScheduleTask.execute(id, ctx.identityId),
-    triggerTask: async (id, ctx) => useCases.triggerScheduleTask.execute(id, ctx.identityId),
     getTask: async (id, ctx) => useCases.getScheduleTask.execute(id, ctx.identityId),
-    completeTask: async (id, ctx) => useCases.completeScheduleTask.execute(id, ctx.identityId),
-    cancelTask: async (id, reason, ctx) =>
-      useCases.cancelScheduleTask.execute(id, ctx.identityId, reason),
     getDueTasks: async () => useCases.getDueScheduleTasks.execute(),
-    batchOperateTasks: async (data, ctx) =>
-      useCases.batchOperateScheduleTasks.execute(data, ctx.identityId),
-    batchDeleteTasks: async (ids, ctx) =>
-      useCases.batchDeleteScheduleTasks.execute(ids, ctx.identityId),
-    updateTaskMetadata: async (id, metadata, ctx) =>
-      useCases.updateScheduleTaskMetadata.execute(id, ctx.identityId, metadata),
 
     queryRebuildTimeline: async (ctx) => {
       if (!auditRepository) {
