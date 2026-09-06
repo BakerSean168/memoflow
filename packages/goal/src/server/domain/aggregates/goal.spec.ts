@@ -150,28 +150,6 @@ describe('Goal.calculateProgress()', () => {
   });
 });
 
-// ============================================================
-// T018: getProgressBreakdown() Tests
-// ============================================================
-
-describe('Goal.getProgressBreakdown()', () => {
-  it('should return breakdown with calculation mode "WeightedAverage"', () => {
-    const goal = createTestGoal();
-    addKeyResult(goal, { title: 'KR1', targetValue: 100, currentValue: 50, weight: 3 });
-    addKeyResult(goal, { title: 'KR2', targetValue: 100, currentValue: 100, weight: 2 });
-
-    const breakdown = goal.getProgressBreakdown();
-
-    expect(breakdown.calculationMode).toBe('WeightedAverage');
-    // (50*3 + 100*2) / (3+2) = (150 + 200) / 5 = 70
-    expect(breakdown.totalProgress).toBe(70);
-    expect(breakdown.krContributions).toHaveLength(2);
-    expect(breakdown.krContributions[0].keyResultName).toBe('KR1');
-    expect(breakdown.krContributions[0].weight).toBe(3);
-    expect(breakdown.krContributions[1].keyResultName).toBe('KR2');
-    expect(breakdown.krContributions[1].weight).toBe(2);
-  });
-});
 
 // ============================================================
 // T019: Weight Validation Tests

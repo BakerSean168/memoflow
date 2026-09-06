@@ -41,7 +41,6 @@ export {
   DeleteGoalRecordUseCase,
   // Workflow Services
   GetGoalAggregateUseCase,
-  GetGoalProgressBreakdownUseCase,
   CloneGoalUseCase,
   BatchUpdateKeyResultWeightsUseCase,
 } from './use-cases';

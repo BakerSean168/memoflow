@@ -2,7 +2,7 @@
  * Dual registry suite (elegance E3b tax cut).
  * Merged 16 dual-retired surface locks from this directory.
  * Behavior/assertions preserved; individual *-dual.surface.spec.ts removed.
- * Sources: dead-res-dual.surface.spec.ts, export-import-goals-res-dual.surface.spec.ts, focus-mode-dual.surface.spec.ts, focus-session-client-dto-dual.surface.spec.ts, focus-session-res-dual.surface.spec.ts, focus-status-history-res-dual.surface.spec.ts, goal-aggregate-client-dto-dual.surface.spec.ts, goal-entity-client-dto-dual.surface.spec.ts, goal-id-params-dual.surface.spec.ts, goal-list-res-dual.surface.spec.ts, goal-record-client-dto-dual.surface.spec.ts, goal-reminder-config-dual.surface.spec.ts, goal-reminder-request-dual.surface.spec.ts, key-result-progress-snapshot-dual.surface.spec.ts, progress-breakdown-res-dual.surface.spec.ts, query-goal-folders-res-dual.surface.spec.ts
+ * Sources: dead-res-dual.surface.spec.ts, export-import-goals-res-dual.surface.spec.ts, focus-mode-dual.surface.spec.ts, focus-session-client-dto-dual.surface.spec.ts, focus-session-res-dual.surface.spec.ts, focus-status-history-res-dual.surface.spec.ts, goal-aggregate-client-dto-dual.surface.spec.ts, goal-entity-client-dto-dual.surface.spec.ts, goal-id-params-dual.surface.spec.ts, goal-list-res-dual.surface.spec.ts, goal-record-client-dto-dual.surface.spec.ts, goal-reminder-config-dual.surface.spec.ts, goal-reminder-request-dual.surface.spec.ts, key-result-progress-snapshot-dual.surface.spec.ts, query-goal-folders-res-dual.surface.spec.ts
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -417,47 +417,6 @@ import { describe, expect, it } from 'vitest';
       expect(responseSchemas).toContain('progress: KeyResultProgressDTOSchema');
       expect(responseSchemas).toContain('systemContext: GoalReviewSystemContextSchema');
       expect(responseSchemas).not.toContain('keyResultSnapshots:');
-    });
-  });
-}
-
-// --- merged from progress-breakdown-res-dual.surface.spec.ts ---
-{
-  /**
-   * Residual 805: ProgressBreakdown dual body retired.
-   * Sole ProgressBreakdownResSchema + z.infer (flat API success body).
-   */
-  describe('progress breakdown res dual retired (residual 805)', () => {
-    const apiDir = __dirname;
-    const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
-    const vo = readFileSync(resolve(apiDir, '../value-objects/progress-breakdown.ts'), 'utf8');
-    const routes = readFileSync(
-      resolve(apiDir, '../../../../../goal/src/api/routes/goal.routes.ts'),
-      'utf8',
-    );
-
-    it('owns ProgressBreakdown as z.infer of ProgressBreakdownResSchema', () => {
-      expect(vo).toContain('Residual 805');
-      expect(vo).toContain("from '../api/response-schemas'");
-      expect(vo).toContain(
-        'export type ProgressBreakdown = z.infer<typeof ProgressBreakdownResSchema>',
-      );
-      expect(vo).not.toMatch(/export interface ProgressBreakdown\b/);
-    });
-
-    it('ProgressBreakdownResSchema owns weighted-average contribution fields', () => {
-      expect(responseSchemas).toContain('Residual 805');
-      expect(responseSchemas).toContain('export const ProgressBreakdownResSchema = z.object({');
-      expect(responseSchemas).toContain("calculationMode: z.literal('WeightedAverage')");
-      expect(responseSchemas).toContain('krContributions: z.array(');
-      expect(responseSchemas).toContain('totalProgress: z.number()');
-      expect(responseSchemas).toContain('lastUpdateTime: z.number()');
-      expect(responseSchemas).toContain('updateTrigger: z.string()');
-    });
-
-    it('OpenAPI goal routes use ProgressBreakdownResSchema only', () => {
-      expect(routes).toContain('ProgressBreakdownResSchema');
-      expect(routes).toContain("successResponse(ProgressBreakdownResSchema, '获取成功')");
     });
   });
 }

@@ -13,7 +13,6 @@ import type {
   GoalClientDTO,
   GoalMutationReceipt,
   GoalSystemView,
-  ProgressBreakdown,
   CreateGoalReq,
   UpdateGoalReq,
   DeleteGoalReq,
@@ -91,7 +90,6 @@ export interface IGoalApiClient {
       updates: Array<{ keyResultId: string; weight: number }>;
     },
   ): Promise<Result<GoalMutationReceipt>>;
-  getProgressBreakdown(goalId: string): Promise<Result<ProgressBreakdown>>;
 
   // GoalReview Management
   createGoalReview(

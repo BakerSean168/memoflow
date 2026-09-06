@@ -42,7 +42,6 @@ export const GoalChannels = {
   SEARCH: 'goal:search',
   AGGREGATE: 'goal:aggregate',
   CLONE: 'goal:clone',
-  PROGRESS_BREAKDOWN: 'goal:progressBreakdown',
   KEY_RESULT_ADD: 'goal:keyResult:add',
   KEY_RESULT_LIST: 'goal:keyResult:list',
   KEY_RESULT_UPDATE: 'goal:keyResult:update',

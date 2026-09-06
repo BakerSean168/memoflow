@@ -27,7 +27,6 @@ export type {
   KeyResultWeightSnapshotDTO,
 } from './key-result-weight-snapshot';
 
-export type { ProgressBreakdown, ProgressBreakdownResponse } from './progress-breakdown';
 
 // ============ 枚举值对象 ============
 export { GoalStatus } from './goal-status';

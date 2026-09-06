@@ -6,7 +6,6 @@ import type {
   GoalMutationReceipt,
   GoalReviewSystemContext,
   ListGoalsQuery,
-  ProgressBreakdown,
   QueryGoalsRes,
   UpdateGoalReq,
   UpdateGoalRes,
@@ -166,7 +165,6 @@ export interface GoalApplicationPort {
   ): Promise<Result<GoalMutationReceipt>>;
 
   getGoalAggregate(goalId: string, identityId: string): Promise<Result<GetGoalAggregateRes>>;
-  getGoalProgressBreakdown(goalId: string, identityId: string): Promise<Result<ProgressBreakdown>>;
   cloneGoal(
     goalId: string,
     params: CloneGoalReq,

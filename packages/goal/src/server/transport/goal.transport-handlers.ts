@@ -47,7 +47,6 @@ export function createGoalTransportHandlers(api: GoalApplicationPort): GoalUseCa
     listRecords: api.listRecords,
     deleteRecord: api.deleteRecord,
     getGoalAggregate: api.getGoalAggregate,
-    getGoalProgressBreakdown: api.getGoalProgressBreakdown,
     cloneGoal: api.cloneGoal,
     batchUpdateKeyResultWeights: api.batchUpdateKeyResultWeights,
   };

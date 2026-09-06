@@ -47,7 +47,6 @@ function createApiStub(): GoalApplicationPort {
     deactivateFocusMode: vi.fn(),
     extendFocusMode: vi.fn(),
     getGoalAggregate: vi.fn(),
-    getGoalProgressBreakdown: vi.fn(),
     cloneGoal: vi.fn(),
     batchUpdateKeyResultWeights: vi.fn(),
     listGoalFolders: vi.fn(),

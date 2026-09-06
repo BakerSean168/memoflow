@@ -313,12 +313,6 @@ export function createGoalElectronModule(
           ),
         );
         installed.push(GoalChannels.AGGREGATE);
-        ipcMain.handle(GoalChannels.PROGRESS_BREAKDOWN, async (_, id) =>
-          withAuthenticatedValue(ctx, async (requestContext: ExecutionContext) =>
-            goalController.getProgressBreakdown(id, requestContext),
-          ),
-        );
-        installed.push(GoalChannels.PROGRESS_BREAKDOWN);
         registerValidatedChannel(
           ctx,
           GoalChannels.CLONE,

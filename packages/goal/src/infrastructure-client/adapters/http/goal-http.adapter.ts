@@ -11,7 +11,6 @@ import type {
   GoalClientDTO,
   GoalMutationReceipt,
   GoalSystemView,
-  ProgressBreakdown,
   CreateGoalReq,
   UpdateGoalReq,
   DeleteGoalReq,
@@ -146,9 +145,6 @@ export class GoalHttpAdapter implements IGoalApiClient {
     return this.httpClient.put(`${this.baseUrl}/${goalId}/key-results/batch-weight`, request);
   }
 
-  async getProgressBreakdown(goalId: string): Promise<Result<ProgressBreakdown>> {
-    return this.httpClient.get(`${this.baseUrl}/${goalId}/progress-breakdown`);
-  }
 
   // ===== GoalReview Management =====
 

@@ -59,7 +59,8 @@ describe('schedule source ownership surface', () => {
     expect(reminderProjection).toContain(
       'identityId: string,\n  ): Promise<ReminderScheduleProjectionPlan>;',
     );
-    expect(reminderProjection).toContain('readonly identityId: string;');
+    expect(reminderProjection).toContain('readonly owner: SchedulingOwner;');
+    expect(reminderProjection).toContain('return { identityId, type: REMINDER_SCHEDULING_OWNER_TYPE, id: templateId };');
     expect(reminderProjection).toContain(
       'findByIdForIdentity(\n        identityId,\n        templateId,',
     );

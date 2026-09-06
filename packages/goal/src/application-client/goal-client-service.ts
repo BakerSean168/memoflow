@@ -36,7 +36,6 @@ import type {
   GetGoalRecordsRes,
   GetGoalReviewsRes,
   GetGoalAggregateRes,
-  ProgressBreakdown,
 } from '@memoflow/contracts/goal';
 import type { IGoalApiClient } from './ports/goal-api-client.port';
 import {
@@ -174,7 +173,6 @@ export interface GoalClientPort {
     expectedVersion: number,
     updates: Array<{ keyResultId: string; weight: number }>,
   ): Promise<Result<GoalMutationReceipt>>;
-  getProgressBreakdown(goalId: string): Promise<Result<ProgressBreakdown>>;
   createGoalRecord(
     goalId: string,
     keyResultId: string,
@@ -238,7 +236,6 @@ export class GoalClientService implements GoalClientPort {
     this.updateKeyResult = this.updateKeyResult.bind(this);
     this.deleteKeyResult = this.deleteKeyResult.bind(this);
     this.batchUpdateKeyResultWeights = this.batchUpdateKeyResultWeights.bind(this);
-    this.getProgressBreakdown = this.getProgressBreakdown.bind(this);
     this.createGoalRecord = this.createGoalRecord.bind(this);
     this.updateGoalRecord = this.updateGoalRecord.bind(this);
     this.getGoalRecordsByKeyResult = this.getGoalRecordsByKeyResult.bind(this);
@@ -379,9 +376,6 @@ export class GoalClientService implements GoalClientPort {
     });
   }
 
-  async getProgressBreakdown(goalId: string): Promise<Result<ProgressBreakdown>> {
-    return this.goalApi.getProgressBreakdown(goalId);
-  }
 
   // ===== Goal Record Use Cases =====
 

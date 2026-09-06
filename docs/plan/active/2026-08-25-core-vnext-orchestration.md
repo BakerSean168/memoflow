@@ -2027,6 +2027,17 @@ old translations/routes/stories
 
 `rg` residual audit mandatory.
 
+**Implementation evidence — tranche A (2026-09-06): standalone ProgressBreakdown retired**
+
+- verified `ProgressBreakdownPanel` had no production page consumer and the standalone HTTP/IPC/client query duplicated KR-native progress already present in `GoalAggregate` (`overallProgress`, key results, records/reviews);
+- deleted the standalone ProgressBreakdown contract/value-object, `GET /:id/progress-breakdown`, Electron channel, client methods/adapters, query use case, aggregate method, Vue orphan component, module-index entries, and their positive legacy surface locks;
+- Goal progress semantics remain intact through `GoalAggregate` and KR progress fields; `GoalDetailView` still renders `overallProgress` plus per-KR progress, so this tranche removes only the duplicate read model rather than product progress capability;
+- added/updated anti-resurrection ownership evidence so Goal HTTP/IPC surfaces must not reintroduce `progress-breakdown` / `PROGRESS_BREAKDOWN`;
+- verification: Goal typecheck green; Goal **80/80 files, 439/439 tests** green; Contracts **67/67 files, 482/482 tests** green; App-Vue typecheck green; focused Goal entry and product-time boundary tests **6/6** green; Goal/Contracts/App-Vue lint **0 errors** (pre-existing warnings remain); `git diff --check` green.
+
+`CLEAN-6301` remains open: GoalFolder/FocusMode residual IDs/test seams plus TaskFolder/DAG/CriticalPath/dependency-demo residuals still require evidence-based deletion or keep-boundary decisions.
+
+
 ## CLEAN-6302 — Retire legacy Reminder naming/control paths
 
 After compatibility consumers are gone:

@@ -3,7 +3,6 @@ export { default as AIGenerateKRButton } from './AIGenerateKRButton.vue';
 export { default as AIKeyResultsSection } from './AIKeyResultsSection.vue';
 export { default as GoalRecordCard } from './GoalRecordCard.vue';
 export { default as KRPreviewList } from './KRPreviewList.vue';
-export { default as ProgressBreakdownPanel } from './ProgressBreakdownPanel.vue';
 
 // Product list rows
 export { default as GoalProgressRow } from './GoalProgressRow.vue';

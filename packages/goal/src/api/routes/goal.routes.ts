@@ -20,7 +20,6 @@ import {
   GoalMutationReceiptSchema,
   QueryGoalsResSchema,
   GetGoalAggregateResSchema,
-  ProgressBreakdownResSchema,
   UpdateGoalInvocationSchema,
   DeleteGoalInvocationSchema,
   GoalStatusCommandInvocationSchema,
@@ -374,21 +373,6 @@ export function registerGoalCrudRoutes(
     (req, ctx) => controller.getAggregate(req.params!.id, ctx),
   );
 
-  // GET /:id/progress-breakdown — 获取进度分解
-  r.route(
-    {
-      method: 'get',
-      path: '/:id/progress-breakdown',
-      summary: '获取目标进度分解',
-      request: { params: z.object({ id: brandedId<GoalId>() }) },
-      responses: {
-        200: successResponse(ProgressBreakdownResSchema, '获取成功'),
-        404: errorResponse('目标不存在'),
-      },
-    },
-    [auth],
-    (req, ctx) => controller.getProgressBreakdown(req.params!.id, ctx),
-  );
 
   // POST /:id/clone — 克隆目标
   r.routeWithValidation(

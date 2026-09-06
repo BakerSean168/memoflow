@@ -329,7 +329,7 @@ StatStrip：活跃任务 12 · 今日完成 3 · 活跃目标 4 · 待提醒 2 �
 | `GoalFocusView` `/goals/focus`                    | 展示当前专注期状态，冲刺心智 | 主：退出/调整专注；次：跳转专注中的目标 | 居中单卡（状态页，不套列表壳）：专注目标 + 剩余天数大字 + "隐藏非专注目标"开关；未激活访问 = `AppEmptyState` + 「激活专注模式」 | 复用 `ActivateFocusModeDialog`；入口固定为目标侧栏底部按钮（§3）      |
 | `MultiGoalComparisonView` `/goals/compare`        | 多目标横向对比               | 主：选择对比目标；次：返回              | DetailPageShell，全宽表格区；<md 横向滚动                                                                                       | 入口收进列表页 ⋯ 菜单（§3）；复用 `comparison/` 现有组件              |
 | `GoalReviewCreationView` / `GoalReviewDetailView` | 创建/查看复盘                | 主：提交复盘 / 无；次：返回详情         | DetailPageShell `max-w-4xl`；表单分节（自评/总结）；提交失败 inline error 保留已填内容                                          | 入口收敛到详情页"复盘"Tab（§4）；组件不动                             |
-| `KeyResultDetailView`                             | KR 明细与记录轨迹            | 主：记录进度（预选该 KR）；次：编辑 KR  | DetailPageShell；进度趋势 + 记录列表                                                                                            | 复用 `GoalRecordDialog` / `KeyResultDialog`、`ProgressBreakdownPanel` |
+| `KeyResultDetailView`                             | KR 明细与记录轨迹            | 主：记录进度（预选该 KR）；次：编辑 KR  | DetailPageShell；进度趋势 + 记录列表                                                                                            | 复用 `GoalRecordDialog` / `KeyResultDialog`；进度统一读取 KR/Goal aggregate，不再使用独立 `ProgressBreakdownPanel` |
 
 响应式与状态设计全部继承 §0.3 / §0.4，不特殊化。
 

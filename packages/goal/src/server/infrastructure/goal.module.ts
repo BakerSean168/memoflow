@@ -48,7 +48,6 @@ import {
   DeleteGoalRecordUseCase,
   PermanentlyDeleteGoalUseCase,
   GetGoalAggregateUseCase,
-  GetGoalProgressBreakdownUseCase,
   CloneGoalUseCase,
   BatchUpdateKeyResultWeightsUseCase,
 } from '../application';
@@ -178,7 +177,6 @@ export interface GoalModuleUseCases {
 
   // Workflow / 工作流
   readonly getGoalAggregate: GetGoalAggregateUseCase;
-  readonly getGoalProgressBreakdown: GetGoalProgressBreakdownUseCase;
   readonly cloneGoal: CloneGoalUseCase;
   readonly batchUpdateKeyResultWeights: BatchUpdateKeyResultWeightsUseCase;
 }
@@ -313,7 +311,6 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
 
     // Workflow / 工作流
     getGoalAggregate: new GetGoalAggregateUseCase(goalRepository, goalRecordRepository),
-    getGoalProgressBreakdown: new GetGoalProgressBreakdownUseCase(goalRepository),
     cloneGoal: new CloneGoalUseCase(
       goalRepository,
       new CreateGoalUseCase(goalRepository, goalPolicy, goalWriteTransactionRunner),
@@ -446,8 +443,6 @@ export function createGoalModule(deps: GoalModuleDependencies): GoalModuleInstan
 
     // Workflow / 工作流
     getGoalAggregate: (goalId, identityId) => useCases.getGoalAggregate.execute(goalId, identityId),
-    getGoalProgressBreakdown: (goalId, identityId) =>
-      useCases.getGoalProgressBreakdown.execute(goalId, identityId),
     cloneGoal: (goalId, params, cx) => useCases.cloneGoal.execute(goalId, params, cx),
     batchUpdateKeyResultWeights: (goalId, identityId, expectedVersion, updates) =>
       useCases.batchUpdateKeyResultWeights.execute(goalId, identityId, expectedVersion, updates),

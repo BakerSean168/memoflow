@@ -242,26 +242,6 @@ export const GoalReviewListResSchema = z.object({
 // Simple Response Schemas
 // ============================================================================
 
-/**
- * 进度分解响应 Schema
- */
-// Residual 805: ProgressBreakdown dual retired — this schema is the sole progress-breakdown shape
-// (semantic ProgressBreakdown is z.infer alias in value-objects/progress-breakdown.ts).
-export const ProgressBreakdownResSchema = z.object({
-  totalProgress: z.number(),
-  calculationMode: z.literal('WeightedAverage'),
-  krContributions: z.array(
-    z.object({
-      keyResultId: brandedId<KeyResultId>(),
-      keyResultName: z.string(),
-      progress: z.number(),
-      weight: z.number(),
-      contribution: z.number(),
-    }),
-  ),
-  lastUpdateTime: z.number(),
-  updateTrigger: z.string(),
-});
 
 // ============================================================================
 // Request Schemas

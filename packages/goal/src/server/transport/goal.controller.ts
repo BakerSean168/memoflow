@@ -28,7 +28,6 @@ import type {
   GoalSystemView,
   GetGoalAggregateRes,
   ListGoalsQuery,
-  ProgressBreakdown,
   UpdateGoalReq,
   UpdateKeyResultProgressReq,
   UpdateKeyResultReq,
@@ -62,7 +61,6 @@ import type {
   DeleteGoalRecordUseCase,
   CompleteGoalUseCase,
   GetGoalAggregateUseCase,
-  GetGoalProgressBreakdownUseCase,
   CloneGoalUseCase,
   BatchUpdateKeyResultWeightsUseCase,
 } from '../application';
@@ -94,7 +92,6 @@ export interface GoalUseCases {
   listRecords: ListGoalRecordsUseCase['execute'];
   deleteRecord: DeleteGoalRecordUseCase['execute'];
   getGoalAggregate: GetGoalAggregateUseCase['execute'];
-  getGoalProgressBreakdown: GetGoalProgressBreakdownUseCase['execute'];
   cloneGoal: CloneGoalUseCase['execute'];
   batchUpdateKeyResultWeights: BatchUpdateKeyResultWeightsUseCase['execute'];
 }
@@ -195,12 +192,6 @@ export class GoalController {
     return this.useCases.getGoalAggregate(goalId, cx.identityId);
   }
 
-  async getProgressBreakdown(
-    goalId: string,
-    cx: ExecutionContext,
-  ): Promise<Result<ProgressBreakdown>> {
-    return this.useCases.getGoalProgressBreakdown(goalId, cx.identityId);
-  }
 
   async cloneGoal(
     goalId: string,
