@@ -19,6 +19,5 @@ export const PortableUserReminderPreferenceSchema = z.object({
   bestTimeSlots: z.array(z.unknown()),
   worstTimeSlots: z.array(z.unknown()),
   globalReminderEnabled: z.boolean(),
-  globalSmartFrequency: z.boolean(),
 }).strict();
 export type PortableUserReminderPreference = z.infer<typeof PortableUserReminderPreferenceSchema>;

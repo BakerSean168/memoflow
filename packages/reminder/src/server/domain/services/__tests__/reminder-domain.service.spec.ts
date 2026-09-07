@@ -43,9 +43,6 @@ function makeTemplateState(overrides: Partial<ReminderTemplateState> = {}): Remi
     updatedAt: now,
     deletedAt: null,
     version: 1,
-    responseMetrics: null,
-    frequencyAdjustment: null,
-    smartFrequencyEnabled: true,
     history: [],
     ...overrides,
   };

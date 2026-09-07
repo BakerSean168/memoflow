@@ -42,7 +42,6 @@ function createReminderControllerStub(): ReminderController {
     getResponseStats: vi.fn(),
     analyzeFrequency: vi.fn(),
     adjustFrequency: vi.fn(),
-    rejectFrequencyAdjustment: vi.fn(),
     createGroup: vi.fn(),
     listGroups: vi.fn(),
     getGroup: vi.fn(),

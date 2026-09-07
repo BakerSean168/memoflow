@@ -27,4 +27,3 @@ export { ActiveTimeConfig } from './active-time-config';
 export { ActiveHoursConfig } from './active-hours-config';
 export { GroupStats } from './group-stats';
 export { ResponseMetrics } from './response-metrics';
-export { FrequencyAdjustment } from './frequency-adjustment';

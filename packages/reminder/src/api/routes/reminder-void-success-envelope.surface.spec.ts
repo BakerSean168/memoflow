@@ -3,9 +3,9 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Reminder void-success envelope surface (stage-6 residual 91):
- * void deletes / reject use z.null()/ok(null);
- * FrequencyAdjustmentResult no longer carries redundant success boolean.
+ * Reminder void-success envelope surface:
+ * delete commands use z.null()/ok(null); retired smart-frequency suggestion
+ * rejection must not be reintroduced as another void command.
  */
 describe('reminder void success envelope surface', () => {
   const templateRoutes = readFileSync(resolve(__dirname, './reminder-template.routes.ts'), 'utf8');
@@ -27,10 +27,10 @@ describe('reminder void success envelope surface', () => {
     'utf8',
   );
 
-  it('OpenAPI void deletes/reject use z.null()', () => {
+  it('OpenAPI void deletes use z.null() and suggestion reject route stays retired', () => {
     expect(templateRoutes).toContain("successResponse(z.null(), '删除成功')");
     expect(groupRoutes).toContain("successResponse(z.null(), '删除成功')");
-    expect(templateRoutes).toContain("successResponse(z.null(), '已拒绝')");
+    expect(templateRoutes).not.toContain('frequency-adjustment/reject');
   });
 
   it('FrequencyAdjustmentResultSchema has no success boolean dual-track', () => {
@@ -43,11 +43,11 @@ describe('reminder void success envelope surface', () => {
     expect(adjustUseCase).not.toContain('success: boolean');
   });
 
-  it('controllers return ok(null) for void deletes/reject', () => {
+  it('controllers return ok(null) only for the remaining void delete surfaces', () => {
     expect(controller).toMatch(/async deleteTemplate[\s\S]*?Promise<Result<null>>/);
     expect(controller).toMatch(/async deleteGroup[\s\S]*?Promise<Result<null>>/);
-    expect(controller).toMatch(/async rejectFrequencyAdjustment[\s\S]*?Promise<Result<null>>/);
-    expect((controller.match(/return ok\(null\)/g) ?? []).length).toBeGreaterThanOrEqual(3);
+    expect(controller).not.toContain('rejectFrequencyAdjustment');
+    expect((controller.match(/return ok\(null\)/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
 
   it('Desktop IPC void delete handlers normalize to ok(null)', () => {

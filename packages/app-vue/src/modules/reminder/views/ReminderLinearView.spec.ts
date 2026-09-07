@@ -273,7 +273,6 @@ function createPreferences(
     bestTimeSlots: [],
     worstTimeSlots: [],
     globalReminderEnabled: true,
-    globalSmartFrequency: false,
     createdAt: 0,
     updatedAt: 0,
     bestTimeSlotsText: '',

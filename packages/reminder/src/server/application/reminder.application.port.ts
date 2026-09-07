@@ -67,7 +67,6 @@ export interface ReminderApplicationPort {
     data: { action: string; customInterval?: number },
     ctx: ExecutionContext,
   ): Promise<Result<unknown>>;
-  rejectFrequencyAdjustment(templateId: string, ctx: ExecutionContext): Promise<Result<unknown>>;
   createGroup(
     data: CreateReminderGroupReq,
     ctx: ExecutionContext,

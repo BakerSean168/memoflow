@@ -107,7 +107,6 @@ export function projectReminderTemplates(
       tags: toStringArray(entity.tags),
       color: entity.color as string | null | undefined,
       icon: entity.icon as string | null | undefined,
-      smartFrequencyEnabled: toBoolean(entity.smartFrequencyEnabled, false),
       createdAt: toDateString(entity.createdAt),
       updatedAt: toDateString(entity.updatedAt),
     };
@@ -143,7 +142,6 @@ export function projectUserReminderPreference(pref: unknown): PortableUserRemind
     bestTimeSlots: (parseJsonField(entity.bestTimeSlots, []) as unknown[]) ?? [],
     worstTimeSlots: (parseJsonField(entity.worstTimeSlots, []) as unknown[]) ?? [],
     globalReminderEnabled: toBoolean(entity.globalReminderEnabled, true),
-    globalSmartFrequency: toBoolean(entity.globalSmartFrequency, false),
   };
 }
 

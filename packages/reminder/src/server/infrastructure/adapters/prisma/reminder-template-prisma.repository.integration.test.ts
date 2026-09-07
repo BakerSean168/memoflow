@@ -37,24 +37,6 @@ function createReminderTemplate(identityId: string) {
     icon: 'sparkles',
   });
 
-  template.updateResponseMetrics({
-    clickRate: 78,
-    ignoreRate: 12,
-    avgResponseTime: 6,
-    snoozeCount: 1,
-    effectivenessScore: 84,
-    sampleSize: 25,
-    lastAnalysisTime: Date.now(),
-  });
-  template.applyFrequencyAdjustment({
-    originalInterval: 3600,
-    adjustedInterval: 5400,
-    adjustmentReason: 'Lower interruption during focus blocks',
-    adjustmentTime: Date.now(),
-    isAutoAdjusted: true,
-    userConfirmed: false,
-    rejectionReason: null,
-  });
   template.recordTrigger();
 
   return template;
@@ -70,7 +52,7 @@ describe('ReminderTemplatePrismaRepository integration', () => {
     await cleanAll();
   });
 
-  it('persists and reloads history children, smart-frequency fields, and nullables without a single Profile owner column', async () => {
+  it('persists and reloads history children and nullables without legacy ownership or smart-frequency state', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
 
@@ -97,8 +79,9 @@ describe('ReminderTemplatePrismaRepository integration', () => {
     expect(loaded).not.toBeNull();
     expect(loaded?.type).toBe(ReminderType.Recurring);
     expect(loaded?.history).toHaveLength(1);
-    expect(loaded?.responseMetrics?.clickRate).toBe(78);
-    expect(loaded?.frequencyAdjustment?.adjustedInterval).toBe(5400);
+    expect(row).not.toHaveProperty('smartFrequencyEnabled');
+    expect(row).not.toHaveProperty('clickRate');
+    expect(row).not.toHaveProperty('originalInterval');
     expect(loaded?.description).toBe('Keep the workday sustainable.');
   });
 

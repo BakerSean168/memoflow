@@ -171,7 +171,6 @@ describe('projection from PowerSync-shaped rows', () => {
           status: 'active',
           importanceLevel: 'moderate',
           tags: '["work"]',
-          smartFrequencyEnabled: 0,
         },
       ],
       [
@@ -216,7 +215,6 @@ describe('projection from PowerSync-shaped rows', () => {
         { profileRef: 'reminderGroup:1', enabled: false },
       ],
       tags: ['work'],
-      smartFrequencyEnabled: false,
     });
     expect(responses[0]?.templateRef).toBe('reminderTemplate:1');
   });

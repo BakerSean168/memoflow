@@ -827,21 +827,7 @@ exports.Prisma.ReminderTemplateScalarFieldEnum = {
   activeTime: 'activeTime',
   activeHours: 'activeHours',
   notificationConfig: 'notificationConfig',
-  stats: 'stats',
-  clickRate: 'clickRate',
-  ignoreRate: 'ignoreRate',
-  avgResponseTime: 'avgResponseTime',
-  snoozeCount: 'snoozeCount',
-  effectivenessScore: 'effectivenessScore',
-  sampleSize: 'sampleSize',
-  lastAnalysisTime: 'lastAnalysisTime',
-  originalInterval: 'originalInterval',
-  adjustedInterval: 'adjustedInterval',
-  adjustmentReason: 'adjustmentReason',
-  adjustmentTime: 'adjustmentTime',
-  isAutoAdjusted: 'isAutoAdjusted',
-  userConfirmed: 'userConfirmed',
-  smartFrequencyEnabled: 'smartFrequencyEnabled'
+  stats: 'stats'
 };
 
 exports.Prisma.ReminderGroupScalarFieldEnum = {
@@ -912,7 +898,6 @@ exports.Prisma.UserReminderPreferenceScalarFieldEnum = {
   bestTimeSlots: 'bestTimeSlots',
   worstTimeSlots: 'worstTimeSlots',
   globalReminderEnabled: 'globalReminderEnabled',
-  globalSmartFrequency: 'globalSmartFrequency',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

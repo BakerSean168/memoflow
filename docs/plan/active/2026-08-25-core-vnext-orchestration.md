@@ -80,7 +80,7 @@ Still real residuals (code search verified):
 - `ROUTINE-5302`: no Routine method-library/catalog implementation exists;
 - `AI-6101~6103`: Goal/Task draft workflows exist, but `TaskPlanTaskSchema` still exposes retired `folderId`; Routine draft/command tooling and Planner/Notification AI read tooling are absent;
 - `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
-- `CLEAN-6301~6304`: convergence is in progress. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, and ordinary product raw-ScheduleTask mutation surfaces are removed; `CLEAN-6301` and `CLEAN-6303` are complete. `CLEAN-6302A` retired `ControlMode` and the legacy Reminder cron/due-set shadow; `CLEAN-6302B2` then completed the single-`groupId` → canonical M:N `RoutineProfile` / `ProfileMembership` cutover across contracts, persistence, transport, UI, scheduler eligibility, and data portability. Remaining `CLEAN-6302` work is duplicate smart-frequency mutation authority, overloaded snooze `responseTime`, and final obsolete UI/route residuals. `CLEAN-6304` remains the physical-boundary decision;
+- `CLEAN-6301~6304`: convergence is in progress. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, and ordinary product raw-ScheduleTask mutation surfaces are removed; `CLEAN-6301` and `CLEAN-6303` are complete. `CLEAN-6302A` retired `ControlMode` and the legacy Reminder cron/due-set shadow; `CLEAN-6302B2` then completed the single-`groupId` → canonical M:N `RoutineProfile` / `ProfileMembership` cutover across contracts, persistence, transport, UI, scheduler eligibility, and data portability. `CLEAN-6302C1` has also retired duplicate Smart Frequency auto-mutation state, leaving overloaded snooze `responseTime` and final obsolete UI/route residuals as the remaining `CLEAN-6302` work. `CLEAN-6304` remains the physical-boundary decision;
 - `POC-6401`: pg-boss remains a documented candidate only and is not installed/evaluated against current constraints;
 - `HARD-7101~7105`: final failure matrix, residual cleanup proof and umbrella closure review remain incomplete.
 
@@ -2100,7 +2100,21 @@ Physical package rename `reminder -> routine` is a separate final decision; do n
 - anti-resurrection audit is zero for live Reminder-template `reminder_group_id`, `reminderGroupId`, `moveTemplateToGroup`, `moveToGroup`, `reminder:template-moved`, and template-repository `findByGroupId`; remaining `groupId`/`findByGroupId` hits belong to the unrelated Editor workspace group/tab domain or explicit negative assertions;
 - verification: Reminder **72/72 files, 493/493 tests** plus PostgreSQL integration **5/5 files, 33/33 tests**; Data Portability **32/32 files, 139/139 tests** including canonical M:N PowerSync round-trip; App-Vue **201/201 files, 773/773 tests**; Contracts **67/67 files, 482/482 tests**; API **62/62 files, 327/327 tests**; Desktop **61/61 files, 322/322 tests**; Schedule Orchestration **9/9 files, 34/34 tests**; PowerSync Schema **1/1 file, 4/4 tests**; Database **9/9 files, 30/30 tests**; ten-project typecheck and lint green (lint: 0 errors, existing warnings remain); `governance:check`, `docs:check`, `test:targets:check`, and `git diff --check` green.
 
-`CLEAN-6302B` is complete. The next Reminder cleanup tranche is `CLEAN-6302C`: retire duplicate smart-frequency auto-mutation authority and replace overloaded snooze `responseTime` with an explicit snooze duration semantic; final obsolete route/component residual cleanup follows before `CLEAN-6302` can close.
+`CLEAN-6302B` is complete. `CLEAN-6302C1` below retires duplicate Smart Frequency authority; the next Reminder cleanup tranche is `CLEAN-6302C2`, which replaces overloaded snooze `responseTime` with an explicit snooze duration semantic. Final obsolete route/component residual cleanup follows before `CLEAN-6302` can close.
+
+**Implementation evidence — CLEAN-6302C1 (2026-09-07): duplicate Smart Frequency write authority retired**
+
+- kept only two intentional frequency capabilities: read-only `frequency-analysis`, which computes transient `ResponseMetrics` from response history, and the explicit `frequency-adjustment` command, which changes the Routine interval only when the user submits a new interval;
+- removed persisted/background suggestion state from `ReminderTemplate`: `responseMetrics`, `frequencyAdjustment`, `smartFrequencyEnabled`, plus `updateResponseMetrics`, `apply/confirm/rejectFrequencyAdjustment`, `toggleSmartFrequency`, `needsFrequencyAdjustment`, and `calculateSuggestedAdjustment`;
+- removed `FrequencyAdjustment` suggestion VO/contracts and the pseudo reject command/event (`/frequency-adjustment/reject`, `rejectFrequencyAdjustment`, `reminder:frequency-adjustment-rejected`); the only frequency write event left is `reminder:frequency-adjusted`, emitted after the explicit command persists successfully;
+- removed the obsolete global auto-mode preference (`globalSmartFrequency` / `globalSmartFrequencyEnabled`) while retaining the real `globalReminderEnabled` master gate;
+- physically removed Smart Frequency columns from Prisma and PowerSync (`click/ignore/avg-response metrics`, persisted adjustment/suggestion columns, per-Routine smart flag, global smart flag), regenerated Prisma Client, and removed those fields from Prisma/PowerSync mappers, repositories, CRUD normalization, and data-portability import/export;
+- fixed a production persistence defect exposed by the cleanup: Prisma `UserReminderPreferenceRepository.save()` had been writing the obsolete `globalSmartFrequency` field instead of `globalReminderEnabled`. It now persists the master gate on both create and update; a PostgreSQL integration test verifies `false` survives save + reload;
+- anti-resurrection audit is zero for live `globalSmartFrequency`, `smartFrequencyEnabled`, auto/suggestion mutation methods, rejected-adjustment route/event, and retired Smart Frequency persistence columns; remaining hits are explicit negative assertions only. `ResponseMetrics` remains transient analysis data and `FrequencyAdjustmentResultSchema` remains the response shape of the explicit interval command;
+- verification: Contracts **67/67 files, 482/482 tests**; Data Portability **32/32 files, 139/139 tests**; Reminder **72/72 files, 471/471 tests**; PostgreSQL Reminder integration **6/6 files, 34/34 tests**; API **62/62 files, 327/327 tests**; Desktop **61/61 files, 322/322 tests**; App-Vue **201/201 files, 773/773 tests**; PowerSync Schema **1/1 file, 4/4 tests**; Database **9/9 files, 30/30 tests**; nine-project typecheck and lint green (lint: 0 errors; existing warnings remain); `governance:check`, `docs:check`, `test:targets:check`, and `git diff --check` green.
+
+`CLEAN-6302C1` is complete. `CLEAN-6302C2` now owns the remaining semantic migration: separate Reminder response latency from Snooze duration and remove the overloaded `responseTime` snooze command semantics without weakening response analytics.
+
 
 
 ## CLEAN-6303 — Internalize raw ScheduleTask product surfaces
@@ -2511,7 +2525,7 @@ A. Product parity (independent lanes)
    MOBILE-6201/6202   parity audit first; current screens already use modern Goal/Task/Notification contracts, implement only proven gaps
 
 B. Scheduling physical convergence (ordered)
-   CLEAN-6302B2/C     cut public single `groupId` transport/UI/persistence to the now-live ProfileMembership M:N store, then retire duplicate smart-frequency and overloaded snooze-response semantics (6302A + B1 complete)
+   CLEAN-6302C2       replace overloaded snooze-response semantics after B2 M:N membership cutover and C1 Smart Frequency authority retirement
         ↓
    CLEAN-6304         decide/perform scheduler physical package split only after semantic ownership is clean
         ↓

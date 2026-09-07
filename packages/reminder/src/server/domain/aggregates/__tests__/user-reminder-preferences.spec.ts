@@ -17,7 +17,6 @@ describe('UserReminderPreferences aggregate', () => {
       expect(prefs.identityId).toBe('id-1');
       expect(prefs.bestTimeSlots).toEqual([]);
       expect(prefs.worstTimeSlots).toEqual([]);
-      expect(prefs.globalSmartFrequency).toBe(true);
     });
 
     it('should generate a unique id', () => {
@@ -40,13 +39,6 @@ describe('UserReminderPreferences aggregate', () => {
       expect(prefs.worstTimeSlots).toHaveLength(1);
     });
 
-    it('should allow disabling global smart frequency', () => {
-      const prefs = UserReminderPreferences.create({
-        identityId: 'id-1',
-        globalSmartFrequency: false,
-      });
-      expect(prefs.globalSmartFrequency).toBe(false);
-    });
   });
 
   // -----------------------------------------------------------------------
@@ -60,14 +52,12 @@ describe('UserReminderPreferences aggregate', () => {
         identityId: 'id-1',
         bestTimeSlots: [{ hourStart: 9, hourEnd: 12, avgResponseRate: 90 }],
         worstTimeSlots: [],
-        globalSmartFrequency: false,
         createdAt: now,
         updatedAt: now,
       });
 
       expect(prefs.id).toBe('pref-1');
       expect(prefs.bestTimeSlots).toHaveLength(1);
-      expect(prefs.globalSmartFrequency).toBe(false);
     });
   });
 
@@ -186,26 +176,6 @@ describe('UserReminderPreferences aggregate', () => {
   });
 
   // -----------------------------------------------------------------------
-  // toggleGlobalSmartFrequency()
-  // -----------------------------------------------------------------------
-  describe('toggleGlobalSmartFrequency()', () => {
-    it('should enable smart frequency', () => {
-      const prefs = UserReminderPreferences.create({
-        identityId: 'id-1',
-        globalSmartFrequency: false,
-      });
-      prefs.toggleGlobalSmartFrequency(true);
-      expect(prefs.globalSmartFrequency).toBe(true);
-    });
-
-    it('should disable smart frequency', () => {
-      const prefs = UserReminderPreferences.create({ identityId: 'id-1' });
-      prefs.toggleGlobalSmartFrequency(false);
-      expect(prefs.globalSmartFrequency).toBe(false);
-    });
-  });
-
-  // -----------------------------------------------------------------------
   // getBestTimeSlot() / getWorstTimeSlot()
   // -----------------------------------------------------------------------
   describe('getBestTimeSlot()', () => {
@@ -293,7 +263,6 @@ describe('UserReminderPreferences aggregate', () => {
 
       expect(dto.identityId).toBe('id-1');
       expect(dto.bestTimeSlots).toHaveLength(1);
-      expect(dto.globalSmartFrequency).toBe(true);
     });
   });
 

@@ -20,7 +20,6 @@ export class PrismaUserReminderPreferenceMapper {
       bestTimeSlots: JSON.parse(data.bestTimeSlots ?? '[]') as TimeSlotDTO[],
       worstTimeSlots: JSON.parse(data.worstTimeSlots ?? '[]') as TimeSlotDTO[],
       globalReminderEnabled: data.globalReminderEnabled ?? true,
-      globalSmartFrequency: data.globalSmartFrequency,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     });

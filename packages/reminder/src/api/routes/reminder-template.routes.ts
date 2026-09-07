@@ -398,21 +398,5 @@ export function registerReminderTemplateRoutes(
     (req, ctx) => controller.adjustFrequency(req.params!.id, req.body, ctx),
   );
 
-  // POST /templates/:id/frequency-adjustment/reject
-  r.route(
-    {
-      method: 'post',
-      path: '/templates/:id/frequency-adjustment/reject',
-      summary: '拒绝频率调整建议',
-      request: { params: z.object({ id: brandedId<ReminderTemplateId>() }) },
-      responses: {
-        200: successResponse(z.null(), '已拒绝'),
-        404: errorResponse('模板不存在'),
-      },
-    },
-    [auth],
-    (_req, ctx) => controller.rejectFrequencyAdjustment(_req.params!.id, ctx),
-  );
-
   return router;
 }

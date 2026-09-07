@@ -39,7 +39,6 @@ export interface UpsertUserReminderPreferenceInput {
   bestTimeSlots: string;
   worstTimeSlots: string;
   globalReminderEnabled: boolean;
-  globalSmartFrequency: boolean;
 }
 
 // --- Repository ---
@@ -273,7 +272,6 @@ export interface CreateReminderTemplateInput extends TimestampedImportInput {
   activeHours: string | null;
   notificationConfig: string;
   stats: string;
-  smartFrequencyEnabled: boolean;
 }
 
 export interface CreateReminderResponseInput extends CreatedImportInput {

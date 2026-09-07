@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NotificationChannel } from '@memoflow/contracts/reminder';
 import { ActiveHoursConfig } from '../active-hours-config';
 import { ActiveTimeConfig } from '../active-time-config';
-import { FrequencyAdjustment } from '../frequency-adjustment';
 import { GroupStats } from '../group-stats';
 import { ReminderNotificationConfig } from '../reminder-notification-config';
 import { ResponseMetrics } from '../response-metrics';
@@ -121,16 +120,4 @@ describe('reminder shared value objects', () => {
     );
   });
 
-  it('covers frequency adjustment status, percentages, and formatting', () => {
-    const auto = FrequencyAdjustment.createAuto(3600, 7200, 'Too noisy');
-    const manual = FrequencyAdjustment.createManual(1800, 900, 'User prefers faster');
-
-    expect(auto.isPending).toBe(true);
-    expect(auto.changeRate).toBe(100);
-    expect(auto.confirm().isConfirmed).toBe(true);
-    expect(auto.reject('No thanks').isRejected).toBe(true);
-    expect(manual.isConfirmed).toBe(true);
-    expect(manual.changeRate).toBe(-50);
-    expect(FrequencyAdjustment.create({ ...manual.toDTO(), originalInterval: 0 }).changeRate).toBe(0);
-  });
 });

@@ -60,7 +60,6 @@ export async function importReminders(
       activeHours: t.activeHours ? jsonStringify(t.activeHours) : null,
       notificationConfig: jsonStringify(t.notificationConfig ?? {}),
       stats: jsonStringify({}),
-      smartFrequencyEnabled: (t.smartFrequencyEnabled as boolean) ?? false,
       ...timestamps(t),
     });
     inc(ctx, 'reminderTemplates');

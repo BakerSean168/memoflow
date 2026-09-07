@@ -466,20 +466,6 @@ const reminder_templates = new Table({
   active_hours: column.text, // JSON
   notification_config: column.text, // JSON
   stats: column.text, // JSON
-  click_rate: column.real,
-  ignore_rate: column.real,
-  avg_response_time: column.integer,
-  snooze_count: column.integer,
-  effectiveness_score: column.real,
-  sample_size: column.integer,
-  last_analysis_time: column.text,
-  original_interval: column.integer,
-  adjusted_interval: column.integer,
-  adjustment_reason: column.text,
-  adjustment_time: column.text,
-  is_auto_adjusted: column.integer, // boolean
-  user_confirmed: column.integer, // boolean
-  smart_frequency_enabled: column.integer, // boolean
 });
 
 const reminder_groups = new Table({
@@ -544,7 +530,6 @@ const user_reminder_preferences = new Table({
   best_time_slots: column.text, // JSON
   worst_time_slots: column.text, // JSON
   global_reminder_enabled: column.integer, // boolean
-  global_smart_frequency: column.integer, // boolean
   created_at: column.text,
   updated_at: column.text,
 });

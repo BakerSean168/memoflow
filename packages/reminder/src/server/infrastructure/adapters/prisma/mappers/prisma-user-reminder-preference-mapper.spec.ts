@@ -4,7 +4,7 @@
  * Covers:
  * - toDomain: Prisma row to domain aggregate
  * - JSON parsing for time slots
- * - Edge cases (null/empty time slots, missing globalSmartFrequency)
+ * - Edge cases (null/empty time slots and global master-gate defaults)
  */
 
 import { describe, it, expect } from 'vitest';
@@ -21,7 +21,6 @@ function createMinimalRow(): PrismaUserReminderPreference {
     bestTimeSlots: null,
     worstTimeSlots: null,
     globalReminderEnabled: true,
-    globalSmartFrequency: null,
     createdAt: now,
     updatedAt: now,
   } as PrismaUserReminderPreference;
@@ -41,7 +40,6 @@ function createFullRow(): PrismaUserReminderPreference {
       { startHour: 0, startMinute: 0, endHour: 6, endMinute: 0 },
     ]),
     globalReminderEnabled: true,
-    globalSmartFrequency: true,
     createdAt: now,
     updatedAt: now,
   } as PrismaUserReminderPreference;
@@ -60,7 +58,6 @@ describe('PrismaUserReminderPreferenceMapper', () => {
       expect(domain.bestTimeSlots).toEqual([]);
       expect(domain.worstTimeSlots).toEqual([]);
       expect(domain.globalReminderEnabled).toBe(true);
-      expect(domain.globalSmartFrequency).toBeNull();
     });
 
     it('maps full Prisma row with all fields to domain', () => {
@@ -72,7 +69,6 @@ describe('PrismaUserReminderPreferenceMapper', () => {
       expect(domain.bestTimeSlots).toHaveLength(2);
       expect(domain.worstTimeSlots).toHaveLength(2);
       expect(domain.globalReminderEnabled).toBe(true);
-      expect(domain.globalSmartFrequency).toBe(true);
     });
 
     it('parses bestTimeSlots JSON correctly', () => {
@@ -144,13 +140,6 @@ describe('PrismaUserReminderPreferenceMapper', () => {
 
       expect(domain.createdAt).toEqual(now);
       expect(domain.updatedAt).toEqual(now);
-    });
-
-    it('handles missing globalSmartFrequency as null', () => {
-      const row = createMinimalRow();
-      const domain = PrismaUserReminderPreferenceMapper.toDomain(row);
-
-      expect(domain.globalSmartFrequency).toBeNull();
     });
 
     it('defaults globalReminderEnabled to true when missing', () => {

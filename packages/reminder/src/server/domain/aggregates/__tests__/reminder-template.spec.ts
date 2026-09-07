@@ -3,12 +3,7 @@ import { ReminderTemplate } from '../reminder-template';
 import type { ReminderTemplateState } from '../reminder-template';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ReminderTemplateId } from '../../value-objects/reminder-template-id';
-import {
-  TriggerConfig,
-  ActiveTimeConfig,
-  ResponseMetrics,
-  FrequencyAdjustment,
-} from '../../value-objects';
+import { TriggerConfig, ActiveTimeConfig } from '../../value-objects';
 import { ReminderNotificationConfig } from '../../value-objects/reminder-notification-config';
 import { ReminderStatus, ReminderType, TriggerResult } from '@memoflow/contracts/reminder';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
@@ -41,9 +36,6 @@ function makeState(overrides: Partial<ReminderTemplateState> = {}): ReminderTemp
     updatedAt: new Date(now),
     deletedAt: null,
     version: 1,
-    responseMetrics: null,
-    frequencyAdjustment: null,
-    smartFrequencyEnabled: true,
     history: [],
     ...overrides,
   };
@@ -139,11 +131,6 @@ describe('ReminderTemplate aggregate', () => {
       expect(createdEvent).toBeDefined();
       expect((createdEvent!.payload as any).templateId).toBe(template.id);
       expect((createdEvent!.payload as any).reminder?.name).toBe('Daily Standup');
-    });
-
-    it('should default smartFrequencyEnabled to true', () => {
-      const template = createDefaultTemplate();
-      expect(template.smartFrequencyEnabled).toBe(true);
     });
 
     it('should default importanceLevel to Moderate', () => {
@@ -516,143 +503,7 @@ describe('ReminderTemplate aggregate', () => {
     });
   });
 
-  // -----------------------------------------------------------------------
-  // Smart frequency methods
-  // -----------------------------------------------------------------------
-  describe('smart frequency', () => {
-    it('toggleSmartFrequency should change the flag', () => {
-      const template = ReminderTemplate.load(makeState({ smartFrequencyEnabled: true }));
-      template.toggleSmartFrequency(false);
-      expect(template.smartFrequencyEnabled).toBe(false);
 
-      template.toggleSmartFrequency(true);
-      expect(template.smartFrequencyEnabled).toBe(true);
-    });
-
-    it('updateResponseMetrics should set metrics', () => {
-      const template = ReminderTemplate.load(makeState());
-      template.updateResponseMetrics({
-        clickRate: 75,
-        ignoreRate: 10,
-        avgResponseTime: 5,
-        snoozeCount: 2,
-        effectivenessScore: 80,
-        sampleSize: 100,
-        lastAnalysisTime: Date.now(),
-      });
-      expect(template.responseMetrics).not.toBeNull();
-      expect(template.responseMetrics!.clickRate).toBe(75);
-    });
-
-    it('needsFrequencyAdjustment returns false when no metrics', () => {
-      const template = ReminderTemplate.load(
-        makeState({ responseMetrics: null, smartFrequencyEnabled: true }),
-      );
-      expect(template.needsFrequencyAdjustment()).toBe(false);
-    });
-
-    it('needsFrequencyAdjustment returns false when smart frequency is disabled', () => {
-      const template = ReminderTemplate.load(
-        makeState({
-          smartFrequencyEnabled: false,
-          responseMetrics: ResponseMetrics.create({
-            clickRate: 10,
-            ignoreRate: 80,
-            avgResponseTime: 5,
-            snoozeCount: 0,
-            effectivenessScore: 20,
-            sampleSize: 50,
-            lastAnalysisTime: Date.now(),
-          }),
-        }),
-      );
-      expect(template.needsFrequencyAdjustment()).toBe(false);
-    });
-
-    it('needsFrequencyAdjustment returns true for low effectiveness', () => {
-      const template = ReminderTemplate.load(
-        makeState({
-          smartFrequencyEnabled: true,
-          responseMetrics: ResponseMetrics.create({
-            clickRate: 10,
-            ignoreRate: 70,
-            avgResponseTime: 5,
-            snoozeCount: 0,
-            effectivenessScore: 30,
-            sampleSize: 50,
-            lastAnalysisTime: Date.now(),
-          }),
-        }),
-      );
-      expect(template.needsFrequencyAdjustment()).toBe(true);
-    });
-
-    it('calculateSuggestedAdjustment returns null when not needed', () => {
-      const template = ReminderTemplate.load(
-        makeState({
-          smartFrequencyEnabled: true,
-          responseMetrics: ResponseMetrics.create({
-            clickRate: 80,
-            ignoreRate: 10,
-            avgResponseTime: 5,
-            snoozeCount: 0,
-            effectivenessScore: 50,
-            sampleSize: 50,
-            lastAnalysisTime: Date.now(),
-          }),
-        }),
-      );
-      expect(template.calculateSuggestedAdjustment()).toBeNull();
-    });
-
-    it('applyFrequencyAdjustment should set adjustment', () => {
-      const template = ReminderTemplate.load(makeState());
-      template.applyFrequencyAdjustment({
-        originalInterval: 3600,
-        adjustedInterval: 7200,
-        adjustmentReason: 'test',
-        adjustmentTime: Date.now(),
-        isAutoAdjusted: true,
-        userConfirmed: false,
-        rejectionReason: null,
-      });
-      expect(template.frequencyAdjustment).not.toBeNull();
-    });
-
-    it('confirmFrequencyAdjustment should mark as confirmed', () => {
-      const template = ReminderTemplate.load(
-        makeState({
-          frequencyAdjustment: FrequencyAdjustment.createAuto(3600, 7200, 'test'),
-        }),
-      );
-      template.confirmFrequencyAdjustment();
-      expect(template.frequencyAdjustment!.userConfirmed).toBe(true);
-    });
-
-    it('confirmFrequencyAdjustment should throw if no adjustment', () => {
-      const template = ReminderTemplate.load(makeState({ frequencyAdjustment: null }));
-      expect(() => template.confirmFrequencyAdjustment()).toThrow(
-        'No frequency adjustment to confirm',
-      );
-    });
-
-    it('rejectFrequencyAdjustment should set rejection reason', () => {
-      const template = ReminderTemplate.load(
-        makeState({
-          frequencyAdjustment: FrequencyAdjustment.createAuto(3600, 7200, 'test'),
-        }),
-      );
-      template.rejectFrequencyAdjustment('Too aggressive');
-      expect(template.frequencyAdjustment!.rejectionReason).toBe('Too aggressive');
-    });
-
-    it('rejectFrequencyAdjustment should throw if no adjustment', () => {
-      const template = ReminderTemplate.load(makeState({ frequencyAdjustment: null }));
-      expect(() => template.rejectFrequencyAdjustment()).toThrow(
-        'No frequency adjustment to reject',
-      );
-    });
-  });
 
   // -----------------------------------------------------------------------
   // toServerDTO() / toClientDTO()

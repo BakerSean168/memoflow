@@ -43,9 +43,6 @@ export class ReminderPreferencesApplicationService {
       if (data.globalReminderEnabled !== undefined) {
         preferences.toggleGlobalReminderEnabled(data.globalReminderEnabled);
       }
-      if (data.globalSmartFrequencyEnabled !== undefined) {
-        preferences.toggleGlobalSmartFrequency(data.globalSmartFrequencyEnabled);
-      }
       await this.userReminderPreferenceRepository.save(preferences);
       await this.reminderDomainService.syncTemplatesEffectiveEnabledByIdentity(ctx.identityId);
       return ok(preferences.toClientDTO());
@@ -56,9 +53,6 @@ export class ReminderPreferencesApplicationService {
     }
     if (data.globalReminderEnabled !== undefined) {
       existing.toggleGlobalReminderEnabled(data.globalReminderEnabled);
-    }
-    if (data.globalSmartFrequencyEnabled !== undefined) {
-      existing.toggleGlobalSmartFrequency(data.globalSmartFrequencyEnabled);
     }
 
     await this.userReminderPreferenceRepository.save(existing);

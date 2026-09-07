@@ -6,7 +6,7 @@ import type { ReminderResponseAction } from '../entities/reminder-response-serve
  *
  * These are not aggregate domain events:
  * - `reminder:response:recorded` is produced when a ReminderResponse entity is persisted.
- * - `reminder:frequency:*` events are produced by the smart-frequency application service.
+ * - `reminder:frequency-adjusted` is produced by the explicit interval adjustment command.
  */
 
 export interface ReminderResponseRecordedEvent {
@@ -25,10 +25,4 @@ export interface ReminderFrequencyAdjustedEvent {
   adjustedInterval: number;
   reason: string;
   adjustedAt: number;
-}
-
-export interface ReminderFrequencyAdjustmentRejectedEvent {
-  identityId: IdentityId;
-  templateId: ReminderTemplateId;
-  rejectedAt: number;
 }

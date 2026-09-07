@@ -48,7 +48,6 @@ export const PortableReminderTemplateSchema = z
     tags: z.array(z.string()),
     color: z.string().nullable().optional(),
     icon: z.string().nullable().optional(),
-    smartFrequencyEnabled: z.boolean(),
     createdAt: IsoDateString.optional(),
     updatedAt: IsoDateString.optional(),
   })

@@ -181,7 +181,6 @@ export const UserReminderPreferencesResponseSchema = z.object({
   bestTimeSlots: z.array(TimeSlotSchema),
   worstTimeSlots: z.array(TimeSlotSchema),
   globalReminderEnabled: z.boolean(),
-  globalSmartFrequency: z.boolean(),
   createdAt: z.number(),
   updatedAt: z.number(),
   bestTimeSlotsText: z.string(),
@@ -193,7 +192,6 @@ export const UpdateReminderPreferencesSchema = z.object({
   bestTimeSlots: z.array(TimeSlotSchema).optional(),
   worstTimeSlots: z.array(TimeSlotSchema).optional(),
   globalReminderEnabled: z.boolean().optional(),
-  globalSmartFrequencyEnabled: z.boolean().optional(),
 });
 
 export type UpdateReminderPreferencesReq = z.infer<typeof UpdateReminderPreferencesSchema>;

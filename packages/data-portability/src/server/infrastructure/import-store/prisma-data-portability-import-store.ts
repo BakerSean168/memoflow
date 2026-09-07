@@ -80,13 +80,11 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
         bestTimeSlots: input.bestTimeSlots,
         worstTimeSlots: input.worstTimeSlots,
         globalReminderEnabled: input.globalReminderEnabled,
-        globalSmartFrequency: input.globalSmartFrequency,
       },
       update: {
         bestTimeSlots: input.bestTimeSlots,
         worstTimeSlots: input.worstTimeSlots,
         globalReminderEnabled: input.globalReminderEnabled,
-        globalSmartFrequency: input.globalSmartFrequency,
       },
     });
   }

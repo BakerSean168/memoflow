@@ -1194,24 +1194,6 @@ model ReminderTemplate {
   notificationConfig String    @map("notification_config")
   stats              String
 
-  // Smart Frequency: Response Metrics
-  clickRate          Float?    @map("click_rate")
-  ignoreRate         Float?    @map("ignore_rate")
-  avgResponseTime    Int?      @map("avg_response_time")
-  snoozeCount        Int       @default(0) @map("snooze_count")
-  effectivenessScore Float?    @map("effectiveness_score")
-  sampleSize         Int       @default(0) @map("sample_size")
-  lastAnalysisTime   DateTime? @map("last_analysis_time")
-
-  // Smart Frequency: Frequency Adjustment
-  originalInterval      Int?      @map("original_interval")
-  adjustedInterval      Int?      @map("adjusted_interval")
-  adjustmentReason      String?   @map("adjustment_reason")
-  adjustmentTime        DateTime? @map("adjustment_time")
-  isAutoAdjusted        Boolean   @default(false) @map("is_auto_adjusted")
-  userConfirmed         Boolean   @default(false) @map("user_confirmed")
-  smartFrequencyEnabled Boolean   @default(true) @map("smart_frequency_enabled")
-
   history     ReminderHistory[]
   instances   ReminderInstance[]
   responses   ReminderResponse[]
@@ -1315,7 +1297,7 @@ model ReminderResponse {
 }
 
 /// UserReminderPreference 聚合根 - 用户提醒偏好
-/// 存储用户的最佳/最差响应时间段和智能频率配置
+/// 存储用户的最佳/最差响应时间段与全局提醒总开关
 model UserReminderPreference {
   // ============ 主键与外键 ============
   id         String @id
@@ -1325,9 +1307,8 @@ model UserReminderPreference {
   bestTimeSlots  String @map("best_time_slots") /// JSON: TimeSlotDTO[]
   worstTimeSlots String @map("worst_time_slots") /// JSON: TimeSlotDTO[]
 
-  // ============ 智能频率 ============
+  // ============ 全局提醒 ============
   globalReminderEnabled Boolean @default(true) @map("global_reminder_enabled")
-  globalSmartFrequency  Boolean @default(true) @map("global_smart_frequency")
 
   // ============ 审计 ============
   createdAt DateTime @default(now()) @map("created_at")

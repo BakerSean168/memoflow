@@ -12,7 +12,6 @@ import type { ReminderGroupPausedEvent } from '../domain/events/reminder-group-p
 import type { ReminderTriggeredEvent } from '../domain/events/reminder-triggered.event';
 import type {
   ReminderFrequencyAdjustedEvent,
-  ReminderFrequencyAdjustmentRejectedEvent,
   ReminderResponseRecordedEvent,
 } from './reminder-analytics-events';
 
@@ -107,14 +106,9 @@ export type ReminderEventMap = {
 
   /**
    * Reminder frequency adjusted integration event
-   * Triggered when the smart-frequency service applies an adjustment
+   * Triggered when the explicit interval adjustment command succeeds
    */
   'reminder:frequency-adjusted': ReminderFrequencyAdjustedEvent;
 
-  /**
-   * Reminder frequency adjustment rejected integration event
-   * Triggered when the user rejects a smart-frequency adjustment
-   */
-  'reminder:frequency-adjustment-rejected': ReminderFrequencyAdjustmentRejectedEvent;
 };
 

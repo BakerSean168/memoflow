@@ -284,7 +284,7 @@ export type ReminderResponse = $Result.DefaultSelection<Prisma.$ReminderResponse
 /**
  * Model UserReminderPreference
  * UserReminderPreference 聚合根 - 用户提醒偏好
- * 存储用户的最佳/最差响应时间段和智能频率配置
+ * 存储用户的最佳/最差响应时间段与全局提醒总开关
  */
 export type UserReminderPreference = $Result.DefaultSelection<Prisma.$UserReminderPreferencePayload>
 /**
@@ -67738,26 +67738,10 @@ export namespace Prisma {
 
   export type ReminderTemplateAvgAggregateOutputType = {
     version: number | null
-    clickRate: number | null
-    ignoreRate: number | null
-    avgResponseTime: number | null
-    snoozeCount: number | null
-    effectivenessScore: number | null
-    sampleSize: number | null
-    originalInterval: number | null
-    adjustedInterval: number | null
   }
 
   export type ReminderTemplateSumAggregateOutputType = {
     version: number | null
-    clickRate: number | null
-    ignoreRate: number | null
-    avgResponseTime: number | null
-    snoozeCount: number | null
-    effectivenessScore: number | null
-    sampleSize: number | null
-    originalInterval: number | null
-    adjustedInterval: number | null
   }
 
   export type ReminderTemplateMinAggregateOutputType = {
@@ -67783,20 +67767,6 @@ export namespace Prisma {
     activeHours: string | null
     notificationConfig: string | null
     stats: string | null
-    clickRate: number | null
-    ignoreRate: number | null
-    avgResponseTime: number | null
-    snoozeCount: number | null
-    effectivenessScore: number | null
-    sampleSize: number | null
-    lastAnalysisTime: Date | null
-    originalInterval: number | null
-    adjustedInterval: number | null
-    adjustmentReason: string | null
-    adjustmentTime: Date | null
-    isAutoAdjusted: boolean | null
-    userConfirmed: boolean | null
-    smartFrequencyEnabled: boolean | null
   }
 
   export type ReminderTemplateMaxAggregateOutputType = {
@@ -67822,20 +67792,6 @@ export namespace Prisma {
     activeHours: string | null
     notificationConfig: string | null
     stats: string | null
-    clickRate: number | null
-    ignoreRate: number | null
-    avgResponseTime: number | null
-    snoozeCount: number | null
-    effectivenessScore: number | null
-    sampleSize: number | null
-    lastAnalysisTime: Date | null
-    originalInterval: number | null
-    adjustedInterval: number | null
-    adjustmentReason: string | null
-    adjustmentTime: Date | null
-    isAutoAdjusted: boolean | null
-    userConfirmed: boolean | null
-    smartFrequencyEnabled: boolean | null
   }
 
   export type ReminderTemplateCountAggregateOutputType = {
@@ -67861,46 +67817,16 @@ export namespace Prisma {
     activeHours: number
     notificationConfig: number
     stats: number
-    clickRate: number
-    ignoreRate: number
-    avgResponseTime: number
-    snoozeCount: number
-    effectivenessScore: number
-    sampleSize: number
-    lastAnalysisTime: number
-    originalInterval: number
-    adjustedInterval: number
-    adjustmentReason: number
-    adjustmentTime: number
-    isAutoAdjusted: number
-    userConfirmed: number
-    smartFrequencyEnabled: number
     _all: number
   }
 
 
   export type ReminderTemplateAvgAggregateInputType = {
     version?: true
-    clickRate?: true
-    ignoreRate?: true
-    avgResponseTime?: true
-    snoozeCount?: true
-    effectivenessScore?: true
-    sampleSize?: true
-    originalInterval?: true
-    adjustedInterval?: true
   }
 
   export type ReminderTemplateSumAggregateInputType = {
     version?: true
-    clickRate?: true
-    ignoreRate?: true
-    avgResponseTime?: true
-    snoozeCount?: true
-    effectivenessScore?: true
-    sampleSize?: true
-    originalInterval?: true
-    adjustedInterval?: true
   }
 
   export type ReminderTemplateMinAggregateInputType = {
@@ -67926,20 +67852,6 @@ export namespace Prisma {
     activeHours?: true
     notificationConfig?: true
     stats?: true
-    clickRate?: true
-    ignoreRate?: true
-    avgResponseTime?: true
-    snoozeCount?: true
-    effectivenessScore?: true
-    sampleSize?: true
-    lastAnalysisTime?: true
-    originalInterval?: true
-    adjustedInterval?: true
-    adjustmentReason?: true
-    adjustmentTime?: true
-    isAutoAdjusted?: true
-    userConfirmed?: true
-    smartFrequencyEnabled?: true
   }
 
   export type ReminderTemplateMaxAggregateInputType = {
@@ -67965,20 +67877,6 @@ export namespace Prisma {
     activeHours?: true
     notificationConfig?: true
     stats?: true
-    clickRate?: true
-    ignoreRate?: true
-    avgResponseTime?: true
-    snoozeCount?: true
-    effectivenessScore?: true
-    sampleSize?: true
-    lastAnalysisTime?: true
-    originalInterval?: true
-    adjustedInterval?: true
-    adjustmentReason?: true
-    adjustmentTime?: true
-    isAutoAdjusted?: true
-    userConfirmed?: true
-    smartFrequencyEnabled?: true
   }
 
   export type ReminderTemplateCountAggregateInputType = {
@@ -68004,20 +67902,6 @@ export namespace Prisma {
     activeHours?: true
     notificationConfig?: true
     stats?: true
-    clickRate?: true
-    ignoreRate?: true
-    avgResponseTime?: true
-    snoozeCount?: true
-    effectivenessScore?: true
-    sampleSize?: true
-    lastAnalysisTime?: true
-    originalInterval?: true
-    adjustedInterval?: true
-    adjustmentReason?: true
-    adjustmentTime?: true
-    isAutoAdjusted?: true
-    userConfirmed?: true
-    smartFrequencyEnabled?: true
     _all?: true
   }
 
@@ -68130,20 +68014,6 @@ export namespace Prisma {
     activeHours: string | null
     notificationConfig: string
     stats: string
-    clickRate: number | null
-    ignoreRate: number | null
-    avgResponseTime: number | null
-    snoozeCount: number
-    effectivenessScore: number | null
-    sampleSize: number
-    lastAnalysisTime: Date | null
-    originalInterval: number | null
-    adjustedInterval: number | null
-    adjustmentReason: string | null
-    adjustmentTime: Date | null
-    isAutoAdjusted: boolean
-    userConfirmed: boolean
-    smartFrequencyEnabled: boolean
     _count: ReminderTemplateCountAggregateOutputType | null
     _avg: ReminderTemplateAvgAggregateOutputType | null
     _sum: ReminderTemplateSumAggregateOutputType | null
@@ -68188,20 +68058,6 @@ export namespace Prisma {
     activeHours?: boolean
     notificationConfig?: boolean
     stats?: boolean
-    clickRate?: boolean
-    ignoreRate?: boolean
-    avgResponseTime?: boolean
-    snoozeCount?: boolean
-    effectivenessScore?: boolean
-    sampleSize?: boolean
-    lastAnalysisTime?: boolean
-    originalInterval?: boolean
-    adjustedInterval?: boolean
-    adjustmentReason?: boolean
-    adjustmentTime?: boolean
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     history?: boolean | ReminderTemplate$historyArgs<ExtArgs>
     instances?: boolean | ReminderTemplate$instancesArgs<ExtArgs>
     responses?: boolean | ReminderTemplate$responsesArgs<ExtArgs>
@@ -68233,20 +68089,6 @@ export namespace Prisma {
     activeHours?: boolean
     notificationConfig?: boolean
     stats?: boolean
-    clickRate?: boolean
-    ignoreRate?: boolean
-    avgResponseTime?: boolean
-    snoozeCount?: boolean
-    effectivenessScore?: boolean
-    sampleSize?: boolean
-    lastAnalysisTime?: boolean
-    originalInterval?: boolean
-    adjustedInterval?: boolean
-    adjustmentReason?: boolean
-    adjustmentTime?: boolean
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["reminderTemplate"]>
 
@@ -68273,20 +68115,6 @@ export namespace Prisma {
     activeHours?: boolean
     notificationConfig?: boolean
     stats?: boolean
-    clickRate?: boolean
-    ignoreRate?: boolean
-    avgResponseTime?: boolean
-    snoozeCount?: boolean
-    effectivenessScore?: boolean
-    sampleSize?: boolean
-    lastAnalysisTime?: boolean
-    originalInterval?: boolean
-    adjustedInterval?: boolean
-    adjustmentReason?: boolean
-    adjustmentTime?: boolean
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["reminderTemplate"]>
 
@@ -68313,23 +68141,9 @@ export namespace Prisma {
     activeHours?: boolean
     notificationConfig?: boolean
     stats?: boolean
-    clickRate?: boolean
-    ignoreRate?: boolean
-    avgResponseTime?: boolean
-    snoozeCount?: boolean
-    effectivenessScore?: boolean
-    sampleSize?: boolean
-    lastAnalysisTime?: boolean
-    originalInterval?: boolean
-    adjustedInterval?: boolean
-    adjustmentReason?: boolean
-    adjustmentTime?: boolean
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
   }
 
-  export type ReminderTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "type" | "selfEnabled" | "status" | "importanceLevel" | "tags" | "color" | "icon" | "nextTriggerAt" | "version" | "createdAt" | "updatedAt" | "deletedAt" | "trigger" | "recurrence" | "activeTime" | "activeHours" | "notificationConfig" | "stats" | "clickRate" | "ignoreRate" | "avgResponseTime" | "snoozeCount" | "effectivenessScore" | "sampleSize" | "lastAnalysisTime" | "originalInterval" | "adjustedInterval" | "adjustmentReason" | "adjustmentTime" | "isAutoAdjusted" | "userConfirmed" | "smartFrequencyEnabled", ExtArgs["result"]["reminderTemplate"]>
+  export type ReminderTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "type" | "selfEnabled" | "status" | "importanceLevel" | "tags" | "color" | "icon" | "nextTriggerAt" | "version" | "createdAt" | "updatedAt" | "deletedAt" | "trigger" | "recurrence" | "activeTime" | "activeHours" | "notificationConfig" | "stats", ExtArgs["result"]["reminderTemplate"]>
   export type ReminderTemplateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     history?: boolean | ReminderTemplate$historyArgs<ExtArgs>
     instances?: boolean | ReminderTemplate$instancesArgs<ExtArgs>
@@ -68377,20 +68191,6 @@ export namespace Prisma {
       activeHours: string | null
       notificationConfig: string
       stats: string
-      clickRate: number | null
-      ignoreRate: number | null
-      avgResponseTime: number | null
-      snoozeCount: number
-      effectivenessScore: number | null
-      sampleSize: number
-      lastAnalysisTime: Date | null
-      originalInterval: number | null
-      adjustedInterval: number | null
-      adjustmentReason: string | null
-      adjustmentTime: Date | null
-      isAutoAdjusted: boolean
-      userConfirmed: boolean
-      smartFrequencyEnabled: boolean
     }, ExtArgs["result"]["reminderTemplate"]>
     composites: {}
   }
@@ -68841,20 +68641,6 @@ export namespace Prisma {
     readonly activeHours: FieldRef<"ReminderTemplate", 'String'>
     readonly notificationConfig: FieldRef<"ReminderTemplate", 'String'>
     readonly stats: FieldRef<"ReminderTemplate", 'String'>
-    readonly clickRate: FieldRef<"ReminderTemplate", 'Float'>
-    readonly ignoreRate: FieldRef<"ReminderTemplate", 'Float'>
-    readonly avgResponseTime: FieldRef<"ReminderTemplate", 'Int'>
-    readonly snoozeCount: FieldRef<"ReminderTemplate", 'Int'>
-    readonly effectivenessScore: FieldRef<"ReminderTemplate", 'Float'>
-    readonly sampleSize: FieldRef<"ReminderTemplate", 'Int'>
-    readonly lastAnalysisTime: FieldRef<"ReminderTemplate", 'DateTime'>
-    readonly originalInterval: FieldRef<"ReminderTemplate", 'Int'>
-    readonly adjustedInterval: FieldRef<"ReminderTemplate", 'Int'>
-    readonly adjustmentReason: FieldRef<"ReminderTemplate", 'String'>
-    readonly adjustmentTime: FieldRef<"ReminderTemplate", 'DateTime'>
-    readonly isAutoAdjusted: FieldRef<"ReminderTemplate", 'Boolean'>
-    readonly userConfirmed: FieldRef<"ReminderTemplate", 'Boolean'>
-    readonly smartFrequencyEnabled: FieldRef<"ReminderTemplate", 'Boolean'>
   }
 
 
@@ -75083,7 +74869,6 @@ export namespace Prisma {
     bestTimeSlots: string | null
     worstTimeSlots: string | null
     globalReminderEnabled: boolean | null
-    globalSmartFrequency: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -75094,7 +74879,6 @@ export namespace Prisma {
     bestTimeSlots: string | null
     worstTimeSlots: string | null
     globalReminderEnabled: boolean | null
-    globalSmartFrequency: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -75105,7 +74889,6 @@ export namespace Prisma {
     bestTimeSlots: number
     worstTimeSlots: number
     globalReminderEnabled: number
-    globalSmartFrequency: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -75118,7 +74901,6 @@ export namespace Prisma {
     bestTimeSlots?: true
     worstTimeSlots?: true
     globalReminderEnabled?: true
-    globalSmartFrequency?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -75129,7 +74911,6 @@ export namespace Prisma {
     bestTimeSlots?: true
     worstTimeSlots?: true
     globalReminderEnabled?: true
-    globalSmartFrequency?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -75140,7 +74921,6 @@ export namespace Prisma {
     bestTimeSlots?: true
     worstTimeSlots?: true
     globalReminderEnabled?: true
-    globalSmartFrequency?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -75224,7 +75004,6 @@ export namespace Prisma {
     bestTimeSlots: string
     worstTimeSlots: string
     globalReminderEnabled: boolean
-    globalSmartFrequency: boolean
     createdAt: Date
     updatedAt: Date
     _count: UserReminderPreferenceCountAggregateOutputType | null
@@ -75252,7 +75031,6 @@ export namespace Prisma {
     bestTimeSlots?: boolean
     worstTimeSlots?: boolean
     globalReminderEnabled?: boolean
-    globalSmartFrequency?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -75264,7 +75042,6 @@ export namespace Prisma {
     bestTimeSlots?: boolean
     worstTimeSlots?: boolean
     globalReminderEnabled?: boolean
-    globalSmartFrequency?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -75276,7 +75053,6 @@ export namespace Prisma {
     bestTimeSlots?: boolean
     worstTimeSlots?: boolean
     globalReminderEnabled?: boolean
-    globalSmartFrequency?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -75288,12 +75064,11 @@ export namespace Prisma {
     bestTimeSlots?: boolean
     worstTimeSlots?: boolean
     globalReminderEnabled?: boolean
-    globalSmartFrequency?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserReminderPreferenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "bestTimeSlots" | "worstTimeSlots" | "globalReminderEnabled" | "globalSmartFrequency" | "createdAt" | "updatedAt", ExtArgs["result"]["userReminderPreference"]>
+  export type UserReminderPreferenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "bestTimeSlots" | "worstTimeSlots" | "globalReminderEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["userReminderPreference"]>
   export type UserReminderPreferenceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }
@@ -75321,7 +75096,6 @@ export namespace Prisma {
        */
       worstTimeSlots: string
       globalReminderEnabled: boolean
-      globalSmartFrequency: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["userReminderPreference"]>
@@ -75753,7 +75527,6 @@ export namespace Prisma {
     readonly bestTimeSlots: FieldRef<"UserReminderPreference", 'String'>
     readonly worstTimeSlots: FieldRef<"UserReminderPreference", 'String'>
     readonly globalReminderEnabled: FieldRef<"UserReminderPreference", 'Boolean'>
-    readonly globalSmartFrequency: FieldRef<"UserReminderPreference", 'Boolean'>
     readonly createdAt: FieldRef<"UserReminderPreference", 'DateTime'>
     readonly updatedAt: FieldRef<"UserReminderPreference", 'DateTime'>
   }
@@ -128340,21 +128113,7 @@ export namespace Prisma {
     activeTime: 'activeTime',
     activeHours: 'activeHours',
     notificationConfig: 'notificationConfig',
-    stats: 'stats',
-    clickRate: 'clickRate',
-    ignoreRate: 'ignoreRate',
-    avgResponseTime: 'avgResponseTime',
-    snoozeCount: 'snoozeCount',
-    effectivenessScore: 'effectivenessScore',
-    sampleSize: 'sampleSize',
-    lastAnalysisTime: 'lastAnalysisTime',
-    originalInterval: 'originalInterval',
-    adjustedInterval: 'adjustedInterval',
-    adjustmentReason: 'adjustmentReason',
-    adjustmentTime: 'adjustmentTime',
-    isAutoAdjusted: 'isAutoAdjusted',
-    userConfirmed: 'userConfirmed',
-    smartFrequencyEnabled: 'smartFrequencyEnabled'
+    stats: 'stats'
   };
 
   export type ReminderTemplateScalarFieldEnum = (typeof ReminderTemplateScalarFieldEnum)[keyof typeof ReminderTemplateScalarFieldEnum]
@@ -128443,7 +128202,6 @@ export namespace Prisma {
     bestTimeSlots: 'bestTimeSlots',
     worstTimeSlots: 'worstTimeSlots',
     globalReminderEnabled: 'globalReminderEnabled',
-    globalSmartFrequency: 'globalSmartFrequency',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -133942,20 +133700,6 @@ export namespace Prisma {
     activeHours?: StringNullableFilter<"ReminderTemplate"> | string | null
     notificationConfig?: StringFilter<"ReminderTemplate"> | string
     stats?: StringFilter<"ReminderTemplate"> | string
-    clickRate?: FloatNullableFilter<"ReminderTemplate"> | number | null
-    ignoreRate?: FloatNullableFilter<"ReminderTemplate"> | number | null
-    avgResponseTime?: IntNullableFilter<"ReminderTemplate"> | number | null
-    snoozeCount?: IntFilter<"ReminderTemplate"> | number
-    effectivenessScore?: FloatNullableFilter<"ReminderTemplate"> | number | null
-    sampleSize?: IntFilter<"ReminderTemplate"> | number
-    lastAnalysisTime?: DateTimeNullableFilter<"ReminderTemplate"> | Date | string | null
-    originalInterval?: IntNullableFilter<"ReminderTemplate"> | number | null
-    adjustedInterval?: IntNullableFilter<"ReminderTemplate"> | number | null
-    adjustmentReason?: StringNullableFilter<"ReminderTemplate"> | string | null
-    adjustmentTime?: DateTimeNullableFilter<"ReminderTemplate"> | Date | string | null
-    isAutoAdjusted?: BoolFilter<"ReminderTemplate"> | boolean
-    userConfirmed?: BoolFilter<"ReminderTemplate"> | boolean
-    smartFrequencyEnabled?: BoolFilter<"ReminderTemplate"> | boolean
     history?: ReminderHistoryListRelationFilter
     instances?: ReminderInstanceListRelationFilter
     responses?: ReminderResponseListRelationFilter
@@ -133986,20 +133730,6 @@ export namespace Prisma {
     activeHours?: SortOrderInput | SortOrder
     notificationConfig?: SortOrder
     stats?: SortOrder
-    clickRate?: SortOrderInput | SortOrder
-    ignoreRate?: SortOrderInput | SortOrder
-    avgResponseTime?: SortOrderInput | SortOrder
-    snoozeCount?: SortOrder
-    effectivenessScore?: SortOrderInput | SortOrder
-    sampleSize?: SortOrder
-    lastAnalysisTime?: SortOrderInput | SortOrder
-    originalInterval?: SortOrderInput | SortOrder
-    adjustedInterval?: SortOrderInput | SortOrder
-    adjustmentReason?: SortOrderInput | SortOrder
-    adjustmentTime?: SortOrderInput | SortOrder
-    isAutoAdjusted?: SortOrder
-    userConfirmed?: SortOrder
-    smartFrequencyEnabled?: SortOrder
     history?: ReminderHistoryOrderByRelationAggregateInput
     instances?: ReminderInstanceOrderByRelationAggregateInput
     responses?: ReminderResponseOrderByRelationAggregateInput
@@ -134033,20 +133763,6 @@ export namespace Prisma {
     activeHours?: StringNullableFilter<"ReminderTemplate"> | string | null
     notificationConfig?: StringFilter<"ReminderTemplate"> | string
     stats?: StringFilter<"ReminderTemplate"> | string
-    clickRate?: FloatNullableFilter<"ReminderTemplate"> | number | null
-    ignoreRate?: FloatNullableFilter<"ReminderTemplate"> | number | null
-    avgResponseTime?: IntNullableFilter<"ReminderTemplate"> | number | null
-    snoozeCount?: IntFilter<"ReminderTemplate"> | number
-    effectivenessScore?: FloatNullableFilter<"ReminderTemplate"> | number | null
-    sampleSize?: IntFilter<"ReminderTemplate"> | number
-    lastAnalysisTime?: DateTimeNullableFilter<"ReminderTemplate"> | Date | string | null
-    originalInterval?: IntNullableFilter<"ReminderTemplate"> | number | null
-    adjustedInterval?: IntNullableFilter<"ReminderTemplate"> | number | null
-    adjustmentReason?: StringNullableFilter<"ReminderTemplate"> | string | null
-    adjustmentTime?: DateTimeNullableFilter<"ReminderTemplate"> | Date | string | null
-    isAutoAdjusted?: BoolFilter<"ReminderTemplate"> | boolean
-    userConfirmed?: BoolFilter<"ReminderTemplate"> | boolean
-    smartFrequencyEnabled?: BoolFilter<"ReminderTemplate"> | boolean
     history?: ReminderHistoryListRelationFilter
     instances?: ReminderInstanceListRelationFilter
     responses?: ReminderResponseListRelationFilter
@@ -134077,20 +133793,6 @@ export namespace Prisma {
     activeHours?: SortOrderInput | SortOrder
     notificationConfig?: SortOrder
     stats?: SortOrder
-    clickRate?: SortOrderInput | SortOrder
-    ignoreRate?: SortOrderInput | SortOrder
-    avgResponseTime?: SortOrderInput | SortOrder
-    snoozeCount?: SortOrder
-    effectivenessScore?: SortOrderInput | SortOrder
-    sampleSize?: SortOrder
-    lastAnalysisTime?: SortOrderInput | SortOrder
-    originalInterval?: SortOrderInput | SortOrder
-    adjustedInterval?: SortOrderInput | SortOrder
-    adjustmentReason?: SortOrderInput | SortOrder
-    adjustmentTime?: SortOrderInput | SortOrder
-    isAutoAdjusted?: SortOrder
-    userConfirmed?: SortOrder
-    smartFrequencyEnabled?: SortOrder
     _count?: ReminderTemplateCountOrderByAggregateInput
     _avg?: ReminderTemplateAvgOrderByAggregateInput
     _max?: ReminderTemplateMaxOrderByAggregateInput
@@ -134124,20 +133826,6 @@ export namespace Prisma {
     activeHours?: StringNullableWithAggregatesFilter<"ReminderTemplate"> | string | null
     notificationConfig?: StringWithAggregatesFilter<"ReminderTemplate"> | string
     stats?: StringWithAggregatesFilter<"ReminderTemplate"> | string
-    clickRate?: FloatNullableWithAggregatesFilter<"ReminderTemplate"> | number | null
-    ignoreRate?: FloatNullableWithAggregatesFilter<"ReminderTemplate"> | number | null
-    avgResponseTime?: IntNullableWithAggregatesFilter<"ReminderTemplate"> | number | null
-    snoozeCount?: IntWithAggregatesFilter<"ReminderTemplate"> | number
-    effectivenessScore?: FloatNullableWithAggregatesFilter<"ReminderTemplate"> | number | null
-    sampleSize?: IntWithAggregatesFilter<"ReminderTemplate"> | number
-    lastAnalysisTime?: DateTimeNullableWithAggregatesFilter<"ReminderTemplate"> | Date | string | null
-    originalInterval?: IntNullableWithAggregatesFilter<"ReminderTemplate"> | number | null
-    adjustedInterval?: IntNullableWithAggregatesFilter<"ReminderTemplate"> | number | null
-    adjustmentReason?: StringNullableWithAggregatesFilter<"ReminderTemplate"> | string | null
-    adjustmentTime?: DateTimeNullableWithAggregatesFilter<"ReminderTemplate"> | Date | string | null
-    isAutoAdjusted?: BoolWithAggregatesFilter<"ReminderTemplate"> | boolean
-    userConfirmed?: BoolWithAggregatesFilter<"ReminderTemplate"> | boolean
-    smartFrequencyEnabled?: BoolWithAggregatesFilter<"ReminderTemplate"> | boolean
   }
 
   export type ReminderGroupWhereInput = {
@@ -134547,7 +134235,6 @@ export namespace Prisma {
     bestTimeSlots?: StringFilter<"UserReminderPreference"> | string
     worstTimeSlots?: StringFilter<"UserReminderPreference"> | string
     globalReminderEnabled?: BoolFilter<"UserReminderPreference"> | boolean
-    globalSmartFrequency?: BoolFilter<"UserReminderPreference"> | boolean
     createdAt?: DateTimeFilter<"UserReminderPreference"> | Date | string
     updatedAt?: DateTimeFilter<"UserReminderPreference"> | Date | string
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
@@ -134559,7 +134246,6 @@ export namespace Prisma {
     bestTimeSlots?: SortOrder
     worstTimeSlots?: SortOrder
     globalReminderEnabled?: SortOrder
-    globalSmartFrequency?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     account?: AccountOrderByWithRelationInput
@@ -134574,7 +134260,6 @@ export namespace Prisma {
     bestTimeSlots?: StringFilter<"UserReminderPreference"> | string
     worstTimeSlots?: StringFilter<"UserReminderPreference"> | string
     globalReminderEnabled?: BoolFilter<"UserReminderPreference"> | boolean
-    globalSmartFrequency?: BoolFilter<"UserReminderPreference"> | boolean
     createdAt?: DateTimeFilter<"UserReminderPreference"> | Date | string
     updatedAt?: DateTimeFilter<"UserReminderPreference"> | Date | string
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
@@ -134586,7 +134271,6 @@ export namespace Prisma {
     bestTimeSlots?: SortOrder
     worstTimeSlots?: SortOrder
     globalReminderEnabled?: SortOrder
-    globalSmartFrequency?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserReminderPreferenceCountOrderByAggregateInput
@@ -134603,7 +134287,6 @@ export namespace Prisma {
     bestTimeSlots?: StringWithAggregatesFilter<"UserReminderPreference"> | string
     worstTimeSlots?: StringWithAggregatesFilter<"UserReminderPreference"> | string
     globalReminderEnabled?: BoolWithAggregatesFilter<"UserReminderPreference"> | boolean
-    globalSmartFrequency?: BoolWithAggregatesFilter<"UserReminderPreference"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"UserReminderPreference"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"UserReminderPreference"> | Date | string
   }
@@ -144065,20 +143748,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     history?: ReminderHistoryCreateNestedManyWithoutTemplateInput
     instances?: ReminderInstanceCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseCreateNestedManyWithoutTemplateInput
@@ -144109,20 +143778,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     history?: ReminderHistoryUncheckedCreateNestedManyWithoutTemplateInput
     instances?: ReminderInstanceUncheckedCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseUncheckedCreateNestedManyWithoutTemplateInput
@@ -144151,20 +143806,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     history?: ReminderHistoryUpdateManyWithoutTemplateNestedInput
     instances?: ReminderInstanceUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUpdateManyWithoutTemplateNestedInput
@@ -144195,20 +143836,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     history?: ReminderHistoryUncheckedUpdateManyWithoutTemplateNestedInput
     instances?: ReminderInstanceUncheckedUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUncheckedUpdateManyWithoutTemplateNestedInput
@@ -144238,20 +143865,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
   }
 
   export type ReminderTemplateUpdateManyMutationInput = {
@@ -144276,20 +143889,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type ReminderTemplateUncheckedUpdateManyInput = {
@@ -144315,20 +143914,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type ReminderGroupCreateInput = {
@@ -144762,7 +144347,6 @@ export namespace Prisma {
     bestTimeSlots: string
     worstTimeSlots: string
     globalReminderEnabled?: boolean
-    globalSmartFrequency?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     account: AccountCreateNestedOneWithoutUserReminderPreferencesInput
@@ -144774,7 +144358,6 @@ export namespace Prisma {
     bestTimeSlots: string
     worstTimeSlots: string
     globalReminderEnabled?: boolean
-    globalSmartFrequency?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -144784,7 +144367,6 @@ export namespace Prisma {
     bestTimeSlots?: StringFieldUpdateOperationsInput | string
     worstTimeSlots?: StringFieldUpdateOperationsInput | string
     globalReminderEnabled?: BoolFieldUpdateOperationsInput | boolean
-    globalSmartFrequency?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     account?: AccountUpdateOneRequiredWithoutUserReminderPreferencesNestedInput
@@ -144796,7 +144378,6 @@ export namespace Prisma {
     bestTimeSlots?: StringFieldUpdateOperationsInput | string
     worstTimeSlots?: StringFieldUpdateOperationsInput | string
     globalReminderEnabled?: BoolFieldUpdateOperationsInput | boolean
-    globalSmartFrequency?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -144807,7 +144388,6 @@ export namespace Prisma {
     bestTimeSlots: string
     worstTimeSlots: string
     globalReminderEnabled?: boolean
-    globalSmartFrequency?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -144817,7 +144397,6 @@ export namespace Prisma {
     bestTimeSlots?: StringFieldUpdateOperationsInput | string
     worstTimeSlots?: StringFieldUpdateOperationsInput | string
     globalReminderEnabled?: BoolFieldUpdateOperationsInput | boolean
-    globalSmartFrequency?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -144828,7 +144407,6 @@ export namespace Prisma {
     bestTimeSlots?: StringFieldUpdateOperationsInput | string
     worstTimeSlots?: StringFieldUpdateOperationsInput | string
     globalReminderEnabled?: BoolFieldUpdateOperationsInput | boolean
-    globalSmartFrequency?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -153350,32 +152928,10 @@ export namespace Prisma {
     activeHours?: SortOrder
     notificationConfig?: SortOrder
     stats?: SortOrder
-    clickRate?: SortOrder
-    ignoreRate?: SortOrder
-    avgResponseTime?: SortOrder
-    snoozeCount?: SortOrder
-    effectivenessScore?: SortOrder
-    sampleSize?: SortOrder
-    lastAnalysisTime?: SortOrder
-    originalInterval?: SortOrder
-    adjustedInterval?: SortOrder
-    adjustmentReason?: SortOrder
-    adjustmentTime?: SortOrder
-    isAutoAdjusted?: SortOrder
-    userConfirmed?: SortOrder
-    smartFrequencyEnabled?: SortOrder
   }
 
   export type ReminderTemplateAvgOrderByAggregateInput = {
     version?: SortOrder
-    clickRate?: SortOrder
-    ignoreRate?: SortOrder
-    avgResponseTime?: SortOrder
-    snoozeCount?: SortOrder
-    effectivenessScore?: SortOrder
-    sampleSize?: SortOrder
-    originalInterval?: SortOrder
-    adjustedInterval?: SortOrder
   }
 
   export type ReminderTemplateMaxOrderByAggregateInput = {
@@ -153401,20 +152957,6 @@ export namespace Prisma {
     activeHours?: SortOrder
     notificationConfig?: SortOrder
     stats?: SortOrder
-    clickRate?: SortOrder
-    ignoreRate?: SortOrder
-    avgResponseTime?: SortOrder
-    snoozeCount?: SortOrder
-    effectivenessScore?: SortOrder
-    sampleSize?: SortOrder
-    lastAnalysisTime?: SortOrder
-    originalInterval?: SortOrder
-    adjustedInterval?: SortOrder
-    adjustmentReason?: SortOrder
-    adjustmentTime?: SortOrder
-    isAutoAdjusted?: SortOrder
-    userConfirmed?: SortOrder
-    smartFrequencyEnabled?: SortOrder
   }
 
   export type ReminderTemplateMinOrderByAggregateInput = {
@@ -153440,32 +152982,10 @@ export namespace Prisma {
     activeHours?: SortOrder
     notificationConfig?: SortOrder
     stats?: SortOrder
-    clickRate?: SortOrder
-    ignoreRate?: SortOrder
-    avgResponseTime?: SortOrder
-    snoozeCount?: SortOrder
-    effectivenessScore?: SortOrder
-    sampleSize?: SortOrder
-    lastAnalysisTime?: SortOrder
-    originalInterval?: SortOrder
-    adjustedInterval?: SortOrder
-    adjustmentReason?: SortOrder
-    adjustmentTime?: SortOrder
-    isAutoAdjusted?: SortOrder
-    userConfirmed?: SortOrder
-    smartFrequencyEnabled?: SortOrder
   }
 
   export type ReminderTemplateSumOrderByAggregateInput = {
     version?: SortOrder
-    clickRate?: SortOrder
-    ignoreRate?: SortOrder
-    avgResponseTime?: SortOrder
-    snoozeCount?: SortOrder
-    effectivenessScore?: SortOrder
-    sampleSize?: SortOrder
-    originalInterval?: SortOrder
-    adjustedInterval?: SortOrder
   }
 
   export type ReminderGroupCountOrderByAggregateInput = {
@@ -153683,7 +153203,6 @@ export namespace Prisma {
     bestTimeSlots?: SortOrder
     worstTimeSlots?: SortOrder
     globalReminderEnabled?: SortOrder
-    globalSmartFrequency?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -153694,7 +153213,6 @@ export namespace Prisma {
     bestTimeSlots?: SortOrder
     worstTimeSlots?: SortOrder
     globalReminderEnabled?: SortOrder
-    globalSmartFrequency?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -153705,7 +153223,6 @@ export namespace Prisma {
     bestTimeSlots?: SortOrder
     worstTimeSlots?: SortOrder
     globalReminderEnabled?: SortOrder
-    globalSmartFrequency?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -163484,20 +163001,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     history?: ReminderHistoryCreateNestedManyWithoutTemplateInput
     instances?: ReminderInstanceCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseCreateNestedManyWithoutTemplateInput
@@ -163526,20 +163029,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     history?: ReminderHistoryUncheckedCreateNestedManyWithoutTemplateInput
     instances?: ReminderInstanceUncheckedCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseUncheckedCreateNestedManyWithoutTemplateInput
@@ -163808,7 +163297,6 @@ export namespace Prisma {
     bestTimeSlots: string
     worstTimeSlots: string
     globalReminderEnabled?: boolean
-    globalSmartFrequency?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -163818,7 +163306,6 @@ export namespace Prisma {
     bestTimeSlots: string
     worstTimeSlots: string
     globalReminderEnabled?: boolean
-    globalSmartFrequency?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -166040,20 +165527,6 @@ export namespace Prisma {
     activeHours?: StringNullableFilter<"ReminderTemplate"> | string | null
     notificationConfig?: StringFilter<"ReminderTemplate"> | string
     stats?: StringFilter<"ReminderTemplate"> | string
-    clickRate?: FloatNullableFilter<"ReminderTemplate"> | number | null
-    ignoreRate?: FloatNullableFilter<"ReminderTemplate"> | number | null
-    avgResponseTime?: IntNullableFilter<"ReminderTemplate"> | number | null
-    snoozeCount?: IntFilter<"ReminderTemplate"> | number
-    effectivenessScore?: FloatNullableFilter<"ReminderTemplate"> | number | null
-    sampleSize?: IntFilter<"ReminderTemplate"> | number
-    lastAnalysisTime?: DateTimeNullableFilter<"ReminderTemplate"> | Date | string | null
-    originalInterval?: IntNullableFilter<"ReminderTemplate"> | number | null
-    adjustedInterval?: IntNullableFilter<"ReminderTemplate"> | number | null
-    adjustmentReason?: StringNullableFilter<"ReminderTemplate"> | string | null
-    adjustmentTime?: DateTimeNullableFilter<"ReminderTemplate"> | Date | string | null
-    isAutoAdjusted?: BoolFilter<"ReminderTemplate"> | boolean
-    userConfirmed?: BoolFilter<"ReminderTemplate"> | boolean
-    smartFrequencyEnabled?: BoolFilter<"ReminderTemplate"> | boolean
   }
 
   export type ReminderInstanceUpsertWithWhereUniqueWithoutAccountInput = {
@@ -166312,7 +165785,6 @@ export namespace Prisma {
     bestTimeSlots?: StringFieldUpdateOperationsInput | string
     worstTimeSlots?: StringFieldUpdateOperationsInput | string
     globalReminderEnabled?: BoolFieldUpdateOperationsInput | boolean
-    globalSmartFrequency?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -166322,7 +165794,6 @@ export namespace Prisma {
     bestTimeSlots?: StringFieldUpdateOperationsInput | string
     worstTimeSlots?: StringFieldUpdateOperationsInput | string
     globalReminderEnabled?: BoolFieldUpdateOperationsInput | boolean
-    globalSmartFrequency?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -180538,20 +180009,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     history?: ReminderHistoryCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseCreateNestedManyWithoutTemplateInput
     occurrences?: ReminderOccurrenceCreateNestedManyWithoutTemplateInput
@@ -180581,20 +180038,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     history?: ReminderHistoryUncheckedCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseUncheckedCreateNestedManyWithoutTemplateInput
     occurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutTemplateInput
@@ -180805,20 +180248,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     history?: ReminderHistoryUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUpdateManyWithoutTemplateNestedInput
     occurrences?: ReminderOccurrenceUpdateManyWithoutTemplateNestedInput
@@ -180848,20 +180277,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     history?: ReminderHistoryUncheckedUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUncheckedUpdateManyWithoutTemplateNestedInput
     occurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutTemplateNestedInput
@@ -181050,20 +180465,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     instances?: ReminderInstanceCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseCreateNestedManyWithoutTemplateInput
     occurrences?: ReminderOccurrenceCreateNestedManyWithoutTemplateInput
@@ -181093,20 +180494,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     instances?: ReminderInstanceUncheckedCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseUncheckedCreateNestedManyWithoutTemplateInput
     occurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutTemplateInput
@@ -181317,20 +180704,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     instances?: ReminderInstanceUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUpdateManyWithoutTemplateNestedInput
     occurrences?: ReminderOccurrenceUpdateManyWithoutTemplateNestedInput
@@ -181360,20 +180733,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     instances?: ReminderInstanceUncheckedUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUncheckedUpdateManyWithoutTemplateNestedInput
     occurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutTemplateNestedInput
@@ -181890,20 +181249,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     history?: ReminderHistoryCreateNestedManyWithoutTemplateInput
     instances?: ReminderInstanceCreateNestedManyWithoutTemplateInput
     occurrences?: ReminderOccurrenceCreateNestedManyWithoutTemplateInput
@@ -181933,20 +181278,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     history?: ReminderHistoryUncheckedCreateNestedManyWithoutTemplateInput
     instances?: ReminderInstanceUncheckedCreateNestedManyWithoutTemplateInput
     occurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutTemplateInput
@@ -182157,20 +181488,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     history?: ReminderHistoryUpdateManyWithoutTemplateNestedInput
     instances?: ReminderInstanceUpdateManyWithoutTemplateNestedInput
     occurrences?: ReminderOccurrenceUpdateManyWithoutTemplateNestedInput
@@ -182200,20 +181517,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     history?: ReminderHistoryUncheckedUpdateManyWithoutTemplateNestedInput
     instances?: ReminderInstanceUncheckedUpdateManyWithoutTemplateNestedInput
     occurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutTemplateNestedInput
@@ -182569,20 +181872,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     history?: ReminderHistoryCreateNestedManyWithoutTemplateInput
     instances?: ReminderInstanceCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseCreateNestedManyWithoutTemplateInput
@@ -182612,20 +181901,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
     history?: ReminderHistoryUncheckedCreateNestedManyWithoutTemplateInput
     instances?: ReminderInstanceUncheckedCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseUncheckedCreateNestedManyWithoutTemplateInput
@@ -182830,20 +182105,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     history?: ReminderHistoryUpdateManyWithoutTemplateNestedInput
     instances?: ReminderInstanceUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUpdateManyWithoutTemplateNestedInput
@@ -182873,20 +182134,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     history?: ReminderHistoryUncheckedUpdateManyWithoutTemplateNestedInput
     instances?: ReminderInstanceUncheckedUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUncheckedUpdateManyWithoutTemplateNestedInput
@@ -196122,20 +195369,6 @@ export namespace Prisma {
     activeHours?: string | null
     notificationConfig: string
     stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
   }
 
   export type ReminderInstanceCreateManyAccountInput = {
@@ -197200,20 +196433,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     history?: ReminderHistoryUpdateManyWithoutTemplateNestedInput
     instances?: ReminderInstanceUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUpdateManyWithoutTemplateNestedInput
@@ -197242,20 +196461,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
     history?: ReminderHistoryUncheckedUpdateManyWithoutTemplateNestedInput
     instances?: ReminderInstanceUncheckedUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUncheckedUpdateManyWithoutTemplateNestedInput
@@ -197284,20 +196489,6 @@ export namespace Prisma {
     activeHours?: NullableStringFieldUpdateOperationsInput | string | null
     notificationConfig?: StringFieldUpdateOperationsInput | string
     stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type ReminderInstanceUpdateWithoutAccountInput = {

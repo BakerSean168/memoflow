@@ -311,10 +311,6 @@ export function createReminderModule(
       });
     },
 
-    async rejectFrequencyAdjustment(templateId, ctx) {
-      return useCases.adjustReminderFrequency.reject(templateId, ctx.identityId);
-    },
-
     async createGroup(data, ctx) {
       return reminderGroupApplicationService.createGroup(data, ctx);
     },

@@ -11,10 +11,7 @@ import type { ReminderEventMap } from '@memoflow/contracts/reminder';
 import { createTypedEventPublisher, eventBus } from '@memoflow/utils/domain';
 
 const reminderAnalyticsEvents = createTypedEventPublisher<
-  Pick<
-    ReminderEventMap,
-    'reminder:frequency-adjusted' | 'reminder:frequency-adjustment-rejected'
-  >
+  Pick<ReminderEventMap, 'reminder:frequency-adjusted'>
 >(eventBus);
 
 /**
@@ -42,9 +39,9 @@ export interface AdjustFrequencyRequest {
  * Adjust Reminder Frequency Service
  *
  * 职责：
- * - 应用频率调整建议
- * - 处理用户确认/拒绝调整
- * - 自动应用调整（当用户启用自动模式时）
+ * - 应用用户显式提交的 interval 调整
+ * - 持久化后发布 frequency-adjusted 事件
+ * - 不维护或自动应用后台建议状态
  */
 export class AdjustReminderFrequencyUseCase {
   constructor(private readonly templateRepository: IReminderTemplateRepository) {}
@@ -107,26 +104,4 @@ export class AdjustReminderFrequencyUseCase {
     });
   }
 
-  /**
-   * 拒绝频率调整
-   *
-   * @param templateId - 模板UUID
-   * @param identityId - 账户 ID
-   */
-  async reject(templateId: string, identityId: string): Promise<Result<void>> {
-    const template = await this.templateRepository.findByIdForIdentity(identityId, templateId);
-    if (!template) {
-      return error('NOT_FOUND', `Template ${templateId} not found`);
-    }
-
-    const rejectedEvent: ReminderEventMap['reminder:frequency-adjustment-rejected'] = {
-      templateId: templateId as ReminderEventMap['reminder:frequency-adjustment-rejected']['templateId'],
-      identityId:
-        identityId as ReminderEventMap['reminder:frequency-adjustment-rejected']['identityId'],
-      rejectedAt: Date.now(),
-    };
-    reminderAnalyticsEvents.send('reminder:frequency-adjustment-rejected', rejectedEvent);
-
-    return ok(undefined);
-  }
 }

@@ -249,15 +249,6 @@ export class ReminderController {
     );
   }
 
-  async rejectFrequencyAdjustment(
-    templateId: string,
-    ctx: ExecutionContext,
-  ): Promise<Result<null>> {
-    const result = await this.useCases.rejectFrequencyAdjustment(templateId, ctx);
-    if (!result.ok) return result as Result<null>;
-    // Serialize as data:null (no Result.void / undefined dual-track).
-    return ok(null);
-  }
 
   // ==================== Group Actions ====================
 

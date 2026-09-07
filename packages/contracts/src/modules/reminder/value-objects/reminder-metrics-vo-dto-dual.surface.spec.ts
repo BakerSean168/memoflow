@@ -1,25 +1,15 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Residual 857: FrequencyAdjustmentDTO / ResponseMetricsDTO duals retired.
- * Sole VO interface + `export type XDTO = X` for each exact-match pair.
- * Residual 859 (soft): Instant/TransferDate duals stay separate interfaces
- *   (see contracts goal dual-registry residual 859).
+ * ResponseMetrics remains a transient analytics value object.
+ * The persisted/suggested FrequencyAdjustment state was retired by CLEAN-6302C.
  */
-describe('reminder metrics vo dto duals retired (residual 857)', () => {
+describe('reminder analytics metrics surface', () => {
   const voDir = __dirname;
-  const frequency = readFileSync(resolve(voDir, 'frequency-adjustment.ts'), 'utf8');
   const metrics = readFileSync(resolve(voDir, 'response-metrics.ts'), 'utf8');
   const index = readFileSync(resolve(voDir, 'index.ts'), 'utf8');
-
-  it('owns FrequencyAdjustmentDTO as type alias of FrequencyAdjustment', () => {
-    expect(frequency).toContain('Residual 857');
-    expect(frequency).toMatch(/export interface FrequencyAdjustment\b/);
-    expect(frequency).toContain('export type FrequencyAdjustmentDTO = FrequencyAdjustment');
-    expect(frequency).not.toMatch(/export interface FrequencyAdjustmentDTO\b/);
-  });
 
   it('owns ResponseMetricsDTO as type alias of ResponseMetrics', () => {
     expect(metrics).toContain('Residual 857');
@@ -28,16 +18,15 @@ describe('reminder metrics vo dto duals retired (residual 857)', () => {
     expect(metrics).not.toMatch(/export interface ResponseMetricsDTO\b/);
   });
 
-  it('barrel still exports FrequencyAdjustment/ResponseMetrics and DTO names', () => {
-    for (const name of [
-      'FrequencyAdjustment',
-      'FrequencyAdjustmentDTO',
-      'ResponseMetrics',
-      'ResponseMetricsDTO',
-    ]) {
-      expect(index).toContain(name);
-    }
-    expect(index).toContain("from './frequency-adjustment'");
+  it('does not expose retired FrequencyAdjustment suggestion state', () => {
+    expect(existsSync(resolve(voDir, 'frequency-adjustment.ts'))).toBe(false);
+    expect(index).not.toContain('FrequencyAdjustment');
+    expect(index).not.toContain("from './frequency-adjustment'");
+  });
+
+  it('keeps ResponseMetrics as the only analytics metric VO export', () => {
+    expect(index).toContain('ResponseMetrics');
+    expect(index).toContain('ResponseMetricsDTO');
     expect(index).toContain("from './response-metrics'");
   });
 });

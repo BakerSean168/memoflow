@@ -129,26 +129,24 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
     );
     if (existing) {
       await this.tx.execute(
-        `UPDATE user_reminder_preferences SET best_time_slots = ?, worst_time_slots = ?, global_reminder_enabled = ?, global_smart_frequency = ?, updated_at = ? WHERE identity_id = ?`,
+        `UPDATE user_reminder_preferences SET best_time_slots = ?, worst_time_slots = ?, global_reminder_enabled = ?, updated_at = ? WHERE identity_id = ?`,
         [
           input.bestTimeSlots,
           input.worstTimeSlots,
           bool(input.globalReminderEnabled),
-          bool(input.globalSmartFrequency),
           new Date().toISOString(),
           input.identityId,
         ],
       );
     } else {
       await this.tx.execute(
-        `INSERT INTO user_reminder_preferences (id, identity_id, best_time_slots, worst_time_slots, global_reminder_enabled, global_smart_frequency, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO user_reminder_preferences (id, identity_id, best_time_slots, worst_time_slots, global_reminder_enabled, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           input.id,
           input.identityId,
           input.bestTimeSlots,
           input.worstTimeSlots,
           bool(input.globalReminderEnabled),
-          bool(input.globalSmartFrequency),
           ...createdUpdated({}),
         ],
       );
@@ -456,7 +454,7 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
   async createReminderTemplate(input: CreateReminderTemplateInput): Promise<void> {
     const [createdAtValue, updatedAtValue] = createdUpdated(input);
     await this.tx.execute(
-      `INSERT INTO reminder_templates (id, identity_id, name, description, type, self_enabled, status, importance_level, tags, color, icon, trigger, active_time, active_hours, notification_config, stats, smart_frequency_enabled, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
+      `INSERT INTO reminder_templates (id, identity_id, name, description, type, self_enabled, status, importance_level, tags, color, icon, trigger, active_time, active_hours, notification_config, stats, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [
         input.id,
         input.identityId,
@@ -474,7 +472,6 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
         str(input.activeHours),
         input.notificationConfig,
         input.stats,
-        bool(input.smartFrequencyEnabled),
         createdAtValue,
         updatedAtValue,
       ],
