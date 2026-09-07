@@ -17,6 +17,7 @@ const governedDomainProjects = new Set([
   'notification',
   'reminder',
   'schedule',
+  'scheduler',
   'setting',
   'task',
 ]);
@@ -33,6 +34,7 @@ const coverageConfigsByProject = new Map([
   ['goal', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
   ['reminder', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
   ['schedule', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
+  ['scheduler', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
   ['task', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
 ]);
 

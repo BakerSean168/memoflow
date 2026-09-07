@@ -2182,33 +2182,28 @@ packages/scheduler  = Temporal Engine
 
 `CLEAN-6304` is complete. Scheduling convergence now advances to `POC-6401`; the PoC must compare pg-boss against this clean SchedulingPort/Scheduler boundary without changing feature code.
 
-## POC-6401 — pg-boss build-vs-adopt experiment
+## POC-6401 — pg-boss build-vs-adopt experiment — COMPLETE (2026-09-07)
 
-**Depends:** all feature packages behind SchedulingPort.
+**Outcome: `Keep custom`.** pg-boss 12.30.0 is a technically viable PostgreSQL cloud adapter, but the evidence does not justify production adoption for current vNext.
 
-Implement alternate adapter PoC and compare:
+**PoC evidence:**
 
-```text
-claim correctness
-retry/backoff
-DLQ/redrive
-heartbeat/expiration
-transaction enqueue
-multi-worker
-startup/recovery
-ops complexity
-PowerSync/Desktop implications
-```
+- isolated dev-only `PgBossSchedulingPocAdapter` implements the existing `SchedulingPort`; no Goal/Task/Routine/Reminder feature code or production host wiring changed;
+- real PostgreSQL PoC is green: 1 file, 10/10 tests; strict PoC TypeScript check is green;
+- passed owner complete-set reconcile, same-owner concurrent reconcile via PostgreSQL advisory lock, transaction rollback, transaction-aware enqueue through a caller-owned Prisma transaction, two-instance claim correctness, retry/deferred backoff, DLQ/redrive, heartbeat/touch, expiration supervision, restart recovery, and terminal `schedulingKey` collision fail-close;
+- pg-boss can therefore provide the generic cloud queue mechanics behind SchedulingPort if a future trigger warrants migration;
+- retry semantics are not exact: MemoFlow uses millisecond delays + arbitrary `backoffMultiplier`, while pg-boss uses second-level delay + boolean exponential backoff;
+- MemoFlow would still own complete-set diffing, owner locking, terminal-key policy, durable reconcile receipt/audit semantics, Handler Registry and product-facing diagnostics mapping;
+- Desktop's canonical store remains PowerSync and cannot use pg-boss directly. A cloud-only Hybrid would retain the local custom engine and add a second execution engine rather than simplify the whole system;
+- measured current implementation surface: ~757 LOC cloud-specific Prisma, ~834 LOC Desktop PowerSync, ~1903 LOC shared runtime/queue/reconcile/lease; PoC wrapper ~380 LOC. The cloud-only replacement cannot delete the Desktop/shared majority;
+- measured DB surface: current custom Scheduler persistence uses 4 tables / 13 indexes; pg-boss PoC installs 12 tables / 27 indexes / 5 functions / 26 types, additive under Hybrid;
+- pg-boss stays `devDependency` only so the evidence remains reproducible. It is not exported by `@memoflow/scheduler` and is not a production dependency.
 
-Outcome must be one of:
+Canonical evidence: `docs/analysis/2026-09-07-pg-boss-build-vs-adopt-evidence.md`.
 
-```text
-Keep custom
-Adopt pg-boss cloud
-Hybrid cloud pg-boss + local adapter
-```
+**Revisit only on evidence:** cloud multi-worker/reliability pressure, measurable custom-queue ops burden, a Desktop persistence move compatible with PostgreSQL/PGlite, or an intentional retry-contract narrowing.
 
-No feature code changes allowed in PoC.
+`POC-6401` is complete. Scheduling convergence is closed for current vNext; proceed to Wave 7 hardening/closure.
 
 ---
 
@@ -2566,7 +2561,7 @@ A. Product parity (independent lanes)
 B. Scheduling convergence
    CLEAN-6304         DONE — Planner/Calendar and Temporal Engine are physically split
         ↓
-   POC-6401           NEXT — run pg-boss Build-vs-Adopt PoC against the clean SchedulingPort boundary; adopt only on evidence
+   POC-6401           DONE — Keep custom for current vNext; retain pg-boss as a dev-only cloud candidate PoC
 
 C. Final closure
    HARD-7101          cross-domain failure matrix
@@ -2576,4 +2571,4 @@ C. Final closure
    HARD-7105          final review / focused repair / archive
 ```
 
-Recommended ordering: finish **A** only for product surfaces that still matter to MemoFlow's roadmap; execute **B** before deciding pg-boss; then run **C** once no deferred product ticket remains. `POC-6401` is a decision ticket, not a mandate to replace the current scheduler.
+Recommended ordering: finish **A** only for product surfaces that still matter to MemoFlow's roadmap; B is now closed with `Keep custom`; run **C** once no deferred product ticket remains. pg-boss remains a reproducible candidate, not production infrastructure.

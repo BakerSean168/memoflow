@@ -106,6 +106,21 @@
         "parallel": false,
         "cwd": "packages/scheduler"
       }
+    },
+    "poc:pg-boss": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "vitest run --config vitest.pgboss-poc.config.ts",
+        "cwd": "packages/scheduler"
+      }
+    },
+    "poc:pg-boss:typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p tsconfig.pgboss-poc.json",
+        "cwd": "packages/scheduler"
+      }
     }
   }
 }

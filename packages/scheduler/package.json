@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",
-    "@types/express": "^5.0.0"
+    "@types/express": "^5.0.0",
+    "pg-boss": "12.30.0"
   }
 }
