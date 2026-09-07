@@ -82,7 +82,7 @@ Still real residuals (code search verified):
 - `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
 - `CLEAN-6301~6304`: semantic and physical convergence is complete. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, ordinary product raw-ScheduleTask mutation surfaces, and the final Reminder duplicate/obsolete product surfaces are removed; `packages/schedule` now owns Planner/Calendar while new `packages/scheduler` owns the Temporal Engine, lease, queue, worker repositories and read-only diagnostics;
 - `POC-6401`: complete on 2026-09-07 with `Keep custom`; pg-boss 12.30.0 remains a reproducible dev-only cloud candidate and is not production infrastructure;
-- `HARD-7101/7102`: complete on 2026-09-07 with a governed 22/22 executable failure matrix plus production architecture locks; `HARD-7103~7105` remain for full acceptance, documentation truth closure and final review.
+- `HARD-7101~7103`: complete on 2026-09-07 with a governed 22/22 executable failure matrix, production architecture locks, and full A-J/host/local-Docker/schema acceptance evidence; `HARD-7104~7105` remain for documentation truth closure and final review.
 
 Execution priority is redefined in §20 below; historical Wave 0/1 text remains evidence only.
 
@@ -2282,7 +2282,7 @@ Canonical evidence: `docs/analysis/2026-09-07-hard-7102-core-vnext-architecture-
 
 `HARD-7102` is complete. Final closure advances to `HARD-7103`.
 
-## HARD-7103 — Full product acceptance journeys
+## HARD-7103 — Full product acceptance journeys — COMPLETE (2026-09-07)
 
 Run fixtures A-J through:
 
@@ -2292,6 +2292,23 @@ Run fixtures A-J through:
 - Web E2E;
 - local Docker product journey;
 - production-like schema boot.
+
+**Implementation evidence — HARD-7103 (2026-09-07):**
+
+- added one canonical A-J acceptance manifest/runner. All ten frozen fixtures have focused executable evidence; host layers are explicit about covered vs architecturally N/A scenarios instead of fabricating a 10 x 5 matrix;
+- grouped focused acceptance passed **15 files / 81 tests** across Task/Goal/Schedule Orchestration/Routine/Notification/Planner, including real PostgreSQL evidence for finite-plan settlement and persisted Routine snooze;
+- API host acceptance passed Fixture B **1/1** with Task -> Goal outbox delivery across API host restart and replay idempotency;
+- Desktop host acceptance passed Fixtures G/H **2 files / 5 tests** for Electron idle input and persisted 50/10 protocol projection after restart;
+- Web Chromium acceptance passed Fixtures B/J **2/2**; Fixture J performs a real FullCalendar 14:00 -> 16:00 drag, sends the real Task owner reschedule request, forces `409 CONFLICT`, and verifies visual rollback;
+- current-revision local Docker acceptance passed **7/7** Product Phase A-E tests with image provenance validation plus a unique browser-request token proven in current container logs;
+- production-like fresh-schema boot passed through canonical `database:prisma-push`: pgvector, **96** public tables, **23** Core vNext tables, scheduling/membership uniqueness fences, and the Task Goal-binding v2 CHECK are verified before the temporary database is dropped;
+- acceptance caught and repaired real deployment residuals: local-compose env layering depended on caller cwd; `Dockerfile.api` omitted the physically split Scheduler package from isolated workspace closure; the hand-written Task Goal-binding CHECK still encoded retired trigger names and did not model link-only bindings;
+- Task Goal-binding schema reconciliation is now versioned `memoflow.task-goal-binding/v2`: fresh databases create it, existing legacy constraints are transactionally replaced with persisted trigger migration, and subsequent migrator runs are idempotent. Focused database constraint tests are **4/4**;
+- stale Phase A-E acceptance assumptions were migrated to current Goal/Task/AI surfaces (inline KR editor, `goal-progress-row`, explicit Plans surface, due-date wording, link-only-by-default Goal binding, current GoalPlanDraft fields) without restoring retired compatibility UI.
+
+Canonical evidence: `docs/analysis/2026-09-07-hard-7103-full-product-acceptance-evidence.md`.
+
+`HARD-7103` is complete. Final closure advances to `HARD-7104`.
 
 ## HARD-7104 — Documentation / ADR closure
 
@@ -2595,8 +2612,8 @@ B. Scheduling convergence
 C. Final closure
    HARD-7101          DONE — governed 22/22 executable cross-domain failure matrix
    HARD-7102          DONE — production architecture locks + residual deletion gate
-   HARD-7103          NEXT — full product acceptance journeys
-   HARD-7104          ADR/docs truth closure
+   HARD-7103          DONE — A-J fixtures + API/Desktop/Web/local-Docker/schema acceptance
+   HARD-7104          NEXT — ADR/docs truth closure
    HARD-7105          final review / focused repair / archive
 ```
 

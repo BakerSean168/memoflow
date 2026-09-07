@@ -88,7 +88,7 @@ test.describe('Local Docker core product Phase C', () => {
     await panelToggle.dispatchEvent('click');
     await expect(panel).toBeVisible();
     await expect(page.getByTestId('goal-name-input')).toHaveValue(draftTitle);
-    await page.getByTestId('cancel-goal-button').click();
+    await page.getByTestId('goal-dialog').getByRole('button', { name: '取消', exact: true }).click();
     await expect(page.getByTestId('goal-dialog')).toBeHidden();
 
     await page.getByTestId('business-panel-focus-toggle').click();

@@ -1627,6 +1627,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/web/e2e/schedule/planner-task-revert.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/web/e2e/schedule/schedule-calendar.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -10860,7 +10868,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 21
+      "fileCount": 22
     },
     {
       "id": "apps/web/playwright.debug.config.ts",
@@ -11845,7 +11853,7 @@
     "smoke": 3,
     "boundary-ipc": 9,
     "boundary-main": 6,
-    "e2e": 59,
+    "e2e": 60,
     "perf": 1,
     "governance": 49
   }

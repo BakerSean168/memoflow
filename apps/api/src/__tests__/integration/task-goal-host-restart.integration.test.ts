@@ -52,7 +52,7 @@ describe('API host Task -> Goal restart recovery', () => {
     await disconnectPrisma();
   });
 
-  it('delivers a committed Task contribution after the completing host exits', async () => {
+  it('Fixture B API: EachCompletion survives host restart, stays idempotent, and updates Goal once', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
 

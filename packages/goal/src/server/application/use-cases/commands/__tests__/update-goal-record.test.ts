@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { Goal, GoalRecord } from '../../../../domain';
+import { Goal, GoalRecord, KeyResultProgress } from '../../../../domain';
 import type { IGoalRecordRepository, IGoalRepository } from '../../../../domain';
 import { InMemoryGoalReliableOperationAdapter } from '../../../../infrastructure/adapters/in-memory/in-memory-goal-reliable-operation.adapter';
 import { createInlineGoalWriteTransactionRunner } from '../goal-write-support';
@@ -81,6 +81,73 @@ describe('UpdateGoalRecordUseCase', () => {
     if (result.ok) {
       expect(result.data.recordChanges?.upserted[0]).toMatchObject({ value: 20, valueAfter: 37 });
     }
+  });
+
+  it('Fixture C: editing the latest 75 -> 70 Last measurement recalculates the decreasing KR from authoritative history', async () => {
+    const goal = Goal.create({
+      identityId: 'identity-1' as never,
+      name: 'Reach 70 kg',
+      description: null,
+      feasibilityAnalysis: null,
+      motivation: null,
+      startDate: null,
+      dueDate: null,
+      reminderConfig: null,
+    });
+    const keyResult = goal.createAndAddKeyResult({
+      title: 'Weight',
+      aggregationMethod: 'Last',
+      startingValue: 75,
+      currentValue: 73,
+      targetValue: 70,
+      progressBaselineValue: 75,
+      unit: 'kg',
+      weight: 1,
+    });
+    const older = GoalRecord.create({
+      id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440201' as never,
+      keyResultId: keyResult.id as never,
+      identityId: 'identity-1' as never,
+      value: 74,
+    });
+    const latest = GoalRecord.create({
+      id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440202' as never,
+      keyResultId: keyResult.id as never,
+      identityId: 'identity-1' as never,
+      value: 73,
+    });
+    const goalRepository = createMockRepo<IGoalRepository>({
+      findByIdForIdentity: vi.fn().mockResolvedValue(goal),
+      saveRootWithExpectedVersion: vi.fn().mockResolvedValue(undefined),
+    });
+    const recordRepository = createMockRepo<IGoalRecordRepository>({
+      findByIdForIdentity: vi.fn().mockResolvedValue(latest),
+      save: vi.fn().mockResolvedValue(undefined),
+      findByKeyResultId: vi.fn().mockImplementation(async () => [older, latest]),
+    });
+    const useCase = new UpdateGoalRecordUseCase(
+      goalRepository,
+      recordRepository,
+      createInlineGoalWriteTransactionRunner(
+        { goalRepository, goalRecordRepository: recordRepository },
+        new InMemoryGoalReliableOperationAdapter(),
+      ),
+    );
+
+    const result = await useCase.execute(
+      String(goal.id),
+      String(keyResult.id),
+      String(latest.id),
+      { value: 70, expectedVersion: goal.version },
+      'identity-1',
+    );
+
+    expect(result).toBeOk();
+    expect(latest.value).toBe(70);
+    expect(goal.getKeyResult(String(keyResult.id))?.progress.currentValue).toBe(70);
+    const progress = KeyResultProgress.fromDTO(goal.getKeyResult(String(keyResult.id))!.progress);
+    expect(progress.getDirection()).toBe('down');
+    expect(progress.isCompleted).toBe(true);
   });
 
   it('rejects manual edits to source-correlated Task contribution facts', async () => {

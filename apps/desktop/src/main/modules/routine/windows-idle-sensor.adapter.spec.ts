@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { WindowsIdleSensorAdapter } from './windows-idle-sensor.adapter';
 
 describe('WindowsIdleSensorAdapter (ROUTINE-4101)', () => {
-  it('polls Electron idle time and emits one idle/resume transition', () => {
+  it('Fixture G Desktop: Electron idle time emits one idle/resume transition for ActiveUsage', () => {
     vi.useFakeTimers();
     let idleSeconds = 0;
     let now = 1_000;

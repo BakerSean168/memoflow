@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { Goal, GoalRecord } from '../../../../domain';
+import { Goal, GoalRecord, KeyResultProgress } from '../../../../domain';
 import type { IGoalRecordRepository, IGoalRepository } from '../../../../domain';
 import { DeleteGoalRecordUseCase } from '../delete-goal-record.use-case';
 import { createInlineGoalWriteTransactionRunner } from '../goal-write-support';
@@ -74,6 +74,73 @@ describe('DeleteGoalRecordUseCase', () => {
     expect(goal.getKeyResult(keyResult.id)?.progress.currentValue).toBe(3);
     expect(recordRepository.delete).toHaveBeenCalledWith('identity-1', deletedRecord.id);
     expect(goalRepository.saveRootWithExpectedVersion).toHaveBeenCalledWith(goal, 1);
+  });
+
+  it('Fixture C: deleting the latest Last measurement restores the previous decreasing measurement', async () => {
+    const goal = Goal.create({
+      identityId: 'identity-1' as any,
+      name: 'Reach 70 kg',
+      description: null,
+      feasibilityAnalysis: null,
+      motivation: null,
+      startDate: null,
+      dueDate: null,
+      reminderConfig: null,
+    });
+    const keyResult = goal.createAndAddKeyResult({
+      title: 'Weight',
+      aggregationMethod: 'Last',
+      startingValue: 75,
+      currentValue: 70,
+      targetValue: 70,
+      progressBaselineValue: 75,
+      weight: 1,
+      unit: 'kg',
+    });
+    const previous = GoalRecord.create({
+      id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440301' as any,
+      keyResultId: keyResult.id as any,
+      identityId: 'identity-1' as any,
+      value: 73,
+    });
+    const latest = GoalRecord.create({
+      id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440302' as any,
+      keyResultId: keyResult.id as any,
+      identityId: 'identity-1' as any,
+      value: 70,
+    });
+    const goalRepository = createMockRepo<IGoalRepository>({
+      findByIdForIdentity: vi.fn().mockResolvedValue(goal),
+      saveRootWithExpectedVersion: vi.fn().mockResolvedValue(undefined),
+    });
+    const recordRepository = createMockRepo<IGoalRecordRepository>({
+      findByIdForIdentity: vi.fn().mockResolvedValue(latest),
+      findByKeyResultId: vi.fn().mockResolvedValue([previous, latest]),
+      delete: vi.fn().mockResolvedValue(undefined),
+    });
+    const useCase = new DeleteGoalRecordUseCase(
+      goalRepository,
+      recordRepository,
+      createInlineGoalWriteTransactionRunner(
+        { goalRepository, goalRecordRepository: recordRepository },
+        new InMemoryGoalReliableOperationAdapter(),
+      ),
+    );
+
+    const result = await useCase.execute(
+      String(goal.id),
+      String(keyResult.id),
+      String(latest.id),
+      'identity-1',
+      goal.version,
+    );
+
+    expect(result.ok).toBe(true);
+    expect(goal.getKeyResult(String(keyResult.id))?.progress.currentValue).toBe(73);
+    const progress = KeyResultProgress.fromDTO(goal.getKeyResult(String(keyResult.id))!.progress);
+    expect(progress.getDirection()).toBe('down');
+    expect(progress.isCompleted).toBe(false);
+    expect(recordRepository.delete).toHaveBeenCalledWith('identity-1', latest.id);
   });
 
   it('returns NOT_FOUND when record is missing or foreign', async () => {

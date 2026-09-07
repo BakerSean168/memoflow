@@ -124,7 +124,7 @@ test.describe('Local Docker core product Phase E', () => {
       contentType: 'image/png',
     });
 
-    await page.getByTestId('cancel-goal-button').click();
+    await page.getByTestId('goal-dialog').getByRole('button', { name: '取消', exact: true }).click();
     expect(pageErrors).toEqual([]);
     expect(consoleErrors).toEqual([]);
   });
@@ -307,21 +307,18 @@ function createApprovalFixture(input: { conversationId: string; runId: string })
     goal: {
       name: 'Phase E 待审批目标',
       description: '验证 clean shell 自动恢复 canonical Mastra goal.create workflow。',
-      category: 'validation',
-      importance: 'Important',
       motivation: '验证 runtime-owned durable workflow refresh restore。',
       feasibilityAnalysis: '用户确认后由产品 application port 执行业务写入。',
-      tags: ['phase-e', 'mastra'],
       startDate: now,
-      targetDate: now + 7 * 24 * 60 * 60 * 1000,
+      dueDate: now + 7 * 24 * 60 * 60 * 1000,
     },
     keyResults: [
       {
         title: '完成 Phase E workflow 审批',
         description: '从 durable run 恢复并显示待确认草稿。',
-        valueType: 'Incremental',
         calculationMethod: 'Sum',
-        startValue: 0,
+        startingValue: 0,
+        progressBaselineValue: null,
         currentValue: 0,
         targetValue: 1,
         unit: 'workflow',

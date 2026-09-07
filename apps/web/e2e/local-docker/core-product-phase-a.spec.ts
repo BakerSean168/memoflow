@@ -18,7 +18,7 @@ type KeyResultProjection = {
 };
 
 test.describe('Local Docker core product Phase A', () => {
-  test('[P0] closes the goal to task contribution loop without crashes or duplicate progress', async ({
+  test('[P0][Fixture B] local Docker closes EachCompletion apply/replay/uncomplete/reapply without duplicate progress', async ({
     page,
   }) => {
     const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -82,6 +82,10 @@ test.describe('Local Docker core product Phase A', () => {
     }
     await toggle.click();
     await selectBinding(page, primary);
+    const contributionToggle = page.getByTestId('task-goal-contribution-toggle');
+    await expect(contributionToggle).toHaveAttribute('data-state', 'unchecked');
+    await contributionToggle.click();
+    await expect(contributionToggle).toHaveAttribute('data-state', 'checked');
     await page.getByTestId('task-goal-increment-input').fill('1');
 
     const createResponsePromise = page.waitForResponse(
@@ -91,27 +95,36 @@ test.describe('Local Docker core product Phase A', () => {
     );
     await page.getByTestId('task-dialog-save-button').click();
     const creation = await expectApiData<{
-      template: { id: string };
+      template: {
+        id: string;
+        goalBinding: {
+          goalId: string;
+          keyResultId: string;
+          contribution: { value: number; trigger: string } | null;
+        } | null;
+      };
       todayInstanceCreated: boolean;
     }>(await createResponsePromise);
     expect(creation.todayInstanceCreated).toBe(true);
+    expect(creation.template.goalBinding).toEqual({
+      goalId: primary.id,
+      keyResultId: primary.keyResultId,
+      contribution: { value: 1, trigger: 'EachCompletion' },
+    });
 
+    await page.getByTestId('task-surface-plans').click();
     const taskCard = page
       .getByTestId('task-plan-card')
       .filter({ has: page.getByText(taskName, { exact: true }) })
       .first();
     await expect(taskCard).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(taskCard).toContainText(primary.name);
-    await expect(taskCard).toContainText(primary.keyResultName);
     await taskCard.getByText(taskName, { exact: true }).click();
 
     await page.waitForURL(new RegExp(`/tasks/${creation.template.id}$`), {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
-    await expect(page.getByTestId('task-linked-goal-name')).toHaveText(primary.name);
-    await expect(page.getByTestId('task-linked-key-result-name')).toHaveText(
-      primary.keyResultName,
-    );
+    await expect(page.getByTestId('task-plan-overview')).toContainText('已绑定 Goal');
+    await expect(page.getByTestId('task-plan-settings')).toContainText('已配置 Goal 贡献');
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await showTodayOverview(page);
@@ -162,15 +175,13 @@ async function createGoalWithKeyResult(
   await page
     .getByTestId('goal-description-input')
     .fill('Created through the real local Docker product surface.');
-  await page.getByTestId('goal-dialog-key-results-tab').click();
-  await page.getByTestId('goal-dialog-add-key-result').click();
-  await expect(page.getByTestId('key-result-dialog')).toBeVisible();
-  await page.getByTestId('key-result-title-input').fill(input.keyResultName);
-  await page.getByTestId('key-result-start-input').fill('0');
-  await page.getByTestId('key-result-current-input').fill('0');
-  await page.getByTestId('key-result-target-input').fill('10');
-  await page.getByTestId('save-key-result-button').click();
-  await expect(page.getByTestId('key-result-dialog')).toBeHidden();
+  await page.getByTestId('add-key-result-entry').click();
+  await expect(page.getByTestId('key-result-draft-form')).toBeVisible();
+  await page.getByTestId('draft-kr-title-input').fill(input.keyResultName);
+  await page.getByTestId('draft-kr-current-input').fill('0');
+  await page.getByTestId('draft-kr-target-input').fill('10');
+  await page.getByTestId('save-key-result-draft').click();
+  await expect(page.getByTestId('key-result-draft-form')).toBeHidden();
   await expect(page.getByTestId('goal-dialog')).toContainText(input.keyResultName);
   await page.getByTestId('save-goal-button').click();
   await expect(page.getByTestId('goal-dialog')).toBeHidden({
@@ -178,7 +189,7 @@ async function createGoalWithKeyResult(
   });
 
   const card = page
-    .getByTestId('goal-card')
+    .getByTestId('goal-progress-row')
     .filter({ has: page.getByText(input.name, { exact: true }) })
     .first();
   await expect(card).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });

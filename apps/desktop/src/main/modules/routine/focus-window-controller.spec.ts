@@ -109,7 +109,7 @@ describe('FocusWindowController (ROUTINE-4202)', () => {
     controller.destroy();
   });
 
-  it('restores after app restart and catches up a missed deadline without a renderer tick', async () => {
+  it('Fixture H Desktop: 50/10 restores after app restart and catches up a missed deadline without a renderer tick', async () => {
     const store = createInMemoryProtocolSessionStore();
     await store.create(runningSession());
     const firstHost = hostHarness();

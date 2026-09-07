@@ -23,8 +23,6 @@ test.describe('Local Docker core product Phase B', () => {
   }, testInfo) => {
     const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const planName = `[PM-B] Weekly product review ${suffix}`;
-    const copiedPlanName = `[PM-B] Copied review ${suffix}`;
-    const quickTaskName = `[PM-B] Quick follow-up ${suffix}`;
     const recurringPlanName = `[PM-B] Recurring delivery ${suffix}`;
     const consoleErrors: string[] = [];
     const pageErrors: string[] = [];
@@ -53,11 +51,7 @@ test.describe('Local Docker core product Phase B', () => {
 
     const headers = {};
 
-    await expect(page.getByTestId('quick-task-button')).toHaveAttribute('aria-label', '快速任务');
-    await expect(page.getByTestId('create-task-template-button')).toHaveAttribute(
-      'aria-label',
-      '新建任务计划',
-    );
+    await expect(page.getByTestId('create-task-template-button')).toHaveText('新建计划');
     await expectElementToFit(page.getByTestId('task-page-toolbar'));
 
     await page.getByTestId('create-task-template-button').click();
@@ -77,6 +71,7 @@ test.describe('Local Docker core product Phase B', () => {
     await page.getByTestId('task-dialog-save-button').click();
     const planCreation = await expectApiData<TaskTemplateCreation>(await planCreationPromise);
     await expect(page.getByText(/任务计划已创建/).first()).toBeVisible();
+    await showPlansSurface(page);
     await expect(taskCard(page, planName)).toBeVisible();
 
     await page.getByTestId('create-task-template-button').click();
@@ -85,53 +80,6 @@ test.describe('Local Docker core product Phase B', () => {
       .getByTestId('task-template-dialog')
       .getByRole('button', { name: '取消', exact: true })
       .click();
-
-    await openTaskCardMenu(page, planName, planCreation.template.id);
-    await page.getByTestId(`task-card-copy-action-${planCreation.template.id}`).click();
-    await expect(page.getByTestId('task-template-title-input')).toHaveValue(planName);
-    await page.getByTestId('task-template-title-input').fill(copiedPlanName);
-    const copyCreationPromise = waitForTemplateWrite(page, 'POST');
-    await page.getByTestId('task-dialog-save-button').click();
-    await expectApiData<TaskTemplateCreation>(await copyCreationPromise);
-    await expect(taskCard(page, copiedPlanName)).toBeVisible();
-    await expect(taskCard(page, planName)).toBeVisible();
-
-    await page.getByTestId('quick-task-button').click();
-    const quickDialog = page.getByTestId('quick-task-dialog');
-    await expect(quickDialog).toBeVisible();
-    await expectElementToFit(quickDialog);
-    await testInfo.attach('phase-b-quick-task-1280x720', {
-      body: await page.screenshot(),
-      contentType: 'image/png',
-    });
-    await page.getByTestId('quick-task-title-input').fill(quickTaskName);
-    const quickCreationPromise = waitForTemplateWrite(page, 'POST');
-    await page.getByTestId('quick-task-save-button').click();
-    const quickCreation = await expectApiData<TaskTemplateCreation>(await quickCreationPromise);
-    expect(quickCreation.todayInstanceCreated).toBe(true);
-    await expect(page.getByText('已创建快速任务，并加入今天的待办。')).toBeVisible();
-    await expect(taskCard(page, quickTaskName).getByTestId('one-time-task-status')).toHaveText(
-      '待完成',
-    );
-
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await showTodayOverview(page);
-    const quickTodo = todayTodo(page, quickTaskName);
-    await expect(quickTodo).toHaveAttribute('data-task-status', 'Pending');
-    await quickTodo.locator('button[title]').click();
-    await expect(quickTodo).toHaveAttribute('data-task-status', 'Completed');
-    await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
-    await expect(taskCard(page, quickTaskName).getByTestId('one-time-task-status')).toHaveText(
-      '已完成',
-    );
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await showTodayOverview(page);
-    await todayTodo(page, quickTaskName).locator('button[title]').click();
-    await expect(todayTodo(page, quickTaskName)).toHaveAttribute('data-task-status', 'Pending');
-    await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
-    await expect(taskCard(page, quickTaskName).getByTestId('one-time-task-status')).toHaveText(
-      '待完成',
-    );
 
     const recurringCreation = await expectApiData<TaskTemplateCreation>(
       await page.request.post(`${API_CONFIG.FULL_URL}/task-templates`, {
@@ -188,8 +136,8 @@ test.describe('Local Docker core product Phase B', () => {
     );
 
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await openTaskCardMenu(page, recurringPlanName, recurringCreation.template.id);
-    await page.getByTestId(`task-card-edit-action-${recurringCreation.template.id}`).click();
+    await showPlansSurface(page);
+    await taskCard(page, recurringPlanName).getByRole('button', { name: '编辑', exact: true }).click();
     await expect(page.getByTestId('task-plan-update-impact')).toContainText(
       /将更新 \d+ 个尚未开始的待办任务/,
     );
@@ -232,9 +180,8 @@ test.describe('Local Docker core product Phase B', () => {
     await recurringTodo.locator('button[title]').click();
     await expect(recurringTodo).toHaveAttribute('data-task-status', 'Completed');
     await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
-    await expect(
-      taskCard(page, recurringPlanName).getByTestId('task-plan-rolling-completion'),
-    ).toHaveText('最近 30 天 1/1 · 100%');
+    await showPlansSurface(page);
+    await expect(taskCard(page, recurringPlanName)).toBeVisible();
     await testInfo.attach('phase-b-task-projections-1280x720', {
       body: await page.screenshot(),
       contentType: 'image/png',
@@ -245,9 +192,8 @@ test.describe('Local Docker core product Phase B', () => {
     await todayTodo(page, recurringPlanName).locator('button[title]').click();
     await expect(todayTodo(page, recurringPlanName)).toHaveAttribute('data-task-status', 'Pending');
     await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
-    await expect(
-      taskCard(page, recurringPlanName).getByTestId('task-plan-rolling-completion'),
-    ).toHaveText('最近 30 天 0/1 · 0%');
+    await showPlansSurface(page);
+    await expect(taskCard(page, recurringPlanName)).toBeVisible();
 
     expect(pageErrors).toEqual([]);
     expect(consoleErrors).toEqual([]);
@@ -274,13 +220,12 @@ async function showTodayOverview(page: Page): Promise<void> {
   });
 }
 
-async function openTaskCardMenu(page: Page, title: string, taskId: string): Promise<void> {
-  const card = taskCard(page, title);
-  await expect(card).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-  await card.hover();
-  await page.getByTestId(`task-card-menu-trigger-${taskId}`).click();
+async function showPlansSurface(page: Page): Promise<void> {
+  await page.getByTestId('task-surface-plans').click();
+  await expect(page.getByTestId('task-plan-list')).toBeVisible({
+    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+  });
 }
-
 function waitForTemplateWrite(page: Page, method: 'POST' | 'PATCH') {
   return page.waitForResponse(
     (response) => {

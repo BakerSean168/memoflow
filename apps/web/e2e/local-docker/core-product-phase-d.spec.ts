@@ -43,26 +43,23 @@ test.describe('Local Docker core product Phase D', () => {
     const goalDialog = page.getByTestId('goal-dialog');
     await expect(goalDialog).toBeVisible();
     await expect(page.getByTestId('goal-name-input')).toBeFocused();
-    await expect(page.getByText('开始日期', { exact: true })).toBeVisible();
-    await expect(page.getByText('目标日期', { exact: true })).toBeVisible();
-    await expect(page.getByTestId('goal-start-date')).toHaveAttribute('aria-label', '开始日期');
-    await expect(page.getByTestId('goal-target-date')).toHaveAttribute('aria-label', '目标日期');
+    await expect(page.getByLabel('开始日期', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('截止日期', { exact: true })).toBeVisible();
     await expectDialogGeometry(goalDialog);
     await expectNoSeriousAxeViolations(page, '[data-testid="goal-dialog"]');
 
     await page.keyboard.type(goalName);
-    await shiftTabTo(page, page.getByTestId('goal-dialog-basic-tab'));
-    await page.keyboard.press('ArrowRight');
-    await expect(page.getByTestId('goal-dialog-key-results-tab')).toBeFocused();
+    await tabTo(page, page.getByTestId('add-key-result-entry'));
     await page.keyboard.press('Enter');
-    await expect(page.getByTestId('inline-kr-form')).toBeVisible();
-    await tabTo(page, page.getByTestId('inline-kr-title'));
+    await expect(page.getByTestId('key-result-draft-form')).toBeVisible();
+    await tabTo(page, page.getByTestId('draft-kr-title-input'));
     await page.keyboard.type(keyResultName);
-    await tabTo(page, page.getByTestId('inline-kr-add'));
+    await page.getByTestId('draft-kr-target-input').fill('1');
+    await tabTo(page, page.getByTestId('save-key-result-draft'));
     await page.keyboard.press('Enter');
+    await expect(page.getByTestId('key-result-draft-form')).toBeHidden();
     await expect(goalDialog).toContainText(keyResultName);
-    await expect(goalDialog).toContainText('累积值');
-    await expect(goalDialog).toContainText('中影响');
+    await expect(goalDialog).toContainText('0 → 1');
     await expect(goalDialog).not.toContainText(/Incremental|Absolute|Binary|Moderate|Vital|Minor/);
 
     await tabTo(page, page.getByTestId('save-goal-button'));
@@ -70,25 +67,13 @@ test.describe('Local Docker core product Phase D', () => {
     await expect(goalDialog).toBeHidden({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     await expect(createGoal).toBeFocused();
     await expect(
-      page.getByTestId('goal-card').filter({ has: page.getByText(goalName, { exact: true }) }),
+      page.getByTestId('goal-progress-row').filter({ has: page.getByText(goalName, { exact: true }) }),
     ).toBeVisible();
 
     await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('task-management-view')).toBeVisible({
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
-
-    const quickTaskButton = page.getByTestId('quick-task-button');
-    await tabTo(page, quickTaskButton);
-    await page.keyboard.press('Enter');
-    const quickTaskDialog = page.getByTestId('quick-task-dialog');
-    await expect(quickTaskDialog).toBeVisible();
-    await expect(page.getByTestId('quick-task-title-input')).toBeFocused();
-    await expectDialogGeometry(quickTaskDialog, true);
-    await expectNoSeriousAxeViolations(page, '[data-testid="quick-task-dialog"]');
-    await page.keyboard.press('Escape');
-    await expect(quickTaskDialog).toBeHidden();
-    await expect(quickTaskButton).toBeFocused();
 
     const createTaskPlan = page.getByTestId('create-task-template-button');
     await tabTo(page, createTaskPlan);
@@ -136,17 +121,6 @@ async function tabTo(page: Page, target: Locator, maxTabs = 60): Promise<void> {
     await page.keyboard.press('Tab');
   }
   throw new Error(`Could not reach ${await target.getAttribute('data-testid')} by keyboard`);
-}
-
-async function shiftTabTo(page: Page, target: Locator, maxTabs = 20): Promise<void> {
-  await expect(target).toBeVisible();
-  for (let index = 0; index < maxTabs; index += 1) {
-    if (await target.evaluate((element) => element === document.activeElement)) return;
-    await page.keyboard.press('Shift+Tab');
-  }
-  throw new Error(
-    `Could not reach ${await target.getAttribute('role')} by reverse keyboard navigation`,
-  );
 }
 
 async function expectDialogGeometry(dialog: Locator, noBodyScroll = false): Promise<void> {

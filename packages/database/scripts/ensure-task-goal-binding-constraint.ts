@@ -12,9 +12,14 @@ async function main(): Promise<void> {
   await client.connect();
   try {
     const report = await ensureTaskGoalBindingConstraint(client);
+    const status = report.constraintReplaced
+      ? 'replaced with canonical v2'
+      : report.constraintCreated
+        ? 'created canonical v2'
+        : 'already canonical v2';
     console.log(
       report.tablePresent
-        ? `Task goal-binding constraint: ${report.constraintCreated ? 'created' : 'already present'}`
+        ? `Task goal-binding constraint: ${status}`
         : 'Task templates table is not present; constraint setup skipped.',
     );
   } finally {
