@@ -19,6 +19,7 @@ import {
   BatchGroupTemplatesSchema,
   ReplaceRoutineProfilesSchema,
   UpdateReminderPreferencesSchema,
+  RecordReminderResponseSchema,
 } from '@memoflow/contracts/reminder';
 import type {
   GetUpcomingRemindersRes,
@@ -202,18 +203,15 @@ export class ReminderController {
     input: unknown,
     ctx: ExecutionContext,
   ): Promise<Result<unknown>> {
-    const action = (input as Record<string, unknown>)?.action;
-    if (!action || typeof action !== 'string') {
-      return fail({ code: 'VALIDATION_ERROR', message: 'action is required' });
+    const parsed = RecordReminderResponseSchema.safeParse(input);
+    if (!parsed.success) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: '参数验证失败',
+        details: formatZodErrors(parsed.error.issues),
+      });
     }
-    return this.useCases.recordResponse(
-      templateId,
-      {
-        action,
-        note: (input as Record<string, unknown>)?.note as string | undefined,
-      },
-      ctx,
-    );
+    return this.useCases.recordResponse(templateId, parsed.data, ctx);
   }
 
   async getTemplateResponses(templateId: string, ctx: ExecutionContext): Promise<Result<unknown>> {

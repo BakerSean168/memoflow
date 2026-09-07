@@ -521,6 +521,7 @@ const reminder_responses = new Table({
   template_id: column.text, // FK
   action: column.text,
   response_time: column.integer,
+  snooze_duration_seconds: column.integer,
   timestamp: column.text,
   created_at: column.text,
 });

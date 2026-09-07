@@ -18,11 +18,6 @@ import {
   resolveExportRefOrThrow,
 } from './projection-helpers';
 
-function responseTimeToPortable(value: unknown): string | null | undefined {
-  if (typeof value === 'number') return new Date(value * 1000).toISOString();
-  return toDateString(value) ?? null;
-}
-
 export function projectReminderGroups(
   groups: unknown[],
   ctx: ExportContext,
@@ -130,7 +125,9 @@ export function projectReminderResponses(
         'reminder',
       ),
       action: entity.action as string,
-      responseTime: responseTimeToPortable(entity.responseTime),
+      responseTime: typeof entity.responseTime === 'number' ? entity.responseTime : null,
+      snoozeDurationSeconds:
+        typeof entity.snoozeDurationSeconds === 'number' ? entity.snoozeDurationSeconds : null,
       timestamp: toDateString(entity.timestamp) ?? new Date().toISOString(),
     };
   });

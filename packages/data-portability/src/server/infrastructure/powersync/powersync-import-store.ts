@@ -506,13 +506,14 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createReminderResponse(input: CreateReminderResponseInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO reminder_responses (id, identity_id, template_id, action, response_time, timestamp, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO reminder_responses (id, identity_id, template_id, action, response_time, snooze_duration_seconds, timestamp, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.id,
         input.identityId,
         input.templateId,
         input.action,
         input.responseTime,
+        input.snoozeDurationSeconds,
         input.timestamp,
         createdAt(input),
       ],

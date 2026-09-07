@@ -119,6 +119,9 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(routineMembership.routine_id).toBe(routineDefinition.id);
     expect(routineMembership.enabled).toBe(0);
     expect(reminderResponse.template_id).toBe(reminderTemplate.id);
+    expect(reminderResponse.action).toBe("SNOOZED");
+    expect(reminderResponse.response_time).toBe(7);
+    expect(reminderResponse.snooze_duration_seconds).toBe(900);
     expect(session.workspace_id).toBe(workspace.id);
     expect(group.session_id).toBe(session.id);
     expect(group.workspace_id).toBe(workspace.id);
@@ -795,8 +798,9 @@ function seedProfile(identityUuid: string): SeedTables {
         id: 'reminder-response-a',
         template_id: 'reminder-template-a',
         identity_id: identityUuid,
-        action: 'dismiss',
-        response_time: 1700000000,
+        action: 'SNOOZED',
+        response_time: 7,
+        snooze_duration_seconds: 900,
         timestamp: later,
         created_at: now,
       },

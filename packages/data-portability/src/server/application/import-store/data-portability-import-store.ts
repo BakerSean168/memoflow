@@ -280,6 +280,7 @@ export interface CreateReminderResponseInput extends CreatedImportInput {
   templateId: string;
   action: string;
   responseTime: number | null;
+  snoozeDurationSeconds: number | null;
   timestamp: string;
 }
 

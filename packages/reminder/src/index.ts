@@ -35,7 +35,7 @@ export {
   type ReminderRuntimeContributionsInput,
   type ReminderPrismaRepositorySet,
   type ReminderPowerSyncRepositorySet,
-  type ReminderSnoozeRescheduler,
+  type ReminderSnoozeOverrideWriter,
   type RoutineProfileStore,
   type IReminderTemplateRepository,
   type IReminderGroupRepository,

@@ -15,6 +15,7 @@ import type {
   ReminderHistoryClientDTO,
   ReminderTemplateClientDTO,
   ReminderTemplateListRes,
+  RecordReminderResponseReq,
   UpdateReminderGroupReq,
   UpdateReminderPreferencesReq,
   UpdateReminderTemplateReq,
@@ -56,7 +57,7 @@ export interface ReminderApplicationPort {
   ): Promise<Result<ReminderHistoryClientDTO[]>>;
   recordResponse(
     templateId: string,
-    data: { action: string; note?: string },
+    data: RecordReminderResponseReq,
     ctx: ExecutionContext,
   ): Promise<Result<unknown>>;
   getTemplateResponses(templateId: string, ctx: ExecutionContext): Promise<Result<unknown>>;

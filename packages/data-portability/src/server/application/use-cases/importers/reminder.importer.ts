@@ -73,9 +73,9 @@ export async function importReminders(
       identityId: ctx.identityId,
       templateId: resolveRef(r.templateRef as string, ctx),
       action: r.action as string,
-      responseTime: r.responseTime
-        ? Math.floor(new Date(r.responseTime as string).getTime() / 1000)
-        : null,
+      responseTime: typeof r.responseTime === 'number' ? r.responseTime : null,
+      snoozeDurationSeconds:
+        typeof r.snoozeDurationSeconds === 'number' ? r.snoozeDurationSeconds : null,
       timestamp: String(r.timestamp),
     });
     inc(ctx, 'reminderResponses');

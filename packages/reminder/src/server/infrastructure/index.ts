@@ -29,7 +29,7 @@ export type {
   IUserReminderPreferenceRepository,
 } from '../domain/repositories';
 export type { ReminderTransactionRunner } from '../domain/ports/reminder-transaction-runner.port';
-export type { ReminderSnoozeRescheduler } from '../application/use-cases/commands/record-reminder-response.use-case';
+export type { ReminderSnoozeOverrideWriter } from '../application/use-cases/commands/record-reminder-response.use-case';
 
 // ============ PowerSync Module Factory / PowerSync 模块工厂 ============
 export { createReminderPowerSyncModule } from './powersync';

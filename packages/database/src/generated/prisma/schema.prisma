@@ -1280,13 +1280,14 @@ model ReminderStatistic {
 }
 
 model ReminderResponse {
-  id           String   @id @default(uuid())
-  identityId   String   @map("identity_id")
-  templateId   String   @map("template_id")
-  action       String // clicked, ignored, snoozed, dismissed, completed
-  responseTime Int?     @map("response_time") // seconds
-  timestamp    DateTime
-  createdAt    DateTime @default(now()) @map("created_at")
+  id                    String   @id @default(uuid())
+  identityId            String   @map("identity_id")
+  templateId            String   @map("template_id")
+  action                String // clicked, ignored, snoozed, dismissed, completed
+  responseTime          Int?     @map("response_time") // actual response latency, seconds
+  snoozeDurationSeconds Int?     @map("snooze_duration_seconds") // requested snooze delay, seconds
+  timestamp             DateTime
+  createdAt             DateTime @default(now()) @map("created_at")
 
   identity Account          @relation("AccountReminderResponses", fields: [identityId], references: [id])
   template ReminderTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)

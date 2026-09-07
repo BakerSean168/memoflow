@@ -55,8 +55,8 @@ export interface ReminderModuleDependencies {
   readonly closureChecker: (identityId: string) => Promise<boolean>;
   readonly accountTimezonePort?: import('../domain/ports/account-timezone.port').AccountTimezonePort;
   readonly runtimeContributions?: ReminderRuntimeContributionsInput;
-  /** R3c：snooze 副作用（可选）——推迟提醒的下次触发。 */
-  readonly snoozeRescheduler?: import('../application/use-cases/commands/record-reminder-response.use-case').ReminderSnoozeRescheduler;
+  /** Snooze command writer: persists canonical Routine temporary override state. */
+  readonly snoozeOverrideWriter?: import('../application/use-cases/commands/record-reminder-response.use-case').ReminderSnoozeOverrideWriter;
   /** W7：可靠操作端口（timeline/replay 查询） */
   readonly reliablePort?: ReminderReliableOperationPort;
   /** W7：审计仓库（最小权限 + 审计） */
@@ -150,7 +150,7 @@ export function createReminderUseCases(
     ),
     recordReminderResponse: new RecordReminderResponseUseCase(
       reminderResponseRepository,
-      dependencies.snoozeRescheduler,
+      dependencies.snoozeOverrideWriter,
     ),
     analyzeReminderFrequency: new AnalyzeReminderFrequencyUseCase(
       reminderTemplateRepository,
@@ -274,6 +274,8 @@ export function createReminderModule(
       return useCases.recordReminderResponse.execute({
         templateId,
         action: data.action as ReminderResponseAction,
+        responseTime: data.responseTime,
+        snoozeDurationSeconds: data.snoozeDurationSeconds,
         identityId: ctx.identityId,
       });
     },

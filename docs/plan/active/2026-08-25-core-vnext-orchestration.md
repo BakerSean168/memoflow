@@ -80,7 +80,7 @@ Still real residuals (code search verified):
 - `ROUTINE-5302`: no Routine method-library/catalog implementation exists;
 - `AI-6101~6103`: Goal/Task draft workflows exist, but `TaskPlanTaskSchema` still exposes retired `folderId`; Routine draft/command tooling and Planner/Notification AI read tooling are absent;
 - `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
-- `CLEAN-6301~6304`: convergence is in progress. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, and ordinary product raw-ScheduleTask mutation surfaces are removed; `CLEAN-6301` and `CLEAN-6303` are complete. `CLEAN-6302A` retired `ControlMode` and the legacy Reminder cron/due-set shadow; `CLEAN-6302B2` then completed the single-`groupId` → canonical M:N `RoutineProfile` / `ProfileMembership` cutover across contracts, persistence, transport, UI, scheduler eligibility, and data portability. `CLEAN-6302C1` has also retired duplicate Smart Frequency auto-mutation state, leaving overloaded snooze `responseTime` and final obsolete UI/route residuals as the remaining `CLEAN-6302` work. `CLEAN-6304` remains the physical-boundary decision;
+- `CLEAN-6301~6304`: convergence is in progress. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, and ordinary product raw-ScheduleTask mutation surfaces are removed; `CLEAN-6301` and `CLEAN-6303` are complete. `CLEAN-6302A` retired `ControlMode` and the legacy Reminder cron/due-set shadow; `CLEAN-6302B2` completed the single-`groupId` -> canonical M:N `RoutineProfile` / `ProfileMembership` cutover; `CLEAN-6302C1` retired duplicate Smart Frequency auto-mutation state; and `CLEAN-6302C2` now separates measured response latency from explicit Snooze duration while routing Snooze through canonical `RoutineTemporaryOverride`. Only the final obsolete Reminder route/component residual audit remains before `CLEAN-6302` can close. `CLEAN-6304` remains the physical-boundary decision;
 - `POC-6401`: pg-boss remains a documented candidate only and is not installed/evaluated against current constraints;
 - `HARD-7101~7105`: final failure matrix, residual cleanup proof and umbrella closure review remain incomplete.
 
@@ -2113,7 +2113,20 @@ Physical package rename `reminder -> routine` is a separate final decision; do n
 - anti-resurrection audit is zero for live `globalSmartFrequency`, `smartFrequencyEnabled`, auto/suggestion mutation methods, rejected-adjustment route/event, and retired Smart Frequency persistence columns; remaining hits are explicit negative assertions only. `ResponseMetrics` remains transient analysis data and `FrequencyAdjustmentResultSchema` remains the response shape of the explicit interval command;
 - verification: Contracts **67/67 files, 482/482 tests**; Data Portability **32/32 files, 139/139 tests**; Reminder **72/72 files, 471/471 tests**; PostgreSQL Reminder integration **6/6 files, 34/34 tests**; API **62/62 files, 327/327 tests**; Desktop **61/61 files, 322/322 tests**; App-Vue **201/201 files, 773/773 tests**; PowerSync Schema **1/1 file, 4/4 tests**; Database **9/9 files, 30/30 tests**; nine-project typecheck and lint green (lint: 0 errors; existing warnings remain); `governance:check`, `docs:check`, `test:targets:check`, and `git diff --check` green.
 
-`CLEAN-6302C1` is complete. `CLEAN-6302C2` now owns the remaining semantic migration: separate Reminder response latency from Snooze duration and remove the overloaded `responseTime` snooze command semantics without weakening response analytics.
+`CLEAN-6302C1` is complete. `CLEAN-6302C2` below completes the Snooze/response-latency semantic split.
+
+**Implementation evidence — CLEAN-6302C2 (2026-09-07): response latency and Snooze duration separated; canonical Routine override owns Snooze**
+
+- `responseTime` now has one meaning only: measured user response latency in non-negative integer seconds for response analytics. `snoozeDurationSeconds` is a distinct positive-integer duration accepted only for `SNOOZED`; the shared `RecordReminderResponseSchema` rejects missing Snooze duration, Snooze duration on non-Snooze actions, negative/fractional response latency, and non-positive Snooze duration;
+- removed the `Date`-as-duration model from `ReminderResponse`. Domain state, DTOs, analytics events, HTTP validation, Prisma, PowerSync, and Data Portability all carry the two durations as independent scalar seconds;
+- fixed both persistence unit defects exposed by the split: Prisma no longer divides an already-second-valued `responseTime` by 1000 on save, and PowerSync no longer reconstructs response seconds as a millisecond `Date`;
+- added `snooze_duration_seconds` to Prisma/PowerSync response persistence, regenerated Prisma Client, and upgraded backup/restore to preserve numeric `responseTime` plus `snoozeDurationSeconds`. A real PowerSync round trip locks `responseTime=7` and `snoozeDurationSeconds=900`;
+- deleted the legacy Prisma Snooze rescheduler that directly mutated raw `ScheduleTask` rows by `sourceModule='reminder'`. API Snooze now writes the existing canonical `RoutineTemporaryOverride` via `createSnoozeOverride()` and publishes `routine:override-changed`, causing Schedule Orchestration to immediately re-project the Routine without rewriting long-lived trigger configuration;
+- Snooze is fail-closed when a host has no canonical override writer, and a durable override write failure returns `SERVICE_UNAVAILABLE` rather than reporting a false Snooze success. The current response record and override write are still two durable writes rather than one transaction: if the override write fails after the response row is saved, the failure is visible but the response audit row remains. This tranche intentionally records that non-atomicity instead of claiming stronger guarantees;
+- hard residual audit is zero in production for `ReminderSnoozeRescheduler`, `snoozeRescheduler`, `ReminderResponseDurationSeconds`, `toReminderResponseDurationSeconds`, Prisma `/1000` response conversion, Date-based response-duration restoration, and raw Reminder Snooze `scheduleTask.updateMany` / `sourceModule:'reminder'` paths;
+- verification: Contracts **68/68 files, 486/486 tests**; Reminder **73/73 files, 466/466 tests**; Data Portability **32/32 files, 139/139 tests**; PostgreSQL Reminder integration **7/7 files, 35/35 tests**; API **62/62 files, 327/327 tests**; Desktop **61/61 files, 322/322 tests**; Schedule Orchestration **9/9 files, 34/34 tests**; ten-project typecheck green; ten-project lint **0 errors** (pre-existing warnings remain, no C2-added warning remains); `governance:check`, `docs:check`, `test:targets:check`, rebuilt `test:inventory:check`, and `git diff --check` green.
+
+`CLEAN-6302C2` is complete. `CLEAN-6302D` is now the sole remaining Reminder cleanup tranche: remove/lock any obsolete Reminder routes/components and prove the final live residual surface before closing `CLEAN-6302`.
 
 
 
@@ -2508,7 +2521,7 @@ Core vNext can close only when all of the following hold:
 - [ ] final cross-domain failure matrix passes (`HARD-7101` pending);
 - [x] API/Desktop/PowerSync/Prisma parity passes for the completed primary product scope;
 - [x] full governance/docs checks green for the completed milestone and current main;
-- [ ] residual grep proves all legacy dual paths removed — raw ScheduleTask product mutations and the SourceModule execution fallback are gone, CLEAN-6301 Goal/Task legacy surfaces are gone, CLEAN-6302A removed ControlMode + the legacy Reminder scanner, and CLEAN-6302B1 made the canonical Routine/Profile/M:N store live; public `groupId` compatibility plus smart-frequency/snooze cleanup still remain;
+- [ ] residual grep proves all legacy dual paths removed — raw ScheduleTask product mutations and the SourceModule execution fallback are gone; CLEAN-6301 Goal/Task legacy surfaces are gone; CLEAN-6302A/B/C retired ControlMode, the legacy Reminder scanner, single-group ownership, duplicate Smart Frequency state, and overloaded Snooze `responseTime`. Only CLEAN-6302D final obsolete Reminder route/component residual cleanup remains before this item can close;
 - [ ] final residual batch review has no P0/P1 unresolved finding.
 
 ---
@@ -2525,7 +2538,7 @@ A. Product parity (independent lanes)
    MOBILE-6201/6202   parity audit first; current screens already use modern Goal/Task/Notification contracts, implement only proven gaps
 
 B. Scheduling physical convergence (ordered)
-   CLEAN-6302C2       replace overloaded snooze-response semantics after B2 M:N membership cutover and C1 Smart Frequency authority retirement
+   CLEAN-6302D        remove/lock final obsolete Reminder routes/components and close CLEAN-6302 residual audit
         ↓
    CLEAN-6304         decide/perform scheduler physical package split only after semantic ownership is clean
         ↓

@@ -73736,10 +73736,12 @@ export namespace Prisma {
 
   export type ReminderResponseAvgAggregateOutputType = {
     responseTime: number | null
+    snoozeDurationSeconds: number | null
   }
 
   export type ReminderResponseSumAggregateOutputType = {
     responseTime: number | null
+    snoozeDurationSeconds: number | null
   }
 
   export type ReminderResponseMinAggregateOutputType = {
@@ -73748,6 +73750,7 @@ export namespace Prisma {
     templateId: string | null
     action: string | null
     responseTime: number | null
+    snoozeDurationSeconds: number | null
     timestamp: Date | null
     createdAt: Date | null
   }
@@ -73758,6 +73761,7 @@ export namespace Prisma {
     templateId: string | null
     action: string | null
     responseTime: number | null
+    snoozeDurationSeconds: number | null
     timestamp: Date | null
     createdAt: Date | null
   }
@@ -73768,6 +73772,7 @@ export namespace Prisma {
     templateId: number
     action: number
     responseTime: number
+    snoozeDurationSeconds: number
     timestamp: number
     createdAt: number
     _all: number
@@ -73776,10 +73781,12 @@ export namespace Prisma {
 
   export type ReminderResponseAvgAggregateInputType = {
     responseTime?: true
+    snoozeDurationSeconds?: true
   }
 
   export type ReminderResponseSumAggregateInputType = {
     responseTime?: true
+    snoozeDurationSeconds?: true
   }
 
   export type ReminderResponseMinAggregateInputType = {
@@ -73788,6 +73795,7 @@ export namespace Prisma {
     templateId?: true
     action?: true
     responseTime?: true
+    snoozeDurationSeconds?: true
     timestamp?: true
     createdAt?: true
   }
@@ -73798,6 +73806,7 @@ export namespace Prisma {
     templateId?: true
     action?: true
     responseTime?: true
+    snoozeDurationSeconds?: true
     timestamp?: true
     createdAt?: true
   }
@@ -73808,6 +73817,7 @@ export namespace Prisma {
     templateId?: true
     action?: true
     responseTime?: true
+    snoozeDurationSeconds?: true
     timestamp?: true
     createdAt?: true
     _all?: true
@@ -73905,6 +73915,7 @@ export namespace Prisma {
     templateId: string
     action: string
     responseTime: number | null
+    snoozeDurationSeconds: number | null
     timestamp: Date
     createdAt: Date
     _count: ReminderResponseCountAggregateOutputType | null
@@ -73934,6 +73945,7 @@ export namespace Prisma {
     templateId?: boolean
     action?: boolean
     responseTime?: boolean
+    snoozeDurationSeconds?: boolean
     timestamp?: boolean
     createdAt?: boolean
     identity?: boolean | AccountDefaultArgs<ExtArgs>
@@ -73946,6 +73958,7 @@ export namespace Prisma {
     templateId?: boolean
     action?: boolean
     responseTime?: boolean
+    snoozeDurationSeconds?: boolean
     timestamp?: boolean
     createdAt?: boolean
     identity?: boolean | AccountDefaultArgs<ExtArgs>
@@ -73958,6 +73971,7 @@ export namespace Prisma {
     templateId?: boolean
     action?: boolean
     responseTime?: boolean
+    snoozeDurationSeconds?: boolean
     timestamp?: boolean
     createdAt?: boolean
     identity?: boolean | AccountDefaultArgs<ExtArgs>
@@ -73970,11 +73984,12 @@ export namespace Prisma {
     templateId?: boolean
     action?: boolean
     responseTime?: boolean
+    snoozeDurationSeconds?: boolean
     timestamp?: boolean
     createdAt?: boolean
   }
 
-  export type ReminderResponseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "templateId" | "action" | "responseTime" | "timestamp" | "createdAt", ExtArgs["result"]["reminderResponse"]>
+  export type ReminderResponseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "templateId" | "action" | "responseTime" | "snoozeDurationSeconds" | "timestamp" | "createdAt", ExtArgs["result"]["reminderResponse"]>
   export type ReminderResponseInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     identity?: boolean | AccountDefaultArgs<ExtArgs>
     template?: boolean | ReminderTemplateDefaultArgs<ExtArgs>
@@ -74000,6 +74015,7 @@ export namespace Prisma {
       templateId: string
       action: string
       responseTime: number | null
+      snoozeDurationSeconds: number | null
       timestamp: Date
       createdAt: Date
     }, ExtArgs["result"]["reminderResponse"]>
@@ -74432,6 +74448,7 @@ export namespace Prisma {
     readonly templateId: FieldRef<"ReminderResponse", 'String'>
     readonly action: FieldRef<"ReminderResponse", 'String'>
     readonly responseTime: FieldRef<"ReminderResponse", 'Int'>
+    readonly snoozeDurationSeconds: FieldRef<"ReminderResponse", 'Int'>
     readonly timestamp: FieldRef<"ReminderResponse", 'DateTime'>
     readonly createdAt: FieldRef<"ReminderResponse", 'DateTime'>
   }
@@ -128189,6 +128206,7 @@ export namespace Prisma {
     templateId: 'templateId',
     action: 'action',
     responseTime: 'responseTime',
+    snoozeDurationSeconds: 'snoozeDurationSeconds',
     timestamp: 'timestamp',
     createdAt: 'createdAt'
   };
@@ -134165,6 +134183,7 @@ export namespace Prisma {
     templateId?: StringFilter<"ReminderResponse"> | string
     action?: StringFilter<"ReminderResponse"> | string
     responseTime?: IntNullableFilter<"ReminderResponse"> | number | null
+    snoozeDurationSeconds?: IntNullableFilter<"ReminderResponse"> | number | null
     timestamp?: DateTimeFilter<"ReminderResponse"> | Date | string
     createdAt?: DateTimeFilter<"ReminderResponse"> | Date | string
     identity?: XOR<AccountScalarRelationFilter, AccountWhereInput>
@@ -134177,6 +134196,7 @@ export namespace Prisma {
     templateId?: SortOrder
     action?: SortOrder
     responseTime?: SortOrderInput | SortOrder
+    snoozeDurationSeconds?: SortOrderInput | SortOrder
     timestamp?: SortOrder
     createdAt?: SortOrder
     identity?: AccountOrderByWithRelationInput
@@ -134192,6 +134212,7 @@ export namespace Prisma {
     templateId?: StringFilter<"ReminderResponse"> | string
     action?: StringFilter<"ReminderResponse"> | string
     responseTime?: IntNullableFilter<"ReminderResponse"> | number | null
+    snoozeDurationSeconds?: IntNullableFilter<"ReminderResponse"> | number | null
     timestamp?: DateTimeFilter<"ReminderResponse"> | Date | string
     createdAt?: DateTimeFilter<"ReminderResponse"> | Date | string
     identity?: XOR<AccountScalarRelationFilter, AccountWhereInput>
@@ -134204,6 +134225,7 @@ export namespace Prisma {
     templateId?: SortOrder
     action?: SortOrder
     responseTime?: SortOrderInput | SortOrder
+    snoozeDurationSeconds?: SortOrderInput | SortOrder
     timestamp?: SortOrder
     createdAt?: SortOrder
     _count?: ReminderResponseCountOrderByAggregateInput
@@ -134222,6 +134244,7 @@ export namespace Prisma {
     templateId?: StringWithAggregatesFilter<"ReminderResponse"> | string
     action?: StringWithAggregatesFilter<"ReminderResponse"> | string
     responseTime?: IntNullableWithAggregatesFilter<"ReminderResponse"> | number | null
+    snoozeDurationSeconds?: IntNullableWithAggregatesFilter<"ReminderResponse"> | number | null
     timestamp?: DateTimeWithAggregatesFilter<"ReminderResponse"> | Date | string
     createdAt?: DateTimeWithAggregatesFilter<"ReminderResponse"> | Date | string
   }
@@ -144278,6 +144301,7 @@ export namespace Prisma {
     id?: string
     action: string
     responseTime?: number | null
+    snoozeDurationSeconds?: number | null
     timestamp: Date | string
     createdAt?: Date | string
     identity: AccountCreateNestedOneWithoutReminderResponsesInput
@@ -144290,6 +144314,7 @@ export namespace Prisma {
     templateId: string
     action: string
     responseTime?: number | null
+    snoozeDurationSeconds?: number | null
     timestamp: Date | string
     createdAt?: Date | string
   }
@@ -144298,6 +144323,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     responseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    snoozeDurationSeconds?: NullableIntFieldUpdateOperationsInput | number | null
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     identity?: AccountUpdateOneRequiredWithoutReminderResponsesNestedInput
@@ -144310,6 +144336,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     responseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    snoozeDurationSeconds?: NullableIntFieldUpdateOperationsInput | number | null
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -144320,6 +144347,7 @@ export namespace Prisma {
     templateId: string
     action: string
     responseTime?: number | null
+    snoozeDurationSeconds?: number | null
     timestamp: Date | string
     createdAt?: Date | string
   }
@@ -144328,6 +144356,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     responseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    snoozeDurationSeconds?: NullableIntFieldUpdateOperationsInput | number | null
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -144338,6 +144367,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     responseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    snoozeDurationSeconds?: NullableIntFieldUpdateOperationsInput | number | null
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -153165,12 +153195,14 @@ export namespace Prisma {
     templateId?: SortOrder
     action?: SortOrder
     responseTime?: SortOrder
+    snoozeDurationSeconds?: SortOrder
     timestamp?: SortOrder
     createdAt?: SortOrder
   }
 
   export type ReminderResponseAvgOrderByAggregateInput = {
     responseTime?: SortOrder
+    snoozeDurationSeconds?: SortOrder
   }
 
   export type ReminderResponseMaxOrderByAggregateInput = {
@@ -153179,6 +153211,7 @@ export namespace Prisma {
     templateId?: SortOrder
     action?: SortOrder
     responseTime?: SortOrder
+    snoozeDurationSeconds?: SortOrder
     timestamp?: SortOrder
     createdAt?: SortOrder
   }
@@ -153189,12 +153222,14 @@ export namespace Prisma {
     templateId?: SortOrder
     action?: SortOrder
     responseTime?: SortOrder
+    snoozeDurationSeconds?: SortOrder
     timestamp?: SortOrder
     createdAt?: SortOrder
   }
 
   export type ReminderResponseSumOrderByAggregateInput = {
     responseTime?: SortOrder
+    snoozeDurationSeconds?: SortOrder
   }
 
   export type UserReminderPreferenceCountOrderByAggregateInput = {
@@ -164539,6 +164574,7 @@ export namespace Prisma {
     id?: string
     action: string
     responseTime?: number | null
+    snoozeDurationSeconds?: number | null
     timestamp: Date | string
     createdAt?: Date | string
     template: ReminderTemplateCreateNestedOneWithoutResponsesInput
@@ -164549,6 +164585,7 @@ export namespace Prisma {
     templateId: string
     action: string
     responseTime?: number | null
+    snoozeDurationSeconds?: number | null
     timestamp: Date | string
     createdAt?: Date | string
   }
@@ -166882,6 +166919,7 @@ export namespace Prisma {
     templateId?: StringFilter<"ReminderResponse"> | string
     action?: StringFilter<"ReminderResponse"> | string
     responseTime?: IntNullableFilter<"ReminderResponse"> | number | null
+    snoozeDurationSeconds?: IntNullableFilter<"ReminderResponse"> | number | null
     timestamp?: DateTimeFilter<"ReminderResponse"> | Date | string
     createdAt?: DateTimeFilter<"ReminderResponse"> | Date | string
   }
@@ -179022,6 +179060,7 @@ export namespace Prisma {
     id?: string
     action: string
     responseTime?: number | null
+    snoozeDurationSeconds?: number | null
     timestamp: Date | string
     createdAt?: Date | string
     identity: AccountCreateNestedOneWithoutReminderResponsesInput
@@ -179032,6 +179071,7 @@ export namespace Prisma {
     identityId: string
     action: string
     responseTime?: number | null
+    snoozeDurationSeconds?: number | null
     timestamp: Date | string
     createdAt?: Date | string
   }
@@ -195825,6 +195865,7 @@ export namespace Prisma {
     templateId: string
     action: string
     responseTime?: number | null
+    snoozeDurationSeconds?: number | null
     timestamp: Date | string
     createdAt?: Date | string
   }
@@ -197883,6 +197924,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     responseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    snoozeDurationSeconds?: NullableIntFieldUpdateOperationsInput | number | null
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     template?: ReminderTemplateUpdateOneRequiredWithoutResponsesNestedInput
@@ -197893,6 +197935,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     responseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    snoozeDurationSeconds?: NullableIntFieldUpdateOperationsInput | number | null
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -197902,6 +197945,7 @@ export namespace Prisma {
     templateId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     responseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    snoozeDurationSeconds?: NullableIntFieldUpdateOperationsInput | number | null
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -199823,6 +199867,7 @@ export namespace Prisma {
     identityId: string
     action: string
     responseTime?: number | null
+    snoozeDurationSeconds?: number | null
     timestamp: Date | string
     createdAt?: Date | string
   }
@@ -199928,6 +199973,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     responseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    snoozeDurationSeconds?: NullableIntFieldUpdateOperationsInput | number | null
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     identity?: AccountUpdateOneRequiredWithoutReminderResponsesNestedInput
@@ -199938,6 +199984,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     responseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    snoozeDurationSeconds?: NullableIntFieldUpdateOperationsInput | number | null
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -199947,6 +199994,7 @@ export namespace Prisma {
     identityId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     responseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    snoozeDurationSeconds?: NullableIntFieldUpdateOperationsInput | number | null
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

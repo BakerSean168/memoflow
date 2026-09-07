@@ -34,6 +34,7 @@ import {
   ReminderTemplateListResponseSchema,
   ReminderHistoryResponseSchema,
   ReminderResponseItemSchema,
+  RecordReminderResponseSchema,
   ResponseRecordResultSchema,
   ResponseStatsResultSchema,
   FrequencyAnalysisResultSchema,
@@ -308,7 +309,7 @@ export function registerReminderTemplateRoutes(
         body: {
           content: {
             'application/json': {
-              schema: z.object({ action: z.string(), note: z.string().optional() }),
+              schema: RecordReminderResponseSchema,
             },
           },
         },

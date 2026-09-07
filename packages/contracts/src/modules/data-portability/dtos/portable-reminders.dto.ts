@@ -60,7 +60,8 @@ export const PortableReminderResponseSchema = z
     _ref: PortableRefSchema,
     templateRef: PortableRefSchema,
     action: z.string(),
-    responseTime: IsoDateString.nullable().optional(),
+    responseTime: z.number().int().nonnegative().nullable().optional(),
+    snoozeDurationSeconds: z.number().int().positive().nullable().optional(),
     timestamp: IsoDateString,
   })
   .strict();

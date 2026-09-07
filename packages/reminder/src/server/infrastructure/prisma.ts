@@ -20,7 +20,7 @@ import {
 } from './reminder.module';
 import { createReminderScheduleExecutionSource } from './schedule-execution-source';
 import { createReminderScheduleProjectionSource } from './schedule-projection-source';
-import { createReminderSnoozeReschedulerPrisma } from './reminder-snooze-rescheduler.prisma';
+import { createReminderSnoozeOverrideWriterPrisma } from './reminder-snooze-override-writer.prisma';
 import { ReminderScheduleExecutionPrismaCommitAdapter } from './adapters/prisma/reminder-schedule-execution-commit.prisma.adapter';
 import {
   ReminderTemplatePrismaRepository,
@@ -38,7 +38,7 @@ import { PrismaRoutineProfileStore } from './routine-vnext/routine-profile-store
 import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 import type { ReminderReliableOperationPort } from '@memoflow/contracts/reliable-messaging';
 import type { ReminderTransactionRunner } from '../domain/ports/reminder-transaction-runner.port';
-import type { ReminderSnoozeRescheduler } from '../application/use-cases/commands/record-reminder-response.use-case';
+import type { ReminderSnoozeOverrideWriter } from '../application/use-cases/commands/record-reminder-response.use-case';
 import type {
   IReminderTemplateRepository,
   IReminderGroupRepository,
@@ -74,8 +74,8 @@ export interface ReminderPrismaRepositorySet {
   readonly routineProfileStore: RoutineProfileStore;
   readonly reliablePort: ReminderReliableOperationPort;
   readonly transactionRunner: ReminderTransactionRunner;
-  /** R3c：snooze 作为真 command——推迟 reminder 对应 schedule task 的下次触发。 */
-  readonly snoozeRescheduler: ReminderSnoozeRescheduler;
+  /** Canonical snooze command writer backed by RoutineTemporaryOverride. */
+  readonly snoozeOverrideWriter: ReminderSnoozeOverrideWriter;
   /** W7：统一 operation timeline / replay / audit。 */
   readonly auditRepository: OperationAuditRepository;
 }
@@ -114,7 +114,7 @@ export function createReminderPrismaModule(
     routineProfileStore: repositories.routineProfileStore,
     closureChecker: options.closureChecker,
     runtimeContributions: options.runtimeContributions,
-    snoozeRescheduler: repositories.snoozeRescheduler,
+    snoozeOverrideWriter: repositories.snoozeOverrideWriter,
     reliablePort: repositories.reliablePort,
     auditRepository: repositories.auditRepository,
   });
@@ -144,7 +144,7 @@ export function createReminderPrismaRepositories(db: PrismaClient): ReminderPris
     routineProfileStore: new PrismaRoutineProfileStore(db),
     reliablePort: new ReminderReliableOperationPrismaAdapter(db),
     transactionRunner: new PrismaReminderWriteTransactionRunner(db),
-    snoozeRescheduler: createReminderSnoozeReschedulerPrisma(db),
+    snoozeOverrideWriter: createReminderSnoozeOverrideWriterPrisma(db),
     auditRepository: new PrismaOperationAuditRepository(db),
   };
 }

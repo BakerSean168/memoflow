@@ -105,7 +105,7 @@ describe('composeReminder assembly order', () => {
       userReminderPreferenceRepository: repoSet.userReminderPreferenceRepository,
       closureChecker,
       reliablePort: repoSet.reliablePort,
-      snoozeRescheduler: repoSet.snoozeRescheduler,
+      snoozeOverrideWriter: repoSet.snoozeOverrideWriter,
       auditRepository: repoSet.auditRepository,
     });
     expect(moduleCall.runtimeContributions).toEqual([]);

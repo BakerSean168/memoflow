@@ -26,6 +26,7 @@ import { ActiveTimeConfigSchema } from '../value-objects/active-time-config';
 import { GroupStatsSchema } from '../value-objects/group-stats';
 import { TriggerConfigSchema } from '../value-objects/trigger-config';
 import { NotificationConfigSchema } from '../value-objects/notification-config';
+import { ReminderResponseAction } from '../entities/reminder-response-server';
 import { TimeSlotSchema } from '../value-objects/time-slot';
 
 // Residual 751: TimeSlotSchema owned by value-objects (TimeSlotDTO is z.infer alias).
@@ -158,8 +159,9 @@ export const ReminderHistoryResponseSchema = z.object({
 export const ReminderResponseItemSchema = z.object({
   id: brandedId<ReminderResponseId>(),
   reminderTemplateId: brandedId<ReminderTemplateId>(),
-  action: z.string(),
-  responseTime: z.number().nullable().optional(),
+  action: z.enum(ReminderResponseAction),
+  responseTime: z.number().int().nonnegative().nullable().optional(),
+  snoozeDurationSeconds: z.number().int().positive().nullable().optional(),
   timestamp: z.number(),
 });
 
@@ -201,8 +203,9 @@ export type UpdateReminderPreferencesReq = z.infer<typeof UpdateReminderPreferen
 export const ResponseRecordResultSchema = z.object({
   id: brandedId<ReminderResponseId>(),
   templateId: brandedId<ReminderTemplateId>(),
-  action: z.string(),
-  responseTime: z.number().nullable(),
+  action: z.enum(ReminderResponseAction),
+  responseTime: z.number().int().nonnegative().nullable(),
+  snoozeDurationSeconds: z.number().int().positive().nullable(),
   recordedAt: z.number(),
 });
 

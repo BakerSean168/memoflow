@@ -888,6 +888,7 @@ exports.Prisma.ReminderResponseScalarFieldEnum = {
   templateId: 'templateId',
   action: 'action',
   responseTime: 'responseTime',
+  snoozeDurationSeconds: 'snoozeDurationSeconds',
   timestamp: 'timestamp',
   createdAt: 'createdAt'
 };

@@ -163,7 +163,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
     routineProfileStore: repositories.routineProfileStore,
     closureChecker: dependencies.closureChecker,
     reliablePort: repositories.reliablePort,
-    snoozeRescheduler: repositories.snoozeRescheduler,
+    snoozeOverrideWriter: repositories.snoozeOverrideWriter,
     auditRepository: repositories.auditRepository,
     runtimeContributions: normalizeRuntimeContributions(dependencies.runtimeContributions),
   });

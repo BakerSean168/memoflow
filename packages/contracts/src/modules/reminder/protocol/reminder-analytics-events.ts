@@ -15,6 +15,7 @@ export interface ReminderResponseRecordedEvent {
   templateId: ReminderTemplateId;
   action: ReminderResponseAction;
   responseTime: number | null;
+  snoozeDurationSeconds: number | null;
   recordedAt: number;
 }
 
