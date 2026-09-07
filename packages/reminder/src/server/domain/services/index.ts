@@ -33,8 +33,5 @@ export type { ITemplateEffectiveStatus } from './reminder-template-control-servi
 export { ReminderTriggerService } from './reminder-trigger-service';
 export type { ITriggerReminderParams, ITriggerReminderResult } from './reminder-trigger-service';
 
-export { ReminderSchedulerService } from './reminder-scheduler-service';
-export type { IScheduleResult, IScheduleOptions } from './reminder-scheduler-service';
-
 export * from './reminder-domain-service';
 export * from './legacy-routine-cutover-service';

@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
     const dto = readFileSync(resolve(apiDir, 'requests/schedule-task-requests.ts'), 'utf8');
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
     const routes = readFileSync(
-      resolve(apiDir, '../../../../../schedule/src/api/routes.ts'),
+      resolve(apiDir, '../../../../../scheduler/src/api/routes.ts'),
       'utf8',
     );
 
@@ -209,7 +209,7 @@ import { describe, expect, it } from 'vitest';
     const apiDir = __dirname;
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
     const routes = readFileSync(
-      resolve(apiDir, '../../../../../schedule/src/api/routes.ts'),
+      resolve(apiDir, '../../../../../scheduler/src/api/routes.ts'),
       'utf8',
     );
 
@@ -410,11 +410,11 @@ import { describe, expect, it } from 'vitest';
       'utf8',
     );
     const routes = readFileSync(
-      resolve(apiDir, '../../../../../schedule/src/api/routes.ts'),
+      resolve(apiDir, '../../../../../scheduler/src/api/routes.ts'),
       'utf8',
     );
     const controller = readFileSync(
-      resolve(apiDir, '../../../../../schedule/src/server/transport/schedule.controller.ts'),
+      resolve(apiDir, '../../../../../scheduler/src/server/transport/schedule.controller.ts'),
       'utf8',
     );
 
@@ -586,11 +586,11 @@ import { describe, expect, it } from 'vitest';
     const apiDir = __dirname;
     const dto = readFileSync(resolve(apiDir, 'requests/schedule-task-requests.ts'), 'utf8');
     const routes = readFileSync(
-      resolve(apiDir, '../../../../../schedule/src/api/routes.ts'),
+      resolve(apiDir, '../../../../../scheduler/src/api/routes.ts'),
       'utf8',
     );
     const controller = readFileSync(
-      resolve(apiDir, '../../../../../schedule/src/server/transport/schedule.controller.ts'),
+      resolve(apiDir, '../../../../../scheduler/src/server/transport/schedule.controller.ts'),
       'utf8',
     );
 

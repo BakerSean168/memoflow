@@ -293,7 +293,7 @@ export class InMemoryNotificationReliableAdapter implements NotificationReliable
 
     for (const row of this.sharedOutboxes) {
       if (claimed.length >= limit) break;
-      if (row.messageType !== 'notification.dispatch' && row.messageType !== 'notification.requested') continue;
+      if (row.messageType !== 'notification.requested') continue;
 
       const isDue =
         row.status === 'pending' ||

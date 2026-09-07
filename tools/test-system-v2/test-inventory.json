@@ -6451,16 +6451,6 @@
       ]
     },
     {
-      "path": "packages/goal/src/server/infrastructure/schedule-execution-source.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/goal/src/server/infrastructure/schedule-projection-source.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7732,16 +7722,6 @@
     },
     {
       "path": "packages/reminder/src/server/domain/services/__tests__/reminder-policy.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/services/__tests__/reminder-scheduler.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -9984,16 +9964,6 @@
       ]
     },
     {
-      "path": "packages/task/src/server/infrastructure/schedule-execution-source.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/task/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/task/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/task/src/server/infrastructure/schedule-projection-source.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10522,6 +10492,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/core-vnext-architecture-lock.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/governance/__tests__/failure-contract-inventory.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -10714,7 +10692,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 80
+      "fileCount": 79
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -10749,7 +10727,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 72
     },
     {
       "id": "packages/reminder/vitest.mappers.config.ts",
@@ -10819,7 +10797,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 71
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -10952,7 +10930,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 11
+      "fileCount": 12
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -11155,7 +11133,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 80
+      "fileCount": 79
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11211,7 +11189,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 72
     },
     {
       "id": "packages/repository/vitest.config.ts",
@@ -11253,7 +11231,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 71
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -11570,7 +11548,6 @@
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-weight-snapshot-mapper.spec.ts",
       "packages/goal/src/server/infrastructure/build-task-name-keep-boundary.surface.spec.ts",
       "packages/goal/src/server/infrastructure/goal-reminder-fire.handler.spec.ts",
-      "packages/goal/src/server/infrastructure/schedule-execution-source.spec.ts",
       "packages/goal/src/server/infrastructure/schedule-projection-source.spec.ts",
       "packages/goal/src/server/transport/__tests__/goal-transport-mapper.spec.ts",
       "packages/goal/src/server/transport/__tests__/goal-transport-parity.spec.ts",
@@ -11679,7 +11656,6 @@
       "packages/reminder/src/server/domain/services/__tests__/reminder-domain.service.spec.ts",
       "packages/reminder/src/server/domain/services/__tests__/reminder-group-business.service.spec.ts",
       "packages/reminder/src/server/domain/services/__tests__/reminder-policy.spec.ts",
-      "packages/reminder/src/server/domain/services/__tests__/reminder-scheduler.service.spec.ts",
       "packages/reminder/src/server/domain/services/__tests__/reminder-template-control.service.spec.ts",
       "packages/reminder/src/server/domain/services/__tests__/reminder-trigger.service.spec.ts",
       "packages/reminder/src/server/domain/services/__tests__/upcoming-reminder-calculation.service.spec.ts",
@@ -11849,7 +11825,6 @@
       "packages/task/src/server/infrastructure/normalize-runtime-contributions-dual.surface.spec.ts",
       "packages/task/src/server/infrastructure/runtime/__tests__/task-instance-maintenance-runtime.spec.ts",
       "packages/task/src/server/infrastructure/runtime/task.runtime.spec.ts",
-      "packages/task/src/server/infrastructure/schedule-execution-source.spec.ts",
       "packages/task/src/server/infrastructure/schedule-projection-source.spec.ts",
       "packages/task/src/server/infrastructure/schedule-source-ownership.surface.spec.ts",
       "packages/task/src/server/infrastructure/task-goal-outbox-runtime.spec.ts",
@@ -11865,13 +11840,13 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1019,
+    "unit": 1016,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,
     "boundary-main": 6,
     "e2e": 59,
     "perf": 1,
-    "governance": 48
+    "governance": 49
   }
 }

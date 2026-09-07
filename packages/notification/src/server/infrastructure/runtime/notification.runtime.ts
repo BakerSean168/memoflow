@@ -1,6 +1,5 @@
 import { createLogger } from '@memoflow/utils/logger';
 import {
-  ChannelStatus,
   NotificationChannelType as ChannelTypeEnum,
   NotificationRequestedSchema,
   NOTIFICATION_REQUESTED_MESSAGE_TYPE,
@@ -195,72 +194,13 @@ function normalizeChannelType(channelType: string): string {
 }
 
 /**
- * Deterministic Notification built from a W1 reminder intent.
- *
- * The notification id equals the stable shared-outbox message id so that a
- * crashed-and-reclaimed worker reuses the same aggregate instead of creating a
- * duplicate with a new random id.
- */
-function createNotificationFromSharedIntent(input: {
-  id: string;
-  identityId: string;
-  title: string;
-  content: string;
-  channelType: string;
-}): Notification {
-  const channel = NotificationChannel.load({
-    id: `${input.id}:${input.channelType}` as never,
-    notificationId: input.id as never,
-    channelType: input.channelType as never,
-    status: ChannelStatus.Pending,
-    recipient: input.identityId,
-    sendAttempts: 0,
-    maxRetries: 3,
-    error: null,
-    response: null,
-    sentAt: null,
-    failedAt: null,
-  });
-
-  return Notification.load({
-    id: input.id as never,
-    identityId: input.identityId as never,
-    workflowKey: 'reminder.legacy-shared-intent',
-    topic: 'reminder.legacy-shared-intent',
-    idempotencyKey: `shared:${input.id}`,
-    title: input.title,
-    content: input.content,
-    type: 'Info' as never,
-    category: 'Reminder' as never,
-    importance: 'Moderate' as never,
-    urgency: 'Medium' as never,
-    relatedEntityType: null,
-    relatedEntityId: null,
-    correlationId: null,
-    causationId: null,
-    isRead: false,
-    readAt: null,
-    actions: null,
-    metadata: null,
-    navigationIntent: null,
-    expiresAt: null,
-    version: 1,
-    deletedAt: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    notificationChannels: [channel],
-  });
-}
-
-/**
  * W2：通知渠道 worker——durable outbox / PENDING 渠道的可靠投递执行者。
  *
  * - 生产启动前根据真实 deliverer registry 检查必需 capability，缺失即 Fail-Fast；
  * - 严格禁止隐式 fallback 或 no-op deliverer 假成功；
  * - 使用 W0 lease/claim 语义竞争 outbox 任务；
  * - 投递成功/失败/重试/dead-letter 全部落库与记录指标；
- * - W1 共享 outbox consumer：在任何外部副作用前建立 durable 幂等记录（NotificationDispatchOutbox），
- *   并通过可过期 lease 恢复崩溃窗口；不重复创建 aggregate/outbox。
+ * - 共享 outbox 只消费 `notification.requested`，由 Notification Policy 形成 DeliveryPlan 后再写 durable dispatch outbox；
  * - 提供按 identity 授权的 dead-letter 查询与 replay 运维接口；
  * - 提供无丢失的 SSE 订阅：先订阅、再补发、按 operationId 去重。
  */
@@ -779,24 +719,13 @@ export function createNotificationRuntimeContribution(
         await processClaimedDispatch(entry);
       }
 
-      // Priority 2: Cross-module shared OutboxMessage from W1 — both
-      // 'notification.dispatch' (per-channel dispatch) and 'notification.requested'
-      // (durable integration envelope, NOTIF-3301). The shared row's leaseExpiresAt
-      // deadline acts as a recoverable lease for both.
+      // Priority 2: canonical cross-module `notification.requested` envelopes only.
+      // The shared row's leaseExpiresAt deadline is the recoverable consumer lease.
       const sharedOutboxes = await deps.reliableAdapter.claimSharedOutboxIntents({
         ownerToken,
         leaseDurationMs,
         limit: 50,
       });
-
-      const pendingSharedById = new Map<
-        string,
-        {
-          sharedMsg: NotificationSharedOutboxMessageRow;
-          notification: Notification;
-          leaseContext: { ownerToken: string; claimId: string; fencingToken: number };
-        }
-      >();
 
       for (const sharedMsg of sharedOutboxes) {
         const leaseContext = {
@@ -805,181 +734,29 @@ export function createNotificationRuntimeContribution(
           fencingToken: sharedMsg.fencingToken!,
         };
         try {
-          if (sharedMsg.messageType === NOTIFICATION_REQUESTED_MESSAGE_TYPE) {
-            // 'notification.requested': materialize the Fact + DeliveryPlan +
-            // dispatch outboxes in one transaction; the shared row is marked
-            // succeeded immediately after materialization and the created dispatch
-            // outboxes are delivered by the next tick (Priority 1) / shared path.
-            await processNotificationRequested(sharedMsg);
-            const res = await deps.reliableAdapter.updateSharedOutboxStatus(
-              sharedMsg.id,
-              'succeeded',
-              null,
-              null,
-              leaseContext,
+          if (sharedMsg.messageType !== NOTIFICATION_REQUESTED_MESSAGE_TYPE) {
+            throw new Error(
+              `[FAIL-CLOSED] Unsupported shared notification message type: ${sharedMsg.messageType}`,
             );
-            if (res === 'ok') {
-              metricsService.recordDelivered();
-            } else {
-              logger.warn(
-                '[NotificationRuntime] Shared outbox notification.requested completion returned conflict (stale owner ignored)',
-                { operationId: sharedMsg.id },
-              );
-            }
-            continue;
           }
-
-          const outerPayload = JSON.parse(sharedMsg.payloadJson);
-          let innerPayload: Record<string, unknown> = {};
-          try {
-            innerPayload =
-              typeof outerPayload.payloadJson === 'string'
-                ? JSON.parse(outerPayload.payloadJson)
-                : (outerPayload.payloadJson as Record<string, unknown>) || outerPayload;
-          } catch {
-            innerPayload = {};
-          }
-
-          const title = (innerPayload.title as string) || (outerPayload.title as string) || 'Notification';
-          const content =
-            (innerPayload.description as string) ||
-            (innerPayload.content as string) ||
-            (outerPayload.content as string) ||
-            title;
-          const rawChannel = (outerPayload.channel as string) || 'InApp';
-          const channelType = rawChannel.toLowerCase() === 'in-app' ? 'InApp' : rawChannel;
-          const identityId = (sharedMsg.identityId as string) || (outerPayload.identityId as string);
-          const idempotencyKey = sharedMsg.idempotencyKey || (outerPayload.idempotencyKey as string);
-          // Deterministic id across re-claims: the shared message id (W1 operationId).
-          const resolvedNotificationId = (outerPayload.notificationId as string) || sharedMsg.id;
-
-          let notification: Notification | null = null;
-          if (deps.repository) {
-            notification = await deps.repository.findByIdForIdentity(identityId, resolvedNotificationId);
-          }
-          if (!notification) {
-            notification = createNotificationFromSharedIntent({
-              id: resolvedNotificationId,
-              identityId,
-              title,
-              content,
-              channelType,
-            });
-            if (!deps.repository) {
-              throw new Error(
-                '[FAIL-FAST] Shared outbox consumer requires a repository to persist the ' +
-                  'Notification aggregate before recording a durable dispatch intent.',
-              );
-            }
-            // Persist the Notification aggregate BEFORE recording the durable
-            // dispatch intent: NotificationDispatchOutbox.notificationId is a real
-            // FK to the Notification table and must reference an existing row.
-            // W1 occurrenceKeys (`${templateId}:${time}`) are opaque, so the
-            // consumer owns creating the Notification entity and using its id.
-            await deps.repository.save(notification);
-          }
-
-          // Durable idempotency fence BEFORE any external side effect. Idempotent by
-          // unique idempotencyKey: a re-claimed attempt returns the existing row.
-          const dispatchReceipt = await deps.reliableAdapter.dispatchOutbox(
-            {
-              operationId: (outerPayload.operationId as string) || sharedMsg.id,
-              identityId,
-              source: 'notification',
-              occurrenceKey: (outerPayload.occurrenceKey as string) || `reminder:${sharedMsg.id}`,
-              channel: channelType,
-              payloadJson: JSON.stringify({ notificationId: resolvedNotificationId, title, content }),
-              idempotencyKey,
-            },
-            { notificationId: resolvedNotificationId },
+          await processNotificationRequested(sharedMsg);
+          const res = await deps.reliableAdapter.updateSharedOutboxStatus(
+            sharedMsg.id,
+            'succeeded',
+            null,
+            null,
+            leaseContext,
           );
-
-          if (dispatchReceipt.status === 'succeeded') {
-            // A previous attempt already completed delivery (crash happened after the
-            // receipt was persisted but before the shared status write).
-            const res = await deps.reliableAdapter.updateSharedOutboxStatus(
-              sharedMsg.id,
-              'succeeded',
-              null,
-              null,
-              leaseContext,
+          if (res === 'ok') {
+            metricsService.recordDelivered();
+          } else {
+            logger.warn(
+              '[NotificationRuntime] Shared outbox notification.requested completion returned conflict (stale owner ignored)',
+              { operationId: sharedMsg.id },
             );
-            if (res === 'ok') {
-              metricsService.recordDelivered();
-            } else {
-              logger.warn('[NotificationRuntime] Shared outbox completion returned conflict (stale owner ignored)', {
-                operationId: sharedMsg.id,
-              });
-            }
-            continue;
           }
-
-          pendingSharedById.set(sharedMsg.id, { sharedMsg, notification, leaseContext });
         } catch (error) {
           await markSharedFailed(sharedMsg, leaseContext, error);
-        }
-      }
-
-      // Deliver the newly-created durable dispatch outbox rows through the standard
-      // lease/claim path. Rows claimed by a concurrent worker are completed there and
-      // reconciled on the next shared-message re-claim (idempotent dispatchOutbox).
-      if (pendingSharedById.size > 0) {
-        const claimedEntries = await deps.reliableAdapter.claimOutboxDispatch({
-          ownerToken,
-          leaseDurationMs,
-          limit: 50,
-        });
-
-        for (const entry of claimedEntries) {
-          const pending = pendingSharedById.get(entry.outbox.id);
-          if (!pending) continue;
-
-          const finalReceipt = await processClaimedDispatch({
-            ...entry,
-            notification: pending.notification,
-          });
-
-          if (finalReceipt.status === 'succeeded') {
-            const res = await deps.reliableAdapter.updateSharedOutboxStatus(
-              entry.outbox.id,
-              'succeeded',
-              null,
-              null,
-              pending.leaseContext,
-            );
-            if (res !== 'ok') {
-              logger.warn('[NotificationRuntime] Shared outbox completion returned conflict (stale owner ignored)', {
-                operationId: entry.outbox.id,
-              });
-            }
-          } else if (finalReceipt.status === 'dead_letter') {
-            const res = await deps.reliableAdapter.updateSharedOutboxStatus(
-              entry.outbox.id,
-              'dead_letter',
-              finalReceipt.lastError,
-              null,
-              pending.leaseContext,
-            );
-            if (res !== 'ok') {
-              logger.warn('[NotificationRuntime] Shared outbox dead-letter returned conflict (stale owner ignored)', {
-                operationId: entry.outbox.id,
-              });
-            }
-          } else {
-            const backoffMs = backoffBaseMs * 2 ** Math.max(0, pending.sharedMsg.attempts - 1);
-            const res = await deps.reliableAdapter.updateSharedOutboxStatus(
-              entry.outbox.id,
-              'retryable',
-              finalReceipt.lastError,
-              new Date(Date.now() + backoffMs),
-              pending.leaseContext,
-            );
-            if (res !== 'ok') {
-              logger.warn('[NotificationRuntime] Shared outbox retryable returned conflict (stale owner ignored)', {
-                operationId: entry.outbox.id,
-              });
-            }
-          }
         }
       }
 

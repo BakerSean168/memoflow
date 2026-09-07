@@ -12,13 +12,13 @@
  *
  * The host (apps/desktop) is responsible for composition: it selects the
  * PowerSync adapters, builds repositories, the closure checker and the
- * cron/snooze/reliable runtime contributions, calls `createReminderModule(...)`,
+ * canonical runtime contributions, calls `createReminderModule(...)`,
  * and passes the resulting instance in through `ReminderElectronModuleOptions`.
  * This factory never reads `ctx.db`, never constructs repositories/use cases,
  * and never starts a runtime adapter.
  *
  * 宿主（apps/desktop）负责组合：选择 PowerSync 适配器、构建 repository、
- * closure checker 与 cron/snooze/reliable runtime contribution、调用
+ * closure checker 与规范 runtime contribution、调用
  * `createReminderModule(...)`，再把组装结果通过
  * `ReminderElectronModuleOptions` 传入。本工厂不读取 `ctx.db`，不创建
  * repository/use case，也不启动任何 runtime adapter。

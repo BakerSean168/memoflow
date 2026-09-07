@@ -538,7 +538,4 @@ export function createGoalElectronModule(
   };
 }
 
-export {
-  createGoalPowerSyncScheduleExecutionSource,
-  createGoalPowerSyncScheduleProjectionSource,
-} from '../server/infrastructure';
+export { createGoalPowerSyncScheduleProjectionSource } from '../server/infrastructure';

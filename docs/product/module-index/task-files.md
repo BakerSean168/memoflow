@@ -103,7 +103,8 @@ updated: 2026-08-26T00:00:00
 | 文件                                                                                                                                                          | 说明                                                 |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | [`packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue`](../../../packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue) | AI 任务生成对话框                                    |
-| [`packages/task/src/server/infrastructure/schedule-execution-source.ts`](../../../packages/task/src/server/infrastructure/schedule-execution-source.ts)       | 任务 → 日程运行时贡献，监听任务事件创建 ScheduleTask |
+| [`packages/task/src/server/infrastructure/schedule-projection-source.ts`](../../../packages/task/src/server/infrastructure/schedule-projection-source.ts)       | Task owner → neutral `ScheduledIntent` projection source |
+| [`packages/task/src/server/infrastructure/task-reminder-fire.handler.ts`](../../../packages/task/src/server/infrastructure/task-reminder-fire.handler.ts)       | `task.reminder.fire` scheduled-handler；不依赖 Scheduler aggregate |
 
 ## 测试入口
 

@@ -73,7 +73,7 @@ updated: 2026-09-07T00:00:00
 | [`packages/reminder/src/server/domain/services/legacy-routine-cutover-service.ts`](../../../packages/reminder/src/server/domain/services/legacy-routine-cutover-service.ts) | legacy Reminder → Routine vNext 临时切换桥，避免普通编辑压缩 M:N membership |
 | [`packages/reminder/src/server/domain/services/reminder-template-control-service.ts`](../../../packages/reminder/src/server/domain/services/reminder-template-control-service.ts) | 模板控制服务（有效启用状态计算） |
 | [`packages/reminder/src/server/domain/services/reminder-trigger-service.ts`](../../../packages/reminder/src/server/domain/services/reminder-trigger-service.ts) | 触发执行服务 |
-| [`packages/reminder/src/server/domain/services/reminder-scheduler-service.ts`](../../../packages/reminder/src/server/domain/services/reminder-scheduler-service.ts) | 调度扫描服务 |
+| [`packages/reminder/src/server/infrastructure/reminder-template-scheduled-handler.ts`](../../../packages/reminder/src/server/infrastructure/reminder-template-scheduled-handler.ts) | Scannerless Reminder scheduled-handler；由 Scheduler handler registry 驱动 |
 | [`packages/reminder/src/server/application/use-cases/commands/create-reminder-template.use-case.ts`](../../../packages/reminder/src/server/application/use-cases/commands/create-reminder-template.use-case.ts) | 创建模板用例 |
 | [`packages/reminder/src/server/application/use-cases/commands/record-reminder-response.use-case.ts`](../../../packages/reminder/src/server/application/use-cases/commands/record-reminder-response.use-case.ts) | 记录响应用例 |
 | [`packages/reminder/src/server/application/use-cases/commands/adjust-reminder-frequency.use-case.ts`](../../../packages/reminder/src/server/application/use-cases/commands/adjust-reminder-frequency.use-case.ts) | 频率调整用例 |

@@ -1608,9 +1608,6 @@ importers:
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../schedule
-      '@memoflow/scheduler':
-        specifier: workspace:*
-        version: link:../scheduler
       '@memoflow/task':
         specifier: workspace:*
         version: link:../task
@@ -2060,9 +2057,6 @@ importers:
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../schedule
-      '@memoflow/scheduler':
-        specifier: workspace:*
-        version: link:../scheduler
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time

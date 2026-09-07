@@ -11,14 +11,14 @@
  * 并托管该实例的 start/dispose 生命周期。
  *
  * The host (apps/api) is responsible for composition: it selects the Prisma
- * adapters, builds repositories, the closure checker and the cron/snooze/
- * reliable runtime contributions, calls `createReminderModule(...)`, and passes
+ * adapters, builds repositories, the closure checker and the canonical
+ * runtime contributions, calls `createReminderModule(...)`, and passes
  * the resulting instance in through `ReminderApiModuleOptions`. This factory
  * never reads `context.db`, never constructs repositories/use cases, and never
  * starts a runtime adapter.
  *
  * 宿主（apps/api）负责组合：选择 Prisma 适配器、构建 repository、closure
- * checker 与 cron/snooze/reliable runtime contribution、调用
+ * checker 与规范 runtime contribution、调用
  * `createReminderModule(...)`，再把组装结果通过 `ReminderApiModuleOptions`
  * 传入。本工厂不读取 `context.db`，不创建 repository/use case，也不启动任何
  * runtime adapter。

@@ -185,7 +185,7 @@ import { describe, expect, it } from 'vitest';
         'executions: z.array(ScheduleExecutionResponseSchema).nullable()',
       );
       const routes = readFileSync(
-        resolve(scheduleApi, '../../../../../schedule/src/api/routes.ts'),
+        resolve(scheduleApi, '../../../../../scheduler/src/api/routes.ts'),
         'utf8',
       );
       expect(routes).toContain("successResponse(ScheduleTaskResponseSchema, '获取成功')");

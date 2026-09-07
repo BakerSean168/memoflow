@@ -5,11 +5,10 @@ import { describe, expect, it } from 'vitest';
 /**
  * TASK-3101 ownership boundary:
  * Task projection is an identity-scoped neutral ScheduledIntent source.
- * Legacy ScheduleTask may remain only in the execution adapter until TASK-3102.
+ * Legacy ScheduleTask execution adapters are forbidden; scheduled execution is handler-key based.
  */
 describe('task schedule source ownership surface', () => {
   const projection = readFileSync(resolve(__dirname, './schedule-projection-source.ts'), 'utf8');
-  const execution = readFileSync(resolve(__dirname, './schedule-execution-source.ts'), 'utf8');
 
   it('projection is identity-scoped and emits neutral SchedulingPort inputs', () => {
     expect(projection).toContain(
@@ -30,14 +29,8 @@ describe('task schedule source ownership surface', () => {
     expect(projection).not.toContain('SourceModule');
   });
 
-  it('execution remains identity-scoped while the legacy ScheduleTask adapter waits for TASK-3102', () => {
-    expect(execution).toContain('findByIdForIdentity(');
-    expect(execution).toContain('String(task.identityId)');
-    expect(execution).not.toContain(
-      'const instance = await deps.taskInstanceRepository.findById(task.sourceEntityId',
-    );
-    expect(execution).not.toContain(
-      'const template = await deps.taskTemplateRepository.findById(String(instance.templateId)',
-    );
+  it('does not resurrect the legacy ScheduleTask execution source', () => {
+    expect(() => readFileSync(resolve(__dirname, './schedule-execution-source.ts'), 'utf8')).toThrow();
+    expect(projection).not.toContain('@memoflow/scheduler');
   });
 });

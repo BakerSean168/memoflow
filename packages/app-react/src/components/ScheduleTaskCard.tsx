@@ -33,7 +33,7 @@ function scheduleTimestamp(timestamp: number | null) {
  * Read-only Scheduler worker diagnostic card.
  *
  * Users change the owning Task/Routine/Planner object; owner-domain commands
- * update worker jobs through SchedulingPort.
+ * project the resulting owner intent into worker state.
  */
 export function ScheduleTaskCard({ task }: { task: ScheduleTaskSummary }) {
   const health = computeHealth(task.consecutiveFailures);

@@ -37,14 +37,12 @@ export {
   createTaskPowerSyncModule,
   createTaskPowerSyncRepositories,
   createTaskPowerSyncGoalOutboxRuntime,
-  createTaskPowerSyncScheduleExecutionSource,
   createTaskPowerSyncScheduleProjectionSource,
 } from './powersync';
 export {
   createTaskPrismaModule,
   createTaskPrismaRepositories,
   createTaskPrismaGoalOutboxRuntime,
-  createTaskPrismaScheduleExecutionSource,
   createTaskPrismaScheduleProjectionSource,
   type CreateTaskPrismaModuleOptions,
   type TaskRepositorySet,
@@ -57,10 +55,6 @@ export {
   createTaskGoalOutboxRuntime,
   type TaskGoalOutboxRuntimeOptions,
 } from './task-goal-outbox-runtime';
-export {
-  createTaskScheduleExecutionSource,
-  type CreateTaskScheduleExecutionSourceDeps,
-} from './schedule-execution-source';
 export {
   createTaskScheduleProjectionSource,
   createTaskScheduleProjectionEventHandlers,

@@ -52,7 +52,6 @@
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/patterns": "workspace:*",
     "@memoflow/schedule": "workspace:*",
-    "@memoflow/scheduler": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",

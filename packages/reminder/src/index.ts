@@ -24,7 +24,6 @@ export {
   createReminderPrismaRepositories,
   createReminderPowerSyncModule,
   createReminderPowerSyncRepositories,
-  createReminderRuntimeContribution,
   createReminderUseCases,
   createPowerSyncClosureChecker,
   type ReminderApplicationPort,

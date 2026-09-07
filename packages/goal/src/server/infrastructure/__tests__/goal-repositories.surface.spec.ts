@@ -170,7 +170,7 @@ describe('goal repository factories surface', () => {
     expect(infrastructure).toContain('createGoalPowerSyncRepositories');
     expect(infrastructure).toContain('createGoalEventListenersRuntime');
     expect(infrastructure).toContain('createGoalPrismaScheduleProjectionSource');
-    expect(infrastructure).toContain('createGoalPowerSyncScheduleExecutionSource');
+    expect(infrastructure).not.toContain('ScheduleExecutionSource');
     expect(infrastructure).toContain('GoalRepositorySet');
     expect(infrastructure).toContain('GoalModuleInstance');
 

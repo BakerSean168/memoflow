@@ -82,7 +82,7 @@ Still real residuals (code search verified):
 - `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
 - `CLEAN-6301~6304`: semantic and physical convergence is complete. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, ordinary product raw-ScheduleTask mutation surfaces, and the final Reminder duplicate/obsolete product surfaces are removed; `packages/schedule` now owns Planner/Calendar while new `packages/scheduler` owns the Temporal Engine, lease, queue, worker repositories and read-only diagnostics;
 - `POC-6401`: complete on 2026-09-07 with `Keep custom`; pg-boss 12.30.0 remains a reproducible dev-only cloud candidate and is not production infrastructure;
-- `HARD-7101`: complete on 2026-09-07 with a governed 22/22 executable cross-domain failure matrix; `HARD-7102~7105` remain for architecture locks, full acceptance, documentation truth closure and final review.
+- `HARD-7101/7102`: complete on 2026-09-07 with a governed 22/22 executable failure matrix plus production architecture locks; `HARD-7103~7105` remain for full acceptance, documentation truth closure and final review.
 
 Execution priority is redefined in §20 below; historical Wave 0/1 text remains evidence only.
 
@@ -2252,7 +2252,7 @@ Canonical evidence: `docs/analysis/2026-09-07-hard-7101-cross-domain-failure-mat
 
 `HARD-7101` is complete. Final closure advances to `HARD-7102`.
 
-## HARD-7102 — Architecture governance locks
+## HARD-7102 — Architecture governance locks — COMPLETE (2026-09-07)
 
 Add/extend checks:
 
@@ -2266,6 +2266,21 @@ Notification multichannel path must use delivery planning
 third-party recurrence/calendar DTOs cannot enter contracts
 UI cannot edit ScheduledInvocation directly
 ```
+
+**Implementation evidence — HARD-7102 (2026-09-07):**
+
+- removed the final Goal/Task `ScheduleTask` execution-source compatibility seams and their direct `@memoflow/scheduler` dependencies; owner domains retain neutral projections + handler-key registrations only;
+- deleted the production Reminder scanner/runtime facade (`ReminderSchedulerService`, cron contribution, `getPendingReminders`) while preserving read-only upcoming-reminder queries;
+- deleted the cross-domain `notification.dispatch` bypass; shared delivery now enters only through `notification.requested -> CreateNotificationUseCase -> NotificationPolicy / DeliveryPlan -> internal durable dispatch`;
+- removed stale Web raw-Scheduler mutation mocks and kept Scheduler HTTP/Electron/Web worker surfaces diagnostics-only;
+- removed the implicit `Asia/Shanghai` default from `ScheduleConfig.createDefault()` so execution timezone is explicit;
+- added `core-vnext-architecture-lock-audit.mjs` with negative/positive fixtures for all eight required HARD-7102 rules plus raw-worker transport sublocks; audit passes across **1765 production source files** and is part of root governance;
+- full regression is green across Contracts `483/483`, Goal `438/438`, Task `730/730`, Reminder `461/461`, Notification `242/242`, Scheduler `273/273`, Schedule Orchestration `34/34`, Schedule `129/129`, App Vue `773/773`, API `323/323`, Desktop `322/322`, and Web `71/71`;
+- real PostgreSQL integration is green: Goal `21/21`, Task `31/31`, Reminder `28/28`, Notification `35/35` (serial file mode avoids shared-TRUNCATE setup deadlock), Scheduler `5/5`; relevant typecheck/lint/governance gates are green with zero lint errors.
+
+Canonical evidence: `docs/analysis/2026-09-07-hard-7102-core-vnext-architecture-governance-evidence.md`.
+
+`HARD-7102` is complete. Final closure advances to `HARD-7103`.
 
 ## HARD-7103 — Full product acceptance journeys
 
@@ -2579,8 +2594,8 @@ B. Scheduling convergence
 
 C. Final closure
    HARD-7101          DONE — governed 22/22 executable cross-domain failure matrix
-   HARD-7102          NEXT — architecture governance locks for residual deletions
-   HARD-7103          full product acceptance journeys
+   HARD-7102          DONE — production architecture locks + residual deletion gate
+   HARD-7103          NEXT — full product acceptance journeys
    HARD-7104          ADR/docs truth closure
    HARD-7105          final review / focused repair / archive
 ```

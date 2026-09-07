@@ -29,7 +29,7 @@ export class ScheduleConfig extends ValueObject<ScheduleConfigDTO> implements IS
     return new ScheduleConfig(props);
   }
 
-  public static createDefault(timezone: Timezone = 'Asia/Shanghai'): ScheduleConfig {
+  public static createDefault(timezone: Timezone): ScheduleConfig {
     return new ScheduleConfig({
       cronExpression: '0 9 * * *', // 每天9点
       timezone,

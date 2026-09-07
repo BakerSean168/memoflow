@@ -745,8 +745,7 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
   }
 
   /**
-   * Claim W1 cross-module `notification.dispatch` / `notification.requested`
-   * rows from the shared outbox_messages table.
+   * Claim canonical cross-module `notification.requested` rows from the shared outbox_messages table.
    *
    * Backoff semantics are unified with the Prisma shared outbox (OutboxMessage.availableAt):
    * `next_retry_at` is the single availability column. retryable/running rows are only
@@ -768,7 +767,7 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
 
     const candidates = await this.db.getAll<PowerSyncSharedOutboxRow>(
       `SELECT * FROM outbox_messages
-        WHERE message_type IN ('notification.dispatch', 'notification.requested')
+        WHERE message_type = 'notification.requested'
           AND (lease_expires_at IS NULL OR lease_expires_at < ?)
           AND (
             status = 'pending'

@@ -219,7 +219,7 @@ export function useCalendarView() {
   /**
    * Canonical owner-aware read model. Goal/Routine adapters are already part of
    * PLAN-4302, while their live client feeds are wired in the later Planner
-   * source-integration slice. Raw ScheduleTask/ScheduledInvocation rows never
+   * source-integration slice. Raw worker-invocation persistence rows never
    * enter this computed value.
    */
   const projections = computed<CalendarEventProjection[]>(() => {

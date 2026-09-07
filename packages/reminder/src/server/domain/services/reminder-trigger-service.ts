@@ -174,17 +174,4 @@ export class ReminderTriggerService {
     return template.calculateNextTrigger();
   }
 
-  /**
-   * 获取待触发的提醒模板
-   *
-   * @param beforeTime 在此时间之前触发的模板
-   * @param identityId 账户 ID（可选）
-   */
-  async getPendingReminders(
-    beforeTime: number = Date.now(),
-    identityId?: string,
-  ): Promise<ReminderTemplate[]> {
-    const templates = await this.templateRepository.findByNextTriggerBefore(beforeTime, identityId);
-    return templates.filter((t): t is ReminderTemplate => Boolean(t));
-  }
 }

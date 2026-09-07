@@ -17,7 +17,6 @@ import {
   WalletPrismaRepository,
 } from './adapters/prisma';
 import { PrismaHabitRepository } from './adapters/prisma/prisma-habit.repository';
-import { createGoalScheduleExecutionSource } from './schedule-execution-source';
 import { createGoalScheduleProjectionSource } from './schedule-projection-source';
 import {
   createGoalReminderFireHandler,
@@ -25,7 +24,6 @@ import {
 } from './goal-reminder-fire.handler';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
 import type { ScheduledHandlerRegistration } from '@memoflow/contracts/schedule';
-import type { GoalScheduleExecutionSource } from '../../schedule-execution';
 import type { GoalScheduleProjectionSource } from '../../schedule-projection';
 import { createGoalTaskProgressHandler } from '../application/event-handlers';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
@@ -159,16 +157,6 @@ export function createGoalPrismaScheduleProjectionSource(
   const repositories = createGoalPrismaRepositories(db);
 
   return createGoalScheduleProjectionSource({
-    goalRepository: repositories.goalRepository,
-  });
-}
-
-export function createGoalPrismaScheduleExecutionSource(
-  db: PrismaClient,
-): GoalScheduleExecutionSource {
-  const repositories = createGoalPrismaRepositories(db);
-
-  return createGoalScheduleExecutionSource({
     goalRepository: repositories.goalRepository,
   });
 }

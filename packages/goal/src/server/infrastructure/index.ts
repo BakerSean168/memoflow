@@ -38,7 +38,6 @@ export {
   createGoalPrismaModule,
   createGoalPrismaRepositories,
   createGoalTaskProgressPrismaHandler,
-  createGoalPrismaScheduleExecutionSource,
   createGoalPrismaScheduleProjectionSource,
   createGoalPrismaReminderFireHandler,
   type GoalRepositorySet,
@@ -52,14 +51,9 @@ export {
   createGoalPowerSyncModule,
   createGoalPowerSyncRepositories,
   createGoalTaskProgressPowerSyncHandler,
-  createGoalPowerSyncScheduleExecutionSource,
   createGoalPowerSyncScheduleProjectionSource,
   createGoalPowerSyncReminderFireHandler,
 } from './powersync';
-export {
-  createGoalScheduleExecutionSource,
-  type CreateGoalScheduleExecutionSourceDeps,
-} from './schedule-execution-source';
 export {
   createGoalReminderFireHandler,
   GOAL_REMINDER_NOTIFICATION_SOURCE,

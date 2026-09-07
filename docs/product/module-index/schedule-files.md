@@ -18,6 +18,7 @@ updated: 2026-09-07T15:20:00+08:00
 | 文件 | 说明 |
 | --- | --- |
 | [`packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue`](../../../packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue) | 统一日/周/月 Calendar 主视图 |
+| [`packages/app-vue/src/modules/schedule/router/index.ts`](../../../packages/app-vue/src/modules/schedule/router/index.ts) | 产品入口 `/schedule/calendar`；无 week/dashboard 兼容双轨 |
 | [`packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.ts`](../../../packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.ts) | CalendarEntry 产品操作 |
 | [`packages/app-vue/src/modules/schedule/composables/useCalendarView.ts`](../../../packages/app-vue/src/modules/schedule/composables/useCalendarView.ts) | Planner 聚合读模型 |
 | [`packages/app-vue/src/modules/schedule/planner/PlannerCalendar.vue`](../../../packages/app-vue/src/modules/schedule/planner/PlannerCalendar.vue) | FullCalendar Planner 渲染引擎 |
@@ -64,7 +65,7 @@ updated: 2026-09-07T15:20:00+08:00
 | 文件 | 说明 |
 | --- | --- |
 | [`packages/patterns/src/lease/index.ts`](../../../packages/patterns/src/lease/index.ts) | `LeaseCoordinatorPort` / `LeaseGuard` / `LeaseLostError` shared contract |
-| [`packages/schedule-orchestration/src/infrastructure-server/schedule-orchestration.module.ts`](../../../packages/schedule-orchestration/src/infrastructure-server/schedule-orchestration.module.ts) | owner-domain projection + Scheduler source executor integration |
+| [`packages/schedule-orchestration/src/index.ts`](../../../packages/schedule-orchestration/src/index.ts) | public owner-domain projection + Scheduler handler orchestration entrypoint |
 | [`apps/api/src/runtime/compose-schedule.ts`](../../../apps/api/src/runtime/compose-schedule.ts) | API sibling Calendar/Scheduler composition |
 | [`apps/desktop/src/main/runtime/compose-schedule.ts`](../../../apps/desktop/src/main/runtime/compose-schedule.ts) | Desktop sibling Calendar/Scheduler composition + combined runtime controller |
 | [`packages/app-react/src/hooks/useScheduleTasks.ts`](../../../packages/app-react/src/hooks/useScheduleTasks.ts) | React worker diagnostics，使用 `SchedulerClientPort` |
