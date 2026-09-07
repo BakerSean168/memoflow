@@ -13,8 +13,13 @@ async function launchDesktop(
   apiOrigin?: string,
 ): Promise<ElectronApplication> {
   const mainEntry = path.resolve('dist-electron/main.cjs');
+  const args = ['--disable-gpu', '--disable-dev-shm-usage'];
+  if (process.platform === 'linux' && process.env.MEMOFLOW_E2E_USE_GNOME_KEYRING === '1') {
+    args.push('-r', path.resolve('e2e/support/real-keyring-playwright-loader.cjs'));
+  }
+  args.push(mainEntry);
   const electronApp = await electron.launch({
-    args: [mainEntry, '--disable-gpu', '--disable-dev-shm-usage'],
+    args,
     cwd: process.cwd(),
     env: {
       ...process.env,
@@ -30,13 +35,16 @@ async function launchDesktop(
   });
 
   if (process.platform === 'linux') {
-    const storage = await electronApp.evaluate(({ safeStorage }) => ({
+    const storage = await electronApp.evaluate(({ app, safeStorage }) => ({
       encryptionAvailable: safeStorage.isEncryptionAvailable(),
       backend: safeStorage.getSelectedStorageBackend(),
+      passwordStore: app.commandLine.getSwitchValue('password-store'),
+      hasDbusSession: Boolean(process.env.DBUS_SESSION_BUS_ADDRESS),
+      hasKeyringControl: Boolean(process.env.GNOME_KEYRING_CONTROL),
     }));
     if (!storage.encryptionAvailable || storage.backend === 'basic_text' || storage.backend === 'unknown') {
       throw new Error(
-        `Electron E2E requires a real Linux Secret Service/keyring; backend=${storage.backend}, available=${storage.encryptionAvailable}`,
+        `Electron E2E requires a real Linux Secret Service/keyring; backend=${storage.backend}, available=${storage.encryptionAvailable}, passwordStore=${storage.passwordStore || 'unset'}, dbus=${storage.hasDbusSession}, keyring=${storage.hasKeyringControl}`,
       );
     }
   }

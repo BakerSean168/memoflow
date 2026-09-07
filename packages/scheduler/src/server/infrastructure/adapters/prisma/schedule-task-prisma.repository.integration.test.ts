@@ -9,6 +9,7 @@ import { ScheduleTask } from '../../../domain/aggregates/schedule-task';
 import { ScheduleTaskPrismaRepository } from './schedule-task-prisma.repository';
 import { buildSchedulingKey } from '../../../../scheduling';
 import { createScheduleTaskSchedulingPort } from '../../scheduling';
+import { createScheduleLeasePrismaRepository } from '../../lease/schedule-lease.repository';
 import {
   cleanAll,
   disconnectPrisma,
@@ -167,6 +168,72 @@ describe('ScheduleTaskPrismaRepository integration', () => {
       deletedCount: 0,
       unchangedCount: 0,
     });
+  });
+
+  it('recovers a claimed invocation after the scheduler worker crashes and its host lease expires', async () => {
+    const identityId = 'schedule-int-worker-crash-recovery';
+    await seedAccount({ id: identityId });
+
+    const prisma = await getPrisma();
+    const repositoryA = new ScheduleTaskPrismaRepository(prisma);
+    const repositoryB = new ScheduleTaskPrismaRepository(prisma);
+    const task = createScheduleTask(identityId);
+    await repositoryA.save(task);
+
+    const persisted = await prisma.scheduleTask.findUniqueOrThrow({
+      where: { id: String(task.id) },
+    });
+    expect(persisted.nextRunAt).not.toBeNull();
+    if (!persisted.nextRunAt) return;
+
+    const leaseA = createScheduleLeasePrismaRepository(prisma);
+    const leaseB = createScheduleLeasePrismaRepository(prisma);
+    const leaseKey = 'schedule-host';
+    const leaseStartedAt = Date.now();
+    const leaseExpiresAt = leaseStartedAt + 1_000;
+
+    await expect(
+      leaseA.tryAcquire({
+        leaseKey,
+        ownerToken: 'worker-a',
+        now: leaseStartedAt,
+        expiresAt: leaseExpiresAt,
+      }),
+    ).resolves.toBe(true);
+
+    // worker A claims the invocation and then crashes before recording execution.
+    await expect(
+      repositoryA.claimForExecution(String(task.id), persisted.nextRunAt),
+    ).resolves.toBe(true);
+
+    // The replacement host cannot own Scheduler until the crashed host lease expires.
+    await expect(
+      leaseB.tryAcquire({
+        leaseKey,
+        ownerToken: 'worker-b',
+        now: leaseStartedAt + 500,
+        expiresAt: leaseStartedAt + 1_500,
+      }),
+    ).resolves.toBe(false);
+
+    // After expiry, the replacement host takes the lease and may re-claim the same
+    // unchanged nextRunAt. Scheduler therefore recovers at-least-once after a crash;
+    // domain handlers remain responsible for idempotent side-effect fences.
+    await expect(
+      leaseB.tryAcquire({
+        leaseKey,
+        ownerToken: 'worker-b',
+        now: leaseExpiresAt + 1,
+        expiresAt: leaseExpiresAt + 60_000,
+      }),
+    ).resolves.toBe(true);
+    await expect(
+      repositoryB.claimForExecution(String(task.id), persisted.nextRunAt),
+    ).resolves.toBe(true);
+
+    const leaseRow = await prisma.scheduleLease.findUniqueOrThrow({ where: { leaseKey } });
+    expect(leaseRow.ownerToken).toBe('worker-b');
+    expect(await repositoryB.findDueTasksForExecution(persisted.nextRunAt)).toHaveLength(1);
   });
 
   it('lists tasks by identity without leaking other scheduler state', async () => {

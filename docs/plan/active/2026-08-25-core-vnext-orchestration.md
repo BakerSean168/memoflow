@@ -81,8 +81,8 @@ Still real residuals (code search verified):
 - `AI-6101~6103`: Goal/Task draft workflows exist, but `TaskPlanTaskSchema` still exposes retired `folderId`; Routine draft/command tooling and Planner/Notification AI read tooling are absent;
 - `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
 - `CLEAN-6301~6304`: semantic and physical convergence is complete. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, ordinary product raw-ScheduleTask mutation surfaces, and the final Reminder duplicate/obsolete product surfaces are removed; `packages/schedule` now owns Planner/Calendar while new `packages/scheduler` owns the Temporal Engine, lease, queue, worker repositories and read-only diagnostics;
-- `POC-6401`: pg-boss remains a documented candidate only and is not installed/evaluated against current constraints;
-- `HARD-7101~7105`: final failure matrix, residual cleanup proof and umbrella closure review remain incomplete.
+- `POC-6401`: complete on 2026-09-07 with `Keep custom`; pg-boss 12.30.0 remains a reproducible dev-only cloud candidate and is not production infrastructure;
+- `HARD-7101`: complete on 2026-09-07 with a governed 22/22 executable cross-domain failure matrix; `HARD-7102~7105` remain for architecture locks, full acceptance, documentation truth closure and final review.
 
 Execution priority is redefined in §20 below; historical Wave 0/1 text remains evidence only.
 
@@ -2209,7 +2209,7 @@ Canonical evidence: `docs/analysis/2026-09-07-pg-boss-build-vs-adopt-evidence.md
 
 # 14. Wave 7 — Hardening and closure
 
-## HARD-7101 — Cross-domain failure matrix
+## HARD-7101 — Cross-domain failure matrix — COMPLETE (2026-09-07)
 
 Must test:
 
@@ -2237,6 +2237,20 @@ Task outcome correction
 Goal settlement replay/revert
 Planner command failure -> visual revert
 ```
+
+**Implementation evidence — HARD-7101 (2026-09-07):**
+
+- added canonical `tools/test/hard-7101-failure-matrix.json` with exactly 22 required scenarios and behavior-test bindings;
+- added `tools/test/hard-7101-failure-matrix.mjs`: `--check` fail-closes on missing files/titles/scenarios and `--run` executes the focused unit/integration/Electron evidence;
+- added a real PostgreSQL Scheduler crash/lease-expiry integration case proving a claimed invocation can be taken over after host-lease expiry while retaining the same logical invocation identity;
+- made the Notification device-offline retry/recovery evidence explicit rather than relying on a generic transport-failure label;
+- hardened Linux Electron restart acceptance with Xvfb + temporary D-Bus/GNOME Secret Service and a test-only Playwright preload that removes Playwright's `password-store=basic`/`use-mock-keychain` defaults without touching MemoFlow product startup or weakening safeStorage fail-closed behavior;
+- full failure-matrix runner passed **22/22 scenarios**; focused Scheduler Prisma integration passed **1 file, 5/5 tests**; Desktop persistent-guest restart E2E passed **1/1** under the real Secret Service path;
+- root governance now runs the cheap matrix `--check`, so scenario/test drift fails before the expensive full execution gate.
+
+Canonical evidence: `docs/analysis/2026-09-07-hard-7101-cross-domain-failure-matrix-evidence.md`.
+
+`HARD-7101` is complete. Final closure advances to `HARD-7102`.
 
 ## HARD-7102 — Architecture governance locks
 
@@ -2532,14 +2546,14 @@ Core vNext can close only when all of the following hold:
 ## Reuse discipline
 
 - [x] no custom calendar grid/date picker recurrence engine was unnecessarily rebuilt;
-- [ ] dependency/license ledger has final decisions for every residual candidate — pg-boss remains `Keep now; later PoC`;
+- [x] dependency/license ledger has final decisions for every residual candidate — POC-6401 selected `Keep custom`; pg-boss remains a dev-only candidate;
 - [x] GPL/AGPL references were not copied into incompatible product code;
 - [x] third-party DTOs/types stay behind adapters for completed v0.11 scope.
 
 ## Quality
 
 - [x] fixtures A-J pass where applicable to the v0.11 milestone;
-- [ ] final cross-domain failure matrix passes (`HARD-7101` pending);
+- [x] final cross-domain failure matrix passes — governed manifest/checker + full executable runner passed 22/22 scenarios;
 - [x] API/Desktop/PowerSync/Prisma parity passes for the completed primary product scope;
 - [x] full governance/docs checks green for the completed milestone and current main;
 - [x] residual grep proves completed CLEAN convergence paths are single-track — raw ScheduleTask product mutations and the SourceModule execution fallback are gone; CLEAN-6301 Goal/Task legacy surfaces are gone; CLEAN-6302A-D retired ControlMode/scanner, single-group ownership, duplicate Smart Frequency state, overloaded Snooze `responseTime`, broken per-user transports, one-way template actions, legacy group batch, and stale Reminder public/mock surfaces. The separately documented AI Task-draft `folderId` parity residual remains owned by AI-6101 rather than this convergence lane;
@@ -2564,8 +2578,8 @@ B. Scheduling convergence
    POC-6401           DONE — Keep custom for current vNext; retain pg-boss as a dev-only cloud candidate PoC
 
 C. Final closure
-   HARD-7101          cross-domain failure matrix
-   HARD-7102          architecture governance locks for residual deletions
+   HARD-7101          DONE — governed 22/22 executable cross-domain failure matrix
+   HARD-7102          NEXT — architecture governance locks for residual deletions
    HARD-7103          full product acceptance journeys
    HARD-7104          ADR/docs truth closure
    HARD-7105          final review / focused repair / archive

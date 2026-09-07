@@ -143,7 +143,7 @@ describe('NotificationChannel durable worker (R3 收尾)', () => {
     expect(unified['memoflow.notification.outbox.succeeded']).toBe(1);
   });
 
-  it('marks failed channels with backoff window and retries them later', async () => {
+  it('treats a device-offline channel failure as retryable and delivers after recovery', async () => {
     const notification = notificationWithChannel(ChannelStatus.Pending);
     const repository = makeRepository([notification]);
     let calls = 0;
