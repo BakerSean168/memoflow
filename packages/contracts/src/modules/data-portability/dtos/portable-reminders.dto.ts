@@ -10,7 +10,6 @@ export const PortableReminderGroupSchema = z
     _ref: PortableRefSchema,
     name: z.string(),
     description: z.string().nullable().optional(),
-    controlMode: z.string(),
     enabled: z.boolean(),
     status: z.string(),
     order: z.number(),

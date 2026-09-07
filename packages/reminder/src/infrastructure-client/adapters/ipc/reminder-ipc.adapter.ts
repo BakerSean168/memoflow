@@ -20,7 +20,6 @@ import type {
   GetUpcomingRemindersRes,
   GetReminderTodayScheduleRes,
 } from '@memoflow/contracts/reminder';
-import type { ControlMode } from '@memoflow/contracts/reminder';
 
 export class ReminderIpcAdapter implements IReminderApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}
@@ -139,17 +138,6 @@ export class ReminderIpcAdapter implements IReminderApiClient {
 
   async toggleReminderGroupStatus(id: string): Promise<Result<ReminderGroupClientDTO>> {
     return this.ipcClient.invoke(ReminderChannels.GROUP_TOGGLE_STATUS, id);
-  }
-
-  /**
-   * Switch the control mode for a reminder group.
-   * Requires an explicit mode value (see ControlMode in contracts).
-   */
-  async switchReminderGroupControlMode(
-    id: string,
-    mode: ControlMode,
-  ): Promise<Result<ReminderGroupClientDTO>> {
-    return this.ipcClient.invoke(ReminderChannels.GROUP_SWITCH_CONTROL_MODE, id, { mode });
   }
 
   async getPreferences(): Promise<Result<UserReminderPreferencesClientDTO>> {

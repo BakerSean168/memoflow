@@ -113,15 +113,8 @@ export {
   type CreateReminderPrismaModuleOptions,
   type ReminderPrismaRepositorySet,
 } from './prisma';
-export { createReminderRuntimeContribution, createReminderTriggerCronRuntime } from './runtime';
-export {
-  compareReminderDueSets,
-  type ReminderDueSetComparison,
-  type ReminderDueSetEntry,
-  type ReminderDueSetReader,
-  type ReminderDueSetTimingMismatch,
-  type ReminderTriggerCronJobDependencies,
-} from './cron/reminder-trigger-cron-job';
+export { createReminderRuntimeContribution } from './runtime';
+
 
 // ============ Host-used concrete consumer ============
 /** Host-used by apps/api: closure worker consumer. 宿主使用：apps/api 的账户关闭 consumer。 */

@@ -3,8 +3,6 @@
  * 提醒模块常量定义
  */
 
-import { ControlMode } from '../value-objects';
-
 /**
  * 根分组（桌面）配置
  * Root Group (Desktop) Configuration
@@ -33,10 +31,6 @@ export const RootGroupConfig = {
   /** 根分组的排序顺序（总是在最前面） */
   Order: -1,
   
-  /** 根分组的控制模式（默认为独立控制） */
-  ControlMode: ControlMode.Individual,
-  
-  /** 根分组是否可以删除 */
   CanDelete: false,
   
   /** 根分组是否可以重命名 */

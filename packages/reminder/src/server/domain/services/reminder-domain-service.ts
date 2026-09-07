@@ -4,7 +4,7 @@ import type {
   NotificationConfigDTO,
   TriggerConfigDTO,
 } from '@memoflow/contracts/reminder';
-import { ControlMode, ReminderType } from '@memoflow/contracts/reminder';
+import { ReminderType } from '@memoflow/contracts/reminder';
 import type { IReminderGroupRepository, IReminderTemplateRepository } from '../repositories';
 import { ReminderTemplate } from '../aggregates/reminder-template';
 import { ReminderGroup } from '../aggregates/reminder-group';
@@ -170,7 +170,6 @@ export class ReminderDomainService {
   public async createReminderGroup(params: {
     identityId: string;
     name: string;
-    controlMode?: ControlMode;
     description?: string;
     color?: string;
     icon?: string;

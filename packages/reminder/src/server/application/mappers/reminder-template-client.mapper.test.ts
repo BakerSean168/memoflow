@@ -25,7 +25,6 @@ describe('ReminderTemplateClientMapper', () => {
           isEffectivelyEnabled: true,
           lifecycleSource: 'template',
           statusReason: 'Template controls itself.',
-          controlMode: null,
           groupEnabled: null,
           globalReminderEnabled: true,
         },

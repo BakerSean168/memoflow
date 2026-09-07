@@ -101,7 +101,6 @@ function createTemplate(
     controlledByGroup: true,
     lifecycleSource: 'group',
     effectiveEnabledReason: 'The group currently controls this reminder.',
-    groupControlMode: 'Group',
     groupEnabled: true,
     globalReminderEnabled: true,
     ...overrides,

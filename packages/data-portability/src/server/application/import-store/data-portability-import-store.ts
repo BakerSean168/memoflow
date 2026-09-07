@@ -247,7 +247,6 @@ export interface CreateReminderGroupInput extends TimestampedImportInput {
   description: string | null;
   color: string | null;
   icon: string | null;
-  controlMode: string;
   enabled: boolean;
   status: string;
   order: number;

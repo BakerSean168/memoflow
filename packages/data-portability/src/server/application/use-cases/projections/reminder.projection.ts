@@ -21,7 +21,6 @@ export function projectReminderGroups(groups: unknown[], ctx: ExportContext): Po
       _ref: ref,
       name: entity.name as string,
       description: entity.description as string | null | undefined,
-      controlMode: entity.controlMode as string,
       enabled: toBoolean(entity.enabled, true),
       status: entity.status as string,
       order: (entity.order as number) ?? 0,

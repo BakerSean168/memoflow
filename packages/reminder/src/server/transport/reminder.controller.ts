@@ -16,7 +16,6 @@ import {
   GetReminderTodayScheduleSchema,
   CreateReminderGroupSchema,
   UpdateReminderGroupSchema,
-  SwitchGroupControlModeSchema,
   BatchGroupTemplatesSchema,
   UpdateReminderPreferencesSchema,
 } from '@memoflow/contracts/reminder';
@@ -139,18 +138,6 @@ export class ReminderController {
     if (!result.ok) return result as Result<null>;
     // Serialize as data:null (no Result.void / undefined dual-track).
     return ok(null);
-  }
-
-  async switchGroupControlMode(id: string, input: unknown, ctx: ExecutionContext): Promise<Result<unknown>> {
-    const parsed = SwitchGroupControlModeSchema.safeParse(input);
-    if (!parsed.success) {
-      return fail({
-        code: 'VALIDATION_ERROR',
-        message: '参数验证失败',
-        details: formatZodErrors(parsed.error.issues),
-      });
-    }
-    return this.useCases.switchGroupControlMode(id, parsed.data, ctx);
   }
 
   async batchGroupTemplates(id: string, input: unknown, ctx: ExecutionContext): Promise<Result<unknown>> {

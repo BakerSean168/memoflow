@@ -80,12 +80,6 @@ export function useReminder() {
     return result;
   }
 
-  async function switchGroupControlMode(...args: Parameters<typeof groupOps.switchGroupControlMode>) {
-    const result = await groupOps.switchGroupControlMode(...args);
-    if (result) await reloadReminderScene();
-    return result;
-  }
-
   async function updatePreferences(...args: Parameters<typeof preferenceOps.updatePreferences>) {
     const result = await preferenceOps.updatePreferences(...args);
     if (result) await reloadReminderScene();
@@ -114,7 +108,6 @@ export function useReminder() {
     updateGroup,
     deleteGroup,
     toggleGroup,
-    switchGroupControlMode,
     // Preferences (wrapped with reload)
     fetchPreferences: preferenceOps.fetchPreferences,
     updatePreferences,

@@ -127,7 +127,6 @@ function createTemplate(
     controlledByGroup: false,
     lifecycleSource: 'template',
     effectiveEnabledReason: 'Routine owns its switch.',
-    groupControlMode: 'Individual',
     groupEnabled: true,
     globalReminderEnabled: true,
     ...overrides,
@@ -143,7 +142,6 @@ function createProfile(overrides: Partial<ReminderGroupClientDTO> = {}): Reminde
     color: null,
     icon: null,
     // Compatibility metadata must not affect Profile gate presentation.
-    controlMode: 'Group',
     enabled: true,
     status: 'Active',
     order: 0,
@@ -161,11 +159,9 @@ function createProfile(overrides: Partial<ReminderGroupClientDTO> = {}): Reminde
     updatedAt: 0,
     deletedAt: null,
     displayName: 'Focus',
-    controlModeText: 'legacy',
     statusText: 'Enabled',
     templateCountText: '2 routines',
     activeStatusText: '1 running',
-    controlDescription: 'legacy',
     ...overrides,
   } as ReminderGroupClientDTO;
 }
@@ -192,19 +188,14 @@ describe('lifecyclePresentation', () => {
     ).toBe('Routine-owned state without a Profile');
   });
 
-  it('models a Profile as a gate independent of legacy ControlMode', () => {
-    const openLegacyGroup = createProfile({ controlMode: 'Group' });
-    const openLegacyIndividual = createProfile({ controlMode: 'Individual' });
+  it('models a Profile as an explicit execution gate', () => {
+    const open = createProfile();
     const closed = createProfile({ enabled: false, status: 'Paused' });
 
-    expect(isProfileGateOpen(openLegacyGroup)).toBe(true);
-    expect(isProfileGateOpen(openLegacyIndividual)).toBe(true);
-    expect(getProfileGateLabel(t, openLegacyGroup)).toBe('Profile gate open');
-    expect(getProfilePolicyText(t, openLegacyGroup)).toBe(
+    expect(isProfileGateOpen(open)).toBe(true);
+    expect(getProfileGateLabel(t, open)).toBe('Profile gate open');
+    expect(getProfilePolicyText(t, open)).toBe(
       'This Profile allows its members to be evaluated. Each Routine keeps and applies its own switch.',
-    );
-    expect(getProfilePolicyText(t, openLegacyIndividual)).toBe(
-      getProfilePolicyText(t, openLegacyGroup),
     );
     expect(isProfileGateOpen(closed)).toBe(false);
     expect(getProfileGateLabel(t, closed)).toBe('Profile gate closed');

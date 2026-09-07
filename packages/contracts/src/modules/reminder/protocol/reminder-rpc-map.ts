@@ -13,8 +13,6 @@ import type {
   CreateReminderGroupRes,
   UpdateReminderGroupReq,
   UpdateReminderGroupRes,
-  SwitchGroupControlModeReq,
-  SwitchGroupControlModeRes,
 } from '../api/reminder-group.dto';
 import type { ReminderTemplateClientDTO } from '../aggregates/reminder-template-client';
 import type { ReminderGroupClientDTO } from '../aggregates/reminder-group-client';
@@ -37,6 +35,5 @@ export type ReminderRpcMap = {
   // === Group Operations ===
   'reminder-group:create': [CreateReminderGroupReq, CreateReminderGroupRes];
   'reminder-group:update': [UpdateReminderGroupReq, UpdateReminderGroupRes];
-  'reminder-group:switch-mode': [SwitchGroupControlModeReq, SwitchGroupControlModeRes];
   'reminder-group:list': [void, ReminderGroupClientDTO[]];
 };

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UpdateReminderTemplateUseCase } from './update-reminder-template.use-case';
-import { ControlMode, ReminderStatus } from '@memoflow/contracts/reminder';
+import { ReminderStatus } from '@memoflow/contracts/reminder';
 
 describe('UpdateReminderTemplateUseCase', () => {
   const templateRepository = {
@@ -137,7 +137,6 @@ describe('UpdateReminderTemplateUseCase', () => {
     groupRepository.findByIdForIdentity.mockResolvedValue({
       id: 'group-1',
       identityId: 'identity-1',
-      controlMode: ControlMode.Individual,
       status: ReminderStatus.Active,
     });
 

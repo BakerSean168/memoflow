@@ -12,7 +12,7 @@
 import { describe, it, expect } from 'vitest';
 import { PrismaReminderGroupMapper } from './prisma-reminder-group-mapper';
 import type { ReminderGroup as PrismaReminderGroup } from '@memoflow/database';
-import { ControlMode, ReminderStatus } from '@memoflow/contracts/reminder';
+import { ReminderStatus } from '@memoflow/contracts/reminder';
 
 // ─── Test Helpers ───────────────────────────────────────────────────
 
@@ -25,7 +25,6 @@ function createMinimalRow(): PrismaReminderGroup {
     description: null,
     color: null,
     icon: null,
-    controlMode: ControlMode.Automatic,
     enabled: true,
     status: ReminderStatus.Active,
     order: 1,
@@ -46,7 +45,6 @@ function createFullRow(): PrismaReminderGroup {
     description: 'Important work-related reminders',
     color: '#FF5733',
     icon: 'briefcase',
-    controlMode: ControlMode.Manual,
     enabled: true,
     status: ReminderStatus.Active,
     order: 2,
@@ -78,7 +76,6 @@ describe('PrismaReminderGroupMapper', () => {
       expect(domain.description).toBeNull();
       expect(domain.color).toBeNull();
       expect(domain.icon).toBeNull();
-      expect(domain.controlMode).toBe(ControlMode.Automatic);
       expect(domain.enabled).toBe(true);
       expect(domain.status).toBe(ReminderStatus.Active);
       expect(domain.order).toBe(1);
@@ -95,7 +92,6 @@ describe('PrismaReminderGroupMapper', () => {
       expect(domain.description).toBe('Important work-related reminders');
       expect(domain.color).toBe('#FF5733');
       expect(domain.icon).toBe('briefcase');
-      expect(domain.controlMode).toBe(ControlMode.Manual);
       expect(domain.enabled).toBe(true);
       expect(domain.status).toBe(ReminderStatus.Active);
       expect(domain.order).toBe(2);
@@ -157,7 +153,6 @@ describe('PrismaReminderGroupMapper', () => {
       expect(persistence.description).toBe('Important work-related reminders');
       expect(persistence.color).toBe('#FF5733');
       expect(persistence.icon).toBe('briefcase');
-      expect(persistence.controlMode).toBe(ControlMode.Manual);
       expect(persistence.enabled).toBe(true);
       expect(persistence.status).toBe(ReminderStatus.Active);
       expect(persistence.order).toBe(2);

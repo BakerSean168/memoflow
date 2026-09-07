@@ -2,7 +2,7 @@
  * ReminderGroup 聚合根实现
  */
 
-import { ControlMode, ReminderStatus } from '@memoflow/contracts/reminder';
+import { ReminderStatus } from '@memoflow/contracts/reminder';
 import type {
   IGroupStats,
   ReminderEventMap,
@@ -23,7 +23,6 @@ export interface ReminderGroupState {
   identityId: IdentityId;
   name: string;
   description: string | null;
-  controlMode: ControlMode;
   enabled: boolean;
   status: ReminderStatus;
   order: number;
@@ -52,9 +51,6 @@ export class ReminderGroup extends AggregateRoot<string> {
   }
   public get description(): string | null {
     return this._props.description;
-  }
-  public get controlMode(): ControlMode {
-    return this._props.controlMode;
   }
   public get enabled(): boolean {
     return this._props.enabled;
@@ -94,7 +90,6 @@ export class ReminderGroup extends AggregateRoot<string> {
   public static create(params: {
     identityId: string;
     name: string;
-    controlMode?: ControlMode;
     description?: string;
     color?: string;
     icon?: string;
@@ -108,7 +103,6 @@ export class ReminderGroup extends AggregateRoot<string> {
       identityId: params.identityId as IdentityId,
       name: params.name,
       description: params.description ?? null,
-      controlMode: params.controlMode || ControlMode.Individual,
       enabled: true,
       status: ReminderStatus.Active,
       order: params.order || 0,
@@ -125,40 +119,6 @@ export class ReminderGroup extends AggregateRoot<string> {
       group: group.toServerDTO(),
     });
     return group;
-  }
-
-  public switchToGroupControl(): void {
-    if (this._props.controlMode === ControlMode.Group) return;
-    const oldMode = this._props.controlMode;
-    this._props.controlMode = ControlMode.Group;
-    this._props.updatedAt = new Date();
-    this.addDomainEvent<ReminderEventMap['reminder:group-control-mode-switched']>('reminder:group-control-mode-switched', {
-      identityId: this._props.identityId,
-      groupId: this.id as ReminderGroupId,
-      previousMode: oldMode,
-      newMode: ControlMode.Group,
-    });
-  }
-
-  public switchToIndividualControl(): void {
-    if (this._props.controlMode === ControlMode.Individual) return;
-    const oldMode = this._props.controlMode;
-    this._props.controlMode = ControlMode.Individual;
-    this._props.updatedAt = new Date();
-    this.addDomainEvent<ReminderEventMap['reminder:group-control-mode-switched']>('reminder:group-control-mode-switched', {
-      identityId: this._props.identityId,
-      groupId: this.id as ReminderGroupId,
-      previousMode: oldMode,
-      newMode: ControlMode.Individual,
-    });
-  }
-
-  public toggleControlMode(): void {
-    if (this._props.controlMode === ControlMode.Group) {
-      this.switchToIndividualControl();
-    } else {
-      this.switchToGroupControl();
-    }
   }
 
   public enable(): void {
@@ -254,7 +214,6 @@ export class ReminderGroup extends AggregateRoot<string> {
       identityId: this.identityId,
       name: this.name,
       description: this.description,
-      controlMode: this.controlMode,
       enabled: this.enabled,
       status: this.status,
       order: this.order,
@@ -274,7 +233,6 @@ export class ReminderGroup extends AggregateRoot<string> {
       identityId: this.identityId as ReminderGroupClientDTO['identityId'],
       name: this.name,
       description: this.description,
-      controlMode: this.controlMode,
       enabled: this.enabled,
       status: this.status,
       order: this.order,

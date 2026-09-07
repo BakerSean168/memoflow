@@ -4,7 +4,6 @@ export interface ReminderGroupFormModel {
   description?: string | null;
   icon?: string | null;
   color?: string | null;
-  controlMode: string;
   enabled?: boolean;
   order?: number;
 }

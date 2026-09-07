@@ -3,7 +3,7 @@
  * 提醒分组聚合根 - 服务端接口
  */
 
-import type { ControlMode, ReminderStatus, GroupStatsDTO } from '../value-objects';
+import type { ReminderStatus, GroupStatsDTO } from '../value-objects';
 import type { TransferDate, ReminderGroupId, IdentityId } from '../../../primitives';
 
 export interface ReminderGroupServerDTO {
@@ -14,7 +14,6 @@ export interface ReminderGroupServerDTO {
   description?: string | null;
   color?: string | null;
   icon?: string | null;
-  controlMode: ControlMode;
   enabled: boolean;
   status: ReminderStatus;
   order: number;

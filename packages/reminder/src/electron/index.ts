@@ -264,12 +264,6 @@ export function createReminderElectronModule(
           ),
         );
         installed.push(ReminderChannels.GROUP_TOGGLE_STATUS);
-        ipcMain.handle(ReminderChannels.GROUP_SWITCH_CONTROL_MODE, async (_event, id, data) =>
-          withAuthenticatedValue(ctx, async (requestContext) =>
-            controller.switchGroupControlMode(id, data, requestContext),
-          ),
-        );
-        installed.push(ReminderChannels.GROUP_SWITCH_CONTROL_MODE);
         ipcMain.handle(ReminderChannels.PREFERENCES_GET, async () =>
           withAuthenticatedValue(ctx, async (requestContext) =>
             controller.getPreferences(requestContext),

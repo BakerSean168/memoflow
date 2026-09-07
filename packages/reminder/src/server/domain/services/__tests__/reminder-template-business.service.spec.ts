@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ControlMode, ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
+import { ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ReminderGroup } from '../../aggregates/reminder-group';
 import { ReminderTemplate } from '../../aggregates/reminder-template';
@@ -42,11 +42,10 @@ function createTemplate(overrides: {
   return template;
 }
 
-function createGroup(identityId: string, overrides: { controlMode?: ControlMode; status?: ReminderStatus } = {}) {
+function createGroup(identityId: string, overrides: { status?: ReminderStatus } = {}) {
   const group = ReminderGroup.create({
     identityId,
     name: 'Group',
-    controlMode: overrides.controlMode,
   });
 
   if (overrides.status === ReminderStatus.Paused) {
@@ -67,10 +66,9 @@ describe('ReminderTemplateBusinessService', () => {
     expect(result.reason).toContain('legacy seam -> Routine gate');
   });
 
-  it('uses Routine and Profile gates regardless of legacy individual-control metadata', () => {
+  it('uses Routine and Profile gates for effective state', () => {
     const identityId = IdentityId.generate();
     const group = createGroup(String(identityId), {
-      controlMode: ControlMode.Individual,
       status: ReminderStatus.Paused,
     });
 
@@ -85,14 +83,12 @@ describe('ReminderTemplateBusinessService', () => {
     ).toBe(false);
   });
 
-  it('uses the same Routine × Profile formula for legacy group-control metadata', () => {
+  it('uses the same Routine × Profile formula for all profile states', () => {
     const identityId = IdentityId.generate();
     const pausedGroup = createGroup(String(identityId), {
-      controlMode: ControlMode.Group,
       status: ReminderStatus.Paused,
     });
     const activeGroup = createGroup(String(identityId), {
-      controlMode: ControlMode.Group,
       status: ReminderStatus.Active,
     });
 
@@ -117,7 +113,7 @@ describe('ReminderTemplateBusinessService', () => {
 
   it('calculates batch status using the provided group map', () => {
     const identityId = IdentityId.generate();
-    const group = createGroup(String(identityId), { controlMode: ControlMode.Group });
+    const group = createGroup(String(identityId));
     const template = createTemplate({ identityId, groupId: group.id });
     const standalone = createTemplate({ identityId });
 
@@ -126,7 +122,7 @@ describe('ReminderTemplateBusinessService', () => {
       new Map([[group.id, group]]),
     );
 
-    expect(result.get(template.id)?.controlMode).toBe(ControlMode.Group);
+    expect(result.get(template.id)?.groupStatus).toBe(ReminderStatus.Active);
     expect(result.get(standalone.id)?.groupStatus).toBeNull();
   });
 

@@ -4,7 +4,7 @@ import { ReminderTemplate } from '../../aggregates/reminder-template';
 import type { ReminderTemplateState } from '../../aggregates/reminder-template';
 import { ReminderGroup } from '../../aggregates/reminder-group';
 import type { ReminderGroupState } from '../../aggregates/reminder-group';
-import { ControlMode, ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
+import { ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { ReminderTemplateId } from '../../value-objects/reminder-template-id';
 import { IdentityId } from '@memoflow/domain-shared';
@@ -58,7 +58,6 @@ function makeGroupState(overrides: Partial<ReminderGroupState> = {}): ReminderGr
     identityId: SHARED_IDENTITY,
     name: 'Policy Group',
     description: null,
-    controlMode: ControlMode.Individual,
     enabled: true,
     status: ReminderStatus.Active,
     order: 0,
@@ -92,11 +91,10 @@ describe('ReminderPolicy', () => {
       expect(policy.calculateEffectiveEnabled(paused, null)).toBe(false);
     });
 
-    it('should return template status for Individual control mode', () => {
+    it('should allow execution when Routine and Profile gates are active', () => {
       const template = ReminderTemplate.load(makeTemplateState({ status: ReminderStatus.Active }));
       const group = ReminderGroup.load(
         makeGroupState({
-          controlMode: ControlMode.Individual,
           status: ReminderStatus.Active,
         }),
       );
@@ -104,11 +102,10 @@ describe('ReminderPolicy', () => {
       expect(policy.calculateEffectiveEnabled(template, group)).toBe(true);
     });
 
-    it('should close the Profile gate even when legacy mode is Individual', () => {
+    it('should close execution when the Profile gate is paused', () => {
       const template = ReminderTemplate.load(makeTemplateState({ status: ReminderStatus.Active }));
       const group = ReminderGroup.load(
         makeGroupState({
-          controlMode: ControlMode.Individual,
           status: ReminderStatus.Paused,
         }),
       );
@@ -116,11 +113,10 @@ describe('ReminderPolicy', () => {
       expect(policy.calculateEffectiveEnabled(template, group)).toBe(false);
     });
 
-    it('should AND profile + routine status in Group control mode (both active)', () => {
+    it('should AND Profile and Routine state when both are active', () => {
       const template = ReminderTemplate.load(makeTemplateState({ status: ReminderStatus.Active }));
       const group = ReminderGroup.load(
         makeGroupState({
-          controlMode: ControlMode.Group,
           status: ReminderStatus.Active,
         }),
       );
@@ -128,11 +124,10 @@ describe('ReminderPolicy', () => {
       expect(policy.calculateEffectiveEnabled(template, group)).toBe(true);
     });
 
-    it('should return false when group paused in Group control mode', () => {
+    it('should return false when the Profile gate is paused', () => {
       const template = ReminderTemplate.load(makeTemplateState({ status: ReminderStatus.Active }));
       const group = ReminderGroup.load(
         makeGroupState({
-          controlMode: ControlMode.Group,
           status: ReminderStatus.Paused,
         }),
       );
@@ -140,11 +135,10 @@ describe('ReminderPolicy', () => {
       expect(policy.calculateEffectiveEnabled(template, group)).toBe(false);
     });
 
-    it('should return false when template paused in Group control mode', () => {
+    it('should return false when the Routine is paused', () => {
       const template = ReminderTemplate.load(makeTemplateState({ status: ReminderStatus.Paused }));
       const group = ReminderGroup.load(
         makeGroupState({
-          controlMode: ControlMode.Group,
           status: ReminderStatus.Active,
         }),
       );
@@ -223,11 +217,10 @@ describe('ReminderPolicy', () => {
       );
     });
 
-    it('should throw when group is paused in Group control mode', () => {
+    it('should throw when the Profile gate is paused', () => {
       const template = ReminderTemplate.load(makeTemplateState({ status: ReminderStatus.Active }));
       const group = ReminderGroup.load(
         makeGroupState({
-          controlMode: ControlMode.Group,
           status: ReminderStatus.Paused,
         }),
       );

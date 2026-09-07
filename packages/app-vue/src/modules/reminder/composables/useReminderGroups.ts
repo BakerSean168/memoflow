@@ -1,5 +1,4 @@
 import type {
-  ControlMode,
   ReminderGroupClientDTO,
   ReminderGroupListRes,
   CreateReminderGroupReq,
@@ -99,32 +98,11 @@ export function useReminderGroups(ctx: ReminderContext) {
     }
   }
 
-  async function switchGroupControlMode(
-    id: string,
-    mode: ControlMode,
-  ): Promise<ReminderGroupClientDTO | null> {
-    savingId.value = id;
-    store.setError(null);
-    try {
-      const result = await executeReminderOperation<ReminderGroupClientDTO>(
-        () => service.switchReminderGroupControlMode(id, mode),
-        'reminder.error.updateGroupFailed',
-      );
-      if (result.ok) {
-        return result.data;
-      }
-      return null;
-    } finally {
-      savingId.value = null;
-    }
-  }
-
   return {
     fetchGroups,
     createGroup,
     updateGroup,
     deleteGroup,
     toggleGroup,
-    switchGroupControlMode,
   };
 }

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ControlMode, ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
+import { ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ReminderGroup } from '../../aggregates/reminder-group';
 import { ReminderTemplate } from '../../aggregates/reminder-template';
@@ -39,13 +39,11 @@ function createTemplate(overrides: {
 }
 
 function createGroup(identityId: string, overrides: {
-  controlMode?: ControlMode;
   status?: ReminderStatus;
 } = {}) {
   const group = ReminderGroup.create({
     identityId,
     name: 'Group',
-    controlMode: overrides.controlMode,
   });
 
   if (overrides.status === ReminderStatus.Paused) {
@@ -117,7 +115,6 @@ describe('ReminderTemplateControlService -> Routine effectiveEnabled seam', () =
   it('profile off disables execution without changing the Routine member state', async () => {
     const identityId = IdentityId.generate();
     const group = createGroup(String(identityId), {
-      controlMode: ControlMode.Individual,
       status: ReminderStatus.Paused,
     });
     const template = createTemplate({ identityId, groupId: group.id });
@@ -130,37 +127,22 @@ describe('ReminderTemplateControlService -> Routine effectiveEnabled seam', () =
     expect(result.groupEnabled).toBe(false);
   });
 
-  it('profile on never revives an individually-disabled Routine, regardless of legacy ControlMode', async () => {
+  it('profile on never revives a disabled Routine', async () => {
     const identityId = IdentityId.generate();
-    const groupMode = createGroup(String(identityId), {
-      controlMode: ControlMode.Group,
-      status: ReminderStatus.Active,
-    });
-    const individualMode = createGroup(String(identityId), {
-      controlMode: ControlMode.Individual,
-      status: ReminderStatus.Active,
-    });
+    const group = createGroup(String(identityId), { status: ReminderStatus.Active });
 
-    const groupModeResult = await service.calculateEffectiveStatus(
-      createTemplate({ identityId, groupId: groupMode.id, status: ReminderStatus.Paused }),
-      groupMode,
-    );
-    const individualModeResult = await service.calculateEffectiveStatus(
-      createTemplate({ identityId, groupId: individualMode.id, status: ReminderStatus.Paused }),
-      individualMode,
+    const result = await service.calculateEffectiveStatus(
+      createTemplate({ identityId, groupId: group.id, status: ReminderStatus.Paused }),
+      group,
     );
 
-    expect(groupModeResult.isEffectivelyEnabled).toBe(false);
-    expect(individualModeResult.isEffectivelyEnabled).toBe(false);
-    expect(groupModeResult.statusReason).toContain('Profile 开启不能重新启用');
-    expect(groupModeResult.controlMode).toBe(ControlMode.Group);
-    expect(individualModeResult.controlMode).toBe(ControlMode.Individual);
+    expect(result.isEffectivelyEnabled).toBe(false);
+    expect(result.statusReason).toContain('Profile 开启不能重新启用');
   });
 
   it('calculates batch state with the same formula and filters enabled templates', async () => {
     const identityId = IdentityId.generate();
     const group = createGroup(String(identityId), {
-      controlMode: ControlMode.Group,
       status: ReminderStatus.Active,
     });
     const enabled = createTemplate({ identityId, groupId: group.id });

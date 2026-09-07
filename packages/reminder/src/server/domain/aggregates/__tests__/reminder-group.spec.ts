@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { ReminderGroup } from '../reminder-group';
 import type { ReminderGroupState } from '../reminder-group';
-import { ControlMode, ReminderStatus } from '@memoflow/contracts/reminder';
+import { ReminderStatus } from '@memoflow/contracts/reminder';
 import { IdentityId } from '@memoflow/domain-shared';
 import { GroupStats } from '../../value-objects';
 import { generateUUID } from '@memoflow/utils/shared';
@@ -17,7 +17,6 @@ function makeGroupState(overrides: Partial<ReminderGroupState> = {}): ReminderGr
     identityId: IdentityId.generate(),
     name: 'Test Group',
     description: null,
-    controlMode: ControlMode.Individual,
     enabled: true,
     status: ReminderStatus.Active,
     order: 0,
@@ -48,7 +47,6 @@ describe('ReminderGroup aggregate', () => {
       });
 
       expect(group.name).toBe('Morning Reminders');
-      expect(group.controlMode).toBe(ControlMode.Individual);
       expect(group.enabled).toBe(true);
       expect(group.status).toBe(ReminderStatus.Active);
       expect(group.version).toBe(1);
@@ -65,14 +63,12 @@ describe('ReminderGroup aggregate', () => {
       const group = ReminderGroup.create({
         identityId: String(IdentityId.generate()),
         name: 'Custom',
-        controlMode: ControlMode.Group,
         description: 'Desc',
         color: '#AABB00',
         icon: 'folder',
         order: 5,
       });
 
-      expect(group.controlMode).toBe(ControlMode.Group);
       expect(group.description).toBe('Desc');
       expect(group.color).toBe('#AABB00');
       expect(group.icon).toBe('folder');
@@ -117,60 +113,6 @@ describe('ReminderGroup aggregate', () => {
 
   // -----------------------------------------------------------------------
   // Control mode switching
-  // -----------------------------------------------------------------------
-  describe('switchToGroupControl()', () => {
-    it('should switch from Individual to Group', () => {
-      const group = ReminderGroup.load(makeGroupState({ controlMode: ControlMode.Individual }));
-      group.switchToGroupControl();
-      expect(group.controlMode).toBe(ControlMode.Group);
-    });
-
-    it('should emit event on switch', () => {
-      const group = ReminderGroup.load(makeGroupState({ controlMode: ControlMode.Individual }));
-      group.switchToGroupControl();
-      const events = group.pullDomainEvents();
-      expect(events.some((e) => e.eventType === 'reminder:group-control-mode-switched')).toBe(true);
-    });
-
-    it('should be idempotent if already Group', () => {
-      const group = ReminderGroup.load(makeGroupState({ controlMode: ControlMode.Group }));
-      group.switchToGroupControl();
-      const events = group.pullDomainEvents();
-      expect(events).toHaveLength(0);
-    });
-  });
-
-  describe('switchToIndividualControl()', () => {
-    it('should switch from Group to Individual', () => {
-      const group = ReminderGroup.load(makeGroupState({ controlMode: ControlMode.Group }));
-      group.switchToIndividualControl();
-      expect(group.controlMode).toBe(ControlMode.Individual);
-    });
-
-    it('should be idempotent if already Individual', () => {
-      const group = ReminderGroup.load(makeGroupState({ controlMode: ControlMode.Individual }));
-      group.switchToIndividualControl();
-      const events = group.pullDomainEvents();
-      expect(events).toHaveLength(0);
-    });
-  });
-
-  describe('toggleControlMode()', () => {
-    it('should toggle from Individual to Group', () => {
-      const group = ReminderGroup.load(makeGroupState({ controlMode: ControlMode.Individual }));
-      group.toggleControlMode();
-      expect(group.controlMode).toBe(ControlMode.Group);
-    });
-
-    it('should toggle from Group to Individual', () => {
-      const group = ReminderGroup.load(makeGroupState({ controlMode: ControlMode.Group }));
-      group.toggleControlMode();
-      expect(group.controlMode).toBe(ControlMode.Individual);
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // enable() / pause() / toggle()
   // -----------------------------------------------------------------------
   describe('enable()', () => {
     it('should enable the group', () => {
@@ -228,9 +170,9 @@ describe('ReminderGroup aggregate', () => {
   // enableAllTemplates() / pauseAllTemplates()
   // -----------------------------------------------------------------------
   describe('legacy enableAllTemplates()/pauseAllTemplates() aliases', () => {
-    it('only changes the profile gate and is independent of ControlMode', () => {
+    it('only changes the profile gate', () => {
       const group = ReminderGroup.load(
-        makeGroupState({ controlMode: ControlMode.Individual, enabled: false, status: ReminderStatus.Paused }),
+        makeGroupState({ enabled: false, status: ReminderStatus.Paused }),
       );
       group.enableAllTemplates();
       expect(group.enabled).toBe(true);
@@ -300,13 +242,11 @@ describe('ReminderGroup aggregate', () => {
       const group = ReminderGroup.load(
         makeGroupState({
           name: 'Client DTO',
-          controlMode: ControlMode.Group,
-          status: ReminderStatus.Active,
+            status: ReminderStatus.Active,
         }),
       );
       const dto = group.toClientDTO();
       expect(dto.name).toBe('Client DTO');
-      expect(dto.controlMode).toBe('Group');
       expect(dto.status).toBe('Active');
     });
   });

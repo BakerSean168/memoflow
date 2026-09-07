@@ -1,7 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import { ControlMode, ReminderType } from '@memoflow/contracts/reminder';
+import { ReminderType } from '@memoflow/contracts/reminder';
 import { NotificationRequestedSchema } from '@memoflow/contracts/notification';
 import {
   buildIdempotencyKeyString,
@@ -17,7 +17,6 @@ import { ReminderSchedulerService } from '../../../../domain/services/reminder-s
 import { ReminderTriggerService } from '../../../../domain/services/reminder-trigger-service';
 import { ReminderTemplateControlService } from '../../../../domain/services/reminder-template-control-service';
 import { ReminderMetricsCollector } from '../../../../domain/services/reminder-metrics-service';
-import { createReminderTriggerCronJob } from '../../../cron/reminder-trigger-cron-job';
 import {
   cleanAll,
   disconnectPrisma,
@@ -545,7 +544,6 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
     const group = ReminderGroup.create({
       identityId: identityId as IdentityId,
       name: 'Paused Group',
-      controlMode: ControlMode.Group,
       order: 1,
     });
     group.pause();
@@ -835,50 +833,6 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
     expect(occDb.lastHeartbeatAt).not.toBeNull();
   });
 
-  it('14. Read-only shadow cron lifecycle: start, compare due sets, and graceful stop drains an active comparison', async () => {
-    const identityId = IdentityId.generate();
-    await seedAccount({ id: identityId });
-    const prisma = await getPrisma();
-    const templateRepo = new ReminderTemplatePrismaRepository(prisma);
-
-    const template = createSampleTemplate(identityId);
-    template.setNextTriggerTime(Date.now() - 1000);
-    await templateRepo.save(template);
-
-    const beforeOccurrences = await prisma.reminderOccurrence.count();
-    const beforeOutbox = await prisma.outboxMessage.count();
-    let scanExecuted = false;
-    const schedulerDueSetReader = {
-      readDueSet: async () => {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        scanExecuted = true;
-        return [
-          {
-            identityId: String(template.identityId),
-            reminderId: String(template.id),
-            dueAt: template.nextTriggerAt!,
-          },
-        ];
-      },
-    };
-
-    const cronJob = createReminderTriggerCronJob({
-      reminderTemplateRepository: templateRepo,
-      schedulerDueSetReader,
-      drainTimeoutMs: 5000,
-    });
-
-    cronJob.start();
-    const executionPromise = cronJob.execute!();
-    await new Promise((resolve) => setTimeout(resolve, 10));
-    await expect(cronJob.stop()).resolves.toBeUndefined();
-    await executionPromise;
-
-    expect(scanExecuted).toBe(true);
-    expect(await prisma.reminderOccurrence.count()).toBe(beforeOccurrences);
-    expect(await prisma.outboxMessage.count()).toBe(beforeOutbox);
-  });
-
   it('15. Re-claim atomicity under concurrency: retryable before nextRetryAt rejected by both workers, after nextRetryAt claimed by exactly one worker', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
@@ -1146,62 +1100,6 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
     expect(occDb.status).toBe('succeeded');
   });
 
-  it('18. Graceful stop drain waits for an active read-only due-set comparison to complete', async () => {
-    const identityId = IdentityId.generate();
-    await seedAccount({ id: identityId });
-    const prisma = await getPrisma();
-    const templateRepo = new ReminderTemplatePrismaRepository(prisma);
-    const template = createSampleTemplate(identityId);
-    template.setNextTriggerTime(Date.now() - 1000);
-    await templateRepo.save(template);
-
-    let scanExecuted = false;
-    const cronJob = createReminderTriggerCronJob({
-      reminderTemplateRepository: templateRepo,
-      schedulerDueSetReader: {
-        readDueSet: async () => {
-          await new Promise((resolve) => setTimeout(resolve, 150));
-          scanExecuted = true;
-          return [];
-        },
-      },
-      drainTimeoutMs: 5000,
-    });
-
-    cronJob.start();
-    const execPromise = cronJob.execute!();
-    await new Promise((resolve) => setTimeout(resolve, 10));
-    await cronJob.stop();
-    await execPromise;
-
-    expect(scanExecuted).toBe(true);
-  });
-
-  it('19. Shadow drain timeout explicitly fails when an in-flight comparison exceeds the stop budget', async () => {
-    const identityId = IdentityId.generate();
-    await seedAccount({ id: identityId });
-    const prisma = await getPrisma();
-    const templateRepo = new ReminderTemplatePrismaRepository(prisma);
-
-    const cronJob = createReminderTriggerCronJob({
-      reminderTemplateRepository: templateRepo,
-      schedulerDueSetReader: {
-        readDueSet: async () => {
-          await new Promise((resolve) => setTimeout(resolve, 300));
-          return [];
-        },
-      },
-      drainTimeoutMs: 50,
-    });
-
-    cronJob.start();
-    const execPromise = cronJob.execute!();
-    await new Promise((resolve) => setTimeout(resolve, 10));
-
-    await expect(cronJob.stop(50)).rejects.toThrow(/Shadow cron drain timed out after 50ms/);
-    await execPromise;
-  });
-
   it('20. Same identity same timestamp dual templates do not collide on idempotency key and both deliver successfully', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
@@ -1408,35 +1306,6 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
     expect(hbRes.renewed).toBe(true);
     expect(hbRes.lease).not.toBeNull();
     expect(hbRes.lease?.ownerToken).toBe('worker-2');
-  });
-
-  it('23. Long shadow comparison across cron ticks reuses the in-flight promise and graceful drain waits for it', async () => {
-    const identityId = IdentityId.generate();
-    await seedAccount({ id: identityId });
-    const prisma = await getPrisma();
-    const templateRepo = new ReminderTemplatePrismaRepository(prisma);
-
-    let scanCompleted = false;
-    const cronJob = createReminderTriggerCronJob({
-      reminderTemplateRepository: templateRepo,
-      schedulerDueSetReader: {
-        readDueSet: async () => {
-          await new Promise((resolve) => setTimeout(resolve, 250));
-          scanCompleted = true;
-          return [];
-        },
-      },
-      drainTimeoutMs: 5000,
-    });
-
-    cronJob.start();
-    const execPromise1 = cronJob.execute!();
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    const execPromise2 = cronJob.execute!();
-
-    expect(execPromise2).toBe(execPromise1);
-    await cronJob.stop();
-    expect(scanCompleted).toBe(true);
   });
 
   it('24. Lease expired mid-transaction: transaction commit rolls back if lease expires during execution without preemption', async () => {

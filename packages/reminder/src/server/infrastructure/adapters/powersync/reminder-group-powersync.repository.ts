@@ -1,4 +1,4 @@
-import type { ControlMode, ReminderStatus } from '@memoflow/contracts/reminder';
+import type { ReminderStatus } from '@memoflow/contracts/reminder';
 import type { IReminderGroupRepository } from '../../../domain/repositories/i-reminder-group-repository';
 import { ReminderGroup } from '../../../domain/aggregates/reminder-group';
 import {
@@ -39,7 +39,6 @@ export class ReminderGroupPowerSyncRepository
              description = ?,
              color = ?,
              icon = ?,
-             control_mode = ?,
              enabled = ?,
              status = ?,
              "order" = ?,
@@ -53,7 +52,6 @@ export class ReminderGroupPowerSyncRepository
           data.description,
           data.color,
           data.icon,
-          data.controlMode,
           data.enabled,
           data.status,
           data.order,
@@ -67,9 +65,9 @@ export class ReminderGroupPowerSyncRepository
     } else {
       await this.db.execute(
         `INSERT INTO reminder_groups (
-          id, identity_id, name, description, color, icon, control_mode, enabled,
+          id, identity_id, name, description, color, icon, enabled,
            status, "order", stats, version, created_at, updated_at, deleted_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           data.id,
           data.identityId,
@@ -77,7 +75,6 @@ export class ReminderGroupPowerSyncRepository
           data.description,
           data.color,
           data.icon,
-          data.controlMode,
           data.enabled,
           data.status,
           data.order,
@@ -108,20 +105,6 @@ export class ReminderGroupPowerSyncRepository
         options?.includeDeleted ? '' : ' AND deleted_at IS NULL'
       } ORDER BY "order" ASC`,
       [identityId],
-    );
-    return rows.map((row) => PowerSyncReminderGroupMapper.toDomain(row));
-  }
-
-  async findByControlMode(
-    identityId: string,
-    controlMode: ControlMode,
-    options?: { includeDeleted?: boolean },
-  ): Promise<ReminderGroup[]> {
-    const rows = await this.db.getAll<PowerSyncReminderGroupRow>(
-      `SELECT * FROM reminder_groups WHERE identity_id = ? AND control_mode = ?${
-        options?.includeDeleted ? '' : ' AND deleted_at IS NULL'
-      } ORDER BY "order" ASC`,
-      [identityId, controlMode],
     );
     return rows.map((row) => PowerSyncReminderGroupMapper.toDomain(row));
   }

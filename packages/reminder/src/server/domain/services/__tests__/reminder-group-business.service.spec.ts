@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ControlMode, ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
+import { ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ReminderGroup } from '../../aggregates/reminder-group';
 import { ReminderTemplate } from '../../aggregates/reminder-template';
@@ -40,11 +40,10 @@ function createTemplate(overrides: {
   return template;
 }
 
-function createGroup(identityId: string, overrides: { controlMode?: ControlMode; deleted?: boolean } = {}) {
+function createGroup(identityId: string, overrides: { deleted?: boolean } = {}) {
   const group = ReminderGroup.create({
     identityId,
     name: 'Group',
-    controlMode: overrides.controlMode,
   });
 
   if (overrides.deleted) {
@@ -110,36 +109,20 @@ describe('ReminderGroupBusinessService', () => {
     ).toEqual({ valid: true });
   });
 
-  it('treats legacy ControlMode changes as semantically inert', () => {
-    const active = createTemplate();
-    const deleted = createTemplate({ deleted: true });
-
-    expect(
-      service.calculateControlModeChangeImpact(ControlMode.Group, ControlMode.Group, [active, deleted]),
-    ).toEqual([]);
-    expect(
-      service.calculateControlModeChangeImpact(
-        ControlMode.Individual,
-        ControlMode.Group,
-        [active, deleted],
-      ),
-    ).toEqual([]);
-  });
-
-  it('applies Profile status impact independent of legacy ControlMode', () => {
+  it('applies Profile status impact to non-deleted members', () => {
     const identityId = String(IdentityId.generate());
     const active = createTemplate();
     const deleted = createTemplate({ deleted: true });
 
     expect(
       service.calculateGroupStatusChangeImpact(
-        createGroup(identityId, { controlMode: ControlMode.Individual }),
+        createGroup(identityId),
         [active, deleted],
       ),
     ).toEqual([active]);
     expect(
       service.calculateGroupStatusChangeImpact(
-        createGroup(identityId, { controlMode: ControlMode.Group }),
+        createGroup(identityId),
         [active, deleted],
       ),
     ).toEqual([active]);

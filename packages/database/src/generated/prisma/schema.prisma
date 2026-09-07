@@ -1231,7 +1231,6 @@ model ReminderGroup {
   description String?
   color       String?
   icon        String?
-  controlMode String    @map("control_mode")
   enabled     Boolean
   status      String
   order       Int

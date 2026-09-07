@@ -40,7 +40,6 @@ export const EditMode: Story = {
         description: '所有工作相关提醒',
         icon: 'mdi-briefcase',
         color: '#2196F3',
-        controlMode: 'Individual',
         order: 1,
       };
       const open = () => dialogRef.value?.openForEdit(editGroup);

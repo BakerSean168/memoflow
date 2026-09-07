@@ -11,7 +11,7 @@
 
 import type { ReminderGroup } from '../aggregates/reminder-group';
 import type { ReminderTemplate } from '../aggregates/reminder-template';
-import { ControlMode, ReminderStatus } from '@memoflow/contracts/reminder';
+import { ReminderStatus } from '@memoflow/contracts/reminder';
 
 /**
  * 分组统计数据
@@ -174,23 +174,8 @@ export class ReminderGroupBusinessService {
   }
 
   /**
-   * ControlMode is legacy compatibility metadata only in Routine vNext.
-   * Switching it has no effective-state impact and must never take over a member.
-   */
-  public calculateControlModeChangeImpact(
-    oldControlMode: ControlMode,
-    newControlMode: ControlMode,
-    templates: ReminderTemplate[],
-  ): ReminderTemplate[] {
-    void oldControlMode;
-    void newControlMode;
-    void templates;
-    return [];
-  }
-
-  /**
    * A legacy group maps to a RoutineProfile, so profile enabled/active changes
-   * affect every non-deleted membership regardless of old ControlMode.
+   * affect every non-deleted membership through the Profile gate.
    */
   public calculateGroupStatusChangeImpact(
     group: ReminderGroup,

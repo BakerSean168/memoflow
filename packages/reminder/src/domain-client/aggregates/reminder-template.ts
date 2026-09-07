@@ -58,7 +58,6 @@ export interface ReminderTemplateState {
   controlledByGroup: boolean;
   lifecycleSource: 'global' | 'group' | 'template';
   effectiveEnabledReason: string;
-  groupControlMode: 'Group' | 'Individual' | null;
   groupEnabled: boolean | null;
   globalReminderEnabled: boolean;
   groupName?: string | null;
@@ -217,7 +216,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
       controlledByGroup: this._props.controlledByGroup,
       lifecycleSource: this._props.lifecycleSource,
       effectiveEnabledReason: this._props.effectiveEnabledReason,
-      groupControlMode: this._props.groupControlMode,
       groupEnabled: this._props.groupEnabled,
       globalReminderEnabled: this._props.globalReminderEnabled,
       groupName: this._props.groupName ?? null,

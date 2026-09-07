@@ -8,7 +8,6 @@ import type {
   CreateReminderGroupRes,
   GroupStatsDTO,
   ReminderGroupListRes,
-  SwitchGroupControlModeReq,
   UpdateReminderGroupReq,
 } from '@memoflow/contracts/reminder';
 import { ReminderGroup } from '../../domain/aggregates/reminder-group';
@@ -89,7 +88,6 @@ export class ReminderGroupApplicationService {
       identityId: existing.identityId,
       name: data.name ?? existing.name,
       description: data.description ?? existing.description,
-      controlMode: data.controlMode ?? existing.controlMode,
       enabled: existing.enabled,
       status: existing.status,
       order: data.order ?? existing.order,
@@ -116,28 +114,6 @@ export class ReminderGroupApplicationService {
 
     await this.reminderDomainService.deleteGroup(ctx.identityId, id, false);
     return ok(undefined);
-  }
-
-  async switchGroupControlMode(
-    id: string,
-    data: SwitchGroupControlModeReq,
-    ctx: ExecutionContext,
-  ): Promise<Result<CreateReminderGroupRes>> {
-    const existing = await this.getOwnedGroupOrFail(id, ctx);
-    if (!existing) {
-      return fail({ code: 'NOT_FOUND', message: 'Group not found' });
-    }
-
-    if (data.mode === 'Group') {
-      existing.switchToGroupControl();
-    } else {
-      existing.switchToIndividualControl();
-    }
-
-    await this.reminderGroupRepository.save(existing);
-    await this.reminderDomainService.syncTemplatesEffectiveEnabledByGroup(ctx.identityId, id);
-
-    return ok(existing.toClientDTO());
   }
 
   async batchGroupTemplates(

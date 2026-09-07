@@ -96,7 +96,6 @@ export const ReminderChannels = {
   GROUP_DELETE: 'reminder:group:delete',
   GROUP_GET_BY_USER: 'reminder:group:get-by-user',
   GROUP_TOGGLE_STATUS: 'reminder:group:toggle-status',
-  GROUP_SWITCH_CONTROL_MODE: 'reminder:group:switch-control-mode',
   PREFERENCES_GET: 'reminder:preferences:get',
   PREFERENCES_UPDATE: 'reminder:preferences:update',
 } as const;

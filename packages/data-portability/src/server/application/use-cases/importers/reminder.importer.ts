@@ -17,7 +17,6 @@ export async function importReminders(
       id, identityId: ctx.identityId,
       name: g.name as string, description: g.description as string | null ?? null,
       color: g.color as string | null ?? null, icon: g.icon as string | null ?? null,
-      controlMode: (g.controlMode as string) ?? 'manual',
       enabled: (g.enabled as boolean) ?? true,
       status: (g.status as string) ?? 'active',
       order: (g.order as number) ?? 0,

@@ -19,7 +19,6 @@ import { ReminderType } from '../value-objects/reminder-type';
 import { ReminderStatus } from '../value-objects/reminder-status';
 import { TriggerResult } from '../value-objects/trigger-result';
 import { NotificationChannel } from '../value-objects/notification-channel';
-import { ControlMode } from '../value-objects/control-mode';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { ActiveHoursConfigSchema } from '../value-objects/active-hours-config';
 import { ActiveTimeConfigSchema } from '../value-objects/active-time-config';
@@ -81,7 +80,6 @@ export const ReminderTemplateResponseSchema = z.object({
   controlledByGroup: z.boolean(),
   lifecycleSource: z.enum(['global', 'group', 'template']),
   effectiveEnabledReason: z.string(),
-  groupControlMode: z.enum(['Group', 'Individual']).nullable(),
   groupEnabled: z.boolean().nullable(),
   globalReminderEnabled: z.boolean(),
 });
@@ -109,7 +107,6 @@ export const ReminderGroupResponseSchema = z.object({
   description: z.string().nullable(),
   color: z.string().nullable(),
   icon: z.string().nullable(),
-  controlMode: z.enum(ControlMode),
   enabled: z.boolean(),
   status: z.enum(ReminderStatus),
   order: z.number(),

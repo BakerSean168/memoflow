@@ -852,7 +852,6 @@ exports.Prisma.ReminderGroupScalarFieldEnum = {
   description: 'description',
   color: 'color',
   icon: 'icon',
-  controlMode: 'controlMode',
   enabled: 'enabled',
   status: 'status',
   order: 'order',

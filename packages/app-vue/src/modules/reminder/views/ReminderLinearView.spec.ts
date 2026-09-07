@@ -202,7 +202,6 @@ function createTemplate(
     controlledByGroup: false,
     lifecycleSource: 'template',
     effectiveEnabledReason: 'Template controls itself.',
-    groupControlMode: 'Individual',
     groupEnabled: true,
     globalReminderEnabled: true,
     status: 'Active',
@@ -235,7 +234,6 @@ function createGroup(overrides: Partial<ReminderGroupClientDTO> = {}): ReminderG
     description: 'Deep work reminders',
     color: null,
     icon: null,
-    controlMode: 'Group',
     enabled: true,
     status: 'Active',
     order: 0,
@@ -253,11 +251,9 @@ function createGroup(overrides: Partial<ReminderGroupClientDTO> = {}): ReminderG
     updatedAt: 0,
     deletedAt: null,
     displayName: 'Focus',
-    controlModeText: 'Group control',
     statusText: 'Enabled',
     templateCountText: '2 templates',
     activeStatusText: '1 active',
-    controlDescription: 'Group decides the final state.',
     ...overrides,
   } as ReminderGroupClientDTO;
 }

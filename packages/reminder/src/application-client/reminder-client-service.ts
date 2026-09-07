@@ -21,7 +21,6 @@ import type {
   GetUpcomingRemindersRes,
   GetReminderTodayScheduleRes,
 } from '@memoflow/contracts/reminder';
-import type { ControlMode } from '@memoflow/contracts/reminder';
 import type { IReminderApiClient } from './ports/reminder-api-client.port';
 
 export class ReminderClientService implements IReminderApiClient {
@@ -43,7 +42,6 @@ export class ReminderClientService implements IReminderApiClient {
     this.updateReminderGroup = this.updateReminderGroup.bind(this);
     this.deleteReminderGroup = this.deleteReminderGroup.bind(this);
     this.toggleReminderGroupStatus = this.toggleReminderGroupStatus.bind(this);
-    this.switchReminderGroupControlMode = this.switchReminderGroupControlMode.bind(this);
     this.getPreferences = this.getPreferences.bind(this);
     this.updatePreferences = this.updatePreferences.bind(this);
   }
@@ -141,13 +139,6 @@ export class ReminderClientService implements IReminderApiClient {
 
   async toggleReminderGroupStatus(id: string): Promise<Result<ReminderGroupClientDTO>> {
     return this.reminderApi.toggleReminderGroupStatus(id);
-  }
-
-  async switchReminderGroupControlMode(
-    id: string,
-    mode: ControlMode,
-  ): Promise<Result<ReminderGroupClientDTO>> {
-    return this.reminderApi.switchReminderGroupControlMode(id, mode);
   }
 
   async getPreferences(): Promise<Result<UserReminderPreferencesClientDTO>> {

@@ -20,7 +20,6 @@ import type {
   GetUpcomingRemindersRes,
   GetReminderTodayScheduleRes,
 } from '@memoflow/contracts/reminder';
-import type { ControlMode } from '@memoflow/contracts/reminder';
 
 /**
  * ReminderHttpAdapter
@@ -128,13 +127,6 @@ export class ReminderHttpAdapter implements IReminderApiClient {
 
   async toggleReminderGroupStatus(id: string): Promise<Result<ReminderGroupClientDTO>> {
     return this.httpClient.post(`${this.groupsUrl}/${id}/toggle-status`, {});
-  }
-
-  async switchReminderGroupControlMode(
-    id: string,
-    mode: ControlMode,
-  ): Promise<Result<ReminderGroupClientDTO>> {
-    return this.httpClient.post(`${this.groupsUrl}/${id}/control-mode`, { mode });
   }
 
   async getPreferences(): Promise<Result<UserReminderPreferencesClientDTO>> {

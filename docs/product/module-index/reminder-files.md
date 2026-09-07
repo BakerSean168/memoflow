@@ -77,7 +77,6 @@ updated: 2026-07-22T00:00:00
 | [`packages/reminder/src/server/application/use-cases/commands/adjust-reminder-frequency.use-case.ts`](../../../packages/reminder/src/server/application/use-cases/commands/adjust-reminder-frequency.use-case.ts) | 频率调整用例 |
 | [`packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.use-case.ts`](../../../packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.use-case.ts) | 频率分析查询 |
 | [`packages/reminder/src/server/infrastructure/reminder.module.ts`](../../../packages/reminder/src/server/infrastructure/reminder.module.ts) | 服务端提醒模块组合根 |
-| [`packages/reminder/src/server/infrastructure/cron/reminder-trigger-cron-job.ts`](../../../packages/reminder/src/server/infrastructure/cron/reminder-trigger-cron-job.ts) | 提醒触发定时任务 |
 | [`packages/reminder/src/server/infrastructure/adapters/prisma/reminder-template-prisma.repository.ts`](../../../packages/reminder/src/server/infrastructure/adapters/prisma/reminder-template-prisma.repository.ts) | Prisma 模板仓储 |
 
 ## Contracts 与数据结构
@@ -94,7 +93,6 @@ updated: 2026-07-22T00:00:00
 | [`packages/contracts/src/modules/reminder/protocol/reminder-event-map.ts`](../../../packages/contracts/src/modules/reminder/protocol/reminder-event-map.ts) | 提醒模块事件 map |
 | [`packages/contracts/src/modules/reminder/value-objects/reminder-status.ts`](../../../packages/contracts/src/modules/reminder/value-objects/reminder-status.ts) | 提醒状态枚举 |
 | [`packages/contracts/src/modules/reminder/value-objects/trigger-type.ts`](../../../packages/contracts/src/modules/reminder/value-objects/trigger-type.ts) | 触发类型枚举 |
-| [`packages/contracts/src/modules/reminder/value-objects/control-mode.ts`](../../../packages/contracts/src/modules/reminder/value-objects/control-mode.ts) | 控制模式枚举 |
 | [`packages/database/prisma/schema/reminder.prisma`](../../../packages/database/prisma/schema/reminder.prisma) | 提醒模块 Prisma schema |
 
 ## 测试入口

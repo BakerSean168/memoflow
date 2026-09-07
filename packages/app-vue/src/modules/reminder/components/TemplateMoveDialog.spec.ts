@@ -189,7 +189,6 @@ function createTemplate(
     controlledByGroup: true,
     lifecycleSource: 'group',
     effectiveEnabledReason: 'Group controls this reminder.',
-    groupControlMode: 'Group',
     groupEnabled: true,
     globalReminderEnabled: true,
     ...overrides,
@@ -204,7 +203,6 @@ function createGroup(overrides: Partial<ReminderGroupClientDTO> = {}): ReminderG
     description: '健康相关',
     icon: null,
     enabled: true,
-    controlMode: 'Group',
     color: null,
     status: 'Active',
     order: 0,
@@ -222,11 +220,9 @@ function createGroup(overrides: Partial<ReminderGroupClientDTO> = {}): ReminderG
     updatedAt: 0,
     deletedAt: null,
     displayName: '健康管理',
-    controlModeText: 'Group control',
     statusText: 'Enabled',
     templateCountText: '1 template',
     activeStatusText: '1 active',
-    controlDescription: 'Group decides the final state.',
     ...overrides,
   } as ReminderGroupClientDTO;
 }
@@ -245,7 +241,6 @@ function mountDialog(props?: {
         createGroup({
           id: 'group-2' as ReminderGroupClientDTO['id'],
           name: '工作提醒',
-          controlMode: 'Individual',
           enabled: true,
         }),
       ],
@@ -334,7 +329,6 @@ describe('TemplateMoveDialog', () => {
         createGroup({
           id: 'group-2' as ReminderGroupClientDTO['id'],
           name: '暂停分组',
-          controlMode: 'Group',
           enabled: false,
         }),
       ],

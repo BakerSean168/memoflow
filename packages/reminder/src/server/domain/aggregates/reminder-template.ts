@@ -847,7 +847,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
       effectiveEnabledReason: controlledByGroup
         ? '当前分组接管了提醒启用状态'
         : '当前使用模板自身启用状态',
-      groupControlMode: controlledByGroup ? 'Group' : null,
       groupEnabled: controlledByGroup ? effectiveEnabled : null,
       globalReminderEnabled: true,
       groupName: null,

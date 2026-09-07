@@ -69470,7 +69470,6 @@ export namespace Prisma {
     description: string | null
     color: string | null
     icon: string | null
-    controlMode: string | null
     enabled: boolean | null
     status: string | null
     order: number | null
@@ -69488,7 +69487,6 @@ export namespace Prisma {
     description: string | null
     color: string | null
     icon: string | null
-    controlMode: string | null
     enabled: boolean | null
     status: string | null
     order: number | null
@@ -69506,7 +69504,6 @@ export namespace Prisma {
     description: number
     color: number
     icon: number
-    controlMode: number
     enabled: number
     status: number
     order: number
@@ -69536,7 +69533,6 @@ export namespace Prisma {
     description?: true
     color?: true
     icon?: true
-    controlMode?: true
     enabled?: true
     status?: true
     order?: true
@@ -69554,7 +69550,6 @@ export namespace Prisma {
     description?: true
     color?: true
     icon?: true
-    controlMode?: true
     enabled?: true
     status?: true
     order?: true
@@ -69572,7 +69567,6 @@ export namespace Prisma {
     description?: true
     color?: true
     icon?: true
-    controlMode?: true
     enabled?: true
     status?: true
     order?: true
@@ -69677,7 +69671,6 @@ export namespace Prisma {
     description: string | null
     color: string | null
     icon: string | null
-    controlMode: string
     enabled: boolean
     status: string
     order: number
@@ -69714,7 +69707,6 @@ export namespace Prisma {
     description?: boolean
     color?: boolean
     icon?: boolean
-    controlMode?: boolean
     enabled?: boolean
     status?: boolean
     order?: boolean
@@ -69735,7 +69727,6 @@ export namespace Prisma {
     description?: boolean
     color?: boolean
     icon?: boolean
-    controlMode?: boolean
     enabled?: boolean
     status?: boolean
     order?: boolean
@@ -69754,7 +69745,6 @@ export namespace Prisma {
     description?: boolean
     color?: boolean
     icon?: boolean
-    controlMode?: boolean
     enabled?: boolean
     status?: boolean
     order?: boolean
@@ -69773,7 +69763,6 @@ export namespace Prisma {
     description?: boolean
     color?: boolean
     icon?: boolean
-    controlMode?: boolean
     enabled?: boolean
     status?: boolean
     order?: boolean
@@ -69784,7 +69773,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type ReminderGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "color" | "icon" | "controlMode" | "enabled" | "status" | "order" | "stats" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["reminderGroup"]>
+  export type ReminderGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "color" | "icon" | "enabled" | "status" | "order" | "stats" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["reminderGroup"]>
   export type ReminderGroupInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     templates?: boolean | ReminderGroup$templatesArgs<ExtArgs>
@@ -69810,7 +69799,6 @@ export namespace Prisma {
       description: string | null
       color: string | null
       icon: string | null
-      controlMode: string
       enabled: boolean
       status: string
       order: number
@@ -70250,7 +70238,6 @@ export namespace Prisma {
     readonly description: FieldRef<"ReminderGroup", 'String'>
     readonly color: FieldRef<"ReminderGroup", 'String'>
     readonly icon: FieldRef<"ReminderGroup", 'String'>
-    readonly controlMode: FieldRef<"ReminderGroup", 'String'>
     readonly enabled: FieldRef<"ReminderGroup", 'Boolean'>
     readonly status: FieldRef<"ReminderGroup", 'String'>
     readonly order: FieldRef<"ReminderGroup", 'Int'>
@@ -128482,7 +128469,6 @@ export namespace Prisma {
     description: 'description',
     color: 'color',
     icon: 'icon',
-    controlMode: 'controlMode',
     enabled: 'enabled',
     status: 'status',
     order: 'order',
@@ -134274,7 +134260,6 @@ export namespace Prisma {
     description?: StringNullableFilter<"ReminderGroup"> | string | null
     color?: StringNullableFilter<"ReminderGroup"> | string | null
     icon?: StringNullableFilter<"ReminderGroup"> | string | null
-    controlMode?: StringFilter<"ReminderGroup"> | string
     enabled?: BoolFilter<"ReminderGroup"> | boolean
     status?: StringFilter<"ReminderGroup"> | string
     order?: IntFilter<"ReminderGroup"> | number
@@ -134294,7 +134279,6 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     color?: SortOrderInput | SortOrder
     icon?: SortOrderInput | SortOrder
-    controlMode?: SortOrder
     enabled?: SortOrder
     status?: SortOrder
     order?: SortOrder
@@ -134317,7 +134301,6 @@ export namespace Prisma {
     description?: StringNullableFilter<"ReminderGroup"> | string | null
     color?: StringNullableFilter<"ReminderGroup"> | string | null
     icon?: StringNullableFilter<"ReminderGroup"> | string | null
-    controlMode?: StringFilter<"ReminderGroup"> | string
     enabled?: BoolFilter<"ReminderGroup"> | boolean
     status?: StringFilter<"ReminderGroup"> | string
     order?: IntFilter<"ReminderGroup"> | number
@@ -134337,7 +134320,6 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     color?: SortOrderInput | SortOrder
     icon?: SortOrderInput | SortOrder
-    controlMode?: SortOrder
     enabled?: SortOrder
     status?: SortOrder
     order?: SortOrder
@@ -134363,7 +134345,6 @@ export namespace Prisma {
     description?: StringNullableWithAggregatesFilter<"ReminderGroup"> | string | null
     color?: StringNullableWithAggregatesFilter<"ReminderGroup"> | string | null
     icon?: StringNullableWithAggregatesFilter<"ReminderGroup"> | string | null
-    controlMode?: StringWithAggregatesFilter<"ReminderGroup"> | string
     enabled?: BoolWithAggregatesFilter<"ReminderGroup"> | boolean
     status?: StringWithAggregatesFilter<"ReminderGroup"> | string
     order?: IntWithAggregatesFilter<"ReminderGroup"> | number
@@ -144475,7 +144456,6 @@ export namespace Prisma {
     description?: string | null
     color?: string | null
     icon?: string | null
-    controlMode: string
     enabled: boolean
     status: string
     order: number
@@ -144495,7 +144475,6 @@ export namespace Prisma {
     description?: string | null
     color?: string | null
     icon?: string | null
-    controlMode: string
     enabled: boolean
     status: string
     order: number
@@ -144513,7 +144492,6 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    controlMode?: StringFieldUpdateOperationsInput | string
     enabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
@@ -144533,7 +144511,6 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    controlMode?: StringFieldUpdateOperationsInput | string
     enabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
@@ -144552,7 +144529,6 @@ export namespace Prisma {
     description?: string | null
     color?: string | null
     icon?: string | null
-    controlMode: string
     enabled: boolean
     status: string
     order: number
@@ -144569,7 +144545,6 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    controlMode?: StringFieldUpdateOperationsInput | string
     enabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
@@ -144587,7 +144562,6 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    controlMode?: StringFieldUpdateOperationsInput | string
     enabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
@@ -153632,7 +153606,6 @@ export namespace Prisma {
     description?: SortOrder
     color?: SortOrder
     icon?: SortOrder
-    controlMode?: SortOrder
     enabled?: SortOrder
     status?: SortOrder
     order?: SortOrder
@@ -153655,7 +153628,6 @@ export namespace Prisma {
     description?: SortOrder
     color?: SortOrder
     icon?: SortOrder
-    controlMode?: SortOrder
     enabled?: SortOrder
     status?: SortOrder
     order?: SortOrder
@@ -153673,7 +153645,6 @@ export namespace Prisma {
     description?: SortOrder
     color?: SortOrder
     icon?: SortOrder
-    controlMode?: SortOrder
     enabled?: SortOrder
     status?: SortOrder
     order?: SortOrder
@@ -163644,7 +163615,6 @@ export namespace Prisma {
     description?: string | null
     color?: string | null
     icon?: string | null
-    controlMode: string
     enabled: boolean
     status: string
     order: number
@@ -163662,7 +163632,6 @@ export namespace Prisma {
     description?: string | null
     color?: string | null
     icon?: string | null
-    controlMode: string
     enabled: boolean
     status: string
     order: number
@@ -166212,7 +166181,6 @@ export namespace Prisma {
     description?: StringNullableFilter<"ReminderGroup"> | string | null
     color?: StringNullableFilter<"ReminderGroup"> | string | null
     icon?: StringNullableFilter<"ReminderGroup"> | string | null
-    controlMode?: StringFilter<"ReminderGroup"> | string
     enabled?: BoolFilter<"ReminderGroup"> | boolean
     status?: StringFilter<"ReminderGroup"> | string
     order?: IntFilter<"ReminderGroup"> | number
@@ -180028,7 +179996,6 @@ export namespace Prisma {
     description?: string | null
     color?: string | null
     icon?: string | null
-    controlMode: string
     enabled: boolean
     status: string
     order: number
@@ -180047,7 +180014,6 @@ export namespace Prisma {
     description?: string | null
     color?: string | null
     icon?: string | null
-    controlMode: string
     enabled: boolean
     status: string
     order: number
@@ -180311,7 +180277,6 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    controlMode?: StringFieldUpdateOperationsInput | string
     enabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
@@ -180330,7 +180295,6 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    controlMode?: StringFieldUpdateOperationsInput | string
     enabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
@@ -196532,7 +196496,6 @@ export namespace Prisma {
     description?: string | null
     color?: string | null
     icon?: string | null
-    controlMode: string
     enabled: boolean
     status: string
     order: number
@@ -197580,7 +197543,6 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    controlMode?: StringFieldUpdateOperationsInput | string
     enabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
@@ -197598,7 +197560,6 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    controlMode?: StringFieldUpdateOperationsInput | string
     enabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
@@ -197616,7 +197577,6 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     color?: NullableStringFieldUpdateOperationsInput | string | null
     icon?: NullableStringFieldUpdateOperationsInput | string | null
-    controlMode?: StringFieldUpdateOperationsInput | string
     enabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number

@@ -158,7 +158,6 @@ export function ReminderDetailScreen() {
 
           <SectionCard title="Scope" description="分组、标签和生效方式。">
             <MetaRow label="Group" value={template.groupName ?? 'No group'} />
-            <MetaRow label="Control mode" value={template.groupControlMode ?? 'Template'} />
             <MetaRow label="Tags" value={template.tags.length > 0 ? template.tags.join(', ') : 'No tags'} />
           </SectionCard>
         </>

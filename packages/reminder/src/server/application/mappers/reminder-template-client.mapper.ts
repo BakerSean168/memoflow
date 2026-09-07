@@ -32,7 +32,6 @@ export class ReminderTemplateClientMapper {
     dto.lifecycleSource = effectiveStatus.lifecycleSource;
     dto.effectiveEnabled = effectiveStatus.isEffectivelyEnabled;
     dto.effectiveEnabledReason = effectiveStatus.statusReason;
-    dto.groupControlMode = effectiveStatus.controlMode;
     dto.groupEnabled = effectiveStatus.groupEnabled;
     dto.globalReminderEnabled = effectiveStatus.globalReminderEnabled;
 
@@ -71,7 +70,6 @@ export class ReminderTemplateClientMapper {
       dto.lifecycleSource = status?.lifecycleSource ?? 'template';
       dto.effectiveEnabled = status?.isEffectivelyEnabled ?? template.effectiveEnabled;
       dto.effectiveEnabledReason = status?.statusReason ?? '使用模板自身状态';
-      dto.groupControlMode = status?.controlMode ?? null;
       dto.groupEnabled = status?.groupEnabled ?? null;
       dto.globalReminderEnabled = status?.globalReminderEnabled ?? true;
 

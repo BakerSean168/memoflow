@@ -491,7 +491,6 @@ const reminder_groups = new Table({
   description: column.text,
   color: column.text,
   icon: column.text,
-  control_mode: column.text,
   enabled: column.integer, // boolean
   status: column.text,
   order: column.integer,

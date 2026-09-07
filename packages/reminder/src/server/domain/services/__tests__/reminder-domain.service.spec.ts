@@ -7,7 +7,7 @@ import { ReminderTemplate } from '../../aggregates/reminder-template';
 import type { ReminderTemplateState } from '../../aggregates/reminder-template';
 import { ReminderGroup } from '../../aggregates/reminder-group';
 import type { ReminderGroupState } from '../../aggregates/reminder-group';
-import { ControlMode, ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
+import { ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { ReminderTemplateId } from '../../value-objects/reminder-template-id';
 import { IdentityId } from '@memoflow/domain-shared';
@@ -61,7 +61,6 @@ function makeGroupState(overrides: Partial<ReminderGroupState> = {}): ReminderGr
     identityId: IDENTITY_ID,
     name: 'Domain Svc Group',
     description: null,
-    controlMode: ControlMode.Individual,
     enabled: true,
     status: ReminderStatus.Active,
     order: 0,
@@ -379,7 +378,7 @@ describe('ReminderDomainService', () => {
   describe('toggleGroupAndTemplates()', () => {
     it('should toggle group and save', async () => {
       const group = ReminderGroup.load(
-        makeGroupState({ enabled: true, controlMode: ControlMode.Individual }),
+        makeGroupState({ enabled: true }),
       );
       (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
 
@@ -388,11 +387,10 @@ describe('ReminderDomainService', () => {
       expect(groupRepo.save).toHaveBeenCalled();
     });
 
-    it('should toggle templates when Group control mode', async () => {
+    it('should recalculate member effective state when the profile gate toggles', async () => {
       const group = ReminderGroup.load(
         makeGroupState({
           enabled: true,
-          controlMode: ControlMode.Group,
           status: ReminderStatus.Active,
         }),
       );
@@ -402,7 +400,7 @@ describe('ReminderDomainService', () => {
 
       await service.toggleGroupAndTemplates(IDENTITY_ID, group.id);
 
-      // Group toggled -> paused, templates should be paused too
+      // Profile gate toggled -> member effective state is re-materialized
       expect(templateRepo.save).toHaveBeenCalled();
     });
 

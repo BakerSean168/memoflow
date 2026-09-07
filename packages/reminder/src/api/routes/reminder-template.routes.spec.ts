@@ -48,7 +48,6 @@ function createReminderControllerStub(): ReminderController {
     getGroup: vi.fn(),
     updateGroup: vi.fn(),
     deleteGroup: vi.fn(),
-    switchGroupControlMode: vi.fn(),
     batchGroupTemplates: vi.fn(),
     toggleGroup: vi.fn(),
     getPreferences: vi.fn(),

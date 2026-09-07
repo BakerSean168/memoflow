@@ -21,7 +21,6 @@ import type {
   GetUpcomingRemindersRes,
   GetReminderTodayScheduleRes,
 } from '@memoflow/contracts/reminder';
-import type { ControlMode } from '@memoflow/contracts/reminder';
 
 /**
  * IReminderApiClient
@@ -74,10 +73,6 @@ export interface IReminderApiClient {
   ): Promise<Result<ReminderGroupClientDTO>>;
   deleteReminderGroup(id: string): Promise<Result<void>>;
   toggleReminderGroupStatus(id: string): Promise<Result<ReminderGroupClientDTO>>;
-  switchReminderGroupControlMode(
-    id: string,
-    mode: ControlMode,
-  ): Promise<Result<ReminderGroupClientDTO>>;
   getPreferences(): Promise<Result<UserReminderPreferencesClientDTO>>;
   updatePreferences(
     data: Record<string, unknown>,

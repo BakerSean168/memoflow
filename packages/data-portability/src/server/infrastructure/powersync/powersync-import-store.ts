@@ -143,7 +143,7 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createResource(input: CreateResourceInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO resources (id, identity_id, repository_id, folder_id, name, type, path, size, content, metadata, status, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
+      `INSERT INTO resources (id, identity_id, repository_id, folder_id, name, type, path, size, content, metadata, status, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [input.id, input.identityId, input.repositoryId, str(input.folderId), input.name, input.type, input.path, input.size, str(input.content), json(input.metadata), input.status, ...createdUpdated(input)],
     );
   }
@@ -189,7 +189,7 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createTaskInstance(input: CreateTaskInstanceInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO task_instances (id, template_id, identity_id, instance_date, occurrence_key, status, importance, time_config, actual_start_time, actual_end_time, comment, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
+      `INSERT INTO task_instances (id, template_id, identity_id, instance_date, occurrence_key, status, importance, time_config, actual_start_time, actual_end_time, comment, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [input.id, input.templateId, input.identityId, input.instanceDate, str(input.occurrenceKey), input.status, input.importance, input.timeConfig, str(input.actualStartTime), str(input.actualEndTime), str(input.comment), ...createdUpdated(input)],
     );
   }
@@ -244,8 +244,8 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createReminderGroup(input: CreateReminderGroupInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO reminder_groups (id, identity_id, name, description, color, icon, control_mode, enabled, status, "order", stats, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [input.id, input.identityId, input.name, str(input.description), str(input.color), str(input.icon), input.controlMode, bool(input.enabled), input.status, input.order, input.stats, ...createdUpdated(input)],
+      `INSERT INTO reminder_groups (id, identity_id, name, description, color, icon, enabled, status, "order", stats, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
+      [input.id, input.identityId, input.name, str(input.description), str(input.color), str(input.icon), bool(input.enabled), input.status, input.order, input.stats, ...createdUpdated(input)],
     );
   }
 

@@ -9,7 +9,6 @@ import type { ReminderGroupUpdatedEvent } from '../domain/events/reminder-group-
 import type { ReminderGroupDeletedEvent } from '../domain/events/reminder-group-deleted.event';
 import type { ReminderGroupEnabledEvent } from '../domain/events/reminder-group-enabled.event';
 import type { ReminderGroupPausedEvent } from '../domain/events/reminder-group-paused.event';
-import type { ReminderGroupControlModeSwitchedEvent } from '../domain/events/reminder-group-control-mode-switched.event';
 import type { ReminderTriggeredEvent } from '../domain/events/reminder-triggered.event';
 import type {
   ReminderFrequencyAdjustedEvent,
@@ -85,12 +84,6 @@ export type ReminderEventMap = {
    * Triggered when reminder group is paused
    */
   'reminder:group-paused': ReminderGroupPausedEvent;
-
-  /**
-   * Reminder group control mode switched event
-   * Triggered when reminder group control mode changes
-   */
-  'reminder:group-control-mode-switched': ReminderGroupControlModeSwitchedEvent;
 
   /**
    * Reminder group deleted event

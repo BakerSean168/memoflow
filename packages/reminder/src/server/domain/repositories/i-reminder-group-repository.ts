@@ -9,7 +9,7 @@
  */
 
 import type { ReminderGroup } from '../aggregates/reminder-group';
-import type { ControlMode, ReminderStatus } from '@memoflow/contracts/reminder';
+import type { ReminderStatus } from '@memoflow/contracts/reminder';
 
 /**
  * IReminderGroupRepository 仓储接口
@@ -40,20 +40,6 @@ export interface IReminderGroupRepository {
    */
   findByIdentityId(
     identityId: string,
-    options?: { includeDeleted?: boolean },
-  ): Promise<ReminderGroup[]>;
-
-  /**
-   * 通过控制模式查找提醒分组
-   *
-   * @param identityId 身份 ID
-   * @param controlMode 控制模式
-   * @param options.includeDeleted 是否包含已删除的分组
-   * @returns 提醒分组列表
-   */
-  findByControlMode(
-    identityId: string,
-    controlMode: ControlMode,
     options?: { includeDeleted?: boolean },
   ): Promise<ReminderGroup[]>;
 

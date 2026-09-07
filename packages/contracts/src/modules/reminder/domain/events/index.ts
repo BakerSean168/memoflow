@@ -14,5 +14,4 @@ export type { ReminderGroupUpdatedEvent } from './reminder-group-updated.event';
 export type { ReminderGroupDeletedEvent } from './reminder-group-deleted.event';
 export type { ReminderGroupEnabledEvent } from './reminder-group-enabled.event';
 export type { ReminderGroupPausedEvent } from './reminder-group-paused.event';
-export type { ReminderGroupControlModeSwitchedEvent } from './reminder-group-control-mode-switched.event';
 export type { ReminderTriggeredEvent } from './reminder-triggered.event';

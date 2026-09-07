@@ -80,7 +80,7 @@ Still real residuals (code search verified):
 - `ROUTINE-5302`: no Routine method-library/catalog implementation exists;
 - `AI-6101~6103`: Goal/Task draft workflows exist, but `TaskPlanTaskSchema` still exposes retired `folderId`; Routine draft/command tooling and Planner/Notification AI read tooling are absent;
 - `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
-- `CLEAN-6301~6304`: convergence is in progress. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, and ordinary product raw-ScheduleTask mutation surfaces are removed; `CLEAN-6301` and `CLEAN-6303` are complete, while `CLEAN-6302` still requires the Reminder naming/control residual audit and `CLEAN-6304` remains the physical-boundary decision;
+- `CLEAN-6301~6304`: convergence is in progress. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, and ordinary product raw-ScheduleTask mutation surfaces are removed; `CLEAN-6301` and `CLEAN-6303` are complete. `CLEAN-6302A` has retired `ControlMode` and the legacy Reminder cron/due-set shadow end to end; remaining `CLEAN-6302` work is `groupId` single-membership compatibility, duplicate smart-frequency mutation authority, overloaded snooze `responseTime`, and final obsolete UI/route residuals. `CLEAN-6304` remains the physical-boundary decision;
 - `POC-6401`: pg-boss remains a documented candidate only and is not installed/evaluated against current constraints;
 - `HARD-7101~7105`: final failure matrix, residual cleanup proof and umbrella closure review remain incomplete.
 
@@ -2061,6 +2061,18 @@ After compatibility consumers are gone:
 
 Physical package rename `reminder -> routine` is a separate final decision; do not mix with behavior migration if it adds churn.
 
+
+**Implementation evidence — tranche A (2026-09-07): `ControlMode` + legacy scanner retired**
+
+- removed legacy `ControlMode` from Reminder contracts, group DTOs, response schemas, domain/server/client aggregates, events, HTTP route, Electron IPC channel, RPC map, client ports/adapters/composables, Prisma and PowerSync persistence, data-portability import/export, and the React/Mobile detail surface;
+- removed the retired Reminder trigger cron, its runtime wrapper, lifecycle/parity tests, Reminder package `node-cron` dependency, and the Scheduler-side due-set shadow reader/parity fixtures that existed only to compare the old scanner with Scheduler;
+- kept Scheduler as the sole production wall-clock authority and retained ordinary due-query repositories used by Dashboard/Scheduler; no Reminder cron compatibility runtime remains;
+- retained an anti-resurrection route assertion that `/groups/:id/control-mode` must stay absent;
+- production residual audit is zero for `ControlMode`, `groupControlMode`, `control_mode`, retired control-mode mutation channels/methods, Reminder trigger cron factories, and Scheduler due-set shadow readers (excluding historical docs and anti-resurrection tests);
+- verification: Reminder **71/71 files, 509/509 tests**; Contracts **67/67 files, 482/482 tests**; Schedule Orchestration **32/32 files, 139/139 tests**; Data Portability **9/9 files, 34/34 tests**; App-Vue Reminder **11 files / 31 tests**; contracts/reminder/app-vue/data-portability/api/desktop/app-react typechecks green; seven-project lint plus App-React lint have **0 errors**; full `governance:check` and `git diff --check` green.
+
+`CLEAN-6302` remains open for the membership, smart-frequency, snooze-response, and final obsolete-surface tranches; physical `reminder -> routine` rename remains out of scope here.
+
 ## CLEAN-6303 — Internalize raw ScheduleTask product surfaces
 
 No ordinary user API/UI should create worker jobs directly.
@@ -2452,7 +2464,7 @@ Core vNext can close only when all of the following hold:
 - [ ] final cross-domain failure matrix passes (`HARD-7101` pending);
 - [x] API/Desktop/PowerSync/Prisma parity passes for the completed primary product scope;
 - [x] full governance/docs checks green for the completed milestone and current main;
-- [ ] residual grep proves all legacy dual paths removed — raw ScheduleTask product mutations and the SourceModule execution fallback are gone, and CLEAN-6301 Goal/Task legacy surfaces are gone; CLEAN-6302 Reminder naming/control cleanup still remains;
+- [ ] residual grep proves all legacy dual paths removed — raw ScheduleTask product mutations and the SourceModule execution fallback are gone, CLEAN-6301 Goal/Task legacy surfaces are gone, and CLEAN-6302A has removed ControlMode + the legacy Reminder scanner; remaining CLEAN-6302 membership/smart-frequency/snooze cleanup still remains;
 - [ ] final residual batch review has no P0/P1 unresolved finding.
 
 ---
@@ -2469,7 +2481,7 @@ A. Product parity (independent lanes)
    MOBILE-6201/6202   parity audit first; current screens already use modern Goal/Task/Notification contracts, implement only proven gaps
 
 B. Scheduling physical convergence (ordered)
-   CLEAN-6302         retire remaining Reminder naming/control compatibility paths (6301/6303 complete)
+   CLEAN-6302B/C      migrate legacy single `groupId` ownership to ProfileMembership, then retire duplicate smart-frequency and overloaded snooze-response semantics (6302A ControlMode/scanner complete)
         ↓
    CLEAN-6304         decide/perform scheduler physical package split only after semantic ownership is clean
         ↓

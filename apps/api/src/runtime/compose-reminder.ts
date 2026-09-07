@@ -5,8 +5,8 @@
  * ROUTINE-3402 cutover: the API host no longer wires the legacy Reminder cron.
  * ReminderTemplate wall-clock work is projected into the shared Scheduler and
  * executed through schedule orchestration, so Scheduler is the sole production
- * timing authority. The old cron factory remains only as an explicit read-only
- * due-set shadow diagnostic outside this composition root.
+ * timing authority. The retired Reminder cron and its due-set shadow diagnostic
+ * are physically removed; no compatibility timing runtime remains.
  *
  * The host still owns the Prisma connection and closure checker, builds exactly
  * one Reminder repository set, assembles the transport-neutral module, and then

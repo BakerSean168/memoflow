@@ -331,10 +331,6 @@ export function createReminderModule(
       return reminderGroupApplicationService.deleteGroup(id, ctx);
     },
 
-    async switchGroupControlMode(id, data, ctx) {
-      return reminderGroupApplicationService.switchGroupControlMode(id, data, ctx);
-    },
-
     async batchGroupTemplates(groupId, data, ctx) {
       return reminderGroupApplicationService.batchGroupTemplates(groupId, data, ctx);
     },

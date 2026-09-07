@@ -15,7 +15,6 @@ import type {
   ReminderHistoryClientDTO,
   ReminderTemplateClientDTO,
   ReminderTemplateListRes,
-  SwitchGroupControlModeReq,
   UpdateReminderGroupReq,
   UpdateReminderPreferencesReq,
   UpdateReminderTemplateReq,
@@ -81,11 +80,6 @@ export interface ReminderApplicationPort {
     ctx: ExecutionContext,
   ): Promise<Result<ReminderGroupClientDTO>>;
   deleteGroup(id: string, ctx: ExecutionContext): Promise<Result<unknown>>;
-  switchGroupControlMode(
-    id: string,
-    data: SwitchGroupControlModeReq,
-    ctx: ExecutionContext,
-  ): Promise<Result<ReminderGroupClientDTO>>;
   batchGroupTemplates(
     groupId: string,
     data: BatchGroupTemplatesReq,

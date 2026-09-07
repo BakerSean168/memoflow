@@ -2,10 +2,9 @@
  * Legacy Reminder template business facade.
  *
  * ROUTINE-2301 keeps this service callable by existing application code but
- * delegates effective-state truth to the canonical Routine AND-gate. Legacy
- * ControlMode is output metadata only and never changes the result.
+ * delegates effective-state truth to the canonical Routine AND-gate.
  */
-import { ReminderStatus, type ControlMode } from '@memoflow/contracts/reminder';
+import { ReminderStatus } from '@memoflow/contracts/reminder';
 import type { ReminderGroup } from '../aggregates/reminder-group';
 import type { ReminderTemplate } from '../aggregates/reminder-template';
 import { evaluateRoutineEffectiveEnabled } from '../routine';
@@ -15,8 +14,6 @@ export interface TemplateEffectiveStatus {
   reason: string;
   templateStatus: ReminderStatus;
   groupStatus: ReminderStatus | null;
-  /** Compatibility metadata only; no longer a control input. */
-  controlMode: ControlMode | null;
 }
 
 export interface GroupAssignmentValidation {
@@ -64,7 +61,6 @@ export class ReminderTemplateBusinessService {
       reason,
       templateStatus,
       groupStatus: group?.status ?? null,
-      controlMode: group?.controlMode ?? null,
     };
   }
 

@@ -5,7 +5,7 @@ import type { IReminderGroupRepository } from '../../domain/repositories/i-remin
 import type { IReminderTemplateRepository } from '../../domain/repositories/i-reminder-template-repository';
 import { ReminderGroup } from '../../domain/aggregates/reminder-group';
 import type { ReminderGroupState } from '../../domain/aggregates/reminder-group';
-import { ControlMode, ReminderStatus } from '@memoflow/contracts/reminder';
+import { ReminderStatus } from '@memoflow/contracts/reminder';
 import { GroupStats } from '../../domain/value-objects/group-stats';
 import { generateUUID } from '@memoflow/utils/shared';
 
@@ -18,7 +18,6 @@ function makeGroupState(overrides: Partial<ReminderGroupState> = {}): ReminderGr
     identityId: IDENTITY_ID,
     name: 'Work',
     description: null,
-    controlMode: ControlMode.Individual,
     enabled: true,
     status: ReminderStatus.Active,
     order: 0,
@@ -102,7 +101,7 @@ describe('ReminderGroupApplicationService', () => {
 
     const result = await service.updateGroup(
       existing.id,
-      { name: 'Updated', controlMode: ControlMode.Group },
+      { name: 'Updated' },
       { identityId: IDENTITY_ID },
     );
 
@@ -111,7 +110,6 @@ describe('ReminderGroupApplicationService', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.data.name).toBe('Updated');
-      expect(result.data.controlMode).toBe(ControlMode.Group);
     }
   });
 

@@ -1,11 +1,10 @@
 /**
  * Legacy Reminder effective-state facade.
  *
- * ROUTINE-2301 removes ControlMode takeover semantics. The legacy DTO still
- * carries controlMode for compatibility, but truth is delegated to the one
- * Routine Coach effectiveEnabled formula.
+ * ROUTINE-2301 delegates effective-state truth to the canonical Routine Coach
+ * AND-gate; the retired control-mode dimension is no longer transported or persisted.
  */
-import { ReminderStatus, type ControlMode } from '@memoflow/contracts/reminder';
+import { ReminderStatus } from '@memoflow/contracts/reminder';
 import type { ReminderGroup } from '../aggregates/reminder-group';
 import type { ReminderTemplate } from '../aggregates/reminder-template';
 import type { IReminderGroupRepository } from '../repositories/i-reminder-group-repository';
@@ -18,8 +17,6 @@ export interface ITemplateEffectiveStatus {
   templateStatus: ReminderStatus;
   groupId: string | null;
   groupStatus: ReminderStatus | null;
-  /** Compatibility metadata only. It no longer changes effective state. */
-  controlMode: ControlMode | null;
   effectiveStatus: ReminderStatus;
   isEffectivelyEnabled: boolean;
   statusReason: string;
@@ -160,7 +157,6 @@ export class ReminderTemplateControlService {
       templateStatus: template.status,
       groupId,
       groupStatus: hasPersistedGroup ? group!.status : null,
-      controlMode: hasPersistedGroup ? group!.controlMode : null,
       effectiveStatus: evaluation.effectiveEnabled ? ReminderStatus.Active : ReminderStatus.Paused,
       isEffectivelyEnabled: evaluation.effectiveEnabled,
       statusReason,
