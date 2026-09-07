@@ -45,15 +45,6 @@ export class ReminderIpcAdapter implements IReminderApiClient {
     return this.ipcClient.invoke(ReminderChannels.TEMPLATE_LIST);
   }
 
-  /**
-   * Lists templates for the authenticated user.
-   * Desktop handler resolves identity from auth context; identityId arg is
-   * kept for HTTP adapter parity but unused by the IPC handler.
-   */
-  async getUserTemplates(): Promise<Result<ReminderTemplateClientDTO[]>> {
-    return this.ipcClient.invoke(ReminderChannels.TEMPLATE_GET_BY_USER);
-  }
-
   async updateReminderTemplate(
     id: string,
     request: UpdateReminderTemplateReq,
@@ -115,14 +106,6 @@ export class ReminderIpcAdapter implements IReminderApiClient {
    */
   async getReminderGroups(): Promise<Result<ReminderGroupListRes>> {
     return this.ipcClient.invoke(ReminderChannels.GROUP_LIST);
-  }
-
-  /**
-   * Lists groups for the authenticated user.
-   * Desktop handler resolves identity from auth context.
-   */
-  async getUserReminderGroups(): Promise<Result<ReminderGroupClientDTO[]>> {
-    return this.ipcClient.invoke(ReminderChannels.GROUP_GET_BY_USER);
   }
 
   async updateReminderGroup(

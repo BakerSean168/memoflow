@@ -10,8 +10,6 @@ function createTemplate(overrides: Record<string, unknown> = {}): Record<string,
   return {
     id: 'template-1',
     identityId: IDENTITY_ID,
-    enable: vi.fn(),
-    pause: vi.fn(),
     toggle: vi.fn(),
     getAllHistory: vi.fn().mockReturnValue([]),
     ...overrides,
@@ -50,15 +48,15 @@ describe('ReminderTemplateActionApplicationService', () => {
     });
   });
 
-  it('enables a template and returns mapped DTO', async () => {
+  it('toggles a template through the canonical action and returns mapped DTO', async () => {
     const template = createTemplate();
     const dto = { id: 'template-1', name: 'Drink water' };
     (reminderTemplateRepository.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(template);
     templateMapper.toDTO.mockResolvedValue(dto);
 
-    const result = await service.enableTemplate('template-1', { identityId: IDENTITY_ID });
+    const result = await service.toggleTemplate('template-1', { identityId: IDENTITY_ID });
 
-    expect(template.enable).toHaveBeenCalledTimes(1);
+    expect(template.toggle).toHaveBeenCalledTimes(1);
     expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledWith(template);
     expect(reminderTemplateRepository.save).toHaveBeenCalledWith(template);
     expect(reminderDomainService.projectRoutineDefinition).toHaveBeenCalledWith(template);

@@ -122,7 +122,7 @@ describe('reminder template ownership surface', () => {
     expect(domainService).toContain('listMembershipsForProfile({ identityId, profileId })');
     expect(domainService).toContain('updateGroupStats(identityId: string, profileId: string)');
     expect(groupApp).toContain('syncTemplatesEffectiveEnabledByProfile(ctx.identityId, id)');
-    expect(groupApp).toContain('setProfileMembershipsEnabled(');
+    expect(groupApp).not.toContain('setProfileMembershipsEnabled(');
   });
 
   it('prisma/powersync hard delete and active queries preserve identity isolation', () => {

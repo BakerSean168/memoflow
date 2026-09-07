@@ -161,12 +161,6 @@ export function createReminderElectronModule(
           ),
         );
         installed.push(ReminderChannels.TEMPLATE_LIST);
-        ipcMain.handle(ReminderChannels.TEMPLATE_GET_BY_USER, async () =>
-          withAuthenticatedValue(ctx, async (requestContext) =>
-            controller.listTemplates(requestContext),
-          ),
-        );
-        installed.push(ReminderChannels.TEMPLATE_GET_BY_USER);
         ipcMain.handle(ReminderChannels.TEMPLATE_GET, async (_event, id) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
             controller.getTemplate(id, requestContext),
@@ -228,12 +222,6 @@ export function createReminderElectronModule(
           ),
         );
         installed.push(ReminderChannels.GROUP_LIST);
-        ipcMain.handle(ReminderChannels.GROUP_GET_BY_USER, async () =>
-          withAuthenticatedValue(ctx, async (requestContext) =>
-            controller.listGroups(requestContext),
-          ),
-        );
-        installed.push(ReminderChannels.GROUP_GET_BY_USER);
         ipcMain.handle(ReminderChannels.GROUP_GET, async (_event, id) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
             controller.getGroup(id, requestContext),

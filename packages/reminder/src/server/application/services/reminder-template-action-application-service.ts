@@ -35,42 +35,6 @@ export class ReminderTemplateActionApplicationService {
     return this.reminderTemplateRepository.findByIdForIdentity(ctx.identityId, templateId, options);
   }
 
-  async enableTemplate(
-    id: string,
-    ctx: ExecutionContext,
-  ): Promise<Result<ReminderTemplateClientDTO>> {
-    const template = await this.getOwnedTemplateOrFail(id, ctx);
-    if (!template) {
-      return fail({ code: 'NOT_FOUND', message: 'Template not found' });
-    }
-
-    template.enable();
-    await this.reminderDomainService.syncTemplateEffectiveEnabled(template);
-    await this.reminderTemplateRepository.save(template);
-    await this.reminderDomainService.projectRoutineDefinition(template);
-    await this.reminderDomainService.updateProfileStatsForRoutine(ctx.identityId, template.id);
-
-    return ok(await this.templateMapper.toDTO(template));
-  }
-
-  async pauseTemplate(
-    id: string,
-    ctx: ExecutionContext,
-  ): Promise<Result<ReminderTemplateClientDTO>> {
-    const template = await this.getOwnedTemplateOrFail(id, ctx);
-    if (!template) {
-      return fail({ code: 'NOT_FOUND', message: 'Template not found' });
-    }
-
-    template.pause();
-    await this.reminderDomainService.syncTemplateEffectiveEnabled(template);
-    await this.reminderTemplateRepository.save(template);
-    await this.reminderDomainService.projectRoutineDefinition(template);
-    await this.reminderDomainService.updateProfileStatsForRoutine(ctx.identityId, template.id);
-
-    return ok(await this.templateMapper.toDTO(template));
-  }
-
   async toggleTemplate(
     id: string,
     ctx: ExecutionContext,

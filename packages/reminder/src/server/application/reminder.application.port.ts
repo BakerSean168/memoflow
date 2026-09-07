@@ -2,8 +2,6 @@ import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/contracts/operations';
 import type {
-  BatchGroupTemplatesReq,
-  BatchGroupTemplatesRes,
   CreateReminderGroupReq,
   CreateReminderTemplateReq,
   GetReminderTodayScheduleReq,
@@ -43,8 +41,6 @@ export interface ReminderApplicationPort {
     ctx: ExecutionContext,
   ): Promise<Result<ReminderTemplateClientDTO>>;
   deleteTemplate(id: string, ctx: ExecutionContext): Promise<Result<unknown>>;
-  enableTemplate(id: string, ctx: ExecutionContext): Promise<Result<ReminderTemplateClientDTO>>;
-  pauseTemplate(id: string, ctx: ExecutionContext): Promise<Result<ReminderTemplateClientDTO>>;
   toggleTemplate(id: string, ctx: ExecutionContext): Promise<Result<ReminderTemplateClientDTO>>;
   replaceTemplateProfiles(
     id: string,
@@ -80,11 +76,6 @@ export interface ReminderApplicationPort {
     ctx: ExecutionContext,
   ): Promise<Result<ReminderGroupClientDTO>>;
   deleteGroup(id: string, ctx: ExecutionContext): Promise<Result<unknown>>;
-  batchGroupTemplates(
-    groupId: string,
-    data: BatchGroupTemplatesReq,
-    ctx: ExecutionContext,
-  ): Promise<Result<BatchGroupTemplatesRes>>;
   toggleGroup(id: string, ctx: ExecutionContext): Promise<Result<ReminderGroupClientDTO>>;
   getPreferences(ctx: ExecutionContext): Promise<Result<UserReminderPreferencesClientDTO>>;
   updatePreferences(

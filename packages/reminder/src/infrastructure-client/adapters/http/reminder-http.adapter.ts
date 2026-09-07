@@ -48,10 +48,6 @@ export class ReminderHttpAdapter implements IReminderApiClient {
     return this.httpClient.get(this.templatesUrl);
   }
 
-  async getUserTemplates(): Promise<Result<ReminderTemplateClientDTO[]>> {
-    return this.httpClient.get(`${this.templatesUrl}/mine`);
-  }
-
   async updateReminderTemplate(
     id: string,
     request: UpdateReminderTemplateReq,
@@ -110,10 +106,6 @@ export class ReminderHttpAdapter implements IReminderApiClient {
     return this.httpClient.get(this.groupsUrl);
   }
 
-  async getUserReminderGroups(): Promise<Result<ReminderGroupClientDTO[]>> {
-    return this.httpClient.get(`${this.groupsUrl}/mine`);
-  }
-
   async updateReminderGroup(
     id: string,
     request: UpdateReminderGroupReq,
@@ -126,7 +118,7 @@ export class ReminderHttpAdapter implements IReminderApiClient {
   }
 
   async toggleReminderGroupStatus(id: string): Promise<Result<ReminderGroupClientDTO>> {
-    return this.httpClient.post(`${this.groupsUrl}/${id}/toggle-status`, {});
+    return this.httpClient.post(`${this.groupsUrl}/${id}/toggle`, {});
   }
 
   async getPreferences(): Promise<Result<UserReminderPreferencesClientDTO>> {

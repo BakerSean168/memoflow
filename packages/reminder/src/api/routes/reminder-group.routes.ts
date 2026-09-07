@@ -23,10 +23,8 @@ import {
 import {
   CreateReminderGroupSchema,
   UpdateReminderGroupSchema,
-  BatchGroupTemplatesSchema,
   ReminderGroupResponseSchema,
   ReminderGroupListResponseSchema,
-  ReminderBatchResultSchema,
 } from '@memoflow/contracts/reminder';
 import { brandedId } from '@memoflow/contracts/primitives';
 import type { ReminderGroupId } from '@memoflow/contracts/primitives';
@@ -140,25 +138,6 @@ export function registerReminderGroupRoutes(
   );
 
   // ==================== Group Actions ====================
-
-  // POST /groups/:id/batch
-  r.route(
-    {
-      method: 'post',
-      path: '/groups/:id/batch',
-      summary: '批量操作分组模板',
-      request: {
-        params: z.object({ id: brandedId<ReminderGroupId>() }),
-        body: { content: { 'application/json': { schema: BatchGroupTemplatesSchema } } },
-      },
-      responses: {
-        200: successResponse(ReminderBatchResultSchema, '操作成功'),
-        404: errorResponse('分组不存在'),
-      },
-    },
-    [auth],
-    (req, ctx) => controller.batchGroupTemplates(req.params!.id, req.body, ctx),
-  );
 
   // POST /groups/:id/toggle
   r.route(

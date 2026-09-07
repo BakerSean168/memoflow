@@ -80,7 +80,7 @@ Still real residuals (code search verified):
 - `ROUTINE-5302`: no Routine method-library/catalog implementation exists;
 - `AI-6101~6103`: Goal/Task draft workflows exist, but `TaskPlanTaskSchema` still exposes retired `folderId`; Routine draft/command tooling and Planner/Notification AI read tooling are absent;
 - `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
-- `CLEAN-6301~6304`: convergence is in progress. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, and ordinary product raw-ScheduleTask mutation surfaces are removed; `CLEAN-6301` and `CLEAN-6303` are complete. `CLEAN-6302A` retired `ControlMode` and the legacy Reminder cron/due-set shadow; `CLEAN-6302B2` completed the single-`groupId` -> canonical M:N `RoutineProfile` / `ProfileMembership` cutover; `CLEAN-6302C1` retired duplicate Smart Frequency auto-mutation state; and `CLEAN-6302C2` now separates measured response latency from explicit Snooze duration while routing Snooze through canonical `RoutineTemporaryOverride`. Only the final obsolete Reminder route/component residual audit remains before `CLEAN-6302` can close. `CLEAN-6304` remains the physical-boundary decision;
+- `CLEAN-6301~6304`: semantic convergence is complete through `CLEAN-6303`. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, ordinary product raw-ScheduleTask mutation surfaces, and the final Reminder duplicate/obsolete product surfaces are removed. `CLEAN-6302` is complete: ControlMode/scanner, single-group ownership, duplicate Smart Frequency state, overloaded Snooze `responseTime`, broken per-user list transports, one-way template actions, and the legacy group batch command are all retired. `CLEAN-6304` remains the physical-boundary decision;
 - `POC-6401`: pg-boss remains a documented candidate only and is not installed/evaluated against current constraints;
 - `HARD-7101~7105`: final failure matrix, residual cleanup proof and umbrella closure review remain incomplete.
 
@@ -2128,6 +2128,19 @@ Physical package rename `reminder -> routine` is a separate final decision; do n
 
 `CLEAN-6302C2` is complete. `CLEAN-6302D` is now the sole remaining Reminder cleanup tranche: remove/lock any obsolete Reminder routes/components and prove the final live residual surface before closing `CLEAN-6302`.
 
+**Implementation evidence — CLEAN-6302D (2026-09-07): obsolete Reminder product/transport surfaces retired; `CLEAN-6302` closed**
+
+- removed the duplicate/broken per-user list family end-to-end: `getUserTemplates()`, `getUserReminderGroups()`, `TEMPLATE_GET_BY_USER`, and `GROUP_GET_BY_USER`. React/Mobile now consumes the canonical template list contract, while HTTP no longer carries client methods that targeted nonexistent `/templates/mine` / `/groups/mine` paths;
+- fixed the live Web Profile toggle transport from the stale `/groups/:id/toggle-status` path to the canonical server `/groups/:id/toggle` route and updated the Web mock accordingly. The existing IPC key `GROUP_TOGGLE_STATUS` is intentionally retained as a live transport identifier: it is not a second command path or state authority and a cosmetic IPC rename would add migration churn without changing semantics;
+- retired HTTP-only one-way `POST /templates/:id/enable` and `POST /templates/:id/pause`; the single product action is `POST /templates/:id/toggle`. Route tests now lock the removed paths out rather than preserving compatibility aliases;
+- retired the unconsumed legacy Profile batch command (`POST /groups/:id/batch`, `BatchGroupTemplates*`, `batchGroupTemplates`, and `setProfileMembershipsEnabled`). Canonical M:N `ProfileMembership.enabled` remains valid domain state, and Profile gating continues through the current Profile command path rather than a bulk compatibility surface;
+- removed the stale Web `toggle-control-mode` mock left behind after CLEAN-6302A and narrowed `@memoflow/app-vue` Reminder exports by deleting the unused Reminder component barrel. `GridTemplateItem`, `ReminderTemplateCard`, `GroupDialog`, `TemplateDialog`, and `TemplateMoveDialog` remain internally reachable from the real Reminder view; only their accidental package-public export was removed;
+- intentionally retained live capabilities that are not legacy duplication: `recordResponse`, read-only `frequency-analysis`, explicit user `frequency-adjustment`, ReminderHistory persistence/lifecycle presentation, and the existing history/response observability reads. CLEAN-6302D removes proven broken/duplicate/unconsumed surfaces rather than deleting useful read capability;
+- hard production residual audit is zero for the retired per-user methods/channels and `/mine` paths, one-way enable/pause routes, batch group command/schema/domain helper, stale control-mode mock, and Reminder component wildcard export. Remaining textual hits are negative anti-resurrection assertions plus the intentionally live `GROUP_TOGGLE_STATUS` IPC key described above;
+- verification: Reminder **73/73 files, 469/469 tests**; Contracts **68/68 files, 483/483 tests**; App-Vue **201/201 files, 773/773 tests**; API **62/62 files, 327/327 tests**; Desktop **61/61 files, 322/322 tests**; six-project typecheck green; six-project lint **0 errors** (pre-existing warnings remain); `governance:check`, `docs:check`, `target-baseline-check`, governance tests **29/29**, `test:targets:check`, `test:inventory:check` (**1172 files**), and `git diff --check` green.
+
+`CLEAN-6302` is complete. No Reminder compatibility shim or physical package rename is required for closure; the ordered scheduling-convergence lane now advances to `CLEAN-6304`.
+
 
 
 ## CLEAN-6303 — Internalize raw ScheduleTask product surfaces
@@ -2521,7 +2534,7 @@ Core vNext can close only when all of the following hold:
 - [ ] final cross-domain failure matrix passes (`HARD-7101` pending);
 - [x] API/Desktop/PowerSync/Prisma parity passes for the completed primary product scope;
 - [x] full governance/docs checks green for the completed milestone and current main;
-- [ ] residual grep proves all legacy dual paths removed — raw ScheduleTask product mutations and the SourceModule execution fallback are gone; CLEAN-6301 Goal/Task legacy surfaces are gone; CLEAN-6302A/B/C retired ControlMode, the legacy Reminder scanner, single-group ownership, duplicate Smart Frequency state, and overloaded Snooze `responseTime`. Only CLEAN-6302D final obsolete Reminder route/component residual cleanup remains before this item can close;
+- [x] residual grep proves completed CLEAN convergence paths are single-track — raw ScheduleTask product mutations and the SourceModule execution fallback are gone; CLEAN-6301 Goal/Task legacy surfaces are gone; CLEAN-6302A-D retired ControlMode/scanner, single-group ownership, duplicate Smart Frequency state, overloaded Snooze `responseTime`, broken per-user transports, one-way template actions, legacy group batch, and stale Reminder public/mock surfaces. The separately documented AI Task-draft `folderId` parity residual remains owned by AI-6101 rather than this convergence lane;
 - [ ] final residual batch review has no P0/P1 unresolved finding.
 
 ---
@@ -2538,9 +2551,7 @@ A. Product parity (independent lanes)
    MOBILE-6201/6202   parity audit first; current screens already use modern Goal/Task/Notification contracts, implement only proven gaps
 
 B. Scheduling physical convergence (ordered)
-   CLEAN-6302D        remove/lock final obsolete Reminder routes/components and close CLEAN-6302 residual audit
-        ↓
-   CLEAN-6304         decide/perform scheduler physical package split only after semantic ownership is clean
+   CLEAN-6304         decide/perform scheduler physical package split now that CLEAN-6301/6302/6303 semantic ownership is clean
         ↓
    POC-6401           run pg-boss Build-vs-Adopt PoC against the now-clean SchedulingPort boundary; adopt only on evidence
 

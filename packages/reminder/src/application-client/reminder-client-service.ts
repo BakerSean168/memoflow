@@ -28,7 +28,6 @@ export class ReminderClientService implements IReminderApiClient {
     this.createReminderTemplate = this.createReminderTemplate.bind(this);
     this.getReminderTemplate = this.getReminderTemplate.bind(this);
     this.getReminderTemplates = this.getReminderTemplates.bind(this);
-    this.getUserTemplates = this.getUserTemplates.bind(this);
     this.updateReminderTemplate = this.updateReminderTemplate.bind(this);
     this.deleteReminderTemplate = this.deleteReminderTemplate.bind(this);
     this.toggleTemplateEnabled = this.toggleTemplateEnabled.bind(this);
@@ -38,7 +37,6 @@ export class ReminderClientService implements IReminderApiClient {
     this.createReminderGroup = this.createReminderGroup.bind(this);
     this.getReminderGroup = this.getReminderGroup.bind(this);
     this.getReminderGroups = this.getReminderGroups.bind(this);
-    this.getUserReminderGroups = this.getUserReminderGroups.bind(this);
     this.updateReminderGroup = this.updateReminderGroup.bind(this);
     this.deleteReminderGroup = this.deleteReminderGroup.bind(this);
     this.toggleReminderGroupStatus = this.toggleReminderGroupStatus.bind(this);
@@ -60,10 +58,6 @@ export class ReminderClientService implements IReminderApiClient {
 
   async getReminderTemplates(): Promise<Result<ReminderTemplateListRes>> {
     return this.reminderApi.getReminderTemplates();
-  }
-
-  async getUserTemplates(): Promise<Result<ReminderTemplateClientDTO[]>> {
-    return this.reminderApi.getUserTemplates();
   }
 
   async updateReminderTemplate(
@@ -120,10 +114,6 @@ export class ReminderClientService implements IReminderApiClient {
 
   async getReminderGroups(): Promise<Result<ReminderGroupListRes>> {
     return this.reminderApi.getReminderGroups();
-  }
-
-  async getUserReminderGroups(): Promise<Result<ReminderGroupClientDTO[]>> {
-    return this.reminderApi.getUserReminderGroups();
   }
 
   async updateReminderGroup(

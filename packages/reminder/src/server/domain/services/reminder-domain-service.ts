@@ -337,33 +337,6 @@ export class ReminderDomainService {
     return group;
   }
 
-  /** Toggle only membership-local enablement for all Routines in one Profile. */
-  public async setProfileMembershipsEnabled(
-    identityId: string,
-    profileId: string,
-    enabled: boolean,
-  ): Promise<number> {
-    const store = this.requireRoutineProfileStore();
-    const memberships = await store.listMembershipsForProfile({ identityId, profileId });
-    for (const membership of memberships) {
-      if (enabled) membership.enable();
-      else membership.disable();
-      await store.upsertMembership(membership);
-    }
-
-    const templates = await this.reminderTemplateRepository.findByIds(
-      identityId,
-      memberships.map((membership) => membership.routineId),
-    );
-    for (const template of templates) {
-      await this.syncTemplateEffectiveEnabled(template);
-      template.markEligibilityContextChanged('profile-membership-state');
-      await this.reminderTemplateRepository.save(template);
-    }
-    await this.updateGroupStats(identityId, profileId);
-    return memberships.length;
-  }
-
   public async updateGroupStats(identityId: string, profileId: string): Promise<void> {
     const group = await this.getGroup(identityId, profileId);
     if (!group) return;

@@ -250,14 +250,6 @@ export function createReminderModule(
       return useCases.deleteReminderTemplate.execute(id, ctx);
     },
 
-    async enableTemplate(id, ctx) {
-      return reminderTemplateActionApplicationService.enableTemplate(id, ctx);
-    },
-
-    async pauseTemplate(id, ctx) {
-      return reminderTemplateActionApplicationService.pauseTemplate(id, ctx);
-    },
-
     async toggleTemplate(id, ctx) {
       return reminderTemplateActionApplicationService.toggleTemplate(id, ctx);
     },
@@ -331,10 +323,6 @@ export function createReminderModule(
 
     async deleteGroup(id, ctx) {
       return reminderGroupApplicationService.deleteGroup(id, ctx);
-    },
-
-    async batchGroupTemplates(groupId, data, ctx) {
-      return reminderGroupApplicationService.batchGroupTemplates(groupId, data, ctx);
     },
 
     async toggleGroup(id, ctx) {

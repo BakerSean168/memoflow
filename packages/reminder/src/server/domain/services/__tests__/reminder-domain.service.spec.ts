@@ -330,38 +330,6 @@ describe('ReminderDomainService', () => {
     expect(templateRepo.save).toHaveBeenCalledWith(template);
   });
 
-  it('batch-disables only membership-local state and preserves the Routine switch', async () => {
-    const group = ReminderGroup.load(makeGroupState({ id: 'work' }));
-    const template = ReminderTemplate.load(makeTemplateState({ selfEnabled: true }));
-    const membership = ProfileMembership.create({
-      identityId: IDENTITY_ID,
-      profileId: group.id,
-      routineId: template.id,
-      enabled: true,
-    });
-    await routineStore.store.upsertProfile(
-      RoutineProfile.create({ id: group.id, identityId: IDENTITY_ID, name: group.name, enabled: true, active: true }),
-    );
-    await routineStore.store.upsertMembership(membership);
-    (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
-    (templateRepo.findByIds as ReturnType<typeof vi.fn>).mockResolvedValue([template]);
-
-    const changed = await service.setProfileMembershipsEnabled(IDENTITY_ID, group.id, false);
-
-    expect(changed).toBe(1);
-    expect(membership.enabled).toBe(false);
-    expect(template.selfEnabled).toBe(true);
-    expect(template.effectiveEnabled).toBe(false);
-    expect(template.pullDomainEvents()).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          eventType: 'reminder:template-eligibility-changed',
-          payload: expect.objectContaining({ cause: 'profile-membership-state' }),
-        }),
-      ]),
-    );
-  });
-
   it('deletes a Routine without requiring any single owner field', async () => {
     const template = ReminderTemplate.load(makeTemplateState());
     (templateRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(template);

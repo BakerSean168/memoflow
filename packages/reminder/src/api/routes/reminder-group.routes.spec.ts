@@ -32,10 +32,7 @@ function createReminderControllerStub(): ReminderController {
     getTemplate: vi.fn(),
     updateTemplate: vi.fn(),
     deleteTemplate: vi.fn(),
-    enableTemplate: vi.fn(),
-    pauseTemplate: vi.fn(),
     toggleTemplate: vi.fn(),
-    moveTemplate: vi.fn(),
     getTemplateHistory: vi.fn(),
     recordResponse: vi.fn(),
     getTemplateResponses: vi.fn(),
@@ -47,7 +44,6 @@ function createReminderControllerStub(): ReminderController {
     getGroup: vi.fn(),
     updateGroup: vi.fn(),
     deleteGroup: vi.fn(),
-    batchGroupTemplates: vi.fn(),
     toggleGroup: vi.fn(),
     getPreferences: vi.fn(),
     updatePreferences: vi.fn(),
@@ -191,7 +187,7 @@ describe('reminder group route contracts', () => {
     expect(updateSchema.safeParse({ name: 'Updated group name' }).success).toBe(true);
   });
 
-  it('does not expose the retired control-mode route', () => {
+  it('does not expose retired control-mode or batch-template routes', () => {
     const registry = new TestOpenApiRegistry();
 
     registerReminderGroupRoutes(
@@ -203,6 +199,10 @@ describe('reminder group route contracts', () => {
     expect(
       registry.paths.some((route) => route.path === `${BASE}/groups/{id}/control-mode`),
     ).toBe(false);
+    expect(
+      registry.paths.some((route) => route.path === `${BASE}/groups/{id}/batch`),
+    ).toBe(false);
+    expect(registry.paths.some((route) => route.path === `${BASE}/groups/{id}/toggle`)).toBe(true);
   });
 
 });

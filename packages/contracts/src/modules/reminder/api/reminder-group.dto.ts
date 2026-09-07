@@ -9,7 +9,6 @@ import { z } from 'zod';
 import type { ReminderGroupClientDTO } from '../aggregates/reminder-group-client';
 import {
   ReminderGroupListResponseSchema,
-  ReminderBatchResultSchema,
 } from './response-schemas';
 
 // ============================================================================
@@ -43,20 +42,6 @@ export const UpdateReminderGroupSchema = z.object({
 
 export type UpdateReminderGroupReq = z.infer<typeof UpdateReminderGroupSchema>;
 export type UpdateReminderGroupRes = ReminderGroupClientDTO;
-
-/**
- * 批量分组操作 Schema
- */
-export const BatchGroupTemplatesSchema = z.object({
-  action: z.enum(['ENABLE', 'PAUSE']),
-});
-
-export type BatchGroupTemplatesReq = z.infer<typeof BatchGroupTemplatesSchema>;
-
-// Residual 781: batch group templates Res dual retired — reuses ReminderBatchResultSchema
-// (runtime returns successCount/failedCount only; unused errors dual field dropped).
-export const BatchGroupTemplatesResSchema = ReminderBatchResultSchema;
-export type BatchGroupTemplatesRes = z.infer<typeof BatchGroupTemplatesResSchema>;
 
 // Residual 693: list response dual body retired — OpenAPI + transport use ReminderGroupListResponseSchema.
 export type ReminderGroupListRes = z.infer<typeof ReminderGroupListResponseSchema>;

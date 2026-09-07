@@ -27,7 +27,7 @@ export function useReminders() {
     setError(null);
 
     const [templateResult, scheduleResult] = await Promise.all([
-      service.getUserTemplates(),
+      service.getReminderTemplates(),
       service.getTodaySchedule({ limit: 20, includeExpired: false }),
     ]);
 
@@ -40,14 +40,14 @@ export function useReminders() {
     }
 
     if (!scheduleResult.ok) {
-      setTemplates(templateResult.data);
+      setTemplates(templateResult.data.templates);
       setTodaySchedule([]);
       setError(presentErrorMessage(scheduleResult.error));
       setIsLoading(false);
       return;
     }
 
-    setTemplates(templateResult.data);
+    setTemplates(templateResult.data.templates);
     setTodaySchedule(scheduleResult.data.data);
     setIsLoading(false);
   }

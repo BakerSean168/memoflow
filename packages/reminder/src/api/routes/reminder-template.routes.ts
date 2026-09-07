@@ -213,38 +213,6 @@ export function registerReminderTemplateRoutes(
 
   // ==================== Template Actions ====================
 
-  // POST /templates/:id/enable
-  r.route(
-    {
-      method: 'post',
-      path: '/templates/:id/enable',
-      summary: '启用提醒模板',
-      request: { params: z.object({ id: brandedId<ReminderTemplateId>() }) },
-      responses: {
-        200: successResponse(ReminderTemplateResponseSchema, '启用成功'),
-        404: errorResponse('模板不存在'),
-      },
-    },
-    [auth],
-    (req, ctx) => controller.enableTemplate(req.params!.id, ctx),
-  );
-
-  // POST /templates/:id/pause
-  r.route(
-    {
-      method: 'post',
-      path: '/templates/:id/pause',
-      summary: '暂停提醒模板',
-      request: { params: z.object({ id: brandedId<ReminderTemplateId>() }) },
-      responses: {
-        200: successResponse(ReminderTemplateResponseSchema, '暂停成功'),
-        404: errorResponse('模板不存在'),
-      },
-    },
-    [auth],
-    (req, ctx) => controller.pauseTemplate(req.params!.id, ctx),
-  );
-
   // POST /templates/:id/toggle
   r.route(
     {

@@ -16,7 +16,6 @@ import {
   GetReminderTodayScheduleSchema,
   CreateReminderGroupSchema,
   UpdateReminderGroupSchema,
-  BatchGroupTemplatesSchema,
   ReplaceRoutineProfilesSchema,
   UpdateReminderPreferencesSchema,
   RecordReminderResponseSchema,
@@ -146,31 +145,7 @@ export class ReminderController {
     return ok(null);
   }
 
-  async batchGroupTemplates(
-    id: string,
-    input: unknown,
-    ctx: ExecutionContext,
-  ): Promise<Result<unknown>> {
-    const parsed = BatchGroupTemplatesSchema.safeParse(input);
-    if (!parsed.success) {
-      return fail({
-        code: 'VALIDATION_ERROR',
-        message: '参数验证失败',
-        details: formatZodErrors(parsed.error.issues),
-      });
-    }
-    return this.useCases.batchGroupTemplates(id, parsed.data, ctx);
-  }
-
   // ==================== Template Actions ====================
-
-  async enableTemplate(id: string, ctx: ExecutionContext): Promise<Result<unknown>> {
-    return this.useCases.enableTemplate(id, ctx);
-  }
-
-  async pauseTemplate(id: string, ctx: ExecutionContext): Promise<Result<unknown>> {
-    return this.useCases.pauseTemplate(id, ctx);
-  }
 
   async toggleTemplate(id: string, ctx: ExecutionContext): Promise<Result<unknown>> {
     return this.useCases.toggleTemplate(id, ctx);

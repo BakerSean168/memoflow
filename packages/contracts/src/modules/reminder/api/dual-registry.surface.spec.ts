@@ -1,58 +1,13 @@
 /**
  * Dual registry suite (elegance E3b tax cut).
- * Merged 10 dual-retired surface locks from this directory.
+ * Merged 9 dual-retired surface locks from this directory.
  * Behavior/assertions preserved; individual *-dual.surface.spec.ts removed.
- * Sources: batch-group-templates-res-dual.surface.spec.ts, reminder-group-history-client-dto-dual.surface.spec.ts, reminder-hours-stats-dual.surface.spec.ts, reminder-list-res-dual.surface.spec.ts, reminder-operation-res-dual.surface.spec.ts, reminder-schedule-list-res-dual.surface.spec.ts, reminder-template-active-time-schedule-execution-dual.surface.spec.ts, reminder-template-request-active-time-dual.surface.spec.ts, reminder-trigger-notification-dual.surface.spec.ts, time-slot-dual.surface.spec.ts
+ * Sources: reminder-group-history-client-dto-dual.surface.spec.ts, reminder-hours-stats-dual.surface.spec.ts, reminder-list-res-dual.surface.spec.ts, reminder-operation-res-dual.surface.spec.ts, reminder-schedule-list-res-dual.surface.spec.ts, reminder-template-active-time-schedule-execution-dual.surface.spec.ts, reminder-template-request-active-time-dual.surface.spec.ts, reminder-trigger-notification-dual.surface.spec.ts, time-slot-dual.surface.spec.ts
  */
 import { readFileSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-
-// --- merged from batch-group-templates-res-dual.surface.spec.ts ---
-{
-  /**
-   * Residual 781: BatchGroupTemplatesRes dual body retired.
-   * Reuses ReminderBatchResultSchema; unused errors field dropped (runtime never returns it).
-   */
-  describe('batch group templates res dual retired (residual 781)', () => {
-    const apiDir = __dirname;
-    const dto = readFileSync(resolve(apiDir, 'reminder-group.dto.ts'), 'utf8');
-    const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
-    const routes = readFileSync(
-      resolve(apiDir, '../../../../../reminder/src/api/routes/reminder-group.routes.ts'),
-      'utf8',
-    );
-
-    it('dto Res reuses ReminderBatchResultSchema without interface dual body', () => {
-      expect(dto).toContain('Residual 781');
-      expect(dto).toContain(
-        'export const BatchGroupTemplatesResSchema = ReminderBatchResultSchema',
-      );
-      expect(dto).toContain(
-        'export type BatchGroupTemplatesRes = z.infer<typeof BatchGroupTemplatesResSchema>',
-      );
-      expect(dto).not.toMatch(/export interface BatchGroupTemplatesRes\b/);
-      expect(dto).not.toContain('errors?: Array<{');
-    });
-
-    it('response-schemas owns sole batch result object body', () => {
-      expect(responseSchemas).toContain('Residual 781');
-      expect(responseSchemas).toContain(
-        'export const ReminderBatchResultSchema = z.object({',
-      );
-      expect(responseSchemas).toContain('successCount: z.number()');
-      expect(responseSchemas).toContain('failedCount: z.number()');
-    });
-
-    it('OpenAPI batch route uses ReminderBatchResultSchema', () => {
-      expect(routes).toContain('ReminderBatchResultSchema');
-      expect(routes).toContain(
-        "successResponse(ReminderBatchResultSchema, '操作成功')",
-      );
-    });
-  });
-}
 
 // --- merged from reminder-group-history-client-dto-dual.surface.spec.ts ---
 {

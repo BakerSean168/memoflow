@@ -32,10 +32,7 @@ function createReminderControllerStub(): ReminderController {
     getTemplate: vi.fn(),
     updateTemplate: vi.fn(),
     deleteTemplate: vi.fn(),
-    enableTemplate: vi.fn(),
-    pauseTemplate: vi.fn(),
     toggleTemplate: vi.fn(),
-    moveTemplate: vi.fn(),
     getTemplateHistory: vi.fn(),
     recordResponse: vi.fn(),
     getTemplateResponses: vi.fn(),
@@ -47,7 +44,6 @@ function createReminderControllerStub(): ReminderController {
     getGroup: vi.fn(),
     updateGroup: vi.fn(),
     deleteGroup: vi.fn(),
-    batchGroupTemplates: vi.fn(),
     toggleGroup: vi.fn(),
     getPreferences: vi.fn(),
     updatePreferences: vi.fn(),
@@ -263,4 +259,18 @@ describe('reminder template route contracts', () => {
     const createResponseSchema = getResponseSchema(createRoute, 201);
     expect(createResponseSchema).toBeDefined();
   });
+  it('does not expose retired one-way enable/pause routes', () => {
+    const registry = new TestOpenApiRegistry();
+    registerReminderTemplateRoutes(
+      createReminderControllerStub(),
+      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
+      registry,
+    );
+
+    const paths = registry.paths.map((route) => route.path);
+    expect(paths).not.toContain(`${BASE}/templates/{id}/enable`);
+    expect(paths).not.toContain(`${BASE}/templates/{id}/pause`);
+    expect(paths).toContain(`${BASE}/templates/{id}/toggle`);
+  });
+
 });

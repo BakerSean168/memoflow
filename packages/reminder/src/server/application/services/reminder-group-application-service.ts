@@ -2,8 +2,6 @@ import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
-  BatchGroupTemplatesReq,
-  BatchGroupTemplatesRes,
   CreateReminderGroupReq,
   CreateReminderGroupRes,
   GroupStatsDTO,
@@ -115,25 +113,6 @@ export class ReminderGroupApplicationService {
 
     await this.reminderDomainService.deleteGroup(ctx.identityId, id, false);
     return ok(undefined);
-  }
-
-  async batchGroupTemplates(
-    groupId: string,
-    data: BatchGroupTemplatesReq,
-    ctx: ExecutionContext,
-  ): Promise<Result<BatchGroupTemplatesRes>> {
-    const group = await this.getOwnedGroupOrFail(groupId, ctx);
-    if (!group) {
-      return fail({ code: 'NOT_FOUND', message: 'Group not found' });
-    }
-
-    const successCount = await this.reminderDomainService.setProfileMembershipsEnabled(
-      ctx.identityId,
-      group.id,
-      data.action === 'ENABLE',
-    );
-
-    return ok({ successCount, failedCount: 0 });
   }
 
   async toggleGroup(id: string, ctx: ExecutionContext): Promise<Result<CreateReminderGroupRes>> {

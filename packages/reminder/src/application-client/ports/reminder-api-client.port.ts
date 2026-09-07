@@ -38,7 +38,6 @@ export interface IReminderApiClient {
   ): Promise<Result<ReminderTemplateClientDTO>>;
   getReminderTemplate(id: string): Promise<Result<ReminderTemplateClientDTO>>;
   getReminderTemplates(): Promise<Result<ReminderTemplateListRes>>;
-  getUserTemplates(): Promise<Result<ReminderTemplateClientDTO[]>>;
   updateReminderTemplate(
     id: string,
     request: UpdateReminderTemplateReq,
@@ -66,7 +65,6 @@ export interface IReminderApiClient {
   createReminderGroup(request: CreateReminderGroupReq): Promise<Result<ReminderGroupClientDTO>>;
   getReminderGroup(id: string): Promise<Result<ReminderGroupClientDTO>>;
   getReminderGroups(): Promise<Result<ReminderGroupListRes>>;
-  getUserReminderGroups(): Promise<Result<ReminderGroupClientDTO[]>>;
   updateReminderGroup(
     id: string,
     request: UpdateReminderGroupReq,

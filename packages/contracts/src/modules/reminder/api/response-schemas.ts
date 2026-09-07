@@ -165,14 +165,6 @@ export const ReminderResponseItemSchema = z.object({
   timestamp: z.number(),
 });
 
-// ============ Batch Result Schema ============
-
-// Residual 781: sole batch result transport shape (BatchGroupTemplatesRes is z.infer alias).
-export const ReminderBatchResultSchema = z.object({
-  successCount: z.number(),
-  failedCount: z.number(),
-});
-
 // ============ UserReminderPreferences Response Schema ============
 
 // Residual 829: UserReminderPreferencesClientDTO dual retired — sole UserReminderPreferencesResponseSchema + z.infer
