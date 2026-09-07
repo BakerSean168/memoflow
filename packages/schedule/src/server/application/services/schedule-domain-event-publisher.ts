@@ -5,7 +5,7 @@ import type {
   IScheduleRepository,
   ScheduleDomainEventOutboxDTO,
 } from '../../domain/repositories/i-schedule-repository';
-import { ScheduleLeaseLostError } from '../../domain/errors/schedule-lease-lost-error';
+import { LeaseLostError } from '@memoflow/patterns/lease';
 import type {
   ScheduleLeaseCoordinatorPort,
 } from './schedule-rebuild-worker-service';
@@ -42,7 +42,7 @@ export class PublishBeforeAckFaultError extends Error {
 }
 
 function isLeaseLostError(err: unknown): boolean {
-  return err instanceof ScheduleLeaseLostError;
+  return err instanceof LeaseLostError;
 }
 
 /**

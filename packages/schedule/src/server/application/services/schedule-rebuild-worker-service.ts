@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { IScheduleRepository } from '../../domain/repositories/i-schedule-repository';
-import { ScheduleLeaseLostError } from '../../domain/errors/schedule-lease-lost-error';
+import { LeaseLostError, type LeaseCoordinatorPort } from '@memoflow/patterns/lease';
 import { ScheduleConflictCacheService } from './schedule-conflict-cache-service';
 import type { UnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';
 
@@ -10,16 +10,7 @@ export interface ProcessOutboxResult {
   leaseAcquired: boolean;
 }
 
-export interface ScheduleLeaseGuard {
-  ensureHeld(): Promise<void>;
-}
-
-export interface ScheduleLeaseCoordinatorPort {
-  execute<T>(
-    leaseKey: string,
-    task: (guard: ScheduleLeaseGuard) => Promise<T>,
-  ): Promise<{ acquired: boolean; value?: T }>;
-}
+export type ScheduleLeaseCoordinatorPort = LeaseCoordinatorPort;
 
 export interface ScheduleRebuildWorkerOptions {
   maxAttempts?: number;
@@ -77,7 +68,7 @@ export class ScheduleRebuildWorkerService {
           this.metrics?.recordOutbox('schedule-rebuild', 'succeeded');
           processedCount++;
         } catch (err: unknown) {
-          if (err instanceof ScheduleLeaseLostError) {
+          if (err instanceof LeaseLostError) {
             throw err;
           }
           const errorMessage = err instanceof Error ? err.message : 'Unknown worker error';

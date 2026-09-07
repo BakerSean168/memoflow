@@ -1,14 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import type { IScheduleLeaseRepository, ScheduleLeaseRequest } from '../../application/ports/schedule-lease.port';
-import { ScheduleLeaseLostError } from '../../domain/errors/schedule-lease-lost-error';
+import { LeaseLostError, type LeaseCoordinatorPort, type LeaseGuard } from '@memoflow/patterns/lease';
 
 export const SCHEDULE_LEASE_TTL_MS = 60_000;
 export const SCHEDULE_LEASE_RENEWAL_INTERVAL_MS = 20_000;
 export const SCHEDULE_LEASE_KEY = 'schedule-host';
 
-export interface ScheduleLeaseGuard {
-  ensureHeld(): Promise<void>;
-}
+export type ScheduleLeaseGuard = LeaseGuard;
 
 export interface ScheduleLeaseCoordinatorOptions {
   now?: () => number;
@@ -24,7 +22,7 @@ export interface ScheduleLeaseCoordinatorOptions {
  * - 释放：任务结束（成功/失败/宿主停止）时仅 owner 释放；
  * - 无 repository（单宿主/测试）时直接放行，行为与旧版一致。
  */
-export class ScheduleLeaseCoordinator {
+export class ScheduleLeaseCoordinator implements LeaseCoordinatorPort {
   private readonly now: () => number;
   private readonly ttlMs: number;
   private readonly renewalIntervalMs: number;
@@ -94,7 +92,7 @@ export class ScheduleLeaseCoordinator {
     const guard: ScheduleLeaseGuard = {
       ensureHeld: async () => {
         await renew();
-        if (!held) throw new ScheduleLeaseLostError();
+        if (!held) throw new LeaseLostError();
       },
     };
     try {
