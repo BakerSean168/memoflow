@@ -5,7 +5,7 @@ tags:
   - reminder
 description: 提醒模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-07-22T00:00:00
+updated: 2026-09-07T00:00:00
 ---
 
 # 提醒模块文件索引
@@ -69,6 +69,8 @@ updated: 2026-07-22T00:00:00
 | [`packages/reminder/src/server/domain/entities/reminder-response.ts`](../../../packages/reminder/src/server/domain/entities/reminder-response.ts) | ReminderResponse 实体 |
 | [`packages/reminder/src/server/domain/entities/reminder-history.ts`](../../../packages/reminder/src/server/domain/entities/reminder-history.ts) | ReminderHistory 实体 |
 | [`packages/reminder/src/server/domain/services/reminder-domain-service.ts`](../../../packages/reminder/src/server/domain/services/reminder-domain-service.ts) | 提醒领域服务 |
+| [`packages/reminder/src/server/domain/ports/routine-profile-store.port.ts`](../../../packages/reminder/src/server/domain/ports/routine-profile-store.port.ts) | RoutineDefinition / RoutineProfile / ProfileMembership 规范化持久化端口 |
+| [`packages/reminder/src/server/domain/services/legacy-routine-cutover-service.ts`](../../../packages/reminder/src/server/domain/services/legacy-routine-cutover-service.ts) | legacy Reminder → Routine vNext 临时切换桥，避免普通编辑压缩 M:N membership |
 | [`packages/reminder/src/server/domain/services/reminder-template-control-service.ts`](../../../packages/reminder/src/server/domain/services/reminder-template-control-service.ts) | 模板控制服务（有效启用状态计算） |
 | [`packages/reminder/src/server/domain/services/reminder-trigger-service.ts`](../../../packages/reminder/src/server/domain/services/reminder-trigger-service.ts) | 触发执行服务 |
 | [`packages/reminder/src/server/domain/services/reminder-scheduler-service.ts`](../../../packages/reminder/src/server/domain/services/reminder-scheduler-service.ts) | 调度扫描服务 |
@@ -78,6 +80,8 @@ updated: 2026-07-22T00:00:00
 | [`packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.use-case.ts`](../../../packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.use-case.ts) | 频率分析查询 |
 | [`packages/reminder/src/server/infrastructure/reminder.module.ts`](../../../packages/reminder/src/server/infrastructure/reminder.module.ts) | 服务端提醒模块组合根 |
 | [`packages/reminder/src/server/infrastructure/adapters/prisma/reminder-template-prisma.repository.ts`](../../../packages/reminder/src/server/infrastructure/adapters/prisma/reminder-template-prisma.repository.ts) | Prisma 模板仓储 |
+| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.ts) | Prisma Routine/Profile/M:N Membership store |
+| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.ts) | PowerSync Routine/Profile/M:N Membership store |
 
 ## Contracts 与数据结构
 
@@ -103,6 +107,9 @@ updated: 2026-07-22T00:00:00
 | [`packages/reminder/src/server/domain/aggregates/__tests__/reminder-group.spec.ts`](../../../packages/reminder/src/server/domain/aggregates/__tests__/reminder-group.spec.ts) | ReminderGroup 聚合测试 |
 | [`packages/reminder/src/server/domain/services/__tests__/reminder-template-control.service.spec.ts`](../../../packages/reminder/src/server/domain/services/__tests__/reminder-template-control.service.spec.ts) | 模板控制服务测试 |
 | [`packages/reminder/src/server/domain/services/__tests__/reminder-trigger.service.spec.ts`](../../../packages/reminder/src/server/domain/services/__tests__/reminder-trigger.service.spec.ts) | 触发服务测试 |
+| [`packages/reminder/src/server/domain/services/__tests__/legacy-routine-cutover-service.spec.ts`](../../../packages/reminder/src/server/domain/services/__tests__/legacy-routine-cutover-service.spec.ts) | legacy cutover 自愈与 M:N 防塌缩测试 |
+| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts) | PowerSync M:N store 真实 SQLite 测试 |
+| [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.integration.test.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.integration.test.ts) | Prisma M:N store PostgreSQL 集成测试 |
 | [`packages/reminder/src/server/application/use-cases/commands/reminder-use-cases.test.ts`](../../../packages/reminder/src/server/application/use-cases/commands/reminder-use-cases.test.ts) | 命令用例测试 |
 | [`packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.spec.ts`](../../../packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.spec.ts) | 频率分析测试 |
 | [`packages/reminder/src/api/routes/reminder-template.routes.spec.ts`](../../../packages/reminder/src/api/routes/reminder-template.routes.spec.ts) | 模板 routes 测试 |
@@ -114,5 +121,4 @@ updated: 2026-07-22T00:00:00
 - 提醒有效启用状态的三层控制逻辑（模板、分组、全局偏好）。
 - 提醒与 Schedule 模块的跨模块依赖：提醒事件变更会影响调度侧。
 - 智能频率调整依赖历史响应数据的准确性。
-- 分组控制模式切换对模板行为的影响。
 - HTTP、IPC、Prisma、PowerSync 多运行时适配器的一致性。

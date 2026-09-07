@@ -13,6 +13,8 @@ import { ReminderGroupBusinessService } from './reminder-group-business-service'
 import { GroupStats, ReminderTemplateId } from '../value-objects';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { IUserReminderPreferenceRepository } from '../repositories/i-user-reminder-preference-repository';
+import type { RoutineProfileStore } from '../ports';
+import { LegacyRoutineCutoverService } from './legacy-routine-cutover-service';
 
 // Local branded type
 type IdentityId = string & { readonly __brand: 'IdentityId' };
@@ -34,11 +36,13 @@ type IdentityId = string & { readonly __brand: 'IdentityId' };
 export class ReminderDomainService {
   private readonly controlService: ReminderTemplateControlService;
   private readonly groupBusinessService: ReminderGroupBusinessService;
+  private readonly routineCutover: LegacyRoutineCutoverService | null;
 
   constructor(
     private readonly reminderTemplateRepository: IReminderTemplateRepository,
     private readonly reminderGroupRepository: IReminderGroupRepository,
     private readonly userReminderPreferenceRepository?: IUserReminderPreferenceRepository,
+    routineProfileStore?: RoutineProfileStore,
   ) {
     this.controlService = new ReminderTemplateControlService(
       reminderTemplateRepository,
@@ -46,6 +50,35 @@ export class ReminderDomainService {
       userReminderPreferenceRepository,
     );
     this.groupBusinessService = new ReminderGroupBusinessService();
+    this.routineCutover = routineProfileStore
+      ? new LegacyRoutineCutoverService(routineProfileStore)
+      : null;
+  }
+
+  /** Keep the canonical RoutineDefinition projection current during the cutover. */
+  public async projectRoutineDefinition(template: ReminderTemplate): Promise<void> {
+    await this.routineCutover?.projectTemplateDefinition(template);
+  }
+
+  /** Keep the canonical RoutineProfile projection current during the cutover. */
+  public async projectRoutineProfile(group: ReminderGroup): Promise<void> {
+    await this.routineCutover?.projectProfile(group);
+  }
+
+  /** Repair deterministic legacy replay without collapsing an existing M:N membership set. */
+  public async healLegacyRoutineProjection(
+    template: ReminderTemplate,
+    group: ReminderGroup | null,
+  ): Promise<void> {
+    await this.routineCutover?.healLegacyProjection({ template, group });
+  }
+
+  /** Legacy single-group commands temporarily map to a complete membership replace. */
+  public async replaceLegacyRoutineMembership(
+    template: ReminderTemplate,
+    group: ReminderGroup | null,
+  ): Promise<void> {
+    await this.routineCutover?.replaceLegacySingleMembership({ template, group });
   }
 
   private async getGlobalReminderEnabled(identityId: string): Promise<boolean> {
@@ -108,14 +141,11 @@ export class ReminderDomainService {
     icon?: string;
     groupId?: string;
   }): Promise<ReminderTemplate> {
-    if (params.groupId) {
-      const group = await this.reminderGroupRepository.findByIdForIdentity(
-        params.identityId,
-        params.groupId,
-      );
-      if (!group) {
-        throw new Error(`Invalid groupId: ${params.groupId}`);
-      }
+    const targetGroup = params.groupId
+      ? await this.reminderGroupRepository.findByIdForIdentity(params.identityId, params.groupId)
+      : null;
+    if (params.groupId && !targetGroup) {
+      throw new Error(`Invalid groupId: ${params.groupId}`);
     }
 
     const template = ReminderTemplate.create({
@@ -125,6 +155,7 @@ export class ReminderDomainService {
     });
     await this.syncTemplateEffectiveEnabled(template);
     await this.reminderTemplateRepository.save(template);
+    await this.replaceLegacyRoutineMembership(template, targetGroup);
 
     if (params.groupId) {
       await this.updateGroupStats(params.identityId, params.groupId);
@@ -159,6 +190,7 @@ export class ReminderDomainService {
     } else {
       await this.reminderTemplateRepository.delete(identityId, id);
     }
+    await this.routineCutover?.deleteRoutine({ identityId, routineId: id });
 
     if (groupId) {
       await this.updateGroupStats(identityId, groupId);
@@ -185,6 +217,7 @@ export class ReminderDomainService {
 
     const group = ReminderGroup.create({ ...params, identityId: params.identityId });
     await this.reminderGroupRepository.save(group);
+    await this.projectRoutineProfile(group);
     return group;
   }
 
@@ -216,6 +249,7 @@ export class ReminderDomainService {
     } else {
       await this.reminderGroupRepository.delete(identityId, id);
     }
+    await this.routineCutover?.deleteProfile({ identityId, profileId: id });
   }
 
   // --- Cross-Aggregate Methods ---
@@ -232,16 +266,15 @@ export class ReminderDomainService {
 
     const oldGroupId = template.groupId;
 
-    if (groupId) {
-      const group = await this.getGroup(identityId, groupId);
-      if (!group) {
-        throw new Error(`Invalid groupId: ${groupId}`);
-      }
+    const targetGroup = groupId ? await this.getGroup(identityId, groupId) : null;
+    if (groupId && !targetGroup) {
+      throw new Error(`Invalid groupId: ${groupId}`);
     }
 
     template.moveToGroup(groupId);
     await this.syncTemplateEffectiveEnabled(template);
     await this.reminderTemplateRepository.save(template);
+    await this.replaceLegacyRoutineMembership(template, targetGroup);
 
     if (oldGroupId) {
       await this.updateGroupStats(identityId, oldGroupId);
@@ -261,6 +294,7 @@ export class ReminderDomainService {
 
     group.toggle();
     await this.reminderGroupRepository.save(group);
+    await this.projectRoutineProfile(group);
     await this.syncTemplatesEffectiveEnabledByGroup(identityId, id);
     return group;
   }

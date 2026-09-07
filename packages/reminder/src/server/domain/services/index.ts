@@ -43,3 +43,4 @@ export { ReminderSchedulerService } from './reminder-scheduler-service';
 export type { IScheduleResult, IScheduleOptions } from './reminder-scheduler-service';
 
 export * from './reminder-domain-service';
+export * from './legacy-routine-cutover-service';

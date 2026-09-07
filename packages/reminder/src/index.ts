@@ -36,6 +36,7 @@ export {
   type ReminderPrismaRepositorySet,
   type ReminderPowerSyncRepositorySet,
   type ReminderSnoozeRescheduler,
+  type RoutineProfileStore,
   type IReminderTemplateRepository,
   type IReminderGroupRepository,
   type IReminderResponseRepository,

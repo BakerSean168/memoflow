@@ -42,6 +42,8 @@ describe('ReminderGroupApplicationService', () => {
     deleteGroup: ReturnType<typeof vi.fn>;
     updateGroupStats: ReturnType<typeof vi.fn>;
     toggleGroupAndTemplates: ReturnType<typeof vi.fn>;
+    projectRoutineProfile: ReturnType<typeof vi.fn>;
+    projectRoutineDefinition: ReturnType<typeof vi.fn>;
   };
   let service: ReminderGroupApplicationService;
 
@@ -62,6 +64,8 @@ describe('ReminderGroupApplicationService', () => {
       deleteGroup: vi.fn().mockResolvedValue(undefined),
       updateGroupStats: vi.fn().mockResolvedValue(undefined),
       toggleGroupAndTemplates: vi.fn(),
+      projectRoutineProfile: vi.fn().mockResolvedValue(undefined),
+      projectRoutineDefinition: vi.fn().mockResolvedValue(undefined),
     };
     service = new ReminderGroupApplicationService({
       reminderGroupRepository: groupRepository,
@@ -106,6 +110,7 @@ describe('ReminderGroupApplicationService', () => {
     );
 
     expect(groupRepository.save).toHaveBeenCalledTimes(1);
+    expect(reminderDomainService.projectRoutineProfile).toHaveBeenCalledTimes(1);
     expect(reminderDomainService.syncTemplatesEffectiveEnabledByGroup).toHaveBeenCalledWith(IDENTITY_ID, existing.id);
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -136,6 +141,7 @@ describe('ReminderGroupApplicationService', () => {
     expect(ownedTemplate.enable).toHaveBeenCalledTimes(1);
     expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledTimes(1);
     expect(templateRepository.save).toHaveBeenCalledTimes(1);
+    expect(reminderDomainService.projectRoutineDefinition).toHaveBeenCalledWith(ownedTemplate);
     expect(reminderDomainService.updateGroupStats).toHaveBeenCalledWith(IDENTITY_ID, group.id);
     expect(result).toEqual({ ok: true, data: { successCount: 1, failedCount: 0 } });
   });

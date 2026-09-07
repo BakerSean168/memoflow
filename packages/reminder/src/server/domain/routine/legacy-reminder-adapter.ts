@@ -32,9 +32,7 @@ export function adaptLegacyReminderTemplate(input: {
     description: template.description,
     // The legacy identity-wide switch is folded into this compatibility gate.
     enabled:
-      globalReminderEnabled &&
-      template.selfEnabled &&
-      template.status === ReminderStatus.Active,
+      globalReminderEnabled && template.selfEnabled && template.status === ReminderStatus.Active,
     trigger: triggerMigration.trigger,
     version: template.version,
     createdAt: new Date(Number(template.createdAt)),
@@ -53,17 +51,7 @@ export function adaptLegacyReminderTemplate(input: {
     throw new TypeError('Legacy reminder group ownership mismatch');
   }
 
-  const profile = RoutineProfile.load({
-    id: group.id,
-    identityId,
-    name: group.name,
-    description: group.description,
-    enabled: group.enabled,
-    active: group.status === ReminderStatus.Active,
-    version: group.version,
-    createdAt: group.createdAt,
-    updatedAt: group.updatedAt,
-  });
+  const profile = adaptLegacyReminderGroup(group);
   const membership = ProfileMembership.create({
     identityId,
     profileId: profile.id,
@@ -79,6 +67,21 @@ export function adaptLegacyReminderTemplate(input: {
     membership,
     legacyRuntimeAnchor: triggerMigration.legacyRuntimeAnchor,
   };
+}
+
+/** Maps one legacy ReminderGroup to the canonical RoutineProfile identity. */
+export function adaptLegacyReminderGroup(group: ReminderGroup): RoutineProfile {
+  return RoutineProfile.load({
+    id: group.id,
+    identityId: String(group.identityId),
+    name: group.name,
+    description: group.description,
+    enabled: group.enabled,
+    active: group.status === ReminderStatus.Active,
+    version: group.version,
+    createdAt: group.createdAt,
+    updatedAt: group.updatedAt,
+  });
 }
 
 export interface LegacyReminderTriggerMigration {
@@ -123,7 +126,8 @@ export function adaptLegacyReminderTrigger(
       return {
         trigger: null,
         legacyRuntimeAnchor: activatedAt,
-        rationale: 'Legacy OneTime Interval has no executable calculator path; migration does not invent new behavior.',
+        rationale:
+          'Legacy OneTime Interval has no executable calculator path; migration does not invent new behavior.',
       };
     }
     const migration = migrateLegacyIntervalTrigger(trigger.interval, {

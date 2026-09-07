@@ -9,6 +9,7 @@ import { ok, error } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IReminderTemplateRepository } from '../../../domain/repositories/i-reminder-template-repository';
 import type { IReminderGroupRepository } from '../../../domain/repositories/i-reminder-group-repository';
+import type { ReminderTemplate } from '../../../domain/aggregates/reminder-template';
 import { ReminderDomainService } from '../../../domain/services/reminder-domain-service';
 import type {
   ReminderTemplateClientDTO,
@@ -42,13 +43,38 @@ export class CreateReminderTemplateUseCase {
       new ReminderTemplateClientMapper(this.reminderDomainService, groupRepository);
   }
 
+  private async replayExisting(
+    existing: ReminderTemplate,
+    cx: ExecutionContext,
+  ): Promise<Result<ReminderTemplateClientDTO>> {
+    const group = existing.groupId
+      ? await this.groupRepository.findByIdForIdentity(cx.identityId, existing.groupId)
+      : null;
+    if (existing.groupId && !group) {
+      return error(
+        'INTERNAL_ERROR',
+        `Legacy reminder group not found during projection repair: ${existing.groupId}`,
+      );
+    }
+
+    try {
+      await this.reminderDomainService.healLegacyRoutineProjection(existing, group);
+      return ok(await this.templateMapper.toDTO(existing));
+    } catch (cause) {
+      return error(
+        'INTERNAL_ERROR',
+        cause instanceof Error ? cause.message : 'Failed to repair Routine projection',
+      );
+    }
+  }
+
   async execute(
     input: CreateReminderTemplateReq,
     cx: ExecutionContext,
   ): Promise<Result<ReminderTemplateClientDTO>> {
     if (input.id) {
       const existing = await this.templateRepository.findByIdForIdentity(cx.identityId, input.id);
-      if (existing) return ok(await this.templateMapper.toDTO(existing));
+      if (existing) return this.replayExisting(existing, cx);
     }
 
     if (await this.closureChecker(cx.identityId)) {
@@ -86,7 +112,7 @@ export class CreateReminderTemplateUseCase {
       // successful replay rather than creating a duplicate reminder.
       if (input.id) {
         const existing = await this.templateRepository.findByIdForIdentity(cx.identityId, input.id);
-        if (existing) return ok(await this.templateMapper.toDTO(existing));
+        if (existing) return this.replayExisting(existing, cx);
       }
 
       return error(

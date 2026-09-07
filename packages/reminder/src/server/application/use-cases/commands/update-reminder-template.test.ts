@@ -14,6 +14,8 @@ describe('UpdateReminderTemplateUseCase', () => {
   const reminderDomainService = {
     syncTemplateEffectiveEnabled: vi.fn(),
     updateGroupStats: vi.fn(),
+    projectRoutineDefinition: vi.fn(),
+    replaceLegacyRoutineMembership: vi.fn(),
   } as any;
   const templateMapper = {
     toDTO: vi.fn(),
@@ -111,6 +113,7 @@ describe('UpdateReminderTemplateUseCase', () => {
     );
     expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledTimes(1);
     expect(templateRepository.save).toHaveBeenCalledTimes(1);
+    expect(reminderDomainService.projectRoutineDefinition).toHaveBeenCalledTimes(1);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.data).toEqual({ id: 'tpl-1', name: 'updated' });
@@ -155,6 +158,10 @@ describe('UpdateReminderTemplateUseCase', () => {
       }),
     );
     expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledTimes(1);
+    expect(reminderDomainService.replaceLegacyRoutineMembership).toHaveBeenCalledWith(
+      template,
+      expect.objectContaining({ id: 'group-1' }),
+    );
     expect(reminderDomainService.updateGroupStats).toHaveBeenCalledWith(expect.any(String), 'group-1');
   });
 });

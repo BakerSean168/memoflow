@@ -37,11 +37,7 @@ export class ReminderTemplateActionApplicationService {
     ctx: ExecutionContext,
     options?: Parameters<IReminderTemplateRepository['findByIdForIdentity']>[2],
   ): Promise<ReminderTemplate | null> {
-    return this.reminderTemplateRepository.findByIdForIdentity(
-      ctx.identityId,
-      templateId,
-      options,
-    );
+    return this.reminderTemplateRepository.findByIdForIdentity(ctx.identityId, templateId, options);
   }
 
   private async getOwnedGroupOrFail(
@@ -63,6 +59,7 @@ export class ReminderTemplateActionApplicationService {
     template.enable();
     await this.reminderDomainService.syncTemplateEffectiveEnabled(template);
     await this.reminderTemplateRepository.save(template);
+    await this.reminderDomainService.projectRoutineDefinition(template);
     if (template.groupId) {
       await this.reminderDomainService.updateGroupStats(ctx.identityId, template.groupId);
     }
@@ -82,6 +79,7 @@ export class ReminderTemplateActionApplicationService {
     template.pause();
     await this.reminderDomainService.syncTemplateEffectiveEnabled(template);
     await this.reminderTemplateRepository.save(template);
+    await this.reminderDomainService.projectRoutineDefinition(template);
     if (template.groupId) {
       await this.reminderDomainService.updateGroupStats(ctx.identityId, template.groupId);
     }
@@ -101,6 +99,7 @@ export class ReminderTemplateActionApplicationService {
     template.toggle();
     await this.reminderDomainService.syncTemplateEffectiveEnabled(template);
     await this.reminderTemplateRepository.save(template);
+    await this.reminderDomainService.projectRoutineDefinition(template);
     if (template.groupId) {
       await this.reminderDomainService.updateGroupStats(ctx.identityId, template.groupId);
     }
@@ -125,7 +124,11 @@ export class ReminderTemplateActionApplicationService {
       }
     }
 
-    const result = await this.reminderDomainService.assignTemplateToGroup(ctx.identityId, id, groupId);
+    const result = await this.reminderDomainService.assignTemplateToGroup(
+      ctx.identityId,
+      id,
+      groupId,
+    );
     return ok(await this.templateMapper.toDTO(result));
   }
 

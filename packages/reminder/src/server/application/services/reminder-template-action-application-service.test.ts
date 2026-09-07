@@ -27,6 +27,7 @@ describe('ReminderTemplateActionApplicationService', () => {
     syncTemplateEffectiveEnabled: ReturnType<typeof vi.fn>;
     updateGroupStats: ReturnType<typeof vi.fn>;
     assignTemplateToGroup: ReturnType<typeof vi.fn>;
+    projectRoutineDefinition: ReturnType<typeof vi.fn>;
   };
   let templateMapper: { toDTO: ReturnType<typeof vi.fn> };
   let service: ReminderTemplateActionApplicationService;
@@ -43,6 +44,7 @@ describe('ReminderTemplateActionApplicationService', () => {
       syncTemplateEffectiveEnabled: vi.fn().mockResolvedValue(undefined),
       updateGroupStats: vi.fn().mockResolvedValue(undefined),
       assignTemplateToGroup: vi.fn(),
+      projectRoutineDefinition: vi.fn().mockResolvedValue(undefined),
     };
     templateMapper = {
       toDTO: vi.fn(),
@@ -66,6 +68,7 @@ describe('ReminderTemplateActionApplicationService', () => {
     expect(template.enable).toHaveBeenCalledTimes(1);
     expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledWith(template);
     expect(reminderTemplateRepository.save).toHaveBeenCalledWith(template);
+    expect(reminderDomainService.projectRoutineDefinition).toHaveBeenCalledWith(template);
     expect(reminderDomainService.updateGroupStats).toHaveBeenCalledWith(IDENTITY_ID, 'group-1');
     expect(result).toEqual({ ok: true, data: dto });
   });

@@ -160,6 +160,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
     reminderGroupRepository: repositories.reminderGroupRepository,
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
+    routineProfileStore: repositories.routineProfileStore,
     closureChecker: dependencies.closureChecker,
     reliablePort: repositories.reliablePort,
     snoozeRescheduler: repositories.snoozeRescheduler,
@@ -196,6 +197,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
           reminderGroupRepository: repositories.reminderGroupRepository,
           reminderResponseRepository: repositories.reminderResponseRepository,
           userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
+          routineProfileStore: repositories.routineProfileStore,
           closureChecker: dependencies.executorClosureChecker,
         });
 

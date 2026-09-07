@@ -32,7 +32,8 @@ export class UpdateReminderTemplateUseCase {
     this.reminderDomainService =
       reminderDomainService ?? new ReminderDomainService(templateRepository, groupRepository);
     this.templateMapper =
-      templateMapper ?? new ReminderTemplateClientMapper(this.reminderDomainService, groupRepository);
+      templateMapper ??
+      new ReminderTemplateClientMapper(this.reminderDomainService, groupRepository);
   }
 
   async execute(
@@ -88,6 +89,11 @@ export class UpdateReminderTemplateUseCase {
 
     await this.reminderDomainService.syncTemplateEffectiveEnabled(template);
     await this.templateRepository.save(template);
+    if (request.groupId !== undefined) {
+      await this.reminderDomainService.replaceLegacyRoutineMembership(template, group);
+    } else {
+      await this.reminderDomainService.projectRoutineDefinition(template);
+    }
 
     if (previousGroupId && previousGroupId !== template.groupId) {
       await this.reminderDomainService.updateGroupStats(cx.identityId, previousGroupId);

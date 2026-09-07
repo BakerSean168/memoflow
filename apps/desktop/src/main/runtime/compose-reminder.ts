@@ -182,6 +182,7 @@ export function composeReminder(
     reminderGroupRepository: repositories.reminderGroupRepository,
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
+    routineProfileStore: repositories.routineProfileStore,
     closureChecker: repositories.closureChecker,
   });
 

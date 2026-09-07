@@ -21,6 +21,7 @@ import {
   ReminderResponsePowerSyncRepository,
   UserReminderPreferencePowerSyncRepository,
 } from './adapters/powersync';
+import { PowerSyncRoutineProfileStore } from './routine-vnext/routine-profile-store.powersync';
 import { ReminderScheduleExecutionPowerSyncCommitAdapter } from './adapters/powersync/reminder-schedule-execution-commit.powersync.adapter';
 import type { ReminderScheduleExecutionSource } from '../../schedule-execution';
 import type { ReminderScheduleExecutionCommitPort } from './schedule-execution-commit.port';
@@ -32,6 +33,7 @@ import type {
   IReminderGroupRepository,
   IReminderResponseRepository,
   IUserReminderPreferenceRepository,
+  RoutineProfileStore,
 } from '../domain';
 
 type Queryable = IElectronDatabase;
@@ -84,6 +86,7 @@ export interface ReminderPowerSyncRepositorySet {
   readonly reminderGroupRepository: IReminderGroupRepository;
   readonly reminderResponseRepository: IReminderResponseRepository;
   readonly userReminderPreferenceRepository: IUserReminderPreferenceRepository;
+  readonly routineProfileStore: RoutineProfileStore;
   readonly closureChecker: (identityId: string) => Promise<boolean>;
 }
 
@@ -108,6 +111,7 @@ export function createReminderPowerSyncRepositories(db: Queryable): ReminderPowe
     reminderGroupRepository: new ReminderGroupPowerSyncRepository(db),
     reminderResponseRepository: new ReminderResponsePowerSyncRepository(db),
     userReminderPreferenceRepository: new UserReminderPreferencePowerSyncRepository(db),
+    routineProfileStore: new PowerSyncRoutineProfileStore(db),
     closureChecker: createPowerSyncClosureChecker(db),
   };
 }
@@ -139,6 +143,7 @@ export function createReminderPowerSyncModule(
     reminderGroupRepository: repositories.reminderGroupRepository,
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
+    routineProfileStore: repositories.routineProfileStore,
     runtimeContributions,
     closureChecker: repositories.closureChecker,
   });

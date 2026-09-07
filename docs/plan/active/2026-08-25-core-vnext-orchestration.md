@@ -2073,6 +2073,20 @@ Physical package rename `reminder -> routine` is a separate final decision; do n
 
 `CLEAN-6302` remains open for the membership, smart-frequency, snooze-response, and final obsolete-surface tranches; physical `reminder -> routine` rename remains out of scope here.
 
+
+**Implementation evidence — tranche B1 (2026-09-07): canonical Routine/Profile/M:N membership persistence made live**
+
+- added MemoFlow-owned `RoutineProfileStore` as the single domain persistence seam for `RoutineDefinition`, `RoutineProfile`, and `ProfileMembership`, with Prisma and PowerSync implementations sharing the same domain objects rather than leaking adapter row types;
+- both stores support definition/profile upsert/query/delete, M:N membership query/upsert/delete, and atomic full-edge replacement for one Routine; replacement rejects cross-owner and duplicate Profile edges before mutation;
+- made `routineProfileStore` a required fail-closed Reminder module dependency and wired it through API Prisma and Desktop PowerSync composition roots, so vNext profile state is no longer a parity-only/read-only schema;
+- added the temporary `LegacyRoutineCutoverService`: legacy create/move commands project into the canonical store while ordinary Routine edits update only the `RoutineDefinition` and therefore cannot collapse a future multi-Profile membership set;
+- deterministic create replay now repairs an interrupted canonical projection before closure policy/re-mutation. Repair only synthesizes the legacy Profile edge when no canonical memberships exist; if `Work + Gaming` (or any other M:N set) already exists, replay preserves it unchanged;
+- legacy group create/update/toggle/delete project to/remove the canonical `RoutineProfile`; template create/update/enable/pause/toggle/delete and batch operations keep the canonical `RoutineDefinition` current. Legacy single-group assignment remains the temporary command shim until the next transport/UI cutover tranche;
+- persistence evidence: real in-memory SQLite PowerSync tests prove one Routine can belong to `Work + Gaming`, transactional edge replacement, and ownership/duplicate rejection; real PostgreSQL Prisma integration proves the same M:N round-trip and transactional replacement;
+- verification: Reminder **73/73 unit files, 519/519 tests**; Reminder integration **5/5 files, 33/33 tests**; Contracts **67/67 files, 482/482 tests**; Reminder package build green; Reminder/API/Desktop/App-Vue/Contracts typechecks green; Reminder/API/Desktop/Contracts lint have **0 errors** (pre-existing warnings remain); Nx sync and `git diff --check` green.
+
+`CLEAN-6302B` is not complete yet: the canonical M:N store is live, but the public Reminder transport/client/UI still exposes legacy single `groupId`. The next tranche must cut those surfaces to ProfileMembership before deleting `reminder_group_id` persistence.
+
 ## CLEAN-6303 — Internalize raw ScheduleTask product surfaces
 
 No ordinary user API/UI should create worker jobs directly.
@@ -2464,7 +2478,7 @@ Core vNext can close only when all of the following hold:
 - [ ] final cross-domain failure matrix passes (`HARD-7101` pending);
 - [x] API/Desktop/PowerSync/Prisma parity passes for the completed primary product scope;
 - [x] full governance/docs checks green for the completed milestone and current main;
-- [ ] residual grep proves all legacy dual paths removed — raw ScheduleTask product mutations and the SourceModule execution fallback are gone, CLEAN-6301 Goal/Task legacy surfaces are gone, and CLEAN-6302A has removed ControlMode + the legacy Reminder scanner; remaining CLEAN-6302 membership/smart-frequency/snooze cleanup still remains;
+- [ ] residual grep proves all legacy dual paths removed — raw ScheduleTask product mutations and the SourceModule execution fallback are gone, CLEAN-6301 Goal/Task legacy surfaces are gone, CLEAN-6302A removed ControlMode + the legacy Reminder scanner, and CLEAN-6302B1 made the canonical Routine/Profile/M:N store live; public `groupId` compatibility plus smart-frequency/snooze cleanup still remain;
 - [ ] final residual batch review has no P0/P1 unresolved finding.
 
 ---
@@ -2481,7 +2495,7 @@ A. Product parity (independent lanes)
    MOBILE-6201/6202   parity audit first; current screens already use modern Goal/Task/Notification contracts, implement only proven gaps
 
 B. Scheduling physical convergence (ordered)
-   CLEAN-6302B/C      migrate legacy single `groupId` ownership to ProfileMembership, then retire duplicate smart-frequency and overloaded snooze-response semantics (6302A ControlMode/scanner complete)
+   CLEAN-6302B2/C     cut public single `groupId` transport/UI/persistence to the now-live ProfileMembership M:N store, then retire duplicate smart-frequency and overloaded snooze-response semantics (6302A + B1 complete)
         ↓
    CLEAN-6304         decide/perform scheduler physical package split only after semantic ownership is clean
         ↓

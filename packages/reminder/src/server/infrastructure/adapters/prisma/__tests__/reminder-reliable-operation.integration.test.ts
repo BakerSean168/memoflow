@@ -17,6 +17,7 @@ import { ReminderSchedulerService } from '../../../../domain/services/reminder-s
 import { ReminderTriggerService } from '../../../../domain/services/reminder-trigger-service';
 import { ReminderTemplateControlService } from '../../../../domain/services/reminder-template-control-service';
 import { ReminderMetricsCollector } from '../../../../domain/services/reminder-metrics-service';
+import { PrismaRoutineProfileStore } from '../../../routine-vnext/routine-profile-store.prisma';
 import {
   cleanAll,
   disconnectPrisma,
@@ -1535,6 +1536,7 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
       reminderGroupRepository: new ReminderGroupPrismaRepository(prisma),
       reminderResponseRepository: new ReminderResponsePrismaRepository(prisma),
       userReminderPreferenceRepository: new UserReminderPreferencePrismaRepository(prisma),
+      routineProfileStore: new PrismaRoutineProfileStore(prisma),
       closureChecker: async () => false,
       reliablePort: new ReminderReliableOperationPrismaAdapter(prisma),
       auditRepository: failingAudit as never,
@@ -1583,6 +1585,7 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
       reminderGroupRepository: new ReminderGroupPrismaRepository(prisma),
       reminderResponseRepository: new ReminderResponsePrismaRepository(prisma),
       userReminderPreferenceRepository: new UserReminderPreferencePrismaRepository(prisma),
+      routineProfileStore: new PrismaRoutineProfileStore(prisma),
       closureChecker: async () => false,
       reliablePort: new ReminderReliableOperationPrismaAdapter(prisma),
       auditRepository: failingAudit as never,

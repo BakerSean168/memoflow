@@ -17,6 +17,7 @@ import type { IReminderTemplateRepository } from '../../domain/repositories/i-re
 import type { IReminderGroupRepository } from '../../domain/repositories/i-reminder-group-repository';
 import type { IReminderResponseRepository } from '../../domain/repositories/i-reminder-response-repository';
 import type { IUserReminderPreferenceRepository } from '../../domain/repositories/i-user-reminder-preference-repository';
+import type { RoutineProfileStore } from '../../domain/ports/routine-profile-store.port';
 import {
   createReminderModule,
   type ReminderModuleDependencies,
@@ -40,24 +41,57 @@ function makeContribution(name: string, failOnStart = false): FakeContribution {
   return { name, start, stop, contribution: { start, stop } };
 }
 
-function makeDeps(runtimeContributions: ReminderModuleRuntimeContribution[]): ReminderModuleDependencies {
+function makeRoutineProfileStore(): RoutineProfileStore {
+  return {
+    upsertDefinition: async () => {},
+    findDefinition: async () => null,
+    deleteDefinition: async () => {},
+    upsertProfile: async () => {},
+    findProfile: async () => null,
+    listProfiles: async () => [],
+    deleteProfile: async () => {},
+    upsertMembership: async () => {},
+    listMembershipsForRoutine: async () => [],
+    listMembershipsForProfile: async () => [],
+    deleteMembership: async () => {},
+    replaceRoutineMemberships: async () => {},
+  };
+}
+
+function makeDeps(
+  runtimeContributions: ReminderModuleRuntimeContribution[],
+): ReminderModuleDependencies {
   return {
     reminderTemplateRepository: {} as unknown as IReminderTemplateRepository,
     reminderGroupRepository: {} as unknown as IReminderGroupRepository,
     reminderResponseRepository: {} as unknown as IReminderResponseRepository,
     userReminderPreferenceRepository: {} as unknown as IUserReminderPreferenceRepository,
+    routineProfileStore: makeRoutineProfileStore(),
     closureChecker: async (): Promise<boolean> => false,
     runtimeContributions,
   };
 }
 
 describe('createReminderModule partial-start cleanup', () => {
+  it('fails closed when the canonical RoutineProfileStore is missing', () => {
+    const dependencies = {
+      ...makeDeps([]),
+      routineProfileStore: undefined,
+    } as unknown as ReminderModuleDependencies;
+
+    expect(() => createReminderModule(dependencies)).toThrow(
+      '[FAIL-CLOSED] ReminderModule requires routineProfileStore dependency',
+    );
+  });
+
   it('awaits already-started contributions in reverse order and rethrows the original error', async () => {
     const a = makeContribution('a');
     const b = makeContribution('b');
     const c = makeContribution('c', true);
 
-    const instance = createReminderModule(makeDeps([a.contribution, b.contribution, c.contribution]));
+    const instance = createReminderModule(
+      makeDeps([a.contribution, b.contribution, c.contribution]),
+    );
 
     await expect(instance.start()).rejects.toThrow('c start failed');
 
