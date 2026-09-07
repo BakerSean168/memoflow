@@ -13,22 +13,18 @@ import type {
 } from '@memoflow/contracts/schedule';
 
 /**
- * Transport-neutral Scheduler worker diagnostics and operational surface.
+ * Planner/Calendar operational surface.
  *
- * Raw ScheduleTask is Scheduler-owned persistence. Product transports may read
- * worker state for diagnostics, but must not mutate worker jobs directly;
- * business writes flow through owner-domain commands -> SchedulingPort.
+ * Worker-job diagnostics live in @memoflow/scheduler. This port owns only
+ * Calendar reliability/operations that are backed by Schedule-owned state.
  */
 export interface ScheduleApplicationPort {
-  listTasks(query: Record<string, unknown>, ctx: Context): Promise<Result<unknown>>;
-  getTask(id: string, ctx: Context): Promise<Result<unknown>>;
-  getDueTasks(ctx: Context): Promise<Result<unknown>>;
   queryRebuildTimeline(ctx: Context): Promise<Result<OperationTimelineEntry[]>>;
   replayRebuildOutbox(operationId: string, ctx: Context): Promise<Result<unknown>>;
   getOperationAudit(ctx: Context): Promise<Result<OperationAuditRecord[]>>;
 }
 
-/** Transport-neutral callable application surface for schedule events. */
+/** Transport-neutral callable application surface for Calendar entries. */
 export interface ScheduleEventApplicationPort {
   createEvent(data: CreateScheduleRequest, ctx: Context): Promise<Result<unknown>>;
   getEvent(id: string, ctx: Context): Promise<Result<unknown>>;

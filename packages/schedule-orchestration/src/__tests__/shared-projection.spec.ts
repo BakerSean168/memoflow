@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { SourceModule } from '@memoflow/contracts/schedule';
-import type { IScheduleTaskRepository, ScheduleTask } from '@memoflow/schedule';
+import type { IScheduleTaskRepository, ScheduleTask } from '@memoflow/scheduler';
 import type { Publisher } from '@memoflow/utils/domain';
 import type { ScheduleEventMap } from '@memoflow/contracts/schedule';
 import { replaceSelection } from '../projectors/shared-projection';

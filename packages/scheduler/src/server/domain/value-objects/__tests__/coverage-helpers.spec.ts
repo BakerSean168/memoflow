@@ -1,6 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ConflictDetectionResult } from '../conflict-detection-result';
-import { ConflictSeverity } from '../conflict-severity';
 import { ExecutionInfo } from '../execution-info';
 import { ExecutionStatus } from '../execution-status';
 import { RetryPolicy } from '../retry-policy';
@@ -10,7 +8,7 @@ import { SourceModule } from '../source-module';
 import { TaskPriority } from '../task-priority';
 import { Timezone } from '../timezone';
 
-describe('schedule shared value object coverage helpers', () => {
+describe('scheduler value object coverage helpers', () => {
   it('covers execution status helpers', () => {
     expect(ExecutionStatus.of('Success')).toBe(ExecutionStatus.Success);
     expect(ExecutionStatus.isSuccess(ExecutionStatus.Success)).toBe(true);
@@ -39,7 +37,7 @@ describe('schedule shared value object coverage helpers', () => {
     expect(() => ScheduleTaskStatus.of('bad')).toThrow('Invalid ScheduleTaskStatus: bad');
   });
 
-  it('covers source module, task priority, timezone, and conflict severity helpers', () => {
+  it('covers source module, task priority, and timezone helpers', () => {
     expect(SourceModule.of('Reminder')).toBe(SourceModule.Reminder);
     expect(SourceModule.isSystem(SourceModule.System)).toBe(true);
     expect(SourceModule.isBusiness(SourceModule.Goal)).toBe(true);
@@ -56,55 +54,6 @@ describe('schedule shared value object coverage helpers', () => {
     expect(Timezone.isAmerica(Timezone.NewYork)).toBe(true);
     expect(Timezone.isEurope(Timezone.London)).toBe(true);
 
-    expect(ConflictSeverity.of('Moderate')).toBe(ConflictSeverity.Moderate);
-    expect(ConflictSeverity.toNumber(ConflictSeverity.Severe)).toBe(3);
-    expect(ConflictSeverity.isSevere(ConflictSeverity.Severe)).toBe(true);
-    expect(ConflictSeverity.needsImmediate(ConflictSeverity.Moderate)).toBe(true);
-  });
-
-  it('covers conflict detection result factories and DTO conversion', () => {
-    const noConflict = ConflictDetectionResult.noConflict();
-    const withConflicts = ConflictDetectionResult.withConflicts(
-      [
-        {
-          scheduleId: 'schedule-1',
-          scheduleTitle: 'Meeting',
-          overlapStart: 100,
-          overlapEnd: 130,
-          overlapDuration: 30,
-          severity: 'Moderate',
-        },
-      ],
-      [{ type: 'MoveLater', newStartTime: 140, newEndTime: 170 }],
-    );
-
-    expect(noConflict.hasConflict).toBe(false);
-    expect(noConflict.conflictCount).toBe(0);
-    expect(noConflict.hasSuggestions).toBe(false);
-    expect(withConflicts.hasConflict).toBe(true);
-    expect(withConflicts.conflictingScheduleIds).toEqual(['schedule-1']);
-    expect(withConflicts.suggestionCount).toBe(1);
-    expect(withConflicts.toDTO()).toEqual({
-      hasConflict: true,
-      conflicts: [
-        {
-          scheduleId: 'schedule-1',
-          scheduleTitle: 'Meeting',
-          overlapStart: 100,
-          overlapEnd: 130,
-          overlapDuration: 30,
-          severity: 'Moderate',
-        },
-      ],
-      suggestions: [{ type: 'MoveLater', newStartTime: 140, newEndTime: 170 }],
-    });
-    expect(
-      ConflictDetectionResult.create({
-        hasConflict: false,
-        conflicts: [],
-        suggestions: [],
-      }).hasConflict,
-    ).toBe(false);
   });
 
   it('covers additional execution info, retry policy, and schedule config branches', () => {

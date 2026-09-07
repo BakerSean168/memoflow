@@ -1,43 +1,26 @@
-/**
- * Schedule client seam.
- *
- * Calendar commands remain product-facing. Raw Scheduler worker jobs are
- * exposed as read-only diagnostics only.
- */
-
+/** Planner/Calendar client seam. */
 import type { IResultHttpClient } from '@memoflow/http-client';
+import type { IResultIpcClient } from '@memoflow/ipc-client';
 import {
   createScheduleClientService,
   createScheduleServiceFromHttpClient,
   type ScheduleClientPort,
 } from '../application-client';
-import { ScheduleTask } from '../domain-client';
 import {
   ScheduleEventHttpAdapter,
-  ScheduleTaskHttpAdapter,
-  createScheduleHttpAdapters,
-  type ScheduleHttpAdapters,
+  createScheduleEventHttpAdapter,
 } from '../infrastructure-client/adapters/http';
 import {
   ScheduleEventIpcAdapter,
-  ScheduleTaskIpcAdapter,
-  createScheduleIpcAdapters,
-  type ScheduleIpcAdapters,
+  createScheduleEventIpcAdapter,
 } from '../infrastructure-client/adapters/ipc';
-import type {
-  IScheduleEventApiClient,
-  IScheduleTaskApiClient,
-  IResultIpcClient,
-} from '../infrastructure-client/adapters/types';
+import type { IScheduleEventApiClient } from '../infrastructure-client/adapters/types';
 
 export type {
   IResultHttpClient,
   IResultIpcClient,
   IScheduleEventApiClient,
-  IScheduleTaskApiClient,
   ScheduleClientPort,
-  ScheduleHttpAdapters,
-  ScheduleIpcAdapters,
 };
 
 export function createScheduleHttpClient(httpClient: IResultHttpClient): ScheduleClientPort {
@@ -45,17 +28,13 @@ export function createScheduleHttpClient(httpClient: IResultHttpClient): Schedul
 }
 
 export function createScheduleIpcClient(ipcClient: IResultIpcClient): ScheduleClientPort {
-  const adapters = createScheduleIpcAdapters(ipcClient);
-  return createScheduleClientService(adapters.event, adapters.task);
+  return createScheduleClientService(createScheduleEventIpcAdapter(ipcClient));
 }
 
 export {
   ScheduleEventHttpAdapter,
   ScheduleEventIpcAdapter,
-  ScheduleTask,
-  ScheduleTaskHttpAdapter,
-  ScheduleTaskIpcAdapter,
   createScheduleClientService,
-  createScheduleHttpAdapters,
-  createScheduleIpcAdapters,
+  createScheduleEventHttpAdapter,
+  createScheduleEventIpcAdapter,
 };

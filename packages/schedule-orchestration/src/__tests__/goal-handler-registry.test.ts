@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ScheduledHandlerRegistry } from '@memoflow/schedule';
+import { ScheduledHandlerRegistry } from '@memoflow/scheduler';
 import type { ScheduledInvocationContext } from '@memoflow/contracts/schedule';
 import {
   createGoalReminderFireHandler,

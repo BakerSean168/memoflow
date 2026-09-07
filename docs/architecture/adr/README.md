@@ -75,7 +75,7 @@ updated: 2026-09-02T16:15:00+08:00
 | [ADR-057](./ADR-057-task-occurrence-outcome-and-plan-lifecycle.md) | Task Occurrence Outcome、Overdue 与 Task Plan 生命周期 | 已采纳（待实施） | 2026-08-25 |
 | [ADR-058](./ADR-058-oss-first-standard-capability-reuse.md) | OSS-first 标准能力复用与领域所有权边界 | 已采纳（从 Goal / Task vNext 开始执行） | 2026-08-25 |
 | [ADR-059](./ADR-059-routine-coach-domain-runtime-and-surfaces.md) | Routine Coach 领域、Runtime 与交互 Surface | 已采纳（待实施） | 2026-08-25 |
-| [ADR-060](./ADR-060-schedule-planner-and-scheduler-boundary.md) | Schedule / Planner 与 Scheduler / Temporal Engine 分离 | 已采纳（待实施） | 2026-08-25 |
+| [ADR-060](./ADR-060-schedule-planner-and-scheduler-boundary.md) | Schedule / Planner 与 Scheduler / Temporal Engine 分离 | 已采纳并实施 | 2026-08-25 |
 | [ADR-061](./ADR-061-business-module-scheduling-port-and-handler-registry.md) | 业务模块通过 Scheduling Port 与 Handler Registry 接入 Scheduler | 已采纳（待实施） | 2026-08-25 |
 | [ADR-062](./ADR-062-reminder-routine-single-scheduling-authority.md) | Reminder / Routine 单一调度权与可靠 Occurrence 执行 | 已采纳（待实施） | 2026-08-25 |
 | [ADR-063](./ADR-063-notification-fact-delivery-policy-and-device-surfaces.md) | Notification Fact、Delivery Policy 与 Device Surface 分离 | 已采纳（待实施） | 2026-08-25 |

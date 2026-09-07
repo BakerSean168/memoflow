@@ -245,7 +245,14 @@ describe('W7 cross-module operation gate (real DB)', () => {
     const notifModule = createNotificationPrismaModule(prisma, {
       closureChecker: async () => false,
     });
-    const schedule = createSchedulePrismaModule(prisma, { wireDeliveryLogConsumer: false });
+    const schedule = createSchedulePrismaModule(prisma, {
+      wireDeliveryLogConsumer: false,
+      leaseCoordinator: {
+        async execute(_leaseKey, task) {
+          return { acquired: true, value: await task({ ensureHeld: async () => undefined }) };
+        },
+      },
+    });
     const account = createAccountPrismaModule(prisma, {
       cloudAuth: {
         revokeAllSessions: async () => ({ revokedSessions: 0 }),

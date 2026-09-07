@@ -366,6 +366,9 @@ importers:
       '@memoflow/schedule-orchestration':
         specifier: workspace:*
         version: link:../../packages/schedule-orchestration
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../../packages/scheduler
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
@@ -565,6 +568,9 @@ importers:
       '@memoflow/schedule-orchestration':
         specifier: workspace:*
         version: link:../../packages/schedule-orchestration
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../../packages/scheduler
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
@@ -1186,6 +1192,9 @@ importers:
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../schedule
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
@@ -1599,6 +1608,9 @@ importers:
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../schedule
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@memoflow/task':
         specifier: workspace:*
         version: link:../task
@@ -1736,6 +1748,9 @@ importers:
       '@memoflow/powersync-schema':
         specifier: workspace:*
         version: link:../powersync-schema
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1904,6 +1919,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@memoflow/test-utils':
         specifier: workspace:*
         version: link:../test-utils
@@ -1925,6 +1943,9 @@ importers:
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../schedule
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@memoflow/task':
         specifier: workspace:*
         version: link:../task
@@ -1938,6 +1959,46 @@ importers:
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
+
+  packages/scheduler:
+    dependencies:
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/database':
+        specifier: workspace:*
+        version: link:../database
+      '@memoflow/domain-shared':
+        specifier: workspace:*
+        version: link:../domain-shared
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@memoflow/patterns':
+        specifier: workspace:*
+        version: link:../patterns
+      '@memoflow/utils':
+        specifier: workspace:*
+        version: link:../utils
+      cron-parser:
+        specifier: ^5.4.0
+        version: 5.4.0
+      express:
+        specifier: ^5.2.1
+        version: 5.2.1(supports-color@10.2.2)
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.6
 
   packages/setting:
     dependencies:
@@ -1996,6 +2057,9 @@ importers:
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../schedule
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time

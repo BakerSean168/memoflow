@@ -9,7 +9,7 @@ import {
   ScheduledHandlerRegistry,
   ScheduleTask,
   type ScheduleTaskExecutionResult,
-} from '@memoflow/schedule';
+} from '@memoflow/scheduler';
 import type { TaskReminderScheduledPayload } from '@memoflow/task/schedule-projection';
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 

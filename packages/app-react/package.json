@@ -22,10 +22,11 @@
     "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule": "workspace:*",
+    "@memoflow/scheduler": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/task": "workspace:*",
-    "@memoflow/ui-react-native": "workspace:*",
-    "@memoflow/time": "workspace:*"
+    "@memoflow/time": "workspace:*",
+    "@memoflow/ui-react-native": "workspace:*"
   },
   "peerDependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

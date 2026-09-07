@@ -14,7 +14,7 @@ import {
   disconnectPrisma,
   getPrisma,
   seedAccount,
-} from '../../../../__tests__/integration-helpers';
+} from '@memoflow/test-utils/setup/integration-helpers';
 
 function createScheduleTask(identityId: string) {
   const task = ScheduleTask.create({

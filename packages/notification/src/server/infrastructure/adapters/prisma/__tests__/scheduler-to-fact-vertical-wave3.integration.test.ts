@@ -43,9 +43,9 @@ import { ROUTINE_SCHEDULING_OWNER_TYPE } from '@memoflow/reminder/schedule-proje
 import {
   ScheduledHandlerRegistry,
   createHandlerRegistryScheduleTaskSourceExecutor,
-  createScheduleTaskPrismaRepository,
+  createSchedulerTaskPrismaRepository,
   createScheduleTaskSchedulingPort,
-} from '@memoflow/schedule';
+} from '@memoflow/scheduler';
 import { NotificationRequestedPrismaWriterAdapter } from '../notification-requested-writer.prisma.adapter';
 import { NotificationPrismaRepository } from '../notification-prisma.repository';
 import { NotificationPreferencePrismaRepository } from '../notification-preference-prisma.repository';
@@ -152,7 +152,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
   }
 
   async function reconcileOwner(owner: SchedulingOwner, desired: readonly ScheduledIntent[]) {
-    const repo = createScheduleTaskPrismaRepository(prisma);
+    const repo = createSchedulerTaskPrismaRepository(prisma);
     const schedulingPort = createScheduleTaskSchedulingPort(repo);
     const receipt = await schedulingPort.reconcile(owner, desired);
     expect(receipt.status).toBe('succeeded');

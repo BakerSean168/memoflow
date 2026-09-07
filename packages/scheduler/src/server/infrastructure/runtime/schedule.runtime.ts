@@ -13,7 +13,7 @@ import {
   type ScheduledItem,
 } from '../../application/scheduler/schedule-task-queue';
 import { SCHEDULE_LEASE_KEY } from '../lease/schedule-lease-coordinator';
-import type { ScheduleModuleRuntimeContribution } from '../schedule.module';
+import type { SchedulerModuleRuntimeContribution } from '../scheduler.module';
 
 const logger = createLogger('ScheduleRuntime');
 
@@ -36,7 +36,7 @@ type ScheduleRuntimeEventMap = Pick<ScheduleEventMap, SyncTaskEventName | Remove
 
 const scheduleRuntimeEvents = createTypedEventSubscriber<ScheduleRuntimeEventMap>(eventBus);
 
-export interface ScheduleRuntimeDependencies {
+export interface SchedulerRuntimeDependencies {
   readonly scheduleTaskRepository: IScheduleTaskRepository;
   readonly sourceExecutor: ScheduleTaskSourceExecutor;
   readonly shouldScheduleTask?: (task: ScheduleTask) => boolean | Promise<boolean>;
@@ -271,9 +271,9 @@ async function executeScheduledTask(
   await repository.save(task);
 }
 
-export function createScheduleRuntimeContribution(
-  deps: ScheduleRuntimeDependencies,
-): ScheduleModuleRuntimeContribution {
+export function createSchedulerRuntimeContribution(
+  deps: SchedulerRuntimeDependencies,
+): SchedulerModuleRuntimeContribution {
   const queue = new ScheduleTaskQueue({
     taskLoader: {
       async loadActiveTasks() {

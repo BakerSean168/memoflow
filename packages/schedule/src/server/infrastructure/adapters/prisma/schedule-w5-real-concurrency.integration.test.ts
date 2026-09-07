@@ -6,12 +6,8 @@ import {
   seedAccount,
 } from '../../../../__tests__/integration-helpers';
 import { SchedulePrismaRepository } from './schedule-prisma.repository';
-import { ScheduleExecutionPrismaRepository } from './schedule-execution-prisma.repository';
-import { ScheduleTaskPrismaRepository } from './schedule-task-prisma.repository';
 import { ScheduleEventApplicationService } from '../../../application/services/schedule-event-application-service';
 import { ScheduleRebuildWorkerService } from '../../../application/services/schedule-rebuild-worker-service';
-import { ScheduleLeaseCoordinator } from '../../../infrastructure/lease/schedule-lease-coordinator';
-import { createScheduleLeasePrismaRepository } from '../../../infrastructure/lease/schedule-lease.repository';
 import { ScheduleDomainEventPublisherService } from '../../../application/services/schedule-domain-event-publisher';
 import { CalendarEntry } from '../../../domain/aggregates/calendar-entry';
 import { PowerSyncScheduleRepository } from '../powersync/schedule-powersync.repository';
@@ -23,6 +19,9 @@ import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/
 import { CrossPlatformEventBus, eventBus } from '@memoflow/utils/domain';
 import { ScheduleEventDeliveryLogConsumer } from '../../consumers/schedule-event-delivery-log.consumer';
 import { createUnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';
+// Cross-package integration: Calendar reliability must interoperate with the concrete Scheduler lease.
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { createSchedulerPrismaRepositories } from '@memoflow/scheduler';
 
 function createRealSqlitePowerSyncDb(): IElectronDatabase {
   const sqlite = new (require('better-sqlite3'))(':memory:') as {
@@ -590,7 +589,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const consumerA = new ScheduleEventDeliveryLogConsumer(prisma, busA);
     consumerA.start();
 
-    const realLeaseA = new ScheduleLeaseCoordinator(createScheduleLeasePrismaRepository(prisma));
+    const realLeaseA = createSchedulerPrismaRepositories(prisma).leaseCoordinator;
     const publisherA = new ScheduleDomainEventPublisherService(repo, realLeaseA, adapterA, {
       faultInjection: { failAfterPublishBeforeAck: true },
     });
@@ -606,12 +605,13 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
 
     // ----- Crash-leftover lease: a dead process left an unexpired lease row (no finally release) -----
     const nowMs = Date.now();
-    const leaseRepo = createScheduleLeasePrismaRepository(prisma);
-    await leaseRepo.tryAcquire({
-      leaseKey: 'schedule-domain-event-publisher',
-      ownerToken: 'dead-owner-crash',
-      now: nowMs,
-      expiresAt: nowMs + 60_000,
+    await prisma.scheduleLease.create({
+      data: {
+        id: 'schedule-domain-event-publisher:dead-owner-crash',
+        leaseKey: 'schedule-domain-event-publisher',
+        ownerToken: 'dead-owner-crash',
+        expiresAt: new Date(nowMs + 60_000),
+      },
     });
 
     // ----- Fully rebuilt chain: NEW client, NEW repo, NEW bus/adapter/consumer, NEW lease -----
@@ -624,7 +624,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
       const adapterB = createEventBusAdapter(busB);
       const consumerB = new ScheduleEventDeliveryLogConsumer(rebuiltClient, busB);
       consumerB.start();
-      const realLeaseB = new ScheduleLeaseCoordinator(createScheduleLeasePrismaRepository(rebuiltClient));
+      const realLeaseB = createSchedulerPrismaRepositories(rebuiltClient).leaseCoordinator;
 
       const restartedPublisher = new ScheduleDomainEventPublisherService(rebuiltRepo, realLeaseB, adapterB);
 
@@ -848,6 +848,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const prisma = await getPrisma();
     const { createSchedulePrismaModule } = await import('../../prisma');
     const moduleInstance = createSchedulePrismaModule(prisma, {
+      leaseCoordinator: createSchedulerPrismaRepositories(prisma).leaseCoordinator,
       wireDeliveryLogConsumer: false,
     });
 
@@ -956,9 +957,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
 
     const moduleInstance = createScheduleModule({
       scheduleRepository: new SchedulePrismaRepository(prisma),
-      scheduleExecutionRepository: new ScheduleExecutionPrismaRepository(prisma),
-      scheduleTaskRepository: new ScheduleTaskPrismaRepository(prisma),
-      wireDeliveryLogConsumer: false,
+      leaseCoordinator: createSchedulerPrismaRepositories(prisma).leaseCoordinator,
       auditRepository: failingAudit as never,
     });
 
@@ -986,9 +985,7 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
 
     const moduleInstance = createScheduleModule({
       scheduleRepository: new SchedulePrismaRepository(prisma),
-      scheduleExecutionRepository: new ScheduleExecutionPrismaRepository(prisma),
-      scheduleTaskRepository: new ScheduleTaskPrismaRepository(prisma),
-      wireDeliveryLogConsumer: false,
+      leaseCoordinator: createSchedulerPrismaRepositories(prisma).leaseCoordinator,
       auditRepository: failingAudit as never,
     });
 

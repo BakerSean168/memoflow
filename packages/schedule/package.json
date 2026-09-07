@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "调度模块 - 日程与时间管理",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -40,6 +42,7 @@
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",
-    "@types/express": "^5.0.0"
+    "@types/express": "^5.0.0",
+    "@memoflow/scheduler": "workspace:*"
   }
 }

@@ -9,13 +9,13 @@ import { SchedulePrismaRepository } from './schedule-prisma.repository';
 import { ScheduleEventApplicationService } from '../../../application/services/schedule-event-application-service';
 import { ScheduleDomainEventPublisherService } from '../../../application/services/schedule-domain-event-publisher';
 import { ScheduleEventDeliveryLogConsumer } from '../../consumers/schedule-event-delivery-log.consumer';
-import type { ScheduleLeaseCoordinatorPort } from '../../../application/services/schedule-rebuild-worker-service';
+import type { LeaseCoordinatorPort } from '@memoflow/patterns/lease';
 import { CrossPlatformEventBus } from '@memoflow/utils/domain';
 import { createEventBusAdapter } from '@memoflow/patterns';
 import { PrismaClient } from '@memoflow/database';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-const passThroughLease: ScheduleLeaseCoordinatorPort = {
+const passThroughLease: LeaseCoordinatorPort = {
   execute: async (_key: string, task) => ({
     acquired: true,
     value: await task({ ensureHeld: async () => undefined }),

@@ -80,7 +80,7 @@ Still real residuals (code search verified):
 - `ROUTINE-5302`: no Routine method-library/catalog implementation exists;
 - `AI-6101~6103`: Goal/Task draft workflows exist, but `TaskPlanTaskSchema` still exposes retired `folderId`; Routine draft/command tooling and Planner/Notification AI read tooling are absent;
 - `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
-- `CLEAN-6301~6304`: semantic convergence is complete through `CLEAN-6303`. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, ordinary product raw-ScheduleTask mutation surfaces, and the final Reminder duplicate/obsolete product surfaces are removed. `CLEAN-6302` is complete: ControlMode/scanner, single-group ownership, duplicate Smart Frequency state, overloaded Snooze `responseTime`, broken per-user list transports, one-way template actions, and the legacy group batch command are all retired. `CLEAN-6304` remains the physical-boundary decision;
+- `CLEAN-6301~6304`: semantic and physical convergence is complete. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, ordinary product raw-ScheduleTask mutation surfaces, and the final Reminder duplicate/obsolete product surfaces are removed; `packages/schedule` now owns Planner/Calendar while new `packages/scheduler` owns the Temporal Engine, lease, queue, worker repositories and read-only diagnostics;
 - `POC-6401`: pg-boss remains a documented candidate only and is not installed/evaluated against current constraints;
 - `HARD-7101~7105`: final failure matrix, residual cleanup proof and umbrella closure review remain incomplete.
 
@@ -2158,16 +2158,29 @@ Keep internal diagnostics/ops API only if genuinely used.
 - anti-resurrection surface tests now assert that raw worker mutation HTTP routes, IPC channels, RPC names, and client methods do not exist; production residual grep finds no retired raw-worker mutation capability outside Scheduler internals;
 - verification: `schedule` 45/45 files, 399/399 tests; `contracts` 67/67 files, 485/485 tests; schedule/app-react/app-vue/api/desktop typechecks green; app-vue production build green through the Desktop dependency chain; schedule/contracts/app-react lint have 0 errors (only pre-existing unrelated test warnings remain); `git diff --check` green.
 
-## CLEAN-6304 — Scheduler physical package split decision
+## CLEAN-6304 — Scheduler physical package split decision — COMPLETE (2026-09-07)
 
-Only now consider:
+**Decision:** perform the physical split now. Semantic ownership was already stable after CLEAN-6301/6302/6303, so deferring the move would only preserve misleading package ownership.
 
 ```text
-packages/schedule   = Planner/Calendar
+packages/schedule   = Planner / Calendar
 packages/scheduler  = Temporal Engine
 ```
 
-Do this only if semantic ownership is already stable; otherwise defer physical moves.
+**Implementation evidence — CLEAN-6304 (2026-09-07):**
+
+- created first-class `@memoflow/scheduler` package and moved Scheduler-owned `ScheduleTask`, `ScheduleExecution`, worker repositories, lease implementation, queue/runtime, SchedulingPort adapter, Handler Registry, read-only diagnostics client/API/Electron transports, and related tests into it;
+- reduced `@memoflow/schedule` to Calendar/Planner ownership: CalendarEntry, conflict detection/resolution, Calendar HTTP/IPC/client surfaces, rebuild worker/domain-event publisher and audited rebuild timeline/replay remain there;
+- extracted the cross-boundary lease protocol to `@memoflow/patterns/lease` (`LeaseCoordinatorPort`, `LeaseGuard`, `LeaseLostError`), so Calendar reliability code depends only on a shared abstraction while Scheduler keeps the concrete `ScheduleLeaseCoordinator` and persistence adapters;
+- API/Desktop composition now creates separate Calendar and Scheduler repository sets and sibling module handles. Schedule orchestration receives only Scheduler `scheduleTaskRepository`/source execution seams; Calendar receives the shared lease coordinator through the abstract port;
+- Web/Mobile React worker diagnostics now use an explicit `SchedulerClientPort`; Calendar continues through `ScheduleClientPort`. The stale App-Vue raw-ScheduleTask composable/state was removed because normal Planner views did not consume it;
+- no compatibility product mutation surface was restored: raw worker operations remain internal, external worker diagnostics stay read-only, and existing HTTP/IPC contract names remain stable;
+- introduced `scope:scheduler` governance, target-baseline classification, root integration/coverage lane inclusion, clean-boundary CI inclusion, package export/public-surface governance, and regenerated the test inventory;
+- real DB proof survived the split: Scheduler integration 1/1 file, 4/4 tests; Schedule integration 2/2 files, 24/24 tests (PostgreSQL CAS/outbox/lease/replay + PowerSync); Account cross-domain integration 4/4 files, 18/18 tests;
+- unit/regression proof: Scheduler 31/31 files, 273/273 tests; Schedule 20/20 files, 129/129 tests; API 62/62 files, 323/323 tests; Desktop 61/61 files, 322/322 tests; Schedule Orchestration 34/34 tests; Goal 439/439; Task 732/732; Notification 242/242; App-Vue 201/201 files, 773/773 tests;
+- 11-project typecheck is green; 11-project lint has 0 errors (pre-existing warnings only); governance, docs, test-target governance and the 1179-file test inventory are green.
+
+`CLEAN-6304` is complete. Scheduling convergence now advances to `POC-6401`; the PoC must compare pg-boss against this clean SchedulingPort/Scheduler boundary without changing feature code.
 
 ## POC-6401 — pg-boss build-vs-adopt experiment
 
@@ -2550,10 +2563,10 @@ A. Product parity (independent lanes)
    AI-6102/6103       add Routine command/draft tools + Planner/Notification read tools if AI assistant scope remains desired
    MOBILE-6201/6202   parity audit first; current screens already use modern Goal/Task/Notification contracts, implement only proven gaps
 
-B. Scheduling physical convergence (ordered)
-   CLEAN-6304         decide/perform scheduler physical package split now that CLEAN-6301/6302/6303 semantic ownership is clean
+B. Scheduling convergence
+   CLEAN-6304         DONE — Planner/Calendar and Temporal Engine are physically split
         ↓
-   POC-6401           run pg-boss Build-vs-Adopt PoC against the now-clean SchedulingPort boundary; adopt only on evidence
+   POC-6401           NEXT — run pg-boss Build-vs-Adopt PoC against the clean SchedulingPort boundary; adopt only on evidence
 
 C. Final closure
    HARD-7101          cross-domain failure matrix

@@ -72,7 +72,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   ],
   database: ['./prisma'],
   'domain-shared': ['./shared'],
-  patterns: ['./scheduler', './repository', './cache', './events', './operations'],
+  patterns: ['./scheduler', './repository', './cache', './events', './operations', './lease'],
   utils: [
     './domain',
     './errors',

@@ -1,6 +1,6 @@
 export {
-  createScheduleRuntimeContribution,
-  type ScheduleRuntimeDependencies,
+  createSchedulerRuntimeContribution,
+  type SchedulerRuntimeDependencies,
   type ScheduleTaskExecutionResult,
   type ScheduleTaskSourceExecutor,
 } from './schedule.runtime';

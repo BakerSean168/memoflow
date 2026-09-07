@@ -10,7 +10,6 @@ export interface ProcessOutboxResult {
   leaseAcquired: boolean;
 }
 
-export type ScheduleLeaseCoordinatorPort = LeaseCoordinatorPort;
 
 export interface ScheduleRebuildWorkerOptions {
   maxAttempts?: number;
@@ -20,7 +19,7 @@ export interface ScheduleRebuildWorkerOptions {
 export class ScheduleRebuildWorkerService {
   constructor(
     private readonly scheduleRepository: IScheduleRepository,
-    private readonly leaseCoordinator: ScheduleLeaseCoordinatorPort,
+    private readonly leaseCoordinator: LeaseCoordinatorPort,
     private readonly options: ScheduleRebuildWorkerOptions = {},
     private readonly metrics?: UnifiedOperationMetricsRecorder,
   ) {}

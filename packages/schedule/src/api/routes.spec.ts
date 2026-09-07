@@ -4,81 +4,28 @@ import type { OpenApiRegistryLike } from '@memoflow/utils/result';
 import type { ScheduleApplicationPort } from '../server/application';
 import { registerScheduleRoutes } from './routes';
 
-type RegisteredRoute = {
-  method: string;
-  path: string;
-  request?: Record<string, unknown>;
-  responses?: Record<string, unknown>;
-};
-
+type RegisteredRoute = { method: string; path: string };
 class TestOpenApiRegistry implements OpenApiRegistryLike {
   readonly paths: RegisteredRoute[] = [];
-
-  registerPath(route: Record<string, unknown>): void {
-    this.paths.push(route as RegisteredRoute);
-  }
-
+  registerPath(route: Record<string, unknown>): void { this.paths.push(route as RegisteredRoute); }
   register(): void {}
 }
+const auth = ((_, __, next) => next()) as RequestHandler;
+const api: ScheduleApplicationPort = {
+  queryRebuildTimeline: vi.fn(),
+  replayRebuildOutbox: vi.fn(),
+  getOperationAudit: vi.fn(),
+};
 
-const authMiddleware = ((_, __, next) => next()) as RequestHandler;
-
-function createHandlersStub(): ScheduleApplicationPort {
-  return {
-    listTasks: vi.fn(),
-    getTask: vi.fn(),
-    getDueTasks: vi.fn(),
-    queryRebuildTimeline: vi.fn(),
-    replayRebuildOutbox: vi.fn(),
-    getOperationAudit: vi.fn(),
-  } as unknown as ScheduleApplicationPort;
-}
-
-function registerAll(registry: TestOpenApiRegistry) {
-  return registerScheduleRoutes(
-    createHandlersStub(),
-    { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-    registry,
-  );
-}
-
-const BASE = '/api/v1/schedules';
-
-describe('schedule raw worker route ownership', () => {
-  it('exposes ScheduleTask diagnostics as read-only GET routes', () => {
+describe('Planner/Calendar operational route ownership', () => {
+  it('owns rebuild reliability routes and no raw ScheduleTask diagnostics', () => {
     const registry = new TestOpenApiRegistry();
-    registerAll(registry);
-
-    const taskRoutes = registry.paths
-      .filter((route) => route.path.startsWith(`${BASE}/tasks`))
-      .map((route) => `${route.method.toUpperCase()} ${route.path}`)
-      .sort();
-
-    expect(taskRoutes).toEqual(
-      [`GET ${BASE}/tasks`, `GET ${BASE}/tasks/due`, `GET ${BASE}/tasks/{id}`].sort(),
-    );
-  });
-
-  it('does not publish raw ScheduleTask mutation routes', () => {
-    const registry = new TestOpenApiRegistry();
-    registerAll(registry);
-
-    expect(
-      registry.paths.filter(
-        (route) => route.path.startsWith(`${BASE}/tasks`) && route.method.toLowerCase() !== 'get',
-      ),
-    ).toEqual([]);
-  });
-
-  it('keeps audited rebuild replay separate from raw worker CRUD', () => {
-    const registry = new TestOpenApiRegistry();
-    registerAll(registry);
-
-    expect(
-      registry.paths.some(
-        (route) =>
-          route.method === 'post' && route.path === `${BASE}/operations/rebuild/{id}/replay`,
-      ),
-    ).toBe(true);
+    registerScheduleRoutes(api, { auth, requireRole: vi.fn(() => auth) }, registry);
+    expect(registry.paths.map((r) => `${r.method.toUpperCase()} ${r.path}`).sort()).toEqual([
+      'GET /api/v1/schedules/operations/rebuild/audit',
+      'GET /api/v1/schedules/operations/rebuild/timeline',
+      'POST /api/v1/schedules/operations/rebuild/{id}/replay',
+    ]);
+    expect(registry.paths.some((r) => r.path.includes('/tasks'))).toBe(false);
   });
 });

@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Schedule task ownership surface (stage-6 residual 121):
+ * Scheduler task ownership surface (stage-6 residual 121):
  * get/update/delete/actions and identity-filtered lists must never authorize
  * by bare schedule task primary key alone.
  * Residual 180: bare findById is intentional runtime bootstrap only (residual 131).
@@ -38,7 +38,7 @@ describe('schedule task ownership surface', () => {
   );
   const routes = readFileSync(resolve(__dirname, '../../../../../api/routes.ts'), 'utf8');
   const electron = readFileSync(resolve(__dirname, '../../../../../electron/index.ts'), 'utf8');
-  const module = readFileSync(resolve(__dirname, '../../../schedule.module.ts'), 'utf8');
+  const module = readFileSync(resolve(__dirname, '../../../scheduler.module.ts'), 'utf8');
 
   it('port findByIdForIdentity and deleteById require identityId', () => {
     expect(port).toContain(
@@ -76,7 +76,7 @@ describe('schedule task ownership surface', () => {
     expect(routes).not.toContain('controller.pauseTask(');
     expect(routes).not.toContain("method: 'delete'");
     expect(electron).toMatch(
-      /TASK_GET_BY_ID[\s\S]*taskController\.getTask\(taskId, requestContext\)/,
+      /TASK_GET_BY_ID[\s\S]*controller\.getTask\(taskId, requestContext\)/,
     );
     expect(electron).not.toMatch(/ipcMain\.handle\(ScheduleChannels\.TASK_DELETE/);
     expect(electron).not.toMatch(/ipcMain\.handle\(ScheduleChannels\.TASK_PAUSE/);

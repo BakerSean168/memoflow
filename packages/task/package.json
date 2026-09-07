@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "任务模块 - 任务模板、实例与依赖管理",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -50,11 +52,12 @@
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/patterns": "workspace:*",
     "@memoflow/schedule": "workspace:*",
+    "@memoflow/scheduler": "workspace:*",
+    "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "date-fns": "^4.1.0",
     "express": "^5.2.1",
-    "zod": "^4.4.3",
-    "@memoflow/time": "workspace:*"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",

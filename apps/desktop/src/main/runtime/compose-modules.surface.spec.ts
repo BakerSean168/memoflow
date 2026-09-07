@@ -73,7 +73,8 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
       '.register(dataPortabilityElectronModule)',
       '.register(goalComposed.module)',
       '.register(taskElectronModule)',
-      '.register(scheduleComposed.module)',
+      '.register(scheduleComposed.calendarModule)',
+      '.register(scheduleComposed.schedulerModule)',
       '.register(reminderComposed.module)',
       '.register(interventionWindowElectronModule)',
       '.register(focusWindowElectronModule)',
@@ -139,12 +140,15 @@ describe('desktop runtime composer surface (Batch Step D)', () => {
     expect(repository).not.toMatch(/createRepositoryModule\(/);
   });
 
-  it('schedule composer returns the bound runtime controller (sole start/stop owner)', () => {
+  it('schedule composer returns sibling Calendar/Scheduler handles and one bound runtime controller', () => {
     const schedule = readFileSync(resolve(composerDir, 'compose-schedule.ts'), 'utf8');
     expect(schedule).toMatch(/interface ScheduleRuntimeController/);
     expect(schedule).toContain('runtimeController');
-    expect(schedule).toContain('createScheduleRuntimeContribution');
-    expect(schedule).toContain('repositories.scheduleTaskRepository');
+    expect(schedule).toContain('calendarModule');
+    expect(schedule).toContain('schedulerModule');
+    expect(schedule).toContain("from '@memoflow/scheduler'");
+    expect(schedule).toContain('createSchedulerRuntimeContribution');
+    expect(schedule).toContain('schedulerRepositories.scheduleTaskRepository');
   });
 
   it('reminder composer owns one per-profile InterventionRuntime and main wires both Routine windows through bootstrapper', () => {

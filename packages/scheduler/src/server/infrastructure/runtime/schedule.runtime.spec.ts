@@ -112,7 +112,7 @@ vi.mock('../../application/scheduler/schedule-task-queue', () => {
   return { ScheduleTaskQueue: MockScheduleTaskQueue };
 });
 
-import { createScheduleRuntimeContribution } from './schedule.runtime';
+import { createSchedulerRuntimeContribution } from './schedule.runtime';
 
 interface MockQueueInstance {
   readonly addTask: ReturnType<typeof vi.fn>;
@@ -270,7 +270,7 @@ function getLastQueue(): MockQueueInstance {
   return queue;
 }
 
-describe('createScheduleRuntimeContribution', () => {
+describe('createSchedulerRuntimeContribution', () => {
   beforeEach(() => {
     mocked.reset();
   });
@@ -281,7 +281,7 @@ describe('createScheduleRuntimeContribution', () => {
     const repository = createRepositoryMock();
     repository.findEnabled.mockResolvedValue([allowedTask, blockedTask]);
 
-    const runtime = createScheduleRuntimeContribution({
+    const runtime = createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       shouldScheduleTask: (task) => task.identityId === 'identity-1',
       sourceExecutor: { execute: vi.fn(async () => undefined) },
@@ -311,7 +311,7 @@ describe('createScheduleRuntimeContribution', () => {
       .mockRejectedValueOnce(new Error('loader failed'))
       .mockResolvedValueOnce([]);
 
-    const runtime = createScheduleRuntimeContribution({
+    const runtime = createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor: { execute: vi.fn(async () => undefined) },
     });
@@ -341,7 +341,7 @@ describe('createScheduleRuntimeContribution', () => {
           .mockResolvedValueOnce({ acquired: true, ownerToken: 'standby-owner' }),
         release: vi.fn(async () => undefined),
       };
-      const runtime = createScheduleRuntimeContribution({
+      const runtime = createSchedulerRuntimeContribution({
         scheduleTaskRepository: repository,
         sourceExecutor: { execute: vi.fn(async () => undefined) },
         leaseCoordinator: leaseCoordinator as never,
@@ -380,7 +380,7 @@ describe('createScheduleRuntimeContribution', () => {
         acquire: vi.fn(async () => ({ acquired: false })),
         release: vi.fn(async () => undefined),
       };
-      const runtime = createScheduleRuntimeContribution({
+      const runtime = createSchedulerRuntimeContribution({
         scheduleTaskRepository: repository,
         sourceExecutor: { execute: vi.fn(async () => undefined) },
         leaseCoordinator: leaseCoordinator as never,
@@ -408,7 +408,7 @@ describe('createScheduleRuntimeContribution', () => {
     repository.findById.mockResolvedValue(task);
     repository.findByIdForIdentity.mockResolvedValue(task);
 
-    const runtime = createScheduleRuntimeContribution({
+    const runtime = createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor: { execute: vi.fn(async () => undefined) },
     });
@@ -445,7 +445,7 @@ describe('createScheduleRuntimeContribution', () => {
     const repository = createRepositoryMock();
     repository.findById.mockRejectedValue(new Error('db unavailable'));
 
-    const runtime = createScheduleRuntimeContribution({
+    const runtime = createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor: { execute: vi.fn(async () => undefined) },
     });
@@ -479,7 +479,7 @@ describe('createScheduleRuntimeContribution', () => {
     repository.findById.mockResolvedValue(task);
     repository.findByIdForIdentity.mockResolvedValue(task);
 
-    const runtime = createScheduleRuntimeContribution({
+    const runtime = createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       shouldScheduleTask: () => false,
       sourceExecutor: { execute: vi.fn(async () => undefined) },
@@ -497,7 +497,7 @@ describe('createScheduleRuntimeContribution', () => {
 
   it('removes queued tasks for pause, completion, cancellation, failure, and deletion events', async () => {
     const repository = createRepositoryMock();
-    const runtime = createScheduleRuntimeContribution({
+    const runtime = createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor: { execute: vi.fn(async () => undefined) },
     });
@@ -557,7 +557,7 @@ describe('createScheduleRuntimeContribution', () => {
       handler: { execute: handler },
     });
 
-    createScheduleRuntimeContribution({
+    createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor: createHandlerRegistryScheduleTaskSourceExecutor({ registry }),
     });
@@ -585,7 +585,7 @@ describe('createScheduleRuntimeContribution', () => {
       execute: vi.fn(async () => ({ nextRunAt: Date.now() + 300_000, result: { ok: true } })),
     };
 
-    createScheduleRuntimeContribution({
+    createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor,
     });
@@ -611,7 +611,7 @@ describe('createScheduleRuntimeContribution', () => {
       execute: vi.fn(async () => ({ nextRunAt: Date.now() + 300_000, result: { ok: true } })),
     };
 
-    createScheduleRuntimeContribution({
+    createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor,
     });
@@ -644,7 +644,7 @@ describe('createScheduleRuntimeContribution', () => {
       }),
     };
 
-    createScheduleRuntimeContribution({
+    createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor,
     });
@@ -683,7 +683,7 @@ describe('createScheduleRuntimeContribution', () => {
           .mockResolvedValueOnce({ nextRunAt: null, result: { ok: true } }),
       };
 
-      createScheduleRuntimeContribution({
+      createSchedulerRuntimeContribution({
         scheduleTaskRepository: repository,
         sourceExecutor,
       });
@@ -726,7 +726,7 @@ describe('createScheduleRuntimeContribution', () => {
       })),
     };
 
-    createScheduleRuntimeContribution({
+    createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor,
     });
@@ -758,7 +758,7 @@ describe('createScheduleRuntimeContribution', () => {
       })),
     };
 
-    createScheduleRuntimeContribution({
+    createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor,
     });
@@ -791,7 +791,7 @@ describe('createScheduleRuntimeContribution', () => {
     const repository = createRepositoryMock();
     repository.findByIdForIdentity.mockResolvedValue(task);
 
-    const runtime = createScheduleRuntimeContribution({
+    const runtime = createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor: { execute: vi.fn(async () => undefined) },
     });
@@ -820,7 +820,7 @@ describe('createScheduleRuntimeContribution', () => {
     repository.findByIdForIdentity.mockResolvedValue(null);
     const sourceExecutor = { execute: vi.fn(async () => undefined) };
 
-    createScheduleRuntimeContribution({
+    createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor,
     });
@@ -835,7 +835,7 @@ describe('createScheduleRuntimeContribution', () => {
 
   it('logs queue execution failures through onExecuteError', () => {
     const repository = createRepositoryMock();
-    createScheduleRuntimeContribution({
+    createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor: { execute: vi.fn(async () => undefined) },
     });
@@ -852,7 +852,7 @@ describe('createScheduleRuntimeContribution', () => {
 
   it('unsubscribes runtime listeners and stops the queue on stop', async () => {
     const repository = createRepositoryMock();
-    const runtime = createScheduleRuntimeContribution({
+    const runtime = createSchedulerRuntimeContribution({
       scheduleTaskRepository: repository,
       sourceExecutor: { execute: vi.fn(async () => undefined) },
     });

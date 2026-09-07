@@ -3,7 +3,7 @@ import type { GoalScheduleProjectionSource } from '@memoflow/goal/schedule-proje
 import type { RoutineScheduleProjectionSource } from '@memoflow/reminder/schedule-projection/routine';
 import type { RoutineTemporaryOverrideStore } from '@memoflow/reminder/schedule-execution/routine';
 import type { ReminderScheduleProjectionSource } from '@memoflow/reminder/schedule-projection';
-import type { IScheduleTaskRepository, ScheduleTask } from '@memoflow/schedule';
+import type { IScheduleTaskRepository, ScheduleTask } from '@memoflow/scheduler';
 import type { TaskScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import type { ScheduleOrchestrationExecutionDeps } from './execution';
 import type { ProjectionRepairMetricsReader } from './projection-repair';

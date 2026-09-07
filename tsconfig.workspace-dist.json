@@ -153,6 +153,12 @@
       ],
       "@api/shared": [
         "apps/api/src/shared/index.ts"
+      ],
+      "@memoflow/scheduler": [
+        "packages/scheduler/dist/index.d.ts"
+      ],
+      "@memoflow/scheduler/*": [
+        "packages/scheduler/dist/*/index.d.ts"
       ]
     }
   }

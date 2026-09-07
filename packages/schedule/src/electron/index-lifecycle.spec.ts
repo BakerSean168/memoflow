@@ -49,14 +49,20 @@ vi.mock('electron', () => ({
 
 import { createScheduleElectronModule } from './index';
 
-const desktopScheduleChannels = Object.values(ScheduleChannels);
+const desktopScheduleChannels = [
+  ScheduleChannels.LIST,
+  ScheduleChannels.LIST_BY_DATE_RANGE,
+  ScheduleChannels.GET,
+  ScheduleChannels.CREATE,
+  ScheduleChannels.UPDATE,
+  ScheduleChannels.DELETE,
+  ScheduleChannels.GET_CONFLICTS,
+  ScheduleChannels.DETECT_CONFLICTS,
+  ScheduleChannels.CREATE_WITH_CONFLICT_DETECTION,
+  ScheduleChannels.RESOLVE_CONFLICT,
+] as const;
 
 function createFakeInstance() {
-  const api = {
-    listTasks: vi.fn(() => ok([] as never)),
-    getTask: vi.fn(() => ok(null as never)),
-    getDueTasks: vi.fn(() => ok([] as never)),
-  };
   const eventApi = {
     createEvent: vi.fn(() => ok(null as never)),
     getEvent: vi.fn(() => ok(null as never)),
@@ -72,15 +78,12 @@ function createFakeInstance() {
   const dispose = vi.fn(async () => undefined);
   const instance: ScheduleModuleInstance = {
     scheduleRepository: {} as never,
-    scheduleExecutionRepository: {} as never,
-    scheduleTaskRepository: {} as never,
     useCases: {} as never,
-    api,
     eventApi,
     start,
     dispose,
   } as ScheduleModuleInstance;
-  return { instance, api, eventApi, start, dispose };
+  return { instance, eventApi, start, dispose };
 }
 
 function createFakeContext(): IElectronModuleContext {
@@ -150,7 +153,7 @@ describe('createScheduleElectronModule lifecycle', () => {
     expect(fake.start).toHaveBeenCalledTimes(1);
 
     await moduleDef.destroy?.();
-    for (const channel of Object.values(ScheduleChannels)) {
+    for (const channel of desktopScheduleChannels) {
       expect(mocks.handlers.has(channel)).toBe(false);
     }
     expect(fake.dispose).toHaveBeenCalledTimes(1);

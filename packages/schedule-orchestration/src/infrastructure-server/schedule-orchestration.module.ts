@@ -17,7 +17,7 @@ import {
   ScheduledHandlerRegistry,
   createHandlerRegistryScheduleTaskSourceExecutor,
   createScheduleTaskSchedulingPort,
-} from '@memoflow/schedule';
+} from '@memoflow/scheduler';
 import { createReminderTemplateScheduledHandlerRegistration } from '@memoflow/reminder/schedule-execution';
 import {
   createRoutineWallClockExecutionSource,

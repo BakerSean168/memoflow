@@ -1,7 +1,6 @@
 export {
-  createScheduleExecutionPrismaRepository,
   createSchedulePrismaModule,
   createSchedulePrismaRepository,
-  createScheduleTaskPrismaRepository,
+  createSchedulePrismaRepositories,
 } from '../server/infrastructure';
 export type { CreateSchedulePrismaModuleOptions } from '../server/infrastructure';

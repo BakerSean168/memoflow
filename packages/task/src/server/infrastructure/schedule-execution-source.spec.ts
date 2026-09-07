@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { SourceModule } from '@memoflow/contracts/schedule';
-import { ScheduleTask } from '@memoflow/schedule';
+import { ScheduleTask } from '@memoflow/scheduler';
 import { createTaskScheduleExecutionSource } from './schedule-execution-source';
 
 function createScheduleTask(payload: Record<string, unknown> = {}) {

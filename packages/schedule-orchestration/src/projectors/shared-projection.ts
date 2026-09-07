@@ -1,5 +1,5 @@
 import type { SourceModule, ScheduleEventMap } from '@memoflow/contracts/schedule';
-import type { IScheduleTaskRepository, ScheduleTask } from '@memoflow/schedule';
+import type { IScheduleTaskRepository, ScheduleTask } from '@memoflow/scheduler';
 import type { Publisher } from '@memoflow/utils/domain';
 
 export interface ProjectionSelection {

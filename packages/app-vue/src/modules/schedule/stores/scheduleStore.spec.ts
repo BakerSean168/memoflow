@@ -1,57 +1,32 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type {
-  CalendarEntryClientDTO,
-  ScheduleExecutionClientDTO,
-  ScheduleTaskClientDTO,
-} from '@memoflow/contracts/schedule';
+import type { CalendarEntryClientDTO } from '@memoflow/contracts/schedule';
 import { createTestPinia } from '@memoflow/test-utils';
 import { useScheduleStore } from './schedule-store';
-
-function createTask(
-  overrides: Partial<ScheduleTaskClientDTO> = {},
-): ScheduleTaskClientDTO {
-  return {
-    id: 'task-1' as ScheduleTaskClientDTO['id'],
-    name: 'Dispatch digest',
-    ...overrides,
-  } as ScheduleTaskClientDTO;
-}
 
 describe('useScheduleStore', () => {
   beforeEach(() => {
     createTestPinia();
   });
 
-  it('mutates task list, pagination, current task, and common status flags', () => {
+  it('owns only Planner/Calendar state and common status flags', () => {
     const store = useScheduleStore();
-    const task = createTask();
+    const entry = { id: 'entry-1' } as CalendarEntryClientDTO;
 
-    store.setTasks([task], 21);
-    store.addTask(createTask({ id: 'task-2' as ScheduleTaskClientDTO['id'], name: 'Sync queue' }));
-    store.updateTask(createTask({ id: task.id, name: 'Dispatch nightly digest' }));
-    store.setCurrentTask(task);
-    store.removeTask('task-2');
-    store.setExecutions([{ id: 'exec-1' } as ScheduleExecutionClientDTO]);
-    store.setCalendarEntries([{ id: 'entry-1' } as CalendarEntryClientDTO]);
+    store.setCalendarEntries([entry]);
     store.setLoading(true);
     store.setError('failed');
-    store.setPage(3);
     store.setInitialized(true);
 
-    expect(store.tasks.map((item) => item.name)).toEqual(['Dispatch nightly digest']);
-    expect(store.pagination.total).toBe(21);
-    expect(store.currentTask).toStrictEqual(task);
-    expect(store.executions).toHaveLength(1);
-    expect(store.calendarEntries).toHaveLength(1);
-    expect(store.pagination.page).toBe(3);
+    expect(store.calendarEntries).toEqual([entry]);
     expect(store.isLoading).toBe(true);
     expect(store.error).toBe('failed');
+    expect(store.isInitialized).toBe(true);
+    expect('tasks' in store).toBe(false);
+    expect('currentTask' in store).toBe(false);
+    expect('executions' in store).toBe(false);
 
     store.reset();
-    expect(store.tasks).toEqual([]);
-    expect(store.executions).toEqual([]);
-    expect(store.currentTask).toBeNull();
-    expect(store.pagination.page).toBe(1);
+    expect(store.calendarEntries).toEqual([]);
     expect(store.isInitialized).toBe(false);
   });
 });

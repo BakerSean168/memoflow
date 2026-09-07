@@ -1,4 +1,4 @@
-import type { ScheduleTask } from '@memoflow/schedule';
+import type { ScheduleTask } from '@memoflow/scheduler';
 
 export interface TaskScheduleExecutionOutcome {
   readonly nextRunAt?: number | null;
