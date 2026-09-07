@@ -118,8 +118,7 @@ export function createReminderUseCases(
       dependencies.routineProfileStore,
     );
   const templateMapper =
-    options?.templateMapper ??
-    new ReminderTemplateClientMapper(reminderDomainService, reminderGroupRepository);
+    options?.templateMapper ?? new ReminderTemplateClientMapper(reminderDomainService);
 
   return {
     createReminderTemplate: new CreateReminderTemplateUseCase(
@@ -198,17 +197,14 @@ export function createReminderModule(
     userReminderPreferenceRepository,
     routineProfileStore,
   );
-  const templateMapper = new ReminderTemplateClientMapper(
-    reminderDomainService,
-    reminderGroupRepository,
-  );
+  const templateMapper = new ReminderTemplateClientMapper(reminderDomainService);
   const useCases = createReminderUseCases(dependencies, {
     reminderDomainService,
     templateMapper,
   });
   const reminderGroupApplicationService = new ReminderGroupApplicationService({
-    reminderGroupRepository,
     reminderTemplateRepository,
+    reminderGroupRepository,
     reminderDomainService,
   });
   const reminderPreferencesApplicationService = new ReminderPreferencesApplicationService({
@@ -221,7 +217,6 @@ export function createReminderModule(
   });
   const reminderTemplateActionApplicationService = new ReminderTemplateActionApplicationService({
     reminderTemplateRepository,
-    reminderGroupRepository,
     reminderDomainService,
     templateMapper,
   });
@@ -267,8 +262,8 @@ export function createReminderModule(
       return reminderTemplateActionApplicationService.toggleTemplate(id, ctx);
     },
 
-    async moveTemplate(id, groupId, ctx) {
-      return reminderTemplateActionApplicationService.moveTemplate(id, groupId, ctx);
+    async replaceTemplateProfiles(id, profileIds, ctx) {
+      return reminderTemplateActionApplicationService.replaceTemplateProfiles(id, profileIds, ctx);
     },
 
     async getTemplateHistory(id, ctx) {

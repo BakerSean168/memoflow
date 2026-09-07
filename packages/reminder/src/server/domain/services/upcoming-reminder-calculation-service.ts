@@ -484,7 +484,6 @@ export class UpcomingReminderCalculationService {
       icon: reminder.icon || 'mdi-bell',
       color: reminder.color || '#1976D2',
       notificationChannels: reminder.notificationConfig?.channels || [],
-      groupId: reminder.groupId ?? undefined,
     };
   }
 

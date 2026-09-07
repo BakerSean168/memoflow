@@ -67,12 +67,12 @@ export class ReminderHttpAdapter implements IReminderApiClient {
     return this.httpClient.post(`${this.templatesUrl}/${id}/toggle`, {});
   }
 
-  async moveTemplateToGroup(
+  async replaceTemplateProfiles(
     templateId: string,
-    targetGroupId: string | null,
+    profileIds: readonly string[],
   ): Promise<Result<ReminderTemplateClientDTO>> {
-    return this.httpClient.post(`${this.templatesUrl}/${templateId}/move`, {
-      groupId: targetGroupId,
+    return this.httpClient.put(`${this.templatesUrl}/${templateId}/profiles`, {
+      profileIds: [...profileIds],
     });
   }
 
@@ -133,7 +133,9 @@ export class ReminderHttpAdapter implements IReminderApiClient {
     return this.httpClient.get('/reminders/preferences');
   }
 
-  async updatePreferences(data: Record<string, unknown>): Promise<Result<UserReminderPreferencesClientDTO>> {
+  async updatePreferences(
+    data: Record<string, unknown>,
+  ): Promise<Result<UserReminderPreferencesClientDTO>> {
     return this.httpClient.patch('/reminders/preferences', data);
   }
 }

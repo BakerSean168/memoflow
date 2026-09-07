@@ -21,11 +21,11 @@ import type {
   INotificationConfig,
   ReminderType,
   ReminderStatus,
+  RoutineProfileMembershipView,
 } from '@memoflow/contracts/reminder';
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { ReminderTemplateId } from '../../server/domain/value-objects/reminder-template-id';
-import { ReminderGroupId } from '../../server/domain/value-objects/reminder-group-id';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ReminderHistory } from '../entities/reminder-history.js';
 
@@ -42,7 +42,7 @@ export interface ReminderTemplateState {
   selfEnabled: boolean;
   status: ReminderStatus;
   effectiveEnabled: boolean;
-  groupId: ReminderGroupId | null;
+  profileMemberships: RoutineProfileMembershipView[];
   importanceLevel: ImportanceLevel;
   tags: string[];
   color: string | null;
@@ -55,12 +55,9 @@ export interface ReminderTemplateState {
   history: ReminderHistory[] | null;
   isActive: boolean;
   isPaused: boolean;
-  controlledByGroup: boolean;
-  lifecycleSource: 'global' | 'group' | 'template';
+  lifecycleSource: 'global' | 'profile' | 'routine';
   effectiveEnabledReason: string;
-  groupEnabled: boolean | null;
   globalReminderEnabled: boolean;
-  groupName?: string | null;
 }
 
 export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
@@ -116,8 +113,8 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
     return this._props.effectiveEnabled;
   }
 
-  get groupId(): ReminderGroupId | null {
-    return this._props.groupId;
+  get profileMemberships(): RoutineProfileMembershipView[] {
+    return this._props.profileMemberships.map((membership) => ({ ...membership }));
   }
 
   get importanceLevel(): ImportanceLevel {
@@ -169,10 +166,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
     return this._props.isPaused;
   }
 
-  get controlledByGroup(): boolean {
-    return this._props.controlledByGroup;
-  }
-
   // UI 计算属性
   get isDeleted(): boolean {
     return this._props.deletedAt !== null;
@@ -198,9 +191,7 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
       selfEnabled: this._props.selfEnabled,
       status: this._props.status,
       effectiveEnabled: this._props.effectiveEnabled,
-      groupId: (this._props.groupId
-        ? String(this._props.groupId)
-        : null) as ReminderTemplateClientDTO['groupId'],
+      profileMemberships: this._props.profileMemberships.map((membership) => ({ ...membership })),
       importanceLevel: this._props.importanceLevel,
       tags: [...this._props.tags],
       color: this._props.color,
@@ -213,12 +204,9 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
       history: this._props.history ? this._props.history.map((h) => h.toDTO()) : null,
       isActive: this._props.isActive,
       isPaused: this._props.isPaused,
-      controlledByGroup: this._props.controlledByGroup,
       lifecycleSource: this._props.lifecycleSource,
       effectiveEnabledReason: this._props.effectiveEnabledReason,
-      groupEnabled: this._props.groupEnabled,
       globalReminderEnabled: this._props.globalReminderEnabled,
-      groupName: this._props.groupName ?? null,
     };
   }
 }

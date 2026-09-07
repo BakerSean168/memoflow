@@ -54,20 +54,6 @@ export interface IReminderTemplateRepository {
   findAllTemplateRefs(): Promise<Array<{ id: string; identityId: string }>>;
 
   /**
-   * 通过分组 ID 查找所有提醒模板
-   *
-   * @param groupId 分组 ID
-   * @param options.includeHistory 是否加载历史记录
-   * @param options.includeDeleted 是否包含已删除的模板（默认 false）
-   * @returns 提醒模板列表
-   */
-  findByGroupId(
-    groupId: string | null,
-    identityId: string,
-    options?: { includeHistory?: boolean; historyLimit?: number; includeDeleted?: boolean },
-  ): Promise<ReminderTemplate[]>;
-
-  /**
    * 查找所有活跃的提醒模板
    *
    * @param identityId 身份 ID

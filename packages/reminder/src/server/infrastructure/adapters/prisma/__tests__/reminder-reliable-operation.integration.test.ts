@@ -8,7 +8,11 @@ import {
   LeaseFencingException,
 } from '@memoflow/contracts/reliable-messaging';
 import { ReminderTemplate } from '../../../../domain/aggregates/reminder-template';
-import { ReminderGroup } from '../../../../domain/aggregates/reminder-group';
+import {
+  ProfileMembership,
+  RoutineProfile,
+  adaptLegacyReminderTemplate,
+} from '../../../../domain/routine';
 import { ReminderReliableOperationPrismaAdapter } from '../reminder-reliable-operation-prisma.adapter';
 import { PrismaReminderWriteTransactionRunner } from '../prisma-reminder-write-transaction-runner';
 import { ReminderTemplatePrismaRepository } from '../reminder-template-prisma.repository';
@@ -427,7 +431,8 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
 
     const controlService = new ReminderTemplateControlService(
       templateRepo,
-      new ReminderGroupPrismaRepository(prisma),
+      undefined,
+      new PrismaRoutineProfileStore(prisma),
     );
     const triggerService = new ReminderTriggerService(templateRepo, controlService);
     const runner = new PrismaReminderWriteTransactionRunner(prisma);
@@ -533,29 +538,42 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
     ).rejects.toThrow();
   });
 
-  it('9. Group disabled or paused template produces durable skipped receipt through scheduler scan', async () => {
+  it('9. Paused Profile membership produces durable skipped receipt through scheduler scan', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
     const prisma = await getPrisma();
     const adapter = new ReminderReliableOperationPrismaAdapter(prisma);
     const runner = new PrismaReminderWriteTransactionRunner(prisma);
     const templateRepo = new ReminderTemplatePrismaRepository(prisma);
-    const groupRepo = new ReminderGroupPrismaRepository(prisma);
-
-    const group = ReminderGroup.create({
-      identityId: identityId as IdentityId,
-      name: 'Paused Group',
-      order: 1,
-    });
-    group.pause();
-    await groupRepo.save(group);
+    const profileStore = new PrismaRoutineProfileStore(prisma);
 
     const template = createSampleTemplate(identityId, true);
-    template.moveToGroup(group.id);
     template.setNextTriggerTime(Date.now() - 1000);
     await templateRepo.save(template);
+    await profileStore.upsertDefinition(adaptLegacyReminderTemplate({ template }).routine);
 
-    const controlService = new ReminderTemplateControlService(templateRepo, groupRepo);
+    const profile = RoutineProfile.create({
+      id: 'paused-profile',
+      identityId,
+      name: 'Paused Profile',
+      enabled: false,
+      active: true,
+    });
+    await profileStore.upsertProfile(profile);
+    await profileStore.upsertMembership(
+      ProfileMembership.create({
+        identityId,
+        profileId: profile.id,
+        routineId: template.id,
+        enabled: true,
+      }),
+    );
+
+    const controlService = new ReminderTemplateControlService(
+      templateRepo,
+      undefined,
+      profileStore,
+    );
     const triggerService = new ReminderTriggerService(templateRepo, controlService);
     const scheduler = new ReminderSchedulerService(
       templateRepo,
@@ -653,8 +671,11 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
       },
     });
 
-    const groupRepo = new ReminderGroupPrismaRepository(prisma);
-    const controlService = new ReminderTemplateControlService(templateRepo, groupRepo);
+    const controlService = new ReminderTemplateControlService(
+      templateRepo,
+      undefined,
+      new PrismaRoutineProfileStore(prisma),
+    );
     const triggerService = new ReminderTriggerService(templateRepo, controlService);
     const runner = new PrismaReminderWriteTransactionRunner(prisma);
     const scheduler = new ReminderSchedulerService(
@@ -743,7 +764,8 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
     // Run scheduler scan -> MUST skip dead_letter
     const controlService = new ReminderTemplateControlService(
       templateRepo,
-      new ReminderGroupPrismaRepository(prisma),
+      undefined,
+      new PrismaRoutineProfileStore(prisma),
     );
     const triggerService = new ReminderTriggerService(templateRepo, controlService);
     const runner = new PrismaReminderWriteTransactionRunner(prisma);
@@ -776,7 +798,8 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
 
     const controlService = new ReminderTemplateControlService(
       templateRepo,
-      new ReminderGroupPrismaRepository(prisma),
+      undefined,
+      new PrismaRoutineProfileStore(prisma),
     );
     const triggerService = new ReminderTriggerService(templateRepo, controlService);
     const runner = new PrismaReminderWriteTransactionRunner(prisma);
@@ -1082,8 +1105,11 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
     expect(replayedReceipt.nextRetryAt).not.toBeNull();
 
     // Cron scan after replay -> reclaims and processes successfully via scheduler.schedule()
-    const groupRepo = new ReminderGroupPrismaRepository(prisma);
-    const controlService = new ReminderTemplateControlService(templateRepo, groupRepo);
+    const controlService = new ReminderTemplateControlService(
+      templateRepo,
+      undefined,
+      new PrismaRoutineProfileStore(prisma),
+    );
     const triggerService = new ReminderTriggerService(templateRepo, controlService);
     const runner = new PrismaReminderWriteTransactionRunner(prisma);
     const scheduler = new ReminderSchedulerService(
@@ -1107,7 +1133,6 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
     const prisma = await getPrisma();
     const adapter = new ReminderReliableOperationPrismaAdapter(prisma);
     const templateRepo = new ReminderTemplatePrismaRepository(prisma);
-    const groupRepo = new ReminderGroupPrismaRepository(prisma);
     const runner = new PrismaReminderWriteTransactionRunner(prisma);
 
     const sameTriggerTime = Date.now() - 1000;
@@ -1122,7 +1147,11 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
     templateB.setNextTriggerTime(sameTriggerTime);
     await templateRepo.save(templateB);
 
-    const controlService = new ReminderTemplateControlService(templateRepo, groupRepo);
+    const controlService = new ReminderTemplateControlService(
+      templateRepo,
+      undefined,
+      new PrismaRoutineProfileStore(prisma),
+    );
     const triggerService = new ReminderTriggerService(templateRepo, controlService);
     const scheduler = new ReminderSchedulerService(
       templateRepo,

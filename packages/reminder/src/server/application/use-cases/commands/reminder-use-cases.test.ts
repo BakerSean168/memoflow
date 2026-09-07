@@ -43,11 +43,6 @@ class MockReminderTemplateRepository implements IReminderTemplateRepository {
     return Array.from(this.templates.values()).filter((t) => t.identityId === identityId);
   }
 
-  async findByGroupId(groupId: string | null, identityId: string): Promise<any[]> {
-    return Array.from(this.templates.values()).filter(
-      (t) => t.groupId === groupId && String(t.identityId) === String(identityId),
-    );
-  }
 
   async findActive(identityId: string): Promise<any[]> {
     return Array.from(this.templates.values()).filter(
@@ -321,7 +316,7 @@ describe('Reminder Use Cases', () => {
       const existing = await templateRepository.findByIdForIdentity(TEST_IDENTITY, templateId);
       expect(existing).not.toBeNull();
 
-      const healLegacyRoutineProjection = vi.fn().mockResolvedValue(undefined);
+      const healRoutineProjection = vi.fn().mockResolvedValue(undefined);
       const mapper = {
         toDTO: vi.fn(async (template: ReminderTemplate) => template.toClientDTO()),
       } as unknown as ReminderTemplateClientMapper;
@@ -329,7 +324,7 @@ describe('Reminder Use Cases', () => {
       const replayUseCase = new CreateReminderTemplateUseCase(
         templateRepository,
         groupRepository,
-        { healLegacyRoutineProjection } as unknown as ReminderDomainService,
+        { healRoutineProjection } as unknown as ReminderDomainService,
         mapper,
         async () => {
           closureChecks += 1;
@@ -340,7 +335,7 @@ describe('Reminder Use Cases', () => {
       const replay = await replayUseCase.execute(request as never, { identityId: TEST_IDENTITY });
 
       expect(replay.ok).toBe(true);
-      expect(healLegacyRoutineProjection).toHaveBeenCalledWith(existing, null);
+      expect(healRoutineProjection).toHaveBeenCalledWith(existing, []);
       expect(closureChecks).toBe(0);
     });
 
@@ -348,15 +343,15 @@ describe('Reminder Use Cases', () => {
       const templateId = 'IReminderTemplateId_550e8400-e29b-41d4-a716-446655440005';
       const request = { ...createValidCreateRequest(), id: templateId };
       const baselineDomain = new ReminderDomainService(templateRepository, groupRepository);
-      const healLegacyRoutineProjection = vi.fn().mockResolvedValue(undefined);
+      const healRoutineProjection = vi.fn().mockResolvedValue(undefined);
       const interruptedDomain = {
         createReminderTemplate: vi.fn(
           async (input: Parameters<ReminderDomainService['createReminderTemplate']>[0]) => {
             await baselineDomain.createReminderTemplate(input);
-            throw new Error('projection interrupted after legacy persistence');
+            throw new Error('projection interrupted after template persistence');
           },
         ),
-        healLegacyRoutineProjection,
+        healRoutineProjection,
       } as unknown as ReminderDomainService;
       const mapper = {
         toDTO: vi.fn(async (template: ReminderTemplate) => template.toClientDTO()),
@@ -374,25 +369,31 @@ describe('Reminder Use Cases', () => {
 
       expect(result.ok).toBe(true);
       expect(persisted).not.toBeNull();
-      expect(healLegacyRoutineProjection).toHaveBeenCalledWith(persisted, null);
+      expect(healRoutineProjection).toHaveBeenCalledWith(persisted, []);
       expect(await templateRepository.count(TEST_IDENTITY)).toBe(1);
     });
 
-    it('returns NOT_FOUND when group ID is invalid', async () => {
+    it('returns NOT_FOUND when a requested Profile does not exist', async () => {
+      const createReminderTemplate = vi.fn().mockRejectedValue(
+        new Error('Routine Profile not found: missing-profile'),
+      );
       const useCase = new CreateReminderTemplateUseCase(
         templateRepository,
         groupRepository,
-        undefined,
+        { createReminderTemplate } as unknown as ReminderDomainService,
         undefined,
         mockClosureChecker,
       );
       const request = {
         ...createValidCreateRequest(),
-        groupId: 'invalid-group-id',
+        profileIds: ['missing-profile'],
       };
 
-      const result = await useCase.execute(request, { identityId: TEST_IDENTITY });
+      const result = await useCase.execute(request as never, { identityId: TEST_IDENTITY });
 
+      expect(createReminderTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ profileIds: ['missing-profile'] }),
+      );
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toBe('NOT_FOUND');

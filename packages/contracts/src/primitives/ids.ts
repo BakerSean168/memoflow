@@ -15,11 +15,8 @@ export type IdentityId = string & { readonly __brand: 'IdentityId' };
 /** 目标 ID */
 export type GoalId = string & { readonly __brand: 'GoalId' };
 
-
 /** 关键结果 ID */
 export type KeyResultId = string & { readonly __brand: 'KeyResultId' };
-
-
 
 /** 任务模板 ID */
 export type TaskTemplateId = string & { readonly __brand: 'TaskTemplateId' };
@@ -27,14 +24,14 @@ export type TaskTemplateId = string & { readonly __brand: 'TaskTemplateId' };
 /** 任务实例 ID */
 export type TaskInstanceId = string & { readonly __brand: 'TaskInstanceId' };
 
-
-
-
 /** 提醒模板 ID */
 export type ReminderTemplateId = string & { readonly __brand: 'ReminderTemplateId' };
 
 /** 提醒分组 ID */
 export type ReminderGroupId = string & { readonly __brand: 'ReminderGroupId' };
+
+/** Routine Profile ID */
+export type RoutineProfileId = string & { readonly __brand: 'RoutineProfileId' };
 
 /** 提醒实例 ID */
 export type ReminderInstanceId = string & { readonly __brand: 'ReminderInstanceId' };
@@ -190,6 +187,7 @@ export const ID_PREFIXES = {
   // === Reminder ===
   ReminderTemplateId: 'IReminderTemplateId',
   ReminderGroupId: 'IReminderGroupId',
+  RoutineProfileId: 'IRoutineProfileId',
   ReminderInstanceId: 'IReminderInstanceId',
   ReminderHistoryId: 'IReminderHistoryId',
   ReminderResponseId: 'IReminderResponseId',

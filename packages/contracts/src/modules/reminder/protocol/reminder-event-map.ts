@@ -2,8 +2,8 @@ import type { ReminderTemplateCreatedEvent } from '../domain/events/reminder-tem
 import type { ReminderTemplateUpdatedEvent } from '../domain/events/reminder-template-updated.event';
 import type { ReminderTemplateEnabledEvent } from '../domain/events/reminder-template-enabled.event';
 import type { ReminderTemplatePausedEvent } from '../domain/events/reminder-template-paused.event';
-import type { ReminderTemplateMovedEvent } from '../domain/events/reminder-template-moved.event';
 import type { ReminderTemplateDeletedEvent } from '../domain/events/reminder-template-deleted.event';
+import type { ReminderTemplateEligibilityChangedEvent } from '../domain/events/reminder-template-eligibility-changed.event';
 import type { ReminderGroupCreatedEvent } from '../domain/events/reminder-group-created.event';
 import type { ReminderGroupUpdatedEvent } from '../domain/events/reminder-group-updated.event';
 import type { ReminderGroupDeletedEvent } from '../domain/events/reminder-group-deleted.event';
@@ -55,11 +55,13 @@ export type ReminderEventMap = {
    */
   'reminder:template-deleted': ReminderTemplateDeletedEvent;
 
+  /** External eligibility context changed; scheduling must re-read canonical gates. */
+  'reminder:template-eligibility-changed': ReminderTemplateEligibilityChangedEvent;
+
   /**
    * Reminder template moved event
    * Triggered when reminder template is moved between groups
    */
-  'reminder:template-moved': ReminderTemplateMovedEvent;
 
   /**
    * Reminder group created event

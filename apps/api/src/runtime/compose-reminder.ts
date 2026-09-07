@@ -178,6 +178,8 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
   });
   const scheduleProjectionSource = createReminderScheduleProjectionSource({
     reminderTemplateRepository,
+    routineProfileStore: repositories.routineProfileStore,
+    userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
   });
 
   // Executor-visible closure path: when the host supplies the frozen

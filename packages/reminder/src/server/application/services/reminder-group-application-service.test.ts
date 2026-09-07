@@ -37,8 +37,8 @@ describe('ReminderGroupApplicationService', () => {
   let templateRepository: ReturnType<typeof createMockRepo<IReminderTemplateRepository>>;
   let reminderDomainService: {
     createReminderGroup: ReturnType<typeof vi.fn>;
-    syncTemplateEffectiveEnabled: ReturnType<typeof vi.fn>;
-    syncTemplatesEffectiveEnabledByGroup: ReturnType<typeof vi.fn>;
+    syncTemplatesEffectiveEnabledByProfile: ReturnType<typeof vi.fn>;
+    setProfileMembershipsEnabled: ReturnType<typeof vi.fn>;
     deleteGroup: ReturnType<typeof vi.fn>;
     updateGroupStats: ReturnType<typeof vi.fn>;
     toggleGroupAndTemplates: ReturnType<typeof vi.fn>;
@@ -54,13 +54,12 @@ describe('ReminderGroupApplicationService', () => {
       save: vi.fn().mockResolvedValue(undefined),
     });
     templateRepository = createMockRepo<IReminderTemplateRepository>({
-      findByGroupId: vi.fn().mockResolvedValue([]),
       save: vi.fn().mockResolvedValue(undefined),
     });
     reminderDomainService = {
       createReminderGroup: vi.fn(),
-      syncTemplateEffectiveEnabled: vi.fn().mockResolvedValue(undefined),
-      syncTemplatesEffectiveEnabledByGroup: vi.fn().mockResolvedValue(undefined),
+      syncTemplatesEffectiveEnabledByProfile: vi.fn().mockResolvedValue(undefined),
+      setProfileMembershipsEnabled: vi.fn().mockResolvedValue(0),
       deleteGroup: vi.fn().mockResolvedValue(undefined),
       updateGroupStats: vi.fn().mockResolvedValue(undefined),
       toggleGroupAndTemplates: vi.fn(),
@@ -111,25 +110,17 @@ describe('ReminderGroupApplicationService', () => {
 
     expect(groupRepository.save).toHaveBeenCalledTimes(1);
     expect(reminderDomainService.projectRoutineProfile).toHaveBeenCalledTimes(1);
-    expect(reminderDomainService.syncTemplatesEffectiveEnabledByGroup).toHaveBeenCalledWith(IDENTITY_ID, existing.id);
+    expect(reminderDomainService.syncTemplatesEffectiveEnabledByProfile).toHaveBeenCalledWith(IDENTITY_ID, existing.id);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.data.name).toBe('Updated');
     }
   });
 
-  it('batches template state changes through repositories and domain sync', async () => {
+  it('batches Profile membership-local state without rewriting Routine state', async () => {
     const group = ReminderGroup.load(makeGroupState());
     (groupRepository.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
-    const ownedTemplate = {
-      id: 'template-1',
-      identityId: IDENTITY_ID,
-      enable: vi.fn(),
-      pause: vi.fn(),
-    };
-    (templateRepository.findByGroupId as ReturnType<typeof vi.fn>).mockResolvedValue([
-      ownedTemplate,
-    ]);
+    reminderDomainService.setProfileMembershipsEnabled.mockResolvedValue(2);
 
     const result = await service.batchGroupTemplates(
       group.id,
@@ -137,12 +128,12 @@ describe('ReminderGroupApplicationService', () => {
       { identityId: IDENTITY_ID },
     );
 
-    expect(templateRepository.findByGroupId).toHaveBeenCalledWith(group.id, IDENTITY_ID);
-    expect(ownedTemplate.enable).toHaveBeenCalledTimes(1);
-    expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledTimes(1);
-    expect(templateRepository.save).toHaveBeenCalledTimes(1);
-    expect(reminderDomainService.projectRoutineDefinition).toHaveBeenCalledWith(ownedTemplate);
-    expect(reminderDomainService.updateGroupStats).toHaveBeenCalledWith(IDENTITY_ID, group.id);
-    expect(result).toEqual({ ok: true, data: { successCount: 1, failedCount: 0 } });
+    expect(reminderDomainService.setProfileMembershipsEnabled).toHaveBeenCalledWith(
+      IDENTITY_ID,
+      group.id,
+      true,
+    );
+    expect(templateRepository.save).not.toHaveBeenCalled();
+    expect(result).toEqual({ ok: true, data: { successCount: 2, failedCount: 0 } });
   });
 });

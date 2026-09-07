@@ -85,7 +85,7 @@ export const ReminderChannels = {
   TEMPLATE_UPDATE: 'reminder:template:update',
   TEMPLATE_DELETE: 'reminder:template:delete',
   TEMPLATE_TOGGLE_ENABLED: 'reminder:template:toggle-enabled',
-  TEMPLATE_MOVE_TO_GROUP: 'reminder:template:move-to-group',
+  TEMPLATE_REPLACE_PROFILES: 'reminder:template:replace-profiles',
   TEMPLATE_GET_BY_USER: 'reminder:template:get-by-user',
   UPCOMING_GET: 'reminder:upcoming:get',
   TODAY_SCHEDULE_GET: 'reminder:today-schedule:get',

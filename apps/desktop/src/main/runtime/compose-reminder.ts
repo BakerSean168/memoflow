@@ -196,6 +196,8 @@ export function composeReminder(
   });
   const scheduleProjectionSource = createReminderScheduleProjectionSource({
     reminderTemplateRepository,
+    routineProfileStore: repositories.routineProfileStore,
+    userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
   });
 
   const interventionRuntime = createInterventionRuntime();

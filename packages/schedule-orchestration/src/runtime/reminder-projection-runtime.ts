@@ -34,9 +34,9 @@ export function createReminderProjectionRuntime(
     'reminder:template-created',
     'reminder:template-updated',
     'reminder:template-enabled',
-    'reminder:template-moved',
     'reminder:template-paused',
     'reminder:template-deleted',
+    'reminder:template-eligibility-changed',
     'reminder:triggered',
   ];
 

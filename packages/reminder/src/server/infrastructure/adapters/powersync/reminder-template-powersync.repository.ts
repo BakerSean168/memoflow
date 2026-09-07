@@ -61,7 +61,6 @@ export class ReminderTemplatePowerSyncRepository implements IReminderTemplateRep
              type = ?,
              self_enabled = ?,
              status = ?,
-             reminder_group_id = ?,
              importance_level = ?,
              tags = ?,
              color = ?,
@@ -96,7 +95,6 @@ export class ReminderTemplatePowerSyncRepository implements IReminderTemplateRep
           data.type,
           data.selfEnabled,
           data.status,
-          data.reminderGroupId,
           data.importanceLevel,
           data.tags,
           data.color,
@@ -130,13 +128,13 @@ export class ReminderTemplatePowerSyncRepository implements IReminderTemplateRep
     } else {
       await tx.execute(
         `INSERT INTO reminder_templates (
-          id, identity_id, name, description, type, self_enabled, status, reminder_group_id,
+          id, identity_id, name, description, type, self_enabled, status,
           importance_level, tags, color, icon, next_trigger_at, version, created_at, updated_at,
           deleted_at, trigger, active_time, active_hours, notification_config, stats,
           click_rate, ignore_rate, avg_response_time, snooze_count, effectiveness_score, sample_size,
           last_analysis_time, original_interval, adjusted_interval, adjustment_reason, adjustment_time,
           is_auto_adjusted, user_confirmed, smart_frequency_enabled
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           data.id,
           data.identityId,
@@ -145,7 +143,6 @@ export class ReminderTemplatePowerSyncRepository implements IReminderTemplateRep
           data.type,
           data.selfEnabled,
           data.status,
-          data.reminderGroupId,
           data.importanceLevel,
           data.tags,
           data.color,
@@ -275,23 +272,6 @@ export class ReminderTemplatePowerSyncRepository implements IReminderTemplateRep
       'SELECT id, identity_id FROM reminder_templates WHERE deleted_at IS NULL ORDER BY created_at ASC',
     );
     return rows.map((row) => ({ id: row.id, identityId: row.identity_id }));
-  }
-
-  async findByGroupId(
-    groupId: string | null,
-    identityId: string,
-    options?: { includeHistory?: boolean; historyLimit?: number; includeDeleted?: boolean },
-  ): Promise<ReminderTemplate[]> {
-    const groupClause = groupId === null ? 'reminder_group_id IS NULL' : 'reminder_group_id = ?';
-    const sql = `SELECT * FROM reminder_templates WHERE ${groupClause} AND identity_id = ?${
-      options?.includeDeleted ? '' : ' AND deleted_at IS NULL'
-    } ORDER BY created_at ASC`;
-    const params = groupId === null ? [identityId] : [groupId, identityId];
-    return this.mapRows(
-      await this.db.getAll(sql, params),
-      options?.includeHistory,
-      options?.historyLimit,
-    );
   }
 
   async findActive(

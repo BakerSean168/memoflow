@@ -39,6 +39,8 @@ describe('data portability dependency factories surface', () => {
     'reminderTemplateRepository',
     'reminderGroupRepository',
     'reminderResponseRepository',
+    'routineProfileMembershipRepository',
+    'routineDefinitionRepository',
     'userReminderPreferenceRepository',
     'repositoryRepository',
     'folderRepository',

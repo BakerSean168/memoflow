@@ -10,6 +10,7 @@ import { brandedId } from '../../../primitives';
 import type {
   ReminderTemplateId,
   ReminderGroupId,
+  RoutineProfileId,
   IdentityId,
   ReminderHistoryId,
   ReminderResponseId,
@@ -43,6 +44,18 @@ export { TriggerConfigSchema, NotificationConfigSchema };
 
 // ============ ReminderTemplate Response Schema ============
 
+/** Canonical Routine/Profile membership read model for one Routine. */
+export const RoutineProfileMembershipViewSchema = z.object({
+  profileId: brandedId<RoutineProfileId>(),
+  profileName: z.string().nullable(),
+  enabled: z.boolean(),
+  profileEnabled: z.boolean(),
+  profileActive: z.boolean(),
+  effectiveEnabled: z.boolean(),
+});
+
+export type RoutineProfileMembershipView = z.infer<typeof RoutineProfileMembershipViewSchema>;
+
 /**
  * Residual 833: ReminderTemplateClientDTO dual retired — sole ReminderTemplateResponseSchema + z.infer
  * (semantic type is z.infer alias in aggregates/reminder-template-client.ts).
@@ -61,8 +74,7 @@ export const ReminderTemplateResponseSchema = z.object({
   selfEnabled: z.boolean(),
   status: z.enum(ReminderStatus),
   effectiveEnabled: z.boolean(),
-  groupId: brandedId<ReminderGroupId>().nullable(),
-  groupName: z.string().nullable().optional(),
+  profileMemberships: z.array(RoutineProfileMembershipViewSchema),
   importanceLevel: z.enum(ImportanceLevel),
   tags: z.array(z.string()),
   color: z.string().nullable(),
@@ -77,10 +89,8 @@ export const ReminderTemplateResponseSchema = z.object({
   // UI 扩展
   isActive: z.boolean(),
   isPaused: z.boolean(),
-  controlledByGroup: z.boolean(),
-  lifecycleSource: z.enum(['global', 'group', 'template']),
+  lifecycleSource: z.enum(['global', 'profile', 'routine']),
   effectiveEnabledReason: z.string(),
-  groupEnabled: z.boolean().nullable(),
   globalReminderEnabled: z.boolean(),
 });
 
@@ -162,7 +172,6 @@ export const ReminderBatchResultSchema = z.object({
 });
 
 // ============ UserReminderPreferences Response Schema ============
-
 
 // Residual 829: UserReminderPreferencesClientDTO dual retired — sole UserReminderPreferencesResponseSchema + z.infer
 // (semantic type is z.infer alias in aggregates/user-reminder-preferences-server.ts).

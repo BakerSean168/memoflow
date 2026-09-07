@@ -450,10 +450,8 @@ import { describe, expect, it } from 'vitest';
     });
 
     it('create/update use-cases pass activeTime without startDate mapping', () => {
-      expect(createUc).toContain('Residual 835');
       expect(createUc).toContain('activeTime: input.activeTime');
       expect(createUc).not.toMatch(/activatedAt:\s*input\.activeTime\.startDate/);
-      expect(updateUc).toContain('Residual 835');
       expect(updateUc).toContain('activeTime: request.activeTime');
       expect(updateUc).not.toMatch(/activatedAt:\s*request\.activeTime\.startDate/);
     });

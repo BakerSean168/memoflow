@@ -84,12 +84,28 @@ describe('PrismaRoutineProfileStore integration', () => {
       { id: work.id, active: true },
     );
     expect(
+      (
+        await store.findProfilesByIds({ identityId, profileIds: [gaming.id, 'missing', work.id] })
+      ).map((profile) => profile.id),
+    ).toEqual(['gaming', 'work']);
+    expect(
       (await store.listMembershipsForRoutine({ identityId, routineId: routine.id })).map(
         (membership) => [membership.profileId, membership.enabled],
       ),
     ).toEqual([
       ['gaming', false],
       ['work', true],
+    ]);
+    expect(
+      (
+        await store.listMembershipsForRoutines({
+          identityId,
+          routineIds: [routine.id, 'missing-routine'],
+        })
+      ).map((membership) => [membership.routineId, membership.profileId]),
+    ).toEqual([
+      [routine.id, 'gaming'],
+      [routine.id, 'work'],
     ]);
 
     await store.replaceRoutineMemberships({

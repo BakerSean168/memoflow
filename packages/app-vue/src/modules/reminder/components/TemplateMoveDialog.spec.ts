@@ -165,8 +165,16 @@ function createTemplate(
     selfEnabled: true,
     status: 'Active',
     effectiveEnabled: true,
-    groupId: 'group-1' as ReminderTemplateClientDTO['groupId'],
-    groupName: '健康管理',
+    profileMemberships: [
+      {
+        profileId: 'group-1' as ReminderTemplateClientDTO['profileMemberships'][number]['profileId'],
+        profileName: '健康管理',
+        enabled: true,
+        profileEnabled: true,
+        profileActive: true,
+        effectiveEnabled: true,
+      },
+    ],
     importanceLevel: 'Moderate',
     tags: [],
     color: null,
@@ -186,10 +194,8 @@ function createTemplate(
     isActive: true,
     isPaused: false,
     lastTriggeredText: null,
-    controlledByGroup: true,
-    lifecycleSource: 'group',
+    lifecycleSource: 'profile',
     effectiveEnabledReason: 'Group controls this reminder.',
-    groupEnabled: true,
     globalReminderEnabled: true,
     ...overrides,
   } as ReminderTemplateClientDTO;
@@ -231,7 +237,7 @@ function mountDialog(props?: {
   template?: ReminderTemplateClientDTO | null;
   groups?: ReminderGroupClientDTO[];
   templates?: ReminderTemplateClientDTO[];
-  onMove?: (templateId: string, groupId: string | null) => Promise<boolean>;
+  onMove?: (templateId: string, profileIds: readonly string[]) => Promise<boolean>;
 }) {
   return mount(TemplateMoveDialog, {
     props: {
@@ -249,7 +255,16 @@ function mountDialog(props?: {
         createTemplate({
           id: 'template-2' as ReminderTemplateClientDTO['id'],
           name: '散步提醒',
-          groupId: 'group-2' as ReminderTemplateClientDTO['groupId'],
+          profileMemberships: [
+            {
+              profileId: 'group-2' as ReminderTemplateClientDTO['profileMemberships'][number]['profileId'],
+              profileName: '工作提醒',
+              enabled: true,
+              profileEnabled: true,
+              profileActive: true,
+              effectiveEnabled: true,
+            },
+          ],
         }),
       ],
       onMove: props?.onMove,
@@ -271,58 +286,56 @@ function mountDialog(props?: {
 }
 
 describe('TemplateMoveDialog', () => {
-  it('emits move-to-root and shows the root lifecycle preview', async () => {
+  it('removes all Profile memberships and shows the unprofiled preview', async () => {
     const onMove = vi.fn().mockResolvedValue(true);
     const wrapper = mountDialog({ onMove });
     (wrapper.vm as unknown as { open: () => void }).open();
     await nextTick();
 
-    const checkbox = wrapper.find('[data-stub="Checkbox"]');
-    await checkbox.trigger('click');
+    const checkboxes = wrapper.findAll('[data-stub="Checkbox"]');
+    expect(checkboxes).toHaveLength(2);
+    await checkboxes[0]!.trigger('click');
     await nextTick();
 
     expect(wrapper.text()).toContain(
       'The Routine will keep its own switch and no longer depend on a Profile gate.',
     );
 
-    const buttons = wrapper.findAll('button');
-    const moveButton = buttons.find((button) => button.text().includes('Update membership'));
+    const moveButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Update membership'));
     expect(moveButton).toBeDefined();
-
     await moveButton!.trigger('click');
 
-    expect(onMove).toHaveBeenCalledWith('template-1', null);
+    expect(onMove).toHaveBeenCalledWith('template-1', []);
     expect(wrapper.emitted('closed')).toHaveLength(1);
   });
 
-  it('emits move-to-group and shows the selected group policy', async () => {
+  it('adds a second Profile without collapsing the existing membership', async () => {
     const onMove = vi.fn().mockResolvedValue(true);
     const wrapper = mountDialog({ onMove });
     (wrapper.vm as unknown as { open: () => void }).open();
     await nextTick();
 
-    const selectButton = wrapper.find('[data-select-value]');
-    await selectButton.trigger('click');
+    const checkboxes = wrapper.findAll('[data-stub="Checkbox"]');
+    await checkboxes[1]!.trigger('click');
     await nextTick();
 
-    expect(wrapper.text()).toContain(
-      'This Profile allows its members to be evaluated. Each Routine keeps and applies its own switch.',
-    );
     expect(wrapper.text()).toContain(
       'The Profile gate is open. The Routine still runs only when its own switch and the master gate allow it.',
     );
 
-    const buttons = wrapper.findAll('button');
-    const moveButton = buttons.find((button) => button.text().includes('Update membership'));
+    const moveButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Update membership'));
     expect(moveButton).toBeDefined();
-
     await moveButton!.trigger('click');
 
-    expect(onMove).toHaveBeenCalledWith('template-1', 'group-2');
+    expect(onMove).toHaveBeenCalledWith('template-1', ['group-1', 'group-2']);
     expect(wrapper.emitted('closed')).toHaveLength(1);
   });
 
-  it('shows a preserved-state preview when moving into a paused Profile', async () => {
+  it('shows a preserved-state preview when only a paused Profile remains selected', async () => {
     const wrapper = mountDialog({
       groups: [
         createGroup(),
@@ -337,8 +350,9 @@ describe('TemplateMoveDialog', () => {
     (wrapper.vm as unknown as { open: () => void }).open();
     await nextTick();
 
-    const selectButton = wrapper.find('[data-select-value]');
-    await selectButton.trigger('click');
+    const checkboxes = wrapper.findAll('[data-stub="Checkbox"]');
+    await checkboxes[0]!.trigger('click');
+    await checkboxes[1]!.trigger('click');
     await nextTick();
 
     expect(wrapper.text()).toContain(

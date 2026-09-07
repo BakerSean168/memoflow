@@ -45,9 +45,9 @@ export interface ReminderApplicationPort {
   enableTemplate(id: string, ctx: ExecutionContext): Promise<Result<ReminderTemplateClientDTO>>;
   pauseTemplate(id: string, ctx: ExecutionContext): Promise<Result<ReminderTemplateClientDTO>>;
   toggleTemplate(id: string, ctx: ExecutionContext): Promise<Result<ReminderTemplateClientDTO>>;
-  moveTemplate(
+  replaceTemplateProfiles(
     id: string,
-    groupId: string | null,
+    profileIds: readonly string[],
     ctx: ExecutionContext,
   ): Promise<Result<ReminderTemplateClientDTO>>;
   getTemplateHistory(

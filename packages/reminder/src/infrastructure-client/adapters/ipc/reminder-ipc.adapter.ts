@@ -69,12 +69,12 @@ export class ReminderIpcAdapter implements IReminderApiClient {
     return this.ipcClient.invoke(ReminderChannels.TEMPLATE_TOGGLE_ENABLED, id);
   }
 
-  async moveTemplateToGroup(
+  async replaceTemplateProfiles(
     templateId: string,
-    targetGroupId: string | null,
+    profileIds: readonly string[],
   ): Promise<Result<ReminderTemplateClientDTO>> {
-    return this.ipcClient.invoke(ReminderChannels.TEMPLATE_MOVE_TO_GROUP, templateId, {
-      groupId: targetGroupId,
+    return this.ipcClient.invoke(ReminderChannels.TEMPLATE_REPLACE_PROFILES, templateId, {
+      profileIds: [...profileIds],
     });
   }
 
@@ -144,7 +144,9 @@ export class ReminderIpcAdapter implements IReminderApiClient {
     return this.ipcClient.invoke(ReminderChannels.PREFERENCES_GET);
   }
 
-  async updatePreferences(data: Record<string, unknown>): Promise<Result<UserReminderPreferencesClientDTO>> {
+  async updatePreferences(
+    data: Record<string, unknown>,
+  ): Promise<Result<UserReminderPreferencesClientDTO>> {
     return this.ipcClient.invoke(ReminderChannels.PREFERENCES_UPDATE, data);
   }
 }

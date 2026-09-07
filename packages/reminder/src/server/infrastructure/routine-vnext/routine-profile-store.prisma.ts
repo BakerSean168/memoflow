@@ -116,6 +116,30 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     );
   }
 
+  async findProfilesByIds(input: {
+    readonly identityId: string;
+    readonly profileIds: readonly string[];
+  }): Promise<RoutineProfile[]> {
+    if (input.profileIds.length === 0) return [];
+    const rows = await this.prisma.routineProfile.findMany({
+      where: { identityId: input.identityId, id: { in: [...input.profileIds] } },
+      orderBy: [{ id: 'asc' }],
+    });
+    return rows.map((row) =>
+      RoutineProfile.load({
+        id: row.id,
+        identityId: row.identityId,
+        name: row.name,
+        description: row.description,
+        enabled: row.enabled,
+        active: row.active,
+        version: row.version,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+      }),
+    );
+  }
+
   async deleteProfile(input: {
     readonly identityId: string;
     readonly profileId: string;
@@ -151,6 +175,18 @@ export class PrismaRoutineProfileStore implements RoutineProfileStore {
     const rows = await this.prisma.routineProfileMembership.findMany({
       where: { identityId: input.identityId, routineId: input.routineId },
       orderBy: [{ profileId: 'asc' }],
+    });
+    return rows.map(mapMembership);
+  }
+
+  async listMembershipsForRoutines(input: {
+    readonly identityId: string;
+    readonly routineIds: readonly string[];
+  }): Promise<ProfileMembership[]> {
+    if (input.routineIds.length === 0) return [];
+    const rows = await this.prisma.routineProfileMembership.findMany({
+      where: { identityId: input.identityId, routineId: { in: [...input.routineIds] } },
+      orderBy: [{ routineId: 'asc' }, { profileId: 'asc' }],
     });
     return rows.map(mapMembership);
   }

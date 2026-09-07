@@ -154,6 +154,14 @@ describe('PowerSyncRoutineProfileStore', () => {
       ).toEqual(['gaming', 'work']);
       expect(
         (
+          await store.findProfilesByIds({
+            identityId: routine.identityId,
+            profileIds: [work.id, 'missing', gaming.id],
+          })
+        ).map((profile) => profile.id),
+      ).toEqual(['gaming', 'work']);
+      expect(
+        (
           await store.listMembershipsForRoutine({
             identityId: routine.identityId,
             routineId: routine.id,
@@ -162,6 +170,17 @@ describe('PowerSyncRoutineProfileStore', () => {
       ).toEqual([
         ['gaming', false],
         ['work', true],
+      ]);
+      expect(
+        (
+          await store.listMembershipsForRoutines({
+            identityId: routine.identityId,
+            routineIds: [routine.id, 'missing-routine'],
+          })
+        ).map((membership) => [membership.routineId, membership.profileId]),
+      ).toEqual([
+        [routine.id, 'gaming'],
+        [routine.id, 'work'],
       ]);
 
       await store.replaceRoutineMemberships({

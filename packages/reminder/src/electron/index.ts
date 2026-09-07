@@ -202,12 +202,12 @@ export function createReminderElectronModule(
           ),
         );
         installed.push(ReminderChannels.TEMPLATE_TOGGLE_ENABLED);
-        ipcMain.handle(ReminderChannels.TEMPLATE_MOVE_TO_GROUP, async (_event, id, payload) =>
+        ipcMain.handle(ReminderChannels.TEMPLATE_REPLACE_PROFILES, async (_event, id, payload) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            controller.moveTemplate(id, payload ?? {}, requestContext),
+            controller.replaceTemplateProfiles(id, payload ?? {}, requestContext),
           ),
         );
-        installed.push(ReminderChannels.TEMPLATE_MOVE_TO_GROUP);
+        installed.push(ReminderChannels.TEMPLATE_REPLACE_PROFILES);
         ipcMain.handle(ReminderChannels.UPCOMING_GET, async (_event, params) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
             controller.getUpcomingReminders(params ?? {}, requestContext),
@@ -223,11 +223,15 @@ export function createReminderElectronModule(
 
         // Group handlers / 分组处理器
         ipcMain.handle(ReminderChannels.GROUP_LIST, async () =>
-          withAuthenticatedValue(ctx, async (requestContext) => controller.listGroups(requestContext)),
+          withAuthenticatedValue(ctx, async (requestContext) =>
+            controller.listGroups(requestContext),
+          ),
         );
         installed.push(ReminderChannels.GROUP_LIST);
         ipcMain.handle(ReminderChannels.GROUP_GET_BY_USER, async () =>
-          withAuthenticatedValue(ctx, async (requestContext) => controller.listGroups(requestContext)),
+          withAuthenticatedValue(ctx, async (requestContext) =>
+            controller.listGroups(requestContext),
+          ),
         );
         installed.push(ReminderChannels.GROUP_GET_BY_USER);
         ipcMain.handle(ReminderChannels.GROUP_GET, async (_event, id) =>

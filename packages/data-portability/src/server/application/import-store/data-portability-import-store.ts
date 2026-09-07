@@ -261,7 +261,9 @@ export interface CreateReminderTemplateInput extends TimestampedImportInput {
   type: string;
   selfEnabled: boolean;
   status: string;
-  reminderGroupId: string | null;
+  routineEnabled: boolean;
+  routineTrigger: unknown | null;
+  profileMemberships: Array<{ profileId: string; enabled: boolean }>;
   importanceLevel: string;
   tags: string;
   color: string | null;

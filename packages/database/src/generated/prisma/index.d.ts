@@ -10545,37 +10545,6 @@ export namespace Prisma {
 
 
   /**
-   * Count Type ReminderGroupCountOutputType
-   */
-
-  export type ReminderGroupCountOutputType = {
-    templates: number
-  }
-
-  export type ReminderGroupCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    templates?: boolean | ReminderGroupCountOutputTypeCountTemplatesArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * ReminderGroupCountOutputType without action
-   */
-  export type ReminderGroupCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ReminderGroupCountOutputType
-     */
-    select?: ReminderGroupCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * ReminderGroupCountOutputType without action
-   */
-  export type ReminderGroupCountOutputTypeCountTemplatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ReminderTemplateWhereInput
-  }
-
-
-  /**
    * Count Type RoutineDefinitionCountOutputType
    */
 
@@ -67799,7 +67768,6 @@ export namespace Prisma {
     type: string | null
     selfEnabled: boolean | null
     status: string | null
-    reminderGroupId: string | null
     importanceLevel: string | null
     tags: string | null
     color: string | null
@@ -67839,7 +67807,6 @@ export namespace Prisma {
     type: string | null
     selfEnabled: boolean | null
     status: string | null
-    reminderGroupId: string | null
     importanceLevel: string | null
     tags: string | null
     color: string | null
@@ -67879,7 +67846,6 @@ export namespace Prisma {
     type: number
     selfEnabled: number
     status: number
-    reminderGroupId: number
     importanceLevel: number
     tags: number
     color: number
@@ -67945,7 +67911,6 @@ export namespace Prisma {
     type?: true
     selfEnabled?: true
     status?: true
-    reminderGroupId?: true
     importanceLevel?: true
     tags?: true
     color?: true
@@ -67985,7 +67950,6 @@ export namespace Prisma {
     type?: true
     selfEnabled?: true
     status?: true
-    reminderGroupId?: true
     importanceLevel?: true
     tags?: true
     color?: true
@@ -68025,7 +67989,6 @@ export namespace Prisma {
     type?: true
     selfEnabled?: true
     status?: true
-    reminderGroupId?: true
     importanceLevel?: true
     tags?: true
     color?: true
@@ -68152,7 +68115,6 @@ export namespace Prisma {
     type: string
     selfEnabled: boolean
     status: string
-    reminderGroupId: string | null
     importanceLevel: string
     tags: string
     color: string | null
@@ -68211,7 +68173,6 @@ export namespace Prisma {
     type?: boolean
     selfEnabled?: boolean
     status?: boolean
-    reminderGroupId?: boolean
     importanceLevel?: boolean
     tags?: boolean
     color?: boolean
@@ -68246,7 +68207,6 @@ export namespace Prisma {
     responses?: boolean | ReminderTemplate$responsesArgs<ExtArgs>
     occurrences?: boolean | ReminderTemplate$occurrencesArgs<ExtArgs>
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | ReminderTemplate$groupArgs<ExtArgs>
     _count?: boolean | ReminderTemplateCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["reminderTemplate"]>
 
@@ -68258,7 +68218,6 @@ export namespace Prisma {
     type?: boolean
     selfEnabled?: boolean
     status?: boolean
-    reminderGroupId?: boolean
     importanceLevel?: boolean
     tags?: boolean
     color?: boolean
@@ -68289,7 +68248,6 @@ export namespace Prisma {
     userConfirmed?: boolean
     smartFrequencyEnabled?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | ReminderTemplate$groupArgs<ExtArgs>
   }, ExtArgs["result"]["reminderTemplate"]>
 
   export type ReminderTemplateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -68300,7 +68258,6 @@ export namespace Prisma {
     type?: boolean
     selfEnabled?: boolean
     status?: boolean
-    reminderGroupId?: boolean
     importanceLevel?: boolean
     tags?: boolean
     color?: boolean
@@ -68331,7 +68288,6 @@ export namespace Prisma {
     userConfirmed?: boolean
     smartFrequencyEnabled?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | ReminderTemplate$groupArgs<ExtArgs>
   }, ExtArgs["result"]["reminderTemplate"]>
 
   export type ReminderTemplateSelectScalar = {
@@ -68342,7 +68298,6 @@ export namespace Prisma {
     type?: boolean
     selfEnabled?: boolean
     status?: boolean
-    reminderGroupId?: boolean
     importanceLevel?: boolean
     tags?: boolean
     color?: boolean
@@ -68374,23 +68329,20 @@ export namespace Prisma {
     smartFrequencyEnabled?: boolean
   }
 
-  export type ReminderTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "type" | "selfEnabled" | "status" | "reminderGroupId" | "importanceLevel" | "tags" | "color" | "icon" | "nextTriggerAt" | "version" | "createdAt" | "updatedAt" | "deletedAt" | "trigger" | "recurrence" | "activeTime" | "activeHours" | "notificationConfig" | "stats" | "clickRate" | "ignoreRate" | "avgResponseTime" | "snoozeCount" | "effectivenessScore" | "sampleSize" | "lastAnalysisTime" | "originalInterval" | "adjustedInterval" | "adjustmentReason" | "adjustmentTime" | "isAutoAdjusted" | "userConfirmed" | "smartFrequencyEnabled", ExtArgs["result"]["reminderTemplate"]>
+  export type ReminderTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "type" | "selfEnabled" | "status" | "importanceLevel" | "tags" | "color" | "icon" | "nextTriggerAt" | "version" | "createdAt" | "updatedAt" | "deletedAt" | "trigger" | "recurrence" | "activeTime" | "activeHours" | "notificationConfig" | "stats" | "clickRate" | "ignoreRate" | "avgResponseTime" | "snoozeCount" | "effectivenessScore" | "sampleSize" | "lastAnalysisTime" | "originalInterval" | "adjustedInterval" | "adjustmentReason" | "adjustmentTime" | "isAutoAdjusted" | "userConfirmed" | "smartFrequencyEnabled", ExtArgs["result"]["reminderTemplate"]>
   export type ReminderTemplateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     history?: boolean | ReminderTemplate$historyArgs<ExtArgs>
     instances?: boolean | ReminderTemplate$instancesArgs<ExtArgs>
     responses?: boolean | ReminderTemplate$responsesArgs<ExtArgs>
     occurrences?: boolean | ReminderTemplate$occurrencesArgs<ExtArgs>
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | ReminderTemplate$groupArgs<ExtArgs>
     _count?: boolean | ReminderTemplateCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ReminderTemplateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | ReminderTemplate$groupArgs<ExtArgs>
   }
   export type ReminderTemplateIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | ReminderTemplate$groupArgs<ExtArgs>
   }
 
   export type $ReminderTemplatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -68401,7 +68353,6 @@ export namespace Prisma {
       responses: Prisma.$ReminderResponsePayload<ExtArgs>[]
       occurrences: Prisma.$ReminderOccurrencePayload<ExtArgs>[]
       account: Prisma.$AccountPayload<ExtArgs>
-      group: Prisma.$ReminderGroupPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -68411,7 +68362,6 @@ export namespace Prisma {
       type: string
       selfEnabled: boolean
       status: string
-      reminderGroupId: string | null
       importanceLevel: string
       tags: string
       color: string | null
@@ -68840,7 +68790,6 @@ export namespace Prisma {
     responses<T extends ReminderTemplate$responsesArgs<ExtArgs> = {}>(args?: Subset<T, ReminderTemplate$responsesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReminderResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     occurrences<T extends ReminderTemplate$occurrencesArgs<ExtArgs> = {}>(args?: Subset<T, ReminderTemplate$occurrencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReminderOccurrencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    group<T extends ReminderTemplate$groupArgs<ExtArgs> = {}>(args?: Subset<T, ReminderTemplate$groupArgs<ExtArgs>>): Prisma__ReminderGroupClient<$Result.GetResult<Prisma.$ReminderGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -68877,7 +68826,6 @@ export namespace Prisma {
     readonly type: FieldRef<"ReminderTemplate", 'String'>
     readonly selfEnabled: FieldRef<"ReminderTemplate", 'Boolean'>
     readonly status: FieldRef<"ReminderTemplate", 'String'>
-    readonly reminderGroupId: FieldRef<"ReminderTemplate", 'String'>
     readonly importanceLevel: FieldRef<"ReminderTemplate", 'String'>
     readonly tags: FieldRef<"ReminderTemplate", 'String'>
     readonly color: FieldRef<"ReminderTemplate", 'String'>
@@ -69404,25 +69352,6 @@ export namespace Prisma {
   }
 
   /**
-   * ReminderTemplate.group
-   */
-  export type ReminderTemplate$groupArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ReminderGroup
-     */
-    select?: ReminderGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ReminderGroup
-     */
-    omit?: ReminderGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ReminderGroupInclude<ExtArgs> | null
-    where?: ReminderGroupWhereInput
-  }
-
-  /**
    * ReminderTemplate without action
    */
   export type ReminderTemplateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -69716,8 +69645,6 @@ export namespace Prisma {
     updatedAt?: boolean
     deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    templates?: boolean | ReminderGroup$templatesArgs<ExtArgs>
-    _count?: boolean | ReminderGroupCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["reminderGroup"]>
 
   export type ReminderGroupSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -69776,8 +69703,6 @@ export namespace Prisma {
   export type ReminderGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "color" | "icon" | "enabled" | "status" | "order" | "stats" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["reminderGroup"]>
   export type ReminderGroupInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    templates?: boolean | ReminderGroup$templatesArgs<ExtArgs>
-    _count?: boolean | ReminderGroupCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ReminderGroupIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
@@ -69790,7 +69715,6 @@ export namespace Prisma {
     name: "ReminderGroup"
     objects: {
       account: Prisma.$AccountPayload<ExtArgs>
-      templates: Prisma.$ReminderTemplatePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -70202,7 +70126,6 @@ export namespace Prisma {
   export interface Prisma__ReminderGroupClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    templates<T extends ReminderGroup$templatesArgs<ExtArgs> = {}>(args?: Subset<T, ReminderGroup$templatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReminderTemplatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -70644,30 +70567,6 @@ export namespace Prisma {
      * Limit how many ReminderGroups to delete.
      */
     limit?: number
-  }
-
-  /**
-   * ReminderGroup.templates
-   */
-  export type ReminderGroup$templatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ReminderTemplate
-     */
-    select?: ReminderTemplateSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ReminderTemplate
-     */
-    omit?: ReminderTemplateOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ReminderTemplateInclude<ExtArgs> | null
-    where?: ReminderTemplateWhereInput
-    orderBy?: ReminderTemplateOrderByWithRelationInput | ReminderTemplateOrderByWithRelationInput[]
-    cursor?: ReminderTemplateWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ReminderTemplateScalarFieldEnum | ReminderTemplateScalarFieldEnum[]
   }
 
   /**
@@ -128427,7 +128326,6 @@ export namespace Prisma {
     type: 'type',
     selfEnabled: 'selfEnabled',
     status: 'status',
-    reminderGroupId: 'reminderGroupId',
     importanceLevel: 'importanceLevel',
     tags: 'tags',
     color: 'color',
@@ -134029,7 +133927,6 @@ export namespace Prisma {
     type?: StringFilter<"ReminderTemplate"> | string
     selfEnabled?: BoolFilter<"ReminderTemplate"> | boolean
     status?: StringFilter<"ReminderTemplate"> | string
-    reminderGroupId?: StringNullableFilter<"ReminderTemplate"> | string | null
     importanceLevel?: StringFilter<"ReminderTemplate"> | string
     tags?: StringFilter<"ReminderTemplate"> | string
     color?: StringNullableFilter<"ReminderTemplate"> | string | null
@@ -134064,7 +133961,6 @@ export namespace Prisma {
     responses?: ReminderResponseListRelationFilter
     occurrences?: ReminderOccurrenceListRelationFilter
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    group?: XOR<ReminderGroupNullableScalarRelationFilter, ReminderGroupWhereInput> | null
   }
 
   export type ReminderTemplateOrderByWithRelationInput = {
@@ -134075,7 +133971,6 @@ export namespace Prisma {
     type?: SortOrder
     selfEnabled?: SortOrder
     status?: SortOrder
-    reminderGroupId?: SortOrderInput | SortOrder
     importanceLevel?: SortOrder
     tags?: SortOrder
     color?: SortOrderInput | SortOrder
@@ -134110,7 +134005,6 @@ export namespace Prisma {
     responses?: ReminderResponseOrderByRelationAggregateInput
     occurrences?: ReminderOccurrenceOrderByRelationAggregateInput
     account?: AccountOrderByWithRelationInput
-    group?: ReminderGroupOrderByWithRelationInput
   }
 
   export type ReminderTemplateWhereUniqueInput = Prisma.AtLeast<{
@@ -134124,7 +134018,6 @@ export namespace Prisma {
     type?: StringFilter<"ReminderTemplate"> | string
     selfEnabled?: BoolFilter<"ReminderTemplate"> | boolean
     status?: StringFilter<"ReminderTemplate"> | string
-    reminderGroupId?: StringNullableFilter<"ReminderTemplate"> | string | null
     importanceLevel?: StringFilter<"ReminderTemplate"> | string
     tags?: StringFilter<"ReminderTemplate"> | string
     color?: StringNullableFilter<"ReminderTemplate"> | string | null
@@ -134159,7 +134052,6 @@ export namespace Prisma {
     responses?: ReminderResponseListRelationFilter
     occurrences?: ReminderOccurrenceListRelationFilter
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    group?: XOR<ReminderGroupNullableScalarRelationFilter, ReminderGroupWhereInput> | null
   }, "id">
 
   export type ReminderTemplateOrderByWithAggregationInput = {
@@ -134170,7 +134062,6 @@ export namespace Prisma {
     type?: SortOrder
     selfEnabled?: SortOrder
     status?: SortOrder
-    reminderGroupId?: SortOrderInput | SortOrder
     importanceLevel?: SortOrder
     tags?: SortOrder
     color?: SortOrderInput | SortOrder
@@ -134218,7 +134109,6 @@ export namespace Prisma {
     type?: StringWithAggregatesFilter<"ReminderTemplate"> | string
     selfEnabled?: BoolWithAggregatesFilter<"ReminderTemplate"> | boolean
     status?: StringWithAggregatesFilter<"ReminderTemplate"> | string
-    reminderGroupId?: StringNullableWithAggregatesFilter<"ReminderTemplate"> | string | null
     importanceLevel?: StringWithAggregatesFilter<"ReminderTemplate"> | string
     tags?: StringWithAggregatesFilter<"ReminderTemplate"> | string
     color?: StringNullableWithAggregatesFilter<"ReminderTemplate"> | string | null
@@ -134269,7 +134159,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"ReminderGroup"> | Date | string
     deletedAt?: DateTimeNullableFilter<"ReminderGroup"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    templates?: ReminderTemplateListRelationFilter
   }
 
   export type ReminderGroupOrderByWithRelationInput = {
@@ -134288,7 +134177,6 @@ export namespace Prisma {
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     account?: AccountOrderByWithRelationInput
-    templates?: ReminderTemplateOrderByRelationAggregateInput
   }
 
   export type ReminderGroupWhereUniqueInput = Prisma.AtLeast<{
@@ -134310,7 +134198,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"ReminderGroup"> | Date | string
     deletedAt?: DateTimeNullableFilter<"ReminderGroup"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    templates?: ReminderTemplateListRelationFilter
   }, "id">
 
   export type ReminderGroupOrderByWithAggregationInput = {
@@ -144197,7 +144084,6 @@ export namespace Prisma {
     responses?: ReminderResponseCreateNestedManyWithoutTemplateInput
     occurrences?: ReminderOccurrenceCreateNestedManyWithoutTemplateInput
     account: AccountCreateNestedOneWithoutReminderTemplatesInput
-    group?: ReminderGroupCreateNestedOneWithoutTemplatesInput
   }
 
   export type ReminderTemplateUncheckedCreateInput = {
@@ -144208,7 +144094,6 @@ export namespace Prisma {
     type: string
     selfEnabled: boolean
     status: string
-    reminderGroupId?: string | null
     importanceLevel: string
     tags: string
     color?: string | null
@@ -144285,7 +144170,6 @@ export namespace Prisma {
     responses?: ReminderResponseUpdateManyWithoutTemplateNestedInput
     occurrences?: ReminderOccurrenceUpdateManyWithoutTemplateNestedInput
     account?: AccountUpdateOneRequiredWithoutReminderTemplatesNestedInput
-    group?: ReminderGroupUpdateOneWithoutTemplatesNestedInput
   }
 
   export type ReminderTemplateUncheckedUpdateInput = {
@@ -144296,7 +144180,6 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     selfEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
-    reminderGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     importanceLevel?: StringFieldUpdateOperationsInput | string
     tags?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
@@ -144340,7 +144223,6 @@ export namespace Prisma {
     type: string
     selfEnabled: boolean
     status: string
-    reminderGroupId?: string | null
     importanceLevel: string
     tags: string
     color?: string | null
@@ -144418,7 +144300,6 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     selfEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
-    reminderGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     importanceLevel?: StringFieldUpdateOperationsInput | string
     tags?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
@@ -144465,7 +144346,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutReminderGroupsInput
-    templates?: ReminderTemplateCreateNestedManyWithoutGroupInput
   }
 
   export type ReminderGroupUncheckedCreateInput = {
@@ -144483,7 +144363,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    templates?: ReminderTemplateUncheckedCreateNestedManyWithoutGroupInput
   }
 
   export type ReminderGroupUpdateInput = {
@@ -144501,7 +144380,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutReminderGroupsNestedInput
-    templates?: ReminderTemplateUpdateManyWithoutGroupNestedInput
   }
 
   export type ReminderGroupUncheckedUpdateInput = {
@@ -144519,7 +144397,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    templates?: ReminderTemplateUncheckedUpdateManyWithoutGroupNestedInput
   }
 
   export type ReminderGroupCreateManyInput = {
@@ -153450,11 +153327,6 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
-  export type ReminderGroupNullableScalarRelationFilter = {
-    is?: ReminderGroupWhereInput | null
-    isNot?: ReminderGroupWhereInput | null
-  }
-
   export type ReminderTemplateCountOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
@@ -153463,7 +153335,6 @@ export namespace Prisma {
     type?: SortOrder
     selfEnabled?: SortOrder
     status?: SortOrder
-    reminderGroupId?: SortOrder
     importanceLevel?: SortOrder
     tags?: SortOrder
     color?: SortOrder
@@ -153515,7 +153386,6 @@ export namespace Prisma {
     type?: SortOrder
     selfEnabled?: SortOrder
     status?: SortOrder
-    reminderGroupId?: SortOrder
     importanceLevel?: SortOrder
     tags?: SortOrder
     color?: SortOrder
@@ -153555,7 +153425,6 @@ export namespace Prisma {
     type?: SortOrder
     selfEnabled?: SortOrder
     status?: SortOrder
-    reminderGroupId?: SortOrder
     importanceLevel?: SortOrder
     tags?: SortOrder
     color?: SortOrder
@@ -160865,12 +160734,6 @@ export namespace Prisma {
     connect?: AccountWhereUniqueInput
   }
 
-  export type ReminderGroupCreateNestedOneWithoutTemplatesInput = {
-    create?: XOR<ReminderGroupCreateWithoutTemplatesInput, ReminderGroupUncheckedCreateWithoutTemplatesInput>
-    connectOrCreate?: ReminderGroupCreateOrConnectWithoutTemplatesInput
-    connect?: ReminderGroupWhereUniqueInput
-  }
-
   export type ReminderHistoryUncheckedCreateNestedManyWithoutTemplateInput = {
     create?: XOR<ReminderHistoryCreateWithoutTemplateInput, ReminderHistoryUncheckedCreateWithoutTemplateInput> | ReminderHistoryCreateWithoutTemplateInput[] | ReminderHistoryUncheckedCreateWithoutTemplateInput[]
     connectOrCreate?: ReminderHistoryCreateOrConnectWithoutTemplateInput | ReminderHistoryCreateOrConnectWithoutTemplateInput[]
@@ -160963,16 +160826,6 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutReminderTemplatesInput, AccountUpdateWithoutReminderTemplatesInput>, AccountUncheckedUpdateWithoutReminderTemplatesInput>
   }
 
-  export type ReminderGroupUpdateOneWithoutTemplatesNestedInput = {
-    create?: XOR<ReminderGroupCreateWithoutTemplatesInput, ReminderGroupUncheckedCreateWithoutTemplatesInput>
-    connectOrCreate?: ReminderGroupCreateOrConnectWithoutTemplatesInput
-    upsert?: ReminderGroupUpsertWithoutTemplatesInput
-    disconnect?: ReminderGroupWhereInput | boolean
-    delete?: ReminderGroupWhereInput | boolean
-    connect?: ReminderGroupWhereUniqueInput
-    update?: XOR<XOR<ReminderGroupUpdateToOneWithWhereWithoutTemplatesInput, ReminderGroupUpdateWithoutTemplatesInput>, ReminderGroupUncheckedUpdateWithoutTemplatesInput>
-  }
-
   export type ReminderHistoryUncheckedUpdateManyWithoutTemplateNestedInput = {
     create?: XOR<ReminderHistoryCreateWithoutTemplateInput, ReminderHistoryUncheckedCreateWithoutTemplateInput> | ReminderHistoryCreateWithoutTemplateInput[] | ReminderHistoryUncheckedCreateWithoutTemplateInput[]
     connectOrCreate?: ReminderHistoryCreateOrConnectWithoutTemplateInput | ReminderHistoryCreateOrConnectWithoutTemplateInput[]
@@ -161035,54 +160888,12 @@ export namespace Prisma {
     connect?: AccountWhereUniqueInput
   }
 
-  export type ReminderTemplateCreateNestedManyWithoutGroupInput = {
-    create?: XOR<ReminderTemplateCreateWithoutGroupInput, ReminderTemplateUncheckedCreateWithoutGroupInput> | ReminderTemplateCreateWithoutGroupInput[] | ReminderTemplateUncheckedCreateWithoutGroupInput[]
-    connectOrCreate?: ReminderTemplateCreateOrConnectWithoutGroupInput | ReminderTemplateCreateOrConnectWithoutGroupInput[]
-    createMany?: ReminderTemplateCreateManyGroupInputEnvelope
-    connect?: ReminderTemplateWhereUniqueInput | ReminderTemplateWhereUniqueInput[]
-  }
-
-  export type ReminderTemplateUncheckedCreateNestedManyWithoutGroupInput = {
-    create?: XOR<ReminderTemplateCreateWithoutGroupInput, ReminderTemplateUncheckedCreateWithoutGroupInput> | ReminderTemplateCreateWithoutGroupInput[] | ReminderTemplateUncheckedCreateWithoutGroupInput[]
-    connectOrCreate?: ReminderTemplateCreateOrConnectWithoutGroupInput | ReminderTemplateCreateOrConnectWithoutGroupInput[]
-    createMany?: ReminderTemplateCreateManyGroupInputEnvelope
-    connect?: ReminderTemplateWhereUniqueInput | ReminderTemplateWhereUniqueInput[]
-  }
-
   export type AccountUpdateOneRequiredWithoutReminderGroupsNestedInput = {
     create?: XOR<AccountCreateWithoutReminderGroupsInput, AccountUncheckedCreateWithoutReminderGroupsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutReminderGroupsInput
     upsert?: AccountUpsertWithoutReminderGroupsInput
     connect?: AccountWhereUniqueInput
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutReminderGroupsInput, AccountUpdateWithoutReminderGroupsInput>, AccountUncheckedUpdateWithoutReminderGroupsInput>
-  }
-
-  export type ReminderTemplateUpdateManyWithoutGroupNestedInput = {
-    create?: XOR<ReminderTemplateCreateWithoutGroupInput, ReminderTemplateUncheckedCreateWithoutGroupInput> | ReminderTemplateCreateWithoutGroupInput[] | ReminderTemplateUncheckedCreateWithoutGroupInput[]
-    connectOrCreate?: ReminderTemplateCreateOrConnectWithoutGroupInput | ReminderTemplateCreateOrConnectWithoutGroupInput[]
-    upsert?: ReminderTemplateUpsertWithWhereUniqueWithoutGroupInput | ReminderTemplateUpsertWithWhereUniqueWithoutGroupInput[]
-    createMany?: ReminderTemplateCreateManyGroupInputEnvelope
-    set?: ReminderTemplateWhereUniqueInput | ReminderTemplateWhereUniqueInput[]
-    disconnect?: ReminderTemplateWhereUniqueInput | ReminderTemplateWhereUniqueInput[]
-    delete?: ReminderTemplateWhereUniqueInput | ReminderTemplateWhereUniqueInput[]
-    connect?: ReminderTemplateWhereUniqueInput | ReminderTemplateWhereUniqueInput[]
-    update?: ReminderTemplateUpdateWithWhereUniqueWithoutGroupInput | ReminderTemplateUpdateWithWhereUniqueWithoutGroupInput[]
-    updateMany?: ReminderTemplateUpdateManyWithWhereWithoutGroupInput | ReminderTemplateUpdateManyWithWhereWithoutGroupInput[]
-    deleteMany?: ReminderTemplateScalarWhereInput | ReminderTemplateScalarWhereInput[]
-  }
-
-  export type ReminderTemplateUncheckedUpdateManyWithoutGroupNestedInput = {
-    create?: XOR<ReminderTemplateCreateWithoutGroupInput, ReminderTemplateUncheckedCreateWithoutGroupInput> | ReminderTemplateCreateWithoutGroupInput[] | ReminderTemplateUncheckedCreateWithoutGroupInput[]
-    connectOrCreate?: ReminderTemplateCreateOrConnectWithoutGroupInput | ReminderTemplateCreateOrConnectWithoutGroupInput[]
-    upsert?: ReminderTemplateUpsertWithWhereUniqueWithoutGroupInput | ReminderTemplateUpsertWithWhereUniqueWithoutGroupInput[]
-    createMany?: ReminderTemplateCreateManyGroupInputEnvelope
-    set?: ReminderTemplateWhereUniqueInput | ReminderTemplateWhereUniqueInput[]
-    disconnect?: ReminderTemplateWhereUniqueInput | ReminderTemplateWhereUniqueInput[]
-    delete?: ReminderTemplateWhereUniqueInput | ReminderTemplateWhereUniqueInput[]
-    connect?: ReminderTemplateWhereUniqueInput | ReminderTemplateWhereUniqueInput[]
-    update?: ReminderTemplateUpdateWithWhereUniqueWithoutGroupInput | ReminderTemplateUpdateWithWhereUniqueWithoutGroupInput[]
-    updateMany?: ReminderTemplateUpdateManyWithWhereWithoutGroupInput | ReminderTemplateUpdateManyWithWhereWithoutGroupInput[]
-    deleteMany?: ReminderTemplateScalarWhereInput | ReminderTemplateScalarWhereInput[]
   }
 
   export type AccountCreateNestedOneWithoutReminderInstancesInput = {
@@ -163623,7 +163434,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    templates?: ReminderTemplateCreateNestedManyWithoutGroupInput
   }
 
   export type ReminderGroupUncheckedCreateWithoutAccountInput = {
@@ -163640,7 +163450,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    templates?: ReminderTemplateUncheckedCreateNestedManyWithoutGroupInput
   }
 
   export type ReminderGroupCreateOrConnectWithoutAccountInput = {
@@ -163693,7 +163502,6 @@ export namespace Prisma {
     instances?: ReminderInstanceCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseCreateNestedManyWithoutTemplateInput
     occurrences?: ReminderOccurrenceCreateNestedManyWithoutTemplateInput
-    group?: ReminderGroupCreateNestedOneWithoutTemplatesInput
   }
 
   export type ReminderTemplateUncheckedCreateWithoutAccountInput = {
@@ -163703,7 +163511,6 @@ export namespace Prisma {
     type: string
     selfEnabled: boolean
     status: string
-    reminderGroupId?: string | null
     importanceLevel: string
     tags: string
     color?: string | null
@@ -166218,7 +166025,6 @@ export namespace Prisma {
     type?: StringFilter<"ReminderTemplate"> | string
     selfEnabled?: BoolFilter<"ReminderTemplate"> | boolean
     status?: StringFilter<"ReminderTemplate"> | string
-    reminderGroupId?: StringNullableFilter<"ReminderTemplate"> | string | null
     importanceLevel?: StringFilter<"ReminderTemplate"> | string
     tags?: StringFilter<"ReminderTemplate"> | string
     color?: StringNullableFilter<"ReminderTemplate"> | string | null
@@ -179990,45 +179796,6 @@ export namespace Prisma {
     create: XOR<AccountCreateWithoutReminderTemplatesInput, AccountUncheckedCreateWithoutReminderTemplatesInput>
   }
 
-  export type ReminderGroupCreateWithoutTemplatesInput = {
-    id: string
-    name: string
-    description?: string | null
-    color?: string | null
-    icon?: string | null
-    enabled: boolean
-    status: string
-    order: number
-    stats: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutReminderGroupsInput
-  }
-
-  export type ReminderGroupUncheckedCreateWithoutTemplatesInput = {
-    id: string
-    identityId: string
-    name: string
-    description?: string | null
-    color?: string | null
-    icon?: string | null
-    enabled: boolean
-    status: string
-    order: number
-    stats: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type ReminderGroupCreateOrConnectWithoutTemplatesInput = {
-    where: ReminderGroupWhereUniqueInput
-    create: XOR<ReminderGroupCreateWithoutTemplatesInput, ReminderGroupUncheckedCreateWithoutTemplatesInput>
-  }
-
   export type ReminderHistoryUpsertWithWhereUniqueWithoutTemplateInput = {
     where: ReminderHistoryWhereUniqueInput
     update: XOR<ReminderHistoryUpdateWithoutTemplateInput, ReminderHistoryUncheckedUpdateWithoutTemplateInput>
@@ -180260,51 +180027,6 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
 
-  export type ReminderGroupUpsertWithoutTemplatesInput = {
-    update: XOR<ReminderGroupUpdateWithoutTemplatesInput, ReminderGroupUncheckedUpdateWithoutTemplatesInput>
-    create: XOR<ReminderGroupCreateWithoutTemplatesInput, ReminderGroupUncheckedCreateWithoutTemplatesInput>
-    where?: ReminderGroupWhereInput
-  }
-
-  export type ReminderGroupUpdateToOneWithWhereWithoutTemplatesInput = {
-    where?: ReminderGroupWhereInput
-    data: XOR<ReminderGroupUpdateWithoutTemplatesInput, ReminderGroupUncheckedUpdateWithoutTemplatesInput>
-  }
-
-  export type ReminderGroupUpdateWithoutTemplatesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    icon?: NullableStringFieldUpdateOperationsInput | string | null
-    enabled?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    order?: IntFieldUpdateOperationsInput | number
-    stats?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutReminderGroupsNestedInput
-  }
-
-  export type ReminderGroupUncheckedUpdateWithoutTemplatesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    icon?: NullableStringFieldUpdateOperationsInput | string | null
-    enabled?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    order?: IntFieldUpdateOperationsInput | number
-    stats?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
   export type AccountCreateWithoutReminderGroupsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
@@ -180464,102 +180186,6 @@ export namespace Prisma {
   export type AccountCreateOrConnectWithoutReminderGroupsInput = {
     where: AccountWhereUniqueInput
     create: XOR<AccountCreateWithoutReminderGroupsInput, AccountUncheckedCreateWithoutReminderGroupsInput>
-  }
-
-  export type ReminderTemplateCreateWithoutGroupInput = {
-    id: string
-    name: string
-    description?: string | null
-    type: string
-    selfEnabled: boolean
-    status: string
-    importanceLevel: string
-    tags: string
-    color?: string | null
-    icon?: string | null
-    nextTriggerAt?: Date | string | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    trigger: string
-    recurrence?: string | null
-    activeTime: string
-    activeHours?: string | null
-    notificationConfig: string
-    stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
-    history?: ReminderHistoryCreateNestedManyWithoutTemplateInput
-    instances?: ReminderInstanceCreateNestedManyWithoutTemplateInput
-    responses?: ReminderResponseCreateNestedManyWithoutTemplateInput
-    occurrences?: ReminderOccurrenceCreateNestedManyWithoutTemplateInput
-    account: AccountCreateNestedOneWithoutReminderTemplatesInput
-  }
-
-  export type ReminderTemplateUncheckedCreateWithoutGroupInput = {
-    id: string
-    identityId: string
-    name: string
-    description?: string | null
-    type: string
-    selfEnabled: boolean
-    status: string
-    importanceLevel: string
-    tags: string
-    color?: string | null
-    icon?: string | null
-    nextTriggerAt?: Date | string | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    trigger: string
-    recurrence?: string | null
-    activeTime: string
-    activeHours?: string | null
-    notificationConfig: string
-    stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
-    history?: ReminderHistoryUncheckedCreateNestedManyWithoutTemplateInput
-    instances?: ReminderInstanceUncheckedCreateNestedManyWithoutTemplateInput
-    responses?: ReminderResponseUncheckedCreateNestedManyWithoutTemplateInput
-    occurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutTemplateInput
-  }
-
-  export type ReminderTemplateCreateOrConnectWithoutGroupInput = {
-    where: ReminderTemplateWhereUniqueInput
-    create: XOR<ReminderTemplateCreateWithoutGroupInput, ReminderTemplateUncheckedCreateWithoutGroupInput>
-  }
-
-  export type ReminderTemplateCreateManyGroupInputEnvelope = {
-    data: ReminderTemplateCreateManyGroupInput | ReminderTemplateCreateManyGroupInput[]
-    skipDuplicates?: boolean
   }
 
   export type AccountUpsertWithoutReminderGroupsInput = {
@@ -180727,22 +180353,6 @@ export namespace Prisma {
     knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type ReminderTemplateUpsertWithWhereUniqueWithoutGroupInput = {
-    where: ReminderTemplateWhereUniqueInput
-    update: XOR<ReminderTemplateUpdateWithoutGroupInput, ReminderTemplateUncheckedUpdateWithoutGroupInput>
-    create: XOR<ReminderTemplateCreateWithoutGroupInput, ReminderTemplateUncheckedCreateWithoutGroupInput>
-  }
-
-  export type ReminderTemplateUpdateWithWhereUniqueWithoutGroupInput = {
-    where: ReminderTemplateWhereUniqueInput
-    data: XOR<ReminderTemplateUpdateWithoutGroupInput, ReminderTemplateUncheckedUpdateWithoutGroupInput>
-  }
-
-  export type ReminderTemplateUpdateManyWithWhereWithoutGroupInput = {
-    where: ReminderTemplateScalarWhereInput
-    data: XOR<ReminderTemplateUpdateManyMutationInput, ReminderTemplateUncheckedUpdateManyWithoutGroupInput>
   }
 
   export type AccountCreateWithoutReminderInstancesInput = {
@@ -180946,7 +180556,6 @@ export namespace Prisma {
     responses?: ReminderResponseCreateNestedManyWithoutTemplateInput
     occurrences?: ReminderOccurrenceCreateNestedManyWithoutTemplateInput
     account: AccountCreateNestedOneWithoutReminderTemplatesInput
-    group?: ReminderGroupCreateNestedOneWithoutTemplatesInput
   }
 
   export type ReminderTemplateUncheckedCreateWithoutInstancesInput = {
@@ -180957,7 +180566,6 @@ export namespace Prisma {
     type: string
     selfEnabled: boolean
     status: string
-    reminderGroupId?: string | null
     importanceLevel: string
     tags: string
     color?: string | null
@@ -181215,7 +180823,6 @@ export namespace Prisma {
     responses?: ReminderResponseUpdateManyWithoutTemplateNestedInput
     occurrences?: ReminderOccurrenceUpdateManyWithoutTemplateNestedInput
     account?: AccountUpdateOneRequiredWithoutReminderTemplatesNestedInput
-    group?: ReminderGroupUpdateOneWithoutTemplatesNestedInput
   }
 
   export type ReminderTemplateUncheckedUpdateWithoutInstancesInput = {
@@ -181226,7 +180833,6 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     selfEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
-    reminderGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     importanceLevel?: StringFieldUpdateOperationsInput | string
     tags?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
@@ -181462,7 +181068,6 @@ export namespace Prisma {
     responses?: ReminderResponseCreateNestedManyWithoutTemplateInput
     occurrences?: ReminderOccurrenceCreateNestedManyWithoutTemplateInput
     account: AccountCreateNestedOneWithoutReminderTemplatesInput
-    group?: ReminderGroupCreateNestedOneWithoutTemplatesInput
   }
 
   export type ReminderTemplateUncheckedCreateWithoutHistoryInput = {
@@ -181473,7 +181078,6 @@ export namespace Prisma {
     type: string
     selfEnabled: boolean
     status: string
-    reminderGroupId?: string | null
     importanceLevel: string
     tags: string
     color?: string | null
@@ -181731,7 +181335,6 @@ export namespace Prisma {
     responses?: ReminderResponseUpdateManyWithoutTemplateNestedInput
     occurrences?: ReminderOccurrenceUpdateManyWithoutTemplateNestedInput
     account?: AccountUpdateOneRequiredWithoutReminderTemplatesNestedInput
-    group?: ReminderGroupUpdateOneWithoutTemplatesNestedInput
   }
 
   export type ReminderTemplateUncheckedUpdateWithoutHistoryInput = {
@@ -181742,7 +181345,6 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     selfEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
-    reminderGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     importanceLevel?: StringFieldUpdateOperationsInput | string
     tags?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
@@ -182306,7 +181908,6 @@ export namespace Prisma {
     instances?: ReminderInstanceCreateNestedManyWithoutTemplateInput
     occurrences?: ReminderOccurrenceCreateNestedManyWithoutTemplateInput
     account: AccountCreateNestedOneWithoutReminderTemplatesInput
-    group?: ReminderGroupCreateNestedOneWithoutTemplatesInput
   }
 
   export type ReminderTemplateUncheckedCreateWithoutResponsesInput = {
@@ -182317,7 +181918,6 @@ export namespace Prisma {
     type: string
     selfEnabled: boolean
     status: string
-    reminderGroupId?: string | null
     importanceLevel: string
     tags: string
     color?: string | null
@@ -182575,7 +182175,6 @@ export namespace Prisma {
     instances?: ReminderInstanceUpdateManyWithoutTemplateNestedInput
     occurrences?: ReminderOccurrenceUpdateManyWithoutTemplateNestedInput
     account?: AccountUpdateOneRequiredWithoutReminderTemplatesNestedInput
-    group?: ReminderGroupUpdateOneWithoutTemplatesNestedInput
   }
 
   export type ReminderTemplateUncheckedUpdateWithoutResponsesInput = {
@@ -182586,7 +182185,6 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     selfEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
-    reminderGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     importanceLevel?: StringFieldUpdateOperationsInput | string
     tags?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
@@ -182989,7 +182587,6 @@ export namespace Prisma {
     instances?: ReminderInstanceCreateNestedManyWithoutTemplateInput
     responses?: ReminderResponseCreateNestedManyWithoutTemplateInput
     account: AccountCreateNestedOneWithoutReminderTemplatesInput
-    group?: ReminderGroupCreateNestedOneWithoutTemplatesInput
   }
 
   export type ReminderTemplateUncheckedCreateWithoutOccurrencesInput = {
@@ -183000,7 +182597,6 @@ export namespace Prisma {
     type: string
     selfEnabled: boolean
     status: string
-    reminderGroupId?: string | null
     importanceLevel: string
     tags: string
     color?: string | null
@@ -183252,7 +182848,6 @@ export namespace Prisma {
     instances?: ReminderInstanceUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUpdateManyWithoutTemplateNestedInput
     account?: AccountUpdateOneRequiredWithoutReminderTemplatesNestedInput
-    group?: ReminderGroupUpdateOneWithoutTemplatesNestedInput
   }
 
   export type ReminderTemplateUncheckedUpdateWithoutOccurrencesInput = {
@@ -183263,7 +182858,6 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     selfEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
-    reminderGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     importanceLevel?: StringFieldUpdateOperationsInput | string
     tags?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
@@ -196513,7 +196107,6 @@ export namespace Prisma {
     type: string
     selfEnabled: boolean
     status: string
-    reminderGroupId?: string | null
     importanceLevel: string
     tags: string
     color?: string | null
@@ -197551,7 +197144,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    templates?: ReminderTemplateUpdateManyWithoutGroupNestedInput
   }
 
   export type ReminderGroupUncheckedUpdateWithoutAccountInput = {
@@ -197568,7 +197160,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    templates?: ReminderTemplateUncheckedUpdateManyWithoutGroupNestedInput
   }
 
   export type ReminderGroupUncheckedUpdateManyWithoutAccountInput = {
@@ -197627,7 +197218,6 @@ export namespace Prisma {
     instances?: ReminderInstanceUpdateManyWithoutTemplateNestedInput
     responses?: ReminderResponseUpdateManyWithoutTemplateNestedInput
     occurrences?: ReminderOccurrenceUpdateManyWithoutTemplateNestedInput
-    group?: ReminderGroupUpdateOneWithoutTemplatesNestedInput
   }
 
   export type ReminderTemplateUncheckedUpdateWithoutAccountInput = {
@@ -197637,7 +197227,6 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     selfEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
-    reminderGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     importanceLevel?: StringFieldUpdateOperationsInput | string
     tags?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
@@ -197680,7 +197269,6 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     selfEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
-    reminderGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     importanceLevel?: StringFieldUpdateOperationsInput | string
     tags?: StringFieldUpdateOperationsInput | string
     color?: NullableStringFieldUpdateOperationsInput | string | null
@@ -201245,170 +200833,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type ReminderTemplateCreateManyGroupInput = {
-    id: string
-    identityId: string
-    name: string
-    description?: string | null
-    type: string
-    selfEnabled: boolean
-    status: string
-    importanceLevel: string
-    tags: string
-    color?: string | null
-    icon?: string | null
-    nextTriggerAt?: Date | string | null
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    trigger: string
-    recurrence?: string | null
-    activeTime: string
-    activeHours?: string | null
-    notificationConfig: string
-    stats: string
-    clickRate?: number | null
-    ignoreRate?: number | null
-    avgResponseTime?: number | null
-    snoozeCount?: number
-    effectivenessScore?: number | null
-    sampleSize?: number
-    lastAnalysisTime?: Date | string | null
-    originalInterval?: number | null
-    adjustedInterval?: number | null
-    adjustmentReason?: string | null
-    adjustmentTime?: Date | string | null
-    isAutoAdjusted?: boolean
-    userConfirmed?: boolean
-    smartFrequencyEnabled?: boolean
-  }
-
-  export type ReminderTemplateUpdateWithoutGroupInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: StringFieldUpdateOperationsInput | string
-    selfEnabled?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    importanceLevel?: StringFieldUpdateOperationsInput | string
-    tags?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    icon?: NullableStringFieldUpdateOperationsInput | string | null
-    nextTriggerAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    trigger?: StringFieldUpdateOperationsInput | string
-    recurrence?: NullableStringFieldUpdateOperationsInput | string | null
-    activeTime?: StringFieldUpdateOperationsInput | string
-    activeHours?: NullableStringFieldUpdateOperationsInput | string | null
-    notificationConfig?: StringFieldUpdateOperationsInput | string
-    stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
-    history?: ReminderHistoryUpdateManyWithoutTemplateNestedInput
-    instances?: ReminderInstanceUpdateManyWithoutTemplateNestedInput
-    responses?: ReminderResponseUpdateManyWithoutTemplateNestedInput
-    occurrences?: ReminderOccurrenceUpdateManyWithoutTemplateNestedInput
-    account?: AccountUpdateOneRequiredWithoutReminderTemplatesNestedInput
-  }
-
-  export type ReminderTemplateUncheckedUpdateWithoutGroupInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: StringFieldUpdateOperationsInput | string
-    selfEnabled?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    importanceLevel?: StringFieldUpdateOperationsInput | string
-    tags?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    icon?: NullableStringFieldUpdateOperationsInput | string | null
-    nextTriggerAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    trigger?: StringFieldUpdateOperationsInput | string
-    recurrence?: NullableStringFieldUpdateOperationsInput | string | null
-    activeTime?: StringFieldUpdateOperationsInput | string
-    activeHours?: NullableStringFieldUpdateOperationsInput | string | null
-    notificationConfig?: StringFieldUpdateOperationsInput | string
-    stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
-    history?: ReminderHistoryUncheckedUpdateManyWithoutTemplateNestedInput
-    instances?: ReminderInstanceUncheckedUpdateManyWithoutTemplateNestedInput
-    responses?: ReminderResponseUncheckedUpdateManyWithoutTemplateNestedInput
-    occurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutTemplateNestedInput
-  }
-
-  export type ReminderTemplateUncheckedUpdateManyWithoutGroupInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    type?: StringFieldUpdateOperationsInput | string
-    selfEnabled?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    importanceLevel?: StringFieldUpdateOperationsInput | string
-    tags?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    icon?: NullableStringFieldUpdateOperationsInput | string | null
-    nextTriggerAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    trigger?: StringFieldUpdateOperationsInput | string
-    recurrence?: NullableStringFieldUpdateOperationsInput | string | null
-    activeTime?: StringFieldUpdateOperationsInput | string
-    activeHours?: NullableStringFieldUpdateOperationsInput | string | null
-    notificationConfig?: StringFieldUpdateOperationsInput | string
-    stats?: StringFieldUpdateOperationsInput | string
-    clickRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    ignoreRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
-    snoozeCount?: IntFieldUpdateOperationsInput | number
-    effectivenessScore?: NullableFloatFieldUpdateOperationsInput | number | null
-    sampleSize?: IntFieldUpdateOperationsInput | number
-    lastAnalysisTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    originalInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustedInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    adjustmentReason?: NullableStringFieldUpdateOperationsInput | string | null
-    adjustmentTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isAutoAdjusted?: BoolFieldUpdateOperationsInput | boolean
-    userConfirmed?: BoolFieldUpdateOperationsInput | boolean
-    smartFrequencyEnabled?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type RoutineProfileMembershipCreateManyRoutineInput = {

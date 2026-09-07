@@ -16,6 +16,8 @@ import type {
   ReminderTemplateRepoPort,
   ReminderGroupRepoPort,
   ReminderResponseRepoPort,
+  RoutineProfileMembershipRepoPort,
+  RoutineDefinitionRepoPort,
   UserReminderPreferenceRepoPort,
   RepositoryRepoPort,
   ResourceFolderRepoPort,
@@ -146,6 +148,28 @@ class PowerSyncReminderResponseAdapter implements ReminderResponseRepoPort {
   ): Promise<unknown[]> {
     const sql = `SELECT * FROM reminder_responses WHERE template_id = ? AND identity_id = ? ORDER BY timestamp DESC${limit ? ` LIMIT ${limit}` : ''}`;
     const rows = await this.db.getAll<Record<string, unknown>>(sql, [templateId, identityId]);
+    return mapRows(rows);
+  }
+}
+
+class PowerSyncRoutineDefinitionAdapter implements RoutineDefinitionRepoPort {
+  constructor(private readonly db: IElectronDatabase) {}
+  async findByIdentityId(identityId: string): Promise<unknown[]> {
+    const rows = await this.db.getAll<Record<string, unknown>>(
+      `SELECT * FROM routine_definitions WHERE identity_id = ? ORDER BY created_at`,
+      [identityId],
+    );
+    return mapRows(rows);
+  }
+}
+
+class PowerSyncRoutineProfileMembershipAdapter implements RoutineProfileMembershipRepoPort {
+  constructor(private readonly db: IElectronDatabase) {}
+  async findByIdentityId(identityId: string): Promise<unknown[]> {
+    const rows = await this.db.getAll<Record<string, unknown>>(
+      `SELECT * FROM routine_profile_memberships WHERE identity_id = ? ORDER BY routine_id, profile_id`,
+      [identityId],
+    );
     return mapRows(rows);
   }
 }
@@ -316,6 +340,8 @@ export function createPowerSyncDataPortabilityDependencies(
     reminderTemplateRepository: new PowerSyncReminderTemplateAdapter(db),
     reminderGroupRepository: new PowerSyncReminderGroupAdapter(db),
     reminderResponseRepository: new PowerSyncReminderResponseAdapter(db),
+    routineProfileMembershipRepository: new PowerSyncRoutineProfileMembershipAdapter(db),
+    routineDefinitionRepository: new PowerSyncRoutineDefinitionAdapter(db),
     userReminderPreferenceRepository: new PowerSyncUserReminderPreferenceAdapter(db),
     repositoryRepository: new PowerSyncRepositoryAdapter(db),
     folderRepository: new PowerSyncFolderAdapter(db),

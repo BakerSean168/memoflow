@@ -6,7 +6,6 @@ import { ReminderTemplateId } from '../../value-objects/reminder-template-id';
 import {
   TriggerConfig,
   ActiveTimeConfig,
-  ActiveHoursConfig,
   ResponseMetrics,
   FrequencyAdjustment,
 } from '../../value-objects';
@@ -32,7 +31,6 @@ function makeState(overrides: Partial<ReminderTemplateState> = {}): ReminderTemp
     notificationConfig: ReminderNotificationConfig.createDefault(),
     selfEnabled: true,
     status: ReminderStatus.Active,
-    groupId: null,
     effectiveEnabled: true,
     importanceLevel: ImportanceLevel.Moderate,
     tags: [],
@@ -123,7 +121,6 @@ describe('ReminderTemplate aggregate', () => {
         tags: ['work', 'urgent'],
         color: '#FF0000',
         icon: 'bell',
-        groupId: 'group-1',
       });
 
       expect(template.description).toBe('A description');
@@ -131,7 +128,6 @@ describe('ReminderTemplate aggregate', () => {
       expect(template.tags).toEqual(['work', 'urgent']);
       expect(template.color).toBe('#FF0000');
       expect(template.icon).toBe('bell');
-      expect(template.groupId).toBe('group-1');
     });
 
     it('should emit a reminder:template-created domain event', () => {
@@ -296,11 +292,6 @@ describe('ReminderTemplate aggregate', () => {
       expect(Number(template.updatedAt)).toBeGreaterThanOrEqual(originalUpdatedAt);
     });
 
-    it('should allow setting groupId to null', () => {
-      const template = ReminderTemplate.load(makeState({ groupId: 'old-group' }));
-      template.update({ groupId: null });
-      expect(template.groupId).toBeNull();
-    });
   });
 
   // -----------------------------------------------------------------------
@@ -331,36 +322,21 @@ describe('ReminderTemplate aggregate', () => {
   });
 
   // -----------------------------------------------------------------------
-  // moveToGroup()
+  // external eligibility context
   // -----------------------------------------------------------------------
-  describe('moveToGroup()', () => {
-    it('should update groupId', () => {
-      const template = ReminderTemplate.load(makeState({ groupId: null }));
-      template.moveToGroup('new-group');
-      expect(template.groupId).toBe('new-group');
-    });
+  describe('markEligibilityContextChanged()', () => {
+    it('emits a scheduling re-read event without restoring single-group ownership', () => {
+      const template = ReminderTemplate.load(makeState());
+      template.markEligibilityContextChanged('profile-membership');
 
-    it('should emit a reminder:template-moved event', () => {
-      const template = ReminderTemplate.load(makeState({ groupId: null }));
-      template.moveToGroup('new-group');
       const events = template.pullDomainEvents();
-      const movedEvent = events.find((e) => e.eventType === 'reminder:template-moved');
-      expect(movedEvent).toBeDefined();
-      expect((movedEvent!.payload as any).oldGroupId).toBeNull();
-      expect((movedEvent!.payload as any).newGroupId).toBe('new-group');
-    });
-
-    it('should not emit event if groupId does not change', () => {
-      const template = ReminderTemplate.load(makeState({ groupId: 'same' }));
-      template.moveToGroup('same');
-      const events = template.pullDomainEvents();
-      expect(events).toHaveLength(0);
-    });
-
-    it('should allow moving to null (ungroup)', () => {
-      const template = ReminderTemplate.load(makeState({ groupId: 'g1' }));
-      template.moveToGroup(null);
-      expect(template.groupId).toBeNull();
+      expect(events).toHaveLength(1);
+      expect(events[0]?.eventType).toBe('reminder:template-eligibility-changed');
+      expect(events[0]?.payload).toMatchObject({
+        identityId: template.identityId,
+        templateId: template.id,
+        cause: 'profile-membership',
+      });
     });
   });
 

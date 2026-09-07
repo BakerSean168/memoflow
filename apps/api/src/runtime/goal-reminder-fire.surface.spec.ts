@@ -21,8 +21,8 @@ describe('goal.reminder.fire API host wiring surface', () => {
   const composer = readFileSync(resolve(dir, 'runtime/compose-notification.ts'), 'utf8');
 
   it('server.ts registers createGoalPrismaReminderFireHandler on the orchestration handlerRegistry', () => {
-    expect(server).toMatch(
-      /createGoalPrismaReminderFireHandler,\s*\n\s*createGoalPrismaScheduleExecutionSource,\s*\n\s*\}\s*from '@memoflow\/goal\/schedule-execution'/,
+    expect(server).toContain(
+      "import { createGoalPrismaReminderFireHandler } from '@memoflow/goal/schedule-execution';",
     );
     expect(server).toContain(
       'scheduleOrchestrationModule.handlerRegistry.register(\n    createGoalPrismaReminderFireHandler(prisma, notificationApiModule.requestedWriter),',

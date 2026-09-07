@@ -400,7 +400,7 @@ const {
   updateTemplate,
   deleteTemplate,
   toggleTemplate,
-  moveTemplateToGroup,
+  replaceTemplateProfiles,
   createGroup,
   updateGroup,
   deleteGroup,
@@ -438,7 +438,9 @@ usePanelSurfaceStatus(surfaceStatus);
 const filteredTemplates = computed(() => {
   let result = templates.value;
   if (selectedGroupId.value) {
-    result = result.filter((t) => t.groupId === selectedGroupId.value);
+    result = result.filter((t) =>
+      t.profileMemberships.some((membership) => membership.profileId === selectedGroupId.value),
+    );
   }
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase();
@@ -513,11 +515,13 @@ function handleMoveTemplate(template: ReminderTemplateClientDTO) {
   templateMoveDialogRef.value?.open();
 }
 
-async function handleTemplateMoved(templateId: string, groupId: string | null) {
-  const result = await moveTemplateToGroup(templateId, groupId);
+async function handleTemplateMoved(templateId: string, profileIds: readonly string[]) {
+  const result = await replaceTemplateProfiles(templateId, profileIds);
   if (result) {
     toast.success(
-      groupId ? t('reminder.toast.templateMoved') : t('reminder.toast.templateMovedToRoot'),
+      profileIds.length > 0
+        ? t('reminder.toast.templateMoved')
+        : t('reminder.toast.templateMovedToRoot'),
     );
     movingTemplate.value = null;
   }

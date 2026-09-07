@@ -182,7 +182,6 @@ const key_result_weight_snapshots = new Table({
 // Task
 // ──────────────────────────────────────────────
 
-
 const task_templates = new Table({
   identity_id: column.text,
   name: column.text,
@@ -241,7 +240,6 @@ const task_instances = new Table({
   updated_at: column.text,
   deleted_at: column.text,
 });
-
 
 const task_template_history = new Table({
   identity_id: column.text,
@@ -453,7 +451,6 @@ const reminder_templates = new Table({
   type: column.text,
   self_enabled: column.integer, // boolean
   status: column.text,
-  reminder_group_id: column.text, // FK
   importance_level: column.text,
   tags: column.text, // JSON
   color: column.text,
@@ -729,7 +726,6 @@ const goal_operation_receipts = new Table(
   { localOnly: true },
 );
 
-
 const notification_history = new Table({
   identity_id: column.text,
   notification_id: column.text, // FK
@@ -908,7 +904,6 @@ const ai_provider_configs = new Table({
   updated_at: column.text,
   deleted_at: column.text,
 });
-
 
 /**
  * Desktop-only Provider onboarding state. Credentials are encrypted with the

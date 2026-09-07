@@ -24,12 +24,20 @@ export interface RoutineProfileStore {
     readonly profileId: string;
   }): Promise<RoutineProfile | null>;
   listProfiles(input: { readonly identityId: string }): Promise<RoutineProfile[]>;
+  findProfilesByIds(input: {
+    readonly identityId: string;
+    readonly profileIds: readonly string[];
+  }): Promise<RoutineProfile[]>;
   deleteProfile(input: { readonly identityId: string; readonly profileId: string }): Promise<void>;
 
   upsertMembership(membership: ProfileMembership): Promise<void>;
   listMembershipsForRoutine(input: {
     readonly identityId: string;
     readonly routineId: string;
+  }): Promise<ProfileMembership[]>;
+  listMembershipsForRoutines(input: {
+    readonly identityId: string;
+    readonly routineIds: readonly string[];
   }): Promise<ProfileMembership[]>;
   listMembershipsForProfile(input: {
     readonly identityId: string;

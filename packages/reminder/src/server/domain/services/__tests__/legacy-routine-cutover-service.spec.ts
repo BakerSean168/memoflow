@@ -4,15 +4,13 @@ import { ReminderType } from '@memoflow/contracts/reminder';
 import { ReminderGroup } from '../../aggregates/reminder-group';
 import { ReminderTemplate } from '../../aggregates/reminder-template';
 import type { RoutineProfileStore } from '../../ports';
-import { ProfileMembership } from '../../routine';
 import { LegacyRoutineCutoverService } from '../legacy-routine-cutover-service';
 
-function createTemplate(identityId: IdentityId, groupId?: string) {
+function createTemplate(identityId: IdentityId) {
   return ReminderTemplate.create({
     identityId,
     title: 'Hydration',
     type: ReminderType.Recurring,
-    groupId,
     trigger: {
       type: 'FixedTime',
       fixedTime: { time: '09:00', timezone: 'UTC' },
@@ -38,9 +36,11 @@ function createStore(overrides: Partial<RoutineProfileStore> = {}): RoutineProfi
     upsertProfile: vi.fn(async () => {}),
     findProfile: vi.fn(async () => null),
     listProfiles: vi.fn(async () => []),
+    findProfilesByIds: vi.fn(async () => []),
     deleteProfile: vi.fn(async () => {}),
     upsertMembership: vi.fn(async () => {}),
     listMembershipsForRoutine: vi.fn(async () => []),
+    listMembershipsForRoutines: vi.fn(async () => []),
     listMembershipsForProfile: vi.fn(async () => []),
     deleteMembership: vi.fn(async () => {}),
     replaceRoutineMemberships: vi.fn(async () => {}),
@@ -49,7 +49,7 @@ function createStore(overrides: Partial<RoutineProfileStore> = {}): RoutineProfi
 }
 
 describe('LegacyRoutineCutoverService', () => {
-  it('projects ordinary Routine edits without touching membership state', async () => {
+  it('projects ReminderTemplate into RoutineDefinition without touching membership state', async () => {
     const identityId = IdentityId.generate();
     const store = createStore();
     const service = new LegacyRoutineCutoverService(store);
@@ -57,95 +57,50 @@ describe('LegacyRoutineCutoverService', () => {
 
     await service.projectTemplateDefinition(template);
 
-    expect(store.upsertDefinition).toHaveBeenCalledTimes(1);
-    expect(store.replaceRoutineMemberships).not.toHaveBeenCalled();
-    expect(store.upsertMembership).not.toHaveBeenCalled();
-  });
-
-  it('maps a legacy single-group command to one canonical ProfileMembership', async () => {
-    const identityId = IdentityId.generate();
-    const group = ReminderGroup.create({ identityId: String(identityId), name: 'Work' });
-    const template = createTemplate(identityId, group.id);
-    const store = createStore();
-    const service = new LegacyRoutineCutoverService(store);
-
-    await service.replaceLegacySingleMembership({ template, group });
-
-    expect(store.upsertDefinition).toHaveBeenCalledTimes(1);
-    expect(store.upsertProfile).toHaveBeenCalledTimes(1);
-    expect(store.replaceRoutineMemberships).toHaveBeenCalledWith({
-      identityId: String(identityId),
-      routineId: template.id,
-      memberships: [
-        expect.objectContaining({
-          identityId: String(identityId),
-          profileId: group.id,
-          routineId: template.id,
-          enabled: true,
-        }),
-      ],
-    });
-  });
-
-  it('heals an interrupted legacy create without collapsing an existing M:N membership set', async () => {
-    const identityId = IdentityId.generate();
-    const group = ReminderGroup.create({ identityId: String(identityId), name: 'Legacy Work' });
-    const template = createTemplate(identityId, group.id);
-    const existingMemberships = [
-      ProfileMembership.create({
-        identityId: String(identityId),
-        profileId: 'work',
-        routineId: template.id,
-      }),
-      ProfileMembership.create({
-        identityId: String(identityId),
-        profileId: 'gaming',
-        routineId: template.id,
-      }),
-    ];
-    const store = createStore({
-      listMembershipsForRoutine: vi.fn(async () => existingMemberships),
-    });
-    const service = new LegacyRoutineCutoverService(store);
-
-    await service.healLegacyProjection({ template, group });
-
-    expect(store.upsertDefinition).toHaveBeenCalledTimes(1);
-    expect(store.upsertProfile).toHaveBeenCalledTimes(1);
-    expect(store.upsertMembership).not.toHaveBeenCalled();
-    expect(store.replaceRoutineMemberships).not.toHaveBeenCalled();
-  });
-
-  it('synthesizes the missing legacy membership only when no canonical edge exists', async () => {
-    const identityId = IdentityId.generate();
-    const group = ReminderGroup.create({ identityId: String(identityId), name: 'Work' });
-    const template = createTemplate(identityId, group.id);
-    const store = createStore();
-    const service = new LegacyRoutineCutoverService(store);
-
-    await service.healLegacyProjection({ template, group });
-
-    expect(store.upsertMembership).toHaveBeenCalledWith(
+    expect(store.upsertDefinition).toHaveBeenCalledWith(
       expect.objectContaining({
+        id: template.id,
         identityId: String(identityId),
-        profileId: group.id,
-        routineId: template.id,
+        enabled: true,
       }),
     );
     expect(store.replaceRoutineMemberships).not.toHaveBeenCalled();
+    expect(store.upsertMembership).not.toHaveBeenCalled();
   });
 
-  it('rejects a legacy group owned by another identity', async () => {
+  it('projects ReminderGroup metadata into a RoutineProfile without synthesizing edges', async () => {
     const identityId = IdentityId.generate();
-    const template = createTemplate(identityId);
-    const foreignGroup = ReminderGroup.create({
-      identityId: String(IdentityId.generate()),
-      name: 'Foreign',
-    });
-    const service = new LegacyRoutineCutoverService(createStore());
+    const store = createStore();
+    const service = new LegacyRoutineCutoverService(store);
+    const group = ReminderGroup.create({ identityId: String(identityId), name: 'Work' });
 
-    await expect(
-      service.replaceLegacySingleMembership({ template, group: foreignGroup }),
-    ).rejects.toThrow(/ownership mismatch/);
+    await service.projectProfile(group);
+
+    expect(store.upsertProfile).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: group.id,
+        identityId: String(identityId),
+        name: 'Work',
+      }),
+    );
+    expect(store.replaceRoutineMemberships).not.toHaveBeenCalled();
+    expect(store.upsertMembership).not.toHaveBeenCalled();
+  });
+
+  it('deletes canonical Routine and Profile projections through the store', async () => {
+    const store = createStore();
+    const service = new LegacyRoutineCutoverService(store);
+
+    await service.deleteRoutine({ identityId: 'identity-1', routineId: 'routine-1' });
+    await service.deleteProfile({ identityId: 'identity-1', profileId: 'profile-1' });
+
+    expect(store.deleteDefinition).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      routineId: 'routine-1',
+    });
+    expect(store.deleteProfile).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      profileId: 'profile-1',
+    });
   });
 });

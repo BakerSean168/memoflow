@@ -94,6 +94,7 @@ import type { ReminderTemplateClientDTO } from '@memoflow/contracts/reminder';
 import { ActionableWrapper, menuLabel } from '../../../components/shared';
 import type { MenuAction } from '../../../components/shared';
 import {
+  getProfileMembershipLabel,
   getTemplateLifecycleSummary,
   getTemplateNextTriggerLabel,
   getTemplateRecurrenceLabel,
@@ -122,9 +123,12 @@ const nextTriggerLabel = computed(() => getTemplateNextTriggerLabel(t, props.ite
 const recurrenceLabel = computed(() => getTemplateRecurrenceLabel(t, props.item));
 const scheduleState = computed(() => getTemplateScheduleState(props.item));
 const scheduleStateLabel = computed(() => getTemplateScheduleStateLabel(t, props.item));
-const secondaryLifecycleLabel = computed(() =>
-  props.item.groupName ? `${props.item.groupName} · ${lifecycleLabel.value}` : lifecycleLabel.value,
-);
+const secondaryLifecycleLabel = computed(() => {
+  const profileLabel = getProfileMembershipLabel(t, props.item);
+  return props.item.profileMemberships.length > 0
+    ? `${profileLabel} · ${lifecycleLabel.value}`
+    : lifecycleLabel.value;
+});
 const scheduleStateClass = computed(() => {
   switch (scheduleState.value) {
     case 'upcoming':

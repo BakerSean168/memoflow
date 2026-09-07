@@ -45,9 +45,9 @@ export interface IReminderApiClient {
   ): Promise<Result<ReminderTemplateClientDTO>>;
   deleteReminderTemplate(id: string): Promise<Result<void>>;
   toggleTemplateEnabled(id: string): Promise<Result<ReminderTemplateClientDTO>>;
-  moveTemplateToGroup(
+  replaceTemplateProfiles(
     templateId: string,
-    targetGroupId: string | null,
+    profileIds: readonly string[],
   ): Promise<Result<ReminderTemplateClientDTO>>;
   getUpcomingReminders(params?: {
     days?: number;

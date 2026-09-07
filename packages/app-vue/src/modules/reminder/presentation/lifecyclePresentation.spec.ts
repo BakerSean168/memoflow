@@ -103,8 +103,16 @@ function createTemplate(
     selfEnabled: true,
     status: 'Active',
     effectiveEnabled: true,
-    groupId: 'profile-1' as ReminderTemplateClientDTO['groupId'],
-    groupName: 'Focus',
+    profileMemberships: [
+      {
+        profileId: 'profile-1' as ReminderTemplateClientDTO['profileMemberships'][number]['profileId'],
+        profileName: 'Focus',
+        enabled: true,
+        profileEnabled: true,
+        profileActive: true,
+        effectiveEnabled: true,
+      },
+    ],
     importanceLevel: 'Moderate',
     tags: [],
     color: null,
@@ -124,10 +132,8 @@ function createTemplate(
     isActive: true,
     isPaused: false,
     lastTriggeredText: null,
-    controlledByGroup: false,
-    lifecycleSource: 'template',
+    lifecycleSource: 'profile',
     effectiveEnabledReason: 'Routine owns its switch.',
-    groupEnabled: true,
     globalReminderEnabled: true,
     ...overrides,
   } as ReminderTemplateClientDTO;
@@ -174,16 +180,16 @@ describe('lifecyclePresentation', () => {
     expect(getTemplateLifecycleBadgeText(t, createTemplate({ lifecycleSource: 'global' }))).toBe(
       'Master gate closed',
     );
-    expect(getTemplateLifecycleSummary(t, createTemplate({ lifecycleSource: 'group' }))).toBe(
+    expect(getTemplateLifecycleSummary(t, createTemplate({ lifecycleSource: 'profile' }))).toBe(
       'Paused by the Profile gate; Routine state preserved',
     );
-    expect(getTemplateLifecycleBadgeText(t, createTemplate({ lifecycleSource: 'group' }))).toBe(
+    expect(getTemplateLifecycleBadgeText(t, createTemplate({ lifecycleSource: 'profile' }))).toBe(
       'Profile gate closed',
     );
     expect(
       getTemplateLifecycleSummary(
         t,
-        createTemplate({ lifecycleSource: 'template', groupName: null, groupId: null }),
+        createTemplate({ lifecycleSource: 'routine', profileMemberships: [] }),
       ),
     ).toBe('Routine-owned state without a Profile');
   });
@@ -209,9 +215,8 @@ describe('lifecyclePresentation', () => {
       effectiveEnabled: false,
       selfEnabled: false,
       globalReminderEnabled: false,
-      groupEnabled: null,
-      groupId: null,
-      groupName: null,
+      profileMemberships: [],
+      lifecycleSource: 'routine',
     });
 
     expect(getTemplateEffectiveStatusLabel(t, pausedRoutine)).toBe('Paused');
@@ -245,7 +250,9 @@ describe('lifecyclePresentation', () => {
       getProfileSidebarSummary(t, profile, [
         createTemplate({
           id: 'global-paused' as ReminderTemplateClientDTO['id'],
-          groupId: profile.id,
+          profileMemberships: [
+            { profileId: profile.id as never, profileName: profile.name, enabled: true, profileEnabled: true, profileActive: true, effectiveEnabled: false },
+          ],
           lifecycleSource: 'global',
           effectiveEnabled: false,
         }),
@@ -255,8 +262,10 @@ describe('lifecyclePresentation', () => {
       getProfileSidebarSummary(t, profile, [
         createTemplate({
           id: 'profile-paused' as ReminderTemplateClientDTO['id'],
-          groupId: profile.id,
-          lifecycleSource: 'group',
+          profileMemberships: [
+            { profileId: profile.id as never, profileName: profile.name, enabled: true, profileEnabled: false, profileActive: false, effectiveEnabled: false },
+          ],
+          lifecycleSource: 'profile',
           effectiveEnabled: false,
         }),
       ]),

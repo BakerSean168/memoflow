@@ -27,7 +27,6 @@ export type PowerSyncReminderTemplateRow = {
   type: string;
   self_enabled: number | boolean;
   status: string;
-  reminder_group_id: string | null;
   importance_level: string;
   tags: string;
   color: string | null;
@@ -135,7 +134,6 @@ export class PowerSyncReminderTemplateMapper {
       notificationConfig: NotificationConfig.fromDTO(JSON.parse(data.notification_config)),
       selfEnabled: data.self_enabled === true || data.self_enabled === 1,
       status: data.status as ReminderStatus,
-      groupId: data.reminder_group_id ?? null,
       effectiveEnabled: data.self_enabled === true || data.self_enabled === 1,
       importanceLevel: data.importance_level as ImportanceLevel,
       tags: JSON.parse(data.tags ?? '[]') as string[],
@@ -168,7 +166,6 @@ export class PowerSyncReminderTemplateMapper {
       type: dto.type,
       selfEnabled: dto.selfEnabled ? 1 : 0,
       status: dto.status,
-      reminderGroupId: dto.groupId ?? null,
       importanceLevel: dto.importanceLevel,
       tags: JSON.stringify(dto.tags),
       color: dto.color ?? null,

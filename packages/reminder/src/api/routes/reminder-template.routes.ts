@@ -25,6 +25,7 @@ import { parseNumber, parseString } from '@memoflow/utils/shared';
 import {
   CreateReminderTemplateSchema,
   UpdateReminderTemplateSchema,
+  ReplaceRoutineProfilesSchema,
   GetUpcomingRemindersSchema,
   GetUpcomingRemindersResSchema,
   GetReminderTodayScheduleSchema,
@@ -259,23 +260,23 @@ export function registerReminderTemplateRoutes(
     (req, ctx) => controller.toggleTemplate(req.params!.id, ctx),
   );
 
-  // POST /templates/:id/move
+  // PUT /templates/:id/profiles
   r.route(
     {
-      method: 'post',
-      path: '/templates/:id/move',
-      summary: '移动提醒模板到其他分组',
+      method: 'put',
+      path: '/templates/:id/profiles',
+      summary: '替换 Routine 的 ProfileMembership 集合',
       request: {
         params: z.object({ id: brandedId<ReminderTemplateId>() }),
-        body: { content: { 'application/json': { schema: z.object({ groupId: z.string() }) } } },
+        body: { content: { 'application/json': { schema: ReplaceRoutineProfilesSchema } } },
       },
       responses: {
-        200: successResponse(ReminderTemplateResponseSchema, '移动成功'),
-        404: errorResponse('模板不存在'),
+        200: successResponse(ReminderTemplateResponseSchema, 'ProfileMembership 更新成功'),
+        404: errorResponse('Routine 或 Profile 不存在'),
       },
     },
     [auth],
-    (req, ctx) => controller.moveTemplate(req.params!.id, req.body, ctx),
+    (req, ctx) => controller.replaceTemplateProfiles(req.params!.id, req.body, ctx),
   );
 
   // GET /templates/:id/history

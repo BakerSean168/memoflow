@@ -102,7 +102,7 @@ export class ReminderGroupApplicationService {
 
     await this.reminderGroupRepository.save(updated);
     await this.reminderDomainService.projectRoutineProfile(updated);
-    await this.reminderDomainService.syncTemplatesEffectiveEnabledByGroup(ctx.identityId, id);
+    await this.reminderDomainService.syncTemplatesEffectiveEnabledByProfile(ctx.identityId, id);
 
     return ok(updated.toClientDTO());
   }
@@ -127,23 +127,11 @@ export class ReminderGroupApplicationService {
       return fail({ code: 'NOT_FOUND', message: 'Group not found' });
     }
 
-    const templates = await this.reminderTemplateRepository.findByGroupId(group.id, ctx.identityId);
-    let successCount = 0;
-
-    for (const template of templates) {
-      if (data.action === 'ENABLE') {
-        template.enable();
-      } else {
-        template.pause();
-      }
-
-      await this.reminderDomainService.syncTemplateEffectiveEnabled(template);
-      await this.reminderTemplateRepository.save(template);
-      await this.reminderDomainService.projectRoutineDefinition(template);
-      successCount++;
-    }
-
-    await this.reminderDomainService.updateGroupStats(ctx.identityId, group.id);
+    const successCount = await this.reminderDomainService.setProfileMembershipsEnabled(
+      ctx.identityId,
+      group.id,
+      data.action === 'ENABLE',
+    );
 
     return ok({ successCount, failedCount: 0 });
   }

@@ -166,29 +166,6 @@ export class ReminderTemplatePrismaRepository
     });
   }
 
-  async findByGroupId(
-    groupId: string | null,
-    identityId: string,
-    options?: { includeHistory?: boolean; historyLimit?: number; includeDeleted?: boolean },
-  ): Promise<ReminderTemplate[]> {
-    const where: Prisma.ReminderTemplateWhereInput = {
-      reminderGroupId: groupId,
-      identityId,
-    };
-    if (!options?.includeDeleted) {
-      where.deletedAt = null;
-    }
-
-    const data = await this.prisma.reminderTemplate.findMany({
-      where,
-      include: options?.includeHistory
-        ? { history: { orderBy: { triggeredAt: 'desc' }, take: options.historyLimit } }
-        : undefined,
-      orderBy: { createdAt: 'asc' },
-    });
-    return data.map((d: PrismaReminderTemplateWithHistory) => this.mapToEntity(d, d.history));
-  }
-
   async findActive(
     identityId: string,
     options?: { includeHistory?: boolean; historyLimit?: number },

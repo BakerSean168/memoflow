@@ -152,8 +152,11 @@ export function createReminderPowerSyncModule(
 export function createReminderPowerSyncScheduleProjectionSource(
   db: Queryable,
 ): ReminderScheduleProjectionSource {
+  const repositories = createReminderPowerSyncRepositories(db);
   return createReminderScheduleProjectionSource({
-    reminderTemplateRepository: createReminderPowerSyncRepositories(db).reminderTemplateRepository,
+    reminderTemplateRepository: repositories.reminderTemplateRepository,
+    routineProfileStore: repositories.routineProfileStore,
+    userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
   });
 }
 

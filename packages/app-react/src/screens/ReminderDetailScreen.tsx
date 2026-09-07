@@ -28,7 +28,8 @@ import {
 export function ReminderDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string | string[] }>();
-  const reminderId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
+  const reminderId =
+    typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
   const service = useReminderService();
   const { isRemoteAuthenticated, signOut } = useAppSession();
 
@@ -100,11 +101,21 @@ export function ReminderDetailScreen() {
       eyebrow="More"
       title={template ? getReminderDisplayTitle(template) : 'Reminder detail'}
       subtitle="提醒详情页承接模板摘要、启停和编辑入口。"
-      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={load} />}>
+      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={load} />}
+    >
       <SectionCard title="Navigation" description="提醒详情从 reminders 列表下钻。">
         <View style={styles.actionRow}>
-          <PrimaryButton label="Back to reminders" onPress={() => router.back()} variant="secondary" />
-          {reminderId ? <PrimaryButton label="Edit template" onPress={() => router.push(`./reminder-editor?id=${reminderId}`)} /> : null}
+          <PrimaryButton
+            label="Back to reminders"
+            onPress={() => router.back()}
+            variant="secondary"
+          />
+          {reminderId ? (
+            <PrimaryButton
+              label="Edit template"
+              onPress={() => router.push(`./reminder-editor?id=${reminderId}`)}
+            />
+          ) : null}
         </View>
       </SectionCard>
 
@@ -116,27 +127,44 @@ export function ReminderDetailScreen() {
 
       {error ? (
         <SectionCard title="Reminder detail failed" description="详情请求失败时先直接展示错误。">
-          <ThemedText type="small" themeColor="warning">{error}</ThemedText>
+          <ThemedText type="small" themeColor="warning">
+            {error}
+          </ThemedText>
         </SectionCard>
       ) : null}
 
       {!isLoading && !error && !template ? (
-        <SectionCard title="Reminder not found" description="当前提醒模板不存在或当前账号无权限访问。">
+        <SectionCard
+          title="Reminder not found"
+          description="当前提醒模板不存在或当前账号无权限访问。"
+        >
           <PrimaryButton label="Back" onPress={() => router.back()} variant="secondary" />
         </SectionCard>
       ) : null}
 
       {template ? (
         <>
-          <SectionCard title="Status" description={template.description ?? getReminderTriggerText(template)}>
+          <SectionCard
+            title="Status"
+            description={template.description ?? getReminderTriggerText(template)}
+          >
             <View style={styles.pillRow}>
               <StatusPill label={template.type} tone="tint" />
-              <StatusPill label={template.status} tone={template.effectiveEnabled ? 'success' : 'warning'} />
+              <StatusPill
+                label={template.status}
+                tone={template.effectiveEnabled ? 'success' : 'warning'}
+              />
               <StatusPill label={getReminderImportanceText(template)} tone="textSecondary" />
             </View>
             <View style={styles.actionRow}>
               <PrimaryButton
-                label={isMutating ? 'Updating…' : template.effectiveEnabled ? 'Pause template' : 'Enable template'}
+                label={
+                  isMutating
+                    ? 'Updating…'
+                    : template.effectiveEnabled
+                      ? 'Pause template'
+                      : 'Enable template'
+                }
                 onPress={handleToggle}
                 disabled={isMutating}
               />
@@ -157,8 +185,20 @@ export function ReminderDetailScreen() {
           </SectionCard>
 
           <SectionCard title="Scope" description="分组、标签和生效方式。">
-            <MetaRow label="Group" value={template.groupName ?? 'No group'} />
-            <MetaRow label="Tags" value={template.tags.length > 0 ? template.tags.join(', ') : 'No tags'} />
+            <MetaRow
+              label="Profiles"
+              value={
+                template.profileMemberships.length > 0
+                  ? template.profileMemberships
+                      .map((membership) => membership.profileName ?? String(membership.profileId))
+                      .join(', ')
+                  : 'No profiles'
+              }
+            />
+            <MetaRow
+              label="Tags"
+              value={template.tags.length > 0 ? template.tags.join(', ') : 'No tags'}
+            />
           </SectionCard>
         </>
       ) : null}
@@ -169,7 +209,9 @@ export function ReminderDetailScreen() {
 function MetaRow({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.metaRow}>
-      <ThemedText type="small" themeColor="textSecondary">{label}</ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        {label}
+      </ThemedText>
       <ThemedText type="smallBold">{value}</ThemedText>
     </View>
   );

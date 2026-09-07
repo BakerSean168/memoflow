@@ -63,7 +63,6 @@ function createMinimalRow(): PrismaReminderTemplate {
     }),
     selfEnabled: true,
     status: ReminderStatus.Active,
-    reminderGroupId: null,
     importanceLevel: ImportanceLevel.Moderate,
     tags: JSON.stringify([]),
     color: null,
@@ -140,7 +139,6 @@ function createFullRow(): PrismaReminderTemplate {
     }),
     selfEnabled: true,
     status: ReminderStatus.Active,
-    reminderGroupId: 'group-2',
     importanceLevel: ImportanceLevel.High,
     tags: JSON.stringify(['urgent', 'work']),
     color: '#FF5733',
@@ -208,7 +206,6 @@ describe('PrismaReminderTemplateMapper', () => {
       expect(domain.type).toBe(ReminderType.EventBased);
       expect(domain.selfEnabled).toBe(true);
       expect(domain.status).toBe(ReminderStatus.Active);
-      expect(domain.groupId).toBeNull();
       expect(domain.importanceLevel).toBe(ImportanceLevel.Moderate);
       expect(domain.tags).toEqual([]);
       expect(domain.color).toBeNull();
@@ -227,7 +224,6 @@ describe('PrismaReminderTemplateMapper', () => {
       expect(domain.type).toBe(ReminderType.TimeBased);
       expect(domain.selfEnabled).toBe(true);
       expect(domain.status).toBe(ReminderStatus.Active);
-      expect(domain.groupId).toBe('group-2');
       expect(domain.importanceLevel).toBe(ImportanceLevel.High);
       expect(domain.tags).toEqual(['urgent', 'work']);
       expect(domain.color).toBe('#FF5733');
@@ -384,7 +380,7 @@ describe('PrismaReminderTemplateMapper', () => {
       expect(persistence.description).toBe('A reminder with full configuration');
       expect(persistence.type).toBe(ReminderType.TimeBased);
       expect(persistence.status).toBe(ReminderStatus.Active);
-      expect(persistence.reminderGroupId).toBe('group-2');
+      expect(persistence).not.toHaveProperty('reminderGroupId');
       expect(persistence.importanceLevel).toBe(ImportanceLevel.High);
       expect(JSON.parse(persistence.tags)).toEqual(['urgent', 'work']);
       expect(persistence.nextTriggerAt).toBeInstanceOf(Date);

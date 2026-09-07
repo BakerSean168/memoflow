@@ -1178,7 +1178,6 @@ model ReminderTemplate {
   type               String
   selfEnabled        Boolean   @map("self_enabled")
   status             String
-  reminderGroupId    String?   @map("reminder_group_id")
   importanceLevel    String    @map("importance_level")
   tags               String
   color              String?
@@ -1218,7 +1217,6 @@ model ReminderTemplate {
   responses   ReminderResponse[]
   occurrences ReminderOccurrence[]
   account     Account              @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  group       ReminderGroup?       @relation(fields: [reminderGroupId], references: [id])
 
   @@index([status])
   @@map("reminder_templates")
@@ -1240,8 +1238,7 @@ model ReminderGroup {
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  account   Account            @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  templates ReminderTemplate[]
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
   @@map("reminder_groups")

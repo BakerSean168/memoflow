@@ -13,6 +13,8 @@ import {
   PrismaEditorGroupAdapter,
   PrismaEditorTabAdapter,
   PrismaAIConversationAdapter,
+  PrismaRoutineProfileMembershipAdapter,
+  PrismaRoutineDefinitionAdapter,
 } from './adapters/prisma-adapters';
 import {
   createDataPortabilityModule,
@@ -82,6 +84,8 @@ export function createPrismaDataPortabilityDependencies(
     reminderTemplateRepository: reminderRepos.reminderTemplateRepository,
     reminderGroupRepository: reminderRepos.reminderGroupRepository,
     reminderResponseRepository: reminderRepos.reminderResponseRepository,
+    routineProfileMembershipRepository: new PrismaRoutineProfileMembershipAdapter(db),
+    routineDefinitionRepository: new PrismaRoutineDefinitionAdapter(db),
     userReminderPreferenceRepository: reminderRepos.userReminderPreferenceRepository,
     repositoryRepository: new PrismaRepositoryAdapter(db),
     folderRepository: new PrismaFolderAdapter(db),

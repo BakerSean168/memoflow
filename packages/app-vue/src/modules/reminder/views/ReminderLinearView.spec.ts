@@ -22,7 +22,7 @@ const fetchTemplates = vi.fn().mockResolvedValue(undefined);
 const fetchGroups = vi.fn().mockResolvedValue(undefined);
 const fetchPreferences = vi.fn().mockResolvedValue(undefined);
 const updatePreferences = vi.fn().mockResolvedValue(null);
-const moveTemplateToGroup = vi.fn().mockResolvedValue(null);
+const replaceTemplateProfiles = vi.fn().mockResolvedValue(null);
 const toggleTemplate = vi.fn().mockResolvedValue(null);
 
 vi.mock('../composables/useReminder', () => ({
@@ -40,7 +40,7 @@ vi.mock('../composables/useReminder', () => ({
     updateTemplate: vi.fn(),
     deleteTemplate: vi.fn(),
     toggleTemplate,
-    moveTemplateToGroup,
+    replaceTemplateProfiles,
     createGroup: vi.fn(),
     updateGroup: vi.fn(),
     deleteGroup: vi.fn(),
@@ -190,8 +190,16 @@ function createTemplate(
       hasSoundEnabled: false,
       hasVibrationEnabled: false,
     },
-    groupId: 'group-1' as ReminderTemplateClientDTO['groupId'],
-    groupName: 'Focus',
+    profileMemberships: [
+      {
+        profileId: 'group-1' as ReminderTemplateClientDTO['profileMemberships'][number]['profileId'],
+        profileName: 'Focus',
+        enabled: true,
+        profileEnabled: true,
+        profileActive: true,
+        effectiveEnabled: true,
+      },
+    ],
     trigger: {
       type: 'FixedTime',
       fixedTime: { time: '09:00', timezone: null },
@@ -199,10 +207,8 @@ function createTemplate(
     },
     selfEnabled: true,
     effectiveEnabled: true,
-    controlledByGroup: false,
-    lifecycleSource: 'template',
+    lifecycleSource: 'profile',
     effectiveEnabledReason: 'Template controls itself.',
-    groupEnabled: true,
     globalReminderEnabled: true,
     status: 'Active',
     importanceLevel: 'Moderate',
@@ -301,7 +307,7 @@ describe('ReminderLinearView', () => {
     fetchGroups.mockClear();
     fetchPreferences.mockClear();
     updatePreferences.mockClear();
-    moveTemplateToGroup.mockClear();
+    replaceTemplateProfiles.mockClear();
     toggleTemplate.mockClear();
     vi.mocked(toast.success).mockClear();
   });
@@ -318,7 +324,7 @@ describe('ReminderLinearView', () => {
       createTemplate({
         id: 'template-group' as ReminderTemplateClientDTO['id'],
         name: 'Afternoon review',
-        lifecycleSource: 'group',
+        lifecycleSource: 'profile',
         selfEnabled: true,
         effectiveEnabled: false,
         effectiveEnabledReason: 'Group is paused.',
@@ -355,12 +361,11 @@ describe('ReminderLinearView', () => {
   it('shows root move toast and refreshes selected template when move succeeds', async () => {
     const movedTemplate = createTemplate({
       id: 'template-1' as ReminderTemplateClientDTO['id'],
-      groupId: null,
-      groupName: null,
-      lifecycleSource: 'template',
+      profileMemberships: [],
+      lifecycleSource: 'routine',
       effectiveEnabledReason: 'Template controls itself after moving to root.',
     });
-    moveTemplateToGroup.mockImplementationOnce(async () => {
+    replaceTemplateProfiles.mockImplementationOnce(async () => {
       templatesRef.value = [movedTemplate];
       return movedTemplate;
     });
@@ -373,7 +378,7 @@ describe('ReminderLinearView', () => {
           h('button', {
             type: 'button',
             'data-stub': 'trigger-root-move',
-            onClick: () => props.onMove(props.template.id, null),
+            onClick: () => props.onMove(props.template.id, []),
           });
       },
     });
@@ -383,7 +388,11 @@ describe('ReminderLinearView', () => {
       props: ['template'],
       setup(props) {
         return () =>
-          h('div', { 'data-stub': 'selected-template-card' }, props.template?.groupName || 'root');
+          h(
+            'div',
+            { 'data-stub': 'selected-template-card' },
+            props.template?.profileMemberships?.map((item: { profileName?: string | null }) => item.profileName).filter(Boolean).join(', ') || 'root',
+          );
       },
     });
 
@@ -422,7 +431,7 @@ describe('ReminderLinearView', () => {
     await wrapper.find('[data-stub="trigger-root-move"]').trigger('click');
     await nextTick();
 
-    expect(moveTemplateToGroup).toHaveBeenCalledWith('template-1', null);
+    expect(replaceTemplateProfiles).toHaveBeenCalledWith('template-1', []);
     expect(vi.mocked(toast.success)).toHaveBeenCalledWith('Routine removed from Profile');
     expect(wrapper.find('[data-stub="selected-template-card"]').text()).toBe('root');
   });
@@ -432,7 +441,7 @@ describe('ReminderLinearView', () => {
       id: 'template-1' as ReminderTemplateClientDTO['id'],
       selfEnabled: false,
       effectiveEnabled: false,
-      lifecycleSource: 'template',
+      lifecycleSource: 'routine',
       effectiveEnabledReason: 'Template self switch is paused.',
     });
 
@@ -496,13 +505,24 @@ describe('ReminderLinearView', () => {
       id: 'template-1' as ReminderTemplateClientDTO['id'],
       selfEnabled: false,
       effectiveEnabled: false,
-      lifecycleSource: 'group',
-      effectiveEnabledReason: 'Group is paused.',
+      lifecycleSource: 'profile',
+      profileMemberships: [
+        { profileId: 'group-1' as never, profileName: 'Focus', enabled: true, profileEnabled: false, profileActive: false, effectiveEnabled: false },
+      ],
+      effectiveEnabledReason: 'Profile is paused.',
     });
 
     toggleTemplate.mockResolvedValueOnce(toggledTemplate);
     groupsRef.value = [createGroup({ enabled: false })];
-    templatesRef.value = [createTemplate({ lifecycleSource: 'group', effectiveEnabled: false })];
+    templatesRef.value = [
+      createTemplate({
+        lifecycleSource: 'profile',
+        effectiveEnabled: false,
+        profileMemberships: [
+          { profileId: 'group-1' as never, profileName: 'Focus', enabled: true, profileEnabled: false, profileActive: false, effectiveEnabled: false },
+        ],
+      }),
+    ];
     preferencesRef.value = createPreferences();
 
     const wrapper = mountView();

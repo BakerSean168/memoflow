@@ -156,6 +156,8 @@ export function createReminderPrismaScheduleProjectionSource(
 
   return createReminderScheduleProjectionSource({
     reminderTemplateRepository: repositories.reminderTemplateRepository,
+    routineProfileStore: repositories.routineProfileStore,
+    userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
   });
 }
 

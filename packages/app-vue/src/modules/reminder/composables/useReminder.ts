@@ -50,8 +50,10 @@ export function useReminder() {
     return result;
   }
 
-  async function moveTemplateToGroup(...args: Parameters<typeof templateOps.moveTemplateToGroup>) {
-    const result = await templateOps.moveTemplateToGroup(...args);
+  async function replaceTemplateProfiles(
+    ...args: Parameters<typeof templateOps.replaceTemplateProfiles>
+  ) {
+    const result = await templateOps.replaceTemplateProfiles(...args);
     if (result) await reloadReminderScene();
     return result;
   }
@@ -101,7 +103,7 @@ export function useReminder() {
     updateTemplate,
     deleteTemplate,
     toggleTemplate,
-    moveTemplateToGroup,
+    replaceTemplateProfiles,
     // Group operations (wrapped with reload)
     fetchGroups: groupOps.fetchGroups,
     createGroup,

@@ -22,7 +22,7 @@ import { ImportanceLevel } from '@memoflow/contracts/shared';
 
 import { ReminderTemplateId } from '../value-objects/reminder-template-id';
 import { IdentityId } from '@memoflow/domain-shared';
-import type { ReminderGroupId, Instant } from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/contracts/primitives';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import {
   NotificationConfig,
@@ -50,7 +50,6 @@ export interface ReminderTemplateState {
   notificationConfig: NotificationConfig;
   selfEnabled: boolean;
   status: ReminderStatus;
-  groupId: string | null;
   effectiveEnabled: boolean;
   importanceLevel: ImportanceLevel;
   tags: string[];
@@ -119,9 +118,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
   }
   public get status(): ReminderStatus {
     return this._props.status;
-  }
-  public get groupId(): string | null {
-    return this._props.groupId;
   }
   public get importanceLevel(): ImportanceLevel {
     return this._props.importanceLevel;
@@ -196,7 +192,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
     tags?: string[];
     color?: string;
     icon?: string;
-    groupId?: string;
   }): ReminderTemplate {
     const id = params.id ?? ReminderTemplateId.generate();
     const now = Date.now();
@@ -219,7 +214,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
       notificationConfig,
       selfEnabled: true, // 默认启用
       status: ReminderStatus.Active,
-      groupId: params.groupId ?? null,
       effectiveEnabled: true,
       importanceLevel: params.importanceLevel ?? (ImportanceLevel.Moderate as ImportanceLevel),
       tags: params.tags ? [...params.tags] : [],
@@ -313,7 +307,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
     tags?: string[];
     color?: string | null;
     icon?: string | null;
-    groupId?: string | null;
   }): void {
     const now = Date.now();
 
@@ -335,9 +328,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
     }
     if (updates.icon !== undefined) {
       this._props.icon = updates.icon;
-    }
-    if (updates.groupId !== undefined) {
-      this._props.groupId = updates.groupId;
     }
 
     // 更新值对象
@@ -435,35 +425,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
   }
 
   /**
-   * 移动到分组（专用方法）
-   *
-   * @param targetGroupId 目标分组 ID，null 表示移出分组
-   */
-  public moveToGroup(targetGroupId: string | null): void {
-    const oldGroupId = this._props.groupId;
-
-    // 如果分组没有变化，直接返回
-    if (oldGroupId === targetGroupId) {
-      return;
-    }
-
-    this._props.groupId = targetGroupId;
-    this._props.updatedAt = Date.now();
-
-    // groupId 变化，effectiveEnabled 需要重新计算
-    // 应用层需要调用 setEffectiveEnabled 来更新
-
-    // 发布移动事件
-    this.addDomainEvent<ReminderEventMap['reminder:template-moved']>('reminder:template-moved', {
-      identityId: this._props.identityId,
-      templateId: this.id,
-      oldGroupId: oldGroupId as ReminderGroupId | null,
-      newGroupId: targetGroupId as ReminderGroupId | null,
-      reminder: this.toServerDTO(),
-    });
-  }
-
-  /**
    * 设置有效启用状态（由应用层/领域服务调用）
    *
    * 应在以下情况调用：
@@ -475,6 +436,24 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
    */
   public setEffectiveEnabled(effectiveEnabled: boolean): void {
     this._props.effectiveEnabled = effectiveEnabled;
+  }
+
+  /**
+   * External execution eligibility changed (Profile membership/gate or master gate).
+   * The aggregate payload is intentionally minimal: scheduling consumers must
+   * re-read canonical ProfileMembership/Profile state before projecting.
+   */
+  public markEligibilityContextChanged(
+    cause: ReminderEventMap['reminder:template-eligibility-changed']['cause'],
+  ): void {
+    this.addDomainEvent<ReminderEventMap['reminder:template-eligibility-changed']>(
+      'reminder:template-eligibility-changed',
+      {
+        identityId: this._props.identityId,
+        templateId: this.id,
+        cause,
+      },
+    );
   }
 
   /**
@@ -554,7 +533,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
     this.addDomainEvent<ReminderEventMap['reminder:triggered']>('reminder:triggered', {
       identityId: this._props.identityId,
       templateId: this.id,
-      groupId: this._props.groupId as ReminderGroupId | null,
       triggeredAt: now,
       nextTriggerAt: this._props.nextTriggerAt,
       reminder: this.toServerDTO(),
@@ -789,7 +767,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
       notificationConfig: this._props.notificationConfig.toDTO(),
       selfEnabled: this._props.selfEnabled,
       status: this._props.status,
-      groupId: this._props.groupId,
       importanceLevel: this._props.importanceLevel,
       tags: [...this._props.tags],
       color: this._props.color,
@@ -810,7 +787,6 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
 
   public toClientDTO(includeChildren = false): ReminderTemplateClientDTO {
     const effectiveEnabled = this._props.effectiveEnabled;
-    const controlledByGroup = !!this._props.groupId;
 
     const clientDTO: ReminderTemplateClientDTO = {
       id: this.id,
@@ -825,7 +801,7 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
       selfEnabled: this._props.selfEnabled,
       status: this._props.status,
       effectiveEnabled: effectiveEnabled,
-      groupId: this._props.groupId as ReminderTemplateClientDTO['groupId'],
+      profileMemberships: [],
       importanceLevel: this._props.importanceLevel,
       tags: [...this._props.tags],
       color: this._props.color,
@@ -839,17 +815,12 @@ export class ReminderTemplate extends AggregateRoot<ReminderTemplateId> {
       // 子实体
       history: null,
 
-      // UI 扩展
+      // UI read-model defaults; application mapper enriches canonical Profile memberships.
       isActive: this._props.status === ReminderStatus.Active,
       isPaused: this._props.status === ReminderStatus.Paused,
-      controlledByGroup: controlledByGroup,
-      lifecycleSource: controlledByGroup ? 'group' : 'template',
-      effectiveEnabledReason: controlledByGroup
-        ? '当前分组接管了提醒启用状态'
-        : '当前使用模板自身启用状态',
-      groupEnabled: controlledByGroup ? effectiveEnabled : null,
+      lifecycleSource: 'routine',
+      effectiveEnabledReason: '使用 Routine 自身启用状态',
       globalReminderEnabled: true,
-      groupName: null,
     };
 
     if (includeChildren && this._props.history.length > 0) {

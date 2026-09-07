@@ -2,6 +2,9 @@ import type { ReminderEventMap } from '@memoflow/contracts/reminder';
 import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 import type { IReminderTemplateRepository } from '../domain/repositories/i-reminder-template-repository';
+import type { IUserReminderPreferenceRepository } from '../domain/repositories/i-user-reminder-preference-repository';
+import type { RoutineProfileStore } from '../domain/ports';
+import { ReminderTemplateControlService } from '../domain/services/reminder-template-control-service';
 
 export const REMINDER_TEMPLATE_HANDLER_KEY = 'reminder.template.fire';
 export const REMINDER_TEMPLATE_PAYLOAD_VERSION = 1;
@@ -37,9 +40,9 @@ export type ReminderScheduleProjectionEventMap = Pick<
   | 'reminder:template-created'
   | 'reminder:template-updated'
   | 'reminder:template-enabled'
-  | 'reminder:template-moved'
   | 'reminder:template-paused'
   | 'reminder:template-deleted'
+  | 'reminder:template-eligibility-changed'
   | 'reminder:triggered'
 >;
 
@@ -48,11 +51,16 @@ function reminderOwner(templateId: string, identityId: string): SchedulingOwner 
 }
 
 export function createReminderScheduleProjectionSource(deps: {
-  reminderTemplateRepository: Pick<
-    IReminderTemplateRepository,
-    'findByIdForIdentity' | 'findAllTemplateRefs'
-  >;
+  reminderTemplateRepository: IReminderTemplateRepository;
+  routineProfileStore: RoutineProfileStore;
+  userReminderPreferenceRepository?: IUserReminderPreferenceRepository;
 }): ReminderScheduleProjectionSource {
+  const controlService = new ReminderTemplateControlService(
+    deps.reminderTemplateRepository,
+    deps.userReminderPreferenceRepository,
+    deps.routineProfileStore,
+  );
+
   return {
     buildTemplateOwner(templateId, identityId) {
       return reminderOwner(templateId, identityId);
@@ -75,7 +83,8 @@ export function createReminderScheduleProjectionSource(deps: {
       }
 
       const canonicalOwner = reminderOwner(template.id, String(template.identityId));
-      if (template.deletedAt || !template.isEffectivelyEnabled() || !template.nextTriggerAt) {
+      const effectiveStatus = await controlService.calculateEffectiveStatus(template);
+      if (template.deletedAt || !effectiveStatus.isEffectivelyEnabled || !template.nextTriggerAt) {
         return { owner: canonicalOwner, desired: [] };
       }
 
@@ -122,12 +131,12 @@ export function createReminderScheduleProjectionEventHandlers(
       handlers.upsertTemplate(event.templateId, String(event.identityId)),
     'reminder:template-enabled': async (event) =>
       handlers.upsertTemplate(event.templateId, String(event.identityId)),
-    'reminder:template-moved': async (event) =>
-      handlers.upsertTemplate(event.templateId, String(event.identityId)),
     'reminder:template-paused': async (event) =>
       handlers.deleteTemplate(event.templateId, String(event.identityId)),
     'reminder:template-deleted': async (event) =>
       handlers.deleteTemplate(event.templateId, String(event.identityId)),
+    'reminder:template-eligibility-changed': async (event) =>
+      handlers.upsertTemplate(event.templateId, String(event.identityId)),
     // Trigger state is committed before this event is published. Re-read the
     // aggregate and arm the next occurrence from its canonical nextTriggerAt.
     'reminder:triggered': async (event) =>

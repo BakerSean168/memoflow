@@ -813,7 +813,6 @@ exports.Prisma.ReminderTemplateScalarFieldEnum = {
   type: 'type',
   selfEnabled: 'selfEnabled',
   status: 'status',
-  reminderGroupId: 'reminderGroupId',
   importanceLevel: 'importanceLevel',
   tags: 'tags',
   color: 'color',

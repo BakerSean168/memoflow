@@ -67,6 +67,22 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
     return rows.map(mapProfile);
   }
 
+  async findProfilesByIds(input: {
+    readonly identityId: string;
+    readonly profileIds: readonly string[];
+  }): Promise<RoutineProfile[]> {
+    if (input.profileIds.length === 0) return [];
+    const placeholders = input.profileIds.map(() => '?').join(', ');
+    const rows = await this.db.getAll<RoutineProfilePowerSyncRecord>(
+      `SELECT id, identity_id, name, description, enabled, active, version, created_at, updated_at
+       FROM routine_profiles
+       WHERE identity_id = ? AND id IN (${placeholders})
+       ORDER BY id ASC`,
+      [input.identityId, ...input.profileIds],
+    );
+    return rows.map(mapProfile);
+  }
+
   async deleteProfile(input: {
     readonly identityId: string;
     readonly profileId: string;
@@ -92,6 +108,22 @@ export class PowerSyncRoutineProfileStore implements RoutineProfileStore {
        WHERE identity_id = ? AND routine_id = ?
        ORDER BY profile_id ASC`,
       [input.identityId, input.routineId],
+    );
+    return rows.map(mapMembership);
+  }
+
+  async listMembershipsForRoutines(input: {
+    readonly identityId: string;
+    readonly routineIds: readonly string[];
+  }): Promise<ProfileMembership[]> {
+    if (input.routineIds.length === 0) return [];
+    const placeholders = input.routineIds.map(() => '?').join(', ');
+    const rows = await this.db.getAll<ProfileMembershipPowerSyncRecord>(
+      `SELECT identity_id, profile_id, routine_id, enabled, version, created_at, updated_at
+       FROM routine_profile_memberships
+       WHERE identity_id = ? AND routine_id IN (${placeholders})
+       ORDER BY routine_id ASC, profile_id ASC`,
+      [input.identityId, ...input.routineIds],
     );
     return rows.map(mapMembership);
   }

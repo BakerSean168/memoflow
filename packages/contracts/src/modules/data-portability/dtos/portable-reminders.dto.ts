@@ -34,7 +34,16 @@ export const PortableReminderTemplateSchema = z
     notificationConfig: z.unknown(),
     selfEnabled: z.boolean(),
     status: z.string(),
-    groupRef: PortableRefSchema.nullable().optional(),
+    routineDefinition: z.object({
+      enabled: z.boolean(),
+      trigger: z.unknown().nullable(),
+    }),
+    profileMemberships: z.array(
+      z.object({
+        profileRef: PortableRefSchema,
+        enabled: z.boolean(),
+      }),
+    ),
     importanceLevel: z.string(),
     tags: z.array(z.string()),
     color: z.string().nullable().optional(),

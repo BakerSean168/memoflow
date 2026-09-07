@@ -3,7 +3,7 @@
  * 提醒模板聚合根 - 服务端接口
  */
 
-import type { ReminderTemplateId, ReminderGroupId, IdentityId } from '../../../primitives';
+import type { ReminderTemplateId, IdentityId } from '../../../primitives';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import type { ReminderHistoryServerDTO } from '../entities/reminder-history-server';
 
@@ -34,7 +34,6 @@ export interface ReminderTemplateServerDTO {
   notificationConfig: NotificationConfigDTO;
   selfEnabled: boolean;
   status: ReminderStatus;
-  groupId?: ReminderGroupId | null;
   importanceLevel: ImportanceLevel;
   tags: string[];
   color?: string | null;

@@ -1,8 +1,4 @@
-/**
- * Create Reminder Template Service
- *
- * 创建提醒模板
- */
+/** Create a Routine template with canonical ProfileMemberships. */
 
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
@@ -17,9 +13,6 @@ import type {
 } from '@memoflow/contracts/reminder';
 import { ReminderTemplateClientMapper } from '../../mappers/reminder-template-client.mapper';
 
-/**
- * Create Reminder Template Service
- */
 export class CreateReminderTemplateUseCase {
   private readonly reminderDomainService: ReminderDomainService;
   private readonly templateMapper: ReminderTemplateClientMapper;
@@ -27,7 +20,7 @@ export class CreateReminderTemplateUseCase {
 
   constructor(
     private readonly templateRepository: IReminderTemplateRepository,
-    private readonly groupRepository: IReminderGroupRepository,
+    groupRepository: IReminderGroupRepository,
     reminderDomainService?: ReminderDomainService,
     templateMapper?: ReminderTemplateClientMapper,
     closureChecker?: (identityId: string) => Promise<boolean>,
@@ -39,30 +32,19 @@ export class CreateReminderTemplateUseCase {
     this.reminderDomainService =
       reminderDomainService ?? new ReminderDomainService(templateRepository, groupRepository);
     this.templateMapper =
-      templateMapper ??
-      new ReminderTemplateClientMapper(this.reminderDomainService, groupRepository);
+      templateMapper ?? new ReminderTemplateClientMapper(this.reminderDomainService);
   }
 
   private async replayExisting(
     existing: ReminderTemplate,
-    cx: ExecutionContext,
+    profileIds: readonly string[],
   ): Promise<Result<ReminderTemplateClientDTO>> {
-    const group = existing.groupId
-      ? await this.groupRepository.findByIdForIdentity(cx.identityId, existing.groupId)
-      : null;
-    if (existing.groupId && !group) {
-      return error(
-        'INTERNAL_ERROR',
-        `Legacy reminder group not found during projection repair: ${existing.groupId}`,
-      );
-    }
-
     try {
-      await this.reminderDomainService.healLegacyRoutineProjection(existing, group);
+      await this.reminderDomainService.healRoutineProjection(existing, profileIds);
       return ok(await this.templateMapper.toDTO(existing));
     } catch (cause) {
       return error(
-        'INTERNAL_ERROR',
+        cause instanceof TypeError ? 'BAD_REQUEST' : 'INTERNAL_ERROR',
         cause instanceof Error ? cause.message : 'Failed to repair Routine projection',
       );
     }
@@ -72,17 +54,19 @@ export class CreateReminderTemplateUseCase {
     input: CreateReminderTemplateReq,
     cx: ExecutionContext,
   ): Promise<Result<ReminderTemplateClientDTO>> {
+    const profileIds = input.profileIds ?? [];
     if (input.id) {
       const existing = await this.templateRepository.findByIdForIdentity(cx.identityId, input.id);
-      if (existing) return this.replayExisting(existing, cx);
+      if (existing) return this.replayExisting(existing, profileIds);
     }
 
     if (await this.closureChecker(cx.identityId)) {
       return error('FORBIDDEN', 'Account is closed or closure in progress');
     }
-    // Residual 835: request activeTime is already ActiveTimeConfigDTO (activatedAt).
+
     const normalizedInput = {
       ...input,
+      profileIds,
       activeTime: input.activeTime,
       activeHours: input.activeHours
         ? {
@@ -104,20 +88,16 @@ export class CreateReminderTemplateUseCase {
         id: input.id,
         identityId: cx.identityId,
       });
-
       return ok(await this.templateMapper.toDTO(template));
     } catch (cause) {
-      // Close the concurrent deterministic-ID create window: if another
-      // workflow attempt committed first, surface that durable entity as the
-      // successful replay rather than creating a duplicate reminder.
       if (input.id) {
         const existing = await this.templateRepository.findByIdForIdentity(cx.identityId, input.id);
-        if (existing) return this.replayExisting(existing, cx);
+        if (existing) return this.replayExisting(existing, profileIds);
       }
 
       return error(
-        'NOT_FOUND',
-        cause instanceof Error ? cause.message : 'Failed to create reminder template',
+        cause instanceof TypeError ? 'BAD_REQUEST' : 'NOT_FOUND',
+        cause instanceof Error ? cause.message : 'Failed to create Routine',
       );
     }
   }

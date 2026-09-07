@@ -148,6 +148,8 @@ export class ExportUserDataUseCase {
     if (modules.includes('reminders')) {
       const groups = await this.deps.reminderGroupRepository.findByIdentityId(identityId);
       const templates = await this.deps.reminderTemplateRepository.findByIdentityId(identityId, { includeHistory: false });
+      const memberships = await this.deps.routineProfileMembershipRepository.findByIdentityId(identityId);
+      const routineDefinitions = await this.deps.routineDefinitionRepository.findByIdentityId(identityId);
 
       const allResponses: unknown[] = [];
       for (const template of templates as { id: string }[]) {
@@ -160,7 +162,7 @@ export class ExportUserDataUseCase {
 
       if (!data.reminders) data.reminders = { groups: [], templates: [], responses: [] };
       data.reminders.groups = projectReminderGroups(groups, ctx);
-      data.reminders.templates = projectReminderTemplates(templates, ctx);
+      data.reminders.templates = projectReminderTemplates(templates, memberships, routineDefinitions, ctx);
       data.reminders.responses = projectReminderResponses(allResponses, ctx);
       entityCounts.reminderGroups = data.reminders.groups.length;
       entityCounts.reminderTemplates = data.reminders.templates.length;

@@ -81,10 +81,14 @@ describe('reminder projection runtime', () => {
     });
 
     await runtime.start();
+    await events.emit('reminder:template-eligibility-changed', {
+      identityId: owner.identityId as never,
+      templateId: owner.id as never,
+      cause: 'profile-membership-state',
+    });
     await events.emit('reminder:triggered', {
       identityId: owner.identityId as never,
       templateId: owner.id as never,
-      groupId: null,
       triggeredAt: 1,
       nextTriggerAt: 2,
       reminder: {} as never,
@@ -101,14 +105,13 @@ describe('reminder projection runtime', () => {
     await events.emit('reminder:triggered', {
       identityId: owner.identityId as never,
       templateId: owner.id as never,
-      groupId: null,
       triggeredAt: 3,
       nextTriggerAt: 4,
       reminder: {} as never,
     });
 
-    expect(source.buildTemplatePlan).toHaveBeenCalledTimes(1);
-    expect(reconcile).toHaveBeenCalledTimes(1);
+    expect(source.buildTemplatePlan).toHaveBeenCalledTimes(2);
+    expect(reconcile).toHaveBeenCalledTimes(2);
     expect(source.buildTemplateOwner).toHaveBeenCalledTimes(1);
     expect(removeOwner).toHaveBeenCalledTimes(1);
   });

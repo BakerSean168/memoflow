@@ -2,10 +2,8 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { ReminderType } from '@memoflow/contracts/reminder';
-import { ReminderGroup } from '../../../domain/aggregates/reminder-group';
 import { ReminderTemplate } from '../../../domain/aggregates/reminder-template';
 import { ReminderTemplatePrismaRepository } from './reminder-template-prisma.repository';
-import { ReminderGroupPrismaRepository } from './reminder-group-prisma.repository';
 import {
   cleanAll,
   disconnectPrisma,
@@ -13,7 +11,7 @@ import {
   seedAccount,
 } from '../../../../__tests__/integration-helpers';
 
-function createReminderTemplate(identityId: string, groupId: string) {
+function createReminderTemplate(identityId: string) {
   const template = ReminderTemplate.create({
     identityId: identityId as IdentityId,
     title: 'Stretch and reset',
@@ -37,7 +35,6 @@ function createReminderTemplate(identityId: string, groupId: string) {
     tags: ['health', 'focus'],
     color: '#14b8a6',
     icon: 'sparkles',
-    groupId,
   });
 
   template.updateResponseMetrics({
@@ -73,23 +70,13 @@ describe('ReminderTemplatePrismaRepository integration', () => {
     await cleanAll();
   });
 
-  it('persists and reloads group relation, history children, smart-frequency fields, and nullables', async () => {
+  it('persists and reloads history children, smart-frequency fields, and nullables without a single Profile owner column', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
 
     const prisma = await getPrisma();
-    const groupRepository = new ReminderGroupPrismaRepository(prisma);
     const repository = new ReminderTemplatePrismaRepository(prisma);
-    const group = ReminderGroup.create({
-      identityId,
-      name: 'Wellbeing',
-      description: 'Healthy cadence reminders',
-      color: '#22c55e',
-      icon: 'leaf',
-    });
-    await groupRepository.save(group);
-
-    const template = createReminderTemplate(identityId, group.id);
+    const template = createReminderTemplate(identityId);
     await repository.save(template);
 
     const row = await prisma.reminderTemplate.findUnique({
@@ -101,14 +88,13 @@ describe('ReminderTemplatePrismaRepository integration', () => {
     });
 
     expect(row).not.toBeNull();
+    expect(row).not.toHaveProperty('reminderGroupId');
     expect(row?.activeHours).toBeNull();
-    expect(row?.reminderGroupId).toBe(group.id);
     expect(row?.history).toHaveLength(1);
     expect(row?.trigger).toContain('FixedTime');
     expect(row?.notificationConfig).toContain('Stretch break');
 
     expect(loaded).not.toBeNull();
-    expect(loaded?.groupId).toBe(group.id);
     expect(loaded?.type).toBe(ReminderType.Recurring);
     expect(loaded?.history).toHaveLength(1);
     expect(loaded?.responseMetrics?.clickRate).toBe(78);
@@ -123,16 +109,10 @@ describe('ReminderTemplatePrismaRepository integration', () => {
     await seedAccount({ id: otherIdentityId });
 
     const prisma = await getPrisma();
-    const groupRepository = new ReminderGroupPrismaRepository(prisma);
     const repository = new ReminderTemplatePrismaRepository(prisma);
-    const firstGroup = ReminderGroup.create({ identityId, name: 'Health' });
-    const otherGroup = ReminderGroup.create({ identityId: otherIdentityId, name: 'Foreign' });
-    await groupRepository.save(firstGroup);
-    await groupRepository.save(otherGroup);
-
-    await repository.save(createReminderTemplate(identityId, firstGroup.id));
-    await repository.save(createReminderTemplate(identityId, firstGroup.id));
-    await repository.save(createReminderTemplate(otherIdentityId, otherGroup.id));
+    await repository.save(createReminderTemplate(identityId));
+    await repository.save(createReminderTemplate(identityId));
+    await repository.save(createReminderTemplate(otherIdentityId));
 
     const templates = await repository.findByIdentityId(identityId);
 
