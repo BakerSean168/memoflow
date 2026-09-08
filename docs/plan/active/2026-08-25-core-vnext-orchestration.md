@@ -2374,10 +2374,12 @@ P0/P1 findings create focused repair passes before plan archive.
 - post-repair re-acceptance passed Web Shard 2 23/23, focused Planner rollback, real PostgreSQL binding/Label/Notification/Schedule checks, four affected coverage targets, exact-revision local-Docker Phase B, affected typecheck, Test System V2 18/18, sync/inventory/target-governance and full governance.
 - PR #338 second CI confirmed the first repair across Unit, Typecheck, Build, 4/4 Web Flow, Boundary, Coverage, Performance and Validate; its only root failure was two Integration suites that executed zero assertions because the integration-only workspace helper still lacked the new Scheduler source alias;
 - focused integration repair `ce603b6e612` added Scheduler bare/deep source resolution to `vitest.workspace-helpers.ts`, locked that invariant in Test System V2, and moved the inventory to 1186 files; with `packages/scheduler/dist` deliberately absent, the two former CI failures passed 3/3 + 18/18 and the full Test System self-test passed 19/19.
+- PR #338 third CI independently turned Verification Children + Integration Oracle green and also passed Unit, Typecheck, Build, Boundary/Coverage/Performance, Governance, 4/4 Web Flow and Web Flow Oracle; its only root failure was Static Analysis on the new regression test importing a root config by relative path, with Validate Oracle red only as downstream fail-closed aggregation;
+- focused test-harness repair `9d505c5f655` preserves the runtime Scheduler-alias assertion through an isolated Node/tsx subprocess while respecting Nx module boundaries; exact affected lint (41 projects), Test System 19/19, inventory 1186, sync, diff check and full governance are green locally.
 
 Canonical evidence: `docs/analysis/2026-09-08-hard-7105-final-review-evidence.md`.
 
-**Review verdict: ACCEPTED — no unresolved P0/P1. Both CI focused repairs are locally re-accepted.** The plan intentionally remains active until PR #338 passes a new exact-head GitHub CI run and merges into `main`; archive occurs from merged `main`, not before delivery.
+**Review verdict: ACCEPTED — no unresolved P0/P1. All three focused CI repairs are locally re-accepted.** The plan intentionally remains active until PR #338 passes a new exact-head GitHub CI run and merges into `main`; archive occurs from merged `main`, not before delivery.
 
 ---
 
@@ -2648,7 +2650,7 @@ C. Final closure
    HARD-7102              DONE — architecture locks / anti-resurrection
    HARD-7103              DONE — A-J + host + local-Docker + schema acceptance
    HARD-7104              DONE — ADR/docs/reuse/plan truth closure
-   HARD-7105              REVIEW PASS + CI REPAIRS PASS — no unresolved P0/P1; PR #338 exact-head CI + merge + archive remain
+   HARD-7105              REVIEW PASS + CI REPAIRS PASS — no unresolved P0/P1; PR #338 fourth exact-head CI + merge + archive remain
 ```
 
-HARD-7105 implementation/review and both CI focused repairs are accepted. Keep the final DoD checkbox open until PR #338 passes CI on the repaired exact head and merges into `main`; then archive this umbrella plan from merged `main`.
+HARD-7105 implementation/review and all focused CI repairs are accepted. Keep the final DoD checkbox open until PR #338 passes CI on the repaired exact head and merges into `main`; then archive this umbrella plan from merged `main`.

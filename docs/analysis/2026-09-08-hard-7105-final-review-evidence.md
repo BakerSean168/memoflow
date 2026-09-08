@@ -7,7 +7,7 @@ tags:
   - acceptance
 description: MemoFlow Core vNext HARD-7105 five-layer final review, focused repair, and pre-delivery acceptance evidence
 created: 2026-09-08T10:27:00+08:00
-updated: 2026-09-08T11:40:00+08:00
+updated: 2026-09-08T11:55:00+08:00
 status: accepted-pre-delivery
 ---
 
@@ -19,7 +19,7 @@ status: accepted-pre-delivery
 
 No unresolved P0/P1 finding remains in the Core vNext residual scope. The initial five-layer implementation review accepted `3f7f7023f127`; the pre-delivery evidence was then committed and opened as PR #338. GitHub's first independent CI pass correctly rejected delivery on fresh-workspace / acceptance-fixture drift that local cached runs had not exposed. Those delivery-gate findings were repaired in `e314e6da344` without widening any vNext product contract.
 
-This document does **not** claim merge/archive completion. The first delivery repair is `e314e6da344`; the second fresh-integration repair is `ce603b6e612`. PR #338 must pass a new exact-head GitHub CI run after both repairs and merge into `main` before the umbrella plan can be archived.
+This document does **not** claim merge/archive completion. The first delivery repair is `e314e6da344`; the second fresh-integration repair is `ce603b6e612`; the third CI-only test-harness repair is `9d505c5f655`. PR #338 must pass a new exact-head GitHub CI run after these repairs and merge into `main` before the umbrella plan can be archived.
 
 ## 1. Contract correctness
 
@@ -162,6 +162,25 @@ Fresh-workspace acceptance deliberately removed `packages/scheduler/dist` during
 - Nx sync, inventory (1186), `git diff --check`, target governance and full governance: **PASS**.
 
 Focused repair commit: `ce603b6e612 test(ci): resolve scheduler in integration workspaces`.
+
+## 8. PR #338 third CI — Static Analysis test-harness boundary repair
+
+The third exact-head CI run at `242b5aa0a874dbef467d2405dc1336799aa3b74a` independently confirmed the integration repair: Verification Children, Integration Oracle, Boundary Oracle, Coverage Oracle, Performance Oracle, Unit Tests, Typecheck, Build, Governance, all four Web Flow shards and Web Flow Oracle all passed. Delivery Observation also completed successfully.
+
+The only root failure was **Static Analysis**. `Validate Oracle` failed only as the expected fail-closed aggregate of the red Static lane. The Static error was isolated to the newly added Test System regression lock: it directly imported the root-level `vitest.workspace-helpers.ts` by a relative path, which correctly violated Nx `@nx/enforce-module-boundaries`.
+
+The repair keeps the same runtime assertion but loads the real helper inside an isolated Node + `tsx/cjs` subprocess rooted at the workspace. That preserves the purpose of the lock (validate actual Scheduler bare/deep integration aliases) without creating a project-to-root relative import edge.
+
+Post-repair local acceptance:
+
+- `test-system-v2:lint`: **PASS**;
+- exact CI-like affected lint across 41 projects: **PASS** with zero errors;
+- Test System V2: **19/19 PASS**;
+- inventory: **1186 files**;
+- Nx sync and `git diff --check`: **PASS**;
+- full `governance:check`: **PASS**, including HARD-7101 **22/22** and Core vNext architecture lock **1769 production files / 0 violations**.
+
+Focused repair commit: `9d505c5f655 test(ci): respect test-system module boundaries`.
 
 ## Final pre-delivery verdict
 
