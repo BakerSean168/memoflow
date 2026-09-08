@@ -4,7 +4,7 @@ tags:
   - index
 description: 架构决策记录索引
 created: 2025-11-23T15:00:00
-updated: 2026-09-08T23:26:00+08:00
+updated: 2026-09-09T00:00:00+08:00
 ---
 
 # ADR 索引
@@ -112,6 +112,10 @@ updated: 2026-09-08T23:26:00+08:00
 | [ADR-093](./ADR-093-user-preference-profile-and-product-time-context.md) | User Preference Profile 与 Product Time Context | 已采纳（待实施） | 2026-09-08 |
 | [ADR-094](./ADR-094-device-preference-feature-policy-and-consent-boundary.md) | Device Preference、Feature Policy 与 Consent Boundary | 已采纳（待实施） | 2026-09-08 |
 | [ADR-095](./ADR-095-preference-persistence-sync-migration-and-portability.md) | Preference Persistence、Sync、Migration 与 Portability | 已采纳（待实施） | 2026-09-08 |
+| [ADR-096](./ADR-096-assistant-conversation-shell-and-mastra-runtime-state-boundary.md) | Assistant Conversation Shell 与 Mastra Runtime State Boundary | 已采纳（待实施） | 2026-09-09 |
+| [ADR-097](./ADR-097-ai-provider-connection-secret-and-model-capability-boundary.md) | AI Provider Connection、Secret 与 Model Capability Boundary | 已采纳（待实施） | 2026-09-09 |
+| [ADR-098](./ADR-098-ai-context-knowledge-index-and-owner-contract-boundary.md) | AI Context、Knowledge Index 与 Owner Contract Boundary | 已采纳（待实施） | 2026-09-09 |
+| [ADR-099](./ADR-099-ai-workflow-draft-apply-and-execution-record-boundary.md) | AI Workflow Draft、Apply 与 Execution Record Boundary | 已采纳（待实施） | 2026-09-09 |
 
 ## 维护规则
 

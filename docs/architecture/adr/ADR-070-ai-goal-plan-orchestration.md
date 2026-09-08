@@ -10,10 +10,12 @@ tags:
   - hitl
 description: AI GoalPlanDraft V2 同时规划 Goal、KR、Task、Knowledge 与 Relation 的 durable apply 工作流
 created: 2026-09-08T17:55:00+08:00
-updated: 2026-09-08T17:55:00+08:00
+updated: 2026-09-09T00:00:00+08:00
 ---
 
 # ADR-070: AI GoalPlanDraft V2 与多实体 Goal Context Orchestration
+
+> **2026-09-09 AI model convergence follow-up：** 本 ADR 的 GoalPlanDraft V2、多实体 `draftRef`/mapping、HITL 与 owner application port 原则继续作为 Goal planning 真值；stable `draftRef` idempotency、Task canonical schedule、Knowledge stable document identity、Routine target vocabulary 与 execution-record boundary 由 ADR-098/099 继续收敛。
 
 **状态：** 已采纳，待实施
 **日期：** 2026-09-08

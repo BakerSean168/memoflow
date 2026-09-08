@@ -5,10 +5,12 @@ tags:
   - ai
 description: AI 模块当前功能、Mastra durable workflows、Routine tools 与产品读写边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-09T00:00:00+08:00
 ---
 
 # AI 模块说明
+
+> **2026-09-09 target convergence notice：** 当前 2026-08 已实施的 Mastra-native runtime 继续是 production truth；Conversation/Provider/Context/Workflow Draft/Knowledge Index/Execution persistence 的下一目标由 ADR-096～099 与 `docs/plan/active/2026-09-09-ai-vnext-model-convergence.md` 冻结。实施完成前，本文件以下“当前”描述仍以现有代码为准，不把新目标冒充成已经落地。
 
 ## 1. 功能定位
 
@@ -82,4 +84,13 @@ API 与 Desktop 各自在 composition root 注入 Goal/Task/Reminder owner mutat
 - [ADR-050 Mastra-native runtime](../../architecture/adr/ADR-050-mastra-native-ai-runtime.md)
 - [ADR-051 AI primitive taxonomy](../../architecture/adr/ADR-051-ai-primitive-taxonomy.md)
 - [ADR-052 Goal create reference workflow](../../architecture/adr/ADR-052-goal-create-reference-workflow.md)
+- [ADR-070 AI GoalPlanDraft V2](../../architecture/adr/ADR-070-ai-goal-plan-orchestration.md)
+- [ADR-096 Conversation / Mastra runtime state](../../architecture/adr/ADR-096-assistant-conversation-shell-and-mastra-runtime-state-boundary.md)
+- [ADR-097 Provider / Secret / Model Capability](../../architecture/adr/ADR-097-ai-provider-connection-secret-and-model-capability-boundary.md)
+- [ADR-098 Context / Knowledge Index / Owner Contract](../../architecture/adr/ADR-098-ai-context-knowledge-index-and-owner-contract-boundary.md)
+- [ADR-099 Workflow Draft / Apply / Execution Record](../../architecture/adr/ADR-099-ai-workflow-draft-apply-and-execution-record-boundary.md)
+- [AI vNext Model Convergence architecture](../../architecture/ai-vnext-model-convergence.md)
+- [AI vNext current-system map](../../analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md)
+- [AI vNext reference/reuse ledger](../../analysis/2026-09-09-ai-vnext-model-convergence-reference-and-reuse-ledger.md)
+- [AI vNext active plan](../../plan/active/2026-09-09-ai-vnext-model-convergence.md)
 - [Core vNext HARD-7104 evidence](../../analysis/2026-09-08-hard-7104-documentation-truth-closure.md)
