@@ -30,10 +30,7 @@ import type {
   TaskGoalBinding,
   TaskGoalBindingDTO,
 } from '@memoflow/contracts/task';
-import type {
-  ITaskPlanApiClient,
-  TaskPlanListParams,
-} from './ports/task-plan-api-client.port';
+import type { ITaskPlanApiClient, TaskPlanListParams } from './ports/task-plan-api-client.port';
 import type { ITaskOccurrenceApiClient } from './ports/task-occurrence-api-client.port';
 import { TaskPlan } from '../domain-client/aggregates/task-plan';
 import { TaskOccurrence } from '../domain-client/aggregates/task-occurrence';
@@ -67,12 +64,6 @@ function taskPlanFromDTO(dto: TaskPlanClientDTO): TaskPlan {
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
     deletedAt: dto.deletedAt ? dto.deletedAt : null,
-    startDate: dto.startDate ? dto.startDate : null,
-    dueDate: dto.dueDate ?? null,
-    completedAt: dto.completedAt ? dto.completedAt : null,
-    estimatedMinutes: dto.estimatedMinutes,
-    actualMinutes: dto.actualMinutes,
-    comment: dto.comment,
     instanceCount: dto.instanceCount,
     completedInstanceCount: dto.completedInstanceCount,
     pendingInstanceCount: dto.pendingInstanceCount,
@@ -168,9 +159,7 @@ export class TaskClientService implements TaskClientPort {
 
   async createTemplate(
     request: CreateTaskPlanReq,
-  ): Promise<
-    Result<{ template: TaskPlan; instanceCount: number; todayInstanceCreated: boolean }>
-  > {
+  ): Promise<Result<{ template: TaskPlan; instanceCount: number; todayInstanceCreated: boolean }>> {
     const result = await this.templateApi.createTaskPlan(request);
     return mapResult(result, (data) => ({
       template: taskPlanFromDTO(data.template),

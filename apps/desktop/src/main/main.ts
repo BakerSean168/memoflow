@@ -411,6 +411,7 @@ async function registerBusinessModules(
   const analyticsReadAdapter = new DesktopAnalyticsReadAdapter({
     goalRepository: goalComposed.repositories.goalRepository,
     taskPlanRepository: taskComposed.repositories.taskPlanRepository,
+    taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
     dashboardDataLoader: (identityId) => getDesktopDashboardData(identityId, dashboardRepositories),
   });
 

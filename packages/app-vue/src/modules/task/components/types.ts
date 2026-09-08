@@ -71,8 +71,6 @@ export interface TaskPlanViewModel {
   isArchived?: boolean;
   importance?: string;
   importanceText?: string;
-  estimatedMinutes?: number | null;
-  dueDate?: string | number | null;
   recurrenceText?: string;
   labels?: LabelClientDTO[];
   labelIds?: string[];

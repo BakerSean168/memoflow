@@ -162,12 +162,6 @@ export class PowerSyncTaskPlanMapper {
         ? new Date(data.last_generated_date).getTime()
         : null,
       generateAheadDays: data.generate_ahead_days ?? null,
-      startDate: null,
-      dueDate: null,
-      completedAt: null,
-      estimatedMinutes: null,
-      actualMinutes: null,
-      note: null,
       createdAt: new Date(data.created_at).getTime(),
       updatedAt: new Date(data.updated_at).getTime(),
       deletedAt: data.deleted_at ? new Date(data.deleted_at).getTime() : null,

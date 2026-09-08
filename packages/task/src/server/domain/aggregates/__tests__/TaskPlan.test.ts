@@ -161,28 +161,21 @@ describe('TaskPlan Aggregate', () => {
         expect(template.title).toBe('Buy groceries');
       });
 
-      it('should accept all optional params', () => {
+      it('should accept persisted plan-owned optional fields without reviving due/completion state', () => {
         const identityId = makeIdentityId();
-        const startDate = new Date('2025-06-15');
-        const dueDate = new Date('2025-06-20');
+        const startDate = new Date('2025-06-15').getTime();
 
-        const template = TaskPlan.createOneTimeTask({
+        const plan = TaskPlan.createOneTimeTask({
           identityId,
           title: 'Full task',
           description: 'Some description',
           importance: ImportanceLevel.Vital,
           startDate,
-          dueDate,
-          estimatedMinutes: 60,
-          note: 'A note',
         });
 
-        expect(template.description).toBe('Some description');
-        expect(template.importance).toBe(ImportanceLevel.Vital);
-        expect(template.startDate).toEqual(startDate);
-        expect(template.dueDate).toEqual(dueDate);
-        expect(template.estimatedMinutes).toBe(60);
-        expect(template.note).toBe('A note');
+        expect(plan.description).toBe('Some description');
+        expect(plan.importance).toBe(ImportanceLevel.Vital);
+        expect(plan.timeConfig?.startDate).toBe(startDate);
       });
 
       it('should generate unique IDs for each template', () => {
@@ -236,29 +229,6 @@ describe('TaskPlan Aggregate', () => {
             title: '   ',
           }),
         ).toThrow(InvalidTaskPlanStateError);
-      });
-
-      it('should throw for startDate after dueDate', () => {
-        expect(() =>
-          TaskPlan.createOneTimeTask({
-            identityId: makeIdentityId(),
-            title: 'Task',
-            startDate: new Date('2025-06-20'),
-            dueDate: new Date('2025-06-15'),
-          }),
-        ).toThrow(InvalidDateRangeError);
-      });
-
-      it('should allow startDate equal to dueDate', () => {
-        const sameDate = new Date('2025-06-15');
-        const template = TaskPlan.createOneTimeTask({
-          identityId: makeIdentityId(),
-          title: 'Task',
-          startDate: sameDate,
-          dueDate: sameDate,
-        });
-        expect(template.startDate).toEqual(sameDate);
-        expect(template.dueDate).toEqual(sameDate);
       });
     });
 
@@ -695,57 +665,6 @@ describe('TaskPlan Aggregate', () => {
       });
     });
 
-    describe('updateStartDate() (ONE_TIME)', () => {
-      it('should update start date', () => {
-        const date = new Date('2025-07-01');
-        template.updateStartDate(date);
-        expect(template.startDate).toEqual(date);
-      });
-
-      it('should accept null to clear start date', () => {
-        template.updateStartDate(new Date());
-        template.updateStartDate(null);
-        expect(template.startDate).toBeNull();
-      });
-
-      it('should throw for RECURRING tasks', () => {
-        const recurring = TaskPlan.createRecurringTask({
-          identityId: makeIdentityId(),
-          title: 'Recurring',
-          timeConfig: makeAllDayTimeConfig(),
-          recurrenceRule: makeDailyRule(),
-        });
-
-        expect(() => recurring.updateStartDate(new Date())).toThrow(InvalidTaskPlanStateError);
-      });
-
-      it('should throw if start date is after due date', () => {
-        template.updateDueDate(new Date('2025-06-15'));
-        expect(() => template.updateStartDate(new Date('2025-06-20'))).toThrow(
-          InvalidDateRangeError,
-        );
-      });
-    });
-
-    describe('updateDueDate() (ONE_TIME)', () => {
-      it('should update due date', () => {
-        const date = new Date('2025-07-15');
-        template.updateDueDate(date);
-        expect(template.dueDate).toEqual(date);
-      });
-
-      it('should throw for RECURRING tasks', () => {
-        const recurring = TaskPlan.createRecurringTask({
-          identityId: makeIdentityId(),
-          title: 'Recurring',
-          timeConfig: makeAllDayTimeConfig(),
-          recurrenceRule: makeDailyRule(),
-        });
-
-        expect(() => recurring.updateDueDate(new Date())).toThrow(InvalidTaskPlanStateError);
-      });
-    });
-
     describe('updateRecurrenceRule() (RECURRING)', () => {
       it('should update recurrence rule', () => {
         const recurring = TaskPlan.createRecurringTask({
@@ -813,57 +732,6 @@ describe('TaskPlan Aggregate', () => {
         const historyBefore = template.history.length;
         template.updatePriority(ImportanceLevel.Important);
         expect(template.history.length).toBeGreaterThan(historyBefore);
-      });
-    });
-
-    describe('updateNote() (ONE_TIME)', () => {
-      it('should update note', () => {
-        template.updateNote('Remember this');
-        expect(template.note).toBe('Remember this');
-      });
-
-      it('should clear note with null', () => {
-        template.updateNote('Something');
-        template.updateNote(null);
-        expect(template.note).toBeNull();
-      });
-
-      it('should throw for RECURRING tasks', () => {
-        const recurring = TaskPlan.createRecurringTask({
-          identityId: makeIdentityId(),
-          title: 'Recurring',
-          timeConfig: makeAllDayTimeConfig(),
-          recurrenceRule: makeDailyRule(),
-        });
-
-        expect(() => recurring.updateNote('Note')).toThrow(InvalidTaskPlanStateError);
-      });
-    });
-
-    describe('updateEstimatedTime() (ONE_TIME)', () => {
-      it('should update estimated minutes', () => {
-        template.updateEstimatedTime(90);
-        expect(template.estimatedMinutes).toBe(90);
-      });
-
-      it('should accept zero', () => {
-        template.updateEstimatedTime(0);
-        expect(template.estimatedMinutes).toBe(0);
-      });
-
-      it('should throw for negative values', () => {
-        expect(() => template.updateEstimatedTime(-1)).toThrow(InvalidTaskPlanStateError);
-      });
-
-      it('should throw for RECURRING tasks', () => {
-        const recurring = TaskPlan.createRecurringTask({
-          identityId: makeIdentityId(),
-          title: 'Recurring',
-          timeConfig: makeAllDayTimeConfig(),
-          recurrenceRule: makeDailyRule(),
-        });
-
-        expect(() => recurring.updateEstimatedTime(30)).toThrow(InvalidTaskPlanStateError);
       });
     });
   });
@@ -1497,81 +1365,6 @@ describe('TaskPlan Aggregate', () => {
         const next = template.getNextOccurrence(new Date(2024, 1, 29, 12, 0, 0).getTime());
         expect(next).not.toBeNull();
         expect(localYmd(next!)).toBe('2028-02-29');
-      });
-    });
-
-    describe('isOverdue() (ONE_TIME)', () => {
-      it('should return true when past due date', () => {
-        const pastDate = new Date(Date.now() - 86400000);
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.OneTime,
-            status: TaskPlanStatus.Active,
-            dueDate: pastDate,
-          }),
-        );
-
-        expect(template.isOverdue()).toBe(true);
-      });
-
-      it('should return false when no due date', () => {
-        const template = TaskPlan.load(
-          makeState({ taskType: TaskType.OneTime, status: TaskPlanStatus.Active }),
-        );
-
-        expect(template.isOverdue()).toBe(false);
-      });
-
-      it('should return false for RECURRING tasks', () => {
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Active,
-          }),
-        );
-
-        expect(template.isOverdue()).toBe(false);
-      });
-    });
-
-    describe('getDaysUntilDue() (ONE_TIME)', () => {
-      it('should return positive number for future due date', () => {
-        const futureDue = new Date(Date.now() + 3 * 86400000);
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.OneTime,
-            dueDate: futureDue,
-          }),
-        );
-
-        const days = template.getDaysUntilDue();
-        expect(days).not.toBeNull();
-        expect(days!).toBeGreaterThanOrEqual(2); // approximately 3
-        expect(days!).toBeLessThanOrEqual(4);
-      });
-
-      it('should return negative for past due date', () => {
-        const pastDue = new Date(Date.now() - 2 * 86400000);
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.OneTime,
-            dueDate: pastDue,
-          }),
-        );
-
-        const days = template.getDaysUntilDue();
-        expect(days).not.toBeNull();
-        expect(days!).toBeLessThan(0);
-      });
-
-      it('should return null for RECURRING tasks', () => {
-        const template = TaskPlan.load(makeState({ taskType: TaskType.Recurring }));
-        expect(template.getDaysUntilDue()).toBeNull();
-      });
-
-      it('should return null when no due date', () => {
-        const template = TaskPlan.load(makeState({ taskType: TaskType.OneTime }));
-        expect(template.getDaysUntilDue()).toBeNull();
       });
     });
   });

@@ -48,16 +48,19 @@ function formatMinuteOfDay(minutes?: number | null): string {
   return formatHHmmParts(hour, minute);
 }
 
-type TaskTimeDisplayInput = {
-  timeType?: TaskTimeConfigDTO['timeType'] | string;
-  timePoint?: number | null;
-  timeRange?: { start: number; end: number } | null;
-} | null | undefined;
+type TaskTimeDisplayInput =
+  | {
+      timeType?: TaskTimeConfigDTO['timeType'] | string;
+      timePoint?: number | null;
+      timeRange?: { start: number; end: number } | null;
+    }
+  | null
+  | undefined;
 
-type TaskTimePayloadInput = Pick<
-  TaskTimeConfigViewModel,
-  'timeType' | 'timePoint' | 'timeRange' | 'startDate'
-> | null | undefined;
+type TaskTimePayloadInput =
+  | Pick<TaskTimeConfigViewModel, 'timeType' | 'timePoint' | 'timeRange' | 'startDate'>
+  | null
+  | undefined;
 
 export function getTaskTimeTypeLabel(t: Translate, type?: string | null): string {
   switch (type) {
@@ -80,10 +83,7 @@ export function getTaskOccurrenceStatusLabel(
   return t(statusKey ?? 'task.templateCard.instanceStatusNotGenerated');
 }
 
-export function getTaskTimeValueDisplay(
-  t: Translate,
-  timeConfig?: TaskTimeDisplayInput,
-): string {
+export function getTaskTimeValueDisplay(t: Translate, timeConfig?: TaskTimeDisplayInput): string {
   if (!timeConfig) return t('common.none');
   if (timeConfig.timeType === 'AllDay') return t('task.timeConfig.allDay');
   if (timeConfig.timeType === 'TimePoint') return formatMinuteOfDay(timeConfig.timePoint);
@@ -142,10 +142,7 @@ export function getTaskRecurrenceText(t: Translate, dto: TaskPlanClientDTO): str
   }
 }
 
-export function mapTaskPlanDtoToViewModel(
-  dto: TaskPlanClientDTO,
-  t: Translate,
-): TaskPlanViewModel {
+export function mapTaskPlanDtoToViewModel(dto: TaskPlanClientDTO, t: Translate): TaskPlanViewModel {
   const status = statusMap[dto.status] ?? dto.status;
   return {
     id: dto.id,
@@ -158,8 +155,6 @@ export function mapTaskPlanDtoToViewModel(
     isArchived: dto.archivedAt !== null,
     importance: dto.importance,
     importanceText: t(importanceLabelKeys[dto.importance] ?? 'common.unknown'),
-    estimatedMinutes: dto.estimatedMinutes,
-    dueDate: dto.dueDate ?? null,
     recurrenceText: getTaskRecurrenceText(t, dto),
     labels: dto.labels ?? [],
     labelIds: (dto.labels ?? []).map((label) => label.id),
@@ -168,7 +163,10 @@ export function mapTaskPlanDtoToViewModel(
           goalId: dto.goalBinding.goalId,
           keyResultId: dto.goalBinding.keyResultId,
           contribution: dto.goalBinding.contribution
-            ? { value: dto.goalBinding.contribution.value, trigger: dto.goalBinding.contribution.trigger }
+            ? {
+                value: dto.goalBinding.contribution.value,
+                trigger: dto.goalBinding.contribution.trigger,
+              }
             : undefined,
         }
       : null,

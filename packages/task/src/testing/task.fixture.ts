@@ -7,7 +7,12 @@
 
 import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import { DayOfWeek, TaskType, TaskPlanCompletionPolicy, TaskPlanOutcome } from '@memoflow/contracts/task';
+import {
+  DayOfWeek,
+  TaskType,
+  TaskPlanCompletionPolicy,
+  TaskPlanOutcome,
+} from '@memoflow/contracts/task';
 import { anIdentityId } from '@memoflow/test-utils/fixtures';
 import {
   TaskPlanId,
@@ -35,9 +40,6 @@ export interface OneTimeTaskOverrides {
   description?: string;
   importance?: ImportanceLevel;
   startDate?: number;
-  dueDate?: number;
-  estimatedMinutes?: number;
-  note?: string;
 }
 
 export function aOneTimeTask(overrides: OneTimeTaskOverrides = {}): TaskPlan {
@@ -47,9 +49,6 @@ export function aOneTimeTask(overrides: OneTimeTaskOverrides = {}): TaskPlan {
     description: overrides.description,
     importance: overrides.importance ?? ImportanceLevel.Moderate,
     startDate: overrides.startDate,
-    dueDate: overrides.dueDate,
-    estimatedMinutes: overrides.estimatedMinutes,
-    note: overrides.note,
   });
 }
 
@@ -101,12 +100,6 @@ export function aTaskPlanState(overrides: Partial<TaskPlanState> = {}): TaskPlan
     reminderConfig: overrides.reminderConfig ?? null,
     lastGeneratedDate: overrides.lastGeneratedDate ?? null,
     generateAheadDays: overrides.generateAheadDays ?? null,
-    startDate: overrides.startDate ?? null,
-    dueDate: overrides.dueDate ?? null,
-    completedAt: overrides.completedAt ?? null,
-    estimatedMinutes: overrides.estimatedMinutes ?? null,
-    actualMinutes: overrides.actualMinutes ?? null,
-    note: overrides.note ?? null,
     createdAt: overrides.createdAt ?? now,
     updatedAt: overrides.updatedAt ?? now,
     deletedAt: overrides.deletedAt ?? null,

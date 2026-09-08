@@ -84,10 +84,7 @@ export class TaskPlanPrismaRepository
     return result;
   }
 
-  private async hydrateTemplates(
-    identityId: string,
-    templates: TaskPlan[],
-  ): Promise<TaskPlan[]> {
+  private async hydrateTemplates(identityId: string, templates: TaskPlan[]): Promise<TaskPlan[]> {
     const labelMap = await this.loadLabelMap(
       identityId,
       templates.map((template) => String(template.id)),
@@ -218,10 +215,7 @@ export class TaskPlanPrismaRepository
     );
   }
 
-  async findByLabelIdsAll(
-    identityId: string,
-    labelIds: readonly string[],
-  ): Promise<TaskPlan[]> {
+  async findByLabelIdsAll(identityId: string, labelIds: readonly string[]): Promise<TaskPlan[]> {
     const requiredLabelIds = [...new Set(labelIds)];
     if (requiredLabelIds.length === 0) return this.findByIdentityId(identityId);
 
@@ -360,19 +354,6 @@ export class TaskPlanPrismaRepository
       identityId,
       data.map((record: PrismaTaskPlan) => this.mapToEntity(record)),
     );
-  }
-
-  async findOverdueTasks(identityId: string): Promise<TaskPlan[]> {
-    const data = await this.db.taskPlan.findMany({
-      where: {
-        identityId,
-        status: 'Active',
-        deletedAt: null,
-      },
-    });
-    return data
-      .map((record: PrismaTaskPlan) => this.mapToEntity(record))
-      .filter((template) => template.isOverdue());
   }
 
   async findByKeyResultId(identityId: string, keyResultId: string): Promise<TaskPlan[]> {

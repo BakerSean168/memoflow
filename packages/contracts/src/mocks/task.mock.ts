@@ -4,9 +4,7 @@ import type { TaskPlanClientDTO } from '../modules/task/aggregates/task-plan-cli
 import type { TaskOccurrenceClientDTO } from '../modules/task/aggregates/task-occurrence-client';
 import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '../primitives';
 
-export function createMockTaskPlan(
-  overrides: Partial<TaskPlanClientDTO> = {},
-): TaskPlanClientDTO {
+export function createMockTaskPlan(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {
   const now = Date.now();
   const startDate = faker.date.recent({ days: 30 }).getTime();
   const status = faker.helpers.arrayElement(['Active', 'Paused', 'Closed'] as const);
@@ -49,14 +47,6 @@ export function createMockTaskPlan(
     createdAt: now - faker.number.int({ min: 0, max: 30 * 24 * 60 * 60 * 1000 }),
     updatedAt: now,
     deletedAt: null,
-    startDate,
-    dueDate: faker.datatype.boolean() ? faker.date.soon({ days: 14 }).getTime() : null,
-    completedAt: outcome === 'Succeeded' ? now : null,
-    estimatedMinutes: faker.datatype.boolean()
-      ? faker.helpers.arrayElement([15, 30, 45, 60, 90, 120])
-      : null,
-    actualMinutes: null,
-    comment: null,
     instanceCount: faker.number.int({ min: 0, max: 10 }),
     completedInstanceCount: faker.number.int({ min: 0, max: 5 }),
     pendingInstanceCount: faker.number.int({ min: 0, max: 5 }),
@@ -112,12 +102,12 @@ export function createMockTaskOccurrence(
     isOverdue: false,
     actualStartTime: null,
     actualEndTime: null,
-    comment: null,
     version: 1,
     createdAt: now - faker.number.int({ min: 0, max: 7 * 24 * 60 * 60 * 1000 }),
     updatedAt: now,
     deletedAt: null,
     ...overrides,
+    comment: overrides.comment ?? null,
   };
 }
 

@@ -122,11 +122,6 @@ export interface ITaskPlanRepository {
   findRecurringTasks(identityId: string, filters?: TaskFilters): Promise<TaskPlan[]>;
 
   /**
-   * 查找逾期的任务
-   */
-  findOverdueTasks(identityId: string): Promise<TaskPlan[]>;
-
-  /**
    * 根据关键结果查找任务（identity-scoped）
    */
   findByKeyResultId(identityId: string, keyResultId: string): Promise<TaskPlan[]>;

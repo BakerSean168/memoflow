@@ -39,11 +39,6 @@ export type TaskSortOption = 'updated' | 'pending' | 'completion';
 
 export type TaskPlanDetail = TaskPlanSummary & {
   createdAt: number;
-  startDate: number | null;
-  dueDate: number | null;
-  estimatedMinutes: number | null;
-  actualMinutes: number | null;
-  comment: string | null;
   timeConfig: TaskTimeConfigDTO;
 };
 
@@ -74,11 +69,6 @@ export function mapTaskPlanDetail(template: TaskPlan): TaskPlanDetail {
   return {
     ...mapTemplate(template),
     createdAt: template.createdAt,
-    startDate: template.startDate ?? null,
-    dueDate: template.dueDate ?? null,
-    estimatedMinutes: template.estimatedMinutes,
-    actualMinutes: template.actualMinutes,
-    comment: template.comment,
     timeConfig: {
       timeType: template.timeConfig.timeType,
       startDate: template.timeConfig.startDate ?? null,
@@ -92,7 +82,9 @@ function sortTemplates(templates: TaskPlanSummary[], sortBy: TaskSortOption) {
   const next = [...templates];
   next.sort((left, right) => {
     if (sortBy === 'pending') {
-      return right.pendingInstanceCount - left.pendingInstanceCount || right.updatedAt - left.updatedAt;
+      return (
+        right.pendingInstanceCount - left.pendingInstanceCount || right.updatedAt - left.updatedAt
+      );
     }
     if (sortBy === 'completion') {
       return right.completionRate - left.completionRate || right.updatedAt - left.updatedAt;
@@ -175,7 +167,11 @@ export function useTaskPlans() {
       normalizedQuery.length === 0
         ? templates
         : templates.filter((template) =>
-            [template.name, template.description ?? '', template.labels.map((label) => label.name).join(' ')]
+            [
+              template.name,
+              template.description ?? '',
+              template.labels.map((label) => label.name).join(' '),
+            ]
               .join(' ')
               .toLowerCase()
               .includes(normalizedQuery),

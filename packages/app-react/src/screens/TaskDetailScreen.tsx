@@ -226,7 +226,9 @@ export function TaskDetailScreen() {
               />
               <StatusPill label={template.importance} tone="tint" />
               <StatusPill label={template.outcome} tone="textSecondary" />
-              {template.archivedAt !== null ? <StatusPill label="Archived" tone="textSecondary" /> : null}
+              {template.archivedAt !== null ? (
+                <StatusPill label="Archived" tone="textSecondary" />
+              ) : null}
             </View>
             <View style={styles.actionRow}>
               {template.status === 'Active' ? (
@@ -263,11 +265,16 @@ export function TaskDetailScreen() {
             <MetricRow label="Time mode" value={formatTimeConfig(template.timeConfig)} />
             <MetricRow
               label="Start date"
-              value={formatProductDateTime(template.startDate ?? template.timeConfig.startDate, emptyKind('notSet'))}
+              value={formatProductDateTime(template.timeConfig.startDate, emptyKind('notSet'))}
             />
-            <MetricRow label="Due date" value={formatProductDateTime(template.dueDate, emptyKind('notSet'))} />
-            <MetricRow label="Created" value={formatProductDateTime(template.createdAt, emptyKind('notSet'))} />
-            <MetricRow label="Updated" value={formatProductDateTime(template.updatedAt, emptyKind('notSet'))} />
+            <MetricRow
+              label="Created"
+              value={formatProductDateTime(template.createdAt, emptyKind('notSet'))}
+            />
+            <MetricRow
+              label="Updated"
+              value={formatProductDateTime(template.updatedAt, emptyKind('notSet'))}
+            />
           </SectionCard>
 
           <SectionCard
@@ -300,7 +307,9 @@ export function TaskDetailScreen() {
                     style={styles.instanceCard}
                   >
                     <View style={styles.instanceHeader}>
-                      <ThemedText type="smallBold">{formatProductDateTime(instance.instanceDate, emptyKind('notSet'))}</ThemedText>
+                      <ThemedText type="smallBold">
+                        {formatProductDateTime(instance.instanceDate, emptyKind('notSet'))}
+                      </ThemedText>
                       <StatusPill
                         label={instance.status}
                         tone={
@@ -357,15 +366,6 @@ export function TaskDetailScreen() {
             title="Notes"
             description={template.description ?? 'No description provided yet.'}
           >
-            <MetricRow
-              label="Estimated minutes"
-              value={template.estimatedMinutes ? String(template.estimatedMinutes) : 'Not set'}
-            />
-            <MetricRow
-              label="Actual minutes"
-              value={template.actualMinutes ? String(template.actualMinutes) : 'Not set'}
-            />
-            <MetricRow label="Comment" value={template.comment ?? 'No comment'} />
             <View style={styles.tagRow}>
               {template.labels.length > 0 ? (
                 template.labels.map((label) => (

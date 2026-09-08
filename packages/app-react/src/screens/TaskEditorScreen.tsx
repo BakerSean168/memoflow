@@ -105,7 +105,7 @@ export function TaskEditorScreen() {
     setImportance(template.importance);
     setSelectedLabelIds(template.labels.map((label) => label.id));
     setTimeType(template.timeConfig.timeType);
-    setDateValue(toDateInput(template.timeConfig.startDate ?? template.startDate));
+    setDateValue(toDateInput(template.timeConfig.startDate));
 
     if (template.timeConfig.timePoint !== null) {
       setTimeValue(toTimeInput(template.timeConfig.timePoint));

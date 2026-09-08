@@ -1,134 +1,88 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { aOneTimeTask, aLoadedTaskPlan, anIdentityId } from '../../../../../testing';
-import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
-import { TaskPlanStatus } from '@memoflow/contracts/task';
-import { TaskType } from '@memoflow/contracts/task';
 import { GetTaskDashboardUseCase } from '../get-task-dashboard.use-case';
+import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
+import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
+import { aOneTimeTask, aTaskOccurrence, anIdentityId } from '../../../../../testing';
+import { TaskPlanStatus } from '@memoflow/contracts/task';
+
+const NOW = new Date('2026-09-08T12:00:00+08:00').getTime();
 
 describe('GetTaskDashboardUseCase', () => {
-  let templateRepo: ReturnType<typeof createMockRepo<ITaskPlanRepository>>;
+  let planRepo: ReturnType<typeof createMockRepo<ITaskPlanRepository>>;
+  let occurrenceRepo: ReturnType<typeof createMockRepo<ITaskOccurrenceRepository>>;
   let useCase: GetTaskDashboardUseCase;
-  const testIdentityId = anIdentityId();
+  const identityId = anIdentityId();
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    templateRepo = createMockRepo<ITaskPlanRepository>({
-      findTodayTasks: vi.fn().mockResolvedValue([]),
-      findOverdueTasks: vi.fn().mockResolvedValue([]),
+    planRepo = createMockRepo<ITaskPlanRepository>({
       findActiveTemplates: vi.fn().mockResolvedValue([]),
-      findUpcomingTasks: vi.fn().mockResolvedValue([]),
-      findOneTimeTasks: vi.fn().mockResolvedValue([]),
       countTasks: vi.fn().mockResolvedValue(0),
     });
-    useCase = new GetTaskDashboardUseCase(templateRepo);
-  });
-
-  it('should return empty dashboard when no tasks exist', async () => {
-    const result = await useCase.execute(testIdentityId);
-
-    expect(result).toBeOk();
-    if (result.ok) {
-      expect(result.data.todayTasks).toEqual([]);
-      expect(result.data.overdueTasks).toEqual([]);
-      expect(result.data.upcomingTasks).toEqual([]);
-      expect(result.data.highPriorityTasks).toEqual([]);
-      expect(result.data.summary.totalTasks).toBe(0);
-    }
-  });
-
-  it('should call all repository methods in parallel', async () => {
-    await useCase.execute(testIdentityId);
-
-    expect(templateRepo.findTodayTasks).toHaveBeenCalledWith(testIdentityId);
-    expect(templateRepo.findOverdueTasks).toHaveBeenCalledWith(testIdentityId);
-    expect(templateRepo.findUpcomingTasks).toHaveBeenCalledWith(testIdentityId, 7);
-    expect(templateRepo.findActiveTemplates).toHaveBeenCalledWith(testIdentityId);
-    expect(templateRepo.findOneTimeTasks).toHaveBeenCalledWith(testIdentityId, {
-      status: TaskPlanStatus.Closed,
+    occurrenceRepo = createMockRepo<ITaskOccurrenceRepository>({
+      findByDateRange: vi.fn().mockResolvedValue([]),
+      findOverdueInstances: vi.fn().mockResolvedValue([]),
     });
-    expect(templateRepo.countTasks).toHaveBeenCalledTimes(2);
+    useCase = new GetTaskDashboardUseCase(planRepo, occurrenceRepo, () => NOW);
   });
 
-  it('should return today tasks as client DTOs', async () => {
-    const task = aOneTimeTask({ title: 'Today Task' });
-    vi.mocked(templateRepo.findTodayTasks).mockResolvedValue([task]);
-
-    const result = await useCase.execute(testIdentityId);
+  it('reads today/upcoming/overdue from occurrence truth, not plan due state', async () => {
+    const result = await useCase.execute(identityId);
 
     expect(result).toBeOk();
-    if (result.ok) {
-      expect(result.data.todayTasks).toHaveLength(1);
-    }
+    expect(occurrenceRepo.findByDateRange).toHaveBeenCalledTimes(2);
+    expect(occurrenceRepo.findOverdueInstances).toHaveBeenCalledWith(identityId);
+    expect(planRepo.countTasks).toHaveBeenCalledWith(identityId, { status: TaskPlanStatus.Active });
+    expect(planRepo.countTasks).toHaveBeenCalledWith(identityId, { status: TaskPlanStatus.Closed });
   });
 
-  it('should return overdue tasks', async () => {
-    const task = aOneTimeTask({ title: 'Overdue Task' });
-    vi.mocked(templateRepo.findOverdueTasks).mockResolvedValue([task]);
+  it('returns occurrence DTOs for today and overdue', async () => {
+    const today = await aTaskOccurrence({ identityId, instanceDate: NOW });
+    const overdue = await aTaskOccurrence({ identityId, instanceDate: NOW - 86_400_000 });
+    vi.mocked(occurrenceRepo.findByDateRange)
+      .mockResolvedValueOnce([today])
+      .mockResolvedValueOnce([]);
+    vi.mocked(occurrenceRepo.findOverdueInstances).mockResolvedValue([overdue]);
 
-    const result = await useCase.execute(testIdentityId);
-
+    const result = await useCase.execute(identityId);
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.overdueTasks).toHaveLength(1);
+      expect(result.data.todayTasks[0]?.id).toBe(String(today.id));
+      expect(result.data.overdueTasks[0]?.id).toBe(String(overdue.id));
       expect(result.data.summary.overdue).toBe(1);
     }
   });
 
-  it('should compute summary totals correctly', async () => {
-    vi.mocked(templateRepo.countTasks)
-      .mockResolvedValueOnce(10) // Active
-      .mockResolvedValueOnce(5); // Closed
+  it('counts actual completed occurrences for completedToday', async () => {
+    const completed = await aTaskOccurrence({ identityId, instanceDate: NOW });
+    completed.complete();
+    vi.mocked(occurrenceRepo.findByDateRange)
+      .mockResolvedValueOnce([completed])
+      .mockResolvedValueOnce([]);
 
-    const result = await useCase.execute(testIdentityId);
+    const result = await useCase.execute(identityId);
+    expect(result).toBeOk();
+    if (result.ok) expect(result.data.summary.completedToday).toBe(1);
+  });
 
+  it('keeps high-priority ranking plan-owned', async () => {
+    const high = aOneTimeTask({ identityId, title: 'High', importance: 'Vital', startDate: NOW });
+    const low = aOneTimeTask({ identityId, title: 'Low', importance: 'Minor', startDate: NOW });
+    vi.mocked(planRepo.findActiveTemplates).mockResolvedValue([low, high]);
+
+    const result = await useCase.execute(identityId);
+    expect(result).toBeOk();
+    if (result.ok) expect(result.data.highPriorityTasks[0]?.name).toBe('High');
+  });
+
+  it('counts active and closed plans without treating closed as completed-today', async () => {
+    vi.mocked(planRepo.countTasks).mockResolvedValueOnce(10).mockResolvedValueOnce(5);
+    const result = await useCase.execute(identityId);
     expect(result).toBeOk();
     if (result.ok) {
       expect(result.data.summary.totalTasks).toBe(15);
-      expect(result.data.summary.completedToday).toBe(5);
-    }
-  });
-
-  it('should filter recent completed tasks by 7-day window', async () => {
-    const now = Date.now();
-    const recentTask = aLoadedTaskPlan({
-      status: TaskPlanStatus.Closed,
-      taskType: TaskType.OneTime,
-      updatedAt: new Date(now - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-    });
-    const oldTask = aLoadedTaskPlan({
-      status: TaskPlanStatus.Closed,
-      taskType: TaskType.OneTime,
-      updatedAt: new Date(now - 10 * 24 * 60 * 60 * 1000), // 10 days ago
-    });
-    vi.mocked(templateRepo.findOneTimeTasks).mockResolvedValue([recentTask, oldTask]);
-
-    const result = await useCase.execute(testIdentityId);
-
-    // The use case filters by 7-day window internally
-    // The recent completed tasks are not directly in the response
-    // but the findOneTimeTasks was called
-    expect(result).toBeOk();
-    expect(templateRepo.findOneTimeTasks).toHaveBeenCalledWith(testIdentityId, {
-      status: TaskPlanStatus.Closed,
-    });
-  });
-
-  it('should return upcoming and high priority tasks', async () => {
-    const upcomingTask = aOneTimeTask({ title: 'Upcoming' });
-    const priorityTask = aOneTimeTask({ title: 'Priority', importance: 'Vital' });
-    vi.mocked(templateRepo.findUpcomingTasks).mockResolvedValue([upcomingTask]);
-    vi.mocked(templateRepo.findActiveTemplates).mockResolvedValue([priorityTask]);
-
-    const result = await useCase.execute(testIdentityId);
-
-    expect(result).toBeOk();
-    if (result.ok) {
-      expect(result.data.upcomingTasks).toHaveLength(1);
-      expect(result.data.highPriorityTasks).toHaveLength(1);
-      expect(result.data.summary.upcoming).toBe(1);
-      expect(result.data.summary.highPriority).toBe(1);
+      expect(result.data.summary.completedToday).toBe(0);
     }
   });
 });

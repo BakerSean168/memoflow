@@ -54,7 +54,6 @@ export function createMockTemplateRepo(): ITaskPlanRepository {
     restore: vi.fn().mockResolvedValue(undefined),
     findOneTimeTasks: vi.fn().mockResolvedValue([]),
     findRecurringTasks: vi.fn().mockResolvedValue([]),
-    findOverdueTasks: vi.fn().mockResolvedValue([]),
     findByKeyResultId: vi.fn().mockResolvedValue([]),
     findUpcomingTasks: vi.fn().mockResolvedValue([]),
     findTodayTasks: vi.fn().mockResolvedValue([]),

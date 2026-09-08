@@ -87,12 +87,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       lastGeneratedDate: rest.lastGeneratedDate ?? null,
       generateAheadDays: rest.generateAheadDays ?? null,
       checklist: rest.checklist ?? [],
-      startDate: rest.startDate ?? null,
-      dueDate: rest.dueDate ?? null,
-      completedAt: rest.completedAt ?? null,
-      estimatedMinutes: rest.estimatedMinutes ?? null,
-      actualMinutes: rest.actualMinutes ?? null,
-      note: rest.note ?? null,
       outcome: rest.outcome ?? TaskPlanOutcome.Open,
       completionPolicy: rest.completionPolicy ?? TaskPlanCompletionPolicy.AllowCorrection,
       closedAt: rest.closedAt ?? null,
@@ -113,16 +107,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   /** Publish a domain event — used by factory after construction. */
   publishDomainEvent<T>(eventName: string, payload: T): void {
     this.addDomainEvent(eventName, payload);
-  }
-
-  private static assertValidDateRange(
-    startDate: Instant | null | undefined,
-    dueDate: Instant | null | undefined,
-  ): void {
-    if (!startDate || !dueDate) return;
-    if (startDate > dueDate) {
-      throw new InvalidDateRangeError(startDate, dueDate);
-    }
   }
 
   private static assertIdentityId(identityId: IdentityId, attemptedAction: string): void {
@@ -238,36 +222,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     return [...this._props.checklist];
   }
 
-  public get startDate(): Instant | null {
-    const v = this._props.startDate;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  public get dueDate(): Instant | null {
-    const v = this._props.dueDate;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  public get completedAt(): Instant | null {
-    const v = this._props.completedAt;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  public get estimatedMinutes(): number | null {
-    return this._props.estimatedMinutes;
-  }
-
-  public get actualMinutes(): number | null {
-    return this._props.actualMinutes;
-  }
-
-  public get note(): string | null {
-    return this._props.note;
-  }
-
   public get createdAt(): Instant {
     const v = this._props.createdAt;
     return v as Instant;
@@ -334,8 +288,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   public getInstanceForDate(date: number): TaskOccurrence | null {
     const targetDay = TaskPlan.startOfLocalDay(date);
     return (
-      this._instances.find((i) => TaskPlan.startOfLocalDay(i.instanceDate) === targetDay) ??
-      null
+      this._instances.find((i) => TaskPlan.startOfLocalDay(i.instanceDate) === targetDay) ?? null
     );
   }
 
@@ -496,64 +449,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     });
   }
 
-  /** Updates the start date (OneTime tasks only). */
-  public updateStartDate(newStartDate: Instant | null): void {
-    if (this._props.taskType !== TaskType.OneTime) {
-      throw new InvalidTaskPlanStateError('Only OneTime tasks have start dates', {
-        templateId: this.id,
-        currentStatus: this._props.status,
-        attemptedAction: 'updateStartDate',
-      });
-    }
-    TaskPlan.assertValidDateRange(newStartDate, this._props.dueDate);
-    const oldStartDate = this._props.startDate;
-    this._props.startDate = newStartDate;
-    this._props.updatedAt = Date.now();
-    this.addHistory('start_date_updated', { oldStartDate, newStartDate });
-
-    this.addDomainEvent<TaskEventMap['task:template-schedule-time-changed']>(
-      'task:template-schedule-time-changed',
-      {
-        identityId: this._props.identityId,
-        taskPlan: this.toServerDTO(),
-        oldStartDate: oldStartDate,
-        oldDueDate: this._props.dueDate,
-        newStartDate: newStartDate,
-        newDueDate: this._props.dueDate,
-      },
-    );
-  }
-
-  /** Updates the due date (OneTime tasks only). */
-  public updateDueDate(newDueDate: Instant | null): void {
-    if (this._props.taskType !== TaskType.OneTime) {
-      throw new InvalidTaskPlanStateError('Only OneTime tasks have due dates', {
-        templateId: this.id,
-        currentStatus: this._props.status,
-        attemptedAction: 'updateDueDate',
-      });
-    }
-    TaskPlan.assertValidDateRange(this._props.startDate, newDueDate);
-    // Note: TaskPlanStatus doesn't have COMPLETED/CANCELLED states
-    // Those are TaskOccurrenceStatus states. This check has been removed.
-    const oldDueDate = this._props.dueDate;
-    this._props.dueDate = newDueDate;
-    this._props.updatedAt = Date.now();
-    this.addHistory('due_date_updated', { oldDueDate, newDueDate });
-
-    this.addDomainEvent<TaskEventMap['task:template-schedule-time-changed']>(
-      'task:template-schedule-time-changed',
-      {
-        identityId: this._props.identityId,
-        taskPlan: this.toServerDTO(),
-        oldStartDate: this._props.startDate,
-        oldDueDate: oldDueDate,
-        newStartDate: this._props.startDate,
-        newDueDate: newDueDate,
-      },
-    );
-  }
-
   /**
    * Updates the time configuration.
    */
@@ -579,10 +474,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       {
         identityId: this._props.identityId,
         taskPlan: this.toServerDTO(),
-        oldStartDate: this._props.startDate,
-        oldDueDate: this._props.dueDate,
-        newStartDate: this._props.startDate,
-        newDueDate: this._props.dueDate,
         oldTimeConfig,
         newTimeConfig: newTimeConfig?.toDTO() ?? null,
       },
@@ -614,69 +505,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       task: this.toServerDTO(),
       changes: ['importance'],
     });
-  }
-
-  /** Updates the note (OneTime tasks only). */
-  public updateNote(newNote: string | null): void {
-    if (this._props.taskType !== TaskType.OneTime) {
-      throw new InvalidTaskPlanStateError('Only OneTime tasks have notes', {
-        templateId: this.id,
-        currentStatus: this._props.status,
-        attemptedAction: 'updateNote',
-      });
-    }
-    const oldNote = this._props.note;
-    this._props.note = newNote;
-    this._props.updatedAt = Date.now();
-    this.addHistory('note_updated', { oldNote, newNote });
-  }
-
-  /** Updates the estimated time (OneTime tasks only). */
-  public updateEstimatedTime(estimatedMinutes: number): void {
-    if (this._props.taskType !== TaskType.OneTime) {
-      throw new InvalidTaskPlanStateError('Only OneTime tasks have estimated time', {
-        templateId: this.id,
-        currentStatus: this._props.status,
-        attemptedAction: 'updateEstimatedTime',
-      });
-    }
-    if (estimatedMinutes < 0) {
-      throw new InvalidTaskPlanStateError('Estimated time cannot be negative', {
-        templateId: this.id,
-        currentStatus: this._props.status,
-        attemptedAction: 'updateEstimatedTime',
-      });
-    }
-    const oldEstimatedMinutes = this._props.estimatedMinutes;
-    this._props.estimatedMinutes = estimatedMinutes;
-    this._props.updatedAt = Date.now();
-    this.addHistory('estimated_time_updated', { oldEstimatedMinutes, estimatedMinutes });
-  }
-
-  /** Checks whether the task is overdue (OneTime tasks only). */
-  public isOverdue(): boolean {
-    if (this._props.taskType !== TaskType.OneTime) {
-      return false;
-    }
-    if (!this._props.dueDate) {
-      return false;
-    }
-    // Note: TaskPlanStatus doesn't have COMPLETED/CANCELLED states
-    // Those checks have been removed as they belong to TaskOccurrence status
-    return Date.now() > this._props.dueDate!;
-  }
-
-  /** Gets the number of days until the due date (OneTime tasks only). */
-  public getDaysUntilDue(): number | null {
-    if (this._props.taskType !== TaskType.OneTime) {
-      return null;
-    }
-    if (!this._props.dueDate) {
-      return null;
-    }
-    const now = Date.now();
-    const diffMs = this._props.dueDate! - now;
-    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
   }
 
   // ===== Reminder Methods =====
@@ -845,12 +673,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       updatedAt: this._props.updatedAt,
       deletedAt: this._props.deletedAt ?? null,
       version: this._props.version,
-      startDate: this._props.startDate ?? null,
-      dueDate: this._props.dueDate ?? null,
-      completedAt: this._props.completedAt ?? null,
-      estimatedMinutes: this._props.estimatedMinutes,
-      actualMinutes: this._props.actualMinutes,
-      comment: this._props.note,
       history: includeChildren ? this._history.map((entry) => entry.toClientDTO()) : undefined,
       instances: includeChildren
         ? this._instances.map((instance) => instance.toClientDTO())
@@ -879,13 +701,9 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     description?: string;
     importance?: ImportanceLevel;
     startDate?: Instant;
-    dueDate?: Instant;
-    estimatedMinutes?: number;
-    note?: string;
   }): TaskPlan {
     TaskPlan.assertIdentityId(params.identityId, 'createOneTimeTask');
     const title = TaskPlan.normalizeTitle(params.title, 'createOneTimeTask');
-    TaskPlan.assertValidDateRange(params.startDate ?? null, params.dueDate ?? null);
 
     const now = Date.now();
     const template = TaskPlan.instantiate({
@@ -903,17 +721,11 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       abandonedReason: null,
       goalBinding: null,
       checklist: [],
-      timeConfig: null,
+      timeConfig: params.startDate ? TaskTimeConfig.createAllDay(params.startDate) : null,
       recurrenceRule: null,
       reminderConfig: null,
       lastGeneratedDate: null,
       generateAheadDays: null,
-      startDate: params.startDate ?? null,
-      dueDate: params.dueDate ?? null,
-      completedAt: null,
-      estimatedMinutes: params.estimatedMinutes ?? null,
-      actualMinutes: null,
-      note: params.note ?? null,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
@@ -965,12 +777,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       reminderConfig: params.reminderConfig ?? null,
       lastGeneratedDate: null,
       generateAheadDays: params.generateAheadDays ?? 30,
-      startDate: null,
-      dueDate: null,
-      completedAt: null,
-      estimatedMinutes: null,
-      actualMinutes: null,
-      note: null,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
@@ -1052,12 +858,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       reminderConfig: params.reminderConfig ?? null,
       lastGeneratedDate: null,
       generateAheadDays: params.generateAheadDays ?? 30,
-      startDate: null,
-      dueDate: null,
-      completedAt: null,
-      estimatedMinutes: null,
-      actualMinutes: null,
-      note: null,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,

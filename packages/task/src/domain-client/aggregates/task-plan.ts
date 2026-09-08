@@ -53,12 +53,6 @@ export interface TaskPlanState {
   createdAt: Instant;
   updatedAt: Instant;
   deletedAt: Instant | null;
-  startDate: Instant | null;
-  dueDate: Instant | null;
-  completedAt: Instant | null;
-  estimatedMinutes: number | null;
-  actualMinutes: number | null;
-  comment: string | null;
   instanceCount: number;
   completedInstanceCount: number;
   pendingInstanceCount: number;
@@ -168,36 +162,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     return v as Instant;
   }
 
-  get startDate(): Instant | null {
-    const v = this._props.startDate;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  get dueDate(): Instant | null {
-    const v = this._props.dueDate;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  get completedAt(): Instant | null {
-    const v = this._props.completedAt;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  get estimatedMinutes(): number | null {
-    return this._props.estimatedMinutes;
-  }
-
-  get actualMinutes(): number | null {
-    return this._props.actualMinutes;
-  }
-
-  get comment(): string | null {
-    return this._props.comment;
-  }
-
   get instanceCount(): number {
     return this._props.instanceCount;
   }
@@ -247,15 +211,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     return this._props.deletedAt !== null;
   }
 
-  get isCompleted(): boolean {
-    return this._props.completedAt !== null;
-  }
-
-  get isOverdue(): boolean {
-    if (!this._props.dueDate) return false;
-    return this._props.dueDate < Date.now() && !this.isCompleted;
-  }
-
   // ================= 4. Factory Methods =================
   public static load(state: TaskPlanState): TaskPlan {
     return new TaskPlan(state);
@@ -290,12 +245,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
       deletedAt: this._props.deletedAt ?? null,
-      startDate: this._props.startDate ?? null,
-      dueDate: this._props.dueDate ?? null,
-      completedAt: this._props.completedAt ?? null,
-      estimatedMinutes: this._props.estimatedMinutes,
-      actualMinutes: this._props.actualMinutes,
-      comment: this._props.comment,
       instanceCount: this._props.instanceCount,
       completedInstanceCount: this._props.completedInstanceCount,
       pendingInstanceCount: this._props.pendingInstanceCount,

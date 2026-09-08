@@ -46,12 +46,6 @@ export interface TaskPlanClientDTO {
   history?: unknown[];
   instances?: unknown[];
 
-  startDate: TransferDate | null;
-  dueDate: TransferDate | null;
-  completedAt: TransferDate | null;
-  estimatedMinutes: number | null;
-  actualMinutes: number | null;
-  comment: string | null;
   instanceCount: number;
   completedInstanceCount: number;
   pendingInstanceCount: number;

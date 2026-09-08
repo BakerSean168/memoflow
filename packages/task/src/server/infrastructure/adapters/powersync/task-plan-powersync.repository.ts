@@ -64,10 +64,7 @@ export class PowerSyncTaskPlanRepository
     return result;
   }
 
-  private async hydrateTemplates(
-    identityId: string,
-    templates: TaskPlan[],
-  ): Promise<TaskPlan[]> {
+  private async hydrateTemplates(identityId: string, templates: TaskPlan[]): Promise<TaskPlan[]> {
     const labelMap = await this.loadLabelMap(
       identityId,
       templates.map((template) => String(template.id)),
@@ -201,10 +198,7 @@ export class PowerSyncTaskPlanRepository
     );
   }
 
-  async findByLabelIdsAll(
-    identityId: string,
-    labelIds: readonly string[],
-  ): Promise<TaskPlan[]> {
+  async findByLabelIdsAll(identityId: string, labelIds: readonly string[]): Promise<TaskPlan[]> {
     const requiredLabelIds = [...new Set(labelIds)];
     if (requiredLabelIds.length === 0) return this.findByIdentityId(identityId);
 
@@ -326,11 +320,6 @@ export class PowerSyncTaskPlanRepository
 
   async findRecurringTasks(identityId: string, filters?: TaskFilters): Promise<TaskPlan[]> {
     return this.queryByType(identityId, false, filters);
-  }
-
-  async findOverdueTasks(identityId: string): Promise<TaskPlan[]> {
-    const rows = await this.findOneTimeTasks(identityId, { status: 'Active' });
-    return rows.filter((template) => template.isOverdue());
   }
 
   async findByKeyResultId(identityId: string, keyResultId: string): Promise<TaskPlan[]> {

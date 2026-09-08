@@ -32,9 +32,10 @@ export class ControlledAnalyticsReadAdapter implements IAnalyticsReadPort {
     });
     const taskRepos = createTaskPrismaRepositories(this.db);
     const dashboard = await getApiDashboardData(this.db, identityId);
-    const taskDashboard = await new GetTaskDashboardUseCase(taskRepos.taskPlanRepository).execute(
-      identityId,
-    );
+    const taskDashboard = await new GetTaskDashboardUseCase(
+      taskRepos.taskPlanRepository,
+      taskRepos.taskOccurrenceRepository,
+    ).execute(identityId);
     const activeGoals = await goalModule.goalRepository.findByIdentityId(identityId, {
       includeChildren: true,
       systemView: 'active',
@@ -54,9 +55,7 @@ export class ControlledAnalyticsReadAdapter implements IAnalyticsReadPort {
         .slice(0, 10)
         .map((goal) => goal.toClientDTO(true) as unknown as Record<string, unknown>),
       goalSearchResults: goalSearch.ok
-        ? goalSearch.data.data.map(
-            (goal) => goal as unknown as Record<string, unknown>,
-          )
+        ? goalSearch.data.data.map((goal) => goal as unknown as Record<string, unknown>)
         : [],
       extra: {},
     };
