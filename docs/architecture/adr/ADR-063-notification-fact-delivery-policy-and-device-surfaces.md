@@ -9,7 +9,7 @@ tags:
   - outbox
 description: 区分 Notification 用户可见事实与各渠道 Delivery Attempt，统一 per-channel preference/DND/rate-limit policy 和桌面设备级覆盖
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-08T20:20:00+08:00
 ---
 
 # ADR-063: Notification Fact、Delivery Policy 与 Device Surface 分离
@@ -22,6 +22,10 @@ updated: 2026-09-08T09:00:00+08:00
 ## 2026-09-08 实现状态
 
 跨模块 producer 现在提交 durable `NotificationRequested`，Notification runtime materialize Fact 后由 NotificationPolicy 决定 per-channel DeliveryPlan/attempt；DND、preference、rate limit、device capability 与 delivery receipt 均在 Notification ownership 内。历史 `notification.dispatch` bypass 被 governance 禁止。
+
+### 2026-09-08 Routine ownership refinement
+
+ADR-079 进一步明确：legacy `ReminderNotificationConfig` 不应继续成为 RoutineDefinition 的长期字段。Routine 只拥有 intervention/presentation intent；Notification 继续拥有 channels、DND、rate limit、delivery；Desktop/Device Surface 拥有 sound/vibration/OS permission/实际 surface。该 Routine 侧退役尚未实施，不改变本 ADR 已落地的 Notification ownership。
 
 ## 1. 背景
 

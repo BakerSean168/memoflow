@@ -9,7 +9,7 @@ tags:
   - vnext
 description: MemoFlow Reminder 向 AI-native Routine Coach 演进的产品定义、真实场景推演、领域模型、运行时与桌面交互设计
 created: 2026-08-25T17:13:00+08:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-08T20:20:00+08:00
 ---
 
 # Routine Coach vNext：习惯节律、健康干预与专注协议
@@ -17,6 +17,59 @@ updated: 2026-09-08T09:00:00+08:00
 > 本文记录 2026-08-25 对现有 Reminder 模块的重新定性与 vNext 设计讨论。
 >
 > **实现状态（2026-09-08）：Core vNext 目标态已经落地。物理包仍名为 `reminder`，`ReminderTemplate` 继续作为兼容写入入口，但写入会投影 canonical RoutineDefinition/ProfileMembership；`ControlMode`、single-group ownership 与独立 cron scanner 已退休。本文中“当前/需要退役”字样若出现在历史推演章节，应按本 checkpoint 理解为 2026-08-25 的迁移背景。**
+
+## 2026-09-08 Model Convergence Freeze
+
+在 Core vNext 基础能力落地后重新审查当前代码，确认 **Routine vNext 与 Legacy Reminder 两代模型仍并存**。因此本轮进一步冻结最终领域目标，但**尚未实施这次退役/收敛**。
+
+最终产品/领域结构：
+
+```text
+RoutineDefinition
+├── RoutineTrigger
+│   ├── WallClock
+│   ├── Elapsed
+│   └── ActiveUsage
+├── InterventionPolicy
+└── Shared Labels (external projection)
+
+RoutineProfile <-> ProfileMembership <-> RoutineDefinition
+
+RoutineRuntimeContext
+RoutineTemporaryOverride
+
+RoutineOccurrence
+└── RoutineInteraction
+
+ProtocolDefinition
+└── ProtocolSession
+```
+
+边界：
+
+```text
+RoutineDefinition = 长期行为意图
+RoutineRuntime     = 当前上下文/累计/临时状态
+RoutineOccurrence  = 一次业务发生事实
+RoutineInteraction = 用户对该 occurrence 的响应
+Scheduler          = durable wall-clock wake-up / retry
+Notification       = Notification Fact + per-channel delivery
+Device Surface     = 实际设备呈现
+```
+
+Legacy `ReminderTemplate / ReminderGroup / ReminderHistory / ReminderResponse / ReminderInstance / ReminderOccurrence` 不再作为长期新能力承载面；后续实施应以迁移后删除为目标，而不是继续双写。
+
+详细决策：
+
+- ADR-076 — Routine Definition / Trigger Algebra / Legacy Reminder retirement；
+- ADR-077 — Routine Occurrence / Interaction / Reliability boundary；
+- ADR-078 — Profile / Eligibility / Runtime Context / Temporary Override；
+- ADR-079 — Intervention Policy / Notification / Device Surface boundary；
+- `docs/analysis/2026-09-08-reminder-routine-current-system-map.md` — 当前代码真值与迁移映射。
+
+> 本轮只冻结模型与退役方向，不创建 Reminder active implementation plan。
+
+---
 
 ## 1. Executive Summary
 

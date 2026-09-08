@@ -91,6 +91,10 @@ updated: 2026-09-08T17:55:00+08:00
 | [ADR-073](./ADR-073-task-occurrence-result-and-checklist.md) | Task Occurrence Result 与 Checklist | 已采纳（实施中） | 2026-09-08 |
 | [ADR-074](./ADR-074-task-reminder-policy-persistence.md) | Task Reminder Policy 与 Persistence Parity | 已采纳（实施中） | 2026-09-08 |
 | [ADR-075](./ADR-075-task-workspace-context-and-goal-link.md) | Task Workspace、Context 与 Goal Link | 已采纳（实施中） | 2026-09-08 |
+| [ADR-076](./ADR-076-routine-definition-trigger-and-legacy-reminder-retirement.md) | Routine Definition、Trigger Algebra 与 Legacy Reminder 退役 | 已采纳（待实施） | 2026-09-08 |
+| [ADR-077](./ADR-077-routine-occurrence-interaction-and-reliability-boundary.md) | Routine Occurrence、Interaction 与 Reliability Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-078](./ADR-078-routine-profile-eligibility-runtime-context-and-overrides.md) | Routine Profile、Eligibility、Runtime Context 与 Temporary Override | 已采纳（待实施） | 2026-09-08 |
+| [ADR-079](./ADR-079-routine-intervention-policy-notification-and-surface-boundary.md) | Routine Intervention Policy、Notification 与 Device Surface 边界 | 已采纳（待实施） | 2026-09-08 |
 
 ## 维护规则
 
