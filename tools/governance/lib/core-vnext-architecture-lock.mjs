@@ -58,6 +58,8 @@ export const UI_SCHEDULED_INVOCATION_MUTATION_PATTERN =
   /\b(ScheduledInvocation|SchedulingPort|createScheduleTask|updateScheduleTask|deleteScheduleTask|pauseScheduleTask|resumeScheduleTask|cancelScheduleTask|completeScheduleTask)\b|\bschedulerService\.(?:create|update|delete|pause|resume|cancel|complete)\b/;
 export const AI_RAW_SCHEDULER_ACCESS_PATTERN =
   /['"`]@memoflow\/scheduler(?:\/[^'"`]*)?['"`]|\b(ScheduledInvocation|ScheduleTask|SchedulingPort|createScheduleTask|updateScheduleTask|deleteScheduleTask|pauseScheduleTask|resumeScheduleTask|cancelScheduleTask|completeScheduleTask)\b|\bschedulerService\.(?:create|update|delete|pause|resume|cancel|complete)\b/;
+export const AI_RETIRED_GOAL_TASK_DRAFT_PATTERN =
+  /\b(validateKeyResultsOutput|validateTasksOutput|valueType|folderId|estimatedHours|progressTrigger|PER_INSTANCE|ALL_INSTANCES_COMPLETED)\b/;
 export const TASK_LEGACY_CLASSIFICATION_PATTERN =
   /\b(?:template|dto|vm|task)\.tags\b|\btask-tag-filter\b|\bfindByTags\b|\bupdateTags\b|\bupdateColor\b/;
 export const TASK_LEGACY_CONTRACT_FIELD_PATTERN = /\b(?:tags|color)\??\s*:/;
@@ -235,6 +237,16 @@ export function findCoreVnextArchitectureLockViolations(files) {
       );
     }
 
+    if (relPath.startsWith('packages/ai/src/')) {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        AI_RETIRED_GOAL_TASK_DRAFT_PATTERN,
+        'ai-retired-goal-task-draft',
+      );
+    }
+
     // ADR-054: Task classification is single-track Shared Label. These locks
     // intentionally target only Task-owned product/contract files so Reminder,
     // Governance and Scheduler metadata may keep their unrelated tag/color semantics.
@@ -327,6 +339,7 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
     'ui-scheduler-internal-import': 'UI may use read-only scheduler/client diagnostics, never Scheduler internals',
     'ui-scheduled-invocation-mutation': 'UI must not mutate ScheduledInvocation/ScheduleTask worker state directly',
     'ai-raw-scheduler-access': 'AI tools/adapters may read Planner/Notification product projections but must never import or mutate raw Scheduler worker state',
+    'ai-retired-goal-task-draft': 'AI production code must use canonical Goal/Task workflow contracts and must not resurrect retired Goal/Task draft fields or validators',
     'task-legacy-classification': 'Task classification must use Shared Label; legacy string tags/custom Task color are forbidden',
   };
   return `${file}:${line}: ${messages[kind] ?? kind} [${text}]`;

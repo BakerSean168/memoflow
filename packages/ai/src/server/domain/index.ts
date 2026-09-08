@@ -16,7 +16,7 @@
  *
  * 【业务特性】
  * - AI 对话：多轮对话管理、上下文维护
- * - 内容生成：目标生成、知识笔记生成
+ * - 内容生成：Mastra workflow + canonical contracts；legacy Goal/Task generation validator 已退休
  * - 提供商管理：OpenAI-compatible provider 配置与选择
  *
  * 【DDD 原则】

@@ -2569,16 +2569,6 @@
       ]
     },
     {
-      "path": "packages/ai/src/server/domain/services/__tests__/validation.keyresults-tasks.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/ai/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/ai/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/ai/src/server/domain/value-objects/__tests__/ai-value-objects.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10750,7 +10740,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 77
+      "fileCount": 76
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11156,7 +11146,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 77
+      "fileCount": 76
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -11475,7 +11465,6 @@
       "packages/ai/src/server/domain/entities/__tests__/message.spec.ts",
       "packages/ai/src/server/domain/services/__tests__/knowledge-series.validation.test.ts",
       "packages/ai/src/server/domain/services/__tests__/summarization.validation.test.ts",
-      "packages/ai/src/server/domain/services/__tests__/validation.keyresults-tasks.test.ts",
       "packages/ai/src/server/domain/value-objects/__tests__/ai-value-objects.spec.ts",
       "packages/ai/src/server/domain/value-objects/__tests__/token-usage.spec.ts",
       "packages/ai/src/server/infrastructure/__tests__/ai-module-mastra-lifecycle.spec.ts",
@@ -11933,7 +11922,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1024,
+    "unit": 1023,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,

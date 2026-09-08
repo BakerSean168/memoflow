@@ -80,6 +80,10 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `import { SchedulingPort } from '@memoflow/scheduler'; const job: ScheduleTask = x;`,
       },
       {
+        relPath: 'packages/ai/src/server/domain/services/legacy-validator.ts',
+        content: `function validateTasksOutput(task) { return task.estimatedHours + task.folderId; }`,
+      },
+      {
         relPath: 'packages/task/src/server/domain/legacy-classification.ts',
         content: `function read(template) { return template.tags; }`,
       },
@@ -109,6 +113,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
       'ui-scheduler-internal-import',
       'ui-scheduled-invocation-mutation',
       'ai-raw-scheduler-access',
+      'ai-retired-goal-task-draft',
       'task-legacy-classification',
     ]) {
       expect(kinds.has(kind), `missing violation kind ${kind}`).toBe(true);

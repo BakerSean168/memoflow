@@ -15,14 +15,26 @@ export interface MemoFlowProductToolDependencies {
 
 function executionContext(requestContext: { getRaw(key: string): unknown }): ExecutionContext {
   const raw = requestContext.getRaw('executionContext');
-  if (!raw || typeof raw !== 'object') {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
     throw new Error('MemoFlow product command requires canonical executionContext');
   }
-  const context = raw as Partial<ExecutionContext>;
-  if (typeof context.identityId !== 'string' || !context.identityId.trim()) {
-    throw new Error('MemoFlow product command requires authenticated identityId');
+  const context = raw as Record<string, unknown>;
+  const identityId = typeof context.identityId === 'string' ? context.identityId.trim() : '';
+  const requestId = typeof context.requestId === 'string' ? context.requestId.trim() : '';
+  const traceId = typeof context.traceId === 'string' ? context.traceId.trim() : '';
+  const startedAt = context.startedAt;
+  const source = context.source;
+  if (
+    !identityId ||
+    !requestId ||
+    !traceId ||
+    typeof startedAt !== 'number' ||
+    !Number.isFinite(startedAt) ||
+    (source !== 'http' && source !== 'ipc' && source !== 'system')
+  ) {
+    throw new Error('MemoFlow product command requires canonical executionContext');
   }
-  return context as ExecutionContext;
+  return { identityId, requestId, traceId, startedAt, source };
 }
 
 function identityId(requestContext: { getRaw(key: string): unknown }): string {
