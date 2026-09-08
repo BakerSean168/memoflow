@@ -7,7 +7,7 @@ tags:
   - acceptance
 description: MemoFlow Core vNext HARD-7105 five-layer final review, focused repair, and pre-delivery acceptance evidence
 created: 2026-09-08T10:27:00+08:00
-updated: 2026-09-08T11:30:00+08:00
+updated: 2026-09-08T11:40:00+08:00
 status: accepted-pre-delivery
 ---
 
@@ -19,7 +19,7 @@ status: accepted-pre-delivery
 
 No unresolved P0/P1 finding remains in the Core vNext residual scope. The initial five-layer implementation review accepted `3f7f7023f127`; the pre-delivery evidence was then committed and opened as PR #338. GitHub's first independent CI pass correctly rejected delivery on fresh-workspace / acceptance-fixture drift that local cached runs had not exposed. Those delivery-gate findings were repaired in `e314e6da344` without widening any vNext product contract.
 
-This document does **not** claim merge/archive completion. The behavioral repair commit is `e314e6da344`; the evidence update that follows is documentation-only. PR #338 must pass a new exact-head GitHub CI run and merge into `main` before the umbrella plan can be archived.
+This document does **not** claim merge/archive completion. The first delivery repair is `e314e6da344`; the second fresh-integration repair is `ce603b6e612`. PR #338 must pass a new exact-head GitHub CI run after both repairs and merge into `main` before the umbrella plan can be archived.
 
 ## 1. Contract correctness
 
@@ -134,6 +134,34 @@ Focused re-acceptance after these repairs:
 - full `memoflow:governance-check`: **PASS**, including HARD-7101 **22/22** and Core vNext architecture lock **1769 production files / 0 violations**.
 
 Focused delivery-repair commit: `e314e6da344 test(ci): repair core vnext fresh-workspace gates`.
+
+## 7. PR #338 second CI — integration-workspace source-resolution repair
+
+The second exact-head CI run at `235f17ddaea62c6ae3d8a54052e58238052f0045` validated the first repair broadly: Scope, Static Analysis, Governance, Build, Unit Tests, Typecheck, all four Web Flow shards, Boundary, Coverage, Performance, Validate and their corresponding Oracles passed. The only root failure remained the Integration child lane; Delivery Observation failed only because that required lane was red.
+
+Machine-readable Integration evidence showed **163/163 executed tests passed**. Exactly two suites failed before executing assertions:
+
+- Notification `scheduler-to-fact-vertical-wave3.integration.test.ts`;
+- Schedule `schedule-w5-real-concurrency.integration.test.ts`.
+
+Both had the same startup error: `Failed to resolve entry for package "@memoflow/scheduler"`. The cause was a second alias plane: `vitest.workspace-helpers.ts`, used by integration configs, still knew `@memoflow/schedule` but not the physically split `@memoflow/scheduler`. Local builds had hidden this via an existing Scheduler `dist`.
+
+Focused repair:
+
+- add Scheduler bare/deep source aliases to `domainResolveAliases`;
+- add Scheduler to `domainResolveAtAlias` package ownership;
+- add a Test System V2 regression lock proving integration workspaces resolve Scheduler source on a fresh checkout;
+- regenerate the canonical test inventory from **1185 -> 1186 files**.
+
+Fresh-workspace acceptance deliberately removed `packages/scheduler/dist` during execution. Under that condition:
+
+- Notification Scheduler -> Fact integration: **3/3 PASS**;
+- Schedule real-concurrency integration: **18/18 PASS**;
+- Test System V2: **19/19 PASS**;
+- Notification / Schedule / Scheduler targeted typecheck: **PASS**;
+- Nx sync, inventory (1186), `git diff --check`, target governance and full governance: **PASS**.
+
+Focused repair commit: `ce603b6e612 test(ci): resolve scheduler in integration workspaces`.
 
 ## Final pre-delivery verdict
 

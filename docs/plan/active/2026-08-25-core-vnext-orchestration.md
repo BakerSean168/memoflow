@@ -2372,10 +2372,12 @@ P0/P1 findings create focused repair passes before plan archive.
 - PR #338 first independent CI correctly rejected stale acceptance/fresh-workspace truth: old Task/AI `tags` fixtures, missing Scheduler source alias, pre-split parser/binding integration assumptions, and a migrated-away Schedule use-case coverage slice;
 - focused delivery repair `e314e6da344` kept production contracts strict, aligned fixtures with Shared Label / binding-v2, made fresh-workspace Scheduler resolution explicit, and moved coverage truth to Schedule Calendar/Planner + Scheduler Temporal Engine ownership;
 - post-repair re-acceptance passed Web Shard 2 23/23, focused Planner rollback, real PostgreSQL binding/Label/Notification/Schedule checks, four affected coverage targets, exact-revision local-Docker Phase B, affected typecheck, Test System V2 18/18, sync/inventory/target-governance and full governance.
+- PR #338 second CI confirmed the first repair across Unit, Typecheck, Build, 4/4 Web Flow, Boundary, Coverage, Performance and Validate; its only root failure was two Integration suites that executed zero assertions because the integration-only workspace helper still lacked the new Scheduler source alias;
+- focused integration repair `ce603b6e612` added Scheduler bare/deep source resolution to `vitest.workspace-helpers.ts`, locked that invariant in Test System V2, and moved the inventory to 1186 files; with `packages/scheduler/dist` deliberately absent, the two former CI failures passed 3/3 + 18/18 and the full Test System self-test passed 19/19.
 
 Canonical evidence: `docs/analysis/2026-09-08-hard-7105-final-review-evidence.md`.
 
-**Review verdict: ACCEPTED — no unresolved P0/P1. Delivery repair is locally re-accepted.** The plan intentionally remains active until PR #338 passes a new exact-head GitHub CI run and merges into `main`; archive occurs from merged `main`, not before delivery.
+**Review verdict: ACCEPTED — no unresolved P0/P1. Both CI focused repairs are locally re-accepted.** The plan intentionally remains active until PR #338 passes a new exact-head GitHub CI run and merges into `main`; archive occurs from merged `main`, not before delivery.
 
 ---
 
@@ -2646,7 +2648,7 @@ C. Final closure
    HARD-7102              DONE — architecture locks / anti-resurrection
    HARD-7103              DONE — A-J + host + local-Docker + schema acceptance
    HARD-7104              DONE — ADR/docs/reuse/plan truth closure
-   HARD-7105              REVIEW PASS + CI REPAIR PASS — no unresolved P0/P1; PR #338 rerun + merge + archive remain
+   HARD-7105              REVIEW PASS + CI REPAIRS PASS — no unresolved P0/P1; PR #338 exact-head CI + merge + archive remain
 ```
 
-HARD-7105 implementation/review and the first CI focused repair are accepted. Keep the final DoD checkbox open until PR #338 passes CI on the repaired exact head and merges into `main`; then archive this umbrella plan from merged `main`.
+HARD-7105 implementation/review and both CI focused repairs are accepted. Keep the final DoD checkbox open until PR #338 passes CI on the repaired exact head and merges into `main`; then archive this umbrella plan from merged `main`.
