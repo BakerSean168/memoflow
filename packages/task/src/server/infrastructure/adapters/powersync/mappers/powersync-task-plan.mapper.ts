@@ -14,6 +14,7 @@ import type { RecurrenceFrequency, ReminderTimeUnit, TaskTimeType } from '@memof
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import {
   ChecklistItemDefinition,
+  TaskPlanSchedule,
   RecurrenceRule,
   TaskGoalBinding,
   TaskReminderConfig,
@@ -119,9 +120,11 @@ export class PowerSyncTaskPlanMapper {
       identityId: IdentityId.of(data.identity_id),
       title: data.name,
       description: data.description ?? null,
-      taskType: recurrenceRule ? TaskType.Recurring : TaskType.OneTime,
-      timeConfig,
-      recurrenceRule,
+      schedule: TaskPlanSchedule.fromLegacy(
+        recurrenceRule ? TaskType.Recurring : TaskType.OneTime,
+        timeConfig,
+        recurrenceRule,
+      ),
       reminderConfig,
       importance: data.importance as ImportanceLevel,
       status: (data.status as TaskPlanStatus) ?? TaskPlanStatus.Active,

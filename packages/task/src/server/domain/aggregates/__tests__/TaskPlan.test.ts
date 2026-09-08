@@ -34,6 +34,7 @@ import {
   TaskReminderConfig,
   TaskGoalBinding,
   ChecklistItemDefinition,
+  TaskPlanSchedule,
 } from '../../value-objects';
 import {
   InvalidTaskPlanStateError,
@@ -91,14 +92,28 @@ function localYmd(instant: number): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
-function makeState(overrides: Partial<TaskPlanState> = {}): TaskPlanState {
-  const now = new Date();
+function makeState(
+  overrides: Partial<TaskPlanState> & {
+    taskType?: TaskType;
+    timeConfig?: TaskTimeConfig | null;
+    recurrenceRule?: RecurrenceRule | null;
+  } = {},
+): TaskPlanState {
+  const now = Date.now();
+  const taskType =
+    overrides.taskType ?? (overrides.recurrenceRule ? TaskType.Recurring : TaskType.OneTime);
+  const timeConfig = overrides.timeConfig ?? TaskTimeConfig.createAllDay(now);
+  const recurrenceRule =
+    taskType === TaskType.Recurring
+      ? (overrides.recurrenceRule ?? RecurrenceRule.createDaily())
+      : null;
   return {
     id: overrides.id ?? TaskPlanId.generate(),
     identityId: overrides.identityId ?? makeIdentityId(),
     title: overrides.title ?? 'Test Task',
     description: overrides.description ?? null,
-    taskType: overrides.taskType ?? TaskType.OneTime,
+    schedule:
+      overrides.schedule ?? TaskPlanSchedule.fromLegacy(taskType, timeConfig, recurrenceRule),
     importance: overrides.importance ?? ImportanceLevel.Moderate,
     status: overrides.status ?? TaskPlanStatus.Active,
     outcome: overrides.outcome ?? TaskPlanOutcome.Open,
@@ -108,17 +123,9 @@ function makeState(overrides: Partial<TaskPlanState> = {}): TaskPlanState {
     abandonedReason: overrides.abandonedReason ?? null,
     goalBinding: overrides.goalBinding ?? null,
     checklist: overrides.checklist ?? [],
-    timeConfig: overrides.timeConfig ?? null,
-    recurrenceRule: overrides.recurrenceRule ?? null,
     reminderConfig: overrides.reminderConfig ?? null,
     lastGeneratedDate: overrides.lastGeneratedDate ?? null,
     generateAheadDays: overrides.generateAheadDays ?? null,
-    startDate: overrides.startDate ?? null,
-    dueDate: overrides.dueDate ?? null,
-    completedAt: overrides.completedAt ?? null,
-    estimatedMinutes: overrides.estimatedMinutes ?? null,
-    actualMinutes: overrides.actualMinutes ?? null,
-    note: overrides.note ?? null,
     createdAt: overrides.createdAt ?? now,
     updatedAt: overrides.updatedAt ?? now,
     deletedAt: overrides.deletedAt ?? null,
@@ -146,7 +153,7 @@ describe('TaskPlan Aggregate', () => {
         expect(template.status).toBe(TaskPlanStatus.Active);
         expect(template.importance).toBe(ImportanceLevel.Moderate);
         expect(template.description).toBeNull();
-        expect(template.timeConfig).toBeNull();
+        expect(template.timeConfig.timeType).toBe('AllDay');
         expect(template.recurrenceRule).toBeNull();
         expect(template.reminderConfig).toBeNull();
         expect(template.version).toBe(1);
@@ -175,7 +182,7 @@ describe('TaskPlan Aggregate', () => {
 
         expect(plan.description).toBe('Some description');
         expect(plan.importance).toBe(ImportanceLevel.Vital);
-        expect(plan.timeConfig?.startDate).toBe(startDate);
+        expect(localYmd(plan.timeConfig.startDate!)).toBe(localYmd(startDate));
       });
 
       it('should generate unique IDs for each template', () => {
@@ -264,8 +271,11 @@ describe('TaskPlan Aggregate', () => {
 
         expect(template.taskType).toBe(TaskType.Recurring);
         expect(template.status).toBe(TaskPlanStatus.Active);
-        expect(template.timeConfig).toBe(timeConfig);
-        expect(template.recurrenceRule).toBe(recurrenceRule);
+        expect(template.timeConfig.toDTO()).toMatchObject({
+          ...timeConfig.toDTO(),
+          startDate: template.timeConfig.startDate,
+        });
+        expect(template.recurrenceRule?.toDTO()).toEqual(recurrenceRule.toDTO());
         expect(template.generateAheadDays).toBe(30);
       });
 
@@ -339,7 +349,10 @@ describe('TaskPlan Aggregate', () => {
         });
 
         expect(template.taskType).toBe(TaskType.OneTime);
-        expect(template.timeConfig).toBe(timeConfig);
+        expect(template.timeConfig.toDTO()).toMatchObject({
+          ...timeConfig.toDTO(),
+          startDate: template.timeConfig.startDate,
+        });
       });
 
       it('should create a recurring task with rule', () => {
@@ -354,18 +367,7 @@ describe('TaskPlan Aggregate', () => {
         });
 
         expect(template.taskType).toBe(TaskType.Recurring);
-        expect(template.recurrenceRule).toBe(recurrenceRule);
-      });
-
-      it('should throw when timeConfig is missing', () => {
-        expect(() =>
-          TaskPlan.create({
-            identityId: makeIdentityId(),
-            title: 'Task',
-            taskType: TaskType.OneTime,
-            timeConfig: undefined as unknown as TaskTimeConfig,
-          }),
-        ).toThrow(InvalidTaskPlanStateError);
+        expect(template.recurrenceRule?.toDTO()).toEqual(recurrenceRule.toDTO());
       });
 
       it('should throw when recurring task is missing recurrenceRule', () => {
@@ -676,7 +678,7 @@ describe('TaskPlan Aggregate', () => {
 
         const newRule = makeWeeklyRule();
         recurring.updateRecurrenceRule(newRule);
-        expect(recurring.recurrenceRule).toBe(newRule);
+        expect(recurring.recurrenceRule?.toDTO()).toEqual(newRule.toDTO());
       });
 
       it('should throw for ONE_TIME tasks', () => {
@@ -1011,18 +1013,6 @@ describe('TaskPlan Aggregate', () => {
         expect(template.shouldGenerateInstance(startDay)).toBe(true);
       });
 
-      it('should return false when no recurrence rule', () => {
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Active,
-            recurrenceRule: null,
-          }),
-        );
-
-        expect(template.shouldGenerateInstance(Date.now())).toBe(false);
-      });
-
       it('should return true for daily recurrence on an anchored schedule day', () => {
         const startDate = new Date(2026, 0, 1, 12, 0, 0);
         const template = TaskPlan.load(
@@ -1200,17 +1190,6 @@ describe('TaskPlan Aggregate', () => {
 
         expect(() => template.createInstance({ instanceDate: null })).toThrow();
       });
-
-      it('should throw when timeConfig is missing', () => {
-        const template = TaskPlan.load(
-          makeState({
-            status: TaskPlanStatus.Active,
-            timeConfig: null,
-          }),
-        );
-
-        expect(() => template.createInstance({ instanceDate: Date.now() })).toThrow();
-      });
     });
 
     describe('Instance management (add/remove/get)', () => {
@@ -1307,7 +1286,7 @@ describe('TaskPlan Aggregate', () => {
         );
 
         const next = template.getNextOccurrence(Date.now());
-        expect(next).toBe(futureDate.getTime());
+        expect(localYmd(next!)).toBe(localYmd(futureDate.getTime()));
       });
 
       it('should return null for one-time task with past startDate', () => {

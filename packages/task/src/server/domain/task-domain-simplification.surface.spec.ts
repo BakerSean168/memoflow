@@ -26,8 +26,12 @@ describe('Task vNext simplified domain surface', () => {
     ]) {
       expect(existsSync(resolve(__dirname, path))).toBe(false);
     }
-    expect(template).not.toMatch(/getPriority\(|getPriorityScore|addSubtask|parentTaskId|markAsBlocked|dependencyStatus|blockingReason/);
-    expect(templateState).not.toMatch(/folderId|parentTaskId|dependencyStatus|isBlocked|blockingReason/);
+    expect(template).not.toMatch(
+      /getPriority\(|getPriorityScore|addSubtask|parentTaskId|markAsBlocked|dependencyStatus|blockingReason/,
+    );
+    expect(templateState).not.toMatch(
+      /folderId|parentTaskId|dependencyStatus|isBlocked|blockingReason/,
+    );
   });
 
   it('retires project-management application and transport surfaces', () => {
@@ -40,7 +44,8 @@ describe('Task vNext simplified domain surface', () => {
     expect(templateState).toContain('importance: ImportanceLevel');
     expect(templateState).toContain('checklist: ChecklistItemDefinition[]');
     expect(templateState).toContain('goalBinding: TaskGoalBinding | null');
-    expect(templateState).toContain('recurrenceRule: RecurrenceRule | null');
+    expect(templateState).toContain('schedule: TaskPlanSchedule');
+    expect(templateState).not.toMatch(/taskType:|timeConfig:|recurrenceRule:/);
     expect(templateState).toContain('reminderConfig: TaskReminderConfig | null');
     expect(template).not.toMatch(/priority:\s*this\.getPriority|priority:\s*priority\?\.score/);
   });

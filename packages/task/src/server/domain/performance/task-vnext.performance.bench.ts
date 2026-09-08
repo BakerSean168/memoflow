@@ -14,7 +14,7 @@ import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createTaskRecurrenceDateAdapter } from '../aggregates/task-recurrence-date.adapter';
 import { TaskPlanOutcomeEvaluator } from '../services/task-plan-outcome-evaluator';
-import { RecurrenceRule, TaskTimeConfig } from '../value-objects';
+import { RecurrenceRule, TaskPlanSchedule, TaskTimeConfig } from '../value-objects';
 
 function averageDuration(iterations: number, work: () => void): number {
   for (let i = 0; i < 3; i++) work();
@@ -33,7 +33,17 @@ describe('Task vNext performance budgets', () => {
       identityId: IdentityId.generate(),
       title: 'Performance benchmark template',
       description: null,
-      taskType: TaskType.Recurring,
+      schedule: TaskPlanSchedule.fromLegacy(
+        TaskType.Recurring,
+        TaskTimeConfig.createAllDay(now),
+        RecurrenceRule.create({
+          frequency: 'Daily',
+          interval: 1,
+          daysOfWeek: [],
+          endDate: null,
+          occurrences: occurrenceCount,
+        }),
+      ),
       importance: ImportanceLevel.Moderate,
       status: TaskPlanStatus.Active,
       outcome: TaskPlanOutcome.Open,
@@ -43,14 +53,6 @@ describe('Task vNext performance budgets', () => {
       abandonedReason: null,
       goalBinding: null,
       checklist: [],
-      timeConfig: null,
-      recurrenceRule: RecurrenceRule.create({
-        frequency: 'Daily',
-        interval: 1,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: occurrenceCount,
-      }),
       reminderConfig: null,
       lastGeneratedDate: null,
       generateAheadDays: null,

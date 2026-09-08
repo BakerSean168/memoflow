@@ -9,7 +9,7 @@ import type { TaskEventMap } from '@memoflow/contracts/task';
 import { RecurrenceEndConditionType } from '@memoflow/contracts/task';
 import { TaskType } from '../value-objects';
 import { InvalidTaskPlanStateError } from '../value-objects/task-errors';
-import type { RecurrenceRule } from '../value-objects';
+import { TaskPlanSchedule, type RecurrenceRule } from '../value-objects';
 import type { TaskPlanId } from '../../domain/value-objects/task-plan-id';
 import type { TaskPlanProps } from './task-plan.state';
 import { createTimeFacade } from '@memoflow/time';
@@ -27,15 +27,20 @@ export interface RecurrenceContext {
 
 /** Updates the recurrence rule (Recurring tasks only). */
 export function updateRecurrenceRule(ctx: RecurrenceContext, newRule: RecurrenceRule): void {
-  if (ctx.props.taskType !== TaskType.Recurring) {
+  if (!ctx.props.schedule.isRecurring) {
     throw new InvalidTaskPlanStateError('Only Recurring tasks have recurrence rules.', {
       templateId: ctx.id,
       currentStatus: ctx.props.status,
       attemptedAction: 'updateRecurrenceRule',
     });
   }
-  const oldRuleDTO = ctx.props.recurrenceRule?.toDTO() ?? null;
-  ctx.props.recurrenceRule = newRule;
+  const currentRule = ctx.props.schedule.toLegacyRecurrenceRule();
+  const oldRuleDTO = currentRule?.toDTO() ?? null;
+  ctx.props.schedule = TaskPlanSchedule.fromLegacy(
+    TaskType.Recurring,
+    ctx.props.schedule.toLegacyTimeConfig(),
+    newRule,
+  );
   ctx.props.updatedAt = Date.now();
   ctx.addHistory('recurrence_rule_updated', {
     oldRule: oldRuleDTO,
@@ -58,14 +63,15 @@ export function updateRecurrenceEndCondition(
   endConditionType: RecurrenceEndConditionType,
   customValue?: number,
 ): void {
-  if (ctx.props.taskType !== TaskType.Recurring) {
+  if (!ctx.props.schedule.isRecurring) {
     throw new InvalidTaskPlanStateError('Only Recurring tasks have recurrence rules.', {
       templateId: ctx.id,
       currentStatus: ctx.props.status,
       attemptedAction: 'updateRecurrenceEndCondition',
     });
   }
-  if (!ctx.props.recurrenceRule) {
+  const currentRule = ctx.props.schedule.toLegacyRecurrenceRule();
+  if (!currentRule) {
     throw new InvalidTaskPlanStateError('Recurrence rule is not set', {
       templateId: ctx.id,
       currentStatus: ctx.props.status,
@@ -77,16 +83,16 @@ export function updateRecurrenceEndCondition(
 
   switch (endConditionType) {
     case RecurrenceEndConditionType.Never:
-      updatedRule = ctx.props.recurrenceRule.setEndDate(null).setOccurrences(null);
+      updatedRule = currentRule.setEndDate(null).setOccurrences(null);
       break;
     case RecurrenceEndConditionType.EndDate: {
       const endDate = customValue ?? taskTime.calendar.addDays(Date.now(), 30);
-      updatedRule = ctx.props.recurrenceRule.setEndDate(new Date(endDate));
+      updatedRule = currentRule.setEndDate(new Date(endDate));
       break;
     }
     case RecurrenceEndConditionType.Occurrences: {
       const occurrences = customValue ?? 10;
-      updatedRule = ctx.props.recurrenceRule.setOccurrences(occurrences);
+      updatedRule = currentRule.setOccurrences(occurrences);
       break;
     }
     default:
@@ -97,8 +103,12 @@ export function updateRecurrenceEndCondition(
       });
   }
 
-  const oldRuleDTO = ctx.props.recurrenceRule.toDTO();
-  ctx.props.recurrenceRule = updatedRule;
+  const oldRuleDTO = currentRule.toDTO();
+  ctx.props.schedule = TaskPlanSchedule.fromLegacy(
+    TaskType.Recurring,
+    ctx.props.schedule.toLegacyTimeConfig(),
+    updatedRule,
+  );
   ctx.props.updatedAt = Date.now();
   ctx.addHistory('recurrence_end_condition_updated', {
     oldRule: oldRuleDTO,

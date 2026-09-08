@@ -28,6 +28,7 @@ import {
   TaskReminderConfig,
   TaskGoalBinding,
   ChecklistItemDefinition,
+  TaskPlanSchedule,
 } from '../../../../domain/value-objects';
 
 type PrismaTaskPlanVNext = PrismaTaskPlan & {
@@ -135,9 +136,11 @@ export class PrismaTaskPlanMapper {
       identityId: IdentityId.of(data.identityId),
       title: data.name,
       description: data.description,
-      taskType: recurrenceRule ? TaskType.Recurring : TaskType.OneTime,
-      timeConfig,
-      recurrenceRule,
+      schedule: TaskPlanSchedule.fromLegacy(
+        recurrenceRule ? TaskType.Recurring : TaskType.OneTime,
+        timeConfig,
+        recurrenceRule,
+      ),
       reminderConfig,
       importance: data.importance as ImportanceLevel,
       goalBinding,

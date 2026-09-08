@@ -1,16 +1,14 @@
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { Instant } from '@memoflow/contracts/primitives';
 import type { IdentityId } from '@memoflow/domain-shared';
-import type { TaskType } from '../value-objects';
 import type { TaskPlanCompletionPolicyValue, TaskPlanOutcomeValue } from '@memoflow/contracts/task';
 import type { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import type { TaskPlanId } from '../../domain/value-objects/task-plan-id';
 import type {
   ChecklistItemDefinition,
-  RecurrenceRule,
+  TaskPlanSchedule,
   TaskGoalBinding,
   TaskReminderConfig,
-  TaskTimeConfig,
 } from '../value-objects';
 
 export interface TaskPlanState {
@@ -18,7 +16,7 @@ export interface TaskPlanState {
   identityId: IdentityId;
   title: string;
   description: string | null;
-  taskType: TaskType;
+  schedule: TaskPlanSchedule;
   importance: ImportanceLevel;
   status: TaskPlanStatus;
   outcome: TaskPlanOutcomeValue;
@@ -28,8 +26,6 @@ export interface TaskPlanState {
   abandonedReason: string | null;
   goalBinding: TaskGoalBinding | null;
   checklist: ChecklistItemDefinition[];
-  timeConfig: TaskTimeConfig | null;
-  recurrenceRule: RecurrenceRule | null;
   reminderConfig: TaskReminderConfig | null;
   lastGeneratedDate: Instant | null;
   generateAheadDays: number | null;

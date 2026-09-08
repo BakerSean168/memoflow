@@ -26,8 +26,8 @@ describe('PrismaTaskPlanMapper', () => {
     updatedAt: new Date('2024-01-01T00:00:00Z'),
     deletedAt: null,
     // Time config fields
-    timeConfigType: null,
-    timeConfigStartTime: null,
+    timeConfigType: 'AllDay',
+    timeConfigStartTime: new Date('2024-01-01T00:00:00Z'),
     timeConfigEndTime: null,
     timeConfigDurationMinutes: null,
     timeConfigTimePoint: null,
@@ -68,17 +68,17 @@ describe('PrismaTaskPlanMapper', () => {
     updatedAt: new Date('2024-02-15T14:45:30Z'),
     deletedAt: null,
     // Time config fields
-    timeConfigType: 'FixedTime',
+    timeConfigType: 'TimeRange',
     timeConfigStartTime: new Date('2024-03-01T00:00:00Z'),
     timeConfigEndTime: null,
     timeConfigDurationMinutes: 60,
-    timeConfigTimePoint: '09:00',
-    timeConfigTimeRangeStart: 9,
-    timeConfigTimeRangeEnd: 17,
+    timeConfigTimePoint: null,
+    timeConfigTimeRangeStart: 540,
+    timeConfigTimeRangeEnd: 1020,
     // Recurrence fields
-    recurrenceRuleType: 'DAILY',
+    recurrenceRuleType: 'Daily',
     recurrenceRuleInterval: 1,
-    recurrenceRuleDaysOfWeek: JSON.stringify(['MON', 'WED', 'FRI']),
+    recurrenceRuleDaysOfWeek: JSON.stringify([]),
     recurrenceRuleDayOfMonth: null,
     recurrenceRuleMonthOfYear: null,
     recurrenceRuleEndDate: new Date('2024-12-31T00:00:00Z'),
@@ -86,7 +86,7 @@ describe('PrismaTaskPlanMapper', () => {
     // Reminder fields
     reminderConfigEnabled: true,
     reminderConfigTimeOffsetMinutes: 15,
-    reminderConfigUnit: 'minutes',
+    reminderConfigUnit: 'Minutes',
     reminderConfigChannel: 'PUSH',
     // Other fields
     goalId: GOAL_ID_1,
@@ -118,7 +118,7 @@ describe('PrismaTaskPlanMapper', () => {
       expect(domain.importance).toBe('Moderate');
       expect(domain.status).toBe('Active');
       expect(domain.version).toBe(1);
-      expect(domain.timeConfig).toBeNull();
+      expect(domain.timeConfig.timeType).toBe('AllDay');
       expect(domain.recurrenceRule).toBeNull();
       expect(domain.reminderConfig).toBeNull();
       expect(domain.goalBinding).toBeNull();
@@ -142,15 +142,15 @@ describe('PrismaTaskPlanMapper', () => {
       const domain = PrismaTaskPlanMapper.toDomain(row);
 
       expect(domain.timeConfig).toBeDefined();
-      expect(domain.timeConfig?.timeType).toBe('FixedTime');
-      expect(domain.timeConfig?.timePoint).toBe('09:00');
+      expect(domain.timeConfig.timeType).toBe('TimeRange');
+      expect(domain.timeConfig.timeRange).toEqual({ start: 540, end: 1020 });
     });
 
     it('returns null timeConfig when not configured', () => {
       const row = createMinimalRow();
       const domain = PrismaTaskPlanMapper.toDomain(row);
 
-      expect(domain.timeConfig).toBeNull();
+      expect(domain.timeConfig.timeType).toBe('AllDay');
     });
 
     it('parses recurrenceRule when present', () => {
@@ -158,9 +158,9 @@ describe('PrismaTaskPlanMapper', () => {
       const domain = PrismaTaskPlanMapper.toDomain(row);
 
       expect(domain.recurrenceRule).toBeDefined();
-      expect(domain.recurrenceRule?.frequency).toBe('DAILY');
+      expect(domain.recurrenceRule?.frequency).toBe('Daily');
       expect(domain.recurrenceRule?.interval).toBe(1);
-      expect(domain.recurrenceRule?.daysOfWeek).toEqual(['MON', 'WED', 'FRI']);
+      expect(domain.recurrenceRule?.daysOfWeek).toEqual([]);
     });
 
     it('returns null recurrenceRule when not configured', () => {
@@ -178,7 +178,7 @@ describe('PrismaTaskPlanMapper', () => {
       expect(domain.reminderConfig?.enabled).toBe(true);
       expect(domain.reminderConfig?.triggers).toBeDefined();
       expect(domain.reminderConfig?.triggers[0].relativeValue).toBe(15);
-      expect(domain.reminderConfig?.triggers[0].relativeUnit).toBe('minutes');
+      expect(domain.reminderConfig?.triggers[0].relativeUnit).toBe('Minutes');
     });
 
     it('returns null reminderConfig when disabled', () => {
@@ -215,7 +215,6 @@ describe('PrismaTaskPlanMapper', () => {
 
       expect(domain.checklist).toEqual([]);
     });
-
   });
 
   describe('toPersistence', () => {
@@ -232,7 +231,7 @@ describe('PrismaTaskPlanMapper', () => {
       expect(persistence.name).toBe('New Task');
       expect(persistence.description).toBeNull();
       expect(persistence.importance).toBe('Minor');
-      expect(persistence.timeConfigType).toBeNull();
+      expect(persistence.timeConfigType).toBe('AllDay');
       expect(persistence.recurrenceRuleType).toBeNull();
       expect(persistence.reminderConfigEnabled).toBeNull();
       expect(persistence.goalId).toBeNull();
@@ -249,9 +248,10 @@ describe('PrismaTaskPlanMapper', () => {
 
       expect(persistence.name).toBe('Complex Recurring Task');
       expect(persistence.importance).toBe('Important');
-      expect(persistence.timeConfigType).toBe('FixedTime');
-      expect(persistence.timeConfigTimePoint).toBe('09:00');
-      expect(persistence.recurrenceRuleType).toBe('DAILY');
+      expect(persistence.timeConfigType).toBe('TimeRange');
+      expect(persistence.timeConfigTimeRangeStart).toBe(540);
+      expect(persistence.timeConfigTimeRangeEnd).toBe(1020);
+      expect(persistence.recurrenceRuleType).toBe('Daily');
       expect(persistence.recurrenceRuleInterval).toBe(1);
       expect(persistence.reminderConfigEnabled).toBe(true);
       expect(persistence.reminderConfigTimeOffsetMinutes).toBe(15);
@@ -272,15 +272,15 @@ describe('PrismaTaskPlanMapper', () => {
 
     it('stringifies JSON for recurrence days of week', () => {
       const aggregate = createTestAggregate({
-        recurrenceRuleType: 'DAILY',
+        recurrenceRuleType: 'Weekly',
         recurrenceRuleInterval: 1,
-        recurrenceRuleDaysOfWeek: JSON.stringify(['MON', 'WED', 'FRI']),
+        recurrenceRuleDaysOfWeek: JSON.stringify([1, 3, 5]),
       });
 
       const persistence = PrismaTaskPlanMapper.toPersistence(aggregate);
 
       expect(typeof persistence.recurrenceRuleDaysOfWeek).toBe('string');
-      expect(JSON.parse(persistence.recurrenceRuleDaysOfWeek!)).toEqual(['MON', 'WED', 'FRI']);
+      expect(JSON.parse(persistence.recurrenceRuleDaysOfWeek!)).toEqual([1, 3, 5]);
     });
 
     it('handles empty checklist correctly', () => {
@@ -297,7 +297,7 @@ describe('PrismaTaskPlanMapper', () => {
       const persistence = PrismaTaskPlanMapper.toPersistence(aggregate);
 
       expect(persistence.description).toBeNull();
-      expect(persistence.timeConfigType).toBeNull();
+      expect(persistence.timeConfigType).toBe('AllDay');
       expect(persistence.goalId).toBeNull();
     });
   });

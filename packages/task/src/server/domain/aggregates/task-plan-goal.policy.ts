@@ -54,7 +54,10 @@ export function bindToGoal(
   }
   if (
     contribution?.trigger === TaskGoalBindingTrigger.PlanCompletion &&
-    !isFiniteTaskPlan(ctx.props.taskType, ctx.props.recurrenceRule)
+    !isFiniteTaskPlan(
+      ctx.props.schedule.isRecurring ? TaskType.Recurring : TaskType.OneTime,
+      ctx.props.schedule.toLegacyRecurrenceRule(),
+    )
   ) {
     throw new InvalidGoalBindingError('Whole-plan goal progress requires a finite task plan');
   }

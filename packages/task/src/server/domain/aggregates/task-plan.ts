@@ -33,6 +33,7 @@ import {
   TaskReminderConfig,
   TaskGoalBinding,
   ChecklistItemDefinition,
+  TaskPlanSchedule,
 } from '../value-objects';
 import { TaskPlanHistory } from '../entities';
 import { TaskOccurrence } from './task-occurrence';
@@ -81,8 +82,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       ...rest,
       description: rest.description ?? null,
       goalBinding: rest.goalBinding ?? null,
-      timeConfig: rest.timeConfig ?? null,
-      recurrenceRule: rest.recurrenceRule ?? null,
       reminderConfig: rest.reminderConfig ?? null,
       lastGeneratedDate: rest.lastGeneratedDate ?? null,
       generateAheadDays: rest.generateAheadDays ?? null,
@@ -160,16 +159,23 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     return this._props.description;
   }
 
+  public get schedule(): TaskPlanSchedule {
+    return this._props.schedule;
+  }
+
+  /** Transitional derived compatibility; canonical state is schedule. */
   public get taskType(): TaskType {
-    return this._props.taskType;
+    return this._props.schedule.isRecurring ? TaskType.Recurring : TaskType.OneTime;
   }
 
-  public get timeConfig(): TaskTimeConfig | null {
-    return this._props.timeConfig;
+  /** Transitional derived compatibility; canonical state is schedule. */
+  public get timeConfig(): TaskTimeConfig {
+    return this._props.schedule.toLegacyTimeConfig();
   }
 
+  /** Transitional derived compatibility; canonical state is schedule. */
   public get recurrenceRule(): RecurrenceRule | null {
-    return this._props.recurrenceRule;
+    return this._props.schedule.toLegacyRecurrenceRule();
   }
 
   public get reminderConfig(): TaskReminderConfig | null {
@@ -302,9 +308,9 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       templateId: this.id,
       identityId: this._props.identityId,
       status: this._props.status,
-      taskType: this._props.taskType,
-      timeConfig: this._props.timeConfig,
-      recurrenceRule: this._props.recurrenceRule,
+      taskType: this.taskType,
+      timeConfig: this.timeConfig,
+      recurrenceRule: this.recurrenceRule,
       importance: this._props.importance,
       existingInstances: this._instances,
     };
@@ -453,15 +459,26 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
    * Updates the time configuration.
    */
   public updateTimeConfig(newTimeConfig: TaskTimeConfig | null): void {
-    if (this._props.taskType === TaskType.Recurring && newTimeConfig?.startDate == null) {
+    if (this.taskType === TaskType.Recurring && newTimeConfig?.startDate == null) {
       throw new InvalidTaskPlanStateError('Recurring Task requires a date', {
         templateId: this.id,
         currentStatus: this._props.status,
         attemptedAction: 'updateTimeConfig',
       });
     }
-    const oldTimeConfig = this._props.timeConfig?.toDTO() ?? null;
-    this._props.timeConfig = newTimeConfig;
+    const oldTimeConfig = this.timeConfig.toDTO();
+    if (!newTimeConfig) {
+      throw new InvalidTaskPlanStateError('Task Plan schedule cannot be cleared', {
+        templateId: this.id,
+        currentStatus: this._props.status,
+        attemptedAction: 'updateTimeConfig',
+      });
+    }
+    this._props.schedule = TaskPlanSchedule.fromLegacy(
+      this.taskType,
+      newTimeConfig,
+      this.recurrenceRule,
+    );
     this._props.updatedAt = Date.now();
 
     this.addHistory('time_config_updated', {
@@ -599,8 +616,8 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       identityId: this._props.identityId,
       name: this._props.title,
       description: this._props.description,
-      timeConfig: this._props.timeConfig?.toDTO() ?? null,
-      recurrenceRule: this._props.recurrenceRule?.toDTO() ?? null,
+      timeConfig: this.timeConfig.toDTO(),
+      recurrenceRule: this.recurrenceRule?.toDTO() ?? null,
       reminderConfig: this._props.reminderConfig?.toDTO() ?? null,
       importance: this._props.importance,
       goalBinding: this._props.goalBinding?.toDTO() ?? null,
@@ -650,13 +667,8 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       identityId: this._props.identityId,
       name: this._props.title,
       description: this._props.description,
-      timeConfig: this._props.timeConfig?.toDTO() ?? {
-        timeType: TimeType.AllDay,
-        startDate: null,
-        timePoint: null,
-        timeRange: null,
-      },
-      recurrenceRule: this._props.recurrenceRule?.toDTO() ?? null,
+      timeConfig: this.timeConfig.toDTO(),
+      recurrenceRule: this.recurrenceRule?.toDTO() ?? null,
       reminderConfig: this._props.reminderConfig?.toDTO() ?? null,
       importance: this._props.importance,
       goalBinding: this._props.goalBinding?.toDTO() ?? null,
@@ -706,12 +718,12 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     const title = TaskPlan.normalizeTitle(params.title, 'createOneTimeTask');
 
     const now = Date.now();
+    const occurrenceDate = params.startDate ?? taskTime.calendar.startOfDay(now);
     const template = TaskPlan.instantiate({
       id: params.id ?? TaskPlanId.generate(),
       identityId: params.identityId,
       title,
       description: params.description ?? null,
-      taskType: TaskType.OneTime,
       importance: params.importance ?? ImportanceLevel.Moderate,
       status: TaskPlanStatus.Active,
       outcome: TaskPlanOutcome.Open,
@@ -721,8 +733,11 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       abandonedReason: null,
       goalBinding: null,
       checklist: [],
-      timeConfig: params.startDate ? TaskTimeConfig.createAllDay(params.startDate) : null,
-      recurrenceRule: null,
+      schedule: TaskPlanSchedule.fromLegacy(
+        TaskType.OneTime,
+        TaskTimeConfig.createAllDay(occurrenceDate),
+        null,
+      ),
       reminderConfig: null,
       lastGeneratedDate: null,
       generateAheadDays: null,
@@ -762,7 +777,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       identityId: params.identityId,
       title,
       description: params.description ?? null,
-      taskType: TaskType.Recurring,
       importance: params.importance ?? ImportanceLevel.Moderate,
       status: TaskPlanStatus.Active,
       outcome: TaskPlanOutcome.Open,
@@ -772,8 +786,11 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       abandonedReason: null,
       goalBinding: null,
       checklist: [],
-      timeConfig: params.timeConfig,
-      recurrenceRule: params.recurrenceRule,
+      schedule: TaskPlanSchedule.fromLegacy(
+        TaskType.Recurring,
+        params.timeConfig,
+        params.recurrenceRule,
+      ),
       reminderConfig: params.reminderConfig ?? null,
       lastGeneratedDate: null,
       generateAheadDays: params.generateAheadDays ?? 30,
@@ -837,7 +854,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       identityId: params.identityId,
       title,
       description: params.description ?? null,
-      taskType: params.taskType,
       importance: params.importance ?? ImportanceLevel.Moderate,
       status: TaskPlanStatus.Active,
       outcome: TaskPlanOutcome.Open,
@@ -853,8 +869,11 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
           })
         : null,
       checklist: [],
-      timeConfig: params.timeConfig,
-      recurrenceRule: params.recurrenceRule ?? null,
+      schedule: TaskPlanSchedule.fromLegacy(
+        params.taskType,
+        params.timeConfig,
+        params.recurrenceRule ?? null,
+      ),
       reminderConfig: params.reminderConfig ?? null,
       lastGeneratedDate: null,
       generateAheadDays: params.generateAheadDays ?? 30,

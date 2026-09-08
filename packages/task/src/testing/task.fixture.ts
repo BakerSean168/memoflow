@@ -23,6 +23,7 @@ import {
   CompletionRecord,
   ChecklistItemDefinition,
   TaskPlanStatus,
+  TaskPlanSchedule,
 } from '../server/domain';
 import { TaskOccurrence, TaskPlan } from '../server/domain';
 import type { TaskPlanState } from '../server/domain';
@@ -48,7 +49,7 @@ export function aOneTimeTask(overrides: OneTimeTaskOverrides = {}): TaskPlan {
     title: overrides.title ?? titleFor('Task'),
     description: overrides.description,
     importance: overrides.importance ?? ImportanceLevel.Moderate,
-    startDate: overrides.startDate,
+    startDate: overrides.startDate ?? Date.now(),
   });
 }
 
@@ -76,7 +77,13 @@ export function aRecurringTask(overrides: RecurringTaskOverrides = {}): TaskPlan
   });
 }
 
-export function aTaskPlanState(overrides: Partial<TaskPlanState> = {}): TaskPlanState {
+export function aTaskPlanState(
+  overrides: Partial<TaskPlanState> & {
+    taskType?: TaskType;
+    timeConfig?: TaskTimeConfig | null;
+    recurrenceRule?: RecurrenceRule | null;
+  } = {},
+): TaskPlanState {
   const id = overrides.id ?? TaskPlanId.generate();
   const now = Date.now();
 
@@ -85,7 +92,13 @@ export function aTaskPlanState(overrides: Partial<TaskPlanState> = {}): TaskPlan
     identityId: overrides.identityId ?? anIdentityId(),
     title: overrides.title ?? titleFor('Task'),
     description: overrides.description ?? null,
-    taskType: overrides.taskType ?? TaskType.OneTime,
+    schedule:
+      overrides.schedule ??
+      TaskPlanSchedule.fromLegacy(
+        overrides.taskType ?? (overrides.recurrenceRule ? TaskType.Recurring : TaskType.OneTime),
+        overrides.timeConfig ?? anAllDayTimeConfig(),
+        overrides.recurrenceRule ?? null,
+      ),
     importance: overrides.importance ?? ImportanceLevel.Moderate,
     status: overrides.status ?? TaskPlanStatus.Active,
     outcome: overrides.outcome ?? TaskPlanOutcome.Open,
@@ -95,8 +108,6 @@ export function aTaskPlanState(overrides: Partial<TaskPlanState> = {}): TaskPlan
     abandonedReason: overrides.abandonedReason ?? null,
     goalBinding: overrides.goalBinding ?? null,
     checklist: overrides.checklist ?? [],
-    timeConfig: overrides.timeConfig ?? null,
-    recurrenceRule: overrides.recurrenceRule ?? null,
     reminderConfig: overrides.reminderConfig ?? null,
     lastGeneratedDate: overrides.lastGeneratedDate ?? null,
     generateAheadDays: overrides.generateAheadDays ?? null,

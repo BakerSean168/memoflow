@@ -58,7 +58,9 @@ export function createInstanceFromTemplate(
 ): TaskOccurrence {
   if (ctx.status !== TaskPlanStatus.Active) {
     throw new InvalidTaskPlanStateError('Can only create instances for active task plans', {
-      templateId: ctx.templateId, currentStatus: ctx.status, attemptedAction: 'createInstance',
+      templateId: ctx.templateId,
+      currentStatus: ctx.status,
+      attemptedAction: 'createInstance',
     });
   }
   if (typeof params.instanceDate !== 'number' || isNaN(params.instanceDate)) {
@@ -94,8 +96,7 @@ function passesBusinessGenerationGuards(
   if (!ctx.recurrenceRule) return false;
 
   const alreadyGenerated = ctx.existingInstances.some(
-    (instance) =>
-      !instance.deletedAt && startOfLocalDay(instance.instanceDate) === candidateDay,
+    (instance) => !instance.deletedAt && startOfLocalDay(instance.instanceDate) === candidateDay,
   );
   if (alreadyGenerated) return false;
 
@@ -104,10 +105,7 @@ function passesBusinessGenerationGuards(
     if (candidateDay < templateStartDay) return false;
   }
 
-  if (
-    ctx.recurrenceRule.endDate &&
-    candidateDay > startOfLocalDay(ctx.recurrenceRule.endDate)
-  ) {
+  if (ctx.recurrenceRule.endDate && candidateDay > startOfLocalDay(ctx.recurrenceRule.endDate)) {
     return false;
   }
 
@@ -162,11 +160,7 @@ export function generateInstances(
         );
       }
     }
-  } else if (
-    ctx.taskType === TaskType.Recurring &&
-    ctx.recurrenceRule &&
-    ctx.timeConfig
-  ) {
+  } else if (ctx.taskType === TaskType.Recurring && ctx.recurrenceRule && ctx.timeConfig) {
     const fromDay = startOfLocalDay(fromDate);
     const toDay = startOfLocalDay(toDate);
     const rangeEnd = taskTime.calendar.endOfDay(toDay);
@@ -212,10 +206,7 @@ export function generateInstances(
 /**
  * Determines whether an instance should be generated for the given date.
  */
-export function shouldGenerateInstance(
-  ctx: InstanceGenerationContext,
-  date: number,
-): boolean {
+export function shouldGenerateInstance(ctx: InstanceGenerationContext, date: number): boolean {
   const candidateDay = startOfLocalDay(date);
   if (!passesBusinessGenerationGuards(ctx, candidateDay)) return false;
   if (!ctx.recurrenceRule) return false;
@@ -226,15 +217,15 @@ export function shouldGenerateInstance(
 /**
  * Checks whether the template is active on a given date.
  */
-export function isActiveOnDate(
-  ctx: InstanceGenerationContext,
-  date: number,
-): boolean {
+export function isActiveOnDate(ctx: InstanceGenerationContext, date: number): boolean {
   if (ctx.status !== TaskPlanStatus.Active) {
     return false;
   }
   if (ctx.taskType === TaskType.OneTime) {
-    return ctx.timeConfig?.startDate === date;
+    return (
+      ctx.timeConfig?.startDate != null &&
+      startOfLocalDay(ctx.timeConfig.startDate) === startOfLocalDay(date)
+    );
   }
   if (!ctx.recurrenceRule) {
     return false;
