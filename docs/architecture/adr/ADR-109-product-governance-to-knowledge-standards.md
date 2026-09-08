@@ -7,8 +7,8 @@ updated: 2026-09-09T00:31:00+08:00
 
 # ADR-109: Product Governance to Knowledge Standards
 
-**状态：** 已采纳，待实施  
-**日期：** 2026-09-09  
+**状态：** 已采纳，待实施
+**日期：** 2026-09-09
 **依赖：** ADR-089~091
 
 ## Critical distinction

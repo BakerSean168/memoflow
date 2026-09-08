@@ -7,7 +7,7 @@ updated: 2026-09-09T00:31:00+08:00
 
 # ADR-106: Owner-driven Data Portability V3
 
-**状态：** 已采纳，待实施  
+**状态：** 已采纳，待实施
 **日期：** 2026-09-09
 
 ## Problem

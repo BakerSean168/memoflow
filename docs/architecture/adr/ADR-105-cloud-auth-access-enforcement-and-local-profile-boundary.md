@@ -7,8 +7,8 @@ updated: 2026-09-09T00:31:00+08:00
 
 # ADR-105: Cloud Auth, Access Enforcement and Local Profile Boundary
 
-**状态：** 已采纳，待实施  
-**日期：** 2026-09-09  
+**状态：** 已采纳，待实施
+**日期：** 2026-09-09
 **修订：** ADR-039 的第二轮收敛；不替换 Better Auth。
 
 ## Decision
