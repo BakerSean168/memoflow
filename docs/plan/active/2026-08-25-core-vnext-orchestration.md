@@ -14,7 +14,7 @@ tags:
   - parallel
 description: MemoFlow Goal/Task/Routine/Planner/Scheduler/Notification/EventBus 的总重构编排计划，按依赖、共享热点和可并行 lane 组织，并为每个标准能力指定 Build/Borrow/Imitate 来源
 created: 2026-08-25T19:18:00+08:00
-updated: 2026-09-04T23:25:00+08:00
+updated: 2026-09-08T10:27:00+08:00
 status: active
 ---
 
@@ -2361,6 +2361,19 @@ Review five layers:
 
 P0/P1 findings create focused repair passes before plan archive.
 
+**Implementation/review evidence — HARD-7105 (2026-09-08):**
+
+- five-layer review completed across contract correctness, vertical completeness, behavioral completeness, engineering quality, and plan integrity;
+- review found two real P1 residuals: obsolete AI Goal/Task validators retaining retired KR/Task semantics, and an unsafe AI tool `ExecutionContext` cast; both were repaired in `3f7f7023f127`;
+- the HARD-7104 feature-map public-surface drift exposed by the first final regression was repaired without weakening the existing contract tests;
+- final fresh behavior matrix passed Contracts, Label, Goal, Task, Reminder, Notification, Schedule, Scheduler, AI, App Vue, API and Desktop; notable totals include Goal 440/440, Task 717/717, Scheduler 273/273, App Vue 774/774, API 329/329 and Desktop 322/322;
+- final lint/typecheck/build, Test System V2 inventory (1185 files), target governance, HARD-7101 (22/22), architecture lock (1769 production files / 0 violations) and full `memoflow:governance-check` all passed;
+- obsolete PR #337 was closed as superseded after patch-level review; its intermediate Mobile raw ScheduleTask mutation design must not be reintroduced.
+
+Canonical evidence: `docs/analysis/2026-09-08-hard-7105-final-review-evidence.md`.
+
+**Review verdict: ACCEPTED — no unresolved P0/P1.** The plan intentionally remains active until the exact accepted candidate passes GitHub PR CI and merges into `main`; archive occurs from merged `main`, not before delivery.
+
 ---
 
 # 15. Concrete parallel batch schedule
@@ -2630,7 +2643,7 @@ C. Final closure
    HARD-7102              DONE — architecture locks / anti-resurrection
    HARD-7103              DONE — A-J + host + local-Docker + schema acceptance
    HARD-7104              DONE — ADR/docs/reuse/plan truth closure
-   HARD-7105              NEXT — five-layer final review, focused repair, delivery reconciliation, archive
+   HARD-7105              REVIEW PASS — no unresolved P0/P1; PR CI + merge + archive are the only remaining delivery gates
 ```
 
-HARD-7105 must not mark the plan complete until any P0/P1 finding is repaired and independently rechecked, the loose delivery/PR state is reconciled, and the final accepted revision has a clean governed workspace.
+HARD-7105 implementation/review is accepted. Keep the final DoD checkbox open until the exact accepted candidate passes GitHub PR CI and merges into `main`; then archive this umbrella plan from merged `main`.
