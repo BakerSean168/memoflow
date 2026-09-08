@@ -86,6 +86,11 @@ updated: 2026-09-08T17:55:00+08:00
 | [ADR-068](./ADR-068-key-result-measurement-v3.md) | Key Result Measurement V3 — Initial / Current / Target | 已采纳（待实施） | 2026-09-08 |
 | [ADR-069](./ADR-069-goal-workspace-cross-module-context.md) | Goal Workspace 与跨模块 Context Read Model | 已采纳（待实施） | 2026-09-08 |
 | [ADR-070](./ADR-070-ai-goal-plan-orchestration.md) | AI GoalPlanDraft V2 与多实体 Goal Context Orchestration | 已采纳（待实施） | 2026-09-08 |
+| [ADR-071](./ADR-071-task-plan-occurrence-aggregate-boundary.md) | Task Plan / Task Occurrence 聚合边界 | 已采纳（实施中） | 2026-09-08 |
+| [ADR-072](./ADR-072-task-plan-schedule-algebra.md) | Task Plan Schedule Algebra | 已采纳（实施中） | 2026-09-08 |
+| [ADR-073](./ADR-073-task-occurrence-result-and-checklist.md) | Task Occurrence Result 与 Checklist | 已采纳（实施中） | 2026-09-08 |
+| [ADR-074](./ADR-074-task-reminder-policy-persistence.md) | Task Reminder Policy 与 Persistence Parity | 已采纳（实施中） | 2026-09-08 |
+| [ADR-075](./ADR-075-task-workspace-context-and-goal-link.md) | Task Workspace、Context 与 Goal Link | 已采纳（实施中） | 2026-09-08 |
 
 ## 维护规则
 

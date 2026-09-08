@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-08T17:55:00+08:00
+updated: 2026-09-08T19:40:00+08:00
 ---
 
 # Active Plans
@@ -13,11 +13,12 @@ updated: 2026-09-08T17:55:00+08:00
 
 ## 当前计划
 
-当前有 1 个仍在推进中的 active plan。
+当前有 2 个仍在推进中的 active plan。
 
-| 计划                                                                         | 当前状态                                                                                                                                                                                                        |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Goal vNext Model Convergence](./2026-09-08-goal-vnext-model-convergence.md) | **ACTIVE / design frozen** — 一次性收敛 Goal identity/lifecycle/Target Timeframe、KR Measurement V3、Task/Knowledge Context、AI GoalPlanDraft V2 与 Linear-style UI；`GOAL-7201` 文档冻结完成，其余实施待开始。 |
+| 计划                                                                         | 当前状态                                                                                                                                                                                                         |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Goal vNext Model Convergence](./2026-09-08-goal-vnext-model-convergence.md) | **ACTIVE / design frozen** — 一次性收敛 Goal identity/lifecycle/Target Timeframe、KR Measurement V3、Task/Knowledge Context、AI GoalPlanDraft V2 与 Linear-style UI；`GOAL-7201` 文档冻结完成，其余实施待开始。  |
+| [Task vNext Model Convergence](./2026-09-08-task-vnext-model-convergence.md) | **ACTIVE / implementation started** — TaskPlan/TaskOccurrence 独立聚合、Schedule union、Result/Checklist、Reminder persistence parity、Goal-level link 与 Workspace read model；基线 71 files / 717 tests PASS。 |
 
 ## 本轮已归档（2026-09-08）
 

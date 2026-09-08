@@ -12,6 +12,8 @@ created: 2026-08-25T14:28:00+08:00
 updated: 2026-09-08T17:55:00+08:00
 ---
 
+> **2026-09-08 Task vNext 后续修订：** ADR-071～075 保留本 ADR 已验证的 Goal settlement / occurrence outcome 语义，并进一步将 TaskTemplate/TaskInstance 收敛为独立 TaskPlan/TaskOccurrence 聚合、Goal-level link、Schedule union、Result/Checklist 与 reminder persistence 单轨。实施完成前当前代码事实仍以源码为准。
+
 # ADR-056: Task Plan → Goal Link / Contribution / Settlement
 
 **状态：** 已采纳并实施
