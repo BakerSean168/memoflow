@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-09T00:30:00+08:00
 ---
 
 # Active Plans
@@ -13,14 +13,15 @@ updated: 2026-09-09T00:00:00+08:00
 
 ## 当前计划
 
-当前有 4 个仍在推进中的 active plan。
+当前有 5 个仍在推进中的 active plan。
 
-| 计划                                                                               | 当前状态                                                                                                                                                                                                                                                    |
-| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Goal vNext Model Convergence](./2026-09-08-goal-vnext-model-convergence.md)       | **ACTIVE / design frozen** — 一次性收敛 Goal identity/lifecycle/Target Timeframe、KR Measurement V3、Task/Knowledge Context、AI GoalPlanDraft V2 与 Linear-style UI；`GOAL-7201` 文档冻结完成，其余实施待开始。                                             |
-| [Task vNext Model Convergence](./2026-09-08-task-vnext-model-convergence.md)       | **ACTIVE / implementation started** — TaskPlan/TaskOccurrence 独立聚合、Schedule union、Result/Checklist、Reminder persistence parity、Goal-level link 与 Workspace read model；基线 71 files / 717 tests PASS。                                            |
-| [Setting vNext Model Convergence](./2026-09-08-setting-vnext-model-convergence.md) | **ACTIVE / design frozen** — Settings Hub ownership、UserPreference presentation/regional、Product Time Context、Notification/device split、namespace persistence/PowerSync/Portability 已冻结；`SETTING-9201` 文档完成，其余实施待开始。                   |
-| [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)           | **ACTIVE / design frozen** — 保留 Mastra 单一 runtime，收敛 Conversation shell、Provider Secret/Model Capability、AI Context、Knowledge stable identity、Workflow Draft/Apply、ExecutionRecord；`AI-9601` 文档完成，其余 production implementation 未开始。 |
+| 计划                                                                                       | 当前状态                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Goal vNext Model Convergence](./2026-09-08-goal-vnext-model-convergence.md)               | **ACTIVE / design frozen** — 一次性收敛 Goal identity/lifecycle/Target Timeframe、KR Measurement V3、Task/Knowledge Context、AI GoalPlanDraft V2 与 Linear-style UI；`GOAL-7201` 文档冻结完成，其余实施待开始。                                             |
+| [Task vNext Model Convergence](./2026-09-08-task-vnext-model-convergence.md)               | **ACTIVE / implementation started** — TaskPlan/TaskOccurrence 独立聚合、Schedule union、Result/Checklist、Reminder persistence parity、Goal-level link 与 Workspace read model；基线 71 files / 717 tests PASS。                                            |
+| [Setting vNext Model Convergence](./2026-09-08-setting-vnext-model-convergence.md)         | **ACTIVE / design frozen** — Settings Hub ownership、UserPreference presentation/regional、Product Time Context、Notification/device split、namespace persistence/PowerSync/Portability 已冻结；`SETTING-9201` 文档完成，其余实施待开始。                   |
+| [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)                   | **ACTIVE / design frozen** — 保留 Mastra 单一 runtime，收敛 Conversation shell、Provider Secret/Model Capability、AI Context、Knowledge stable identity、Workflow Draft/Apply、ExecutionRecord；`AI-9601` 文档完成，其余 production implementation 未开始。 |
+| [Time + Label vNext Model Convergence](./2026-09-09-time-label-vnext-model-convergence.md) | **ACTIVE / design frozen** — TimeContext/timezone-aware Calendar/Presentation 与 pure Shared Label Registry/owner assignment 边界已冻结；`FOUNDATION-1001` 文档完成，其余 production implementation 未开始。                                                |
 
 ## 本轮已归档（2026-09-08）
 

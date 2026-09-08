@@ -4,7 +4,7 @@ tags:
   - index
 description: 架构决策记录索引
 created: 2025-11-23T15:00:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-09T00:30:00+08:00
 ---
 
 # ADR 索引
@@ -116,6 +116,10 @@ updated: 2026-09-09T00:00:00+08:00
 | [ADR-097](./ADR-097-ai-provider-connection-secret-and-model-capability-boundary.md) | AI Provider Connection、Secret 与 Model Capability Boundary | 已采纳（待实施） | 2026-09-09 |
 | [ADR-098](./ADR-098-ai-context-knowledge-index-and-owner-contract-boundary.md) | AI Context、Knowledge Index 与 Owner Contract Boundary | 已采纳（待实施） | 2026-09-09 |
 | [ADR-099](./ADR-099-ai-workflow-draft-apply-and-execution-record-boundary.md) | AI Workflow Draft、Apply 与 Execution Record Boundary | 已采纳（待实施） | 2026-09-09 |
+| [ADR-100](./ADR-100-product-time-context-and-timezone-aware-calendar.md) | Product Time Context 与 Timezone-aware Calendar | 已采纳（待实施） | 2026-09-09 |
+| [ADR-101](./ADR-101-product-time-presentation-and-compatibility-surface.md) | Product Time Presentation 与 Compatibility Surface | 已采纳（待实施） | 2026-09-09 |
+| [ADR-102](./ADR-102-label-registry-and-owner-assignment-boundary.md) | Label Registry 与 Owner Assignment Boundary | 已采纳（待实施） | 2026-09-09 |
+| [ADR-103](./ADR-103-label-identity-normalization-time-and-color-contract.md) | Label Identity、Normalization、Time 与 Color Contract | 已采纳（待实施） | 2026-09-09 |
 
 ## 维护规则
 
