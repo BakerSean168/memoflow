@@ -73,7 +73,7 @@ test.describe('Task completion closed loop', () => {
           recurrenceRule: null,
           reminderConfig: null,
           importance: 'Moderate',
-          tags: [],
+          labelIds: [],
           goalBinding: {
             goalId: goalReceipt.goalId,
             keyResultId,

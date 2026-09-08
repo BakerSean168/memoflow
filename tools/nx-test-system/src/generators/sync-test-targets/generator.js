@@ -32,7 +32,8 @@ const governedRequiredTargets = ['test', 'test:watch', 'test:coverage'];
 const coverageConfigsByProject = new Map([
   ['goal', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
   ['reminder', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
-  ['schedule', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
+  // CLEAN-6304: Temporal Engine use cases moved to @memoflow/scheduler; Schedule keeps Calendar/Planner + mapper coverage only.
+  ['schedule', ['vitest.config.ts', 'vitest.mappers.config.ts']],
   ['task', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
 ]);
 

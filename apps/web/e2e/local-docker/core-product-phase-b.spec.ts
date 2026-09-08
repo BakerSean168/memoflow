@@ -103,7 +103,7 @@ test.describe('Local Docker core product Phase B', () => {
           },
           reminderConfig: null,
           importance: 'Moderate',
-          tags: [],
+          labelIds: [],
           goalBinding: null,
         },
       }),

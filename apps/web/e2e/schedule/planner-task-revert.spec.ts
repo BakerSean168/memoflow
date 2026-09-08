@@ -37,7 +37,7 @@ test.describe('Planner owner-command acceptance', () => {
           recurrenceRule: null,
           reminderConfig: null,
           importance: 'Moderate',
-          tags: [],
+          labelIds: [],
           goalBinding: null,
         },
       }),
