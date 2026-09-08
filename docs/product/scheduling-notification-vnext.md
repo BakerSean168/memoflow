@@ -34,6 +34,31 @@ Scheduler / Temporal Engine
 
 当前代码仍存在 legacy `ScheduleTask / ScheduleExecution / ScheduleConfig` 实现壳以及 CalendarEntry 的 `duration/conflict/priority` 残差。它们属于**待实施迁移**，不能因为本文已冻结 North Star 就当作代码已完成。详细模型见 [Schedule / Planner + Scheduler / Temporal Engine vNext](./schedule-planner-scheduler-vnext.md) 和 [Current System Map](../analysis/2026-09-08-schedule-scheduler-current-system-map.md)。
 
+## 2026-09-08 Notification Model Convergence Freeze
+
+ADR-063 已落地的 Notification 主干继续保护：
+
+```text
+NotificationRequested
+  -> Notification Fact
+  -> per-channel policy
+  -> durable dispatch / receipt
+```
+
+本轮进一步冻结 ADR-084~088：
+
+```text
+NotificationFact + InboxLifecycle
+NotificationWorkflowDefinition
+DeliveryPlan + DeliveryProjection
+NotificationInteraction + typed OwnerCommand
+QuietHours(TimeZoneId,Hm)
+InboxPort / OperationsPort
+InboxRealtime / DeliveryRealtime
+```
+
+当前代码仍保留 `NotificationChannel[] / NotificationHistory / NotificationTemplate / NotificationCategory / RelatedEntityType / host-local DND` 等第一代或过渡模型；这些属于**待实施迁移**。详细见 [Notification vNext](./notification-vnext.md) 与 [Notification Current System Map](../analysis/2026-09-08-notification-current-system-map.md)。
+
 ## 1. 为什么需要这一份统一设计
 
 MemoFlow 早期把“时间相关能力”自然聚集到 Schedule 和 Reminder 附近：

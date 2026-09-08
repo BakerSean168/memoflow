@@ -27,6 +27,10 @@ updated: 2026-09-08T20:20:00+08:00
 
 ADR-079 进一步明确：legacy `ReminderNotificationConfig` 不应继续成为 RoutineDefinition 的长期字段。Routine 只拥有 intervention/presentation intent；Notification 继续拥有 channels、DND、rate limit、delivery；Desktop/Device Surface 拥有 sound/vibration/OS permission/实际 surface。该 Routine 侧退役尚未实施，不改变本 ADR 已落地的 Notification ownership。
 
+### 2026-09-08 Notification model convergence follow-up
+
+ADR-084~088 继续沿用本 ADR 已实施的 `NotificationRequested -> Fact -> per-channel policy -> durable delivery` 主干，但进一步收敛内部模型：Notification 变成更纯的 `NotificationFact + Inbox lifecycle`；`NotificationChannel` 从 Fact aggregate truth 退出；`NotificationTemplate/History` 退役；workflow registry 成为 canonical semantic catalog；DND 收敛为带 `TimeZoneId/Hm` 的 QuietHours；Product Inbox 与 Delivery Operations/realtime 分离。以上均为**已采纳、待实施**，不得把本文“已实施”误解成第二次模型收敛已经完成。
+
 ## 1. 背景
 
 MemoFlow Notification 当前已经有较完整的可靠交付结构：

@@ -100,6 +100,11 @@ updated: 2026-09-08T20:45:00+08:00
 | [ADR-081](./ADR-081-scheduled-invocation-model-and-legacy-schedule-task-retirement.md) | ScheduledInvocation Model 与 Legacy ScheduleTask 退役 | 已采纳（待实施） | 2026-09-08 |
 | [ADR-082](./ADR-082-scheduler-invocation-attempt-and-runtime-state-machine.md) | Scheduler Invocation Attempt 与 Runtime State Machine | 已采纳（待实施） | 2026-09-08 |
 | [ADR-083](./ADR-083-schedule-scheduler-contract-diagnostics-and-persistence-boundary.md) | Schedule / Scheduler Contract、Diagnostics 与 Persistence Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-084](./ADR-084-notification-fact-and-inbox-lifecycle.md) | Notification Fact 与 Inbox Lifecycle | 已采纳（待实施） | 2026-09-08 |
+| [ADR-085](./ADR-085-notification-workflow-semantics-and-template-retirement.md) | Notification Workflow Semantics 与 Template 退役 | 已采纳（待实施） | 2026-09-08 |
+| [ADR-086](./ADR-086-notification-delivery-plan-projection-and-channel-retirement.md) | Notification DeliveryPlan、Projection 与 Legacy Channel 退役 | 已采纳（待实施） | 2026-09-08 |
+| [ADR-087](./ADR-087-notification-interaction-and-typed-action-intents.md) | Notification Interaction 与 Typed Action Intents | 已采纳（待实施） | 2026-09-08 |
+| [ADR-088](./ADR-088-notification-preference-quiet-hours-realtime-and-operations-boundary.md) | Notification Preference、QuietHours、Realtime 与 Operations Boundary | 已采纳（待实施） | 2026-09-08 |
 
 ## 维护规则
 

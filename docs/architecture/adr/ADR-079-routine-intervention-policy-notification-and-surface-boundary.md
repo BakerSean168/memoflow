@@ -19,6 +19,10 @@ updated: 2026-09-08T20:20:00+08:00
 **修订：** ADR-059 Intervention Surface；ADR-063 Notification delivery boundary  
 **关联：** ADR-042、ADR-059、ADR-062、ADR-063、ADR-076~078
 
+## 2026-09-08 Notification vNext follow-up
+
+ADR-084~088 进一步冻结 Notification 自身的目标模型。Routine 侧仍只提交 intervention/presentation intent 或 durable `NotificationRequested`；Notification 侧长期不再以 `NotificationTemplate`、nested `NotificationChannel[]`、generic `NotificationHistory` 作为业务真值，而由 `NotificationFact / WorkflowDefinition / DeliveryPlan / NotificationInteraction / QuietHours` 共同承担。该 follow-up 不改变本 ADR 的 Routine ownership 结论。
+
 ## 1. 决策摘要
 
 旧 `ReminderNotificationConfig` 不再属于 Routine 长期领域模型。
