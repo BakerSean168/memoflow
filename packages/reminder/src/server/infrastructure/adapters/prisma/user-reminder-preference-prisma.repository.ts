@@ -32,12 +32,12 @@ export class UserReminderPreferencePrismaRepository
         identityId: dto.identityId,
         bestTimeSlots: JSON.stringify(dto.bestTimeSlots),
         worstTimeSlots: JSON.stringify(dto.worstTimeSlots),
-        globalSmartFrequency: dto.globalSmartFrequency,
+        globalReminderEnabled: dto.globalReminderEnabled,
       },
       update: {
         bestTimeSlots: JSON.stringify(dto.bestTimeSlots),
         worstTimeSlots: JSON.stringify(dto.worstTimeSlots),
-        globalSmartFrequency: dto.globalSmartFrequency,
+        globalReminderEnabled: dto.globalReminderEnabled,
       },
     });
   }

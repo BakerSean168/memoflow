@@ -78,12 +78,8 @@ import { describe, expect, it } from 'vitest';
       expect(completion).not.toContain('DomainDate');
     });
 
-    it('keeps residual 857 exact metrics duals as type aliases; residual 859 marker present', () => {
-      const frequency = readFileSync(resolve(reminderVo, 'frequency-adjustment.ts'), 'utf8');
+    it('keeps transient ResponseMetrics as the residual 857 alias; residual 859 marker present', () => {
       const metrics = readFileSync(resolve(reminderVo, 'response-metrics.ts'), 'utf8');
-      expect(frequency).toContain('Residual 857');
-      expect(frequency).toContain('export type FrequencyAdjustmentDTO = FrequencyAdjustment');
-      expect(frequency).not.toMatch(/export interface FrequencyAdjustmentDTO\b/);
       expect(metrics).toContain('Residual 857');
       expect(metrics).toContain('export type ResponseMetricsDTO = ResponseMetrics');
       expect(metrics).not.toMatch(/export interface ResponseMetricsDTO\b/);

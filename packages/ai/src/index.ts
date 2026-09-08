@@ -44,4 +44,13 @@ export type {
   IAnalyticsReadPort,
   IKnowledgeSourcePort,
   IKnowledgeNotePersistencePort,
+  IAIRoutineCommandPort,
+  IAIPlannerReadPort,
+  IAINotificationReadPort,
+  AIRoutineCreateInput,
+  AIRoutineCommandReceipt,
+  AIPlannerWindowSummary,
+  AIPlannerConflictSummary,
+  AIPlannerTaskItem,
+  AIUnreadNotificationSummary,
 } from './ports';

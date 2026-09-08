@@ -2,12 +2,13 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { getRuntimeProfile, resolveLocalDockerHostPorts } from '../runtime/load-profiles.mjs';
 import { detectHostEnvShadowing } from './env-shadow.mjs';
 
 export { detectHostEnvShadowing } from './env-shadow.mjs';
 
+const workspaceRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const baseEnvFile = '.env.production';
 const envFile = '.env.production.local';
 const machineEnvFile = '.env.local';
@@ -21,7 +22,7 @@ const machineEnvFile = '.env.local';
  * @returns {string[]}
  */
 export function createLocalComposeArgs(options = {}) {
-  const cwd = options.cwd ?? process.cwd();
+  const cwd = options.cwd ?? workspaceRoot;
   const args = ['compose', '-f', 'docker-compose.local.yml', '--env-file', baseEnvFile];
   if (existsSync(resolve(cwd, envFile))) {
     args.push('--env-file', envFile);
@@ -305,22 +306,23 @@ export function createLocalComposeRuntimeEnv(options = {}) {
   const quiet = options.quiet === true;
   const log = quiet ? () => {} : console.log.bind(console);
   const warn = quiet ? () => {} : console.warn.bind(console);
+  const cwd = options.cwd ?? workspaceRoot;
 
   const env = {
     ...process.env,
     NX_DAEMON: 'false',
     NX_ISOLATE_PLUGINS: 'false',
   };
-  env.VCS_REF ||= resolveWorkspaceRevision({ cwd: options.cwd ?? process.cwd() });
+  env.VCS_REF ||= resolveWorkspaceRevision({ cwd });
   env.BUILD_DATE ||= new Date().toISOString();
 
   log(`[docker:local] image revision: ${env.VCS_REF}`);
   log(`[docker:local] image build date: ${env.BUILD_DATE}`);
 
-  const envFileMap = readEnvFileMap(envFile);
-  const envKeys = readEnvFileKeys(envFile);
-  const machineEnvFileMap = readEnvFileMap(machineEnvFile);
-  const developmentEnv = readEnvFileMap('.env.development');
+  const envFileMap = readEnvFileMap(resolve(cwd, envFile));
+  const envKeys = new Set(envFileMap.keys());
+  const machineEnvFileMap = readEnvFileMap(resolve(cwd, machineEnvFile));
+  const developmentEnv = readEnvFileMap(resolve(cwd, '.env.development'));
   const shareDevelopmentSecrets =
     machineEnvFileMap.get('LOCAL_DOCKER_SHARE_DEV_SECRETS')?.toLowerCase() === 'true';
 

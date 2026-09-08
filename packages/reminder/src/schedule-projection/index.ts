@@ -4,15 +4,16 @@ export {
   createReminderScheduleProjectionSource,
   type ReminderScheduleProjectionEventMap,
   type ReminderScheduleProjectionHandlers,
+  REMINDER_SCHEDULING_OWNER_TYPE,
+  REMINDER_TEMPLATE_HANDLER_KEY,
+  REMINDER_TEMPLATE_PAYLOAD_VERSION,
+  type ReminderTemplateScheduledPayload,
   type ReminderScheduleProjectionPlan,
-  type ReminderScheduleProjectionSelection,
   type ReminderScheduleProjectionSource,
 } from '../server/infrastructure/schedule-projection-source';
 export { createReminderPrismaScheduleProjectionSource } from '../server/infrastructure/prisma';
 export { createReminderPowerSyncScheduleProjectionSource } from '../server/infrastructure/powersync';
-export {
-  ROUTINE_SCHEDULING_OWNER_TYPE,
-} from '../server/infrastructure/routine-schedule/routine-schedule-contract';
+export { ROUTINE_SCHEDULING_OWNER_TYPE } from '../server/infrastructure/routine-schedule/routine-schedule-contract';
 export {
   createRoutineScheduleProjectionEventHandlers,
   createRoutineScheduleProjectionSource,
@@ -25,9 +26,5 @@ export {
   type RoutineScheduleSnapshot,
   type RoutineScheduleStateReader,
 } from '../server/infrastructure/routine-schedule/routine-schedule-projection-source';
-export {
-  createRoutinePrismaScheduleProjectionSource,
-} from '../server/infrastructure/routine-schedule/routine-schedule-projection-source.prisma';
-export {
-  createPrismaRoutineScheduleStateReader,
-} from '../server/infrastructure/routine-schedule/routine-schedule-state-reader.prisma';
+export { createRoutinePrismaScheduleProjectionSource } from '../server/infrastructure/routine-schedule/routine-schedule-projection-source.prisma';
+export { createPrismaRoutineScheduleStateReader } from '../server/infrastructure/routine-schedule/routine-schedule-state-reader.prisma';

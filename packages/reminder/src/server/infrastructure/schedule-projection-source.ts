@@ -1,18 +1,23 @@
-import { ReminderType, type ReminderEventMap } from '@memoflow/contracts/reminder';
-import { SourceModule, Timezone } from '@memoflow/contracts/schedule';
-import { ScheduleTask } from '@memoflow/schedule';
+import type { ReminderEventMap } from '@memoflow/contracts/reminder';
+import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
+import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 import type { IReminderTemplateRepository } from '../domain/repositories/i-reminder-template-repository';
+import type { IUserReminderPreferenceRepository } from '../domain/repositories/i-user-reminder-preference-repository';
+import type { RoutineProfileStore } from '../domain/ports';
+import { ReminderTemplateControlService } from '../domain/services/reminder-template-control-service';
 
-export interface ReminderScheduleProjectionSelection {
-  readonly sourceModule: SourceModule;
-  readonly identityId: string;
-  readonly sourceEntityId?: string;
-  matches(task: ScheduleTask): boolean;
+export const REMINDER_TEMPLATE_HANDLER_KEY = 'reminder.template.fire';
+export const REMINDER_TEMPLATE_PAYLOAD_VERSION = 1;
+export const REMINDER_SCHEDULING_OWNER_TYPE = 'reminder.template';
+
+export interface ReminderTemplateScheduledPayload {
+  readonly templateId: string;
+  readonly scheduledFor: number;
 }
 
 export interface ReminderScheduleProjectionPlan {
-  readonly selection: ReminderScheduleProjectionSelection;
-  readonly nextTasks: readonly ScheduleTask[];
+  readonly owner: SchedulingOwner;
+  readonly desired: readonly ScheduledIntent<ReminderTemplateScheduledPayload>[];
 }
 
 export interface ReminderScheduleProjectionSource {
@@ -20,10 +25,9 @@ export interface ReminderScheduleProjectionSource {
     templateId: string,
     identityId: string,
   ): Promise<ReminderScheduleProjectionPlan>;
-  buildTemplateDeletionSelection(
-    templateId: string,
-    identityId: string,
-  ): ReminderScheduleProjectionSelection;
+  buildTemplateOwner(templateId: string, identityId: string): SchedulingOwner;
+  /** Full authority scan used by startup reconcile / lost-event repair. */
+  listTemplateRefs(): Promise<Array<{ templateId: string; identityId: string }>>;
 }
 
 export interface ReminderScheduleProjectionHandlers {
@@ -36,91 +40,79 @@ export type ReminderScheduleProjectionEventMap = Pick<
   | 'reminder:template-created'
   | 'reminder:template-updated'
   | 'reminder:template-enabled'
-  | 'reminder:template-moved'
   | 'reminder:template-paused'
   | 'reminder:template-deleted'
+  | 'reminder:template-eligibility-changed'
+  | 'reminder:triggered'
 >;
 
-function selectReminderProjection(
-  templateId: string,
-  identityId: string,
-): ReminderScheduleProjectionSelection {
-  return {
-    sourceModule: SourceModule.Reminder,
-    sourceEntityId: templateId,
-    identityId,
-    matches(task) {
-      return task.sourceEntityId === templateId;
-    },
-  };
+function reminderOwner(templateId: string, identityId: string): SchedulingOwner {
+  return { identityId, type: REMINDER_SCHEDULING_OWNER_TYPE, id: templateId };
 }
 
 export function createReminderScheduleProjectionSource(deps: {
   reminderTemplateRepository: IReminderTemplateRepository;
+  routineProfileStore: RoutineProfileStore;
+  userReminderPreferenceRepository?: IUserReminderPreferenceRepository;
 }): ReminderScheduleProjectionSource {
+  const controlService = new ReminderTemplateControlService(
+    deps.reminderTemplateRepository,
+    deps.userReminderPreferenceRepository,
+    deps.routineProfileStore,
+  );
+
   return {
+    buildTemplateOwner(templateId, identityId) {
+      return reminderOwner(templateId, identityId);
+    },
+
+    async listTemplateRefs() {
+      const refs = await deps.reminderTemplateRepository.findAllTemplateRefs();
+      return refs.map((ref) => ({ templateId: ref.id, identityId: ref.identityId }));
+    },
+
     async buildTemplatePlan(templateId, identityId) {
+      const owner = reminderOwner(templateId, identityId);
       const template = await deps.reminderTemplateRepository.findByIdForIdentity(
         identityId,
         templateId,
-        {
-          includeHistory: true,
-        },
       );
 
       if (!template) {
-        return {
-          selection: selectReminderProjection(templateId, identityId),
-          nextTasks: [],
-        };
+        return { owner, desired: [] };
       }
 
-      const selection = selectReminderProjection(templateId, String(template.identityId));
-      if (!template || template.deletedAt || !template.isEffectivelyEnabled() || !template.nextTriggerAt) {
-        return {
-          selection,
-          nextTasks: [],
-        };
+      const canonicalOwner = reminderOwner(template.id, String(template.identityId));
+      const effectiveStatus = await controlService.calculateEffectiveStatus(template);
+      if (template.deletedAt || !effectiveStatus.isEffectivelyEnabled || !template.nextTriggerAt) {
+        return { owner: canonicalOwner, desired: [] };
       }
 
-      const fixedTimezone = template.trigger.fixedTime?.timezone;
-      const scheduleTimezone =
-        fixedTimezone && Object.values(Timezone).includes(fixedTimezone as (typeof Timezone)[keyof typeof Timezone])
-          ? (fixedTimezone as (typeof Timezone)[keyof typeof Timezone])
-          : Timezone.Shanghai;
-
-      const scheduleTask = ScheduleTask.create({
-        identityId: String(template.identityId),
-        name: template.title,
-        description: template.description ?? undefined,
-        sourceModule: SourceModule.Reminder,
-        sourceEntityId: template.id,
-        schedule: {
-          cronExpression: null,
-          timezone: scheduleTimezone,
-          startDate: new Date(template.nextTriggerAt).toISOString(),
-          endDate: null,
-          maxExecutions: template.type === ReminderType.OneTime ? 1 : null,
+      const scheduledFor = template.nextTriggerAt;
+      const schedulingKey = buildSchedulingKey(
+        'reminder.template',
+        template.id,
+        String(scheduledFor),
+      );
+      const intent: ScheduledIntent<ReminderTemplateScheduledPayload> = {
+        schedulingKey,
+        handlerKey: REMINDER_TEMPLATE_HANDLER_KEY,
+        runAt: scheduledFor,
+        payloadVersion: REMINDER_TEMPLATE_PAYLOAD_VERSION,
+        payload: {
+          templateId: template.id,
+          scheduledFor,
         },
-        metadata: {
-          payload: {
-            reminderId: template.id,
-            reminderTitle: template.title,
-          },
-          tags: ['reminder'],
-          priority: 'Normal',
-          timeout: null,
+        sourceRevision: template.version,
+        priority: 'normal',
+        timeoutMs: null,
+        observability: {
+          name: template.title,
+          tags: ['reminder', `template:${template.id}`],
         },
-      });
-
-      return {
-        selection,
-        nextTasks: [scheduleTask],
       };
-    },
 
-    buildTemplateDeletionSelection(templateId, identityId) {
-      return selectReminderProjection(templateId, identityId);
+      return { owner: canonicalOwner, desired: [intent] };
     },
   };
 }
@@ -139,11 +131,15 @@ export function createReminderScheduleProjectionEventHandlers(
       handlers.upsertTemplate(event.templateId, String(event.identityId)),
     'reminder:template-enabled': async (event) =>
       handlers.upsertTemplate(event.templateId, String(event.identityId)),
-    'reminder:template-moved': async (event) =>
-      handlers.upsertTemplate(event.templateId, String(event.identityId)),
     'reminder:template-paused': async (event) =>
       handlers.deleteTemplate(event.templateId, String(event.identityId)),
     'reminder:template-deleted': async (event) =>
       handlers.deleteTemplate(event.templateId, String(event.identityId)),
+    'reminder:template-eligibility-changed': async (event) =>
+      handlers.upsertTemplate(event.templateId, String(event.identityId)),
+    // Trigger state is committed before this event is published. Re-read the
+    // aggregate and arm the next occurrence from its canonical nextTriggerAt.
+    'reminder:triggered': async (event) =>
+      handlers.upsertTemplate(event.templateId, String(event.identityId)),
   };
 }

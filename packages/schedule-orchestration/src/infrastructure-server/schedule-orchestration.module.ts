@@ -1,9 +1,11 @@
-import type { ScheduleEventMap } from '@memoflow/contracts/schedule';
 import type { GoalScheduleProjectionEventMap } from '@memoflow/goal/schedule-projection';
 import { GOAL_SCHEDULING_OWNER_TYPE } from '@memoflow/goal/schedule-projection';
 import type { RoutineScheduleProjectionEventMap } from '@memoflow/reminder/schedule-projection/routine';
 import { ROUTINE_SCHEDULING_OWNER_TYPE } from '@memoflow/reminder/schedule-projection/routine';
-import type { ReminderScheduleProjectionEventMap } from '@memoflow/reminder/schedule-projection';
+import {
+  REMINDER_SCHEDULING_OWNER_TYPE,
+  type ReminderScheduleProjectionEventMap,
+} from '@memoflow/reminder/schedule-projection';
 import type { TaskScheduleProjectionEventMap } from '@memoflow/task/schedule-projection';
 import { TASK_SCHEDULING_OWNER_TYPE } from '@memoflow/task/schedule-projection';
 import {
@@ -15,7 +17,8 @@ import {
   ScheduledHandlerRegistry,
   createHandlerRegistryScheduleTaskSourceExecutor,
   createScheduleTaskSchedulingPort,
-} from '@memoflow/schedule';
+} from '@memoflow/scheduler';
+import { createReminderTemplateScheduledHandlerRegistration } from '@memoflow/reminder/schedule-execution';
 import {
   createRoutineWallClockExecutionSource,
   createRoutineWallClockScheduledHandler,
@@ -28,7 +31,6 @@ import {
   defineProjectionRepairLane,
   type ProjectionRepairLane,
 } from '../runtime/projection-repair-runtime';
-import { createScheduleExecutionRouter } from '../execution/router';
 import { createCompositeRuntimeContribution } from '../runtime/composite-runtime';
 import { createGoalProjectionRuntime } from '../runtime/goal-projection-runtime';
 import { createProjectionRepairRuntime } from '../runtime/projection-repair-runtime';
@@ -40,23 +42,17 @@ import { createRoutineOverrideChangedPublishingStore } from './routine-override-
 export function createScheduleOrchestrationModule(
   options: CreateScheduleOrchestrationModuleOptions,
 ): ScheduleOrchestrationModule {
-  const scheduleEvents =
-    createTypedEventPublisher<Pick<ScheduleEventMap, 'schedule:task-deleted'>>(eventBus);
   const scheduleTaskRepository = options.taskProjection.scheduleTaskRepository;
-  if (options.reminderProjection.scheduleTaskRepository !== scheduleTaskRepository) {
-    throw new Error(
-      'Schedule orchestration requires one shared ScheduleTask repository for projections and SchedulingPort.',
-    );
-  }
-
   const schedulingPort = createScheduleTaskSchedulingPort(scheduleTaskRepository);
   const handlerRegistry = new ScheduledHandlerRegistry();
-  const legacySourceExecutor = createScheduleExecutionRouter(options.execution);
+  handlerRegistry.register(
+    createReminderTemplateScheduledHandlerRegistration({
+      executionSource: options.execution.reminderSource,
+    }),
+  );
 
-  // SCHED-3601 startup ordering is intentional: every Task/Goal/Routine
+  // SCHED-3601 startup ordering is intentional: every Task/Goal/Reminder/Routine
   // incremental listener is registered before the common durable repair sweep.
-  // The legacy Reminder listener also joins before the sweep so moving the
-  // neutral lanes does not regress its event coverage.
   const incrementalRuntimes = [
     createTaskProjectionRuntime({
       source: options.taskProjection.source,
@@ -67,6 +63,11 @@ export function createScheduleOrchestrationModule(
       source: options.goalProjection.source,
       schedulingPort,
       goalEvents: createTypedEventSubscriber<GoalScheduleProjectionEventMap>(eventBus),
+    }),
+    createReminderProjectionRuntime({
+      source: options.reminderProjection.source,
+      schedulingPort,
+      reminderEvents: createTypedEventSubscriber<ReminderScheduleProjectionEventMap>(eventBus),
     }),
   ];
 
@@ -98,10 +99,28 @@ export function createScheduleOrchestrationModule(
         const plan = await options.goalProjection.source.buildGoalPlan(ref.goalId, ref.identityId);
         return schedulingPort.reconcile(plan.owner, plan.desired);
       },
-      buildOwner: (ref) =>
-        options.goalProjection.source.buildGoalOwner(ref.goalId, ref.identityId),
+      buildOwner: (ref) => options.goalProjection.source.buildGoalOwner(ref.goalId, ref.identityId),
       listSchedulerOwners: () =>
         scheduleTaskRepository.listSchedulingOwners?.(GOAL_SCHEDULING_OWNER_TYPE) ??
+        Promise.resolve([]),
+      removeOwner: (owner) => schedulingPort.removeOwner(owner),
+      describeOwner: (owner) => `${owner.identityId}/${owner.id}`,
+    }),
+    defineProjectionRepairLane<{ templateId: string; identityId: string }>({
+      source: 'reminder',
+      enumerate: () => options.reminderProjection.source.listTemplateRefs(),
+      describe: (ref) => `${ref.identityId}/${ref.templateId}`,
+      repair: async (ref) => {
+        const plan = await options.reminderProjection.source.buildTemplatePlan(
+          ref.templateId,
+          ref.identityId,
+        );
+        return schedulingPort.reconcile(plan.owner, plan.desired);
+      },
+      buildOwner: (ref) =>
+        options.reminderProjection.source.buildTemplateOwner(ref.templateId, ref.identityId),
+      listSchedulerOwners: () =>
+        scheduleTaskRepository.listSchedulingOwners?.(REMINDER_SCHEDULING_OWNER_TYPE) ??
         Promise.resolve([]),
       removeOwner: (owner) => schedulingPort.removeOwner(owner),
       describeOwner: (owner) => `${owner.identityId}/${owner.id}`,
@@ -152,15 +171,6 @@ export function createScheduleOrchestrationModule(
     );
   }
 
-  incrementalRuntimes.push(
-    createReminderProjectionRuntime({
-      source: options.reminderProjection.source,
-      scheduleTaskRepository: options.reminderProjection.scheduleTaskRepository,
-      reminderEvents: createTypedEventSubscriber<ReminderScheduleProjectionEventMap>(eventBus),
-      scheduleEvents,
-    }),
-  );
-
   const projectionRepairRuntime = createProjectionRepairRuntime(repairLanes);
   const runtimeContributions = [...incrementalRuntimes, projectionRepairRuntime];
 
@@ -185,7 +195,6 @@ export function createScheduleOrchestrationModule(
     handlerRegistry,
     sourceExecutor: createHandlerRegistryScheduleTaskSourceExecutor({
       registry: handlerRegistry,
-      legacyFallback: legacySourceExecutor,
     }),
     ...(routineOverrideStore ? { routineOverrideStore } : {}),
   };

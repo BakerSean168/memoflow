@@ -57,8 +57,8 @@ export default {
     "filter": {
       "status": "Filter by occurrence status",
       "allStatuses": "All statuses",
-      "tag": "Filter by tag",
-      "allTags": "All tags",
+      "label": "Filter by label",
+      "allLabels": "All labels",
       "goal": "Filter by Goal binding",
       "allGoals": "All Goal bindings",
       "goalLinked": "Linked to a Goal",
@@ -91,22 +91,9 @@ export default {
     "timeType": "Time Type",
     "timeValue": "Time Value",
     "description": "Description",
-    "tags": "Tags",
     "goalBinding": "Goal contribution",
     "linkedGoal": "Linked goal",
     "keyResult": "Key result",
-    "relations": "Task Relations",
-    "parentTask": "Parent Task",
-    "noParentTask": "No parent task",
-    "dependencyStatus": "Dependency Status",
-    "blockedState": "Blocked",
-    "readyState": "Ready",
-    "subtasks": "Subtasks",
-    "noSubtasks": "No subtasks",
-    "predecessors": "Predecessors",
-    "noPredecessors": "No predecessor tasks",
-    "successors": "Successors",
-    "noSuccessors": "No successor tasks",
     "executionStats": "Execution Stats",
     "totalInstances": "Total to-dos",
     "completed": "Completed",
@@ -147,12 +134,6 @@ export default {
     "completedCount": "{count} completed",
     "openCount": "{count} open",
     "noOccurrences": "This plan has not generated any occurrences yet."
-  },
-  "depValidationDemo": {
-    "title": "Dependency Validation Demo (STORY-024)",
-    "subtitle": "Task Dependency Validation",
-    "description": "This page is for testing the dependency validation feature",
-    "devInProgress": "Dependency validation demo in development..."
   },
   "complete": {
     "title": "Complete Task",
@@ -350,13 +331,6 @@ export default {
       "maxValue": "Increment value cannot exceed 1000"
     }
   },
-  "schedulingPolicy": {
-    "title": "Scheduling Policy",
-    "alertDescription": "Scheduling policy controls how tasks appear in calendar view and execution rules.",
-    "alertMessage": "Advanced scheduling policy features coming soon.",
-    "label": "Tags",
-    "tagPlaceholder": "Press Enter to add a tag"
-  },
   "metadata": {
     "title": "Task Properties",
     "taskType": "Task Type",
@@ -375,30 +349,12 @@ export default {
     "importanceLowSub": "Can be deferred",
     "importanceMinimal": "Minimal",
     "importanceMinimalSub": "Handle when free",
-    "colorMark": "Color Mark",
-    "selectColor": "Select color",
-    "clearColor": "Clear color",
-    "parentTask": "Parent Task",
-    "selectParentTask": "Select parent task",
-    "noParentTask": "No parent task",
-    "tags": "Tags",
-    "tagPlaceholder": "Press Enter to add a tag",
-    "tagWork": "Work",
-    "tagPersonal": "Personal",
-    "tagStudy": "Study",
-    "tagHealth": "Health",
-    "tagFinance": "Finance",
-    "tagSocial": "Social",
-    "tagCreative": "Creative",
-    "tagTravel": "Travel",
-    "tagHome": "Home",
-    "tagShopping": "Shopping",
-    "tagExercise": "Exercise",
-    "tagReading": "Reading",
-    "tagMeeting": "Meeting",
-    "tagDeadline": "Deadline",
-    "tagUrgent": "Urgent",
-    "tagReview": "Review"
+    "labels": "Labels",
+    "labelsPlaceholder": "Add labels",
+    "searchLabels": "Search labels…",
+    "noLabels": "No labels found",
+    "createLabel": "Create label",
+    "labelCreateFailed": "Failed to create label"
   },
   "weekday": {
     "title": "Select Days",
@@ -456,7 +412,7 @@ export default {
     "notFoundMessage": "The task plan being edited was not found. Please select or create a task plan.",
     "close": "Close",
     "advancedSettings": "Advanced settings",
-    "advancedSettingsDescription": "Reminders, organization, and dependencies"
+    "advancedSettingsDescription": "Reminders, labels, and Goal contribution"
   },
   "templateCard": {
     "noDescription": "No description",
@@ -469,12 +425,6 @@ export default {
     "totalCount": "Total",
     "completionRate": "Completion",
     "createdAt": "Created",
-    "parentTask": "Parent task",
-    "subtasksCount": "{count} subtasks",
-    "predecessorsCount": "{count} predecessors",
-    "successorsCount": "{count} successors",
-    "blockedState": "Blocked",
-    "locateInGraph": "Locate in graph",
     "pause": "Pause",
     "resume": "Resume",
     "activate": "Activate",
@@ -497,10 +447,6 @@ export default {
     "unknownTask": "Unknown Task",
     "completedAt": "Completed at {time}"
   },
-  "draggableCard": {
-    "releaseToDep": "Release to create dependency",
-    "cannotCreateDep": "Cannot create dependency"
-  },
   "infoCard": {
     "title": "Task Detail",
     "close": "Close",
@@ -515,27 +461,21 @@ export default {
     "addNew": "Add New Task"
   },
   "templateMgmt": {
-    "viewDependencyGraph": "View Dependency Graph",
     "deleteAll": "Delete all task plans",
     "createNew": "New task plan",
     "quickCreate": "Quick task",
     "createFirst": "Create first task plan",
     "countLabel": "{count} task plans",
     "viewCard": "Cards",
-    "viewGraph": "Graph",
-    "relationFilterLabel": "Relations",
     "emptyTitle": "No task plans yet",
-    "emptyDescription": "The task library holds repeatable task definitions: recurrence rules, dependencies, and goal bindings.",
+    "emptyDescription": "The task library holds repeatable task definitions: recurrence rules, reminders, and goal bindings.",
     "emptyAiLink": "Let AI generate them →",
     "noMatch": "No matching task plans",
     "clearFilter": "Clear Filters",
-    "graphNarrowViewport": "Maximize the panel to view the dependency graph",
-    "dragRequiresFocus": "Drag-to-create dependency is available after maximizing the panel",
     "noActive": "No enabled task plans",
     "noPaused": "No paused task plans",
     "noArchived": "No ended task plans",
     "noTemplates": "No task plans",
-    "dependencyGraphTitle": "Task Dependency Graph",
     "confirmDeleteAll": "Confirm Delete All Tasks",
     "cannotUndo": "This cannot be undone!",
     "confirmText": "This deletes all {count} task plans, their to-dos, and execution history.",
@@ -545,11 +485,6 @@ export default {
     "statusActive": "Enabled",
     "statusPaused": "Paused",
     "statusArchived": "Ended",
-    "relationAll": "All Relations",
-    "relationBlocked": "Blocked",
-    "relationParented": "Has Parent",
-    "relationDependencies": "Has Dependencies",
-    "relationChildren": "Has Subtasks"
   },
   "instanceMgmt": {
     "todayTasks": "Today's Tasks",
@@ -568,27 +503,6 @@ export default {
     "completedTasks": "Completed Tasks",
     "taskFallback": "Task"
   },
-  "dependencyGraph": {
-    "title": "Task Dependency Graph",
-    "forceLayout": "Force Layout",
-    "circularLayout": "Circular Layout",
-    "criticalPath": "Critical Path",
-    "refresh": "Refresh",
-    "retry": "Retry",
-    "emptyTitle": "No dependency data",
-    "emptyDescription": "Create tasks and add dependencies to see the dependency graph",
-    "stats": "Statistics",
-    "taskCount": " tasks",
-    "depCount": " dependencies",
-    "cyclicDetected": "Cyclic dependency detected",
-    "criticalPathLabel": "Critical Path",
-    "totalDuration": "Total duration:",
-    "criticalTaskCount": " critical tasks",
-    "hours": "h",
-    "minutes": "min",
-    "renderFailed": "Failed to render chart",
-    "estimateTooltip": "Estimate: {duration} min"
-  },
   "aiGeneration": {
     "title": "Generate Tasks for Key Result",
     "generating": "Generating tasks...",
@@ -601,67 +515,6 @@ export default {
     "priorityNormal": "NORMAL",
     "priorityLow": "LOW",
     "priorityUrgent": "URGENT"
-  },
-  "dependency": {
-    "title": "Manage Dependencies",
-    "currentDeps": "Current Dependencies",
-    "addNew": "Add New Dependency",
-    "sourceTask": "Predecessor Task",
-    "selectSource": "Select predecessor",
-    "depType": "Dependency Type",
-    "selectType": "Select type",
-    "fs": "FS - Finish to Start",
-    "ss": "SS - Start to Start",
-    "ff": "FF - Finish to Finish",
-    "sf": "SF - Start to Finish",
-    "add": "Add Dependency",
-    "alreadyExists": "This dependency already exists",
-    "cyclicError": "This would create a cyclic dependency",
-    "fsLabel": "Finish to Start",
-    "ssLabel": "Start to Start",
-    "ffLabel": "Finish to Finish",
-    "sfLabel": "Start to Finish"
-  },
-  "depValidation": {
-    "cannotCreate": "Cannot Create Dependency",
-    "cyclicPath": "This would create a cyclic dependency path:",
-    "backToStart": "Back to start",
-    "suggestions": "Suggestions:",
-    "details": "Details:",
-    "errorCode": "Error code:",
-    "viewGraph": "View Graph",
-    "close": "Close",
-    "suggestion1": "Check the logical relationships between tasks",
-    "suggestion2": "Consider splitting complex tasks into independent tasks",
-    "suggestion3": "Use the DAG view to visualize dependencies"
-  },
-  "blocked": {
-    "title": "Task Blocked",
-    "waitingMessage": "This task is waiting for {count} predecessor(s) to complete:",
-    "estimate": "Estimate:",
-    "completionProgress": "Completion Progress",
-    "ready": "Task Ready",
-    "readyMessage": "All predecessors completed. Ready to start."
-  },
-  "criticalPath": {
-    "title": "Critical Path Analysis",
-    "export": "Export",
-    "addDepsHint": "Add task dependencies to calculate the critical path.",
-    "estimatedDuration": "Estimated Duration",
-    "criticalTaskCount": "Critical Tasks",
-    "tasks": "Critical Path Tasks",
-    "durationLabel": "Duration:"
-  },
-  "dagVisualization": {
-    "title": "Task Dependency Graph",
-    "criticalPathLabel": "Critical Path:",
-    "minutes": "min",
-    "forceLayout": "Force",
-    "layeredLayout": "Layered",
-    "criticalPath": "Critical Path",
-    "statusTooltip": "Status:",
-    "durationTooltip": "Est. duration:",
-    "minuteUnit": "min"
   },
   "rootInstanceCard": {
     "taskFallback": "Task"

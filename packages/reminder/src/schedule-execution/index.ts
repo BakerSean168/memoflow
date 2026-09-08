@@ -14,6 +14,11 @@ export interface ReminderScheduleExecutionSource {
 }
 
 export {
+  createReminderTemplateScheduledHandlerRegistration,
+  ReminderTemplateScheduledPayloadSchema,
+} from '../server/infrastructure/reminder-template-scheduled-handler';
+
+export {
   createReminderPrismaScheduleExecutionCommitPort,
   createReminderPrismaScheduleExecutionSource,
   createReminderPowerSyncScheduleExecutionCommitPort,

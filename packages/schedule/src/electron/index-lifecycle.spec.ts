@@ -49,20 +49,20 @@ vi.mock('electron', () => ({
 
 import { createScheduleElectronModule } from './index';
 
+const desktopScheduleChannels = [
+  ScheduleChannels.LIST,
+  ScheduleChannels.LIST_BY_DATE_RANGE,
+  ScheduleChannels.GET,
+  ScheduleChannels.CREATE,
+  ScheduleChannels.UPDATE,
+  ScheduleChannels.DELETE,
+  ScheduleChannels.GET_CONFLICTS,
+  ScheduleChannels.DETECT_CONFLICTS,
+  ScheduleChannels.CREATE_WITH_CONFLICT_DETECTION,
+  ScheduleChannels.RESOLVE_CONFLICT,
+] as const;
+
 function createFakeInstance() {
-  const api = {
-    createTask: vi.fn(() => ok(null as never)),
-    listTasks: vi.fn(() => ok([] as never)),
-    getTask: vi.fn(() => ok(null as never)),
-    getDueTasks: vi.fn(() => ok([] as never)),
-    pauseTask: vi.fn(() => ok(null as never)),
-    resumeTask: vi.fn(() => ok(null as never)),
-    completeTask: vi.fn(() => ok(null as never)),
-    cancelTask: vi.fn(() => ok(null as never)),
-    deleteTask: vi.fn(() => ok(null as never)),
-    batchDeleteTasks: vi.fn(() => ok(null as never)),
-    updateTaskMetadata: vi.fn(() => ok(null as never)),
-  };
   const eventApi = {
     createEvent: vi.fn(() => ok(null as never)),
     getEvent: vi.fn(() => ok(null as never)),
@@ -78,15 +78,12 @@ function createFakeInstance() {
   const dispose = vi.fn(async () => undefined);
   const instance: ScheduleModuleInstance = {
     scheduleRepository: {} as never,
-    scheduleExecutionRepository: {} as never,
-    scheduleTaskRepository: {} as never,
     useCases: {} as never,
-    api,
     eventApi,
     start,
     dispose,
   } as ScheduleModuleInstance;
-  return { instance, api, eventApi, start, dispose };
+  return { instance, eventApi, start, dispose };
 }
 
 function createFakeContext(): IElectronModuleContext {
@@ -128,10 +125,10 @@ describe('createScheduleElectronModule lifecycle', () => {
   it('register installs all channels WITHOUT starting the runtime (delayed start)', () => {
     moduleDef.register(context);
 
-    for (const channel of Object.values(ScheduleChannels)) {
+    for (const channel of desktopScheduleChannels) {
       expect(mocks.handlers.has(channel), `Expected ${channel} to be registered`).toBe(true);
     }
-    expect(mocks.handlers.size).toBe(Object.values(ScheduleChannels).length);
+    expect(mocks.handlers.size).toBe(desktopScheduleChannels.length);
     expect(fake.start).not.toHaveBeenCalled();
   });
 
@@ -156,7 +153,7 @@ describe('createScheduleElectronModule lifecycle', () => {
     expect(fake.start).toHaveBeenCalledTimes(1);
 
     await moduleDef.destroy?.();
-    for (const channel of Object.values(ScheduleChannels)) {
+    for (const channel of desktopScheduleChannels) {
       expect(mocks.handlers.has(channel)).toBe(false);
     }
     expect(fake.dispose).toHaveBeenCalledTimes(1);

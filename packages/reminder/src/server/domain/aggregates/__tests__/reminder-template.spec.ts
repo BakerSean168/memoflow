@@ -3,13 +3,7 @@ import { ReminderTemplate } from '../reminder-template';
 import type { ReminderTemplateState } from '../reminder-template';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ReminderTemplateId } from '../../value-objects/reminder-template-id';
-import {
-  TriggerConfig,
-  ActiveTimeConfig,
-  ActiveHoursConfig,
-  ResponseMetrics,
-  FrequencyAdjustment,
-} from '../../value-objects';
+import { TriggerConfig, ActiveTimeConfig } from '../../value-objects';
 import { ReminderNotificationConfig } from '../../value-objects/reminder-notification-config';
 import { ReminderStatus, ReminderType, TriggerResult } from '@memoflow/contracts/reminder';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
@@ -32,7 +26,6 @@ function makeState(overrides: Partial<ReminderTemplateState> = {}): ReminderTemp
     notificationConfig: ReminderNotificationConfig.createDefault(),
     selfEnabled: true,
     status: ReminderStatus.Active,
-    groupId: null,
     effectiveEnabled: true,
     importanceLevel: ImportanceLevel.Moderate,
     tags: [],
@@ -43,9 +36,6 @@ function makeState(overrides: Partial<ReminderTemplateState> = {}): ReminderTemp
     updatedAt: new Date(now),
     deletedAt: null,
     version: 1,
-    responseMetrics: null,
-    frequencyAdjustment: null,
-    smartFrequencyEnabled: true,
     history: [],
     ...overrides,
   };
@@ -123,7 +113,6 @@ describe('ReminderTemplate aggregate', () => {
         tags: ['work', 'urgent'],
         color: '#FF0000',
         icon: 'bell',
-        groupId: 'group-1',
       });
 
       expect(template.description).toBe('A description');
@@ -131,7 +120,6 @@ describe('ReminderTemplate aggregate', () => {
       expect(template.tags).toEqual(['work', 'urgent']);
       expect(template.color).toBe('#FF0000');
       expect(template.icon).toBe('bell');
-      expect(template.groupId).toBe('group-1');
     });
 
     it('should emit a reminder:template-created domain event', () => {
@@ -143,11 +131,6 @@ describe('ReminderTemplate aggregate', () => {
       expect(createdEvent).toBeDefined();
       expect((createdEvent!.payload as any).templateId).toBe(template.id);
       expect((createdEvent!.payload as any).reminder?.name).toBe('Daily Standup');
-    });
-
-    it('should default smartFrequencyEnabled to true', () => {
-      const template = createDefaultTemplate();
-      expect(template.smartFrequencyEnabled).toBe(true);
     });
 
     it('should default importanceLevel to Moderate', () => {
@@ -296,11 +279,6 @@ describe('ReminderTemplate aggregate', () => {
       expect(Number(template.updatedAt)).toBeGreaterThanOrEqual(originalUpdatedAt);
     });
 
-    it('should allow setting groupId to null', () => {
-      const template = ReminderTemplate.load(makeState({ groupId: 'old-group' }));
-      template.update({ groupId: null });
-      expect(template.groupId).toBeNull();
-    });
   });
 
   // -----------------------------------------------------------------------
@@ -331,36 +309,21 @@ describe('ReminderTemplate aggregate', () => {
   });
 
   // -----------------------------------------------------------------------
-  // moveToGroup()
+  // external eligibility context
   // -----------------------------------------------------------------------
-  describe('moveToGroup()', () => {
-    it('should update groupId', () => {
-      const template = ReminderTemplate.load(makeState({ groupId: null }));
-      template.moveToGroup('new-group');
-      expect(template.groupId).toBe('new-group');
-    });
+  describe('markEligibilityContextChanged()', () => {
+    it('emits a scheduling re-read event without restoring single-group ownership', () => {
+      const template = ReminderTemplate.load(makeState());
+      template.markEligibilityContextChanged('profile-membership');
 
-    it('should emit a reminder:template-moved event', () => {
-      const template = ReminderTemplate.load(makeState({ groupId: null }));
-      template.moveToGroup('new-group');
       const events = template.pullDomainEvents();
-      const movedEvent = events.find((e) => e.eventType === 'reminder:template-moved');
-      expect(movedEvent).toBeDefined();
-      expect((movedEvent!.payload as any).oldGroupId).toBeNull();
-      expect((movedEvent!.payload as any).newGroupId).toBe('new-group');
-    });
-
-    it('should not emit event if groupId does not change', () => {
-      const template = ReminderTemplate.load(makeState({ groupId: 'same' }));
-      template.moveToGroup('same');
-      const events = template.pullDomainEvents();
-      expect(events).toHaveLength(0);
-    });
-
-    it('should allow moving to null (ungroup)', () => {
-      const template = ReminderTemplate.load(makeState({ groupId: 'g1' }));
-      template.moveToGroup(null);
-      expect(template.groupId).toBeNull();
+      expect(events).toHaveLength(1);
+      expect(events[0]?.eventType).toBe('reminder:template-eligibility-changed');
+      expect(events[0]?.payload).toMatchObject({
+        identityId: template.identityId,
+        templateId: template.id,
+        cause: 'profile-membership',
+      });
     });
   });
 
@@ -540,143 +503,7 @@ describe('ReminderTemplate aggregate', () => {
     });
   });
 
-  // -----------------------------------------------------------------------
-  // Smart frequency methods
-  // -----------------------------------------------------------------------
-  describe('smart frequency', () => {
-    it('toggleSmartFrequency should change the flag', () => {
-      const template = ReminderTemplate.load(makeState({ smartFrequencyEnabled: true }));
-      template.toggleSmartFrequency(false);
-      expect(template.smartFrequencyEnabled).toBe(false);
 
-      template.toggleSmartFrequency(true);
-      expect(template.smartFrequencyEnabled).toBe(true);
-    });
-
-    it('updateResponseMetrics should set metrics', () => {
-      const template = ReminderTemplate.load(makeState());
-      template.updateResponseMetrics({
-        clickRate: 75,
-        ignoreRate: 10,
-        avgResponseTime: 5,
-        snoozeCount: 2,
-        effectivenessScore: 80,
-        sampleSize: 100,
-        lastAnalysisTime: Date.now(),
-      });
-      expect(template.responseMetrics).not.toBeNull();
-      expect(template.responseMetrics!.clickRate).toBe(75);
-    });
-
-    it('needsFrequencyAdjustment returns false when no metrics', () => {
-      const template = ReminderTemplate.load(
-        makeState({ responseMetrics: null, smartFrequencyEnabled: true }),
-      );
-      expect(template.needsFrequencyAdjustment()).toBe(false);
-    });
-
-    it('needsFrequencyAdjustment returns false when smart frequency is disabled', () => {
-      const template = ReminderTemplate.load(
-        makeState({
-          smartFrequencyEnabled: false,
-          responseMetrics: ResponseMetrics.create({
-            clickRate: 10,
-            ignoreRate: 80,
-            avgResponseTime: 5,
-            snoozeCount: 0,
-            effectivenessScore: 20,
-            sampleSize: 50,
-            lastAnalysisTime: Date.now(),
-          }),
-        }),
-      );
-      expect(template.needsFrequencyAdjustment()).toBe(false);
-    });
-
-    it('needsFrequencyAdjustment returns true for low effectiveness', () => {
-      const template = ReminderTemplate.load(
-        makeState({
-          smartFrequencyEnabled: true,
-          responseMetrics: ResponseMetrics.create({
-            clickRate: 10,
-            ignoreRate: 70,
-            avgResponseTime: 5,
-            snoozeCount: 0,
-            effectivenessScore: 30,
-            sampleSize: 50,
-            lastAnalysisTime: Date.now(),
-          }),
-        }),
-      );
-      expect(template.needsFrequencyAdjustment()).toBe(true);
-    });
-
-    it('calculateSuggestedAdjustment returns null when not needed', () => {
-      const template = ReminderTemplate.load(
-        makeState({
-          smartFrequencyEnabled: true,
-          responseMetrics: ResponseMetrics.create({
-            clickRate: 80,
-            ignoreRate: 10,
-            avgResponseTime: 5,
-            snoozeCount: 0,
-            effectivenessScore: 50,
-            sampleSize: 50,
-            lastAnalysisTime: Date.now(),
-          }),
-        }),
-      );
-      expect(template.calculateSuggestedAdjustment()).toBeNull();
-    });
-
-    it('applyFrequencyAdjustment should set adjustment', () => {
-      const template = ReminderTemplate.load(makeState());
-      template.applyFrequencyAdjustment({
-        originalInterval: 3600,
-        adjustedInterval: 7200,
-        adjustmentReason: 'test',
-        adjustmentTime: Date.now(),
-        isAutoAdjusted: true,
-        userConfirmed: false,
-        rejectionReason: null,
-      });
-      expect(template.frequencyAdjustment).not.toBeNull();
-    });
-
-    it('confirmFrequencyAdjustment should mark as confirmed', () => {
-      const template = ReminderTemplate.load(
-        makeState({
-          frequencyAdjustment: FrequencyAdjustment.createAuto(3600, 7200, 'test'),
-        }),
-      );
-      template.confirmFrequencyAdjustment();
-      expect(template.frequencyAdjustment!.userConfirmed).toBe(true);
-    });
-
-    it('confirmFrequencyAdjustment should throw if no adjustment', () => {
-      const template = ReminderTemplate.load(makeState({ frequencyAdjustment: null }));
-      expect(() => template.confirmFrequencyAdjustment()).toThrow(
-        'No frequency adjustment to confirm',
-      );
-    });
-
-    it('rejectFrequencyAdjustment should set rejection reason', () => {
-      const template = ReminderTemplate.load(
-        makeState({
-          frequencyAdjustment: FrequencyAdjustment.createAuto(3600, 7200, 'test'),
-        }),
-      );
-      template.rejectFrequencyAdjustment('Too aggressive');
-      expect(template.frequencyAdjustment!.rejectionReason).toBe('Too aggressive');
-    });
-
-    it('rejectFrequencyAdjustment should throw if no adjustment', () => {
-      const template = ReminderTemplate.load(makeState({ frequencyAdjustment: null }));
-      expect(() => template.rejectFrequencyAdjustment()).toThrow(
-        'No frequency adjustment to reject',
-      );
-    });
-  });
 
   // -----------------------------------------------------------------------
   // toServerDTO() / toClientDTO()

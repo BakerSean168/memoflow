@@ -5,7 +5,7 @@ import { registerAndLogin } from '../helpers/testHelpers';
 const testPassword = 'Test123456!';
 
 test.describe('Task completion closed loop', () => {
-  test('[P0] completes today instance without a body and refreshes task, stats, and goal progress', async ({
+  test('[P0][Fixture B] EachCompletion updates task, stats, and Goal progress through the Web product loop', async ({
     page,
   }) => {
     const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -73,7 +73,7 @@ test.describe('Task completion closed loop', () => {
           recurrenceRule: null,
           reminderConfig: null,
           importance: 'Moderate',
-          tags: [],
+          labelIds: [],
           goalBinding: {
             goalId: goalReceipt.goalId,
             keyResultId,

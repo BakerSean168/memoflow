@@ -11,7 +11,7 @@ tags:
   - routine
 description: MemoFlow Core vNext 的 Build / Borrow / Integrate 决策台账，明确哪些能力直接复用成熟库、哪些只借鉴业务语义、哪些继续由 MemoFlow 持有
 created: 2026-08-25T19:18:00+08:00
-updated: 2026-08-25T21:25:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # Core vNext — OSS / Standard Capability Reuse & Reference Ledger
@@ -49,15 +49,15 @@ Integrate  = 把外部系统作为运行时依赖；当前默认不采用，除�
 | Product time facade                      | **Keep + Borrow underneath**        | existing `@memoflow/time` + `date-fns`                                           | `TimeFacade`                            | 已有统一 Instant/Ymd/Hm contract，不重写                                    |
 | Zoned / calendar UI date value           | **Borrow / implemented W1**                          | existing `@internationalized/date`; optional `temporal-polyfill` at adapter edge | UI/time adapter                         | 不手写 calendar arithmetic / zoned date object                              |
 | Date picker / calendar primitive         | **Borrow / implemented W1 composites**                          | existing shadcn-vue Calendar + Reka UI                                           | `@memoflow/ui-vue-shadcn`               | 已存在、可访问性 primitives 已接入                                          |
-| Planner calendar rendering               | **Borrow candidate A / preferred**  | FullCalendar Standard Vue 3                                                      | `PlannerCalendarAdapter`                | MIT Standard、成熟 Day/Week/Month/List、drag/resize/revert                  |
+| Planner calendar rendering               | **Borrow / implemented**           | FullCalendar Standard Vue 3                                                      | `PlannerCalendarAdapter`                | MIT Standard、成熟 Day/Week/Month/List、drag/resize/revert                  |
 | Planner candidate B                      | **Do not adopt for interactive v1** | Schedule-X v4                                                                    | spike only                              | v4 drag/resize 已进入 Premium，不符合低成本重构目标                         |
 | Task/Routine recurrence math             | **Borrow / selected**                | `rrule@2.8.1`; `ical.js` deferred                                                 | `RecurrenceEnginePort`                  | fixture 已通过；RFC recurrence math 复用，IANA/Instant 仍由 TimeFacade 持有 |
 | ICS import/export                        | **Borrow when needed**              | `ical.js`                                                                        | `ICalendarCodecPort`                    | RFC 5545 parser/serializer 是标准问题；当前不阻塞 vNext                     |
 | Internal cron parsing                    | **Keep**                            | existing `cron-parser`                                                           | Scheduler infra only                    | 适合 internal cron，不允许成为 Task/Routine domain recurrence truth         |
 | Scheduler upper contract                 | **Build**                           | Trigger.dev semantics as reference                                               | `SchedulingPort` / `ScheduledIntent`    | owner/schedulingKey/handlerKey 是 MemoFlow contract                         |
-| Scheduler queue engine                   | **Keep now; later PoC**             | current engine; compare pg-boss                                                  | `SchedulingPort` infrastructure adapter | 先稳定上层，避免同时换 seam + engine                                        |
+| Scheduler queue engine                   | **Keep custom / PoC complete**      | current engine; pg-boss 12.30.0 dev-only candidate                                                  | `SchedulingPort` infrastructure adapter | 先稳定上层，避免同时换 seam + engine                                        |
 | Scheduling dedupe / timezone semantics   | **Imitate**                         | Trigger.dev                                                                      | stable `schedulingKey`, IANA timezone   | 成熟实践直接对应当前重复 schedule 问题                                      |
-| Queue retry / DLQ / singleton semantics  | **Imitate / possible Borrow later** | pg-boss                                                                          | scheduler adapter                       | Postgres queue 成熟，但当前不急于替换                                       |
+| Queue retry / DLQ / singleton semantics  | **Keep custom; imitate pg-boss**    | pg-boss                                                                          | scheduler adapter                       | Postgres queue 成熟，但当前不急于替换                                       |
 | Notification Fact / workflow preferences | **Build semantics, imitate**        | Novu                                                                             | Notification domain                     | 保留 MemoFlow source of truth，学习 workflow/global/per-workflow preference |
 | Notification UI                          | **Build from existing primitives**  | current MemoFlow + Novu Inbox hierarchy                                          | app-vue                                 | 不接入第二套 Inbox source of truth                                          |
 | Routine Active/Idle/Natural Break        | **Build adapters, imitate**         | Workrave / Safe Eyes / Sane Break                                                | `ActivitySensorPort` / `IdleSensorPort` | 平台事实要本地实现；借成熟 state semantics，不复制 GPL code                 |
@@ -67,6 +67,22 @@ Integrate  = 把外部系统作为运行时依赖；当前默认不采用，除�
 | Goal / Task business model               | **Build, imitate**                  | Vikunja / Tasks.org / Super Productivity / Leantime etc.                         | Goal/Task bounded contexts              | 业务 source of truth 必须由 MemoFlow 持有                                   |
 | UI forms / popup / menu / drawer         | **Borrow primitives**               | shadcn-vue / Reka UI / Vaul Vue                                                  | UI package                              | 禁止重复实现 accessibility primitives                                       |
 | Plugin runtime                           | **Defer**                           | Cordis / other plugin kernels only as research                                   | registry seams only                     | 当前只做 plugin-ready registry，不做 installer/runtime/marketplace          |
+
+---
+
+## 2.1 Final implementation checkpoint — 2026-09-08
+
+The candidate decisions above are now closed for Core vNext:
+
+- **Emittery:** adopted and implemented as the runtime-local EventBus backend (ADR-064).
+- **rrule 2.8.1:** adopted behind MemoFlow-owned recurrence adapter; timezone truth remains `@memoflow/time`.
+- **FullCalendar Standard:** adopted for the Vue Planner; drag/resize is translated back to owner-domain commands.
+- **Schedule-X:** reference only; not adopted for the interactive Planner.
+- **pg-boss 12.30.0:** PoC completed under POC-6401. Decision is **Keep custom** for current vNext because the existing engine already satisfies API/Desktop/PowerSync/restart-recovery boundaries; pg-boss remains a reproducible dev-only cloud candidate, not production infrastructure.
+- **Shared Label:** MemoFlow-owned business capability, fully implemented; third-party task taxonomies were not imported.
+- **Routine methods / Protocol:** business state remains MemoFlow-owned; external products remain semantic/test references only.
+
+No Core vNext ticket remains blocked on a third-party dependency decision.
 
 ---
 
@@ -367,7 +383,7 @@ goal:{id}:remaining-days:7
 routine:{id}:occurrence:{instant}
 ```
 
-### 6.2 Keep current scheduler engine during seam migration
+### 6.2 Final decision: keep the current Scheduler engine
 
 Current MemoFlow already has:
 
@@ -379,7 +395,7 @@ Current MemoFlow already has:
 - restart recovery;
 - Prisma / PowerSync paths.
 
-Do not replace these in Wave 1.
+These capabilities remain the production engine after POC-6401; no queue-engine replacement is part of Core vNext closure.
 
 First:
 
@@ -387,9 +403,9 @@ First:
 Feature -> SchedulingPort -> existing ScheduleTask adapter
 ```
 
-Only after all business packages stop importing `ScheduleTask`, run pg-boss PoC.
+Business packages no longer own/import raw ScheduleTask execution behavior, and the pg-boss PoC has been completed. The current production decision is still **Keep custom**.
 
-### 6.3 pg-boss reference / PoC
+### 6.3 pg-boss PoC — complete, not adopted
 
 Learn/compare:
 
@@ -401,7 +417,7 @@ Learn/compare:
 - deferred jobs;
 - transaction adapter possibilities.
 
-PoC must compare against MemoFlow's actual API/Desktop/PowerSync constraints. No architecture change is allowed merely because pg-boss has more features.
+POC-6401 compared pg-boss 12.30.0 against MemoFlow's actual API/Desktop/PowerSync/restart constraints. The PoC remains reproducible, but no production architecture change was justified; pg-boss is retained only as a dev candidate for a future evidence-driven reevaluation.
 
 ---
 

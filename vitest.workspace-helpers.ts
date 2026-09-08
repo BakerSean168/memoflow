@@ -29,6 +29,7 @@ export const domainResolveAtAlias = {
       'editor',
       'repository',
       'schedule',
+      'scheduler',
       'schedule-orchestration',
     ];
 
@@ -219,6 +220,14 @@ export const domainResolveAliases = [
   {
     find: '@memoflow/schedule',
     replacement: path.resolve(__dirname, './packages/schedule/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/scheduler\/(.+)/,
+    replacement: path.resolve(__dirname, './packages/scheduler/src/$1'),
+  },
+  {
+    find: '@memoflow/scheduler',
+    replacement: path.resolve(__dirname, './packages/scheduler/src/index.ts'),
   },
   {
     find: /^@memoflow\/reminder\/(.+)/,

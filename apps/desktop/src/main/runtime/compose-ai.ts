@@ -18,7 +18,11 @@
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { ReminderApplicationPort } from '@memoflow/reminder';
+import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
+import type { IScheduleRepository } from '@memoflow/schedule';
+import type { INotificationRepository } from '@memoflow/notification';
 import type { TaskApplicationPort } from '@memoflow/task';
+import type { LabelService } from '@memoflow/label';
 import {
   AIEvaluationReportFileAdapter,
   createAIModule,
@@ -36,6 +40,9 @@ import {
 import { createAIElectronModule, type AIElectronModuleDef } from '@memoflow/ai/electron';
 import { DesktopGoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
 import { DesktopTaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
+import { DesktopRoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
+import { DesktopPlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
+import { DesktopNotificationAIReadAdapter } from '../modules/ai/notification-read.adapter';
 
 export interface ComposeAIElectronDependencies {
   readonly db: IElectronDatabase;
@@ -45,6 +52,10 @@ export interface ComposeAIElectronDependencies {
   readonly goalApplicationPort: GoalApplicationPort;
   readonly taskApplicationPort: TaskApplicationPort;
   readonly reminderApplicationPort: ReminderApplicationPort;
+  readonly labelService: LabelService;
+  readonly routineCommandPort: RoutineCoachCommandPort;
+  readonly scheduleRepository: IScheduleRepository;
+  readonly notificationRepository: INotificationRepository;
   readonly mastraStorage: MastraStorageConfig;
 }
 
@@ -64,8 +75,12 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
     dependencies.goalApplicationPort,
     dependencies.taskApplicationPort,
     dependencies.reminderApplicationPort,
+    dependencies.labelService,
   );
-  const taskPlanMutationAdapter = new DesktopTaskPlanMutationAdapter(dependencies.taskApplicationPort);
+  const taskPlanMutationAdapter = new DesktopTaskPlanMutationAdapter(
+    dependencies.taskApplicationPort,
+    dependencies.labelService,
+  );
   const mastraRuntime = new MastraAIRuntime({
     storage: createMastraStorage(dependencies.mastraStorage),
     modelResolver: new MastraModelResolver(providerConfigRepository),
@@ -77,6 +92,15 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
     ),
     executionLogPort,
     usageReadPort: executionLogPort,
+    routineCommandPort: new DesktopRoutineAICommandAdapter(
+      dependencies.reminderApplicationPort,
+      dependencies.routineCommandPort,
+    ),
+    plannerReadPort: new DesktopPlannerAIReadAdapter(
+      dependencies.scheduleRepository,
+      dependencies.taskApplicationPort,
+    ),
+    notificationReadPort: new DesktopNotificationAIReadAdapter(dependencies.notificationRepository),
   });
 
   const instance = createAIModule({

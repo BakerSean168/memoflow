@@ -42,19 +42,9 @@ function createApiStub(): GoalApplicationPort {
     createRecord: vi.fn(),
     listRecords: vi.fn(),
     deleteRecord: vi.fn(),
-    getCurrentFocusMode: vi.fn(),
-    activateFocusMode: vi.fn(),
-    deactivateFocusMode: vi.fn(),
-    extendFocusMode: vi.fn(),
     getGoalAggregate: vi.fn(),
-    getGoalProgressBreakdown: vi.fn(),
     cloneGoal: vi.fn(),
     batchUpdateKeyResultWeights: vi.fn(),
-    listGoalFolders: vi.fn(),
-    createGoalFolder: vi.fn(),
-    getGoalFolder: vi.fn(),
-    updateGoalFolder: vi.fn(),
-    deleteGoalFolder: vi.fn(),
   } as GoalApplicationPort;
 }
 

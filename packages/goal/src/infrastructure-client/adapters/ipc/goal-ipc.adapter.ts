@@ -12,7 +12,6 @@ import type {
   GoalClientDTO,
   GoalMutationReceipt,
   GoalSystemView,
-  ProgressBreakdown,
   CreateGoalReq,
   UpdateGoalReq,
   DeleteGoalReq,
@@ -138,9 +137,6 @@ export class GoalIpcAdapter implements IGoalApiClient {
     return this.ipcClient.invoke(GoalChannels.KEY_RESULT_BATCH_UPDATE_WEIGHTS, goalId, request);
   }
 
-  async getProgressBreakdown(goalId: string): Promise<Result<ProgressBreakdown>> {
-    return this.ipcClient.invoke(GoalChannels.PROGRESS_BREAKDOWN, goalId);
-  }
 
   // ===== GoalReview Management =====
 

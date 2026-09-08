@@ -645,7 +645,7 @@ function createTaskWorkflowDraft(
       goalId: null,
       keyResultId: null,
       contributionValue: null,
-      tags: ['ai', 'mastra'],
+      labels: ['ai', 'mastra'],
     },
     rationale: 'Keep task creation behind the canonical task mutation port.',
     warnings: [],
@@ -904,7 +904,7 @@ function createGoalAgentWorkflowDraft(): GoalPlanDraft {
         occurrences: null,
         keyResultIndex: 0,
         contributionValue: 1,
-        tags: [],
+        labels: [],
       },
     ],
     reminders: [

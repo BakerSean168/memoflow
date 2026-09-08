@@ -9,7 +9,7 @@
  * Note: Tests provide basic coverage for mapper integration and repository mocking.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CreateReminderTemplateUseCase } from './create-reminder-template.use-case';
 import { DeleteReminderTemplateUseCase } from './delete-reminder-template.use-case';
 import { UpdateReminderTemplateUseCase } from './update-reminder-template.use-case';
@@ -17,6 +17,9 @@ import { RecordReminderResponseUseCase } from './record-reminder-response.use-ca
 import type { IReminderTemplateRepository } from '../../../domain';
 import type { IReminderResponseRepository } from '../../../domain';
 import type { IReminderGroupRepository } from '../../../domain';
+import { ReminderDomainService } from '../../../domain/services/reminder-domain-service';
+import type { ReminderTemplate } from '../../../domain/aggregates/reminder-template';
+import type { ReminderTemplateClientMapper } from '../../mappers/reminder-template-client.mapper';
 
 const TEST_IDENTITY = 'IdentityId_550e8400-e29b-41d4-a716-446655440001';
 
@@ -40,11 +43,6 @@ class MockReminderTemplateRepository implements IReminderTemplateRepository {
     return Array.from(this.templates.values()).filter((t) => t.identityId === identityId);
   }
 
-  async findByGroupId(groupId: string | null, identityId: string): Promise<any[]> {
-    return Array.from(this.templates.values()).filter(
-      (t) => t.groupId === groupId && String(t.identityId) === String(identityId),
-    );
-  }
 
   async findActive(identityId: string): Promise<any[]> {
     return Array.from(this.templates.values()).filter(
@@ -302,21 +300,100 @@ describe('Reminder Use Cases', () => {
       expect(await templateRepository.count(TEST_IDENTITY)).toBe(1);
     });
 
-    it('returns NOT_FOUND when group ID is invalid', async () => {
-      const useCase = new CreateReminderTemplateUseCase(
+    it('repairs the canonical Routine projection on deterministic replay before closure policy', async () => {
+      const templateId = 'IReminderTemplateId_550e8400-e29b-41d4-a716-446655440004';
+      const request = { ...createValidCreateRequest(), id: templateId };
+      const seedUseCase = new CreateReminderTemplateUseCase(
         templateRepository,
         groupRepository,
         undefined,
         undefined,
         mockClosureChecker,
       );
+      expect((await seedUseCase.execute(request as never, { identityId: TEST_IDENTITY })).ok).toBe(
+        true,
+      );
+      const existing = await templateRepository.findByIdForIdentity(TEST_IDENTITY, templateId);
+      expect(existing).not.toBeNull();
+
+      const healRoutineProjection = vi.fn().mockResolvedValue(undefined);
+      const mapper = {
+        toDTO: vi.fn(async (template: ReminderTemplate) => template.toClientDTO()),
+      } as unknown as ReminderTemplateClientMapper;
+      let closureChecks = 0;
+      const replayUseCase = new CreateReminderTemplateUseCase(
+        templateRepository,
+        groupRepository,
+        { healRoutineProjection } as unknown as ReminderDomainService,
+        mapper,
+        async () => {
+          closureChecks += 1;
+          return true;
+        },
+      );
+
+      const replay = await replayUseCase.execute(request as never, { identityId: TEST_IDENTITY });
+
+      expect(replay.ok).toBe(true);
+      expect(healRoutineProjection).toHaveBeenCalledWith(existing, []);
+      expect(closureChecks).toBe(0);
+    });
+
+    it('self-heals when legacy create persisted but canonical projection was interrupted', async () => {
+      const templateId = 'IReminderTemplateId_550e8400-e29b-41d4-a716-446655440005';
+      const request = { ...createValidCreateRequest(), id: templateId };
+      const baselineDomain = new ReminderDomainService(templateRepository, groupRepository);
+      const healRoutineProjection = vi.fn().mockResolvedValue(undefined);
+      const interruptedDomain = {
+        createReminderTemplate: vi.fn(
+          async (input: Parameters<ReminderDomainService['createReminderTemplate']>[0]) => {
+            await baselineDomain.createReminderTemplate(input);
+            throw new Error('projection interrupted after template persistence');
+          },
+        ),
+        healRoutineProjection,
+      } as unknown as ReminderDomainService;
+      const mapper = {
+        toDTO: vi.fn(async (template: ReminderTemplate) => template.toClientDTO()),
+      } as unknown as ReminderTemplateClientMapper;
+      const useCase = new CreateReminderTemplateUseCase(
+        templateRepository,
+        groupRepository,
+        interruptedDomain,
+        mapper,
+        mockClosureChecker,
+      );
+
+      const result = await useCase.execute(request as never, { identityId: TEST_IDENTITY });
+      const persisted = await templateRepository.findByIdForIdentity(TEST_IDENTITY, templateId);
+
+      expect(result.ok).toBe(true);
+      expect(persisted).not.toBeNull();
+      expect(healRoutineProjection).toHaveBeenCalledWith(persisted, []);
+      expect(await templateRepository.count(TEST_IDENTITY)).toBe(1);
+    });
+
+    it('returns NOT_FOUND when a requested Profile does not exist', async () => {
+      const createReminderTemplate = vi.fn().mockRejectedValue(
+        new Error('Routine Profile not found: missing-profile'),
+      );
+      const useCase = new CreateReminderTemplateUseCase(
+        templateRepository,
+        groupRepository,
+        { createReminderTemplate } as unknown as ReminderDomainService,
+        undefined,
+        mockClosureChecker,
+      );
       const request = {
         ...createValidCreateRequest(),
-        groupId: 'invalid-group-id',
+        profileIds: ['missing-profile'],
       };
 
-      const result = await useCase.execute(request, { identityId: TEST_IDENTITY });
+      const result = await useCase.execute(request as never, { identityId: TEST_IDENTITY });
 
+      expect(createReminderTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ profileIds: ['missing-profile'] }),
+      );
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toBe('NOT_FOUND');

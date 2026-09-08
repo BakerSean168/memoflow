@@ -2,8 +2,6 @@ import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/contracts/operations';
 import type {
-  BatchGroupTemplatesReq,
-  BatchGroupTemplatesRes,
   CreateReminderGroupReq,
   CreateReminderTemplateReq,
   GetReminderTodayScheduleReq,
@@ -15,7 +13,7 @@ import type {
   ReminderHistoryClientDTO,
   ReminderTemplateClientDTO,
   ReminderTemplateListRes,
-  SwitchGroupControlModeReq,
+  RecordReminderResponseReq,
   UpdateReminderGroupReq,
   UpdateReminderPreferencesReq,
   UpdateReminderTemplateReq,
@@ -43,12 +41,10 @@ export interface ReminderApplicationPort {
     ctx: ExecutionContext,
   ): Promise<Result<ReminderTemplateClientDTO>>;
   deleteTemplate(id: string, ctx: ExecutionContext): Promise<Result<unknown>>;
-  enableTemplate(id: string, ctx: ExecutionContext): Promise<Result<ReminderTemplateClientDTO>>;
-  pauseTemplate(id: string, ctx: ExecutionContext): Promise<Result<ReminderTemplateClientDTO>>;
   toggleTemplate(id: string, ctx: ExecutionContext): Promise<Result<ReminderTemplateClientDTO>>;
-  moveTemplate(
+  replaceTemplateProfiles(
     id: string,
-    groupId: string | null,
+    profileIds: readonly string[],
     ctx: ExecutionContext,
   ): Promise<Result<ReminderTemplateClientDTO>>;
   getTemplateHistory(
@@ -57,7 +53,7 @@ export interface ReminderApplicationPort {
   ): Promise<Result<ReminderHistoryClientDTO[]>>;
   recordResponse(
     templateId: string,
-    data: { action: string; note?: string },
+    data: RecordReminderResponseReq,
     ctx: ExecutionContext,
   ): Promise<Result<unknown>>;
   getTemplateResponses(templateId: string, ctx: ExecutionContext): Promise<Result<unknown>>;
@@ -68,7 +64,6 @@ export interface ReminderApplicationPort {
     data: { action: string; customInterval?: number },
     ctx: ExecutionContext,
   ): Promise<Result<unknown>>;
-  rejectFrequencyAdjustment(templateId: string, ctx: ExecutionContext): Promise<Result<unknown>>;
   createGroup(
     data: CreateReminderGroupReq,
     ctx: ExecutionContext,
@@ -81,16 +76,6 @@ export interface ReminderApplicationPort {
     ctx: ExecutionContext,
   ): Promise<Result<ReminderGroupClientDTO>>;
   deleteGroup(id: string, ctx: ExecutionContext): Promise<Result<unknown>>;
-  switchGroupControlMode(
-    id: string,
-    data: SwitchGroupControlModeReq,
-    ctx: ExecutionContext,
-  ): Promise<Result<ReminderGroupClientDTO>>;
-  batchGroupTemplates(
-    groupId: string,
-    data: BatchGroupTemplatesReq,
-    ctx: ExecutionContext,
-  ): Promise<Result<BatchGroupTemplatesRes>>;
   toggleGroup(id: string, ctx: ExecutionContext): Promise<Result<ReminderGroupClientDTO>>;
   getPreferences(ctx: ExecutionContext): Promise<Result<UserReminderPreferencesClientDTO>>;
   updatePreferences(

@@ -1,56 +1,45 @@
 /**
- * Reminder Response 实体
- * 提醒响应记录实体
+ * ReminderResponse Entity
+ * 提醒响应实体
+ *
+ * Records the user's action for a reminder occurrence. Response latency and
+ * snooze delay are distinct scalar durations; neither is represented as Date.
  */
 
-import type {
-  ReminderResponseServerDTO,
-  ReminderResponseClientDTO,
+import {
   ReminderResponseAction,
+  toReminderResponseLatencySeconds,
+  toReminderSnoozeDurationSeconds,
+  type ReminderResponseLatencySeconds,
+  type ReminderSnoozeDurationSeconds,
+  type ReminderResponseServerDTO,
+  type ReminderResponseClientDTO,
 } from '@memoflow/contracts/reminder';
-import { toReminderResponseDurationSeconds } from '@memoflow/contracts/reminder';
-import type { ReminderTemplateId, IdentityId } from '@memoflow/contracts/primitives';
-import { Entity } from '@memoflow/utils/domain';
+import type { IdentityId, ReminderTemplateId } from '@memoflow/contracts/primitives';
 import { ReminderResponseId } from '../value-objects/reminder-response-id';
 
-/**
- * ReminderResponse 内部状态接口
- */
 export interface ReminderResponseState {
   id: ReminderResponseId;
-  reminderTemplateId: string;
-  identityId: string;
+  reminderTemplateId: ReminderTemplateId;
+  identityId: IdentityId;
   action: ReminderResponseAction;
-  responseTime: Date | null;
+  responseTime: ReminderResponseLatencySeconds | null;
+  snoozeDurationSeconds: ReminderSnoozeDurationSeconds | null;
   timestamp: Date;
 }
 
-/**
- * ReminderResponse 实体
- *
- * DDD 实体特点：
- * - 有唯一标识符（uuid）
- * - 有生命周期
- * - 记录用户对提醒的响应行为
- * - 用于计算提醒效果指标
- */
-export class ReminderResponse extends Entity<ReminderResponseId> {
-  // ===== 私有字段 =====
-  private _props: ReminderResponseState;
+export class ReminderResponse {
+  private constructor(private readonly _props: ReminderResponseState) {}
 
-  // ===== 构造函数（私有，通过工厂方法创建） =====
-  private constructor(state: ReminderResponseState) {
-    super(state.id);
-    this._props = { ...state };
+  public get id(): string {
+    return this._props.id.toString();
   }
 
-  // ===== Getter 属性 =====
-
-  public get reminderTemplateId(): string {
+  public get reminderTemplateId(): ReminderTemplateId {
     return this._props.reminderTemplateId;
   }
 
-  public get identityId(): string {
+  public get identityId(): IdentityId {
     return this._props.identityId;
   }
 
@@ -58,143 +47,116 @@ export class ReminderResponse extends Entity<ReminderResponseId> {
     return this._props.action;
   }
 
-  public get responseTime(): Date | null {
+  /** Actual user response latency in seconds. */
+  public get responseTime(): ReminderResponseLatencySeconds | null {
     return this._props.responseTime;
+  }
+
+  /** User-requested snooze delay in seconds; only present for SNOOZED. */
+  public get snoozeDurationSeconds(): ReminderSnoozeDurationSeconds | null {
+    return this._props.snoozeDurationSeconds;
   }
 
   public get timestamp(): Date {
     return this._props.timestamp;
   }
 
-  // ===== 工厂方法 =====
+  public static create(params: {
+    reminderTemplateId: string;
+    identityId: string;
+    action: ReminderResponseAction;
+    responseTime?: number | null;
+    snoozeDurationSeconds?: number | null;
+    timestamp?: Date | number;
+  }): ReminderResponse {
+    const responseTime =
+      params.responseTime == null ? null : toReminderResponseLatencySeconds(params.responseTime);
+    const snoozeDurationSeconds =
+      params.snoozeDurationSeconds == null
+        ? null
+        : toReminderSnoozeDurationSeconds(params.snoozeDurationSeconds);
+
+    if (params.action === ReminderResponseAction.Snoozed && snoozeDurationSeconds == null) {
+      throw new Error('SNOOZED responses require snoozeDurationSeconds');
+    }
+    if (params.action !== ReminderResponseAction.Snoozed && snoozeDurationSeconds != null) {
+      throw new Error('snoozeDurationSeconds is only valid for SNOOZED responses');
+    }
+
+    return new ReminderResponse({
+      id: ReminderResponseId.generate(),
+      reminderTemplateId: params.reminderTemplateId as ReminderTemplateId,
+      identityId: params.identityId as IdentityId,
+      action: params.action,
+      responseTime,
+      snoozeDurationSeconds,
+      timestamp: params.timestamp instanceof Date ? params.timestamp : new Date(params.timestamp ?? Date.now()),
+    });
+  }
 
   public static load(state: ReminderResponseState): ReminderResponse {
     return new ReminderResponse(state);
   }
 
-  /**
-   * 创建新的 ReminderResponse 实体
-   */
-  public static create(params: {
-    reminderTemplateId: string;
-    identityId: string;
-    action: ReminderResponseAction;
-    responseTime?: number;
-    timestamp?: number;
-  }): ReminderResponse {
-    return new ReminderResponse({
-      id: ReminderResponseId.generate(),
-      reminderTemplateId: params.reminderTemplateId,
-      identityId: params.identityId,
-      action: params.action,
-      // R3c：params.responseTime 语义为秒，内部 Date 存对应毫秒时刻。
-      responseTime: params.responseTime != null ? new Date(params.responseTime * 1_000) : null,
-      timestamp: new Date(params.timestamp ?? Date.now()),
-    });
-  }
-
-  // ===== 业务方法 =====
-
-  /**
-   * 是否点击
-   */
   public isClicked(): boolean {
-    return this._props.action === 'CLICKED';
+    return this._props.action === ReminderResponseAction.Clicked;
   }
 
-  /**
-   * 是否忽略
-   */
   public isIgnored(): boolean {
-    return this._props.action === 'IGNORED';
+    return this._props.action === ReminderResponseAction.Ignored;
   }
 
-  /**
-   * 是否延迟
-   */
   public isSnoozed(): boolean {
-    return this._props.action === 'SNOOZED';
+    return this._props.action === ReminderResponseAction.Snoozed;
   }
 
-  /**
-   * 是否关闭
-   */
   public isDismissed(): boolean {
-    return this._props.action === 'DISMISSED';
+    return this._props.action === ReminderResponseAction.Dismissed;
   }
 
-  /**
-   * 是否完成
-   */
   public isCompleted(): boolean {
-    return this._props.action === 'COMPLETED';
+    return this._props.action === ReminderResponseAction.Completed;
   }
 
-  /**
-   * 是否正面响应（CLICKED 或 COMPLETED）
-   */
   public isPositiveResponse(): boolean {
     return this.isClicked() || this.isCompleted();
   }
 
-  /**
-   * 是否负面响应（IGNORED 或 DISMISSED）
-   */
   public isNegativeResponse(): boolean {
     return this.isIgnored() || this.isDismissed();
   }
 
-  /**
-   * 获取响应权重
-   * COMPLETED(1.5), CLICKED(1.0), SNOOZED(-0.2), DISMISSED(-0.3), IGNORED(-0.5)
-   */
   public getResponseWeight(): number {
     switch (this._props.action) {
-      case 'COMPLETED':
+      case ReminderResponseAction.Completed:
         return 1.5;
-      case 'CLICKED':
-        return 1.0;
-      case 'SNOOZED':
+      case ReminderResponseAction.Clicked:
+        return 1;
+      case ReminderResponseAction.Snoozed:
         return -0.2;
-      case 'DISMISSED':
+      case ReminderResponseAction.Dismissed:
         return -0.3;
-      case 'IGNORED':
+      case ReminderResponseAction.Ignored:
         return -0.5;
       default:
         return 0;
     }
   }
 
-  // ===== 转换方法 =====
-
-  /**
-   * 转换为 Server DTO
-   */
   public toServerDTO(): ReminderResponseServerDTO {
     return {
-      id: this.id,
-      reminderTemplateId: this._props.reminderTemplateId as ReminderTemplateId,
-      identityId: this._props.identityId as IdentityId,
+      id: this._props.id.toString() as ReminderResponseServerDTO['id'],
+      reminderTemplateId: this._props.reminderTemplateId,
+      identityId: this._props.identityId,
       action: this._props.action,
-      responseTime: this._props.responseTime
-        ? toReminderResponseDurationSeconds(Math.round(this._props.responseTime.getTime() / 1_000))
-        : null,
+      responseTime: this._props.responseTime,
+      snoozeDurationSeconds: this._props.snoozeDurationSeconds,
       timestamp: this._props.timestamp.getTime(),
     };
   }
 
-  /**
-   * 转换为 Client DTO
-   */
   public toClientDTO(): ReminderResponseClientDTO {
-    return {
-      id: this.id,
-      reminderTemplateId: this._props.reminderTemplateId as ReminderTemplateId,
-      action: this._props.action,
-      responseTime: this._props.responseTime
-        ? toReminderResponseDurationSeconds(Math.round(this._props.responseTime.getTime() / 1_000))
-        : null,
-      timestamp: this._props.timestamp.getTime(),
-    };
+    const { identityId: _identityId, ...client } = this.toServerDTO();
+    return client;
   }
 }

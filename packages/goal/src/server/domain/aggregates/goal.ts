@@ -39,7 +39,6 @@ import type {
   GoalServerDTO,
   GoalReviewServerDTO,
   KeyResultServerDTO,
-  ProgressBreakdown,
   ReminderTrigger,
 } from '@memoflow/contracts/goal';
 import { KeyResult } from '../entities/key-result';
@@ -811,35 +810,6 @@ export class Goal extends AggregateRoot<GoalId> {
     return Math.round(progress * 100) / 100;
   }
 
-  /**
-   * 📊 获取进度分解详情
-   */
-  public getProgressBreakdown(): ProgressBreakdown {
-    const totalWeight = this._props.keyResults.reduce((sum, kr) => sum + kr.weight, 0);
-    const totalProgress = this.calculateProgress();
-
-    return {
-      totalProgress,
-      calculationMode: 'WeightedAverage' as const,
-      krContributions: this._props.keyResults.map((kr) => {
-        const krProgress = kr.calculatePercentage();
-        const contribution =
-          totalWeight > 0
-            ? Math.round(((krProgress * kr.weight) / totalWeight) * 100) / 100
-            : Math.round((krProgress / this._props.keyResults.length) * 100) / 100;
-
-        return {
-          keyResultId: kr.id,
-          keyResultName: kr.title,
-          progress: krProgress,
-          weight: kr.weight,
-          contribution,
-        };
-      }),
-      lastUpdateTime: this._props.updatedAt,
-      updateTrigger: '自动计算',
-    };
-  }
 
   /**
    * 📊 检查是否所有关键结果都已完成

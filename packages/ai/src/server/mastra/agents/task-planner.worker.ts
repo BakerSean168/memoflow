@@ -65,6 +65,7 @@ export class TaskPlannerWorker implements TaskPlannerPort {
           'Use only current Task semantics: never propose folders, dependency graphs, critical paths or other retired project-management fields.',
           'A Goal link requires both goalId and keyResultId. Leave both null when the task is not linked to a specific Key Result.',
           'contributionValue is optional. Leave it null unless the user wants Task completion to automatically contribute a positive amount to the linked Key Result.',
+          'Use labels only as human-readable Shared Label names. Never invent label IDs and never emit legacy Task tags or custom Task colors.',
           `Write user-visible titles, explanations and questions in ${language}.`,
         ].join('\n');
       },

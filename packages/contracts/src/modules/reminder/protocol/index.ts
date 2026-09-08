@@ -7,5 +7,4 @@ export type { ReminderRpcMap } from './reminder-rpc-map';
 export type {
   ReminderResponseRecordedEvent,
   ReminderFrequencyAdjustedEvent,
-  ReminderFrequencyAdjustmentRejectedEvent,
 } from './reminder-analytics-events';

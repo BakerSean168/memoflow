@@ -9,15 +9,19 @@ tags:
   - missed
 description: Task occurrence 的 Pending/Completed/Missed/Skipped 语义、Overdue 派生状态与 Task Plan outcome 生命周期
 created: 2026-08-25T15:03:00+08:00
-updated: 2026-08-25T15:03:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-057: Task Occurrence Outcome、Overdue 与 Task Plan 生命周期
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施
 **日期：** 2026-08-25  
 **影响范围：** Task domain、contracts、database、recurrence、Task UI、Goal contribution settlement、Schedule projection、AI workflow  
 **关联：** ADR-037、ADR-038、ADR-053、ADR-056
+
+## 2026-09-08 实现状态
+
+Occurrence 当前持久状态为 Pending / InProgress / Completed / Missed / Skipped；`Expired` 已退休，Overdue 是派生事实。Task Plan outcome 使用 Open / Succeeded / Failed / Abandoned，有限计划 settlement 与历史修正已有集成测试覆盖。
 
 ## 1. 背景
 

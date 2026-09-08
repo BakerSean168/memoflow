@@ -1,4 +1,4 @@
-export type ProjectionRepairSource = 'task' | 'goal' | 'routine';
+export type ProjectionRepairSource = 'task' | 'goal' | 'reminder' | 'routine';
 
 export interface ProjectionRepairCounters {
   readonly repaired: number;
@@ -9,6 +9,7 @@ export interface ProjectionRepairCounters {
 export interface ProjectionRepairMetricsSnapshot {
   readonly task: ProjectionRepairCounters;
   readonly goal: ProjectionRepairCounters;
+  readonly reminder: ProjectionRepairCounters;
   readonly routine: ProjectionRepairCounters;
   readonly total: ProjectionRepairCounters;
 }

@@ -5,7 +5,7 @@ tags:
   - task
 description: 任务模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-08-26T00:00:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # 任务模块文件索引
@@ -103,7 +103,8 @@ updated: 2026-08-26T00:00:00
 | 文件                                                                                                                                                          | 说明                                                 |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | [`packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue`](../../../packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue) | AI 任务生成对话框                                    |
-| [`packages/task/src/server/infrastructure/schedule-execution-source.ts`](../../../packages/task/src/server/infrastructure/schedule-execution-source.ts)       | 任务 → 日程运行时贡献，监听任务事件创建 ScheduleTask |
+| [`packages/task/src/server/infrastructure/schedule-projection-source.ts`](../../../packages/task/src/server/infrastructure/schedule-projection-source.ts)       | Task owner → neutral `ScheduledIntent` projection source |
+| [`packages/task/src/server/infrastructure/task-reminder-fire.handler.ts`](../../../packages/task/src/server/infrastructure/task-reminder-fire.handler.ts)       | `task.reminder.fire` scheduled-handler；不依赖 Scheduler aggregate |
 
 ## 测试入口
 
@@ -118,14 +119,11 @@ updated: 2026-08-26T00:00:00
 | [`packages/task/src/api/routes/task-instance.routes.spec.ts`](../../../packages/task/src/api/routes/task-instance.routes.spec.ts)                                                                                                   | 实例 routes 测试        |
 | [`packages/app-vue/src/modules/task/stores/taskStore.spec.ts`](../../../packages/app-vue/src/modules/task/stores/taskStore.spec.ts)                                                                                                 | 任务 store 测试         |
 | [`apps/web/e2e/task/task-template-crud.spec.ts`](../../../apps/web/e2e/task/task-template-crud.spec.ts)                                                                                                                             | Web 模板 CRUD e2e       |
-| [`apps/web/e2e/task/task-dependency-crud.spec.ts`](../../../apps/web/e2e/task/task-dependency-crud.spec.ts)                                                                                                                         | Web 依赖 CRUD e2e       |
-| [`apps/web/e2e/task/task-dag-visualization.spec.ts`](../../../apps/web/e2e/task/task-dag-visualization.spec.ts)                                                                                                                     | Web DAG 可视化 e2e      |
-| [`apps/web/e2e/task/task-critical-path.spec.ts`](../../../apps/web/e2e/task/task-critical-path.spec.ts)                                                                                                                             | Web 关键路径 e2e        |
 
 ## 需要重点关注的改动风险
 
-- TaskTemplate 状态流转和实例生成策略。
-- 目标绑定变更对目标进度计算的影响。
+- Task Plan outcome、Occurrence Missed/Skipped/Overdue 派生语义与实例生成策略。
+- Goal Link 与 optional contribution/settlement 的幂等、撤销与 PlanCompletion 行为。
 - HTTP、IPC、Prisma、PowerSync 多运行时适配器的一致性。
-- Schedule 模块通过 `SourceModule.Task` 消费任务事件的跨模块依赖。
+- Task 通过 neutral ScheduledIntent / SchedulingPort 接入 Scheduler；`SourceModule` 只允许作为可观测元数据，不能恢复中央执行 switch。
 - Dashboard 对任务数据的读模型依赖。

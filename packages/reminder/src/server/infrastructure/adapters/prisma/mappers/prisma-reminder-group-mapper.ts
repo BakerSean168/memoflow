@@ -6,7 +6,7 @@
  */
 
 import type { ReminderGroup as PrismaReminderGroup } from '@memoflow/database';
-import type { ControlMode, ReminderStatus, GroupStatsDTO } from '@memoflow/contracts/reminder';
+import type { ReminderStatus, GroupStatsDTO } from '@memoflow/contracts/reminder';
 import { ReminderGroup } from '../../../../domain/aggregates/reminder-group';
 import { GroupStats } from '../../../../domain/value-objects';
 import type { IdentityId } from '@memoflow/domain-shared';
@@ -27,7 +27,6 @@ export class PrismaReminderGroupMapper {
       description: data.description ?? null,
       color: data.color ?? null,
       icon: data.icon ?? null,
-      controlMode: data.controlMode as ControlMode,
       enabled: data.enabled,
       status: data.status as ReminderStatus,
       order: data.order,
@@ -50,7 +49,6 @@ export class PrismaReminderGroupMapper {
       description: dto.description,
       color: dto.color,
       icon: dto.icon,
-      controlMode: dto.controlMode,
       enabled: dto.enabled,
       status: dto.status,
       order: dto.order,

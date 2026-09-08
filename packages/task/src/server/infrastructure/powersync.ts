@@ -30,8 +30,6 @@ import {
 import {
   createTaskScheduleProjectionSource,
 } from './schedule-projection-source';
-import { createTaskScheduleExecutionSource } from './schedule-execution-source';
-import type { TaskScheduleExecutionSource } from '../../schedule-execution';
 import type { TaskScheduleProjectionSource } from '../../schedule-projection';
 import type { TaskRepositorySet } from './prisma';
 
@@ -129,15 +127,6 @@ export function createTaskPowerSyncScheduleProjectionSource(
   return createTaskScheduleProjectionSource({
     taskTemplateRepository: new PowerSyncTaskTemplateRepository(db),
     taskInstanceRepository: new PowerSyncTaskInstanceRepository(db),
-  });
-}
-
-export function createTaskPowerSyncScheduleExecutionSource(
-  db: TaskPowerSyncQueryable,
-): TaskScheduleExecutionSource {
-  return createTaskScheduleExecutionSource({
-    taskInstanceRepository: new PowerSyncTaskInstanceRepository(db),
-    taskTemplateRepository: new PowerSyncTaskTemplateRepository(db),
   });
 }
 

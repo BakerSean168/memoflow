@@ -9,7 +9,7 @@
 import type { PrismaClient, Schedule as PrismaSchedule } from '@memoflow/database';
 import type { IScheduleRepository, ScheduleRebuildOutboxDTO } from '../../../domain/repositories/i-schedule-repository';
 import { CalendarEntry } from '../../../domain/aggregates/calendar-entry';
-import { ScheduleLeaseLostError } from '../../../domain/errors/schedule-lease-lost-error';
+import { LeaseLostError } from '@memoflow/patterns/lease';
 import { PrismaScheduleMapper } from './mappers/prisma-schedule-mapper';
 import { toResultErrorException } from '@memoflow/contracts/result';
 import type { UnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';
@@ -438,7 +438,7 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new ScheduleLeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
       }
       return;
     }
@@ -447,7 +447,7 @@ export class SchedulePrismaRepository implements IScheduleRepository {
       where: { id, claimToken, status: 'processing' },
     });
     if (!existing) {
-      throw new ScheduleLeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
+      throw new LeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
     }
 
     const nextAttempts = existing.attempts + 1;
@@ -462,7 +462,7 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new ScheduleLeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
       }
     } else {
       const backoffMs = Math.pow(2, nextAttempts) * 1000;
@@ -477,7 +477,7 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new ScheduleLeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(`Rebuild outbox item ${id} is no longer owned by this claim token (lease lost)`);
       }
     }
   }
@@ -585,7 +585,7 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new ScheduleLeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
       }
       return;
     }
@@ -594,7 +594,7 @@ export class SchedulePrismaRepository implements IScheduleRepository {
       where: { id, claimToken, status: 'processing' },
     });
     if (!existing) {
-      throw new ScheduleLeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+      throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
     }
 
     const nextAttempts = existing.attempts + 1;
@@ -609,7 +609,7 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new ScheduleLeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
       }
     } else {
       const backoffMs = Math.pow(2, nextAttempts) * 1000;
@@ -624,7 +624,7 @@ export class SchedulePrismaRepository implements IScheduleRepository {
         },
       });
       if (res.count === 0) {
-        throw new ScheduleLeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
+        throw new LeaseLostError(`Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`);
       }
     }
   }

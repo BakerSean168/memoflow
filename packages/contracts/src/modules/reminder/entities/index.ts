@@ -12,9 +12,13 @@ export type {
 } from './reminder-history-client';
 
 export type {
-  ReminderResponseAction,
   ReminderResponseServerDTO,
   ReminderResponseClientDTO,
-  ReminderResponseDurationSeconds,
+  ReminderResponseLatencySeconds,
+  ReminderSnoozeDurationSeconds,
 } from './reminder-response-server';
-export { toReminderResponseDurationSeconds } from './reminder-response-server';
+export {
+  ReminderResponseAction,
+  toReminderResponseLatencySeconds,
+  toReminderSnoozeDurationSeconds,
+} from './reminder-response-server';

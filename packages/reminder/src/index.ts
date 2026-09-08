@@ -24,8 +24,6 @@ export {
   createReminderPrismaRepositories,
   createReminderPowerSyncModule,
   createReminderPowerSyncRepositories,
-  createReminderRuntimeContribution,
-  createReminderTriggerCronRuntime,
   createReminderUseCases,
   createPowerSyncClosureChecker,
   type ReminderApplicationPort,
@@ -36,13 +34,8 @@ export {
   type ReminderRuntimeContributionsInput,
   type ReminderPrismaRepositorySet,
   type ReminderPowerSyncRepositorySet,
-  type ReminderSnoozeRescheduler,
-  compareReminderDueSets,
-  type ReminderDueSetComparison,
-  type ReminderDueSetEntry,
-  type ReminderDueSetReader,
-  type ReminderDueSetTimingMismatch,
-  type ReminderTriggerCronJobDependencies,
+  type ReminderSnoozeOverrideWriter,
+  type RoutineProfileStore,
   type IReminderTemplateRepository,
   type IReminderGroupRepository,
   type IReminderResponseRepository,
@@ -55,6 +48,7 @@ export {
 // 通过包根重新导出 schedule 编排集成，使宿主 composer 只导入 `@memoflow/reminder`。
 export {
   createReminderScheduleExecutionSource,
+  createReminderTemplateScheduledHandlerRegistration,
   createReminderPrismaScheduleExecutionCommitPort,
   createReminderPowerSyncScheduleExecutionCommitPort,
   type ReminderScheduleExecutionSource,
@@ -63,5 +57,9 @@ export {
 } from './schedule-execution';
 export {
   createReminderScheduleProjectionSource,
+  REMINDER_SCHEDULING_OWNER_TYPE,
+  REMINDER_TEMPLATE_HANDLER_KEY,
+  REMINDER_TEMPLATE_PAYLOAD_VERSION,
+  type ReminderTemplateScheduledPayload,
   type ReminderScheduleProjectionSource,
 } from './schedule-projection';

@@ -13,8 +13,6 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { ITaskDependencyRepository } from '../../domain/repositories/i-task-dependency-repository';
-import type { ITaskFolderRepository } from '../../domain/repositories/i-task-folder-repository';
 import type { ITaskInstanceRepository } from '../../domain/repositories/i-task-instance-repository';
 import type { ITaskTemplateRepository } from '../../domain/repositories/i-task-template-repository';
 import type { TaskWriteTransactionRunner } from '../../application/use-cases/commands/task-write-support';
@@ -47,8 +45,6 @@ function makeDeps(runtimeContributions: TaskModuleRuntimeContribution[]): TaskMo
       findNeedGenerateInstances: vi.fn(async () => []),
     } as unknown as ITaskTemplateRepository,
     taskInstanceRepository: {} as unknown as ITaskInstanceRepository,
-    taskDependencyRepository: {} as unknown as ITaskDependencyRepository,
-    taskFolderRepository: {} as unknown as ITaskFolderRepository,
     taskWriteTransactionRunner: {} as unknown as TaskWriteTransactionRunner,
     runtimeContributions,
   };

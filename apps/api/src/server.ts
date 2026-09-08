@@ -65,18 +65,13 @@ import {
 import { composeGoal } from './runtime/compose-goal';
 import { PrismaTaskBindingReadPort } from '@memoflow/task';
 import { createGoalTaskProgressPrismaHandler } from '@memoflow/goal';
-import {
-  createGoalPrismaReminderFireHandler,
-  createGoalPrismaScheduleExecutionSource,
-} from '@memoflow/goal/schedule-execution';
+import { createGoalPrismaReminderFireHandler } from '@memoflow/goal/schedule-execution';
 import { createGoalPrismaScheduleProjectionSource } from '@memoflow/goal/schedule-projection';
 import { resolveRepositoryStorageBaseDir } from '@memoflow/repository';
 import { createSchedulePrismaRepositories } from '@memoflow/schedule';
+import { createSchedulerPrismaRepositories } from '@memoflow/scheduler';
 import { createScheduleOrchestrationModule } from '@memoflow/schedule-orchestration';
-import {
-  createTaskPrismaScheduleExecutionSource,
-  createTaskReminderScheduledHandlerRegistration,
-} from '@memoflow/task/schedule-execution';
+import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 import { createTaskPrismaScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import { createRoutinePrismaScheduleExecutionDeps } from '@memoflow/reminder/schedule-execution';
 import { createRoutinePrismaScheduleProjectionSource } from '@memoflow/reminder/schedule-projection';
@@ -223,33 +218,30 @@ async function bootstrap(): Promise<void> {
   const settingApiModule = composeSetting({ db: prisma });
   const dataPortabilityApiModule = composeDataPortability({ db: prisma });
 
-  // Schedule 两阶段装配：先创建一次 schedule 仓储集合，把其中的
-  // scheduleTaskRepository 交给 schedule orchestration（产出 sourceExecutor），
-  // 再把同一集合与 sourceExecutor 交给 composeSchedule —— 全程只有一个集合。
-  // 事件总线失败时兜底到 durable outbox（R1-2 merge-base 行为）。
-  const scheduleRepositorySet = createSchedulePrismaRepositories(prisma, {
+  // CLEAN-6304: Calendar and Temporal Engine own separate repository sets.
+  // Orchestration shares the ONE Scheduler task repository; Calendar receives
+  // the Scheduler lease coordinator only through the shared lease port.
+  const calendarRepositorySet = createSchedulePrismaRepositories(prisma);
+  const schedulerRepositorySet = createSchedulerPrismaRepositories(prisma, {
     outboxWriter: new PrismaOutboxWriter(prisma),
   });
   const routineExecutionDeps = createRoutinePrismaScheduleExecutionDeps(prisma);
   const scheduleOrchestrationModule = createScheduleOrchestrationModule({
     taskProjection: {
       source: createTaskPrismaScheduleProjectionSource(prisma),
-      scheduleTaskRepository: scheduleRepositorySet.scheduleTaskRepository,
+      scheduleTaskRepository: schedulerRepositorySet.scheduleTaskRepository,
     },
     goalProjection: {
       source: createGoalPrismaScheduleProjectionSource(prisma),
     },
     reminderProjection: {
       source: reminderComposed.scheduleProjectionSource,
-      scheduleTaskRepository: scheduleRepositorySet.scheduleTaskRepository,
     },
     routineProjection: {
       source: createRoutinePrismaScheduleProjectionSource(prisma),
     },
     routineOverrideStore: routineExecutionDeps.temporaryOverrideStore,
     execution: {
-      taskSource: createTaskPrismaScheduleExecutionSource(prisma),
-      goalSource: createGoalPrismaScheduleExecutionSource(prisma),
       reminderSource: reminderComposed.scheduleExecutionSource,
       routineSource: routineExecutionDeps,
     },
@@ -258,7 +250,8 @@ async function bootstrap(): Promise<void> {
     createGoalPrismaReminderFireHandler(prisma, notificationApiModule.requestedWriter),
   );
   const scheduleApiModule = composeSchedule({
-    repositories: scheduleRepositorySet,
+    calendarRepositories: calendarRepositorySet,
+    schedulerRepositories: schedulerRepositorySet,
     sourceExecutor: scheduleOrchestrationModule.sourceExecutor,
   });
   const taskComposed = composeTask({
@@ -283,6 +276,7 @@ async function bootstrap(): Promise<void> {
   if (!env.DATABASE_URL) {
     throw new Error('AI Mastra runtime requires DATABASE_URL after environment normalization');
   }
+  const labelService = new LabelService(new PrismaLabelRepository(prisma));
   const aiApiModule = composeAI({
     db: prisma,
     repositoryApiPort: repositoryApiModule.getApplicationPort(),
@@ -290,6 +284,10 @@ async function bootstrap(): Promise<void> {
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
     reminderApplicationPort: reminderComposed.executorReminderPort,
+    routineCommandPort: reminderComposed.routineCommandPort,
+    scheduleRepository: scheduleApiModule.repositories.scheduleRepository,
+    notificationRepository: notificationApiModule.repositories.notificationRepository,
+    labelService,
     mastraStorage: { kind: 'postgres', connectionString: env.DATABASE_URL },
   });
   const governanceApiModule = composeGovernance({ db: prisma });
@@ -297,9 +295,7 @@ async function bootstrap(): Promise<void> {
   // runtime composer/factory closure BEFORE registration; register() only
   // mounts routes against the transport-only context.
   const powerSyncApiModule = composePowerSyncApiModule({ db: prisma });
-  const labelApiModule = composeLabelApiModule({
-    service: new LabelService(new PrismaLabelRepository(prisma)),
-  });
+  const labelApiModule = composeLabelApiModule({ service: labelService });
   const dashboardApiModule = composeDashboardApiModule({
     dashboardReadPort: new PrismaDashboardReadPort(prisma),
     activityLedgerRuntime: createActivityLedgerRecorder(new PrismaActivityLedgerWriter(prisma)),
@@ -311,7 +307,8 @@ async function bootstrap(): Promise<void> {
     .register(notificationApiModule.module) // ✅ 通知模块 (runtime composer)
     .register(reminderComposed.module) // ✅ 提醒模块 (runtime composer)
     .register(repositoryApiModule) // ✅ 仓库模块 (runtime composer)
-    .register(scheduleApiModule.module) // ✅ 日程模块 (runtime composer)
+    .register(scheduleApiModule.calendarModule) // ✅ Calendar/Planner
+    .register(scheduleApiModule.schedulerModule) // ✅ Temporal Engine diagnostics/runtime
     .register(settingApiModule) // ✅ 设置模块 (runtime composer)
     .register(taskComposed.module) // ✅ 任务模块
     .register(aiApiModule) // ✅ AI 模块 (runtime composer)

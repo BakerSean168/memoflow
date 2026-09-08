@@ -58,6 +58,7 @@
     "notification": "runtime-lib",
     "reminder": "runtime-lib",
     "schedule": "runtime-lib",
+    "scheduler": "runtime-lib",
     "schedule-orchestration": "runtime-lib",
     "setting": "runtime-lib",
     "data-portability": "runtime-lib",

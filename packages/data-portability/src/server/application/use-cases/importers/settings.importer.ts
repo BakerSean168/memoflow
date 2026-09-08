@@ -45,7 +45,6 @@ export async function importUserReminderPreference(
     bestTimeSlots: jsonStringify(pref.bestTimeSlots ?? []),
     worstTimeSlots: jsonStringify(pref.worstTimeSlots ?? []),
     globalReminderEnabled: pref.globalReminderEnabled ?? true,
-    globalSmartFrequency: pref.globalSmartFrequency ?? true,
   });
   incSingleton(ctx, 'userReminderPreference');
 }

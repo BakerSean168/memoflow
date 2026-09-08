@@ -182,7 +182,6 @@ const key_result_weight_snapshots = new Table({
 // Task
 // ──────────────────────────────────────────────
 
-
 const task_templates = new Table({
   identity_id: column.text,
   name: column.text,
@@ -194,8 +193,6 @@ const task_templates = new Table({
   archived_at: column.text,
   abandoned_reason: column.text,
   importance: column.text,
-  color: column.text,
-  tags: column.text, // JSON array
   time_config_type: column.text,
   time_config_start_time: column.text,
   time_config_end_time: column.text,
@@ -241,7 +238,6 @@ const task_instances = new Table({
   updated_at: column.text,
   deleted_at: column.text,
 });
-
 
 const task_template_history = new Table({
   identity_id: column.text,
@@ -453,7 +449,6 @@ const reminder_templates = new Table({
   type: column.text,
   self_enabled: column.integer, // boolean
   status: column.text,
-  reminder_group_id: column.text, // FK
   importance_level: column.text,
   tags: column.text, // JSON
   color: column.text,
@@ -469,20 +464,6 @@ const reminder_templates = new Table({
   active_hours: column.text, // JSON
   notification_config: column.text, // JSON
   stats: column.text, // JSON
-  click_rate: column.real,
-  ignore_rate: column.real,
-  avg_response_time: column.integer,
-  snooze_count: column.integer,
-  effectiveness_score: column.real,
-  sample_size: column.integer,
-  last_analysis_time: column.text,
-  original_interval: column.integer,
-  adjusted_interval: column.integer,
-  adjustment_reason: column.text,
-  adjustment_time: column.text,
-  is_auto_adjusted: column.integer, // boolean
-  user_confirmed: column.integer, // boolean
-  smart_frequency_enabled: column.integer, // boolean
 });
 
 const reminder_groups = new Table({
@@ -491,7 +472,6 @@ const reminder_groups = new Table({
   description: column.text,
   color: column.text,
   icon: column.text,
-  control_mode: column.text,
   enabled: column.integer, // boolean
   status: column.text,
   order: column.integer,
@@ -539,6 +519,7 @@ const reminder_responses = new Table({
   template_id: column.text, // FK
   action: column.text,
   response_time: column.integer,
+  snooze_duration_seconds: column.integer,
   timestamp: column.text,
   created_at: column.text,
 });
@@ -548,7 +529,6 @@ const user_reminder_preferences = new Table({
   best_time_slots: column.text, // JSON
   worst_time_slots: column.text, // JSON
   global_reminder_enabled: column.integer, // boolean
-  global_smart_frequency: column.integer, // boolean
   created_at: column.text,
   updated_at: column.text,
 });
@@ -585,6 +565,14 @@ const routine_profile_memberships = new Table({
   routine_id: column.text,
   enabled: column.integer,
   version: column.integer,
+  created_at: column.text,
+  updated_at: column.text,
+});
+
+const routine_temporary_overrides = new Table({
+  identity_id: column.text,
+  routine_id: column.text,
+  override_json: column.text,
   created_at: column.text,
   updated_at: column.text,
 });
@@ -729,7 +717,6 @@ const goal_operation_receipts = new Table(
   },
   { localOnly: true },
 );
-
 
 const notification_history = new Table({
   identity_id: column.text,
@@ -909,7 +896,6 @@ const ai_provider_configs = new Table({
   updated_at: column.text,
   deleted_at: column.text,
 });
-
 
 /**
  * Desktop-only Provider onboarding state. Credentials are encrypted with the
@@ -1144,6 +1130,7 @@ export const PowerSyncAppSchema = new Schema({
   routine_definitions,
   routine_profiles,
   routine_profile_memberships,
+  routine_temporary_overrides,
   routine_protocol_definitions,
   routine_protocol_sessions,
   // Notification

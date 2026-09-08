@@ -9,7 +9,7 @@ import { toBoolean } from './projection-helpers';
  * accepting numbers and case-insensitive "true"/"false"/"1"/"0".
  * Intentionally not force-merged into query parseBoolean family:
  * - utils parseBoolean: string via parseString → boolean|undefined (no fallback/numbers)
- * - schedule parseBoolean: empty short-circuit + boolean literals → boolean|undefined
+ * - scheduler parseBoolean: empty short-circuit + boolean literals → boolean|undefined
  * - goal parseBoolean (985): "true"/"false" only → boolean|undefined
  * Soft residual 1021/1073/985: query parser duals/keep-boundaries remain.
  * Soft residual 1117: optionalString/toNonEmptyString keep-boundary remains.
@@ -22,8 +22,8 @@ describe('data-portability toBoolean keep-boundary (residual 1113)', () => {
     resolve(dir, '../../../../../../utils/src/shared/parse-query-value.ts'),
     'utf8',
   );
-  const scheduleRoutes = readFileSync(
-    resolve(dir, '../../../../../../schedule/src/api/routes.ts'),
+  const schedulerRoutes = readFileSync(
+    resolve(dir, '../../../../../../scheduler/src/api/routes.ts'),
     'utf8',
   );
   const goalParseBoolean = readFileSync(
@@ -42,7 +42,7 @@ describe('data-portability toBoolean keep-boundary (residual 1113)', () => {
     expect(helpers).not.toMatch(/export function toBoolean[\s\S]{0,350}return undefined/);
   });
 
-  it('differs from utils/schedule/goal parseBoolean query shapes (no force-merge)', () => {
+  it('differs from utils/scheduler/goal parseBoolean query shapes (no force-merge)', () => {
     expect(utilsParse).toMatch(/export function parseBoolean\b/);
     expect(utilsParse).toContain('boolean | undefined');
     expect(utilsParse).toContain('return undefined');
@@ -50,10 +50,10 @@ describe('data-portability toBoolean keep-boundary (residual 1113)', () => {
     expect(utilsParse).not.toMatch(/export function toBoolean\b/);
     expect(utilsParse).not.toContain('fallback = false');
 
-    expect(scheduleRoutes).toMatch(/function parseBoolean\b/);
-    expect(scheduleRoutes).toContain('boolean | undefined');
-    expect(scheduleRoutes).toContain("value === ''");
-    expect(scheduleRoutes).not.toMatch(/function toBoolean\b/);
+    expect(schedulerRoutes).toMatch(/function parseBoolean\b/);
+    expect(schedulerRoutes).toContain('boolean | undefined');
+    expect(schedulerRoutes).toContain("value === ''");
+    expect(schedulerRoutes).not.toMatch(/function toBoolean\b/);
 
     expect(goalParseBoolean).toContain('Residual 985');
     expect(goalParseBoolean).toContain('Soft residual 1113');

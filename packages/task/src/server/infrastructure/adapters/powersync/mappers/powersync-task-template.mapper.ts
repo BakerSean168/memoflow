@@ -26,8 +26,6 @@ export type PowerSyncTaskTemplateRow = {
   archived_at: string | null;
   abandoned_reason: string | null;
   importance: string;
-  color: string | null;
-  tags: string | null;
   time_config_type: string | null;
   time_config_start_time: string | null;
   time_config_end_time: string | null;
@@ -120,8 +118,6 @@ export class PowerSyncTaskTemplateMapper {
       recurrenceRule,
       reminderConfig,
       importance: data.importance as ImportanceLevel,
-      tags: data.tags ? (JSON.parse(data.tags) as string[]) : [],
-      color: data.color ?? null,
       status: (data.status as TaskTemplateStatus) ?? TaskTemplateStatus.Active,
       outcome: (data.outcome ?? TaskPlanOutcome.Open) as TaskPlanOutcomeValue,
       completionPolicy: (data.completion_policy ?? TaskPlanCompletionPolicy.AllowCorrection) as TaskPlanCompletionPolicyValue,
@@ -185,8 +181,6 @@ export class PowerSyncTaskTemplateMapper {
       archivedAt: dto.archivedAt != null ? new Date(dto.archivedAt).toISOString() : null,
       abandonedReason: dto.abandonedReason,
       importance: dto.importance,
-      color: dto.color ?? null,
-      tags: JSON.stringify(dto.tags ?? []),
       timeConfigType: timeConfig?.timeType ?? null,
       timeConfigStartTime:
         timeConfig?.startDate != null ? new Date(timeConfig.startDate).toISOString() : null,

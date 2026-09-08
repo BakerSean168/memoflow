@@ -9,7 +9,7 @@ async function seedGoalAndTask(identityId: string, suffix: string) {
   const taskTemplateId = `task-${suffix}`
   await prisma.goal.create({ data: { id: goalId, identityId, name: `Goal ${suffix}` } })
   await prisma.taskTemplate.create({
-    data: { id: taskTemplateId, identityId, name: `Task ${suffix}`, status: 'Active', tags: '[]' },
+    data: { id: taskTemplateId, identityId, name: `Task ${suffix}`, status: 'Active' },
   })
   return { goalId, taskTemplateId }
 }

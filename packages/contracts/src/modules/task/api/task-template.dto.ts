@@ -37,9 +37,7 @@ export const CreateTaskTemplateSchema = z
     recurrenceRule: RecurrenceConfigSchema.optional().nullable(),
     reminderConfig: TaskReminderConfigSchema.optional().nullable(),
     importance: z.enum(ImportanceLevel),
-    tags: z.array(z.string()).default([]).optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
-    color: z.string().optional().nullable(),
     goalBinding: TaskGoalBindingSchema.optional().nullable(),
     completionPolicy: z.enum(TaskPlanCompletionPolicy).optional(),
   })
@@ -66,9 +64,7 @@ export const UpdateTaskTemplateSchema = z
     recurrenceRule: RecurrenceConfigSchema.optional().nullable(),
     reminderConfig: TaskReminderConfigSchema.optional().nullable(),
     importance: z.enum(ImportanceLevel).optional(),
-    tags: z.array(z.string()).optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
-    color: z.string().optional().nullable(),
     goalBinding: TaskGoalBindingSchema.optional().nullable(),
     completionPolicy: z.enum(TaskPlanCompletionPolicy).optional(),
     /** R2-5a：乐观锁期望版本（可选；提供时校验，旧客户端可不传）。 */
@@ -90,7 +86,6 @@ export type AbandonTaskPlanReq = z.infer<typeof AbandonTaskPlanSchema>;
 export const ListTaskTemplateFiltersSchema = z.object({
   status: z.array(z.string()).optional(),
   goalId: brandedId<GoalId>().optional(),
-  tags: z.array(z.string()).optional(),
   labelIdsAll: z.array(z.string().min(1)).max(50).optional(),
 });
 
@@ -108,7 +103,6 @@ export interface QueryTaskTemplatesInternal {
   identityId: IdentityId;
   status?: string[];
   goalId?: GoalId;
-  tags?: string[];
   labelIdsAll?: string[];
 }
 export interface QueryTaskTemplatesRes {

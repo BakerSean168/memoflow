@@ -80,7 +80,7 @@ export class TaskTemplateController {
       identityId: IdentityId.of(ctx.identityId),
       status: filters?.status,
       goalId: filters?.goalId as GoalId | undefined,
-      tags: filters?.tags,
+      labelIdsAll: filters?.labelIdsAll,
     };
   }
 
@@ -102,9 +102,9 @@ export class TaskTemplateController {
       recurrenceRule: input.recurrenceRule,
       reminderConfig: input.reminderConfig,
       importance: input.importance,
-      tags: input.tags,
-      color: input.color,
+      labelIds: input.labelIds,
       goalBinding: input.goalBinding,
+      completionPolicy: input.completionPolicy,
     };
 
     const result = await this.useCases.createTemplate(createInput);
@@ -169,9 +169,9 @@ export class TaskTemplateController {
       recurrenceRule: input.recurrenceRule,
       reminderConfig: input.reminderConfig,
       importance: input.importance,
-      tags: input.tags,
-      color: input.color,
+      labelIds: input.labelIds,
       goalBinding: input.goalBinding,
+      completionPolicy: input.completionPolicy,
     });
   }
 

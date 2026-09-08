@@ -1,29 +1,37 @@
 /**
- * Reminder Response Entity - Server
- * 提醒响应实体 - 服务端
- *
- * Residual 861: ReminderResponseClientDTO dual body retired —
- * Client is Omit<Server, 'identityId'> (server-only identity scope).
+ * Reminder Response Entity - Server DTO
+ * 提醒响应实体 - 服务端 DTO
  */
 
 import type { ReminderResponseId, ReminderTemplateId, IdentityId } from '../../../primitives';
 
-/**
- * R3c：响应时长值对象（秒）。
- * 语义约束：非负整数秒；snooze 的 duration 必填且 > 0。
- */
-export type ReminderResponseDurationSeconds = number & { readonly __brand: 'ReminderResponseDurationSeconds' };
+/** Actual user response latency measured in non-negative integer seconds. */
+export type ReminderResponseLatencySeconds =
+  number & { readonly __brand: 'ReminderResponseLatencySeconds' };
 
-export function toReminderResponseDurationSeconds(value: number): ReminderResponseDurationSeconds {
+export function toReminderResponseLatencySeconds(value: number): ReminderResponseLatencySeconds {
   if (!Number.isInteger(value) || value < 0) {
-    throw new Error(`Invalid reminder response duration: ${value} (must be non-negative integer seconds)`);
+    throw new Error(
+      `Invalid reminder response latency: ${value} (must be non-negative integer seconds)`,
+    );
   }
-  return value as ReminderResponseDurationSeconds;
+  return value as ReminderResponseLatencySeconds;
 }
 
-/**
- * 响应行为类型
- */
+/** User-requested snooze delay measured in positive integer seconds. */
+export type ReminderSnoozeDurationSeconds =
+  number & { readonly __brand: 'ReminderSnoozeDurationSeconds' };
+
+export function toReminderSnoozeDurationSeconds(value: number): ReminderSnoozeDurationSeconds {
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(
+      `Invalid reminder snooze duration: ${value} (must be positive integer seconds)`,
+    );
+  }
+  return value as ReminderSnoozeDurationSeconds;
+}
+
+/** 响应行为类型 */
 export const ReminderResponseAction = {
   Clicked: 'CLICKED',
   Ignored: 'IGNORED',
@@ -41,10 +49,12 @@ export interface ReminderResponseServerDTO {
   reminderTemplateId: ReminderTemplateId;
   identityId: IdentityId;
   action: ReminderResponseAction;
-  /** R3c：响应/延后时长（秒）；snooze 必填且 > 0。 */
-  responseTime?: ReminderResponseDurationSeconds | null;
+  /** Measured latency from presentation to user response; never a snooze delay. */
+  responseTime?: ReminderResponseLatencySeconds | null;
+  /** Requested snooze delay; present only for SNOOZED responses. */
+  snoozeDurationSeconds?: ReminderSnoozeDurationSeconds | null;
   timestamp: number; // epoch ms
 }
 
-// Residual 861: Client dual retired — public shape without identityId.
+// Residual 861: Client dual retired - public shape without identityId.
 export type ReminderResponseClientDTO = Omit<ReminderResponseServerDTO, 'identityId'>;

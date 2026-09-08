@@ -24,7 +24,17 @@ export default {
     "profileFallbackDescription": "A Profile is a context gate. Pausing it never changes a Routine’s own switch.",
     "routineCountValue": "{count} routines",
     "runningCountValue": "{count} running",
-    "sidebarProfilePaused": "{count} routines paused by this Profile gate"
+    "sidebarProfilePaused": "{count} routines paused by this Profile gate",
+    "methodLibraryTitle": "Method library",
+    "methodLibraryDescription": "Start from a small, reviewable set of routine methods. Wall-clock methods can prefill a Routine; Protocol methods stay owned by the deterministic Protocol runtime.",
+    "methodApply": "Use preset",
+    "methodProtocolOwned": "Protocol runtime",
+    "methodRuntimeProtocol": "Protocol",
+    "methodRuntimeWallClock": "Wall clock",
+    "methodEveryMinutes": "Recommended: every {minutes} min",
+    "methodAtTime": "Recommended: {time}",
+    "methodProtocolSummary": "Recommended: {focus}/{breakMinutes} min × {cycles} cycles",
+    "methodIntervention": "Default intervention: {value}",
   },
   "action": {
     "createReminder": "New Routine",

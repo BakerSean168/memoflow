@@ -2,8 +2,7 @@ import { ReminderStatus, ReminderType, TriggerType } from '@memoflow/contracts/r
 import { asInstant, type Instant } from '@memoflow/time';
 import type { ReminderGroup } from '../aggregates/reminder-group';
 import type { ReminderTemplate } from '../aggregates/reminder-template';
-import { evaluateRoutineEffectiveEnabled } from './effective-enabled';
-import { ProfileMembership, RoutineDefinition, RoutineProfile } from './model';
+import { RoutineDefinition, RoutineProfile } from './model';
 import {
   migrateLegacyFixedTimeTrigger,
   migrateLegacyIntervalTrigger,
@@ -11,18 +10,12 @@ import {
 } from './trigger';
 
 /** Short-lived migration seam from legacy Reminder vocabulary to Routine truth. */
-export function adaptLegacyReminderTemplate(input: {
-  template: ReminderTemplate;
-  group?: ReminderGroup | null;
-  globalReminderEnabled?: boolean;
-}): {
+export function adaptLegacyReminderTemplate(input: { template: ReminderTemplate }): {
   routine: RoutineDefinition;
-  profile: RoutineProfile | null;
-  membership: ProfileMembership | null;
   /** Legacy elapsed anchor is runtime state, not long-lived Routine trigger config. */
   legacyRuntimeAnchor: Instant | null;
 } {
-  const { template, group = null, globalReminderEnabled = true } = input;
+  const { template } = input;
   const identityId = String(template.identityId);
   const triggerMigration = adaptLegacyReminderTrigger(template);
   const routine = RoutineDefinition.load({
@@ -30,32 +23,24 @@ export function adaptLegacyReminderTemplate(input: {
     identityId,
     name: template.title,
     description: template.description,
-    // The legacy identity-wide switch is folded into this compatibility gate.
-    enabled:
-      globalReminderEnabled &&
-      template.selfEnabled &&
-      template.status === ReminderStatus.Active,
+    enabled: template.selfEnabled && template.status === ReminderStatus.Active,
     trigger: triggerMigration.trigger,
     version: template.version,
     createdAt: new Date(Number(template.createdAt)),
     updatedAt: new Date(Number(template.updatedAt)),
   });
 
-  if (!group) {
-    return {
-      routine,
-      profile: null,
-      membership: null,
-      legacyRuntimeAnchor: triggerMigration.legacyRuntimeAnchor,
-    };
-  }
-  if (String(group.identityId) !== identityId) {
-    throw new TypeError('Legacy reminder group ownership mismatch');
-  }
+  return {
+    routine,
+    legacyRuntimeAnchor: triggerMigration.legacyRuntimeAnchor,
+  };
+}
 
-  const profile = RoutineProfile.load({
+/** Maps one legacy ReminderGroup to the canonical RoutineProfile identity. */
+export function adaptLegacyReminderGroup(group: ReminderGroup): RoutineProfile {
+  return RoutineProfile.load({
     id: group.id,
-    identityId,
+    identityId: String(group.identityId),
     name: group.name,
     description: group.description,
     enabled: group.enabled,
@@ -64,21 +49,6 @@ export function adaptLegacyReminderTemplate(input: {
     createdAt: group.createdAt,
     updatedAt: group.updatedAt,
   });
-  const membership = ProfileMembership.create({
-    identityId,
-    profileId: profile.id,
-    routineId: routine.id,
-    // Legacy had no per-membership state. The single-group edge starts enabled;
-    // template state remains on RoutineDefinition and cannot be revived by profile state.
-    enabled: true,
-    now: group.updatedAt,
-  });
-  return {
-    routine,
-    profile,
-    membership,
-    legacyRuntimeAnchor: triggerMigration.legacyRuntimeAnchor,
-  };
 }
 
 export interface LegacyReminderTriggerMigration {
@@ -123,7 +93,8 @@ export function adaptLegacyReminderTrigger(
       return {
         trigger: null,
         legacyRuntimeAnchor: activatedAt,
-        rationale: 'Legacy OneTime Interval has no executable calculator path; migration does not invent new behavior.',
+        rationale:
+          'Legacy OneTime Interval has no executable calculator path; migration does not invent new behavior.',
       };
     }
     const migration = migrateLegacyIntervalTrigger(trigger.interval, {
@@ -158,19 +129,4 @@ function ymdAtInstant(instant: Instant, timeZone: string): string {
     throw new TypeError(`Could not derive legacy start date in time zone ${timeZone}`);
   }
   return `${bag.year}-${bag.month}-${bag.day}`;
-}
-
-export function evaluateLegacyReminderEffectiveEnabled(input: {
-  template: ReminderTemplate;
-  group?: ReminderGroup | null;
-  globalReminderEnabled?: boolean;
-}): ReturnType<typeof evaluateRoutineEffectiveEnabled> {
-  const adapted = adaptLegacyReminderTemplate(input);
-  return evaluateRoutineEffectiveEnabled({
-    routineEnabled: adapted.routine.enabled,
-    profileEnabled: adapted.profile?.enabled,
-    profileActive: adapted.profile?.active,
-    membershipEnabled: adapted.membership?.enabled,
-    temporaryOverrideAllowsExecution: true,
-  });
 }

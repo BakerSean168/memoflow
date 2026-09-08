@@ -34,7 +34,7 @@ const stages = [
       'run-many',
       '-t',
       'test:integration',
-      '--projects=task,goal,schedule,reminder',
+      '--projects=task,goal,schedule,scheduler,reminder',
       '--parallel=1',
       '--outputStyle=static',
     ],

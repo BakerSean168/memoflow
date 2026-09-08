@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import type { IReminderGroupRepository } from '../../domain/repositories/i-reminder-group-repository';
 import type { IReminderTemplateRepository } from '../../domain/repositories/i-reminder-template-repository';
 import { ReminderTemplateActionApplicationService } from './reminder-template-action-application-service';
 import { ReminderTemplateClientMapper } from '../mappers/reminder-template-client.mapper';
@@ -11,9 +10,6 @@ function createTemplate(overrides: Record<string, unknown> = {}): Record<string,
   return {
     id: 'template-1',
     identityId: IDENTITY_ID,
-    groupId: 'group-1',
-    enable: vi.fn(),
-    pause: vi.fn(),
     toggle: vi.fn(),
     getAllHistory: vi.fn().mockReturnValue([]),
     ...overrides,
@@ -22,11 +18,11 @@ function createTemplate(overrides: Record<string, unknown> = {}): Record<string,
 
 describe('ReminderTemplateActionApplicationService', () => {
   let reminderTemplateRepository: ReturnType<typeof createMockRepo<IReminderTemplateRepository>>;
-  let reminderGroupRepository: ReturnType<typeof createMockRepo<IReminderGroupRepository>>;
   let reminderDomainService: {
     syncTemplateEffectiveEnabled: ReturnType<typeof vi.fn>;
-    updateGroupStats: ReturnType<typeof vi.fn>;
-    assignTemplateToGroup: ReturnType<typeof vi.fn>;
+    updateProfileStatsForRoutine: ReturnType<typeof vi.fn>;
+    replaceRoutineProfileMemberships: ReturnType<typeof vi.fn>;
+    projectRoutineDefinition: ReturnType<typeof vi.fn>;
   };
   let templateMapper: { toDTO: ReturnType<typeof vi.fn> };
   let service: ReminderTemplateActionApplicationService;
@@ -36,56 +32,69 @@ describe('ReminderTemplateActionApplicationService', () => {
       findByIdForIdentity: vi.fn().mockResolvedValue(null),
       save: vi.fn().mockResolvedValue(undefined),
     });
-    reminderGroupRepository = createMockRepo<IReminderGroupRepository>({
-      findByIdForIdentity: vi.fn().mockResolvedValue(null),
-    });
     reminderDomainService = {
       syncTemplateEffectiveEnabled: vi.fn().mockResolvedValue(undefined),
-      updateGroupStats: vi.fn().mockResolvedValue(undefined),
-      assignTemplateToGroup: vi.fn(),
+      updateProfileStatsForRoutine: vi.fn().mockResolvedValue(undefined),
+      replaceRoutineProfileMemberships: vi.fn().mockResolvedValue(undefined),
+      projectRoutineDefinition: vi.fn().mockResolvedValue(undefined),
     };
     templateMapper = {
       toDTO: vi.fn(),
     };
     service = new ReminderTemplateActionApplicationService({
       reminderTemplateRepository,
-      reminderGroupRepository,
       reminderDomainService: reminderDomainService as never,
       templateMapper: templateMapper as unknown as ReminderTemplateClientMapper,
     });
   });
 
-  it('enables a template and returns mapped DTO', async () => {
+  it('toggles a template through the canonical action and returns mapped DTO', async () => {
     const template = createTemplate();
     const dto = { id: 'template-1', name: 'Drink water' };
     (reminderTemplateRepository.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(template);
     templateMapper.toDTO.mockResolvedValue(dto);
 
-    const result = await service.enableTemplate('template-1', { identityId: IDENTITY_ID });
+    const result = await service.toggleTemplate('template-1', { identityId: IDENTITY_ID });
 
-    expect(template.enable).toHaveBeenCalledTimes(1);
+    expect(template.toggle).toHaveBeenCalledTimes(1);
     expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledWith(template);
     expect(reminderTemplateRepository.save).toHaveBeenCalledWith(template);
-    expect(reminderDomainService.updateGroupStats).toHaveBeenCalledWith(IDENTITY_ID, 'group-1');
+    expect(reminderDomainService.projectRoutineDefinition).toHaveBeenCalledWith(template);
+    expect(reminderDomainService.updateProfileStatsForRoutine).toHaveBeenCalledWith(IDENTITY_ID, 'template-1');
     expect(result).toEqual({ ok: true, data: dto });
   });
 
-  it('delegates template move to domain service without duplicate stats sync in the facade layer', async () => {
-    const template = createTemplate({ groupId: 'group-old' });
-    const targetGroup = { id: 'group-new', identityId: IDENTITY_ID };
-    const movedTemplate = createTemplate({ groupId: 'group-new' });
-    const dto = { id: 'template-1', groupId: 'group-new' };
+  it('replaces the complete Profile membership set without mutating Routine-owned state', async () => {
+    const template = createTemplate();
+    const dto = {
+      id: 'template-1',
+      profileMemberships: [
+        { profileId: 'work', profileName: 'Work', membershipEnabled: true, profileEnabled: true, profileActive: true },
+        { profileId: 'gaming', profileName: 'Gaming', membershipEnabled: true, profileEnabled: true, profileActive: true },
+      ],
+    };
     (reminderTemplateRepository.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(template);
-    (reminderGroupRepository.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(targetGroup);
-    reminderDomainService.assignTemplateToGroup.mockResolvedValue(movedTemplate);
     templateMapper.toDTO.mockResolvedValue(dto);
 
-    const result = await service.moveTemplate('template-1', 'group-new', { identityId: IDENTITY_ID });
+    const result = await service.replaceTemplateProfiles(
+      'template-1',
+      ['work', 'gaming'],
+      { identityId: IDENTITY_ID },
+    );
 
-    expect(reminderDomainService.assignTemplateToGroup).toHaveBeenCalledWith(IDENTITY_ID, 'template-1', 'group-new');
-    expect(reminderDomainService.updateGroupStats).not.toHaveBeenCalled();
+    expect(reminderDomainService.replaceRoutineProfileMemberships).toHaveBeenCalledWith(
+      template,
+      ['work', 'gaming'],
+    );
+    expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledWith(template);
+    expect(reminderTemplateRepository.save).toHaveBeenCalledWith(template);
+    expect(reminderDomainService.updateProfileStatsForRoutine).toHaveBeenCalledWith(
+      IDENTITY_ID,
+      'template-1',
+    );
     expect(result).toEqual({ ok: true, data: dto });
   });
+
 
   it('returns template history as client DTOs', async () => {
     const historyA = { toClientDTO: vi.fn().mockReturnValue({ id: 'history-1' }) };

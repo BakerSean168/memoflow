@@ -23,7 +23,6 @@ function createTestGoal(name = 'Test Goal'): Goal {
     tags: [],
     startDate: null,
     targetDate: null,
-    folderId: null,
     parentGoalId: null,
     reminderConfig: null,
   });

@@ -35,8 +35,6 @@ describe('Task vNext performance budgets', () => {
       description: null,
       taskType: TaskType.Recurring,
       importance: ImportanceLevel.Moderate,
-      tags: [],
-      color: null,
       status: TaskTemplateStatus.Active,
       outcome: TaskPlanOutcome.Open,
       completionPolicy: TaskPlanCompletionPolicy.AllowCorrection,

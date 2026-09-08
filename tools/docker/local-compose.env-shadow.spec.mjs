@@ -230,6 +230,12 @@ describe('API runtime image boundary', () => {
         dockerfile.indexOf('COPY apps/api ./apps/api'),
     );
     assert.ok(dockerfile.includes('pnpm --config.node-linker=isolated'));
+    assert.ok(dockerfile.includes('COPY packages/scheduler/package.json ./packages/scheduler/package.json'));
+    assert.ok(dockerfile.includes('COPY packages/scheduler ./packages/scheduler'));
+    assert.ok(
+      dockerfile.indexOf('COPY packages/scheduler/package.json') <
+        dockerfile.indexOf('pnpm --config.node-linker=isolated'),
+    );
     assert.ok(
       dockerfile.includes('--filter @memoflow/api deploy --prod --ignore-scripts /prod/api'),
     );

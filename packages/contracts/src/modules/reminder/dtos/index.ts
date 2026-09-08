@@ -2,7 +2,7 @@ import type { ReminderType } from '../value-objects/reminder-type';
 import type { TriggerType } from '../value-objects/trigger-type';
 import type { NotificationChannel } from '../value-objects/notification-channel';
 import type { ImportanceLevel } from '../../../shared/value-objects/importance';
-import type { ReminderTemplateId, ReminderGroupId } from '../../../primitives';
+import type { ReminderTemplateId } from '../../../primitives';
 
 /**
  * Residual 647: ReminderTemplateSummaryDTO / ReminderDashboardDTO dead duals retired.
@@ -32,7 +32,4 @@ export interface UpcomingReminderDTO {
 
   // 通知配置
   notificationChannels: NotificationChannel[];
-
-  // 分组信息
-  groupId?: ReminderGroupId | null;
 }

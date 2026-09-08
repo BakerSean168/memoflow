@@ -11,7 +11,6 @@ model ReminderTemplate {
   type               String
   selfEnabled        Boolean   @map("self_enabled")
   status             String
-  reminderGroupId    String?   @map("reminder_group_id")
   importanceLevel    String    @map("importance_level")
   tags               String
   color              String?
@@ -28,30 +27,11 @@ model ReminderTemplate {
   notificationConfig String    @map("notification_config")
   stats              String
 
-  // Smart Frequency: Response Metrics
-  clickRate          Float?    @map("click_rate")
-  ignoreRate         Float?    @map("ignore_rate")
-  avgResponseTime    Int?      @map("avg_response_time")
-  snoozeCount        Int       @default(0) @map("snooze_count")
-  effectivenessScore Float?    @map("effectiveness_score")
-  sampleSize         Int       @default(0) @map("sample_size")
-  lastAnalysisTime   DateTime? @map("last_analysis_time")
-
-  // Smart Frequency: Frequency Adjustment
-  originalInterval      Int?      @map("original_interval")
-  adjustedInterval      Int?      @map("adjusted_interval")
-  adjustmentReason      String?   @map("adjustment_reason")
-  adjustmentTime        DateTime? @map("adjustment_time")
-  isAutoAdjusted        Boolean   @default(false) @map("is_auto_adjusted")
-  userConfirmed         Boolean   @default(false) @map("user_confirmed")
-  smartFrequencyEnabled Boolean   @default(true) @map("smart_frequency_enabled")
-
   history     ReminderHistory[]
   instances   ReminderInstance[]
   responses   ReminderResponse[]
   occurrences ReminderOccurrence[]
   account     Account              @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  group       ReminderGroup?       @relation(fields: [reminderGroupId], references: [id])
 
   @@index([status])
   @@map("reminder_templates")
@@ -64,7 +44,6 @@ model ReminderGroup {
   description String?
   color       String?
   icon        String?
-  controlMode String    @map("control_mode")
   enabled     Boolean
   status      String
   order       Int
@@ -75,7 +54,6 @@ model ReminderGroup {
   deletedAt   DateTime? @map("deleted_at")
 
   account   Account            @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  templates ReminderTemplate[]
 
   @@index([identityId])
   @@map("reminder_groups")
@@ -139,8 +117,9 @@ model ReminderResponse {
   identityId   String   @map("identity_id")
   templateId   String   @map("template_id")
   action       String // clicked, ignored, snoozed, dismissed, completed
-  responseTime Int?     @map("response_time") // seconds
-  timestamp    DateTime
+  responseTime           Int?     @map("response_time") // actual response latency, seconds
+  snoozeDurationSeconds Int?     @map("snooze_duration_seconds") // requested snooze delay, seconds
+  timestamp              DateTime
   createdAt    DateTime @default(now()) @map("created_at")
 
   identity Account          @relation("AccountReminderResponses", fields: [identityId], references: [id])
@@ -152,7 +131,7 @@ model ReminderResponse {
 }
 
 /// UserReminderPreference 聚合根 - 用户提醒偏好
-/// 存储用户的最佳/最差响应时间段和智能频率配置
+/// 存储用户的最佳/最差响应时间段与全局提醒总开关
 model UserReminderPreference {
   // ============ 主键与外键 ============
   id         String @id
@@ -162,9 +141,8 @@ model UserReminderPreference {
   bestTimeSlots  String @map("best_time_slots") /// JSON: TimeSlotDTO[]
   worstTimeSlots String @map("worst_time_slots") /// JSON: TimeSlotDTO[]
 
-  // ============ 智能频率 ============
+  // ============ 全局提醒 ============
   globalReminderEnabled Boolean @default(true) @map("global_reminder_enabled")
-  globalSmartFrequency  Boolean @default(true) @map("global_smart_frequency")
 
   // ============ 审计 ============
   createdAt DateTime @default(now()) @map("created_at")

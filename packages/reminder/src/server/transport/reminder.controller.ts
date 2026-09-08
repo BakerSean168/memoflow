@@ -16,9 +16,9 @@ import {
   GetReminderTodayScheduleSchema,
   CreateReminderGroupSchema,
   UpdateReminderGroupSchema,
-  SwitchGroupControlModeSchema,
-  BatchGroupTemplatesSchema,
+  ReplaceRoutineProfilesSchema,
   UpdateReminderPreferencesSchema,
+  RecordReminderResponseSchema,
 } from '@memoflow/contracts/reminder';
 import type {
   GetUpcomingRemindersRes,
@@ -81,7 +81,11 @@ export class ReminderController {
     return this.useCases.getTemplate(id, ctx);
   }
 
-  async updateTemplate(id: string, input: unknown, ctx: ExecutionContext): Promise<Result<unknown>> {
+  async updateTemplate(
+    id: string,
+    input: unknown,
+    ctx: ExecutionContext,
+  ): Promise<Result<unknown>> {
     const parsed = UpdateReminderTemplateSchema.safeParse(input);
     if (!parsed.success) {
       return fail({
@@ -141,50 +145,26 @@ export class ReminderController {
     return ok(null);
   }
 
-  async switchGroupControlMode(id: string, input: unknown, ctx: ExecutionContext): Promise<Result<unknown>> {
-    const parsed = SwitchGroupControlModeSchema.safeParse(input);
-    if (!parsed.success) {
-      return fail({
-        code: 'VALIDATION_ERROR',
-        message: '参数验证失败',
-        details: formatZodErrors(parsed.error.issues),
-      });
-    }
-    return this.useCases.switchGroupControlMode(id, parsed.data, ctx);
-  }
-
-  async batchGroupTemplates(id: string, input: unknown, ctx: ExecutionContext): Promise<Result<unknown>> {
-    const parsed = BatchGroupTemplatesSchema.safeParse(input);
-    if (!parsed.success) {
-      return fail({
-        code: 'VALIDATION_ERROR',
-        message: '参数验证失败',
-        details: formatZodErrors(parsed.error.issues),
-      });
-    }
-    return this.useCases.batchGroupTemplates(id, parsed.data, ctx);
-  }
-
   // ==================== Template Actions ====================
-
-  async enableTemplate(id: string, ctx: ExecutionContext): Promise<Result<unknown>> {
-    return this.useCases.enableTemplate(id, ctx);
-  }
-
-  async pauseTemplate(id: string, ctx: ExecutionContext): Promise<Result<unknown>> {
-    return this.useCases.pauseTemplate(id, ctx);
-  }
 
   async toggleTemplate(id: string, ctx: ExecutionContext): Promise<Result<unknown>> {
     return this.useCases.toggleTemplate(id, ctx);
   }
 
-  async moveTemplate(id: string, input: unknown, ctx: ExecutionContext): Promise<Result<unknown>> {
-    const rawGroupId = (input as Record<string, unknown>)?.groupId;
-    if (rawGroupId !== null && rawGroupId !== undefined && typeof rawGroupId !== 'string') {
-      return fail({ code: 'VALIDATION_ERROR', message: 'groupId must be a string or null' });
+  async replaceTemplateProfiles(
+    id: string,
+    input: unknown,
+    ctx: ExecutionContext,
+  ): Promise<Result<unknown>> {
+    const parsed = ReplaceRoutineProfilesSchema.safeParse(input);
+    if (!parsed.success) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: 'ProfileMembership 参数验证失败',
+        details: formatZodErrors(parsed.error.issues),
+      });
     }
-    return this.useCases.moveTemplate(id, rawGroupId ?? null, ctx);
+    return this.useCases.replaceTemplateProfiles(id, parsed.data.profileIds, ctx);
   }
 
   async getTemplateHistory(id: string, ctx: ExecutionContext): Promise<Result<unknown>> {
@@ -193,19 +173,20 @@ export class ReminderController {
 
   // ==================== Response Operations ====================
 
-  async recordResponse(templateId: string, input: unknown, ctx: ExecutionContext): Promise<Result<unknown>> {
-    const action = (input as Record<string, unknown>)?.action;
-    if (!action || typeof action !== 'string') {
-      return fail({ code: 'VALIDATION_ERROR', message: 'action is required' });
+  async recordResponse(
+    templateId: string,
+    input: unknown,
+    ctx: ExecutionContext,
+  ): Promise<Result<unknown>> {
+    const parsed = RecordReminderResponseSchema.safeParse(input);
+    if (!parsed.success) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: '参数验证失败',
+        details: formatZodErrors(parsed.error.issues),
+      });
     }
-    return this.useCases.recordResponse(
-      templateId,
-      {
-        action,
-        note: (input as Record<string, unknown>)?.note as string | undefined,
-      },
-      ctx,
-    );
+    return this.useCases.recordResponse(templateId, parsed.data, ctx);
   }
 
   async getTemplateResponses(templateId: string, ctx: ExecutionContext): Promise<Result<unknown>> {
@@ -241,12 +222,6 @@ export class ReminderController {
     );
   }
 
-  async rejectFrequencyAdjustment(templateId: string, ctx: ExecutionContext): Promise<Result<null>> {
-    const result = await this.useCases.rejectFrequencyAdjustment(templateId, ctx);
-    if (!result.ok) return result as Result<null>;
-    // Serialize as data:null (no Result.void / undefined dual-track).
-    return ok(null);
-  }
 
   // ==================== Group Actions ====================
 

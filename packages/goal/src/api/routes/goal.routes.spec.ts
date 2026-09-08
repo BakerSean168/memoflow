@@ -37,7 +37,6 @@ function createGoalControllerStub(): GoalController {
     activate: vi.fn(async () => okResult),
     complete: vi.fn(async () => okResult),
     getAggregate: vi.fn(async () => okResult),
-    getProgressBreakdown: vi.fn(async () => okResult),
     cloneGoal: vi.fn(async () => okResult),
     batchUpdateKeyResultWeights: vi.fn(async () => okResult),
   } as unknown as GoalController;
@@ -125,12 +124,7 @@ function createGoalUseCasesStub(): Parameters<typeof registerGoalRoutes>[0] {
     createRecord: vi.fn(),
     listRecords: vi.fn(),
     deleteRecord: vi.fn(),
-    activateFocusMode: vi.fn(),
-    deactivateFocusMode: vi.fn(),
-    extendFocusMode: vi.fn(),
-    getCurrentFocusMode: vi.fn(),
     getGoalAggregate: vi.fn(),
-    getGoalProgressBreakdown: vi.fn(),
     cloneGoal: vi.fn(),
     batchUpdateKeyResultWeights: vi.fn(),
   };

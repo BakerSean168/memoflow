@@ -76,7 +76,6 @@ function createApiStub(): GoalApplicationPort {
     listRecords: vi.fn(() => ok([] as never)),
     deleteRecord: vi.fn(() => ok(null as never)),
     getGoalAggregate: vi.fn(() => ok(null as never)),
-    getGoalProgressBreakdown: vi.fn(() => ok(null as never)),
     cloneGoal: vi.fn(() => ok(null as never)),
     batchUpdateKeyResultWeights: vi.fn(() => ok(null as never)),
   } as GoalApplicationPort;

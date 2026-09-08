@@ -66,7 +66,6 @@ function createFakeInstance() {
     updateGroup: vi.fn(() => ok(null as never)),
     deleteGroup: vi.fn(() => ok(null as never)),
     toggleGroup: vi.fn(() => ok(null as never)),
-    switchGroupControlMode: vi.fn(() => ok(null as never)),
     getPreferences: vi.fn(() => ok(null as never)),
     updatePreferences: vi.fn(() => ok(null as never)),
   };

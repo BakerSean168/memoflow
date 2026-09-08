@@ -24,9 +24,6 @@ import { UrgencyLevel } from '../../../shared/value-objects/urgency';
 /** 跨模块共享 outbox 消息类型：NotificationRequested 信封。 */
 export const NOTIFICATION_REQUESTED_MESSAGE_TYPE = 'notification.requested' as const;
 
-/** 跨模块共享 outbox 消息类型：W1 传统投递意图。 */
-export const NOTIFICATION_DISPATCH_MESSAGE_TYPE = 'notification.dispatch' as const;
-
 /**
  * Notification content inputs carried by the envelope.
  * 信封携带的通知内容输入。

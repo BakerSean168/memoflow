@@ -10,7 +10,6 @@
  *
  * 路由前缀：
  * - /goals        (目标 CRUD + 状态 + 关键结果 + 复盘 + 记录)
- * - /goal-folders (文件夹 CRUD)
  */
 
 export { createGoalApiModule } from './module';

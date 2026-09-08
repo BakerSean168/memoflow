@@ -2,13 +2,10 @@ import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
-  BatchGroupTemplatesReq,
-  BatchGroupTemplatesRes,
   CreateReminderGroupReq,
   CreateReminderGroupRes,
   GroupStatsDTO,
   ReminderGroupListRes,
-  SwitchGroupControlModeReq,
   UpdateReminderGroupReq,
 } from '@memoflow/contracts/reminder';
 import { ReminderGroup } from '../../domain/aggregates/reminder-group';
@@ -89,7 +86,6 @@ export class ReminderGroupApplicationService {
       identityId: existing.identityId,
       name: data.name ?? existing.name,
       description: data.description ?? existing.description,
-      controlMode: data.controlMode ?? existing.controlMode,
       enabled: existing.enabled,
       status: existing.status,
       order: data.order ?? existing.order,
@@ -103,7 +99,8 @@ export class ReminderGroupApplicationService {
     });
 
     await this.reminderGroupRepository.save(updated);
-    await this.reminderDomainService.syncTemplatesEffectiveEnabledByGroup(ctx.identityId, id);
+    await this.reminderDomainService.projectRoutineProfile(updated);
+    await this.reminderDomainService.syncTemplatesEffectiveEnabledByProfile(ctx.identityId, id);
 
     return ok(updated.toClientDTO());
   }
@@ -118,68 +115,16 @@ export class ReminderGroupApplicationService {
     return ok(undefined);
   }
 
-  async switchGroupControlMode(
-    id: string,
-    data: SwitchGroupControlModeReq,
-    ctx: ExecutionContext,
-  ): Promise<Result<CreateReminderGroupRes>> {
-    const existing = await this.getOwnedGroupOrFail(id, ctx);
-    if (!existing) {
-      return fail({ code: 'NOT_FOUND', message: 'Group not found' });
-    }
-
-    if (data.mode === 'Group') {
-      existing.switchToGroupControl();
-    } else {
-      existing.switchToIndividualControl();
-    }
-
-    await this.reminderGroupRepository.save(existing);
-    await this.reminderDomainService.syncTemplatesEffectiveEnabledByGroup(ctx.identityId, id);
-
-    return ok(existing.toClientDTO());
-  }
-
-  async batchGroupTemplates(
-    groupId: string,
-    data: BatchGroupTemplatesReq,
-    ctx: ExecutionContext,
-  ): Promise<Result<BatchGroupTemplatesRes>> {
-    const group = await this.getOwnedGroupOrFail(groupId, ctx);
-    if (!group) {
-      return fail({ code: 'NOT_FOUND', message: 'Group not found' });
-    }
-
-    const templates = await this.reminderTemplateRepository.findByGroupId(
-      group.id,
-      ctx.identityId,
-    );
-    let successCount = 0;
-
-    for (const template of templates) {
-      if (data.action === 'ENABLE') {
-        template.enable();
-      } else {
-        template.pause();
-      }
-
-      await this.reminderDomainService.syncTemplateEffectiveEnabled(template);
-      await this.reminderTemplateRepository.save(template);
-      successCount++;
-    }
-
-    await this.reminderDomainService.updateGroupStats(ctx.identityId, group.id);
-
-    return ok({ successCount, failedCount: 0 });
-  }
-
   async toggleGroup(id: string, ctx: ExecutionContext): Promise<Result<CreateReminderGroupRes>> {
     const group = await this.getOwnedGroupOrFail(id, ctx);
     if (!group) {
       return fail({ code: 'NOT_FOUND', message: 'Group not found' });
     }
 
-    const toggled = await this.reminderDomainService.toggleGroupAndTemplates(ctx.identityId, group.id);
+    const toggled = await this.reminderDomainService.toggleGroupAndTemplates(
+      ctx.identityId,
+      group.id,
+    );
     return ok(toggled.toClientDTO());
   }
 }

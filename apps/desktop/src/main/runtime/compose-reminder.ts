@@ -69,6 +69,9 @@ import {
   type ActiveUsageRuntime,
   type ActiveUsageRoutineRegistration,
   type RoutineActivitySensorRuntime,
+  createRoutineCoachCommandService,
+  createRoutineOverrideChangedNotifier,
+  type RoutineCoachCommandPort,
 } from '@memoflow/reminder/routine-runtime';
 import type { IdleSensorPort } from '@memoflow/reminder/routine-runtime';
 import { WindowsIdleSensorAdapter } from '../modules/routine/windows-idle-sensor.adapter';
@@ -108,6 +111,8 @@ export interface ComposedReminderDesktop {
   readonly module: ReminderElectronModuleDef;
   /** Canonical transport-neutral application port from the SAME module instance. */
   readonly applicationPort: ReminderApplicationPort;
+  /** Routine Coach owner-domain command seam for approved AI/product orchestration. */
+  readonly routineCommandPort: RoutineCoachCommandPort;
   /** Repository view exposed to sibling modules (dashboard). 暴露给兄弟模块（dashboard）的仓储视图。 */
   readonly repositories: { readonly reminderTemplateRepository: IReminderTemplateRepository };
   /** Schedule execution source built from the SAME repository set. 从同一仓储集合构建的 schedule execution source。 */
@@ -177,11 +182,19 @@ export function composeReminder(
 ): ComposedReminderDesktop {
   const repositories = createReminderPowerSyncRepositories(dependencies.db);
 
+  const routineCommandPort = createRoutineCoachCommandService({
+    routineProfileStore: repositories.routineProfileStore,
+    temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
+    protocolSessionStore: repositories.protocolSessionStore,
+    onOverrideChanged: createRoutineOverrideChangedNotifier(),
+  });
+
   const instance = createReminderModule({
     reminderTemplateRepository: repositories.reminderTemplateRepository,
     reminderGroupRepository: repositories.reminderGroupRepository,
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
+    routineProfileStore: repositories.routineProfileStore,
     closureChecker: repositories.closureChecker,
   });
 
@@ -195,6 +208,8 @@ export function composeReminder(
   });
   const scheduleProjectionSource = createReminderScheduleProjectionSource({
     reminderTemplateRepository,
+    routineProfileStore: repositories.routineProfileStore,
+    userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
   });
 
   const interventionRuntime = createInterventionRuntime();
@@ -285,6 +300,7 @@ export function composeReminder(
   return {
     module: createReminderElectronModule({ instance }),
     applicationPort: instance.api,
+    routineCommandPort,
     repositories: { reminderTemplateRepository },
     scheduleExecutionSource,
     scheduleProjectionSource,

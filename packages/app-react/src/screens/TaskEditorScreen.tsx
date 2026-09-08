@@ -6,10 +6,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { LabelClientDTO } from '@memoflow/contracts/label';
 import { TaskTimeType, TaskType, type CreateTaskTemplateReq, type UpdateTaskTemplateReq } from '@memoflow/contracts/task';
 
 import { useTaskTemplateDetail } from '../hooks/useTaskTemplateDetail';
 import { useTaskService } from '../hooks/useTaskService';
+import { useLabelService } from '../hooks/useLabelService';
 
 import {
   PageShell,
@@ -71,25 +73,21 @@ function combineDateAndTime(dateValue: string, timeValue: string) {
   return date.getTime();
 }
 
-function parseTags(input: string) {
-  return input
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 export function TaskEditorScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const taskId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
   const isEditing = !!taskId;
   const service = useTaskService();
+  const labelService = useLabelService();
   const { isLoading: isDetailLoading, template } = useTaskTemplateDetail(taskId);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [importance, setImportance] = useState<(typeof IMPORTANCE_OPTIONS)[number]>(ImportanceLevel.Moderate);
-  const [tags, setTags] = useState('');
+  const [labels, setLabels] = useState<LabelClientDTO[]>([]);
+  const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
+  const [newLabelName, setNewLabelName] = useState('');
   const [timeType, setTimeType] = useState<(typeof TIME_TYPE_OPTIONS)[number]>(TaskTimeType.AllDay);
   const [dateValue, setDateValue] = useState(toDateInput(null));
   const [timeValue, setTimeValue] = useState('09:00');
@@ -105,7 +103,7 @@ export function TaskEditorScreen() {
     setName(template.name);
     setDescription(template.description ?? '');
     setImportance(template.importance);
-    setTags(template.tags.join(', '));
+    setSelectedLabelIds(template.labels.map((label) => label.id));
     setTimeType(template.timeConfig.timeType);
     setDateValue(toDateInput(template.timeConfig.startDate ?? template.startDate));
 
@@ -118,6 +116,46 @@ export function TaskEditorScreen() {
       setEndTimeValue(toTimeInput(template.timeConfig.timeRange.end));
     }
   }, [template]);
+
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadLabels() {
+      const result = await labelService.listLabels({ limit: 500 });
+      if (cancelled) return;
+      if (!result.ok) {
+        setFormError(presentErrorMessage(result.error));
+        return;
+      }
+      setLabels(result.data);
+    }
+    void loadLabels();
+    return () => {
+      cancelled = true;
+    };
+  }, [labelService]);
+
+  function toggleLabel(labelId: string) {
+    setSelectedLabelIds((current) =>
+      current.includes(labelId) ? current.filter((id) => id !== labelId) : [...current, labelId],
+    );
+  }
+
+  async function handleCreateLabel() {
+    const name = newLabelName.trim();
+    if (!name) return;
+    const result = await labelService.createLabel({ name });
+    if (!result.ok) {
+      setFormError(presentErrorMessage(result.error));
+      return;
+    }
+    setLabels((current) => {
+      const withoutDuplicate = current.filter((label) => label.id !== result.data.id);
+      return [...withoutDuplicate, result.data].sort((a, b) => a.name.localeCompare(b.name));
+    });
+    setSelectedLabelIds((current) => [...new Set([...current, result.data.id])]);
+    setNewLabelName('');
+  }
 
   async function handleSave() {
     const trimmedName = name.trim();
@@ -147,7 +185,7 @@ export function TaskEditorScreen() {
         name: trimmedName,
         description: description.trim() || null,
         importance,
-        tags: parseTags(tags),
+        labelIds: selectedLabelIds,
         timeConfig: baseTimeConfig,
       };
 
@@ -167,12 +205,11 @@ export function TaskEditorScreen() {
       name: trimmedName,
       description: description.trim() || null,
       importance,
-      tags: parseTags(tags),
+      labelIds: selectedLabelIds,
       taskType: TaskType.OneTime,
       timeConfig: baseTimeConfig,
       recurrenceRule: null,
       reminderConfig: null,
-      color: null,
       goalBinding: null,
     };
 
@@ -191,7 +228,7 @@ export function TaskEditorScreen() {
     <PageShell
       eyebrow="Tasks"
       title={isEditing ? 'Edit template' : 'Create template'}
-      subtitle="第一版移动端编辑页先支持最小可用字段：名称、描述、重要性、标签和时间配置。">
+      subtitle="移动端编辑页使用与 Web/Desktop 相同的 Shared Label、重要性和时间配置语义。">
       <SectionCard title="Navigation" description="创建和编辑都走单独 screen，不在列表页里弹复杂桌面对话框。">
         <View style={styles.actionRow}>
           <PrimaryButton label="Back" onPress={() => router.back()} variant="secondary" />
@@ -211,13 +248,29 @@ export function TaskEditorScreen() {
           textAlignVertical="top"
           value={description}
         />
+      </SectionCard>
+
+      <SectionCard title="Labels" description="Shared Labels are the single classification system across Goal and Task.">
+        <View style={styles.optionRow}>
+          {labels.map((label) => (
+            <PrimaryButton
+              key={label.id}
+              label={label.name}
+              onPress={() => toggleLabel(label.id)}
+              variant={selectedLabelIds.includes(label.id) ? 'solid' : 'ghost'}
+            />
+          ))}
+          {labels.length === 0 ? (
+            <ThemedText type="small" themeColor="textSecondary">No labels yet.</ThemedText>
+          ) : null}
+        </View>
         <PrimaryTextField
-          hint="Comma separated tags"
-          label="Tags"
-          onChangeText={setTags}
-          placeholder="focus, weekly, team"
-          value={tags}
+          label="Create label"
+          onChangeText={setNewLabelName}
+          placeholder="Work"
+          value={newLabelName}
         />
+        <PrimaryButton label="Create and select" onPress={() => void handleCreateLabel()} variant="secondary" />
       </SectionCard>
 
       <SectionCard title="Importance" description="先保留单选按钮，后续再接更完整的设计系统表单原语。">

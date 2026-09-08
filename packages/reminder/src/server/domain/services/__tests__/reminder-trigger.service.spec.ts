@@ -29,7 +29,6 @@ function createTemplate() {
 describe('ReminderTriggerService', () => {
   const templateRepository = {
     save: vi.fn(),
-    findByNextTriggerBefore: vi.fn(),
   } as any;
   const controlService = {
     isTemplateEffectivelyEnabled: vi.fn(),
@@ -121,27 +120,4 @@ describe('ReminderTriggerService', () => {
     expect(template.calculateNextTrigger).toHaveBeenCalled();
   });
 
-  it('filters pending reminders by effective enabled state and ignores check failures', async () => {
-    const enabled = createTemplate();
-    const disabled = createTemplate();
-    const broken = createTemplate();
-
-    templateRepository.findByNextTriggerBefore.mockResolvedValue([null, enabled, disabled, broken]);
-    controlService.isTemplateEffectivelyEnabled.mockImplementation(async (template: ReminderTemplate) => {
-      if (template === enabled) {
-        return true;
-      }
-      if (template === disabled) {
-        return false;
-      }
-      throw new Error('bad state');
-    });
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-
-    const results = await service.getPendingReminders(789, 'identity-1');
-
-    consoleErrorSpy.mockRestore();
-    expect(templateRepository.findByNextTriggerBefore).toHaveBeenCalledWith(789, 'identity-1');
-    expect(results).toEqual([enabled, disabled, broken]);
-  });
 });

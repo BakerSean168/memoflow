@@ -4,7 +4,7 @@ import type {
   NotificationConfigDTO,
   TriggerConfigDTO,
 } from '@memoflow/contracts/reminder';
-import { ControlMode, ReminderType } from '@memoflow/contracts/reminder';
+import { ReminderType } from '@memoflow/contracts/reminder';
 import type { IReminderGroupRepository, IReminderTemplateRepository } from '../repositories';
 import { ReminderTemplate } from '../aggregates/reminder-template';
 import { ReminderGroup } from '../aggregates/reminder-group';
@@ -13,6 +13,9 @@ import { ReminderGroupBusinessService } from './reminder-group-business-service'
 import { GroupStats, ReminderTemplateId } from '../value-objects';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { IUserReminderPreferenceRepository } from '../repositories/i-user-reminder-preference-repository';
+import type { RoutineProfileStore } from '../ports';
+import { LegacyRoutineCutoverService } from './legacy-routine-cutover-service';
+import { ProfileMembership } from '../routine';
 
 // Local branded type
 type IdentityId = string & { readonly __brand: 'IdentityId' };
@@ -34,18 +37,123 @@ type IdentityId = string & { readonly __brand: 'IdentityId' };
 export class ReminderDomainService {
   private readonly controlService: ReminderTemplateControlService;
   private readonly groupBusinessService: ReminderGroupBusinessService;
+  private readonly routineCutover: LegacyRoutineCutoverService | null;
 
   constructor(
     private readonly reminderTemplateRepository: IReminderTemplateRepository,
     private readonly reminderGroupRepository: IReminderGroupRepository,
     private readonly userReminderPreferenceRepository?: IUserReminderPreferenceRepository,
+    private readonly routineProfileStore?: RoutineProfileStore,
   ) {
     this.controlService = new ReminderTemplateControlService(
       reminderTemplateRepository,
-      reminderGroupRepository,
       userReminderPreferenceRepository,
+      routineProfileStore,
     );
     this.groupBusinessService = new ReminderGroupBusinessService();
+    this.routineCutover = routineProfileStore
+      ? new LegacyRoutineCutoverService(routineProfileStore)
+      : null;
+  }
+
+  /** Keep the canonical RoutineDefinition projection current during the cutover. */
+  public async projectRoutineDefinition(template: ReminderTemplate): Promise<void> {
+    await this.routineCutover?.projectTemplateDefinition(template);
+  }
+
+  /** Keep the canonical RoutineProfile projection current during the cutover. */
+  public async projectRoutineProfile(group: ReminderGroup): Promise<void> {
+    await this.routineCutover?.projectProfile(group);
+  }
+
+  private requireRoutineProfileStore(): RoutineProfileStore {
+    if (!this.routineProfileStore) {
+      throw new Error(
+        '[FAIL-CLOSED] RoutineProfileStore is required for ProfileMembership commands',
+      );
+    }
+    return this.routineProfileStore;
+  }
+
+  /** Replace the complete canonical ProfileMembership set for one Routine. */
+  public async replaceRoutineProfileMemberships(
+    template: ReminderTemplate,
+    profileIds: readonly string[],
+  ): Promise<void> {
+    const store = this.routineProfileStore;
+    if (!store) {
+      if (profileIds.length === 0) return;
+      throw new Error(
+        '[FAIL-CLOSED] RoutineProfileStore is required for ProfileMembership commands',
+      );
+    }
+    const identityId = String(template.identityId);
+    const uniqueProfileIds = Array.from(new Set(profileIds));
+    if (uniqueProfileIds.length !== profileIds.length) {
+      throw new TypeError('Duplicate Routine profile membership');
+    }
+
+    const profiles = await store.findProfilesByIds({ identityId, profileIds: uniqueProfileIds });
+    if (profiles.length !== uniqueProfileIds.length) {
+      const found = new Set(profiles.map((profile) => profile.id));
+      const missing = uniqueProfileIds.filter((profileId) => !found.has(profileId));
+      throw new Error(`Routine Profile not found: ${missing.join(', ')}`);
+    }
+
+    const existing = await store.listMembershipsForRoutine({ identityId, routineId: template.id });
+    const existingByProfile = new Map(
+      existing.map((membership) => [membership.profileId, membership]),
+    );
+    const memberships = uniqueProfileIds.map(
+      (profileId) =>
+        existingByProfile.get(profileId) ??
+        ProfileMembership.create({
+          identityId,
+          profileId,
+          routineId: template.id,
+          enabled: true,
+          now: new Date(template.updatedAt),
+        }),
+    );
+
+    await this.projectRoutineDefinition(template);
+    await store.replaceRoutineMemberships({ identityId, routineId: template.id, memberships });
+    template.markEligibilityContextChanged('profile-membership');
+  }
+
+  /** Repair deterministic create replay without overwriting a newer M:N set. */
+  public async healRoutineProjection(
+    template: ReminderTemplate,
+    requestedProfileIds: readonly string[],
+  ): Promise<void> {
+    const store = this.routineProfileStore;
+    if (!store) {
+      if (requestedProfileIds.length === 0) return;
+      throw new Error(
+        '[FAIL-CLOSED] RoutineProfileStore is required for ProfileMembership commands',
+      );
+    }
+    await this.projectRoutineDefinition(template);
+    const memberships = await store.listMembershipsForRoutine({
+      identityId: String(template.identityId),
+      routineId: template.id,
+    });
+    if (memberships.length > 0 || requestedProfileIds.length === 0) return;
+    await this.replaceRoutineProfileMemberships(template, requestedProfileIds);
+  }
+
+  /** Canonical membership lookup used by Profile operations and stats. */
+  public async getTemplatesForProfile(
+    identityId: string,
+    profileId: string,
+  ): Promise<ReminderTemplate[]> {
+    const store = this.requireRoutineProfileStore();
+    const memberships = await store.listMembershipsForProfile({ identityId, profileId });
+    if (memberships.length === 0) return [];
+    return this.reminderTemplateRepository.findByIds(
+      identityId,
+      memberships.map((membership) => membership.routineId),
+    );
   }
 
   private async getGlobalReminderEnabled(identityId: string): Promise<boolean> {
@@ -66,19 +174,19 @@ export class ReminderDomainService {
     const templates = await this.reminderTemplateRepository.findByIdentityId(identityId);
     for (const template of templates) {
       await this.syncTemplateEffectiveEnabled(template);
+      template.markEligibilityContextChanged('global-gate');
       await this.reminderTemplateRepository.save(template);
     }
   }
 
-  public async syncTemplatesEffectiveEnabledByGroup(
+  public async syncTemplatesEffectiveEnabledByProfile(
     identityId: string,
-    groupId: string,
+    profileId: string,
   ): Promise<void> {
-    const group = await this.getGroup(identityId, groupId);
-    if (!group) return;
-    const templates = await this.reminderTemplateRepository.findByGroupId(groupId, identityId);
+    const templates = await this.getTemplatesForProfile(identityId, profileId);
     for (const template of templates) {
       await this.syncTemplateEffectiveEnabled(template);
+      template.markEligibilityContextChanged('profile-gate');
       await this.reminderTemplateRepository.save(template);
     }
   }
@@ -106,30 +214,16 @@ export class ReminderDomainService {
     tags?: string[];
     color?: string;
     icon?: string;
-    groupId?: string;
+    profileIds?: readonly string[];
   }): Promise<ReminderTemplate> {
-    if (params.groupId) {
-      const group = await this.reminderGroupRepository.findByIdForIdentity(
-        params.identityId,
-        params.groupId,
-      );
-      if (!group) {
-        throw new Error(`Invalid groupId: ${params.groupId}`);
-      }
-    }
-
     const template = ReminderTemplate.create({
       ...params,
       id: params.id ? ReminderTemplateId.of(params.id) : undefined,
       identityId: params.identityId as IdentityId,
     });
+    await this.replaceRoutineProfileMemberships(template, params.profileIds ?? []);
     await this.syncTemplateEffectiveEnabled(template);
     await this.reminderTemplateRepository.save(template);
-
-    if (params.groupId) {
-      await this.updateGroupStats(params.identityId, params.groupId);
-    }
-
     return template;
   }
 
@@ -151,7 +245,14 @@ export class ReminderDomainService {
       throw new Error(`ReminderTemplate not found: ${id}`);
     }
 
-    const groupId = template.groupId;
+    const profileIds = this.routineProfileStore
+      ? (
+          await this.routineProfileStore.listMembershipsForRoutine({
+            identityId,
+            routineId: id,
+          })
+        ).map((membership) => membership.profileId)
+      : [];
 
     if (softDelete) {
       template.softDelete();
@@ -159,9 +260,10 @@ export class ReminderDomainService {
     } else {
       await this.reminderTemplateRepository.delete(identityId, id);
     }
+    await this.routineCutover?.deleteRoutine({ identityId, routineId: id });
 
-    if (groupId) {
-      await this.updateGroupStats(identityId, groupId);
+    for (const profileId of new Set(profileIds)) {
+      await this.updateGroupStats(identityId, profileId);
     }
   }
 
@@ -170,7 +272,6 @@ export class ReminderDomainService {
   public async createReminderGroup(params: {
     identityId: string;
     name: string;
-    controlMode?: ControlMode;
     description?: string;
     color?: string;
     icon?: string;
@@ -186,6 +287,7 @@ export class ReminderDomainService {
 
     const group = ReminderGroup.create({ ...params, identityId: params.identityId });
     await this.reminderGroupRepository.save(group);
+    await this.projectRoutineProfile(group);
     return group;
   }
 
@@ -203,11 +305,11 @@ export class ReminderDomainService {
       throw new Error(`ReminderGroup not found: ${id}`);
     }
 
-    // Business Rule: Cannot delete a group that still contains templates.
-    const templatesInGroup = await this.reminderTemplateRepository.findByGroupId(id, identityId);
-    if (templatesInGroup.length > 0) {
+    // Business Rule: cannot delete a Profile that still owns memberships.
+    const templatesInProfile = await this.getTemplatesForProfile(identityId, id);
+    if (templatesInProfile.length > 0) {
       throw new Error(
-        `Cannot delete group ${id} because it still contains ${templatesInGroup.length} templates.`,
+        `Cannot delete Profile ${id} because it still contains ${templatesInProfile.length} Routine memberships.`,
       );
     }
 
@@ -217,42 +319,10 @@ export class ReminderDomainService {
     } else {
       await this.reminderGroupRepository.delete(identityId, id);
     }
+    await this.routineCutover?.deleteProfile({ identityId, profileId: id });
   }
 
   // --- Cross-Aggregate Methods ---
-
-  public async assignTemplateToGroup(
-    identityId: string,
-    templateId: string,
-    groupId: string | null,
-  ): Promise<ReminderTemplate> {
-    const template = await this.getTemplate(identityId, templateId);
-    if (!template) {
-      throw new Error(`ReminderTemplate not found: ${templateId}`);
-    }
-
-    const oldGroupId = template.groupId;
-
-    if (groupId) {
-      const group = await this.getGroup(identityId, groupId);
-      if (!group) {
-        throw new Error(`Invalid groupId: ${groupId}`);
-      }
-    }
-
-    template.moveToGroup(groupId);
-    await this.syncTemplateEffectiveEnabled(template);
-    await this.reminderTemplateRepository.save(template);
-
-    if (oldGroupId) {
-      await this.updateGroupStats(identityId, oldGroupId);
-    }
-    if (groupId) {
-      await this.updateGroupStats(identityId, groupId);
-    }
-
-    return template;
-  }
 
   public async toggleGroupAndTemplates(identityId: string, id: string): Promise<ReminderGroup> {
     const group = await this.getGroup(identityId, id);
@@ -262,16 +332,15 @@ export class ReminderDomainService {
 
     group.toggle();
     await this.reminderGroupRepository.save(group);
-    await this.syncTemplatesEffectiveEnabledByGroup(identityId, id);
+    await this.projectRoutineProfile(group);
+    await this.syncTemplatesEffectiveEnabledByProfile(identityId, id);
     return group;
   }
 
-  public async updateGroupStats(identityId: string, groupId: string): Promise<void> {
-    const group = await this.getGroup(identityId, groupId);
+  public async updateGroupStats(identityId: string, profileId: string): Promise<void> {
+    const group = await this.getGroup(identityId, profileId);
     if (!group) return;
-    const templates = await this.reminderTemplateRepository.findByGroupId(groupId, identityId, {
-      includeDeleted: false,
-    });
+    const templates = await this.getTemplatesForProfile(identityId, profileId);
 
     const stats = this.groupBusinessService.calculateGroupStatistics(templates);
     group.updateStats(
@@ -284,5 +353,16 @@ export class ReminderDomainService {
       }),
     );
     await this.reminderGroupRepository.save(group);
+  }
+
+  public async updateProfileStatsForRoutine(identityId: string, routineId: string): Promise<void> {
+    if (!this.routineProfileStore) return;
+    const memberships = await this.routineProfileStore.listMembershipsForRoutine({
+      identityId,
+      routineId,
+    });
+    for (const profileId of new Set(memberships.map((membership) => membership.profileId))) {
+      await this.updateGroupStats(identityId, profileId);
+    }
   }
 }

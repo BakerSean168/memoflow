@@ -25,16 +25,10 @@ import { registerDashboardIpcHandler } from './ipc/dashboard-handler';
 // ── Module Electron Entry Points ─────────────────────────────────────
 import { PowerSyncTaskBindingReadPort } from '@memoflow/task';
 import { createGoalTaskProgressPowerSyncHandler } from '@memoflow/goal';
-import {
-  createTaskPowerSyncScheduleExecutionSource,
-  createTaskReminderScheduledHandlerRegistration,
-} from '@memoflow/task/schedule-execution';
+import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 import { createTaskPowerSyncScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import { createScheduleOrchestrationModule } from '@memoflow/schedule-orchestration';
-import {
-  createGoalPowerSyncReminderFireHandler,
-  createGoalPowerSyncScheduleExecutionSource,
-} from '@memoflow/goal/schedule-execution';
+import { createGoalPowerSyncReminderFireHandler } from '@memoflow/goal/schedule-execution';
 import { createGoalPowerSyncScheduleProjectionSource } from '@memoflow/goal/schedule-projection';
 import {
   createLocalVaultRuntime,
@@ -42,6 +36,7 @@ import {
   LocalVaultRuntimeError,
 } from '@memoflow/repository/electron';
 import { createSchedulePowerSyncRepositories } from '@memoflow/schedule';
+import { createSchedulerPowerSyncRepositories } from '@memoflow/scheduler';
 import { LabelService, PowerSyncLabelRepository } from '@memoflow/label';
 import { createLabelElectronModule } from './modules/label/label.electron-module';
 import { composeGovernance } from './runtime/compose-governance';
@@ -155,10 +150,7 @@ async function registerBusinessModules(
         // Bounded, explicit rejection (no local path or URI leaked) that the
         // existing Local Vault IPC error boundary maps to a failure result.
         return Promise.reject(
-          new LocalVaultRuntimeError(
-            'INTERNAL_ERROR',
-            'External editor capability is unavailable',
-          ),
+          new LocalVaultRuntimeError('INTERNAL_ERROR', 'External editor capability is unavailable'),
         );
       }
       return editor.openExternal(uri);
@@ -175,7 +167,8 @@ async function registerBusinessModules(
   // 装配（单一 PowerSync 集合，scheduleTaskRepository 与编排共享，不建第二套）。
   // 1. Raw schedule ingredient set — the ONE two-phase schedule repository set.
   //    原始 schedule 原料集合 —— 唯一的、两阶段的 schedule 仓储集合。
-  const scheduleRepositorySet = createSchedulePowerSyncRepositories(db);
+  const calendarRepositorySet = createSchedulePowerSyncRepositories(db);
+  const schedulerRepositorySet = createSchedulerPowerSyncRepositories(db);
 
   // 2. Notification/reminder composers FIRST — schedule orchestration consumes
   //    their returned source/notification ports. Desktop channel capabilities are
@@ -253,18 +246,15 @@ async function registerBusinessModules(
   const scheduleOrchestrationModule = createScheduleOrchestrationModule({
     taskProjection: {
       source: createTaskPowerSyncScheduleProjectionSource(db),
-      scheduleTaskRepository: scheduleRepositorySet.scheduleTaskRepository,
+      scheduleTaskRepository: schedulerRepositorySet.scheduleTaskRepository,
     },
     goalProjection: {
       source: createGoalPowerSyncScheduleProjectionSource(db),
     },
     reminderProjection: {
       source: reminderComposed.scheduleProjectionSource,
-      scheduleTaskRepository: scheduleRepositorySet.scheduleTaskRepository,
     },
     execution: {
-      taskSource: createTaskPowerSyncScheduleExecutionSource(db),
-      goalSource: createGoalPowerSyncScheduleExecutionSource(db),
       reminderSource: reminderComposed.scheduleExecutionSource,
     },
   });
@@ -272,7 +262,8 @@ async function registerBusinessModules(
     createGoalPowerSyncReminderFireHandler(db, notificationComposed.requestedWriter),
   );
   const scheduleComposed = composeSchedule({
-    repositories: scheduleRepositorySet,
+    calendarRepositories: calendarRepositorySet,
+    schedulerRepositories: schedulerRepositorySet,
     sourceExecutor: scheduleOrchestrationModule.sourceExecutor,
     shouldScheduleTask: (task) => {
       const identityId = mainRuntime?.profileRuntimeManager.getCurrentIdentityId() ?? null;
@@ -307,9 +298,8 @@ async function registerBusinessModules(
     taskBindingReadPort: new PowerSyncTaskBindingReadPort(db),
   });
 
-  const labelElectronModule = createLabelElectronModule({
-    service: new LabelService(new PowerSyncLabelRepository(db)),
-  });
+  const labelService = new LabelService(new PowerSyncLabelRepository(db));
+  const labelElectronModule = createLabelElectronModule({ service: labelService });
 
   const dashboardRepositories: DashboardRepositoryDependencies = {
     goalRepository: goalComposed.repositories.goalRepository,
@@ -432,6 +422,10 @@ async function registerBusinessModules(
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
     reminderApplicationPort: reminderComposed.applicationPort,
+    routineCommandPort: reminderComposed.routineCommandPort,
+    scheduleRepository: scheduleComposed.repositories.scheduleRepository,
+    notificationRepository: notificationComposed.repositories.notificationRepository,
+    labelService,
     mastraStorage: {
       kind: 'libsql',
       url: pathToFileURL(path.join(profilePaths.storageDir, 'mastra.db')).href,
@@ -512,7 +506,8 @@ async function registerBusinessModules(
     .register(goalComposed.module)
     .register(labelElectronModule)
     .register(taskElectronModule)
-    .register(scheduleComposed.module)
+    .register(scheduleComposed.calendarModule)
+    .register(scheduleComposed.schedulerModule)
     .register(reminderComposed.module)
     .register(interventionWindowElectronModule)
     .register(focusWindowElectronModule)

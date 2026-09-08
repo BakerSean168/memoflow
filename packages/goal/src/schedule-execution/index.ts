@@ -1,21 +1,3 @@
-import type { ScheduleTask } from '@memoflow/schedule';
-
-export interface GoalScheduleExecutionOutcome {
-  readonly nextRunAt?: number | null;
-  readonly result?: Record<string, unknown>;
-}
-
-export interface GoalScheduleExecutionSource {
-  executeGoal(task: ScheduleTask): Promise<GoalScheduleExecutionOutcome>;
-}
-
-export {
-  createGoalPrismaScheduleExecutionSource,
-  createGoalPowerSyncScheduleExecutionSource,
-  createGoalScheduleExecutionSource,
-  type CreateGoalScheduleExecutionSourceDeps,
-} from '../server/infrastructure';
-
 export {
   createGoalPrismaReminderFireHandler,
   createGoalPowerSyncReminderFireHandler,

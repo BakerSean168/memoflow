@@ -21,6 +21,9 @@ import {
   ReminderResponsePowerSyncRepository,
   UserReminderPreferencePowerSyncRepository,
 } from './adapters/powersync';
+import { PowerSyncRoutineProfileStore } from './routine-vnext/routine-profile-store.powersync';
+import { PowerSyncProtocolSessionStore } from './routine-vnext/protocol-session-store.powersync';
+import { PowerSyncRoutineTemporaryOverrideStore } from './routine-schedule/routine-temporary-override-store.powersync';
 import { ReminderScheduleExecutionPowerSyncCommitAdapter } from './adapters/powersync/reminder-schedule-execution-commit.powersync.adapter';
 import type { ReminderScheduleExecutionSource } from '../../schedule-execution';
 import type { ReminderScheduleExecutionCommitPort } from './schedule-execution-commit.port';
@@ -32,6 +35,9 @@ import type {
   IReminderGroupRepository,
   IReminderResponseRepository,
   IUserReminderPreferenceRepository,
+  RoutineProfileStore,
+  ProtocolSessionStore,
+  RoutineTemporaryOverrideStore,
 } from '../domain';
 
 type Queryable = IElectronDatabase;
@@ -84,6 +90,9 @@ export interface ReminderPowerSyncRepositorySet {
   readonly reminderGroupRepository: IReminderGroupRepository;
   readonly reminderResponseRepository: IReminderResponseRepository;
   readonly userReminderPreferenceRepository: IUserReminderPreferenceRepository;
+  readonly routineProfileStore: RoutineProfileStore;
+  readonly routineTemporaryOverrideStore: RoutineTemporaryOverrideStore;
+  readonly protocolSessionStore: ProtocolSessionStore;
   readonly closureChecker: (identityId: string) => Promise<boolean>;
 }
 
@@ -108,6 +117,9 @@ export function createReminderPowerSyncRepositories(db: Queryable): ReminderPowe
     reminderGroupRepository: new ReminderGroupPowerSyncRepository(db),
     reminderResponseRepository: new ReminderResponsePowerSyncRepository(db),
     userReminderPreferenceRepository: new UserReminderPreferencePowerSyncRepository(db),
+    routineProfileStore: new PowerSyncRoutineProfileStore(db),
+    routineTemporaryOverrideStore: new PowerSyncRoutineTemporaryOverrideStore(db),
+    protocolSessionStore: new PowerSyncProtocolSessionStore(db),
     closureChecker: createPowerSyncClosureChecker(db),
   };
 }
@@ -139,6 +151,7 @@ export function createReminderPowerSyncModule(
     reminderGroupRepository: repositories.reminderGroupRepository,
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
+    routineProfileStore: repositories.routineProfileStore,
     runtimeContributions,
     closureChecker: repositories.closureChecker,
   });
@@ -147,8 +160,11 @@ export function createReminderPowerSyncModule(
 export function createReminderPowerSyncScheduleProjectionSource(
   db: Queryable,
 ): ReminderScheduleProjectionSource {
+  const repositories = createReminderPowerSyncRepositories(db);
   return createReminderScheduleProjectionSource({
-    reminderTemplateRepository: createReminderPowerSyncRepositories(db).reminderTemplateRepository,
+    reminderTemplateRepository: repositories.reminderTemplateRepository,
+    routineProfileStore: repositories.routineProfileStore,
+    userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
   });
 }
 

@@ -2,18 +2,16 @@ import type { ReminderTemplateCreatedEvent } from '../domain/events/reminder-tem
 import type { ReminderTemplateUpdatedEvent } from '../domain/events/reminder-template-updated.event';
 import type { ReminderTemplateEnabledEvent } from '../domain/events/reminder-template-enabled.event';
 import type { ReminderTemplatePausedEvent } from '../domain/events/reminder-template-paused.event';
-import type { ReminderTemplateMovedEvent } from '../domain/events/reminder-template-moved.event';
 import type { ReminderTemplateDeletedEvent } from '../domain/events/reminder-template-deleted.event';
+import type { ReminderTemplateEligibilityChangedEvent } from '../domain/events/reminder-template-eligibility-changed.event';
 import type { ReminderGroupCreatedEvent } from '../domain/events/reminder-group-created.event';
 import type { ReminderGroupUpdatedEvent } from '../domain/events/reminder-group-updated.event';
 import type { ReminderGroupDeletedEvent } from '../domain/events/reminder-group-deleted.event';
 import type { ReminderGroupEnabledEvent } from '../domain/events/reminder-group-enabled.event';
 import type { ReminderGroupPausedEvent } from '../domain/events/reminder-group-paused.event';
-import type { ReminderGroupControlModeSwitchedEvent } from '../domain/events/reminder-group-control-mode-switched.event';
 import type { ReminderTriggeredEvent } from '../domain/events/reminder-triggered.event';
 import type {
   ReminderFrequencyAdjustedEvent,
-  ReminderFrequencyAdjustmentRejectedEvent,
   ReminderResponseRecordedEvent,
 } from './reminder-analytics-events';
 
@@ -56,11 +54,13 @@ export type ReminderEventMap = {
    */
   'reminder:template-deleted': ReminderTemplateDeletedEvent;
 
+  /** External eligibility context changed; scheduling must re-read canonical gates. */
+  'reminder:template-eligibility-changed': ReminderTemplateEligibilityChangedEvent;
+
   /**
    * Reminder template moved event
    * Triggered when reminder template is moved between groups
    */
-  'reminder:template-moved': ReminderTemplateMovedEvent;
 
   /**
    * Reminder group created event
@@ -87,12 +87,6 @@ export type ReminderEventMap = {
   'reminder:group-paused': ReminderGroupPausedEvent;
 
   /**
-   * Reminder group control mode switched event
-   * Triggered when reminder group control mode changes
-   */
-  'reminder:group-control-mode-switched': ReminderGroupControlModeSwitchedEvent;
-
-  /**
    * Reminder group deleted event
    * Triggered when reminder group is deleted
    */
@@ -112,14 +106,9 @@ export type ReminderEventMap = {
 
   /**
    * Reminder frequency adjusted integration event
-   * Triggered when the smart-frequency service applies an adjustment
+   * Triggered when the explicit interval adjustment command succeeds
    */
   'reminder:frequency-adjusted': ReminderFrequencyAdjustedEvent;
 
-  /**
-   * Reminder frequency adjustment rejected integration event
-   * Triggered when the user rejects a smart-frequency adjustment
-   */
-  'reminder:frequency-adjustment-rejected': ReminderFrequencyAdjustmentRejectedEvent;
 };
 

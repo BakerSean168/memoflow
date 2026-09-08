@@ -13,7 +13,7 @@ import type { UpdateTaskTemplateReq } from '@memoflow/contracts/task';
 import type { TaskTemplateClientDTO } from '@memoflow/contracts/task';
 import { taskTemplateQueryKeys } from '../../../platform/server-state/query-keys';
 
-/** Shape of a list/graph data payload stored under a task-template list/graph key. */
+/** Shape of a list data payload stored under a task-template list key. */
 interface TemplateCollectionData {
   templates?: unknown[];
 }
@@ -40,8 +40,8 @@ function isDetailFor(data: unknown, id: string): data is TemplateDetailData {
 }
 
 /**
- * Read a task template from the detail cache, falling back to any cached list/graph.
- * 从 detail cache 读取模板；缺失时回退到任意已缓存的 list/graph。
+ * Read a task template from the detail cache, falling back to any cached list.
+ * 从 detail cache 读取模板；缺失时回退到任意已缓存的 list。
  */
 export function getTaskTemplateFromCache(
   queryClient: QueryClient,
@@ -64,8 +64,8 @@ export function getTaskTemplateFromCache(
 }
 
 /**
- * Patch every cached list/graph entry + detail for a task template.
- * 用 server-confirmed DTO patch 所有已缓存 list/graph 条目与 detail。
+ * Patch every cached list entry + detail for a task template.
+ * 用 server-confirmed DTO patch 所有已缓存 list 条目与 detail。
  */
 export function patchTaskTemplateEverywhere(
   queryClient: QueryClient,
@@ -95,8 +95,8 @@ export function patchTaskTemplateEverywhere(
 }
 
 /**
- * Remove a server-confirmed deleted task template from every cached list/graph + detail.
- * 从所有已缓存 list/graph 与 detail 中移除 server-confirmed 删除的模板。
+ * Remove a server-confirmed deleted task template from every cached list + detail.
+ * 从所有已缓存 list 与 detail 中移除 server-confirmed 删除的模板。
  */
 export function removeTaskTemplateFromCache(
   queryClient: QueryClient,
@@ -190,8 +190,6 @@ export function mapUpdateToDtoPatch(req: UpdateTaskTemplateReq): Record<string, 
     ...(req.name !== undefined ? { name: req.name } : {}),
     ...(req.description !== undefined ? { description: req.description } : {}),
     ...(req.importance !== undefined ? { importance: req.importance } : {}),
-    ...(req.tags !== undefined ? { tags: [...req.tags] } : {}),
-    ...(req.color !== undefined ? { color: req.color } : {}),
     ...(req.goalBinding !== undefined ? { goalBinding: req.goalBinding } : {}),
     ...(req.timeConfig !== undefined ? { timeConfig: req.timeConfig } : {}),
     ...(req.recurrenceRule !== undefined ? { recurrenceRule: req.recurrenceRule } : {}),

@@ -13,11 +13,11 @@ describe('TaskManagementView occurrence-first surface', () => {
     expect(source).toContain('isTaskOccurrenceOnSurface');
   });
 
-  it('filters occurrences by title/tags/status/Goal and sorts without reintroducing graph mode', () => {
+  it('filters occurrences by title/labels/status/Goal and sorts without reintroducing graph mode', () => {
     for (const selector of [
       'task-search-input',
       'task-status-filter',
-      'task-tag-filter',
+      'task-label-filter',
       'task-goal-filter',
       'task-occurrence-sort',
     ]) {

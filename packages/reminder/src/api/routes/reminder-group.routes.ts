@@ -1,7 +1,7 @@
 /**
  * Reminder Group Routes
  *
- * 提醒分组的增删改查及控制模式/批量操作路由。
+ * 提醒分组（Routine Profile 兼容表面）的增删改查及批量操作路由。
  *
  * Routes:
  *   POST   /groups                  — Create reminder group
@@ -9,7 +9,6 @@
  *   GET    /groups/:id              — Get group by ID
  *   PUT    /groups/:id              — Update group
  *   DELETE /groups/:id              — Delete group
- *   POST   /groups/:id/control-mode — Switch group control mode
  *   POST   /groups/:id/batch        — Batch group template operations
  */
 
@@ -24,11 +23,8 @@ import {
 import {
   CreateReminderGroupSchema,
   UpdateReminderGroupSchema,
-  SwitchGroupControlModeSchema,
-  BatchGroupTemplatesSchema,
   ReminderGroupResponseSchema,
   ReminderGroupListResponseSchema,
-  ReminderBatchResultSchema,
 } from '@memoflow/contracts/reminder';
 import { brandedId } from '@memoflow/contracts/primitives';
 import type { ReminderGroupId } from '@memoflow/contracts/primitives';
@@ -142,44 +138,6 @@ export function registerReminderGroupRoutes(
   );
 
   // ==================== Group Actions ====================
-
-  // POST /groups/:id/control-mode
-  r.route(
-    {
-      method: 'post',
-      path: '/groups/:id/control-mode',
-      summary: '切换分组控制模式',
-      request: {
-        params: z.object({ id: brandedId<ReminderGroupId>() }),
-        body: { content: { 'application/json': { schema: SwitchGroupControlModeSchema } } },
-      },
-      responses: {
-        200: successResponse(ReminderGroupResponseSchema, '切换成功'),
-        404: errorResponse('分组不存在'),
-      },
-    },
-    [auth],
-    (req, ctx) => controller.switchGroupControlMode(req.params!.id, req.body, ctx),
-  );
-
-  // POST /groups/:id/batch
-  r.route(
-    {
-      method: 'post',
-      path: '/groups/:id/batch',
-      summary: '批量操作分组模板',
-      request: {
-        params: z.object({ id: brandedId<ReminderGroupId>() }),
-        body: { content: { 'application/json': { schema: BatchGroupTemplatesSchema } } },
-      },
-      responses: {
-        200: successResponse(ReminderBatchResultSchema, '操作成功'),
-        404: errorResponse('分组不存在'),
-      },
-    },
-    [auth],
-    (req, ctx) => controller.batchGroupTemplates(req.params!.id, req.body, ctx),
-  );
 
   // POST /groups/:id/toggle
   r.route(

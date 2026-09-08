@@ -520,7 +520,4 @@ export function createTaskElectronModule(
   };
 }
 
-export {
-  createTaskPowerSyncScheduleExecutionSource,
-  createTaskPowerSyncScheduleProjectionSource,
-} from '../server/infrastructure';
+export { createTaskPowerSyncScheduleProjectionSource } from '../server/infrastructure';

@@ -51,6 +51,7 @@ COPY packages/powersync-schema/package.json ./packages/powersync-schema/package.
 COPY packages/reminder/package.json ./packages/reminder/package.json
 COPY packages/repository/package.json ./packages/repository/package.json
 COPY packages/schedule/package.json ./packages/schedule/package.json
+COPY packages/scheduler/package.json ./packages/scheduler/package.json
 COPY packages/schedule-orchestration/package.json ./packages/schedule-orchestration/package.json
 COPY packages/setting/package.json ./packages/setting/package.json
 COPY packages/task/package.json ./packages/task/package.json
@@ -88,6 +89,7 @@ COPY packages/powersync-schema ./packages/powersync-schema
 COPY packages/reminder ./packages/reminder
 COPY packages/repository ./packages/repository
 COPY packages/schedule ./packages/schedule
+COPY packages/scheduler ./packages/scheduler
 COPY packages/schedule-orchestration ./packages/schedule-orchestration
 COPY packages/setting ./packages/setting
 COPY packages/task ./packages/task

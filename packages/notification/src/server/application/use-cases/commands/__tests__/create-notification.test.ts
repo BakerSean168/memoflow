@@ -88,7 +88,7 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
     });
   });
 
-  it('keeps the Inbox Fact unread when Desktop delivery is suppressed by DND', async () => {
+  it('Fixture I: DND keeps the Inbox Fact unread when Desktop delivery is suppressed', async () => {
     const identityId = anIdentityId();
     const now = new Date('2026-08-25T23:30:00');
     const preference = NotificationPreference.create({ identityId });
@@ -129,7 +129,7 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
     });
   });
 
-  it('preserves DND defer semantics for an allowed InApp delivery', async () => {
+  it('Fixture I: DND preserves defer semantics for an allowed InApp delivery', async () => {
     const identityId = anIdentityId();
     const now = new Date('2026-08-25T23:30:00');
     const dnd = DoNotDisturbConfig.create({

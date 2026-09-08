@@ -71,7 +71,8 @@ const updateTemplate = (updater: (template: TaskTemplateViewModel) => void) => {
   const updatedTemplate: TaskTemplateViewModel = {
     ...props.modelValue,
     timeConfig: { ...(props.modelValue.timeConfig || {}) },
-    tags: [...(props.modelValue.tags || [])],
+    labels: [...(props.modelValue.labels ?? [])],
+    labelIds: [...(props.modelValue.labelIds ?? [])],
     goalBinding: props.modelValue.goalBinding ? { ...props.modelValue.goalBinding } : null,
   };
   updater(updatedTemplate);

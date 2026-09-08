@@ -171,6 +171,59 @@
               </div>
             </section>
 
+            <section
+              class="mb-4 rounded-2xl border bg-card px-4 py-4"
+              data-testid="routine-method-library"
+            >
+              <div class="mb-3 flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <h2 class="text-sm font-semibold">{{ t('reminder.linear.methodLibraryTitle') }}</h2>
+                  <p class="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
+                    {{ t('reminder.linear.methodLibraryDescription') }}
+                  </p>
+                </div>
+                <Badge variant="outline">{{ routineMethods.length }}</Badge>
+              </div>
+              <div class="grid grid-cols-1 gap-3 @2xl/panel:grid-cols-2 @5xl/panel:grid-cols-3">
+                <article
+                  v-for="method in routineMethods"
+                  :key="method.id"
+                  class="rounded-xl border bg-background p-3"
+                  :data-testid="`routine-method-${method.id}`"
+                >
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <h3 class="text-sm font-medium">{{ method.name }}</h3>
+                      <p class="mt-1 text-xs leading-5 text-muted-foreground">{{ method.summary }}</p>
+                    </div>
+                    <Badge variant="secondary" class="shrink-0 text-[10px]">
+                      {{ getMethodRuntimeLabel(method) }}
+                    </Badge>
+                  </div>
+                  <p class="mt-2 text-xs text-muted-foreground">
+                    {{ getMethodRecommendation(method) }}
+                  </p>
+                  <div class="mt-3 flex items-center justify-between gap-2">
+                    <span class="text-[11px] text-muted-foreground">
+                      {{ t('reminder.linear.methodIntervention', { value: method.interventionDefault }) }}
+                    </span>
+                    <Button
+                      v-if="method.templatePreset"
+                      size="sm"
+                      variant="outline"
+                      :data-testid="`routine-method-apply-${method.id}`"
+                      @click="handleApplyRoutineMethod(method)"
+                    >
+                      {{ t('reminder.linear.methodApply') }}
+                    </Button>
+                    <Badge v-else variant="outline" class="text-[10px]">
+                      {{ t('reminder.linear.methodProtocolOwned') }}
+                    </Badge>
+                  </div>
+                </article>
+              </div>
+            </section>
+
             <div
               v-if="preferences && !preferences.globalReminderEnabled"
               class="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
@@ -367,6 +420,11 @@ import TemplateDialog from '../components/TemplateDialog.vue';
 import GroupDialog from '../components/GroupDialog.vue';
 import TemplateMoveDialog from '../components/TemplateMoveDialog.vue';
 import { useReminder } from '../composables/useReminder';
+import {
+  ROUTINE_METHOD_CATALOG,
+  getRoutineMethodTemplatePreset,
+  type RoutineMethodRecord,
+} from '@memoflow/reminder/method-library';
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';
 import {
@@ -400,7 +458,7 @@ const {
   updateTemplate,
   deleteTemplate,
   toggleTemplate,
-  moveTemplateToGroup,
+  replaceTemplateProfiles,
   createGroup,
   updateGroup,
   deleteGroup,
@@ -410,6 +468,7 @@ const {
 } = useReminder();
 
 const { t } = useI18n();
+const routineMethods = ROUTINE_METHOD_CATALOG;
 
 const selectedGroupId = ref<string | null>(null);
 const searchQuery = ref('');
@@ -438,7 +497,9 @@ usePanelSurfaceStatus(surfaceStatus);
 const filteredTemplates = computed(() => {
   let result = templates.value;
   if (selectedGroupId.value) {
-    result = result.filter((t) => t.groupId === selectedGroupId.value);
+    result = result.filter((t) =>
+      t.profileMemberships.some((membership) => membership.profileId === selectedGroupId.value),
+    );
   }
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase();
@@ -472,6 +533,35 @@ function handleCreateTemplate(groupId?: string | null) {
   editingTemplate.value = null;
   defaultTemplateGroupId.value = groupId ?? selectedGroupId.value ?? null;
   templateDialogRef.value?.openForCreate();
+}
+
+function getMethodRuntimeLabel(method: RoutineMethodRecord): string {
+  return method.runtimeRequirement === 'Protocol'
+    ? t('reminder.linear.methodRuntimeProtocol')
+    : t('reminder.linear.methodRuntimeWallClock');
+}
+
+function getMethodRecommendation(method: RoutineMethodRecord): string {
+  const p = method.recommendedParameters;
+  if (p.intervalMinutes != null) {
+    return t('reminder.linear.methodEveryMinutes', { minutes: p.intervalMinutes });
+  }
+  if (p.fixedTime != null) {
+    return t('reminder.linear.methodAtTime', { time: p.fixedTime });
+  }
+  return t('reminder.linear.methodProtocolSummary', {
+    focus: p.focusMinutes ?? 0,
+    breakMinutes: p.breakMinutes ?? 0,
+    cycles: p.cycles ?? 0,
+  });
+}
+
+function handleApplyRoutineMethod(method: RoutineMethodRecord) {
+  const preset = getRoutineMethodTemplatePreset(method.id);
+  if (!preset) return;
+  editingTemplate.value = null;
+  defaultTemplateGroupId.value = selectedGroupId.value ?? null;
+  templateDialogRef.value?.openForPreset(preset);
 }
 
 function handleEditTemplate(template: ReminderTemplateClientDTO) {
@@ -513,11 +603,13 @@ function handleMoveTemplate(template: ReminderTemplateClientDTO) {
   templateMoveDialogRef.value?.open();
 }
 
-async function handleTemplateMoved(templateId: string, groupId: string | null) {
-  const result = await moveTemplateToGroup(templateId, groupId);
+async function handleTemplateMoved(templateId: string, profileIds: readonly string[]) {
+  const result = await replaceTemplateProfiles(templateId, profileIds);
   if (result) {
     toast.success(
-      groupId ? t('reminder.toast.templateMoved') : t('reminder.toast.templateMovedToRoot'),
+      profileIds.length > 0
+        ? t('reminder.toast.templateMoved')
+        : t('reminder.toast.templateMovedToRoot'),
     );
     movingTemplate.value = null;
   }

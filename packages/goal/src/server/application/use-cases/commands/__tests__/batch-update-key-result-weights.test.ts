@@ -19,7 +19,6 @@ function createGoalFixture() {
     tags: [],
     startDate: null,
     targetDate: null,
-    folderId: null,
     parentGoalId: null,
     reminderConfig: null,
   });

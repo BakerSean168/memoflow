@@ -100,8 +100,6 @@ function makeState(overrides: Partial<TaskTemplateState> = {}): TaskTemplateStat
     description: overrides.description ?? null,
     taskType: overrides.taskType ?? TaskType.OneTime,
     importance: overrides.importance ?? ImportanceLevel.Moderate,
-    tags: overrides.tags ?? [],
-    color: overrides.color ?? null,
     status: overrides.status ?? TaskTemplateStatus.Active,
     outcome: overrides.outcome ?? TaskPlanOutcome.Open,
     completionPolicy: overrides.completionPolicy ?? TaskPlanCompletionPolicy.AllowCorrection,
@@ -151,8 +149,6 @@ describe('TaskTemplate Aggregate', () => {
         expect(template.timeConfig).toBeNull();
         expect(template.recurrenceRule).toBeNull();
         expect(template.reminderConfig).toBeNull();
-        expect(template.tags).toEqual([]);
-        expect(template.color).toBeNull();
         expect(template.version).toBe(1);
       });
 
@@ -179,8 +175,6 @@ describe('TaskTemplate Aggregate', () => {
           dueDate,
           estimatedMinutes: 60,
           note: 'A note',
-          tags: ['work', 'urgent'],
-          color: '#FF0000',
         });
 
         expect(template.description).toBe('Some description');
@@ -189,8 +183,6 @@ describe('TaskTemplate Aggregate', () => {
         expect(template.dueDate).toEqual(dueDate);
         expect(template.estimatedMinutes).toBe(60);
         expect(template.note).toBe('A note');
-        expect(template.tags).toEqual(['work', 'urgent']);
-        expect(template.color).toBe('#FF0000');
       });
 
       it('should generate unique IDs for each template', () => {
@@ -460,12 +452,10 @@ describe('TaskTemplate Aggregate', () => {
       it('should handle null-like fields gracefully', () => {
         const state = makeState({
           description: undefined as unknown as string | null,
-          color: undefined as unknown as string | null,
         });
         const template = TaskTemplate.load(state);
 
         expect(template.description).toBeNull();
-        expect(template.color).toBeNull();
       });
     });
   });
@@ -651,7 +641,6 @@ describe('TaskTemplate Aggregate', () => {
       template = TaskTemplate.createOneTimeTask({
         identityId: makeIdentityId(),
         title: 'Updatable task',
-        tags: ['initial'],
       });
     });
 
@@ -825,38 +814,6 @@ describe('TaskTemplate Aggregate', () => {
         const historyBefore = template.history.length;
         template.updatePriority(ImportanceLevel.Important);
         expect(template.history.length).toBeGreaterThan(historyBefore);
-      });
-    });
-
-    describe('updateTags()', () => {
-      it('should replace tags', () => {
-        template.updateTags(['a', 'b', 'c']);
-        expect(template.tags).toEqual(['a', 'b', 'c']);
-      });
-
-      it('should deduplicate tags', () => {
-        template.updateTags(['a', 'b', 'a', 'c', 'b']);
-        expect(template.tags).toEqual(['a', 'b', 'c']);
-      });
-
-      it('should return a copy (not a reference)', () => {
-        template.updateTags(['immutable']);
-        const tags = template.tags;
-        tags.push('mutated');
-        expect(template.tags).toEqual(['immutable']);
-      });
-    });
-
-    describe('updateColor()', () => {
-      it('should set a color', () => {
-        template.updateColor('#00FF00');
-        expect(template.color).toBe('#00FF00');
-      });
-
-      it('should clear color with null', () => {
-        template.updateColor('#00FF00');
-        template.updateColor(null);
-        expect(template.color).toBeNull();
       });
     });
 
@@ -1804,8 +1761,6 @@ describe('TaskTemplate Aggregate', () => {
           title: 'DTO Test',
           description: 'A description',
           importance: ImportanceLevel.Important,
-          tags: ['test'],
-          color: '#FF0000',
         });
 
         const dto = template.toServerDTO();
@@ -1815,8 +1770,6 @@ describe('TaskTemplate Aggregate', () => {
         expect(dto.name).toBe('DTO Test');
         expect(dto.description).toBe('A description');
         expect(dto.importance).toBe(ImportanceLevel.Important);
-        expect(dto.tags).toEqual(['test']);
-        expect(dto.color).toBe('#FF0000');
         expect(dto.status).toBe(TaskTemplateStatus.Active);
         expect(dto.createdAt).toBeTypeOf('number');
         expect(dto.updatedAt).toBeTypeOf('number');
@@ -1992,18 +1945,6 @@ describe('TaskTemplate Aggregate', () => {
       const length = instances.length;
       instances.push(null as any); // mutate the copy
       expect(template.instances.length).toBe(length); // original unchanged
-    });
-
-    it('should return defensive copy of tags array', () => {
-      const template = TaskTemplate.createOneTimeTask({
-        identityId: makeIdentityId(),
-        title: 'Task',
-        tags: ['original'],
-      });
-
-      const tags = template.tags;
-      tags.push('mutated');
-      expect(template.tags).toEqual(['original']);
     });
 
     it('should handle load with version > 1', () => {

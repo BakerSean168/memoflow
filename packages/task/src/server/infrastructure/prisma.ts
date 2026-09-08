@@ -22,9 +22,7 @@ import {
   type TaskGoalProgressHandler,
 } from '../application/outbox';
 import { createTaskGoalOutboxRuntime } from './task-goal-outbox-runtime';
-import { createTaskScheduleExecutionSource } from './schedule-execution-source';
 import { createTaskScheduleProjectionSource } from './schedule-projection-source';
-import type { TaskScheduleExecutionSource } from '../../schedule-execution';
 import type { TaskScheduleProjectionSource } from '../../schedule-projection';
 import type { ITaskInstanceRepository } from '../domain/repositories/i-task-instance-repository';
 import type { ITaskTemplateRepository } from '../domain/repositories/i-task-template-repository';
@@ -144,16 +142,5 @@ export function createTaskPrismaScheduleProjectionSource(
   return createTaskScheduleProjectionSource({
     taskTemplateRepository: repositories.taskTemplateRepository,
     taskInstanceRepository: repositories.taskInstanceRepository,
-  });
-}
-
-export function createTaskPrismaScheduleExecutionSource(
-  db: PrismaClient,
-): TaskScheduleExecutionSource {
-  const repositories = createTaskPrismaRepositories(db);
-
-  return createTaskScheduleExecutionSource({
-    taskInstanceRepository: repositories.taskInstanceRepository,
-    taskTemplateRepository: repositories.taskTemplateRepository,
   });
 }

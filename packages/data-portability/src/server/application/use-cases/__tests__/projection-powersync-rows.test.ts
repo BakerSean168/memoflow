@@ -169,10 +169,24 @@ describe('projection from PowerSync-shaped rows', () => {
           notificationConfig: '{"channel":"system"}',
           selfEnabled: 1,
           status: 'active',
-          reminderGroupId: 'group-db-id',
           importanceLevel: 'moderate',
           tags: '["work"]',
-          smartFrequencyEnabled: 0,
+        },
+      ],
+      [
+        {
+          identityId: 'identity-1',
+          profileId: 'group-db-id',
+          routineId: 'template-db-id',
+          enabled: 0,
+        },
+      ],
+      [
+        {
+          id: 'template-db-id',
+          identityId: 'identity-1',
+          enabled: 1,
+          triggerJson: '{"type":"WallClock"}',
         },
       ],
       ctx,
@@ -193,9 +207,14 @@ describe('projection from PowerSync-shaped rows', () => {
       title: 'Standup',
       trigger: { kind: 'time' },
       selfEnabled: true,
-      groupRef: 'reminderGroup:1',
+      routineDefinition: {
+        enabled: true,
+        trigger: { type: 'WallClock' },
+      },
+      profileMemberships: [
+        { profileRef: 'reminderGroup:1', enabled: false },
+      ],
       tags: ['work'],
-      smartFrequencyEnabled: false,
     });
     expect(responses[0]?.templateRef).toBe('reminderTemplate:1');
   });

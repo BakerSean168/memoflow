@@ -9,15 +9,19 @@ tags:
   - task
 description: MemoFlow 对标准算法/协议优先复用成熟库，对产品业务语义保持领域所有权，并以 API/plugin seam 集成完整开源应用
 created: 2026-08-25T15:44:00+08:00
-updated: 2026-08-25T15:44:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-058: OSS-first 标准能力复用与领域所有权边界
 
-**状态：** 已采纳（从 Goal / Task vNext 开始执行）  
+**状态：** 已采纳并持续执行
 **日期：** 2026-08-25  
 **影响范围：** Goal、Task、Schedule、UI foundation、未来所有涉及标准算法/协议/第三方依赖的实施计划  
 **关联：** ADR-015、ADR-025、ADR-037、ADR-053~057
+
+## 2026-09-08 实现状态
+
+该 ADR 已成为持续工程政策，而非待实施 ticket。Core vNext 已实际 Borrow/采用 Emittery、rrule、FullCalendar、date/time/UI primitives，并通过 MemoFlow-owned adapter/contract 隔离第三方类型；pg-boss PoC 已完成但当前决定继续使用自有 Scheduler engine。最终依赖决策见 Core vNext reuse ledger。
 
 ## 1. 背景
 

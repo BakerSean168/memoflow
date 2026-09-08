@@ -9,9 +9,7 @@ import { z } from 'zod';
 import type { ReminderGroupClientDTO } from '../aggregates/reminder-group-client';
 import {
   ReminderGroupListResponseSchema,
-  ReminderBatchResultSchema,
 } from './response-schemas';
-import { ControlMode } from '../value-objects/control-mode';
 
 // ============================================================================
 // REMINDER GROUP Operations
@@ -25,7 +23,6 @@ export const CreateReminderGroupSchema = z.object({
   description: z.string().max(500).optional(),
   color: z.string().optional(),
   icon: z.string().optional(),
-  controlMode: z.enum(ControlMode).optional(),
   order: z.number().int().min(0).optional(),
 });
 
@@ -40,36 +37,11 @@ export const UpdateReminderGroupSchema = z.object({
   description: z.string().max(500).optional(),
   color: z.string().optional(),
   icon: z.string().optional(),
-  controlMode: z.enum(ControlMode).optional(),
   order: z.number().int().min(0).optional(),
 });
 
 export type UpdateReminderGroupReq = z.infer<typeof UpdateReminderGroupSchema>;
 export type UpdateReminderGroupRes = ReminderGroupClientDTO;
-
-/**
- * 切换分组控制模式 Schema
- */
-export const SwitchGroupControlModeSchema = z.object({
-  mode: z.enum(ControlMode),
-});
-
-export type SwitchGroupControlModeReq = z.infer<typeof SwitchGroupControlModeSchema>;
-export type SwitchGroupControlModeRes = ReminderGroupClientDTO;
-
-/**
- * 批量分组操作 Schema
- */
-export const BatchGroupTemplatesSchema = z.object({
-  action: z.enum(['ENABLE', 'PAUSE']),
-});
-
-export type BatchGroupTemplatesReq = z.infer<typeof BatchGroupTemplatesSchema>;
-
-// Residual 781: batch group templates Res dual retired — reuses ReminderBatchResultSchema
-// (runtime returns successCount/failedCount only; unused errors dual field dropped).
-export const BatchGroupTemplatesResSchema = ReminderBatchResultSchema;
-export type BatchGroupTemplatesRes = z.infer<typeof BatchGroupTemplatesResSchema>;
 
 // Residual 693: list response dual body retired — OpenAPI + transport use ReminderGroupListResponseSchema.
 export type ReminderGroupListRes = z.infer<typeof ReminderGroupListResponseSchema>;

@@ -7,15 +7,19 @@ tags:
   - reliable-messaging
 description: Runtime-local EventBus 采用 Emittery 的 delivery-scoped async publish，保留 send 通知语义并移除全局 awaitDrain 状态
 created: 2026-08-25T19:05:00+08:00
-updated: 2026-08-25T19:05:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-064: Runtime EventBus 采用 Emittery 与 Delivery-scoped Async Publish
 
-**状态：** 已采纳并实施  
+**状态：** 已采纳并实施
 **日期：** 2026-08-25  
 **影响范围：** utils、patterns、所有通过 `createEventBusAdapter()` 发布 domain event 的 server repositories  
 **关联：** ADR-003、ADR-033、ADR-042、ADR-058
+
+## 2026-09-08 实现状态
+
+Emittery 仍是唯一 runtime-local EventBus implementation；业务通知使用 `send()`，需要等待本次 delivery handlers 的基础设施边界使用 `dispatch()`。HARD-7102/7103 回归未发现旧 mitt-RPC/global drain 路径复活。
 
 ## 1. 背景
 

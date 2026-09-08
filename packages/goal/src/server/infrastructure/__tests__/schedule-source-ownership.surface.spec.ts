@@ -5,14 +5,13 @@ import { describe, expect, it } from 'vitest';
 /**
  * GOAL-3201 ownership boundary:
  * Goal projection is an identity-scoped neutral ScheduledIntent source.
- * Legacy ScheduleTask may remain only in the goal execution adapter.
+ * Legacy ScheduleTask execution adapters are forbidden; scheduled execution is handler-key based.
  */
 describe('schedule source ownership surface', () => {
   const goalProjection = readFileSync(
     resolve(__dirname, '../schedule-projection-source.ts'),
     'utf8',
   );
-  const goalExecution = readFileSync(resolve(__dirname, '../schedule-execution-source.ts'), 'utf8');
   const reminderProjection = readFileSync(
     resolve(
       __dirname,
@@ -47,19 +46,17 @@ describe('schedule source ownership surface', () => {
     expect(goalProjection).not.toContain('SourceModule');
   });
 
-  it('goal execution loads via findByIdForIdentity(task.identityId)', () => {
-    expect(goalExecution).toContain('findByIdForIdentity(');
-    expect(goalExecution).toContain('String(task.identityId)');
-    expect(goalExecution).not.toContain(
-      'const goal = await deps.goalRepository.findById(task.sourceEntityId',
-    );
+  it('does not resurrect the legacy Goal ScheduleTask execution source', () => {
+    expect(() => readFileSync(resolve(__dirname, '../schedule-execution-source.ts'), 'utf8')).toThrow();
+    expect(goalProjection).not.toContain('@memoflow/scheduler');
   });
 
   it('reminder projection requires identityId and never bare findById (residual 168)', () => {
     expect(reminderProjection).toContain(
       'identityId: string,\n  ): Promise<ReminderScheduleProjectionPlan>;',
     );
-    expect(reminderProjection).toContain('readonly identityId: string;');
+    expect(reminderProjection).toContain('readonly owner: SchedulingOwner;');
+    expect(reminderProjection).toContain('return { identityId, type: REMINDER_SCHEDULING_OWNER_TYPE, id: templateId };');
     expect(reminderProjection).toContain(
       'findByIdForIdentity(\n        identityId,\n        templateId,',
     );

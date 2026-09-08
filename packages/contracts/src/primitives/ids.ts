@@ -15,17 +15,8 @@ export type IdentityId = string & { readonly __brand: 'IdentityId' };
 /** 目标 ID */
 export type GoalId = string & { readonly __brand: 'GoalId' };
 
-/** 目标文件夹 ID */
-export type GoalFolderId = string & { readonly __brand: 'GoalFolderId' };
-
 /** 关键结果 ID */
 export type KeyResultId = string & { readonly __brand: 'KeyResultId' };
-
-/** 专注会话 ID */
-export type FocusSessionId = string & { readonly __brand: 'FocusSessionId' };
-
-/** 专注模式 ID */
-export type FocusModeId = string & { readonly __brand: 'FocusModeId' };
 
 /** 任务模板 ID */
 export type TaskTemplateId = string & { readonly __brand: 'TaskTemplateId' };
@@ -33,20 +24,14 @@ export type TaskTemplateId = string & { readonly __brand: 'TaskTemplateId' };
 /** 任务实例 ID */
 export type TaskInstanceId = string & { readonly __brand: 'TaskInstanceId' };
 
-/** 任务依赖 ID */
-export type TaskDependencyId = string & { readonly __brand: 'TaskDependencyId' };
-
-/** 子任务 ID */
-export type SubtaskId = string & { readonly __brand: 'SubtaskId' };
-
-/** 任务文件夹 ID */
-export type TaskFolderId = string & { readonly __brand: 'TaskFolderId' };
-
 /** 提醒模板 ID */
 export type ReminderTemplateId = string & { readonly __brand: 'ReminderTemplateId' };
 
 /** 提醒分组 ID */
 export type ReminderGroupId = string & { readonly __brand: 'ReminderGroupId' };
+
+/** Routine Profile ID */
+export type RoutineProfileId = string & { readonly __brand: 'RoutineProfileId' };
 
 /** 提醒实例 ID */
 export type ReminderInstanceId = string & { readonly __brand: 'ReminderInstanceId' };
@@ -190,23 +175,19 @@ export const ID_PREFIXES = {
 
   // === Goal ===
   GoalId: 'IGoalId',
-  GoalFolderId: 'IGoalFolderId',
   KeyResultId: 'IKeyResultId',
   GoalRecordId: 'IGoalRecordId',
   GoalReviewId: 'IGoalReviewId',
-  FocusSessionId: 'IFocusSessionId',
   KeyResultWeightSnapshotId: 'IKeyResultWeightSnapshotId',
 
   // === Task ===
   TaskTemplateId: 'ITaskTemplateId',
   TaskInstanceId: 'ITaskInstanceId',
-  TaskDependencyId: 'ITaskDependencyId',
-  SubtaskId: 'ISubtaskId',
-  TaskFolderId: 'ITaskFolderId',
 
   // === Reminder ===
   ReminderTemplateId: 'IReminderTemplateId',
   ReminderGroupId: 'IReminderGroupId',
+  RoutineProfileId: 'IRoutineProfileId',
   ReminderInstanceId: 'IReminderInstanceId',
   ReminderHistoryId: 'IReminderHistoryId',
   ReminderResponseId: 'IReminderResponseId',

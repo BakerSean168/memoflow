@@ -1,11 +1,9 @@
 import type { IResultHttpClient } from '@memoflow/http-client';
-
-import { createScheduleHttpAdapters } from '../infrastructure-client';
-import { ScheduleClientService, createScheduleClientService } from './schedule-client-service';
+import { createScheduleEventHttpAdapter } from '../infrastructure-client';
+import { createScheduleClientService, type ScheduleClientService } from './schedule-client-service';
 
 export function createScheduleServiceFromHttpClient(
   httpClient: IResultHttpClient,
 ): ScheduleClientService {
-  const adapters = createScheduleHttpAdapters(httpClient);
-  return createScheduleClientService(adapters.event, adapters.task);
+  return createScheduleClientService(createScheduleEventHttpAdapter(httpClient));
 }

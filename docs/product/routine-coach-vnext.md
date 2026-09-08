@@ -9,14 +9,14 @@ tags:
   - vnext
 description: MemoFlow Reminder 向 AI-native Routine Coach 演进的产品定义、真实场景推演、领域模型、运行时与桌面交互设计
 created: 2026-08-25T17:13:00+08:00
-updated: 2026-08-25T17:13:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # Routine Coach vNext：习惯节律、健康干预与专注协议
 
 > 本文记录 2026-08-25 对现有 Reminder 模块的重新定性与 vNext 设计讨论。
 >
-> **当前代码仍使用 `reminder` 包、`ReminderTemplate`、`ReminderGroup`、`ControlMode` 等模型。本文描述的是目标产品与目标架构，不代表已经完成迁移。**
+> **实现状态（2026-09-08）：Core vNext 目标态已经落地。物理包仍名为 `reminder`，`ReminderTemplate` 继续作为兼容写入入口，但写入会投影 canonical RoutineDefinition/ProfileMembership；`ControlMode`、single-group ownership 与独立 cron scanner 已退休。本文中“当前/需要退役”字样若出现在历史推演章节，应按本 checkpoint 理解为 2026-08-25 的迁移背景。**
 
 ## 1. Executive Summary
 
@@ -785,7 +785,7 @@ ProfileMembership
 
 ### 6.4 Profile 启用语义
 
-当前 `ControlMode.Group / Individual` 需要退休。
+2026-08-25 迁移基线中的 `ControlMode.Group / Individual` 需要退休；该删除现已完成。
 
 正确的不变量是：
 
@@ -1541,17 +1541,17 @@ vNext 原则：
 | smartFrequency auto adjustment       | 对重要节律过于激进                         | Insight + user-confirmed suggestion   |
 | Reminder 页面作为主要产品入口        | 不符合 AI-native / ambient usage           | 配置中心 + AI + popup/session surface |
 
-### 18.3 当前代码事实
+### 18.3 当前代码事实（2026-09-08）
 
-截至本文创建时：
-
-- `packages/reminder` 仍以 `ReminderTemplate` 为核心聚合；
-- Trigger 主要只有 `FixedTime` / `Interval`；
-- Template 使用单一 `groupId`；
-- `ReminderGroup` 存在 `ControlMode.Group / Individual`；
-- `ReminderTemplateControlService` 在 Group 模式下允许 Group 接管子项状态；
-- Desktop `WindowManager` 当前主要管理 ProfileAccessWindow 和 MainWindow，尚未存在 Routine 专用 Intervention/Focus BrowserWindow；
-- Reminder 的可靠 occurrence / lease / retry 链路已经存在，应避免在重构中丢失。
+- `packages/reminder` 仍是物理包名，`ReminderTemplate` 是兼容写入入口；create/update 会投影 canonical `RoutineDefinition` 与 M:N `ProfileMembership`；
+- Profile 只作为 Gate；`ControlMode` 与 single-group ownership 已删除；
+- WallClock 由 Scheduler 唯一 durable wake-up authority 驱动，旧 `ReminderSchedulerService` / cron scanner 已删除；
+- ActiveUsage runtime 与 activity sensor 在 Desktop 本地执行，端能力不伪造；
+- ProtocolDefinition / ProtocolSession 已形成确定性 state machine，50/10 与 Pomodoro 不复用普通 Interval Reminder timer；
+- Temporary Override 与长期 trigger 分离，Prisma / PowerSync 均有持久化 parity；
+- InterventionWindow / FocusWindow 已存在实际 Desktop surface；
+- 初始六方法 Method Library 已实现；AI 可通过 owner-domain command port 创建 Routine、切换 Profile gate、设置 temporary override、启动/控制 ProtocolSession；
+- 可靠 occurrence / lease / fencing / retry / idempotency 能力保留并纳入 HARD-7101~7103 回归。
 
 ---
 

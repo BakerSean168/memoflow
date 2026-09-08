@@ -104,8 +104,6 @@ export class PowerSyncTaskTemplateRepository
       ['archived_at', data.archivedAt],
       ['abandoned_reason', data.abandonedReason],
       ['importance', data.importance],
-      ['color', data.color],
-      ['tags', data.tags],
       ['time_config_type', data.timeConfigType],
       ['time_config_start_time', data.timeConfigStartTime],
       ['time_config_end_time', data.timeConfigEndTime],
@@ -201,11 +199,6 @@ export class PowerSyncTaskTemplateRepository
       'SELECT * FROM task_templates WHERE identity_id = ? AND goal_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
       [identityId, goalId],
     );
-  }
-
-  async findByTags(identityId: string, tags: string[]): Promise<TaskTemplate[]> {
-    const rows = await this.findByIdentityId(identityId);
-    return rows.filter((template) => tags.some((tag) => template.tags.includes(tag)));
   }
 
   async findByLabelIdsAll(

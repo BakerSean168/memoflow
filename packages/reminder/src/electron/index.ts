@@ -12,13 +12,13 @@
  *
  * The host (apps/desktop) is responsible for composition: it selects the
  * PowerSync adapters, builds repositories, the closure checker and the
- * cron/snooze/reliable runtime contributions, calls `createReminderModule(...)`,
+ * canonical runtime contributions, calls `createReminderModule(...)`,
  * and passes the resulting instance in through `ReminderElectronModuleOptions`.
  * This factory never reads `ctx.db`, never constructs repositories/use cases,
  * and never starts a runtime adapter.
  *
  * 宿主（apps/desktop）负责组合：选择 PowerSync 适配器、构建 repository、
- * closure checker 与 cron/snooze/reliable runtime contribution、调用
+ * closure checker 与规范 runtime contribution、调用
  * `createReminderModule(...)`，再把组装结果通过
  * `ReminderElectronModuleOptions` 传入。本工厂不读取 `ctx.db`，不创建
  * repository/use case，也不启动任何 runtime adapter。
@@ -161,12 +161,6 @@ export function createReminderElectronModule(
           ),
         );
         installed.push(ReminderChannels.TEMPLATE_LIST);
-        ipcMain.handle(ReminderChannels.TEMPLATE_GET_BY_USER, async () =>
-          withAuthenticatedValue(ctx, async (requestContext) =>
-            controller.listTemplates(requestContext),
-          ),
-        );
-        installed.push(ReminderChannels.TEMPLATE_GET_BY_USER);
         ipcMain.handle(ReminderChannels.TEMPLATE_GET, async (_event, id) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
             controller.getTemplate(id, requestContext),
@@ -202,12 +196,12 @@ export function createReminderElectronModule(
           ),
         );
         installed.push(ReminderChannels.TEMPLATE_TOGGLE_ENABLED);
-        ipcMain.handle(ReminderChannels.TEMPLATE_MOVE_TO_GROUP, async (_event, id, payload) =>
+        ipcMain.handle(ReminderChannels.TEMPLATE_REPLACE_PROFILES, async (_event, id, payload) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
-            controller.moveTemplate(id, payload ?? {}, requestContext),
+            controller.replaceTemplateProfiles(id, payload ?? {}, requestContext),
           ),
         );
-        installed.push(ReminderChannels.TEMPLATE_MOVE_TO_GROUP);
+        installed.push(ReminderChannels.TEMPLATE_REPLACE_PROFILES);
         ipcMain.handle(ReminderChannels.UPCOMING_GET, async (_event, params) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
             controller.getUpcomingReminders(params ?? {}, requestContext),
@@ -223,13 +217,11 @@ export function createReminderElectronModule(
 
         // Group handlers / 分组处理器
         ipcMain.handle(ReminderChannels.GROUP_LIST, async () =>
-          withAuthenticatedValue(ctx, async (requestContext) => controller.listGroups(requestContext)),
+          withAuthenticatedValue(ctx, async (requestContext) =>
+            controller.listGroups(requestContext),
+          ),
         );
         installed.push(ReminderChannels.GROUP_LIST);
-        ipcMain.handle(ReminderChannels.GROUP_GET_BY_USER, async () =>
-          withAuthenticatedValue(ctx, async (requestContext) => controller.listGroups(requestContext)),
-        );
-        installed.push(ReminderChannels.GROUP_GET_BY_USER);
         ipcMain.handle(ReminderChannels.GROUP_GET, async (_event, id) =>
           withAuthenticatedValue(ctx, async (requestContext) =>
             controller.getGroup(id, requestContext),
@@ -264,12 +256,6 @@ export function createReminderElectronModule(
           ),
         );
         installed.push(ReminderChannels.GROUP_TOGGLE_STATUS);
-        ipcMain.handle(ReminderChannels.GROUP_SWITCH_CONTROL_MODE, async (_event, id, data) =>
-          withAuthenticatedValue(ctx, async (requestContext) =>
-            controller.switchGroupControlMode(id, data, requestContext),
-          ),
-        );
-        installed.push(ReminderChannels.GROUP_SWITCH_CONTROL_MODE);
         ipcMain.handle(ReminderChannels.PREFERENCES_GET, async () =>
           withAuthenticatedValue(ctx, async (requestContext) =>
             controller.getPreferences(requestContext),

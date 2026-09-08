@@ -23,6 +23,7 @@ const draft = GoalPlanDraftSchema.parse({
     feasibilityAnalysis: 'One focused hour per day is available.',
     startDate: Date.UTC(2026, 8, 1),
     dueDate: Date.UTC(2026, 11, 1),
+    labels: ['Learning'],
   },
   keyResults: [
     {
@@ -45,7 +46,7 @@ const draft = GoalPlanDraftSchema.parse({
       timeOfDay: '20:00',
       keyResultIndex: 0,
       contributionValue: 1,
-      tags: ['japanese'],
+      labels: ['Japanese'],
     },
     {
       name: 'Weekly mock exam',
@@ -73,11 +74,15 @@ const draft = GoalPlanDraftSchema.parse({
 });
 
 function mutationPort(): GoalPlanMutationPort & {
+  resolveLabels: ReturnType<typeof vi.fn>;
   createGoal: ReturnType<typeof vi.fn>;
   createTaskTemplate: ReturnType<typeof vi.fn>;
   createReminder: ReturnType<typeof vi.fn>;
 } {
   return {
+    resolveLabels: vi.fn(async (names: readonly string[]) =>
+      ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
+    ),
     createGoal: vi.fn(async (request) =>
       ok({
         goalId: String(request.id),
@@ -123,6 +128,7 @@ describe('ApplyGoalPlanService', () => {
       id: expected.goal,
       name: 'Pass JLPT N1',
       initialKeyResults: [{ id: expected.kr0, title: 'Complete mock exams' }],
+      labelIds: ['label:learning'],
     });
     expect(port.createTaskTemplate.mock.calls[0]?.[0]).toMatchObject({
       id: expected.task0,
@@ -133,6 +139,7 @@ describe('ApplyGoalPlanService', () => {
         startDate: draft.goal.startDate,
       },
       recurrenceRule: { frequency: 'Daily', interval: 1 },
+      labelIds: ['label:japanese'],
       goalBinding: {
         goalId: expected.goal,
         keyResultId: expected.kr0,

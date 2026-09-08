@@ -9,7 +9,7 @@
  * - 无状态：不持有任何实例状态
  *
  * 【AIGenerationValidationService】
- * - AI 输出验证：验证 AI 生成内容的业务规则
+ * - AI 输出验证：仅保留 Summary / Knowledge Series 的领域约束；Goal/Task 结构由 canonical workflow Zod contracts 验证
  * - 纯领域验证，不涉及基础设施
  *
  * 【QuotaEnforcementService】

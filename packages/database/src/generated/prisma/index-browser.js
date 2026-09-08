@@ -813,7 +813,6 @@ exports.Prisma.ReminderTemplateScalarFieldEnum = {
   type: 'type',
   selfEnabled: 'selfEnabled',
   status: 'status',
-  reminderGroupId: 'reminderGroupId',
   importanceLevel: 'importanceLevel',
   tags: 'tags',
   color: 'color',
@@ -828,21 +827,7 @@ exports.Prisma.ReminderTemplateScalarFieldEnum = {
   activeTime: 'activeTime',
   activeHours: 'activeHours',
   notificationConfig: 'notificationConfig',
-  stats: 'stats',
-  clickRate: 'clickRate',
-  ignoreRate: 'ignoreRate',
-  avgResponseTime: 'avgResponseTime',
-  snoozeCount: 'snoozeCount',
-  effectivenessScore: 'effectivenessScore',
-  sampleSize: 'sampleSize',
-  lastAnalysisTime: 'lastAnalysisTime',
-  originalInterval: 'originalInterval',
-  adjustedInterval: 'adjustedInterval',
-  adjustmentReason: 'adjustmentReason',
-  adjustmentTime: 'adjustmentTime',
-  isAutoAdjusted: 'isAutoAdjusted',
-  userConfirmed: 'userConfirmed',
-  smartFrequencyEnabled: 'smartFrequencyEnabled'
+  stats: 'stats'
 };
 
 exports.Prisma.ReminderGroupScalarFieldEnum = {
@@ -852,7 +837,6 @@ exports.Prisma.ReminderGroupScalarFieldEnum = {
   description: 'description',
   color: 'color',
   icon: 'icon',
-  controlMode: 'controlMode',
   enabled: 'enabled',
   status: 'status',
   order: 'order',
@@ -904,6 +888,7 @@ exports.Prisma.ReminderResponseScalarFieldEnum = {
   templateId: 'templateId',
   action: 'action',
   responseTime: 'responseTime',
+  snoozeDurationSeconds: 'snoozeDurationSeconds',
   timestamp: 'timestamp',
   createdAt: 'createdAt'
 };
@@ -914,7 +899,6 @@ exports.Prisma.UserReminderPreferenceScalarFieldEnum = {
   bestTimeSlots: 'bestTimeSlots',
   worstTimeSlots: 'worstTimeSlots',
   globalReminderEnabled: 'globalReminderEnabled',
-  globalSmartFrequency: 'globalSmartFrequency',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -1495,8 +1479,6 @@ exports.Prisma.TaskTemplateScalarFieldEnum = {
   archivedAt: 'archivedAt',
   abandonedReason: 'abandonedReason',
   importance: 'importance',
-  color: 'color',
-  tags: 'tags',
   timeConfigType: 'timeConfigType',
   timeConfigStartTime: 'timeConfigStartTime',
   timeConfigEndTime: 'timeConfigEndTime',

@@ -92,6 +92,9 @@ describe('PowerSync desktop data portability round trip', () => {
     const scheduleTask = insertedRow(firstStatements, 'schedule_tasks');
     const reminderGroup = insertedRow(firstStatements, 'reminder_groups');
     const reminderTemplate = insertedRow(firstStatements, 'reminder_templates');
+    const routineProfile = insertedRow(firstStatements, 'routine_profiles');
+    const routineDefinition = insertedRow(firstStatements, 'routine_definitions');
+    const routineMembership = insertedRow(firstStatements, 'routine_profile_memberships');
     const reminderResponse = insertedRow(firstStatements, 'reminder_responses');
     const workspace = insertedRow(firstStatements, 'editor_workspaces');
     const session = insertedRow(firstStatements, 'editor_workspace_sessions');
@@ -109,8 +112,16 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(taskTemplate.key_result_id).toBe(keyResult.id);
     expect(taskInstance.template_id).toBe(taskTemplate.id);
     expect(scheduleTask.source_entity_id).toBe(taskTemplate.id);
-    expect(reminderTemplate.reminder_group_id).toBe(reminderGroup.id);
+    expect(reminderTemplate).not.toHaveProperty('reminder_group_id');
+    expect(routineProfile.id).toBe(reminderGroup.id);
+    expect(routineDefinition.id).toBe(reminderTemplate.id);
+    expect(routineMembership.profile_id).toBe(routineProfile.id);
+    expect(routineMembership.routine_id).toBe(routineDefinition.id);
+    expect(routineMembership.enabled).toBe(0);
     expect(reminderResponse.template_id).toBe(reminderTemplate.id);
+    expect(reminderResponse.action).toBe("SNOOZED");
+    expect(reminderResponse.response_time).toBe(7);
+    expect(reminderResponse.snooze_duration_seconds).toBe(900);
     expect(session.workspace_id).toBe(workspace.id);
     expect(group.session_id).toBe(session.id);
     expect(group.workspace_id).toBe(workspace.id);
@@ -433,7 +444,6 @@ function existingSingleton(table: string, identityUuid: unknown): Row {
         id: 'existing-reminder-preference-b',
         identity_id: identityUuid,
         global_reminder_enabled: 1,
-        global_smart_frequency: 0,
         default_snooze_minutes: 10,
         max_daily_reminders: 10,
         preferred_hours_start: 9,
@@ -494,7 +504,6 @@ function seedProfile(identityUuid: string): SeedTables {
         id: 'reminder-preference-a',
         identity_id: identityUuid,
         global_reminder_enabled: 1,
-        global_smart_frequency: 0,
         default_snooze_minutes: 10,
         max_daily_reminders: 10,
         preferred_hours_start: 9,
@@ -717,7 +726,6 @@ function seedProfile(identityUuid: string): SeedTables {
         identity_id: identityUuid,
         name: 'Delivery',
         description: 'Delivery reminders',
-        control_mode: 'manual',
         enabled: 1,
         status: 'active',
         order: 0,
@@ -732,7 +740,6 @@ function seedProfile(identityUuid: string): SeedTables {
       {
         id: 'reminder-template-a',
         identity_id: identityUuid,
-        reminder_group_id: 'reminder-group-a',
         name: 'Check import',
         description: 'Verify imported data',
         type: 'custom',
@@ -744,10 +751,46 @@ function seedProfile(identityUuid: string): SeedTables {
         notification_config: JSON.stringify({ channel: 'desktop' }),
         tags: JSON.stringify(['portable']),
         stats: JSON.stringify({ triggered: 1 }),
-        smart_frequency_enabled: 0,
         created_at: now,
         updated_at: later,
         deleted_at: null,
+      },
+    ],
+    routine_profiles: [
+      {
+        id: 'reminder-group-a',
+        identity_id: identityUuid,
+        name: 'Delivery',
+        description: 'Delivery reminders',
+        enabled: 1,
+        active: 1,
+        version: 1,
+        created_at: now,
+        updated_at: later,
+      },
+    ],
+    routine_definitions: [
+      {
+        id: 'reminder-template-a',
+        identity_id: identityUuid,
+        name: 'Check import',
+        description: 'Verify imported data',
+        enabled: 1,
+        trigger_json: JSON.stringify({ type: 'WallClock', localTime: '09:00' }),
+        version: 1,
+        created_at: now,
+        updated_at: later,
+      },
+    ],
+    routine_profile_memberships: [
+      {
+        identity_id: identityUuid,
+        profile_id: 'reminder-group-a',
+        routine_id: 'reminder-template-a',
+        enabled: 0,
+        version: 1,
+        created_at: now,
+        updated_at: later,
       },
     ],
     reminder_responses: [
@@ -755,8 +798,9 @@ function seedProfile(identityUuid: string): SeedTables {
         id: 'reminder-response-a',
         template_id: 'reminder-template-a',
         identity_id: identityUuid,
-        action: 'dismiss',
-        response_time: 1700000000,
+        action: 'SNOOZED',
+        response_time: 7,
+        snooze_duration_seconds: 900,
         timestamp: later,
         created_at: now,
       },

@@ -62,6 +62,50 @@ export class LabelService {
     })
   }
 
+  /**
+   * Resolve human-readable label names into identity-owned canonical Label rows.
+   *
+   * AI/workflow callers deliberately propose names rather than IDs. This method
+   * reuses existing normalized names, creates only missing labels, preserves the
+   * caller's first-seen order, and remains replay-safe because a retry sees the
+   * previously created identity-scoped label.
+   */
+  async resolveNames(identityId: string, names: readonly string[]): Promise<LabelDto[]> {
+    const validated = names.map((name) => validateLabelName(name))
+    const unique = new Map<string, { name: string; normalizedName: string }>()
+    for (const item of validated) {
+      if (!unique.has(item.normalizedName)) unique.set(item.normalizedName, item)
+    }
+    if (unique.size === 0) return []
+
+    const existing = await this.repository.list({ identityId, limit: 500 })
+    const byNormalized = new Map(existing.map((label) => [label.normalizedName, label]))
+    const resolved: LabelDto[] = []
+
+    for (const item of unique.values()) {
+      let label = byNormalized.get(item.normalizedName)
+      if (!label) {
+        try {
+          label = await this.create({ identityId, name: item.name })
+        } catch (cause) {
+          // A concurrent creator may win the identity/name unique race. Re-read
+          // exact normalized truth before surfacing the original failure.
+          const afterRace = await this.repository.list({
+            identityId,
+            normalizedSearch: item.normalizedName,
+            limit: 50,
+          })
+          label = afterRace.find((candidate) => candidate.normalizedName === item.normalizedName)
+          if (!label) throw cause
+        }
+        byNormalized.set(item.normalizedName, label)
+      }
+      resolved.push(label)
+    }
+
+    return resolved
+  }
+
   setGoalLabels(command: GoalLabelAssignmentCommand): Promise<void> {
     return this.repository.replaceGoalLabels(command.identityId, command.goalId, unique(command.labelIds))
   }

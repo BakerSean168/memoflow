@@ -41,8 +41,6 @@ export interface TaskTemplateServerDTO {
   generateAheadDays: number | null;
 
   importance: ImportanceLevel;
-  tags: string[];
-  color: string | null;
   status: TaskTemplateStatus;
   outcome: TaskPlanOutcome;
   completionPolicy: TaskPlanCompletionPolicy;

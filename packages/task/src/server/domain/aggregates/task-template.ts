@@ -80,7 +80,6 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
     this._props = {
       ...rest,
       description: rest.description ?? null,
-      color: rest.color ?? null,
       goalBinding: rest.goalBinding ?? null,
       timeConfig: rest.timeConfig ?? null,
       recurrenceRule: rest.recurrenceRule ?? null,
@@ -199,14 +198,6 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
 
   public get goalBinding(): TaskGoalBinding | null {
     return this._props.goalBinding;
-  }
-
-  public get tags(): string[] {
-    return [...this._props.tags];
-  }
-
-  public get color(): string | null {
-    return this._props.color;
   }
 
   public get status(): TaskTemplateStatus {
@@ -625,22 +616,6 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
     });
   }
 
-  /** Updates the tags. */
-  public updateTags(newTags: string[]): void {
-    const oldTags = [...this._props.tags];
-    this._props.tags = [...new Set(newTags)]; // Deduplicate
-    this._props.updatedAt = Date.now();
-    this.addHistory('tags_updated', { oldTags, newTags: this._props.tags });
-  }
-
-  /** Updates the color. */
-  public updateColor(newColor: string | null): void {
-    const oldColor = this._props.color;
-    this._props.color = newColor;
-    this._props.updatedAt = Date.now();
-    this.addHistory('color_updated', { oldColor, newColor });
-  }
-
   /** Updates the note (OneTime tasks only). */
   public updateNote(newNote: string | null): void {
     if (this._props.taskType !== TaskType.OneTime) {
@@ -802,8 +777,6 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
       importance: this._props.importance,
       goalBinding: this._props.goalBinding?.toDTO() ?? null,
       checklist: this._props.checklist.map((item) => item.toDTO()),
-      tags: [...this._props.tags],
-      color: this._props.color,
       status: this._props.status,
       outcome: this._props.outcome,
       completionPolicy: this._props.completionPolicy,
@@ -859,9 +832,7 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
       reminderConfig: this._props.reminderConfig?.toDTO() ?? null,
       importance: this._props.importance,
       goalBinding: this._props.goalBinding?.toDTO() ?? null,
-      tags: [...this._props.tags],
       labels: this._labelProjection.map((label) => ({ ...label })),
-      color: this._props.color,
       status: this._props.status,
       outcome: this._props.outcome,
       completionPolicy: this._props.completionPolicy,
@@ -911,8 +882,6 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
     dueDate?: Instant;
     estimatedMinutes?: number;
     note?: string;
-    tags?: string[];
-    color?: string;
   }): TaskTemplate {
     TaskTemplate.assertIdentityId(params.identityId, 'createOneTimeTask');
     const title = TaskTemplate.normalizeTitle(params.title, 'createOneTimeTask');
@@ -926,8 +895,6 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
       description: params.description ?? null,
       taskType: TaskType.OneTime,
       importance: params.importance ?? ImportanceLevel.Moderate,
-      tags: params.tags ?? [],
-      color: params.color ?? null,
       status: TaskTemplateStatus.Active,
       outcome: TaskPlanOutcome.Open,
       completionPolicy: TaskPlanCompletionPolicy.AllowCorrection,
@@ -965,8 +932,6 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
     recurrenceRule: RecurrenceRule;
     reminderConfig?: TaskReminderConfig;
     importance?: ImportanceLevel;
-    tags?: string[];
-    color?: string;
     generateAheadDays?: number;
   }): TaskTemplate {
     TaskTemplate.assertIdentityId(params.identityId, 'createRecurringTask');
@@ -987,8 +952,6 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
       description: params.description ?? null,
       taskType: TaskType.Recurring,
       importance: params.importance ?? ImportanceLevel.Moderate,
-      tags: params.tags ?? [],
-      color: params.color ?? null,
       status: TaskTemplateStatus.Active,
       outcome: TaskPlanOutcome.Open,
       completionPolicy: TaskPlanCompletionPolicy.AllowCorrection,
@@ -1028,8 +991,6 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
     recurrenceRule?: RecurrenceRule;
     reminderConfig?: TaskReminderConfig;
     importance?: ImportanceLevel;
-    tags?: string[];
-    color?: string;
     generateAheadDays?: number;
     goalBinding?: {
       goalId: string;
@@ -1072,8 +1033,6 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
       description: params.description ?? null,
       taskType: params.taskType,
       importance: params.importance ?? ImportanceLevel.Moderate,
-      tags: params.tags ?? [],
-      color: params.color ?? null,
       status: TaskTemplateStatus.Active,
       outcome: TaskPlanOutcome.Open,
       completionPolicy: params.completionPolicy ?? TaskPlanCompletionPolicy.AllowCorrection,

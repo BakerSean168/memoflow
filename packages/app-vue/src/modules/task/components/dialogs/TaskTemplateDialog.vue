@@ -93,7 +93,6 @@ import { Copy, Pencil, PlusCircle } from '@lucide/vue';
 import TaskTemplateForm from '../TaskTemplateForm/TaskTemplateForm.vue';
 import type { TaskTemplateViewModel } from '../types';
 import { TaskType } from '@memoflow/contracts/task';
-import { defaultNamedColor } from '../../../../shared/constants/color-palette';
 import { useTaskGoalBindingOptions } from '../../composables/useTaskGoalBindingOptions';
 import { ProductDialogShell } from '../../../../shared/components';
 import { useDialogDraftStore } from '../../../../layouts/shell/dialog-draft-store';
@@ -121,7 +120,8 @@ function createBlankTemplate(): TaskTemplateViewModel {
     isPaused: false,
     isArchived: false,
     importance: 'Moderate',
-    tags: [],
+    labels: [],
+    labelIds: [],
     goalBinding: null,
     timeConfig: {
       timeType: 'AllDay',
@@ -134,7 +134,6 @@ function createBlankTemplate(): TaskTemplateViewModel {
     instanceCount: 0,
     completionRate: 0,
     taskType: TaskType.Recurring,
-    color: defaultNamedColor,
   };
 }
 

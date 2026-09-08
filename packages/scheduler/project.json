@@ -1,0 +1,126 @@
+{
+  "name": "scheduler",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/scheduler/src",
+  "projectType": "library",
+  "tags": [
+    "scope:scheduler",
+    "type:lib",
+    "layer:infra"
+  ],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
+      "options": {
+        "command": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && node ../../node_modules/tsup/dist/cli-default.js --clean=false && node ../../node_modules/typescript/bin/tsc -p tsconfig.build.json --emitDeclarationOnly",
+        "cwd": "packages/scheduler"
+      },
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "packages/scheduler/**/*.{ts,js}"
+        ]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p tsconfig.json",
+        "cwd": "packages/scheduler"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/scheduler"
+      }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
+        "cwd": "packages/scheduler"
+      }
+    },
+    "test:integration": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "cache": false,
+      "options": {
+        "command": "vitest run --config vitest.integration.config.ts",
+        "cwd": "packages/scheduler"
+      }
+    },
+    "test:coverage": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "cache": true,
+      "options": {
+        "commands": [
+          {
+            "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts --coverage",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.use-cases.config.ts --coverage",
+            "forwardAllArgs": false
+          },
+          {
+            "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.mappers.config.ts --coverage",
+            "forwardAllArgs": false
+          }
+        ],
+        "parallel": false,
+        "cwd": "packages/scheduler"
+      }
+    },
+    "poc:pg-boss": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "vitest run --config vitest.pgboss-poc.config.ts",
+        "cwd": "packages/scheduler"
+      }
+    },
+    "poc:pg-boss:typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit -p tsconfig.pgboss-poc.json",
+        "cwd": "packages/scheduler"
+      }
+    }
+  }
+}

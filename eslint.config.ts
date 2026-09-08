@@ -32,7 +32,7 @@ const featureScopeConstraints = [
   {
     sourceTag: 'scope:goal',
     // temporary: schedule shared-kernel until Schedule* contracts are extracted
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:goal', 'scope:schedule'],
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:goal', 'scope:schedule', 'scope:scheduler'],
   },
   {
     sourceTag: 'scope:governance',
@@ -56,13 +56,17 @@ const featureScopeConstraints = [
     onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:schedule'],
   },
   {
+    sourceTag: 'scope:scheduler',
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:scheduler'],
+  },
+  {
     sourceTag: 'scope:setting',
     onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:setting'],
   },
   {
     sourceTag: 'scope:task',
     // temporary: schedule shared-kernel until Schedule* contracts are extracted
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:task', 'scope:schedule'],
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:task', 'scope:schedule', 'scope:scheduler'],
   },
   {
     sourceTag: 'scope:data-portability',
@@ -147,6 +151,7 @@ const moduleBoundaryDepConstraints = [
       'scope:reminder',
       'scope:repository',
       'scope:schedule',
+      'scope:scheduler',
       'scope:setting',
       'scope:task',
       'scope:data-portability',
@@ -167,6 +172,7 @@ const moduleBoundaryDepConstraints = [
       'scope:reminder',
       'scope:repository',
       'scope:schedule',
+      'scope:scheduler',
       'scope:setting',
       'scope:task',
       'scope:data-portability',
@@ -188,6 +194,7 @@ const moduleBoundaryDepConstraints = [
       'scope:reminder',
       'scope:repository',
       'scope:schedule',
+      'scope:scheduler',
       'scope:setting',
       'scope:task',
       'scope:data-portability',
@@ -217,6 +224,7 @@ const moduleBoundaryDepConstraints = [
       'scope:reminder',
       'scope:repository',
       'scope:schedule',
+      'scope:scheduler',
       'scope:setting',
       'scope:task',
       'scope:data-portability',
@@ -246,6 +254,7 @@ const moduleBoundaryDepConstraints = [
       'scope:reminder',
       'scope:repository',
       'scope:schedule',
+      'scope:scheduler',
       'scope:setting',
       'scope:task',
       'scope:data-portability',
@@ -275,6 +284,7 @@ const moduleBoundaryDepConstraints = [
       'scope:reminder',
       'scope:repository',
       'scope:schedule',
+      'scope:scheduler',
       'scope:setting',
       'scope:task',
       'scope:data-portability',

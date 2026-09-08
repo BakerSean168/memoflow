@@ -9,7 +9,8 @@ import {
 import type { DashboardData } from '@memoflow/contracts/dashboard';
 import type { IGoalRepository } from '@memoflow/goal';
 import type { ITaskInstanceRepository, ITaskTemplateRepository } from '@memoflow/task';
-import type { IScheduleRepository, IScheduleTaskRepository } from '@memoflow/schedule';
+import type { IScheduleRepository } from '@memoflow/schedule';
+import type { IScheduleTaskRepository } from '@memoflow/scheduler';
 import type { IReminderTemplateRepository } from '@memoflow/reminder';
 import type { INotificationRepository } from '@memoflow/notification';
 import { createLogger } from '@memoflow/utils/logger';

@@ -1,16 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
-
-import { presentErrorMessage } from '@memoflow/http-client';
 
 import { ScheduleTaskStatus } from '@memoflow/contracts/schedule';
 
 import { ScheduleTaskCard } from '../components/ScheduleTaskCard';
 import { useAppSession } from '../hooks/useAppSession';
 import { useScheduleAgenda } from '../hooks/useScheduleAgenda';
-import { useScheduleService } from '../hooks/useScheduleService';
 import { useScheduleTasks, type ScheduleStatusFilter, type ScheduleTaskSummary } from '../hooks/useScheduleTasks';
 
 import {
@@ -69,7 +66,6 @@ function buildTaskLanes(tasks: ScheduleTaskSummary[]) {
 
 export function ScheduleScreen() {
   const router = useRouter();
-  const service = useScheduleService();
   const { signOut } = useAppSession();
   const {
     error,
@@ -90,9 +86,6 @@ export function ScheduleScreen() {
     isLoading: isAgendaLoading,
     refresh: refreshAgenda,
   } = useScheduleAgenda();
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [mutatingId, setMutatingId] = useState<string | null>(null);
-
   const activeCount = tasks.filter((item) => item.status === ScheduleTaskStatus.Active).length;
   const overdueCount = tasks.filter((item) => item.isOverdue).length;
   const conflictCount = entries.filter((item) => item.hasConflict).length;
@@ -120,30 +113,6 @@ export function ScheduleScreen() {
       ],
     },
   ];
-
-  async function runAction(taskId: string, action: 'pause' | 'resume' | 'complete' | 'cancel') {
-    setMutatingId(taskId);
-    setActionError(null);
-
-    const result =
-      action === 'pause'
-        ? await service.pauseTask(taskId)
-        : action === 'resume'
-          ? await service.resumeTask(taskId)
-          : action === 'complete'
-            ? await service.completeTask(taskId)
-            : await service.cancelTask(taskId);
-
-    setMutatingId(taskId);
-
-    if (!result.ok) {
-      setActionError(presentErrorMessage(result.error));
-      return;
-    }
-
-    setMutatingId(null);
-    await Promise.all([refresh(), refreshAgenda()]);
-  }
 
   async function handleRefresh() {
     await Promise.all([refresh(), refreshAgenda()]);
@@ -210,12 +179,6 @@ export function ScheduleScreen() {
             </SectionCard>
           ) : null}
 
-          {actionError ? (
-            <SectionCard title="Task action failed" description="Unable to update schedule task.">
-              <ThemedText type="small" themeColor="warning">{actionError}</ThemedText>
-            </SectionCard>
-          ) : null}
-
           <SectionCard title="Task lanes" description="按时间窗口查看调度任务。">
             <View style={styles.listColumn}>
               {taskLanes.length > 0 ? (
@@ -228,14 +191,7 @@ export function ScheduleScreen() {
                     <ThemedText type="small" themeColor="textSecondary">{lane.description}</ThemedText>
                     <View style={styles.listColumn}>
                       {lane.items.map((task) => (
-                        <ScheduleTaskCard
-                          key={task.id}
-                          task={task}
-                          onPause={task.status === 'Active' ? () => runAction(task.id, 'pause') : undefined}
-                          onResume={task.status === 'Paused' ? () => runAction(task.id, 'resume') : undefined}
-                          onComplete={task.status !== 'Completed' ? () => runAction(task.id, 'complete') : undefined}
-                          onCancel={task.status !== 'Cancelled' ? () => runAction(task.id, 'cancel') : undefined}
-                        />
+                        <ScheduleTaskCard key={task.id} task={task} />
                       ))}
                     </View>
                   </View>
@@ -295,7 +251,6 @@ export function ScheduleScreen() {
             </SectionCard>
           ) : null}
 
-          {mutatingId ? <ThemedText type="small" themeColor="textSecondary">Updating schedule task {mutatingId}…</ThemedText> : null}
         </>
       )}
     </PageShell>

@@ -1,8 +1,4 @@
-/**
- * List Reminder Templates Service
- *
- * 获取提醒模板列表
- */
+/** List Routine templates for the authenticated identity. */
 
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
@@ -14,13 +10,9 @@ import { ReminderDomainService } from '../../../domain/services/reminder-domain-
 import { ReminderTemplateClientMapper } from '../../mappers/reminder-template-client.mapper';
 
 export interface ListReminderTemplatesQuery {
-  groupId?: string;
   effectiveEnabled?: boolean;
 }
 
-/**
- * List Reminder Templates Service
- */
 export class ListReminderTemplatesUseCase {
   private readonly templateMapper: ReminderTemplateClientMapper;
 
@@ -33,7 +25,6 @@ export class ListReminderTemplatesUseCase {
       templateMapper ??
       new ReminderTemplateClientMapper(
         new ReminderDomainService(templateRepository, groupRepository),
-        groupRepository,
       );
   }
 
@@ -41,27 +32,17 @@ export class ListReminderTemplatesUseCase {
     query: ListReminderTemplatesQuery | undefined,
     cx: ExecutionContext,
   ): Promise<Result<ReminderTemplateListRes>> {
-    let templates;
-
-    if (query?.groupId) {
-      templates = await this.templateRepository.findByGroupId(query.groupId, cx.identityId, {
-        includeHistory: true,
-        historyLimit: 1,
-      });
-    } else if (query?.effectiveEnabled) {
-      templates = await this.templateRepository.findActive(cx.identityId, {
-        includeHistory: true,
-        historyLimit: 1,
-      });
-    } else {
-      templates = await this.templateRepository.findByIdentityId(cx.identityId, {
-        includeHistory: true,
-        historyLimit: 1,
-      });
-    }
+    const templates = query?.effectiveEnabled
+      ? await this.templateRepository.findActive(cx.identityId, {
+          includeHistory: true,
+          historyLimit: 1,
+        })
+      : await this.templateRepository.findByIdentityId(cx.identityId, {
+          includeHistory: true,
+          historyLimit: 1,
+        });
 
     const data = await this.templateMapper.toDTOList(templates);
-
     return ok({
       templates: data,
       total: data.length,

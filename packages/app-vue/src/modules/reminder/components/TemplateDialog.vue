@@ -33,7 +33,9 @@
 
             <div class="flex gap-3">
               <div class="flex-1">
-                <Label for="reminder-template-title">{{ t('reminder.templateDialog.labelTitle') }}</Label>
+                <Label for="reminder-template-title">{{
+                  t('reminder.templateDialog.labelTitle')
+                }}</Label>
                 <Input
                   id="reminder-template-title"
                   v-model="formData.title"
@@ -54,7 +56,9 @@
             </div>
 
             <div>
-              <Label for="reminder-template-description">{{ t('reminder.templateDialog.labelDescription') }}</Label>
+              <Label for="reminder-template-description">{{
+                t('reminder.templateDialog.labelDescription')
+              }}</Label>
               <Textarea
                 id="reminder-template-description"
                 v-model="formData.description"
@@ -68,19 +72,23 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <Label>{{ t('reminder.templateDialog.labelGroup') }}</Label>
-                <Select v-model="formData.groupId">
-                  <SelectTrigger class="mt-1.5">
-                    <SelectValue :placeholder="t('reminder.templateDialog.placeholderGroup')" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__root__">
-                      {{ t('reminder.templateDialog.rootOption') }}
-                    </SelectItem>
-                    <SelectItem v-for="group in groupOptions" :key="group.id" :value="group.id">
-                      {{ group.name }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <div class="mt-1.5 max-h-32 space-y-1 overflow-y-auto rounded-md border p-2">
+                  <label
+                    v-for="profile in groupOptions"
+                    :key="profile.id"
+                    class="flex cursor-pointer items-center gap-2 rounded p-1.5 hover:bg-muted/50"
+                  >
+                    <Checkbox
+                      :aria-label="profile.name"
+                      :model-value="formData.profileIds.includes(profile.id)"
+                      @update:model-value="toggleProfile(profile.id, $event)"
+                    />
+                    <span class="truncate text-sm">{{ profile.name }}</span>
+                  </label>
+                  <p v-if="groupOptions.length === 0" class="text-xs text-muted-foreground">
+                    {{ t('reminder.templateDialog.rootOption') }}
+                  </p>
+                </div>
                 <p class="mt-1 text-xs text-muted-foreground">
                   {{ currentGroupHint }}
                 </p>
@@ -329,6 +337,7 @@ import {
   DialogTitle,
 } from '@memoflow/ui-vue-shadcn';
 import { Button } from '@memoflow/ui-vue-shadcn';
+import { Checkbox } from '@memoflow/ui-vue-shadcn';
 import { Input } from '@memoflow/ui-vue-shadcn';
 import { Label } from '@memoflow/ui-vue-shadcn';
 import { Textarea } from '@memoflow/ui-vue-shadcn';
@@ -355,6 +364,7 @@ import type {
   UpdateReminderTemplateReq,
 } from '@memoflow/contracts/reminder';
 import type { ReminderTemplateClientDTO } from '@memoflow/contracts/reminder';
+import type { RoutineMethodTemplatePreset } from '@memoflow/reminder/method-library';
 import { ColorPickerField } from '../../../shared/components';
 import { defaultNamedColor } from '../../../shared/constants/color-palette';
 import { getUserTimezone } from '../utils/user-timezone';
@@ -388,12 +398,14 @@ const showActiveHours = ref(false);
 const tagsInput = ref('');
 const saving = computed(() => props.saving);
 const currentGroupHint = computed(() => {
-  if (formData.groupId === '__root__' || !formData.groupId) {
+  if (formData.profileIds.length === 0) {
     return t('reminder.templateDialog.currentGroupHintRoot');
   }
-  const group = props.groupOptions.find((item) => item.id === formData.groupId);
-  return group
-    ? t('reminder.templateDialog.currentGroupHintNamed', { name: group.name })
+  const names = props.groupOptions
+    .filter((profile) => formData.profileIds.includes(profile.id))
+    .map((profile) => profile.name);
+  return names.length > 0
+    ? t('reminder.templateDialog.currentGroupHintNamed', { name: names.join(', ') })
     : t('reminder.templateDialog.currentGroupHintSelected');
 });
 
@@ -411,7 +423,7 @@ const formData = reactive({
   color: defaultNamedColor,
   icon: 'mdi-bell',
   tags: [] as NonNullable<CreateReminderTemplateReq['tags']>,
-  groupId: undefined as CreateReminderTemplateReq['groupId'] | '__root__' | undefined,
+  profileIds: [] as string[],
 });
 
 const isEditMode = computed(() => !!props.template?.id);
@@ -424,6 +436,13 @@ const updateTags = () => {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
+};
+
+const toggleProfile = (profileId: string, value: boolean | 'indeterminate') => {
+  const selected = new Set(formData.profileIds);
+  if (value === true) selected.add(profileId);
+  else selected.delete(profileId);
+  formData.profileIds = [...selected];
 };
 
 const resetForm = () => {
@@ -441,7 +460,7 @@ const resetForm = () => {
     color: defaultNamedColor,
     icon: 'mdi-bell',
     tags: [],
-    groupId: props.defaultGroupId ?? undefined,
+    profileIds: props.defaultGroupId ? [props.defaultGroupId] : [],
   });
   tagsInput.value = '';
   showActiveHours.value = false;
@@ -465,7 +484,7 @@ const loadTemplateData = (template: ReminderTemplateClientDTO) => {
     color: template.color || defaultNamedColor,
     icon: template.icon || 'mdi-bell',
     tags: template.tags ? [...template.tags] : [],
-    groupId: template.groupId ?? undefined,
+    profileIds: template.profileMemberships.map((membership) => String(membership.profileId)),
   });
   tagsInput.value = (template.tags || []).join(', ');
 
@@ -480,6 +499,23 @@ const open = () => {
 
 const openForCreate = () => {
   resetForm();
+  visible.value = true;
+  emit('open-change', true);
+};
+
+const openForPreset = (preset: RoutineMethodTemplatePreset) => {
+  resetForm();
+  Object.assign(formData, {
+    title: preset.title,
+    description: preset.description,
+    importanceLevel: preset.importanceLevel,
+    triggerType: preset.trigger.type,
+    fixedTime: preset.trigger.type === 'FixedTime' ? preset.trigger.fixedTime : '09:00',
+    intervalMinutes: preset.trigger.type === 'Interval' ? preset.trigger.intervalMinutes : 60,
+    icon: preset.icon,
+    tags: [...preset.tags],
+  });
+  tagsInput.value = preset.tags.join(', ');
   visible.value = true;
   emit('open-change', true);
 };
@@ -520,7 +556,7 @@ function buildPayload(): CreateReminderTemplateReq {
           fixedTime: null,
         };
 
-    // Residual 835: request activeTime uses activatedAt (ActiveTimeConfigSchema).
+  // Residual 835: request activeTime uses activatedAt (ActiveTimeConfigSchema).
   const activeTime: CreateReminderTemplateReq['activeTime'] = {
     activatedAt: Date.now(),
   };
@@ -555,7 +591,7 @@ function buildPayload(): CreateReminderTemplateReq {
     tags: formData.tags.length > 0 ? formData.tags : undefined,
     color: formData.color || undefined,
     icon: formData.icon || undefined,
-    groupId: formData.groupId === '__root__' ? undefined : formData.groupId,
+    profileIds: [...formData.profileIds] as NonNullable<CreateReminderTemplateReq['profileIds']>,
   };
 }
 
@@ -571,5 +607,5 @@ const handleSave = async () => {
   }
 };
 
-defineExpose({ open, openForCreate, openForEdit, close });
+defineExpose({ open, openForCreate, openForPreset, openForEdit, close });
 </script>

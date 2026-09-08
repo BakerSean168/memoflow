@@ -17,6 +17,7 @@ const governedDomainProjects = new Set([
   'notification',
   'reminder',
   'schedule',
+  'scheduler',
   'setting',
   'task',
 ]);
@@ -32,7 +33,9 @@ const governedRequiredTargets = ['test', 'test:watch', 'test:coverage'];
 const coverageConfigsByProject = new Map([
   ['goal', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
   ['reminder', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
-  ['schedule', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
+  // CLEAN-6304: Schedule owns Calendar/Planner; Temporal Engine use-case coverage belongs to Scheduler.
+  ['schedule', ['vitest.config.ts', 'vitest.mappers.config.ts']],
+  ['scheduler', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
   ['task', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
 ]);
 

@@ -26,6 +26,9 @@ import type {
   AIUsageSummary,
   IAIExecutionLogPort,
   IAIUsageReadPort,
+  IAIRoutineCommandPort,
+  IAIPlannerReadPort,
+  IAINotificationReadPort,
 } from '../../application/ports';
 import {
   createMemoFlowAssistant,
@@ -33,6 +36,7 @@ import {
   KnowledgeCapturePlannerWorker,
   TaskPlannerWorker,
 } from '../agents';
+import { createMemoFlowProductTools } from '../tools/product-tools';
 import type { MastraModelResolver } from '../models';
 import {
   ApplyGoalPlanService,
@@ -113,6 +117,9 @@ export interface MastraAIRuntimeDependencies {
   readonly executionLogPort?: IAIExecutionLogPort;
   /** Durable indexed usage projection for run/thread queries and workflow views. */
   readonly usageReadPort?: IAIUsageReadPort;
+  readonly routineCommandPort: IAIRoutineCommandPort;
+  readonly plannerReadPort: IAIPlannerReadPort;
+  readonly notificationReadPort: IAINotificationReadPort;
 }
 
 type ActiveRun = {
@@ -147,6 +154,11 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       modelResolver: deps.modelResolver,
       memory: this.memory,
     });
+    const productTools = createMemoFlowProductTools({
+      routineCommandPort: deps.routineCommandPort,
+      plannerReadPort: deps.plannerReadPort,
+      notificationReadPort: deps.notificationReadPort,
+    });
     this.goalPlanner = new GoalPlannerWorker(deps.modelResolver, deps.executionLogPort);
     this.goalCreateWorkflow = createGoalCreateWorkflow({
       planner: this.goalPlanner,
@@ -170,7 +182,12 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       storage: deps.storage,
       memory: this.memory,
       agent: this.assistant,
-      modes: [{ id: 'assistant', name: 'Assistant', availableTools: [] }],
+      modes: [{
+        id: 'assistant',
+        name: 'Assistant',
+        tools: productTools,
+        availableTools: Object.keys(productTools),
+      }],
       defaultModeId: 'assistant',
       disableBuiltinTools: [
         'ask_user',

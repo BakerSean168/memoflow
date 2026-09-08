@@ -202,17 +202,7 @@ export const reminderHandlers = [
     );
   }),
 
-  http.post(`${GROUPS}/:id/toggle-status`, ({ params }) => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Toggled',
-      data: createMockReminderGroup({ id: toGroupId(params['id']) }),
-      timestamp: Date.now(),
-    });
-  }),
-
-  http.post(`${GROUPS}/:id/toggle-control-mode`, ({ params }) => {
+  http.post(`${GROUPS}/:id/toggle`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,

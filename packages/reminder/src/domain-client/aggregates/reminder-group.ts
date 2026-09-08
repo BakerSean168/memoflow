@@ -12,7 +12,6 @@
 import type {
   ReminderGroupClientDTO,
   GroupStatsDTO,
-  ControlMode,
   ReminderStatus,
 } from '@memoflow/contracts/reminder';
 import { AggregateRoot } from '@memoflow/utils/domain';
@@ -26,7 +25,6 @@ export interface ReminderGroupState {
   description: string | null;
   color: string | null;
   icon: string | null;
-  controlMode: ControlMode;
   enabled: boolean;
   status: ReminderStatus;
   order: number;
@@ -64,10 +62,6 @@ export class ReminderGroup extends AggregateRoot<ReminderGroupId> {
 
   get icon(): string | null {
     return this._props.icon;
-  }
-
-  get controlMode(): ControlMode {
-    return this._props.controlMode;
   }
 
   get enabled(): boolean {
@@ -121,7 +115,6 @@ export class ReminderGroup extends AggregateRoot<ReminderGroupId> {
       description: this._props.description,
       color: this._props.color,
       icon: this._props.icon,
-      controlMode: this._props.controlMode,
       enabled: this._props.enabled,
       status: this._props.status,
       order: this._props.order,

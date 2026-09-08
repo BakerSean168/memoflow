@@ -59,4 +59,15 @@ describe('ROUTINE-5301 configuration-center surface', () => {
     expect(detail).not.toContain('const stats = computed');
     expect(detail).not.toContain('sectionStats');
   });
+  it('exposes the six-method library without turning Protocol methods into ReminderTemplate timers', () => {
+    const view = read('src/modules/reminder/views/ReminderLinearView.vue');
+    const dialog = read('src/modules/reminder/components/TemplateDialog.vue');
+
+    expect(view).toContain('routine-method-library');
+    expect(view).toContain('ROUTINE_METHOD_CATALOG');
+    expect(view).toContain('method.templatePreset');
+    expect(dialog).toContain('openForPreset');
+    expect(dialog).toContain('RoutineMethodTemplatePreset');
+  });
+
 });

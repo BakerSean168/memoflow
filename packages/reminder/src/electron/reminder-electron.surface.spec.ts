@@ -25,4 +25,11 @@ describe('ReminderElectronModule channel surface', () => {
     expect(ReminderChannels.GROUP_CREATE).toBe('reminder:group:create');
     expect(ReminderChannels.PREFERENCES_UPDATE).toBe('reminder:preferences:update');
   });
+
+  it('does not register retired duplicate per-user list channels', () => {
+    expect('TEMPLATE_GET_BY_USER' in ReminderChannels).toBe(false);
+    expect('GROUP_GET_BY_USER' in ReminderChannels).toBe(false);
+    expect(source).not.toContain('TEMPLATE_GET_BY_USER');
+    expect(source).not.toContain('GROUP_GET_BY_USER');
+  });
 });

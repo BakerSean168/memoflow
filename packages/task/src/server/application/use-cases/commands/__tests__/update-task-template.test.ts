@@ -145,38 +145,6 @@ describe('UpdateTaskTemplateUseCase', () => {
     expect(template.importance).toBe(ImportanceLevel.Vital);
   });
 
-  it('should update tags', async () => {
-    const template = aOneTimeTask({ tags: ['old-tag'] });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-
-    const result = await useCase.execute(template.id, template.identityId, {
-      tags: ['new-tag-1', 'new-tag-2'],
-    });
-
-    expect(result).toBeOk();
-    expect(template.tags).toEqual(['new-tag-1', 'new-tag-2']);
-  });
-
-  it('should update color', async () => {
-    const template = aOneTimeTask();
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-
-    const result = await useCase.execute(template.id, template.identityId, { color: '#FF0000' });
-
-    expect(result).toBeOk();
-    expect(template.color).toBe('#FF0000');
-  });
-
-  it('should clear color when null is passed', async () => {
-    const template = aLoadedTaskTemplate({ color: '#FF0000' });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-
-    const result = await useCase.execute(template.id, template.identityId, { color: null as any });
-
-    expect(result).toBeOk();
-    expect(template.color).toBeNull();
-  });
-
   it('should update multiple fields at once', async () => {
     const template = aOneTimeTask({ title: 'Old', importance: ImportanceLevel.Minor });
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
@@ -184,32 +152,28 @@ describe('UpdateTaskTemplateUseCase', () => {
     const result = await useCase.execute(template.id, template.identityId, {
       name: 'New Name',
       importance: ImportanceLevel.Vital,
-      tags: ['urgent'],
-      color: '#00FF00',
     });
 
     expect(result).toBeOk();
     expect(template.title).toBe('New Name');
     expect(template.importance).toBe(ImportanceLevel.Vital);
-    expect(template.tags).toEqual(['urgent']);
-    expect(template.color).toBe('#00FF00');
   });
 
   it('should not modify fields that are not in the request', async () => {
     const template = aOneTimeTask({
       title: 'Keep Me',
       importance: ImportanceLevel.Important,
-      tags: ['keep'],
     });
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
 
-    // Only update color
-    const result = await useCase.execute(template.id, template.identityId, { color: '#000' });
+    const result = await useCase.execute(template.id, template.identityId, {
+      description: 'Only this field changes',
+    });
 
     expect(result).toBeOk();
     expect(template.title).toBe('Keep Me');
     expect(template.importance).toBe(ImportanceLevel.Important);
-    expect(template.tags).toEqual(['keep']);
+    expect(template.description).toBe('Only this field changes');
   });
 
   it('should save exactly once', async () => {

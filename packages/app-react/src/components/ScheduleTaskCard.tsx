@@ -2,23 +2,13 @@ import { StyleSheet, View } from 'react-native';
 
 import type { ScheduleTaskSummary } from '../hooks/useScheduleTasks';
 
-import { PrimaryButton, SectionCard, Spacing, StatusPill, ThemedText } from '@memoflow/ui-react-native';
+import { SectionCard, Spacing, StatusPill, ThemedText } from '@memoflow/ui-react-native';
 
 import { formatProductDateTime, emptyKind } from '../utils/product-time';
 
 function statusTone(status: ScheduleTaskSummary['status']) {
-  if (status === 'Active') {
-    return 'success' as const;
-  }
-
-  if (status === 'Paused') {
-    return 'warning' as const;
-  }
-
-  if (status === 'Failed') {
-    return 'warning' as const;
-  }
-
+  if (status === 'Active') return 'success' as const;
+  if (status === 'Paused' || status === 'Failed') return 'warning' as const;
   return 'textSecondary' as const;
 }
 
@@ -29,14 +19,8 @@ function computeHealth(consecutiveFailures: number): 'healthy' | 'warning' | 'cr
 }
 
 function healthTone(health: 'healthy' | 'warning' | 'critical') {
-  if (health === 'healthy') {
-    return 'success' as const;
-  }
-
-  if (health === 'warning') {
-    return 'warning' as const;
-  }
-
+  if (health === 'healthy') return 'success' as const;
+  if (health === 'warning') return 'warning' as const;
   return 'textSecondary' as const;
 }
 
@@ -45,19 +29,13 @@ function scheduleTimestamp(timestamp: number | null) {
   return formatProductDateTime(timestamp, emptyKind('dash'));
 }
 
-export function ScheduleTaskCard({
-  onCancel,
-  onComplete,
-  onPause,
-  onResume,
-  task,
-}: {
-  task: ScheduleTaskSummary;
-  onPause?: () => void;
-  onResume?: () => void;
-  onComplete?: () => void;
-  onCancel?: () => void;
-}) {
+/**
+ * Read-only Scheduler worker diagnostic card.
+ *
+ * Users change the owning Task/Routine/Planner object; owner-domain commands
+ * project the resulting owner intent into worker state.
+ */
+export function ScheduleTaskCard({ task }: { task: ScheduleTaskSummary }) {
   const health = computeHealth(task.consecutiveFailures);
   const successCount = task.executionCount - task.consecutiveFailures;
 
@@ -81,13 +59,6 @@ export function ScheduleTaskCard({
         {task.tags.slice(0, 3).map((tag) => (
           <StatusPill key={tag} label={`#${tag}`} tone="textSecondary" />
         ))}
-      </View>
-
-      <View style={styles.actionRow}>
-        {task.status === 'Active' ? <PrimaryButton label="Pause" onPress={onPause} variant="secondary" /> : null}
-        {task.status === 'Paused' ? <PrimaryButton label="Resume" onPress={onResume} variant="secondary" /> : null}
-        {task.status !== 'Completed' ? <PrimaryButton label="Complete" onPress={onComplete} /> : null}
-        {task.status !== 'Cancelled' ? <PrimaryButton label="Cancel" onPress={onCancel} variant="ghost" /> : null}
       </View>
     </SectionCard>
   );
@@ -120,10 +91,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.one,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.two,
   },
 });

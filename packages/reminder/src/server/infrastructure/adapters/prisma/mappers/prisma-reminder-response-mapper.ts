@@ -1,33 +1,32 @@
-/**
- * Prisma ReminderResponse Mapper
- *
- * Maps between ReminderResponse domain entity and Prisma model.
- */
+/** Prisma ReminderResponse Mapper. */
 
 import type { ReminderResponse as PrismaReminderResponse } from '@memoflow/database';
-import type { ReminderResponseAction } from '@memoflow/contracts/reminder';
+import {
+  toReminderResponseLatencySeconds,
+  toReminderSnoozeDurationSeconds,
+  type ReminderResponseAction,
+} from '@memoflow/contracts/reminder';
+import type { IdentityId, ReminderTemplateId } from '@memoflow/contracts/primitives';
 import { ReminderResponse } from '../../../../domain/entities/reminder-response';
 import { ReminderResponseId } from '../../../../domain/value-objects/reminder-response-id';
 
 export class PrismaReminderResponseMapper {
-  /**
-   * Prisma record → ReminderResponse entity
-   */
   static toDomain(data: PrismaReminderResponse): ReminderResponse {
     return ReminderResponse.load({
       id: ReminderResponseId.of(data.id),
-      reminderTemplateId: data.templateId,
-      identityId: data.identityId,
+      reminderTemplateId: data.templateId as ReminderTemplateId,
+      identityId: data.identityId as IdentityId,
       action: data.action as ReminderResponseAction,
-      // responseTime is stored as seconds in DB; convert to JS Date (milliseconds)
-      responseTime: data.responseTime != null ? new Date(data.responseTime * 1000) : null,
+      responseTime:
+        data.responseTime == null ? null : toReminderResponseLatencySeconds(data.responseTime),
+      snoozeDurationSeconds:
+        data.snoozeDurationSeconds == null
+          ? null
+          : toReminderSnoozeDurationSeconds(data.snoozeDurationSeconds),
       timestamp: data.timestamp,
     });
   }
 
-  /**
-   * Batch conversion: Prisma → Domain
-   */
   static toDomainList(rows: PrismaReminderResponse[]): ReminderResponse[] {
     return rows.map((row) => PrismaReminderResponseMapper.toDomain(row));
   }

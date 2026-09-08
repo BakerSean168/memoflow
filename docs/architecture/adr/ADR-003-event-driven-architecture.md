@@ -7,14 +7,18 @@ tags:
   - messaging
 description: ADR-003 - 采用事件驱动架构实现模块解耦
 created: 2025-11-23T15:00:00
-updated: 2025-11-23T15:00:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-003: 事件驱动架构
 
-**状态**: ✅ 已采纳  
+**状态**: 历史决策（事件语义保留；实现由 ADR-033 / ADR-064 修订）
 **日期**: 2024-09-01  
 **决策者**: @BakerSean168  
+
+## 2026-09-08 实现状态
+
+本 ADR 保留“通知式跨模块协作使用事件”的历史方向，但不再代表当前 EventBus 的具体实现。当前规则由 ADR-033/064 收敛：请求-响应使用 Port / IPC / HTTP；runtime-local EventBus 使用 Emittery，业务 `send()` 保持通知语义，可靠基础设施边界使用 delivery-scoped `dispatch()`。历史 mitt-RPC / 全局 drain 不属于当前架构。
 
 ## 背景
 

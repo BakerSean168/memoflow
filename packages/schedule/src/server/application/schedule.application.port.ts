@@ -5,46 +5,26 @@ import type {
   OperationAuditRecord,
 } from '@memoflow/contracts/operations';
 import type {
-  BatchScheduleTaskOperationRequest,
   CreateScheduleRequest,
-  CreateScheduleTaskRequest,
   DetectConflictsInternalQuery,
   GetSchedulesByTimeRangeInternalQuery,
   ResolveConflictRequest,
   UpdateScheduleRequest,
-  UpdateScheduleTaskRequest,
-  UpdateTaskMetadataRequest,
 } from '@memoflow/contracts/schedule';
 
 /**
- * Transport-neutral callable application surface for schedule tasks.
+ * Planner/Calendar operational surface.
+ *
+ * Worker-job diagnostics live in @memoflow/scheduler. This port owns only
+ * Calendar reliability/operations that are backed by Schedule-owned state.
  */
 export interface ScheduleApplicationPort {
-  createTask(data: CreateScheduleTaskRequest, ctx: Context): Promise<Result<unknown>>;
-  listTasks(query: Record<string, unknown>, ctx: Context): Promise<Result<unknown>>;
-  getTask(id: string, ctx: Context): Promise<Result<unknown>>;
-  updateTask(id: string, data: UpdateScheduleTaskRequest, ctx: Context): Promise<Result<unknown>>;
-  deleteTask(id: string, ctx: Context): Promise<Result<unknown>>;
-  pauseTask(id: string, ctx: Context): Promise<Result<unknown>>;
-  resumeTask(id: string, ctx: Context): Promise<Result<unknown>>;
-  triggerTask(id: string, ctx: Context): Promise<Result<unknown>>;
-  completeTask(id: string, ctx: Context): Promise<Result<unknown>>;
-  cancelTask(id: string, reason: string, ctx: Context): Promise<Result<unknown>>;
-  getDueTasks(ctx: Context): Promise<Result<unknown>>;
-  batchOperateTasks(data: BatchScheduleTaskOperationRequest, ctx: Context): Promise<Result<unknown>>;
-  batchDeleteTasks(ids: string[], ctx: Context): Promise<Result<unknown>>;
-  updateTaskMetadata(id: string, metadata: UpdateTaskMetadataRequest, ctx: Context): Promise<Result<unknown>>;
-  /** W7: 按 identity 查询 conflict-rebuild operation timeline */
   queryRebuildTimeline(ctx: Context): Promise<Result<OperationTimelineEntry[]>>;
-  /** W7: 重放失败的 rebuild outbox 并记录审计 */
   replayRebuildOutbox(operationId: string, ctx: Context): Promise<Result<unknown>>;
-  /** W7: 查询操作审计记录（actor 最小权限） */
   getOperationAudit(ctx: Context): Promise<Result<OperationAuditRecord[]>>;
 }
 
-/**
- * Transport-neutral callable application surface for schedule events.
- */
+/** Transport-neutral callable application surface for Calendar entries. */
 export interface ScheduleEventApplicationPort {
   createEvent(data: CreateScheduleRequest, ctx: Context): Promise<Result<unknown>>;
   getEvent(id: string, ctx: Context): Promise<Result<unknown>>;

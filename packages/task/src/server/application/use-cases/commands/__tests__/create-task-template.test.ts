@@ -56,7 +56,6 @@ describe('CreateTaskTemplateUseCase', () => {
         timeRange: null,
       },
       importance: ImportanceLevel.Moderate,
-      tags: [],
       ...overrides,
     } as CreateTaskTemplateUseCaseReq;
   }
@@ -218,26 +217,6 @@ describe('CreateTaskTemplateUseCase', () => {
   it('should use provided importance level', async () => {
     const request = aCreateRequest({
       importance: ImportanceLevel.Vital,
-    });
-
-    const result = await useCase.execute(request);
-
-    expect(result).toBeOk();
-  });
-
-  it('should use provided tags', async () => {
-    const request = aCreateRequest({
-      tags: ['work', 'urgent'],
-    });
-
-    const result = await useCase.execute(request);
-
-    expect(result).toBeOk();
-  });
-
-  it('should use provided color', async () => {
-    const request = aCreateRequest({
-      color: '#FF5500',
     });
 
     const result = await useCase.execute(request);

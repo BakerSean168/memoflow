@@ -44,6 +44,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './schedule-projection',
     './schedule-projection/routine',
     './routine-runtime',
+    './method-library',
     './server',
   ],
   contracts: [
@@ -72,7 +73,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   ],
   database: ['./prisma'],
   'domain-shared': ['./shared'],
-  patterns: ['./scheduler', './repository', './cache', './events', './operations'],
+  patterns: ['./scheduler', './repository', './cache', './events', './operations', './lease'],
   utils: [
     './domain',
     './errors',

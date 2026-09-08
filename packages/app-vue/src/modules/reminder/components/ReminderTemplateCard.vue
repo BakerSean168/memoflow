@@ -18,11 +18,11 @@
           <Badge :variant="template?.effectiveEnabled ? 'default' : 'secondary'">
             {{ scheduleStateLabel }}
           </Badge>
-          <Badge v-if="template?.groupId" variant="outline">
+          <Badge v-if="template?.profileMemberships.length" variant="outline">
             <Folder class="h-3 w-3 mr-1" />
-            {{ template?.groupName || t('reminder.templateDetail.groupedFallback') }}
+            {{ profileMembershipLabel }}
           </Badge>
-          <Badge v-if="template?.lifecycleSource === 'group'" variant="outline">
+          <Badge v-if="template?.lifecycleSource === 'profile'" variant="outline">
             {{ t('reminder.templateDetail.badgeProfilePaused') }}
           </Badge>
           <Badge v-else-if="template?.lifecycleSource === 'global'" variant="secondary">{{
@@ -155,7 +155,7 @@
           </div>
 
           <div
-            v-if="template.lifecycleSource !== 'template'"
+            v-if="template.lifecycleSource !== 'routine'"
             class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
           >
             <p class="font-medium">{{ t('reminder.templateDetail.overrideTitle') }}</p>

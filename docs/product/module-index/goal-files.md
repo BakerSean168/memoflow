@@ -74,7 +74,6 @@ updated: 2026-08-26T00:00:00
 | [`packages/goal/src/server/application/use-cases/commands/add-goal-key-result.use-case.ts`](../../../packages/goal/src/server/application/use-cases/commands/add-goal-key-result.use-case.ts) | 添加关键结果用例 |
 | [`packages/goal/src/server/application/use-cases/commands/add-goal-review.use-case.ts`](../../../packages/goal/src/server/application/use-cases/commands/add-goal-review.use-case.ts) | 添加目标复盘用例 |
 | [`packages/goal/src/server/application/use-cases/queries/get-goal-aggregate.use-case.ts`](../../../packages/goal/src/server/application/use-cases/queries/get-goal-aggregate.use-case.ts) | 获取目标聚合查询 |
-| [`packages/goal/src/server/application/use-cases/queries/get-goal-progress-breakdown.use-case.ts`](../../../packages/goal/src/server/application/use-cases/queries/get-goal-progress-breakdown.use-case.ts) | 目标进度拆解查询 |
 | [`packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts`](../../../packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts) | Prisma 目标仓储 |
 | [`packages/goal/src/server/infrastructure/adapters/powersync/goal-powersync.repository.ts`](../../../packages/goal/src/server/infrastructure/adapters/powersync/goal-powersync.repository.ts) | PowerSync 目标仓储 |
 
@@ -112,13 +111,11 @@ updated: 2026-08-26T00:00:00
 | [`packages/goal/src/server/application/use-cases/commands/__tests__/add-goal-key-result.test.ts`](../../../packages/goal/src/server/application/use-cases/commands/__tests__/add-goal-key-result.test.ts) | 添加关键结果用例测试 |
 | [`packages/goal/src/server/application/use-cases/commands/__tests__/add-goal-review.test.ts`](../../../packages/goal/src/server/application/use-cases/commands/__tests__/add-goal-review.test.ts) | 添加复盘用例测试 |
 | [`packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-aggregate.test.ts`](../../../packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-aggregate.test.ts) | 目标聚合查询测试 |
-| [`packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-progress-breakdown.test.ts`](../../../packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-progress-breakdown.test.ts) | 目标进度拆解测试 |
 | [`packages/goal/src/api/routes/goal.routes.spec.ts`](../../../packages/goal/src/api/routes/goal.routes.spec.ts) | 目标 routes 测试 |
 | [`packages/app-vue/src/modules/goal/stores/goalStore.spec.ts`](../../../packages/app-vue/src/modules/goal/stores/goalStore.spec.ts) | 目标 store 测试 |
 | [`packages/app-vue/src/modules/goal/index.spec.ts`](../../../packages/app-vue/src/modules/goal/index.spec.ts) | 前端目标模块入口测试 |
 | [`apps/web/e2e/goal/goal-crud.spec.ts`](../../../apps/web/e2e/goal/goal-crud.spec.ts) | Web 目标 CRUD e2e |
 | [`apps/web/e2e/goal/goal-keyresult.spec.ts`](../../../apps/web/e2e/goal/goal-keyresult.spec.ts) | Web 关键结果 e2e |
-| [`apps/web/e2e/goal/goal-focus-mode.spec.ts`](../../../apps/web/e2e/goal/goal-focus-mode.spec.ts) | Web 专注模式 e2e |
 | [`apps/web/e2e/sync/goal-sync-regression.spec.ts`](../../../apps/web/e2e/sync/goal-sync-regression.spec.ts) | 目标同步回归 e2e |
 
 ## 需要重点关注的改动风险

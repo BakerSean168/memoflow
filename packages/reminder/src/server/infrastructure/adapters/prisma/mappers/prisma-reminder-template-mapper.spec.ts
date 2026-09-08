@@ -4,10 +4,9 @@
  * Covers:
  * - toDomain: Prisma row to domain aggregate with nested JSON parsing
  * - toPersistence: Aggregate to Prisma write data with JSON serialization
- * - Smart Frequency fields (responseMetrics, frequencyAdjustment)
  * - Optional history child entities
  * - Nested config objects (trigger, activeTime, notificationConfig, activeHours)
- * - Edge cases (null optional fields, missing smart frequency data)
+ * - Edge cases (null optional fields)
  */
 
 import { describe, it, expect } from 'vitest';
@@ -63,28 +62,12 @@ function createMinimalRow(): PrismaReminderTemplate {
     }),
     selfEnabled: true,
     status: ReminderStatus.Active,
-    reminderGroupId: null,
     importanceLevel: ImportanceLevel.Moderate,
     tags: JSON.stringify([]),
     color: null,
     icon: null,
     nextTriggerAt: null,
     
-    // Smart Frequency fields: not set
-    clickRate: null,
-    ignoreRate: null,
-    avgResponseTime: null,
-    snoozeCount: null,
-    effectivenessScore: null,
-    sampleSize: null,
-    lastAnalysisTime: null,
-    originalInterval: null,
-    adjustedInterval: null,
-    adjustmentReason: null,
-    adjustmentTime: null,
-    isAutoAdjusted: null,
-    userConfirmed: null,
-    smartFrequencyEnabled: true,
 
     version: 1,
     createdAt: now,
@@ -140,30 +123,12 @@ function createFullRow(): PrismaReminderTemplate {
     }),
     selfEnabled: true,
     status: ReminderStatus.Active,
-    reminderGroupId: 'group-2',
     importanceLevel: ImportanceLevel.High,
     tags: JSON.stringify(['urgent', 'work']),
     color: '#FF5733',
     icon: 'bell',
     nextTriggerAt: tomorrow,
     
-    // Smart Frequency: Response Metrics
-    clickRate: 0.75,
-    ignoreRate: 0.15,
-    avgResponseTime: 300,
-    snoozeCount: 5,
-    effectivenessScore: 0.85,
-    sampleSize: 20,
-    lastAnalysisTime: new Date(now.getTime() - 60 * 1000),
-    
-    // Smart Frequency: Frequency Adjustment
-    originalInterval: 86400000,
-    adjustedInterval: 64800000,
-    adjustmentReason: 'Low click rate detected',
-    adjustmentTime: new Date(now.getTime() - 30 * 1000),
-    isAutoAdjusted: true,
-    userConfirmed: true,
-    smartFrequencyEnabled: true,
 
     version: 3,
     createdAt: now,
@@ -208,7 +173,6 @@ describe('PrismaReminderTemplateMapper', () => {
       expect(domain.type).toBe(ReminderType.EventBased);
       expect(domain.selfEnabled).toBe(true);
       expect(domain.status).toBe(ReminderStatus.Active);
-      expect(domain.groupId).toBeNull();
       expect(domain.importanceLevel).toBe(ImportanceLevel.Moderate);
       expect(domain.tags).toEqual([]);
       expect(domain.color).toBeNull();
@@ -227,7 +191,6 @@ describe('PrismaReminderTemplateMapper', () => {
       expect(domain.type).toBe(ReminderType.TimeBased);
       expect(domain.selfEnabled).toBe(true);
       expect(domain.status).toBe(ReminderStatus.Active);
-      expect(domain.groupId).toBe('group-2');
       expect(domain.importanceLevel).toBe(ImportanceLevel.High);
       expect(domain.tags).toEqual(['urgent', 'work']);
       expect(domain.color).toBe('#FF5733');
@@ -278,41 +241,6 @@ describe('PrismaReminderTemplateMapper', () => {
       expect(domain.notificationConfig.channels).toContain('Push');
     });
 
-    it('reconstructs response metrics from flat fields', () => {
-      const row = createFullRow();
-      const domain = PrismaReminderTemplateMapper.toDomain(row);
-
-      expect(domain.responseMetrics).toBeDefined();
-      expect(domain.responseMetrics?.clickRate).toBe(0.75);
-      expect(domain.responseMetrics?.ignoreRate).toBe(0.15);
-      expect(domain.responseMetrics?.avgResponseTime).toBe(300);
-      expect(domain.responseMetrics?.snoozeCount).toBe(5);
-    });
-
-    it('handles missing response metrics as null', () => {
-      const row = createMinimalRow();
-      const domain = PrismaReminderTemplateMapper.toDomain(row);
-
-      expect(domain.responseMetrics).toBeNull();
-    });
-
-    it('reconstructs frequency adjustment from flat fields', () => {
-      const row = createFullRow();
-      const domain = PrismaReminderTemplateMapper.toDomain(row);
-
-      expect(domain.frequencyAdjustment).toBeDefined();
-      expect(domain.frequencyAdjustment?.originalInterval).toBe(86400000);
-      expect(domain.frequencyAdjustment?.adjustedInterval).toBe(64800000);
-      expect(domain.frequencyAdjustment?.adjustmentReason).toBe('Low click rate detected');
-      expect(domain.frequencyAdjustment?.isAutoAdjusted).toBe(true);
-    });
-
-    it('handles missing frequency adjustment as null', () => {
-      const row = createMinimalRow();
-      const domain = PrismaReminderTemplateMapper.toDomain(row);
-
-      expect(domain.frequencyAdjustment).toBeNull();
-    });
 
     it('preserves timestamps', () => {
       const row = createFullRow();
@@ -384,23 +312,13 @@ describe('PrismaReminderTemplateMapper', () => {
       expect(persistence.description).toBe('A reminder with full configuration');
       expect(persistence.type).toBe(ReminderType.TimeBased);
       expect(persistence.status).toBe(ReminderStatus.Active);
-      expect(persistence.reminderGroupId).toBe('group-2');
+      expect(persistence).not.toHaveProperty('reminderGroupId');
       expect(persistence.importanceLevel).toBe(ImportanceLevel.High);
       expect(JSON.parse(persistence.tags)).toEqual(['urgent', 'work']);
       expect(persistence.nextTriggerAt).toBeInstanceOf(Date);
       expect(persistence.activeHours).not.toBeNull();
       expect(persistence.stats).toBe('{}');
 
-      // Smart frequency fields should be materialized from value objects.
-      expect(persistence.clickRate).toBe(0.75);
-      expect(persistence.ignoreRate).toBe(0.15);
-      expect(persistence.originalInterval).toBe(86400000);
-      expect(persistence.adjustedInterval).toBe(64800000);
-      expect(persistence.adjustmentReason).toBe('Low click rate detected');
-      expect(persistence.lastAnalysisTime).toBeInstanceOf(Date);
-      expect(persistence.adjustmentTime).toBeInstanceOf(Date);
-      expect(persistence.isAutoAdjusted).toBe(true);
-      expect(persistence.userConfirmed).toBe(true);
     });
 
     it('maps minimal aggregate to Prisma write data with null-able fields', () => {
@@ -410,15 +328,6 @@ describe('PrismaReminderTemplateMapper', () => {
       expect(persistence.identityId).toBe(TEST_IDENTITY_1);
       expect(persistence.activeHours).toBeNull();
       expect(persistence.nextTriggerAt).toBeNull();
-      expect(persistence.clickRate).toBeNull();
-      expect(persistence.ignoreRate).toBeNull();
-      expect(persistence.originalInterval).toBeNull();
-      expect(persistence.adjustedInterval).toBeNull();
-      expect(persistence.adjustmentReason).toBeNull();
-      expect(persistence.lastAnalysisTime).toBeNull();
-      expect(persistence.adjustmentTime).toBeNull();
-      expect(persistence.isAutoAdjusted).toBe(false);
-      expect(persistence.userConfirmed).toBe(false);
       expect(persistence.deletedAt).toBeNull();
     });
 

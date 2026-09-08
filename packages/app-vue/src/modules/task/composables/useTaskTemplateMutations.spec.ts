@@ -17,7 +17,6 @@ function template(overrides: Partial<TaskTemplateClientDTO> = {}): TaskTemplateC
     recurrenceRule: null,
     reminderConfig: null,
     importance: 'Moderate',
-    folderId: null,
     tags: [],
     color: null,
     status: 'Active',
@@ -26,8 +25,6 @@ function template(overrides: Partial<TaskTemplateClientDTO> = {}): TaskTemplateC
     updatedAt: 1,
     deletedAt: null,
     goalBinding: null,
-    parentTaskId: null,
-    blockingReason: null,
     instanceCount: 0,
     completedInstanceCount: 0,
     pendingInstanceCount: 0,
@@ -42,7 +39,6 @@ function entity(dto: TaskTemplateClientDTO) {
 function makeService(overrides: Record<string, ReturnType<typeof vi.fn>> = {}) {
   return {
     listTemplates: vi.fn(),
-    getTaskGraph: vi.fn(),
     getTemplate: vi.fn(),
     createTemplate: vi.fn(),
     updateTemplate: vi.fn(),
@@ -55,7 +51,7 @@ function makeService(overrides: Record<string, ReturnType<typeof vi.fn>> = {}) {
 }
 
 describe('useTaskTemplateMutations (plan §3.4)', () => {
-  it('optimistic update patches all matching list/detail/graph entries and rolls back exactly on failure', async () => {
+  it('optimistic update patches matching list/detail entries and rolls back exactly on failure', async () => {
     const tpl = template();
     const service = makeService({
       updateTemplate: vi
@@ -66,27 +62,18 @@ describe('useTaskTemplateMutations (plan §3.4)', () => {
     const { api, runtime } = mountTaskComposable(() => useTaskTemplateMutations(), { service });
 
     const listKey = taskTemplateQueryKeys.list(SCOPE, { page: 1, limit: 20 });
-    const graphKey = taskTemplateQueryKeys.graph(SCOPE, { page: 1, limit: 1000 });
     const detailKey = taskTemplateQueryKeys.detail(SCOPE, tpl.id);
     runtime.queryClient.setQueryData(listKey, { templates: [tpl], total: 1 });
-    runtime.queryClient.setQueryData(graphKey, { templates: [tpl], dependencies: [], total: 1 });
     runtime.queryClient.setQueryData(detailKey, tpl);
 
     // Success: optimistic patch converges to the server-confirmed DTO everywhere.
     const okResult = await api.updateTemplateSafe(tpl.id, { name: 'Published' });
     expect(okResult).toBeTruthy();
-    const afterOk = runtime.queryClient.getQueryData(graphKey) as {
-      templates: TaskTemplateClientDTO[];
-    };
-    expect(afterOk.templates[0].name).toBe('Published');
+    expect(runtime.queryClient.getQueryData(detailKey)?.name).toBe('Published');
 
     // Failure: exact restore of every snapshot key (to the pre-mutation 'Published' state).
     await api.updateTemplateSafe(tpl.id, { name: 'Broken' });
     expect(runtime.queryClient.getQueryData(detailKey)?.name).toBe('Published');
-    const afterFail = runtime.queryClient.getQueryData(graphKey) as {
-      templates: TaskTemplateClientDTO[];
-    };
-    expect(afterFail.templates[0].name).toBe('Published');
     const afterFailList = runtime.queryClient.getQueryData(listKey) as {
       templates: TaskTemplateClientDTO[];
     };
@@ -159,7 +146,7 @@ describe('useTaskTemplateMutations (plan §3.4)', () => {
     expect(runtime.queryClient.getQueryData(detailKey)).toBeUndefined();
   });
 
-  it('create success keeps server-confirmed semantics (no fake id) and invalidates lists/graphs', async () => {
+  it('create success keeps server-confirmed semantics (no fake id) and invalidates task-template lists', async () => {
     const created = template({ id: 'template-new' as TaskTemplateClientDTO['id'] });
     const service = makeService({
       createTemplate: vi

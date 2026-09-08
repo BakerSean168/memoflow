@@ -30,4 +30,32 @@ describe('ReminderHttpAdapter', () => {
     expect(put).toHaveBeenCalledWith('/reminders/templates/template-1', request);
     expect(patch).not.toHaveBeenCalled();
   });
+
+  it('toggles reminder profiles through the canonical group toggle route', async () => {
+    const response = { id: 'group-1', name: 'Work' };
+    const post = vi.fn().mockResolvedValue(ok(response));
+    const httpClient = createHttpClientStub({ post });
+    const adapter = new ReminderHttpAdapter(httpClient);
+
+    await expect(adapter.toggleReminderGroupStatus('group-1')).resolves.toEqual(ok(response));
+
+    expect(post).toHaveBeenCalledWith('/reminders/groups/group-1/toggle', {});
+    expect(post).not.toHaveBeenCalledWith('/reminders/groups/group-1/toggle-status', {});
+  });
+
+  it('does not resurrect retired per-user list or toggle-status HTTP paths', async () => {
+    const get = vi.fn().mockResolvedValue(ok({ templates: [] }));
+    const post = vi.fn().mockResolvedValue(ok({ id: 'group-1' }));
+    const httpClient = createHttpClientStub({ get, post });
+    const adapter = new ReminderHttpAdapter(httpClient);
+
+    await adapter.getReminderTemplates();
+    await adapter.getReminderGroups();
+    await adapter.toggleReminderGroupStatus('group-1');
+
+    for (const call of [...get.mock.calls, ...post.mock.calls]) {
+      expect(String(call[0])).not.toContain('/mine');
+      expect(String(call[0])).not.toContain('/toggle-status');
+    }
+  });
 });

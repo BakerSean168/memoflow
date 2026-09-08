@@ -108,7 +108,7 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
     await cleanTaskTables();
   });
 
-  it('waived final occurrence closes the plan as Succeeded and enqueues one TaskPlan settlement', async () => {
+  it('Fixture A: waived final occurrence closes the 15-day plan as Succeeded and enqueues one TaskPlan settlement', async () => {
     const seed = await seedFifteenOccurrencePlan(TaskPlanCompletionPolicy.AllowCorrection);
     const prisma = await getPrisma();
 
@@ -138,7 +138,7 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
     seed.module.dispose();
   });
 
-  it('15/15 settles once, uncomplete reverts, and correction can settle the plan again', async () => {
+  it('Fixture A: 15/15 settles once, uncomplete reverts, and correction can settle the plan again', async () => {
     const seed = await seedFifteenOccurrencePlan(TaskPlanCompletionPolicy.AllowCorrection);
     const prisma = await getPrisma();
     const where = { taskTemplateId: String(seed.template.id) };
@@ -196,7 +196,7 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
     seed.module.dispose();
   });
 
-  it('strict final Missed closes the plan as Failed and never enqueues Goal settlement', async () => {
+  it('Fixture A: strict final Missed closes the 15-day plan as Failed and never enqueues Goal settlement', async () => {
     const seed = await seedFifteenOccurrencePlan(TaskPlanCompletionPolicy.StrictNoBackfill);
     const prisma = await getPrisma();
 

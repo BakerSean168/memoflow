@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UpdateReminderTemplateUseCase } from './update-reminder-template.use-case';
-import { ControlMode, ReminderStatus } from '@memoflow/contracts/reminder';
+import { ReminderStatus } from '@memoflow/contracts/reminder';
 
 describe('UpdateReminderTemplateUseCase', () => {
   const templateRepository = {
@@ -13,7 +13,8 @@ describe('UpdateReminderTemplateUseCase', () => {
   } as any;
   const reminderDomainService = {
     syncTemplateEffectiveEnabled: vi.fn(),
-    updateGroupStats: vi.fn(),
+    projectRoutineDefinition: vi.fn(),
+    replaceRoutineProfileMemberships: vi.fn(),
   } as any;
   const templateMapper = {
     toDTO: vi.fn(),
@@ -21,6 +22,10 @@ describe('UpdateReminderTemplateUseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    reminderDomainService.syncTemplateEffectiveEnabled.mockResolvedValue(undefined);
+    reminderDomainService.projectRoutineDefinition.mockResolvedValue(undefined);
+    reminderDomainService.replaceRoutineProfileMemberships.mockResolvedValue(undefined);
+    templateRepository.save.mockResolvedValue(undefined);
     templateMapper.toDTO.mockResolvedValue({ id: 'tpl-1', name: 'updated' });
   });
 
@@ -41,14 +46,17 @@ describe('UpdateReminderTemplateUseCase', () => {
     }
   });
 
-  it('returns NOT_FOUND when group id is provided but group not found', async () => {
-    templateRepository.findByIdForIdentity.mockResolvedValue({
+  it('returns NOT_FOUND when a requested Profile does not exist', async () => {
+    const template = {
+      id: 'tpl-1',
       identityId: 'identity-1',
+      status: ReminderStatus.Active,
       update: vi.fn(),
-      setEffectiveEnabled: vi.fn(),
-      toClientDTO: vi.fn().mockReturnValue({ id: 'tpl-1' }),
-    });
-    groupRepository.findByIdForIdentity.mockResolvedValue(null);
+    };
+    templateRepository.findByIdForIdentity.mockResolvedValue(template);
+    reminderDomainService.replaceRoutineProfileMemberships.mockRejectedValueOnce(
+      new Error('Routine Profile not found: missing-profile'),
+    );
     const useCase = new UpdateReminderTemplateUseCase(
       templateRepository,
       groupRepository,
@@ -56,29 +64,32 @@ describe('UpdateReminderTemplateUseCase', () => {
       templateMapper,
     );
 
-    const result = await useCase.execute('tpl-1', {
-      groupId: 'group-1',
-    } as any, { identityId: 'identity-1' });
+    const result = await useCase.execute(
+      'tpl-1',
+      { profileIds: ['missing-profile'] } as any,
+      { identityId: 'identity-1' },
+    );
 
+    expect(reminderDomainService.replaceRoutineProfileMemberships).toHaveBeenCalledWith(
+      template,
+      ['missing-profile'],
+    );
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.code).toBe('NOT_FOUND');
     }
   });
 
-  it('updates template without group reassignment', async () => {
+  it('updates template without replacing Profile memberships', async () => {
     const update = vi.fn();
-    const setEffectiveEnabled = vi.fn();
-
-    templateRepository.findByIdForIdentity.mockResolvedValue({
+    const template = {
       id: 'tpl-1',
       identityId: 'identity-1',
-      groupId: null,
       status: ReminderStatus.Active,
       update,
-      setEffectiveEnabled,
-    });
-    templateRepository.save.mockResolvedValue(undefined);
+    };
+
+    templateRepository.findByIdForIdentity.mockResolvedValue(template);
     const useCase = new UpdateReminderTemplateUseCase(
       templateRepository,
       groupRepository,
@@ -86,17 +97,21 @@ describe('UpdateReminderTemplateUseCase', () => {
       templateMapper,
     );
 
-    const result = await useCase.execute('tpl-1', {
-      title: 'updated',
-      activeTime: { activatedAt: new Date('2026-04-01T00:00:00.000Z').getTime() },
-      notificationConfig: {
-        channels: ['Push'],
-        title: null,
-        body: null,
-        sound: { enabled: true, soundName: null },
-        vibration: { enabled: true, pattern: null },
-      },
-    } as any, { identityId: 'identity-1' });
+    const result = await useCase.execute(
+      'tpl-1',
+      {
+        title: 'updated',
+        activeTime: { activatedAt: new Date('2026-04-01T00:00:00.000Z').getTime() },
+        notificationConfig: {
+          channels: ['Push'],
+          title: null,
+          body: null,
+          sound: { enabled: true, soundName: null },
+          vibration: { enabled: true, pattern: null },
+        },
+      } as any,
+      { identityId: 'identity-1' },
+    );
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -104,42 +119,27 @@ describe('UpdateReminderTemplateUseCase', () => {
         activeTime: {
           activatedAt: new Date('2026-04-01T00:00:00.000Z').getTime(),
         },
-        notificationConfig: expect.objectContaining({
-          actions: null,
-        }),
+        notificationConfig: expect.objectContaining({ actions: null }),
       }),
     );
-    expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledTimes(1);
-    expect(templateRepository.save).toHaveBeenCalledTimes(1);
+    expect(reminderDomainService.projectRoutineDefinition).toHaveBeenCalledWith(template);
+    expect(reminderDomainService.replaceRoutineProfileMemberships).not.toHaveBeenCalled();
+    expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledWith(template);
+    expect(templateRepository.save).toHaveBeenCalledWith(template);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.data).toEqual({ id: 'tpl-1', name: 'updated' });
     }
   });
 
-  it('recalculates effective enabled when group reassigned', async () => {
-    const setEffectiveEnabled = vi.fn();
+  it('recalculates effective enabled after replacing the complete Profile membership set', async () => {
     const template = {
       id: 'tpl-1',
       identityId: 'identity-1',
-      groupId: null as string | null,
       status: ReminderStatus.Active,
-      setEffectiveEnabled,
-      update: vi.fn((patch: { groupId?: string | null }) => {
-        if (patch.groupId !== undefined) {
-          template.groupId = patch.groupId;
-        }
-      }),
+      update: vi.fn(),
     };
-
     templateRepository.findByIdForIdentity.mockResolvedValue(template);
-
-    groupRepository.findByIdForIdentity.mockResolvedValue({
-      id: 'group-1',
-      identityId: 'identity-1',
-      controlMode: ControlMode.Individual,
-      status: ReminderStatus.Active,
-    });
 
     const useCase = new UpdateReminderTemplateUseCase(
       templateRepository,
@@ -147,15 +147,18 @@ describe('UpdateReminderTemplateUseCase', () => {
       reminderDomainService,
       templateMapper,
     );
-    await useCase.execute('tpl-1', { groupId: 'group-1' } as any, { identityId: 'identity-1' });
-
-    expect(groupRepository.findByIdForIdentity).toHaveBeenCalledWith('identity-1', 'group-1');
-    expect(template.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        groupId: 'group-1',
-      }),
+    const result = await useCase.execute(
+      'tpl-1',
+      { profileIds: ['work', 'gaming'] } as any,
+      { identityId: 'identity-1' },
     );
-    expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledTimes(1);
-    expect(reminderDomainService.updateGroupStats).toHaveBeenCalledWith(expect.any(String), 'group-1');
+
+    expect(reminderDomainService.replaceRoutineProfileMemberships).toHaveBeenCalledWith(
+      template,
+      ['work', 'gaming'],
+    );
+    expect(reminderDomainService.syncTemplateEffectiveEnabled).toHaveBeenCalledWith(template);
+    expect(templateRepository.save).toHaveBeenCalledWith(template);
+    expect(result.ok).toBe(true);
   });
 });

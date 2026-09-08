@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 
 import type { ScheduleTaskStatus, SourceModule, TaskPriority } from '@memoflow/contracts/schedule';
-import type { ScheduleTask } from '@memoflow/schedule/client';
+import type { ScheduleTask } from '@memoflow/scheduler/client';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
-import { useScheduleService } from './useScheduleService';
+import { useSchedulerService } from './useSchedulerService';
 
 export type ScheduleTaskSummary = {
   id: string;
@@ -48,7 +48,7 @@ function mapScheduleTask(task: ScheduleTask): ScheduleTaskSummary {
 }
 
 export function useScheduleTasks() {
-  const service = useScheduleService();
+  const service = useSchedulerService();
   const { isRemoteAuthenticated } = useAppSession();
 
   const [tasks, setTasks] = useState<ScheduleTaskSummary[]>([]);

@@ -158,27 +158,12 @@ export class ReminderTemplatePrismaRepository
     return data.map((d: PrismaReminderTemplateWithHistory) => this.mapToEntity(d, d.history));
   }
 
-  async findByGroupId(
-    groupId: string | null,
-    identityId: string,
-    options?: { includeHistory?: boolean; historyLimit?: number; includeDeleted?: boolean },
-  ): Promise<ReminderTemplate[]> {
-    const where: Prisma.ReminderTemplateWhereInput = {
-      reminderGroupId: groupId,
-      identityId,
-    };
-    if (!options?.includeDeleted) {
-      where.deletedAt = null;
-    }
-
-    const data = await this.prisma.reminderTemplate.findMany({
-      where,
-      include: options?.includeHistory
-        ? { history: { orderBy: { triggeredAt: 'desc' }, take: options.historyLimit } }
-        : undefined,
+  async findAllTemplateRefs(): Promise<Array<{ id: string; identityId: string }>> {
+    return this.prisma.reminderTemplate.findMany({
+      where: { deletedAt: null },
+      select: { id: true, identityId: true },
       orderBy: { createdAt: 'asc' },
     });
-    return data.map((d: PrismaReminderTemplateWithHistory) => this.mapToEntity(d, d.history));
   }
 
   async findActive(

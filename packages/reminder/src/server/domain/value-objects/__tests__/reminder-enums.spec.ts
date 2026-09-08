@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { ControlMode } from '../control-mode';
 import { NotificationAction } from '../notification-action';
 import { NotificationChannel } from '../notification-channel';
 import { ReminderStatus } from '../reminder-status';
@@ -8,14 +7,6 @@ import { TriggerResult } from '../trigger-result';
 import { TriggerType } from '../trigger-type';
 
 describe('reminder branded enum helpers', () => {
-  it('covers control mode helpers', () => {
-    expect(ControlMode.of('Group')).toBe(ControlMode.Group);
-    expect(ControlMode.isGroup(ControlMode.Group)).toBe(true);
-    expect(ControlMode.isIndividual(ControlMode.Individual)).toBe(true);
-    expect(ControlMode.getAll()).toEqual(['Group', 'Individual']);
-    expect(() => ControlMode.of('invalid')).toThrow('Invalid ControlMode: invalid');
-  });
-
   it('covers notification action helpers', () => {
     expect(NotificationAction.of('Dismiss')).toBe(NotificationAction.Dismiss);
     expect(NotificationAction.isDismiss(NotificationAction.Dismiss)).toBe(true);

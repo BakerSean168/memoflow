@@ -103,14 +103,14 @@ describe('schedule event ownership surface', () => {
     expect(routes).toContain('controller.getConflicts(req.params!.id, ctx)');
     expect(routes).toContain('controller.resolveConflict(req.params!.id, req.body, ctx)');
     expect(electron).toMatch(
-      /ScheduleChannels\.GET[\s\S]*eventController\.get\(id, requestContext\)/,
+      /ScheduleChannels\.GET[\s\S]*controller\.get\(id, requestContext\)/,
     );
     expect(electron).toMatch(
-      /ScheduleChannels\.UPDATE[\s\S]*eventController\.update\(id, dto, requestContext\)/,
+      /ScheduleChannels\.UPDATE[\s\S]*controller\.update\(id, dto, requestContext\)/,
     );
     expect(electron).toMatch(
-      /ScheduleChannels\.DELETE[\s\S]*eventController\.delete\(id, payload, requestContext\)/,
+      /ScheduleChannels\.DELETE[\s\S]*controller\.delete\(id, payload, requestContext\)/,
     );
-    expect(electron).not.toContain('ipcMain.handle(ScheduleChannels.GET, (_event, id) => eventController.get(id));');
+    expect(electron).not.toContain('ipcMain.handle(ScheduleChannels.GET, (_event, id) => controller.get(id));');
   });
 });

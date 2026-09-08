@@ -6,6 +6,7 @@
 import type { IReminderTemplateRepository } from '../domain/repositories/i-reminder-template-repository';
 import type { IReminderGroupRepository } from '../domain/repositories/i-reminder-group-repository';
 import type { IReminderResponseRepository } from '../domain/repositories/i-reminder-response-repository';
+import type { RoutineProfileStore } from '../domain/ports/routine-profile-store.port';
 import type { IUserReminderPreferenceRepository } from '../domain/repositories/i-user-reminder-preference-repository';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { fail, ok } from '@memoflow/contracts/result';
@@ -15,7 +16,10 @@ import type {
   ReminderReliableOperationPort,
   ReminderReplayDeadLetterInput,
 } from '@memoflow/contracts/reliable-messaging';
-import type { OperationAuditRecordInput, OperationAuditRepository } from '@memoflow/patterns/operations';
+import type {
+  OperationAuditRecordInput,
+  OperationAuditRepository,
+} from '@memoflow/patterns/operations';
 import { runTimelineQueryWithAudit } from '@memoflow/patterns/operations';
 import type { ReminderTemplate } from '../domain/aggregates/reminder-template';
 import { ReminderDomainService } from '../domain/services/reminder-domain-service';
@@ -40,19 +44,19 @@ import { createLogger } from '@memoflow/utils/logger';
 const logger = createLogger('ReminderModule');
 
 export type ReminderRuntimeContributionsInput =
-  | ReminderModuleRuntimeContribution
-  | readonly ReminderModuleRuntimeContribution[];
+  ReminderModuleRuntimeContribution | readonly ReminderModuleRuntimeContribution[];
 
 export interface ReminderModuleDependencies {
   readonly reminderTemplateRepository: IReminderTemplateRepository;
   readonly reminderGroupRepository: IReminderGroupRepository;
   readonly reminderResponseRepository: IReminderResponseRepository;
   readonly userReminderPreferenceRepository: IUserReminderPreferenceRepository;
+  readonly routineProfileStore: RoutineProfileStore;
   readonly closureChecker: (identityId: string) => Promise<boolean>;
   readonly accountTimezonePort?: import('../domain/ports/account-timezone.port').AccountTimezonePort;
   readonly runtimeContributions?: ReminderRuntimeContributionsInput;
-  /** R3c：snooze 副作用（可选）——推迟提醒的下次触发。 */
-  readonly snoozeRescheduler?: import('../application/use-cases/commands/record-reminder-response.use-case').ReminderSnoozeRescheduler;
+  /** Snooze command writer: persists canonical Routine temporary override state. */
+  readonly snoozeOverrideWriter?: import('../application/use-cases/commands/record-reminder-response.use-case').ReminderSnoozeOverrideWriter;
   /** W7：可靠操作端口（timeline/replay 查询） */
   readonly reliablePort?: ReminderReliableOperationPort;
   /** W7：审计仓库（最小权限 + 审计） */
@@ -70,6 +74,7 @@ export interface ReminderModuleInstance {
   readonly reminderGroupRepository: IReminderGroupRepository;
   readonly reminderResponseRepository: IReminderResponseRepository;
   readonly userReminderPreferenceRepository: IUserReminderPreferenceRepository;
+  readonly routineProfileStore: RoutineProfileStore;
   readonly useCases: ReminderModuleUseCases;
   readonly api: ReminderApplicationPort;
   start(): void | Promise<void>;
@@ -97,8 +102,12 @@ export function createReminderUseCases(
   if (!dependencies.closureChecker) {
     throw new Error('[FAIL-CLOSED] ReminderModule requires closureChecker dependency');
   }
+  if (!dependencies.routineProfileStore) {
+    throw new Error('[FAIL-CLOSED] ReminderModule requires routineProfileStore dependency');
+  }
 
-  const { reminderTemplateRepository, reminderGroupRepository, reminderResponseRepository } = dependencies;
+  const { reminderTemplateRepository, reminderGroupRepository, reminderResponseRepository } =
+    dependencies;
 
   const reminderDomainService =
     options?.reminderDomainService ??
@@ -106,10 +115,10 @@ export function createReminderUseCases(
       reminderTemplateRepository,
       reminderGroupRepository,
       dependencies.userReminderPreferenceRepository,
+      dependencies.routineProfileStore,
     );
   const templateMapper =
-    options?.templateMapper ??
-    new ReminderTemplateClientMapper(reminderDomainService, reminderGroupRepository);
+    options?.templateMapper ?? new ReminderTemplateClientMapper(reminderDomainService);
 
   return {
     createReminderTemplate: new CreateReminderTemplateUseCase(
@@ -141,7 +150,7 @@ export function createReminderUseCases(
     ),
     recordReminderResponse: new RecordReminderResponseUseCase(
       reminderResponseRepository,
-      dependencies.snoozeRescheduler,
+      dependencies.snoozeOverrideWriter,
     ),
     analyzeReminderFrequency: new AnalyzeReminderFrequencyUseCase(
       reminderTemplateRepository,
@@ -176,6 +185,7 @@ export function createReminderModule(
     reminderGroupRepository,
     reminderResponseRepository,
     userReminderPreferenceRepository,
+    routineProfileStore,
   } = dependencies;
 
   const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
@@ -185,18 +195,16 @@ export function createReminderModule(
     reminderTemplateRepository,
     reminderGroupRepository,
     userReminderPreferenceRepository,
+    routineProfileStore,
   );
-  const templateMapper = new ReminderTemplateClientMapper(
-    reminderDomainService,
-    reminderGroupRepository,
-  );
+  const templateMapper = new ReminderTemplateClientMapper(reminderDomainService);
   const useCases = createReminderUseCases(dependencies, {
     reminderDomainService,
     templateMapper,
   });
   const reminderGroupApplicationService = new ReminderGroupApplicationService({
-    reminderGroupRepository,
     reminderTemplateRepository,
+    reminderGroupRepository,
     reminderDomainService,
   });
   const reminderPreferencesApplicationService = new ReminderPreferencesApplicationService({
@@ -209,7 +217,6 @@ export function createReminderModule(
   });
   const reminderTemplateActionApplicationService = new ReminderTemplateActionApplicationService({
     reminderTemplateRepository,
-    reminderGroupRepository,
     reminderDomainService,
     templateMapper,
   });
@@ -243,20 +250,12 @@ export function createReminderModule(
       return useCases.deleteReminderTemplate.execute(id, ctx);
     },
 
-    async enableTemplate(id, ctx) {
-      return reminderTemplateActionApplicationService.enableTemplate(id, ctx);
-    },
-
-    async pauseTemplate(id, ctx) {
-      return reminderTemplateActionApplicationService.pauseTemplate(id, ctx);
-    },
-
     async toggleTemplate(id, ctx) {
       return reminderTemplateActionApplicationService.toggleTemplate(id, ctx);
     },
 
-    async moveTemplate(id, groupId, ctx) {
-      return reminderTemplateActionApplicationService.moveTemplate(id, groupId, ctx);
+    async replaceTemplateProfiles(id, profileIds, ctx) {
+      return reminderTemplateActionApplicationService.replaceTemplateProfiles(id, profileIds, ctx);
     },
 
     async getTemplateHistory(id, ctx) {
@@ -267,6 +266,8 @@ export function createReminderModule(
       return useCases.recordReminderResponse.execute({
         templateId,
         action: data.action as ReminderResponseAction,
+        responseTime: data.responseTime,
+        snoozeDurationSeconds: data.snoozeDurationSeconds,
         identityId: ctx.identityId,
       });
     },
@@ -276,10 +277,7 @@ export function createReminderModule(
       if (!template) {
         return fail({ code: 'NOT_FOUND', message: 'Template not found' });
       }
-      return useCases.recordReminderResponse.getResponsesByTemplate(
-        templateId,
-        ctx.identityId,
-      );
+      return useCases.recordReminderResponse.getResponsesByTemplate(templateId, ctx.identityId);
     },
 
     async getResponseStats(templateId, ctx) {
@@ -307,10 +305,6 @@ export function createReminderModule(
       });
     },
 
-    async rejectFrequencyAdjustment(templateId, ctx) {
-      return useCases.adjustReminderFrequency.reject(templateId, ctx.identityId);
-    },
-
     async createGroup(data, ctx) {
       return reminderGroupApplicationService.createGroup(data, ctx);
     },
@@ -329,14 +323,6 @@ export function createReminderModule(
 
     async deleteGroup(id, ctx) {
       return reminderGroupApplicationService.deleteGroup(id, ctx);
-    },
-
-    async switchGroupControlMode(id, data, ctx) {
-      return reminderGroupApplicationService.switchGroupControlMode(id, data, ctx);
-    },
-
-    async batchGroupTemplates(groupId, data, ctx) {
-      return reminderGroupApplicationService.batchGroupTemplates(groupId, data, ctx);
     },
 
     async toggleGroup(id, ctx) {
@@ -420,6 +406,7 @@ export function createReminderModule(
     reminderGroupRepository,
     reminderResponseRepository,
     userReminderPreferenceRepository,
+    routineProfileStore,
     useCases,
     api,
 

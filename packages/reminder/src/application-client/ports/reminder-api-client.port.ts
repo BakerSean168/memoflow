@@ -21,7 +21,6 @@ import type {
   GetUpcomingRemindersRes,
   GetReminderTodayScheduleRes,
 } from '@memoflow/contracts/reminder';
-import type { ControlMode } from '@memoflow/contracts/reminder';
 
 /**
  * IReminderApiClient
@@ -39,16 +38,15 @@ export interface IReminderApiClient {
   ): Promise<Result<ReminderTemplateClientDTO>>;
   getReminderTemplate(id: string): Promise<Result<ReminderTemplateClientDTO>>;
   getReminderTemplates(): Promise<Result<ReminderTemplateListRes>>;
-  getUserTemplates(): Promise<Result<ReminderTemplateClientDTO[]>>;
   updateReminderTemplate(
     id: string,
     request: UpdateReminderTemplateReq,
   ): Promise<Result<ReminderTemplateClientDTO>>;
   deleteReminderTemplate(id: string): Promise<Result<void>>;
   toggleTemplateEnabled(id: string): Promise<Result<ReminderTemplateClientDTO>>;
-  moveTemplateToGroup(
+  replaceTemplateProfiles(
     templateId: string,
-    targetGroupId: string | null,
+    profileIds: readonly string[],
   ): Promise<Result<ReminderTemplateClientDTO>>;
   getUpcomingReminders(params?: {
     days?: number;
@@ -67,17 +65,12 @@ export interface IReminderApiClient {
   createReminderGroup(request: CreateReminderGroupReq): Promise<Result<ReminderGroupClientDTO>>;
   getReminderGroup(id: string): Promise<Result<ReminderGroupClientDTO>>;
   getReminderGroups(): Promise<Result<ReminderGroupListRes>>;
-  getUserReminderGroups(): Promise<Result<ReminderGroupClientDTO[]>>;
   updateReminderGroup(
     id: string,
     request: UpdateReminderGroupReq,
   ): Promise<Result<ReminderGroupClientDTO>>;
   deleteReminderGroup(id: string): Promise<Result<void>>;
   toggleReminderGroupStatus(id: string): Promise<Result<ReminderGroupClientDTO>>;
-  switchReminderGroupControlMode(
-    id: string,
-    mode: ControlMode,
-  ): Promise<Result<ReminderGroupClientDTO>>;
   getPreferences(): Promise<Result<UserReminderPreferencesClientDTO>>;
   updatePreferences(
     data: Record<string, unknown>,

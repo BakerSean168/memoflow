@@ -13,67 +13,63 @@
 
       <div class="min-h-0 flex-1 overflow-y-auto px-6 pb-4">
         <div class="space-y-4 py-2">
-          <!-- Current Template Info -->
           <Alert v-if="template">
             <Info class="h-4 w-4" />
             <AlertTitle>{{ t('reminder.templateMove.currentTemplate') }}</AlertTitle>
             <AlertDescription>
-              <div class="flex items-center gap-2 mt-1">
+              <div class="mt-1 flex items-center gap-2">
                 <Bell class="h-4 w-4" />
                 <span class="font-medium">{{ template.name }}</span>
               </div>
-              <div v-if="template.groupId" class="flex items-center gap-2 mt-1 text-xs">
+              <div class="mt-1 flex items-center gap-2 text-xs">
                 <Folder class="h-3 w-3" />
-                <span
-                  >{{ t('reminder.templateMove.currentGroup') }} {{ getCurrentGroupName() }}</span
-                >
+                <span>{{ t('reminder.templateMove.currentGroup') }} {{ currentProfileNames }}</span>
               </div>
             </AlertDescription>
           </Alert>
 
-          <!-- Target Group Selection -->
           <div class="space-y-2">
             <Label>{{ t('reminder.templateMove.targetGroup') }}</Label>
-            <Select v-model="selectedGroupId" :disabled="moveToRoot">
-              <SelectTrigger>
-                <SelectValue :placeholder="t('reminder.templateMove.selectTargetGroup')" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="group in groupOptions"
-                  :key="group.id"
-                  :value="group.id"
-                  :disabled="group.id === template?.groupId"
-                >
+            <div v-if="groupOptions.length > 0" class="space-y-2 rounded-md border p-2">
+              <label
+                v-for="profile in groupOptions"
+                :key="profile.id"
+                class="flex cursor-pointer items-start gap-3 rounded-md p-2 hover:bg-muted/50"
+              >
+                <Checkbox
+                  :aria-label="profile.name"
+                  :model-value="selectedProfileIds.includes(profile.id)"
+                  @update:model-value="toggleProfile(profile.id, $event)"
+                />
+                <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-2">
-                    <component :is="getGroupIcon(group.icon)" class="h-4 w-4" />
-                    <span>{{ group.name }}</span>
-                    <Badge v-if="group.id === template?.groupId" variant="outline" class="ml-auto"
-                      >> {{ t('reminder.templateMove.current') }}
+                    <component :is="getGroupIcon(profile.icon)" class="h-4 w-4 shrink-0" />
+                    <span class="truncate font-medium">{{ profile.name }}</span>
+                    <Badge
+                      v-if="currentProfileIds.includes(profile.id)"
+                      variant="outline"
+                      class="ml-auto"
+                    >
+                      {{ t('reminder.templateMove.current') }}
                     </Badge>
                   </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+                  <div class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{{ getGroupStatus(profile.id) }}</span>
+                    <span>·</span>
+                    <span>{{ getGroupTemplateCount(profile.id) }} Routine</span>
+                  </div>
+                  <p class="mt-1 text-xs text-muted-foreground">
+                    {{ getProfilePolicyText(profile.id) }}
+                  </p>
+                </div>
+              </label>
+            </div>
+            <p v-else class="text-sm text-muted-foreground">
+              {{ t('reminder.templateMove.none') }}
+            </p>
           </div>
 
-          <!-- Move to Root Option -->
-          <div class="flex items-center space-x-2">
-            <Checkbox
-              id="move-to-root"
-              v-model="moveToRoot"
-              @update:model-value="handleMoveToRootChange"
-            />
-            <Label
-              for="move-to-root"
-              class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-            >
-              {{ t('reminder.templateMove.removeFromAllGroups') }}
-            </Label>
-          </div>
-
-          <!-- Warning Alert -->
-          <Alert v-if="moveToRoot">
+          <Alert v-if="selectedProfileIds.length === 0">
             <AlertCircle class="h-4 w-4" />
             <AlertTitle>{{ t('reminder.templateMove.warning') }}</AlertTitle>
             <AlertDescription>
@@ -81,55 +77,20 @@
             </AlertDescription>
           </Alert>
 
-          <!-- Target Group Info -->
-          <Card v-if="selectedGroupId && !moveToRoot" class="p-4">
-            <h4 class="text-sm font-semibold mb-2">
-              {{ t('reminder.templateMove.targetGroupInfo') }}
-            </h4>
-            <div class="space-y-2 text-sm">
-              <div class="flex items-center gap-2">
-                <Info class="h-4 w-4 text-muted-foreground" />
-                <span
-                  >{{ t('reminder.templateMove.name') }} {{ getGroupName(selectedGroupId) }}</span
-                >
-              </div>
-              <div class="flex items-center gap-2">
-                <Hash class="h-4 w-4 text-muted-foreground" />
-                <span
-                  >{{ t('reminder.templateMove.templates') }}
-                  {{ getGroupTemplateCount(selectedGroupId) }}</span
-                >
-              </div>
-              <div class="flex items-center gap-2">
-                <CheckCircle2 class="h-4 w-4 text-muted-foreground" />
-                <span
-                  >{{ t('reminder.templateMove.status') }}
-                  {{ getGroupStatus(selectedGroupId) }}</span
-                >
-              </div>
-              <div class="flex items-start gap-2">
-                <ShieldCheck class="mt-0.5 h-4 w-4 text-muted-foreground" />
-                <span>{{ getProfilePolicyText(selectedGroupId) }}</span>
-              </div>
-            </div>
-          </Card>
-
-          <Alert v-if="previewText">
+          <Alert>
             <Info class="h-4 w-4" />
             <AlertTitle>{{ t('reminder.templateMove.previewTitle') }}</AlertTitle>
-            <AlertDescription>
-              {{ previewText }}
-            </AlertDescription>
+            <AlertDescription>{{ previewText }}</AlertDescription>
           </Alert>
         </div>
       </div>
 
       <DialogFooter class="shrink-0 flex-row justify-end gap-2 border-t p-6 pt-4">
-        <Button variant="ghost" @click="close" :disabled="isMoving">
+        <Button variant="ghost" :disabled="isMoving" @click="close">
           {{ t('reminder.templateMove.cancel') }}
         </Button>
-        <Button variant="default" @click="handleMove" :disabled="!canMove || isMoving">
-          <Loader2 v-if="isMoving" class="h-4 w-4 mr-2 animate-spin" />
+        <Button variant="default" :disabled="!canMove || isMoving" @click="handleMove">
+          <Loader2 v-if="isMoving" class="mr-2 h-4 w-4 animate-spin" />
           {{ t('reminder.templateMove.move') }}
         </Button>
       </DialogFooter>
@@ -138,49 +99,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type {
   ReminderGroupClientDTO,
   ReminderTemplateClientDTO,
 } from '@memoflow/contracts/reminder';
+import { AlertCircle, Bell, Folder, FolderInput, FolderOpen, Info, Loader2 } from '@lucide/vue';
 import {
-  FolderInput,
-  Info,
-  Bell,
-  Folder,
-  AlertCircle,
-  Hash,
-  CheckCircle2,
-  Loader2,
-  FolderOpen,
-  ShieldCheck,
-} from '@lucide/vue';
-import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Badge,
+  Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Label,
 } from '@memoflow/ui-vue-shadcn';
 import {
   getProfilePolicyText as getProfilePolicySummary,
   isProfileGateOpen,
 } from '../presentation/lifecycle-presentation';
-import { Button } from '@memoflow/ui-vue-shadcn';
-import { Label } from '@memoflow/ui-vue-shadcn';
-import { Badge } from '@memoflow/ui-vue-shadcn';
-import { Card } from '@memoflow/ui-vue-shadcn';
-import { Checkbox } from '@memoflow/ui-vue-shadcn';
-import { Alert, AlertDescription, AlertTitle } from '@memoflow/ui-vue-shadcn';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@memoflow/ui-vue-shadcn';
 
 const { t } = useI18n();
 
@@ -189,7 +133,7 @@ const props = withDefaults(
     template?: ReminderTemplateClientDTO | null;
     groups?: ReminderGroupClientDTO[];
     templates?: ReminderTemplateClientDTO[];
-    onMove?: (templateId: string, groupId: string | null) => Promise<boolean>;
+    onMove?: (templateId: string, profileIds: readonly string[]) => Promise<boolean>;
   }>(),
   {
     template: null,
@@ -198,140 +142,121 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits<{
-  closed: [];
-}>();
-
+const emit = defineEmits<{ closed: [] }>();
 const visible = ref(false);
-const selectedGroupId = ref<string | undefined>(undefined);
-const moveToRoot = ref(false);
+const selectedProfileIds = ref<string[]>([]);
 const isMoving = ref(false);
 
-const groupOptions = computed(() => {
-  return props.groups.map((group) => ({
+const currentProfileIds = computed(
+  () => props.template?.profileMemberships.map((membership) => String(membership.profileId)) ?? [],
+);
+
+const currentProfileNames = computed(() => {
+  if (!props.template || props.template.profileMemberships.length === 0) {
+    return t('reminder.templateMove.none');
+  }
+  return props.template.profileMemberships
+    .map((membership) => membership.profileName ?? String(membership.profileId))
+    .join(', ');
+});
+
+const groupOptions = computed(() =>
+  props.groups.map((group) => ({
     id: group.id,
     name: group.name,
     icon: group.icon || 'mdi-folder',
-    enabled: group.enabled,
-  }));
-});
+  })),
+);
 
 const canMove = computed(() => {
   if (!props.template) return false;
-  if (moveToRoot.value) return true;
-  if (!selectedGroupId.value) return false;
-  return selectedGroupId.value !== props.template.groupId;
+  return normalizeIds(selectedProfileIds.value) !== normalizeIds(currentProfileIds.value);
 });
 
-const getCurrentGroupName = (): string => {
-  if (!props.template?.groupId) return t('reminder.templateMove.none');
-  const group = props.groups.find((g) => g.id === props.template!.groupId);
-  return group?.name || t('reminder.templateMove.unknownGroup');
-};
-
-const getGroupName = (groupId: string): string => {
-  const group = props.groups.find((g) => g.id === groupId);
-  return group?.name || t('reminder.templateMove.unknown');
-};
-
-const getGroupStatus = (groupId: string): string => {
-  const profile = props.groups.find((group) => group.id === groupId);
-  return profile && isProfileGateOpen(profile)
-    ? t('reminder.templateMove.enabled')
-    : t('reminder.templateMove.disabled');
-};
-
-const getGroupTemplateCount = (groupId: string): number => {
-  return props.templates.filter((t) => t.groupId === groupId).length;
-};
-
-const getProfilePolicyText = (groupId: string): string => {
-  const profile = props.groups.find((group) => group.id === groupId);
-  return profile
-    ? getProfilePolicySummary(t, profile)
-    : t('reminder.templateMove.defaultPolicyText');
-};
-
-const getGroupIcon = (icon?: string) => {
-  return icon === 'mdi-folder-open' ? FolderOpen : Folder;
-};
-
 const previewText = computed(() => {
-  if (!props.template) return '';
-  if (moveToRoot.value) {
-    return t('reminder.templateMove.previewRoot');
-  }
-  if (!selectedGroupId.value) return '';
-
-  const profile = props.groups.find((item) => item.id === selectedGroupId.value);
-  if (!profile) return '';
-
-  return isProfileGateOpen(profile)
+  if (selectedProfileIds.value.length === 0) return t('reminder.templateMove.previewRoot');
+  const selectedProfiles = props.groups.filter((group) =>
+    selectedProfileIds.value.includes(group.id),
+  );
+  return selectedProfiles.some(isProfileGateOpen)
     ? t('reminder.templateMove.previewProfileEnabled')
     : t('reminder.templateMove.previewProfilePaused');
 });
 
-const handleMoveToRootChange = (value: boolean | 'indeterminate') => {
-  if (value === true) {
-    selectedGroupId.value = undefined;
-  }
-};
+function normalizeIds(ids: readonly string[]): string {
+  return [...ids].sort().join('\u0000');
+}
 
-const open = () => {
+function toggleProfile(profileId: string, value: boolean | 'indeterminate') {
+  const selected = new Set(selectedProfileIds.value);
+  if (value === true) selected.add(profileId);
+  else selected.delete(profileId);
+  selectedProfileIds.value = [...selected];
+}
+
+function getGroupStatus(profileId: string): string {
+  const profile = props.groups.find((group) => group.id === profileId);
+  return profile && isProfileGateOpen(profile)
+    ? t('reminder.templateMove.enabled')
+    : t('reminder.templateMove.disabled');
+}
+
+function getGroupTemplateCount(profileId: string): number {
+  return props.templates.filter((template) =>
+    template.profileMemberships.some((membership) => membership.profileId === profileId),
+  ).length;
+}
+
+function getProfilePolicyText(profileId: string): string {
+  const profile = props.groups.find((group) => group.id === profileId);
+  return profile
+    ? getProfilePolicySummary(t, profile)
+    : t('reminder.templateMove.defaultPolicyText');
+}
+
+function getGroupIcon(icon?: string) {
+  return icon === 'mdi-folder-open' ? FolderOpen : Folder;
+}
+
+function resetForm() {
+  selectedProfileIds.value = [...currentProfileIds.value];
+}
+
+function open() {
   resetForm();
   visible.value = true;
-};
+}
 
-const close = () => {
+function close() {
   visible.value = false;
   emit('closed');
   setTimeout(resetForm, 300);
-};
+}
 
-const handleVisibleChange = (value: boolean) => {
+function handleVisibleChange(value: boolean) {
   visible.value = value;
   if (!value) {
     emit('closed');
     setTimeout(resetForm, 300);
   }
-};
+}
 
-const resetForm = () => {
-  selectedGroupId.value = props.template?.groupId || undefined;
-  moveToRoot.value = false;
-};
-
-const handleMove = async () => {
+async function handleMove() {
   if (!props.template || !canMove.value) return;
-
   isMoving.value = true;
   try {
-    const targetGroupId = moveToRoot.value ? null : (selectedGroupId.value ?? null);
-    const moved = await props.onMove?.(props.template.id, targetGroupId);
+    const moved = await props.onMove?.(props.template.id, [...selectedProfileIds.value]);
     if (moved) close();
   } finally {
     isMoving.value = false;
   }
-};
+}
 
 watch(
   () => props.template,
-  (newTemplate) => {
-    if (newTemplate) {
-      selectedGroupId.value = newTemplate.groupId || undefined;
-    }
-  },
+  () => resetForm(),
   { immediate: true },
 );
 
-watch(selectedGroupId, (newVal) => {
-  if (newVal) {
-    moveToRoot.value = false;
-  }
-});
-
-defineExpose({
-  open,
-  close,
-});
+defineExpose({ open, close });
 </script>

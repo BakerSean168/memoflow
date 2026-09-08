@@ -26,8 +26,6 @@ import {
   ActiveTimeConfig,
   NotificationConfig,
   ActiveHoursConfig,
-  ResponseMetrics,
-  FrequencyAdjustment,
 } from '../../../../domain/value-objects';
 
 /**
@@ -53,39 +51,6 @@ export class PrismaReminderTemplateMapper {
       : null;
     const tags: string[] = JSON.parse(data.tags);
 
-    // Smart Frequency: Reconstruct ResponseMetrics from flat fields
-    const responseMetrics =
-      data.clickRate !== null &&
-      data.clickRate !== undefined &&
-      data.ignoreRate !== null &&
-      data.ignoreRate !== undefined
-        ? ResponseMetrics.fromDTO({
-            clickRate: data.clickRate,
-            ignoreRate: data.ignoreRate,
-            avgResponseTime: data.avgResponseTime ?? 0,
-            snoozeCount: data.snoozeCount ?? 0,
-            effectivenessScore: data.effectivenessScore ?? 0,
-            sampleSize: data.sampleSize ?? 0,
-            lastAnalysisTime: data.lastAnalysisTime?.getTime() ?? Date.now(),
-          })
-        : null;
-
-    // Smart Frequency: Reconstruct FrequencyAdjustment from flat fields
-    const frequencyAdjustment =
-      data.originalInterval !== null &&
-      data.originalInterval !== undefined &&
-      data.adjustedInterval !== null &&
-      data.adjustedInterval !== undefined
-        ? FrequencyAdjustment.fromDTO({
-            originalInterval: data.originalInterval,
-            adjustedInterval: data.adjustedInterval,
-            adjustmentReason: data.adjustmentReason ?? '',
-            adjustmentTime: data.adjustmentTime?.getTime() ?? Date.now(),
-            isAutoAdjusted: data.isAutoAdjusted ?? false,
-            userConfirmed: data.userConfirmed ?? false,
-            rejectionReason: null,
-          })
-        : null;
 
     // Build history child entities
     const history: ReminderHistory[] = [];
@@ -107,16 +72,12 @@ export class PrismaReminderTemplateMapper {
       notificationConfig,
       selfEnabled: data.selfEnabled,
       status: data.status as ReminderStatus,
-      groupId: data.reminderGroupId ?? null,
       effectiveEnabled: data.selfEnabled,
       importanceLevel: data.importanceLevel as ImportanceLevel,
       tags,
       color: data.color ?? null,
       icon: data.icon ?? null,
       nextTriggerAt: data.nextTriggerAt?.getTime() ?? null,
-      responseMetrics,
-      frequencyAdjustment,
-      smartFrequencyEnabled: data.smartFrequencyEnabled ?? true,
       createdAt: data.createdAt instanceof Date ? data.createdAt.getTime() : Number(data.createdAt),
       updatedAt: data.updatedAt instanceof Date ? data.updatedAt.getTime() : Number(data.updatedAt),
       deletedAt: data.deletedAt == null ? null : data.deletedAt instanceof Date ? data.deletedAt.getTime() : Number(data.deletedAt),
@@ -151,8 +112,6 @@ export class PrismaReminderTemplateMapper {
    */
   static toPersistence(template: ReminderTemplate) {
     const dto = template.toServerDTO();
-    const responseMetrics = template.responseMetrics?.toDTO();
-    const frequencyAdjustment = template.frequencyAdjustment?.toDTO();
 
     return {
       identityId: dto.identityId as string,
@@ -165,7 +124,6 @@ export class PrismaReminderTemplateMapper {
       notificationConfig: JSON.stringify(dto.notificationConfig),
       selfEnabled: dto.selfEnabled,
       status: dto.status,
-      reminderGroupId: dto.groupId,
       importanceLevel: dto.importanceLevel,
       tags: JSON.stringify(dto.tags),
       color: dto.color,
@@ -173,27 +131,6 @@ export class PrismaReminderTemplateMapper {
       nextTriggerAt: dto.nextTriggerAt != null ? new Date(dto.nextTriggerAt) : null,
       stats: '{}',
 
-      // Smart Frequency: Response Metrics
-      clickRate: responseMetrics?.clickRate ?? null,
-      ignoreRate: responseMetrics?.ignoreRate ?? null,
-      avgResponseTime: responseMetrics?.avgResponseTime ?? null,
-      snoozeCount: responseMetrics?.snoozeCount ?? 0,
-      effectivenessScore: responseMetrics?.effectivenessScore ?? null,
-      sampleSize: responseMetrics?.sampleSize ?? 0,
-      lastAnalysisTime: responseMetrics?.lastAnalysisTime
-        ? new Date(responseMetrics.lastAnalysisTime)
-        : null,
-
-      // Smart Frequency: Frequency Adjustment
-      originalInterval: frequencyAdjustment?.originalInterval ?? null,
-      adjustedInterval: frequencyAdjustment?.adjustedInterval ?? null,
-      adjustmentReason: frequencyAdjustment?.adjustmentReason ?? null,
-      adjustmentTime: frequencyAdjustment?.adjustmentTime
-        ? new Date(frequencyAdjustment.adjustmentTime)
-        : null,
-      isAutoAdjusted: frequencyAdjustment?.isAutoAdjusted ?? false,
-      userConfirmed: frequencyAdjustment?.userConfirmed ?? false,
-      smartFrequencyEnabled: template.smartFrequencyEnabled ?? true,
 
       version: dto.version,
       deletedAt: dto.deletedAt != null ? new Date(dto.deletedAt) : null,

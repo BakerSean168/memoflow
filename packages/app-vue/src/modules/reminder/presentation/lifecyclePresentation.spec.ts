@@ -103,8 +103,16 @@ function createTemplate(
     selfEnabled: true,
     status: 'Active',
     effectiveEnabled: true,
-    groupId: 'profile-1' as ReminderTemplateClientDTO['groupId'],
-    groupName: 'Focus',
+    profileMemberships: [
+      {
+        profileId: 'profile-1' as ReminderTemplateClientDTO['profileMemberships'][number]['profileId'],
+        profileName: 'Focus',
+        enabled: true,
+        profileEnabled: true,
+        profileActive: true,
+        effectiveEnabled: true,
+      },
+    ],
     importanceLevel: 'Moderate',
     tags: [],
     color: null,
@@ -124,11 +132,8 @@ function createTemplate(
     isActive: true,
     isPaused: false,
     lastTriggeredText: null,
-    controlledByGroup: false,
-    lifecycleSource: 'template',
+    lifecycleSource: 'profile',
     effectiveEnabledReason: 'Routine owns its switch.',
-    groupControlMode: 'Individual',
-    groupEnabled: true,
     globalReminderEnabled: true,
     ...overrides,
   } as ReminderTemplateClientDTO;
@@ -143,7 +148,6 @@ function createProfile(overrides: Partial<ReminderGroupClientDTO> = {}): Reminde
     color: null,
     icon: null,
     // Compatibility metadata must not affect Profile gate presentation.
-    controlMode: 'Group',
     enabled: true,
     status: 'Active',
     order: 0,
@@ -161,11 +165,9 @@ function createProfile(overrides: Partial<ReminderGroupClientDTO> = {}): Reminde
     updatedAt: 0,
     deletedAt: null,
     displayName: 'Focus',
-    controlModeText: 'legacy',
     statusText: 'Enabled',
     templateCountText: '2 routines',
     activeStatusText: '1 running',
-    controlDescription: 'legacy',
     ...overrides,
   } as ReminderGroupClientDTO;
 }
@@ -178,33 +180,28 @@ describe('lifecyclePresentation', () => {
     expect(getTemplateLifecycleBadgeText(t, createTemplate({ lifecycleSource: 'global' }))).toBe(
       'Master gate closed',
     );
-    expect(getTemplateLifecycleSummary(t, createTemplate({ lifecycleSource: 'group' }))).toBe(
+    expect(getTemplateLifecycleSummary(t, createTemplate({ lifecycleSource: 'profile' }))).toBe(
       'Paused by the Profile gate; Routine state preserved',
     );
-    expect(getTemplateLifecycleBadgeText(t, createTemplate({ lifecycleSource: 'group' }))).toBe(
+    expect(getTemplateLifecycleBadgeText(t, createTemplate({ lifecycleSource: 'profile' }))).toBe(
       'Profile gate closed',
     );
     expect(
       getTemplateLifecycleSummary(
         t,
-        createTemplate({ lifecycleSource: 'template', groupName: null, groupId: null }),
+        createTemplate({ lifecycleSource: 'routine', profileMemberships: [] }),
       ),
     ).toBe('Routine-owned state without a Profile');
   });
 
-  it('models a Profile as a gate independent of legacy ControlMode', () => {
-    const openLegacyGroup = createProfile({ controlMode: 'Group' });
-    const openLegacyIndividual = createProfile({ controlMode: 'Individual' });
+  it('models a Profile as an explicit execution gate', () => {
+    const open = createProfile();
     const closed = createProfile({ enabled: false, status: 'Paused' });
 
-    expect(isProfileGateOpen(openLegacyGroup)).toBe(true);
-    expect(isProfileGateOpen(openLegacyIndividual)).toBe(true);
-    expect(getProfileGateLabel(t, openLegacyGroup)).toBe('Profile gate open');
-    expect(getProfilePolicyText(t, openLegacyGroup)).toBe(
+    expect(isProfileGateOpen(open)).toBe(true);
+    expect(getProfileGateLabel(t, open)).toBe('Profile gate open');
+    expect(getProfilePolicyText(t, open)).toBe(
       'This Profile allows its members to be evaluated. Each Routine keeps and applies its own switch.',
-    );
-    expect(getProfilePolicyText(t, openLegacyIndividual)).toBe(
-      getProfilePolicyText(t, openLegacyGroup),
     );
     expect(isProfileGateOpen(closed)).toBe(false);
     expect(getProfileGateLabel(t, closed)).toBe('Profile gate closed');
@@ -218,9 +215,8 @@ describe('lifecyclePresentation', () => {
       effectiveEnabled: false,
       selfEnabled: false,
       globalReminderEnabled: false,
-      groupEnabled: null,
-      groupId: null,
-      groupName: null,
+      profileMemberships: [],
+      lifecycleSource: 'routine',
     });
 
     expect(getTemplateEffectiveStatusLabel(t, pausedRoutine)).toBe('Paused');
@@ -254,7 +250,9 @@ describe('lifecyclePresentation', () => {
       getProfileSidebarSummary(t, profile, [
         createTemplate({
           id: 'global-paused' as ReminderTemplateClientDTO['id'],
-          groupId: profile.id,
+          profileMemberships: [
+            { profileId: profile.id as never, profileName: profile.name, enabled: true, profileEnabled: true, profileActive: true, effectiveEnabled: false },
+          ],
           lifecycleSource: 'global',
           effectiveEnabled: false,
         }),
@@ -264,8 +262,10 @@ describe('lifecyclePresentation', () => {
       getProfileSidebarSummary(t, profile, [
         createTemplate({
           id: 'profile-paused' as ReminderTemplateClientDTO['id'],
-          groupId: profile.id,
-          lifecycleSource: 'group',
+          profileMemberships: [
+            { profileId: profile.id as never, profileName: profile.name, enabled: true, profileEnabled: false, profileActive: false, effectiveEnabled: false },
+          ],
+          lifecycleSource: 'profile',
           effectiveEnabled: false,
         }),
       ]),

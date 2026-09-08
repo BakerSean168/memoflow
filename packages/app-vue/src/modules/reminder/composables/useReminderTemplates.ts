@@ -124,15 +124,15 @@ export function useReminderTemplates(ctx: ReminderContext) {
     }
   }
 
-  async function moveTemplateToGroup(
+  async function replaceTemplateProfiles(
     id: string,
-    groupId: string | null,
+    profileIds: readonly string[],
   ): Promise<ReminderTemplateClientDTO | null> {
     savingId.value = id;
     store.setError(null);
     try {
       const result = await executeReminderOperation<ReminderTemplateClientDTO>(
-        () => service.moveTemplateToGroup(id, groupId),
+        () => service.replaceTemplateProfiles(id, profileIds),
         'reminder.error.moveTemplateFailed',
       );
       if (result.ok) {
@@ -153,6 +153,6 @@ export function useReminderTemplates(ctx: ReminderContext) {
     updateTemplate,
     deleteTemplate,
     toggleTemplate,
-    moveTemplateToGroup,
+    replaceTemplateProfiles,
   };
 }

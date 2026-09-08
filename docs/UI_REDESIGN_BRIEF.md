@@ -1,5 +1,9 @@
 # UI 重构前业务与界面分析（UI Redesign Brief）
 
+> **⚠️ Core vNext Goal/Task 边界更新（2026-09-07）**：GoalFolder、Goal Focus/Comparison、TaskFolder、Task Dependency/DAG/CriticalPath 已按 ADR-053/054 与 Core vNext 从运行时、公开契约和产品 UI 退役。本文中仍出现这些名称的页面清单、数据字段、组件或交互描述均是 **vNext 之前的历史快照，不得作为当前实施依据**；当前真值以 `docs/product/modules/goal.md`、`docs/product/modules/task.md` 与 `docs/plan/active/2026-08-25-core-vnext-orchestration.md` 为准。
+>
+
+
 > **📌 更新（2026-07-12）**：重构方向已改为 ChatGPT 桌面式壳（AI 优先三态布局），见 `docs/UI_REDESIGN_V2_PLAN.md`。本文 §9（新信息架构）与 §10（新页面布局）的建议**已被 V2 取代**；§1–§8（现状/用户/页面分析/操作路径/问题清单）、§11（保留资产）、§12（风险）、§13（Obsidian vault 专项）继续有效。
 >
 > **📌 决策固化（2026-07-16）**：§13 的 Obsidian Vault 方向已由 [ADR-034](./architecture/adr/ADR-034-obsidian-vault-repository.md) 正式采纳并在后续讨论中调整为“本地 Vault + 可选 GitHub private repository”。涉及登录、事实源、同步、Web 创建和 AI 写入路径时以 ADR-034 为准；本文 §13 的 Desktop 自定义上传、Web 永久只读和固定 `00-inbox` 只保留为历史调研方案。

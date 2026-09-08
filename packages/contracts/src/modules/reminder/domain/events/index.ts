@@ -7,12 +7,14 @@ export type { ReminderTemplateCreatedEvent } from './reminder-template-created.e
 export type { ReminderTemplateUpdatedEvent } from './reminder-template-updated.event';
 export type { ReminderTemplateEnabledEvent } from './reminder-template-enabled.event';
 export type { ReminderTemplatePausedEvent } from './reminder-template-paused.event';
-export type { ReminderTemplateMovedEvent } from './reminder-template-moved.event';
 export type { ReminderTemplateDeletedEvent } from './reminder-template-deleted.event';
+export type {
+  ReminderTemplateEligibilityChangedEvent,
+  ReminderTemplateEligibilityChangeCause,
+} from './reminder-template-eligibility-changed.event';
 export type { ReminderGroupCreatedEvent } from './reminder-group-created.event';
 export type { ReminderGroupUpdatedEvent } from './reminder-group-updated.event';
 export type { ReminderGroupDeletedEvent } from './reminder-group-deleted.event';
 export type { ReminderGroupEnabledEvent } from './reminder-group-enabled.event';
 export type { ReminderGroupPausedEvent } from './reminder-group-paused.event';
-export type { ReminderGroupControlModeSwitchedEvent } from './reminder-group-control-mode-switched.event';
 export type { ReminderTriggeredEvent } from './reminder-triggered.event';

@@ -1,21 +1,3 @@
-import type { ScheduleTask } from '@memoflow/schedule';
-
-export interface TaskScheduleExecutionOutcome {
-  readonly nextRunAt?: number | null;
-  readonly result?: Record<string, unknown>;
-}
-
-export interface TaskScheduleExecutionSource {
-  executeTask(task: ScheduleTask): Promise<TaskScheduleExecutionOutcome>;
-}
-
-export {
-  createTaskPrismaScheduleExecutionSource,
-  createTaskPowerSyncScheduleExecutionSource,
-  createTaskScheduleExecutionSource,
-  type CreateTaskScheduleExecutionSourceDeps,
-} from '../server/infrastructure';
-
 export {
   createTaskReminderScheduledHandlerRegistration,
   buildTaskReminderOperationId,

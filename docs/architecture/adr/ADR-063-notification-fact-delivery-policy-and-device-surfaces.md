@@ -9,15 +9,19 @@ tags:
   - outbox
 description: 区分 Notification 用户可见事实与各渠道 Delivery Attempt，统一 per-channel preference/DND/rate-limit policy 和桌面设备级覆盖
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-08-25T17:49:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-063: Notification Fact、Delivery Policy 与 Device Surface 分离
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施
 **日期：** 2026-08-25  
 **影响范围：** notification、reminder/routine、schedule-orchestration、desktop、app-vue、contracts、database  
 **关联：** ADR-004、ADR-006、ADR-042、ADR-059、ADR-060~062
+
+## 2026-09-08 实现状态
+
+跨模块 producer 现在提交 durable `NotificationRequested`，Notification runtime materialize Fact 后由 NotificationPolicy 决定 per-channel DeliveryPlan/attempt；DND、preference、rate limit、device capability 与 delivery receipt 均在 Notification ownership 内。历史 `notification.dispatch` bypass 被 governance 禁止。
 
 ## 1. 背景
 

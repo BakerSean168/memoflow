@@ -6,7 +6,7 @@ import type {
   ScheduleRebuildOutboxDTO,
 } from '../../domain/repositories/i-schedule-repository';
 import type { CalendarEntry } from '../../domain/aggregates/calendar-entry';
-import { ScheduleLeaseLostError } from '../../../domain/errors/schedule-lease-lost-error';
+import { LeaseLostError } from '@memoflow/patterns/lease';
 import {
   ScheduleDomainEventPublisherRuntime,
   ScheduleDomainEventPublisherService,
@@ -101,7 +101,7 @@ class InMemoryDomainEventOutboxRepository implements IScheduleRepository {
   ): Promise<void> {
     const item = this.outbox.find((o) => o.id === id);
     if (!item || item.claimToken !== claimToken || item.status !== 'processing') {
-      throw new ScheduleLeaseLostError(
+      throw new LeaseLostError(
         `Domain event outbox item ${id} is no longer owned by this claim token (lease lost)`,
       );
     }
@@ -265,7 +265,7 @@ describe('ScheduleDomainEventPublisherService — durable delivery semantics', (
           ensureHeld: async () => {
             guardCalls += 1;
             if (guardCalls >= 3) {
-              throw new ScheduleLeaseLostError();
+              throw new LeaseLostError();
             }
           },
         });
@@ -274,7 +274,7 @@ describe('ScheduleDomainEventPublisherService — durable delivery semantics', (
     };
 
     const publisher = new ScheduleDomainEventPublisherService(repo, leaseThatBreaks, bus);
-    await expect(publisher.processOutbox()).rejects.toThrow('lease ownership was lost');
+    await expect(publisher.processOutbox()).rejects.toBeInstanceOf(LeaseLostError);
 
     // First item was published and acked; the batch aborts at the start of the
     // second item, so it is never published and never written past the claim.

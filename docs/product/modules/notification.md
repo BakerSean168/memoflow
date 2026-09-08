@@ -3,87 +3,65 @@ tags:
   - product
   - module
   - notification
-description: 通知模块当前功能资产说明
+description: Notification Fact、DeliveryPlan、可靠投递与跨端通知中心当前实现
 created: 2026-06-02T00:00:00
-updated: 2026-08-25T17:49:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
-# 通知模块说明
-
-> **vNext 方向（2026-08-25）：** Notification 将明确区分 **Notification Fact（用户可追溯消息事实）** 与 **per-channel Delivery Attempt**。每个渠道必须独立经过 workflow/user preference、DND、rate-limit 和 device capability policy；Scheduler 不再直接拥有 Notification delivery。详见 [Scheduling / Notification vNext](../scheduling-notification-vnext.md) 与 [ADR-063](../../architecture/adr/ADR-063-notification-fact-delivery-policy-and-device-surfaces.md)。
+# Notification 模块说明
 
 ## 1. 功能定位
 
-通知模块是系统通知基础设施，用于统一承载系统通知和用户提醒触达。它围绕通知、通知偏好、通知模板、通知渠道和实时推送形成闭环，是所有业务模块触达用户的统一出口。
+Notification 把“**用户应该能追溯的一条消息事实**”与“**各渠道是否、何时、如何投递**”分离。业务模块只提交 durable `NotificationRequested`；Notification 模块创建 Fact、执行 policy、生成 per-channel DeliveryPlan/attempt，并持久记录 delivery receipt。
 
-## 2. 当前功能说明
+## 2. 当前产品能力
 
-- 通知管理：创建、查询、标记已读、批量已读、删除、批量删除和清理过期通知。
-- 通知中心：前端提供通知列表页面，支持全部/未读/已读筛选和分页。
-- 实时通知：通过 SSE（Server-Sent Events）推送应用内通知，前端提供 InAppNotification Toast 组件和 NotificationBell 入口。
-- 通知偏好：用户可配置每个业务模块（task、goal、schedule、reminder、system）的通知渠道（应用内、桌面推送）。
-- 通知模板：系统级通知模板，支持应用内、邮件和推送三种渲染方式，可配置变量和默认动作。
-- 免打扰：支持免打扰时间段配置，在免打扰期间不发送通知。
-- 频率限制：支持通知频率限制配置，防止通知轰炸。
-- 通知渠道跟踪：记录每个通知在每个渠道的投递状态、重试次数和错误信息。
-- 通知历史：记录通知的操作历史（创建、发送、已读、删除等）。
-- 未读计数：实时维护未读通知计数，支持快速查询。
+- Notification Fact 创建、查询、未读计数、已读/全部已读、删除；
+- Notification Center 与实时 In-App surface；
+- 用户 channel preference、DND、rate limit 与 device capability policy；
+- per-channel DeliveryPlan / DeliveryAttempt、重试与失败记录；
+- Desktop native notification delivery ack；
+- SSE 只广播已进入 Notification delivery 边界的实时事件；
+- React/Mobile Notification list/detail/preferences 复用同一 Fact contract；
+- AI 只读 `notification_unread_summary`，只读取 Notification Fact，不读取/修改 delivery worker 内部状态。
 
-## 3. 用户路径
+## 3. Canonical 流程
 
-- 通知中心路径：用户点击导航栏的通知铃铛图标，查看通知列表，标记单条或全部已读，删除通知。
-- 实时通知路径：系统触发通知后，用户在页面右下角收到 Toast 通知，点击可查看详情或执行动作。
-- 通知偏好路径：用户在设置中配置每个业务模块的通知渠道偏好，设置免打扰时间段。
-- 移动端路径：移动端提供通知列表和通知详情入口。
+```text
+Task / Goal / Routine / other producer
+          |
+          v
+ durable NotificationRequested
+          |
+          v
+ Notification runtime
+          |
+          +--> materialize Notification Fact
+          |
+          +--> NotificationPolicy
+                 preferences / DND / rate limit / capability
+          |
+          +--> DeliveryPlan / channel attempt
+          |
+          +--> receipt / retry / failure
+```
 
-## 4. 业务规则
+跨模块不得重新引入历史 `notification.dispatch` bypass。
 
-- Notification 是通知模块核心聚合，NotificationPreference 和 NotificationTemplate 是独立聚合。
-- NotificationChannel 和 NotificationHistory 是 Notification 的关联实体。
-- 通知创建时，NotificationPolicy 会检查用户偏好、免打扰和频率限制，决定是否发送。
-- 通知发送后通过 SSE 推送 `notification:dispatch_in_app` 和 `notification:dispatch_desktop` 事件。
-- 通知偏好按业务模块（task、goal、schedule、reminder、system）和渠道类型（应用内、桌面推送）维度配置。
-- 通知模板支持变量替换和多渠道渲染（应用内、邮件、推送）。
-- 通知状态流转：Created → Sent → Delivered/Failed，已读状态独立于投递状态。
-- 客户端通过 HTTP 或 IPC 适配器访问通知能力，服务端通过模块组合根装配用例和仓储实现。
+## 4. SSE 与 delivery event
 
-## 5. 相关文件索引
+`notification:dispatch_in_app` 与 `notification:dispatch_desktop` 仍是合法的 **Notification-owned delivery events**，用于实时 surface / deliverer 边界；它们不代表业务模块可以绕过 `NotificationRequested -> Fact -> DeliveryPlan` 链路直接发送通知。
 
-详细文件清单见 [通知模块文件索引](../module-index/notification-files.md)。
+## 5. 可靠性规则
 
-## 6. 当前问题
+- Notification Fact 的 read state 与 delivery state 分离；
+- 每个 channel 独立决策、独立重试；
+- delivery 只有获得可验证 ack 才算成功；
+- DND 可以抑制某个 delivery，但不抹掉应被用户追溯的 Fact；
+- Scheduler 只负责时间触发，不拥有 Notification delivery。
 
-- 通知模块和提醒模块的职责边界需要在优化前明确：提醒负责触发规则，通知负责投递，但当前两者有交叉。
-- 通知模板目前主要是系统级模板，业务模块自定义模板的能力较弱。
-- 免打扰和频率限制的配置入口较深，用户可能不知道这些功能存在。
-- SSE 连接的稳定性和重连机制需要在生产环境验证。
-- 邮件和推送渠道目前在模板层面支持渲染，但实际投递能力需要确认。
+## 6. 相关资产
 
-## 7. 优化机会
-
-- 梳理通知和提醒的职责边界，建立清晰的"触发 → 投递"链路。
-- 强化通知模板的业务模块自定义能力。
-- 将免打扰和频率限制的配置入口提升到更显眼的位置。
-- 为通知中心提供更好的分类和筛选能力。
-- 考虑通知的批量操作和快捷操作（如一键清除已读）。
-
-## 8. 风险点
-
-- 用户偏好、免打扰和频率限制对实际发送的影响：这些配置可能导致用户收不到预期通知。
-- 通知模板与业务事件之间的映射关系变更会影响所有触达场景。
-- SSE 连接断开会导致实时通知丢失，需要有兜底机制。
-- 通知模块是所有业务模块的触达出口，其稳定性影响面广。
-- HTTP、IPC、Prisma 和 PowerSync 适配器同时存在，索引和测试需要覆盖多运行时边界。
-
-## 9. 后续待确认
-
-- 邮件和推送渠道是否需要完整的投递实现。
-- 通知模板是否需要支持业务模块级别的自定义。
-- 免打扰期间的通知是否需要在免打扰结束后补发。
-- 通知中心是否需要支持归档或更复杂的组织方式。
-- Dashboard 对通知数据的依赖是否需要专门的读模型契约。
-
-## 10. 相关资料
-
-- [提醒模块说明](./reminder.md)
-- [通知模块文件索引](../module-index/notification-files.md)
+- [Scheduling / Notification vNext](../scheduling-notification-vnext.md)
+- [ADR-063](../../architecture/adr/ADR-063-notification-fact-delivery-policy-and-device-surfaces.md)
+- [Notification 模块文件索引](../module-index/notification-files.md)

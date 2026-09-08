@@ -35,12 +35,14 @@ export class ReminderResponsePrismaRepository implements IReminderResponseReposi
         templateId: dto.reminderTemplateId,
         identityId: dto.identityId,
         action: dto.action,
-        responseTime: dto.responseTime != null ? Math.floor(dto.responseTime / 1000) : null,
+        responseTime: dto.responseTime ?? null,
+        snoozeDurationSeconds: dto.snoozeDurationSeconds ?? null,
         timestamp: new Date(dto.timestamp),
       },
       update: {
         action: dto.action,
-        responseTime: dto.responseTime != null ? Math.floor(dto.responseTime / 1000) : null,
+        responseTime: dto.responseTime ?? null,
+        snoozeDurationSeconds: dto.snoozeDurationSeconds ?? null,
         timestamp: new Date(dto.timestamp),
       },
     });

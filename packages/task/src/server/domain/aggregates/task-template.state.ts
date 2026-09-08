@@ -23,8 +23,6 @@ export interface TaskTemplateState {
   description: string | null;
   taskType: TaskType;
   importance: ImportanceLevel;
-  tags: string[];
-  color: string | null;
   status: TaskTemplateStatus;
   outcome: TaskPlanOutcomeValue;
   completionPolicy: TaskPlanCompletionPolicyValue;

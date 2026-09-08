@@ -30,9 +30,7 @@ export interface TaskTemplateClientDTO {
   importance: ImportanceLevel;
 
   goalBinding: TaskGoalBindingDTO | null;
-  tags: string[];
   labels: LabelClientDTO[];
-  color: string | null;
   status: TaskTemplateStatus;
   outcome: TaskPlanOutcome;
   completionPolicy: TaskPlanCompletionPolicy;

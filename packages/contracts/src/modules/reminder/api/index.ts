@@ -8,4 +8,5 @@
 // Feature-based DTO exports
 export * from './reminder-template.dto';
 export * from './reminder-group.dto';
+export * from './reminder-response.dto';
 export * from './response-schemas';

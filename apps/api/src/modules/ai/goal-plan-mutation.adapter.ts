@@ -1,6 +1,7 @@
 import type { GoalPlanMutationPort } from '@memoflow/ai';
 import type { IdentityId } from '@memoflow/contracts/primitives';
-import { ok } from '@memoflow/contracts/result';
+import { error, ok } from '@memoflow/contracts/result';
+import type { LabelService } from '@memoflow/label';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { ReminderApplicationPort } from '@memoflow/reminder';
 import type { TaskApplicationPort } from '@memoflow/task';
@@ -15,7 +16,23 @@ export class GoalPlanMutationAdapter implements GoalPlanMutationPort {
     private readonly goal: GoalApplicationPort,
     private readonly task: TaskApplicationPort,
     private readonly reminder: ReminderApplicationPort,
+    private readonly labels: LabelService,
   ) {}
+
+  async resolveLabels(
+    names: readonly string[],
+    context: Parameters<GoalPlanMutationPort['resolveLabels']>[1],
+  ) {
+    try {
+      const labels = await this.labels.resolveNames(context.identityId, names);
+      return ok(labels.map((label) => label.id));
+    } catch (cause) {
+      return error(
+        'AI_LABEL_RESOLUTION_FAILED',
+        cause instanceof Error ? cause.message : 'Failed to resolve Shared Labels',
+      );
+    }
+  }
 
   async createGoal(request: Parameters<GoalPlanMutationPort['createGoal']>[0], context: Parameters<GoalPlanMutationPort['createGoal']>[1]) {
     const result = await this.goal.createGoal(request, context);

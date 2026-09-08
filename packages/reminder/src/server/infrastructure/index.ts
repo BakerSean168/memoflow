@@ -29,7 +29,7 @@ export type {
   IUserReminderPreferenceRepository,
 } from '../domain/repositories';
 export type { ReminderTransactionRunner } from '../domain/ports/reminder-transaction-runner.port';
-export type { ReminderSnoozeRescheduler } from '../application/use-cases/commands/record-reminder-response.use-case';
+export type { ReminderSnoozeOverrideWriter } from '../application/use-cases/commands/record-reminder-response.use-case';
 
 // ============ PowerSync Module Factory / PowerSync 模块工厂 ============
 export { createReminderPowerSyncModule } from './powersync';
@@ -43,6 +43,10 @@ export {
   createPowerSyncClosureChecker,
   type ReminderPowerSyncRepositorySet,
 } from './powersync';
+export {
+  createReminderTemplateScheduledHandlerRegistration,
+  ReminderTemplateScheduledPayloadSchema,
+} from './reminder-template-scheduled-handler';
 export {
   createReminderScheduleExecutionSource,
   type CreateReminderScheduleExecutionSourceDeps,
@@ -58,7 +62,6 @@ export {
   type ReminderScheduleProjectionEventMap,
   type ReminderScheduleProjectionHandlers,
   type ReminderScheduleProjectionPlan,
-  type ReminderScheduleProjectionSelection,
   type ReminderScheduleProjectionSource,
 } from './schedule-projection-source';
 
@@ -110,15 +113,6 @@ export {
   type CreateReminderPrismaModuleOptions,
   type ReminderPrismaRepositorySet,
 } from './prisma';
-export { createReminderRuntimeContribution, createReminderTriggerCronRuntime } from './runtime';
-export {
-  compareReminderDueSets,
-  type ReminderDueSetComparison,
-  type ReminderDueSetEntry,
-  type ReminderDueSetReader,
-  type ReminderDueSetTimingMismatch,
-  type ReminderTriggerCronJobDependencies,
-} from './cron/reminder-trigger-cron-job';
 
 // ============ Host-used concrete consumer ============
 /** Host-used by apps/api: closure worker consumer. 宿主使用：apps/api 的账户关闭 consumer。 */

@@ -155,6 +155,7 @@ function taskRequest(
     goalId: string;
     keyResultIds: readonly string[];
     goalStartDate: number | null;
+    labelIds: readonly string[];
   },
 ): CreateTaskTemplateReq {
   const startDate = task.startDate ?? input.goalStartDate;
@@ -191,8 +192,7 @@ function taskRequest(
     recurrenceRule,
     reminderConfig: null,
     importance: task.importance,
-    tags: task.tags,
-    color: null,
+    labelIds: [...input.labelIds],
     goalBinding: keyResultId
       ? {
           goalId: input.goalId as NonNullable<NonNullable<CreateTaskTemplateReq['goalBinding']>['goalId']>,
@@ -321,6 +321,21 @@ export class ApplyGoalPlanService {
       expectedKeyResultIds.every((expectedId) => keyResultIds.includes(expectedId));
 
     if (!goalFullyApplied) {
+      const goalLabelsResult = await this.mutations.resolveLabels(draft.goal.labels, context);
+      if (!goalLabelsResult.ok) {
+        failures.push(failure('goal', goalLabelsResult.error));
+        return {
+          workflowRunId,
+          revision: draft.revision,
+          status: 'failed',
+          keyResultIds: [],
+          taskIds: [],
+          reminderIds: [],
+          failures,
+          retryable: failures.some((item) => item.retryable),
+        };
+      }
+
       const request: CreateGoalReq = {
         id: expectedGoalId as NonNullable<CreateGoalReq['id']>,
         name: draft.goal.name,
@@ -329,6 +344,7 @@ export class ApplyGoalPlanService {
         feasibilityAnalysis: draft.goal.feasibilityAnalysis,
         startDate: draft.goal.startDate ?? undefined,
         dueDate: draft.goal.dueDate ?? undefined,
+        labelIds: goalLabelsResult.data,
         initialKeyResults: draft.keyResults.map((keyResult, index) => ({
           id: expectedKeyResultIds[index] as NonNullable<
             NonNullable<CreateGoalReq['initialKeyResults']>[number]['id']
@@ -399,6 +415,13 @@ export class ApplyGoalPlanService {
     for (const [index, task] of draft.taskTemplates.entries()) {
       const expectedId = expectedTaskIds[index]!;
       if (taskIds.includes(expectedId)) continue;
+
+      const taskLabelsResult = await this.mutations.resolveLabels(task.labels, context);
+      if (!taskLabelsResult.ok) {
+        failures.push(failure('task_template', taskLabelsResult.error, index));
+        continue;
+      }
+
       let result: Result<TaskTemplateMutationResult> | undefined;
       try {
         result = await this.mutations.createTaskTemplate(
@@ -407,6 +430,7 @@ export class ApplyGoalPlanService {
             goalId,
             keyResultIds: expectedKeyResultIds,
             goalStartDate: draft.goal.startDate,
+            labelIds: taskLabelsResult.data,
           }),
           context,
         );

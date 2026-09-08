@@ -28,21 +28,23 @@ export class ReminderResponsePowerSyncRepository implements IReminderResponseRep
         `UPDATE reminder_responses
          SET action = ?,
              response_time = ?,
+             snooze_duration_seconds = ?,
              timestamp = ?
          WHERE id = ?`,
-        [dto.action, dto.responseTime ?? null, ts, dto.id],
+        [dto.action, dto.responseTime ?? null, dto.snoozeDurationSeconds ?? null, ts, dto.id],
       );
     } else {
       await this.db.execute(
         `INSERT INTO reminder_responses (
-          id, identity_id, template_id, action, response_time, timestamp, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          id, identity_id, template_id, action, response_time, snooze_duration_seconds, timestamp, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           dto.id,
           dto.identityId,
           dto.reminderTemplateId,
           dto.action,
           dto.responseTime ?? null,
+          dto.snoozeDurationSeconds ?? null,
           ts,
           ts,
         ],

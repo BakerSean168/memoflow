@@ -27,7 +27,6 @@ export class TaskLabelOwnershipError extends Error {
 export interface TaskFilters {
   status?: string;
   goalId?: string;
-  tags?: string[];
   dueDateFrom?: number;
   dueDateTo?: number;
   limit?: number;
@@ -72,11 +71,6 @@ export interface ITaskTemplateRepository {
    * 根据目标查找任务模板（identity-scoped）
    */
   findByGoalId(identityId: string, goalId: string): Promise<TaskTemplate[]>;
-
-  /**
-   * 根据标签查找任务模板
-   */
-  findByTags(identityId: string, tags: string[]): Promise<TaskTemplate[]>;
 
   /** Shared Label AND filtering for vNext classification. */
   findByLabelIdsAll(identityId: string, labelIds: readonly string[]): Promise<TaskTemplate[]>;

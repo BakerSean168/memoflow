@@ -16,8 +16,6 @@ import { describe, expect, it, vi } from 'vitest';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
 import type { GoalWriteTransactionRunner } from '../../application/use-cases/commands/goal-write-support';
 import type {
-  IFocusModeRepository,
-  IGoalFolderRepository,
   IGoalRecordRepository,
   IGoalRepository,
 } from '../../domain';
@@ -47,9 +45,7 @@ function makeContribution(name: string, failOnStart = false): FakeContribution {
 function makeDeps(runtimeContributions: GoalModuleRuntimeContribution[]): GoalModuleDependencies {
   return {
     goalRepository: {} as unknown as IGoalRepository,
-    goalFolderRepository: {} as unknown as IGoalFolderRepository,
     goalRecordRepository: {} as unknown as IGoalRecordRepository,
-    focusModeRepository: {} as unknown as IFocusModeRepository,
     goalWriteTransactionRunner: {} as unknown as GoalWriteTransactionRunner,
     taskBindingReadPort: {} as unknown as GoalDependencyReadPort,
     runtimeContributions,

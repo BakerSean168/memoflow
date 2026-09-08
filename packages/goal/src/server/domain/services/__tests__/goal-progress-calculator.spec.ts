@@ -30,7 +30,6 @@ function createTestGoal(opts?: { name?: string }): Goal {
     tags: [],
     startDate: null,
     targetDate: null,
-    folderId: null,
     parentGoalId: null,
     reminderConfig: null,
   });

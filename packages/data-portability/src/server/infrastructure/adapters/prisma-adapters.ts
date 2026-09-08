@@ -21,6 +21,8 @@ import type {
   EditorGroupRepoPort,
   EditorTabRepoPort,
   AIConversationRepoPort,
+  RoutineProfileMembershipRepoPort,
+  RoutineDefinitionRepoPort,
 } from '../../application/data-portability.dependencies';
 
 export class PrismaRepositoryAdapter implements RepositoryRepoPort {
@@ -41,6 +43,26 @@ export class PrismaResourceAdapter implements ResourceRepoPort {
   constructor(private readonly prisma: PrismaClient) {}
   async findByIdentityId(identityId: string): Promise<unknown[]> {
     return this.prisma.resource.findMany({ where: { identityId, deletedAt: null } });
+  }
+}
+
+export class PrismaRoutineDefinitionAdapter implements RoutineDefinitionRepoPort {
+  constructor(private readonly prisma: PrismaClient) {}
+  async findByIdentityId(identityId: string): Promise<unknown[]> {
+    return this.prisma.routineDefinition.findMany({
+      where: { identityId },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+}
+
+export class PrismaRoutineProfileMembershipAdapter implements RoutineProfileMembershipRepoPort {
+  constructor(private readonly prisma: PrismaClient) {}
+  async findByIdentityId(identityId: string): Promise<unknown[]> {
+    return this.prisma.routineProfileMembership.findMany({
+      where: { identityId },
+      orderBy: [{ routineId: 'asc' }, { profileId: 'asc' }],
+    });
   }
 }
 

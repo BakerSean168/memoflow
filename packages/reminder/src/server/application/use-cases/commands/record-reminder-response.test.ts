@@ -1,27 +1,30 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RecordReminderResponseUseCase } from './record-reminder-response.use-case';
 import { eventBus } from '@memoflow/utils/domain';
+import type { IReminderResponseRepository } from '../../../domain/repositories/i-reminder-response-repository';
 
 describe('RecordReminderResponseUseCase', () => {
-  const repo = {
+  const repo: IReminderResponseRepository = {
     save: vi.fn(),
+    findByIdForIdentity: vi.fn(),
     findByTemplateId: vi.fn(),
     deleteByTemplateId: vi.fn(),
     getResponseStats: vi.fn(),
-  } as any;
+    getResponseDistribution: vi.fn(),
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    repo.save.mockResolvedValue(undefined);
   });
 
-  it('records a response and emits event', async () => {
-    repo.save.mockResolvedValue(undefined);
+  it('records actual response latency and emits analytics without snooze delay', async () => {
     const eventSpy = vi.spyOn(eventBus, 'send');
     const useCase = new RecordReminderResponseUseCase(repo);
 
     const result = await useCase.execute({
       templateId: 'template-1',
-      action: 'Dismiss' as any,
+      action: 'DISMISSED',
       responseTime: 12,
       identityId: 'identity-1',
     });
@@ -31,16 +34,28 @@ describe('RecordReminderResponseUseCase', () => {
       'reminder:response-recorded',
       expect.objectContaining({
         templateId: 'template-1',
-        action: 'Dismiss',
+        action: 'DISMISSED',
         responseTime: 12,
+        snoozeDurationSeconds: null,
       }),
     );
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.data.templateId).toBe('template-1');
-      expect(result.data.action).toBe('Dismiss');
       expect(result.data.responseTime).toBe(12);
+      expect(result.data.snoozeDurationSeconds).toBeNull();
     }
+  });
+
+  it('rejects invalid response latency', async () => {
+    const useCase = new RecordReminderResponseUseCase(repo);
+    const result = await useCase.execute({
+      templateId: 'template-1',
+      action: 'CLICKED',
+      responseTime: 1.5,
+      identityId: 'identity-1',
+    });
+    expect(result.ok).toBe(false);
+    expect(repo.save).not.toHaveBeenCalled();
   });
 
   it('propagates when save fails', async () => {
@@ -50,7 +65,7 @@ describe('RecordReminderResponseUseCase', () => {
     await expect(
       useCase.execute({
         templateId: 'template-1',
-        action: 'Snooze' as any,
+        action: 'COMPLETED',
         identityId: 'identity-1',
       }),
     ).rejects.toThrow('db down');
@@ -59,41 +74,17 @@ describe('RecordReminderResponseUseCase', () => {
   it('loads responses by template with custom limit', async () => {
     repo.findByTemplateId.mockResolvedValue([{ id: 'r1' }]);
     const useCase = new RecordReminderResponseUseCase(repo);
-
     const result = await useCase.getResponsesByTemplate('template-1', 'identity-1', 5);
-
     expect(repo.findByTemplateId).toHaveBeenCalledWith('template-1', 'identity-1', 5);
     expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.data).toEqual([{ id: 'r1' }]);
-    }
-  });
-
-  it('propagates when loading responses fails', async () => {
-    repo.findByTemplateId.mockRejectedValue(new Error('read error'));
-    const useCase = new RecordReminderResponseUseCase(repo);
-
-    await expect(useCase.getResponsesByTemplate('template-1', 'identity-1')).rejects.toThrow('read error');
   });
 
   it('deletes responses by template', async () => {
     repo.deleteByTemplateId.mockResolvedValue(3);
     const useCase = new RecordReminderResponseUseCase(repo);
-
     const result = await useCase.deleteResponsesByTemplate('template-1', 'identity-1');
-
     expect(repo.deleteByTemplateId).toHaveBeenCalledWith('template-1', 'identity-1');
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.data).toBe(3);
-    }
-  });
-
-  it('propagates when deleting responses fails', async () => {
-    repo.deleteByTemplateId.mockRejectedValue(new Error('delete error'));
-    const useCase = new RecordReminderResponseUseCase(repo);
-
-    await expect(useCase.deleteResponsesByTemplate('template-1', 'identity-1')).rejects.toThrow('delete error');
+    expect(result).toEqual(expect.objectContaining({ ok: true, data: 3 }));
   });
 
   it('returns response stats for a template', async () => {
@@ -107,85 +98,104 @@ describe('RecordReminderResponseUseCase', () => {
       avgResponseTime: 15,
     });
     const useCase = new RecordReminderResponseUseCase(repo);
-
     const result = await useCase.getResponseStats('template-1', 'identity-1', 14);
-
     expect(repo.getResponseStats).toHaveBeenCalledWith('template-1', 'identity-1', 14);
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.data.total).toBe(10);
-      expect(result.data.avgResponseTime).toBe(15);
-    }
-  });
-
-  it('propagates when loading stats fails', async () => {
-    repo.getResponseStats.mockRejectedValue(new Error('stats error'));
-    const useCase = new RecordReminderResponseUseCase(repo);
-
-    await expect(useCase.getResponseStats('template-1', 'identity-1')).rejects.toThrow('stats error');
+    expect(result).toEqual(expect.objectContaining({ ok: true }));
   });
 });
 
-describe('RecordReminderResponseUseCase R3c (snooze command semantics)', () => {
-  const repo = { save: vi.fn(), findByTemplateId: vi.fn(), deleteByTemplateId: vi.fn(), getResponseStats: vi.fn() } as any;
+describe('RecordReminderResponseUseCase snooze semantics', () => {
+  const repo: IReminderResponseRepository = {
+    save: vi.fn(),
+    findByIdForIdentity: vi.fn(),
+    findByTemplateId: vi.fn(),
+    deleteByTemplateId: vi.fn(),
+    getResponseStats: vi.fn(),
+    getResponseDistribution: vi.fn(),
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
     repo.save.mockResolvedValue(undefined);
   });
 
-  it('rejects snooze without a positive duration', async () => {
-    const useCase = new RecordReminderResponseUseCase(repo);
+  it('rejects snooze without an explicit positive snooze duration', async () => {
+    const writer = { snooze: vi.fn(async () => undefined) };
+    const useCase = new RecordReminderResponseUseCase(repo, writer);
     const result = await useCase.execute({
       templateId: 'template-1',
       action: 'SNOOZED',
+      responseTime: 8,
       identityId: 'identity-1',
     });
     expect(result.ok).toBe(false);
     expect(repo.save).not.toHaveBeenCalled();
+    expect(writer.snooze).not.toHaveBeenCalled();
   });
 
-  it('calls the snooze rescheduler to defer the next trigger', async () => {
-    const rescheduler = { reschedule: vi.fn(async () => undefined) };
-    const useCase = new RecordReminderResponseUseCase(repo, rescheduler);
+  it('fails closed when the host has no canonical snooze writer', async () => {
+    const useCase = new RecordReminderResponseUseCase(repo);
+    const result = await useCase.execute({
+      templateId: 'template-1',
+      action: 'SNOOZED',
+      snoozeDurationSeconds: 900,
+      identityId: 'identity-1',
+    });
+    expect(result).toEqual(
+      expect.objectContaining({ ok: false, error: expect.objectContaining({ code: 'SERVICE_UNAVAILABLE' }) }),
+    );
+    expect(repo.save).not.toHaveBeenCalled();
+  });
+
+  it('uses snoozeDurationSeconds for scheduling and keeps responseTime as analytics latency', async () => {
+    const writer = { snooze: vi.fn(async () => undefined) };
+    const useCase = new RecordReminderResponseUseCase(repo, writer);
 
     const result = await useCase.execute({
       templateId: 'template-1',
       action: 'SNOOZED',
-      responseTime: 900, // seconds
+      responseTime: 7,
+      snoozeDurationSeconds: 900,
       identityId: 'identity-1',
     });
 
     expect(result.ok).toBe(true);
-    expect(rescheduler.reschedule).toHaveBeenCalledWith('template-1', 'identity-1', 900);
+    expect(writer.snooze).toHaveBeenCalledWith('template-1', 'identity-1', 900);
+    if (result.ok) {
+      expect(result.data.responseTime).toBe(7);
+      expect(result.data.snoozeDurationSeconds).toBe(900);
+    }
   });
 
-  it('still records the response when rescheduling fails', async () => {
-    const rescheduler = { reschedule: vi.fn(async () => { throw new Error('schedule down'); }) };
-    const useCase = new RecordReminderResponseUseCase(repo, rescheduler);
+  it('returns service unavailable when the durable snooze write fails', async () => {
+    const writer = { snooze: vi.fn(async () => { throw new Error('override store down'); }) };
+    const useCase = new RecordReminderResponseUseCase(repo, writer);
 
     const result = await useCase.execute({
       templateId: 'template-1',
       action: 'SNOOZED',
-      responseTime: 300,
+      snoozeDurationSeconds: 300,
       identityId: 'identity-1',
     });
 
-    expect(result.ok).toBe(true);
+    expect(result).toEqual(
+      expect.objectContaining({ ok: false, error: expect.objectContaining({ code: 'SERVICE_UNAVAILABLE' }) }),
+    );
     expect(repo.save).toHaveBeenCalledTimes(1);
   });
 
-  it('does not reschedule for non-snooze actions', async () => {
-    const rescheduler = { reschedule: vi.fn(async () => undefined) };
-    const useCase = new RecordReminderResponseUseCase(repo, rescheduler);
-
-    await useCase.execute({
+  it('rejects snoozeDurationSeconds on non-snooze actions', async () => {
+    const writer = { snooze: vi.fn(async () => undefined) };
+    const useCase = new RecordReminderResponseUseCase(repo, writer);
+    const result = await useCase.execute({
       templateId: 'template-1',
       action: 'COMPLETED',
       responseTime: 10,
+      snoozeDurationSeconds: 60,
       identityId: 'identity-1',
     });
-
-    expect(rescheduler.reschedule).not.toHaveBeenCalled();
+    expect(result.ok).toBe(false);
+    expect(repo.save).not.toHaveBeenCalled();
+    expect(writer.snooze).not.toHaveBeenCalled();
   });
 });

@@ -1,35 +1,29 @@
 import { describe, expect, it, vi } from 'vitest';
-import { SourceModule } from '@memoflow/contracts/schedule';
-import type { ScheduleEventMap } from '@memoflow/contracts/schedule';
+import type {
+  SchedulingOwner,
+  SchedulingPort,
+  SchedulingReconcileReceipt,
+} from '@memoflow/contracts/schedule';
 import type {
   ReminderScheduleProjectionEventMap,
   ReminderScheduleProjectionSource,
 } from '@memoflow/reminder/schedule-projection';
-import type { IScheduleTaskRepository } from '@memoflow/schedule';
-import { ScheduleTask } from '@memoflow/schedule';
-import type { Publisher, Subscriber } from '@memoflow/utils/domain';
+import type { Subscriber } from '@memoflow/utils/domain';
 import { createReminderProjectionRuntime } from '../runtime/reminder-projection-runtime';
 
-function createScheduleTask(templateId: string, name: string) {
-  return ScheduleTask.create({
-    identityId: 'IdentityId_reminder-owner',
-    name,
-    sourceModule: SourceModule.Reminder,
-    sourceEntityId: templateId,
-    schedule: {
-      cronExpression: null,
-      timezone: 'Asia/Shanghai',
-      startDate: new Date('2030-01-10T08:45:00.000Z').toISOString(),
-      endDate: null,
-      maxExecutions: 1,
-    },
-    metadata: {
-      payload: { reminderId: templateId },
-      tags: ['reminder'],
-      priority: 'Normal',
-      timeout: null,
-    },
-  });
+function receipt(owner: SchedulingOwner): SchedulingReconcileReceipt {
+  return {
+    operationId: 'op',
+    owner,
+    status: 'succeeded',
+    desiredCount: 0,
+    createdCount: 0,
+    updatedCount: 0,
+    deletedCount: 0,
+    unchangedCount: 0,
+    startedAt: 1,
+    finishedAt: 2,
+  };
 }
 
 function createReminderEventsHarness(): {
@@ -41,13 +35,8 @@ function createReminderEventsHarness(): {
 } {
   const handlers = new Map<
     keyof ReminderScheduleProjectionEventMap,
-    Set<
-      (
-        payload: ReminderScheduleProjectionEventMap[keyof ReminderScheduleProjectionEventMap],
-      ) => void
-    >
+    Set<(payload: never) => void>
   >();
-
   return {
     subscriber: {
       on(event, handler) {
@@ -60,89 +49,70 @@ function createReminderEventsHarness(): {
       },
     },
     async emit(event, payload) {
-      const activeHandlers = Array.from(handlers.get(event) ?? []);
-      await Promise.all(activeHandlers.map((handler) => Promise.resolve(handler(payload))));
+      await Promise.all(
+        Array.from(handlers.get(event) ?? []).map((handler) =>
+          Promise.resolve(handler(payload as never)),
+        ),
+      );
     },
-  };
-}
-
-function createScheduleEventsHarness(): {
-  publisher: Publisher<Pick<ScheduleEventMap, 'schedule:task-deleted'>>;
-  sent: Array<{ event: 'schedule:task-deleted'; payload: { taskId: string } }>;
-} {
-  const sent: Array<{ event: 'schedule:task-deleted'; payload: { taskId: string } }> = [];
-
-  return {
-    publisher: {
-      send(event, payload) {
-        sent.push({ event, payload });
-      },
-    },
-    sent,
   };
 }
 
 describe('reminder projection runtime', () => {
-  it('removes template projection entries and unsubscribes on stop', async () => {
-    const matchingTask = createScheduleTask('ReminderTemplateId_dead', 'Old');
-    const reminderEvents = createReminderEventsHarness();
-    const scheduleEvents = createScheduleEventsHarness();
-
-    const scheduleTaskRepository: IScheduleTaskRepository = {
-      save: vi.fn(),
-      findById: vi.fn(),
-      findByIdForIdentity: vi.fn(),
-      deleteById: vi.fn(),
-      findByIdentityId: vi.fn(),
-      findBySourceModule: vi.fn(),
-      findBySourceEntity: vi.fn().mockResolvedValue([matchingTask]),
-      findByStatus: vi.fn(),
-      findEnabled: vi.fn(),
-      findDueTasksForExecution: vi.fn(),
-      query: vi.fn(),
-      count: vi.fn(),
-      saveBatch: vi.fn().mockResolvedValue(undefined),
-      deleteBatch: vi.fn().mockResolvedValue(undefined),
-      withTransaction: vi.fn(),
+  it('reconciles on persisted trigger, removes deleted owners, and unsubscribes on stop', async () => {
+    const owner = {
+      identityId: 'IdentityId_reminder-owner',
+      type: 'reminder.template',
+      id: 'ReminderTemplateId_r1',
     };
-
     const source: ReminderScheduleProjectionSource = {
-      buildTemplatePlan: vi.fn(),
-      buildTemplateDeletionSelection: vi.fn().mockReturnValue({
-        sourceModule: SourceModule.Reminder,
-        sourceEntityId: 'ReminderTemplateId_dead',
-        identityId: 'IdentityId_reminder-owner',
-        matches(task: ScheduleTask) {
-          return task.sourceEntityId === 'ReminderTemplateId_dead';
-        },
-      }),
+      buildTemplatePlan: vi.fn().mockResolvedValue({ owner, desired: [] }),
+      buildTemplateOwner: vi.fn().mockReturnValue(owner),
+      listTemplateRefs: vi.fn().mockResolvedValue([]),
     };
-
+    const reconcile = vi.fn().mockResolvedValue(receipt(owner));
+    const removeOwner = vi.fn().mockResolvedValue(receipt(owner));
+    const schedulingPort: SchedulingPort = { reconcile, removeOwner };
+    const events = createReminderEventsHarness();
     const runtime = createReminderProjectionRuntime({
       source,
-      scheduleTaskRepository,
-      reminderEvents: reminderEvents.subscriber,
-      scheduleEvents: scheduleEvents.publisher,
+      schedulingPort,
+      reminderEvents: events.subscriber,
     });
 
-    runtime.start();
-    await reminderEvents.emit('reminder:template-deleted', {
-      identityId: 'IdentityId_reminder-owner',
-      templateId: 'ReminderTemplateId_dead',
-    } as never);
-    runtime.stop();
-    await reminderEvents.emit('reminder:template-deleted', {
-      identityId: 'IdentityId_reminder-owner',
-      templateId: 'ReminderTemplateId_dead',
-    } as never);
+    await runtime.start();
+    await events.emit('reminder:template-eligibility-changed', {
+      identityId: owner.identityId as never,
+      templateId: owner.id as never,
+      cause: 'profile-membership-state',
+    });
+    await events.emit('reminder:triggered', {
+      identityId: owner.identityId as never,
+      templateId: owner.id as never,
+      triggeredAt: 1,
+      nextTriggerAt: 2,
+      reminder: {} as never,
+    });
+    await events.emit('reminder:template-deleted', {
+      identityId: owner.identityId as never,
+      templateId: owner.id as never,
+      templateTitle: 'Deleted reminder',
+      reminder: {} as never,
+      isSoftDelete: true,
+      deletedAt: Date.now(),
+    });
+    await runtime.stop();
+    await events.emit('reminder:triggered', {
+      identityId: owner.identityId as never,
+      templateId: owner.id as never,
+      triggeredAt: 3,
+      nextTriggerAt: 4,
+      reminder: {} as never,
+    });
 
-    expect(source.buildTemplateDeletionSelection).toHaveBeenCalledTimes(1);
-    expect(scheduleTaskRepository.deleteBatch).toHaveBeenCalledTimes(1);
-    expect(scheduleEvents.sent).toEqual([
-      {
-        event: 'schedule:task-deleted',
-        payload: { taskId: matchingTask.id },
-      },
-    ]);
+    expect(source.buildTemplatePlan).toHaveBeenCalledTimes(2);
+    expect(reconcile).toHaveBeenCalledTimes(2);
+    expect(source.buildTemplateOwner).toHaveBeenCalledTimes(1);
+    expect(removeOwner).toHaveBeenCalledTimes(1);
   });
 });

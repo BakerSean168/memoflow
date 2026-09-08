@@ -80,13 +80,15 @@
           </select>
 
           <select
-            v-model="tagFilter"
+            v-model="labelFilter"
             class="h-9 rounded-md border bg-background px-3 text-sm"
-            data-testid="task-tag-filter"
-            :aria-label="t('task.management.filter.tag')"
+            data-testid="task-label-filter"
+            :aria-label="t('task.management.filter.label')"
           >
-            <option value="all">{{ t('task.management.filter.allTags') }}</option>
-            <option v-for="tag in availableTags" :key="tag" :value="tag">{{ tag }}</option>
+            <option value="all">{{ t('task.management.filter.allLabels') }}</option>
+            <option v-for="label in availableLabels" :key="label.id" :value="label.id">
+              {{ label.name }}
+            </option>
           </select>
 
           <select
@@ -327,7 +329,7 @@ const instanceStatuses: TaskInstanceClientDTO['status'][] = [
 const activeSurface = ref<(typeof surfaces)[number]>('today');
 const searchQuery = ref('');
 const statusFilter = ref<'all' | TaskInstanceClientDTO['status']>('all');
-const tagFilter = ref('all');
+const labelFilter = ref('all');
 const goalFilter = ref<'all' | 'linked' | 'unlinked'>('all');
 const occurrenceSort = ref<TaskOccurrenceSort>('time');
 const showDialog = ref(false);
@@ -359,11 +361,12 @@ const templateById = computed(
 const planViewModels = computed(() =>
   templates.value.map((template) => mapTaskTemplateDtoToViewModel(template, t)),
 );
-const availableTags = computed(() =>
-  [...new Set(templates.value.flatMap((template) => template.tags))].sort((a, b) =>
-    a.localeCompare(b),
-  ),
-);
+const availableLabels = computed(() => {
+  const byId = new Map(
+    templates.value.flatMap((template) => template.labels).map((label) => [label.id, label] as const),
+  );
+  return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
+});
 const isLoading = computed(() => templatesLoading.value || instancesLoading.value);
 const loadError = computed(() => templatesError.value || Boolean(instancesError.value));
 
@@ -373,14 +376,14 @@ function templateMatchesFilters(templateId: string): boolean {
   const query = searchQuery.value.trim().toLowerCase();
   if (
     query &&
-    ![template.name, template.description ?? '', ...template.tags]
+    ![template.name, template.description ?? '', ...template.labels.map((label) => label.name)]
       .join(' ')
       .toLowerCase()
       .includes(query)
   ) {
     return false;
   }
-  if (tagFilter.value !== 'all' && !template.tags.includes(tagFilter.value)) return false;
+  if (labelFilter.value !== 'all' && !template.labels.some((label) => label.id === labelFilter.value)) return false;
   if (goalFilter.value === 'linked' && !template.goalBinding) return false;
   if (goalFilter.value === 'unlinked' && template.goalBinding) return false;
   return true;
@@ -477,8 +480,7 @@ async function handleSubmit(vm: TaskTemplateViewModel) {
     recurrenceRule: (vm.recurrenceRule as unknown as RecurrenceRuleDTO) ?? null,
     reminderConfig: (vm.reminderConfig as never) ?? null,
     importance: (vm.importance as ImportanceLevel) ?? ImportanceLevel.Moderate,
-    tags: vm.tags ?? [],
-    color: vm.color ?? null,
+    labelIds: vm.labelIds ?? vm.labels?.map((label) => label.id) ?? [],
     goalBinding: goalBinding(vm),
   };
   const saved =

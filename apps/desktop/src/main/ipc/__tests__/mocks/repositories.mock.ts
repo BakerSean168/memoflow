@@ -33,28 +33,6 @@ export function createMockGoalRepository(): MockGoalRepository {
   };
 }
 
-// ===== Goal Folder Repository Mock =====
-
-export interface MockGoalFolderRepository {
-  save: ReturnType<typeof vi.fn>;
-  findById: ReturnType<typeof vi.fn>;
-  findByAccountId: ReturnType<typeof vi.fn>;
-  findRootFolders: ReturnType<typeof vi.fn>;
-  delete: ReturnType<typeof vi.fn>;
-  exists: ReturnType<typeof vi.fn>;
-}
-
-export function createMockGoalFolderRepository(): MockGoalFolderRepository {
-  return {
-    save: vi.fn().mockResolvedValue(undefined),
-    findById: vi.fn().mockResolvedValue(null),
-    findByAccountId: vi.fn().mockResolvedValue([]),
-    findRootFolders: vi.fn().mockResolvedValue([]),
-    delete: vi.fn().mockResolvedValue(undefined),
-    exists: vi.fn().mockResolvedValue(false),
-  };
-}
-
 // ===== Task Repository Mocks =====
 
 export interface MockTaskTemplateRepository {

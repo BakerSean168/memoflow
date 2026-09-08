@@ -118,7 +118,6 @@ function createPortStub(): GoalApplicationPort {
     listGoals: vi.fn(),
     searchGoals: vi.fn(),
     getGoalAggregate: vi.fn(),
-    getGoalProgressBreakdown: vi.fn(),
     permanentlyDeleteGoal: vi.fn(),
   } as unknown as GoalApplicationPort;
 }

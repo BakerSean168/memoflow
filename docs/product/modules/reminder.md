@@ -3,90 +3,62 @@ tags:
   - product
   - module
   - reminder
-description: 提醒模块当前功能资产说明
+  - routine
+description: Routine Coach 当前实现、Reminder 兼容聚合与确定性 runtime 边界
 created: 2026-06-02T00:00:00
-updated: 2026-08-25T17:49:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
-# 提醒模块说明
-
-> **调度补充决策（2026-08-25）：** ADR-059 的 Routine Coach 产品方向保持不变；durable wall-clock trigger 将进一步收敛为 **Scheduler 唯一 wake-up authority + Reminder/Routine Domain 唯一 occurrence/next-trigger truth**。当前并行的 Reminder Cron 调度权将按迁移计划退役，但 `ReminderOccurrence` 的幂等、lease/fencing 与可靠事务能力保留。详见 [ADR-062](../../architecture/adr/ADR-062-reminder-routine-single-scheduling-authority.md)。
-
-> **文档状态说明（2026-08-25）：** 本文继续记录当前 `packages/reminder` 已实现的资产与行为，便于迁移期间核对事实。经产品重新推演，Reminder vNext 不再被定义为全局提醒基础设施，而是向独立的 AI-native `Routine Coach`（习惯节律 / 健康干预 / 专注协议）业务领域演进。目标设计见 [Routine Coach vNext](../routine-coach-vnext.md)，长期架构决策见 [ADR-059](../../architecture/adr/ADR-059-routine-coach-domain-runtime-and-surfaces.md)，OSS 调研见 [Routine / Break / Focus OSS 调研](../../analysis/2026-08-25-routine-break-focus-oss-study.md)。
+# Routine / Reminder 模块说明
 
 ## 1. 功能定位
 
-提醒模块用于帮助用户按配置收到行动提醒。它围绕提醒模板、提醒分组、用户偏好、触发配置和响应记录形成闭环，是用户习惯养成和时间管理的触达基础。提醒模块通过 Schedule 模块实现定时调度，通过 Notification 模块实现实际通知发送。
+`packages/reminder` 是当前物理包名与兼容聚合入口，但产品语义已经收敛到 **Routine Coach**：长期配置由 RoutineDefinition / ProfileMembership 表达，确定性的 WallClock / ActiveUsage / Protocol runtime 执行，Notification 只负责用户触达。
 
-## 2. 当前功能说明
+当前 `ReminderTemplate` 创建/更新是迁移兼容入口；写入后会投影 canonical `RoutineDefinition` 与 ProfileMembership，而不是维护第二套独立 Routine 真值。
 
-- 提醒模板管理：创建、编辑、删除、启用、暂停和移动提醒模板。
-- 提醒分组管理：创建、编辑、删除提醒分组，支持分组控制模式（Group vs Individual）。
-- 分组控制模式：Group 模式下分组开关统一控制所有模板；Individual 模式下每个模板独立控制。
-- 触发配置：支持多种触发类型（时间间隔、固定时间、cron 表达式），可配置活跃时间段和活跃小时。
-- 通知配置：每个模板可配置通知渠道（应用内、桌面推送）和通知动作（点击、忽略、贪睡、关闭、完成）。
-- 响应记录：记录用户对提醒的响应动作和响应时间。
-- 频率调整：基于用户响应指标（点击率、忽略率、平均响应时间、有效性评分）智能调整提醒频率。
-- 提醒偏好：用户级别的全局偏好，包括最佳/最差时间段、全局提醒开关和智能频率开关。
-- 即将到来提醒：查询即将到来的提醒列表和今日提醒时间表。
-- Dashboard 小组件：前端提供 UpcomingRemindersWidget 用于 Dashboard 展示。
+## 2. 当前产品能力
 
-## 3. 用户路径
+- Routine/Reminder template 创建、编辑、启停与删除；
+- RoutineProfile + M:N ProfileMembership；Profile 只作为 Gate，不接管成员自身状态；
+- WallClock trigger：由 Scheduler 作为唯一 durable wake-up authority；
+- ActiveUsage trigger：Desktop 本地 activity sensor/runtime 驱动，端能力显式区分；
+- ProtocolSession：50/10、Pomodoro 等持续会话由确定性状态机计时；
+- Temporary Override：snooze / suppress / temporary interval 与长期配置分离，过期后自动回到 canonical trigger；
+- Routine occurrence：保留可靠、幂等、可 fencing 的执行事实；
+- Method Library：初始只提供 Stand & Move、20-20-20、Drink Water、Sleep Wind-down、50/10 Protocol、Pomodoro 六个可验证方法；
+- AI Routine commands：创建 Routine、Profile gate、temporary override、Protocol start/pause/resume/end 通过 owner-domain command port 执行；持久配置变更要求 AI tool approval。
 
-- 常规提醒路径：用户进入提醒页，创建提醒模板，配置触发规则和通知方式，启用后系统按配置自动触发提醒，用户响应后系统记录并调整频率。
-- 分组管理路径：用户创建提醒分组，将模板移入分组，选择控制模式（Group/Individual），通过分组开关批量控制模板状态。
-- 提醒偏好路径：用户在偏好设置中配置最佳/最差时间段、全局开关和智能频率，这些设置影响所有提醒的有效启用状态。
-- 移动端路径：移动端提供提醒列表、提醒详情和提醒编辑入口。
+已退休：`ControlMode.Group/Individual`、single-group ownership、独立 Reminder cron/scanner (`ReminderSchedulerService`)、重复 Smart Frequency 状态、把 snooze 与响应延迟混为一个字段的旧模型。
 
-## 4. 业务规则
+## 3. 单一调度权
 
-- ReminderTemplate 是提醒模块核心聚合，ReminderGroup 和 UserReminderPreferences 是独立聚合。
-- ReminderResponse 和 ReminderHistory 是 ReminderTemplate 的关联实体。
-- 提醒的有效启用状态由三层因素决定：模板自身开关、所属分组控制模式和开关、全局偏好开关。
-- 分组控制模式为 Group 时，分组的 enabled 状态覆盖单个模板的 enabled 状态。
-- 频率调整基于响应指标自动计算 effectivenessScore 和 adjustedInterval。
-- 提醒模块通过 Schedule 模块的 runtime contribution 监听领域事件创建 ScheduleTask，实现定时调度。
-- 提醒模块不直接发送通知，而是通过 Schedule 模块的执行链路触发 Notification 模块。
-- 客户端通过 HTTP 或 IPC 适配器访问提醒能力，服务端通过模块组合根装配用例和仓储实现。
+```text
+Routine domain
+  owns trigger / occurrence / session truth
+        |
+        v
+SchedulingPort.reconcile
+        |
+        v
+Scheduler / Temporal Engine
+  owns durable wake-up / lease / retry
+```
 
-## 5. 相关文件索引
+Routine 不直接创建或修改 raw ScheduleTask。temporary override 更新后只发送 owner-domain `routine:override-changed`，由既有 projection 重新 reconcile。
 
-详细文件清单见 [提醒模块文件索引](../module-index/reminder-files.md)。
+## 4. Method Library 与 Protocol
 
-## 6. 当前问题
+WallClock 方法可直接预填现有 Routine 配置；50/10 与 Pomodoro 不伪装成普通 Interval Reminder，而是进入 ProtocolSession runtime。每个 Method record 明确：方法类型、推荐参数、可编辑参数、runtime requirement、默认干预级别与 source/reference note。
 
-- 提醒模块和通知模块的职责边界需要在优化前明确：提醒负责"何时触发什么"，通知负责"如何送达"。
-- 智能频率调整的算法和有效性需要进一步验证，当前依赖历史响应数据。
-- 分组控制模式的语义较复杂，Group vs Individual 的切换对模板行为的影响需要用户理解。
-- 提醒模板的触发配置类型较多（时间间隔、固定时间、cron），需要确认哪些是用户真正需要的。
-- 提醒与 Schedule 模块的耦合较深，提醒事件变更会直接影响调度侧。
+## 5. 跨端一致性
 
-## 7. 优化机会
+Prisma 与 PowerSync 都持久化 RoutineDefinition / Profile / Membership / ProtocolSession；temporary override 也已补齐 PowerSync parity。Mobile 不伪造 Desktop-only ActiveUsage 能力；能力不可用时应显式反映 capability state。
 
-- 梳理提醒和通知的职责边界，减少用户对"提醒"和"通知"概念的混淆。
-- 强化智能频率调整的可视化，让用户理解频率变化的原因。
-- 简化分组控制模式的用户界面，降低认知负担。
-- 为提醒提供更好的统计和分析能力，帮助用户了解自己的提醒响应习惯。
-- 考虑提醒模板的批量操作能力。
+## 6. 相关资产
 
-## 8. 风险点
-
-- 提醒规则和实际触达之间的边界：提醒模块定义触发规则，但实际通知发送依赖 Notification 模块。
-- 分组控制模式变更对模板有效启用状态的影响。
-- 智能频率调整依赖历史响应数据，新用户或低频用户的数据不足。
-- Schedule 模块的调度精度直接影响提醒的准时性。
-- HTTP、IPC、Prisma 和 PowerSync 适配器同时存在，索引和测试需要覆盖多运行时边界。
-
-## 9. 后续待确认
-
-- 提醒模块是否需要支持更多触发类型（如地理位置触发）。
-- 智能频率调整是否应成为默认行为还是可选功能。
-- 分组控制模式是否需要简化或重新设计。
-- 提醒与通知的职责边界是否需要在产品层面更清晰地划分。
-- Dashboard 对提醒数据的依赖是否需要专门的读模型契约。
-
-## 10. 相关资料
-
-- [通知模块说明](./notification.md)
-- [日程模块说明](./schedule.md)
-- [提醒模块文件索引](../module-index/reminder-files.md)
+- [Routine Coach vNext](../routine-coach-vnext.md)
+- [ADR-059 Routine Coach](../../architecture/adr/ADR-059-routine-coach-domain-runtime-and-surfaces.md)
+- [ADR-062 Single Scheduling Authority](../../architecture/adr/ADR-062-reminder-routine-single-scheduling-authority.md)
+- [Method Library / AI parity evidence](../../analysis/2026-09-08-hard-7104-documentation-truth-closure.md)
+- [Reminder/Routine 文件索引](../module-index/reminder-files.md)

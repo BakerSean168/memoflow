@@ -24,6 +24,7 @@
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule": "workspace:*",
     "@memoflow/schedule-orchestration": "workspace:*",
+    "@memoflow/scheduler": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/utils": "workspace:*",

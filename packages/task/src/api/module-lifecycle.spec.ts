@@ -32,8 +32,6 @@ function createApiStub(): TaskApplicationPort {
     unbindTaskFromGoal: noop,
     getTaskTemplate: noop,
     listTaskTemplates: noop,
-    getTaskTemplateGraph: noop,
-    listTaskTemplatesByPriority: noop,
     completeTaskInstance: noop,
     uncompleteTaskInstance: noop,
     skipTaskInstance: noop,
@@ -45,13 +43,6 @@ function createApiStub(): TaskApplicationPort {
     listTaskInstancesByTemplate: noop,
     listTaskInstancesByStatus: noop,
     getTaskInstancesByDateRange: noop,
-    createTaskDependency: noop,
-    deleteTaskDependency: noop,
-    updateTaskDependency: noop,
-    listTaskDependencies: noop,
-    listTaskDependents: noop,
-    getDependencyChain: noop,
-    validateTaskDependency: noop,
   } as TaskApplicationPort;
 }
 

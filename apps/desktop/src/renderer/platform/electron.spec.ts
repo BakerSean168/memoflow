@@ -92,9 +92,9 @@ describe('initElectronFeatures DB_CHANGED pilot routing (Step 3)', () => {
     const { initElectronFeatures } = await import('./electron');
     initElectronFeatures({} as never);
 
-    emitDbChanged(['notifications', 'task_templates', 'task_dependencies', 'rules', 'goals']);
+    emitDbChanged(['notifications', 'task_templates', 'rules', 'goals']);
 
-    expect(dispatchedIntents()).toHaveLength(4);
+    expect(dispatchedIntents()).toHaveLength(3);
     expect(dispatchedIntents()[0]).toEqual({
       target: 'notification',
       identityScope: 'profile-1',
@@ -107,12 +107,6 @@ describe('initElectronFeatures DB_CHANGED pilot routing (Step 3)', () => {
       projection: 'all',
     });
     expect(dispatchedIntents()[2]).toEqual({
-      target: 'task-template',
-      identityScope: 'profile-1',
-      source: 'powersync',
-      projection: 'graphs',
-    });
-    expect(dispatchedIntents()[3]).toEqual({
       target: 'governance',
       identityScope: 'profile-1',
       source: 'powersync',

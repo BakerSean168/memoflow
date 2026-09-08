@@ -10,6 +10,7 @@ import { brandedId } from '../../../primitives';
 import type {
   ReminderTemplateId,
   ReminderGroupId,
+  RoutineProfileId,
   IdentityId,
   ReminderHistoryId,
   ReminderResponseId,
@@ -19,13 +20,13 @@ import { ReminderType } from '../value-objects/reminder-type';
 import { ReminderStatus } from '../value-objects/reminder-status';
 import { TriggerResult } from '../value-objects/trigger-result';
 import { NotificationChannel } from '../value-objects/notification-channel';
-import { ControlMode } from '../value-objects/control-mode';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { ActiveHoursConfigSchema } from '../value-objects/active-hours-config';
 import { ActiveTimeConfigSchema } from '../value-objects/active-time-config';
 import { GroupStatsSchema } from '../value-objects/group-stats';
 import { TriggerConfigSchema } from '../value-objects/trigger-config';
 import { NotificationConfigSchema } from '../value-objects/notification-config';
+import { ReminderResponseAction } from '../entities/reminder-response-server';
 import { TimeSlotSchema } from '../value-objects/time-slot';
 
 // Residual 751: TimeSlotSchema owned by value-objects (TimeSlotDTO is z.infer alias).
@@ -43,6 +44,18 @@ export { TriggerConfigSchema, NotificationConfigSchema };
 // ============ 值对象 Zod Schema ============
 
 // ============ ReminderTemplate Response Schema ============
+
+/** Canonical Routine/Profile membership read model for one Routine. */
+export const RoutineProfileMembershipViewSchema = z.object({
+  profileId: brandedId<RoutineProfileId>(),
+  profileName: z.string().nullable(),
+  enabled: z.boolean(),
+  profileEnabled: z.boolean(),
+  profileActive: z.boolean(),
+  effectiveEnabled: z.boolean(),
+});
+
+export type RoutineProfileMembershipView = z.infer<typeof RoutineProfileMembershipViewSchema>;
 
 /**
  * Residual 833: ReminderTemplateClientDTO dual retired — sole ReminderTemplateResponseSchema + z.infer
@@ -62,8 +75,7 @@ export const ReminderTemplateResponseSchema = z.object({
   selfEnabled: z.boolean(),
   status: z.enum(ReminderStatus),
   effectiveEnabled: z.boolean(),
-  groupId: brandedId<ReminderGroupId>().nullable(),
-  groupName: z.string().nullable().optional(),
+  profileMemberships: z.array(RoutineProfileMembershipViewSchema),
   importanceLevel: z.enum(ImportanceLevel),
   tags: z.array(z.string()),
   color: z.string().nullable(),
@@ -78,11 +90,8 @@ export const ReminderTemplateResponseSchema = z.object({
   // UI 扩展
   isActive: z.boolean(),
   isPaused: z.boolean(),
-  controlledByGroup: z.boolean(),
-  lifecycleSource: z.enum(['global', 'group', 'template']),
+  lifecycleSource: z.enum(['global', 'profile', 'routine']),
   effectiveEnabledReason: z.string(),
-  groupControlMode: z.enum(['Group', 'Individual']).nullable(),
-  groupEnabled: z.boolean().nullable(),
   globalReminderEnabled: z.boolean(),
 });
 
@@ -109,7 +118,6 @@ export const ReminderGroupResponseSchema = z.object({
   description: z.string().nullable(),
   color: z.string().nullable(),
   icon: z.string().nullable(),
-  controlMode: z.enum(ControlMode),
   enabled: z.boolean(),
   status: z.enum(ReminderStatus),
   order: z.number(),
@@ -151,21 +159,13 @@ export const ReminderHistoryResponseSchema = z.object({
 export const ReminderResponseItemSchema = z.object({
   id: brandedId<ReminderResponseId>(),
   reminderTemplateId: brandedId<ReminderTemplateId>(),
-  action: z.string(),
-  responseTime: z.number().nullable().optional(),
+  action: z.enum(ReminderResponseAction),
+  responseTime: z.number().int().nonnegative().nullable().optional(),
+  snoozeDurationSeconds: z.number().int().positive().nullable().optional(),
   timestamp: z.number(),
 });
 
-// ============ Batch Result Schema ============
-
-// Residual 781: sole batch result transport shape (BatchGroupTemplatesRes is z.infer alias).
-export const ReminderBatchResultSchema = z.object({
-  successCount: z.number(),
-  failedCount: z.number(),
-});
-
 // ============ UserReminderPreferences Response Schema ============
-
 
 // Residual 829: UserReminderPreferencesClientDTO dual retired — sole UserReminderPreferencesResponseSchema + z.infer
 // (semantic type is z.infer alias in aggregates/user-reminder-preferences-server.ts).
@@ -175,7 +175,6 @@ export const UserReminderPreferencesResponseSchema = z.object({
   bestTimeSlots: z.array(TimeSlotSchema),
   worstTimeSlots: z.array(TimeSlotSchema),
   globalReminderEnabled: z.boolean(),
-  globalSmartFrequency: z.boolean(),
   createdAt: z.number(),
   updatedAt: z.number(),
   bestTimeSlotsText: z.string(),
@@ -187,7 +186,6 @@ export const UpdateReminderPreferencesSchema = z.object({
   bestTimeSlots: z.array(TimeSlotSchema).optional(),
   worstTimeSlots: z.array(TimeSlotSchema).optional(),
   globalReminderEnabled: z.boolean().optional(),
-  globalSmartFrequencyEnabled: z.boolean().optional(),
 });
 
 export type UpdateReminderPreferencesReq = z.infer<typeof UpdateReminderPreferencesSchema>;
@@ -197,8 +195,9 @@ export type UpdateReminderPreferencesReq = z.infer<typeof UpdateReminderPreferen
 export const ResponseRecordResultSchema = z.object({
   id: brandedId<ReminderResponseId>(),
   templateId: brandedId<ReminderTemplateId>(),
-  action: z.string(),
-  responseTime: z.number().nullable(),
+  action: z.enum(ReminderResponseAction),
+  responseTime: z.number().int().nonnegative().nullable(),
+  snoozeDurationSeconds: z.number().int().positive().nullable(),
   recordedAt: z.number(),
 });
 

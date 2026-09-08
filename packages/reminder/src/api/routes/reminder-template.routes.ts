@@ -25,6 +25,7 @@ import { parseNumber, parseString } from '@memoflow/utils/shared';
 import {
   CreateReminderTemplateSchema,
   UpdateReminderTemplateSchema,
+  ReplaceRoutineProfilesSchema,
   GetUpcomingRemindersSchema,
   GetUpcomingRemindersResSchema,
   GetReminderTodayScheduleSchema,
@@ -33,6 +34,7 @@ import {
   ReminderTemplateListResponseSchema,
   ReminderHistoryResponseSchema,
   ReminderResponseItemSchema,
+  RecordReminderResponseSchema,
   ResponseRecordResultSchema,
   ResponseStatsResultSchema,
   FrequencyAnalysisResultSchema,
@@ -211,38 +213,6 @@ export function registerReminderTemplateRoutes(
 
   // ==================== Template Actions ====================
 
-  // POST /templates/:id/enable
-  r.route(
-    {
-      method: 'post',
-      path: '/templates/:id/enable',
-      summary: '启用提醒模板',
-      request: { params: z.object({ id: brandedId<ReminderTemplateId>() }) },
-      responses: {
-        200: successResponse(ReminderTemplateResponseSchema, '启用成功'),
-        404: errorResponse('模板不存在'),
-      },
-    },
-    [auth],
-    (req, ctx) => controller.enableTemplate(req.params!.id, ctx),
-  );
-
-  // POST /templates/:id/pause
-  r.route(
-    {
-      method: 'post',
-      path: '/templates/:id/pause',
-      summary: '暂停提醒模板',
-      request: { params: z.object({ id: brandedId<ReminderTemplateId>() }) },
-      responses: {
-        200: successResponse(ReminderTemplateResponseSchema, '暂停成功'),
-        404: errorResponse('模板不存在'),
-      },
-    },
-    [auth],
-    (req, ctx) => controller.pauseTemplate(req.params!.id, ctx),
-  );
-
   // POST /templates/:id/toggle
   r.route(
     {
@@ -259,23 +229,23 @@ export function registerReminderTemplateRoutes(
     (req, ctx) => controller.toggleTemplate(req.params!.id, ctx),
   );
 
-  // POST /templates/:id/move
+  // PUT /templates/:id/profiles
   r.route(
     {
-      method: 'post',
-      path: '/templates/:id/move',
-      summary: '移动提醒模板到其他分组',
+      method: 'put',
+      path: '/templates/:id/profiles',
+      summary: '替换 Routine 的 ProfileMembership 集合',
       request: {
         params: z.object({ id: brandedId<ReminderTemplateId>() }),
-        body: { content: { 'application/json': { schema: z.object({ groupId: z.string() }) } } },
+        body: { content: { 'application/json': { schema: ReplaceRoutineProfilesSchema } } },
       },
       responses: {
-        200: successResponse(ReminderTemplateResponseSchema, '移动成功'),
-        404: errorResponse('模板不存在'),
+        200: successResponse(ReminderTemplateResponseSchema, 'ProfileMembership 更新成功'),
+        404: errorResponse('Routine 或 Profile 不存在'),
       },
     },
     [auth],
-    (req, ctx) => controller.moveTemplate(req.params!.id, req.body, ctx),
+    (req, ctx) => controller.replaceTemplateProfiles(req.params!.id, req.body, ctx),
   );
 
   // GET /templates/:id/history
@@ -307,7 +277,7 @@ export function registerReminderTemplateRoutes(
         body: {
           content: {
             'application/json': {
-              schema: z.object({ action: z.string(), note: z.string().optional() }),
+              schema: RecordReminderResponseSchema,
             },
           },
         },
@@ -395,22 +365,6 @@ export function registerReminderTemplateRoutes(
     },
     [auth],
     (req, ctx) => controller.adjustFrequency(req.params!.id, req.body, ctx),
-  );
-
-  // POST /templates/:id/frequency-adjustment/reject
-  r.route(
-    {
-      method: 'post',
-      path: '/templates/:id/frequency-adjustment/reject',
-      summary: '拒绝频率调整建议',
-      request: { params: z.object({ id: brandedId<ReminderTemplateId>() }) },
-      responses: {
-        200: successResponse(z.null(), '已拒绝'),
-        404: errorResponse('模板不存在'),
-      },
-    },
-    [auth],
-    (_req, ctx) => controller.rejectFrequencyAdjustment(_req.params!.id, ctx),
   );
 
   return router;

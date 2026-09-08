@@ -8,15 +8,19 @@ tags:
   - taxonomy
 description: Shared Label Registry、Goal/Task 标签关联与系统派生视图分离决策
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-08-25T14:28:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-054: Shared Labels 与 System Views 分离
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施
 **日期：** 2026-08-25  
 **影响范围：** Goal、Task、contracts、database、shared UI、query/filter  
 **关联：** ADR-053
+
+## 2026-09-08 实现状态
+
+Shared Label 已成为 Goal/Task 唯一用户分类真值：identity-scoped Label registry + GoalLabel/TaskLabel assignment，客户端读取 `labels[]`、写入 `labelIds`，AND 过滤使用 `labelIdsAll`。Task 旧 `tags/color` 已通过 fail-closed、可重放迁移转入 Label/TaskLabel 后删除；Web/Desktop/Mobile/AI 均已切到同一语义。
 
 ## 1. 背景
 

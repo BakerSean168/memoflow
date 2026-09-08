@@ -43,6 +43,10 @@ export default defineConfig({
         'web-overlays': path.resolve(__dirname, 'src/web-overlays.ts'),
         'di/index': path.resolve(__dirname, 'src/di/index.ts'),
         desktop: path.resolve(__dirname, 'src/desktop.ts'),
+        'shared/utils/desktop-profile-access': path.resolve(
+          __dirname,
+          'src/shared/utils/desktop-profile-access.ts',
+        ),
         'plugins/i18n': path.resolve(__dirname, 'src/plugins/i18n.ts'),
         'router/index': path.resolve(__dirname, 'src/router/index.ts'),
         'modules/authentication/index': path.resolve(

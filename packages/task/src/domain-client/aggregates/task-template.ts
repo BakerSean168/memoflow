@@ -40,9 +40,7 @@ export interface TaskTemplateState {
   reminderConfig: TaskReminderConfig | null;
   importance: ImportanceLevel;
   goalBinding: TaskGoalBinding | null;
-  tags: string[];
   labels: LabelClientDTO[];
-  color: string | null;
   status: TaskTemplateStatus;
   outcome: TaskPlanOutcomeValue;
   completionPolicy: TaskPlanCompletionPolicyValue;
@@ -117,16 +115,8 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
     return this._props.goalBinding;
   }
 
-  get tags(): string[] {
-    return [...this._props.tags];
-  }
-
   get labels(): LabelClientDTO[] {
     return this._props.labels.map((label) => ({ ...label }));
-  }
-
-  get color(): string | null {
-    return this._props.color;
   }
 
   get status(): TaskTemplateStatus {
@@ -287,9 +277,7 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
       goalBinding: this._props.goalBinding
         ? this.serializeGoalBinding(this._props.goalBinding)
         : null,
-      tags: [...this._props.tags],
       labels: this._props.labels.map((label) => ({ ...label })),
-      color: this._props.color,
       status: this._props.status,
       outcome: this._props.outcome,
       completionPolicy: this._props.completionPolicy,

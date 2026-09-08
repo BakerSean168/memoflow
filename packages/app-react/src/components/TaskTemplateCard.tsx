@@ -68,9 +68,9 @@ export function TaskTemplateCard({
           Updated {formatProductRelative(template.updatedAt)}
         </ThemedText>
         <View style={styles.tagRow}>
-          {template.tags.slice(0, 3).map((tag) => (
-            <ThemedView key={tag} type="backgroundSelected" style={styles.tagBadge}>
-              <ThemedText type="small" themeColor="textSecondary">#{tag}</ThemedText>
+          {template.labels.slice(0, 3).map((label) => (
+            <ThemedView key={label.id} type="backgroundSelected" style={styles.tagBadge}>
+              <ThemedText type="small" themeColor="textSecondary">{label.name}</ThemedText>
             </ThemedView>
           ))}
         </View>

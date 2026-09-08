@@ -1,25 +1,23 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { IReminderTemplateRepository } from '../../repositories/i-reminder-template-repository';
 import type { IReminderGroupRepository } from '../../repositories/i-reminder-group-repository';
+import type { RoutineProfileStore } from '../../ports';
 import { ReminderDomainService } from '../reminder-domain-service';
 import { ReminderTemplate } from '../../aggregates/reminder-template';
 import type { ReminderTemplateState } from '../../aggregates/reminder-template';
 import { ReminderGroup } from '../../aggregates/reminder-group';
 import type { ReminderGroupState } from '../../aggregates/reminder-group';
-import { ControlMode, ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
+import { ReminderStatus, ReminderType } from '@memoflow/contracts/reminder';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { ReminderTemplateId } from '../../value-objects/reminder-template-id';
 import { IdentityId } from '@memoflow/domain-shared';
 import { TriggerConfig, ActiveTimeConfig, GroupStats } from '../../value-objects';
 import { ReminderNotificationConfig } from '../../value-objects/reminder-notification-config';
 import { generateUUID } from '@memoflow/utils/shared';
+import { ProfileMembership, RoutineProfile } from '../../routine';
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-const IDENTITY_ID = IdentityId.generate();
+const IDENTITY_ID = String(IdentityId.generate());
 
 function makeTemplateState(overrides: Partial<ReminderTemplateState> = {}): ReminderTemplateState {
   const now = Date.now();
@@ -35,20 +33,16 @@ function makeTemplateState(overrides: Partial<ReminderTemplateState> = {}): Remi
     notificationConfig: ReminderNotificationConfig.createDefault(),
     selfEnabled: true,
     status: ReminderStatus.Active,
-    groupId: null,
     effectiveEnabled: true,
     importanceLevel: ImportanceLevel.Moderate,
     tags: [],
     color: null,
     icon: null,
     nextTriggerAt: now + 3_600_000,
-    createdAt: new Date(now),
-    updatedAt: new Date(now),
+    createdAt: now,
+    updatedAt: now,
     deletedAt: null,
     version: 1,
-    responseMetrics: null,
-    frequencyAdjustment: null,
-    smartFrequencyEnabled: true,
     history: [],
     ...overrides,
   };
@@ -59,9 +53,8 @@ function makeGroupState(overrides: Partial<ReminderGroupState> = {}): ReminderGr
   return {
     id: generateUUID(),
     identityId: IDENTITY_ID,
-    name: 'Domain Svc Group',
+    name: 'Work',
     description: null,
-    controlMode: ControlMode.Individual,
     enabled: true,
     status: ReminderStatus.Active,
     order: 0,
@@ -76,13 +69,115 @@ function makeGroupState(overrides: Partial<ReminderGroupState> = {}): ReminderGr
   };
 }
 
-// ===========================================================================
-// Tests
-// ===========================================================================
+function makeCreateInput(profileIds: readonly string[] = []) {
+  return {
+    identityId: IDENTITY_ID,
+    title: 'Hydration',
+    type: ReminderType.Recurring,
+    trigger: {
+      type: 'FixedTime' as const,
+      fixedTime: { time: '09:00', timezone: 'UTC' },
+      interval: null,
+    },
+    activeTime: { activatedAt: Date.now() },
+    notificationConfig: {
+      channels: ['InApp'] as const,
+      title: null,
+      body: null,
+      sound: null,
+      vibration: null,
+      actions: null,
+    },
+    profileIds,
+  };
+}
+
+function createInMemoryStore() {
+  let profiles: RoutineProfile[] = [];
+  let memberships: ProfileMembership[] = [];
+
+  const store: RoutineProfileStore = {
+    upsertDefinition: vi.fn(async () => {}),
+    findDefinition: vi.fn(async () => null),
+    deleteDefinition: vi.fn(async () => {}),
+    upsertProfile: vi.fn(async (profile: RoutineProfile) => {
+      profiles = [...profiles.filter((item) => item.id !== profile.id), profile];
+    }),
+    findProfile: vi.fn(async ({ identityId, profileId }) =>
+      profiles.find((item) => item.identityId === identityId && item.id === profileId) ?? null,
+    ),
+    listProfiles: vi.fn(async ({ identityId }) =>
+      profiles.filter((item) => item.identityId === identityId),
+    ),
+    findProfilesByIds: vi.fn(async ({ identityId, profileIds }) =>
+      profiles.filter((item) => item.identityId === identityId && profileIds.includes(item.id)),
+    ),
+    deleteProfile: vi.fn(async ({ identityId, profileId }) => {
+      profiles = profiles.filter(
+        (item) => !(item.identityId === identityId && item.id === profileId),
+      );
+      memberships = memberships.filter(
+        (item) => !(item.identityId === identityId && item.profileId === profileId),
+      );
+    }),
+    upsertMembership: vi.fn(async (membership: ProfileMembership) => {
+      memberships = [
+        ...memberships.filter(
+          (item) =>
+            !(
+              item.identityId === membership.identityId &&
+              item.profileId === membership.profileId &&
+              item.routineId === membership.routineId
+            ),
+        ),
+        membership,
+      ];
+    }),
+    listMembershipsForRoutine: vi.fn(async ({ identityId, routineId }) =>
+      memberships.filter(
+        (item) => item.identityId === identityId && item.routineId === routineId,
+      ),
+    ),
+    listMembershipsForRoutines: vi.fn(async ({ identityId, routineIds }) =>
+      memberships.filter(
+        (item) => item.identityId === identityId && routineIds.includes(item.routineId),
+      ),
+    ),
+    listMembershipsForProfile: vi.fn(async ({ identityId, profileId }) =>
+      memberships.filter(
+        (item) => item.identityId === identityId && item.profileId === profileId,
+      ),
+    ),
+    deleteMembership: vi.fn(async ({ identityId, profileId, routineId }) => {
+      memberships = memberships.filter(
+        (item) =>
+          !(
+            item.identityId === identityId &&
+            item.profileId === profileId &&
+            item.routineId === routineId
+          ),
+      );
+    }),
+    replaceRoutineMemberships: vi.fn(async ({ identityId, routineId, memberships: next }) => {
+      memberships = [
+        ...memberships.filter(
+          (item) => !(item.identityId === identityId && item.routineId === routineId),
+        ),
+        ...next,
+      ];
+    }),
+  };
+
+  return {
+    store,
+    getMemberships: () => memberships,
+  };
+}
 
 describe('ReminderDomainService', () => {
   let templateRepo: ReturnType<typeof createMockRepo<IReminderTemplateRepository>>;
   let groupRepo: ReturnType<typeof createMockRepo<IReminderGroupRepository>>;
+  let routineStore: ReturnType<typeof createInMemoryStore>;
   let service: ReminderDomainService;
 
   beforeEach(() => {
@@ -90,7 +185,8 @@ describe('ReminderDomainService', () => {
     templateRepo = createMockRepo<IReminderTemplateRepository>({
       save: vi.fn().mockResolvedValue(undefined),
       findByIdForIdentity: vi.fn().mockResolvedValue(null),
-      findByGroupId: vi.fn().mockResolvedValue([]),
+      findByIdentityId: vi.fn().mockResolvedValue([]),
+      findByIds: vi.fn().mockResolvedValue([]),
       delete: vi.fn().mockResolvedValue(undefined),
     });
     groupRepo = createMockRepo<IReminderGroupRepository>({
@@ -99,319 +195,164 @@ describe('ReminderDomainService', () => {
       findByName: vi.fn().mockResolvedValue(null),
       delete: vi.fn().mockResolvedValue(undefined),
     });
-    service = new ReminderDomainService(templateRepo, groupRepo);
+    routineStore = createInMemoryStore();
+    service = new ReminderDomainService(templateRepo, groupRepo, undefined, routineStore.store);
   });
 
-  // -----------------------------------------------------------------------
-  // createReminderTemplate()
-  // -----------------------------------------------------------------------
-  describe('createReminderTemplate()', () => {
-    it('should create and save a template', async () => {
-      const result = await service.createReminderTemplate({
+  it('creates a Routine and persists an empty canonical membership set by default', async () => {
+    const template = await service.createReminderTemplate(makeCreateInput());
+
+    expect(template.title).toBe('Hydration');
+    expect(routineStore.store.upsertDefinition).toHaveBeenCalled();
+    expect(routineStore.store.replaceRoutineMemberships).toHaveBeenCalledWith(
+      expect.objectContaining({
         identityId: IDENTITY_ID,
-        title: 'New Template',
-        type: ReminderType.Recurring,
-        trigger: {
-          type: 'FixedTime',
-          fixedTime: { time: '09:00', timezone: null },
-          interval: null,
-        },
-        activeTime: { activatedAt: Date.now() },
-        notificationConfig: {
-          channels: ['InApp'],
-          title: null,
-          body: null,
-          sound: null,
-          vibration: null,
-          actions: null,
-        },
-      });
+        routineId: template.id,
+        memberships: [],
+      }),
+    );
+    expect(templateRepo.save).toHaveBeenCalledWith(template);
+  });
 
-      expect(result).toBeDefined();
-      expect(result.title).toBe('New Template');
-      expect(templateRepo.save).toHaveBeenCalledTimes(1);
+  it('creates an M:N ProfileMembership set and never consults a single Group owner', async () => {
+    const work = RoutineProfile.create({
+      id: 'work', identityId: IDENTITY_ID, name: 'Work', enabled: true, active: true,
     });
-
-    it('should throw when groupId does not exist', async () => {
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-
-      await expect(
-        service.createReminderTemplate({
-          identityId: IDENTITY_ID,
-          title: 'With Group',
-          type: ReminderType.Recurring,
-          trigger: {
-            type: 'FixedTime',
-            fixedTime: { time: '09:00', timezone: null },
-            interval: null,
-          },
-          activeTime: { activatedAt: Date.now() },
-          notificationConfig: {
-            channels: ['InApp'],
-            title: null,
-            body: null,
-            sound: null,
-            vibration: null,
-            actions: null,
-          },
-          groupId: 'non-existent',
-        }),
-      ).rejects.toThrow('Invalid groupId');
+    const gaming = RoutineProfile.create({
+      id: 'gaming', identityId: IDENTITY_ID, name: 'Gaming', enabled: true, active: true,
     });
+    await routineStore.store.upsertProfile(work);
+    await routineStore.store.upsertProfile(gaming);
 
-    it('should throw when owned group lookup returns null (cross-identity)', async () => {
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    const template = await service.createReminderTemplate(makeCreateInput(['work', 'gaming']));
+    const memberships = routineStore.getMemberships().filter((item) => item.routineId === template.id);
 
-      await expect(
-        service.createReminderTemplate({
-          identityId: IDENTITY_ID,
-          title: 'Mismatched',
-          type: ReminderType.Recurring,
-          trigger: {
-            type: 'FixedTime',
-            fixedTime: { time: '09:00', timezone: null },
-            interval: null,
-          },
-          activeTime: { activatedAt: Date.now() },
-          notificationConfig: {
-            channels: ['InApp'],
-            title: null,
-            body: null,
-            sound: null,
-            vibration: null,
-            actions: null,
-          },
-          groupId: 'foreign-group',
-        }),
-      ).rejects.toThrow('Invalid groupId');
-    });
+    expect(memberships.map((item) => item.profileId).sort()).toEqual(['gaming', 'work']);
+    expect(groupRepo.findByIdForIdentity).not.toHaveBeenCalled();
+  });
 
-    it('should update group stats when groupId is provided', async () => {
-      const group = ReminderGroup.load(makeGroupState());
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
+  it('fails closed when any requested Profile is missing', async () => {
+    await routineStore.store.upsertProfile(
+      RoutineProfile.create({ id: 'work', identityId: IDENTITY_ID, name: 'Work' }),
+    );
 
-      await service.createReminderTemplate({
+    await expect(
+      service.createReminderTemplate(makeCreateInput(['work', 'missing'])),
+    ).rejects.toThrow('Routine Profile not found: missing');
+    expect(templateRepo.save).not.toHaveBeenCalled();
+  });
+
+  it('recalculates Profile stats from canonical memberships', async () => {
+    const group = ReminderGroup.load(makeGroupState());
+    const template = ReminderTemplate.load(makeTemplateState());
+    await routineStore.store.upsertProfile(
+      RoutineProfile.create({ id: group.id, identityId: IDENTITY_ID, name: group.name }),
+    );
+    await routineStore.store.upsertMembership(
+      ProfileMembership.create({
         identityId: IDENTITY_ID,
-        title: 'Grouped',
-        type: ReminderType.Recurring,
-        trigger: {
-          type: 'FixedTime',
-          fixedTime: { time: '09:00', timezone: null },
-          interval: null,
-        },
-        activeTime: { activatedAt: Date.now() },
-        notificationConfig: {
-          channels: ['InApp'],
-          title: null,
-          body: null,
-          sound: null,
-          vibration: null,
-          actions: null,
-        },
-        groupId: group.id,
-      });
+        profileId: group.id,
+        routineId: template.id,
+      }),
+    );
+    (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
+    (templateRepo.findByIds as ReturnType<typeof vi.fn>).mockResolvedValue([template]);
 
-      // save called for template + group stats update
-      expect(groupRepo.save).toHaveBeenCalled();
+    await service.updateGroupStats(IDENTITY_ID, group.id);
+
+    expect(templateRepo.findByIds).toHaveBeenCalledWith(IDENTITY_ID, [template.id]);
+    expect(group.stats).toMatchObject({
+      totalTemplates: 1,
+      activeTemplates: 1,
+      pausedTemplates: 0,
+      selfEnabledTemplates: 1,
+      selfPausedTemplates: 0,
     });
+    expect(groupRepo.save).toHaveBeenCalledWith(group);
   });
 
-  describe('updateGroupStats()', () => {
-    it('should recalculate and persist group stats', async () => {
-      const group = ReminderGroup.load(makeGroupState());
-      const template = ReminderTemplate.load(
-        makeTemplateState({
-          groupId: group.id,
-          status: ReminderStatus.Active,
-          selfEnabled: true,
+  it('refuses to delete a Profile while canonical memberships still reference it', async () => {
+    const group = ReminderGroup.load(makeGroupState());
+    const template = ReminderTemplate.load(makeTemplateState());
+    (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
+    (templateRepo.findByIds as ReturnType<typeof vi.fn>).mockResolvedValue([template]);
+    await routineStore.store.upsertMembership(
+      ProfileMembership.create({ identityId: IDENTITY_ID, profileId: group.id, routineId: template.id }),
+    );
+
+    await expect(service.deleteGroup(IDENTITY_ID, group.id)).rejects.toThrow(
+      /still contains 1 Routine memberships/,
+    );
+  });
+
+  it('soft- and hard-deletes an empty Profile and removes its canonical projection', async () => {
+    const soft = ReminderGroup.load(makeGroupState({ id: 'profile-soft' }));
+    (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValueOnce(soft);
+    await service.deleteGroup(IDENTITY_ID, soft.id);
+    expect(soft.deletedAt).not.toBeNull();
+    expect(groupRepo.save).toHaveBeenCalledWith(soft);
+    expect(routineStore.store.deleteProfile).toHaveBeenCalledWith({
+      identityId: IDENTITY_ID,
+      profileId: soft.id,
+    });
+
+    const hard = ReminderGroup.load(makeGroupState({ id: 'profile-hard' }));
+    (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValueOnce(hard);
+    await service.deleteGroup(IDENTITY_ID, hard.id, false);
+    expect(groupRepo.delete).toHaveBeenCalledWith(IDENTITY_ID, hard.id);
+  });
+
+  it('recalculates member eligibility after a Profile gate toggles', async () => {
+    const group = ReminderGroup.load(makeGroupState({ id: 'work', enabled: true, status: ReminderStatus.Active }));
+    const template = ReminderTemplate.load(makeTemplateState());
+    await routineStore.store.upsertProfile(
+      RoutineProfile.create({ id: group.id, identityId: IDENTITY_ID, name: group.name, enabled: true, active: true }),
+    );
+    await routineStore.store.upsertMembership(
+      ProfileMembership.create({ identityId: IDENTITY_ID, profileId: group.id, routineId: template.id }),
+    );
+    (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
+    (templateRepo.findByIds as ReturnType<typeof vi.fn>).mockResolvedValue([template]);
+
+    await service.toggleGroupAndTemplates(IDENTITY_ID, group.id);
+
+    expect(group.enabled).toBe(false);
+    expect(template.selfEnabled).toBe(true);
+    expect(template.effectiveEnabled).toBe(false);
+    expect(template.pullDomainEvents()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          eventType: 'reminder:template-eligibility-changed',
+          payload: expect.objectContaining({ cause: 'profile-gate' }),
         }),
-      );
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
-      (templateRepo.findByGroupId as ReturnType<typeof vi.fn>).mockResolvedValue([template]);
+      ]),
+    );
+    expect(templateRepo.save).toHaveBeenCalledWith(template);
+  });
 
-      await service.updateGroupStats(IDENTITY_ID, group.id);
+  it('deletes a Routine without requiring any single owner field', async () => {
+    const template = ReminderTemplate.load(makeTemplateState());
+    (templateRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(template);
 
-      expect(groupRepo.save).toHaveBeenCalledTimes(1);
-      const savedGroup = (groupRepo.save as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReminderGroup;
-      expect(savedGroup.stats.totalTemplates).toBe(1);
-      expect(savedGroup.stats.activeTemplates).toBe(1);
-      expect(savedGroup.stats.pausedTemplates).toBe(0);
+    await service.deleteTemplate(IDENTITY_ID, template.id);
+
+    expect(template.deletedAt).not.toBeNull();
+    expect(templateRepo.save).toHaveBeenCalledWith(template);
+    expect(routineStore.store.deleteDefinition).toHaveBeenCalledWith({
+      identityId: IDENTITY_ID,
+      routineId: template.id,
     });
   });
 
-  // -----------------------------------------------------------------------
-  // deleteTemplate()
-  // -----------------------------------------------------------------------
-  describe('deleteTemplate()', () => {
-    it('should soft-delete and save the template', async () => {
-      const template = ReminderTemplate.load(makeTemplateState());
-      (templateRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(template);
+  it('creates a Profile projection and rejects duplicate names', async () => {
+    const group = await service.createReminderGroup({ identityId: IDENTITY_ID, name: 'Focus' });
+    expect(routineStore.store.upsertProfile).toHaveBeenCalledWith(
+      expect.objectContaining({ id: group.id, name: 'Focus' }),
+    );
 
-      await service.deleteTemplate(IDENTITY_ID, template.id);
-
-      expect(templateRepo.save).toHaveBeenCalledTimes(1);
-      expect(template.deletedAt).not.toBeNull();
-    });
-
-    it('should throw when template not found', async () => {
-      (templateRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-
-      await expect(service.deleteTemplate(IDENTITY_ID, 'missing-id')).rejects.toThrow(
-        'ReminderTemplate not found',
-      );
-    });
-
-    it('should hard-delete via repository when specified', async () => {
-      const template = ReminderTemplate.load(makeTemplateState());
-      (templateRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(template);
-
-      await service.deleteTemplate(IDENTITY_ID, template.id, false);
-
-      expect(templateRepo.delete).toHaveBeenCalledWith(IDENTITY_ID, template.id);
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // createReminderGroup()
-  // -----------------------------------------------------------------------
-  describe('createReminderGroup()', () => {
-    it('should create and save a group', async () => {
-      const group = await service.createReminderGroup({
-        identityId: IDENTITY_ID,
-        name: 'New Group',
-      });
-
-      expect(group.name).toBe('New Group');
-      expect(groupRepo.save).toHaveBeenCalledTimes(1);
-    });
-
-    it('should throw when group name already exists', async () => {
-      const existing = ReminderGroup.load(makeGroupState({ name: 'Duplicate' }));
-      (groupRepo.findByName as ReturnType<typeof vi.fn>).mockResolvedValue(existing);
-
-      await expect(
-        service.createReminderGroup({ identityId: IDENTITY_ID, name: 'Duplicate' }),
-      ).rejects.toThrow('already exists');
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // deleteGroup()
-  // -----------------------------------------------------------------------
-  describe('deleteGroup()', () => {
-    it('should throw when group has templates', async () => {
-      const group = ReminderGroup.load(makeGroupState());
-      const template = ReminderTemplate.load(makeTemplateState());
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
-      (templateRepo.findByGroupId as ReturnType<typeof vi.fn>).mockResolvedValue([template]);
-
-      await expect(service.deleteGroup(IDENTITY_ID, group.id)).rejects.toThrow('still contains');
-    });
-
-    it('should soft-delete when no templates in group', async () => {
-      const group = ReminderGroup.load(makeGroupState());
-      (templateRepo.findByGroupId as ReturnType<typeof vi.fn>).mockResolvedValue([]);
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
-
-      await service.deleteGroup(IDENTITY_ID, group.id);
-
-      expect(groupRepo.save).toHaveBeenCalled();
-    });
-
-    it('should hard-delete via repository when specified', async () => {
-      const group = ReminderGroup.load(makeGroupState());
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
-      (templateRepo.findByGroupId as ReturnType<typeof vi.fn>).mockResolvedValue([]);
-
-      await service.deleteGroup(IDENTITY_ID, group.id, false);
-
-      expect(groupRepo.delete).toHaveBeenCalledWith(IDENTITY_ID, group.id);
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // assignTemplateToGroup()
-  // -----------------------------------------------------------------------
-  describe('assignTemplateToGroup()', () => {
-    it('should move template to a new group', async () => {
-      const template = ReminderTemplate.load(makeTemplateState({ groupId: null }));
-      const group = ReminderGroup.load(makeGroupState());
-      (templateRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(template);
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
-
-      const result = await service.assignTemplateToGroup(IDENTITY_ID, template.id, group.id);
-
-      expect(result.groupId).toBe(group.id);
-      expect(templateRepo.save).toHaveBeenCalled();
-    });
-
-    it('should throw when template not found', async () => {
-      (templateRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-
-      await expect(service.assignTemplateToGroup(IDENTITY_ID, 'missing', 'g1')).rejects.toThrow(
-        'ReminderTemplate not found',
-      );
-    });
-
-    it('should throw when target group is invalid', async () => {
-      const template = ReminderTemplate.load(makeTemplateState());
-      (templateRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(template);
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-
-      await expect(service.assignTemplateToGroup(IDENTITY_ID, template.id, 'bad-group')).rejects.toThrow(
-        'Invalid groupId',
-      );
-    });
-
-    it('should allow unassigning from group (null)', async () => {
-      const template = ReminderTemplate.load(makeTemplateState({ groupId: 'old-group' }));
-      (templateRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(template);
-
-      const result = await service.assignTemplateToGroup(IDENTITY_ID, template.id, null);
-
-      expect(result.groupId).toBeNull();
-    });
-  });
-
-  // -----------------------------------------------------------------------
-  // toggleGroupAndTemplates()
-  // -----------------------------------------------------------------------
-  describe('toggleGroupAndTemplates()', () => {
-    it('should toggle group and save', async () => {
-      const group = ReminderGroup.load(
-        makeGroupState({ enabled: true, controlMode: ControlMode.Individual }),
-      );
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
-
-      await service.toggleGroupAndTemplates(IDENTITY_ID, group.id);
-
-      expect(groupRepo.save).toHaveBeenCalled();
-    });
-
-    it('should toggle templates when Group control mode', async () => {
-      const group = ReminderGroup.load(
-        makeGroupState({
-          enabled: true,
-          controlMode: ControlMode.Group,
-          status: ReminderStatus.Active,
-        }),
-      );
-      const template = ReminderTemplate.load(makeTemplateState({ groupId: group.id }));
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(group);
-      (templateRepo.findByGroupId as ReturnType<typeof vi.fn>).mockResolvedValue([template]);
-
-      await service.toggleGroupAndTemplates(IDENTITY_ID, group.id);
-
-      // Group toggled -> paused, templates should be paused too
-      expect(templateRepo.save).toHaveBeenCalled();
-    });
-
-    it('should throw when group not found', async () => {
-      (groupRepo.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-
-      await expect(service.toggleGroupAndTemplates(IDENTITY_ID, 'missing')).rejects.toThrow(
-        'ReminderGroup not found',
-      );
-    });
+    (groupRepo.findByName as ReturnType<typeof vi.fn>).mockResolvedValue(group);
+    await expect(
+      service.createReminderGroup({ identityId: IDENTITY_ID, name: 'Focus' }),
+    ).rejects.toThrow('already exists');
   });
 });

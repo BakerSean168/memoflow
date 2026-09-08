@@ -15,6 +15,7 @@ export const WEB_FLOW_SPECS = Object.freeze([
   'notification/reminder-notification-loop.spec.ts',
   'reminder/reminder-template-crud.spec.ts',
   'schedule/schedule-calendar.spec.ts',
+  'schedule/planner-task-revert.spec.ts',
   'task/task-template-crud.spec.ts',
   'task/task-completion-loop.spec.ts',
   'user-settings/notifications.spec.ts',

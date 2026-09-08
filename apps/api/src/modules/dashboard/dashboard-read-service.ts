@@ -10,7 +10,7 @@ import {
 import type { DashboardData } from '@memoflow/contracts/dashboard';
 import { createGoalPrismaRepositories } from '@memoflow/goal';
 import { createTaskPrismaRepositories } from '@memoflow/task';
-import { createSchedulePrismaModule } from '@memoflow/schedule';
+import { createSchedulePrismaRepository } from '@memoflow/schedule';
 import { createReminderPrismaRepositories } from '@memoflow/reminder';
 import { createNotificationPrismaRepositories } from '@memoflow/notification';
 
@@ -97,7 +97,7 @@ export async function getApiDashboardData(
 ): Promise<DashboardData> {
   const goalRepos = createGoalPrismaRepositories(db);
   const taskRepos = createTaskPrismaRepositories(db);
-  const scheduleModule = createSchedulePrismaModule(db);
+  const scheduleRepository = createSchedulePrismaRepository(db);
   const reminderRepos = createReminderPrismaRepositories(db);
   const notificationRepos = createNotificationPrismaRepositories(db);
 
@@ -116,7 +116,7 @@ export async function getApiDashboardData(
         toDashboardTaskInstanceRecord,
       ),
     listSchedules: async (id) =>
-      (await scheduleModule.scheduleRepository.findByIdentityId(id)).map(toScheduleRecord),
+      (await scheduleRepository.findByIdentityId(id)).map(toScheduleRecord),
     listUpcomingReminders: async (id, beforeTime) =>
       (await reminderRepos.reminderTemplateRepository.findByNextTriggerBefore(beforeTime, id)).map(
         toReminderRecord,

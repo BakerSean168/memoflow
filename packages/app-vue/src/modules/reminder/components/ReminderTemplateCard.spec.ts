@@ -102,8 +102,16 @@ function createTemplate(
     },
     effectiveEnabled: false,
     selfEnabled: true,
-    groupId: 'group-1' as ReminderTemplateClientDTO['groupId'],
-    groupName: 'Focus',
+    profileMemberships: [
+      {
+        profileId: 'profile-1' as ReminderTemplateClientDTO['profileMemberships'][number]['profileId'],
+        profileName: 'Focus',
+        enabled: true,
+        profileEnabled: false,
+        profileActive: false,
+        effectiveEnabled: false,
+      },
+    ],
     trigger: {
       type: 'FixedTime',
       fixedTime: { time: '09:00', timezone: null },
@@ -128,10 +136,7 @@ function createTemplate(
     status: 'Active',
     version: 1,
     effectiveEnabledReason: 'Group is paused, so the reminder cannot run yet.',
-    lifecycleSource: 'group',
-    controlledByGroup: true,
-    groupControlMode: 'Group',
-    groupEnabled: false,
+    lifecycleSource: 'profile',
     globalReminderEnabled: true,
     triggerText: 'Every day',
     ...overrides,
@@ -173,10 +178,8 @@ describe('ReminderTemplateCard', () => {
       createTemplate({
         effectiveEnabled: true,
         selfEnabled: true,
-        lifecycleSource: 'template',
-        controlledByGroup: false,
-        groupControlMode: 'Individual',
-        groupEnabled: true,
+        lifecycleSource: 'routine',
+        profileMemberships: [],
         effectiveEnabledReason: 'Template controls itself.',
       }),
     );
@@ -189,7 +192,8 @@ describe('ReminderTemplateCard', () => {
     const wrapper = mountCard(
       createTemplate({
         effectiveEnabled: true,
-        lifecycleSource: 'template',
+        lifecycleSource: 'routine',
+        profileMemberships: [],
         nextTriggerAt: Date.now() + 60 * 60 * 1000,
       }),
     );

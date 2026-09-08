@@ -1,5 +1,4 @@
 import type {
-  ControlMode,
   ReminderStatus,
   GroupStatsDTO,
 } from '@memoflow/contracts/reminder';
@@ -14,7 +13,6 @@ export type PowerSyncReminderGroupRow = {
   description: string | null;
   color: string | null;
   icon: string | null;
-  control_mode: string;
   enabled: number | boolean;
   status: string;
   order: number;
@@ -38,7 +36,6 @@ export class PowerSyncReminderGroupMapper {
       description: data.description ?? null,
       color: data.color ?? null,
       icon: data.icon ?? null,
-      controlMode: data.control_mode as ControlMode,
       enabled: data.enabled === true || data.enabled === 1,
       status: data.status as ReminderStatus,
       order: Number(data.order ?? 0),
@@ -59,7 +56,6 @@ export class PowerSyncReminderGroupMapper {
       description: dto.description ?? null,
       color: dto.color ?? null,
       icon: dto.icon ?? null,
-      controlMode: dto.controlMode,
       enabled: dto.enabled ? 1 : 0,
       status: dto.status,
       order: dto.order,

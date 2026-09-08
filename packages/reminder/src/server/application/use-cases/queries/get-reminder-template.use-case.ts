@@ -28,7 +28,6 @@ export class GetReminderTemplateUseCase {
       templateMapper ??
       new ReminderTemplateClientMapper(
         new ReminderDomainService(templateRepository, groupRepository),
-        groupRepository,
       );
   }
 

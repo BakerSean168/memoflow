@@ -20,7 +20,6 @@ import type {
   GetUpcomingRemindersRes,
   GetReminderTodayScheduleRes,
 } from '@memoflow/contracts/reminder';
-import type { ControlMode } from '@memoflow/contracts/reminder';
 
 /**
  * ReminderHttpAdapter
@@ -49,10 +48,6 @@ export class ReminderHttpAdapter implements IReminderApiClient {
     return this.httpClient.get(this.templatesUrl);
   }
 
-  async getUserTemplates(): Promise<Result<ReminderTemplateClientDTO[]>> {
-    return this.httpClient.get(`${this.templatesUrl}/mine`);
-  }
-
   async updateReminderTemplate(
     id: string,
     request: UpdateReminderTemplateReq,
@@ -68,12 +63,12 @@ export class ReminderHttpAdapter implements IReminderApiClient {
     return this.httpClient.post(`${this.templatesUrl}/${id}/toggle`, {});
   }
 
-  async moveTemplateToGroup(
+  async replaceTemplateProfiles(
     templateId: string,
-    targetGroupId: string | null,
+    profileIds: readonly string[],
   ): Promise<Result<ReminderTemplateClientDTO>> {
-    return this.httpClient.post(`${this.templatesUrl}/${templateId}/move`, {
-      groupId: targetGroupId,
+    return this.httpClient.put(`${this.templatesUrl}/${templateId}/profiles`, {
+      profileIds: [...profileIds],
     });
   }
 
@@ -111,10 +106,6 @@ export class ReminderHttpAdapter implements IReminderApiClient {
     return this.httpClient.get(this.groupsUrl);
   }
 
-  async getUserReminderGroups(): Promise<Result<ReminderGroupClientDTO[]>> {
-    return this.httpClient.get(`${this.groupsUrl}/mine`);
-  }
-
   async updateReminderGroup(
     id: string,
     request: UpdateReminderGroupReq,
@@ -127,21 +118,16 @@ export class ReminderHttpAdapter implements IReminderApiClient {
   }
 
   async toggleReminderGroupStatus(id: string): Promise<Result<ReminderGroupClientDTO>> {
-    return this.httpClient.post(`${this.groupsUrl}/${id}/toggle-status`, {});
-  }
-
-  async switchReminderGroupControlMode(
-    id: string,
-    mode: ControlMode,
-  ): Promise<Result<ReminderGroupClientDTO>> {
-    return this.httpClient.post(`${this.groupsUrl}/${id}/control-mode`, { mode });
+    return this.httpClient.post(`${this.groupsUrl}/${id}/toggle`, {});
   }
 
   async getPreferences(): Promise<Result<UserReminderPreferencesClientDTO>> {
     return this.httpClient.get('/reminders/preferences');
   }
 
-  async updatePreferences(data: Record<string, unknown>): Promise<Result<UserReminderPreferencesClientDTO>> {
+  async updatePreferences(
+    data: Record<string, unknown>,
+  ): Promise<Result<UserReminderPreferencesClientDTO>> {
     return this.httpClient.patch('/reminders/preferences', data);
   }
 }

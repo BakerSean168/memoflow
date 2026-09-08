@@ -9,15 +9,19 @@ tags:
   - reliable-messaging
 description: 业务模块通过 ScheduledIntent + SchedulingPort.reconcile 接入 Scheduler，并以稳定 schedulingKey 与 handlerKey registry 替代 SourceModule 中央路由
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-08-25T17:49:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-061: 业务模块通过 Scheduling Port 与 Handler Registry 接入 Scheduler
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施
 **日期：** 2026-08-25  
 **影响范围：** schedule-orchestration、scheduler/schedule、task、goal、reminder、contracts、database、apps/api、apps/desktop  
 **关联：** ADR-025、ADR-033、ADR-037、ADR-042、ADR-058、ADR-060、ADR-062
+
+## 2026-09-08 实现状态
+
+Goal/Task/Reminder 通过 neutral ScheduledIntent + `SchedulingPort.reconcile` 接入 Scheduler；稳定 `schedulingKey` 与 handler key registry 已替代 `SourceModule` 中央执行 switch。`SourceModule` 只允许作为 metadata/diagnostics，HARD-7102 governance lock 防止行为路由复活。
 
 ## 1. 背景
 

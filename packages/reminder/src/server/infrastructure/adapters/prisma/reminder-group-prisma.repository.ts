@@ -7,7 +7,7 @@
 
 import type { PrismaClient, ReminderGroup as PrismaReminderGroup, Prisma } from '@memoflow/database';
 import type { IReminderGroupRepository } from '../../../domain/repositories/i-reminder-group-repository';
-import type { ControlMode, ReminderStatus } from '@memoflow/contracts/reminder';
+import type { ReminderStatus } from '@memoflow/contracts/reminder';
 import { ReminderGroup } from '../../../domain/aggregates/reminder-group';
 import { AggregateRepositoryBase, createEventBusAdapter } from '@memoflow/patterns';
 import { eventBus } from '@memoflow/utils/domain';
@@ -65,23 +65,6 @@ export class ReminderGroupPrismaRepository
     options?: { includeDeleted?: boolean },
   ): Promise<ReminderGroup[]> {
     const where: Prisma.ReminderGroupWhereInput = { identityId };
-    if (!options?.includeDeleted) {
-      where.deletedAt = null;
-    }
-
-    const data = await this.prisma.reminderGroup.findMany({
-      where,
-      orderBy: { order: 'asc' },
-    });
-    return data.map((d: PrismaReminderGroup) => this.mapToEntity(d));
-  }
-
-  async findByControlMode(
-    identityId: string,
-    controlMode: ControlMode,
-    options?: { includeDeleted?: boolean },
-  ): Promise<ReminderGroup[]> {
-    const where: Prisma.ReminderGroupWhereInput = { identityId, controlMode };
     if (!options?.includeDeleted) {
       where.deletedAt = null;
     }

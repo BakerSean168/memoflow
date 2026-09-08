@@ -118,7 +118,7 @@ describe('task repository factories surface', () => {
     expect(infrastructure).toContain('createTaskPowerSyncRepositories');
     expect(infrastructure).toContain('createTaskRuntimeContribution');
     expect(infrastructure).toContain('createTaskPrismaScheduleProjectionSource');
-    expect(infrastructure).toContain('createTaskPowerSyncScheduleExecutionSource');
+    expect(infrastructure).not.toContain('ScheduleExecutionSource');
     expect(infrastructure).toContain('TaskRepositorySet');
     expect(infrastructure).toContain('TaskModuleInstance');
     // Cross-module read ports stay reachable for host composition.

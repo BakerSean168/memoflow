@@ -14,7 +14,7 @@ tags:
   - parallel
 description: MemoFlow Goal/Task/Routine/Planner/Scheduler/Notification/EventBus 的总重构编排计划，按依赖、共享热点和可并行 lane 组织，并为每个标准能力指定 Build/Borrow/Imitate 来源
 created: 2026-08-25T19:18:00+08:00
-updated: 2026-09-04T23:25:00+08:00
+updated: 2026-09-08T10:27:00+08:00
 status: active
 ---
 
@@ -75,14 +75,15 @@ Verified complete in current `main`:
 - FullCalendar Planner, owner-aware edits, Web/Desktop Goal/Task/Routine/Notification product surfaces, InterventionWindow and FocusWindow;
 - v0.11 milestone fixture/parity/governance evidence and current-main required CI.
 
-Still real residuals (code search verified):
+Post-v0.11 residual truth — 2026-09-08:
 
-- `ROUTINE-5302`: no Routine method-library/catalog implementation exists;
-- `AI-6101~6103`: Goal/Task draft workflows exist, but `TaskPlanTaskSchema` still exposes retired `folderId`; Routine draft/command tooling and Planner/Notification AI read tooling are absent;
-- `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
-- `CLEAN-6301~6304`: legacy scheduling seams remain — `packages/reminder/.../schedule-projection-source.ts` still constructs `ScheduleTask`, and `schedule-orchestration/src/execution/router.ts` still contains a `SourceModule` fallback; raw ScheduleTask API/client surfaces also remain;
-- `POC-6401`: pg-boss remains a documented candidate only and is not installed/evaluated against current constraints;
-- `HARD-7101~7105`: final failure matrix, residual cleanup proof and umbrella closure review remain incomplete.
+- `ROUTINE-5302`: **DONE** — six-method curated Method Library is implemented; WallClock presets reuse existing Routine configuration and Protocol methods remain deterministic ProtocolSession-owned (`e3e5ae29aef`);
+- `AI-6101`: **DONE** — Goal/Task drafts use current Shared Label / Measurement / recurrence / Goal Link / optional contribution semantics; retired Task `folderId/tags/color` are absent (`4a7b8f154e8`);
+- `AI-6102/6103`: **DONE** — approved Routine command tools plus read-only Planner/Notification tools are wired in both API/Desktop; governance forbids raw Scheduler access (`2abcbd5591eb`);
+- `MOBILE-6201/6202`: **DONE by parity audit + focused repair** — React/mobile consumes current Goal/Task/Notification contracts, Task Shared Label editing is wired, and no Folder/Dependency/ValueType/raw Scheduler mutation surface remains;
+- `CLEAN-6301~6304`: **DONE** — owner-domain direct `ScheduleTask.create(...)`, `SourceModule` execution fallback, raw product worker mutation surfaces, Reminder scanner/ControlMode and obsolete product duplicates are removed; `packages/schedule` owns Planner/Calendar while `packages/scheduler` owns the Temporal Engine;
+- `POC-6401`: **DONE / Keep custom** — pg-boss 12.30.0 remains a reproducible dev-only candidate, not production infrastructure;
+- `HARD-7101~7104`: **DONE** — 22/22 failure matrix, production architecture locks, full A-J/host/local-Docker/schema acceptance and documentation/ADR truth closure are complete. `HARD-7105` is the only remaining umbrella ticket.
 
 Execution priority is redefined in §20 below; historical Wave 0/1 text remains evidence only.
 
@@ -1900,6 +1901,8 @@ source/reference note
 
 Do not add dozens of health methods before the execution model is proven.
 
+**Implementation — COMPLETE (2026-09-08):** `@memoflow/reminder/method-library` ships the six records above with runtime requirement, editable/recommended parameters, intervention default and source note. WallClock methods prefill the existing Routine configuration center; 50/10 and Pomodoro remain ProtocolSession-owned. Commit: `e3e5ae29aef`.
+
 ## NOTIF-5401 — Notification Center refresh
 
 **Depends:** NOTIF-2401/3301
@@ -1969,6 +1972,8 @@ optional contribution
 
 AI is not allowed to invent unsupported auto-settlement types.
 
+**Implementation — COMPLETE (2026-09-08):** Shared Label is now the single Goal/Task classification path. AI drafts propose Label names, host LabelService resolves/creates canonical identity-scoped Labels, then Goal/Task owner mutation receives real IDs. Task draft no longer exposes retired folder/tag/color fields. Commit: `4a7b8f154e8`.
+
 ## AI-6102 — Routine AI command/draft tools
 
 **Depends:** Routine contracts/runtime.
@@ -1985,6 +1990,8 @@ pause/resume/end session
 
 Persistent config changes require product-defined confirmation; timer truth stays deterministic.
 
+**Implementation — COMPLETE (2026-09-08):** Mastra tools cover Routine create, Profile gate activation/deactivation, temporary override, Protocol start/pause/resume/end. Persistent configuration/new-session tools require approval; commands terminate at a Reminder-owned `RoutineCoachCommandPort`. PowerSync temporary-override parity prevents API/Desktop divergence. Commit: `2abcbd5591eb`.
+
 ## AI-6103 — Planner/Notification AI read tools
 
 Read-only first:
@@ -1995,6 +2002,8 @@ Read-only first:
 
 Do not give model direct ScheduledInvocation mutation tools.
 
+**Implementation — COMPLETE (2026-09-08):** `planner_today_summary`, `planner_conflicts`, `planner_upcoming_tasks`, and `notification_unread_summary` read owner-domain Calendar/Task/Notification Fact projections only. HARD-7102 now fails if AI tools/adapters import `@memoflow/scheduler` or touch raw ScheduleTask/ScheduledInvocation mutation APIs. Commit: `2abcbd5591eb`.
+
 ## MOBILE-6201 — React/Mobile Goal/Task parity
 
 **Depends:** Goal/Task web contracts stable.
@@ -2003,11 +2012,15 @@ Reuse same public contracts, not Vue component implementation.
 
 Delete old Folder/Dependency/ValueType UI from mobile.
 
+**Acceptance — COMPLETE (2026-09-08):** production-source parity audit found no GoalFolder/TaskFolder/Dependency/DAG/ValueType/raw Scheduler mutation surface. Task React/Mobile editor/list/detail now load, create/select and persist Shared Labels through the same public contract as Web/Desktop.
+
 ## MOBILE-6202 — Mobile Notification parity
 
 Notification Fact/preferences share contract; device channel adapter may differ.
 
 Routine ActiveUsage desktop-only capabilities must expose capability state rather than fake support on mobile.
+
+**Acceptance — COMPLETE (2026-09-08):** React/Mobile Notification list/detail/preferences consume Notification Fact contracts; no Desktop-only ActiveUsage/Protocol implementation is faked in the mobile product surface.
 
 ## CLEAN-6301 — Retire legacy Goal/Task surfaces
 
@@ -2027,6 +2040,27 @@ old translations/routes/stories
 
 `rg` residual audit mandatory.
 
+**Implementation evidence — tranche A (2026-09-06): standalone ProgressBreakdown retired**
+
+- verified `ProgressBreakdownPanel` had no production page consumer and the standalone HTTP/IPC/client query duplicated KR-native progress already present in `GoalAggregate` (`overallProgress`, key results, records/reviews);
+- deleted the standalone ProgressBreakdown contract/value-object, `GET /:id/progress-breakdown`, Electron channel, client methods/adapters, query use case, aggregate method, Vue orphan component, module-index entries, and their positive legacy surface locks;
+- Goal progress semantics remain intact through `GoalAggregate` and KR progress fields; `GoalDetailView` still renders `overallProgress` plus per-KR progress, so this tranche removes only the duplicate read model rather than product progress capability;
+- added/updated anti-resurrection ownership evidence so Goal HTTP/IPC surfaces must not reintroduce `progress-breakdown` / `PROGRESS_BREAKDOWN`;
+- verification: Goal typecheck green; Goal **80/80 files, 439/439 tests** green; Contracts **67/67 files, 482/482 tests** green; App-Vue typecheck green; focused Goal entry and product-time boundary tests **6/6** green; Goal/Contracts/App-Vue lint **0 errors** (pre-existing warnings remain); `git diff --check` green.
+
+**Implementation evidence — tranche B (2026-09-07): remaining Goal/Task legacy surfaces retired; `CLEAN-6301` complete**
+
+- retired GoalFolder/FocusMode/FocusSession/TaskFolder/TaskDependency/Subtask branded IDs and obsolete PowerSync/API/Desktop table mappings; canonical Prisma/PowerSync schemas already had no such live models;
+- removed Task graph/folder cache identity and graph-only invalidation (`folderId`, `taskTemplateQueryKeys.graph*`, `projection: 'graphs'`, `task_dependencies`), leaving list/detail cache semantics intact;
+- removed stale Goal/Task fixtures that still modeled Folder/Focus/Dependency repositories or graph/priority/dependency application methods, while retaining anti-resurrection tests that require the retired concepts to stay absent;
+- retired Goal Focus/DAG and Task Dependency/DAG/CriticalPath/drag-to-dependency Web E2E suites, the dedicated `TaskDAGPage`, dependency-only helper methods, obsolete audit entries and their locale domains; surviving Core Product E2E uses the current `task-plan-card`;
+- pre-vNext UI analysis documents now explicitly mark Folder/Focus/Comparison/Dependency/DAG/CriticalPath descriptions as historical snapshots, with current product/module docs as truth;
+- production residual audit (excluding tests/docs/generated code) is zero for GoalFolder/FocusMode/FocusSession/MultiGoalComparison/TaskFolder/TaskDependency/DAG/CriticalPath and retired ghost tables; remaining mentions are architectural retirement records or anti-resurrection assertions;
+- verification: Goal/Task/App-Vue/API/Desktop typechecks green; Goal **80/80 files, 439/439 tests**; Task **72/72 files, 732/732 tests**; Contracts **67/67 files, 482/482 tests**; App-Vue focused **10 files / 70 tests**; API focused **2 files / 8 tests**; Desktop focused **2 files / 13 tests**; six-project lint **0 errors** (pre-existing warnings remain); `git diff --check` green.
+
+`CLEAN-6301` is complete. Goal and Task now expose only their vNext owner-domain/product contracts; retired Folder/Focus/Comparison/Dependency/DAG/CriticalPath paths have no ordinary runtime surface.
+
+
 ## CLEAN-6302 — Retire legacy Reminder naming/control paths
 
 After compatibility consumers are gone:
@@ -2040,56 +2074,155 @@ After compatibility consumers are gone:
 
 Physical package rename `reminder -> routine` is a separate final decision; do not mix with behavior migration if it adds churn.
 
+
+**Implementation evidence — tranche A (2026-09-07): `ControlMode` + legacy scanner retired**
+
+- removed legacy `ControlMode` from Reminder contracts, group DTOs, response schemas, domain/server/client aggregates, events, HTTP route, Electron IPC channel, RPC map, client ports/adapters/composables, Prisma and PowerSync persistence, data-portability import/export, and the React/Mobile detail surface;
+- removed the retired Reminder trigger cron, its runtime wrapper, lifecycle/parity tests, Reminder package `node-cron` dependency, and the Scheduler-side due-set shadow reader/parity fixtures that existed only to compare the old scanner with Scheduler;
+- kept Scheduler as the sole production wall-clock authority and retained ordinary due-query repositories used by Dashboard/Scheduler; no Reminder cron compatibility runtime remains;
+- retained an anti-resurrection route assertion that `/groups/:id/control-mode` must stay absent;
+- production residual audit is zero for `ControlMode`, `groupControlMode`, `control_mode`, retired control-mode mutation channels/methods, Reminder trigger cron factories, and Scheduler due-set shadow readers (excluding historical docs and anti-resurrection tests);
+- verification: Reminder **71/71 files, 509/509 tests**; Contracts **67/67 files, 482/482 tests**; Schedule Orchestration **32/32 files, 139/139 tests**; Data Portability **9/9 files, 34/34 tests**; App-Vue Reminder **11 files / 31 tests**; contracts/reminder/app-vue/data-portability/api/desktop/app-react typechecks green; seven-project lint plus App-React lint have **0 errors**; full `governance:check` and `git diff --check` green.
+
+`CLEAN-6302` remains open for the membership, smart-frequency, snooze-response, and final obsolete-surface tranches; physical `reminder -> routine` rename remains out of scope here.
+
+
+**Implementation evidence — tranche B1 (2026-09-07): canonical Routine/Profile/M:N membership persistence made live**
+
+- added MemoFlow-owned `RoutineProfileStore` as the single domain persistence seam for `RoutineDefinition`, `RoutineProfile`, and `ProfileMembership`, with Prisma and PowerSync implementations sharing the same domain objects rather than leaking adapter row types;
+- both stores support definition/profile upsert/query/delete, M:N membership query/upsert/delete, and atomic full-edge replacement for one Routine; replacement rejects cross-owner and duplicate Profile edges before mutation;
+- made `routineProfileStore` a required fail-closed Reminder module dependency and wired it through API Prisma and Desktop PowerSync composition roots, so vNext profile state is no longer a parity-only/read-only schema;
+- added the temporary `LegacyRoutineCutoverService`: legacy create/move commands project into the canonical store while ordinary Routine edits update only the `RoutineDefinition` and therefore cannot collapse a future multi-Profile membership set;
+- deterministic create replay now repairs an interrupted canonical projection before closure policy/re-mutation. Repair only synthesizes the legacy Profile edge when no canonical memberships exist; if `Work + Gaming` (or any other M:N set) already exists, replay preserves it unchanged;
+- legacy group create/update/toggle/delete project to/remove the canonical `RoutineProfile`; template create/update/enable/pause/toggle/delete and batch operations keep the canonical `RoutineDefinition` current. Legacy single-group assignment remains the temporary command shim until the next transport/UI cutover tranche;
+- persistence evidence: real in-memory SQLite PowerSync tests prove one Routine can belong to `Work + Gaming`, transactional edge replacement, and ownership/duplicate rejection; real PostgreSQL Prisma integration proves the same M:N round-trip and transactional replacement;
+- verification: Reminder **73/73 unit files, 519/519 tests**; Reminder integration **5/5 files, 33/33 tests**; Contracts **67/67 files, 482/482 tests**; Reminder package build green; Reminder/API/Desktop/App-Vue/Contracts typechecks green; Reminder/API/Desktop/Contracts lint have **0 errors** (pre-existing warnings remain); Nx sync and `git diff --check` green.
+
+`CLEAN-6302B1` is the persistence-live checkpoint above; its temporary single-group command bridge is retired by B2 below and must not be restored.
+
+**Implementation evidence — tranche B2 (2026-09-07): single `groupId` ownership retired; canonical M:N ProfileMembership is end-to-end authority**
+
+- cut ReminderTemplate public contracts from `groupId`/`groupName`/`groupEnabled`/`controlledByGroup` to `profileIds[]` commands and `profileMemberships[]` read models; lifecycle authority is now `global | profile | routine`;
+- replaced the legacy move-to-one-group command with full membership replacement (`PUT /templates/:id/profiles`) across HTTP, Electron IPC, client ports/adapters/services and Vue composables; no compatibility alias for `/move` or `TEMPLATE_MOVE_TO_GROUP` remains;
+- changed create/update, effective-state calculation, Profile statistics, Profile deletion guards, Profile bulk enable/pause and UI filtering to canonical `RoutineProfileStore` M:N membership reads. Profile bulk control mutates only `ProfileMembership.enabled` and never rewrites the Routine self switch;
+- physically removed `ReminderTemplate.reminderGroupId` / `reminder_group_id` and the Prisma `ReminderGroup.templates` relation; Prisma Client was regenerated and the PowerSync schema/mappers/repositories no longer carry a single owner column or `findByGroupId` query;
+- narrowed the legacy cutover seam to independent Template→RoutineDefinition and Group→RoutineProfile projection only. It can no longer synthesize, heal or replace a legacy single membership;
+- upgraded data portability to preserve `routineDefinition` plus `profileMemberships[{ profileRef, enabled }]`; Prisma/PowerSync import reconstructs `routine_profiles`, `routine_definitions`, and `routine_profile_memberships`, so multi-Profile membership-local state survives backup/restore without `reminder_group_id`;
+- made Reminder schedule projection re-read canonical global/Profile/membership eligibility rather than trusting the non-persisted aggregate `effectiveEnabled` cache, and added `reminder:template-eligibility-changed` for immediate re-projection after membership, membership-local state, Profile gate, or global gate changes;
+- migrated Web and React/Mobile presentation to multi-Profile membership semantics. Create/Edit can select multiple Profiles, Profile filtering uses membership edges, and the membership dialog supports add/remove-many without collapsing existing membership sets; governance-required accessible names are present on the new controls;
+- anti-resurrection audit is zero for live Reminder-template `reminder_group_id`, `reminderGroupId`, `moveTemplateToGroup`, `moveToGroup`, `reminder:template-moved`, and template-repository `findByGroupId`; remaining `groupId`/`findByGroupId` hits belong to the unrelated Editor workspace group/tab domain or explicit negative assertions;
+- verification: Reminder **72/72 files, 493/493 tests** plus PostgreSQL integration **5/5 files, 33/33 tests**; Data Portability **32/32 files, 139/139 tests** including canonical M:N PowerSync round-trip; App-Vue **201/201 files, 773/773 tests**; Contracts **67/67 files, 482/482 tests**; API **62/62 files, 327/327 tests**; Desktop **61/61 files, 322/322 tests**; Schedule Orchestration **9/9 files, 34/34 tests**; PowerSync Schema **1/1 file, 4/4 tests**; Database **9/9 files, 30/30 tests**; ten-project typecheck and lint green (lint: 0 errors, existing warnings remain); `governance:check`, `docs:check`, `test:targets:check`, and `git diff --check` green.
+
+`CLEAN-6302B` is complete. `CLEAN-6302C1` below retires duplicate Smart Frequency authority; the next Reminder cleanup tranche is `CLEAN-6302C2`, which replaces overloaded snooze `responseTime` with an explicit snooze duration semantic. Final obsolete route/component residual cleanup follows before `CLEAN-6302` can close.
+
+**Implementation evidence — CLEAN-6302C1 (2026-09-07): duplicate Smart Frequency write authority retired**
+
+- kept only two intentional frequency capabilities: read-only `frequency-analysis`, which computes transient `ResponseMetrics` from response history, and the explicit `frequency-adjustment` command, which changes the Routine interval only when the user submits a new interval;
+- removed persisted/background suggestion state from `ReminderTemplate`: `responseMetrics`, `frequencyAdjustment`, `smartFrequencyEnabled`, plus `updateResponseMetrics`, `apply/confirm/rejectFrequencyAdjustment`, `toggleSmartFrequency`, `needsFrequencyAdjustment`, and `calculateSuggestedAdjustment`;
+- removed `FrequencyAdjustment` suggestion VO/contracts and the pseudo reject command/event (`/frequency-adjustment/reject`, `rejectFrequencyAdjustment`, `reminder:frequency-adjustment-rejected`); the only frequency write event left is `reminder:frequency-adjusted`, emitted after the explicit command persists successfully;
+- removed the obsolete global auto-mode preference (`globalSmartFrequency` / `globalSmartFrequencyEnabled`) while retaining the real `globalReminderEnabled` master gate;
+- physically removed Smart Frequency columns from Prisma and PowerSync (`click/ignore/avg-response metrics`, persisted adjustment/suggestion columns, per-Routine smart flag, global smart flag), regenerated Prisma Client, and removed those fields from Prisma/PowerSync mappers, repositories, CRUD normalization, and data-portability import/export;
+- fixed a production persistence defect exposed by the cleanup: Prisma `UserReminderPreferenceRepository.save()` had been writing the obsolete `globalSmartFrequency` field instead of `globalReminderEnabled`. It now persists the master gate on both create and update; a PostgreSQL integration test verifies `false` survives save + reload;
+- anti-resurrection audit is zero for live `globalSmartFrequency`, `smartFrequencyEnabled`, auto/suggestion mutation methods, rejected-adjustment route/event, and retired Smart Frequency persistence columns; remaining hits are explicit negative assertions only. `ResponseMetrics` remains transient analysis data and `FrequencyAdjustmentResultSchema` remains the response shape of the explicit interval command;
+- verification: Contracts **67/67 files, 482/482 tests**; Data Portability **32/32 files, 139/139 tests**; Reminder **72/72 files, 471/471 tests**; PostgreSQL Reminder integration **6/6 files, 34/34 tests**; API **62/62 files, 327/327 tests**; Desktop **61/61 files, 322/322 tests**; App-Vue **201/201 files, 773/773 tests**; PowerSync Schema **1/1 file, 4/4 tests**; Database **9/9 files, 30/30 tests**; nine-project typecheck and lint green (lint: 0 errors; existing warnings remain); `governance:check`, `docs:check`, `test:targets:check`, and `git diff --check` green.
+
+`CLEAN-6302C1` is complete. `CLEAN-6302C2` below completes the Snooze/response-latency semantic split.
+
+**Implementation evidence — CLEAN-6302C2 (2026-09-07): response latency and Snooze duration separated; canonical Routine override owns Snooze**
+
+- `responseTime` now has one meaning only: measured user response latency in non-negative integer seconds for response analytics. `snoozeDurationSeconds` is a distinct positive-integer duration accepted only for `SNOOZED`; the shared `RecordReminderResponseSchema` rejects missing Snooze duration, Snooze duration on non-Snooze actions, negative/fractional response latency, and non-positive Snooze duration;
+- removed the `Date`-as-duration model from `ReminderResponse`. Domain state, DTOs, analytics events, HTTP validation, Prisma, PowerSync, and Data Portability all carry the two durations as independent scalar seconds;
+- fixed both persistence unit defects exposed by the split: Prisma no longer divides an already-second-valued `responseTime` by 1000 on save, and PowerSync no longer reconstructs response seconds as a millisecond `Date`;
+- added `snooze_duration_seconds` to Prisma/PowerSync response persistence, regenerated Prisma Client, and upgraded backup/restore to preserve numeric `responseTime` plus `snoozeDurationSeconds`. A real PowerSync round trip locks `responseTime=7` and `snoozeDurationSeconds=900`;
+- deleted the legacy Prisma Snooze rescheduler that directly mutated raw `ScheduleTask` rows by `sourceModule='reminder'`. API Snooze now writes the existing canonical `RoutineTemporaryOverride` via `createSnoozeOverride()` and publishes `routine:override-changed`, causing Schedule Orchestration to immediately re-project the Routine without rewriting long-lived trigger configuration;
+- Snooze is fail-closed when a host has no canonical override writer, and a durable override write failure returns `SERVICE_UNAVAILABLE` rather than reporting a false Snooze success. The current response record and override write are still two durable writes rather than one transaction: if the override write fails after the response row is saved, the failure is visible but the response audit row remains. This tranche intentionally records that non-atomicity instead of claiming stronger guarantees;
+- hard residual audit is zero in production for `ReminderSnoozeRescheduler`, `snoozeRescheduler`, `ReminderResponseDurationSeconds`, `toReminderResponseDurationSeconds`, Prisma `/1000` response conversion, Date-based response-duration restoration, and raw Reminder Snooze `scheduleTask.updateMany` / `sourceModule:'reminder'` paths;
+- verification: Contracts **68/68 files, 486/486 tests**; Reminder **73/73 files, 466/466 tests**; Data Portability **32/32 files, 139/139 tests**; PostgreSQL Reminder integration **7/7 files, 35/35 tests**; API **62/62 files, 327/327 tests**; Desktop **61/61 files, 322/322 tests**; Schedule Orchestration **9/9 files, 34/34 tests**; ten-project typecheck green; ten-project lint **0 errors** (pre-existing warnings remain, no C2-added warning remains); `governance:check`, `docs:check`, `test:targets:check`, rebuilt `test:inventory:check`, and `git diff --check` green.
+
+`CLEAN-6302C2` is complete. `CLEAN-6302D` is now the sole remaining Reminder cleanup tranche: remove/lock any obsolete Reminder routes/components and prove the final live residual surface before closing `CLEAN-6302`.
+
+**Implementation evidence — CLEAN-6302D (2026-09-07): obsolete Reminder product/transport surfaces retired; `CLEAN-6302` closed**
+
+- removed the duplicate/broken per-user list family end-to-end: `getUserTemplates()`, `getUserReminderGroups()`, `TEMPLATE_GET_BY_USER`, and `GROUP_GET_BY_USER`. React/Mobile now consumes the canonical template list contract, while HTTP no longer carries client methods that targeted nonexistent `/templates/mine` / `/groups/mine` paths;
+- fixed the live Web Profile toggle transport from the stale `/groups/:id/toggle-status` path to the canonical server `/groups/:id/toggle` route and updated the Web mock accordingly. The existing IPC key `GROUP_TOGGLE_STATUS` is intentionally retained as a live transport identifier: it is not a second command path or state authority and a cosmetic IPC rename would add migration churn without changing semantics;
+- retired HTTP-only one-way `POST /templates/:id/enable` and `POST /templates/:id/pause`; the single product action is `POST /templates/:id/toggle`. Route tests now lock the removed paths out rather than preserving compatibility aliases;
+- retired the unconsumed legacy Profile batch command (`POST /groups/:id/batch`, `BatchGroupTemplates*`, `batchGroupTemplates`, and `setProfileMembershipsEnabled`). Canonical M:N `ProfileMembership.enabled` remains valid domain state, and Profile gating continues through the current Profile command path rather than a bulk compatibility surface;
+- removed the stale Web `toggle-control-mode` mock left behind after CLEAN-6302A and narrowed `@memoflow/app-vue` Reminder exports by deleting the unused Reminder component barrel. `GridTemplateItem`, `ReminderTemplateCard`, `GroupDialog`, `TemplateDialog`, and `TemplateMoveDialog` remain internally reachable from the real Reminder view; only their accidental package-public export was removed;
+- intentionally retained live capabilities that are not legacy duplication: `recordResponse`, read-only `frequency-analysis`, explicit user `frequency-adjustment`, ReminderHistory persistence/lifecycle presentation, and the existing history/response observability reads. CLEAN-6302D removes proven broken/duplicate/unconsumed surfaces rather than deleting useful read capability;
+- hard production residual audit is zero for the retired per-user methods/channels and `/mine` paths, one-way enable/pause routes, batch group command/schema/domain helper, stale control-mode mock, and Reminder component wildcard export. Remaining textual hits are negative anti-resurrection assertions plus the intentionally live `GROUP_TOGGLE_STATUS` IPC key described above;
+- verification: Reminder **73/73 files, 469/469 tests**; Contracts **68/68 files, 483/483 tests**; App-Vue **201/201 files, 773/773 tests**; API **62/62 files, 327/327 tests**; Desktop **61/61 files, 322/322 tests**; six-project typecheck green; six-project lint **0 errors** (pre-existing warnings remain); `governance:check`, `docs:check`, `target-baseline-check`, governance tests **29/29**, `test:targets:check`, `test:inventory:check` (**1172 files**), and `git diff --check` green.
+
+`CLEAN-6302` is complete. No Reminder compatibility shim or physical package rename is required for closure; the ordered scheduling-convergence lane now advances to `CLEAN-6304`.
+
+
+
 ## CLEAN-6303 — Internalize raw ScheduleTask product surfaces
 
 No ordinary user API/UI should create worker jobs directly.
 
 Keep internal diagnostics/ops API only if genuinely used.
 
-## CLEAN-6304 — Scheduler physical package split decision
+**Implementation evidence (2026-09-06):**
 
-Only now consider:
+- raw `ScheduleTask` worker jobs are now Scheduler-owned persistence across every ordinary product transport: HTTP publishes only `GET /tasks`, `GET /tasks/due`, and `GET /tasks/:id`; Electron IPC exposes only list/detail/due/source diagnostics; the schedule RPC map keeps only the read query;
+- removed product-client worker mutations from `ScheduleClientPort`, task API ports, HTTP/IPC adapters, and the React/Mobile Schedule surface. Mobile now renders worker status/health as diagnostics only; users change Task/Routine/Planner owner objects instead of pausing/completing/cancelling worker rows;
+- retained CalendarEntry product commands and the audited W7 rebuild timeline/replay/audit operation surface because these are owner/ops capabilities rather than raw worker CRUD;
+- retained Scheduler-internal create/update/pause/resume/complete/cancel/batch use cases and the legacy internal `SchedulingPort` adapter, so temporal execution capability remains intact behind the ownership boundary;
+- anti-resurrection surface tests now assert that raw worker mutation HTTP routes, IPC channels, RPC names, and client methods do not exist; production residual grep finds no retired raw-worker mutation capability outside Scheduler internals;
+- verification: `schedule` 45/45 files, 399/399 tests; `contracts` 67/67 files, 485/485 tests; schedule/app-react/app-vue/api/desktop typechecks green; app-vue production build green through the Desktop dependency chain; schedule/contracts/app-react lint have 0 errors (only pre-existing unrelated test warnings remain); `git diff --check` green.
+
+## CLEAN-6304 — Scheduler physical package split decision — COMPLETE (2026-09-07)
+
+**Decision:** perform the physical split now. Semantic ownership was already stable after CLEAN-6301/6302/6303, so deferring the move would only preserve misleading package ownership.
 
 ```text
-packages/schedule   = Planner/Calendar
+packages/schedule   = Planner / Calendar
 packages/scheduler  = Temporal Engine
 ```
 
-Do this only if semantic ownership is already stable; otherwise defer physical moves.
+**Implementation evidence — CLEAN-6304 (2026-09-07):**
 
-## POC-6401 — pg-boss build-vs-adopt experiment
+- created first-class `@memoflow/scheduler` package and moved Scheduler-owned `ScheduleTask`, `ScheduleExecution`, worker repositories, lease implementation, queue/runtime, SchedulingPort adapter, Handler Registry, read-only diagnostics client/API/Electron transports, and related tests into it;
+- reduced `@memoflow/schedule` to Calendar/Planner ownership: CalendarEntry, conflict detection/resolution, Calendar HTTP/IPC/client surfaces, rebuild worker/domain-event publisher and audited rebuild timeline/replay remain there;
+- extracted the cross-boundary lease protocol to `@memoflow/patterns/lease` (`LeaseCoordinatorPort`, `LeaseGuard`, `LeaseLostError`), so Calendar reliability code depends only on a shared abstraction while Scheduler keeps the concrete `ScheduleLeaseCoordinator` and persistence adapters;
+- API/Desktop composition now creates separate Calendar and Scheduler repository sets and sibling module handles. Schedule orchestration receives only Scheduler `scheduleTaskRepository`/source execution seams; Calendar receives the shared lease coordinator through the abstract port;
+- Web/Mobile React worker diagnostics now use an explicit `SchedulerClientPort`; Calendar continues through `ScheduleClientPort`. The stale App-Vue raw-ScheduleTask composable/state was removed because normal Planner views did not consume it;
+- no compatibility product mutation surface was restored: raw worker operations remain internal, external worker diagnostics stay read-only, and existing HTTP/IPC contract names remain stable;
+- introduced `scope:scheduler` governance, target-baseline classification, root integration/coverage lane inclusion, clean-boundary CI inclusion, package export/public-surface governance, and regenerated the test inventory;
+- real DB proof survived the split: Scheduler integration 1/1 file, 4/4 tests; Schedule integration 2/2 files, 24/24 tests (PostgreSQL CAS/outbox/lease/replay + PowerSync); Account cross-domain integration 4/4 files, 18/18 tests;
+- unit/regression proof: Scheduler 31/31 files, 273/273 tests; Schedule 20/20 files, 129/129 tests; API 62/62 files, 323/323 tests; Desktop 61/61 files, 322/322 tests; Schedule Orchestration 34/34 tests; Goal 439/439; Task 732/732; Notification 242/242; App-Vue 201/201 files, 773/773 tests;
+- 11-project typecheck is green; 11-project lint has 0 errors (pre-existing warnings only); governance, docs, test-target governance and the 1179-file test inventory are green.
 
-**Depends:** all feature packages behind SchedulingPort.
+`CLEAN-6304` is complete. Scheduling convergence now advances to `POC-6401`; the PoC must compare pg-boss against this clean SchedulingPort/Scheduler boundary without changing feature code.
 
-Implement alternate adapter PoC and compare:
+## POC-6401 — pg-boss build-vs-adopt experiment — COMPLETE (2026-09-07)
 
-```text
-claim correctness
-retry/backoff
-DLQ/redrive
-heartbeat/expiration
-transaction enqueue
-multi-worker
-startup/recovery
-ops complexity
-PowerSync/Desktop implications
-```
+**Outcome: `Keep custom`.** pg-boss 12.30.0 is a technically viable PostgreSQL cloud adapter, but the evidence does not justify production adoption for current vNext.
 
-Outcome must be one of:
+**PoC evidence:**
 
-```text
-Keep custom
-Adopt pg-boss cloud
-Hybrid cloud pg-boss + local adapter
-```
+- isolated dev-only `PgBossSchedulingPocAdapter` implements the existing `SchedulingPort`; no Goal/Task/Routine/Reminder feature code or production host wiring changed;
+- real PostgreSQL PoC is green: 1 file, 10/10 tests; strict PoC TypeScript check is green;
+- passed owner complete-set reconcile, same-owner concurrent reconcile via PostgreSQL advisory lock, transaction rollback, transaction-aware enqueue through a caller-owned Prisma transaction, two-instance claim correctness, retry/deferred backoff, DLQ/redrive, heartbeat/touch, expiration supervision, restart recovery, and terminal `schedulingKey` collision fail-close;
+- pg-boss can therefore provide the generic cloud queue mechanics behind SchedulingPort if a future trigger warrants migration;
+- retry semantics are not exact: MemoFlow uses millisecond delays + arbitrary `backoffMultiplier`, while pg-boss uses second-level delay + boolean exponential backoff;
+- MemoFlow would still own complete-set diffing, owner locking, terminal-key policy, durable reconcile receipt/audit semantics, Handler Registry and product-facing diagnostics mapping;
+- Desktop's canonical store remains PowerSync and cannot use pg-boss directly. A cloud-only Hybrid would retain the local custom engine and add a second execution engine rather than simplify the whole system;
+- measured current implementation surface: ~757 LOC cloud-specific Prisma, ~834 LOC Desktop PowerSync, ~1903 LOC shared runtime/queue/reconcile/lease; PoC wrapper ~380 LOC. The cloud-only replacement cannot delete the Desktop/shared majority;
+- measured DB surface: current custom Scheduler persistence uses 4 tables / 13 indexes; pg-boss PoC installs 12 tables / 27 indexes / 5 functions / 26 types, additive under Hybrid;
+- pg-boss stays `devDependency` only so the evidence remains reproducible. It is not exported by `@memoflow/scheduler` and is not a production dependency.
 
-No feature code changes allowed in PoC.
+Canonical evidence: `docs/analysis/2026-09-07-pg-boss-build-vs-adopt-evidence.md`.
+
+**Revisit only on evidence:** cloud multi-worker/reliability pressure, measurable custom-queue ops burden, a Desktop persistence move compatible with PostgreSQL/PGlite, or an intentional retry-contract narrowing.
+
+`POC-6401` is complete. Scheduling convergence is closed for current vNext; proceed to Wave 7 hardening/closure.
 
 ---
 
 # 14. Wave 7 — Hardening and closure
 
-## HARD-7101 — Cross-domain failure matrix
+## HARD-7101 — Cross-domain failure matrix — COMPLETE (2026-09-07)
 
 Must test:
 
@@ -2118,7 +2251,21 @@ Goal settlement replay/revert
 Planner command failure -> visual revert
 ```
 
-## HARD-7102 — Architecture governance locks
+**Implementation evidence — HARD-7101 (2026-09-07):**
+
+- added canonical `tools/test/hard-7101-failure-matrix.json` with exactly 22 required scenarios and behavior-test bindings;
+- added `tools/test/hard-7101-failure-matrix.mjs`: `--check` fail-closes on missing files/titles/scenarios and `--run` executes the focused unit/integration/Electron evidence;
+- added a real PostgreSQL Scheduler crash/lease-expiry integration case proving a claimed invocation can be taken over after host-lease expiry while retaining the same logical invocation identity;
+- made the Notification device-offline retry/recovery evidence explicit rather than relying on a generic transport-failure label;
+- hardened Linux Electron restart acceptance with Xvfb + temporary D-Bus/GNOME Secret Service and a test-only Playwright preload that removes Playwright's `password-store=basic`/`use-mock-keychain` defaults without touching MemoFlow product startup or weakening safeStorage fail-closed behavior;
+- full failure-matrix runner passed **22/22 scenarios**; focused Scheduler Prisma integration passed **1 file, 5/5 tests**; Desktop persistent-guest restart E2E passed **1/1** under the real Secret Service path;
+- root governance now runs the cheap matrix `--check`, so scenario/test drift fails before the expensive full execution gate.
+
+Canonical evidence: `docs/analysis/2026-09-07-hard-7101-cross-domain-failure-matrix-evidence.md`.
+
+`HARD-7101` is complete. Final closure advances to `HARD-7102`.
+
+## HARD-7102 — Architecture governance locks — COMPLETE (2026-09-07)
 
 Add/extend checks:
 
@@ -2133,7 +2280,22 @@ third-party recurrence/calendar DTOs cannot enter contracts
 UI cannot edit ScheduledInvocation directly
 ```
 
-## HARD-7103 — Full product acceptance journeys
+**Implementation evidence — HARD-7102 (2026-09-07):**
+
+- removed the final Goal/Task `ScheduleTask` execution-source compatibility seams and their direct `@memoflow/scheduler` dependencies; owner domains retain neutral projections + handler-key registrations only;
+- deleted the production Reminder scanner/runtime facade (`ReminderSchedulerService`, cron contribution, `getPendingReminders`) while preserving read-only upcoming-reminder queries;
+- deleted the cross-domain `notification.dispatch` bypass; shared delivery now enters only through `notification.requested -> CreateNotificationUseCase -> NotificationPolicy / DeliveryPlan -> internal durable dispatch`;
+- removed stale Web raw-Scheduler mutation mocks and kept Scheduler HTTP/Electron/Web worker surfaces diagnostics-only;
+- removed the implicit `Asia/Shanghai` default from `ScheduleConfig.createDefault()` so execution timezone is explicit;
+- added `core-vnext-architecture-lock-audit.mjs` with negative/positive fixtures for all eight required HARD-7102 rules plus raw-worker transport sublocks; audit passes across **1765 production source files** and is part of root governance;
+- full regression is green across Contracts `483/483`, Goal `438/438`, Task `730/730`, Reminder `461/461`, Notification `242/242`, Scheduler `273/273`, Schedule Orchestration `34/34`, Schedule `129/129`, App Vue `773/773`, API `323/323`, Desktop `322/322`, and Web `71/71`;
+- real PostgreSQL integration is green: Goal `21/21`, Task `31/31`, Reminder `28/28`, Notification `35/35` (serial file mode avoids shared-TRUNCATE setup deadlock), Scheduler `5/5`; relevant typecheck/lint/governance gates are green with zero lint errors.
+
+Canonical evidence: `docs/analysis/2026-09-07-hard-7102-core-vnext-architecture-governance-evidence.md`.
+
+`HARD-7102` is complete. Final closure advances to `HARD-7103`.
+
+## HARD-7103 — Full product acceptance journeys — COMPLETE (2026-09-07)
 
 Run fixtures A-J through:
 
@@ -2144,7 +2306,24 @@ Run fixtures A-J through:
 - local Docker product journey;
 - production-like schema boot.
 
-## HARD-7104 — Documentation / ADR closure
+**Implementation evidence — HARD-7103 (2026-09-07):**
+
+- added one canonical A-J acceptance manifest/runner. All ten frozen fixtures have focused executable evidence; host layers are explicit about covered vs architecturally N/A scenarios instead of fabricating a 10 x 5 matrix;
+- grouped focused acceptance passed **15 files / 81 tests** across Task/Goal/Schedule Orchestration/Routine/Notification/Planner, including real PostgreSQL evidence for finite-plan settlement and persisted Routine snooze;
+- API host acceptance passed Fixture B **1/1** with Task -> Goal outbox delivery across API host restart and replay idempotency;
+- Desktop host acceptance passed Fixtures G/H **2 files / 5 tests** for Electron idle input and persisted 50/10 protocol projection after restart;
+- Web Chromium acceptance passed Fixtures B/J **2/2**; Fixture J performs a real FullCalendar 14:00 -> 16:00 drag, sends the real Task owner reschedule request, forces `409 CONFLICT`, and verifies visual rollback;
+- current-revision local Docker acceptance passed **7/7** Product Phase A-E tests with image provenance validation plus a unique browser-request token proven in current container logs;
+- production-like fresh-schema boot passed through canonical `database:prisma-push`: pgvector, **96** public tables, **23** Core vNext tables, scheduling/membership uniqueness fences, and the Task Goal-binding v2 CHECK are verified before the temporary database is dropped;
+- acceptance caught and repaired real deployment residuals: local-compose env layering depended on caller cwd; `Dockerfile.api` omitted the physically split Scheduler package from isolated workspace closure; the hand-written Task Goal-binding CHECK still encoded retired trigger names and did not model link-only bindings;
+- Task Goal-binding schema reconciliation is now versioned `memoflow.task-goal-binding/v2`: fresh databases create it, existing legacy constraints are transactionally replaced with persisted trigger migration, and subsequent migrator runs are idempotent. Focused database constraint tests are **4/4**;
+- stale Phase A-E acceptance assumptions were migrated to current Goal/Task/AI surfaces (inline KR editor, `goal-progress-row`, explicit Plans surface, due-date wording, link-only-by-default Goal binding, current GoalPlanDraft fields) without restoring retired compatibility UI.
+
+Canonical evidence: `docs/analysis/2026-09-07-hard-7103-full-product-acceptance-evidence.md`.
+
+`HARD-7103` is complete. Final closure advances to `HARD-7104`.
+
+## HARD-7104 — Documentation / ADR closure — COMPLETE (2026-09-08)
 
 Update:
 
@@ -2158,6 +2337,18 @@ Update:
 - reuse ledger final decisions;
 - actual validation evidence.
 
+**Implementation evidence — HARD-7104 (2026-09-08):**
+
+- ADR-003 is explicitly historical for implementation details; ADR-053~064 now report their real implemented/ongoing-policy status;
+- Goal/Task/Routine/Notification/AI module docs, module indexes, feature map and Routine vNext checkpoint describe current production boundaries rather than migration-era surfaces;
+- reuse ledger records final Emittery/rrule/FullCalendar/pg-boss decisions; pg-boss remains `Keep custom` / dev-only candidate;
+- post-v0.11 Product parity is closed: ROUTINE-5302, AI-6101~6103 and MOBILE-6201/6202 all have implementation/acceptance evidence;
+- final pre-doc quality sequence passed lint, typecheck, build, inventory, target-governance and full `memoflow:governance-check`; HARD-7101 remains 22/22 and architecture lock scans 1769 production files with zero violations.
+
+Canonical evidence: `docs/analysis/2026-09-08-hard-7104-documentation-truth-closure.md`.
+
+`HARD-7104` is complete. Final closure advances to `HARD-7105`.
+
 ## HARD-7105 — Final batch review and focused repair
 
 Review five layers:
@@ -2169,6 +2360,26 @@ Review five layers:
 5. plan integrity.
 
 P0/P1 findings create focused repair passes before plan archive.
+
+**Implementation/review evidence — HARD-7105 (2026-09-08):**
+
+- five-layer review completed across contract correctness, vertical completeness, behavioral completeness, engineering quality, and plan integrity;
+- review found two real P1 residuals: obsolete AI Goal/Task validators retaining retired KR/Task semantics, and an unsafe AI tool `ExecutionContext` cast; both were repaired in `3f7f7023f127`;
+- the HARD-7104 feature-map public-surface drift exposed by the first final regression was repaired without weakening the existing contract tests;
+- final fresh behavior matrix passed Contracts, Label, Goal, Task, Reminder, Notification, Schedule, Scheduler, AI, App Vue, API and Desktop; notable totals include Goal 440/440, Task 717/717, Scheduler 273/273, App Vue 774/774, API 329/329 and Desktop 322/322;
+- final lint/typecheck/build, Test System V2 inventory (1185 files), target governance, HARD-7101 (22/22), architecture lock (1769 production files / 0 violations) and full `memoflow:governance-check` all passed;
+- obsolete PR #337 was closed as superseded after patch-level review; its intermediate Mobile raw ScheduleTask mutation design must not be reintroduced;
+- PR #338 first independent CI correctly rejected stale acceptance/fresh-workspace truth: old Task/AI `tags` fixtures, missing Scheduler source alias, pre-split parser/binding integration assumptions, and a migrated-away Schedule use-case coverage slice;
+- focused delivery repair `e314e6da344` kept production contracts strict, aligned fixtures with Shared Label / binding-v2, made fresh-workspace Scheduler resolution explicit, and moved coverage truth to Schedule Calendar/Planner + Scheduler Temporal Engine ownership;
+- post-repair re-acceptance passed Web Shard 2 23/23, focused Planner rollback, real PostgreSQL binding/Label/Notification/Schedule checks, four affected coverage targets, exact-revision local-Docker Phase B, affected typecheck, Test System V2 18/18, sync/inventory/target-governance and full governance.
+- PR #338 second CI confirmed the first repair across Unit, Typecheck, Build, 4/4 Web Flow, Boundary, Coverage, Performance and Validate; its only root failure was two Integration suites that executed zero assertions because the integration-only workspace helper still lacked the new Scheduler source alias;
+- focused integration repair `ce603b6e612` added Scheduler bare/deep source resolution to `vitest.workspace-helpers.ts`, locked that invariant in Test System V2, and moved the inventory to 1186 files; with `packages/scheduler/dist` deliberately absent, the two former CI failures passed 3/3 + 18/18 and the full Test System self-test passed 19/19.
+- PR #338 third CI independently turned Verification Children + Integration Oracle green and also passed Unit, Typecheck, Build, Boundary/Coverage/Performance, Governance, 4/4 Web Flow and Web Flow Oracle; its only root failure was Static Analysis on the new regression test importing a root config by relative path, with Validate Oracle red only as downstream fail-closed aggregation;
+- focused test-harness repair `9d505c5f655` preserves the runtime Scheduler-alias assertion through an isolated Node/tsx subprocess while respecting Nx module boundaries; exact affected lint (41 projects), Test System 19/19, inventory 1186, sync, diff check and full governance are green locally.
+
+Canonical evidence: `docs/analysis/2026-09-08-hard-7105-final-review-evidence.md`.
+
+**Review verdict: ACCEPTED — no unresolved P0/P1. All three focused CI repairs are locally re-accepted.** The plan intentionally remains active until PR #338 passes a new exact-head GitHub CI run and merges into `main`; archive occurs from merged `main`, not before delivery.
 
 ---
 
@@ -2393,9 +2604,9 @@ Core vNext can close only when all of the following hold:
 
 - [x] EventBus = Emittery fast path; no bus-global drain;
 - [x] standard recurrence engine selected and adapterized;
-- [ ] Goal/Task/Routine no longer construct/own legacy ScheduleTask projection paths — Reminder/Routine projection still calls `ScheduleTask.create(...)`;
+- [x] Goal/Task/Routine no longer construct/own legacy ScheduleTask projection paths — production residual grep now finds `ScheduleTask.create(...)` only inside the Scheduler package itself;
 - [x] stable schedulingKey + atomic reconcile;
-- [ ] HandlerRegistry fully replaces SourceModule execution switch — a domain-neutral legacy fallback remains in `schedule-orchestration/src/execution/router.ts`;
+- [x] HandlerRegistry fully replaces the SourceModule execution switch — the legacy `schedule-orchestration` execution fallback has been removed; remaining `sourceModule` fields are Scheduler metadata, not handler routing authority;
 - [x] wall-clock Routine has one scheduler authority;
 - [x] durable NotificationRequested pipeline exists;
 - [x] Notification Fact and Delivery outcome separated;
@@ -2407,50 +2618,39 @@ Core vNext can close only when all of the following hold:
 - [x] Planner edits route to owner domains;
 - [x] Goal/Task/Routine/Notification primary Web/Desktop vNext UI implemented;
 - [x] Routine InterventionWindow and FocusWindow validated;
-- [ ] Mobile/AI contracts have no retired fields and parity gaps — AI Task draft still exposes retired `folderId`; Mobile appears largely migrated but still requires explicit parity acceptance.
+- [x] Mobile/AI contracts have no retired fields and parity gaps — AI-6101~6103 and MOBILE-6201/6202 are complete; Shared Label is single-track and AI has no raw Scheduler capability.
 
 ## Reuse discipline
 
 - [x] no custom calendar grid/date picker recurrence engine was unnecessarily rebuilt;
-- [ ] dependency/license ledger has final decisions for every residual candidate — pg-boss remains `Keep now; later PoC`;
+- [x] dependency/license ledger has final decisions for every residual candidate — POC-6401 selected `Keep custom`; pg-boss remains a dev-only candidate;
 - [x] GPL/AGPL references were not copied into incompatible product code;
 - [x] third-party DTOs/types stay behind adapters for completed v0.11 scope.
 
 ## Quality
 
 - [x] fixtures A-J pass where applicable to the v0.11 milestone;
-- [ ] final cross-domain failure matrix passes (`HARD-7101` pending);
+- [x] final cross-domain failure matrix passes — governed manifest/checker + full executable runner passed 22/22 scenarios;
 - [x] API/Desktop/PowerSync/Prisma parity passes for the completed primary product scope;
 - [x] full governance/docs checks green for the completed milestone and current main;
-- [ ] residual grep proves legacy dual paths removed — ScheduleTask/SourceModule/raw schedule surfaces still exist;
+- [x] residual grep proves completed convergence paths are single-track — raw ScheduleTask product mutations, SourceModule execution fallback, Goal/Task legacy surfaces, Reminder ControlMode/scanner/duplicate state, Task string tags/color and AI raw Scheduler access are gone;
 - [ ] final residual batch review has no P0/P1 unresolved finding.
 
 ---
 
 # 20. Immediate next implementation batch
 
-Do **not** restart Wave 0–5 or rewrite completed Goal/Task pages. The current executable residual queue is:
+Do **not** restart Wave 0–5, Product parity, CLEAN convergence, or dependency PoCs. All of those lanes are closed. The only executable residual is:
 
 ```text
-A. Product parity (independent lanes)
-   ROUTINE-5302       Routine method library/catalog (product enhancement; implement if Routine presets remain desired)
-   AI-6101            remove retired Task draft fields and finish Goal/Task vNext draft alignment
-   AI-6102/6103       add Routine command/draft tools + Planner/Notification read tools if AI assistant scope remains desired
-   MOBILE-6201/6202   parity audit first; current screens already use modern Goal/Task/Notification contracts, implement only proven gaps
-
-B. Scheduling physical convergence (ordered)
-   CLEAN-6301~6303    delete remaining legacy Goal/Task/Reminder naming/control/raw ScheduleTask product paths
-        ↓
-   CLEAN-6304         decide/perform scheduler physical package split only after semantic ownership is clean
-        ↓
-   POC-6401           run pg-boss Build-vs-Adopt PoC against the now-clean SchedulingPort boundary; adopt only on evidence
-
+A. Product parity          DONE — ROUTINE-5302, AI-6101~6103, MOBILE-6201/6202
+B. Scheduling convergence DONE — CLEAN-6301~6304; POC-6401 = Keep custom
 C. Final closure
-   HARD-7101          cross-domain failure matrix
-   HARD-7102          architecture governance locks for residual deletions
-   HARD-7103          full product acceptance journeys
-   HARD-7104          ADR/docs truth closure
-   HARD-7105          final review / focused repair / archive
+   HARD-7101              DONE — 22/22 executable failure matrix
+   HARD-7102              DONE — architecture locks / anti-resurrection
+   HARD-7103              DONE — A-J + host + local-Docker + schema acceptance
+   HARD-7104              DONE — ADR/docs/reuse/plan truth closure
+   HARD-7105              REVIEW PASS + CI REPAIRS PASS — no unresolved P0/P1; PR #338 fourth exact-head CI + merge + archive remain
 ```
 
-Recommended ordering: finish **A** only for product surfaces that still matter to MemoFlow's roadmap; execute **B** before deciding pg-boss; then run **C** once no deferred product ticket remains. `POC-6401` is a decision ticket, not a mandate to replace the current scheduler.
+HARD-7105 implementation/review and all focused CI repairs are accepted. Keep the final DoD checkbox open until PR #338 passes CI on the repaired exact head and merges into `main`; then archive this umbrella plan from merged `main`.

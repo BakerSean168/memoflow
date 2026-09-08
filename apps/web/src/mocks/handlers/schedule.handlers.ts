@@ -3,7 +3,7 @@
  *
  * Paths match the actual HTTP adapters:
  *   - ScheduleEventHttpAdapter: /schedules/events
- *   - ScheduleTaskHttpAdapter:  /schedules/tasks
+ *   - Scheduler diagnostics:    /schedules/tasks (read-only)
  */
 
 import { http, HttpResponse } from 'msw';
@@ -182,43 +182,6 @@ export const scheduleHandlers = [
     });
   }),
 
-  http.post(`${TASKS}/batch`, async ({ request }) => {
-    const body = (await request.json()) as Record<string, unknown>[];
-    return HttpResponse.json(
-      {
-        ok: true,
-        code: 200,
-        message: 'Created',
-        data: body.map(() => createMockScheduleTask()),
-        timestamp: Date.now(),
-      },
-      { status: 201 },
-    );
-  }),
-
-  http.post(`${TASKS}/batch/delete`, () => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Deleted',
-      data: { count: 0 },
-      timestamp: Date.now(),
-    });
-  }),
-
-  http.post(TASKS, async ({ request }) => {
-    const body = (await request.json()) as Record<string, unknown>;
-    return HttpResponse.json(
-      {
-        ok: true,
-        code: 200,
-        message: 'Created',
-        data: createMockScheduleTask({ name: body.name as string }),
-        timestamp: Date.now(),
-      },
-      { status: 201 },
-    );
-  }),
 
   http.get(`${TASKS}/:taskId`, ({ params }) => {
     return HttpResponse.json({
@@ -230,71 +193,4 @@ export const scheduleHandlers = [
     });
   }),
 
-  http.post(`${TASKS}/:taskId/pause`, ({ params }) => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Paused',
-      data: createMockScheduleTask({
-        id: toScheduleTaskId(params['taskId']),
-        status: 'Paused',
-        enabled: false,
-      }),
-      timestamp: Date.now(),
-    });
-  }),
-
-  http.post(`${TASKS}/:taskId/resume`, ({ params }) => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Resumed',
-      data: createMockScheduleTask({
-        id: toScheduleTaskId(params['taskId']),
-        status: 'Active',
-        enabled: true,
-      }),
-      timestamp: Date.now(),
-    });
-  }),
-
-  http.post(`${TASKS}/:taskId/complete`, ({ params }) => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Completed',
-      data: createMockScheduleTask({ id: toScheduleTaskId(params['taskId']), status: 'Completed' }),
-      timestamp: Date.now(),
-    });
-  }),
-
-  http.post(`${TASKS}/:taskId/cancel`, ({ params }) => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Cancelled',
-      data: createMockScheduleTask({ id: toScheduleTaskId(params['taskId']), status: 'Cancelled' }),
-      timestamp: Date.now(),
-    });
-  }),
-
-  http.patch(`${TASKS}/:taskId/metadata`, ({ params }) => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Updated',
-      data: createMockScheduleTask({ id: toScheduleTaskId(params['taskId']) }),
-      timestamp: Date.now(),
-    });
-  }),
-
-  http.delete(`${TASKS}/:taskId`, ({ params }) => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Deleted',
-      data: { id: params.taskId },
-      timestamp: Date.now(),
-    });
-  }),
 ];

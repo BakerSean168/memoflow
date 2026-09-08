@@ -23,7 +23,6 @@ export interface UserReminderPreferencesServerDTO {
   bestTimeSlots: TimeSlotDTO[]; // 最佳时间段
   worstTimeSlots: TimeSlotDTO[]; // 最差时间段
   globalReminderEnabled: boolean; // 全局提醒总开关
-  globalSmartFrequency: boolean; // 全局启用智能频率
   createdAt: number; // epoch ms
   updatedAt: number; // epoch ms
 }

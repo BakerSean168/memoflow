@@ -21,8 +21,6 @@ function createBoundRow(): PowerSyncTaskTemplateRow {
     status: 'Active',
     importance: 'Moderate',
     priority: null,
-    color: null,
-    tags: '[]',
     folder_id: null,
     parent_task_id: null,
     time_config_type: null,

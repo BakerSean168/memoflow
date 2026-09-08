@@ -1,97 +1,59 @@
-import type { ScheduleEventMap } from '@memoflow/contracts/schedule';
+import type { SchedulingPort } from '@memoflow/contracts/schedule';
 import {
   createReminderScheduleProjectionEventHandlers,
   type ReminderScheduleProjectionEventMap,
   type ReminderScheduleProjectionSource,
 } from '@memoflow/reminder/schedule-projection';
-import type { IScheduleTaskRepository } from '@memoflow/schedule';
-import type { Publisher, Subscriber } from '@memoflow/utils/domain';
+import type { Subscriber } from '@memoflow/utils/domain';
 import type { RuntimeContribution } from '../ports/runtime-contribution';
 import { createReminderProjector } from '../projectors/reminder-projector';
 
 export interface CreateReminderProjectionRuntimeDeps {
   readonly source: ReminderScheduleProjectionSource;
-  readonly scheduleTaskRepository: IScheduleTaskRepository;
+  readonly schedulingPort: SchedulingPort;
   readonly reminderEvents: Subscriber<ReminderScheduleProjectionEventMap>;
-  readonly scheduleEvents: Publisher<Pick<ScheduleEventMap, 'schedule:task-deleted'>>;
 }
 
+/**
+ * Incremental Reminder projection. `reminder:triggered` is deliberately part of
+ * the event map: the Reminder aggregate commits its nextTriggerAt and durable
+ * NotificationRequested first, then this listener re-arms the next one-shot
+ * Scheduler invocation from business truth.
+ */
 export function createReminderProjectionRuntime(
   deps: CreateReminderProjectionRuntimeDeps,
 ): RuntimeContribution {
   const projector = createReminderProjector({
     source: deps.source,
-    scheduleTaskRepository: deps.scheduleTaskRepository,
-    scheduleEvents: deps.scheduleEvents,
+    schedulingPort: deps.schedulingPort,
   });
-
   const handlers = createReminderScheduleProjectionEventHandlers(projector);
   let started = false;
 
+  const eventNames: readonly (keyof ReminderScheduleProjectionEventMap)[] = [
+    'reminder:template-created',
+    'reminder:template-updated',
+    'reminder:template-enabled',
+    'reminder:template-paused',
+    'reminder:template-deleted',
+    'reminder:template-eligibility-changed',
+    'reminder:triggered',
+  ];
+
   return {
     async start(): Promise<void> {
-      if (started) {
-        return;
+      if (started) return;
+      for (const eventName of eventNames) {
+        deps.reminderEvents.on(eventName, handlers[eventName] as never);
       }
-
-      deps.reminderEvents.on(
-        'reminder:template-created',
-        handlers['reminder:template-created'],
-      );
-      deps.reminderEvents.on(
-        'reminder:template-updated',
-        handlers['reminder:template-updated'],
-      );
-      deps.reminderEvents.on(
-        'reminder:template-enabled',
-        handlers['reminder:template-enabled'],
-      );
-      deps.reminderEvents.on(
-        'reminder:template-moved',
-        handlers['reminder:template-moved'],
-      );
-      deps.reminderEvents.on(
-        'reminder:template-paused',
-        handlers['reminder:template-paused'],
-      );
-      deps.reminderEvents.on(
-        'reminder:template-deleted',
-        handlers['reminder:template-deleted'],
-      );
-
       started = true;
     },
 
     async stop(): Promise<void> {
-      if (!started) {
-        return;
+      if (!started) return;
+      for (const eventName of eventNames) {
+        deps.reminderEvents.off(eventName, handlers[eventName] as never);
       }
-
-      deps.reminderEvents.off(
-        'reminder:template-created',
-        handlers['reminder:template-created'],
-      );
-      deps.reminderEvents.off(
-        'reminder:template-updated',
-        handlers['reminder:template-updated'],
-      );
-      deps.reminderEvents.off(
-        'reminder:template-enabled',
-        handlers['reminder:template-enabled'],
-      );
-      deps.reminderEvents.off(
-        'reminder:template-moved',
-        handlers['reminder:template-moved'],
-      );
-      deps.reminderEvents.off(
-        'reminder:template-paused',
-        handlers['reminder:template-paused'],
-      );
-      deps.reminderEvents.off(
-        'reminder:template-deleted',
-        handlers['reminder:template-deleted'],
-      );
-
       started = false;
     },
   };

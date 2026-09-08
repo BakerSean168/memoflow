@@ -1,5 +1,9 @@
 # 页面级 UI 重构方案（UI Page Redesign Plan）
 
+> **⚠️ Core vNext Goal/Task 边界更新（2026-09-07）**：GoalFolder、Goal Focus/Comparison、TaskFolder、Task Dependency/DAG/CriticalPath 已按 ADR-053/054 与 Core vNext 从运行时、公开契约和产品 UI 退役。本文中仍出现这些名称的页面清单、数据字段、组件或交互描述均是 **vNext 之前的历史快照，不得作为当前实施依据**；当前真值以 `docs/product/modules/goal.md`、`docs/product/modules/task.md` 与 `docs/plan/active/2026-08-25-core-vnext-orchestration.md` 为准。
+>
+
+
 > **⚠️ 已被取代（2026-07-12）**：壳与导航体系（§0.1 页面壳、§0.2 主导航、§0.4 响应式基线、§0.5 壳类共享组件、§15.3 实施顺序）由 `docs/UI_REDESIGN_V2_PLAN.md`（ChatGPT 桌面式壳，AI 优先三态布局）**取代**。各页面章节 §1–§14 的**内容级结论**（主/次操作、信息删减清单、拆分/退役/更名表、空态设计、不可破坏契约）仍然有效，作为 V2 面板内容设计的输入，由 V2 §6 逐条映射引用。请勿按本文 §0/§15.3 施工。
 >
 > **⚠️ 笔记边界更新（2026-07-16）**：§9/§10 中仍保留的跨端轻编辑、新建和保存描述已由 [ADR-034](./architecture/adr/ADR-034-obsidian-vault-repository.md) 取代。目标态为 Desktop 在 Obsidian 外部编辑；绑定 GitHub 知识仓库后 Web 可快捷创建新文件，但已有笔记编辑仍延期。本文相关内容只用于理解迁移前 UI。
@@ -329,7 +333,7 @@ StatStrip：活跃任务 12 · 今日完成 3 · 活跃目标 4 · 待提醒 2 �
 | `GoalFocusView` `/goals/focus`                    | 展示当前专注期状态，冲刺心智 | 主：退出/调整专注；次：跳转专注中的目标 | 居中单卡（状态页，不套列表壳）：专注目标 + 剩余天数大字 + "隐藏非专注目标"开关；未激活访问 = `AppEmptyState` + 「激活专注模式」 | 复用 `ActivateFocusModeDialog`；入口固定为目标侧栏底部按钮（§3）      |
 | `MultiGoalComparisonView` `/goals/compare`        | 多目标横向对比               | 主：选择对比目标；次：返回              | DetailPageShell，全宽表格区；<md 横向滚动                                                                                       | 入口收进列表页 ⋯ 菜单（§3）；复用 `comparison/` 现有组件              |
 | `GoalReviewCreationView` / `GoalReviewDetailView` | 创建/查看复盘                | 主：提交复盘 / 无；次：返回详情         | DetailPageShell `max-w-4xl`；表单分节（自评/总结）；提交失败 inline error 保留已填内容                                          | 入口收敛到详情页"复盘"Tab（§4）；组件不动                             |
-| `KeyResultDetailView`                             | KR 明细与记录轨迹            | 主：记录进度（预选该 KR）；次：编辑 KR  | DetailPageShell；进度趋势 + 记录列表                                                                                            | 复用 `GoalRecordDialog` / `KeyResultDialog`、`ProgressBreakdownPanel` |
+| `KeyResultDetailView`                             | KR 明细与记录轨迹            | 主：记录进度（预选该 KR）；次：编辑 KR  | DetailPageShell；进度趋势 + 记录列表                                                                                            | 复用 `GoalRecordDialog` / `KeyResultDialog`；进度统一读取 KR/Goal aggregate，不再使用独立 `ProgressBreakdownPanel` |
 
 响应式与状态设计全部继承 §0.3 / §0.4，不特殊化。
 

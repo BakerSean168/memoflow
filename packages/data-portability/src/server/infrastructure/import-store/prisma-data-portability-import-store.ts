@@ -80,13 +80,11 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
         bestTimeSlots: input.bestTimeSlots,
         worstTimeSlots: input.worstTimeSlots,
         globalReminderEnabled: input.globalReminderEnabled,
-        globalSmartFrequency: input.globalSmartFrequency,
       },
       update: {
         bestTimeSlots: input.bestTimeSlots,
         worstTimeSlots: input.worstTimeSlots,
         globalReminderEnabled: input.globalReminderEnabled,
-        globalSmartFrequency: input.globalSmartFrequency,
       },
     });
   }
@@ -112,25 +110,35 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
   }
 
   async createKeyResult(input: CreateKeyResultInput): Promise<void> {
-    await this.tx.keyResult.create({ data: input as unknown as Prisma.KeyResultUncheckedCreateInput });
+    await this.tx.keyResult.create({
+      data: input as unknown as Prisma.KeyResultUncheckedCreateInput,
+    });
   }
 
   async createGoalReview(input: CreateGoalReviewInput): Promise<void> {
-    await this.tx.goalReview.create({ data: input as unknown as Prisma.GoalReviewUncheckedCreateInput });
+    await this.tx.goalReview.create({
+      data: input as unknown as Prisma.GoalReviewUncheckedCreateInput,
+    });
   }
 
   async createGoalRecord(input: CreateGoalRecordInput): Promise<void> {
-    await this.tx.goalRecord.create({ data: input as unknown as Prisma.GoalRecordUncheckedCreateInput });
+    await this.tx.goalRecord.create({
+      data: input as unknown as Prisma.GoalRecordUncheckedCreateInput,
+    });
   }
 
   // --- Task ---
 
   async createTaskTemplate(input: CreateTaskTemplateInput): Promise<void> {
-    await this.tx.taskTemplate.create({ data: input as unknown as Prisma.TaskTemplateUncheckedCreateInput });
+    await this.tx.taskTemplate.create({
+      data: input as unknown as Prisma.TaskTemplateUncheckedCreateInput,
+    });
   }
 
   async createTaskInstance(input: CreateTaskInstanceInput): Promise<void> {
-    await this.tx.taskInstance.create({ data: input as unknown as Prisma.TaskInstanceUncheckedCreateInput });
+    await this.tx.taskInstance.create({
+      data: input as unknown as Prisma.TaskInstanceUncheckedCreateInput,
+    });
   }
 
   // --- Schedule ---
@@ -147,20 +155,61 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createReminderGroup(input: CreateReminderGroupInput): Promise<void> {
     await this.tx.reminderGroup.create({ data: input });
+    await this.tx.routineProfile.create({
+      data: {
+        id: input.id,
+        identityId: input.identityId,
+        name: input.name,
+        description: input.description,
+        enabled: input.enabled,
+        active: input.status.toLowerCase() === 'active',
+        createdAt: input.createdAt,
+        updatedAt: input.updatedAt,
+      },
+    });
   }
 
   async createReminderTemplate(input: CreateReminderTemplateInput): Promise<void> {
-    await this.tx.reminderTemplate.create({ data: input });
+    const { routineEnabled, routineTrigger, profileMemberships, ...templateInput } = input;
+    await this.tx.reminderTemplate.create({ data: templateInput });
+    await this.tx.routineDefinition.create({
+      data: {
+        id: input.id,
+        identityId: input.identityId,
+        name: input.name,
+        description: input.description,
+        enabled: routineEnabled,
+        triggerJson: routineTrigger == null ? null : JSON.stringify(routineTrigger),
+        createdAt: input.createdAt,
+        updatedAt: input.updatedAt,
+      },
+    });
+    for (const membership of profileMemberships) {
+      await this.tx.routineProfileMembership.create({
+        data: {
+          identityId: input.identityId,
+          profileId: membership.profileId,
+          routineId: input.id,
+          enabled: membership.enabled,
+          createdAt: input.createdAt,
+          updatedAt: input.updatedAt,
+        },
+      });
+    }
   }
 
   async createReminderResponse(input: CreateReminderResponseInput): Promise<void> {
-    await this.tx.reminderResponse.create({ data: input as Prisma.ReminderResponseUncheckedCreateInput });
+    await this.tx.reminderResponse.create({
+      data: input as Prisma.ReminderResponseUncheckedCreateInput,
+    });
   }
 
   // --- Editor ---
 
   async createEditorWorkspace(input: CreateEditorWorkspaceInput): Promise<void> {
-    await this.tx.editorWorkspace.create({ data: input as Prisma.EditorWorkspaceUncheckedCreateInput });
+    await this.tx.editorWorkspace.create({
+      data: input as Prisma.EditorWorkspaceUncheckedCreateInput,
+    });
   }
 
   async createEditorSession(input: CreateEditorSessionInput): Promise<void> {
@@ -184,7 +233,9 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
   // --- AI ---
 
   async createAIConversation(input: CreateAIConversationInput): Promise<void> {
-    await this.tx.aiConversation.create({ data: input as Prisma.AiConversationUncheckedCreateInput });
+    await this.tx.aiConversation.create({
+      data: input as Prisma.AiConversationUncheckedCreateInput,
+    });
   }
 
   async createAIMessage(input: CreateAIMessageInput): Promise<void> {

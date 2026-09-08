@@ -108,32 +108,4 @@ describe('AdjustReminderFrequencyUseCase', () => {
     }
   });
 
-  it('reject returns NOT_FOUND when template is not found', async () => {
-    repo.findByIdForIdentity.mockResolvedValue(null);
-    const useCase = new AdjustReminderFrequencyUseCase(repo);
-
-    const result = await useCase.reject('tpl-1', 'identity-1');
-
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.code).toBe('NOT_FOUND');
-    }
-  });
-
-  it('reject emits adjustment-rejected event', async () => {
-    repo.findByIdForIdentity.mockResolvedValue({ id: 'tpl-1' });
-    const eventSpy = vi.spyOn(eventBus, 'send');
-    const useCase = new AdjustReminderFrequencyUseCase(repo);
-
-    const result = await useCase.reject('tpl-1', 'identity-1');
-
-    expect(result.ok).toBe(true);
-    expect(eventSpy).toHaveBeenCalledWith(
-      'reminder:frequency-adjustment-rejected',
-      expect.objectContaining({
-        templateId: 'tpl-1',
-        identityId: 'identity-1',
-      }),
-    );
-  });
 });

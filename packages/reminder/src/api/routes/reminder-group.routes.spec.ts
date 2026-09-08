@@ -32,24 +32,18 @@ function createReminderControllerStub(): ReminderController {
     getTemplate: vi.fn(),
     updateTemplate: vi.fn(),
     deleteTemplate: vi.fn(),
-    enableTemplate: vi.fn(),
-    pauseTemplate: vi.fn(),
     toggleTemplate: vi.fn(),
-    moveTemplate: vi.fn(),
     getTemplateHistory: vi.fn(),
     recordResponse: vi.fn(),
     getTemplateResponses: vi.fn(),
     getResponseStats: vi.fn(),
     analyzeFrequency: vi.fn(),
     adjustFrequency: vi.fn(),
-    rejectFrequencyAdjustment: vi.fn(),
     createGroup: vi.fn(),
     listGroups: vi.fn(),
     getGroup: vi.fn(),
     updateGroup: vi.fn(),
     deleteGroup: vi.fn(),
-    switchGroupControlMode: vi.fn(),
-    batchGroupTemplates: vi.fn(),
     toggleGroup: vi.fn(),
     getPreferences: vi.fn(),
     updatePreferences: vi.fn(),
@@ -193,7 +187,7 @@ describe('reminder group route contracts', () => {
     expect(updateSchema.safeParse({ name: 'Updated group name' }).success).toBe(true);
   });
 
-  it('control-mode body schema uses SwitchGroupControlModeSchema with mode field', () => {
+  it('does not expose retired control-mode or batch-template routes', () => {
     const registry = new TestOpenApiRegistry();
 
     registerReminderGroupRoutes(
@@ -202,13 +196,13 @@ describe('reminder group route contracts', () => {
       registry,
     );
 
-    const bodySchema = getJsonBodySchema(
-      getRegisteredRoute(registry, 'post', `${BASE}/groups/{id}/control-mode`),
-    );
-
-    // SwitchGroupControlModeSchema uses 'mode' with ControlMode values: 'Group' | 'Individual'
-    expect(bodySchema.safeParse({ mode: 'Group' }).success).toBe(true);
-    expect(bodySchema.safeParse({ mode: 'Individual' }).success).toBe(true);
-    expect(bodySchema.safeParse({}).success).toBe(false);
+    expect(
+      registry.paths.some((route) => route.path === `${BASE}/groups/{id}/control-mode`),
+    ).toBe(false);
+    expect(
+      registry.paths.some((route) => route.path === `${BASE}/groups/{id}/batch`),
+    ).toBe(false);
+    expect(registry.paths.some((route) => route.path === `${BASE}/groups/{id}/toggle`)).toBe(true);
   });
+
 });

@@ -39,7 +39,6 @@ export interface UpsertUserReminderPreferenceInput {
   bestTimeSlots: string;
   worstTimeSlots: string;
   globalReminderEnabled: boolean;
-  globalSmartFrequency: boolean;
 }
 
 // --- Repository ---
@@ -247,7 +246,6 @@ export interface CreateReminderGroupInput extends TimestampedImportInput {
   description: string | null;
   color: string | null;
   icon: string | null;
-  controlMode: string;
   enabled: boolean;
   status: string;
   order: number;
@@ -262,7 +260,9 @@ export interface CreateReminderTemplateInput extends TimestampedImportInput {
   type: string;
   selfEnabled: boolean;
   status: string;
-  reminderGroupId: string | null;
+  routineEnabled: boolean;
+  routineTrigger: unknown | null;
+  profileMemberships: Array<{ profileId: string; enabled: boolean }>;
   importanceLevel: string;
   tags: string;
   color: string | null;
@@ -272,7 +272,6 @@ export interface CreateReminderTemplateInput extends TimestampedImportInput {
   activeHours: string | null;
   notificationConfig: string;
   stats: string;
-  smartFrequencyEnabled: boolean;
 }
 
 export interface CreateReminderResponseInput extends CreatedImportInput {
@@ -281,6 +280,7 @@ export interface CreateReminderResponseInput extends CreatedImportInput {
   templateId: string;
   action: string;
   responseTime: number | null;
+  snoozeDurationSeconds: number | null;
   timestamp: string;
 }
 

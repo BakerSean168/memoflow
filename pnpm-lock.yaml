@@ -366,6 +366,9 @@ importers:
       '@memoflow/schedule-orchestration':
         specifier: workspace:*
         version: link:../../packages/schedule-orchestration
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../../packages/scheduler
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
@@ -565,6 +568,9 @@ importers:
       '@memoflow/schedule-orchestration':
         specifier: workspace:*
         version: link:../../packages/schedule-orchestration
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../../packages/scheduler
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
@@ -1174,6 +1180,9 @@ importers:
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
+      '@memoflow/label':
+        specifier: workspace:*
+        version: link:../label
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification
@@ -1186,6 +1195,9 @@ importers:
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../schedule
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
@@ -1736,6 +1748,9 @@ importers:
       '@memoflow/powersync-schema':
         specifier: workspace:*
         version: link:../powersync-schema
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1820,9 +1835,6 @@ importers:
       express:
         specifier: ^5.2.1
         version: 5.2.1(supports-color@10.2.2)
-      node-cron:
-        specifier: ^4.2.1
-        version: 4.2.1
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -1907,6 +1919,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@memoflow/test-utils':
         specifier: workspace:*
         version: link:../test-utils
@@ -1928,6 +1943,9 @@ importers:
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../schedule
+      '@memoflow/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@memoflow/task':
         specifier: workspace:*
         version: link:../task
@@ -1941,6 +1959,49 @@ importers:
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
+
+  packages/scheduler:
+    dependencies:
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/database':
+        specifier: workspace:*
+        version: link:../database
+      '@memoflow/domain-shared':
+        specifier: workspace:*
+        version: link:../domain-shared
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@memoflow/patterns':
+        specifier: workspace:*
+        version: link:../patterns
+      '@memoflow/utils':
+        specifier: workspace:*
+        version: link:../utils
+      cron-parser:
+        specifier: ^5.4.0
+        version: 5.4.0
+      express:
+        specifier: ^5.2.1
+        version: 5.2.1(supports-color@10.2.2)
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.6
+      pg-boss:
+        specifier: 12.30.0
+        version: 12.30.0
 
   packages/setting:
     dependencies:
@@ -8596,6 +8657,10 @@ packages:
     resolution: {integrity: sha512-p0SaNjrHOnQeR8/VnfGbmg9te2kfyYSQ7Sc/j/6DtPL3JQvKxmjO9TSjNFpujqV3vEYYBvNNvXSxzyksBWAx1Q==}
     engines: {node: '>=12.0.0'}
 
+  cron-parser@5.10.0:
+    resolution: {integrity: sha512-izNAxJyRWUP8ljBoDSub5WyrVOUlT4SLGShswE7eoRBpp6QUsSycYxLBMJlbshgPBMcPT/nrfgjNY2918ayv2A==}
+    engines: {node: '>=18'}
+
   cron-parser@5.4.0:
     resolution: {integrity: sha512-HxYB8vTvnQFx4dLsZpGRa0uHp6X3qIzS3ZJgJ9v6l/5TJMgeWQbLkR5yiJ5hOxGbc9+jCADDnydIe15ReLZnJA==}
     engines: {node: '>=18'}
@@ -12367,6 +12432,10 @@ packages:
     resolution: {integrity: sha512-n+YP+NKwR5zRWa60k3GiQ6Q3B4KXCoAw40dAKeCtYn020iNN74aWK2liXIC3ZEATeGql7we3tE3t8QwhY0eskw==}
     engines: {node: '>=6.0.0'}
 
+  non-error@0.1.0:
+    resolution: {integrity: sha512-TMB1uHiGsHRGv1uYclfhivcnf0/PdFp2pNqRxXjncaAsjYMoisaQJI+SSZCqRq+VliwRTC8tsMQfmrWjDMhkPQ==}
+    engines: {node: '>=20'}
+
   nopt@7.2.1:
     resolution: {integrity: sha512-taM24ViiimT/XntxbPyJQzCG+p4EKOpgD3mxFwW38mGjVUrfERQOeY4EDHjdnptttfHuHQXFx+lTP08Q+mLa/w==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
@@ -12748,6 +12817,11 @@ packages:
   performance-now@2.1.0:
     resolution: {integrity: sha512-7EAHlyLHI56VEIdK57uwHdHKIaAGbnXPiw0yWbarQZOKaKpvUIgW0jWRVLiatnM+XXlSwsanIBH/hzGMJulMow==}
 
+  pg-boss@12.30.0:
+    resolution: {integrity: sha512-ke4Rr/uMJGwqt7DwKoWS9aa6XFlK43C0fMw1Ma0CoJrVxWSjE7ZwFLwz60dGQODESDA2+yq/B474pOH4n3d3CQ==}
+    engines: {node: '>=22.12.0'}
+    hasBin: true
+
   pg-cloudflare@1.4.0:
     resolution: {integrity: sha512-Vo7z/6rrQYxpNRylp4Tlob2elzbh+N/MOQbxFVWCxS7oEx6jF53GTJFxK2WWpKuBRkmiin4Mt+xofFDjx09R0A==}
 
@@ -12777,12 +12851,24 @@ packages:
   pg-protocol@1.15.0:
     resolution: {integrity: sha512-cq9sECI5s0+uPUXjbz8ioyPJni6RzsRib0US67i5IoTZKw8fNeYlVE7u8F4dG7vEJJtc5wdD1K189lCCUwqWTQ==}
 
+  pg-protocol@1.16.0:
+    resolution: {integrity: sha512-sILXutLVjCLjcDuOmvhX5e2Z4cS5qG/6Bu3VkpFwdf/633ElGLpEh9bgmuI5I4sqKqkifQiGyiCcx1HdtrK7tg==}
+
   pg-types@2.2.0:
     resolution: {integrity: sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==}
     engines: {node: '>=4'}
 
   pg@8.22.0:
     resolution: {integrity: sha512-8wih1vVIBMxoUM2oB4soJsD9tDnDpLv4OXBJ+EJzFsvycD+lfyIreC2gGHq78f8jbLLt+bvlPTFdFZfJkOuzAA==}
+    engines: {node: '>= 16.0.0'}
+    peerDependencies:
+      pg-native: '>=3.0.1'
+    peerDependenciesMeta:
+      pg-native:
+        optional: true
+
+  pg@8.23.0:
+    resolution: {integrity: sha512-Ip2EQCngowJLGOfCwkFhPXU7/ljlhn6Rxlmy4XYfL2Y+vyRM59+8uR2xqRWKdYmbXmxCFOAmKxBuSUCdF34qLg==}
     engines: {node: '>= 16.0.0'}
     peerDependencies:
       pg-native: '>=3.0.1'
@@ -13911,6 +13997,10 @@ packages:
 
   seq-queue@0.0.5:
     resolution: {integrity: sha512-hr3Wtp/GZIc/6DAGPDcV4/9WoZhjrkXsi5B/07QgX8tsdc6ilr7BFM6PM6rbdAX1kFSDYeZGLipIZZKyQP0O5Q==}
+
+  serialize-error@13.0.1:
+    resolution: {integrity: sha512-bBZaRwLH9PN5HbLCjPId4dP5bNGEtumcErgOX952IsvOhVPrm3/AeK1y0UHA/QaPG701eg0yEnOKsCOC6X/kaA==}
+    engines: {node: '>=20'}
 
   serialize-error@2.1.0:
     resolution: {integrity: sha512-ghgmKt5o4Tly5yEG/UJp8qTd0AN7Xalw4XBtDEKP655B699qMEtra1WlXeE6WIvdEG481JvRxULKsInq/iNysw==}
@@ -23297,6 +23387,10 @@ snapshots:
     dependencies:
       luxon: 3.7.2
 
+  cron-parser@5.10.0:
+    dependencies:
+      luxon: 3.7.2
+
   cron-parser@5.4.0:
     dependencies:
       luxon: 3.7.2
@@ -24743,7 +24837,7 @@ snapshots:
 
   eventsource@3.0.7:
     dependencies:
-      eventsource-parser: 3.0.6
+      eventsource-parser: 3.1.1
 
   evp_bytestokey@1.0.3:
     dependencies:
@@ -27879,6 +27973,8 @@ snapshots:
 
   nodemailer@9.0.3: {}
 
+  non-error@0.1.0: {}
+
   nopt@7.2.1:
     dependencies:
       abbrev: 2.0.0
@@ -28449,6 +28545,14 @@ snapshots:
 
   performance-now@2.1.0: {}
 
+  pg-boss@12.30.0:
+    dependencies:
+      cron-parser: 5.10.0
+      pg: 8.23.0
+      serialize-error: 13.0.1
+    transitivePeerDependencies:
+      - pg-native
+
   pg-cloudflare@1.4.0:
     optional: true
 
@@ -28466,9 +28570,15 @@ snapshots:
     dependencies:
       pg: 8.22.0
 
+  pg-pool@3.14.0(pg@8.23.0):
+    dependencies:
+      pg: 8.23.0
+
   pg-protocol@1.11.0: {}
 
   pg-protocol@1.15.0: {}
+
+  pg-protocol@1.16.0: {}
 
   pg-types@2.2.0:
     dependencies:
@@ -28483,6 +28593,16 @@ snapshots:
       pg-connection-string: 2.14.0
       pg-pool: 3.14.0(pg@8.22.0)
       pg-protocol: 1.15.0
+      pg-types: 2.2.0
+      pgpass: 1.0.5
+    optionalDependencies:
+      pg-cloudflare: 1.4.0
+
+  pg@8.23.0:
+    dependencies:
+      pg-connection-string: 2.14.0
+      pg-pool: 3.14.0(pg@8.23.0)
+      pg-protocol: 1.16.0
       pg-types: 2.2.0
       pgpass: 1.0.5
     optionalDependencies:
@@ -29810,6 +29930,11 @@ snapshots:
       - supports-color
 
   seq-queue@0.0.5: {}
+
+  serialize-error@13.0.1:
+    dependencies:
+      non-error: 0.1.0
+      type-fest: 5.8.0
 
   serialize-error@2.1.0: {}
 

@@ -21,5 +21,3 @@ export type {
   ProjectionRepairMetricsSnapshot,
   ProjectionRepairSource,
 } from './ports/projection-repair';
-
-export { createReminderSchedulerDueSetReader } from './shadow/reminder-due-set-shadow';

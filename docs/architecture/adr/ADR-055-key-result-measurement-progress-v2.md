@@ -7,15 +7,19 @@ tags:
   - measurement
 description: Key Result Measurement V2，删除 valueType、拆分记录起点与进度基线并统一进度/完成语义
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-08-25T14:28:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-055: Key Result Measurement & Progress V2
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施
 **日期：** 2026-08-25  
 **影响范围：** Goal domain、contracts、database、Task contribution、Goal UI、Review snapshots、AI Goal workflow  
 **关联：** ADR-038、ADR-052、ADR-053、ADR-056
+
+## 2026-09-08 实现状态
+
+KR Measurement V2 已是当前 contract/domain/UI 真值；旧 `valueType` 产品语义已退休。统一 progress calculator 负责 baseline/current/target/direction 解释，Goal 完成与 weighted progress 展示保持分离；AI Goal draft 与 React/Mobile 也消费当前 Measurement contract。
 
 ## 1. 背景
 

@@ -13,10 +13,9 @@ const powerSyncSchema = readFileSync(
 );
 
 describe('Goal schema projection ownership', () => {
-  it('does not persist folder counters without a single projector', () => {
-    const folderModel = schema.match(/model GoalFolder \{[\s\S]*?\n\}/)?.[0] ?? '';
-    expect(folderModel).not.toMatch(/goalCount|completedGoalCount/);
-    expect(powerSyncSchema).not.toMatch(/goal_count|completed_goal_count/);
+  it('keeps retired GoalFolder/Focus persistence absent', () => {
+    expect(schema).not.toMatch(/model (GoalFolder|FocusMode|FocusSession)\b/);
+    expect(powerSyncSchema).not.toMatch(/goal_folders|focus_modes|focus_sessions/);
   });
 
   it('removes the unused aggregate statistics cache instead of syncing stale copies', () => {

@@ -111,13 +111,6 @@ describe('goal ownership surface', () => {
     resolve(__dirname, '../../../../application/use-cases/queries/list-goal-records.use-case.ts'),
     'utf8',
   );
-  const progressBreakdown = readFileSync(
-    resolve(
-      __dirname,
-      '../../../../application/use-cases/queries/get-goal-progress-breakdown.use-case.ts',
-    ),
-    'utf8',
-  );
   const crossModule = readFileSync(
     resolve(
       __dirname,
@@ -213,8 +206,6 @@ describe('goal ownership surface', () => {
     expect(listRecords).toContain('identityId: string;');
     expect(listRecords).toContain('findByIdForIdentity(identityId, goalId,');
     expect(listRecords).toContain('String(record.identityId) === identityId');
-    expect(progressBreakdown).toContain('findByIdForIdentity(identityId, goalId,');
-    expect(progressBreakdown).toMatch(/execute\(goalId: string, identityId: string\)/);
     expect(crossModule).toContain('findByIdForIdentity(identityId, goalId)');
   });
 
@@ -223,7 +214,6 @@ describe('goal ownership surface', () => {
     expect(routes).toContain('controller.get(');
     expect(routes).toMatch(/controller\.get\(\s*req\.params!\.id,\s*ctx,/);
     expect(routes).toContain('controller.getAggregate(req.params!.id, ctx)');
-    expect(routes).toContain('controller.getProgressBreakdown(req.params!.id, ctx)');
 
     // Phase 4: mutation routes bind contract invocation schemas through the
     // validation-aware registrar; the controller still receives the canonical
@@ -304,9 +294,8 @@ describe('goal ownership surface', () => {
       /REVIEW_DELETE[\s\S]*goalController\.deleteReview\([\s\S]*data\.params\.id,[\s\S]*data\.params\.reviewId,[\s\S]*data\.query,[\s\S]*requestContext/,
     );
     expect(electron).toMatch(/KEY_RESULT_BATCH_UPDATE_WEIGHTS[\s\S]*requestContext/);
-    expect(electron).toMatch(
-      /PROGRESS_BREAKDOWN[\s\S]*goalController\.getProgressBreakdown\(id, requestContext\)/,
-    );
+    expect(routes).not.toContain('progress-breakdown');
+    expect(electron).not.toContain('PROGRESS_BREAKDOWN');
     expect(electron).toMatch(
       /RECORD_LIST_BY_GOAL[\s\S]*listRecordsByGoal\(goalId, params \?\? undefined, requestContext\)/,
     );

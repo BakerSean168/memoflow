@@ -46,11 +46,6 @@ export class ListTaskTemplatesUseCase {
           (template) => String(template.goalBinding?.goalId ?? '') === String(request.goalId),
         );
       }
-      if (request.tags && request.tags.length > 0) {
-        templates = templates.filter((template) =>
-          request.tags!.some((tag) => template.tags.includes(tag)),
-        );
-      }
     } else if (request.status && request.status.length > 0) {
       templates = await this.templateRepository.findByStatus(
         request.identityId,
@@ -58,8 +53,6 @@ export class ListTaskTemplatesUseCase {
       );
     } else if (request.goalId) {
       templates = await this.templateRepository.findByGoalId(request.identityId, request.goalId);
-    } else if (request.tags && request.tags.length > 0) {
-      templates = await this.templateRepository.findByTags(request.identityId, request.tags);
     } else {
       templates = await this.templateRepository.findByIdentityId(request.identityId);
     }

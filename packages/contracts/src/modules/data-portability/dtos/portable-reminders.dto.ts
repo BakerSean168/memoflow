@@ -10,7 +10,6 @@ export const PortableReminderGroupSchema = z
     _ref: PortableRefSchema,
     name: z.string(),
     description: z.string().nullable().optional(),
-    controlMode: z.string(),
     enabled: z.boolean(),
     status: z.string(),
     order: z.number(),
@@ -35,12 +34,20 @@ export const PortableReminderTemplateSchema = z
     notificationConfig: z.unknown(),
     selfEnabled: z.boolean(),
     status: z.string(),
-    groupRef: PortableRefSchema.nullable().optional(),
+    routineDefinition: z.object({
+      enabled: z.boolean(),
+      trigger: z.unknown().nullable(),
+    }),
+    profileMemberships: z.array(
+      z.object({
+        profileRef: PortableRefSchema,
+        enabled: z.boolean(),
+      }),
+    ),
     importanceLevel: z.string(),
     tags: z.array(z.string()),
     color: z.string().nullable().optional(),
     icon: z.string().nullable().optional(),
-    smartFrequencyEnabled: z.boolean(),
     createdAt: IsoDateString.optional(),
     updatedAt: IsoDateString.optional(),
   })
@@ -53,7 +60,8 @@ export const PortableReminderResponseSchema = z
     _ref: PortableRefSchema,
     templateRef: PortableRefSchema,
     action: z.string(),
-    responseTime: IsoDateString.nullable().optional(),
+    responseTime: z.number().int().nonnegative().nullable().optional(),
+    snoozeDurationSeconds: z.number().int().positive().nullable().optional(),
     timestamp: IsoDateString,
   })
   .strict();

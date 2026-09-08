@@ -28,4 +28,13 @@ describe('ReminderIpcAdapter channel surface', () => {
       expect(source).toContain(`ReminderChannels.${key}`);
     }
   });
+
+  it('does not expose retired per-user list IPC channels or adapter methods', () => {
+    expect('TEMPLATE_GET_BY_USER' in ReminderChannels).toBe(false);
+    expect('GROUP_GET_BY_USER' in ReminderChannels).toBe(false);
+    expect(source).not.toContain('getUserTemplates');
+    expect(source).not.toContain('getUserReminderGroups');
+    expect(source).not.toContain('TEMPLATE_GET_BY_USER');
+    expect(source).not.toContain('GROUP_GET_BY_USER');
+  });
 });

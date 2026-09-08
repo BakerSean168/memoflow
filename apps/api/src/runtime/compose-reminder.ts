@@ -5,8 +5,8 @@
  * ROUTINE-3402 cutover: the API host no longer wires the legacy Reminder cron.
  * ReminderTemplate wall-clock work is projected into the shared Scheduler and
  * executed through schedule orchestration, so Scheduler is the sole production
- * timing authority. The old cron factory remains only as an explicit read-only
- * due-set shadow diagnostic outside this composition root.
+ * timing authority. The retired Reminder cron and its due-set shadow diagnostic
+ * are physically removed; no compatibility timing runtime remains.
  *
  * The host still owns the Prisma connection and closure checker, builds exactly
  * one Reminder repository set, assembles the transport-neutral module, and then
@@ -32,6 +32,11 @@ import { createReminderApiModule, type ReminderApiModuleDef } from '@memoflow/re
 import type { ReminderScheduleExecutionSource } from '@memoflow/reminder';
 import type { ReminderScheduleProjectionSource } from '@memoflow/reminder';
 import type { ReminderApplicationPort } from '@memoflow/reminder';
+import {
+  createRoutineCoachCommandService,
+  createRoutineOverrideChangedNotifier,
+  type RoutineCoachCommandPort,
+} from '@memoflow/reminder/routine-runtime';
 
 /**
  * Dependencies the reminder composer needs from the API host runtime.
@@ -121,6 +126,8 @@ export interface ComposedReminder {
    * 是同一对象。
    */
   readonly executorReminderPort: ReminderApplicationPort;
+  /** Routine Coach owner-domain command seam for approved AI/product orchestration. */
+  readonly routineCommandPort: RoutineCoachCommandPort;
   /** Repository views exposed to sibling modules in the same host. 暴露给同一宿主内兄弟模块的仓储视图。 */
   readonly repositories: { readonly reminderTemplateRepository: IReminderTemplateRepository };
   /** Schedule execution source built from the SAME repository set. 从同一仓储集合构建的 schedule execution source。 */
@@ -155,14 +162,22 @@ function normalizeRuntimeContributions(
 export function composeReminder(dependencies: ComposeReminderDependencies): ComposedReminder {
   const repositories = createReminderPrismaRepositories(dependencies.db);
 
+  const routineCommandPort = createRoutineCoachCommandService({
+    routineProfileStore: repositories.routineProfileStore,
+    temporaryOverrideStore: repositories.routineTemporaryOverrideStore,
+    protocolSessionStore: repositories.protocolSessionStore,
+    onOverrideChanged: createRoutineOverrideChangedNotifier(),
+  });
+
   const instance = createReminderModule({
     reminderTemplateRepository: repositories.reminderTemplateRepository,
     reminderGroupRepository: repositories.reminderGroupRepository,
     reminderResponseRepository: repositories.reminderResponseRepository,
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
+    routineProfileStore: repositories.routineProfileStore,
     closureChecker: dependencies.closureChecker,
     reliablePort: repositories.reliablePort,
-    snoozeRescheduler: repositories.snoozeRescheduler,
+    snoozeOverrideWriter: repositories.snoozeOverrideWriter,
     auditRepository: repositories.auditRepository,
     runtimeContributions: normalizeRuntimeContributions(dependencies.runtimeContributions),
   });
@@ -177,6 +192,8 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
   });
   const scheduleProjectionSource = createReminderScheduleProjectionSource({
     reminderTemplateRepository,
+    routineProfileStore: repositories.routineProfileStore,
+    userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
   });
 
   // Executor-visible closure path: when the host supplies the frozen
@@ -196,6 +213,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
           reminderGroupRepository: repositories.reminderGroupRepository,
           reminderResponseRepository: repositories.reminderResponseRepository,
           userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
+          routineProfileStore: repositories.routineProfileStore,
           closureChecker: dependencies.executorClosureChecker,
         });
 
@@ -211,6 +229,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
     module: createReminderApiModule({ instance }),
     applicationPort: instance.api,
     executorReminderPort,
+    routineCommandPort,
     repositories: { reminderTemplateRepository },
     scheduleExecutionSource,
     scheduleProjectionSource,

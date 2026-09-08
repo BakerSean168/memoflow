@@ -34,6 +34,12 @@ export interface ReminderGroupRepoPort {
 export interface ReminderResponseRepoPort {
   findByTemplateId(templateId: string, identityId: string, limit?: number): Promise<unknown[]>;
 }
+export interface RoutineProfileMembershipRepoPort {
+  findByIdentityId(identityId: string): Promise<unknown[]>;
+}
+export interface RoutineDefinitionRepoPort {
+  findByIdentityId(identityId: string): Promise<unknown[]>;
+}
 export interface UserReminderPreferenceRepoPort {
   findByIdentityId(identityId: string): Promise<unknown | null>;
 }
@@ -102,6 +108,8 @@ export interface DataPortabilityDependencies {
   reminderTemplateRepository: ReminderTemplateRepoPort;
   reminderGroupRepository: ReminderGroupRepoPort;
   reminderResponseRepository: ReminderResponseRepoPort;
+  routineProfileMembershipRepository: RoutineProfileMembershipRepoPort;
+  routineDefinitionRepository: RoutineDefinitionRepoPort;
   userReminderPreferenceRepository: UserReminderPreferenceRepoPort;
   repositoryRepository: RepositoryRepoPort;
   folderRepository: ResourceFolderRepoPort;

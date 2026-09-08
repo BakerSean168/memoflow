@@ -9,19 +9,23 @@ tags:
   - architecture
 description: 将用户可见的 Schedule/Planner 与内部 Scheduler/Temporal Engine 明确分层，避免 CalendarEntry 与后台执行队列继续共享同一产品语义
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-08-25T17:49:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-060: Schedule / Planner 与 Scheduler / Temporal Engine 分离
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施
 **日期：** 2026-08-25  
-**影响范围：** schedule、schedule-orchestration、task、goal、reminder、notification、app-vue、desktop、contracts、database  
+**影响范围：** schedule、scheduler、schedule-orchestration、patterns、task、goal、reminder、notification、app-vue、app-react、api、desktop、contracts、database
 **关联：** ADR-003、ADR-025、ADR-033、ADR-037、ADR-042、ADR-058、ADR-059、ADR-061~063
+
+## 2026-09-08 实现状态
+
+CLEAN-6304 已完成语义与物理拆分：`@memoflow/schedule` 只拥有 Planner/Calendar 产品能力，`@memoflow/scheduler` 拥有 Temporal Engine/worker persistence/lease/queue/retry 与只读 diagnostics。产品 UI 与 AI 均不得直接 mutation raw ScheduleTask。
 
 ## 1. 背景
 
-MemoFlow 当前 `packages/schedule` 同时承载两类本质不同的能力：
+在本 ADR 编写时，MemoFlow 的 `packages/schedule` 同时承载两类本质不同的能力：
 
 1. **用户可见的时间规划产品**
    - `CalendarEntry`；
@@ -72,7 +76,7 @@ Notification
 
 > **Calendar 管“用户怎么看和安排时间”，Scheduler 管“系统什么时候执行”，Reminder 管“什么时候需要提醒/干预”，Notification 管“消息如何抵达用户”。**
 
-逻辑边界立即生效；物理 package 拆分可以分阶段完成，避免一次性重写已有可靠执行能力。
+逻辑边界先行；在语义所有权稳定后再执行物理 package 拆分。该 Phase B 物理拆分已于 2026-09-07 完成。
 
 ## 3. 当前系统事实
 
@@ -264,26 +268,27 @@ interface ScheduledInvocation {
 - timezone 由明确的 source configuration / product time policy 解析后传入；
 - DST 行为必须通过成熟时间库或经过充分测试的 engine 处理。
 
-## 9. 物理 package 迁移策略
+## 9. 物理 package 迁移策略与实施状态
 
-不要求第一步就把所有代码移动。
-
-推荐阶段：
+原决策要求先完成语义收敛，再执行物理拆分。2026-09-07，`CLEAN-6304` 证明语义所有权已稳定，因此 Phase B 已完成：
 
 ```text
-Phase A
-packages/schedule
-  ├─ planner/calendar 语义
-  └─ scheduler legacy internals
-
-Phase B
-packages/scheduler        <- invocation / queue / worker / execution
-packages/schedule         <- calendar/planner domain
+packages/schedule         = Planner / Calendar
+packages/scheduler        = Scheduler / Temporal Engine
 packages/schedule-orchestration
-  -> 逐步收敛为 scheduling integration / registry adapter
+  = owner-domain projection + handler-registry integration
 ```
 
-只有 contract 和行为稳定后再搬物理目录，避免“大搬家但语义没变”。
+当前物理边界：
+
+- `@memoflow/schedule` 只拥有 CalendarEntry、冲突检测/解决、Planner/Calendar client/transport，以及 rebuild/domain-event outbox 等 Calendar reliability operation；
+- `@memoflow/scheduler` 拥有 ScheduleTask、ScheduleExecution、Prisma/PowerSync worker repositories、lease coordinator、queue/runtime、SchedulingPort adapter、Handler Registry 与只读 worker diagnostics client/API/IPC；
+- `@memoflow/patterns/lease` 提供纯 `LeaseCoordinatorPort + LeaseLostError`，Calendar reliability worker 只依赖该抽象；具体 ScheduleLease persistence/coordinator 留在 Scheduler；
+- API 与 Desktop composition root 分别创建 Calendar repository set 与 Scheduler repository set，并注册 sibling module handles；外部既有 `/schedules` HTTP/IPC contract 保持兼容，ownership 在包内分离；
+- App-Vue 的普通 Planner 不再持有 raw ScheduleTask diagnostics state；App-React 的 worker diagnostics 改由 `SchedulerClientPort` 注入；
+- `scope:scheduler` 已加入 Nx/ESLint/governance scope matrix 与 target baseline，防止未来把 worker internals 搬回 `schedule`。
+
+这次迁移不重命名数据库表或公开 schedule contract；数据库 schema/DTO 仍可保留历史 `schedule_*` 命名，物理 package ownership 已独立。若未来需要 contract namespace 重命名，应另开 ADR/ticket，不能混入 Scheduler runtime 变更。
 
 ## 10. 受保护契约
 

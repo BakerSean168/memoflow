@@ -5,10 +5,7 @@ import type {
   IScheduleRepository,
   ScheduleDomainEventOutboxDTO,
 } from '../../domain/repositories/i-schedule-repository';
-import { ScheduleLeaseLostError } from '../../domain/errors/schedule-lease-lost-error';
-import type {
-  ScheduleLeaseCoordinatorPort,
-} from './schedule-rebuild-worker-service';
+import { LeaseLostError, type LeaseCoordinatorPort } from '@memoflow/patterns/lease';
 
 export interface DomainEventPublishResult {
   publishedCount: number;
@@ -42,7 +39,7 @@ export class PublishBeforeAckFaultError extends Error {
 }
 
 function isLeaseLostError(err: unknown): boolean {
-  return err instanceof ScheduleLeaseLostError;
+  return err instanceof LeaseLostError;
 }
 
 /**
@@ -58,7 +55,7 @@ function isLeaseLostError(err: unknown): boolean {
 export class ScheduleDomainEventPublisherService {
   constructor(
     private readonly scheduleRepository: IScheduleRepository,
-    private readonly leaseCoordinator: ScheduleLeaseCoordinatorPort,
+    private readonly leaseCoordinator: LeaseCoordinatorPort,
     private readonly eventBus: IEventBus,
     private readonly options: ScheduleDomainEventPublisherOptions = {},
   ) {}

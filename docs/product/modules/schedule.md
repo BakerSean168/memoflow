@@ -3,89 +3,91 @@ tags:
   - product
   - module
   - schedule
-description: 日程模块当前功能资产说明
+description: Planner / Calendar 产品模块与 Scheduler 边界说明
 created: 2026-06-02T00:00:00
-updated: 2026-08-25T17:49:00+08:00
+updated: 2026-09-07T15:20:00+08:00
 ---
 
 # 日程模块说明
 
-> **vNext 方向（2026-08-25）：** 当前文档继续记录现有 Schedule 资产。新的正式边界把用户可见的 Schedule 收敛为 **Calendar / Planner**，把 `ScheduleTask`/queue/lease/retry 等后台能力定义为内部 **Scheduler / Temporal Engine**。业务模块通过 neutral `ScheduledIntent + SchedulingPort.reconcile` 接入，不再长期直接构造 `ScheduleTask`。详见 [Scheduling / Notification vNext](../scheduling-notification-vnext.md)、[ADR-060](../../architecture/adr/ADR-060-schedule-planner-and-scheduler-boundary.md)、[ADR-061](../../architecture/adr/ADR-061-business-module-scheduling-port-and-handler-registry.md)。
+> **当前边界（2026-09-07）：** CLEAN-6304 已完成物理拆包。`@memoflow/schedule` 是用户可见的 **Planner / Calendar**；后台 `ScheduleTask`、queue、lease、retry、execution 属于独立 `@memoflow/scheduler` **Temporal Engine**。业务模块通过 `ScheduledIntent + SchedulingPort.reconcile` 接入 Scheduler，不直接把 worker job 当成产品对象。详见 [Scheduling / Notification vNext](../scheduling-notification-vnext.md)、[ADR-060](../../architecture/adr/ADR-060-schedule-planner-and-scheduler-boundary.md)、[ADR-061](../../architecture/adr/ADR-061-business-module-scheduling-port-and-handler-registry.md)。
 
 ## 1. 功能定位
 
-日程模块用于把任务、目标和提醒落到时间安排上。它围绕日程任务（ScheduleTask）、日历条目（CalendarEntry）、冲突检测、调度执行和多视图日历形成闭环，是跨模块时间调度的基础设施。
+`@memoflow/schedule` 负责“用户怎么看和安排时间”：CalendarEntry、日/周/月 Planner、冲突检测/解决，以及 Calendar reliability operation。它可以投影 Task / Goal / Routine 的时间事实，但不拥有这些业务实体，也不拥有后台 worker job。
+
+`@memoflow/scheduler` 负责“系统什么时候可靠执行”：ScheduleTask / ScheduleExecution、lease、claim、queue、retry/backoff、source executor、Handler Registry 与只读 worker diagnostics。
 
 ## 2. 当前功能说明
 
-- 日程任务管理：创建、更新、删除、暂停、恢复、触发、完成和取消日程任务。
-- 日历条目管理：创建、更新、删除日历条目，支持按时间范围查询。
-- 冲突检测：检测日历条目之间的时间冲突，提供冲突详情和解决建议。
-- 冲突解决：对检测到的冲突执行重新调度或其他解决操作。
-- 调度执行：基于 cron 表达式自动执行到期任务，支持手动触发、重试策略和错过任务检测。
-- 批量操作：支持日程任务的批量操作和批量删除。
-- 执行记录：记录每次执行的状态、时长、结果和错误信息。
-- 日程统计：按账户聚合日程任务和执行的多维度统计数据。
-- 多视图日历：前端提供日视图、周视图和月视图，合并日历条目和任务实例。
-- 跨模块来源追踪：通过 SourceModule 枚举（Reminder、Task、Goal、Notification、System、Custom）标识日程任务的业务来源。
+### Planner / Calendar (`@memoflow/schedule`)
+
+- CalendarEntry 创建、更新、删除与按时间范围查询；
+- 日 / 周 / 月统一 Planner 视图，聚合 CalendarEntry 与 owner-domain 时间 projection；
+- 冲突检测、冲突解决、拖动/缩放到 owner command 的路由；
+- Prisma / PowerSync Calendar repository；
+- rebuild outbox、domain-event publisher、delivery-log consumer，以及带审计的 rebuild timeline / replay；
+- HTTP / IPC / client 只暴露 Calendar 产品命令与 Calendar reliability ops。
+
+### Temporal Engine (`@memoflow/scheduler`)
+
+- ScheduleTask / ScheduleExecution 领域模型与 Prisma / PowerSync repositories；
+- ScheduleLease coordinator、queue/runtime、claim/retry/backoff；
+- `SchedulingPort` adapter 与 `ScheduledHandlerRegistry`；
+- HTTP / IPC / client 仅提供 raw worker 的只读 diagnostics；
+- raw worker create/update/pause/resume/complete/cancel/delete 只允许在 Scheduler 内部用例中使用，普通产品 transport 不公开。
 
 ## 3. 用户路径
 
-- 日历视图路径：用户进入日程页，默认展示日历视图（支持日/周/月切换），查看来自日历条目和任务实例的统一事件列表，点击事件查看详情或执行操作。
-- 日程任务路径：用户创建日程任务，配置 cron 表达式、时区和执行参数，系统按计划自动执行，用户可暂停、恢复或手动触发。
-- 冲突处理路径：用户创建日历条目时系统自动检测冲突，展示冲突详情和建议，用户可选择重新调度或忽略。
-- 移动端路径：移动端提供日程列表、日历视图、周视图和事件编辑入口。
+- **Planner 路径：** 用户进入日程页，在日/周/月视图查看统一事件；CalendarEntry 可直接编辑，Task / Goal / Routine 事件通过各自 owner command 修改。
+- **Calendar Entry 路径：** 用户创建或编辑时间块，系统执行冲突检测并给出解决路径。
+- **Worker diagnostics：** 仅在需要诊断后台触发状态时读取 Scheduler worker 状态；用户不能直接通过产品 UI 暂停/完成/删除 raw ScheduleTask。
+- **移动端：** Calendar/Planner 产品路径继续使用 `ScheduleClientPort`；需要 worker diagnostics 的 React surface 使用独立 `SchedulerClientPort`。
 
-## 4. 业务规则
+## 4. 业务与架构规则
 
-- ScheduleTask 是日程模块核心聚合，ScheduleExecution 与任务关联，CalendarEntry 是独立的日历条目聚合。
-- ScheduleTask 状态：Active、Paused、Completed、Failed、Cancelled。Active ↔ Paused 支持暂停恢复。
-- 执行状态：Pending、Running、Success、Failed、Timeout、Skipped。
-- 冲突检测基于时间范围重叠，冲突严重度分为 Info、Warning、Error。
-- SourceModule 枚举标识日程任务的业务来源，其他模块（Goal、Task、Reminder）通过注册 schedule runtime contribution 监听领域事件来创建/删除 ScheduleTask。
-- 调度队列使用最小堆按 nextRunAt 排序，维护单个 setTimeout 指向最近任务。
-- 重试策略可配置最大重试次数、初始延迟、最大延迟、退避乘数和可重试状态。
-- cron 表达式支持标准 5 字段格式，可配置时区、开始/结束日期和最大执行次数。
-- 客户端通过 HTTP 或 IPC 适配器访问日程能力，服务端通过模块组合根装配用例和仓储实现。
+- `CalendarEntry` 是 `@memoflow/schedule` 的产品聚合；`ScheduleTask` 是 `@memoflow/scheduler` 的内部 invocation persistence。
+- Planner projection 与 Scheduler invocation 是两条独立 projection；一个 Task/Goal/Routine 可以同时出现在 Planner 并产生 Scheduler invocation，但二者不共享产品所有权。
+- owner domain 通过 `SchedulingPort.reconcile` 写入调度意图；不得直接构造/持久化 raw ScheduleTask。
+- Scheduler 的执行选择由 handler key / registry 驱动；历史 `SourceModule` 仅保留兼容/可观测元数据，不再作为中央行为路由 authority。
+- Calendar reliability worker 依赖 `@memoflow/patterns/lease` 抽象；具体 ScheduleLease coordinator/repository 属于 Scheduler。
+- API 与 Desktop 都分别装配 Calendar module 与 Scheduler module；不能重新创建一个混合的“大 Schedule module”。
 
 ## 5. 相关文件索引
 
-详细文件清单见 [日程模块文件索引](../module-index/schedule-files.md)。
+详细文件清单见 [日程 / Scheduler 文件索引](../module-index/schedule-files.md)。
 
 ## 6. 当前问题
 
-- 日程模块同时承载"用户创建的日历条目"和"跨模块注册的调度任务"两类职责，边界需要在优化前明确。
-- 冲突检测和冲突解决目前只针对 CalendarEntry，不覆盖 ScheduleTask。
-- 调度队列的错过任务检测（系统休眠恢复）机制需要在生产环境验证。
-- 前端 useCalendarView 合并了日历条目、任务实例和任务模板三类数据源，数据一致性依赖各模块的实时状态。
-- ScheduleJob 模型（schedule_jobs 表）在 Prisma schema 中存在但与 ScheduleTask 有职责重叠。
+- Planner 仍需继续完善跨 owner projection 的交互一致性与完整 acceptance journey。
+- Scheduler 目前仍是自研 Temporal Engine；是否采用 pg-boss 尚未决定，必须通过 `POC-6401` 比较 claim/retry/DLQ/heartbeat/transaction enqueue/multi-worker/PowerSync 等约束。
+- 数据库与 contracts 仍保留历史 `schedule_*` 命名；这不等于 package ownership 仍混合。若未来重命名，应独立决策，避免把 schema churn 与 runtime 行为变化混在一起。
 
 ## 7. 优化机会
 
-- 梳理 CalendarEntry 和 ScheduleTask 的职责边界，减少用户困惑。
-- 将冲突检测能力扩展到 ScheduleTask，或明确其只属于 CalendarEntry。
-- 强化日历视图的跨模块数据展示，让用户能区分事件来源。
-- 为调度执行提供更好的监控和告警能力，当前只有统计聚合。
-- 考虑日历条目的拖拽编辑和批量操作能力。
+- Planner 增强拖拽/resize、跨来源筛选、agenda/read model 与冲突体验；
+- 为 Scheduler 增加更清晰的只读运维可观测面，而不是恢复产品级 raw worker mutation；
+- 用 `POC-6401` 评估 pg-boss cloud adapter 或 hybrid cloud/local adapter；
+- 最终 HARD-7101~7105 中补齐跨域失败矩阵、完整产品 journey 与架构文档 closure。
 
 ## 8. 风险点
 
-- 调度状态流转和执行记录的准确性直接影响用户信任。
-- 跨模块 source 元数据一致性：Goal、Task、Reminder 模块的事件变更会影响 ScheduleTask 的创建和删除。
-- 冲突检测规则变更对用户日历展示和执行计划的影响。
-- 调度队列的定时器精度和系统休眠恢复的可靠性。
-- HTTP、IPC、Prisma 和 PowerSync 适配器同时存在，索引和测试需要覆盖多运行时边界。
+- Calendar projection 和 Scheduler invocation 必须保持独立 truth，不能因 UI convenience 再次合并 ownership；
+- API / Desktop 双宿主必须共享相同 SchedulingPort/lease/recovery 语义；
+- PostgreSQL 与 PowerSync 的 CAS、claim、lease、outbox/replay 行为需要持续真实 DB 回归；
+- 任何新的 raw worker product mutation route/client/IPC 都属于架构回退，应由 surface/governance tests 阻止。
 
-## 9. 后续待确认
+## 9. 已确认决策
 
-- CalendarEntry 和 ScheduleTask 是否应合并为统一概念，还是保持分离。
-- 冲突检测是否应覆盖所有类型的日程数据。
-- 调度队列的错过任务检测策略是否需要可配置。
-- Dashboard 对日程数据的依赖是否需要专门的读模型契约。
-- 日程模块是否需要支持重复日历条目（当前只有 ScheduleTask 支持 cron 重复）。
+- CalendarEntry 与 ScheduleTask **不合并**；
+- Planner/Calendar 与 Scheduler/Temporal Engine 已物理拆包；
+- raw ScheduleTask 不是普通用户产品对象；
+- pg-boss 不是既定迁移目标，只有 PoC 证据通过才考虑 Adopt/Hybrid。
 
 ## 10. 相关资料
 
+- [ADR-060 Schedule / Planner 与 Scheduler / Temporal Engine 分离](../../architecture/adr/ADR-060-schedule-planner-and-scheduler-boundary.md)
+- [ADR-061 Scheduling Port 与 Handler Registry](../../architecture/adr/ADR-061-business-module-scheduling-port-and-handler-registry.md)
 - [目标模块说明](./goal.md)
 - [任务模块说明](./task.md)
-- [日程模块文件索引](../module-index/schedule-files.md)
+- [日程 / Scheduler 文件索引](../module-index/schedule-files.md)

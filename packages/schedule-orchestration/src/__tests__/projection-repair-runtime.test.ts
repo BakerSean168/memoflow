@@ -7,7 +7,7 @@ import {
 } from '../runtime/projection-repair-runtime';
 import type { RuntimeContribution } from '../ports/runtime-contribution';
 
-function owner(source: 'task' | 'goal' | 'routine', id: string): SchedulingOwner {
+function owner(source: 'task' | 'goal' | 'reminder' | 'routine', id: string): SchedulingOwner {
   return {
     identityId: 'IdentityId_repair',
     type: `${source}.owner`,
@@ -52,9 +52,9 @@ describe('common projection repair runtime (SCHED-3601)', () => {
     const order: string[] = [];
     const durableProjection = new Set<string>();
     const allListenersReady = () =>
-      ['task', 'goal', 'routine'].every((source) => order.includes(`listen:${source}`));
+      ['task', 'goal', 'reminder', 'routine'].every((source) => order.includes(`listen:${source}`));
 
-    const lane = (source: 'task' | 'goal' | 'routine', id: string) =>
+    const lane = (source: 'task' | 'goal' | 'reminder' | 'routine', id: string) =>
       defineProjectionRepairLane({
         source,
         async enumerate() {
@@ -77,11 +77,13 @@ describe('common projection repair runtime (SCHED-3601)', () => {
     const repairRuntime = createProjectionRepairRuntime([
       lane('task', 'task-1'),
       lane('goal', 'goal-1'),
+      lane('reminder', 'reminder-1'),
       lane('routine', 'routine-1'),
     ]);
     const runtime = createCompositeRuntimeContribution([
       listenerContribution('task', order),
       listenerContribution('goal', order),
+      listenerContribution('reminder', order),
       listenerContribution('routine', order),
       repairRuntime,
     ]);
@@ -93,14 +95,16 @@ describe('common projection repair runtime (SCHED-3601)', () => {
 
     expect([...durableProjection].sort()).toEqual([
       'goal:goal-1:stable-scheduling-key',
+      'reminder:reminder-1:stable-scheduling-key',
       'routine:routine-1:stable-scheduling-key',
       'task:task-1:stable-scheduling-key',
     ]);
     expect(repairRuntime.metrics.snapshot()).toEqual({
       task: { repaired: 1, unchanged: 0, failed: 0 },
       goal: { repaired: 1, unchanged: 0, failed: 0 },
+      reminder: { repaired: 1, unchanged: 0, failed: 0 },
       routine: { repaired: 1, unchanged: 0, failed: 0 },
-      total: { repaired: 3, unchanged: 0, failed: 0 },
+      total: { repaired: 4, unchanged: 0, failed: 0 },
     });
 
     // A later restart re-enumerates the same stable keys and must converge as
@@ -109,12 +113,13 @@ describe('common projection repair runtime (SCHED-3601)', () => {
     order.length = 0;
     await runtime.start();
 
-    expect(durableProjection.size).toBe(3);
+    expect(durableProjection.size).toBe(4);
     expect(repairRuntime.metrics.snapshot()).toEqual({
       task: { repaired: 1, unchanged: 1, failed: 0 },
       goal: { repaired: 1, unchanged: 1, failed: 0 },
+      reminder: { repaired: 1, unchanged: 1, failed: 0 },
       routine: { repaired: 1, unchanged: 1, failed: 0 },
-      total: { repaired: 3, unchanged: 3, failed: 0 },
+      total: { repaired: 4, unchanged: 4, failed: 0 },
     });
   });
 

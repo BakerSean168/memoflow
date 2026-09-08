@@ -9,7 +9,6 @@ function makeService() {
     listInstances: vi.fn(),
     listInstancesByDateRange: vi.fn(),
     getTemplate: vi.fn(),
-    getTaskGraph: vi.fn(),
     createTemplate: vi.fn(),
     updateTemplate: vi.fn(),
     deleteTemplate: vi.fn(),
@@ -20,8 +19,6 @@ function makeService() {
     completeInstance: vi.fn(),
     uncompleteInstance: vi.fn(),
     skipInstance: vi.fn(),
-    createDependency: vi.fn(),
-    deleteDependency: vi.fn(),
   };
 }
 

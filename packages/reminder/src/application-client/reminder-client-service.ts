@@ -21,7 +21,6 @@ import type {
   GetUpcomingRemindersRes,
   GetReminderTodayScheduleRes,
 } from '@memoflow/contracts/reminder';
-import type { ControlMode } from '@memoflow/contracts/reminder';
 import type { IReminderApiClient } from './ports/reminder-api-client.port';
 
 export class ReminderClientService implements IReminderApiClient {
@@ -29,21 +28,18 @@ export class ReminderClientService implements IReminderApiClient {
     this.createReminderTemplate = this.createReminderTemplate.bind(this);
     this.getReminderTemplate = this.getReminderTemplate.bind(this);
     this.getReminderTemplates = this.getReminderTemplates.bind(this);
-    this.getUserTemplates = this.getUserTemplates.bind(this);
     this.updateReminderTemplate = this.updateReminderTemplate.bind(this);
     this.deleteReminderTemplate = this.deleteReminderTemplate.bind(this);
     this.toggleTemplateEnabled = this.toggleTemplateEnabled.bind(this);
-    this.moveTemplateToGroup = this.moveTemplateToGroup.bind(this);
+    this.replaceTemplateProfiles = this.replaceTemplateProfiles.bind(this);
     this.getUpcomingReminders = this.getUpcomingReminders.bind(this);
     this.getTodaySchedule = this.getTodaySchedule.bind(this);
     this.createReminderGroup = this.createReminderGroup.bind(this);
     this.getReminderGroup = this.getReminderGroup.bind(this);
     this.getReminderGroups = this.getReminderGroups.bind(this);
-    this.getUserReminderGroups = this.getUserReminderGroups.bind(this);
     this.updateReminderGroup = this.updateReminderGroup.bind(this);
     this.deleteReminderGroup = this.deleteReminderGroup.bind(this);
     this.toggleReminderGroupStatus = this.toggleReminderGroupStatus.bind(this);
-    this.switchReminderGroupControlMode = this.switchReminderGroupControlMode.bind(this);
     this.getPreferences = this.getPreferences.bind(this);
     this.updatePreferences = this.updatePreferences.bind(this);
   }
@@ -64,10 +60,6 @@ export class ReminderClientService implements IReminderApiClient {
     return this.reminderApi.getReminderTemplates();
   }
 
-  async getUserTemplates(): Promise<Result<ReminderTemplateClientDTO[]>> {
-    return this.reminderApi.getUserTemplates();
-  }
-
   async updateReminderTemplate(
     id: string,
     request: UpdateReminderTemplateReq,
@@ -83,11 +75,11 @@ export class ReminderClientService implements IReminderApiClient {
     return this.reminderApi.toggleTemplateEnabled(id);
   }
 
-  async moveTemplateToGroup(
+  async replaceTemplateProfiles(
     templateId: string,
-    targetGroupId: string | null,
+    profileIds: readonly string[],
   ): Promise<Result<ReminderTemplateClientDTO>> {
-    return this.reminderApi.moveTemplateToGroup(templateId, targetGroupId);
+    return this.reminderApi.replaceTemplateProfiles(templateId, profileIds);
   }
 
   async getUpcomingReminders(params?: {
@@ -124,10 +116,6 @@ export class ReminderClientService implements IReminderApiClient {
     return this.reminderApi.getReminderGroups();
   }
 
-  async getUserReminderGroups(): Promise<Result<ReminderGroupClientDTO[]>> {
-    return this.reminderApi.getUserReminderGroups();
-  }
-
   async updateReminderGroup(
     id: string,
     request: UpdateReminderGroupReq,
@@ -143,13 +131,6 @@ export class ReminderClientService implements IReminderApiClient {
     return this.reminderApi.toggleReminderGroupStatus(id);
   }
 
-  async switchReminderGroupControlMode(
-    id: string,
-    mode: ControlMode,
-  ): Promise<Result<ReminderGroupClientDTO>> {
-    return this.reminderApi.switchReminderGroupControlMode(id, mode);
-  }
-
   async getPreferences(): Promise<Result<UserReminderPreferencesClientDTO>> {
     return this.reminderApi.getPreferences();
   }
@@ -163,6 +144,8 @@ export class ReminderClientService implements IReminderApiClient {
 
 // ===== Factory =====
 
-export function createReminderClientService(reminderApi: IReminderApiClient): ReminderClientService {
+export function createReminderClientService(
+  reminderApi: IReminderApiClient,
+): ReminderClientService {
   return new ReminderClientService(reminderApi);
 }

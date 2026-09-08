@@ -11,7 +11,6 @@ describe('PrismaTaskTemplateMapper', () => {
   const IDENTITY_ID_1 = aPrefixedUuid('IdentityId', 'task-template-owner-1');
   const IDENTITY_ID_2 = aPrefixedUuid('IdentityId', 'task-template-owner-2');
   const IDENTITY_ID_3 = aPrefixedUuid('IdentityId', 'task-template-owner-3');
-  const FOLDER_ID_1 = aPrefixedUuid('ITaskFolderId', 'task-folder-1');
   const GOAL_ID_1 = aPrefixedUuid('GoalId', 'goal-1');
   const KEY_RESULT_ID_1 = aPrefixedUuid('KeyResultId', 'key-result-1');
 
@@ -21,10 +20,6 @@ describe('PrismaTaskTemplateMapper', () => {
     name: 'Simple Task',
     description: null,
     importance: 'Moderate',
-    color: null,
-    tags: '[]',
-    folderId: null,
-    parentTaskId: null,
     status: 'Active',
     version: 1,
     createdAt: new Date('2024-01-01T00:00:00Z'),
@@ -59,9 +54,6 @@ describe('PrismaTaskTemplateMapper', () => {
     checklist: null,
     lastGeneratedDate: null,
     generateAheadDays: null,
-    dependencyStatus: 'NONE',
-    isBlocked: false,
-    blockingReason: null,
   });
 
   const createFullRow = (): PrismaTaskTemplate => ({
@@ -70,10 +62,6 @@ describe('PrismaTaskTemplateMapper', () => {
     name: 'Complex Recurring Task',
     description: 'A task with full configuration',
     importance: 'Important',
-    color: '#FF5733',
-    tags: JSON.stringify(['urgent', 'work']),
-    folderId: FOLDER_ID_1,
-    parentTaskId: TEMPLATE_ID_1,
     status: 'Active',
     version: 2,
     createdAt: new Date('2024-02-01T10:30:45Z'),
@@ -111,9 +99,6 @@ describe('PrismaTaskTemplateMapper', () => {
     ]),
     lastGeneratedDate: new Date('2024-02-29T00:00:00Z'),
     generateAheadDays: 7,
-    dependencyStatus: 'Blocked',
-    isBlocked: true,
-    blockingReason: 'Waiting for approval',
   });
 
   /** Creates a TaskTemplate aggregate from a Prisma row for use with toPersistence */
@@ -131,8 +116,6 @@ describe('PrismaTaskTemplateMapper', () => {
       expect(domain.title).toBe('Simple Task');
       expect(domain.description).toBeNull();
       expect(domain.importance).toBe('Moderate');
-      expect(domain.color).toBeNull();
-      expect(domain.tags).toEqual([]);
       expect(domain.status).toBe('Active');
       expect(domain.version).toBe(1);
       expect(domain.timeConfig).toBeNull();
@@ -150,17 +133,8 @@ describe('PrismaTaskTemplateMapper', () => {
       expect(domain.title).toBe('Complex Recurring Task');
       expect(domain.description).toBe('A task with full configuration');
       expect(domain.importance).toBe('Important');
-      expect(domain.color).toBe('#FF5733');
-      expect(domain.tags).toEqual(['urgent', 'work']);
       expect(domain.status).toBe('Active');
       expect(domain.version).toBe(2);
-    });
-
-    it('parses JSON tags correctly', () => {
-      const row = createFullRow();
-      const domain = PrismaTaskTemplateMapper.toDomain(row);
-
-      expect(domain.tags).toEqual(['urgent', 'work']);
     });
 
     it('parses timeConfig when present', () => {
@@ -258,7 +232,6 @@ describe('PrismaTaskTemplateMapper', () => {
       expect(persistence.name).toBe('New Task');
       expect(persistence.description).toBeNull();
       expect(persistence.importance).toBe('Minor');
-      expect(persistence.tags).toBe('[]');
       expect(persistence.timeConfigType).toBeNull();
       expect(persistence.recurrenceRuleType).toBeNull();
       expect(persistence.reminderConfigEnabled).toBeNull();
@@ -276,7 +249,6 @@ describe('PrismaTaskTemplateMapper', () => {
 
       expect(persistence.name).toBe('Complex Recurring Task');
       expect(persistence.importance).toBe('Important');
-      expect(persistence.color).toBe('#FF5733');
       expect(persistence.timeConfigType).toBe('FixedTime');
       expect(persistence.timeConfigTimePoint).toBe('09:00');
       expect(persistence.recurrenceRuleType).toBe('DAILY');
@@ -286,13 +258,11 @@ describe('PrismaTaskTemplateMapper', () => {
       expect(persistence.generateAheadDays).toBe(7);
     });
 
-    it('serializes JSON collections and expands the goal binding', () => {
+    it('serializes checklist and expands the goal binding', () => {
       const aggregate = createTestAggregate(createFullRow());
 
       const persistence = PrismaTaskTemplateMapper.toPersistence(aggregate);
 
-      expect(typeof persistence.tags).toBe('string');
-      expect(JSON.parse(persistence.tags!)).toEqual(['urgent', 'work']);
       expect(persistence.goalId).toBe(GOAL_ID_1);
       expect(persistence.keyResultId).toBe(KEY_RESULT_ID_1);
       expect(persistence.goalRecordValue).toBe(2);
@@ -327,7 +297,6 @@ describe('PrismaTaskTemplateMapper', () => {
       const persistence = PrismaTaskTemplateMapper.toPersistence(aggregate);
 
       expect(persistence.description).toBeNull();
-      expect(persistence.color).toBeNull();
       expect(persistence.timeConfigType).toBeNull();
       expect(persistence.goalId).toBeNull();
     });

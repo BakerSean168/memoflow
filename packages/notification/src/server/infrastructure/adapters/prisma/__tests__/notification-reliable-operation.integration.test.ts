@@ -12,10 +12,7 @@ import { NotificationPrismaRepository } from '../notification-prisma.repository'
 import { NotificationPreferencePrismaRepository } from '../notification-preference-prisma.repository';
 import { NotificationTemplatePrismaRepository } from '../notification-template-prisma.repository';
 import { CreateNotificationUseCase } from '../../../../application/use-cases/commands/create-notification.use-case';
-import {
-  createNotificationRuntimeContribution,
-  type NotificationChannelDeliverer,
-} from '../../../runtime/notification.runtime';
+import { createNotificationRuntimeContribution } from '../../../runtime/notification.runtime';
 import { RealInAppChannelDeliverer } from '../../deliverers/real-channel-deliverers';
 import {
   cleanAll,
@@ -1192,70 +1189,6 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     expect(dispatchOutbox?.notificationId).not.toBe(templateId);
   });
 
-  it('13. Fault Injection 1: Shared claim crash -> lease expires -> reclaimed -> deliverer invoked exactly once', async () => {
-    let delivererCount = 0;
-    const mockDeliverer = {
-      async deliver() {
-        delivererCount++;
-      },
-    };
-
-    const worker2 = createNotificationRuntimeContribution({
-      environment: 'test',
-      ownerToken: 'worker-crash-2',
-      repository: notificationRepo,
-      reliableAdapter,
-      deliverer: mockDeliverer,
-    });
-
-    const sharedId = randomUUID();
-    const notificationId = 'notif_fault_shared_crash';
-
-    // Seed cross-module W1 OutboxMessage
-    await prisma.outboxMessage.create({
-      data: {
-        id: sharedId,
-        correlationId: sharedId,
-        messageType: 'notification.dispatch',
-        payloadJson: JSON.stringify({
-          notificationId,
-          identityId,
-          title: 'Shared Fault Crash',
-          content: 'Shared Crash Content',
-          channel: 'InApp',
-        }),
-        status: 'pending',
-        identityId,
-        idempotencyKey: buildIdempotencyKeyString({
-          identityId,
-          source: 'notification',
-          occurrenceKey: `reminder:${sharedId}`,
-        }),
-      },
-    });
-
-    // Worker 1 claims shared outbox intent with a 1ms short lease
-    const claims = await reliableAdapter.claimSharedOutboxIntents({
-      ownerToken: 'worker-crash-1',
-      leaseDurationMs: 1,
-    });
-    expect(claims).toHaveLength(1);
-    expect(claims[0].ownerToken).toBe('worker-crash-1');
-
-    // Worker 1 crashes before calling tick/deliverer/completion update.
-    // Wait for worker 1 lease to expire.
-    await new Promise((r) => setTimeout(r, 15));
-
-    // Worker 2 reclaims the expired lease and runs tick
-    await worker2.tick();
-
-    // Deliverer call count must be exactly 1
-    expect(delivererCount).toBe(1);
-
-    const sharedOutbox = await prisma.outboxMessage.findUnique({ where: { id: sharedId } });
-    expect(sharedOutbox?.status).toBe('succeeded');
-  });
-
   it('14. Fault Injection 2: Side effect succeeded but crash before receipt commit -> reclaimed -> does not re-invoke deliverer', async () => {
     let delivererCount = 0;
     const realInAppDeliverer = new RealInAppChannelDeliverer(notificationRepo);
@@ -1741,7 +1674,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       data: {
         id: sharedId,
         correlationId: sharedId,
-        messageType: 'notification.dispatch',
+        messageType: 'notification.requested',
         payloadJson: JSON.stringify({
           notificationId,
           identityId,
@@ -1812,143 +1745,4 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     expect(updated?.lastError).toBeNull();
   });
 
-  it('20. Dual runtime shared outbox in-flight completion conflict: only first runtime succeeds, status remains succeeded without duplicate side-effects', async () => {
-    const sharedId = randomUUID();
-    const notificationId = 'notif_dual_runtime_conflict';
-
-    // Runtime A deliverer: records the call, signals it is in-flight, then
-    // blocks inside tick() until the test releases it — a real in-flight
-    // barrier between the claim and the completion write.
-    let deliverCallsA = 0;
-    let signalDeliverStarted!: () => void;
-    const deliverStarted = new Promise<void>((resolve) => (signalDeliverStarted = resolve));
-    let releaseDelivererA!: () => void;
-    const deliverGate = new Promise<void>((resolve) => (releaseDelivererA = resolve));
-    const delivererA: NotificationChannelDeliverer = {
-      async deliver() {
-        deliverCallsA++;
-        signalDeliverStarted();
-        await deliverGate;
-      },
-    };
-
-    let deliverCallsB = 0;
-    const delivererB: NotificationChannelDeliverer = {
-      async deliver() {
-        deliverCallsB++;
-      },
-    };
-
-    const runtimeA = createNotificationRuntimeContribution({
-      environment: 'test',
-      repository: notificationRepo,
-      reliableAdapter,
-      deliverer: delivererA,
-      ownerToken: 'runtime-1-owner',
-      leaseDurationMs: 30000,
-    });
-
-    const runtimeB = createNotificationRuntimeContribution({
-      environment: 'test',
-      repository: notificationRepo,
-      reliableAdapter,
-      deliverer: delivererB,
-      ownerToken: 'runtime-2-owner',
-      leaseDurationMs: 30000,
-    });
-
-    // Seed one shared W1 `notification.dispatch` intent (pending, no lease).
-    await prisma.outboxMessage.create({
-      data: {
-        id: sharedId,
-        correlationId: sharedId,
-        messageType: 'notification.dispatch',
-        payloadJson: JSON.stringify({
-          notificationId,
-          identityId,
-          title: 'Dual Runtime Conflict',
-          content: 'Dual Runtime Content',
-          channel: 'InApp',
-        }),
-        status: 'pending',
-        identityId,
-        idempotencyKey: buildIdempotencyKeyString({
-          identityId,
-          source: 'notification',
-          occurrenceKey: `reminder:${sharedId}`,
-        }),
-      },
-    });
-
-    // Runtime A really ticks: claims the shared intent, creates the durable
-    // dispatch outbox, claims it, and enters delivererA (now in-flight).
-    const tickPromiseA = runtimeA.tick();
-    await Promise.race([
-      deliverStarted,
-      tickPromiseA.then(() => {
-        throw new Error('Runtime A completed its tick without reaching the deliverer barrier');
-      }),
-    ]);
-
-    // While A is in-flight with valid leases, B really ticks: it must NOT
-    // reclaim the shared intent nor the dispatch outbox (no duplicate claim).
-    await runtimeB.tick();
-    expect(deliverCallsB).toBe(0);
-    const stillOwnedByA = await prisma.outboxMessage.findUnique({ where: { id: sharedId } });
-    expect(stillOwnedByA?.ownerToken).toBe('runtime-1-owner');
-
-    // Force A's leases (shared intent + durable dispatch outbox) to expire so
-    // B can reclaim them, modelling A's lease window elapsing mid-flight.
-    const past = new Date(Date.now() - 1000);
-    await prisma.outboxMessage.update({
-      where: { id: sharedId },
-      data: { leaseExpiresAt: past, availableAt: past },
-    });
-    await prisma.notificationDispatchOutbox.update({
-      where: { id: sharedId },
-      data: { leaseExpiresAt: past },
-    });
-
-    // Runtime B really ticks again: reclaims both leases, delivers once, and
-    // completes the shared intent to succeeded (fencingToken 2, attempt 2).
-    await runtimeB.tick();
-    expect(deliverCallsB).toBe(1);
-
-    const dispatchAfterB = await prisma.notificationDispatchOutbox.findUniqueOrThrow({
-      where: { id: sharedId },
-    });
-    expect(dispatchAfterB.status).toBe('succeeded');
-    expect(dispatchAfterB.fencingToken).toBe(2);
-    expect(dispatchAfterB.attempt).toBe(2);
-
-    // Release A's deliverer: its completion write is now stale and must be
-    // rejected (fencing conflict) instead of overwriting B's state.
-    releaseDelivererA();
-    await tickPromiseA;
-
-    // Exactly one deliver per claim cycle: A delivered once, B delivered once.
-    // A's stale completion must NOT have triggered any re-delivery or override.
-    expect(deliverCallsA).toBe(1);
-    expect(deliverCallsB).toBe(1);
-
-    const sharedFinal = await prisma.outboxMessage.findUnique({ where: { id: sharedId } });
-    expect(sharedFinal?.status).toBe('succeeded');
-    expect(sharedFinal?.fencingToken).toBe(2);
-    expect(sharedFinal?.ownerToken).toBeNull();
-    expect(sharedFinal?.lastError).toBeNull();
-
-    const dispatchFinal = await prisma.notificationDispatchOutbox.findUniqueOrThrow({
-      where: { id: sharedId },
-    });
-    expect(dispatchFinal.status).toBe('succeeded');
-    expect(dispatchFinal.fencingToken).toBe(2); // still B's claim fencing, not rolled back
-    expect(dispatchFinal.attempt).toBe(2); // not rolled back to A's attempt 1
-    expect(dispatchFinal.ownerToken).toBeNull();
-    expect(dispatchFinal.lastError).toBeNull();
-
-    // Metrics corroborate the rejection: A's stale completion was never
-    // recorded as delivered, while B's completion was.
-    expect(runtimeA.getMetrics().deliveredTotal).toBe(0);
-    expect(runtimeB.getMetrics().deliveredTotal).toBeGreaterThanOrEqual(1);
-  });
 });

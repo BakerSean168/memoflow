@@ -7,7 +7,7 @@
 
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
-import type { ReminderGroupId, ReminderTemplateId } from '../../../primitives';
+import type { ReminderTemplateId, RoutineProfileId } from '../../../primitives';
 import type { ReminderTemplateClientDTO } from '../aggregates/reminder-template-client';
 import { ReminderTemplateListResponseSchema } from './response-schemas';
 import { ReminderType } from '../value-objects/reminder-type';
@@ -86,7 +86,7 @@ export const CreateReminderTemplateSchema = z.object({
   tags: z.array(z.string()).optional(),
   color: z.string().optional(),
   icon: z.string().optional(),
-  groupId: brandedId<ReminderGroupId>().optional(),
+  profileIds: z.array(brandedId<RoutineProfileId>()).optional(),
 });
 
 export type CreateReminderTemplateReq = z.infer<typeof CreateReminderTemplateSchema>;
@@ -99,6 +99,14 @@ export const UpdateReminderTemplateSchema = CreateReminderTemplateSchema.partial
 
 export type UpdateReminderTemplateReq = z.infer<typeof UpdateReminderTemplateSchema>;
 export type UpdateReminderTemplateRes = ReminderTemplateClientDTO;
+
+/** Replaces the complete M:N ProfileMembership set for one Routine. */
+export const ReplaceRoutineProfilesSchema = z.object({
+  profileIds: z.array(brandedId<RoutineProfileId>()),
+});
+
+export type ReplaceRoutineProfilesReq = z.infer<typeof ReplaceRoutineProfilesSchema>;
+export type ReplaceRoutineProfilesRes = ReminderTemplateClientDTO;
 
 /**
  * 获取即将到来的提醒 Schema
@@ -129,9 +137,7 @@ export const ReminderTodayScheduleItemSchema = z.object({
   icon: z.string(),
   color: z.string(),
   notificationChannels: z.array(z.enum(NotificationChannel)),
-  groupId: brandedId<ReminderGroupId>().nullable().optional(),
 });
-
 export type ReminderTodayScheduleItem = z.infer<typeof ReminderTodayScheduleItemSchema>;
 
 // Residual 775: upcoming/today schedule list Res dual retired — sole list shape + z.infer.

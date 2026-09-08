@@ -40,7 +40,6 @@ describe('ReminderPreferencesApplicationService', () => {
     const result = await service.updatePreferences(
       {
         globalReminderEnabled: false,
-        globalSmartFrequencyEnabled: false,
       },
       { identityId: IDENTITY_ID },
     );
@@ -50,7 +49,6 @@ describe('ReminderPreferencesApplicationService', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.data.globalReminderEnabled).toBe(false);
-      expect(result.data.globalSmartFrequency).toBe(false);
     }
   });
 

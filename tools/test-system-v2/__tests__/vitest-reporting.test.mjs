@@ -2,11 +2,17 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
-const coverageConfigs = ['task', 'goal', 'reminder', 'schedule'].flatMap((project) => [
+const aggregateCoverageConfigs = ['task', 'goal', 'reminder', 'scheduler'].flatMap((project) => [
   `packages/${project}/vitest.config.ts`,
   `packages/${project}/vitest.use-cases.config.ts`,
   `packages/${project}/vitest.mappers.config.ts`,
 ]);
+
+const coverageConfigs = [
+  ...aggregateCoverageConfigs,
+  'packages/schedule/vitest.config.ts',
+  'packages/schedule/vitest.mappers.config.ts',
+];
 
 test('aggregate coverage configs emit distinct JSON and JUnit reports', () => {
   const script = `

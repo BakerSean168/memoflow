@@ -1,0 +1,268 @@
+{
+  "version": 1,
+  "ticket": "HARD-7101",
+  "scenarios": [
+    {
+      "id": "event-handler-outbox-fallback",
+      "scenario": "event handler failure -> outbox fallback",
+      "evidence": [
+        {
+          "runner": "schedule-integration",
+          "file": "packages/schedule/src/server/infrastructure/adapters/prisma/schedule-event-delivery-log-consumer.integration.test.ts",
+          "title": "sync throw: handler failure is returned to the publisher — outbox enters retry, no receipt/effect written"
+        }
+      ]
+    },
+    {
+      "id": "projection-lost-reconcile-repair",
+      "scenario": "projection event lost -> reconcile repair",
+      "evidence": [
+        {
+          "runner": "schedule-orchestration-unit",
+          "file": "packages/schedule-orchestration/src/__tests__/projection-repair-runtime.test.ts",
+          "title": "registers every incremental listener before full repair and heals lost Task/Goal/Routine events after restart"
+        }
+      ]
+    },
+    {
+      "id": "reconcile-transaction-crash",
+      "scenario": "reconcile transaction crash",
+      "evidence": [
+        {
+          "runner": "scheduler-integration",
+          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.integration.test.ts",
+          "title": "rolls back a transaction-scoped save when the owner reconcile callback fails"
+        }
+      ]
+    },
+    {
+      "id": "scheduler-worker-crash",
+      "scenario": "scheduler worker crash",
+      "evidence": [
+        {
+          "runner": "scheduler-integration",
+          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.integration.test.ts",
+          "title": "recovers a claimed invocation after the scheduler worker crashes and its host lease expires"
+        }
+      ]
+    },
+    {
+      "id": "lease-expiry",
+      "scenario": "lease expiry",
+      "evidence": [
+        {
+          "runner": "scheduler-integration",
+          "file": "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.integration.test.ts",
+          "title": "recovers a claimed invocation after the scheduler worker crashes and its host lease expires"
+        }
+      ]
+    },
+    {
+      "id": "duplicate-scheduling-key",
+      "scenario": "same schedulingKey duplicate",
+      "evidence": [
+        {
+          "runner": "scheduler-unit",
+          "file": "packages/scheduler/src/server/infrastructure/scheduling/__tests__/legacy-schedule-task-scheduling.adapter.spec.ts",
+          "title": "rejects duplicate desired scheduling keys before writing"
+        }
+      ]
+    },
+    {
+      "id": "stale-invocation",
+      "scenario": "stale invocation",
+      "evidence": [
+        {
+          "runner": "reminder-unit",
+          "file": "packages/reminder/src/server/infrastructure/reminder-template-scheduled-handler.spec.ts",
+          "title": "maps a stale Reminder occurrence to skipped without replaying the business commit"
+        }
+      ]
+    },
+    {
+      "id": "handler-business-skip",
+      "scenario": "handler business skip",
+      "evidence": [
+        {
+          "runner": "reminder-unit",
+          "file": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
+          "title": "maps a skip to a skipped result without retry semantics"
+        }
+      ]
+    },
+    {
+      "id": "handler-technical-retry",
+      "scenario": "handler technical retry",
+      "evidence": [
+        {
+          "runner": "reminder-unit",
+          "file": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
+          "title": "maps a transient failure to a retryable HANDLER_EXECUTION_FAILED"
+        }
+      ]
+    },
+    {
+      "id": "notification-requested-replay",
+      "scenario": "NotificationRequested replay",
+      "evidence": [
+        {
+          "runner": "notification-integration",
+          "file": "packages/notification/src/server/infrastructure/adapters/prisma/__tests__/notification-requested-writer.integration.test.ts",
+          "title": "3. Replay after crash-after-Fact commit keeps exactly one Fact and one dispatch outbox"
+        }
+      ]
+    },
+    {
+      "id": "channel-disabled",
+      "scenario": "channel disabled",
+      "evidence": [
+        {
+          "runner": "notification-integration",
+          "file": "packages/notification/src/server/infrastructure/adapters/prisma/__tests__/notification-requested-writer.integration.test.ts",
+          "title": "4. Per-channel policy is evaluated at consumption: disabled InApp yields no dispatch + observable decision"
+        }
+      ]
+    },
+    {
+      "id": "dnd",
+      "scenario": "DND",
+      "evidence": [
+        {
+          "runner": "notification-unit",
+          "file": "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
+          "title": "Fixture I: DND keeps the Inbox Fact unread when Desktop delivery is suppressed"
+        }
+      ]
+    },
+    {
+      "id": "rate-limit",
+      "scenario": "rate limit",
+      "evidence": [
+        {
+          "runner": "notification-unit",
+          "file": "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
+          "title": "preserves rate-limit suppression without mutating Fact read state"
+        }
+      ]
+    },
+    {
+      "id": "device-offline",
+      "scenario": "device offline",
+      "evidence": [
+        {
+          "runner": "notification-unit",
+          "file": "packages/notification/src/server/infrastructure/runtime/notification.runtime.spec.ts",
+          "title": "treats a device-offline channel failure as retryable and delivers after recovery"
+        }
+      ]
+    },
+    {
+      "id": "desktop-restart",
+      "scenario": "Desktop restart",
+      "evidence": [
+        {
+          "runner": "desktop-e2e",
+          "file": "apps/desktop/e2e/authentication/desktop-auth-flow.spec.ts",
+          "title": "persistent guest works offline, survives lock, and reopens with edited profile data"
+        }
+      ]
+    },
+    {
+      "id": "api-restart",
+      "scenario": "API restart",
+      "evidence": [
+        {
+          "runner": "api-integration",
+          "file": "apps/api/src/__tests__/integration/task-goal-host-restart.integration.test.ts",
+          "title": "Fixture B API: EachCompletion survives host restart, stays idempotent, and updates Goal once"
+        }
+      ]
+    },
+    {
+      "id": "routine-local-runtime-restart",
+      "scenario": "Routine local runtime restart",
+      "evidence": [
+        {
+          "runner": "reminder-unit",
+          "file": "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
+          "title": "restores an accumulator snapshot without counting process downtime"
+        },
+        {
+          "runner": "reminder-unit",
+          "file": "packages/reminder/src/server/runtime/routine-activity/routine-activity-sensor.runtime.spec.ts",
+          "title": "cleans subscriptions and restarts without duplicate listeners"
+        }
+      ]
+    },
+    {
+      "id": "protocol-session-restart",
+      "scenario": "Protocol session restart",
+      "evidence": [
+        {
+          "runner": "reminder-unit",
+          "file": "packages/reminder/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
+          "title": "recovers crash-during-focus and crash-during-break from persisted deadlines"
+        }
+      ]
+    },
+    {
+      "id": "clock-timezone-dst",
+      "scenario": "clock/timezone/DST",
+      "evidence": [
+        {
+          "runner": "time-unit",
+          "file": "packages/time/src/__tests__/recurrence.conformance.spec.ts",
+          "title": "preserves a Tokyo wall-clock time"
+        },
+        {
+          "runner": "time-unit",
+          "file": "packages/time/src/__tests__/recurrence.conformance.spec.ts",
+          "title": "keeps 09:00 America/New_York across spring DST"
+        },
+        {
+          "runner": "time-unit",
+          "file": "packages/time/src/__tests__/recurrence.conformance.spec.ts",
+          "title": "keeps 09:00 America/New_York across fall DST"
+        }
+      ]
+    },
+    {
+      "id": "task-outcome-correction",
+      "scenario": "Task outcome correction",
+      "evidence": [
+        {
+          "runner": "task-integration",
+          "file": "packages/task/src/server/infrastructure/task-plan-settlement.integration.test.ts",
+          "title": "15/15 settles once, uncomplete reverts, and correction can settle the plan again"
+        }
+      ]
+    },
+    {
+      "id": "goal-settlement-replay-revert",
+      "scenario": "Goal settlement replay/revert",
+      "evidence": [
+        {
+          "runner": "task-unit",
+          "file": "packages/task/src/server/application/outbox/task-goal-outbox-dispatcher.test.ts",
+          "title": "replays persisted V2 events after restart and marks delivered only after Goal succeeds"
+        },
+        {
+          "runner": "goal-integration",
+          "file": "packages/goal/src/server/application/event-handlers/register-goal-event-listeners.integration.test.ts",
+          "title": "applies an explicit TaskInstance source once and reverts it explicitly"
+        }
+      ]
+    },
+    {
+      "id": "planner-command-visual-revert",
+      "scenario": "Planner command failure -> visual revert",
+      "evidence": [
+        {
+          "runner": "app-vue-unit",
+          "file": "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.spec.ts",
+          "title": "Fixture J routes Task 14:00 -> 16:00 to Task owner and reverts optimistic UI on conflict"
+        }
+      ]
+    }
+  ]
+}

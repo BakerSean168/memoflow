@@ -37,6 +37,7 @@ const REQUIRED_SCOPE_PREFIXES = [
   'scope:reminder',
   'scope:repository',
   'scope:schedule',
+  'scope:scheduler',
   'scope:setting',
   'scope:task',
   'scope:data-portability',

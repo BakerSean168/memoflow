@@ -42,7 +42,6 @@ export const GoalChannels = {
   SEARCH: 'goal:search',
   AGGREGATE: 'goal:aggregate',
   CLONE: 'goal:clone',
-  PROGRESS_BREAKDOWN: 'goal:progressBreakdown',
   KEY_RESULT_ADD: 'goal:keyResult:add',
   KEY_RESULT_LIST: 'goal:keyResult:list',
   KEY_RESULT_UPDATE: 'goal:keyResult:update',
@@ -71,19 +70,12 @@ export const ScheduleChannels = {
   DETECT_CONFLICTS: 'schedule:detect-conflicts',
   CREATE_WITH_CONFLICT_DETECTION: 'schedule:create-with-conflict-detection',
   RESOLVE_CONFLICT: 'schedule:resolve-conflict',
-  TASK_CREATE: 'schedule:task:create',
-  TASK_CREATE_BATCH: 'schedule:task:create-batch',
+  // Raw ScheduleTask worker jobs are Scheduler-owned persistence. IPC exposes
+  // diagnostics only; product mutations flow through owner-domain commands.
   TASK_LIST: 'schedule:task:list',
   TASK_GET_BY_ID: 'schedule:task:get-by-id',
   TASK_GET_DUE: 'schedule:task:get-due',
   TASK_GET_BY_SOURCE: 'schedule:task:get-by-source',
-  TASK_PAUSE: 'schedule:task:pause',
-  TASK_RESUME: 'schedule:task:resume',
-  TASK_COMPLETE: 'schedule:task:complete',
-  TASK_CANCEL: 'schedule:task:cancel',
-  TASK_DELETE: 'schedule:task:delete',
-  TASK_DELETE_BATCH: 'schedule:task:delete-batch',
-  TASK_UPDATE_METADATA: 'schedule:task:update-metadata',
 } as const;
 
 export const ReminderChannels = {
@@ -93,8 +85,7 @@ export const ReminderChannels = {
   TEMPLATE_UPDATE: 'reminder:template:update',
   TEMPLATE_DELETE: 'reminder:template:delete',
   TEMPLATE_TOGGLE_ENABLED: 'reminder:template:toggle-enabled',
-  TEMPLATE_MOVE_TO_GROUP: 'reminder:template:move-to-group',
-  TEMPLATE_GET_BY_USER: 'reminder:template:get-by-user',
+  TEMPLATE_REPLACE_PROFILES: 'reminder:template:replace-profiles',
   UPCOMING_GET: 'reminder:upcoming:get',
   TODAY_SCHEDULE_GET: 'reminder:today-schedule:get',
   GROUP_LIST: 'reminder:group:list',
@@ -102,9 +93,7 @@ export const ReminderChannels = {
   GROUP_CREATE: 'reminder:group:create',
   GROUP_UPDATE: 'reminder:group:update',
   GROUP_DELETE: 'reminder:group:delete',
-  GROUP_GET_BY_USER: 'reminder:group:get-by-user',
   GROUP_TOGGLE_STATUS: 'reminder:group:toggle-status',
-  GROUP_SWITCH_CONTROL_MODE: 'reminder:group:switch-control-mode',
   PREFERENCES_GET: 'reminder:preferences:get',
   PREFERENCES_UPDATE: 'reminder:preferences:update',
 } as const;

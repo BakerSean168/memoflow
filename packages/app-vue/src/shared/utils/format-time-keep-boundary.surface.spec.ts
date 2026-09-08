@@ -18,10 +18,6 @@ describe('formatTime keep-boundary (residual 1237)', () => {
     resolve(dir, '../../modules/setting/components/SettingAdvancedActions.vue'),
     'utf8',
   );
-  const progress = readFileSync(
-    resolve(dir, '../../modules/goal/components/ProgressBreakdownPanel.vue'),
-    'utf8',
-  );
   const weight = readFileSync(
     resolve(dir, '../../modules/goal/components/weight-snapshot/WeightSnapshotList.vue'),
     'utf8',
@@ -46,8 +42,6 @@ describe('formatTime keep-boundary (residual 1237)', () => {
   it('soft residual 1237 absolute product-time sites stay separate from relative', () => {
     expect(setting).toContain('formatProductDateTime');
     expect(setting).not.toMatch(/function formatTime\b/);
-    expect(progress).toContain('formatProductPattern');
-    expect(progress).not.toMatch(/function formatTime\b/);
     expect(weight).toContain('formatProductPattern');
     expect(weight).not.toMatch(/function formatTime\b/);
     expect(capsule).toContain('formatProductHm');

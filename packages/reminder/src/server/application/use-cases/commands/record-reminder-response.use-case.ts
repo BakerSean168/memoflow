@@ -1,15 +1,19 @@
 /**
  * Record Reminder Response Service
  *
- * 记录提醒响应
+ * Records user response analytics while keeping snooze as a distinct command.
  */
 
 import type { Result } from '@memoflow/contracts/result';
 import { error, ok } from '@memoflow/contracts/result';
-import type { IReminderResponseRepository } from '../../../domain/repositories/i-reminder-response-repository';
-import type { ReminderEventMap, ReminderResponseAction } from '@memoflow/contracts/reminder';
+import {
+  ReminderResponseAction,
+  type ReminderEventMap,
+  type ReminderResponseAction as ReminderResponseActionType,
+} from '@memoflow/contracts/reminder';
 import { createTypedEventPublisher, eventBus } from '@memoflow/utils/domain';
 import { createLogger } from '@memoflow/utils/logger';
+import type { IReminderResponseRepository } from '../../../domain/repositories/i-reminder-response-repository';
 import { ReminderResponse } from '../../../domain/entities/reminder-response';
 
 const logger = createLogger('RecordReminderResponseUseCase');
@@ -18,37 +22,32 @@ const reminderAnalyticsEvents = createTypedEventPublisher<
 >(eventBus);
 
 /**
- * R3c：snooze 副作用端口——把提醒的下次触发推迟 duration 秒。
- * 由宿主/模块组合根注入实现（API：更新 schedule task nextRunAt；desktop 同理）。
+ * Durable snooze command port. Implementations must persist temporary Routine
+ * override state; they must not mutate raw Scheduler persistence directly.
  */
-export interface ReminderSnoozeRescheduler {
-  reschedule(templateId: string, identityId: string, durationSeconds: number): Promise<void>;
+export interface ReminderSnoozeOverrideWriter {
+  snooze(routineId: string, identityId: string, durationSeconds: number): Promise<void>;
 }
 
-/**
- * 响应记录DTO
- */
 export interface RecordResponseDTO {
   templateId: string;
-  action: ReminderResponseAction;
-  responseTime?: number; // 响应时间(秒)
+  action: ReminderResponseActionType;
+  /** Actual latency from reminder presentation to user response, in seconds. */
+  responseTime?: number;
+  /** User-requested snooze delay, in seconds. Only valid for SNOOZED. */
+  snoozeDurationSeconds?: number;
   identityId: string;
 }
 
-/**
- * 响应记录结果
- */
 export interface ResponseRecordResult {
   id: string;
   templateId: string;
-  action: ReminderResponseAction;
+  action: ReminderResponseActionType;
   responseTime: number | null;
+  snoozeDurationSeconds: number | null;
   recordedAt: number;
 }
 
-/**
- * 响应统计结果
- */
 export interface ResponseStatsResult {
   total: number;
   clicked: number;
@@ -59,51 +58,87 @@ export interface ResponseStatsResult {
   avgResponseTime: number;
 }
 
-/**
- * Record Reminder Response Service
- *
- * 职责：
- * - 记录用户对提醒的响应行为（主要职责）
- * - 为智能频率分析提供数据基础
- * - 触发相关业务事件
- */
 export class RecordReminderResponseUseCase {
   constructor(
     private readonly responseRepository: IReminderResponseRepository,
-    private readonly snoozeRescheduler?: ReminderSnoozeRescheduler,
+    private readonly snoozeOverrideWriter?: ReminderSnoozeOverrideWriter,
   ) {}
 
-  /**
-   * 记录响应行为
-   *
-   * @param dto - 响应记录DTO
-   * @returns 创建的记录
-   */
   async execute(dto: RecordResponseDTO): Promise<Result<ResponseRecordResult>> {
     logger.info('Recording response', {
       templateId: dto.templateId,
       action: dto.action,
       responseTime: dto.responseTime,
+      snoozeDurationSeconds: dto.snoozeDurationSeconds,
       identityId: dto.identityId,
     });
 
-    // R3c：snooze 必须带正的时长；其他 action 的时长可选非负。
-    if (dto.action === 'SNOOZED') {
-      if (dto.responseTime === undefined || dto.responseTime <= 0) {
-        return error('VALIDATION_ERROR', 'Snooze requires a positive duration (responseTime seconds)');
+    if (
+      dto.responseTime !== undefined &&
+      (!Number.isInteger(dto.responseTime) || dto.responseTime < 0)
+    ) {
+      return error('VALIDATION_ERROR', 'responseTime must be a non-negative integer number of seconds');
+    }
+
+    const isSnoozed = dto.action === ReminderResponseAction.Snoozed;
+    if (isSnoozed) {
+      if (
+        dto.snoozeDurationSeconds === undefined ||
+        !Number.isInteger(dto.snoozeDurationSeconds) ||
+        dto.snoozeDurationSeconds <= 0
+      ) {
+        return error(
+          'VALIDATION_ERROR',
+          'SNOOZED responses require a positive integer snoozeDurationSeconds',
+        );
       }
+      if (!this.snoozeOverrideWriter) {
+        return error('SERVICE_UNAVAILABLE', 'Snooze runtime is not available');
+      }
+    } else if (dto.snoozeDurationSeconds !== undefined) {
+      return error(
+        'VALIDATION_ERROR',
+        'snoozeDurationSeconds is only valid for SNOOZED responses',
+      );
     }
 
     const response = ReminderResponse.create({
       reminderTemplateId: dto.templateId,
       identityId: dto.identityId,
       action: dto.action,
-      responseTime: dto.responseTime ?? undefined,
-      timestamp: Date.now(),
+      responseTime: dto.responseTime,
+      snoozeDurationSeconds: dto.snoozeDurationSeconds,
     });
 
     await this.responseRepository.save(response);
     const savedRecord = response.toServerDTO();
+
+    if (isSnoozed) {
+      try {
+        await this.snoozeOverrideWriter!.snooze(
+          dto.templateId,
+          dto.identityId,
+          dto.snoozeDurationSeconds!,
+        );
+      } catch (cause) {
+        logger.error('Snooze override write failed after response record', {
+          templateId: dto.templateId,
+          error: cause instanceof Error ? cause.message : String(cause),
+        });
+        return error('SERVICE_UNAVAILABLE', 'Unable to persist snooze override');
+      }
+    }
+
+    const recordedEvent: ReminderEventMap['reminder:response-recorded'] = {
+      responseId: savedRecord.id,
+      templateId: savedRecord.reminderTemplateId,
+      identityId: savedRecord.identityId,
+      action: savedRecord.action,
+      responseTime: savedRecord.responseTime ?? null,
+      snoozeDurationSeconds: savedRecord.snoozeDurationSeconds ?? null,
+      recordedAt: savedRecord.timestamp,
+    };
+    reminderAnalyticsEvents.send('reminder:response-recorded', recordedEvent);
 
     logger.info('Response recorded', {
       id: savedRecord.id,
@@ -111,49 +146,16 @@ export class RecordReminderResponseUseCase {
       action: dto.action,
     });
 
-    // R3c：snooze 是真正的 command——推迟该提醒的下次触发。
-    if (dto.action === 'SNOOZED' && this.snoozeRescheduler) {
-      try {
-        await this.snoozeRescheduler.reschedule(
-          dto.templateId,
-          dto.identityId,
-          dto.responseTime ?? 0,
-        );
-      } catch (error) {
-        logger.error('Snooze reschedule failed (response still recorded)', {
-          templateId: dto.templateId,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    // 发布响应记录事件
-    const recordedEvent: ReminderEventMap['reminder:response-recorded'] = {
-      responseId: savedRecord.id,
-      templateId: dto.templateId as ReminderEventMap['reminder:response-recorded']['templateId'],
-      action: dto.action,
-      responseTime: dto.responseTime || null,
-      identityId: dto.identityId as ReminderEventMap['reminder:response-recorded']['identityId'],
-      recordedAt: Date.now(),
-    };
-    reminderAnalyticsEvents.send('reminder:response-recorded', recordedEvent);
-
     return ok({
       id: savedRecord.id,
       templateId: savedRecord.reminderTemplateId,
-      action: savedRecord.action as ResponseRecordResult['action'],
+      action: savedRecord.action,
       responseTime: savedRecord.responseTime ?? null,
+      snoozeDurationSeconds: savedRecord.snoozeDurationSeconds ?? null,
       recordedAt: savedRecord.timestamp,
     });
   }
 
-  /**
-   * 获取模板的响应记录
-   *
-   * @param templateId - 模板UUID
-   * @param limit - 返回记录数限制
-   * @returns 响应记录列表
-   */
   async getResponsesByTemplate(
     templateId: string,
     identityId: string,
@@ -167,35 +169,16 @@ export class RecordReminderResponseUseCase {
     return ok(responses);
   }
 
-  /**
-   * 删除模板的所有响应记录
-   *
-   * @param templateId - 模板UUID
-   * @returns 删除的记录数量
-   */
   async deleteResponsesByTemplate(
     templateId: string,
     identityId: string,
   ): Promise<Result<number>> {
     logger.info('Deleting responses for template', { templateId, identityId });
-
     const count = await this.responseRepository.deleteByTemplateId(templateId, identityId);
-
-    logger.info('Responses deleted', {
-      templateId,
-      count,
-    });
-
+    logger.info('Responses deleted', { templateId, count });
     return ok(count);
   }
 
-  /**
-   * 获取响应统计
-   *
-   * @param templateId - 模板UUID
-   * @param lookbackDays - 回溯天数
-   * @returns 响应统计信息
-   */
   async getResponseStats(
     templateId: string,
     identityId: string,

@@ -1,0 +1,261 @@
+{
+  "version": 1,
+  "ticket": "HARD-7103",
+  "fixtures": [
+    {
+      "id": "A",
+      "scenario": "Graduation finite 15-day PlanCompletion lifecycle",
+      "focused": [
+        {
+          "runner": "task-integration",
+          "file": "packages/task/src/server/infrastructure/task-plan-settlement.integration.test.ts",
+          "title": "Fixture A: 15/15 settles once, uncomplete reverts, and correction can settle the plan again"
+        },
+        {
+          "runner": "task-integration",
+          "file": "packages/task/src/server/infrastructure/task-plan-settlement.integration.test.ts",
+          "title": "Fixture A: strict final Missed closes the 15-day plan as Failed and never enqueues Goal settlement"
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "scenario": "Run 100 km EachCompletion apply/replay/uncomplete/reapply",
+      "focused": [
+        {
+          "runner": "task-unit",
+          "file": "packages/task/src/server/infrastructure/task-goal-outbox.test.ts",
+          "title": "derives a stable instance-source event id so transaction retries cannot enqueue duplicates"
+        },
+        {
+          "runner": "goal-integration",
+          "file": "packages/goal/src/server/application/event-handlers/register-goal-event-listeners.integration.test.ts",
+          "title": "applies an explicit TaskInstance source once and reverts it explicitly"
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "scenario": "Decrease 75 -> 70 kg using Last measurement with edit/delete recalculation",
+      "focused": [
+        {
+          "runner": "goal-unit",
+          "file": "packages/goal/src/server/application/use-cases/commands/__tests__/update-goal-record.test.ts",
+          "title": "Fixture C: editing the latest 75 -> 70 Last measurement recalculates the decreasing KR from authoritative history"
+        },
+        {
+          "runner": "goal-unit",
+          "file": "packages/goal/src/server/application/use-cases/commands/__tests__/delete-goal-record.test.ts",
+          "title": "Fixture C: deleting the latest Last measurement restores the previous decreasing measurement"
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "scenario": "One-time Task 14:00 with -30m reminder fires once at 13:30",
+      "focused": [
+        {
+          "runner": "task-unit",
+          "file": "packages/task/src/server/infrastructure/schedule-projection-source.spec.ts",
+          "title": "fixture D: one-time Task at 14:00 with -30m reminder emits exactly one 13:30 neutral intent"
+        },
+        {
+          "runner": "orchestration-unit",
+          "file": "packages/schedule-orchestration/src/__tests__/task-reminder-fire-runtime.test.ts",
+          "title": "fires exactly one durable NotificationRequested for Fixture D"
+        }
+      ]
+    },
+    {
+      "id": "E",
+      "scenario": "Goal RemainingDays -7d reminder with terminal cancellation",
+      "focused": [
+        {
+          "runner": "goal-unit",
+          "file": "packages/goal/src/server/infrastructure/schedule-projection-source.spec.ts",
+          "title": "projects one stable -7d RemainingDays reminder through the neutral scheduling identity"
+        },
+        {
+          "runner": "goal-unit",
+          "file": "packages/goal/src/server/infrastructure/schedule-projection-source.spec.ts",
+          "title": "emits no desired intents for completed/abandoned/archived goals before due (fixture E)"
+        }
+      ]
+    },
+    {
+      "id": "F",
+      "scenario": "Routine wall-clock 23:30 in local zone with snooze tomorrow",
+      "focused": [
+        {
+          "runner": "reminder-unit",
+          "file": "packages/reminder/src/server/domain/routine/__tests__/next-eligible-occurrence.spec.ts",
+          "title": "resolves the next 23:30 occurrence in a non-UTC IANA timezone"
+        },
+        {
+          "runner": "reminder-integration",
+          "file": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-prisma-adapters.integration.test.ts",
+          "title": "honors a durably persisted snooze in the production projection (Fixture F)"
+        }
+      ]
+    },
+    {
+      "id": "G",
+      "scenario": "ActiveUsage 40m then 6m natural break resets without duplicate",
+      "focused": [
+        {
+          "runner": "reminder-unit",
+          "file": "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
+          "title": "Fixture G: 40m active -> due, then a 6m natural break satisfies and resets without duplicate occurrence"
+        }
+      ]
+    },
+    {
+      "id": "H",
+      "scenario": "50/10 protocol break credits Stand/Eye/Movement and survives restart",
+      "focused": [
+        {
+          "runner": "reminder-unit",
+          "file": "packages/reminder/src/server/runtime/protocol-break-credit/protocol-break-credit.runtime.spec.ts",
+          "title": "Fixture H: a completed 50/10 break satisfies Stand/Eye/Movement and prevents immediate duplicate intervention"
+        },
+        {
+          "runner": "reminder-unit",
+          "file": "packages/reminder/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
+          "title": "recovers crash-during-focus and crash-during-break from persisted deadlines"
+        }
+      ]
+    },
+    {
+      "id": "I",
+      "scenario": "DND mixed-channel notification policy",
+      "focused": [
+        {
+          "runner": "notification-unit",
+          "file": "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
+          "title": "Fixture I: DND keeps the Inbox Fact unread when Desktop delivery is suppressed"
+        },
+        {
+          "runner": "notification-unit",
+          "file": "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
+          "title": "Fixture I: DND preserves defer semantics for an allowed InApp delivery"
+        }
+      ]
+    },
+    {
+      "id": "J",
+      "scenario": "Planner Task drag 14:00 -> 16:00 and owner-command failure revert",
+      "focused": [
+        {
+          "runner": "app-vue-unit",
+          "file": "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.spec.ts",
+          "title": "Fixture J routes Task 14:00 -> 16:00 to Task owner and reverts optimistic UI on conflict"
+        }
+      ]
+    }
+  ],
+  "layers": {
+    "api": {
+      "covered": ["B"],
+      "evidence": [
+        {
+          "fixture": "B",
+          "file": "apps/api/src/__tests__/integration/task-goal-host-restart.integration.test.ts",
+          "title": "Fixture B API: EachCompletion survives host restart, stays idempotent, and updates Goal once"
+        }
+      ],
+      "notApplicable": {
+        "A": "Finite-plan settlement is a domain/database transaction invariant; the API host adds no separate clock or settlement authority.",
+        "C": "Measurement edit/delete calculation is Goal-owned domain behavior; API transport is contract-only.",
+        "D": "Task reminder execution is Scheduler/Orchestration-owned rather than API-host request behavior.",
+        "E": "Goal reminder execution is Scheduler/Orchestration-owned rather than API-host request behavior.",
+        "F": "Routine wall-clock/snooze execution is Scheduler + Routine-owned.",
+        "G": "ActiveUsage consumes Desktop OS activity and has no API-host equivalent.",
+        "H": "Protocol focus/break runtime is Desktop-local by design.",
+        "I": "DND mixed-channel policy is Notification-owned and independently integration-tested below transport.",
+        "J": "Planner optimistic drag/revert is a Web presentation-owner-command behavior."
+      }
+    },
+    "desktop": {
+      "covered": ["G", "H"],
+      "evidence": [
+        {
+          "fixture": "G",
+          "file": "apps/desktop/src/main/modules/routine/windows-idle-sensor.adapter.spec.ts",
+          "title": "Fixture G Desktop: Electron idle time emits one idle/resume transition for ActiveUsage"
+        },
+        {
+          "fixture": "H",
+          "file": "apps/desktop/src/main/modules/routine/focus-window-controller.spec.ts",
+          "title": "Fixture H Desktop: 50/10 restores after app restart and catches up a missed deadline without a renderer tick"
+        }
+      ],
+      "notApplicable": {
+        "A": "Task finite-plan settlement is shared domain persistence and is host-neutral.",
+        "B": "Task -> Goal EachCompletion semantics are shared domain persistence and are covered at API/Web/Docker host layers.",
+        "C": "Goal measurement semantics are shared Goal-domain behavior.",
+        "D": "Task scheduled notification is owned by shared Scheduler/Orchestration, not a Desktop-only runtime.",
+        "E": "Goal scheduled notification is owned by shared Scheduler/Orchestration, not a Desktop-only runtime.",
+        "F": "Wall-clock/snooze projection is shared Routine scheduling; Desktop has no distinct authority.",
+        "I": "Notification DND planning is shared policy; Desktop only supplies a channel transport.",
+        "J": "Planner drag/revert is exercised in the Web renderer host."
+      }
+    },
+    "web": {
+      "covered": ["B", "J"],
+      "evidence": [
+        {
+          "fixture": "B",
+          "file": "apps/web/e2e/task/task-completion-loop.spec.ts",
+          "title": "[P0][Fixture B] EachCompletion updates task, stats, and Goal progress through the Web product loop"
+        },
+        {
+          "fixture": "J",
+          "file": "apps/web/e2e/schedule/planner-task-revert.spec.ts",
+          "title": "[P0][Fixture J] Task 14:00 -> 16:00 owner conflict reverts the optimistic FullCalendar drag"
+        }
+      ],
+      "notApplicable": {
+        "A": "The 15-occurrence settlement matrix is not a presentation-specific behavior.",
+        "C": "Last-measurement recalculation has no Web-specific alternate calculator.",
+        "D": "13:30 firing is background Scheduler/Orchestration behavior, not browser-clock behavior.",
+        "E": "Goal reminder cancellation is background Scheduler/Orchestration behavior.",
+        "F": "Routine wall-clock/snooze execution is background scheduling behavior.",
+        "G": "OS active/idle input is a Desktop capability and intentionally absent on Web.",
+        "H": "Protocol focus/break local runtime is Desktop-owned.",
+        "I": "DND mixed-channel policy is Notification-domain behavior; Web only configures preferences."
+      }
+    },
+    "localDocker": {
+      "covered": ["B"],
+      "evidence": [
+        {
+          "fixture": "B",
+          "file": "apps/web/e2e/local-docker/core-product-phase-a.spec.ts",
+          "title": "[P0][Fixture B] local Docker closes EachCompletion apply/replay/uncomplete/reapply without duplicate progress"
+        }
+      ],
+      "notApplicable": {
+        "A": "The Docker journey is a deploy/runtime acceptance lane, not a replacement for the exhaustive 15-occurrence domain matrix.",
+        "C": "Goal Last-measurement calculation is already frozen at the domain/use-case layer and has no container-specific semantics.",
+        "D": "Wall-clock firing is time-dependent background behavior covered by deterministic Scheduler/Orchestration fixtures.",
+        "E": "Goal reminder timing/cancellation is deterministic background behavior below the browser journey.",
+        "F": "Routine snooze timing is deterministic scheduling behavior below the browser journey.",
+        "G": "Containerized Web has no OS idle capability.",
+        "H": "Containerized Web has no Desktop protocol runtime.",
+        "I": "DND channel policy is deterministic Notification behavior; container transport does not change the policy result.",
+        "J": "The same Planner renderer behavior is covered by the dedicated Web E2E; local Docker focuses on deployment/product-loop health."
+      }
+    },
+    "schemaBoot": {
+      "covered": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"],
+      "evidence": [
+        {
+          "fixture": "*",
+          "file": "tools/test/hard-7103-schema-boot.mjs",
+          "title": null
+        }
+      ],
+      "notApplicable": {}
+    }
+  }
+}

@@ -15,8 +15,6 @@ import {
   ActiveTimeConfig,
   NotificationConfig,
   ActiveHoursConfig,
-  ResponseMetrics,
-  FrequencyAdjustment,
 } from '../../../../domain/value-objects';
 
 export type PowerSyncReminderTemplateRow = {
@@ -27,7 +25,6 @@ export type PowerSyncReminderTemplateRow = {
   type: string;
   self_enabled: number | boolean;
   status: string;
-  reminder_group_id: string | null;
   importance_level: string;
   tags: string;
   color: string | null;
@@ -42,20 +39,6 @@ export type PowerSyncReminderTemplateRow = {
   active_hours: string | null;
   notification_config: string;
   stats: string | null;
-  click_rate: number | null;
-  ignore_rate: number | null;
-  avg_response_time: number | null;
-  snooze_count: number | null;
-  effectiveness_score: number | null;
-  sample_size: number | null;
-  last_analysis_time: string | null;
-  original_interval: number | null;
-  adjusted_interval: number | null;
-  adjustment_reason: string | null;
-  adjustment_time: string | null;
-  is_auto_adjusted: number | boolean | null;
-  user_confirmed: number | boolean | null;
-  smart_frequency_enabled: number | boolean | null;
 };
 
 export type PowerSyncReminderHistoryRow = {
@@ -75,35 +58,6 @@ export class PowerSyncReminderTemplateMapper {
     data: PowerSyncReminderTemplateRow,
     historyRows: PowerSyncReminderHistoryRow[] = [],
   ): ReminderTemplate {
-    const responseMetrics =
-      data.click_rate != null && data.ignore_rate != null
-        ? ResponseMetrics.fromDTO({
-            clickRate: data.click_rate,
-            ignoreRate: data.ignore_rate,
-            avgResponseTime: data.avg_response_time ?? 0,
-            snoozeCount: data.snooze_count ?? 0,
-            effectivenessScore: data.effectiveness_score ?? 0,
-            sampleSize: data.sample_size ?? 0,
-            lastAnalysisTime: data.last_analysis_time
-              ? new Date(data.last_analysis_time).getTime()
-              : Date.now(),
-          })
-        : null;
-
-    const frequencyAdjustment =
-      data.original_interval != null && data.adjusted_interval != null
-        ? FrequencyAdjustment.fromDTO({
-            originalInterval: data.original_interval,
-            adjustedInterval: data.adjusted_interval,
-            adjustmentReason: data.adjustment_reason ?? '',
-            adjustmentTime: data.adjustment_time
-              ? new Date(data.adjustment_time).getTime()
-              : Date.now(),
-            isAutoAdjusted: data.is_auto_adjusted === true || data.is_auto_adjusted === 1,
-            userConfirmed: data.user_confirmed === true || data.user_confirmed === 1,
-            rejectionReason: null,
-          })
-        : null;
 
     const history = historyRows.map((row) =>
       ReminderHistory.load({
@@ -135,7 +89,6 @@ export class PowerSyncReminderTemplateMapper {
       notificationConfig: NotificationConfig.fromDTO(JSON.parse(data.notification_config)),
       selfEnabled: data.self_enabled === true || data.self_enabled === 1,
       status: data.status as ReminderStatus,
-      groupId: data.reminder_group_id ?? null,
       effectiveEnabled: data.self_enabled === true || data.self_enabled === 1,
       importanceLevel: data.importance_level as ImportanceLevel,
       tags: JSON.parse(data.tags ?? '[]') as string[],
@@ -146,20 +99,12 @@ export class PowerSyncReminderTemplateMapper {
       updatedAt: new Date(data.updated_at).getTime(),
       deletedAt: data.deleted_at ? new Date(data.deleted_at).getTime() : null,
       version: data.version ?? 1,
-      responseMetrics,
-      frequencyAdjustment,
-      smartFrequencyEnabled:
-        data.smart_frequency_enabled == null
-          ? true
-          : data.smart_frequency_enabled === true || data.smart_frequency_enabled === 1,
       history,
     });
   }
 
   static toPersistence(template: ReminderTemplate) {
     const dto = template.toServerDTO();
-    const responseMetrics = template.responseMetrics?.toDTO();
-    const frequencyAdjustment = template.frequencyAdjustment?.toDTO();
     return {
       id: String(dto.id),
       identityId: String(dto.identityId),
@@ -168,7 +113,6 @@ export class PowerSyncReminderTemplateMapper {
       type: dto.type,
       selfEnabled: dto.selfEnabled ? 1 : 0,
       status: dto.status,
-      reminderGroupId: dto.groupId ?? null,
       importanceLevel: dto.importanceLevel,
       tags: JSON.stringify(dto.tags),
       color: dto.color ?? null,
@@ -183,24 +127,6 @@ export class PowerSyncReminderTemplateMapper {
       activeHours: dto.activeHours ? JSON.stringify(dto.activeHours) : null,
       notificationConfig: JSON.stringify(dto.notificationConfig),
       stats: '{}',
-      clickRate: responseMetrics?.clickRate ?? null,
-      ignoreRate: responseMetrics?.ignoreRate ?? null,
-      avgResponseTime: responseMetrics?.avgResponseTime ?? null,
-      snoozeCount: responseMetrics?.snoozeCount ?? 0,
-      effectivenessScore: responseMetrics?.effectivenessScore ?? null,
-      sampleSize: responseMetrics?.sampleSize ?? 0,
-      lastAnalysisTime: responseMetrics?.lastAnalysisTime
-        ? new Date(responseMetrics.lastAnalysisTime).toISOString()
-        : null,
-      originalInterval: frequencyAdjustment?.originalInterval ?? null,
-      adjustedInterval: frequencyAdjustment?.adjustedInterval ?? null,
-      adjustmentReason: frequencyAdjustment?.adjustmentReason ?? null,
-      adjustmentTime: frequencyAdjustment?.adjustmentTime
-        ? new Date(frequencyAdjustment.adjustmentTime).toISOString()
-        : null,
-      isAutoAdjusted: frequencyAdjustment?.isAutoAdjusted ? 1 : 0,
-      userConfirmed: frequencyAdjustment?.userConfirmed ? 1 : 0,
-      smartFrequencyEnabled: template.smartFrequencyEnabled ? 1 : 0,
     };
   }
 }

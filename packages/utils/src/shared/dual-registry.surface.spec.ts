@@ -398,7 +398,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
    * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
    * Soft residual 989: parseString/parseNumber already sole for notification + reminder.
    * Soft residual 985: goal parseBoolean remains true/false-only keep-boundary.
-   * Soft residual: schedule parseBoolean remains keep-boundary (boolean literal + empty shapes).
+   * Soft residual: scheduler parseBoolean remains keep-boundary (boolean literal + empty shapes).
    * Does not flip §13.2 checkboxes.
    */
   describe('parseQueryBoolean dual retired (residual 1021)', () => {
@@ -410,7 +410,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       'utf8',
     );
     const schedule = readFileSync(
-      resolve(sharedDir, '../../../schedule/src/api/routes.ts'),
+      resolve(sharedDir, '../../../scheduler/src/api/routes.ts'),
       'utf8',
     );
     const goalSole = readFileSync(
@@ -436,7 +436,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(notification).toContain('parseBoolean(req.query?.isRead)');
     });
 
-    it('schedule + goal remain keep-boundary vs this query boolean sole', () => {
+    it('scheduler + goal remain keep-boundary vs this query boolean sole', () => {
       expect(schedule).toMatch(/function parseBoolean\b/);
       expect(schedule).toContain('value === true');
       expect(schedule).toContain("value === ''");
@@ -467,8 +467,8 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
    * Sole body in @memoflow/utils/shared/parse-query-value.
    * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
    * Soft residual 1023: governance parseString/parseNumber dual retired (re-export this sole).
-   * Soft residual: schedule route parsers keep-boundary (different empty/boolean handling).
-   * Soft residual 1073: schedule route parsers keep-boundary surface (no force-merge).
+   * Soft residual: scheduler route parsers keep-boundary (different empty/boolean handling).
+   * Soft residual 1073: scheduler route parsers keep-boundary surface (no force-merge).
    * Soft residual: goal parseBoolean sole (residual 985) is true/false-only keep-boundary vs this dual.
    * Soft residual 1067: goal parseNumber + parseStringArray keep-boundary (no force-merge).
    * Soft residual 1113: data-portability toBoolean keep-boundary (always boolean + numbers; no force-merge).
@@ -487,7 +487,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       'utf8',
     );
     const schedule = readFileSync(
-      resolve(sharedDir, '../../../schedule/src/api/routes.ts'),
+      resolve(sharedDir, '../../../scheduler/src/api/routes.ts'),
       'utf8',
     );
 
@@ -526,7 +526,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(reminder).toContain('parseNumber(');
     });
 
-    it('schedule route parsers remain keep-boundary (not this sole dual body)', () => {
+    it('scheduler route parsers remain keep-boundary (not this sole dual body)', () => {
       expect(schedule).toMatch(/function parseString\b/);
       expect(schedule).toMatch(/function parseNumber\b/);
       expect(schedule).toContain("value === ''");
@@ -565,7 +565,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
    * governance-route-shared re-exports utils sole; parseStringArray remains package-local.
    * Soft residual 1069: governance parseStringArray keep-boundary surface (no force-merge).
    * Soft residual 1038: tip focused suite numbers track Residual 1038 evidence tip (309/1339).
-   * Soft residual: schedule route parsers remain keep-boundary (empty-string shapes).
+   * Soft residual: scheduler route parsers remain keep-boundary (empty-string shapes).
    * Soft residual 1021: notification parseBoolean sole family.
    * Does not flip §13.2 checkboxes.
    */
@@ -588,7 +588,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       'utf8',
     );
     const schedule = readFileSync(
-      resolve(sharedDir, '../../../schedule/src/api/routes.ts'),
+      resolve(sharedDir, '../../../scheduler/src/api/routes.ts'),
       'utf8',
     );
 
@@ -620,7 +620,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(revisions).not.toMatch(/function parseNumber\b/);
     });
 
-    it('schedule remains keep-boundary; sole still parses arrays and finite numbers', () => {
+    it('scheduler remains keep-boundary; sole still parses arrays and finite numbers', () => {
       expect(schedule).toMatch(/function parseString\b/);
       expect(schedule).toContain("value === ''");
       expect(schedule).not.toContain('@memoflow/utils/shared');

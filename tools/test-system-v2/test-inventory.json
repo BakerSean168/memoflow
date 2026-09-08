@@ -70,6 +70,26 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/ai/planner-read.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/ai/repository-knowledge-cloud-data-purger.adapter.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -101,6 +121,16 @@
     },
     {
       "path": "apps/api/src/modules/ai/repository-knowledge-source.adapter.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/ai/routine-command.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/api/vitest.config.ts"
@@ -1411,14 +1441,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/web/e2e/dag-visualization.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "apps/web/e2e/dashboard/dashboard-overview.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -1531,14 +1553,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/web/e2e/goal/goal-focus-mode.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "apps/web/e2e/goal/goal-keyresult.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -1643,6 +1657,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/web/e2e/schedule/planner-task-revert.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/web/e2e/schedule/schedule-calendar.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -1711,38 +1733,6 @@
       "primarySuite": "e2e",
       "collectors": [
         "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/web/e2e/task/task-critical-path.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/web/e2e/task/task-dag-visualization.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/web/e2e/task/task-dependency-crud.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/web/e2e/task/task-drag-drop.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.audit.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -2579,16 +2569,6 @@
       ]
     },
     {
-      "path": "packages/ai/src/server/domain/services/__tests__/validation.keyresults-tasks.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/ai/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/ai/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/ai/src/server/domain/value-objects/__tests__/ai-value-objects.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2930,6 +2910,16 @@
     },
     {
       "path": "packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/mastra/tools/product-tools.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -4997,6 +4987,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/reminder/api/reminder-response.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/reminder/entities/reminder-response-client-dto-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5645,6 +5643,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/database/src/schema/task-shared-label-migration.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/database/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/database/src/schema/vnext-unique-constraints.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6083,17 +6089,6 @@
       ]
     },
     {
-      "path": "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-progress-breakdown.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts",
-        "packages/goal/vitest.use-cases.config.ts"
-      ]
-    },
-    {
       "path": "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6493,16 +6488,6 @@
     },
     {
       "path": "packages/goal/src/server/infrastructure/goal-reminder-fire.handler.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal/src/server/infrastructure/schedule-execution-source.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -7378,6 +7363,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/patterns/src/lease/lease-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/patterns/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/patterns/src/operations/operations-dist.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7516,6 +7509,16 @@
       ]
     },
     {
+      "path": "packages/reminder/src/method-library/method-library.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/reminder/src/server/application/mappers/reminder-template-client.mapper.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7557,6 +7560,16 @@
     },
     {
       "path": "packages/reminder/src/server/application/services/reminder-template-action-application-service.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/reminder/src/server/application/services/routine-coach-command.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -7744,6 +7757,16 @@
       ]
     },
     {
+      "path": "packages/reminder/src/server/domain/services/__tests__/legacy-routine-cutover-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/reminder/src/server/domain/services/__tests__/reminder-domain.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7765,26 +7788,6 @@
     },
     {
       "path": "packages/reminder/src/server/domain/services/__tests__/reminder-policy.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/services/__tests__/reminder-scheduler.service.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/domain/services/__tests__/reminder-template-business.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -7986,6 +7989,14 @@
       ]
     },
     {
+      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/reminder-response-prisma.repository.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/reminder/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/reminder/src/server/infrastructure/adapters/prisma/reminder-template-prisma.repository.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -7994,7 +8005,15 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/reminder/src/server/infrastructure/cron/reminder-trigger-cron-job.spec.ts",
+      "path": "packages/reminder/src/server/infrastructure/adapters/prisma/user-reminder-preference-prisma.repository.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/reminder/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/reminder/src/server/infrastructure/reminder-snooze-override-writer.prisma.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -8004,7 +8023,7 @@
       ]
     },
     {
-      "path": "packages/reminder/src/server/infrastructure/cron/reminder-trigger-cron-job.surface.spec.ts",
+      "path": "packages/reminder/src/server/infrastructure/reminder-template-scheduled-handler.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -8043,6 +8062,16 @@
     },
     {
       "path": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -8100,7 +8129,7 @@
       ]
     },
     {
-      "path": "packages/reminder/src/server/infrastructure/routine-vnext/trigger-persistence-parity.spec.ts",
+      "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -8110,7 +8139,15 @@
       ]
     },
     {
-      "path": "packages/reminder/src/server/infrastructure/runtime/reminder-trigger-cron.runtime.spec.ts",
+      "path": "packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/reminder/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/reminder/src/server/infrastructure/routine-vnext/trigger-persistence-parity.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -8520,22 +8557,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/schedule-orchestration/src/__tests__/reminder-due-set-parity.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule-orchestration/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/schedule-orchestration/src/__tests__/reminder-due-set-shadow.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule-orchestration/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/schedule-orchestration/src/__tests__/reminder-projection-runtime.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8553,14 +8574,6 @@
     },
     {
       "path": "packages/schedule-orchestration/src/__tests__/routine-projection-runtime.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule-orchestration/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/schedule-orchestration/src/__tests__/schedule-execution-router.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/schedule-orchestration/vitest.config.ts"
@@ -8702,36 +8715,6 @@
       ]
     },
     {
-      "path": "packages/schedule/src/scheduling/__tests__/handler-registry.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/scheduling/__tests__/scheduling-contracts.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/application/scheduler/patterns-scheduler-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/schedule/src/server/application/services/__tests__/schedule-domain-event-publisher.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8772,61 +8755,6 @@
       ]
     },
     {
-      "path": "packages/schedule/src/server/application/use-cases/calculate-next-run.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts",
-        "packages/schedule/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/application/use-cases/commands/schedule-command-use-cases.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts",
-        "packages/schedule/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/application/use-cases/commands/schedule-use-cases.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts",
-        "packages/schedule/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/application/use-cases/queries/schedule-query-use-cases.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts",
-        "packages/schedule/vitest.use-cases.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/application/use-cases/schedule-executor.use-cases.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts",
-        "packages/schedule/vitest.use-cases.config.ts"
-      ]
-    },
-    {
       "path": "packages/schedule/src/server/domain/aggregates/__tests__/calendar-entry.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8837,77 +8765,7 @@
       ]
     },
     {
-      "path": "packages/schedule/src/server/domain/aggregates/__tests__/schedule-task.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/domain/entities/__tests__/schedule-execution.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/domain/value-objects/__tests__/coverage-helpers.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/domain/value-objects/__tests__/errors.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/domain/value-objects/__tests__/execution-info.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/domain/value-objects/__tests__/retry-policy.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/domain/value-objects/__tests__/schedule-config.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/domain/value-objects/__tests__/schedule-task-metadata.spec.ts",
+      "path": "packages/schedule/src/server/domain/value-objects/conflict-value-objects.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/schedule/vitest.config.ts"
@@ -8927,16 +8785,6 @@
       ]
     },
     {
-      "path": "packages/schedule/src/server/infrastructure/adapters/powersync/__tests__/schedule-task-powersync.repository.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/schedule/src/server/infrastructure/adapters/prisma/__tests__/schedule-event-ownership.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8947,49 +8795,7 @@
       ]
     },
     {
-      "path": "packages/schedule/src/server/infrastructure/adapters/prisma/__tests__/schedule-execution-ownership.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/infrastructure/adapters/prisma/__tests__/schedule-task-ownership.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-execution-mapper.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts",
-        "packages/schedule/vitest.mappers.config.ts"
-      ]
-    },
-    {
       "path": "packages/schedule/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-mapper.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts",
-        "packages/schedule/vitest.mappers.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-task-mapper.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/schedule/vitest.config.ts"
@@ -9008,14 +8814,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/schedule/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.integration.test.ts",
-      "primarySuite": "integration",
-      "collectors": [
-        "packages/schedule/vitest.integration.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/schedule/src/server/infrastructure/adapters/prisma/schedule-w5-real-concurrency.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -9024,53 +8822,328 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/schedule/src/server/infrastructure/lease/schedule-lease-coordinator.spec.ts",
+      "path": "packages/scheduler/src/api/routes.spec.ts",
       "primarySuite": "unit",
       "collectors": [
-        "packages/schedule/vitest.config.ts"
+        "packages/scheduler/vitest.config.ts"
       ],
       "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
+        "packages/scheduler/vitest.config.ts"
       ]
     },
     {
-      "path": "packages/schedule/src/server/infrastructure/lease/schedule-lease.repository.spec.ts",
+      "path": "packages/scheduler/src/api/scheduler-route-parsers.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
-        "packages/schedule/vitest.config.ts"
+        "packages/scheduler/vitest.config.ts"
       ],
       "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
+        "packages/scheduler/vitest.config.ts"
       ]
     },
     {
-      "path": "packages/schedule/src/server/infrastructure/runtime/schedule-runtime-ownership.surface.spec.ts",
+      "path": "packages/scheduler/src/electron/scheduler-electron.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
-        "packages/schedule/vitest.config.ts"
+        "packages/scheduler/vitest.config.ts"
       ],
       "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
+        "packages/scheduler/vitest.config.ts"
       ]
     },
     {
-      "path": "packages/schedule/src/server/infrastructure/runtime/schedule.runtime.spec.ts",
+      "path": "packages/scheduler/src/infrastructure-client/adapters/ipc/scheduler-ipc.adapter.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
-        "packages/schedule/vitest.config.ts"
+        "packages/scheduler/vitest.config.ts"
       ],
       "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
+        "packages/scheduler/vitest.config.ts"
       ]
     },
     {
-      "path": "packages/schedule/src/server/infrastructure/scheduling/__tests__/legacy-schedule-task-scheduling.adapter.spec.ts",
+      "path": "packages/scheduler/src/scheduling/__tests__/handler-registry.spec.ts",
       "primarySuite": "unit",
       "collectors": [
-        "packages/schedule/vitest.config.ts"
+        "packages/scheduler/vitest.config.ts"
       ],
       "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/scheduling/__tests__/scheduling-contracts.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/application/scheduler/patterns-scheduler-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/application/use-cases/calculate-next-run.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts",
+        "packages/scheduler/vitest.use-cases.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/application/use-cases/commands/schedule-command-use-cases.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts",
+        "packages/scheduler/vitest.use-cases.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/application/use-cases/commands/schedule-use-cases.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts",
+        "packages/scheduler/vitest.use-cases.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/application/use-cases/queries/schedule-query-use-cases.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts",
+        "packages/scheduler/vitest.use-cases.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/application/use-cases/schedule-executor.use-cases.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts",
+        "packages/scheduler/vitest.use-cases.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/domain/aggregates/__tests__/schedule-task.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/domain/entities/__tests__/schedule-execution.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/domain/value-objects/__tests__/coverage-helpers.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/domain/value-objects/__tests__/errors.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/domain/value-objects/__tests__/execution-info.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/domain/value-objects/__tests__/retry-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/domain/value-objects/__tests__/schedule-config.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/domain/value-objects/__tests__/schedule-task-metadata.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/__tests__/scheduler-repositories.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/adapters/powersync/__tests__/schedule-task-powersync.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/adapters/prisma/__tests__/schedule-execution-ownership.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/adapters/prisma/__tests__/schedule-task-ownership.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-execution-mapper.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts",
+        "packages/scheduler/vitest.mappers.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-task-mapper.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts",
+        "packages/scheduler/vitest.mappers.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/scheduler/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/lease/schedule-lease-coordinator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/lease/schedule-lease.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/runtime/schedule-runtime-ownership.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/runtime/schedule.runtime.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/server/infrastructure/scheduling/__tests__/legacy-schedule-task-scheduling.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
       ]
     },
     {
@@ -9967,16 +10040,6 @@
       ]
     },
     {
-      "path": "packages/task/src/server/infrastructure/schedule-execution-source.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/task/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/task/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/task/src/server/infrastructure/schedule-projection-source.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10505,6 +10568,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/core-vnext-architecture-lock.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/governance/__tests__/failure-contract-inventory.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -10641,6 +10712,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/test-system-v2/__tests__/vitest-workspace-helpers.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "test-system-v2:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/test-system-v2/__tests__/web-shards.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -10655,7 +10734,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 62
+      "fileCount": 65
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -10697,7 +10776,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 81
+      "fileCount": 79
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -10711,7 +10790,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 29
+      "fileCount": 28
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -10732,7 +10811,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 75
     },
     {
       "id": "packages/reminder/vitest.mappers.config.ts",
@@ -10753,17 +10832,31 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 45
+      "fileCount": 20
     },
     {
       "id": "packages/schedule/vitest.mappers.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 3
+      "fileCount": 1
     },
     {
-      "id": "packages/schedule/vitest.use-cases.config.ts",
+      "id": "packages/scheduler/vitest.config.ts",
+      "type": "measurement",
+      "suite": "coverage",
+      "runner": "vitest",
+      "fileCount": 31
+    },
+    {
+      "id": "packages/scheduler/vitest.mappers.config.ts",
+      "type": "measurement",
+      "suite": "coverage",
+      "runner": "vitest",
+      "fileCount": 2
+    },
+    {
+      "id": "packages/scheduler/vitest.use-cases.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
@@ -10781,7 +10874,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 71
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -10837,14 +10930,14 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 18
+      "fileCount": 12
     },
     {
       "id": "apps/web/playwright.config.ts",
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 21
+      "fileCount": 22
     },
     {
       "id": "apps/web/playwright.debug.config.ts",
@@ -10907,14 +11000,14 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 7
+      "fileCount": 8
     },
     {
       "id": "tools/governance/vitest.config.ts",
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 11
+      "fileCount": 12
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -10956,7 +11049,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 4
+      "fileCount": 7
     },
     {
       "id": "packages/repository/vitest.integration.config.ts",
@@ -10970,7 +11063,14 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 3
+      "fileCount": 2
+    },
+    {
+      "id": "packages/scheduler/vitest.integration.config.ts",
+      "type": "primary",
+      "suite": "integration",
+      "runner": "vitest",
+      "fileCount": 1
     },
     {
       "id": "packages/setting/vitest.integration.config.ts",
@@ -11012,7 +11112,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 62
+      "fileCount": 65
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -11075,7 +11175,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 67
+      "fileCount": 68
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11096,7 +11196,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 9
+      "fileCount": 10
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11110,7 +11210,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 81
+      "fileCount": 79
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11152,7 +11252,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 6
+      "fileCount": 7
     },
     {
       "id": "packages/powersync-schema/vitest.config.ts",
@@ -11166,7 +11266,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 75
     },
     {
       "id": "packages/repository/vitest.config.ts",
@@ -11180,14 +11280,21 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 9
     },
     {
       "id": "packages/schedule/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 45
+      "fileCount": 20
+    },
+    {
+      "id": "packages/scheduler/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 31
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -11201,7 +11308,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 71
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -11236,10 +11343,13 @@
     "coverage": [
       "apps/api/src/bootstrap-module-names.surface.spec.ts",
       "apps/api/src/bootstrap.spec.ts",
+      "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
+      "apps/api/src/modules/ai/planner-read.adapter.spec.ts",
       "apps/api/src/modules/ai/repository-knowledge-cloud-data-purger.adapter.test.ts",
       "apps/api/src/modules/ai/repository-knowledge-index-status.adapter.test.ts",
       "apps/api/src/modules/ai/repository-knowledge-note-persistence.adapter.test.ts",
       "apps/api/src/modules/ai/repository-knowledge-source.adapter.test.ts",
+      "apps/api/src/modules/ai/routine-command.adapter.spec.ts",
       "apps/api/src/modules/dashboard/module.spec.ts",
       "apps/api/src/modules/label/module.spec.ts",
       "apps/api/src/modules/powersync/crud-normalization.spec.ts",
@@ -11356,7 +11466,6 @@
       "packages/ai/src/server/domain/entities/__tests__/message.spec.ts",
       "packages/ai/src/server/domain/services/__tests__/knowledge-series.validation.test.ts",
       "packages/ai/src/server/domain/services/__tests__/summarization.validation.test.ts",
-      "packages/ai/src/server/domain/services/__tests__/validation.keyresults-tasks.test.ts",
       "packages/ai/src/server/domain/value-objects/__tests__/ai-value-objects.spec.ts",
       "packages/ai/src/server/domain/value-objects/__tests__/token-usage.spec.ts",
       "packages/ai/src/server/infrastructure/__tests__/ai-module-mastra-lifecycle.spec.ts",
@@ -11392,6 +11501,7 @@
       "packages/ai/src/server/mastra/runtime/assistant-history.service.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-observability.spec.ts",
       "packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts",
+      "packages/ai/src/server/mastra/tools/product-tools.spec.ts",
       "packages/ai/src/server/mastra/workflows/apply-goal-plan.service.spec.ts",
       "packages/ai/src/server/mastra/workflows/deterministic-entity-id.spec.ts",
       "packages/ai/src/server/mastra/workflows/goal-create.workflow.spec.ts",
@@ -11481,7 +11591,6 @@
       "packages/goal/src/server/application/use-cases/commands/__tests__/update-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/wallet.use-cases.spec.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-aggregate.test.ts",
-      "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-progress-breakdown.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/goal-cross-module-query-service.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/list-goal-records.test.ts",
@@ -11519,7 +11628,6 @@
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-weight-snapshot-mapper.spec.ts",
       "packages/goal/src/server/infrastructure/build-task-name-keep-boundary.surface.spec.ts",
       "packages/goal/src/server/infrastructure/goal-reminder-fire.handler.spec.ts",
-      "packages/goal/src/server/infrastructure/schedule-execution-source.spec.ts",
       "packages/goal/src/server/infrastructure/schedule-projection-source.spec.ts",
       "packages/goal/src/server/transport/__tests__/goal-transport-mapper.spec.ts",
       "packages/goal/src/server/transport/__tests__/goal-transport-parity.spec.ts",
@@ -11602,11 +11710,13 @@
       "packages/reminder/src/electron/reminder-electron.surface.spec.ts",
       "packages/reminder/src/infrastructure-client/adapters/http/reminder-http.adapter.test.ts",
       "packages/reminder/src/infrastructure-client/adapters/ipc/reminder-ipc.adapter.surface.spec.ts",
+      "packages/reminder/src/method-library/method-library.spec.ts",
       "packages/reminder/src/server/application/mappers/reminder-template-client.mapper.test.ts",
       "packages/reminder/src/server/application/services/reminder-group-application-service.test.ts",
       "packages/reminder/src/server/application/services/reminder-preferences-application-service.test.ts",
       "packages/reminder/src/server/application/services/reminder-schedule-query-application-service.test.ts",
       "packages/reminder/src/server/application/services/reminder-template-action-application-service.test.ts",
+      "packages/reminder/src/server/application/services/routine-coach-command.service.spec.ts",
       "packages/reminder/src/server/application/use-cases/commands/adjust-reminder-frequency.test.ts",
       "packages/reminder/src/server/application/use-cases/commands/record-reminder-response.test.ts",
       "packages/reminder/src/server/application/use-cases/commands/reminder-use-cases.test.ts",
@@ -11624,11 +11734,10 @@
       "packages/reminder/src/server/domain/routine/__tests__/protocol.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/routine-profile.spec.ts",
       "packages/reminder/src/server/domain/routine/__tests__/routine-trigger.spec.ts",
+      "packages/reminder/src/server/domain/services/__tests__/legacy-routine-cutover-service.spec.ts",
       "packages/reminder/src/server/domain/services/__tests__/reminder-domain.service.spec.ts",
       "packages/reminder/src/server/domain/services/__tests__/reminder-group-business.service.spec.ts",
       "packages/reminder/src/server/domain/services/__tests__/reminder-policy.spec.ts",
-      "packages/reminder/src/server/domain/services/__tests__/reminder-scheduler.service.spec.ts",
-      "packages/reminder/src/server/domain/services/__tests__/reminder-template-business.service.spec.ts",
       "packages/reminder/src/server/domain/services/__tests__/reminder-template-control.service.spec.ts",
       "packages/reminder/src/server/domain/services/__tests__/reminder-trigger.service.spec.ts",
       "packages/reminder/src/server/domain/services/__tests__/upcoming-reminder-calculation.service.spec.ts",
@@ -11647,17 +11756,18 @@
       "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-reminder-response-mapper.spec.ts",
       "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-reminder-template-mapper.spec.ts",
       "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-user-reminder-preference-mapper.spec.ts",
-      "packages/reminder/src/server/infrastructure/cron/reminder-trigger-cron-job.spec.ts",
-      "packages/reminder/src/server/infrastructure/cron/reminder-trigger-cron-job.surface.spec.ts",
+      "packages/reminder/src/server/infrastructure/reminder-snooze-override-writer.prisma.spec.ts",
+      "packages/reminder/src/server/infrastructure/reminder-template-scheduled-handler.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-projection-source.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
+      "packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/profile-persistence-parity.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/protocol-persistence-parity.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/protocol-session-store.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/routine-local-registrations.powersync.spec.ts",
+      "packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.spec.ts",
       "packages/reminder/src/server/infrastructure/routine-vnext/trigger-persistence-parity.spec.ts",
-      "packages/reminder/src/server/infrastructure/runtime/reminder-trigger-cron.runtime.spec.ts",
       "packages/reminder/src/server/infrastructure/schedule-execution-source.spec.ts",
       "packages/reminder/src/server/infrastructure/schedule-projection-source.spec.ts",
       "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
@@ -11677,40 +11787,46 @@
       "packages/schedule/src/electron/schedule-electron-delete-contract.spec.ts",
       "packages/schedule/src/electron/schedule-electron.surface.spec.ts",
       "packages/schedule/src/infrastructure-client/adapters/ipc/schedule-ipc.adapter.surface.spec.ts",
-      "packages/schedule/src/scheduling/__tests__/handler-registry.spec.ts",
-      "packages/schedule/src/scheduling/__tests__/scheduling-contracts.spec.ts",
-      "packages/schedule/src/server/application/scheduler/patterns-scheduler-dual.surface.spec.ts",
       "packages/schedule/src/server/application/services/__tests__/schedule-domain-event-publisher.spec.ts",
       "packages/schedule/src/server/application/services/__tests__/schedule-w5-concurrency-projection.spec.ts",
       "packages/schedule/src/server/application/services/schedule-conflict-resolution-service.spec.ts",
       "packages/schedule/src/server/application/services/schedule-event-application-service.spec.ts",
-      "packages/schedule/src/server/application/use-cases/calculate-next-run.test.ts",
-      "packages/schedule/src/server/application/use-cases/commands/schedule-command-use-cases.test.ts",
-      "packages/schedule/src/server/application/use-cases/commands/schedule-use-cases.test.ts",
-      "packages/schedule/src/server/application/use-cases/queries/schedule-query-use-cases.test.ts",
-      "packages/schedule/src/server/application/use-cases/schedule-executor.use-cases.test.ts",
       "packages/schedule/src/server/domain/aggregates/__tests__/calendar-entry.spec.ts",
-      "packages/schedule/src/server/domain/aggregates/__tests__/schedule-task.spec.ts",
-      "packages/schedule/src/server/domain/entities/__tests__/schedule-execution.spec.ts",
-      "packages/schedule/src/server/domain/value-objects/__tests__/coverage-helpers.spec.ts",
-      "packages/schedule/src/server/domain/value-objects/__tests__/errors.spec.ts",
-      "packages/schedule/src/server/domain/value-objects/__tests__/execution-info.spec.ts",
-      "packages/schedule/src/server/domain/value-objects/__tests__/retry-policy.spec.ts",
-      "packages/schedule/src/server/domain/value-objects/__tests__/schedule-config.spec.ts",
-      "packages/schedule/src/server/domain/value-objects/__tests__/schedule-task-metadata.spec.ts",
+      "packages/schedule/src/server/domain/value-objects/conflict-value-objects.spec.ts",
       "packages/schedule/src/server/infrastructure/__tests__/schedule-repositories.surface.spec.ts",
-      "packages/schedule/src/server/infrastructure/adapters/powersync/__tests__/schedule-task-powersync.repository.spec.ts",
       "packages/schedule/src/server/infrastructure/adapters/prisma/__tests__/schedule-event-ownership.surface.spec.ts",
-      "packages/schedule/src/server/infrastructure/adapters/prisma/__tests__/schedule-execution-ownership.surface.spec.ts",
-      "packages/schedule/src/server/infrastructure/adapters/prisma/__tests__/schedule-task-ownership.surface.spec.ts",
-      "packages/schedule/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-execution-mapper.spec.ts",
       "packages/schedule/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-mapper.spec.ts",
-      "packages/schedule/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-task-mapper.spec.ts",
-      "packages/schedule/src/server/infrastructure/lease/schedule-lease-coordinator.spec.ts",
-      "packages/schedule/src/server/infrastructure/lease/schedule-lease.repository.spec.ts",
-      "packages/schedule/src/server/infrastructure/runtime/schedule-runtime-ownership.surface.spec.ts",
-      "packages/schedule/src/server/infrastructure/runtime/schedule.runtime.spec.ts",
-      "packages/schedule/src/server/infrastructure/scheduling/__tests__/legacy-schedule-task-scheduling.adapter.spec.ts",
+      "packages/scheduler/src/api/routes.spec.ts",
+      "packages/scheduler/src/api/scheduler-route-parsers.surface.spec.ts",
+      "packages/scheduler/src/electron/scheduler-electron.surface.spec.ts",
+      "packages/scheduler/src/infrastructure-client/adapters/ipc/scheduler-ipc.adapter.surface.spec.ts",
+      "packages/scheduler/src/scheduling/__tests__/handler-registry.spec.ts",
+      "packages/scheduler/src/scheduling/__tests__/scheduling-contracts.spec.ts",
+      "packages/scheduler/src/server/application/scheduler/patterns-scheduler-dual.surface.spec.ts",
+      "packages/scheduler/src/server/application/use-cases/calculate-next-run.test.ts",
+      "packages/scheduler/src/server/application/use-cases/commands/schedule-command-use-cases.test.ts",
+      "packages/scheduler/src/server/application/use-cases/commands/schedule-use-cases.test.ts",
+      "packages/scheduler/src/server/application/use-cases/queries/schedule-query-use-cases.test.ts",
+      "packages/scheduler/src/server/application/use-cases/schedule-executor.use-cases.test.ts",
+      "packages/scheduler/src/server/domain/aggregates/__tests__/schedule-task.spec.ts",
+      "packages/scheduler/src/server/domain/entities/__tests__/schedule-execution.spec.ts",
+      "packages/scheduler/src/server/domain/value-objects/__tests__/coverage-helpers.spec.ts",
+      "packages/scheduler/src/server/domain/value-objects/__tests__/errors.spec.ts",
+      "packages/scheduler/src/server/domain/value-objects/__tests__/execution-info.spec.ts",
+      "packages/scheduler/src/server/domain/value-objects/__tests__/retry-policy.spec.ts",
+      "packages/scheduler/src/server/domain/value-objects/__tests__/schedule-config.spec.ts",
+      "packages/scheduler/src/server/domain/value-objects/__tests__/schedule-task-metadata.spec.ts",
+      "packages/scheduler/src/server/infrastructure/__tests__/scheduler-repositories.surface.spec.ts",
+      "packages/scheduler/src/server/infrastructure/adapters/powersync/__tests__/schedule-task-powersync.repository.spec.ts",
+      "packages/scheduler/src/server/infrastructure/adapters/prisma/__tests__/schedule-execution-ownership.surface.spec.ts",
+      "packages/scheduler/src/server/infrastructure/adapters/prisma/__tests__/schedule-task-ownership.surface.spec.ts",
+      "packages/scheduler/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-execution-mapper.spec.ts",
+      "packages/scheduler/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-task-mapper.spec.ts",
+      "packages/scheduler/src/server/infrastructure/lease/schedule-lease-coordinator.spec.ts",
+      "packages/scheduler/src/server/infrastructure/lease/schedule-lease.repository.spec.ts",
+      "packages/scheduler/src/server/infrastructure/runtime/schedule-runtime-ownership.surface.spec.ts",
+      "packages/scheduler/src/server/infrastructure/runtime/schedule.runtime.spec.ts",
+      "packages/scheduler/src/server/infrastructure/scheduling/__tests__/legacy-schedule-task-scheduling.adapter.spec.ts",
       "packages/setting/src/api/module-lifecycle.spec.ts",
       "packages/setting/src/api/routes.spec.ts",
       "packages/setting/src/application-client/ports/setting-api-client-port.surface.spec.ts",
@@ -11792,7 +11908,6 @@
       "packages/task/src/server/infrastructure/normalize-runtime-contributions-dual.surface.spec.ts",
       "packages/task/src/server/infrastructure/runtime/__tests__/task-instance-maintenance-runtime.spec.ts",
       "packages/task/src/server/infrastructure/runtime/task.runtime.spec.ts",
-      "packages/task/src/server/infrastructure/schedule-execution-source.spec.ts",
       "packages/task/src/server/infrastructure/schedule-projection-source.spec.ts",
       "packages/task/src/server/infrastructure/schedule-source-ownership.surface.spec.ts",
       "packages/task/src/server/infrastructure/task-goal-outbox-runtime.spec.ts",
@@ -11808,13 +11923,13 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1015,
-    "integration": 31,
+    "unit": 1023,
+    "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,
     "boundary-main": 6,
-    "e2e": 65,
+    "e2e": 60,
     "perf": 1,
-    "governance": 48
+    "governance": 50
   }
 }

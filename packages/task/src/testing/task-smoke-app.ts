@@ -46,7 +46,6 @@ export function createMockTemplateRepo(): ITaskTemplateRepository {
     findByStatus: vi.fn().mockResolvedValue([]),
     findActiveTemplates: vi.fn().mockResolvedValue([]),
     findByGoalId: vi.fn().mockResolvedValue([]),
-    findByTags: vi.fn().mockResolvedValue([]),
     findByLabelIdsAll: vi.fn().mockResolvedValue([]),
     replaceLabels: vi.fn().mockResolvedValue([]),
     findNeedGenerateInstances: vi.fn().mockResolvedValue([]),

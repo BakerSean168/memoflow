@@ -21,7 +21,6 @@ export interface UserReminderPreferencesState {
   bestTimeSlots: TimeSlotDTO[];
   worstTimeSlots: TimeSlotDTO[];
   globalReminderEnabled: boolean;
-  globalSmartFrequency: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,7 +32,6 @@ export interface UserReminderPreferencesState {
  * - 管理用户的提醒偏好设置
  * - 记录最佳/最差提醒时间段
  * - 支持时间段推荐算法
- * - 全局智能频率开关
  */
 export class UserReminderPreferences extends AggregateRoot<string> {
   // ===== 私有字段 =====
@@ -41,7 +39,6 @@ export class UserReminderPreferences extends AggregateRoot<string> {
   private _bestTimeSlots: TimeSlotDTO[];
   private _worstTimeSlots: TimeSlotDTO[];
   private _globalReminderEnabled: boolean;
-  private _globalSmartFrequency: boolean;
   private _createdAt: Date;
   private _updatedAt: Date;
 
@@ -52,7 +49,6 @@ export class UserReminderPreferences extends AggregateRoot<string> {
     this._bestTimeSlots = [...state.bestTimeSlots];
     this._worstTimeSlots = [...state.worstTimeSlots];
     this._globalReminderEnabled = state.globalReminderEnabled;
-    this._globalSmartFrequency = state.globalSmartFrequency;
     this._createdAt = state.createdAt;
     this._updatedAt = state.updatedAt;
   }
@@ -73,10 +69,6 @@ export class UserReminderPreferences extends AggregateRoot<string> {
 
   public get globalReminderEnabled(): boolean {
     return this._globalReminderEnabled;
-  }
-
-  public get globalSmartFrequency(): boolean {
-    return this._globalSmartFrequency;
   }
 
   public get createdAt(): Date {
@@ -101,7 +93,6 @@ export class UserReminderPreferences extends AggregateRoot<string> {
     bestTimeSlots?: TimeSlotDTO[];
     worstTimeSlots?: TimeSlotDTO[];
     globalReminderEnabled?: boolean;
-    globalSmartFrequency?: boolean;
   }): UserReminderPreferences {
     const now = new Date();
 
@@ -111,7 +102,6 @@ export class UserReminderPreferences extends AggregateRoot<string> {
       bestTimeSlots: params.bestTimeSlots ?? [],
       worstTimeSlots: params.worstTimeSlots ?? [],
       globalReminderEnabled: params.globalReminderEnabled ?? true,
-      globalSmartFrequency: params.globalSmartFrequency ?? true,
       createdAt: now,
       updatedAt: now,
     });
@@ -194,14 +184,6 @@ export class UserReminderPreferences extends AggregateRoot<string> {
     this._updatedAt = new Date(Date.now());
   }
 
-  /**
-   * 切换全局智能频率开关
-   */
-  public toggleGlobalSmartFrequency(enabled: boolean): void {
-    this._globalSmartFrequency = enabled;
-    this._updatedAt = new Date(Date.now());
-  }
-
   public toggleGlobalReminderEnabled(enabled: boolean): void {
     this._globalReminderEnabled = enabled;
     this._updatedAt = new Date(Date.now());
@@ -268,7 +250,6 @@ export class UserReminderPreferences extends AggregateRoot<string> {
       bestTimeSlots: [...this._bestTimeSlots],
       worstTimeSlots: [...this._worstTimeSlots],
       globalReminderEnabled: this._globalReminderEnabled,
-      globalSmartFrequency: this._globalSmartFrequency,
       createdAt: this._createdAt.getTime(),
       updatedAt: this._updatedAt.getTime(),
     };
@@ -300,7 +281,6 @@ export class UserReminderPreferences extends AggregateRoot<string> {
       bestTimeSlots: [...this._bestTimeSlots],
       worstTimeSlots: [...this._worstTimeSlots],
       globalReminderEnabled: this._globalReminderEnabled,
-      globalSmartFrequency: this._globalSmartFrequency,
       createdAt: this._createdAt.getTime(),
       updatedAt: this._updatedAt.getTime(),
       bestTimeSlotsText,
