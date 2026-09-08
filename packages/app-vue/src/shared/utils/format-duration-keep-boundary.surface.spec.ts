@@ -13,7 +13,6 @@ import { describe, expect, it } from 'vitest';
  * - schedule-presentation durationMs/Sec keep-boundary remains
  * - formatTaskDuration: Intl unit hour/minute
  * - app-react buildDuration: compute minutes only
- * Soft residual 1237: formatTime keep-boundary remains separate.
  * Soft residual 1240: formatDate keep-boundary remains separate.
  * Does not flip §13.2 checkboxes.
  */

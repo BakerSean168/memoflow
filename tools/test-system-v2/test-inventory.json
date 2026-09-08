@@ -4507,14 +4507,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/shared/utils/format-time-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/shared/utils/format-time-range-keep-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5124,6 +5116,22 @@
     },
     {
       "path": "packages/contracts/src/modules/task/protocol/task-rpc-map.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/task/value-objects/task-occurrence-result.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/task/value-objects/task-plan-schedule.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -9807,7 +9815,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/domain/value-objects/__tests__/task-server-value-objects.spec.ts",
+      "path": "packages/task/src/server/domain/value-objects/__tests__/task-plan-id.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9817,7 +9825,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/domain/value-objects/__tests__/task-plan-id.spec.ts",
+      "path": "packages/task/src/server/domain/value-objects/__tests__/task-server-value-objects.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -11154,7 +11162,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 201
+      "fileCount": 200
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11175,7 +11183,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 68
+      "fileCount": 70
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11889,8 +11897,8 @@
       "packages/task/src/server/domain/task-goal-contribution-v2.surface.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-domain-value-objects.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-occurrence-occurrence-key.spec.ts",
-      "packages/task/src/server/domain/value-objects/__tests__/task-server-value-objects.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-plan-id.spec.ts",
+      "packages/task/src/server/domain/value-objects/__tests__/task-server-value-objects.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-time-config-ymd.spec.ts",
       "packages/task/src/server/infrastructure/__tests__/task-module-partial-start.spec.ts",
       "packages/task/src/server/infrastructure/__tests__/task-reminder-fire.handler.spec.ts",
@@ -11923,7 +11931,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1023,
+    "unit": 1024,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,

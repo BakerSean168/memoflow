@@ -115,6 +115,8 @@ Within a phase, lanes may run in parallel only when they do not write the same c
 
 ## SYS-0002 — Retire unused Dashboard page-only Vue components
 
+**状态：DONE — 2026-09-09 first implementation checkpoint**
+
 **Goal:** remove code that belonged only to the already-retired Dashboard page without touching current Home behavior.
 
 **Scope:** `DashboardStatsStrip`, `DashboardTrendPanel`, `DashboardActivityTimeline` and tests/keep-boundary references proven unused.
@@ -122,6 +124,17 @@ Within a phase, lanes may run in parallel only when they do not write the same c
 **Out of scope:** `useDashboard`, DashboardData API/IPC/package, Goal progress, ActivityLedger, DashboardConfig.
 
 **Acceptance:** production import graph contains none of the three components; app-vue typecheck/tests green.
+
+**Closure evidence:**
+
+- consumer search found no production imports for the three components before deletion;
+- removed obsolete Residual 1237 keep-boundary spec + Dual Registry entry tied only to `DashboardActivityTimeline`;
+- focused Vitest: `format-duration` 5/5, `ReminderCapsulePreview` 2/2, `SettingAdvancedActions` 3/3 PASS;
+- `app-vue:typecheck` PASS;
+- `app-vue:lint` PASS with 13 inherited warnings / 0 errors;
+- `pnpm test:inventory` regenerated inventory: 1187 files;
+- `pnpm docs:check` PASS;
+- `pnpm governance:check` PASS.
 
 ## SYS-0003 — Add target no-return architecture manifest
 
@@ -479,9 +492,4 @@ Plus affected integration/E2E, PowerSync parity, Prisma migration checks, local 
 
 ## 7. Immediate next ticket
 
-**SYS-0002 — retire unused Dashboard page-only Vue components** is selected as the first production-code implementation because:
-
-- the page is already retired;
-- consumer search proves these three components have no production imports;
-- it does not depend on unfinished Goal/Task contracts;
-- it provides a low-risk first implementation checkpoint while Phase-0 characterization expands.
+**SYS-0001 — capture exact current-system characterization** is now the next system-level ticket. SYS-0002 has closed the first low-risk dead surface; before broader contract/schema migrations, Phase 0 must establish executable characterization for Time timezone behavior, Account/Auth closure, Data Portability V2 safety, Knowledge projection, remaining Dashboard live consumers, Governance migration and Editor no-runtime residue.

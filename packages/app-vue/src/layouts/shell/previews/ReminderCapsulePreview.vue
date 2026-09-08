@@ -36,7 +36,6 @@ const visible = computed(() => remaining.value.slice(0, RECENT_LIMIT));
 
 /**
  * Residual 1294: formatProductHm HH:mm sole (capsule clock).
- * Soft residual 1237: HH:mm-only vs dashboard relative keep-boundary.
  */
 
 async function load(force = false) {

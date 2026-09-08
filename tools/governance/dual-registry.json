@@ -485,17 +485,6 @@
       "suite_describes": 1
     },
     {
-      "id": "r1237",
-      "path": "packages/app-vue/src/shared/utils/format-time-keep-boundary.surface.spec.ts",
-      "package": "packages/app-vue",
-      "class": "keep_boundary",
-      "sole": "../../modules/dashboard/components/DashboardActivityTimeline.vue",
-      "blast": "surface lock (keep_boundary)",
-      "next": "none",
-      "residual": "1237",
-      "suite_describes": 1
-    },
-    {
       "id": "r1213",
       "path": "packages/app-vue/src/shared/utils/format-time-range-keep-boundary.surface.spec.ts",
       "package": "packages/app-vue",

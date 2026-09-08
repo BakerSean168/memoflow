@@ -172,7 +172,6 @@
 </template>
 
 <script setup lang="ts">
-/** Soft residual 1237: absolute product dateTime via formatProductDateTime (not dashboard relative). */
 import { useI18n } from 'vue-i18n';
 import { Card, CardContent, CardHeader, CardTitle } from '@memoflow/ui-vue-shadcn';
 import { Button } from '@memoflow/ui-vue-shadcn';

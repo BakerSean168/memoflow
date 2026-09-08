@@ -132,7 +132,6 @@ updated: 2026-08-22T15:38:00+08:00
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-duration-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-event-time-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-message-time-keep-boundary.surface.spec.ts` |
-| `keep_boundary` | `packages/app-vue/src/shared/utils/format-time-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-time-range-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/format-timestamp-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `packages/app-vue/src/shared/utils/get-importance-label-keep-boundary.surface.spec.ts` |
