@@ -10712,6 +10712,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/test-system-v2/__tests__/vitest-workspace-helpers.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "test-system-v2:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/test-system-v2/__tests__/web-shards.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -10992,7 +11000,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 7
+      "fileCount": 8
     },
     {
       "id": "tools/governance/vitest.config.ts",
@@ -11922,6 +11930,6 @@
     "boundary-main": 6,
     "e2e": 60,
     "perf": 1,
-    "governance": 49
+    "governance": 50
   }
 }
