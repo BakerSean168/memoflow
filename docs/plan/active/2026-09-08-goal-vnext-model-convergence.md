@@ -17,6 +17,8 @@ status: active
 
 # Goal vNext Model Convergence — Active Plan
 
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive migration gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+
 ## 1. Executive decision
 
 原 `Goal Target Date Semantics` 小计划扩展为一次完整但边界明确的 **Goal vNext Model Convergence**。

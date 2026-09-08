@@ -13,6 +13,8 @@ updated: 2026-09-09T00:00:00+08:00
 
 # Time + Label vNext Model Convergence
 
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive migration gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+
 **状态：ACTIVE / design frozen, implementation not started**
 **设计分支：** `docs/time-label-vnext-model-convergence`
 **目标 ADR：** ADR-100～103

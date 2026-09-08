@@ -10,6 +10,8 @@ updated: 2026-06-02T00:00:00
 
 # 治理模块说明
 
+> **2026-09-09 convergence notice:** ADR-109 决定将产品 Rule/RuleRevision 迁入 Knowledge Standards 后退休产品 Governance bounded context。`tools/governance` / `docs/governance` / CI engineering governance 不受影响。
+
 ## 1. 功能定位
 
 治理模块用于管理产品内的治理规则。它围绕规则列表、规则详情、规则编辑、修订历史和治理状态形成闭环，是用户可见的治理入口。需要注意区分产品内治理功能和仓库级治理规范（docs/governance/）。

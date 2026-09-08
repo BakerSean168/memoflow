@@ -10,6 +10,8 @@ updated: 2026-07-22T00:00:00
 
 # 编辑器模块说明
 
+> **2026-09-09 retirement closure:** ADR-107 决定不再存在 vNext Editor bounded context；当前 `editor_*` Prisma/PowerSync/Data Portability 只属于待删除 compatibility residue。
+
 ## 1. 功能定位
 
 根据 [ADR-034](../../architecture/adr/ADR-034-obsidian-vault-repository.md)，编辑器职责已经收缩为安全预览、知识关系、Web 新笔记确认和 Obsidian 外部编辑。数据库 Resource 不再作为跨端 Markdown 编辑真值源。

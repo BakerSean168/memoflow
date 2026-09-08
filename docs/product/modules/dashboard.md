@@ -10,6 +10,8 @@ updated: 2026-06-02T00:00:00
 
 # Dashboard 模块说明
 
+> **2026-09-09 retirement notice:** 独立 `/dashboard` 页面已经退休。ADR-108 决定最终删除 Dashboard bounded context/package/contracts/API/IPC；当前 package 仅是 Home/AI 迁移中的历史聚合读模型，不能把下文旧页面描述当作目标态。
+
 ## 1. 功能定位
 
 Dashboard 模块用于汇总用户当前状态和关键行动入口。它是一个纯读模型（read-model），不承载写业务数据职责，通过聚合目标、任务、日程、提醒和通知五个模块的数据，为用户提供统一的状态概览和快速操作入口。

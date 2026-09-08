@@ -11,6 +11,8 @@ updated: 2026-09-08T21:25:00+08:00
 
 # Task vNext Model Convergence
 
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive migration gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+
 **状态：ACTIVE / implementation started**
 **分支：** `feat/task-vnext-model-convergence`
 **上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）

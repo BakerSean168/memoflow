@@ -12,16 +12,18 @@ updated: 2026-08-03T00:00:00+08:00
 
 # 云端认证与本地 Profile Access
 
+> **2026-09-09 vNext notice:** ADR-105 保留 Better Auth 单一云端认证权威，并进一步固定 Account lifecycle / Auth enforcement / Desktop Profile Access 三轴边界。
+
 ## 1. 模块边界
 
 MemoFlow 不再使用一个“登录状态”同时表示本地数据访问、访客身份和云端同步资格。
 
-| 事实 | 真源 | 决定的能力 |
-| --- | --- | --- |
+| 事实                  | 真源                   | 决定的能力                         |
+| --------------------- | ---------------------- | ---------------------------------- |
 | 本地 Profile 是否打开 | Desktop Profile Access | Desktop 本地业务、Vault 和设置访问 |
-| 云端用户是谁 | Better Auth | Web 访问、云端 Account 和在线能力 |
-| Profile 是否连接云端 | `CloudBinding` | 当前 Profile 对应的云端 tenant |
-| 云端会话是否有效 | Better Auth session | 同步、云端 AI 和远程仓库连接 |
+| 云端用户是谁          | Better Auth            | Web 访问、云端 Account 和在线能力  |
+| Profile 是否连接云端  | `CloudBinding`         | 当前 Profile 对应的云端 tenant     |
+| 云端会话是否有效      | Better Auth session    | 同步、云端 AI 和远程仓库连接       |
 
 云端 session 失效只会把 Profile 置为 `REAUTH_REQUIRED`，不得锁定、删除或重建本地 Profile。
 
@@ -57,11 +59,11 @@ Desktop 以 Profile 为启动入口：
 
 Profile 使用三个不混用的标识：
 
-| 标识 | 语义 |
-| --- | --- |
-| `profileId` | 永久稳定的本地容器、目录和密钥命名空间 |
-| `localOwnerId` | 未绑定云端时本地业务数据 owner |
-| `cloudAccountId` | Better Auth 云端用户和同步 tenant |
+| 标识             | 语义                                   |
+| ---------------- | -------------------------------------- |
+| `profileId`      | 永久稳定的本地容器、目录和密钥命名空间 |
+| `localOwnerId`   | 未绑定云端时本地业务数据 owner         |
+| `cloudAccountId` | Better Auth 云端用户和同步 tenant      |
 
 本地锁定与云端退出是两个独立命令：
 

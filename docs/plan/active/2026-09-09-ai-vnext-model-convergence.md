@@ -16,6 +16,8 @@ updated: 2026-09-09T00:00:00+08:00
 
 # AI vNext Model Convergence
 
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive migration gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+
 **状态：ACTIVE / design frozen, implementation not started**
 **实施分支：** 尚未创建；本轮提交只冻结 docs/design，不开始 AI production code 重构
 **当前源码 truth：** `packages/ai` + `packages/contracts/ai` + Mastra runtime + Prisma/PowerSync + Vue AI workspace 现状

@@ -120,6 +120,12 @@ updated: 2026-09-09T00:30:00+08:00
 | [ADR-101](./ADR-101-product-time-presentation-and-compatibility-surface.md) | Product Time Presentation 与 Compatibility Surface | 已采纳（待实施） | 2026-09-09 |
 | [ADR-102](./ADR-102-label-registry-and-owner-assignment-boundary.md) | Label Registry 与 Owner Assignment Boundary | 已采纳（待实施） | 2026-09-09 |
 | [ADR-103](./ADR-103-label-identity-normalization-time-and-color-contract.md) | Label Identity、Normalization、Time 与 Color Contract | 已采纳（待实施） | 2026-09-09 |
+| [ADR-104](./ADR-104-account-profile-lifecycle-and-cloud-identity-projection.md) | Account Profile、Lifecycle 与 Cloud Identity Projection | 已采纳（待实施） | 2026-09-09 |
+| [ADR-105](./ADR-105-cloud-auth-access-enforcement-and-local-profile-boundary.md) | Cloud Auth、Access Enforcement 与 Local Profile Boundary | 已采纳（待实施） | 2026-09-09 |
+| [ADR-106](./ADR-106-owner-driven-data-portability-v3.md) | Owner-driven Data Portability V3 | 已采纳（待实施） | 2026-09-09 |
+| [ADR-107](./ADR-107-legacy-editor-persistence-retirement.md) | Legacy Editor Persistence Retirement | 已采纳（待实施） | 2026-09-09 |
+| [ADR-108](./ADR-108-dashboard-retirement-and-home-composition.md) | Dashboard Retirement 与 Home Composition | 已采纳（待实施） | 2026-09-09 |
+| [ADR-109](./ADR-109-product-governance-to-knowledge-standards.md) | Product Governance → Knowledge Standards | 已采纳（待实施） | 2026-09-09 |
 
 ## 维护规则
 

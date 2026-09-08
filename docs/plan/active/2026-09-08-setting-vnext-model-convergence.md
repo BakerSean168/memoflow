@@ -12,6 +12,8 @@ updated: 2026-09-08T23:26:00+08:00
 
 # Setting vNext Model Convergence
 
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive migration gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+
 **状态：ACTIVE / design frozen, implementation not started**
 **设计分支：** `docs/setting-vnext-model`
 **当前源码 truth：** `packages/setting` + `packages/account` + `packages/notification` + Desktop/PowerSync 现状
