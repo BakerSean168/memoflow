@@ -13,7 +13,11 @@ updated: 2026-09-08T12:14:00+08:00
 
 ## 当前计划
 
-当前没有仍在推进中的 active plan。
+当前有 1 个仍在推进中的 active plan。
+
+| 计划 | 当前状态 |
+| --- | --- |
+| [Goal Target Date Semantics](./2026-09-08-goal-target-date-semantics.md) | **ACTIVE / planned** — 将 Goal 的 canonical `dueDate` 恢复为 `targetDate`，包括 domain/contracts/DB/PowerSync/AI/UI/docs，并保持 Task due/overdue 语义不变。 |
 
 ## 本轮已归档（2026-09-08）
 
