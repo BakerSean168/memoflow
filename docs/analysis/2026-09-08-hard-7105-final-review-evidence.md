@@ -7,7 +7,7 @@ tags:
   - acceptance
 description: MemoFlow Core vNext HARD-7105 five-layer final review, focused repair, and pre-delivery acceptance evidence
 created: 2026-09-08T10:27:00+08:00
-updated: 2026-09-08T10:27:00+08:00
+updated: 2026-09-08T11:30:00+08:00
 status: accepted-pre-delivery
 ---
 
@@ -17,9 +17,9 @@ status: accepted-pre-delivery
 
 **Five-layer review: PASS for implementation and pre-delivery acceptance.**
 
-No unresolved P0/P1 finding remains in the Core vNext residual scope. The accepted local candidate is `3f7f7023f127` on `refactor/core-clean-reminder-schedule-legacy`, based on current `origin/main` with `0 behind / 23 ahead` at the time of this review.
+No unresolved P0/P1 finding remains in the Core vNext residual scope. The initial five-layer implementation review accepted `3f7f7023f127`; the pre-delivery evidence was then committed and opened as PR #338. GitHub's first independent CI pass correctly rejected delivery on fresh-workspace / acceptance-fixture drift that local cached runs had not exposed. Those delivery-gate findings were repaired in `e314e6da344` without widening any vNext product contract.
 
-This document does **not** claim merge/archive completion. GitHub PR CI and merge into `main` remain the final delivery gate; the umbrella plan stays active until that delivery is reconciled.
+This document does **not** claim merge/archive completion. The behavioral repair commit is `e314e6da344`; the evidence update that follows is documentation-only. PR #338 must pass a new exact-head GitHub CI run and merge into `main` before the umbrella plan can be archived.
 
 ## 1. Contract correctness
 
@@ -104,6 +104,36 @@ Residual production grep found retired Goal/Task terms only in explicit comments
 - HARD-7101~7104 are complete.
 - HARD-7105 implementation/review is accepted after focused repair and full recheck.
 - Delivery is intentionally still pending: push current exact candidate, open PR against `main`, require repository CI, merge exact accepted source, then archive the umbrella plan from merged `main`.
+
+## 6. GitHub delivery-gate repair after PR #338 first CI
+
+The first PR #338 CI run was treated as independent review evidence, not as a rerun-to-green exercise. It exposed four concrete truth gaps:
+
+1. **Web acceptance fixtures still used retired Task / AI classification fields.**
+   - Planner Fixture J, Task completion, and local-Docker Phase B still posted Task `tags`; Goal/Task AI workflow mocks still returned AI draft `tags`.
+   - Repair changed only acceptance fixtures to the current contract: Task create uses `labelIds`; AI draft mocks use `labels`. The production Task/AI schemas stayed strict and were not relaxed.
+2. **Fresh-workspace Vitest resolution missed the new physical Scheduler package.**
+   - Cached local `dist` output had hidden the missing `@memoflow/scheduler` source alias.
+   - Repair added Scheduler to the shared Vitest workspace source aliases. With `packages/scheduler/dist` removed, API compose-schedule and Schedule Orchestration source-resolution checks passed from source.
+3. **Parser ownership and database integration fixtures still encoded pre-CLEAN-6304 / pre-binding-v2 assumptions.**
+   - Utils/Data-portability keep-boundary tests now read Scheduler-owned worker parsers, not Schedule-owned Calendar routes.
+   - Label integration no longer seeds retired Task `tags`; Task binding integration now seeds real identity-owned Goal/KR rows and validates identity isolation through the current composite binding constraints.
+4. **Schedule coverage governance still referenced an empty migrated use-case slice.**
+   - `packages/schedule/src/server/application/use-cases` no longer exists after the physical split, so its old coverage config could only fail with `No test files found`.
+   - Repair removed the empty Schedule use-case coverage config, kept Schedule main + mapper coverage, retained Scheduler main + use-case + mapper coverage, and synchronized the Nx generator, target-governance checker, reporting self-test, and generated test inventory.
+
+Focused re-acceptance after these repairs:
+
+- Planner Fixture J full drag -> owner `409` -> UI rollback browser journey: **PASS**;
+- Web Flow Shard 2, including Goal/Task AI approval + task completion: **23/23 PASS**;
+- real PostgreSQL: Task binding **2/2**, Label **3/3**, Notification -> Scheduler -> Fact **3/3**, Schedule concurrency **18/18**, Schedule Orchestration **34/34**;
+- coverage targets for Schedule / Scheduler / Data-portability / API: **PASS**;
+- current-revision local-Docker Phase B with image provenance gate: **1/1 PASS**;
+- affected typecheck for API / Schedule / Scheduler / Task / Label / Data-portability / Utils / Web plus dependencies: **PASS**;
+- Test System V2 self-test **18/18**, target governance **PASS**, Nx sync **clean**, inventory **1185 files**, `git diff --check` **PASS**;
+- full `memoflow:governance-check`: **PASS**, including HARD-7101 **22/22** and Core vNext architecture lock **1769 production files / 0 violations**.
+
+Focused delivery-repair commit: `e314e6da344 test(ci): repair core vnext fresh-workspace gates`.
 
 ## Final pre-delivery verdict
 

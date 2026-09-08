@@ -2368,11 +2368,14 @@ P0/P1 findings create focused repair passes before plan archive.
 - the HARD-7104 feature-map public-surface drift exposed by the first final regression was repaired without weakening the existing contract tests;
 - final fresh behavior matrix passed Contracts, Label, Goal, Task, Reminder, Notification, Schedule, Scheduler, AI, App Vue, API and Desktop; notable totals include Goal 440/440, Task 717/717, Scheduler 273/273, App Vue 774/774, API 329/329 and Desktop 322/322;
 - final lint/typecheck/build, Test System V2 inventory (1185 files), target governance, HARD-7101 (22/22), architecture lock (1769 production files / 0 violations) and full `memoflow:governance-check` all passed;
-- obsolete PR #337 was closed as superseded after patch-level review; its intermediate Mobile raw ScheduleTask mutation design must not be reintroduced.
+- obsolete PR #337 was closed as superseded after patch-level review; its intermediate Mobile raw ScheduleTask mutation design must not be reintroduced;
+- PR #338 first independent CI correctly rejected stale acceptance/fresh-workspace truth: old Task/AI `tags` fixtures, missing Scheduler source alias, pre-split parser/binding integration assumptions, and a migrated-away Schedule use-case coverage slice;
+- focused delivery repair `e314e6da344` kept production contracts strict, aligned fixtures with Shared Label / binding-v2, made fresh-workspace Scheduler resolution explicit, and moved coverage truth to Schedule Calendar/Planner + Scheduler Temporal Engine ownership;
+- post-repair re-acceptance passed Web Shard 2 23/23, focused Planner rollback, real PostgreSQL binding/Label/Notification/Schedule checks, four affected coverage targets, exact-revision local-Docker Phase B, affected typecheck, Test System V2 18/18, sync/inventory/target-governance and full governance.
 
 Canonical evidence: `docs/analysis/2026-09-08-hard-7105-final-review-evidence.md`.
 
-**Review verdict: ACCEPTED — no unresolved P0/P1.** The plan intentionally remains active until the exact accepted candidate passes GitHub PR CI and merges into `main`; archive occurs from merged `main`, not before delivery.
+**Review verdict: ACCEPTED — no unresolved P0/P1. Delivery repair is locally re-accepted.** The plan intentionally remains active until PR #338 passes a new exact-head GitHub CI run and merges into `main`; archive occurs from merged `main`, not before delivery.
 
 ---
 
@@ -2643,7 +2646,7 @@ C. Final closure
    HARD-7102              DONE — architecture locks / anti-resurrection
    HARD-7103              DONE — A-J + host + local-Docker + schema acceptance
    HARD-7104              DONE — ADR/docs/reuse/plan truth closure
-   HARD-7105              REVIEW PASS — no unresolved P0/P1; PR CI + merge + archive are the only remaining delivery gates
+   HARD-7105              REVIEW PASS + CI REPAIR PASS — no unresolved P0/P1; PR #338 rerun + merge + archive remain
 ```
 
-HARD-7105 implementation/review is accepted. Keep the final DoD checkbox open until the exact accepted candidate passes GitHub PR CI and merges into `main`; then archive this umbrella plan from merged `main`.
+HARD-7105 implementation/review and the first CI focused repair are accepted. Keep the final DoD checkbox open until PR #338 passes CI on the repaired exact head and merges into `main`; then archive this umbrella plan from merged `main`.
