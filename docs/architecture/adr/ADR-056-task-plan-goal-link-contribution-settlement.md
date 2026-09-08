@@ -9,15 +9,19 @@ tags:
   - contribution
 description: Task Goal Link 与可选 Contribution 解耦，并把整计划完成后贡献建模为 PlanCompletion settlement
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-08-25T15:03:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-056: Task Plan → Goal Link / Contribution / Settlement
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施
 **日期：** 2026-08-25  
 **影响范围：** Task domain、Goal domain、contracts、database、outbox、Task UI、Goal activity、AI workflow  
 **关联：** ADR-038、ADR-053、ADR-055、ADR-057
+
+## 2026-09-08 实现状态
+
+Task Goal binding 已分成语义 Link 与可选 Contribution。link-only Task 不产生进度；自动 contribution 使用当前 `EachCompletion` / `PlanCompletion` settlement，持久 source correlation 保证重放幂等并支持撤销。数据库约束已升级为 `memoflow.task-goal-binding/v2`。
 
 ## 1. 背景
 

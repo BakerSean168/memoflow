@@ -5,7 +5,7 @@ tags:
   - ai
 description: AI 模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-08-22T00:00:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # AI 模块文件索引
@@ -47,6 +47,10 @@ AI-VNEXT-07 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScr
 | [`packages/ai/src/server/mastra/workflows/apply-goal-plan.service.ts`](../../../packages/ai/src/server/mastra/workflows/apply-goal-plan.service.ts) | deterministic Goal mutation boundary |
 | [`packages/ai/src/server/mastra/workflows/apply-task-plan.service.ts`](../../../packages/ai/src/server/mastra/workflows/apply-task-plan.service.ts) | deterministic Task mutation boundary |
 | [`packages/ai/src/server/mastra/workflows/apply-knowledge-note.service.ts`](../../../packages/ai/src/server/mastra/workflows/apply-knowledge-note.service.ts) | deterministic Knowledge mutation boundary |
+| [`packages/ai/src/server/mastra/tools/product-tools.ts`](../../../packages/ai/src/server/mastra/tools/product-tools.ts) | AI-6102/6103 Routine commands + Planner/Notification read-only tools |
+| [`packages/ai/src/server/application/ports/routine-command.port.ts`](../../../packages/ai/src/server/application/ports/routine-command.port.ts) | AI-owned Routine command abstraction |
+| [`packages/ai/src/server/application/ports/planner-read.port.ts`](../../../packages/ai/src/server/application/ports/planner-read.port.ts) | AI-owned read-only Planner projection |
+| [`packages/ai/src/server/application/ports/notification-read.port.ts`](../../../packages/ai/src/server/application/ports/notification-read.port.ts) | AI-owned Notification Fact reader |
 
 ## Transport 与宿主组合
 
@@ -60,6 +64,10 @@ AI-VNEXT-07 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScr
 | [`packages/ai/src/server/infrastructure/ai.module.ts`](../../../packages/ai/src/server/infrastructure/ai.module.ts) | AI module composition root |
 | [`apps/api/src/runtime/compose-ai.ts`](../../../apps/api/src/runtime/compose-ai.ts) | API host Mastra composition |
 | [`apps/desktop/src/main/runtime/compose-ai.ts`](../../../apps/desktop/src/main/runtime/compose-ai.ts) | Desktop host Mastra composition |
+| [`apps/api/src/modules/ai/routine-command.adapter.ts`](../../../apps/api/src/modules/ai/routine-command.adapter.ts) | API host AI → Routine owner-command adapter |
+| [`apps/api/src/modules/ai/planner-read.adapter.ts`](../../../apps/api/src/modules/ai/planner-read.adapter.ts) | API host read-only Planner/Task projection |
+| [`apps/api/src/modules/ai/notification-read.adapter.ts`](../../../apps/api/src/modules/ai/notification-read.adapter.ts) | API host Notification Fact projection |
+| [`apps/desktop/src/main/modules/ai/routine-command.adapter.ts`](../../../apps/desktop/src/main/modules/ai/routine-command.adapter.ts) | Desktop AI → Routine owner-command adapter |
 | [`packages/ai/src/server/infrastructure/adapters/openai-compatible-chat-execution.adapter.ts`](../../../packages/ai/src/server/infrastructure/adapters/openai-compatible-chat-execution.adapter.ts) | OpenAI-compatible BYOK execution adapter |
 | [`packages/ai/src/server/infrastructure/adapters/openai-compatible-knowledge-query.adapter.ts`](../../../packages/ai/src/server/infrastructure/adapters/openai-compatible-knowledge-query.adapter.ts) | Knowledge query provider adapter |
 | [`packages/ai/src/server/infrastructure/adapters/openai-compatible-analytics-query.adapter.ts`](../../../packages/ai/src/server/infrastructure/adapters/openai-compatible-analytics-query.adapter.ts) | Analytics query provider adapter |
@@ -81,4 +89,4 @@ AI-VNEXT-07 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScr
 - Mastra 是唯一核心 Agent/Workflow runtime；不得重新引入 Python/LangGraph/AgentHost 双 runtime。
 - `identityId` 只来自宿主认证 `ExecutionContext`，客户端不得提交。
 - Provider credential 不进入客户端、prompt、event、snapshot 或 trace payload。
-- Goal/Task/Knowledge mutation 必须经过 canonical application/mutation port，Agent/Workflow 不直写业务 persistence。
+- Goal/Task/Knowledge/Routine mutation 必须经过 owner application/command port；Planner/Notification tools 只读；AI tool/adapter 禁止 import 或 mutation raw Scheduler worker state。

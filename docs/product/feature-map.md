@@ -2,35 +2,30 @@
 tags:
   - product
   - feature-map
-description: 当前核心功能地图
+description: MemoFlow 当前核心功能与 vNext 产品边界地图
 created: 2026-06-02T00:00:00
-updated: 2026-08-03T12:00:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # 功能地图
 
-本页用于建立当前系统的全局功能视角。状态只表达文档盘点状态，不等同于代码质量或业务优先级。
+本页只描述当前生产代码的产品边界；历史方案、已退休能力与迁移理由放在 ADR / analysis 文档中。
 
-## 模块列表
+| 模块 | 当前核心能力 | 当前状态 | 主要入口 | 关键边界 |
+| --- | --- | --- | --- | --- |
+| Goal | Direction + KR Measurement V2、Record、Review、Shared Label、AI Goal draft | Core vNext 已落地 | `packages/goal`、`packages/app-vue/src/modules/goal`、`packages/app-react` | 无 GoalFolder/category/string tags/Focus/Comparison；`archivedAt` 与业务状态分离 |
+| Task | Plan + Occurrence、Today/Upcoming/Plans、Missed/Skipped、recurrence、Shared Label、Goal Link/optional contribution | Core vNext 已落地 | `packages/task`、`packages/app-vue/src/modules/task`、`packages/app-react` | 无 TaskFolder/Dependency/DAG/CriticalPath；Overdue 为派生事实；无 raw Scheduler mutation |
+| Routine / Reminder | RoutineDefinition、ProfileMembership、WallClock/ActiveUsage/Protocol、Temporary Override、Occurrence、Method Library | Core vNext 已落地 | `packages/reminder`、`packages/app-vue/src/modules/reminder` | ReminderTemplate 是迁移兼容写入入口；无 ControlMode/独立 cron scanner；Scheduler 仅负责 durable wake-up |
+| Planner / Calendar | CalendarEntry、Day/Week/Month Planner、冲突检测、drag/resize owner commands | Core vNext 已落地 | `packages/schedule`、`packages/app-vue/src/modules/schedule` | `@memoflow/schedule` 是产品 Planner；不拥有 worker job |
+| Scheduler / Temporal Engine | ScheduledIntent reconcile、ScheduleTask/Execution、lease、queue、retry/backoff、handler registry、只读 diagnostics | Core vNext 已落地 | `packages/scheduler` | 后台基础设施；产品 UI/AI 不直接写 raw ScheduleTask |
+| Notification | NotificationRequested、Fact、DeliveryPolicy/Plan、per-channel attempt/receipt、DND/rate limit、Notification Center | Core vNext 已落地 | `packages/notification`、`packages/app-vue/src/modules/notification`、`packages/app-react` | Fact 与 delivery state 分离；业务 producer 不直接 dispatch channel |
+| AI | Mastra Assistant、Goal/Task/Knowledge durable workflows、Routine approved commands、Planner/Notification read tools、BYOK、usage/eval | Mastra-native vNext 已落地 | `packages/ai`、API/Desktop `compose-ai` | mutation 必须走 owner port；Planner/Notification 只读；禁止 Scheduler raw access |
+| Repository | Vault/GitHub knowledge、Git sync、搜索/反链、Knowledge AI ports | 主线已落地 | `packages/repository`、Repository workspace | Repository 是知识事实 owner；AI 通过 read/mutation port 访问 |
+| Dashboard | 统一读模型、统计/趋势、小组件 | 已落地 | `packages/dashboard`、Dashboard UI | 只消费 owner-domain projection，不成为第二份业务真值 |
+| Account / Auth / Profile | Better Auth 云端身份、Desktop local Profile、guest/unlock、cloud adoption/offline recovery | 单轨已落地 | `packages/cloud-auth`、`apps/desktop/src/main/profile` | 云端身份与本地 Profile 分离 |
+| Settings | 外观、语言、AI Provider、通知、隐私、数据可移植性 | 已落地 | `packages/setting`、Settings UI | Provider secret 只存在 host-side secure storage |
+| Governance | 架构、surface、failure contract、test inventory、CI 规则 | 持续执行 | `tools/governance`、`tools/test-system-v2` | HARD-7102 anti-resurrection locks 阻止旧架构复活 |
 
-| 模块           | 功能点                                                                    | 业务目标                                    | 当前状态                  | 相关代码入口                                                                                                             | 备注                                                                                                                                                                |
-| -------------- | ------------------------------------------------------------------------- | ------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 目标模块       | 目标管理、关键结果、目标记录、目标复盘、专注模式、多目标对比、AI 创建目标 | 帮助用户制定、执行、追踪和复盘目标          | 样板已盘点                | `packages/goal`、`packages/app-vue/src/modules/goal`、`apps/mobile/src/app/goals`                                        | 见 [目标模块说明](./modules/goal.md) 和 [文件索引](./module-index/goal-files.md)                                                                                    |
-| 任务模块       | 任务模板、任务实例、任务依赖、任务与目标绑定、DAG 与关键路径              | 承接用户日常行动和目标拆解                  | 已盘点                    | `packages/task`、`packages/app-vue/src/modules/task`、`apps/mobile/src/app/tasks`                                        | 见 [任务模块说明](./modules/task.md) 和 [文件索引](./module-index/task-files.md)                                                                                    |
-| 日程模块       | 日程任务、周视图、日历视图、冲突检测、调度执行                            | 把任务、目标和提醒落到时间安排              | 已盘点                    | `packages/schedule`、`packages/app-vue/src/modules/schedule`、`apps/mobile/src/app/schedule`                             | 见 [日程模块说明](./modules/schedule.md) 和 [文件索引](./module-index/schedule-files.md)                                                                            |
-| 提醒模块       | 提醒模板、提醒分组、提醒偏好、触发记录、频率调整                          | 帮助用户按配置收到行动提醒                  | 已盘点                    | `packages/reminder`、`packages/app-vue/src/modules/reminder`                                                             | 见 [提醒模块说明](./modules/reminder.md) 和 [文件索引](./module-index/reminder-files.md)                                                                            |
-| 通知模块       | 通知中心、通知偏好、通知模板、桌面通知、SSE 实时推送                      | 统一承载系统通知和用户提醒触达              | 已盘点                    | `packages/notification`、`packages/app-vue/src/modules/notification`                                                     | 见 [通知模块说明](./modules/notification.md) 和 [文件索引](./module-index/notification-files.md)                                                                    |
-| Dashboard 模块 | 仪表盘投影、统计卡片、趋势图、小组件、配置持久化                          | 汇总用户当前状态和关键行动入口              | 已盘点                    | `packages/dashboard`、`packages/app-vue/src/modules/dashboard`                                                           | 见 [Dashboard 模块说明](./modules/dashboard.md) 和 [文件索引](./module-index/dashboard-files.md)                                                                    |
-| 资源库模块     | 本地 Vault、GitHub private repo、Git 同步、Web 快捷创建、搜索与反链       | 连接 Obsidian/GitHub 知识资产与 Memory Flow | 主线已落地；阶段 6 收口与外部验收中      | `packages/repository`、`packages/app-vue/src/modules/repository`                                                         | 见 [ADR-034](../architecture/adr/ADR-034-obsidian-vault-repository.md)、[资源库模块说明](./modules/repository.md) 和 [文件索引](./module-index/repository-files.md) |
-| 编辑器模块     | 安全 Markdown 预览、路径确认、AI 引用、Obsidian 外部打开                  | 提供跨端知识呈现和新笔记确认                | 运行时包已退役；职责落在 repository 工作区 | `packages/app-vue/src/modules/repository`、`packages/app-vue/src/shared/utils/safe-markdown.ts`、`packages/repository`   | 见 [编辑器模块说明](./modules/editor.md) 和 [文件索引](./module-index/editor-files.md)                                                                              |
-| AI 模块        | AI Chat、Goal/Task/Knowledge durable workflow、模型选择、usage/eval | 用 AI 辅助用户整理上下文并生成结构化行动 | Mastra-native vNext 已落地 | `packages/ai`、`packages/app-vue/src/modules/ai`、`apps/api/src/runtime/compose-ai.ts`、`apps/desktop/src/main/runtime/compose-ai.ts` | 见 [AI 模块说明](./modules/ai.md) 和 [文件索引](./module-index/ai-files.md)；Mastra 是唯一 Assistant/Workflow runtime，业务 mutation 仍由 Goal/Task/Repository application port 承担。 |
-| 账户模块       | 账户中心、用户资料、账户管理、Profile 编辑                                | 管理用户业务资料                            | 已盘点                    | `packages/account`、`packages/app-vue/src/modules/account`                                                               | 见 [账户模块说明](./modules/account.md) 和 [文件索引](./module-index/account-files.md)                                                                              |
-| 云端认证与本地 Profile | Better Auth 账密/GitHub、Desktop guest/Profile unlock、云端连接与离线恢复 | 云端身份与本地数据访问彻底分离；云端失效只暂停同步 | 单轨重写与全链路验证已完成 | `packages/cloud-auth`、`apps/desktop/src/main/profile`、`packages/app-vue/src/modules/authentication`、`apps/web/src/auth` | 见 [认证模块说明](./modules/authentication.md) 和 [文件索引](./module-index/authentication-files.md)；GitHub 登录与知识仓库 App 授权保持分离 |
-| 设置模块       | 外观、语言、AI、隐私、快捷键、通知、实验功能                              | 管理用户偏好配置                            | 已盘点                    | `packages/setting`、`packages/app-vue/src/modules/setting`                                                               | 见 [设置模块说明](./modules/setting.md) 和 [文件索引](./module-index/setting-files.md)                                                                              |
-| 治理模块       | 规则管理、状态流转、修订历史、代码示例、搜索                              | 管理产品内治理规则                          | 已盘点                    | `packages/governance`、`packages/app-vue/src/modules/governance`                                                         | 见 [治理模块说明](./modules/governance.md) 和 [文件索引](./module-index/governance-files.md)                                                                        |
+## 当前 Core vNext closure
 
-## 当前重点优化前置资产
-
-1. 目标模块：已经建立样板底图。
-2. 任务模块：已完成盘点，承接目标拆解和日常执行。
-3. 日程模块：已完成盘点，处理跨模块调度和时间安排。
+Wave 0–5 与 CLEAN-6301~6304、POC-6401、ROUTINE-5302、AI-6101~6103、MOBILE-6201/6202、HARD-7101~7103 已完成。当前 active plan 只剩 HARD-7104 文档真值闭环与 HARD-7105 最终审查/归档。

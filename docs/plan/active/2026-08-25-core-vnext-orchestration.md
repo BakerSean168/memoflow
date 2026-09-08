@@ -75,14 +75,15 @@ Verified complete in current `main`:
 - FullCalendar Planner, owner-aware edits, Web/Desktop Goal/Task/Routine/Notification product surfaces, InterventionWindow and FocusWindow;
 - v0.11 milestone fixture/parity/governance evidence and current-main required CI.
 
-Still real residuals (code search verified):
+Post-v0.11 residual truth — 2026-09-08:
 
-- `ROUTINE-5302`: no Routine method-library/catalog implementation exists;
-- `AI-6101~6103`: Goal/Task draft workflows exist, but `TaskPlanTaskSchema` still exposes retired `folderId`; Routine draft/command tooling and Planner/Notification AI read tooling are absent;
-- `MOBILE-6201/6202`: React/mobile already has current-contract Goal/Task/Notification screens and no Folder/Dependency/ValueType UI was found. Treat these as **parity-audit tickets first**, not a mandate to rebuild mobile; only implement gaps proven by the audit;
-- `CLEAN-6301~6304`: semantic and physical convergence is complete. By 2026-09-07, owner-domain direct `ScheduleTask.create(...)` construction, the `SourceModule` execution fallback, ordinary product raw-ScheduleTask mutation surfaces, and the final Reminder duplicate/obsolete product surfaces are removed; `packages/schedule` now owns Planner/Calendar while new `packages/scheduler` owns the Temporal Engine, lease, queue, worker repositories and read-only diagnostics;
-- `POC-6401`: complete on 2026-09-07 with `Keep custom`; pg-boss 12.30.0 remains a reproducible dev-only cloud candidate and is not production infrastructure;
-- `HARD-7101~7103`: complete on 2026-09-07 with a governed 22/22 executable failure matrix, production architecture locks, and full A-J/host/local-Docker/schema acceptance evidence; `HARD-7104~7105` remain for documentation truth closure and final review.
+- `ROUTINE-5302`: **DONE** — six-method curated Method Library is implemented; WallClock presets reuse existing Routine configuration and Protocol methods remain deterministic ProtocolSession-owned (`e3e5ae29aef`);
+- `AI-6101`: **DONE** — Goal/Task drafts use current Shared Label / Measurement / recurrence / Goal Link / optional contribution semantics; retired Task `folderId/tags/color` are absent (`4a7b8f154e8`);
+- `AI-6102/6103`: **DONE** — approved Routine command tools plus read-only Planner/Notification tools are wired in both API/Desktop; governance forbids raw Scheduler access (`2abcbd5591eb`);
+- `MOBILE-6201/6202`: **DONE by parity audit + focused repair** — React/mobile consumes current Goal/Task/Notification contracts, Task Shared Label editing is wired, and no Folder/Dependency/ValueType/raw Scheduler mutation surface remains;
+- `CLEAN-6301~6304`: **DONE** — owner-domain direct `ScheduleTask.create(...)`, `SourceModule` execution fallback, raw product worker mutation surfaces, Reminder scanner/ControlMode and obsolete product duplicates are removed; `packages/schedule` owns Planner/Calendar while `packages/scheduler` owns the Temporal Engine;
+- `POC-6401`: **DONE / Keep custom** — pg-boss 12.30.0 remains a reproducible dev-only candidate, not production infrastructure;
+- `HARD-7101~7104`: **DONE** — 22/22 failure matrix, production architecture locks, full A-J/host/local-Docker/schema acceptance and documentation/ADR truth closure are complete. `HARD-7105` is the only remaining umbrella ticket.
 
 Execution priority is redefined in §20 below; historical Wave 0/1 text remains evidence only.
 
@@ -1900,6 +1901,8 @@ source/reference note
 
 Do not add dozens of health methods before the execution model is proven.
 
+**Implementation — COMPLETE (2026-09-08):** `@memoflow/reminder/method-library` ships the six records above with runtime requirement, editable/recommended parameters, intervention default and source note. WallClock methods prefill the existing Routine configuration center; 50/10 and Pomodoro remain ProtocolSession-owned. Commit: `e3e5ae29aef`.
+
 ## NOTIF-5401 — Notification Center refresh
 
 **Depends:** NOTIF-2401/3301
@@ -1969,6 +1972,8 @@ optional contribution
 
 AI is not allowed to invent unsupported auto-settlement types.
 
+**Implementation — COMPLETE (2026-09-08):** Shared Label is now the single Goal/Task classification path. AI drafts propose Label names, host LabelService resolves/creates canonical identity-scoped Labels, then Goal/Task owner mutation receives real IDs. Task draft no longer exposes retired folder/tag/color fields. Commit: `4a7b8f154e8`.
+
 ## AI-6102 — Routine AI command/draft tools
 
 **Depends:** Routine contracts/runtime.
@@ -1985,6 +1990,8 @@ pause/resume/end session
 
 Persistent config changes require product-defined confirmation; timer truth stays deterministic.
 
+**Implementation — COMPLETE (2026-09-08):** Mastra tools cover Routine create, Profile gate activation/deactivation, temporary override, Protocol start/pause/resume/end. Persistent configuration/new-session tools require approval; commands terminate at a Reminder-owned `RoutineCoachCommandPort`. PowerSync temporary-override parity prevents API/Desktop divergence. Commit: `2abcbd5591eb`.
+
 ## AI-6103 — Planner/Notification AI read tools
 
 Read-only first:
@@ -1995,6 +2002,8 @@ Read-only first:
 
 Do not give model direct ScheduledInvocation mutation tools.
 
+**Implementation — COMPLETE (2026-09-08):** `planner_today_summary`, `planner_conflicts`, `planner_upcoming_tasks`, and `notification_unread_summary` read owner-domain Calendar/Task/Notification Fact projections only. HARD-7102 now fails if AI tools/adapters import `@memoflow/scheduler` or touch raw ScheduleTask/ScheduledInvocation mutation APIs. Commit: `2abcbd5591eb`.
+
 ## MOBILE-6201 — React/Mobile Goal/Task parity
 
 **Depends:** Goal/Task web contracts stable.
@@ -2003,11 +2012,15 @@ Reuse same public contracts, not Vue component implementation.
 
 Delete old Folder/Dependency/ValueType UI from mobile.
 
+**Acceptance — COMPLETE (2026-09-08):** production-source parity audit found no GoalFolder/TaskFolder/Dependency/DAG/ValueType/raw Scheduler mutation surface. Task React/Mobile editor/list/detail now load, create/select and persist Shared Labels through the same public contract as Web/Desktop.
+
 ## MOBILE-6202 — Mobile Notification parity
 
 Notification Fact/preferences share contract; device channel adapter may differ.
 
 Routine ActiveUsage desktop-only capabilities must expose capability state rather than fake support on mobile.
+
+**Acceptance — COMPLETE (2026-09-08):** React/Mobile Notification list/detail/preferences consume Notification Fact contracts; no Desktop-only ActiveUsage/Protocol implementation is faked in the mobile product surface.
 
 ## CLEAN-6301 — Retire legacy Goal/Task surfaces
 
@@ -2310,7 +2323,7 @@ Canonical evidence: `docs/analysis/2026-09-07-hard-7103-full-product-acceptance-
 
 `HARD-7103` is complete. Final closure advances to `HARD-7104`.
 
-## HARD-7104 — Documentation / ADR closure
+## HARD-7104 — Documentation / ADR closure — COMPLETE (2026-09-08)
 
 Update:
 
@@ -2323,6 +2336,18 @@ Update:
 - migration notes;
 - reuse ledger final decisions;
 - actual validation evidence.
+
+**Implementation evidence — HARD-7104 (2026-09-08):**
+
+- ADR-003 is explicitly historical for implementation details; ADR-053~064 now report their real implemented/ongoing-policy status;
+- Goal/Task/Routine/Notification/AI module docs, module indexes, feature map and Routine vNext checkpoint describe current production boundaries rather than migration-era surfaces;
+- reuse ledger records final Emittery/rrule/FullCalendar/pg-boss decisions; pg-boss remains `Keep custom` / dev-only candidate;
+- post-v0.11 Product parity is closed: ROUTINE-5302, AI-6101~6103 and MOBILE-6201/6202 all have implementation/acceptance evidence;
+- final pre-doc quality sequence passed lint, typecheck, build, inventory, target-governance and full `memoflow:governance-check`; HARD-7101 remains 22/22 and architecture lock scans 1769 production files with zero violations.
+
+Canonical evidence: `docs/analysis/2026-09-08-hard-7104-documentation-truth-closure.md`.
+
+`HARD-7104` is complete. Final closure advances to `HARD-7105`.
 
 ## HARD-7105 — Final batch review and focused repair
 
@@ -2573,7 +2598,7 @@ Core vNext can close only when all of the following hold:
 - [x] Planner edits route to owner domains;
 - [x] Goal/Task/Routine/Notification primary Web/Desktop vNext UI implemented;
 - [x] Routine InterventionWindow and FocusWindow validated;
-- [ ] Mobile/AI contracts have no retired fields and parity gaps — AI Task draft still exposes retired `folderId`; Mobile appears largely migrated but still requires explicit parity acceptance.
+- [x] Mobile/AI contracts have no retired fields and parity gaps — AI-6101~6103 and MOBILE-6201/6202 are complete; Shared Label is single-track and AI has no raw Scheduler capability.
 
 ## Reuse discipline
 
@@ -2588,33 +2613,24 @@ Core vNext can close only when all of the following hold:
 - [x] final cross-domain failure matrix passes — governed manifest/checker + full executable runner passed 22/22 scenarios;
 - [x] API/Desktop/PowerSync/Prisma parity passes for the completed primary product scope;
 - [x] full governance/docs checks green for the completed milestone and current main;
-- [x] residual grep proves completed CLEAN convergence paths are single-track — raw ScheduleTask product mutations and the SourceModule execution fallback are gone; CLEAN-6301 Goal/Task legacy surfaces are gone; CLEAN-6302A-D retired ControlMode/scanner, single-group ownership, duplicate Smart Frequency state, overloaded Snooze `responseTime`, broken per-user transports, one-way template actions, legacy group batch, and stale Reminder public/mock surfaces. The separately documented AI Task-draft `folderId` parity residual remains owned by AI-6101 rather than this convergence lane;
+- [x] residual grep proves completed convergence paths are single-track — raw ScheduleTask product mutations, SourceModule execution fallback, Goal/Task legacy surfaces, Reminder ControlMode/scanner/duplicate state, Task string tags/color and AI raw Scheduler access are gone;
 - [ ] final residual batch review has no P0/P1 unresolved finding.
 
 ---
 
 # 20. Immediate next implementation batch
 
-Do **not** restart Wave 0–5 or rewrite completed Goal/Task pages. The current executable residual queue is:
+Do **not** restart Wave 0–5, Product parity, CLEAN convergence, or dependency PoCs. All of those lanes are closed. The only executable residual is:
 
 ```text
-A. Product parity (independent lanes)
-   ROUTINE-5302       Routine method library/catalog (product enhancement; implement if Routine presets remain desired)
-   AI-6101            remove retired Task draft fields and finish Goal/Task vNext draft alignment
-   AI-6102/6103       add Routine command/draft tools + Planner/Notification read tools if AI assistant scope remains desired
-   MOBILE-6201/6202   parity audit first; current screens already use modern Goal/Task/Notification contracts, implement only proven gaps
-
-B. Scheduling convergence
-   CLEAN-6304         DONE — Planner/Calendar and Temporal Engine are physically split
-        ↓
-   POC-6401           DONE — Keep custom for current vNext; retain pg-boss as a dev-only cloud candidate PoC
-
+A. Product parity          DONE — ROUTINE-5302, AI-6101~6103, MOBILE-6201/6202
+B. Scheduling convergence DONE — CLEAN-6301~6304; POC-6401 = Keep custom
 C. Final closure
-   HARD-7101          DONE — governed 22/22 executable cross-domain failure matrix
-   HARD-7102          DONE — production architecture locks + residual deletion gate
-   HARD-7103          DONE — A-J fixtures + API/Desktop/Web/local-Docker/schema acceptance
-   HARD-7104          NEXT — ADR/docs truth closure
-   HARD-7105          final review / focused repair / archive
+   HARD-7101              DONE — 22/22 executable failure matrix
+   HARD-7102              DONE — architecture locks / anti-resurrection
+   HARD-7103              DONE — A-J + host + local-Docker + schema acceptance
+   HARD-7104              DONE — ADR/docs/reuse/plan truth closure
+   HARD-7105              NEXT — five-layer final review, focused repair, delivery reconciliation, archive
 ```
 
-Recommended ordering: finish **A** only for product surfaces that still matter to MemoFlow's roadmap; B is now closed with `Keep custom`; run **C** once no deferred product ticket remains. pg-boss remains a reproducible candidate, not production infrastructure.
+HARD-7105 must not mark the plan complete until any P0/P1 finding is repaired and independently rechecked, the loose delivery/PR state is reconciled, and the final accepted revision has a clean governed workspace.

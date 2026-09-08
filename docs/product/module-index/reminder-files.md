@@ -5,7 +5,7 @@ tags:
   - reminder
 description: 提醒模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-09-07T00:00:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # 提醒模块文件索引
@@ -82,6 +82,10 @@ updated: 2026-09-07T00:00:00
 | [`packages/reminder/src/server/infrastructure/adapters/prisma/reminder-template-prisma.repository.ts`](../../../packages/reminder/src/server/infrastructure/adapters/prisma/reminder-template-prisma.repository.ts) | Prisma 模板仓储 |
 | [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.prisma.ts) | Prisma Routine/Profile/M:N Membership store |
 | [`packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.ts`](../../../packages/reminder/src/server/infrastructure/routine-vnext/routine-profile-store.powersync.ts) | PowerSync Routine/Profile/M:N Membership store |
+| [`packages/reminder/src/server/application/services/routine-coach-command.service.ts`](../../../packages/reminder/src/server/application/services/routine-coach-command.service.ts) | Routine Profile / Temporary Override / Protocol owner-domain command seam |
+| [`packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.prisma.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.prisma.ts) | Prisma temporary override store |
+| [`packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.ts`](../../../packages/reminder/src/server/infrastructure/routine-schedule/routine-temporary-override-store.powersync.ts) | PowerSync temporary override parity store |
+| [`packages/reminder/src/method-library/index.ts`](../../../packages/reminder/src/method-library/index.ts) | ROUTINE-5302 six-method curated catalog |
 
 ## Contracts 与数据结构
 
@@ -118,7 +122,7 @@ updated: 2026-09-07T00:00:00
 
 ## 需要重点关注的改动风险
 
-- 提醒有效启用状态的三层控制逻辑（模板、分组、全局偏好）。
-- 提醒与 Schedule 模块的跨模块依赖：提醒事件变更会影响调度侧。
-- 智能频率调整依赖历史响应数据的准确性。
+- Profile 只作为 Gate；不得恢复 ControlMode 或父级接管成员状态。
+- WallClock/temporary override 变更通过 owner-domain projection + SchedulingPort reconcile；不得恢复独立 scanner 或 raw Scheduler mutation。
+- WallClock / ActiveUsage / Protocol 三类 runtime 的能力边界与跨端 parity。
 - HTTP、IPC、Prisma、PowerSync 多运行时适配器的一致性。

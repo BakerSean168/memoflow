@@ -8,15 +8,19 @@ tags:
   - simplification
 description: MemoFlow 个人 Goal/Task 产品边界、信息架构与过度项目管理能力退役决策
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-08-25T14:28:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-053: Goal / Task 个人产品边界与信息架构收敛
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施
 **日期：** 2026-08-25  
 **影响范围：** Goal、Task、contracts、database、app-vue、app-react、AI goal/task workflow、product docs  
 **关联：** ADR-038、ADR-052、ADR-054、ADR-055、ADR-056
+
+## 2026-09-08 实现状态
+
+Goal 已收敛为 Direction + Measurement，Task 已收敛为 Action + Execution。GoalFolder / TaskFolder、Goal Focus/Comparison、Task Dependency/DAG/CriticalPath、dynamic priority 等过度项目管理 surface 已从生产 contract/domain/UI 清除；Web/Desktop 与 React/Mobile 均使用 vNext public contracts。历史章节中的旧模型仅用于说明迁移动机。
 
 ## 1. 背景
 

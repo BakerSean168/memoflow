@@ -3,115 +3,83 @@ tags:
   - product
   - module
   - ai
-description: AI 模块当前功能、产品边界与 Mastra-native 运行架构
+description: AI 模块当前功能、Mastra durable workflows、Routine tools 与产品读写边界
 created: 2026-06-02T00:00:00
-updated: 2026-08-22T12:50:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # AI 模块说明
 
 ## 1. 功能定位
 
-AI 模块提供统一对话、Goal/Task/Knowledge 结构化工作流、Provider/BYOK 选择、知识检索与评估能力。它负责 AI 推理和 durable workflow 编排，但**不拥有 Goal、Task、Repository 等业务事实**；真实写入必须通过对应业务 application port。
+AI 模块负责自然语言理解、结构化草稿、durable workflow 与受控工具调用；**不拥有 Goal、Task、Routine、Planner、Notification 等业务事实**。真实写入必须终止在 owner-domain application/command port，只读工具必须使用产品 projection/read port。
 
-## 2. 当前产品能力
+## 2. 唯一运行时
 
-- **AI Chat**：Mastra Assistant 流式响应、取消、history/restart recovery、conversation usage/cost。
-- **Goal Create**：clarify → draft/review → revise/reject/approve → `ApplyGoalPlanService` → Goal/Task/Reminder application ports。
-- **Task Create**：durable `task.create` workflow，经用户确认后通过 Task application port 创建真实任务模板。
-- **Knowledge Capture**：durable `knowledge.capture` workflow，生成结构化知识草稿并经产品确认边界写入 Repository/Vault/GitHub 路径。
-- **Knowledge Query / Analytics**：只读能力由 host-owned read ports 提供，模型不能绕过 product boundary 直读数据库。
-- **Provider / Model**：ProviderConfig 加密保存 BYOK credential，Mastra model resolver 在 server-side 解析 provider/model。
-- **Usage / Cost / Trace**：按 conversation/run 持久查询 token、估算成本、requestId/traceId、provider/model。
-- **Evaluation**：TypeScript eval runner 比较 configuration bundle，当前离线 replay 覆盖 open chat、goal planning、knowledge answer，并提供 quality/cost/latency release gate。
-
-## 3. 唯一运行时
-
-当前核心运行时只有：
+当前核心 runtime 是 **TypeScript + Mastra**。Python FastAPI/LangGraph bridge、Agent Host、TurnEngine、ProposalKernel、AgentRun/AgentAction DAG 与 direct-provider/remote-service 双 runtime 已退休。
 
 ```text
-TypeScript packages/ai
-  └─ MastraAIRuntime
-      ├─ Assistant runtime
-      ├─ goal.create workflow
-      ├─ task.create workflow
-      └─ knowledge.capture workflow
+MastraAIRuntime
+├─ Assistant
+├─ goal.create
+├─ task.create
+├─ knowledge.capture
+└─ product tools
 ```
 
-以下旧架构均已退役，不是兼容 fallback：
+## 3. Durable workflows
 
-- Python `apps/ai-service` / FastAPI / LangGraph；
-- `AIService*Adapter` + HMAC runtime bridge；
-- Agent Host / `AssistantFacade` / `ProposalKernel` / `CapabilityResolver` / `TurnEngine`；
-- AgentRun / AgentAction DAG 与 LangGraph checkpoint persistence；
-- direct-provider / remote-ai-service 双 runtime。
+- `goal.create`：clarify / draft / review / revise / approve，草稿使用当前 Shared Label 与 KR Measurement V2；
+- `task.create`：使用当前 recurrence、Shared Label、Goal Link 与 optional contribution contract；
+- `knowledge.capture`：结构化知识草稿，经确认后由 Repository owner port 持久化；
+- workflow apply 使用稳定 entity/request identity，重试不会重复创建业务对象或 Label。
 
-ADR-035 仅保留为历史决策记录；当前目标态由 ADR-050/051/052 取代。
+## 4. Routine command tools（AI-6102）
 
-## 4. 产品工作区
+Assistant 当前可调用：
 
-AI 工作区保持“左对话、右业务工作台”：
+```text
+routine_create
+routine_set_profile_active
+routine_set_temporary_override
+routine_clear_temporary_override
+routine_start_protocol
+routine_pause_protocol
+routine_resume_protocol
+routine_end_protocol
+```
 
-- 左侧聊天只消费 Assistant runtime event/history；
-- 右侧 Goal/Task/Knowledge 面板只投影 `AIWorkflowRunView`；
-- UI 不拥有 workflow engine，不持久化第二套状态机；
-- workflow restore 通过 `get/list` 从 Mastra durable snapshot 重建；
-- usage badge 读取 durable conversation/run 累计 token/cost；
-- 完成后的 deep link 只使用 domain mutation 返回的真实 entity id。
+持久 Routine 配置与新 ProtocolSession 创建要求 Mastra tool approval。Profile 仍只是 Gate；temporary override 不重写长期 trigger；Protocol timer truth 永远由确定性 Routine runtime 持有。
 
-## 5. 写入与审批边界
+## 5. Planner / Notification read tools（AI-6103）
 
-AI 的默认路径是“建议/草稿 → 用户确认 → 业务写入”：
+Assistant 当前只读工具：
 
-1. Planner 生成 typed decision/draft；
-2. 如信息不足，workflow suspend 并请求 clarification；
-3. 用户可 revise / reject / approve；
-4. approve/confirm 后调用 product-owned mutation port；
-5. domain application service 执行业务 invariant、幂等和持久化；
-6. workflow 记录结果并生成 `AIWorkflowRunView`。
+```text
+planner_today_summary
+planner_conflicts
+planner_upcoming_tasks
+notification_unread_summary
+```
 
-Mastra tool/workflow **不得直接 import Prisma/PowerSync repository 做业务 mutation**。
+Planner 工具读取 Calendar/Task owner projection；Notification 工具读取 Notification Fact。AI 不获得 `@memoflow/scheduler` repository、ScheduledInvocation 或 raw ScheduleTask mutation capability。HARD-7102 architecture lock 会阻止这条边界复活。
 
-## 6. Identity / Credential / Error 边界
+## 6. Provider / Knowledge / Evaluation
 
-- HTTP/IPC command body 不接受客户端 `identityId`；Host 从认证上下文注入。
-- Provider API key 不进入 RequestContext、runtime event、execution log、eval report 或 UI。
-- raw provider exception 不跨 transport；使用稳定公开 error code/category。
-- `requestId` / `traceId` 在 HTTP entry 一次生成并透传到 Mastra execution log。
-- usage query 始终以 authenticated identity 作为数据库谓词，不能先查全量再在内存过滤。
+- Provider/BYOK credential 由 host-side secret vault 加密保存；
+- model resolver 在 server-side 选择 provider/model；
+- Knowledge source/index/analytics 通过 host-owned read ports 注入；
+- execution log 保存 usage/cost/requestId/traceId/provider/model；
+- evaluation runner 继续承担 quality/cost/latency gate。
 
-## 7. Persistence ownership
+## 7. 宿主边界
 
-| 数据 | Authority |
-| --- | --- |
-| Assistant thread/history | Mastra storage |
-| Workflow execution/snapshot | Mastra storage |
-| Goal/Task/Reminder | MemoFlow domain stores |
-| Knowledge notes/resources | Repository/Vault/GitHub product stores |
-| Provider config / encrypted credential | MemoFlow AI provider persistence |
-| Usage/cost/trace | `ai_generation_tasks` execution log |
-| Eval latest | `reports/apps/ai/evals` |
+API 与 Desktop 各自在 composition root 注入 Goal/Task/Reminder owner mutation ports、Routine command port、Planner read port、Notification read port、Repository/Knowledge ports 与 LabelService。AI package 不 deep-import Prisma/PowerSync provider 实现，也不创建第二套业务 repository。
 
-旧 `AiMessage` transcript 仅允许一次性 bootstrap 到 Mastra thread；新 Assistant turn 不双写旧 message store。
+## 8. 相关资产
 
-## 8. Web / Desktop parity
-
-- Web：HTTP/SSE clients；API composition 使用 PostgreSQL-backed Mastra storage。
-- Desktop：typed IPC clients；profile-local runtime 使用 LibSQL Mastra storage。
-- 两端共享 Assistant/Workflow/Usage contracts，不暴露 Mastra private snapshot/type。
-
-## 9. 当前持续优化项
-
-- 扩充 live eval executor 与更大风险分层数据集；
-- 完善 Provider pricing catalog/真实账单对账；
-- 继续 harden knowledge indexing、webhook/幂等/删除后向量清理；
-- 在不破坏 product mutation boundary 的前提下增加更多 durable workflow；
-- 对长 conversation/run 的 usage/cost 提供更细粒度产品视图。
-
-## 10. 相关资料
-
-- [AI 运行路径地图](../../architecture/ai-runtime-path-map.md)
-- [ADR-050: Mastra Native AI Runtime](../../architecture/adr/ADR-050-mastra-native-ai-runtime.md)
-- [ADR-051: AI Primitive Taxonomy](../../architecture/adr/ADR-051-ai-primitive-taxonomy.md)
-- [ADR-052: Goal Create Reference Workflow](../../architecture/adr/ADR-052-goal-create-reference-workflow.md)
 - [AI 模块文件索引](../module-index/ai-files.md)
+- [ADR-050 Mastra-native runtime](../../architecture/adr/ADR-050-mastra-native-ai-runtime.md)
+- [ADR-051 AI primitive taxonomy](../../architecture/adr/ADR-051-ai-primitive-taxonomy.md)
+- [ADR-052 Goal create reference workflow](../../architecture/adr/ADR-052-goal-create-reference-workflow.md)
+- [Core vNext HARD-7104 evidence](../../analysis/2026-09-08-hard-7104-documentation-truth-closure.md)

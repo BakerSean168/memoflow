@@ -9,7 +9,7 @@ tags:
   - architecture
 description: 将用户可见的 Schedule/Planner 与内部 Scheduler/Temporal Engine 明确分层，避免 CalendarEntry 与后台执行队列继续共享同一产品语义
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-09-07T15:20:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-060: Schedule / Planner 与 Scheduler / Temporal Engine 分离
@@ -18,6 +18,10 @@ updated: 2026-09-07T15:20:00+08:00
 **日期：** 2026-08-25  
 **影响范围：** schedule、scheduler、schedule-orchestration、patterns、task、goal、reminder、notification、app-vue、app-react、api、desktop、contracts、database
 **关联：** ADR-003、ADR-025、ADR-033、ADR-037、ADR-042、ADR-058、ADR-059、ADR-061~063
+
+## 2026-09-08 实现状态
+
+CLEAN-6304 已完成语义与物理拆分：`@memoflow/schedule` 只拥有 Planner/Calendar 产品能力，`@memoflow/scheduler` 拥有 Temporal Engine/worker persistence/lease/queue/retry 与只读 diagnostics。产品 UI 与 AI 均不得直接 mutation raw ScheduleTask。
 
 ## 1. 背景
 

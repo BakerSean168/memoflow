@@ -9,15 +9,19 @@ tags:
   - idempotency
 description: Reminder/Routine 的 wall-clock 触发统一由 Scheduler 唤醒，Reminder Domain 保留 occurrence/next-trigger 业务真相，退役并行 cron 调度权
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-08-25T17:49:00+08:00
+updated: 2026-09-08T09:00:00+08:00
 ---
 
 # ADR-062: Reminder / Routine 单一调度权与可靠 Occurrence 执行
 
-**状态：** 已采纳（待实施）  
+**状态：** 已采纳并实施
 **日期：** 2026-08-25  
 **影响范围：** reminder、schedule/scheduler、schedule-orchestration、notification、database、apps/api、apps/desktop  
 **关联：** ADR-042、ADR-059、ADR-060、ADR-061、ADR-063
+
+## 2026-09-08 实现状态
+
+Scheduler 已是 Routine/Reminder wall-clock 的唯一 durable wake-up authority；Reminder/Routine domain 保留 trigger/occurrence/next-trigger 真值。旧 ReminderSchedulerService/cron scanner 已删除，scheduled handler + occurrence fencing/idempotency/retry 路径为唯一执行主线。
 
 ## 1. 背景
 
