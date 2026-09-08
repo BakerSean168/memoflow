@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-08T12:14:00+08:00
+updated: 2026-09-08T17:55:00+08:00
 ---
 
 # Active Plans
@@ -15,14 +15,14 @@ updated: 2026-09-08T12:14:00+08:00
 
 当前有 1 个仍在推进中的 active plan。
 
-| 计划 | 当前状态 |
-| --- | --- |
-| [Goal Target Date Semantics](./2026-09-08-goal-target-date-semantics.md) | **ACTIVE / planned** — 将 Goal 的 canonical `dueDate` 恢复为 `targetDate`，包括 domain/contracts/DB/PowerSync/AI/UI/docs，并保持 Task due/overdue 语义不变。 |
+| 计划                                                                         | 当前状态                                                                                                                                                                                                        |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Goal vNext Model Convergence](./2026-09-08-goal-vnext-model-convergence.md) | **ACTIVE / design frozen** — 一次性收敛 Goal identity/lifecycle/Target Timeframe、KR Measurement V3、Task/Knowledge Context、AI GoalPlanDraft V2 与 Linear-style UI；`GOAL-7201` 文档冻结完成，其余实施待开始。 |
 
 ## 本轮已归档（2026-09-08）
 
-| 计划 | 结果 |
-| --- | --- |
+| 计划                                                                                                      | 结果                                                                                                                                                                                                 |
+| --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [MemoFlow Core vNext — Unified Refactor Orchestration](../archive/2026-08-25-core-vnext-orchestration.md) | Goal/Task/Routine/Planner/Scheduler/Notification/EventBus 全面收口；产品 parity、Schedule/Scheduler 物理拆分、HARD-7101~7105 全部完成；PR #338 第四轮 exact-head CI 19/19 全绿并合入 `088a9f16499`。 |
 
 ## 本轮已归档（2026-09-06）

@@ -5,10 +5,12 @@ tags:
   - goal
 description: Goal vNext 当前功能、产品语义与模块边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-08T17:55:00+08:00
 ---
 
 # Goal 模块说明
+
+> **下一版目标设计（2026-09-08，待实施）：** 当前本文仍描述已实现的 Goal vNext。新的 Goal Model Convergence 已由 [ADR-067](../../architecture/adr/ADR-067-goal-vnext-product-model-and-lifecycle.md)～[ADR-070](../../architecture/adr/ADR-070-ai-goal-plan-orchestration.md) 与 [Goal vNext Workspace UI](../goal-vnext-workspace-and-create-ui.md) 冻结，实施计划见 [active plan](../../plan/active/2026-09-08-goal-vnext-model-convergence.md)。在代码迁移完成前不要把 target design 误写成当前事实。
 
 ## 1. 功能定位
 

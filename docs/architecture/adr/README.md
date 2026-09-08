@@ -4,7 +4,7 @@ tags:
   - index
 description: 架构决策记录索引
 created: 2025-11-23T15:00:00
-updated: 2026-09-02T16:15:00+08:00
+updated: 2026-09-08T17:55:00+08:00
 ---
 
 # ADR 索引
@@ -68,10 +68,10 @@ updated: 2026-09-02T16:15:00+08:00
 | [ADR-050](./ADR-050-mastra-native-ai-runtime.md) | MemoFlow AI vNext — Mastra-native Runtime 与单一状态所有权 | 已采纳 | 2026-08-20 |
 | [ADR-051](./ADR-051-ai-primitive-taxonomy.md) | AI Primitive Taxonomy — Agent / Tool / Workflow / Skill / Memory / Context | 已采纳 | 2026-08-20 |
 | [ADR-052](./ADR-052-goal-create-reference-workflow.md) | `goal.create` Reference Workflow 与确定性业务执行 | 已采纳（Goal/Task draft schema 由 ADR-053~056 修订） | 2026-08-20 |
-| [ADR-053](./ADR-053-goal-task-personal-product-boundary.md) | Goal / Task 个人产品边界与信息架构收敛 | 已采纳（待实施） | 2026-08-25 |
-| [ADR-054](./ADR-054-shared-labels-and-system-views.md) | Shared Labels 与 System Views 分离 | 已采纳（待实施） | 2026-08-25 |
-| [ADR-055](./ADR-055-key-result-measurement-progress-v2.md) | Key Result Measurement & Progress V2 | 已采纳（待实施） | 2026-08-25 |
-| [ADR-056](./ADR-056-task-plan-goal-link-contribution-settlement.md) | Task Plan → Goal Link / Contribution / Settlement | 已采纳（待实施） | 2026-08-25 |
+| [ADR-053](./ADR-053-goal-task-personal-product-boundary.md) | Goal / Task 个人产品边界与信息架构收敛 | 已采纳并实施（Goal 新模型由 ADR-067/069 修订） | 2026-08-25 |
+| [ADR-054](./ADR-054-shared-labels-and-system-views.md) | Shared Labels 与 System Views 分离 | 已采纳并实施 | 2026-08-25 |
+| [ADR-055](./ADR-055-key-result-measurement-progress-v2.md) | Key Result Measurement & Progress V2 | 已采纳并实施（待 ADR-068 V3 替代） | 2026-08-25 |
+| [ADR-056](./ADR-056-task-plan-goal-link-contribution-settlement.md) | Task Plan → Goal Link / Contribution / Settlement | 已采纳并实施（Goal-level link 由 ADR-069 修订） | 2026-08-25 |
 | [ADR-057](./ADR-057-task-occurrence-outcome-and-plan-lifecycle.md) | Task Occurrence Outcome、Overdue 与 Task Plan 生命周期 | 已采纳（待实施） | 2026-08-25 |
 | [ADR-058](./ADR-058-oss-first-standard-capability-reuse.md) | OSS-first 标准能力复用与领域所有权边界 | 已采纳（从 Goal / Task vNext 开始执行） | 2026-08-25 |
 | [ADR-059](./ADR-059-routine-coach-domain-runtime-and-surfaces.md) | Routine Coach 领域、Runtime 与交互 Surface | 已采纳（待实施） | 2026-08-25 |
@@ -82,6 +82,10 @@ updated: 2026-09-02T16:15:00+08:00
 | [ADR-064](./ADR-064-emittery-runtime-event-delivery.md) | Runtime EventBus 采用 Emittery 与 Delivery-scoped Async Publish | 已采纳并实施 | 2026-08-25 |
 | [ADR-065](./ADR-065-durable-github-installation-intent-gateway.md) | Durable GitHub App Installation Intent 与 Setup Gateway | 已采纳 | 2026-08-28 |
 | [ADR-066](./ADR-066-adopt-delivery-platform-v3.md) | MemoFlow Delivery Platform V3 与跨平台 build-once/promote-many 交付模型 | 已采纳并实施 | 2026-09-02 |
+| [ADR-067](./ADR-067-goal-vnext-product-model-and-lifecycle.md) | Goal vNext Product Model、Lifecycle 与 Target Timeframe | 已采纳（待实施） | 2026-09-08 |
+| [ADR-068](./ADR-068-key-result-measurement-v3.md) | Key Result Measurement V3 — Initial / Current / Target | 已采纳（待实施） | 2026-09-08 |
+| [ADR-069](./ADR-069-goal-workspace-cross-module-context.md) | Goal Workspace 与跨模块 Context Read Model | 已采纳（待实施） | 2026-09-08 |
+| [ADR-070](./ADR-070-ai-goal-plan-orchestration.md) | AI GoalPlanDraft V2 与多实体 Goal Context Orchestration | 已采纳（待实施） | 2026-09-08 |
 
 ## 维护规则
 

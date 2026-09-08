@@ -7,7 +7,7 @@ tags:
   - measurement
 description: Key Result Measurement V2，删除 valueType、拆分记录起点与进度基线并统一进度/完成语义
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-08T17:55:00+08:00
 ---
 
 # ADR-055: Key Result Measurement & Progress V2
@@ -16,6 +16,8 @@ updated: 2026-09-08T09:00:00+08:00
 **日期：** 2026-08-25  
 **影响范围：** Goal domain、contracts、database、Task contribution、Goal UI、Review snapshots、AI Goal workflow  
 **关联：** ADR-038、ADR-052、ADR-053、ADR-056
+
+> **2026-09-08 后续修订：** [ADR-068](./ADR-068-key-result-measurement-v3.md) 已采纳 `initialValue/currentValue/targetValue + trackingBaseValue` 的 V3 用户模型。V3 实施完成前，本 ADR 仍是当前代码算术真值；迁移完成后，V2 的 `startingValue/progressBaselineValue` 用户字段与 baseline 解释由 ADR-068 取代。
 
 ## 2026-09-08 实现状态
 

@@ -9,7 +9,7 @@ tags:
   - contribution
 description: Task Goal Link 与可选 Contribution 解耦，并把整计划完成后贡献建模为 PlanCompletion settlement
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-08T17:55:00+08:00
 ---
 
 # ADR-056: Task Plan → Goal Link / Contribution / Settlement
@@ -18,6 +18,8 @@ updated: 2026-09-08T09:00:00+08:00
 **日期：** 2026-08-25  
 **影响范围：** Task domain、Goal domain、contracts、database、outbox、Task UI、Goal activity、AI workflow  
 **关联：** ADR-038、ADR-053、ADR-055、ADR-057
+
+> **2026-09-08 后续修订：** Link 与 Contribution 解耦、EachCompletion/PlanCompletion settlement 与幂等 source correlation 继续有效；[ADR-069](./ADR-069-goal-workspace-cross-module-context.md) 将 `TaskGoalLink.keyResultId` 从 required 修订为 optional，使 Task 可建立 Goal-level context。若 contribution 存在，KR 仍必须存在。实施完成前当前代码仍要求 KR。
 
 ## 2026-09-08 实现状态
 
