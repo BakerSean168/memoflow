@@ -6,7 +6,7 @@ import {
   type EditableGoal,
   type EditableKeyResult,
   type EditableGoalReminder,
-  type EditableGoalTaskTemplate,
+  type EditableGoalTaskPlan,
   type GoalWorkflowStage,
   type KnowledgeAnswer,
   type PersistedWorkflowEntry,
@@ -26,7 +26,7 @@ export interface UseAIWorkflowPersistenceOptions {
   clarificationAnswers: Ref<string[]>;
   editableGoal: Ref<EditableGoal>;
   editableKeyResults: Ref<EditableKeyResult[]>;
-  editableTaskTemplates: Ref<EditableGoalTaskTemplate[]>;
+  editableTaskPlans: Ref<EditableGoalTaskPlan[]>;
   editableReminders: Ref<EditableGoalReminder[]>;
   showGoalDraftEditor: Ref<boolean>;
   resetWorkflowArtifacts: () => void;
@@ -82,7 +82,7 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
       clarificationAnswers: [...options.clarificationAnswers.value],
       editableGoal: { ...options.editableGoal.value },
       editableKeyResults: options.editableKeyResults.value.map((item) => ({ ...item })),
-      editableTaskTemplates: options.editableTaskTemplates.value.map((item) => ({ ...item })),
+      editableTaskPlans: options.editableTaskPlans.value.map((item) => ({ ...item })),
       editableReminders: options.editableReminders.value.map((item) => ({ ...item })),
       showGoalDraftEditor: options.showGoalDraftEditor.value,
     };
@@ -126,7 +126,7 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
       ...entry.editableGoal,
     };
     options.editableKeyResults.value = (entry.editableKeyResults ?? []).map((item) => ({ ...item }));
-    options.editableTaskTemplates.value = (entry.editableTaskTemplates ?? []).map((item) => ({ ...item }));
+    options.editableTaskPlans.value = (entry.editableTaskPlans ?? []).map((item) => ({ ...item }));
     options.editableReminders.value = (entry.editableReminders ?? []).map(normalizeReminderDraft);
     options.showGoalDraftEditor.value = Boolean(entry.showGoalDraftEditor);
   }
@@ -145,7 +145,7 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
         JSON.stringify(options.clarificationAnswers.value),
         JSON.stringify(options.editableGoal.value),
         JSON.stringify(options.editableKeyResults.value),
-        JSON.stringify(options.editableTaskTemplates.value),
+        JSON.stringify(options.editableTaskPlans.value),
         JSON.stringify(options.editableReminders.value),
       ].join('|'),
       () => {

@@ -114,7 +114,7 @@
             "tool": "create_task_template",
             "status": "executed",
             "message": "Created task template in fake execution.",
-            "entityId": "fake-task-template-1"
+            "entityId": "fake-task-plan-1"
           }
         ],
         "execution_status": "partial",
@@ -222,7 +222,7 @@
             "tool": "create_task_template",
             "status": "executed",
             "message": "Created task template in fake execution.",
-            "entityId": "fake-task-template-1"
+            "entityId": "fake-task-plan-1"
           }
         ],
         "execution_status": "success",
@@ -491,7 +491,7 @@
             "tool": "create_task_template",
             "status": "executed",
             "message": "Created task template in fake execution.",
-            "entityId": "fake-task-template-1"
+            "entityId": "fake-task-plan-1"
           },
           {
             "tool": "create_reminder",
@@ -609,7 +609,7 @@
             "tool": "create_task_template",
             "status": "executed",
             "message": "Created task template in fake execution.",
-            "entityId": "fake-task-template-1"
+            "entityId": "fake-task-plan-1"
           },
           {
             "tool": "create_reminder",
@@ -727,7 +727,7 @@
             "tool": "create_task_template",
             "status": "executed",
             "message": "Created task template in fake execution.",
-            "entityId": "fake-task-template-1"
+            "entityId": "fake-task-plan-1"
           },
           {
             "tool": "create_reminder",

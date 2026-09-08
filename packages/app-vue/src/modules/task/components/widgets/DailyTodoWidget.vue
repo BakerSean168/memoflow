@@ -59,7 +59,7 @@
               class="group flex items-center gap-3 rounded-md px-1 py-1.5 hover:bg-muted/50 transition-colors"
               :class="{ 'opacity-50': inst.status === 'Completed' || inst.status === 'Skipped' }"
               data-testid="daily-todo-item"
-              :data-task-instance-id="inst.id"
+              :data-task-occurrence-id="inst.id"
               :data-task-status="inst.status"
             >
               <!-- Complete button (circle dot) -->
@@ -130,12 +130,12 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { ListTodo, ArrowRight, CheckCircle2, Check, Loader2 } from '@lucide/vue';
 import { useTask } from '../../composables/useTask';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import { formatHHmmParts } from '../../../../shared/utils/format-hhmm-parts';
 
 const emit = defineEmits<{
   (e: 'view-all'): void;
-  (e: 'completed', instance: TaskInstanceClientDTO): void;
+  (e: 'completed', instance: TaskOccurrenceClientDTO): void;
 }>();
 
 const props = withDefaults(
@@ -182,7 +182,7 @@ watch(
 const isLoading = computed(() => task.isLoading.value);
 
 // ── Derive today's instances ──
-const todayInstances = computed<TaskInstanceClientDTO[]>(() => {
+const todayInstances = computed<TaskOccurrenceClientDTO[]>(() => {
   return (task.instances.value ?? []).filter((inst) => {
     return isTodayMs(inst.instanceDate);
   });
@@ -196,7 +196,7 @@ const sortedInstances = computed(() => {
   const done = todayInstances.value.filter(
     (i) => i.status === 'Completed' || i.status === 'Skipped' || i.status === 'Missed',
   );
-  const byTime = (a: TaskInstanceClientDTO, b: TaskInstanceClientDTO) => {
+  const byTime = (a: TaskOccurrenceClientDTO, b: TaskOccurrenceClientDTO) => {
     const ta = a.timeConfig?.timeRange?.start ?? a.timeConfig?.timePoint ?? 0;
     const tb = b.timeConfig?.timeRange?.start ?? b.timeConfig?.timePoint ?? 0;
     return (ta ?? 0) - (tb ?? 0);
@@ -215,7 +215,7 @@ const progressPct = computed(() => {
 });
 
 // ── Template name lookup ──
-const templateMap = computed<Map<string, TaskTemplateClientDTO>>(() => {
+const templateMap = computed<Map<string, TaskPlanClientDTO>>(() => {
   return new Map((task.templates.value ?? []).map((t) => [t.id, t]));
 });
 
@@ -225,7 +225,7 @@ function templateName(templateId: string): string {
 
 // ── Time label ──
 /** Residual 1297: minutes-of-day HH:mm dual retired onto formatHHmmParts sole. */
-function timeLabel(inst: TaskInstanceClientDTO): string {
+function timeLabel(inst: TaskOccurrenceClientDTO): string {
   const fmt = (minutes: number) => {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
@@ -254,7 +254,7 @@ function completeBtnClass(status: string): string {
 }
 
 // ── Complete handler ──
-async function handleComplete(inst: TaskInstanceClientDTO) {
+async function handleComplete(inst: TaskOccurrenceClientDTO) {
   if (completing.value || inst.status === 'Skipped' || inst.status === 'Missed') return;
   completing.value = inst.id;
   try {

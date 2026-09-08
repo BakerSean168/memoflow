@@ -6,7 +6,7 @@
  * 管理任务（Task）的客户端领域模型
  *
  * 【包含内容】
- * - 聚合根（Aggregates）：TaskTemplate, TaskInstance
+ * - 聚合根（Aggregates）：TaskPlan, TaskOccurrence
  * - 值对象（Value Objects）：从 domain-shared 导入
  *
  * 【依赖规则】

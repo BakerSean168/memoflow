@@ -1,20 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { aOneTimeTask, aLoadedTaskTemplate, anIdentityId } from '../../../../../testing';
-import type { ITaskTemplateRepository } from '../../../../domain/repositories/i-task-template-repository';
-import { TaskTemplateStatus } from '@memoflow/contracts/task';
+import { aOneTimeTask, aLoadedTaskPlan, anIdentityId } from '../../../../../testing';
+import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
+import { TaskPlanStatus } from '@memoflow/contracts/task';
 import { TaskType } from '@memoflow/contracts/task';
 import { GetTaskDashboardUseCase } from '../get-task-dashboard.use-case';
 
 describe('GetTaskDashboardUseCase', () => {
-  let templateRepo: ReturnType<typeof createMockRepo<ITaskTemplateRepository>>;
+  let templateRepo: ReturnType<typeof createMockRepo<ITaskPlanRepository>>;
   let useCase: GetTaskDashboardUseCase;
   const testIdentityId = anIdentityId();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    templateRepo = createMockRepo<ITaskTemplateRepository>({
+    templateRepo = createMockRepo<ITaskPlanRepository>({
       findTodayTasks: vi.fn().mockResolvedValue([]),
       findOverdueTasks: vi.fn().mockResolvedValue([]),
       findActiveTemplates: vi.fn().mockResolvedValue([]),
@@ -46,7 +46,7 @@ describe('GetTaskDashboardUseCase', () => {
     expect(templateRepo.findUpcomingTasks).toHaveBeenCalledWith(testIdentityId, 7);
     expect(templateRepo.findActiveTemplates).toHaveBeenCalledWith(testIdentityId);
     expect(templateRepo.findOneTimeTasks).toHaveBeenCalledWith(testIdentityId, {
-      status: TaskTemplateStatus.Closed,
+      status: TaskPlanStatus.Closed,
     });
     expect(templateRepo.countTasks).toHaveBeenCalledTimes(2);
   });
@@ -92,13 +92,13 @@ describe('GetTaskDashboardUseCase', () => {
 
   it('should filter recent completed tasks by 7-day window', async () => {
     const now = Date.now();
-    const recentTask = aLoadedTaskTemplate({
-      status: TaskTemplateStatus.Closed,
+    const recentTask = aLoadedTaskPlan({
+      status: TaskPlanStatus.Closed,
       taskType: TaskType.OneTime,
       updatedAt: new Date(now - 1 * 24 * 60 * 60 * 1000), // 1 day ago
     });
-    const oldTask = aLoadedTaskTemplate({
-      status: TaskTemplateStatus.Closed,
+    const oldTask = aLoadedTaskPlan({
+      status: TaskPlanStatus.Closed,
       taskType: TaskType.OneTime,
       updatedAt: new Date(now - 10 * 24 * 60 * 60 * 1000), // 10 days ago
     });
@@ -111,7 +111,7 @@ describe('GetTaskDashboardUseCase', () => {
     // but the findOneTimeTasks was called
     expect(result).toBeOk();
     expect(templateRepo.findOneTimeTasks).toHaveBeenCalledWith(testIdentityId, {
-      status: TaskTemplateStatus.Closed,
+      status: TaskPlanStatus.Closed,
     });
   });
 

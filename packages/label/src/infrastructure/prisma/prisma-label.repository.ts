@@ -4,7 +4,7 @@ import type { LabelListOptions, LabelRepository } from '../../domain/label-repos
 
 type Db = Pick<
   PrismaClient,
-  'label' | 'goalLabel' | 'taskLabel' | 'goal' | 'taskTemplate' | '$transaction'
+  'label' | 'goalLabel' | 'taskLabel' | 'goal' | 'taskPlan' | '$transaction'
 >
 
 type LabelRow = Awaited<ReturnType<Db['label']['findFirst']>>
@@ -88,15 +88,15 @@ export class PrismaLabelRepository implements LabelRepository {
 
   async replaceTaskLabels(
     identityId: string,
-    taskTemplateId: string,
+    taskPlanId: string,
     labelIds: readonly string[],
   ): Promise<void> {
     await this.db.$transaction(async (tx) => {
-      await ensureOwnerAndLabels(tx, 'task', identityId, taskTemplateId, labelIds)
-      await tx.taskLabel.deleteMany({ where: { identityId, taskTemplateId } })
+      await ensureOwnerAndLabels(tx, 'task', identityId, taskPlanId, labelIds)
+      await tx.taskLabel.deleteMany({ where: { identityId, taskPlanId } })
       if (labelIds.length) {
         await tx.taskLabel.createMany({
-          data: labelIds.map((labelId) => ({ identityId, taskTemplateId, labelId })),
+          data: labelIds.map((labelId) => ({ identityId, taskPlanId, labelId })),
         })
       }
     })
@@ -111,9 +111,9 @@ export class PrismaLabelRepository implements LabelRepository {
     return links.map(({ label }) => toRecord(label))
   }
 
-  async listTaskLabels(identityId: string, taskTemplateId: string): Promise<LabelRecord[]> {
+  async listTaskLabels(identityId: string, taskPlanId: string): Promise<LabelRecord[]> {
     const links = await this.db.taskLabel.findMany({
-      where: { identityId, taskTemplateId },
+      where: { identityId, taskPlanId },
       include: { label: true },
       orderBy: { label: { name: 'asc' } },
     })
@@ -136,19 +136,19 @@ export class PrismaLabelRepository implements LabelRepository {
     return result
   }
 
-  async listTaskLabelsByTaskTemplateIds(
+  async listTaskLabelsByTaskPlanIds(
     identityId: string,
-    taskTemplateIds: readonly string[],
+    taskPlanIds: readonly string[],
   ): Promise<Map<string, LabelRecord[]>> {
-    const ids = [...new Set(taskTemplateIds)]
+    const ids = [...new Set(taskPlanIds)]
     const result = new Map(ids.map((id) => [id, [] as LabelRecord[]]))
     if (!ids.length) return result
     const links = await this.db.taskLabel.findMany({
-      where: { identityId, taskTemplateId: { in: ids } },
+      where: { identityId, taskPlanId: { in: ids } },
       include: { label: true },
-      orderBy: [{ taskTemplateId: 'asc' }, { label: { name: 'asc' } }],
+      orderBy: [{ taskPlanId: 'asc' }, { label: { name: 'asc' } }],
     })
-    for (const { taskTemplateId, label } of links) result.get(taskTemplateId)?.push(toRecord(label))
+    for (const { taskPlanId, label } of links) result.get(taskPlanId)?.push(toRecord(label))
     return result
   }
 
@@ -163,17 +163,17 @@ export class PrismaLabelRepository implements LabelRepository {
     )
   }
 
-  async findTaskTemplateIdsMatchingAllLabels(
+  async findTaskPlanIdsMatchingAllLabels(
     identityId: string,
     labelIds: readonly string[],
   ): Promise<string[]> {
     return allMatches(
       await this.db.taskLabel.findMany({
         where: { identityId, labelId: { in: [...new Set(labelIds)] } },
-        select: { taskTemplateId: true, labelId: true },
+        select: { taskPlanId: true, labelId: true },
       }),
       [...new Set(labelIds)],
-      (row) => row.taskTemplateId,
+      (row) => row.taskPlanId,
     )
   }
 }
@@ -199,7 +199,7 @@ async function ensureOwnerAndLabels(
 ): Promise<void> {
   const owner = ownerType === 'goal'
     ? await tx.goal.findFirst({ where: { id: ownerId, identityId }, select: { id: true } })
-    : await tx.taskTemplate.findFirst({ where: { id: ownerId, identityId }, select: { id: true } })
+    : await tx.taskPlan.findFirst({ where: { id: ownerId, identityId }, select: { id: true } })
   if (!owner) throw new Error(`${ownerType === 'goal' ? 'Goal' : 'Task template'} not found.`)
 
   const uniqueIds = [...new Set(labelIds)]

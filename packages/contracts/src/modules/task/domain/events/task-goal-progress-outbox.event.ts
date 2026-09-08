@@ -2,13 +2,13 @@ import type {
   IdentityId,
   GoalId,
   KeyResultId,
-  TaskInstanceId,
-  TaskTemplateId,
+  TaskOccurrenceId,
+  TaskPlanId,
 } from '../../../../primitives';
 
 /** Explicit settlement source owned by the durable Task -> Goal contract. */
 export const TaskGoalSettlementSourceType = {
-  TaskInstance: 'TaskInstance',
+  TaskOccurrence: 'TaskOccurrence',
   TaskPlan: 'TaskPlan',
 } as const;
 export type TaskGoalSettlementSourceTypeValue =
@@ -24,8 +24,8 @@ interface TaskGoalProgressOutboxEventV2Base {
   schemaVersion: 2;
   eventType: 'task.goal-progress-requested';
   identityId: IdentityId;
-  taskInstanceId: TaskInstanceId;
-  taskTemplateId: TaskTemplateId;
+  taskOccurrenceId: TaskOccurrenceId;
+  taskPlanId: TaskPlanId;
   occurredAt: number;
 }
 

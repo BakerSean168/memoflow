@@ -3,30 +3,30 @@ import type { IDomainEvent } from '@memoflow/contracts/shared';
 import {
   TaskGoalBindingTrigger,
   TaskPlanOutcome,
-  type TaskInstanceCompletedEvent,
+  type TaskOccurrenceCompletedEvent,
   type TaskPlanOutcomeChangedEvent,
 } from '@memoflow/contracts/task';
 import { toTaskGoalOutboxRecord } from './task-goal-outbox';
 
 function completionEvent(
-  contribution: NonNullable<NonNullable<TaskInstanceCompletedEvent['goalBinding']>['contribution']> | null = {
+  contribution: NonNullable<NonNullable<TaskOccurrenceCompletedEvent['goalBinding']>['contribution']> | null = {
     value: 2,
     trigger: TaskGoalBindingTrigger.EachCompletion,
   },
-): IDomainEvent<TaskInstanceCompletedEvent> {
+): IDomainEvent<TaskOccurrenceCompletedEvent> {
   return {
     eventType: 'task:instance-completed',
     aggregateId: 'instance-1',
     occurredAt: new Date(1_000),
     payload: {
-      identityId: 'identity-1' as TaskInstanceCompletedEvent['identityId'],
-      taskInstanceId: 'instance-1' as TaskInstanceCompletedEvent['taskInstanceId'],
-      taskTemplateId: 'template-1' as TaskInstanceCompletedEvent['taskTemplateId'],
+      identityId: 'identity-1' as TaskOccurrenceCompletedEvent['identityId'],
+      taskOccurrenceId: 'instance-1' as TaskOccurrenceCompletedEvent['taskOccurrenceId'],
+      taskPlanId: 'template-1' as TaskOccurrenceCompletedEvent['taskPlanId'],
       completedAt: 1_000,
       taskTitle: 'Ship reliable progress',
       goalBinding: {
-        goalId: 'goal-1' as NonNullable<TaskInstanceCompletedEvent['goalBinding']>['goalId'],
-        keyResultId: 'kr-1' as NonNullable<TaskInstanceCompletedEvent['goalBinding']>['keyResultId'],
+        goalId: 'goal-1' as NonNullable<TaskOccurrenceCompletedEvent['goalBinding']>['goalId'],
+        keyResultId: 'kr-1' as NonNullable<TaskOccurrenceCompletedEvent['goalBinding']>['keyResultId'],
         contribution,
       },
     },
@@ -48,9 +48,9 @@ function planOutcomeEvent(
     occurredAt: new Date(2_000),
     payload: {
       identityId: 'identity-1' as TaskPlanOutcomeChangedEvent['identityId'],
-      taskTemplateId: 'template-1' as TaskPlanOutcomeChangedEvent['taskTemplateId'],
-      triggeringTaskInstanceId:
-        'instance-15' as TaskPlanOutcomeChangedEvent['triggeringTaskInstanceId'],
+      taskPlanId: 'template-1' as TaskPlanOutcomeChangedEvent['taskPlanId'],
+      triggeringTaskOccurrenceId:
+        'instance-15' as TaskPlanOutcomeChangedEvent['triggeringTaskOccurrenceId'],
       taskTitle: 'Graduate reliably',
       goalBinding: {
         goalId: 'goal-1' as NonNullable<TaskPlanOutcomeChangedEvent['goalBinding']>['goalId'],
@@ -71,13 +71,13 @@ describe('toTaskGoalOutboxRecord V2', () => {
     const first = toTaskGoalOutboxRecord(source);
     const retry = toTaskGoalOutboxRecord(source);
 
-    expect(first?.eventId).toBe('task-goal-apply:TaskInstance:instance-1:1000');
+    expect(first?.eventId).toBe('task-goal-apply:TaskOccurrence:instance-1:1000');
     expect(retry?.eventId).toBe(first?.eventId);
     expect(JSON.parse(first!.payload)).toMatchObject({
       schemaVersion: 2,
       action: 'apply',
       value: 2,
-      source: { type: 'TaskInstance', id: 'instance-1' },
+      source: { type: 'TaskOccurrence', id: 'instance-1' },
     });
   });
 
@@ -143,8 +143,8 @@ describe('toTaskGoalOutboxRecord V2', () => {
       occurredAt: new Date(2_000),
       payload: {
         identityId: 'identity-1',
-        taskInstanceId: 'instance-1',
-        taskTemplateId: 'template-1',
+        taskOccurrenceId: 'instance-1',
+        taskPlanId: 'template-1',
         uncompletedAt: 2_000,
       },
     };
@@ -156,7 +156,7 @@ describe('toTaskGoalOutboxRecord V2', () => {
     expect(JSON.parse(record!.payload)).toMatchObject({
       schemaVersion: 2,
       action: 'revert',
-      sources: [{ type: 'TaskInstance', id: 'instance-1' }],
+      sources: [{ type: 'TaskOccurrence', id: 'instance-1' }],
     });
   });
 });

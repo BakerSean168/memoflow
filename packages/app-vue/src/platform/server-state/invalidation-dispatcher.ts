@@ -17,7 +17,7 @@
  */
 
 import type { QueryClient, QueryKey } from '@tanstack/vue-query';
-import { governanceQueryKeys, notificationQueryKeys, taskTemplateQueryKeys } from './query-keys';
+import { governanceQueryKeys, notificationQueryKeys, taskPlanQueryKeys } from './query-keys';
 
 /**
  * Typed invalidation intent produced by mutation lifecycles and realtime adapters.
@@ -32,7 +32,7 @@ export type ServerStateInvalidation =
       dedupeKey?: string;
     }
   | {
-      target: 'task-template';
+      target: 'task-plan';
       identityScope: string;
       source: 'mutation' | 'powersync' | 'reconnect';
       projection?: 'all' | 'lists' | 'details';
@@ -130,28 +130,28 @@ export function createServerStateInvalidationDispatcher(
     return keys;
   }
 
-  function taskTemplateIntentKeys(
-    intent: Extract<ServerStateInvalidation, { target: 'task-template' }>,
+  function taskPlanIntentKeys(
+    intent: Extract<ServerStateInvalidation, { target: 'task-plan' }>,
   ): QueryKey[] {
     const scope = intent.identityScope;
     const projection = intent.projection ?? 'all';
     const keys: QueryKey[] = [];
     if (projection === 'lists') {
-      keys.push(taskTemplateQueryKeys.lists(scope));
+      keys.push(taskPlanQueryKeys.lists(scope));
     } else if (projection === 'details') {
-      keys.push(taskTemplateQueryKeys.details(scope));
+      keys.push(taskPlanQueryKeys.details(scope));
     } else {
       // 'all' — but mutation semantics differ: mutations must not invalidate the whole details
       // prefix (only the known entity's detail, added below). Non-mutation 'all' (powersync) does.
       // mutation 语义不同：只失效 lists（详情只按已知 entity 单独失效），非 mutation 的
       // 'all'（powersync 表变化）才整段失效 details prefix。
-      keys.push(taskTemplateQueryKeys.lists(scope));
+      keys.push(taskPlanQueryKeys.lists(scope));
       if (intent.source !== 'mutation') {
-        keys.push(taskTemplateQueryKeys.details(scope));
+        keys.push(taskPlanQueryKeys.details(scope));
       }
     }
     if (intent.entityId !== undefined) {
-      keys.push(taskTemplateQueryKeys.detail(scope, intent.entityId));
+      keys.push(taskPlanQueryKeys.detail(scope, intent.entityId));
     }
     return keys;
   }
@@ -169,7 +169,7 @@ export function createServerStateInvalidationDispatcher(
     } else if (projection === 'details') {
       keys.push(governanceQueryKeys.details(scope));
     } else {
-      // 'all' — mutation semantics differ from table changes (see task-template above).
+      // 'all' — mutation semantics differ from table changes (see task-plan above).
       keys.push(
         governanceQueryKeys.lists(scope),
         governanceQueryKeys.details(scope),
@@ -184,7 +184,7 @@ export function createServerStateInvalidationDispatcher(
 
   function intentKeys(intent: ServerStateInvalidation): QueryKey[] {
     if (intent.target === 'notification') return notificationIntentKeys(intent);
-    if (intent.target === 'task-template') return taskTemplateIntentKeys(intent);
+    if (intent.target === 'task-plan') return taskPlanIntentKeys(intent);
     return governanceIntentKeys(intent);
   }
 
@@ -242,7 +242,7 @@ export function createServerStateInvalidationDispatcher(
       // Remove pilot keys for this identity only; other identities stay intact.
       for (const key of [
         notificationQueryKeys.identity,
-        taskTemplateQueryKeys.identity,
+        taskPlanQueryKeys.identity,
         governanceQueryKeys.identity,
       ]) {
         queryClient.removeQueries({ queryKey: key(identityScope) });

@@ -76,7 +76,7 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(JSON.stringify(firstStatements)).not.toContain('resource-a');
     expect(JSON.stringify(firstStatements)).not.toContain('goal-a');
     expect(JSON.stringify(firstStatements)).not.toContain('kr-a');
-    expect(JSON.stringify(firstStatements)).not.toContain('task-template-a');
+    expect(JSON.stringify(firstStatements)).not.toContain('task-plan-a');
     expect(JSON.stringify(firstStatements)).not.toContain('reminder-template-a');
     expect(JSON.stringify(firstStatements)).not.toContain('workspace-a');
     expect(JSON.stringify(firstStatements)).not.toContain('conversation-a');
@@ -87,8 +87,8 @@ describe('PowerSync desktop data portability round trip', () => {
     const goal = insertedRow(firstStatements, 'goals');
     const keyResult = insertedRow(firstStatements, 'key_results');
     const goalRecord = insertedRow(firstStatements, 'goal_records');
-    const taskTemplate = insertedRow(firstStatements, 'task_templates');
-    const taskInstance = insertedRow(firstStatements, 'task_instances');
+    const taskPlan = insertedRow(firstStatements, 'task_templates');
+    const taskOccurrence = insertedRow(firstStatements, 'task_instances');
     const scheduleTask = insertedRow(firstStatements, 'schedule_tasks');
     const reminderGroup = insertedRow(firstStatements, 'reminder_groups');
     const reminderTemplate = insertedRow(firstStatements, 'reminder_templates');
@@ -108,10 +108,10 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(resource.folder_id).toBe(folder.id);
     expect(keyResult.goal_id).toBe(goal.id);
     expect(goalRecord.key_result_id).toBe(keyResult.id);
-    expect(taskTemplate.goal_id).toBe(goal.id);
-    expect(taskTemplate.key_result_id).toBe(keyResult.id);
-    expect(taskInstance.template_id).toBe(taskTemplate.id);
-    expect(scheduleTask.source_entity_id).toBe(taskTemplate.id);
+    expect(taskPlan.goal_id).toBe(goal.id);
+    expect(taskPlan.key_result_id).toBe(keyResult.id);
+    expect(taskOccurrence.template_id).toBe(taskPlan.id);
+    expect(scheduleTask.source_entity_id).toBe(taskPlan.id);
     expect(reminderTemplate).not.toHaveProperty('reminder_group_id');
     expect(routineProfile.id).toBe(reminderGroup.id);
     expect(routineDefinition.id).toBe(reminderTemplate.id);
@@ -134,10 +134,10 @@ describe('PowerSync desktop data portability round trip', () => {
     await importUseCase.execute(identityB, exported.content);
     const secondStatements = targetDb.committedStatements.slice(firstStatementCount);
     const secondRepository = insertedRow(secondStatements, 'repositories');
-    const secondTaskTemplate = insertedRow(secondStatements, 'task_templates');
+    const secondTaskPlan = insertedRow(secondStatements, 'task_templates');
 
     expect(secondRepository.id).not.toBe(repository.id);
-    expect(secondTaskTemplate.id).not.toBe(taskTemplate.id);
+    expect(secondTaskPlan.id).not.toBe(taskPlan.id);
 
     expect(eventSpy).toHaveBeenCalledWith(
       DataPortabilityEventTopics.EXPORTED,
@@ -659,7 +659,7 @@ function seedProfile(identityUuid: string): SeedTables {
     ],
     task_templates: [
       {
-        id: 'task-template-a',
+        id: 'task-plan-a',
         identity_id: identityUuid,
         name: 'Write tests',
         description: 'Cover profile round trip',
@@ -703,11 +703,11 @@ function seedProfile(identityUuid: string): SeedTables {
     ],
     task_instances: [
       {
-        id: 'task-instance-a',
-        template_id: 'task-template-a',
+        id: 'task-occurrence-a',
+        template_id: 'task-plan-a',
         identity_id: identityUuid,
         instance_date: now,
-        occurrence_key: 'task-template-a:2026-06-04',
+        occurrence_key: 'task-plan-a:2026-06-04',
         status: 'Completed',
         importance: 'high',
         time_config: JSON.stringify({ type: 'FixedTime', timePoint: 540 }),
@@ -827,7 +827,7 @@ function seedProfile(identityUuid: string): SeedTables {
         name: 'Daily test run',
         description: 'Run portability tests',
         source_module: 'task',
-        source_entity_id: 'task-template-a',
+        source_entity_id: 'task-plan-a',
         status: 'active',
         enabled: 1,
         cron_expression: '0 8 * * *',

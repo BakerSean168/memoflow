@@ -387,7 +387,7 @@ test.describe('AI Goal Workflow', () => {
 
     const result = page.getByTestId('task-workflow-result');
     await expect(result).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(result).toContainText(/task-template-e2e-mastra-1/i);
+    await expect(result).toContainText(/task-plan-e2e-mastra-1/i);
     expect(telemetry.taskWorkflowStartCount).toBe(1);
     expect(telemetry.taskWorkflowApproveCount).toBe(1);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
@@ -697,8 +697,8 @@ function createTaskCompletedRun(mockRun: TaskWorkflowMockRun): AIWorkflowRunView
       workflowRunId: mockRun.runId,
       revision: mockRun.draft.revision,
       status: 'success',
-      taskTemplateId: 'task-template-e2e-mastra-1',
-      taskIds: ['task-instance-e2e-mastra-1'],
+      taskPlanId: 'task-plan-e2e-mastra-1',
+      taskIds: ['task-occurrence-e2e-mastra-1'],
       failures: [],
       retryable: false,
     },
@@ -792,7 +792,7 @@ function createRestoredGoalWorkflowDraft(): GoalPlanDraft {
         weight: 3,
       },
     ],
-    taskTemplates: [],
+    taskPlans: [],
     reminders: [],
     rationale: 'Create the restored Agent goal after user approval.',
     warnings: [],
@@ -831,7 +831,7 @@ function createPendingApprovalWorkflowEntry() {
       dueDate: draft.goal.dueDate,
     },
     editableKeyResults: [],
-    editableTaskTemplates: [],
+    editableTaskPlans: [],
     editableReminders: [],
     showGoalDraftEditor: false,
   };
@@ -861,7 +861,7 @@ function createPendingTaskApprovalWorkflowEntry() {
       dueDate: null,
     },
     editableKeyResults: [],
-    editableTaskTemplates: [],
+    editableTaskPlans: [],
     editableReminders: [],
     showGoalDraftEditor: false,
   };
@@ -892,7 +892,7 @@ function createGoalAgentWorkflowDraft(): GoalPlanDraft {
         weight: 3,
       },
     ],
-    taskTemplates: [
+    taskPlans: [
       {
         name: 'Review Agent execution',
         description: 'Check result and recovery.',
@@ -1049,7 +1049,7 @@ function executeGoalWorkflowMockRun(
 
   mockRun.executedGoalId = 'goal-e2e-1';
   if (retrySucceeded) {
-    mockRun.executedTaskIds = ['task-template-e2e-1'];
+    mockRun.executedTaskIds = ['task-plan-e2e-1'];
     mockRun.executedReminderIds = ['reminder-e2e-1'];
     mockRun.failures = [];
     mockRun.executionStatus = 'success';

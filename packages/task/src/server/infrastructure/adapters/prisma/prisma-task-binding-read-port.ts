@@ -13,7 +13,7 @@ export class PrismaTaskBindingReadPort implements GoalDependencyReadPort {
     activeCount: number;
   }> {
     const validated = GoalTaskBindingQueryInputSchema.parse(input);
-    const count = await this.db.taskTemplate.count({
+    const count = await this.db.taskPlan.count({
       where: {
         identityId: validated.identityId,
         goalId: validated.goalId,

@@ -51,7 +51,7 @@ const draftContent = GoalPlanDraftContentSchema.parse({
       weight: 5,
     },
   ],
-  taskTemplates: [
+  taskPlans: [
     {
       name: 'Daily study',
         cadence: 'daily',
@@ -92,7 +92,7 @@ function mastraRequestContext(requestId: string): RequestContext {
 function mutationPort(): GoalPlanMutationPort & {
   resolveLabels: ReturnType<typeof vi.fn>;
   createGoal: ReturnType<typeof vi.fn>;
-  createTaskTemplate: ReturnType<typeof vi.fn>;
+  createTaskPlan: ReturnType<typeof vi.fn>;
   createReminder: ReturnType<typeof vi.fn>;
 } {
   return {
@@ -105,7 +105,7 @@ function mutationPort(): GoalPlanMutationPort & {
         keyResultIds: (request.initialKeyResults ?? []).map((item) => String(item.id)),
       }),
     ),
-    createTaskTemplate: vi.fn(async (request) => ok({ taskId: String(request.id) })),
+    createTaskPlan: vi.fn(async (request) => ok({ taskId: String(request.id) })),
     createReminder: vi.fn(async (request) => ok({ reminderId: String(request.id) })),
   };
 }
@@ -228,7 +228,7 @@ describe('ADR-052 goal.create durable Workflow', () => {
       receipt: { workflowRunId: runId, revision: 2, status: 'success' },
     });
     expect(mutations.createGoal).toHaveBeenCalledTimes(1);
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(1);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);
     // Domain mutations use the current approval entry context, not the start context.
     expect(mutations.createGoal.mock.calls[0]?.[1]).toMatchObject({
       requestId: 'request-approve',
@@ -268,7 +268,7 @@ describe('ADR-052 goal.create durable Workflow', () => {
     expect(resumed.status).toBe('success');
     expect(resumed.result).toEqual({ outcome: 'cancelled' });
     expect(mutations.createGoal).not.toHaveBeenCalled();
-    expect(mutations.createTaskTemplate).not.toHaveBeenCalled();
+    expect(mutations.createTaskPlan).not.toHaveBeenCalled();
     expect(mutations.createReminder).not.toHaveBeenCalled();
   });
 
@@ -281,7 +281,7 @@ describe('ADR-052 goal.create durable Workflow', () => {
       })),
     };
     const mutations = mutationPort();
-    mutations.createTaskTemplate
+    mutations.createTaskPlan
       .mockResolvedValueOnce(error('SERVICE_UNAVAILABLE', 'task store unavailable'))
       .mockImplementationOnce(async (request) => ok({ taskId: String(request.id) }));
     const { buildWorkflow } = await harness(planner, mutations);
@@ -306,7 +306,7 @@ describe('ADR-052 goal.create durable Workflow', () => {
       failures: [{ operation: 'task_template', index: 0, retryable: true }],
     });
     expect(mutations.createGoal).toHaveBeenCalledTimes(1);
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(1);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);
 
     const workflow2 = buildWorkflow();
     const retry = await (
@@ -324,8 +324,8 @@ describe('ADR-052 goal.create durable Workflow', () => {
     });
     // Goal is checkpointed in the partial receipt; only the failed task is retried.
     expect(mutations.createGoal).toHaveBeenCalledTimes(1);
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(2);
-    expect(mutations.createTaskTemplate.mock.calls[1]?.[1]).toMatchObject({
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(2);
+    expect(mutations.createTaskPlan.mock.calls[1]?.[1]).toMatchObject({
       requestId: 'request-retry',
     });
   });

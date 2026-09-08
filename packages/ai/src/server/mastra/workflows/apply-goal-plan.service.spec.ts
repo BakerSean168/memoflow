@@ -37,7 +37,7 @@ const draft = GoalPlanDraftSchema.parse({
       weight: 5,
     },
   ],
-  taskTemplates: [
+  taskPlans: [
     {
       name: 'Daily N1 study',
       description: 'One focused study block',
@@ -76,7 +76,7 @@ const draft = GoalPlanDraftSchema.parse({
 function mutationPort(): GoalPlanMutationPort & {
   resolveLabels: ReturnType<typeof vi.fn>;
   createGoal: ReturnType<typeof vi.fn>;
-  createTaskTemplate: ReturnType<typeof vi.fn>;
+  createTaskPlan: ReturnType<typeof vi.fn>;
   createReminder: ReturnType<typeof vi.fn>;
 } {
   return {
@@ -89,7 +89,7 @@ function mutationPort(): GoalPlanMutationPort & {
         keyResultIds: (request.initialKeyResults ?? []).map((item) => String(item.id)),
       }),
     ),
-    createTaskTemplate: vi.fn(async (request) => ok({ taskId: String(request.id) })),
+    createTaskPlan: vi.fn(async (request) => ok({ taskId: String(request.id) })),
     createReminder: vi.fn(async (request) => ok({ reminderId: String(request.id) })),
   };
 }
@@ -130,7 +130,7 @@ describe('ApplyGoalPlanService', () => {
       initialKeyResults: [{ id: expected.kr0, title: 'Complete mock exams' }],
       labelIds: ['label:learning'],
     });
-    expect(port.createTaskTemplate.mock.calls[0]?.[0]).toMatchObject({
+    expect(port.createTaskPlan.mock.calls[0]?.[0]).toMatchObject({
       id: expected.task0,
       taskType: 'Recurring',
       timeConfig: {
@@ -146,7 +146,7 @@ describe('ApplyGoalPlanService', () => {
         contribution: { value: 1, trigger: 'EachCompletion' },
       },
     });
-    expect(port.createTaskTemplate.mock.calls[1]?.[0]).toMatchObject({
+    expect(port.createTaskPlan.mock.calls[1]?.[0]).toMatchObject({
       id: expected.task1,
       recurrenceRule: { frequency: 'Weekly', daysOfWeek: [6], occurrences: 8 },
     });
@@ -160,7 +160,7 @@ describe('ApplyGoalPlanService', () => {
       notificationConfig: { channels: ['InApp'] },
     });
     expect(port.createGoal.mock.calls[0]?.[1]).toBe(context);
-    expect(port.createTaskTemplate.mock.calls[0]?.[1]).toBe(context);
+    expect(port.createTaskPlan.mock.calls[0]?.[1]).toBe(context);
     expect(port.createReminder.mock.calls[0]?.[1]).toBe(context);
   });
 
@@ -196,8 +196,8 @@ describe('ApplyGoalPlanService', () => {
     });
 
     expect(port.createGoal).not.toHaveBeenCalled();
-    expect(port.createTaskTemplate).toHaveBeenCalledTimes(1);
-    expect(port.createTaskTemplate.mock.calls[0]?.[0]).toMatchObject({ id: expected.task1 });
+    expect(port.createTaskPlan).toHaveBeenCalledTimes(1);
+    expect(port.createTaskPlan.mock.calls[0]?.[0]).toMatchObject({ id: expected.task1 });
     expect(port.createReminder).toHaveBeenCalledTimes(1);
     expect(receipt.status).toBe('success');
     expect(receipt.taskIds).toEqual([expected.task0, expected.task1]);
@@ -221,13 +221,13 @@ describe('ApplyGoalPlanService', () => {
         retryable: false,
       },
     ]);
-    expect(port.createTaskTemplate).not.toHaveBeenCalled();
+    expect(port.createTaskPlan).not.toHaveBeenCalled();
     expect(port.createReminder).not.toHaveBeenCalled();
   });
 
   it('returns a retryable partial receipt when one deterministic child mutation has a transient failure', async () => {
     const port = mutationPort();
-    port.createTaskTemplate
+    port.createTaskPlan
       .mockImplementationOnce(async (request) => ok({ taskId: String(request.id) }))
       .mockResolvedValueOnce(error('SERVICE_UNAVAILABLE', 'task database unavailable'));
     const service = new ApplyGoalPlanService(port);
@@ -290,13 +290,13 @@ describe('ApplyGoalPlanService', () => {
         retryable: true,
       }),
     ]);
-    expect(port.createTaskTemplate).not.toHaveBeenCalled();
+    expect(port.createTaskPlan).not.toHaveBeenCalled();
     expect(port.createReminder).not.toHaveBeenCalled();
   });
 
   it('folds a task mutation throw into a retryable partial receipt and continues other mutations', async () => {
     const port = mutationPort();
-    port.createTaskTemplate
+    port.createTaskPlan
       .mockImplementationOnce(async (request) => ok({ taskId: String(request.id) }))
       .mockRejectedValueOnce(
         new Error('duplicate key value violates unique constraint "task_templates_pkey"'),

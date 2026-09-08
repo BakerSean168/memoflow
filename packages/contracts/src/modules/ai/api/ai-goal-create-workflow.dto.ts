@@ -77,7 +77,7 @@ export type GoalPlanCadence = z.infer<typeof GoalPlanCadenceSchema>;
 
 const TimeOfDaySchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
-export const GoalPlanTaskTemplateSchema = z
+export const GoalPlanTaskPlanSchema = z
   .object({
     name: z.string().trim().min(1).max(256),
     description: z.string().trim().max(2000).optional(),
@@ -101,7 +101,7 @@ export const GoalPlanTaskTemplateSchema = z
       });
     }
   });
-export type GoalPlanTaskTemplate = z.infer<typeof GoalPlanTaskTemplateSchema>;
+export type GoalPlanTaskPlan = z.infer<typeof GoalPlanTaskPlanSchema>;
 
 export const GoalPlanReminderSchema = z
   .object({
@@ -131,18 +131,18 @@ export const GoalPlanDraftContentSchema = z
   .object({
     goal: GoalPlanGoalSchema,
     keyResults: z.array(GoalPlanKeyResultSchema).max(50).default([]),
-    taskTemplates: z.array(GoalPlanTaskTemplateSchema).max(50).default([]),
+    taskPlans: z.array(GoalPlanTaskPlanSchema).max(50).default([]),
     reminders: z.array(GoalPlanReminderSchema).max(50).default([]),
     rationale: z.string().trim().max(4000).default(''),
     warnings: z.array(z.string().trim().min(1).max(1000)).max(20).default([]),
   })
   .strict()
   .superRefine((value, ctx) => {
-    for (const [index, task] of value.taskTemplates.entries()) {
+    for (const [index, task] of value.taskPlans.entries()) {
       if (task.keyResultIndex != null && task.keyResultIndex >= value.keyResults.length) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ['taskTemplates', index, 'keyResultIndex'],
+          path: ['taskPlans', index, 'keyResultIndex'],
           message: 'Task keyResultIndex must reference an existing key result',
         });
       }

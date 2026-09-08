@@ -7,8 +7,8 @@ import { presentErrorMessage } from '@memoflow/http-client';
 
 import { getProductTime, formatProductDateTime, emptyKind } from '../utils/product-time';
 
-import { useTaskInstances } from '../hooks/useTaskInstances';
-import { useTaskTemplateDetail } from '../hooks/useTaskTemplateDetail';
+import { useTaskOccurrences } from '../hooks/useTaskOccurrences';
+import { useTaskPlanDetail } from '../hooks/useTaskPlanDetail';
 import { useAppSession } from '../hooks/useAppSession';
 import { useTaskService } from '../hooks/useTaskService';
 
@@ -51,7 +51,7 @@ export function TaskDetailScreen() {
     typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
   const { signOut } = useAppSession();
   const service = useTaskService();
-  const { error, isLoading, refresh, template } = useTaskTemplateDetail(taskId);
+  const { error, isLoading, refresh, template } = useTaskPlanDetail(taskId);
   const {
     completeInstance,
     error: instancesError,
@@ -60,7 +60,7 @@ export function TaskDetailScreen() {
     refresh: refreshInstances,
     skipInstance,
     startInstance,
-  } = useTaskInstances(taskId);
+  } = useTaskOccurrences(taskId);
   const [isMutating, setIsMutating] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [activeInstanceId, setActiveInstanceId] = useState<string | null>(null);

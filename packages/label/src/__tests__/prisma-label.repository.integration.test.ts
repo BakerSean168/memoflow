@@ -6,12 +6,12 @@ import { PrismaLabelRepository } from '../infrastructure/prisma/prisma-label.rep
 async function seedGoalAndTask(identityId: string, suffix: string) {
   const prisma = await getPrisma()
   const goalId = `goal-${suffix}`
-  const taskTemplateId = `task-${suffix}`
+  const taskPlanId = `task-${suffix}`
   await prisma.goal.create({ data: { id: goalId, identityId, name: `Goal ${suffix}` } })
-  await prisma.taskTemplate.create({
-    data: { id: taskTemplateId, identityId, name: `Task ${suffix}`, status: 'Active' },
+  await prisma.taskPlan.create({
+    data: { id: taskPlanId, identityId, name: `Task ${suffix}`, status: 'Active' },
   })
-  return { goalId, taskTemplateId }
+  return { goalId, taskPlanId }
 }
 
 describe('PrismaLabelRepository integration', () => {
@@ -27,7 +27,7 @@ describe('PrismaLabelRepository integration', () => {
   it('shares one identity-owned label across Goal and Task and supports AND filtering', async () => {
     const identityId = 'label-int-primary'
     await seedAccount({ id: identityId })
-    const { goalId, taskTemplateId } = await seedGoalAndTask(identityId, 'primary')
+    const { goalId, taskPlanId } = await seedGoalAndTask(identityId, 'primary')
     const repository = new PrismaLabelRepository(await getPrisma())
     let nextId = 0
     const service = new LabelService(repository, { idFactory: () => `label-${++nextId}` })
@@ -36,20 +36,20 @@ describe('PrismaLabelRepository integration', () => {
     const deep = await service.create({ identityId, name: 'Deep Work' })
 
     await service.setGoalLabels({ identityId, goalId, labelIds: [work.id, deep.id] })
-    await service.setTaskLabels({ identityId, taskTemplateId, labelIds: [work.id, deep.id] })
+    await service.setTaskLabels({ identityId, taskPlanId, labelIds: [work.id, deep.id] })
 
     expect(await repository.listGoalLabels(identityId, goalId)).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: work.id }), expect.objectContaining({ id: deep.id })]),
     )
-    expect(await repository.listTaskLabels(identityId, taskTemplateId)).toEqual(
+    expect(await repository.listTaskLabels(identityId, taskPlanId)).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: work.id }), expect.objectContaining({ id: deep.id })]),
     )
     expect(await repository.findGoalIdsMatchingAllLabels(identityId, [work.id, deep.id])).toEqual([goalId])
-    expect(await repository.findTaskTemplateIdsMatchingAllLabels(identityId, [work.id, deep.id])).toEqual([taskTemplateId])
+    expect(await repository.findTaskPlanIdsMatchingAllLabels(identityId, [work.id, deep.id])).toEqual([taskPlanId])
     const goalBatch = await repository.listGoalLabelsByGoalIds(identityId, [goalId])
-    const taskBatch = await repository.listTaskLabelsByTaskTemplateIds(identityId, [taskTemplateId])
+    const taskBatch = await repository.listTaskLabelsByTaskPlanIds(identityId, [taskPlanId])
     expect(goalBatch.get(goalId)?.map((label) => label.id).sort()).toEqual([deep.id, work.id].sort())
-    expect(taskBatch.get(taskTemplateId)?.map((label) => label.id).sort()).toEqual([deep.id, work.id].sort())
+    expect(taskBatch.get(taskPlanId)?.map((label) => label.id).sort()).toEqual([deep.id, work.id].sort())
   })
 
   it('enforces normalized identity-scoped uniqueness in the database', async () => {

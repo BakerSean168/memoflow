@@ -2,12 +2,12 @@ import {
   InstanceGenerationFailedError,
   InvalidDateRangeError,
   InvalidGoalBindingError,
-  InvalidTaskTemplateStateError,
+  InvalidTaskPlanStateError,
   RecurrenceRuleNotImplementedError,
-  TaskInstanceAlreadyCompletedError,
-  TaskInstanceNotFoundError,
-  TaskTemplateArchivedError,
-  TaskTemplateNotFoundError,
+  TaskOccurrenceAlreadyCompletedError,
+  TaskOccurrenceNotFoundError,
+  TaskPlanArchivedError,
+  TaskPlanNotFoundError,
 } from '../task-errors';
 import { SkipRecord } from '../skip-record';
 
@@ -27,11 +27,11 @@ describe('task server value objects', () => {
   });
 
   it('builds domain errors with stable codes and messages', () => {
-    expect(new TaskTemplateNotFoundError('tpl-1')).toMatchObject({
+    expect(new TaskPlanNotFoundError('tpl-1')).toMatchObject({
       code: 'task_template_not_found',
       message: '任务模板未找到：tpl-1',
     });
-    expect(new TaskTemplateArchivedError('tpl-2')).toMatchObject({
+    expect(new TaskPlanArchivedError('tpl-2')).toMatchObject({
       code: 'task_template_archived',
       message: '任务模板已归档：tpl-2',
     });
@@ -43,11 +43,11 @@ describe('task server value objects', () => {
       code: 'invalid_goal_binding',
       message: '目标绑定无效：missing key result',
     });
-    expect(new TaskInstanceNotFoundError('instance-1')).toMatchObject({
+    expect(new TaskOccurrenceNotFoundError('instance-1')).toMatchObject({
       code: 'task_instance_not_found',
       message: '任务实例未找到：instance-1',
     });
-    expect(new TaskInstanceAlreadyCompletedError('instance-2')).toMatchObject({
+    expect(new TaskOccurrenceAlreadyCompletedError('instance-2')).toMatchObject({
       code: 'task_instance_already_completed',
       message: '任务实例已完成：instance-2',
     });
@@ -56,7 +56,7 @@ describe('task server value objects', () => {
       message: '任务实例生成失败：tpl-3 - cycle detected',
     });
 
-    const invalidState = new InvalidTaskTemplateStateError('invalid transition', {
+    const invalidState = new InvalidTaskPlanStateError('invalid transition', {
       templateId: 'tpl-4',
       currentStatus: 'Paused',
       attemptedAction: 'archive',

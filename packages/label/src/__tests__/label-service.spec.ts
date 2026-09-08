@@ -15,9 +15,9 @@ function repositoryMock(): LabelRepository {
     listGoalLabels: vi.fn(async () => []),
     listTaskLabels: vi.fn(async () => []),
     listGoalLabelsByGoalIds: vi.fn(async () => new Map()),
-    listTaskLabelsByTaskTemplateIds: vi.fn(async () => new Map()),
+    listTaskLabelsByTaskPlanIds: vi.fn(async () => new Map()),
     findGoalIdsMatchingAllLabels: vi.fn(async () => []),
-    findTaskTemplateIdsMatchingAllLabels: vi.fn(async () => []),
+    findTaskPlanIdsMatchingAllLabels: vi.fn(async () => []),
   }
 }
 
@@ -73,7 +73,7 @@ describe('shared label semantics', () => {
 
     const created = await service.create({ identityId: 'identity-1', name: '  Work  ' })
     await service.setGoalLabels({ identityId: 'identity-1', goalId: 'goal-1', labelIds: ['label-1', 'label-1'] })
-    await service.setTaskLabels({ identityId: 'identity-1', taskTemplateId: 'task-1', labelIds: ['label-1', 'label-1'] })
+    await service.setTaskLabels({ identityId: 'identity-1', taskPlanId: 'task-1', labelIds: ['label-1', 'label-1'] })
 
     expect(created).toMatchObject({ id: 'label-1', name: 'Work', normalizedName: 'work' })
     expect(repository.replaceGoalLabels).toHaveBeenCalledWith('identity-1', 'goal-1', ['label-1'])

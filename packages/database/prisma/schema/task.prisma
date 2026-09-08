@@ -3,9 +3,9 @@
 // 任务计划、实例、历史、统计
 // ==========================================
 
-/// TaskTemplate 聚合根 - 任务模板
+/// TaskPlan 聚合根 - 任务模板
 /// 管理任务的完整定义，包括时间配置、重复规则、提醒、Goal绑定等
-model TaskTemplate {
+model TaskPlan {
   // ============ 主键与外键 ============
   id         String @id
   identityId String @map("identity_id")
@@ -66,13 +66,13 @@ model TaskTemplate {
 
   // ============ 关系映射 ============
   account   Account     @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  keyResult KeyResult?  @relation("KeyResultTaskTemplates", fields: [keyResultId, goalId, identityId], references: [id, goalId, identityId], onDelete: Restrict)
+  keyResult KeyResult?  @relation("KeyResultTaskPlans", fields: [keyResultId, goalId, identityId], references: [id, goalId, identityId], onDelete: Restrict)
 
 
 
   // 实例
-  instances TaskInstance[]
-  history   TaskTemplateHistory[]
+  instances TaskOccurrence[]
+  history   TaskPlanHistory[]
   labelLinks TaskLabel[]
 
   // ============ 索引优化 ============
@@ -86,9 +86,9 @@ model TaskTemplate {
   @@map("task_templates")
 }
 
-/// TaskInstance 聚合根 - 任务实例
+/// TaskOccurrence 聚合根 - 任务实例
 /// 从模板生成的具体任务实例，包含执行状态和时间追踪
-model TaskInstance {
+model TaskOccurrence {
   // ============ 主键与外键 ============
   id         String @id
   templateId String @map("template_id")
@@ -97,7 +97,7 @@ model TaskInstance {
   // ============ 实例基本信息 ============
   instanceDate  DateTime @map("instance_date")
   occurrenceKey String?  @map("occurrence_key") /// R2-1 幂等键 templateId:localDate
-  status        String /// TaskInstanceStatus
+  status        String /// TaskOccurrenceStatus
   importance   String   @default("moderate") /// ImportanceLevel
 
   // ============ 时间追踪 ============
@@ -116,7 +116,7 @@ model TaskInstance {
 
   // ============ 关系映射 ============
   account  Account      @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  template TaskPlan @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   // ============ 索引优化 ============
   @@index([templateId, instanceDate])
@@ -132,8 +132,8 @@ model TaskInstance {
 model TaskGoalOutbox {
   eventId        String    @id @map("event_id")
   identityId     String    @map("identity_id")
-  taskInstanceId String    @map("task_instance_id")
-  taskTemplateId String    @map("task_template_id")
+  taskOccurrenceId String    @map("task_instance_id")
+  taskPlanId String    @map("task_template_id")
   goalId         String    @map("goal_id")
   keyResultId    String    @map("key_result_id")
   payload        String
@@ -148,11 +148,11 @@ model TaskGoalOutbox {
 
   @@index([identityId, status, availableAt])
   @@index([status, availableAt])
-  @@index([taskInstanceId])
+  @@index([taskOccurrenceId])
   @@map("task_goal_outbox")
 }
 
-model TaskTemplateHistory {
+model TaskPlanHistory {
   id         String   @id
   identityId String   @map("identity_id")
   templateId String   @map("template_id")
@@ -160,8 +160,8 @@ model TaskTemplateHistory {
   changes    String?
   createdAt  DateTime @default(now()) @map("created_at")
 
-  identity Account      @relation("AccountTaskTemplateHistory", fields: [identityId], references: [id])
-  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  identity Account      @relation("AccountTaskPlanHistory", fields: [identityId], references: [id])
+  template TaskPlan @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
   @@index([templateId])

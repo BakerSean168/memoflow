@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
  * Residual 1165: startOfDay keep-boundary (dashboard projection vs app-react agenda).
  * - dashboard domain projection: timestamp ms → timestamp ms (numeric day math for stats)
  * - app-react useScheduleAgenda: Date → Date (local calendar day for agenda UI)
- * Soft residual 1156: toDashboardTaskInstanceRecord dual retired remains separate.
+ * Soft residual 1156: toDashboardTaskOccurrenceRecord dual retired remains separate.
  * Soft residual 1145: formatFileSize keep-boundary remains separate.
  * Does not flip §13.2 checkboxes.
  */

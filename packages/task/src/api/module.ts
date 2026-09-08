@@ -36,8 +36,8 @@
  * Per-handle state machine (`created -> registered | failed`, then any state
  * -> `disposed`):
  * - register(): only allowed from `created`. Builds controllers from
- *   `instance.api` and the fixed routes (`/task-templates`,
- *   `/task-instances`) via `registerTaskRoutes`, AWAITS
+ *   `instance.api` and the fixed routes (`/task-plans`,
+ *   `/task-occurrences`) via `registerTaskRoutes`, AWAITS
  *   `instance.start()`, and ONLY THEN mounts the combined router — a failed
  *   start happens before any `router.use(...)` call, so the host router never
  *   observes a route for a handle that did not start (no rollback/unmount is
@@ -54,7 +54,7 @@
  * 每个 handle 的状态机（`created -> registered | failed`，之后任意状态 ->
  * `disposed`）：
  * - register()：仅允许从 `created` 进入。用 `instance.api` 构建控制器并通过
- *   `registerTaskRoutes` 挂载固定路由（`/task-templates`、`/task-instances`、
+ *   `registerTaskRoutes` 挂载固定路由（`/task-plans`、`/task-occurrences`、
  *   `/tasks`），await `instance.start()`，之后才挂载组合 router——start 失败
  *   发生在任何 `router.use(...)` 之前，因此宿主 router 永远不会看到一个
  *   未启动成功 handle 的路由（无需回滚/卸载）。成功则进入 `registered`，
@@ -78,8 +78,8 @@ import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow
 import { createLogger } from '@memoflow/utils/logger';
 import type { TaskModuleInstance } from '../server/infrastructure';
 import { createTaskTransportHandlers } from '../server/transport';
-import { TaskInstanceController } from '../server/transport/task-instance.controller';
-import { TaskTemplateController } from '../server/transport/task-template.controller';
+import { TaskOccurrenceController } from '../server/transport/task-occurrence.controller';
+import { TaskPlanController } from '../server/transport/task-plan.controller';
 import { registerTaskRoutes } from './routes';
 
 const logger = createLogger('TaskApi');
@@ -152,8 +152,8 @@ export function createTaskApiModule(options: TaskApiModuleOptions): TaskApiModul
       try {
         const handlers = createTaskTransportHandlers(options.instance.api);
 
-        const templateController = new TaskTemplateController(handlers.template);
-        const instanceController = new TaskInstanceController(handlers.instance);
+        const templateController = new TaskPlanController(handlers.template);
+        const instanceController = new TaskOccurrenceController(handlers.instance);
 
         const taskRoutes = registerTaskRoutes(
           {

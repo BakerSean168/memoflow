@@ -234,7 +234,7 @@
           :clarification-answers="clarificationAnswers"
           :editable-goal="editableGoal"
           :editable-key-results="editableKeyResults"
-          :editable-task-templates="editableTaskTemplates"
+          :editable-task-plans="editableTaskPlans"
           :editable-reminders="editableReminders"
           :show-goal-draft-editor="showGoalDraftEditor"
           :knowledge-answer="knowledgeAnswer"
@@ -245,9 +245,9 @@
           @remove-key-result="removeKeyResultDraft"
           @update-goal="handleUpdateGoalDraft"
           @update-key-result="updateKeyResultDraft"
-          @add-task-template="addTaskTemplateDraft"
-          @remove-task-template="removeTaskTemplateDraft"
-          @update-task-template="updateTaskTemplateDraft"
+          @add-task-plan="addTaskPlanDraft"
+          @remove-task-plan="removeTaskPlanDraft"
+          @update-task-plan="updateTaskPlanDraft"
           @add-reminder="addReminderDraft"
           @remove-reminder="removeReminderDraft"
           @update-reminder="updateReminderDraft"
@@ -375,7 +375,7 @@ const {
   goalAgentResuming,
   editableGoal,
   editableKeyResults,
-  editableTaskTemplates,
+  editableTaskPlans,
   editableReminders,
   canRunGoalAgent,
   canResumeGoalAgentClarification,
@@ -397,9 +397,9 @@ const {
   removeKeyResultDraft,
   updateKeyResultDraft,
   handleUpdateGoalDraft,
-  addTaskTemplateDraft,
-  removeTaskTemplateDraft,
-  updateTaskTemplateDraft,
+  addTaskPlanDraft,
+  removeTaskPlanDraft,
+  updateTaskPlanDraft,
   addReminderDraft,
   removeReminderDraft,
   updateReminderDraft,

@@ -4,12 +4,12 @@
  */
 
 // IDs
-export { TaskTemplateId } from './task-template-id';
-export { TaskInstanceId } from './task-instance-id';
+export { TaskPlanId } from './task-plan-id';
+export { TaskOccurrenceId } from './task-occurrence-id';
 
 // Type Value Objects (Enums)
-export { TaskTemplateStatus } from './task-template-status';
-export { TaskInstanceStatus } from './task-instance-status';
+export { TaskPlanStatus } from './task-plan-status';
+export { TaskOccurrenceStatus } from './task-occurrence-status';
 export { TaskTimeType } from './task-time-type';
 export {
   TaskGoalBindingTrigger,

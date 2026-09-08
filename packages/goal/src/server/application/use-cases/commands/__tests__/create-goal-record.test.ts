@@ -169,7 +169,7 @@ describe('CreateGoalRecordUseCase', () => {
       keyResult.id,
       {
         value: 1,
-        source: { type: 'TASK_INSTANCE' as const, id: 'task-instance-1' },
+        source: { type: 'TASK_INSTANCE' as const, id: 'task-occurrence-1' },
       },
       'identity-1',
     );
@@ -179,7 +179,7 @@ describe('CreateGoalRecordUseCase', () => {
     expect(goalRepository.saveRootWithExpectedVersion).not.toHaveBeenCalled();
   });
 
-  it('applies the same task-instance contribution only once', async () => {
+  it('applies the same task-occurrence contribution only once', async () => {
     const goal = createTestGoal();
     const keyResult = goal.createAndAddKeyResult({
       title: 'Completed tasks',
@@ -200,7 +200,7 @@ describe('CreateGoalRecordUseCase', () => {
     const params = {
       value: 2,
       note: 'Task completed',
-      source: { type: 'TASK_INSTANCE' as const, id: 'task-instance-1' },
+      source: { type: 'TASK_INSTANCE' as const, id: 'task-occurrence-1' },
     };
     const first = await useCase.execute(goal.id, keyResult.id, params, 'identity-1');
     const duplicate = await useCase.execute(goal.id, keyResult.id, params, 'identity-1');

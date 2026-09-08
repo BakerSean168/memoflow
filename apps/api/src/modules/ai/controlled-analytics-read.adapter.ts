@@ -32,7 +32,7 @@ export class ControlledAnalyticsReadAdapter implements IAnalyticsReadPort {
     });
     const taskRepos = createTaskPrismaRepositories(this.db);
     const dashboard = await getApiDashboardData(this.db, identityId);
-    const taskDashboard = await new GetTaskDashboardUseCase(taskRepos.taskTemplateRepository).execute(
+    const taskDashboard = await new GetTaskDashboardUseCase(taskRepos.taskPlanRepository).execute(
       identityId,
     );
     const activeGoals = await goalModule.goalRepository.findByIdentityId(identityId, {

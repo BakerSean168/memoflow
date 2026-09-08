@@ -24,13 +24,13 @@ import type {
 } from '@memoflow/contracts/schedule';
 import {
   ReminderTimeUnit,
-  TaskInstanceStatus,
+  TaskOccurrenceStatus,
   TaskReminderType,
-  TaskTemplateStatus,
-  type TaskTemplateServerDTO,
+  TaskPlanStatus,
+  type TaskPlanServerDTO,
 } from '@memoflow/contracts/task';
-import type { ITaskInstanceRepository } from '../domain/repositories/i-task-instance-repository';
-import type { ITaskTemplateRepository } from '../domain/repositories/i-task-template-repository';
+import type { ITaskOccurrenceRepository } from '../domain/repositories/i-task-occurrence-repository';
+import type { ITaskPlanRepository } from '../domain/repositories/i-task-plan-repository';
 import {
   TASK_REMINDER_HANDLER_KEY,
   TASK_REMINDER_PAYLOAD_VERSION,
@@ -75,8 +75,8 @@ export function buildTaskReminderOperationId(schedulingKey: string): string {
 }
 
 export interface CreateTaskReminderScheduledHandlerRegistrationDeps {
-  readonly taskInstanceRepository: Pick<ITaskInstanceRepository, 'findByIdForIdentity'>;
-  readonly taskTemplateRepository: Pick<ITaskTemplateRepository, 'findByIdForIdentity'>;
+  readonly taskOccurrenceRepository: Pick<ITaskOccurrenceRepository, 'findByIdForIdentity'>;
+  readonly taskPlanRepository: Pick<ITaskPlanRepository, 'findByIdForIdentity'>;
   readonly notificationRequestedWriter: NotificationRequestedWriterPort;
 }
 
@@ -108,7 +108,7 @@ function reminderTriggerIdentity(input: {
 }
 
 export function taskReminderSkippedReasonFromTemplate(
-  template: TaskTemplateServerDTO | null,
+  template: TaskPlanServerDTO | null,
   templateId: string,
   payload: Pick<
     ParsedTaskReminderScheduledPayload,
@@ -119,28 +119,28 @@ export function taskReminderSkippedReasonFromTemplate(
     return {
       keep: false,
       reason: 'TASK_TEMPLATE_UNAVAILABLE',
-      message: `TaskTemplate '${templateId}' no longer exists; reminder is not fireable.`,
+      message: `TaskPlan '${templateId}' no longer exists; reminder is not fireable.`,
     };
   }
   if (template.deletedAt !== null) {
     return {
       keep: false,
       reason: 'TASK_TEMPLATE_UNAVAILABLE',
-      message: `TaskTemplate '${templateId}' is deleted; reminder is not fireable.`,
+      message: `TaskPlan '${templateId}' is deleted; reminder is not fireable.`,
     };
   }
-  if (template.status !== TaskTemplateStatus.Active) {
+  if (template.status !== TaskPlanStatus.Active) {
     return {
       keep: false,
       reason: 'TASK_TEMPLATE_UNAVAILABLE',
-      message: `TaskTemplate '${templateId}' status is '${template.status}', not 'Active'; reminder is not fireable.`,
+      message: `TaskPlan '${templateId}' status is '${template.status}', not 'Active'; reminder is not fireable.`,
     };
   }
   if (!template.reminderConfig?.enabled || template.reminderConfig.triggers.length === 0) {
     return {
       keep: false,
       reason: 'TASK_TEMPLATE_UNAVAILABLE',
-      message: `TaskTemplate '${templateId}' reminders are disabled; reminder is not fireable.`,
+      message: `TaskPlan '${templateId}' reminders are disabled; reminder is not fireable.`,
     };
   }
   // Re-read of Task truth: the scheduled payload was projected from a precise
@@ -160,7 +160,7 @@ export function taskReminderSkippedReasonFromTemplate(
       keep: false,
       reason: 'TASK_REMINDER_CONFIG_STALE',
       message:
-        `TaskTemplate '${templateId}' no longer configures reminder '${scheduledIdentity}'; ` +
+        `TaskPlan '${templateId}' no longer configures reminder '${scheduledIdentity}'; ` +
         'the scheduled invocation is stale and is not fireable.',
     };
   }
@@ -179,26 +179,26 @@ export function createTaskReminderScheduledHandlerRegistration(
     handler: {
       async execute(context: ScheduledInvocationContext<TaskReminderScheduledPayload>): Promise<ScheduledHandlerResult> {
         const { identityId, schedulingKey, payload } = context;
-        const instance = await deps.taskInstanceRepository.findByIdForIdentity(identityId, payload.instanceId);
+        const instance = await deps.taskOccurrenceRepository.findByIdForIdentity(identityId, payload.instanceId);
         if (!instance) {
-          return skipped('TASK_INSTANCE_NOT_FOUND', `TaskInstance '${payload.instanceId}' no longer exists; reminder is not fireable.`, {
+          return skipped('TASK_INSTANCE_NOT_FOUND', `TaskOccurrence '${payload.instanceId}' no longer exists; reminder is not fireable.`, {
             instanceId: payload.instanceId,
           });
         }
         if (instance.deletedAt !== null) {
-          return skipped('TASK_INSTANCE_UNAVAILABLE', `TaskInstance '${instance.id}' is deleted; reminder is not fireable.`, {
+          return skipped('TASK_INSTANCE_UNAVAILABLE', `TaskOccurrence '${instance.id}' is deleted; reminder is not fireable.`, {
             instanceId: instance.id,
             status: instance.status,
           });
         }
-        if (instance.status !== TaskInstanceStatus.Pending && instance.status !== TaskInstanceStatus.InProgress) {
-          return skipped('TASK_INSTANCE_UNAVAILABLE', `TaskInstance '${instance.id}' status is '${instance.status}', not pending/in-progress; reminder is not fireable.`, {
+        if (instance.status !== TaskOccurrenceStatus.Pending && instance.status !== TaskOccurrenceStatus.InProgress) {
+          return skipped('TASK_INSTANCE_UNAVAILABLE', `TaskOccurrence '${instance.id}' status is '${instance.status}', not pending/in-progress; reminder is not fireable.`, {
             instanceId: instance.id,
             status: instance.status,
           });
         }
         if (instance.occurrenceKey !== payload.occurrenceKey) {
-          return skipped('TASK_OCCURRENCE_STALE', `TaskInstance '${instance.id}' moved to a newer occurrence; stale reminder is not fireable.`, {
+          return skipped('TASK_OCCURRENCE_STALE', `TaskOccurrence '${instance.id}' moved to a newer occurrence; stale reminder is not fireable.`, {
             instanceId: instance.id,
             staleOccurrence: payload.occurrenceKey,
             currentOccurrence: instance.occurrenceKey,
@@ -206,7 +206,7 @@ export function createTaskReminderScheduledHandlerRegistration(
         }
 
         const templateId = String(instance.templateId);
-        const template = await deps.taskTemplateRepository.findByIdForIdentity(identityId, templateId);
+        const template = await deps.taskPlanRepository.findByIdForIdentity(identityId, templateId);
         const templateDecision = taskReminderSkippedReasonFromTemplate(
           template?.toServerDTO() ?? null,
           templateId,

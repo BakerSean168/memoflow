@@ -122,31 +122,31 @@
           <div class="space-y-3">
             <div class="flex items-center justify-between gap-3">
               <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                {{ t('aiAssistant.goalDraft.taskTemplates') }}
+                {{ t('aiAssistant.goalDraft.taskPlans') }}
               </p>
-              <Button variant="outline" size="sm" @click="$emit('add-task-template')">
-                {{ t('aiAssistant.goalDraft.addTaskTemplate') }}
+              <Button variant="outline" size="sm" @click="$emit('add-task-plan')">
+                {{ t('aiAssistant.goalDraft.addTaskPlan') }}
               </Button>
             </div>
 
-            <div v-if="editableTaskTemplates.length" class="space-y-3">
+            <div v-if="editableTaskPlans.length" class="space-y-3">
               <div
-                v-for="(item, index) in editableTaskTemplates"
-                :key="`task-template-${index}`"
+                v-for="(item, index) in editableTaskPlans"
+                :key="`task-plan-${index}`"
                 class="space-y-3 rounded-xl border border-border/50 bg-background/70 p-3"
-                data-testid="goal-workflow-task-template-editor"
+                data-testid="goal-workflow-task-plan-editor"
               >
                 <Input
                   :model-value="item.name"
-                  :placeholder="t('aiAssistant.goalDraft.taskTemplateName')"
-                  @update:model-value="updateTaskTemplate(index, { name: String($event ?? '') })"
+                  :placeholder="t('aiAssistant.goalDraft.taskPlanName')"
+                  @update:model-value="updateTaskPlan(index, { name: String($event ?? '') })"
                 />
                 <Textarea
                   class="min-h-20"
                   :model-value="item.description"
-                  :placeholder="t('aiAssistant.goalDraft.taskTemplateDescription')"
+                  :placeholder="t('aiAssistant.goalDraft.taskPlanDescription')"
                   @update:model-value="
-                    updateTaskTemplate(index, { description: String($event ?? '') })
+                    updateTaskPlan(index, { description: String($event ?? '') })
                   "
                 />
                 <div class="grid gap-3 @sm/ai:grid-cols-3">
@@ -157,8 +157,8 @@
                     <Select
                       :model-value="item.cadence"
                       @update:model-value="
-                        updateTaskTemplate(index, {
-                          cadence: $event as EditableGoalTaskTemplate['cadence'],
+                        updateTaskPlan(index, {
+                          cadence: $event as EditableGoalTaskPlan['cadence'],
                         })
                       "
                     >
@@ -186,7 +186,7 @@
                       :model-value="item.timeOfDay"
                       data-testid="goal-workflow-task-time"
                       @update:model-value="
-                        updateTaskTemplate(index, { timeOfDay: String($event ?? '') })
+                        updateTaskPlan(index, { timeOfDay: String($event ?? '') })
                       "
                     />
                   </div>
@@ -198,8 +198,8 @@
                     <Select
                       :model-value="item.importance"
                       @update:model-value="
-                        updateTaskTemplate(index, {
-                          importance: $event as EditableGoalTaskTemplate['importance'],
+                        updateTaskPlan(index, {
+                          importance: $event as EditableGoalTaskPlan['importance'],
                         })
                       "
                     >
@@ -218,13 +218,13 @@
                     </Select>
                   </div>
                 </div>
-                <Button variant="outline" @click="$emit('remove-task-template', index)">
-                  {{ t('aiAssistant.goalDraft.removeTaskTemplate') }}
+                <Button variant="outline" @click="$emit('remove-task-plan', index)">
+                  {{ t('aiAssistant.goalDraft.removeTaskPlan') }}
                 </Button>
               </div>
             </div>
             <p v-else class="text-sm leading-6 text-muted-foreground">
-              {{ t('aiAssistant.goalDraft.noTaskTemplates') }}
+              {{ t('aiAssistant.goalDraft.noTaskPlans') }}
             </p>
           </div>
 
@@ -529,7 +529,7 @@ import type {
   EditableGoal,
   EditableKeyResult,
   EditableGoalReminder,
-  EditableGoalTaskTemplate,
+  EditableGoalTaskPlan,
   GoalClarificationView,
   KnowledgeAnswer,
   WorkflowMode,
@@ -542,7 +542,7 @@ const props = defineProps<{
   clarificationAnswers: string[];
   editableGoal: EditableGoal;
   editableKeyResults: EditableKeyResult[];
-  editableTaskTemplates: EditableGoalTaskTemplate[];
+  editableTaskPlans: EditableGoalTaskPlan[];
   editableReminders: EditableGoalReminder[];
   showGoalDraftEditor: boolean;
   knowledgeAnswer: KnowledgeAnswer | null;
@@ -556,9 +556,9 @@ const emit = defineEmits<{
   'remove-key-result': [index: number];
   'update-goal': [payload: EditableGoal];
   'update-key-result': [payload: { index: number; value: EditableKeyResult }];
-  'add-task-template': [];
-  'remove-task-template': [index: number];
-  'update-task-template': [payload: { index: number; value: EditableGoalTaskTemplate }];
+  'add-task-plan': [];
+  'remove-task-plan': [index: number];
+  'update-task-plan': [payload: { index: number; value: EditableGoalTaskPlan }];
   'add-reminder': [];
   'remove-reminder': [index: number];
   'update-reminder': [payload: { index: number; value: EditableGoalReminder }];
@@ -600,10 +600,10 @@ function updateClarificationAnswer(index: number, value: string) {
   emit('update:clarificationAnswers', next);
 }
 
-function updateTaskTemplate(index: number, patch: Partial<EditableGoalTaskTemplate>) {
-  emit('update-task-template', {
+function updateTaskPlan(index: number, patch: Partial<EditableGoalTaskPlan>) {
+  emit('update-task-plan', {
     index,
-    value: { ...props.editableTaskTemplates[index], ...patch },
+    value: { ...props.editableTaskPlans[index], ...patch },
   });
 }
 

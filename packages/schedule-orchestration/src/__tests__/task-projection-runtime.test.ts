@@ -13,7 +13,7 @@ import type {
 import type { Subscriber } from '@memoflow/utils/domain';
 import { createTaskProjectionRuntime } from '../runtime/task-projection-runtime';
 
-function owner(id = 'TaskTemplateId_template'): SchedulingOwner {
+function owner(id = 'TaskPlanId_template'): SchedulingOwner {
   return { identityId: 'IdentityId_schedule-owner', type: 'task.template', id };
 }
 
@@ -24,9 +24,9 @@ function intent(key = 'intent-1'): ScheduledIntent<TaskReminderScheduledPayload>
     runAt: Date.UTC(2030, 0, 10, 13, 30),
     payloadVersion: 1,
     payload: {
-      templateId: 'TaskTemplateId_template',
-      instanceId: 'TaskInstanceId_instance',
-      occurrenceKey: 'TaskTemplateId_template:2030-01-10',
+      templateId: 'TaskPlanId_template',
+      instanceId: 'TaskOccurrenceId_instance',
+      occurrenceKey: 'TaskPlanId_template:2030-01-10',
       taskTitle: 'Task',
       reminderType: 'Relative',
       reminderValue: 30,
@@ -129,7 +129,7 @@ function sourceWithPlan(
 }
 
 describe('task projection runtime -> SchedulingPort', () => {
-  it('reconciles the complete TaskTemplate desired set on task:created', async () => {
+  it('reconciles the complete TaskPlan desired set on task:created', async () => {
     const taskEvents = createTaskEventsHarness();
     const scheduling = createSchedulingPortHarness();
     const source = sourceWithPlan();
@@ -142,13 +142,13 @@ describe('task projection runtime -> SchedulingPort', () => {
     await runtime.start();
     await taskEvents.emit('task:created', {
       identityId: 'IdentityId_schedule-owner',
-      templateId: 'TaskTemplateId_template',
+      templateId: 'TaskPlanId_template',
       goalId: null,
-      task: { id: 'TaskTemplateId_template' },
+      task: { id: 'TaskPlanId_template' },
     } as never);
 
     expect(source.buildTemplatePlan).toHaveBeenCalledWith(
-      'TaskTemplateId_template',
+      'TaskPlanId_template',
       'IdentityId_schedule-owner',
     );
     expect(scheduling.reconciles).toEqual([{ owner: owner(), desired: [intent()] }]);
@@ -167,8 +167,8 @@ describe('task projection runtime -> SchedulingPort', () => {
 
     const common = {
       identityId: 'IdentityId_schedule-owner',
-      taskInstanceId: 'TaskInstanceId_instance',
-      taskTemplateId: 'TaskTemplateId_template',
+      taskOccurrenceId: 'TaskOccurrenceId_instance',
+      taskPlanId: 'TaskPlanId_template',
     };
     await taskEvents.emit('task:instance-completed', {
       ...common,
@@ -208,14 +208,14 @@ describe('task projection runtime -> SchedulingPort', () => {
 
     await taskEvents.emit('task:rescheduled', {
       identityId: 'IdentityId_schedule-owner',
-      taskInstanceId: 'TaskInstanceId_instance',
-      taskTemplateId: 'TaskTemplateId_template',
+      taskOccurrenceId: 'TaskOccurrenceId_instance',
+      taskPlanId: 'TaskPlanId_template',
       previousDueDate: Date.now(),
       newDueDate: Date.now(),
     } as never);
 
     expect(source.buildTemplatePlan).toHaveBeenCalledWith(
-      'TaskTemplateId_template',
+      'TaskPlanId_template',
       'IdentityId_schedule-owner',
     );
     expect(scheduling.reconciles).toEqual([{ owner: owner(), desired: [intent()] }]);
@@ -224,15 +224,15 @@ describe('task projection runtime -> SchedulingPort', () => {
     await runtime.stop();
     await taskEvents.emit('task:rescheduled', {
       identityId: 'IdentityId_schedule-owner',
-      taskInstanceId: 'TaskInstanceId_instance',
-      taskTemplateId: 'TaskTemplateId_template',
+      taskOccurrenceId: 'TaskOccurrenceId_instance',
+      taskPlanId: 'TaskPlanId_template',
       previousDueDate: Date.now(),
       newDueDate: Date.now(),
     } as never);
     expect(source.buildTemplatePlan).toHaveBeenCalledTimes(1);
   });
 
-  it('removes the whole TaskTemplate owner on pause/delete and unsubscribes on stop', async () => {
+  it('removes the whole TaskPlan owner on pause/delete and unsubscribes on stop', async () => {
     const taskEvents = createTaskEventsHarness();
     const scheduling = createSchedulingPortHarness();
     const source = sourceWithPlan();
@@ -245,19 +245,19 @@ describe('task projection runtime -> SchedulingPort', () => {
 
     await taskEvents.emit('task:template-paused', {
       identityId: 'IdentityId_schedule-owner',
-      taskTemplateId: 'TaskTemplateId_template',
+      taskPlanId: 'TaskPlanId_template',
       pausedAt: Date.now(),
-      taskTemplate: { id: 'TaskTemplateId_template' },
+      taskPlan: { id: 'TaskPlanId_template' },
     } as never);
     await taskEvents.emit('task:deleted', {
       identityId: 'IdentityId_schedule-owner',
-      taskTemplateId: 'TaskTemplateId_template',
+      taskPlanId: 'TaskPlanId_template',
       deletedAt: Date.now(),
     } as never);
     await runtime.stop();
     await taskEvents.emit('task:deleted', {
       identityId: 'IdentityId_schedule-owner',
-      taskTemplateId: 'TaskTemplateId_template',
+      taskPlanId: 'TaskPlanId_template',
       deletedAt: Date.now(),
     } as never);
 

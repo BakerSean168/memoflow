@@ -4,14 +4,14 @@ import {
   RecurrenceFrequency,
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
-  TaskTemplateStatus,
+  TaskPlanStatus,
   TaskType,
 } from '@memoflow/contracts/task';
-import { TaskTemplate } from '../aggregates/task-template';
-import { TaskInstance } from '../aggregates/task-instance';
+import { TaskPlan } from '../aggregates/task-plan';
+import { TaskOccurrence } from '../aggregates/task-occurrence';
 import { TaskPlanOutcomeEvaluator } from './task-plan-outcome-evaluator';
 import { RecurrenceRule, TaskTimeConfig } from '../value-objects';
-import { aTaskTemplateState } from '../../../testing/task.fixture';
+import { aTaskPlanState } from '../../../testing/task.fixture';
 
 function fifteenDayPlan(policy = TaskPlanCompletionPolicy.AllowCorrection) {
   const recurrenceRule = RecurrenceRule.create({
@@ -22,12 +22,12 @@ function fifteenDayPlan(policy = TaskPlanCompletionPolicy.AllowCorrection) {
     occurrences: 15,
   });
   const timeConfig = TaskTimeConfig.createAllDay(new Date());
-  const template = TaskTemplate.load(
-    aTaskTemplateState({ taskType: TaskType.Recurring, recurrenceRule, timeConfig, completionPolicy: policy }),
+  const template = TaskPlan.load(
+    aTaskPlanState({ taskType: TaskType.Recurring, recurrenceRule, timeConfig, completionPolicy: policy }),
   );
   const base = Date.now() - 15 * 86_400_000;
   const instances = Array.from({ length: 15 }, (_, index) =>
-    TaskInstance.create({
+    TaskOccurrence.create({
       templateId: template.id,
       identityId: template.identityId,
       instanceDate: base + index * 86_400_000,
@@ -46,8 +46,8 @@ describe('TaskPlanOutcomeEvaluator (TASK-2202)', () => {
     instances.forEach((instance) => instance.complete());
     const outcome = evaluator.evaluate(template, instances);
     expect(outcome).toBe(TaskPlanOutcome.Succeeded);
-    template.applyPlanOutcome(outcome, { triggeringTaskInstanceId: instances[14].id });
-    expect(template.status).toBe(TaskTemplateStatus.Closed);
+    template.applyPlanOutcome(outcome, { triggeringTaskOccurrenceId: instances[14].id });
+    expect(template.status).toBe(TaskPlanStatus.Closed);
     expect(template.outcome).toBe(TaskPlanOutcome.Succeeded);
   });
 
@@ -82,30 +82,30 @@ describe('TaskPlanOutcomeEvaluator (TASK-2202)', () => {
     instances.forEach((instance) => instance.complete());
     instances[14].uncomplete();
     instances[14].markMissed();
-    template.applyPlanOutcome(evaluator.evaluate(template, instances), { triggeringTaskInstanceId: instances[14].id });
+    template.applyPlanOutcome(evaluator.evaluate(template, instances), { triggeringTaskOccurrenceId: instances[14].id });
     expect(template.outcome).toBe(TaskPlanOutcome.Failed);
 
     instances[14].complete();
-    template.applyPlanOutcome(evaluator.evaluate(template, instances), { triggeringTaskInstanceId: instances[14].id });
+    template.applyPlanOutcome(evaluator.evaluate(template, instances), { triggeringTaskOccurrenceId: instances[14].id });
     expect(template.outcome).toBe(TaskPlanOutcome.Succeeded);
-    expect(template.status).toBe(TaskTemplateStatus.Closed);
+    expect(template.status).toBe(TaskPlanStatus.Closed);
 
     instances[14].uncomplete();
-    template.applyPlanOutcome(evaluator.evaluate(template, instances), { triggeringTaskInstanceId: instances[14].id });
+    template.applyPlanOutcome(evaluator.evaluate(template, instances), { triggeringTaskOccurrenceId: instances[14].id });
     expect(template.outcome).toBe(TaskPlanOutcome.Open);
-    expect(template.status).toBe(TaskTemplateStatus.Active);
+    expect(template.status).toBe(TaskPlanStatus.Active);
   });
 
   it('explicit abandon is authoritative and evaluator never overwrites it', () => {
     const { template, instances } = fifteenDayPlan();
     template.abandon('user stopped the plan');
     expect(template.outcome).toBe(TaskPlanOutcome.Abandoned);
-    expect(template.status).toBe(TaskTemplateStatus.Closed);
+    expect(template.status).toBe(TaskPlanStatus.Closed);
     expect(evaluator.evaluate(template, instances)).toBe(TaskPlanOutcome.Abandoned);
   });
 
   it('historical Archived/Deleted lifecycle values are rejected after destructive reset', () => {
-    expect(() => TaskTemplate.load(aTaskTemplateState({ status: 'Archived' as any }))).toThrow();
-    expect(() => TaskTemplate.load(aTaskTemplateState({ status: 'Deleted' as any }))).toThrow();
+    expect(() => TaskPlan.load(aTaskPlanState({ status: 'Archived' as any }))).toThrow();
+    expect(() => TaskPlan.load(aTaskPlanState({ status: 'Deleted' as any }))).toThrow();
   });
 });

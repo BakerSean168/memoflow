@@ -12,30 +12,30 @@ import { computed, ref } from 'vue';
 import { useTaskStore } from '../stores/task-store';
 import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';
 import {
-  canonicalizeTaskTemplateListQuery,
-  taskTemplateQueryKeys,
-  type TaskTemplateListQueryInput,
+  canonicalizeTaskPlanListQuery,
+  taskPlanQueryKeys,
+  type TaskPlanListQueryInput,
 } from '../../../platform/server-state/query-keys';
-import { useTaskInstances } from './useTaskInstances';
-import { useTaskTemplateListQuery } from './useTaskTemplateListQuery';
-import { waitForTaskTemplateQuery } from './taskTemplateCache';
+import { useTaskOccurrences } from './useTaskOccurrences';
+import { useTaskPlanListQuery } from './useTaskPlanListQuery';
+import { waitForTaskPlanQuery } from './taskPlanCache';
 
 export function useTask() {
   const store = useTaskStore();
   const runtime = useServerStateRuntime();
   const resolveIdentityScope = useServerStateIdentityScope();
-  const listParams = ref<TaskTemplateListQueryInput>({});
+  const listParams = ref<TaskPlanListQueryInput>({});
   // P2-4: keep the default list query disabled until `fetchTemplates` requests it, so no
   // avoidable default `limit:20` fetch fires before a consumer supplies its own params.
   // P2-4：默认 list query 保持禁用，直到 `fetchTemplates` 被调用，避免提前发起默认 limit:20 请求。
   const listRequested = ref(false);
-  const templateList = useTaskTemplateListQuery({
+  const templateList = useTaskPlanListQuery({
     params: listParams,
     enabled: listRequested,
   });
-  const instanceOps = useTaskInstances();
+  const instanceOps = useTaskOccurrences();
 
-  async function fetchTemplates(query?: TaskTemplateListQueryInput) {
+  async function fetchTemplates(query?: TaskPlanListQueryInput) {
     listParams.value = {
       page: query?.page ?? store.pagination.page,
       limit: query?.limit ?? store.pagination.pageSize,
@@ -44,9 +44,9 @@ export function useTask() {
       labelIdsAll: query?.labelIdsAll,
     };
     listRequested.value = true;
-    const queryKey = taskTemplateQueryKeys.list(
+    const queryKey = taskPlanQueryKeys.list(
       resolveIdentityScope(),
-      canonicalizeTaskTemplateListQuery(listParams.value),
+      canonicalizeTaskPlanListQuery(listParams.value),
     );
     // An errored query makes the waiter settle instantly without re-requesting; force a
     // refetch so a consumer's retry actually retries (P2-2). Fresh/pending keys still wait.
@@ -54,7 +54,7 @@ export function useTask() {
     if (runtime.queryClient.getQueryState(queryKey)?.status === 'error') {
       await templateList.refetch();
     } else {
-      await waitForTaskTemplateQuery(runtime.queryClient, queryKey);
+      await waitForTaskPlanQuery(runtime.queryClient, queryKey);
     }
   }
 

@@ -13,9 +13,9 @@ import {
 } from '@memoflow/contracts/notification';
 import {
   ReminderTimeUnit,
-  TaskInstanceStatus,
+  TaskOccurrenceStatus,
   TaskReminderType,
-  TaskTemplateStatus,
+  TaskPlanStatus,
 } from '@memoflow/contracts/task';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
 // eslint-disable-next-line @nx/enforce-module-boundaries
@@ -63,10 +63,10 @@ import {
 } from '@memoflow/test-utils/setup/integration-helpers';
 
 const FIXTURE_D = {
-  templateId: 'TaskTemplateId_wave3-d',
-  instanceId: 'TaskInstanceId_wave3-d',
+  templateId: 'TaskPlanId_wave3-d',
+  instanceId: 'TaskOccurrenceId_wave3-d',
   runAt: Date.parse('2026-08-10T08:45:00.000Z'),
-  schedulingKey: 'TaskInstanceId_wave3-d|2026-08-10T08:45:00.000Z',
+  schedulingKey: 'TaskOccurrenceId_wave3-d|2026-08-10T08:45:00.000Z',
   anchorTime: 1_704_000_000_000,
 } as const;
 
@@ -198,23 +198,23 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     const registry = new ScheduledHandlerRegistry();
     registry.register(
       createTaskReminderScheduledHandlerRegistration({
-        taskInstanceRepository: {
+        taskOccurrenceRepository: {
           findByIdForIdentity: async () => ({
             id: instanceId,
             identityId,
             templateId,
             occurrenceKey: null,
-            status: TaskInstanceStatus.Pending,
+            status: TaskOccurrenceStatus.Pending,
             deletedAt: null,
           }),
         },
-        taskTemplateRepository: {
+        taskPlanRepository: {
           findByIdForIdentity: async () => ({
             toServerDTO: () => ({
               id: templateId,
               identityId,
               name: 'Ship R07',
-              status: TaskTemplateStatus.Active,
+              status: TaskPlanStatus.Active,
               deletedAt: null,
               reminderConfig: {
                 enabled: true,

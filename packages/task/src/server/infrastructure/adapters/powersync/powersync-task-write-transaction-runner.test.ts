@@ -8,11 +8,11 @@ import type {
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskGoalBindingTrigger, TaskPlanOutcome, TaskType } from '@memoflow/contracts/task';
 import { eventBus } from '@memoflow/utils/domain';
-import { TaskTemplate } from '../../../domain/aggregates/task-template';
-import { RecurrenceRule, TaskInstanceId, TaskTimeConfig } from '../../../domain/value-objects';
+import { TaskPlan } from '../../../domain/aggregates/task-plan';
+import { RecurrenceRule, TaskOccurrenceId, TaskTimeConfig } from '../../../domain/value-objects';
 import { anIdentityId } from '../../../../testing';
 import { createTaskPowerSyncModule } from '../../powersync';
-import { PowerSyncTaskInstanceRepository } from './task-instance-powersync.repository';
+import { PowerSyncTaskOccurrenceRepository } from './task-occurrence-powersync.repository';
 import { PowerSyncTaskWriteTransactionRunner } from './powersync-task-write-transaction-runner';
 
 type TemplateRecord = { id: string };
@@ -304,7 +304,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const db = new FakePowerSyncTaskDb();
     const runner = new PowerSyncTaskWriteTransactionRunner(db);
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
-    const template = TaskTemplate.create({
+    const template = TaskPlan.create({
       identityId: anIdentityId(),
       title: 'PowerSync write',
       taskType: TaskType.Recurring,
@@ -338,11 +338,11 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const db = new FakePowerSyncTaskDb();
     const module = createTaskPowerSyncModule(db);
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
-    vi.spyOn(PowerSyncTaskInstanceRepository.prototype, 'saveMany').mockRejectedValue(
+    vi.spyOn(PowerSyncTaskOccurrenceRepository.prototype, 'saveMany').mockRejectedValue(
       new Error('saveMany failed'),
     );
 
-    const result = await module.api.createTaskTemplate({
+    const result = await module.api.createTaskPlan({
       identityId: anIdentityId(),
       name: 'Daily Review',
       taskType: TaskType.Recurring,
@@ -374,7 +374,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const db = new FakePowerSyncTaskDb();
     const module = createTaskPowerSyncModule(db);
     const identityId = anIdentityId();
-    const template = TaskTemplate.create({
+    const template = TaskPlan.create({
       identityId,
       title: 'PowerSync finite plan',
       taskType: TaskType.Recurring,
@@ -387,12 +387,12 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
         contribution: { value: 1, trigger: TaskGoalBindingTrigger.PlanCompletion },
       },
     });
-    await module.taskTemplateRepository.save(template);
+    await module.taskPlanRepository.save(template);
 
     const runner = new PowerSyncTaskWriteTransactionRunner(db);
     await runner.run(async ({ templateRepository }) => {
       template.applyPlanOutcome(TaskPlanOutcome.Succeeded, {
-        triggeringTaskInstanceId: TaskInstanceId.generate(),
+        triggeringTaskOccurrenceId: TaskOccurrenceId.generate(),
       });
       await templateRepository.save(template);
     });
@@ -407,7 +407,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
 
     const identityId = anIdentityId();
-    const createRes = await module.api.createTaskTemplate({
+    const createRes = await module.api.createTaskPlan({
       identityId,
       name: 'Goal Task',
       taskType: TaskType.Recurring,
@@ -441,7 +441,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
 
     db.failOutbox = true;
 
-    const result = await module.api.completeTaskInstance(instanceId, identityId);
+    const result = await module.api.completeTaskOccurrence(instanceId, identityId);
 
     expect(result).toBeErrorWithCode('INTERNAL_ERROR');
     expect(db.templateCount).toBe(1);

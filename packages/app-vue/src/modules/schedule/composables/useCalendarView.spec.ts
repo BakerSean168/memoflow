@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { taskInstancesToEvents, toLocalDateKey } from './useCalendarView';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
-import type { TaskTemplateId, TaskInstanceId, IdentityId } from '@memoflow/contracts/primitives';
+import { taskOccurrencesToEvents, toLocalDateKey } from './useCalendarView';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '@memoflow/contracts/primitives';
 
-function makeTemplate(overrides: Partial<TaskTemplateClientDTO> = {}): TaskTemplateClientDTO {
+function makeTemplate(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {
   return {
-    id: 'tpl-1' as TaskTemplateId,
+    id: 'tpl-1' as TaskPlanId,
     identityId: 'acc-1' as IdentityId,
     name: 'Morning Task',
     description: null,
@@ -44,10 +44,10 @@ function makeTemplate(overrides: Partial<TaskTemplateClientDTO> = {}): TaskTempl
   };
 }
 
-function makeInstance(overrides: Partial<TaskInstanceClientDTO> = {}): TaskInstanceClientDTO {
+function makeInstance(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
   return {
-    id: 'inst-1' as TaskInstanceId,
-    templateId: 'tpl-1' as TaskTemplateId,
+    id: 'inst-1' as TaskOccurrenceId,
+    templateId: 'tpl-1' as TaskPlanId,
     identityId: 'acc-1' as IdentityId,
     instanceDate: new Date(2026, 2, 18, 0, 0, 0, 0).getTime(),
     timeConfig: {
@@ -71,7 +71,7 @@ function makeInstance(overrides: Partial<TaskInstanceClientDTO> = {}): TaskInsta
 
 describe('useCalendarView helpers', () => {
   it('maps all-day task instances to all-day calendar events', () => {
-    const [event] = taskInstancesToEvents([makeInstance()], [makeTemplate()]);
+    const [event] = taskOccurrencesToEvents([makeInstance()], [makeTemplate()]);
 
     expect(event).toMatchObject({
       id: 'task-inst-1',
@@ -88,7 +88,7 @@ describe('useCalendarView helpers', () => {
   });
 
   it('maps timed task instances to timed calendar events', () => {
-    const [event] = taskInstancesToEvents(
+    const [event] = taskOccurrencesToEvents(
       [
         makeInstance({
           timeConfig: {

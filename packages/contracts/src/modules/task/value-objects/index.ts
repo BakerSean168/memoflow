@@ -71,12 +71,12 @@ export { ReminderTimeUnit } from './reminder-time-unit';
 export { RecurrenceEndConditionType } from './recurrence-end-condition-type';
 export { TaskScheduleMode } from './task-schedule-mode';
 
-export { TaskTemplateStatus } from './task-template-status';
+export { TaskPlanStatus } from './task-plan-status';
 export { TaskPlanOutcome } from './task-plan-outcome';
 export type { TaskPlanOutcome as TaskPlanOutcomeValue } from './task-plan-outcome';
 export { TaskPlanCompletionPolicy } from './task-plan-completion-policy';
 export type { TaskPlanCompletionPolicy as TaskPlanCompletionPolicyValue } from './task-plan-completion-policy';
-export { TaskInstanceStatus } from './task-instance-status';
+export { TaskOccurrenceStatus } from './task-occurrence-status';
 export { TaskTimeType } from './task-time-type';
 export { TaskType } from './task-type';
 export type {

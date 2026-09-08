@@ -31,7 +31,7 @@ export {
   type TaskRuntimeContributionsInput,
   type TaskRepositorySet,
   type CreateTaskPrismaModuleOptions,
-  type ITaskTemplateRepository,
-  type ITaskInstanceRepository,
+  type ITaskPlanRepository,
+  type ITaskOccurrenceRepository,
 } from './server';
 export type { TaskWriteTransactionRunner } from './server/application/use-cases/commands/task-write-support';

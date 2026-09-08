@@ -7,7 +7,7 @@
 export type { TaskCreatedEvent } from './task-created.event';
 export type { TaskUpdatedEvent } from './task-updated.event';
 export type { TaskDeletedEvent } from './task-deleted.event';
-export type { TaskInstanceCompletedEvent } from './task-instance-completed.event';
+export type { TaskOccurrenceCompletedEvent } from './task-occurrence-completed.event';
 export type { TaskPlanOutcomeChangedEvent } from './task-plan-outcome-changed.event';
 export {
   TaskGoalSettlementSourceType,
@@ -17,12 +17,12 @@ export {
   type TaskGoalProgressRevertEventV2,
   type TaskGoalProgressOutboxEventV2,
 } from './task-goal-progress-outbox.event';
-export type { TaskInstanceSkippedEvent } from './task-instance-skipped.event';
-export type { TaskInstanceDeletedEvent } from './task-instance-deleted.event';
-export type { TaskInstancesGeneratedEvent } from './task-instances-generated.event';
-export type { TaskTemplatePausedEvent } from './task-template-paused.event';
-export type { TaskTemplateResumedEvent } from './task-template-resumed.event';
-export type { TaskTemplateScheduleTimeChangedEvent } from './task-template-schedule-time-changed.event';
-export type { TaskTemplateRecurrenceChangedEvent } from './task-template-recurrence-changed.event';
+export type { TaskOccurrenceSkippedEvent } from './task-occurrence-skipped.event';
+export type { TaskOccurrenceDeletedEvent } from './task-occurrence-deleted.event';
+export type { TaskOccurrencesGeneratedEvent } from './task-occurrences-generated.event';
+export type { TaskPlanPausedEvent } from './task-plan-paused.event';
+export type { TaskPlanResumedEvent } from './task-plan-resumed.event';
+export type { TaskPlanScheduleTimeChangedEvent } from './task-plan-schedule-time-changed.event';
+export type { TaskPlanRecurrenceChangedEvent } from './task-plan-recurrence-changed.event';
 export type { TaskUncompletedEvent } from './task-uncompleted.event';
 export type { TaskRescheduledEvent } from './task-rescheduled.event';

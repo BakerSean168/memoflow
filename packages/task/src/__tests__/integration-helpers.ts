@@ -19,8 +19,8 @@ export async function cleanTaskTables(): Promise<void> {
   const prisma = await getPrisma();
   await prisma.taskGoalOutbox.deleteMany();
   await prisma.taskLabel.deleteMany();
-  await prisma.taskInstance.deleteMany();
-  await prisma.taskTemplateHistory.deleteMany();
-  await prisma.taskTemplate.deleteMany();
+  await prisma.taskOccurrence.deleteMany();
+  await prisma.taskPlanHistory.deleteMany();
+  await prisma.taskPlan.deleteMany();
   await prisma.taskStatistic.deleteMany();
 }

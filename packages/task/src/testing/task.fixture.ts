@@ -10,17 +10,17 @@ import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { DayOfWeek, TaskType, TaskPlanCompletionPolicy, TaskPlanOutcome } from '@memoflow/contracts/task';
 import { anIdentityId } from '@memoflow/test-utils/fixtures';
 import {
-  TaskTemplateId,
-  TaskInstanceId,
+  TaskPlanId,
+  TaskOccurrenceId,
   TaskTimeConfig,
   RecurrenceRule,
   TaskReminderConfig,
   CompletionRecord,
   ChecklistItemDefinition,
-  TaskTemplateStatus,
+  TaskPlanStatus,
 } from '../server/domain';
-import { TaskInstance, TaskTemplate } from '../server/domain';
-import type { TaskTemplateState } from '../server/domain';
+import { TaskOccurrence, TaskPlan } from '../server/domain';
+import type { TaskPlanState } from '../server/domain';
 
 function titleFor(prefix: string): string {
   return `${prefix} ${Math.random().toString(36).slice(2, 8)}`;
@@ -40,8 +40,8 @@ export interface OneTimeTaskOverrides {
   note?: string;
 }
 
-export function aOneTimeTask(overrides: OneTimeTaskOverrides = {}): TaskTemplate {
-  return TaskTemplate.createOneTimeTask({
+export function aOneTimeTask(overrides: OneTimeTaskOverrides = {}): TaskPlan {
+  return TaskPlan.createOneTimeTask({
     identityId: overrides.identityId ?? anIdentityId(),
     title: overrides.title ?? titleFor('Task'),
     description: overrides.description,
@@ -64,8 +64,8 @@ export interface RecurringTaskOverrides {
   generateAheadDays?: number;
 }
 
-export function aRecurringTask(overrides: RecurringTaskOverrides = {}): TaskTemplate {
-  return TaskTemplate.createRecurringTask({
+export function aRecurringTask(overrides: RecurringTaskOverrides = {}): TaskPlan {
+  return TaskPlan.createRecurringTask({
     identityId: overrides.identityId ?? anIdentityId(),
     title: overrides.title ?? titleFor('Recurring Task'),
     description: overrides.description,
@@ -77,8 +77,8 @@ export function aRecurringTask(overrides: RecurringTaskOverrides = {}): TaskTemp
   });
 }
 
-export function aTaskTemplateState(overrides: Partial<TaskTemplateState> = {}): TaskTemplateState {
-  const id = overrides.id ?? TaskTemplateId.generate();
+export function aTaskPlanState(overrides: Partial<TaskPlanState> = {}): TaskPlanState {
+  const id = overrides.id ?? TaskPlanId.generate();
   const now = Date.now();
 
   return {
@@ -88,7 +88,7 @@ export function aTaskTemplateState(overrides: Partial<TaskTemplateState> = {}): 
     description: overrides.description ?? null,
     taskType: overrides.taskType ?? TaskType.OneTime,
     importance: overrides.importance ?? ImportanceLevel.Moderate,
-    status: overrides.status ?? TaskTemplateStatus.Active,
+    status: overrides.status ?? TaskPlanStatus.Active,
     outcome: overrides.outcome ?? TaskPlanOutcome.Open,
     completionPolicy: overrides.completionPolicy ?? TaskPlanCompletionPolicy.AllowCorrection,
     closedAt: overrides.closedAt ?? null,
@@ -114,21 +114,21 @@ export function aTaskTemplateState(overrides: Partial<TaskTemplateState> = {}): 
   };
 }
 
-export function aLoadedTaskTemplate(overrides: Partial<TaskTemplateState> = {}): TaskTemplate {
-  return TaskTemplate.load(aTaskTemplateState(overrides));
+export function aLoadedTaskPlan(overrides: Partial<TaskPlanState> = {}): TaskPlan {
+  return TaskPlan.load(aTaskPlanState(overrides));
 }
 
-export interface TaskInstanceOverrides {
-  templateId?: TaskTemplateId;
+export interface TaskOccurrenceOverrides {
+  templateId?: TaskPlanId;
   identityId?: IdentityId;
   instanceDate?: number;
   timeConfig?: TaskTimeConfig;
   importance?: ImportanceLevel;
 }
 
-export async function aTaskInstance(overrides: TaskInstanceOverrides = {}) {
-  return TaskInstance.create({
-    templateId: overrides.templateId ?? TaskTemplateId.generate(),
+export async function aTaskOccurrence(overrides: TaskOccurrenceOverrides = {}) {
+  return TaskOccurrence.create({
+    templateId: overrides.templateId ?? TaskPlanId.generate(),
     identityId: overrides.identityId ?? anIdentityId(),
     instanceDate: overrides.instanceDate ?? Date.now(),
     timeConfig: overrides.timeConfig ?? anAllDayTimeConfig(),
@@ -191,12 +191,12 @@ export function aChecklist(...titles: string[]): ChecklistItemDefinition[] {
   return ChecklistItemDefinition.fromTitles(titles);
 }
 
-export function aTaskTemplateId(value?: string): TaskTemplateId {
-  if (value) return TaskTemplateId.of(value);
-  return TaskTemplateId.generate();
+export function aTaskPlanId(value?: string): TaskPlanId {
+  if (value) return TaskPlanId.of(value);
+  return TaskPlanId.generate();
 }
 
-export function aTaskInstanceId(value?: string): TaskInstanceId {
-  if (value) return TaskInstanceId.of(value);
-  return TaskInstanceId.generate();
+export function aTaskOccurrenceId(value?: string): TaskOccurrenceId {
+  if (value) return TaskOccurrenceId.of(value);
+  return TaskOccurrenceId.generate();
 }

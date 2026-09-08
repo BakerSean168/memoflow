@@ -75,19 +75,19 @@ test.describe('Local Docker core product Phase D', () => {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
 
-    const createTaskPlan = page.getByTestId('create-task-template-button');
+    const createTaskPlan = page.getByTestId('create-task-plan-button');
     await tabTo(page, createTaskPlan);
     await page.keyboard.press('Enter');
-    const taskDialog = page.getByTestId('task-template-dialog');
+    const taskDialog = page.getByTestId('task-plan-dialog');
     await expect(taskDialog).toBeVisible();
-    await expect(page.getByTestId('task-template-title-input')).toBeFocused();
+    await expect(page.getByTestId('task-plan-title-input')).toBeFocused();
     await expect(page.getByTestId('task-form-advanced-toggle')).toHaveAttribute(
       'aria-expanded',
       'false',
     );
     await expect(taskDialog.getByText('提醒设置', { exact: true })).toHaveCount(0);
     await expectDialogGeometry(taskDialog);
-    await expectNoSeriousAxeViolations(page, '[data-testid="task-template-dialog"]');
+    await expectNoSeriousAxeViolations(page, '[data-testid="task-plan-dialog"]');
 
     await page.keyboard.type(taskPlanName);
     await tabTo(page, page.getByTestId('task-dialog-save-button'));

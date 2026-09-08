@@ -34,7 +34,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/api/src/__tests__/smoke/task/task-instance.smoke.test.ts",
+      "path": "apps/api/src/__tests__/smoke/task/task-occurrence.smoke.test.ts",
       "primarySuite": "smoke",
       "collectors": [
         "apps/api/vitest.smoke.config.ts"
@@ -42,7 +42,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/api/src/__tests__/smoke/task/task-template.smoke.test.ts",
+      "path": "apps/api/src/__tests__/smoke/task/task-plan.smoke.test.ts",
       "primarySuite": "smoke",
       "collectors": [
         "apps/api/vitest.smoke.config.ts"
@@ -1737,7 +1737,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/web/e2e/task/task-template-crud.spec.ts",
+      "path": "apps/web/e2e/task/task-plan-crud.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
         "apps/web/playwright.config.ts"
@@ -4121,7 +4121,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/task/components/TaskTemplateForm/TaskTemplateForm.spec.ts",
+      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4129,7 +4129,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/task/components/TaskTemplateForm/sections/KeyResultLinksSection.spec.ts",
+      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4137,7 +4137,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/task/components/TaskTemplateForm/widgets/selectors-accessibility.spec.ts",
+      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4145,7 +4145,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/task/components/cards/TaskInstanceCard.spec.ts",
+      "path": "packages/app-vue/src/modules/task/components/cards/TaskOccurrenceCard.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4161,7 +4161,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/task/components/dialogs/TaskTemplateDialog.spec.ts",
+      "path": "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4185,7 +4185,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/task/composables/taskTemplateCache.spec.ts",
+      "path": "packages/app-vue/src/modules/task/composables/taskPlanCache.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4209,7 +4209,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskInstances.spec.ts",
+      "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrences.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4217,7 +4217,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskTemplateMutations.spec.ts",
+      "path": "packages/app-vue/src/modules/task/composables/useTaskPlanMutations.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4225,7 +4225,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/task/composables/useTaskTemplateQueries.spec.ts",
+      "path": "packages/app-vue/src/modules/task/composables/useTaskPlanQueries.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5107,7 +5107,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/task/api/task-template.dto.test.ts",
+      "path": "packages/contracts/src/modules/task/api/task-plan.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5251,7 +5251,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/dashboard/src/to-dashboard-task-instance-record-dual.surface.spec.ts",
+      "path": "packages/dashboard/src/to-dashboard-task-occurrence-record-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/dashboard/vitest.config.ts"
@@ -9355,7 +9355,7 @@
       ]
     },
     {
-      "path": "packages/task/src/api/routes/task-instance.routes.spec.ts",
+      "path": "packages/task/src/api/routes/task-occurrence.routes.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9365,7 +9365,7 @@
       ]
     },
     {
-      "path": "packages/task/src/api/routes/task-template.routes.spec.ts",
+      "path": "packages/task/src/api/routes/task-plan.routes.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9415,7 +9415,7 @@
       ]
     },
     {
-      "path": "packages/task/src/infrastructure-client/adapters/http/task-instance-http.adapter.spec.ts",
+      "path": "packages/task/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9446,7 +9446,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/activate-task-template.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/activate-task-plan.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9457,7 +9457,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/archive-task-template.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/archive-task-plan.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9468,7 +9468,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/complete-task-instance.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/complete-task-occurrence.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9479,7 +9479,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/create-task-template.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/create-task-plan.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9490,7 +9490,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/delete-task-instance.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/delete-task-occurrence.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9501,7 +9501,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/delete-task-template.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/delete-task-plan.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9512,7 +9512,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/generate-task-instances.use-case.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/generate-task-occurrences.use-case.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9534,7 +9534,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/pause-task-template.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/pause-task-plan.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9545,7 +9545,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/reschedule-task-instance.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/reschedule-task-occurrence.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9556,7 +9556,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/skip-task-instance.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/skip-task-occurrence.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9567,7 +9567,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/start-task-instance.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/start-task-occurrence.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9589,7 +9589,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/uncomplete-task-instance.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/uncomplete-task-occurrence.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9600,7 +9600,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/commands/__tests__/update-task-template.test.ts",
+      "path": "packages/task/src/server/application/use-cases/commands/__tests__/update-task-plan.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9622,7 +9622,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/queries/__tests__/get-task-instance.test.ts",
+      "path": "packages/task/src/server/application/use-cases/queries/__tests__/get-task-occurrence.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9633,7 +9633,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/queries/__tests__/get-task-instances-by-date-range.test.ts",
+      "path": "packages/task/src/server/application/use-cases/queries/__tests__/get-task-occurrences-by-date-range.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9644,7 +9644,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/queries/__tests__/get-task-template.test.ts",
+      "path": "packages/task/src/server/application/use-cases/queries/__tests__/get-task-plan.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9655,7 +9655,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/queries/__tests__/list-task-instances-by-account.test.ts",
+      "path": "packages/task/src/server/application/use-cases/queries/__tests__/list-task-occurrences-by-account.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9666,7 +9666,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/queries/__tests__/list-task-instances-by-status.test.ts",
+      "path": "packages/task/src/server/application/use-cases/queries/__tests__/list-task-occurrences-by-status.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9677,7 +9677,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/queries/__tests__/list-task-instances-by-template.test.ts",
+      "path": "packages/task/src/server/application/use-cases/queries/__tests__/list-task-occurrences-by-template.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9688,7 +9688,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/application/use-cases/queries/__tests__/list-task-templates.test.ts",
+      "path": "packages/task/src/server/application/use-cases/queries/__tests__/list-task-plans.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9699,7 +9699,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/domain/aggregates/__tests__/TaskInstance.test.ts",
+      "path": "packages/task/src/server/domain/aggregates/__tests__/TaskOccurrence.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9709,7 +9709,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/domain/aggregates/__tests__/TaskTemplate.test.ts",
+      "path": "packages/task/src/server/domain/aggregates/__tests__/TaskPlan.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9737,7 +9737,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/task/src/server/domain/services/TaskInstanceGenerationService.spec.ts",
+      "path": "packages/task/src/server/domain/services/TaskOccurrenceGenerationService.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9797,7 +9797,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/domain/value-objects/__tests__/task-instance-occurrence-key.spec.ts",
+      "path": "packages/task/src/server/domain/value-objects/__tests__/task-occurrence-occurrence-key.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9817,7 +9817,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/domain/value-objects/__tests__/task-template-id.spec.ts",
+      "path": "packages/task/src/server/domain/value-objects/__tests__/task-plan-id.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9897,7 +9897,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/infrastructure/adapters/powersync/task-instance-powersync.repository.test.ts",
+      "path": "packages/task/src/server/infrastructure/adapters/powersync/task-occurrence-powersync.repository.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9907,7 +9907,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/infrastructure/adapters/powersync/task-template-powersync.repository.spec.ts",
+      "path": "packages/task/src/server/infrastructure/adapters/powersync/task-plan-powersync.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9917,7 +9917,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/infrastructure/adapters/prisma/__tests__/task-instance-ownership.surface.spec.ts",
+      "path": "packages/task/src/server/infrastructure/adapters/prisma/__tests__/task-occurrence-ownership.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9927,7 +9927,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/infrastructure/adapters/prisma/__tests__/task-template-ownership.surface.spec.ts",
+      "path": "packages/task/src/server/infrastructure/adapters/prisma/__tests__/task-plan-ownership.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9948,7 +9948,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/infrastructure/adapters/prisma/mappers/prisma-task-instance-mapper.spec.ts",
+      "path": "packages/task/src/server/infrastructure/adapters/prisma/mappers/prisma-task-occurrence-mapper.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9959,7 +9959,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/infrastructure/adapters/prisma/mappers/prisma-task-template-mapper.spec.ts",
+      "path": "packages/task/src/server/infrastructure/adapters/prisma/mappers/prisma-task-plan-mapper.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -9994,7 +9994,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/task/src/server/infrastructure/adapters/prisma/task-instance-prisma.repository.integration.test.ts",
+      "path": "packages/task/src/server/infrastructure/adapters/prisma/task-occurrence-prisma.repository.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
         "packages/task/vitest.integration.config.ts"
@@ -10002,7 +10002,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/task/src/server/infrastructure/adapters/prisma/task-template-prisma.repository.integration.test.ts",
+      "path": "packages/task/src/server/infrastructure/adapters/prisma/task-plan-prisma.repository.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
         "packages/task/vitest.integration.config.ts"
@@ -10020,7 +10020,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/infrastructure/runtime/__tests__/task-instance-maintenance-runtime.spec.ts",
+      "path": "packages/task/src/server/infrastructure/runtime/__tests__/task-occurrence-maintenance-runtime.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -10088,7 +10088,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/task/src/server/transport/__tests__/task-instance.controller.test.ts",
+      "path": "packages/task/src/server/transport/__tests__/task-occurrence.controller.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -10098,7 +10098,7 @@
       ]
     },
     {
-      "path": "packages/task/src/server/transport/__tests__/task-template.controller.test.ts",
+      "path": "packages/task/src/server/transport/__tests__/task-plan.controller.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -11847,50 +11847,50 @@
       "packages/setting/src/server/infrastructure/__tests__/setting-repositories.surface.spec.ts",
       "packages/task/src/api/module-lifecycle.spec.ts",
       "packages/task/src/api/routes/get-first-query-value-dual.surface.spec.ts",
-      "packages/task/src/api/routes/task-instance.routes.spec.ts",
-      "packages/task/src/api/routes/task-template.routes.spec.ts",
+      "packages/task/src/api/routes/task-occurrence.routes.spec.ts",
+      "packages/task/src/api/routes/task-plan.routes.spec.ts",
       "packages/task/src/api/routes/task-void-success-envelope.surface.spec.ts",
       "packages/task/src/electron/authenticated-ipc.spec.ts",
       "packages/task/src/electron/index.spec.ts",
       "packages/task/src/electron/task-electron.surface.spec.ts",
-      "packages/task/src/infrastructure-client/adapters/http/task-instance-http.adapter.spec.ts",
+      "packages/task/src/infrastructure-client/adapters/http/task-occurrence-http.adapter.spec.ts",
       "packages/task/src/server/application/outbox/task-goal-outbox-dispatcher.test.ts",
       "packages/task/src/server/application/use-cases/commands/__tests__/abandon-task-plan.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/activate-task-template.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/archive-task-template.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/complete-task-instance.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/create-task-template.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/delete-task-instance.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/delete-task-template.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/generate-task-instances.use-case.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/activate-task-plan.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/archive-task-plan.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/complete-task-occurrence.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/create-task-plan.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/delete-task-occurrence.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/delete-task-plan.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/generate-task-occurrences.use-case.test.ts",
       "packages/task/src/server/application/use-cases/commands/__tests__/instance-maintenance.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/pause-task-template.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/reschedule-task-instance.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/skip-task-instance.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/start-task-instance.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/pause-task-plan.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/reschedule-task-occurrence.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/skip-task-occurrence.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/start-task-occurrence.test.ts",
       "packages/task/src/server/application/use-cases/commands/__tests__/task-plan-outcome-transaction.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/uncomplete-task-instance.test.ts",
-      "packages/task/src/server/application/use-cases/commands/__tests__/update-task-template.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/uncomplete-task-occurrence.test.ts",
+      "packages/task/src/server/application/use-cases/commands/__tests__/update-task-plan.test.ts",
       "packages/task/src/server/application/use-cases/queries/__tests__/get-task-dashboard.test.ts",
-      "packages/task/src/server/application/use-cases/queries/__tests__/get-task-instance.test.ts",
-      "packages/task/src/server/application/use-cases/queries/__tests__/get-task-instances-by-date-range.test.ts",
-      "packages/task/src/server/application/use-cases/queries/__tests__/get-task-template.test.ts",
-      "packages/task/src/server/application/use-cases/queries/__tests__/list-task-instances-by-account.test.ts",
-      "packages/task/src/server/application/use-cases/queries/__tests__/list-task-instances-by-status.test.ts",
-      "packages/task/src/server/application/use-cases/queries/__tests__/list-task-instances-by-template.test.ts",
-      "packages/task/src/server/application/use-cases/queries/__tests__/list-task-templates.test.ts",
-      "packages/task/src/server/domain/aggregates/__tests__/TaskInstance.test.ts",
-      "packages/task/src/server/domain/aggregates/__tests__/TaskTemplate.test.ts",
+      "packages/task/src/server/application/use-cases/queries/__tests__/get-task-occurrence.test.ts",
+      "packages/task/src/server/application/use-cases/queries/__tests__/get-task-occurrences-by-date-range.test.ts",
+      "packages/task/src/server/application/use-cases/queries/__tests__/get-task-plan.test.ts",
+      "packages/task/src/server/application/use-cases/queries/__tests__/list-task-occurrences-by-account.test.ts",
+      "packages/task/src/server/application/use-cases/queries/__tests__/list-task-occurrences-by-status.test.ts",
+      "packages/task/src/server/application/use-cases/queries/__tests__/list-task-occurrences-by-template.test.ts",
+      "packages/task/src/server/application/use-cases/queries/__tests__/list-task-plans.test.ts",
+      "packages/task/src/server/domain/aggregates/__tests__/TaskOccurrence.test.ts",
+      "packages/task/src/server/domain/aggregates/__tests__/TaskPlan.test.ts",
       "packages/task/src/server/domain/aggregates/task-recurrence-date.adapter.spec.ts",
-      "packages/task/src/server/domain/services/TaskInstanceGenerationService.spec.ts",
+      "packages/task/src/server/domain/services/TaskOccurrenceGenerationService.spec.ts",
       "packages/task/src/server/domain/services/task-plan-outcome-evaluator.spec.ts",
       "packages/task/src/server/domain/task-domain-events-barrel.surface.spec.ts",
       "packages/task/src/server/domain/task-domain-simplification.surface.spec.ts",
       "packages/task/src/server/domain/task-goal-contribution-v2.surface.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-domain-value-objects.spec.ts",
-      "packages/task/src/server/domain/value-objects/__tests__/task-instance-occurrence-key.spec.ts",
+      "packages/task/src/server/domain/value-objects/__tests__/task-occurrence-occurrence-key.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-server-value-objects.spec.ts",
-      "packages/task/src/server/domain/value-objects/__tests__/task-template-id.spec.ts",
+      "packages/task/src/server/domain/value-objects/__tests__/task-plan-id.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-time-config-ymd.spec.ts",
       "packages/task/src/server/infrastructure/__tests__/task-module-partial-start.spec.ts",
       "packages/task/src/server/infrastructure/__tests__/task-reminder-fire.handler.spec.ts",
@@ -11898,22 +11898,22 @@
       "packages/task/src/server/infrastructure/adapters/powersync/powersync-task-binding-read-port.spec.ts",
       "packages/task/src/server/infrastructure/adapters/powersync/powersync-task-goal-outbox-dispatch-store.test.ts",
       "packages/task/src/server/infrastructure/adapters/powersync/powersync-task-write-transaction-runner.test.ts",
-      "packages/task/src/server/infrastructure/adapters/powersync/task-instance-powersync.repository.test.ts",
-      "packages/task/src/server/infrastructure/adapters/powersync/task-template-powersync.repository.spec.ts",
-      "packages/task/src/server/infrastructure/adapters/prisma/__tests__/task-instance-ownership.surface.spec.ts",
-      "packages/task/src/server/infrastructure/adapters/prisma/__tests__/task-template-ownership.surface.spec.ts",
+      "packages/task/src/server/infrastructure/adapters/powersync/task-occurrence-powersync.repository.test.ts",
+      "packages/task/src/server/infrastructure/adapters/powersync/task-plan-powersync.repository.spec.ts",
+      "packages/task/src/server/infrastructure/adapters/prisma/__tests__/task-occurrence-ownership.surface.spec.ts",
+      "packages/task/src/server/infrastructure/adapters/prisma/__tests__/task-plan-ownership.surface.spec.ts",
       "packages/task/src/server/infrastructure/adapters/prisma/mappers/__tests__/task-row-mapper.spec.ts",
-      "packages/task/src/server/infrastructure/adapters/prisma/mappers/prisma-task-instance-mapper.spec.ts",
-      "packages/task/src/server/infrastructure/adapters/prisma/mappers/prisma-task-template-mapper.spec.ts",
+      "packages/task/src/server/infrastructure/adapters/prisma/mappers/prisma-task-occurrence-mapper.spec.ts",
+      "packages/task/src/server/infrastructure/adapters/prisma/mappers/prisma-task-plan-mapper.spec.ts",
       "packages/task/src/server/infrastructure/normalize-runtime-contributions-dual.surface.spec.ts",
-      "packages/task/src/server/infrastructure/runtime/__tests__/task-instance-maintenance-runtime.spec.ts",
+      "packages/task/src/server/infrastructure/runtime/__tests__/task-occurrence-maintenance-runtime.spec.ts",
       "packages/task/src/server/infrastructure/runtime/task.runtime.spec.ts",
       "packages/task/src/server/infrastructure/schedule-projection-source.spec.ts",
       "packages/task/src/server/infrastructure/schedule-source-ownership.surface.spec.ts",
       "packages/task/src/server/infrastructure/task-goal-outbox-runtime.spec.ts",
       "packages/task/src/server/infrastructure/task-goal-outbox.test.ts",
-      "packages/task/src/server/transport/__tests__/task-instance.controller.test.ts",
-      "packages/task/src/server/transport/__tests__/task-template.controller.test.ts",
+      "packages/task/src/server/transport/__tests__/task-occurrence.controller.test.ts",
+      "packages/task/src/server/transport/__tests__/task-plan.controller.test.ts",
       "packages/task/src/server/transport/__tests__/task-transport-parity.spec.ts",
       "packages/task/src/testing/an-identity-id-dual.surface.spec.ts"
     ]

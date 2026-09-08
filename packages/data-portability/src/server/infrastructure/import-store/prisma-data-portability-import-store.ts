@@ -23,8 +23,8 @@ import type {
   CreateKeyResultInput,
   CreateGoalReviewInput,
   CreateGoalRecordInput,
-  CreateTaskTemplateInput,
-  CreateTaskInstanceInput,
+  CreateTaskPlanInput,
+  CreateTaskOccurrenceInput,
   CreateScheduleInput,
   CreateScheduleTaskInput,
   CreateReminderGroupInput,
@@ -129,15 +129,15 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
 
   // --- Task ---
 
-  async createTaskTemplate(input: CreateTaskTemplateInput): Promise<void> {
-    await this.tx.taskTemplate.create({
-      data: input as unknown as Prisma.TaskTemplateUncheckedCreateInput,
+  async createTaskPlan(input: CreateTaskPlanInput): Promise<void> {
+    await this.tx.taskPlan.create({
+      data: input as unknown as Prisma.TaskPlanUncheckedCreateInput,
     });
   }
 
-  async createTaskInstance(input: CreateTaskInstanceInput): Promise<void> {
-    await this.tx.taskInstance.create({
-      data: input as unknown as Prisma.TaskInstanceUncheckedCreateInput,
+  async createTaskOccurrence(input: CreateTaskOccurrenceInput): Promise<void> {
+    await this.tx.taskOccurrence.create({
+      data: input as unknown as Prisma.TaskOccurrenceUncheckedCreateInput,
     });
   }
 

@@ -13,8 +13,8 @@ import {
 } from './task.module';
 import {
   PrismaTaskWriteTransactionRunner,
-  TaskInstancePrismaRepository,
-  TaskTemplatePrismaRepository,
+  TaskOccurrencePrismaRepository,
+  TaskPlanPrismaRepository,
 } from './adapters/prisma';
 import { PrismaTaskGoalOutboxDispatchStore } from './adapters/prisma/prisma-task-goal-outbox-dispatch-store';
 import {
@@ -24,8 +24,8 @@ import {
 import { createTaskGoalOutboxRuntime } from './task-goal-outbox-runtime';
 import { createTaskScheduleProjectionSource } from './schedule-projection-source';
 import type { TaskScheduleProjectionSource } from '../../schedule-projection';
-import type { ITaskInstanceRepository } from '../domain/repositories/i-task-instance-repository';
-import type { ITaskTemplateRepository } from '../domain/repositories/i-task-template-repository';
+import type { ITaskOccurrenceRepository } from '../domain/repositories/i-task-occurrence-repository';
+import type { ITaskPlanRepository } from '../domain/repositories/i-task-plan-repository';
 import type { TaskWriteTransactionRunner } from '../application/use-cases/commands/task-write-support';
 
 export interface CreateTaskPrismaModuleOptions {
@@ -47,8 +47,8 @@ export interface CreateTaskPrismaModuleOptions {
  *
  */
 export interface TaskRepositorySet {
-  readonly taskTemplateRepository: ITaskTemplateRepository;
-  readonly taskInstanceRepository: ITaskInstanceRepository;
+  readonly taskPlanRepository: ITaskPlanRepository;
+  readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   readonly taskWriteTransactionRunner: TaskWriteTransactionRunner;
 }
 
@@ -72,14 +72,14 @@ export function createTaskPrismaModule(
   options: CreateTaskPrismaModuleOptions = {},
 ): TaskModuleInstance {
   const {
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
   } = createTaskPrismaRepositories(db);
 
   return createTaskModule({
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
     runtimeContributions: options.runtimeContributions,
   });
@@ -101,8 +101,8 @@ export function createTaskPrismaModule(
  */
 export function createTaskPrismaRepositories(db: PrismaClient): TaskRepositorySet {
   return {
-    taskTemplateRepository: new TaskTemplatePrismaRepository(db),
-    taskInstanceRepository: new TaskInstancePrismaRepository(db),
+    taskPlanRepository: new TaskPlanPrismaRepository(db),
+    taskOccurrenceRepository: new TaskOccurrencePrismaRepository(db),
     taskWriteTransactionRunner: new PrismaTaskWriteTransactionRunner(db),
   };
 }
@@ -140,7 +140,7 @@ export function createTaskPrismaScheduleProjectionSource(
   const repositories = createTaskPrismaRepositories(db);
 
   return createTaskScheduleProjectionSource({
-    taskTemplateRepository: repositories.taskTemplateRepository,
-    taskInstanceRepository: repositories.taskInstanceRepository,
+    taskPlanRepository: repositories.taskPlanRepository,
+    taskOccurrenceRepository: repositories.taskOccurrenceRepository,
   });
 }

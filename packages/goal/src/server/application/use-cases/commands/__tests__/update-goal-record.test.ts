@@ -156,7 +156,7 @@ describe('UpdateGoalRecordUseCase', () => {
       keyResultId: keyResult.id as never,
       identityId: 'identity-1' as never,
       value: 7,
-      source: { type: 'TASK_INSTANCE', id: 'task-instance-1' },
+      source: { type: 'TASK_INSTANCE', id: 'task-occurrence-1' },
     });
     const goalRepository = createMockRepo<IGoalRepository>({
       findByIdForIdentity: vi.fn().mockResolvedValue(goal),

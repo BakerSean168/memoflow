@@ -7,7 +7,7 @@ describe('date input product-time boundary', () => {
   const vueAi = readFileSync(resolve(dir, '../../modules/ai/components/AIGoalDraftEditor.vue'), 'utf8');
   const goalDialog = readFileSync(resolve(dir, '../../modules/goal/components/dialogs/GoalDialog.vue'), 'utf8');
   const vueTask = readFileSync(
-    resolve(dir, '../../modules/task/components/TaskTemplateForm/sections/TimeConfigSection.vue'),
+    resolve(dir, '../../modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue'),
     'utf8',
   );
 

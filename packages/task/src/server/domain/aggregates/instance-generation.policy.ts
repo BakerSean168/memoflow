@@ -1,21 +1,21 @@
 /**
- * Instance generation policy for TaskTemplate.
+ * Instance generation policy for TaskPlan.
  *
  * Pure functions that determine whether and how task instances should be generated.
- * Extracted from TaskTemplate aggregate to reduce aggregate size.
+ * Extracted from TaskPlan aggregate to reduce aggregate size.
  */
 
 import { createTimeFacade } from '@memoflow/time';
 
 const taskTime = createTimeFacade();
 import { TaskType } from '../value-objects';
-import { TaskTemplateStatus } from '../../domain/value-objects/task-template-status';
-import { InvalidDateRangeError, InvalidTaskTemplateStateError } from '../value-objects/task-errors';
+import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
+import { InvalidDateRangeError, InvalidTaskPlanStateError } from '../value-objects/task-errors';
 import type { RecurrenceRule, TaskTimeConfig } from '../value-objects';
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { IdentityId } from '@memoflow/domain-shared';
-import type { TaskTemplateId } from '../../domain/value-objects/task-template-id';
-import { TaskInstance } from './task-instance';
+import type { TaskPlanId } from '../../domain/value-objects/task-plan-id';
+import { TaskOccurrence } from './task-occurrence';
 import {
   nextRecurrenceDate,
   recurrenceDatesBetween,
@@ -24,9 +24,9 @@ import {
 
 /** Parameters for instance generation. */
 export interface InstanceGenerationContext {
-  templateId: TaskTemplateId;
+  templateId: TaskPlanId;
   identityId: IdentityId;
-  status: TaskTemplateStatus;
+  status: TaskPlanStatus;
   taskType: TaskType;
   timeConfig: TaskTimeConfig | null;
   recurrenceRule: RecurrenceRule | null;
@@ -36,7 +36,7 @@ export interface InstanceGenerationContext {
 
 /** Result of instance generation. */
 export interface InstanceGenerationResult {
-  instances: TaskInstance[];
+  instances: TaskOccurrence[];
   lastGeneratedDate: number | null;
 }
 
@@ -55,28 +55,28 @@ export function startOfLocalDay(value: number): number {
 export function createInstanceFromTemplate(
   ctx: InstanceGenerationContext,
   params: CreateInstanceParams,
-): TaskInstance {
-  if (ctx.status !== TaskTemplateStatus.Active) {
-    throw new InvalidTaskTemplateStateError('Can only create instances for active task plans', {
+): TaskOccurrence {
+  if (ctx.status !== TaskPlanStatus.Active) {
+    throw new InvalidTaskPlanStateError('Can only create instances for active task plans', {
       templateId: ctx.templateId, currentStatus: ctx.status, attemptedAction: 'createInstance',
     });
   }
   if (typeof params.instanceDate !== 'number' || isNaN(params.instanceDate)) {
-    throw new InvalidTaskTemplateStateError('instanceDate must be a valid number', {
+    throw new InvalidTaskPlanStateError('instanceDate must be a valid number', {
       templateId: ctx.templateId,
       currentStatus: ctx.status,
       attemptedAction: 'createInstance',
     });
   }
   if (!ctx.timeConfig) {
-    throw new InvalidTaskTemplateStateError('Template must have timeConfig to create instances', {
+    throw new InvalidTaskPlanStateError('Template must have timeConfig to create instances', {
       templateId: ctx.templateId,
       currentStatus: ctx.status,
       attemptedAction: 'createInstance',
     });
   }
 
-  return TaskInstance.create({
+  return TaskOccurrence.create({
     templateId: ctx.templateId,
     identityId: ctx.identityId,
     instanceDate: params.instanceDate,
@@ -89,7 +89,7 @@ function passesBusinessGenerationGuards(
   ctx: InstanceGenerationContext,
   candidateDay: number,
 ): boolean {
-  if (ctx.status !== TaskTemplateStatus.Active) return false;
+  if (ctx.status !== TaskPlanStatus.Active) return false;
   if (ctx.taskType !== TaskType.Recurring) return false;
   if (!ctx.recurrenceRule) return false;
 
@@ -133,15 +133,15 @@ export function generateInstances(
   if (fromDate >= toDate) {
     throw new InvalidDateRangeError(fromDate, toDate);
   }
-  if (ctx.status !== TaskTemplateStatus.Active) {
-    throw new InvalidTaskTemplateStateError('Can only generate instances for active templates', {
+  if (ctx.status !== TaskPlanStatus.Active) {
+    throw new InvalidTaskPlanStateError('Can only generate instances for active templates', {
       templateId: ctx.templateId,
       currentStatus: ctx.status,
       attemptedAction: 'generateInstances',
     });
   }
 
-  const instances: TaskInstance[] = [];
+  const instances: TaskOccurrence[] = [];
 
   if (ctx.taskType === TaskType.OneTime) {
     if (ctx.timeConfig?.startDate) {
@@ -152,7 +152,7 @@ export function generateInstances(
 
       if (!alreadyGenerated) {
         instances.push(
-          TaskInstance.create({
+          TaskOccurrence.create({
             templateId: ctx.templateId,
             identityId: ctx.identityId,
             instanceDate: targetDay,
@@ -194,7 +194,7 @@ export function generateInstances(
       if (!passesBusinessGenerationGuards(ctx, candidateDay)) continue;
 
       instances.push(
-        TaskInstance.create({
+        TaskOccurrence.create({
           templateId: ctx.templateId,
           identityId: ctx.identityId,
           instanceDate: candidateDay,
@@ -230,7 +230,7 @@ export function isActiveOnDate(
   ctx: InstanceGenerationContext,
   date: number,
 ): boolean {
-  if (ctx.status !== TaskTemplateStatus.Active) {
+  if (ctx.status !== TaskPlanStatus.Active) {
     return false;
   }
   if (ctx.taskType === TaskType.OneTime) {
@@ -255,7 +255,7 @@ export function getNextOccurrence(
   ctx: InstanceGenerationContext,
   afterDate: number,
 ): number | null {
-  if (ctx.status !== TaskTemplateStatus.Active) {
+  if (ctx.status !== TaskPlanStatus.Active) {
     return null;
   }
   if (ctx.taskType === TaskType.OneTime) {

@@ -70,8 +70,8 @@ import {
   createTaskRuntimeContribution,
   normalizeTaskRuntimeContributions,
   type TaskApplicationPort,
-  type ITaskInstanceRepository,
-  type ITaskTemplateRepository,
+  type ITaskOccurrenceRepository,
+  type ITaskPlanRepository,
   type TaskRuntimeContributionsInput,
 } from '@memoflow/task';
 import { createTaskElectronModule, type TaskElectronModuleDef } from '@memoflow/task/electron';
@@ -110,8 +110,8 @@ export interface ComposeTaskResult {
   readonly applicationPort: TaskApplicationPort;
   /** Instance-bound repository view for desktop consumers (dashboard/AI). 供 desktop 消费者（dashboard/AI）使用的 instance-bound repository view。 */
   readonly repositories: {
-    readonly taskTemplateRepository: ITaskTemplateRepository;
-    readonly taskInstanceRepository: ITaskInstanceRepository;
+    readonly taskPlanRepository: ITaskPlanRepository;
+    readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   };
 }
 
@@ -157,8 +157,8 @@ export interface ComposeTaskResult {
  */
 export function composeTask(dependencies: ComposeTaskDependencies): ComposeTaskResult {
   const {
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
   } = createTaskPowerSyncRepositories(dependencies.db);
 
@@ -171,8 +171,8 @@ export function composeTask(dependencies: ComposeTaskDependencies): ComposeTaskR
   ];
 
   const instance = createTaskModule({
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
     runtimeContributions,
   });
@@ -181,8 +181,8 @@ export function composeTask(dependencies: ComposeTaskDependencies): ComposeTaskR
     module: createTaskElectronModule({ instance }),
     applicationPort: instance.api,
     repositories: {
-      taskTemplateRepository,
-      taskInstanceRepository,
+      taskPlanRepository,
+      taskOccurrenceRepository,
     },
   };
 }

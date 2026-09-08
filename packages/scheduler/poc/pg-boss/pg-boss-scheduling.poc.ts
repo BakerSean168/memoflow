@@ -16,8 +16,8 @@ import {
 
 const owner: SchedulingOwner = {
   identityId: 'poc-identity',
-  type: 'task-template',
-  id: 'task-template-poc',
+  type: 'task-plan',
+  id: 'task-plan-poc',
 };
 
 function intent(
@@ -69,7 +69,7 @@ async function ensurePocQueues(boss: PgBoss): Promise<void> {
 
 async function jobsForOwner(boss: PgBoss) {
   return boss.findJobs<PgBossPocPayload>(PGBOSS_POC_QUEUE, {
-    data: { ownerKey: 'owner:v1:12:poc-identity:13:task-template:17:task-template-poc' },
+    data: { ownerKey: 'owner:v1:12:poc-identity:13:task-plan:17:task-plan-poc' },
   });
 }
 

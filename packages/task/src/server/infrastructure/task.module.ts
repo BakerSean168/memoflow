@@ -14,33 +14,33 @@
  * injection only, no hidden service locator.
  */
 
-import type { ITaskTemplateRepository } from '../domain/repositories/i-task-template-repository';
-import { createTaskInstanceMaintenanceRuntime } from './runtime/task-instance-maintenance-runtime';
-import type { ITaskInstanceRepository } from '../domain/repositories/i-task-instance-repository';
-import { CreateTaskTemplateUseCase } from '../application/use-cases/commands/create-task-template.use-case';
-import { GetTaskTemplateUseCase } from '../application/use-cases/queries/get-task-template.use-case';
-import { ListTaskTemplatesUseCase } from '../application/use-cases/queries/list-task-templates.use-case';
-import { UpdateTaskTemplateUseCase } from '../application/use-cases/commands/update-task-template.use-case';
-import { ActivateTaskTemplateUseCase } from '../application/use-cases/commands/activate-task-template.use-case';
-import { PauseTaskTemplateUseCase } from '../application/use-cases/commands/pause-task-template.use-case';
-import { ArchiveTaskTemplateUseCase } from '../application/use-cases/commands/archive-task-template.use-case';
+import type { ITaskPlanRepository } from '../domain/repositories/i-task-plan-repository';
+import { createTaskOccurrenceMaintenanceRuntime } from './runtime/task-occurrence-maintenance-runtime';
+import type { ITaskOccurrenceRepository } from '../domain/repositories/i-task-occurrence-repository';
+import { CreateTaskPlanUseCase } from '../application/use-cases/commands/create-task-plan.use-case';
+import { GetTaskPlanUseCase } from '../application/use-cases/queries/get-task-plan.use-case';
+import { ListTaskPlansUseCase } from '../application/use-cases/queries/list-task-plans.use-case';
+import { UpdateTaskPlanUseCase } from '../application/use-cases/commands/update-task-plan.use-case';
+import { ActivateTaskPlanUseCase } from '../application/use-cases/commands/activate-task-plan.use-case';
+import { PauseTaskPlanUseCase } from '../application/use-cases/commands/pause-task-plan.use-case';
+import { ArchiveTaskPlanUseCase } from '../application/use-cases/commands/archive-task-plan.use-case';
 import { AbandonTaskPlanUseCase } from '../application/use-cases/commands/abandon-task-plan.use-case';
-import { DeleteTaskTemplateUseCase } from '../application/use-cases/commands/delete-task-template.use-case';
-import { CompleteTaskInstanceUseCase } from '../application/use-cases/commands/complete-task-instance.use-case';
-import { UncompleteTaskInstanceUseCase } from '../application/use-cases/commands/uncomplete-task-instance.use-case';
-import { SkipTaskInstanceUseCase } from '../application/use-cases/commands/skip-task-instance.use-case';
-import { GetTaskInstancesByDateRangeUseCase } from '../application/use-cases/queries/get-task-instances-by-date-range.use-case';
-import { GetTaskInstanceUseCase } from '../application/use-cases/queries/get-task-instance.use-case';
-import { ListTaskInstancesByAccountUseCase } from '../application/use-cases/queries/list-task-instances-by-account.use-case';
-import { ListTaskInstancesByTemplateUseCase } from '../application/use-cases/queries/list-task-instances-by-template.use-case';
-import { ListTaskInstancesByStatusUseCase } from '../application/use-cases/queries/list-task-instances-by-status.use-case';
-import { StartTaskInstanceUseCase } from '../application/use-cases/commands/start-task-instance.use-case';
-import { DeleteTaskInstanceUseCase } from '../application/use-cases/commands/delete-task-instance.use-case';
-import { GenerateTaskInstancesUseCase } from '../application/use-cases/commands/generate-task-instances.use-case';
+import { DeleteTaskPlanUseCase } from '../application/use-cases/commands/delete-task-plan.use-case';
+import { CompleteTaskOccurrenceUseCase } from '../application/use-cases/commands/complete-task-occurrence.use-case';
+import { UncompleteTaskOccurrenceUseCase } from '../application/use-cases/commands/uncomplete-task-occurrence.use-case';
+import { SkipTaskOccurrenceUseCase } from '../application/use-cases/commands/skip-task-occurrence.use-case';
+import { GetTaskOccurrencesByDateRangeUseCase } from '../application/use-cases/queries/get-task-occurrences-by-date-range.use-case';
+import { GetTaskOccurrenceUseCase } from '../application/use-cases/queries/get-task-occurrence.use-case';
+import { ListTaskOccurrencesByAccountUseCase } from '../application/use-cases/queries/list-task-occurrences-by-account.use-case';
+import { ListTaskOccurrencesByTemplateUseCase } from '../application/use-cases/queries/list-task-occurrences-by-template.use-case';
+import { ListTaskOccurrencesByStatusUseCase } from '../application/use-cases/queries/list-task-occurrences-by-status.use-case';
+import { StartTaskOccurrenceUseCase } from '../application/use-cases/commands/start-task-occurrence.use-case';
+import { DeleteTaskOccurrenceUseCase } from '../application/use-cases/commands/delete-task-occurrence.use-case';
+import { GenerateTaskOccurrencesUseCase } from '../application/use-cases/commands/generate-task-occurrences.use-case';
 import { BindTaskToGoalUseCase } from '../application/use-cases/commands/bind-task-to-goal.use-case';
 import { UnbindTaskFromGoalUseCase } from '../application/use-cases/commands/unbind-task-from-goal.use-case';
-import { MarkTaskInstanceMissedUseCase } from '../application/use-cases/commands/mark-task-instance-missed.use-case';
-import { RescheduleTaskInstanceUseCase } from '../application/use-cases/commands/reschedule-task-instance.use-case';
+import { MarkTaskOccurrenceMissedUseCase } from '../application/use-cases/commands/mark-task-occurrence-missed.use-case';
+import { RescheduleTaskOccurrenceUseCase } from '../application/use-cases/commands/reschedule-task-occurrence.use-case';
 import type { TaskWriteTransactionRunner } from '../application/use-cases/commands/task-write-support';
 import type { TaskApplicationPort } from '../application';
 import { createLogger } from '@memoflow/utils/logger';
@@ -77,8 +77,8 @@ export type TaskRuntimeContributionsInput =
  * - never hide these dependencies behind a singleton container
  */
 export interface TaskModuleDependencies {
-  readonly taskTemplateRepository: ITaskTemplateRepository;
-  readonly taskInstanceRepository: ITaskInstanceRepository;
+  readonly taskPlanRepository: ITaskPlanRepository;
+  readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   readonly taskWriteTransactionRunner: TaskWriteTransactionRunner;
   readonly runtimeContributions?: TaskRuntimeContributionsInput;
 }
@@ -97,36 +97,36 @@ export interface TaskModuleDependencies {
  */
 export interface TaskModuleUseCases {
   // Template commands
-  readonly createTaskTemplate: CreateTaskTemplateUseCase;
-  readonly updateTaskTemplate: UpdateTaskTemplateUseCase;
-  readonly activateTaskTemplate: ActivateTaskTemplateUseCase;
-  readonly pauseTaskTemplate: PauseTaskTemplateUseCase;
-  readonly archiveTaskTemplate: ArchiveTaskTemplateUseCase;
+  readonly createTaskPlan: CreateTaskPlanUseCase;
+  readonly updateTaskPlan: UpdateTaskPlanUseCase;
+  readonly activateTaskPlan: ActivateTaskPlanUseCase;
+  readonly pauseTaskPlan: PauseTaskPlanUseCase;
+  readonly archiveTaskPlan: ArchiveTaskPlanUseCase;
   readonly abandonTaskPlan: AbandonTaskPlanUseCase;
-  readonly deleteTaskTemplate: DeleteTaskTemplateUseCase;
-  readonly generateTaskInstances: GenerateTaskInstancesUseCase;
+  readonly deleteTaskPlan: DeleteTaskPlanUseCase;
+  readonly generateTaskOccurrences: GenerateTaskOccurrencesUseCase;
   readonly bindTaskToGoal: BindTaskToGoalUseCase;
   readonly unbindTaskFromGoal: UnbindTaskFromGoalUseCase;
 
   // Template queries
-  readonly getTaskTemplate: GetTaskTemplateUseCase;
-  readonly listTaskTemplates: ListTaskTemplatesUseCase;
+  readonly getTaskPlan: GetTaskPlanUseCase;
+  readonly listTaskPlans: ListTaskPlansUseCase;
 
   // Instance commands
-  readonly completeTaskInstance: CompleteTaskInstanceUseCase;
-  readonly uncompleteTaskInstance: UncompleteTaskInstanceUseCase;
-  readonly skipTaskInstance: SkipTaskInstanceUseCase;
-  readonly markTaskInstanceMissed: MarkTaskInstanceMissedUseCase;
-  readonly startTaskInstance: StartTaskInstanceUseCase;
-  readonly deleteTaskInstance: DeleteTaskInstanceUseCase;
-  readonly rescheduleTaskInstance: RescheduleTaskInstanceUseCase;
+  readonly completeTaskOccurrence: CompleteTaskOccurrenceUseCase;
+  readonly uncompleteTaskOccurrence: UncompleteTaskOccurrenceUseCase;
+  readonly skipTaskOccurrence: SkipTaskOccurrenceUseCase;
+  readonly markTaskOccurrenceMissed: MarkTaskOccurrenceMissedUseCase;
+  readonly startTaskOccurrence: StartTaskOccurrenceUseCase;
+  readonly deleteTaskOccurrence: DeleteTaskOccurrenceUseCase;
+  readonly rescheduleTaskOccurrence: RescheduleTaskOccurrenceUseCase;
 
   // Instance queries
-  readonly getTaskInstance: GetTaskInstanceUseCase;
-  readonly listTaskInstancesByAccount: ListTaskInstancesByAccountUseCase;
-  readonly listTaskInstancesByTemplate: ListTaskInstancesByTemplateUseCase;
-  readonly listTaskInstancesByStatus: ListTaskInstancesByStatusUseCase;
-  readonly getTaskInstancesByDateRange: GetTaskInstancesByDateRangeUseCase;
+  readonly getTaskOccurrence: GetTaskOccurrenceUseCase;
+  readonly listTaskOccurrencesByAccount: ListTaskOccurrencesByAccountUseCase;
+  readonly listTaskOccurrencesByTemplate: ListTaskOccurrencesByTemplateUseCase;
+  readonly listTaskOccurrencesByStatus: ListTaskOccurrencesByStatusUseCase;
+  readonly getTaskOccurrencesByDateRange: GetTaskOccurrencesByDateRangeUseCase;
 }
 
 // ---------------------------------------------------------------------------
@@ -143,8 +143,8 @@ export interface TaskModuleUseCases {
  * `start` / `dispose` own runtime side effects.
  */
 export interface TaskModuleInstance {
-  readonly taskTemplateRepository: ITaskTemplateRepository;
-  readonly taskInstanceRepository: ITaskInstanceRepository;
+  readonly taskPlanRepository: ITaskPlanRepository;
+  readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   readonly useCases: TaskModuleUseCases;
   readonly api: TaskApplicationPort;
   start(): void;
@@ -183,85 +183,85 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
     );
   }
 
-  const { taskTemplateRepository, taskInstanceRepository, taskWriteTransactionRunner } =
+  const { taskPlanRepository, taskOccurrenceRepository, taskWriteTransactionRunner } =
     dependencies;
-  const listTaskTemplates = new ListTaskTemplatesUseCase(
-    taskTemplateRepository,
-    taskInstanceRepository,
+  const listTaskPlans = new ListTaskPlansUseCase(
+    taskPlanRepository,
+    taskOccurrenceRepository,
   );
 
   return {
     // Template commands
-    createTaskTemplate: new CreateTaskTemplateUseCase(
-      taskTemplateRepository,
-      taskInstanceRepository,
+    createTaskPlan: new CreateTaskPlanUseCase(
+      taskPlanRepository,
+      taskOccurrenceRepository,
       taskWriteTransactionRunner,
     ),
-    updateTaskTemplate: new UpdateTaskTemplateUseCase(
-      taskTemplateRepository,
-      taskInstanceRepository,
+    updateTaskPlan: new UpdateTaskPlanUseCase(
+      taskPlanRepository,
+      taskOccurrenceRepository,
       taskWriteTransactionRunner,
     ),
-    activateTaskTemplate: new ActivateTaskTemplateUseCase(
-      taskTemplateRepository,
-      taskInstanceRepository,
+    activateTaskPlan: new ActivateTaskPlanUseCase(
+      taskPlanRepository,
+      taskOccurrenceRepository,
       taskWriteTransactionRunner,
     ),
-    pauseTaskTemplate: new PauseTaskTemplateUseCase(
-      taskTemplateRepository,
-      taskInstanceRepository,
+    pauseTaskPlan: new PauseTaskPlanUseCase(
+      taskPlanRepository,
+      taskOccurrenceRepository,
       taskWriteTransactionRunner,
     ),
-    archiveTaskTemplate: new ArchiveTaskTemplateUseCase(taskTemplateRepository),
-    abandonTaskPlan: new AbandonTaskPlanUseCase(taskTemplateRepository, taskWriteTransactionRunner),
-    deleteTaskTemplate: new DeleteTaskTemplateUseCase(
-      taskTemplateRepository,
-      taskInstanceRepository,
+    archiveTaskPlan: new ArchiveTaskPlanUseCase(taskPlanRepository),
+    abandonTaskPlan: new AbandonTaskPlanUseCase(taskPlanRepository, taskWriteTransactionRunner),
+    deleteTaskPlan: new DeleteTaskPlanUseCase(
+      taskPlanRepository,
+      taskOccurrenceRepository,
       taskWriteTransactionRunner,
     ),
-    generateTaskInstances: new GenerateTaskInstancesUseCase(
-      taskTemplateRepository,
-      taskInstanceRepository,
+    generateTaskOccurrences: new GenerateTaskOccurrencesUseCase(
+      taskPlanRepository,
+      taskOccurrenceRepository,
       taskWriteTransactionRunner,
     ),
-    bindTaskToGoal: new BindTaskToGoalUseCase(taskTemplateRepository),
-    unbindTaskFromGoal: new UnbindTaskFromGoalUseCase(taskTemplateRepository),
+    bindTaskToGoal: new BindTaskToGoalUseCase(taskPlanRepository),
+    unbindTaskFromGoal: new UnbindTaskFromGoalUseCase(taskPlanRepository),
 
     // Template queries
-    getTaskTemplate: new GetTaskTemplateUseCase(taskTemplateRepository, taskInstanceRepository),
-    listTaskTemplates,
+    getTaskPlan: new GetTaskPlanUseCase(taskPlanRepository, taskOccurrenceRepository),
+    listTaskPlans,
 
     // Instance commands
-    completeTaskInstance: new CompleteTaskInstanceUseCase(
-      taskInstanceRepository,
-      taskTemplateRepository,
+    completeTaskOccurrence: new CompleteTaskOccurrenceUseCase(
+      taskOccurrenceRepository,
+      taskPlanRepository,
       taskWriteTransactionRunner,
     ),
-    uncompleteTaskInstance: new UncompleteTaskInstanceUseCase(
-      taskInstanceRepository,
+    uncompleteTaskOccurrence: new UncompleteTaskOccurrenceUseCase(
+      taskOccurrenceRepository,
       taskWriteTransactionRunner,
     ),
-    skipTaskInstance: new SkipTaskInstanceUseCase(
-      taskInstanceRepository,
+    skipTaskOccurrence: new SkipTaskOccurrenceUseCase(
+      taskOccurrenceRepository,
       taskWriteTransactionRunner,
     ),
-    markTaskInstanceMissed: new MarkTaskInstanceMissedUseCase(
-      taskInstanceRepository,
+    markTaskOccurrenceMissed: new MarkTaskOccurrenceMissedUseCase(
+      taskOccurrenceRepository,
       taskWriteTransactionRunner,
     ),
-    startTaskInstance: new StartTaskInstanceUseCase(taskInstanceRepository),
-    deleteTaskInstance: new DeleteTaskInstanceUseCase(taskInstanceRepository),
-    rescheduleTaskInstance: new RescheduleTaskInstanceUseCase(taskInstanceRepository),
+    startTaskOccurrence: new StartTaskOccurrenceUseCase(taskOccurrenceRepository),
+    deleteTaskOccurrence: new DeleteTaskOccurrenceUseCase(taskOccurrenceRepository),
+    rescheduleTaskOccurrence: new RescheduleTaskOccurrenceUseCase(taskOccurrenceRepository),
 
     // Instance queries
-    getTaskInstance: new GetTaskInstanceUseCase(taskInstanceRepository),
-    listTaskInstancesByAccount: new ListTaskInstancesByAccountUseCase(taskInstanceRepository),
-    listTaskInstancesByTemplate: new ListTaskInstancesByTemplateUseCase(
-      taskInstanceRepository,
-      taskTemplateRepository,
+    getTaskOccurrence: new GetTaskOccurrenceUseCase(taskOccurrenceRepository),
+    listTaskOccurrencesByAccount: new ListTaskOccurrencesByAccountUseCase(taskOccurrenceRepository),
+    listTaskOccurrencesByTemplate: new ListTaskOccurrencesByTemplateUseCase(
+      taskOccurrenceRepository,
+      taskPlanRepository,
     ),
-    listTaskInstancesByStatus: new ListTaskInstancesByStatusUseCase(taskInstanceRepository),
-    getTaskInstancesByDateRange: new GetTaskInstancesByDateRangeUseCase(taskInstanceRepository),
+    listTaskOccurrencesByStatus: new ListTaskOccurrencesByStatusUseCase(taskOccurrenceRepository),
+    getTaskOccurrencesByDateRange: new GetTaskOccurrencesByDateRangeUseCase(taskOccurrenceRepository),
   };
 }
 
@@ -284,13 +284,13 @@ export function createTaskModule(dependencies: TaskModuleDependencies): TaskModu
     );
   }
 
-  const { taskTemplateRepository, taskInstanceRepository } = dependencies;
+  const { taskPlanRepository, taskOccurrenceRepository } = dependencies;
 
   const runtimeContributions = [
     // R2-3：实例补充 maintenance worker（列表查询保持纯读）。
-    createTaskInstanceMaintenanceRuntime({
-      taskTemplateRepository: dependencies.taskTemplateRepository,
-      taskInstanceRepository: dependencies.taskInstanceRepository,
+    createTaskOccurrenceMaintenanceRuntime({
+      taskPlanRepository: dependencies.taskPlanRepository,
+      taskOccurrenceRepository: dependencies.taskOccurrenceRepository,
     }),
     ...normalizeRuntimeContributions(dependencies.runtimeContributions),
   ];
@@ -300,49 +300,49 @@ export function createTaskModule(dependencies: TaskModuleDependencies): TaskModu
   // The API facade simply exposes the assembled use cases.
   // API 门面只是直接暴露已组装好的 use case。
   const api: TaskApplicationPort = {
-    createTaskTemplate: (input) => useCases.createTaskTemplate.execute(input),
-    updateTaskTemplate: (id, identityId, input) =>
-      useCases.updateTaskTemplate.execute(id, identityId, input),
-    activateTaskTemplate: (id, identityId) => useCases.activateTaskTemplate.execute(id, identityId),
-    pauseTaskTemplate: (id, identityId) => useCases.pauseTaskTemplate.execute(id, identityId),
-    archiveTaskTemplate: (id, identityId) => useCases.archiveTaskTemplate.execute(id, identityId),
+    createTaskPlan: (input) => useCases.createTaskPlan.execute(input),
+    updateTaskPlan: (id, identityId, input) =>
+      useCases.updateTaskPlan.execute(id, identityId, input),
+    activateTaskPlan: (id, identityId) => useCases.activateTaskPlan.execute(id, identityId),
+    pauseTaskPlan: (id, identityId) => useCases.pauseTaskPlan.execute(id, identityId),
+    archiveTaskPlan: (id, identityId) => useCases.archiveTaskPlan.execute(id, identityId),
     abandonTaskPlan: (id, identityId, input) =>
       useCases.abandonTaskPlan.execute(id, identityId, input),
-    deleteTaskTemplate: (id, identityId) => useCases.deleteTaskTemplate.execute(id, identityId),
-    generateTaskInstances: (id, identityId, input) =>
-      useCases.generateTaskInstances.execute(id, identityId, input),
+    deleteTaskPlan: (id, identityId) => useCases.deleteTaskPlan.execute(id, identityId),
+    generateTaskOccurrences: (id, identityId, input) =>
+      useCases.generateTaskOccurrences.execute(id, identityId, input),
     bindTaskToGoal: (id, identityId, input) =>
       useCases.bindTaskToGoal.execute(id, identityId, input),
     unbindTaskFromGoal: (id, identityId) => useCases.unbindTaskFromGoal.execute(id, identityId),
-    getTaskTemplate: (id, identityId, includeChildren) =>
-      useCases.getTaskTemplate.execute(id, identityId, includeChildren),
-    listTaskTemplates: (query) => useCases.listTaskTemplates.execute(query),
-    completeTaskInstance: (id, identityId, input) =>
-      useCases.completeTaskInstance.execute(id, identityId, input),
-    uncompleteTaskInstance: (id, identityId) =>
-      useCases.uncompleteTaskInstance.execute(id, identityId),
-    skipTaskInstance: (id, identityId, input) =>
-      useCases.skipTaskInstance.execute(id, identityId, input),
-    markTaskInstanceMissed: (id, identityId, input) =>
-      useCases.markTaskInstanceMissed.execute(id, identityId, input),
-    startTaskInstance: (id, identityId) => useCases.startTaskInstance.execute(id, identityId),
-    deleteTaskInstance: (id, identityId) => useCases.deleteTaskInstance.execute(id, identityId),
-    rescheduleTaskInstance: (id, identityId, input) =>
-      useCases.rescheduleTaskInstance.execute(id, identityId, input),
-    getTaskInstance: (id, identityId) => useCases.getTaskInstance.execute(id, identityId),
-    listTaskInstancesByAccount: (identityId) =>
-      useCases.listTaskInstancesByAccount.execute(identityId),
-    listTaskInstancesByTemplate: (templateId, identityId) =>
-      useCases.listTaskInstancesByTemplate.execute(templateId, identityId),
-    listTaskInstancesByStatus: (identityId, status) =>
-      useCases.listTaskInstancesByStatus.execute(identityId, status),
-    getTaskInstancesByDateRange: (identityId, startDate, endDate) =>
-      useCases.getTaskInstancesByDateRange.execute(identityId, startDate, endDate),
+    getTaskPlan: (id, identityId, includeChildren) =>
+      useCases.getTaskPlan.execute(id, identityId, includeChildren),
+    listTaskPlans: (query) => useCases.listTaskPlans.execute(query),
+    completeTaskOccurrence: (id, identityId, input) =>
+      useCases.completeTaskOccurrence.execute(id, identityId, input),
+    uncompleteTaskOccurrence: (id, identityId) =>
+      useCases.uncompleteTaskOccurrence.execute(id, identityId),
+    skipTaskOccurrence: (id, identityId, input) =>
+      useCases.skipTaskOccurrence.execute(id, identityId, input),
+    markTaskOccurrenceMissed: (id, identityId, input) =>
+      useCases.markTaskOccurrenceMissed.execute(id, identityId, input),
+    startTaskOccurrence: (id, identityId) => useCases.startTaskOccurrence.execute(id, identityId),
+    deleteTaskOccurrence: (id, identityId) => useCases.deleteTaskOccurrence.execute(id, identityId),
+    rescheduleTaskOccurrence: (id, identityId, input) =>
+      useCases.rescheduleTaskOccurrence.execute(id, identityId, input),
+    getTaskOccurrence: (id, identityId) => useCases.getTaskOccurrence.execute(id, identityId),
+    listTaskOccurrencesByAccount: (identityId) =>
+      useCases.listTaskOccurrencesByAccount.execute(identityId),
+    listTaskOccurrencesByTemplate: (templateId, identityId) =>
+      useCases.listTaskOccurrencesByTemplate.execute(templateId, identityId),
+    listTaskOccurrencesByStatus: (identityId, status) =>
+      useCases.listTaskOccurrencesByStatus.execute(identityId, status),
+    getTaskOccurrencesByDateRange: (identityId, startDate, endDate) =>
+      useCases.getTaskOccurrencesByDateRange.execute(identityId, startDate, endDate),
   };
 
   return {
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     useCases,
     api,
     async start(): Promise<void> {

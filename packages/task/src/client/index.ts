@@ -11,39 +11,39 @@ import {
   createTaskServiceFromHttpClient,
   type TaskClientPort,
 } from '../application-client';
-import { TaskInstance, TaskTemplate } from '../domain-client';
+import { TaskOccurrence, TaskPlan } from '../domain-client';
 import {
-  TaskInstanceHttpAdapter,
-  TaskTemplateHttpAdapter,
+  TaskOccurrenceHttpAdapter,
+  TaskPlanHttpAdapter,
   createTaskHttpAdapters,
-  createTaskInstanceHttpAdapter,
-  createTaskTemplateHttpAdapter,
+  createTaskOccurrenceHttpAdapter,
+  createTaskPlanHttpAdapter,
   type TaskHttpAdapters,
 } from '../infrastructure-client/adapters/http';
 import {
-  TaskInstanceIpcAdapter,
-  TaskTemplateIpcAdapter,
+  TaskOccurrenceIpcAdapter,
+  TaskPlanIpcAdapter,
   createTaskIpcAdapters,
-  createTaskInstanceIpcAdapter,
-  createTaskTemplateIpcAdapter,
+  createTaskOccurrenceIpcAdapter,
+  createTaskPlanIpcAdapter,
   type TaskIpcAdapters,
 } from '../infrastructure-client/adapters/ipc';
 import type {
   IResultIpcClient,
-  ITaskInstanceApiClient,
-  ITaskTemplateApiClient,
-  TaskTemplateListParams,
+  ITaskOccurrenceApiClient,
+  ITaskPlanApiClient,
+  TaskPlanListParams,
 } from '../infrastructure-client/adapters/types';
 
 export type {
   IResultHttpClient,
   IResultIpcClient,
-  ITaskInstanceApiClient,
-  ITaskTemplateApiClient,
+  ITaskOccurrenceApiClient,
+  ITaskPlanApiClient,
   TaskClientPort,
   TaskHttpAdapters,
   TaskIpcAdapters,
-  TaskTemplateListParams,
+  TaskPlanListParams,
 };
 
 export function createTaskHttpClient(httpClient: IResultHttpClient): TaskClientPort {
@@ -57,17 +57,17 @@ export function createTaskIpcClient(ipcClient: IResultIpcClient): TaskClientPort
 
 export {
   TaskClientService,
-  TaskInstance,
-  TaskInstanceHttpAdapter,
-  TaskInstanceIpcAdapter,
-  TaskTemplate,
-  TaskTemplateHttpAdapter,
-  TaskTemplateIpcAdapter,
+  TaskOccurrence,
+  TaskOccurrenceHttpAdapter,
+  TaskOccurrenceIpcAdapter,
+  TaskPlan,
+  TaskPlanHttpAdapter,
+  TaskPlanIpcAdapter,
   createTaskClientService,
   createTaskHttpAdapters,
-  createTaskInstanceHttpAdapter,
-  createTaskInstanceIpcAdapter,
+  createTaskOccurrenceHttpAdapter,
+  createTaskOccurrenceIpcAdapter,
   createTaskIpcAdapters,
-  createTaskTemplateHttpAdapter,
-  createTaskTemplateIpcAdapter,
+  createTaskPlanHttpAdapter,
+  createTaskPlanIpcAdapter,
 };

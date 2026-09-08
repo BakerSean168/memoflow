@@ -42,7 +42,7 @@ const draft = GoalPlanDraftContentSchema.parse({
       weight: 5,
     },
   ],
-  taskTemplates: [],
+  taskPlans: [],
   reminders: [],
   rationale: 'The workflow must be restart-safe before later workflow batches build on it.',
   warnings: [],
@@ -82,7 +82,7 @@ function context(identityId: string, requestId: string): ExecutionContext {
 function mutationPort(): GoalPlanMutationPort & {
   resolveLabels: ReturnType<typeof vi.fn>;
   createGoal: ReturnType<typeof vi.fn>;
-  createTaskTemplate: ReturnType<typeof vi.fn>;
+  createTaskPlan: ReturnType<typeof vi.fn>;
   createReminder: ReturnType<typeof vi.fn>;
 } {
   return {
@@ -95,7 +95,7 @@ function mutationPort(): GoalPlanMutationPort & {
         keyResultIds: (request.initialKeyResults ?? []).map((item) => String(item.id)),
       }),
     ),
-    createTaskTemplate: vi.fn(async (request) => ok({ taskId: String(request.id) })),
+    createTaskPlan: vi.fn(async (request) => ok({ taskId: String(request.id) })),
     createReminder: vi.fn(async (request) => ok({ reminderId: String(request.id) })),
   };
 }
@@ -108,7 +108,7 @@ async function createRuntime() {
   const file = join(tmpdir(), `memoflow-mastra-runtime-${randomUUID()}.db`);
   const storage = new LibSQLStore({ id: randomUUID(), url: `file:${file}` });
   const mutations = mutationPort();
-  const createTaskTemplate = taskMutationPort();
+  const createTaskPlan = taskMutationPort();
   const saveKnowledgeNote = vi.fn(async (request) => ok({ noteId: String(request.requestId) }));
   const summarizeUsage = vi.fn(async () => ({
     executionCount: 2,
@@ -126,7 +126,7 @@ async function createRuntime() {
       resolveLabels: vi.fn(async (names: readonly string[]) =>
         ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
       ),
-      createTaskTemplate,
+      createTaskPlan,
     },
     knowledgeCaptureMutationPort: { saveKnowledgeNote },
     usageReadPort: { summarizeUsage },
@@ -147,7 +147,7 @@ async function createRuntime() {
     candidateDraft: knowledgeDraft,
   });
   resources.push({ runtime, file });
-  return { runtime, mutations, createTaskTemplate, saveKnowledgeNote, summarizeUsage };
+  return { runtime, mutations, createTaskPlan, saveKnowledgeNote, summarizeUsage };
 }
 
 describe('MastraAIRuntime goal.create product projection', () => {
@@ -240,7 +240,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
   });
 
   it('owns a task.create workflow: start → draft review → approve creates one task template', async () => {
-    const { runtime, createTaskTemplate } = await createRuntime();
+    const { runtime, createTaskPlan } = await createRuntime();
     const identityId = 'identity-task';
 
     const started = await runtime.start({
@@ -275,8 +275,8 @@ describe('MastraAIRuntime goal.create product projection', () => {
       status: 'completed',
       result: { workflowRunId: started.runId, revision: 1, status: 'success' },
     });
-    expect(createTaskTemplate).toHaveBeenCalledTimes(1);
-    expect(createTaskTemplate.mock.calls[0]?.[1]).toMatchObject({
+    expect(createTaskPlan).toHaveBeenCalledTimes(1);
+    expect(createTaskPlan.mock.calls[0]?.[1]).toMatchObject({
       requestId: 'request-task-approve',
       identityId,
     });

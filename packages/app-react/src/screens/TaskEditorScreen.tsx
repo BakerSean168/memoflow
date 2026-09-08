@@ -7,9 +7,9 @@ import { presentErrorMessage } from '@memoflow/http-client';
 
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
-import { TaskTimeType, TaskType, type CreateTaskTemplateReq, type UpdateTaskTemplateReq } from '@memoflow/contracts/task';
+import { TaskTimeType, TaskType, type CreateTaskPlanReq, type UpdateTaskPlanReq } from '@memoflow/contracts/task';
 
-import { useTaskTemplateDetail } from '../hooks/useTaskTemplateDetail';
+import { useTaskPlanDetail } from '../hooks/useTaskPlanDetail';
 import { useTaskService } from '../hooks/useTaskService';
 import { useLabelService } from '../hooks/useLabelService';
 
@@ -80,7 +80,7 @@ export function TaskEditorScreen() {
   const isEditing = !!taskId;
   const service = useTaskService();
   const labelService = useLabelService();
-  const { isLoading: isDetailLoading, template } = useTaskTemplateDetail(taskId);
+  const { isLoading: isDetailLoading, template } = useTaskPlanDetail(taskId);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -181,7 +181,7 @@ export function TaskEditorScreen() {
     };
 
     if (isEditing && taskId) {
-      const request: UpdateTaskTemplateReq = {
+      const request: UpdateTaskPlanReq = {
         name: trimmedName,
         description: description.trim() || null,
         importance,
@@ -201,7 +201,7 @@ export function TaskEditorScreen() {
       return;
     }
 
-    const request: CreateTaskTemplateReq = {
+    const request: CreateTaskPlanReq = {
       name: trimmedName,
       description: description.trim() || null,
       importance,

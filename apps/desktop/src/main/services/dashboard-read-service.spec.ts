@@ -24,7 +24,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@memoflow/dashboard', () => ({
   getDashboardData: mocks.getDashboardData,
   toDashboardGoalRecord: (goal: unknown) => goal,
-  toDashboardTaskInstanceRecord: (instance: unknown) => instance,
+  toDashboardTaskOccurrenceRecord: (instance: unknown) => instance,
 }));
 
 import type { DashboardData } from '@memoflow/contracts/dashboard';
@@ -43,12 +43,12 @@ function createFakeDependencies(): DashboardRepositoryDependencies {
       },
     ]),
   };
-  const taskTemplateRepository = {
+  const taskPlanRepository = {
     findByIdentityId: vi.fn().mockResolvedValue([
       { id: 't1', title: 'Task', status: 'Active', deletedAt: null, createdAt: Date.now() },
     ]),
   };
-  const taskInstanceRepository = {
+  const taskOccurrenceRepository = {
     findByIdentityId: vi.fn().mockResolvedValue([
       {
         id: 'i1',
@@ -85,8 +85,8 @@ function createFakeDependencies(): DashboardRepositoryDependencies {
 
   return {
     goalRepository: goalRepository as never,
-    taskTemplateRepository: taskTemplateRepository as never,
-    taskInstanceRepository: taskInstanceRepository as never,
+    taskPlanRepository: taskPlanRepository as never,
+    taskOccurrenceRepository: taskOccurrenceRepository as never,
     scheduleRepository: scheduleRepository as never,
     scheduleTaskRepository: {} as never,
     reminderTemplateRepository: reminderTemplateRepository as never,
@@ -98,8 +98,8 @@ function captureDashboardSource(_deps: DashboardRepositoryDependencies) {
   mocks.getDashboardData.mockImplementationOnce(
     async (id: string, source: Parameters<typeof getDesktopDashboardData>[0]) => {
       await source.listGoals(id);
-      await source.listTaskTemplates(id);
-      await source.listTaskInstances(id);
+      await source.listTaskPlans(id);
+      await source.listTaskOccurrences(id);
       await source.listSchedules(id);
       await source.listUpcomingReminders(id, Date.now());
       await source.countUnreadNotifications(id);
@@ -120,8 +120,8 @@ describe('getDesktopDashboardData instance-bound aggregation', () => {
       includeChildren: true,
       systemView: 'active',
     });
-    expect(deps.taskTemplateRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
-    expect(deps.taskInstanceRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
+    expect(deps.taskPlanRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
+    expect(deps.taskOccurrenceRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
     expect(deps.scheduleRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
     expect(deps.reminderTemplateRepository.findByNextTriggerBefore).toHaveBeenCalledWith(
       expect.any(Number),

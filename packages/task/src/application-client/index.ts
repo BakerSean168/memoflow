@@ -6,8 +6,8 @@
  */
 
 // ===== Port Interfaces =====
-export type { ITaskTemplateApiClient, TaskTemplateListParams } from './ports/task-template-api-client.port';
-export type { ITaskInstanceApiClient } from './ports/task-instance-api-client.port';
+export type { ITaskPlanApiClient, TaskPlanListParams } from './ports/task-plan-api-client.port';
+export type { ITaskOccurrenceApiClient } from './ports/task-occurrence-api-client.port';
 export type { TaskClientPort } from './task-client.port';
 
 // ===== Client Service =====

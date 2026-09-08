@@ -7,11 +7,11 @@ describe('Task vNext simplified domain surface', () => {
   const taskSrc = resolve(__dirname, '../..');
   const taskRoot = resolve(taskSrc, '..');
   const contractsTask = resolve(taskRoot, '../contracts/src/modules/task');
-  const template = readFileSync(resolve(__dirname, 'aggregates/task-template.ts'), 'utf8');
-  const templateState = readFileSync(resolve(__dirname, 'aggregates/task-template.state.ts'), 'utf8');
+  const template = readFileSync(resolve(__dirname, 'aggregates/task-plan.ts'), 'utf8');
+  const templateState = readFileSync(resolve(__dirname, 'aggregates/task-plan.state.ts'), 'utf8');
   const module = readFileSync(resolve(taskSrc, 'server/infrastructure/task.module.ts'), 'utf8');
   const rpcMap = readFileSync(resolve(contractsTask, 'protocol/task-rpc-map.ts'), 'utf8');
-  const templateContract = readFileSync(resolve(contractsTask, 'api/task-template.dto.ts'), 'utf8');
+  const templateContract = readFileSync(resolve(contractsTask, 'api/task-plan.dto.ts'), 'utf8');
 
   it('retires folder, hierarchy, dependency graph, and dynamic-priority domain artifacts', () => {
     for (const path of [
@@ -31,9 +31,9 @@ describe('Task vNext simplified domain surface', () => {
   });
 
   it('retires project-management application and transport surfaces', () => {
-    expect(module).not.toMatch(/TaskDependency|TaskFolder|TaskTemplateGraph|ByPriority/);
+    expect(module).not.toMatch(/TaskDependency|TaskFolder|TaskPlanGraph|ByPriority/);
     expect(rpcMap).not.toMatch(/template:graph|dependency:/);
-    expect(templateContract).not.toMatch(/folderId|parentTaskId|QueryTaskTemplateGraphRes/);
+    expect(templateContract).not.toMatch(/folderId|parentTaskId|QueryTaskPlanGraphRes/);
   });
 
   it('keeps user priority as importance and preserves execution capabilities', () => {

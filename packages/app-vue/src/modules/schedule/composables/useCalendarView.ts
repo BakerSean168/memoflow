@@ -1,7 +1,7 @@
 /**
  * useCalendarView - 日历视图聚合 composable
  *
- * 将 CalendarEntry（schedule 模块）、Goal 和 TaskInstance 三个来源
+ * 将 CalendarEntry（schedule 模块）、Goal 和 TaskOccurrence 三个来源
  * 统一转换为内部 CalendarEventItem 类型后提供给日历组件渲染。
  */
 
@@ -11,9 +11,9 @@ import { padTwoDigits } from '../../../shared/utils/pad-two-digits';
 import { useSchedule } from './useSchedule';
 import { useTask } from '../../task/composables/useTask';
 import type {
-  TaskInstanceClientDTO,
-  TaskInstanceStatus,
-  TaskTemplateClientDTO,
+  TaskOccurrenceClientDTO,
+  TaskOccurrenceStatus,
+  TaskPlanClientDTO,
 } from '@memoflow/contracts/task';
 import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
 import { endOfDayMs, getProductTime, startOfDayMs } from '../../../shared/utils/product-time';
@@ -34,8 +34,8 @@ export interface CalendarEventItem {
   source: 'schedule' | 'task' | 'goal';
   hasConflict?: boolean;
   originalId: string;
-  /** 仅当 source === 'task' 时存在，对应 TaskInstanceStatus 值 */
-  instanceStatus?: TaskInstanceStatus;
+  /** 仅当 source === 'task' 时存在，对应 TaskOccurrenceStatus 值 */
+  instanceStatus?: TaskOccurrenceStatus;
 }
 
 /**
@@ -184,15 +184,15 @@ function projectionToLegacyCalendarEvent(
     originalId: projection.ownerCommandTarget.ownerId,
     instanceStatus:
       projection.sourceType === 'task'
-        ? (projection.displayMetadata.status as TaskInstanceStatus | undefined)
+        ? (projection.displayMetadata.status as TaskOccurrenceStatus | undefined)
         : undefined,
   };
 }
 
-/** TaskInstance → legacy CalendarEventItem through the canonical PLAN-4302 projection. */
-export function taskInstancesToEvents(
-  instances: TaskInstanceClientDTO[],
-  templates: TaskTemplateClientDTO[],
+/** TaskOccurrence → legacy CalendarEventItem through the canonical PLAN-4302 projection. */
+export function taskOccurrencesToEvents(
+  instances: TaskOccurrenceClientDTO[],
+  templates: TaskPlanClientDTO[],
 ): CalendarEventItem[] {
   const templateMap = new Map(templates.map((template) => [String(template.id), template]));
   const time = plannerProductTimePort();
@@ -229,7 +229,7 @@ export function useCalendarView() {
     return projectPlannerReadModel({
       calendarEntries: Array.isArray(entriesRaw) ? entriesRaw : [],
       taskOccurrences: Array.isArray(instancesRaw) ? instancesRaw : [],
-      taskTemplates: Array.isArray(templatesRaw) ? templatesRaw : [],
+      taskPlans: Array.isArray(templatesRaw) ? templatesRaw : [],
       goals: [],
       routineOccurrences: [],
       time: plannerProductTimePort(),

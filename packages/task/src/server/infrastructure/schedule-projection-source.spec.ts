@@ -2,12 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { TaskType } from '@memoflow/contracts/task';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import type { ITaskInstanceRepository } from '../domain/repositories/i-task-instance-repository';
-import type { ITaskTemplateRepository } from '../domain/repositories/i-task-template-repository';
+import type { ITaskOccurrenceRepository } from '../domain/repositories/i-task-occurrence-repository';
+import type { ITaskPlanRepository } from '../domain/repositories/i-task-plan-repository';
 import {
-  aLoadedTaskTemplate,
+  aLoadedTaskPlan,
   aRelativeReminder,
-  aTaskInstance,
+  aTaskOccurrence,
   aTimePointConfig,
   anIdentityId,
 } from '../../testing';
@@ -20,19 +20,19 @@ import {
 } from './schedule-projection-source';
 
 function repos(input: {
-  template: Awaited<ReturnType<typeof aLoadedTaskTemplate>> | null;
-  instances?: Awaited<ReturnType<typeof aTaskInstance>>[];
+  template: Awaited<ReturnType<typeof aLoadedTaskPlan>> | null;
+  instances?: Awaited<ReturnType<typeof aTaskOccurrence>>[];
 }) {
   const findByIdForIdentity = vi.fn().mockResolvedValue(input.template);
   const findById = vi.fn();
   return {
     findById,
     findByIdForIdentity,
-    taskTemplateRepository: createMockRepo<ITaskTemplateRepository>({
+    taskPlanRepository: createMockRepo<ITaskPlanRepository>({
       findById,
       findByIdForIdentity,
     }),
-    taskInstanceRepository: createMockRepo<ITaskInstanceRepository>({
+    taskOccurrenceRepository: createMockRepo<ITaskOccurrenceRepository>({
       findByTemplateId: vi.fn().mockResolvedValue(input.instances ?? []),
     }),
   };
@@ -47,14 +47,14 @@ describe('task schedule projection source -> ScheduledIntent', () => {
       const identityId = anIdentityId();
       const instanceDay = new Date('2030-01-10T00:00:00.000Z');
       const timeConfig = aTimePointConfig(14 * 60, instanceDay);
-      const template = aLoadedTaskTemplate({
+      const template = aLoadedTaskPlan({
         identityId,
         title: 'Thesis defense',
         taskType: TaskType.OneTime,
         timeConfig,
         reminderConfig: aRelativeReminder(30),
       });
-      const instance = await aTaskInstance({
+      const instance = await aTaskOccurrence({
         identityId,
         templateId: template.id,
         instanceDate: instanceDay.getTime(),
@@ -112,13 +112,13 @@ describe('task schedule projection source -> ScheduledIntent', () => {
       const day = new Date('2030-01-10T00:00:00.000Z');
       const timeConfig = aTimePointConfig(14 * 60, day);
       const duplicateReminder = aRelativeReminder(30).addRelativeTrigger(30, 'Minutes');
-      const template = aLoadedTaskTemplate({
+      const template = aLoadedTaskPlan({
         identityId,
         taskType: TaskType.OneTime,
         timeConfig,
         reminderConfig: duplicateReminder,
       });
-      const instance = await aTaskInstance({
+      const instance = await aTaskOccurrence({
         identityId,
         templateId: template.id,
         instanceDate: day.getTime(),
@@ -142,14 +142,14 @@ describe('task schedule projection source -> ScheduledIntent', () => {
     const identityId = anIdentityId();
     const day = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const timeConfig = aTimePointConfig(14 * 60, day);
-    const template = aLoadedTaskTemplate({
+    const template = aLoadedTaskPlan({
       identityId,
       taskType: TaskType.OneTime,
       timeConfig,
       reminderConfig: aRelativeReminder(30),
     });
     template.pause();
-    const instance = await aTaskInstance({
+    const instance = await aTaskOccurrence({
       identityId,
       templateId: template.id,
       instanceDate: day.getTime(),
@@ -176,10 +176,10 @@ describe('task schedule projection source -> ScheduledIntent', () => {
     const dependencies = repos({ template: null });
     const source = createTaskScheduleProjectionSource(dependencies);
 
-    const plan = await source.buildTemplatePlan('TaskTemplateId_missing', 'identity-1');
+    const plan = await source.buildTemplatePlan('TaskPlanId_missing', 'identity-1');
 
     expect(plan).toEqual({
-      owner: { identityId: 'identity-1', type: 'task.template', id: 'TaskTemplateId_missing' },
+      owner: { identityId: 'identity-1', type: 'task.template', id: 'TaskPlanId_missing' },
       desired: [],
     });
   });
@@ -190,8 +190,8 @@ describe('task schedule projection source -> ScheduledIntent', () => {
     const handlers = createTaskScheduleProjectionEventHandlers({ upsertTemplate, deleteTemplate });
     const common = {
       identityId: 'IdentityId_test',
-      taskTemplateId: 'TaskTemplateId_template',
-      taskInstanceId: 'TaskInstanceId_instance',
+      taskPlanId: 'TaskPlanId_template',
+      taskOccurrenceId: 'TaskOccurrenceId_instance',
     };
 
     expect(taskScheduleProjectionEventNames).toContain('task:instance-uncompleted');
@@ -209,8 +209,8 @@ describe('task schedule projection source -> ScheduledIntent', () => {
     await handlers['task:deleted']({ ...common, deletedAt: 6 } as never);
 
     expect(upsertTemplate).toHaveBeenCalledTimes(5);
-    expect(upsertTemplate).toHaveBeenCalledWith('TaskTemplateId_template', 'IdentityId_test');
+    expect(upsertTemplate).toHaveBeenCalledWith('TaskPlanId_template', 'IdentityId_test');
     expect(deleteTemplate).toHaveBeenCalledTimes(2);
-    expect(deleteTemplate).toHaveBeenCalledWith('TaskTemplateId_template', 'IdentityId_test');
+    expect(deleteTemplate).toHaveBeenCalledWith('TaskPlanId_template', 'IdentityId_test');
   });
 });

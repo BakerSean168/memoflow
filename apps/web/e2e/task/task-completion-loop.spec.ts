@@ -58,7 +58,7 @@ test.describe('Task completion closed loop', () => {
       template: { id: string };
       todayInstanceCreated: boolean;
     }>(
-      await page.request.post(`${API_CONFIG.API_PREFIX}/task-templates`, {
+      await page.request.post(`${API_CONFIG.API_PREFIX}/task-plans`, {
         headers,
         data: {
           name: taskName,

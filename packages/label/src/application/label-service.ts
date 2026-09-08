@@ -113,7 +113,7 @@ export class LabelService {
   setTaskLabels(command: TaskLabelAssignmentCommand): Promise<void> {
     return this.repository.replaceTaskLabels(
       command.identityId,
-      command.taskTemplateId,
+      command.taskPlanId,
       unique(command.labelIds),
     )
   }

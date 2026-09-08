@@ -54,7 +54,7 @@ model KeyResult {
   updatedAt              DateTime @updatedAt @map("updated_at")
 
   goal                     Goal                      @relation("GoalKeyResults", fields: [goalId, identityId], references: [id, identityId], onDelete: Cascade)
-  linkedTaskTemplates      TaskTemplate[]            @relation("KeyResultTaskTemplates")
+  linkedTaskPlans      TaskPlan[]            @relation("KeyResultTaskPlans")
   records                  GoalRecord[]
   keyResultWeightSnapshots KeyResultWeightSnapshot[]
 

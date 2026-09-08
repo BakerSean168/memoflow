@@ -34,8 +34,8 @@ describe('data portability dependency factories surface', () => {
   const expectedFieldNames = [
     'goalRepository',
     'goalRecordRepository',
-    'taskTemplateRepository',
-    'taskInstanceRepository',
+    'taskPlanRepository',
+    'taskOccurrenceRepository',
     'reminderTemplateRepository',
     'reminderGroupRepository',
     'reminderResponseRepository',
@@ -108,7 +108,7 @@ describe('data portability dependency factories surface', () => {
   it('does not leak concrete adapter classes through the root barrel', async () => {
     const forbidden = [
       'PowerSyncGoalAdapter',
-      'PowerSyncTaskTemplateAdapter',
+      'PowerSyncTaskPlanAdapter',
       'PowerSyncAIConversationAdapter',
       'PowerSyncDataPortabilityImportStore',
       'PrismaDataPortabilityImportStore',

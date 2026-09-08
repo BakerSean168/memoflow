@@ -6,7 +6,7 @@ import {
   createServerStateInvalidationDispatcher,
   type ServerStateInvalidation,
 } from './invalidation-dispatcher';
-import { governanceQueryKeys, notificationQueryKeys, taskTemplateQueryKeys } from './query-keys';
+import { governanceQueryKeys, notificationQueryKeys, taskPlanQueryKeys } from './query-keys';
 
 /** Wait for the current microtask turn so dispatcher turn-batching flushes. */
 async function flushTurn(): Promise<void> {
@@ -99,10 +99,10 @@ describe('invalidation-dispatcher — key mapping', () => {
     expect(keys).toContainEqual(notificationQueryKeys.detail('id-1', 'n-1'));
   });
 
-  it('task-template mutation invalidates lists + detail(id) without details prefix', async () => {
+  it('task-plan mutation invalidates lists + detail(id) without details prefix', async () => {
     const dispatcher = createServerStateInvalidationDispatcher(queryClient);
     await dispatcher.invalidate({
-      target: 'task-template',
+      target: 'task-plan',
       identityScope: 'id-1',
       source: 'mutation',
       entityId: 't-1',
@@ -110,15 +110,15 @@ describe('invalidation-dispatcher — key mapping', () => {
     await flushTurn();
 
     const keys = calledQueryKeys();
-    expect(keys).toContainEqual(taskTemplateQueryKeys.lists('id-1'));
-    expect(keys).toContainEqual(taskTemplateQueryKeys.detail('id-1', 't-1'));
-    expect(keys).not.toContainEqual(taskTemplateQueryKeys.details('id-1'));
+    expect(keys).toContainEqual(taskPlanQueryKeys.lists('id-1'));
+    expect(keys).toContainEqual(taskPlanQueryKeys.detail('id-1', 't-1'));
+    expect(keys).not.toContainEqual(taskPlanQueryKeys.details('id-1'));
   });
 
   it('task_templates table change (projection all) invalidates lists + details prefix', async () => {
     const dispatcher = createServerStateInvalidationDispatcher(queryClient);
     await dispatcher.invalidate({
-      target: 'task-template',
+      target: 'task-plan',
       identityScope: 'id-1',
       source: 'powersync',
       projection: 'all',
@@ -126,14 +126,14 @@ describe('invalidation-dispatcher — key mapping', () => {
     await flushTurn();
 
     const keys = calledQueryKeys();
-    expect(keys).toContainEqual(taskTemplateQueryKeys.lists('id-1'));
-    expect(keys).toContainEqual(taskTemplateQueryKeys.details('id-1'));
+    expect(keys).toContainEqual(taskPlanQueryKeys.lists('id-1'));
+    expect(keys).toContainEqual(taskPlanQueryKeys.details('id-1'));
   });
 
-  it('task-template mutation with projection lists invalidates lists only', async () => {
+  it('task-plan mutation with projection lists invalidates lists only', async () => {
     const dispatcher = createServerStateInvalidationDispatcher(queryClient);
     await dispatcher.invalidate({
-      target: 'task-template',
+      target: 'task-plan',
       identityScope: 'id-1',
       source: 'mutation',
       projection: 'lists',
@@ -141,8 +141,8 @@ describe('invalidation-dispatcher — key mapping', () => {
     await flushTurn();
 
     const keys = calledQueryKeys();
-    expect(keys).toContainEqual(taskTemplateQueryKeys.lists('id-1'));
-    expect(keys).not.toContainEqual(taskTemplateQueryKeys.details('id-1'));
+    expect(keys).toContainEqual(taskPlanQueryKeys.lists('id-1'));
+    expect(keys).not.toContainEqual(taskPlanQueryKeys.details('id-1'));
   });
 
   it('governance mutation invalidates lists + details + revision prefix (+ detail(id))', async () => {

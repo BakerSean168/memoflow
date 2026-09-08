@@ -8,7 +8,7 @@ import { toPrismaJson as aiToPrismaJson } from './to-prisma-json';
  * - AI sole: JSON.parse(JSON.stringify(value)) → Prisma.InputJsonValue (unknown in, deep-clone)
  * - Account private: DTO cast → Prisma.InputJsonObject (typed profile/settings, no clone)
  * Soft residual 979: AI Prisma adapter duals retired onto sole.
- * Soft residual 1156: toDashboardTaskInstanceRecord dual retired remains separate.
+ * Soft residual 1156: toDashboardTaskOccurrenceRecord dual retired remains separate.
  * Does not flip §13.2 checkboxes.
  */
 describe('toPrismaJson keep-boundary (residual 1159)', () => {

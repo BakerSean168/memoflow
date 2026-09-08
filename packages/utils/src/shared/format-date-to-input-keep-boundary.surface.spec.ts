@@ -24,7 +24,7 @@ describe('formatDateToInput dual retired (residual 1210)', () => {
   const vue = readFileSync(
     resolve(
       dir,
-      '../../../app-vue/src/modules/task/components/TaskTemplateForm/sections/TimeConfigSection.vue',
+      '../../../app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue',
     ),
     'utf8',
   );

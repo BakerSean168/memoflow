@@ -34,7 +34,7 @@ export class TaskPage {
 
     // Prefer the stable create button testid used by TaskManagementView
     const createBtn = this.page
-      .getByTestId('create-task-template-button')
+      .getByTestId('create-task-plan-button')
       .or(this.createTaskButton);
     await createBtn.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {
       console.log('[TaskPage] Create button not found, page might need authentication or different route');

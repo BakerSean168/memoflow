@@ -3,14 +3,14 @@ import type { CreateGoalReq } from '@memoflow/contracts/goal';
 import type { CreateReminderTemplateReq } from '@memoflow/contracts/reminder';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { CreateTaskTemplateReq } from '@memoflow/contracts/task';
+import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
 
 export type GoalMutationResult = {
   goalId: string;
   keyResultIds: string[];
 };
 
-export type TaskTemplateMutationResult = { taskId: string };
+export type TaskPlanMutationResult = { taskId: string };
 export type ReminderMutationResult = { reminderId: string };
 
 /**
@@ -28,10 +28,10 @@ export interface GoalPlanMutationPort {
     context: ExecutionContext,
   ): Promise<Result<string[]>>;
   createGoal(request: CreateGoalReq, context: ExecutionContext): Promise<Result<GoalMutationResult>>;
-  createTaskTemplate(
-    request: CreateTaskTemplateReq,
+  createTaskPlan(
+    request: CreateTaskPlanReq,
     context: ExecutionContext,
-  ): Promise<Result<TaskTemplateMutationResult>>;
+  ): Promise<Result<TaskPlanMutationResult>>;
   createReminder(
     request: CreateReminderTemplateReq,
     context: ExecutionContext,

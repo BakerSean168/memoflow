@@ -926,10 +926,10 @@
     },
     {
       "id": "r1156",
-      "path": "packages/dashboard/src/to-dashboard-task-instance-record-dual.surface.spec.ts",
+      "path": "packages/dashboard/src/to-dashboard-task-occurrence-record-dual.surface.spec.ts",
       "package": "packages/dashboard",
       "class": "retired",
-      "sole": "domain/to-dashboard-task-instance-record.ts",
+      "sole": "domain/to-dashboard-task-occurrence-record.ts",
       "blast": "surface lock (retired)",
       "next": "none",
       "residual": "1156",

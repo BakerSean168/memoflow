@@ -10,11 +10,11 @@ import type {
 import {
   createEmptyGoalDraft,
   createEmptyGoalReminderDraft,
-  createEmptyGoalTaskTemplateDraft,
+  createEmptyGoalTaskPlanDraft,
   type EditableGoal,
   type EditableKeyResult,
   type EditableGoalReminder,
-  type EditableGoalTaskTemplate,
+  type EditableGoalTaskPlan,
   type GoalWorkflowStage,
   type GoalClarificationView,
   type UseAIGoalWorkflowOptions,
@@ -48,7 +48,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
 
   const editableGoal = ref<EditableGoal>(createEmptyGoalDraft());
   const editableKeyResults = ref<EditableKeyResult[]>([]);
-  const editableTaskTemplates = ref<EditableGoalTaskTemplate[]>([]);
+  const editableTaskPlans = ref<EditableGoalTaskPlan[]>([]);
   const editableReminders = ref<EditableGoalReminder[]>([]);
 
   function currentReviewDraft(): GoalPlanDraft | null {
@@ -76,7 +76,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
       unit: item.unit,
       weight: item.weight,
     }));
-    editableTaskTemplates.value = draft.taskTemplates.map((item) => ({
+    editableTaskPlans.value = draft.taskPlans.map((item) => ({
       name: item.name,
       description: item.description ?? '',
       importance: item.importance,
@@ -171,8 +171,8 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
       weight: item.weight,
     }));
 
-    const taskTemplates = editableTaskTemplates.value.map((item, index) => {
-      const prior = draft.taskTemplates[index];
+    const taskPlans = editableTaskPlans.value.map((item, index) => {
+      const prior = draft.taskPlans[index];
       return {
         ...(prior ?? {
           daysOfWeek: item.cadence === 'weekly' ? [1] : [],
@@ -215,7 +215,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     return {
       goal,
       keyResults,
-      taskTemplates,
+      taskPlans,
       reminders,
       rationale: draft.rationale,
       warnings: [...draft.warnings],
@@ -509,17 +509,17 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
   function handleUpdateGoalDraft(payload: EditableGoal): void {
     editableGoal.value = { ...payload };
   }
-  function addTaskTemplateDraft(): void {
-    editableTaskTemplates.value.push(createEmptyGoalTaskTemplateDraft());
+  function addTaskPlanDraft(): void {
+    editableTaskPlans.value.push(createEmptyGoalTaskPlanDraft());
   }
-  function removeTaskTemplateDraft(index: number): void {
-    editableTaskTemplates.value.splice(index, 1);
+  function removeTaskPlanDraft(index: number): void {
+    editableTaskPlans.value.splice(index, 1);
   }
-  function updateTaskTemplateDraft(payload: {
+  function updateTaskPlanDraft(payload: {
     index: number;
-    value: EditableGoalTaskTemplate;
+    value: EditableGoalTaskPlan;
   }): void {
-    editableTaskTemplates.value[payload.index] = { ...payload.value };
+    editableTaskPlans.value[payload.index] = { ...payload.value };
   }
   function addReminderDraft(): void {
     editableReminders.value.push(createEmptyGoalReminderDraft());
@@ -545,7 +545,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     showGoalDraftEditor.value = false;
     editableGoal.value = createEmptyGoalDraft();
     editableKeyResults.value = [];
-    editableTaskTemplates.value = [];
+    editableTaskPlans.value = [];
     editableReminders.value = [];
   }
   return {
@@ -562,7 +562,7 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     goalAgentResuming,
     editableGoal,
     editableKeyResults,
-    editableTaskTemplates,
+    editableTaskPlans,
     editableReminders,
     canSubmitGoalClarification,
     canRunGoalWorkflow,
@@ -593,9 +593,9 @@ export function useAIGoalWorkflow(options: UseAIGoalWorkflowOptions) {
     removeKeyResultDraft,
     updateKeyResultDraft,
     handleUpdateGoalDraft,
-    addTaskTemplateDraft,
-    removeTaskTemplateDraft,
-    updateTaskTemplateDraft,
+    addTaskPlanDraft,
+    removeTaskPlanDraft,
+    updateTaskPlanDraft,
     addReminderDraft,
     removeReminderDraft,
     updateReminderDraft,

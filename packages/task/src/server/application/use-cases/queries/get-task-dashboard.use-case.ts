@@ -4,19 +4,19 @@
  * 鑾峰彇浠诲姟浠爮鏉挎暟锟?
  */
 
-import type { ITaskTemplateRepository } from '../../../domain/repositories/i-task-template-repository';
-import type { TaskFilters } from '../../../domain/repositories/i-task-template-repository';
-import type { TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
+import type { TaskFilters } from '../../../domain/repositories/i-task-plan-repository';
+import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import { TaskTemplateStatus } from '@memoflow/contracts/task';
+import { TaskPlanStatus } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
 
 interface TaskDashboardResponse {
-  todayTasks: TaskTemplateClientDTO[];
-  overdueTasks: TaskTemplateClientDTO[];
-  upcomingTasks: TaskTemplateClientDTO[];
-  highPriorityTasks: TaskTemplateClientDTO[];
+  todayTasks: TaskPlanClientDTO[];
+  overdueTasks: TaskPlanClientDTO[];
+  upcomingTasks: TaskPlanClientDTO[];
+  highPriorityTasks: TaskPlanClientDTO[];
   summary: {
     totalTasks: number;
     completedToday: number;
@@ -30,7 +30,7 @@ interface TaskDashboardResponse {
  * Get Task Dashboard Service
  */
 export class GetTaskDashboardUseCase {
-  constructor(private readonly templateRepository: ITaskTemplateRepository) {}
+  constructor(private readonly templateRepository: ITaskPlanRepository) {}
 
   async execute(identityId: string): Promise<Result<TaskDashboardResponse>> {
 
@@ -49,8 +49,8 @@ export class GetTaskDashboardUseCase {
       this.getUpcomingTasks(identityId, 7),
       this.getHighPriorityTasks(identityId, 5),
       this.getRecentCompletedTasks(identityId, 10),
-      this.countTasks(identityId, { status: TaskTemplateStatus.Active }),
-      this.countTasks(identityId, { status: TaskTemplateStatus.Closed }),
+      this.countTasks(identityId, { status: TaskPlanStatus.Active }),
+      this.countTasks(identityId, { status: TaskPlanStatus.Closed }),
     ]);
 
     const _completionRate =
@@ -73,23 +73,23 @@ export class GetTaskDashboardUseCase {
     });
   }
 
-  private async getTodayTasks(identityId: string): Promise<TaskTemplateClientDTO[]> {
+  private async getTodayTasks(identityId: string): Promise<TaskPlanClientDTO[]> {
     const tasks = await this.templateRepository.findTodayTasks(identityId);
     return tasks.map((t) => t.toClientDTO());
   }
 
-  private async getOverdueTasks(identityId: string): Promise<TaskTemplateClientDTO[]> {
+  private async getOverdueTasks(identityId: string): Promise<TaskPlanClientDTO[]> {
     const tasks = await this.templateRepository.findOverdueTasks(identityId);
     return tasks.map((t) => t.toClientDTO());
   }
 
 
-  private async getUpcomingTasks(identityId: string, daysAhead: number): Promise<TaskTemplateClientDTO[]> {
+  private async getUpcomingTasks(identityId: string, daysAhead: number): Promise<TaskPlanClientDTO[]> {
     const tasks = await this.templateRepository.findUpcomingTasks(identityId, daysAhead);
     return tasks.map((t) => t.toClientDTO());
   }
 
-  private async getHighPriorityTasks(identityId: string, limit: number): Promise<TaskTemplateClientDTO[]> {
+  private async getHighPriorityTasks(identityId: string, limit: number): Promise<TaskPlanClientDTO[]> {
     const rank: Record<string, number> = {
       [ImportanceLevel.Vital]: 0,
       [ImportanceLevel.Important]: 1,
@@ -104,10 +104,10 @@ export class GetTaskDashboardUseCase {
       .map((task) => task.toClientDTO());
   }
 
-  private async getRecentCompletedTasks(identityId: string, limit: number): Promise<TaskTemplateClientDTO[]> {
+  private async getRecentCompletedTasks(identityId: string, limit: number): Promise<TaskPlanClientDTO[]> {
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const tasks = await this.templateRepository.findOneTimeTasks(identityId, {
-      status: TaskTemplateStatus.Closed,
+      status: TaskPlanStatus.Closed,
     });
 
     return tasks

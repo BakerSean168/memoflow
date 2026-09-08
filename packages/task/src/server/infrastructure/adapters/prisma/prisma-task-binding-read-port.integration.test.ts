@@ -51,7 +51,7 @@ describe('PrismaTaskBindingReadPort (W4 P2-3)', () => {
       ],
     });
 
-    await prisma.taskTemplate.createMany({
+    await prisma.taskPlan.createMany({
       data: [
         { id: `tpl-a1`, identityId: identityA, name: 'A1', status: 'Active', goalId: goalA, keyResultId: keyResultA, createdAt: now, updatedAt: now },
         { id: `tpl-a2`, identityId: identityA, name: 'A2', status: 'Active', goalId: goalA, keyResultId: keyResultA, createdAt: now, updatedAt: now },

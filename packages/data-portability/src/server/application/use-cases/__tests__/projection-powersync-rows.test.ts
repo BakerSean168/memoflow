@@ -7,7 +7,7 @@ import {
   projectReminderTemplates,
 } from '../projections/reminder.projection';
 import { projectScheduleTasks } from '../projections/schedule.projection';
-import { projectTaskTemplates } from '../projections/task.projection';
+import { projectTaskPlans } from '../projections/task.projection';
 import type { DataPortabilityDependencies } from '../../data-portability.dependencies';
 
 function createExportContext(refs: Record<string, string> = {}): ExportContext {
@@ -85,7 +85,7 @@ describe('projection from PowerSync-shaped rows', () => {
       'kr-db-id': 'keyResult:1',
     });
 
-    const templates = projectTaskTemplates(
+    const templates = projectTaskPlans(
       [
         {
           id: 'task-db-id',
@@ -132,7 +132,7 @@ describe('projection from PowerSync-shaped rows', () => {
       'goal-db-id': 'goal:1',
       'kr-db-id': 'keyResult:1',
     });
-    const [template] = projectTaskTemplates([
+    const [template] = projectTaskPlans([
       {
         id: 'task-link-only',
         name: 'Read linked context',

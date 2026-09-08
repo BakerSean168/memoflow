@@ -43,11 +43,11 @@ export class GoalPlanMutationAdapter implements GoalPlanMutationPort {
     });
   }
 
-  async createTaskTemplate(
-    request: Parameters<GoalPlanMutationPort['createTaskTemplate']>[0],
-    context: Parameters<GoalPlanMutationPort['createTaskTemplate']>[1],
+  async createTaskPlan(
+    request: Parameters<GoalPlanMutationPort['createTaskPlan']>[0],
+    context: Parameters<GoalPlanMutationPort['createTaskPlan']>[1],
   ) {
-    const result = await this.task.createTaskTemplate({
+    const result = await this.task.createTaskPlan({
       ...request,
       identityId: context.identityId as IdentityId,
     });

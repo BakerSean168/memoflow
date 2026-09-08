@@ -15,7 +15,7 @@ export type {
   ConversationSummary,
   EditableGoal,
   EditableGoalReminder,
-  EditableGoalTaskTemplate,
+  EditableGoalTaskPlan,
   EditableKeyResult,
   GoalWorkflowStage,
   GoalClarificationView,

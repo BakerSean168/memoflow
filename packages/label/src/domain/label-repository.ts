@@ -19,11 +19,11 @@ export interface LabelRepository {
   findById(identityId: string, labelId: string): Promise<LabelRecord | null>
   list(options: LabelListOptions): Promise<LabelRecord[]>
   replaceGoalLabels(identityId: string, goalId: string, labelIds: readonly string[]): Promise<void>
-  replaceTaskLabels(identityId: string, taskTemplateId: string, labelIds: readonly string[]): Promise<void>
+  replaceTaskLabels(identityId: string, taskPlanId: string, labelIds: readonly string[]): Promise<void>
   listGoalLabels(identityId: string, goalId: string): Promise<LabelRecord[]>
-  listTaskLabels(identityId: string, taskTemplateId: string): Promise<LabelRecord[]>
+  listTaskLabels(identityId: string, taskPlanId: string): Promise<LabelRecord[]>
   listGoalLabelsByGoalIds(identityId: string, goalIds: readonly string[]): Promise<Map<string, LabelRecord[]>>
-  listTaskLabelsByTaskTemplateIds(identityId: string, taskTemplateIds: readonly string[]): Promise<Map<string, LabelRecord[]>>
+  listTaskLabelsByTaskPlanIds(identityId: string, taskPlanIds: readonly string[]): Promise<Map<string, LabelRecord[]>>
   findGoalIdsMatchingAllLabels(identityId: string, labelIds: readonly string[]): Promise<string[]>
-  findTaskTemplateIdsMatchingAllLabels(identityId: string, labelIds: readonly string[]): Promise<string[]>
+  findTaskPlanIdsMatchingAllLabels(identityId: string, labelIds: readonly string[]): Promise<string[]>
 }

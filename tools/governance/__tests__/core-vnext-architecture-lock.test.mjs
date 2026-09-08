@@ -88,12 +88,12 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `function read(template) { return template.tags; }`,
       },
       {
-        relPath: 'packages/contracts/src/modules/task/api/task-template.dto.ts',
+        relPath: 'packages/contracts/src/modules/task/api/task-plan.dto.ts',
         content: `export interface LegacyTaskInput { tags?: string[]; color?: string | null; }`,
       },
       {
         relPath: 'packages/database/prisma/schema/task.prisma',
-        content: `model TaskTemplate {\n  id String @id\n  tags String\n}`,
+        content: `model TaskPlan {\n  id String @id\n  tags String\n}`,
       },
     );
     const kinds = new Set(violations.map((v) => v.kind));
@@ -163,16 +163,16 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `export interface RecurrenceRule { frequency: 'daily' | 'weekly'; }`,
       },
       {
-        relPath: 'packages/contracts/src/modules/task/api/task-template.dto.ts',
+        relPath: 'packages/contracts/src/modules/task/api/task-plan.dto.ts',
         content: `export interface TaskInput { labelIds?: string[]; }`,
       },
       {
-        relPath: 'packages/task/src/server/domain/aggregates/task-template.state.ts',
-        content: `export interface TaskTemplateState { labels: readonly string[]; }`,
+        relPath: 'packages/task/src/server/domain/aggregates/task-plan.state.ts',
+        content: `export interface TaskPlanState { labels: readonly string[]; }`,
       },
       {
         relPath: 'packages/database/prisma/schema/task.prisma',
-        content: `model TaskTemplate { id String @id }\nmodel TaskLabel { labelId String }`,
+        content: `model TaskPlan { id String @id }\nmodel TaskLabel { labelId String }`,
       },
       {
         relPath: 'packages/app-vue/src/modules/task/TaskView.vue',

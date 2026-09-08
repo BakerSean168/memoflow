@@ -138,7 +138,7 @@ export interface CreateGoalRecordInput extends TimestampedImportInput {
 
 // --- Task ---
 
-export interface CreateTaskTemplateInput extends TimestampedImportInput {
+export interface CreateTaskPlanInput extends TimestampedImportInput {
   id: string;
   identityId: string;
   name: string;
@@ -177,7 +177,7 @@ export interface CreateTaskTemplateInput extends TimestampedImportInput {
   checklist: string | null;
 }
 
-export interface CreateTaskInstanceInput extends TimestampedImportInput {
+export interface CreateTaskOccurrenceInput extends TimestampedImportInput {
   id: string;
   templateId: string;
   identityId: string;
@@ -370,8 +370,8 @@ export interface DataPortabilityImportTx {
   createGoalRecord(input: CreateGoalRecordInput): Promise<void>;
 
   // Task
-  createTaskTemplate(input: CreateTaskTemplateInput): Promise<void>;
-  createTaskInstance(input: CreateTaskInstanceInput): Promise<void>;
+  createTaskPlan(input: CreateTaskPlanInput): Promise<void>;
+  createTaskOccurrence(input: CreateTaskOccurrenceInput): Promise<void>;
 
   // Schedule
   createSchedule(input: CreateScheduleInput): Promise<void>;

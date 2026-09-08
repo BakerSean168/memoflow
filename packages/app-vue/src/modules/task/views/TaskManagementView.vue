@@ -14,7 +14,7 @@
       </template>
       <template #actions>
         <Button
-          data-testid="create-task-template-button"
+          data-testid="create-task-plan-button"
           data-primary-action="create-task"
           @click="openCreateDialog"
         >
@@ -263,7 +263,7 @@
       </div>
     </main>
 
-    <TaskTemplateDialog
+    <TaskPlanDialog
       v-model="showDialog"
       :mode="dialogMode"
       :template="selectedTemplate"
@@ -292,22 +292,22 @@ import {
 import {
   TaskType,
   type RecurrenceRuleDTO,
-  type TaskInstanceClientDTO,
+  type TaskOccurrenceClientDTO,
 } from '@memoflow/contracts/task';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
-import TaskTemplateDialog from '../components/dialogs/TaskTemplateDialog.vue';
-import type { TaskTemplateViewModel } from '../components/types';
+import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
+import type { TaskPlanViewModel } from '../components/types';
 import { useTaskStore } from '../stores/task-store';
-import { useTaskInstances } from '../composables/useTaskInstances';
-import { useTaskTemplateListQuery } from '../composables/useTaskTemplateListQuery';
-import { useTaskTemplateMutations } from '../composables/useTaskTemplateMutations';
+import { useTaskOccurrences } from '../composables/useTaskOccurrences';
+import { useTaskPlanListQuery } from '../composables/useTaskPlanListQuery';
+import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import {
-  mapTaskTemplateDtoToViewModel,
+  mapTaskPlanDtoToViewModel,
   toTaskTimeConfigPayload,
-} from '../utils/task-template-presentation';
+} from '../utils/task-plan-presentation';
 import {
   getTaskOccurrencePosition,
   isTaskOccurrenceOnSurface,
@@ -318,7 +318,7 @@ import {
 const router = useRouter();
 const { t } = useI18n();
 const surfaces = ['today', 'upcoming', 'plans'] as const;
-const instanceStatuses: TaskInstanceClientDTO['status'][] = [
+const instanceStatuses: TaskOccurrenceClientDTO['status'][] = [
   'Pending',
   'InProgress',
   'Completed',
@@ -328,13 +328,13 @@ const instanceStatuses: TaskInstanceClientDTO['status'][] = [
 
 const activeSurface = ref<(typeof surfaces)[number]>('today');
 const searchQuery = ref('');
-const statusFilter = ref<'all' | TaskInstanceClientDTO['status']>('all');
+const statusFilter = ref<'all' | TaskOccurrenceClientDTO['status']>('all');
 const labelFilter = ref('all');
 const goalFilter = ref<'all' | 'linked' | 'unlinked'>('all');
 const occurrenceSort = ref<TaskOccurrenceSort>('time');
 const showDialog = ref(false);
 const dialogMode = ref<'create' | 'edit'>('create');
-const selectedTemplate = ref<TaskTemplateViewModel | null>(null);
+const selectedTemplate = ref<TaskPlanViewModel | null>(null);
 const busyOccurrenceId = ref<string | null>(null);
 
 const {
@@ -342,16 +342,16 @@ const {
   isLoading: templatesLoading,
   isError: templatesError,
   refetch: refetchTemplates,
-} = useTaskTemplateListQuery({ page: 1, limit: 500 });
+} = useTaskPlanListQuery({ page: 1, limit: 500 });
 const {
   createTemplateSafe,
   updateTemplateSafe,
   archiveTemplateSafe,
   deleteTemplateSafe,
   isSaving,
-} = useTaskTemplateMutations();
+} = useTaskPlanMutations();
 const { fetchInstances, completeInstance, uncompleteInstance, markInstanceMissed, skipInstance } =
-  useTaskInstances();
+  useTaskOccurrences();
 const taskStore = useTaskStore();
 const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
 
@@ -359,7 +359,7 @@ const templateById = computed(
   () => new Map(templates.value.map((template) => [String(template.id), template])),
 );
 const planViewModels = computed(() =>
-  templates.value.map((template) => mapTaskTemplateDtoToViewModel(template, t)),
+  templates.value.map((template) => mapTaskPlanDtoToViewModel(template, t)),
 );
 const availableLabels = computed(() => {
   const byId = new Map(
@@ -449,7 +449,7 @@ function openCreateDialog() {
   selectedTemplate.value = null;
   showDialog.value = true;
 }
-function openEditDialog(template: TaskTemplateViewModel) {
+function openEditDialog(template: TaskPlanViewModel) {
   dialogMode.value = 'edit';
   selectedTemplate.value = template;
   showDialog.value = true;
@@ -463,7 +463,7 @@ function closeDialog() {
   selectedTemplate.value = null;
 }
 
-function goalBinding(vm: TaskTemplateViewModel) {
+function goalBinding(vm: TaskPlanViewModel) {
   if (!vm.goalBinding?.goalId || !vm.goalBinding.keyResultId) return null;
   return {
     goalId: vm.goalBinding.goalId as GoalId,
@@ -472,7 +472,7 @@ function goalBinding(vm: TaskTemplateViewModel) {
   };
 }
 
-async function handleSubmit(vm: TaskTemplateViewModel) {
+async function handleSubmit(vm: TaskPlanViewModel) {
   const common = {
     name: vm.title,
     description: vm.description ?? null,
@@ -498,7 +498,7 @@ async function handleSubmit(vm: TaskTemplateViewModel) {
 async function archive(id: string) {
   if (await archiveTemplateSafe(id)) await refetchTemplates();
 }
-async function remove(vm: TaskTemplateViewModel) {
+async function remove(vm: TaskPlanViewModel) {
   const confirmed = await useConfirm({
     title: t('task.management.deleteTemplate'),
     description: t('task.management.confirmDelete', { name: vm.title }),

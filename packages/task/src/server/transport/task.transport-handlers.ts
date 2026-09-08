@@ -11,16 +11,16 @@
  */
 
 import type { TaskApplicationPort } from '../application';
-import type { TaskInstanceUseCases } from './task-instance.controller';
-import type { TaskTemplateUseCases } from './task-template.controller';
+import type { TaskOccurrenceUseCases } from './task-occurrence.controller';
+import type { TaskPlanUseCases } from './task-plan.controller';
 
 /**
  * All controller use-case interfaces grouped together.
  * 所有控制器用例接口的统一分组。
  */
 export interface TaskTransportHandlers {
-  readonly template: TaskTemplateUseCases;
-  readonly instance: TaskInstanceUseCases;
+  readonly template: TaskPlanUseCases;
+  readonly instance: TaskOccurrenceUseCases;
 }
 
 /**
@@ -35,33 +35,33 @@ export interface TaskTransportHandlers {
 export function createTaskTransportHandlers(api: TaskApplicationPort): TaskTransportHandlers {
   return {
     template: {
-      createTemplate: api.createTaskTemplate,
-      getTemplate: api.getTaskTemplate,
-      listTemplates: api.listTaskTemplates,
-      updateTemplate: api.updateTaskTemplate,
-      deleteTemplate: api.deleteTaskTemplate,
-      activateTemplate: api.activateTaskTemplate,
-      pauseTemplate: api.pauseTaskTemplate,
-      archiveTemplate: api.archiveTaskTemplate,
+      createTemplate: api.createTaskPlan,
+      getTemplate: api.getTaskPlan,
+      listTemplates: api.listTaskPlans,
+      updateTemplate: api.updateTaskPlan,
+      deleteTemplate: api.deleteTaskPlan,
+      activateTemplate: api.activateTaskPlan,
+      pauseTemplate: api.pauseTaskPlan,
+      archiveTemplate: api.archiveTaskPlan,
       abandonPlan: api.abandonTaskPlan,
-      generateInstances: api.generateTaskInstances,
+      generateInstances: api.generateTaskOccurrences,
       bindToGoal: api.bindTaskToGoal,
       unbindFromGoal: api.unbindTaskFromGoal,
-      listInstancesByTemplate: api.listTaskInstancesByTemplate,
+      listInstancesByTemplate: api.listTaskOccurrencesByTemplate,
     },
     instance: {
-      getTaskInstance: api.getTaskInstance,
-      listByAccount: api.listTaskInstancesByAccount,
-      listByTemplate: api.listTaskInstancesByTemplate,
-      listByStatus: api.listTaskInstancesByStatus,
-      getByDateRange: api.getTaskInstancesByDateRange,
-      complete: api.completeTaskInstance,
-      uncomplete: api.uncompleteTaskInstance,
-      skip: api.skipTaskInstance,
-      markMissed: api.markTaskInstanceMissed,
-      start: api.startTaskInstance,
-      deleteInstance: api.deleteTaskInstance,
-      reschedule: api.rescheduleTaskInstance,
+      getTaskOccurrence: api.getTaskOccurrence,
+      listByAccount: api.listTaskOccurrencesByAccount,
+      listByTemplate: api.listTaskOccurrencesByTemplate,
+      listByStatus: api.listTaskOccurrencesByStatus,
+      getByDateRange: api.getTaskOccurrencesByDateRange,
+      complete: api.completeTaskOccurrence,
+      uncomplete: api.uncompleteTaskOccurrence,
+      skip: api.skipTaskOccurrence,
+      markMissed: api.markTaskOccurrenceMissed,
+      start: api.startTaskOccurrence,
+      deleteInstance: api.deleteTaskOccurrence,
+      reschedule: api.rescheduleTaskOccurrence,
     },
   };
 }

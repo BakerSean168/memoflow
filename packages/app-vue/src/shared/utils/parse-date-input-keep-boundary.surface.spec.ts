@@ -12,7 +12,7 @@ describe('date input Product Time boundary (residual 1225)', () => {
   const vue = readFileSync(
     resolve(
       dir,
-      '../../modules/task/components/TaskTemplateForm/sections/TimeConfigSection.vue',
+      '../../modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue',
     ),
     'utf8',
   );

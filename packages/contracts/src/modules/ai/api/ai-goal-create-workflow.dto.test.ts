@@ -28,7 +28,7 @@ const draft = {
       weight: 5,
     },
   ],
-  taskTemplates: [
+  taskPlans: [
     {
       name: 'Daily N1 study',
       importance: 'Important',
@@ -74,26 +74,26 @@ describe('ADR-052 goal.create workflow contracts', () => {
   it('validates a complete product draft and domain-previewable references', () => {
     const parsed = GoalPlanDraftSchema.parse(draft);
     expect(parsed.revision).toBe(1);
-    expect(parsed.taskTemplates[0].keyResultIndex).toBe(0);
+    expect(parsed.taskPlans[0].keyResultIndex).toBe(0);
     expect(parsed.goal.labels).toEqual(['Learning']);
-    expect(parsed.taskTemplates[0].labels).toEqual(['Japanese']);
+    expect(parsed.taskPlans[0].labels).toEqual(['Japanese']);
     expect(
       GoalPlanDraftSchema.safeParse({
         ...draft,
-        taskTemplates: [{ ...draft.taskTemplates[0], tags: ['legacy'] }],
+        taskPlans: [{ ...draft.taskPlans[0], tags: ['legacy'] }],
       }).success,
     ).toBe(false);
 
     expect(
       GoalPlanDraftSchema.safeParse({
         ...draft,
-        taskTemplates: [{ ...draft.taskTemplates[0], keyResultIndex: 9 }],
+        taskPlans: [{ ...draft.taskPlans[0], keyResultIndex: 9 }],
       }).success,
     ).toBe(false);
     expect(
       GoalPlanDraftSchema.safeParse({
         ...draft,
-        taskTemplates: [{ ...draft.taskTemplates[0], cadence: 'weekly', daysOfWeek: [] }],
+        taskPlans: [{ ...draft.taskPlans[0], cadence: 'weekly', daysOfWeek: [] }],
       }).success,
     ).toBe(false);
   });

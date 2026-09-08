@@ -8,21 +8,21 @@ import { describe, expect, it } from 'vitest';
  * no `{ success: boolean }` dual-track body / Result.void data:undefined.
  */
 describe('task void success envelope surface', () => {
-  const templateRoutes = readFileSync(resolve(__dirname, './task-template.routes.ts'), 'utf8');
-  const instanceRoutes = readFileSync(resolve(__dirname, './task-instance.routes.ts'), 'utf8');
+  const templateRoutes = readFileSync(resolve(__dirname, './task-plan.routes.ts'), 'utf8');
+  const instanceRoutes = readFileSync(resolve(__dirname, './task-occurrence.routes.ts'), 'utf8');
   const templateController = readFileSync(
-    resolve(__dirname, '../../server/transport/task-template.controller.ts'),
+    resolve(__dirname, '../../server/transport/task-plan.controller.ts'),
     'utf8',
   );
   const instanceController = readFileSync(
-    resolve(__dirname, '../../server/transport/task-instance.controller.ts'),
+    resolve(__dirname, '../../server/transport/task-occurrence.controller.ts'),
     'utf8',
   );
   const electron = readFileSync(resolve(__dirname, '../../electron/index.ts'), 'utf8');
   const deleteTemplateUseCase = readFileSync(
     resolve(
       __dirname,
-      '../../server/application/use-cases/commands/delete-task-template.use-case.ts',
+      '../../server/application/use-cases/commands/delete-task-plan.use-case.ts',
     ),
     'utf8',
   );

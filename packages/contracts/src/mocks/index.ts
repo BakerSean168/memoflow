@@ -9,7 +9,7 @@
  * import {
  *   createMockGoal,
  *   createMockGoalList,
- *   createMockTaskTemplate,
+ *   createMockTaskPlan,
  *   createMockAccount,
  *   createMockScheduleTask,
  *   createMockReminderTemplate,

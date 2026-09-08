@@ -53,10 +53,10 @@ test.describe('Local Docker core product Phase A', () => {
     await expect(page.getByTestId('task-management-view')).toBeVisible({
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
-    await page.getByTestId('create-task-template-button').click();
-    await expect(page.getByTestId('task-template-dialog')).toBeVisible();
-    await page.getByTestId('task-template-title-input').fill(taskName);
-    await page.getByTestId('task-template-description-input').fill(taskDescription);
+    await page.getByTestId('create-task-plan-button').click();
+    await expect(page.getByTestId('task-plan-dialog')).toBeVisible();
+    await page.getByTestId('task-plan-title-input').fill(taskName);
+    await page.getByTestId('task-plan-description-input').fill(taskDescription);
 
     const toggle = page.getByTestId('task-goal-binding-toggle');
     const fixtures = [primary, alternate];
@@ -70,8 +70,8 @@ test.describe('Local Docker core product Phase A', () => {
       await expect(toggle).toHaveAttribute('data-state', 'checked');
       await selectBinding(page, fixtures[index % fixtures.length]);
 
-      await expect(page.getByTestId('task-template-title-input')).toHaveValue(taskName);
-      await expect(page.getByTestId('task-template-description-input')).toHaveValue(
+      await expect(page.getByTestId('task-plan-title-input')).toHaveValue(taskName);
+      await expect(page.getByTestId('task-plan-description-input')).toHaveValue(
         taskDescription,
       );
       await expect(page.getByText(/Cannot read properties of null/i)).toHaveCount(0);
@@ -91,7 +91,7 @@ test.describe('Local Docker core product Phase A', () => {
     const createResponsePromise = page.waitForResponse(
       (response) =>
         response.request().method() === 'POST' &&
-        new URL(response.url()).pathname.endsWith('/api/v1/task-templates'),
+        new URL(response.url()).pathname.endsWith('/api/v1/task-plans'),
     );
     await page.getByTestId('task-dialog-save-button').click();
     const creation = await expectApiData<{
@@ -133,7 +133,7 @@ test.describe('Local Docker core product Phase A', () => {
       .filter({ has: page.getByText(taskName, { exact: true }) });
     await expect(taskItem).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
     await expect(taskItem).toHaveAttribute('data-task-status', 'Pending');
-    const instanceId = await taskItem.getAttribute('data-task-instance-id');
+    const instanceId = await taskItem.getAttribute('data-task-occurrence-id');
     expect(instanceId).toBeTruthy();
     const completeButton = page.getByTestId(`complete-today-task-${instanceId}`);
 
@@ -142,7 +142,7 @@ test.describe('Local Docker core product Phase A', () => {
     await expectGoalContribution(page, headers, primary, { currentValue: 1, recordCount: 1 });
 
     const repeatedCompletion = await page.request.post(
-      `${API_CONFIG.FULL_URL}/task-instances/${instanceId}/complete`,
+      `${API_CONFIG.FULL_URL}/task-occurrences/${instanceId}/complete`,
       { headers },
     );
     expect(repeatedCompletion.ok(), await repeatedCompletion.text()).toBe(true);

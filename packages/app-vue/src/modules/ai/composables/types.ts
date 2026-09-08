@@ -3,7 +3,7 @@ import type { Ref } from 'vue';
 import type {
   ConversationListRes,
   GoalPlanReminder,
-  GoalPlanTaskTemplate,
+  GoalPlanTaskPlan,
   QueryKnowledgeRes,
 } from '@memoflow/contracts/ai';
 import type { IAIClient, IWorkflowRuntimeService } from '../../../di/types';
@@ -165,11 +165,11 @@ export type EditableKeyResult = {
   weight: number;
 };
 
-export type EditableGoalTaskTemplate = {
+export type EditableGoalTaskPlan = {
   name: string;
   description: string;
-  importance: GoalPlanTaskTemplate['importance'];
-  cadence: GoalPlanTaskTemplate['cadence'];
+  importance: GoalPlanTaskPlan['importance'];
+  cadence: GoalPlanTaskPlan['cadence'];
   timeOfDay: string;
 };
 
@@ -194,7 +194,7 @@ export type PersistedWorkflowEntry = {
   clarificationAnswers: string[];
   editableGoal: EditableGoal;
   editableKeyResults: EditableKeyResult[];
-  editableTaskTemplates?: EditableGoalTaskTemplate[];
+  editableTaskPlans?: EditableGoalTaskPlan[];
   editableReminders?: EditableGoalReminder[];
   showGoalDraftEditor: boolean;
 };
@@ -205,11 +205,11 @@ export function createEmptyGoalDraft(): EditableGoal {
   return { name: '', description: '', motivation: '', feasibilityAnalysis: '', startDate: null, dueDate: null };
 }
 
-export function createEmptyGoalTaskTemplateDraft(): EditableGoalTaskTemplate {
+export function createEmptyGoalTaskPlanDraft(): EditableGoalTaskPlan {
   return {
     name: '',
     description: '',
-    importance: 'Moderate' as EditableGoalTaskTemplate['importance'],
+    importance: 'Moderate' as EditableGoalTaskPlan['importance'],
     cadence: 'weekly',
     timeOfDay: '09:00',
   };

@@ -1,9 +1,9 @@
-import type { TaskTemplateServerDTO } from '../../aggregates/task-template-server';
-import type { IdentityId, TaskTemplateId, GoalId } from '../../../../primitives';
+import type { TaskPlanServerDTO } from '../../aggregates/task-plan-server';
+import type { IdentityId, TaskPlanId, GoalId } from '../../../../primitives';
 
 export interface TaskCreatedEvent {
   identityId: IdentityId;
-  task: TaskTemplateServerDTO;
-  templateId: TaskTemplateId;
+  task: TaskPlanServerDTO;
+  templateId: TaskPlanId;
   goalId: GoalId | null;
 }

@@ -21,8 +21,8 @@ import type {
   CreateKeyResultInput,
   CreateGoalReviewInput,
   CreateGoalRecordInput,
-  CreateTaskTemplateInput,
-  CreateTaskInstanceInput,
+  CreateTaskPlanInput,
+  CreateTaskOccurrenceInput,
   CreateScheduleInput,
   CreateScheduleTaskInput,
   CreateReminderGroupInput,
@@ -292,7 +292,7 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   // --- Task ---
 
-  async createTaskTemplate(input: CreateTaskTemplateInput): Promise<void> {
+  async createTaskPlan(input: CreateTaskPlanInput): Promise<void> {
     await this.tx.execute(
       `INSERT INTO task_templates (id, identity_id, name, description, status, outcome, completion_policy, closed_at, archived_at, abandoned_reason, importance, color, tags, time_config_type, time_config_start_time, time_config_end_time, time_config_duration_minutes, time_config_time_point, time_config_time_range_start, time_config_time_range_end, recurrence_rule_type, recurrence_rule_interval, recurrence_rule_days_of_week, recurrence_rule_end_date, recurrence_rule_count, reminder_config_enabled, reminder_config_time_offset_minutes, reminder_config_unit, reminder_config_channel, last_generated_date, generate_ahead_days, goal_id, key_result_id, goal_record_value, goal_progress_trigger, checklist, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [
@@ -337,7 +337,7 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
     );
   }
 
-  async createTaskInstance(input: CreateTaskInstanceInput): Promise<void> {
+  async createTaskOccurrence(input: CreateTaskOccurrenceInput): Promise<void> {
     await this.tx.execute(
       `INSERT INTO task_instances (id, template_id, identity_id, instance_date, occurrence_key, status, importance, time_config, actual_start_time, actual_end_time, comment, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [

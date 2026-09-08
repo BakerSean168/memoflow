@@ -253,7 +253,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
     if (relPath.startsWith('packages/task/src/')
       || relPath.startsWith('packages/app-vue/src/modules/task/')
       || relPath.startsWith('packages/app-react/src/screens/Task')
-      || relPath === 'packages/app-react/src/hooks/useTaskTemplates.ts') {
+      || relPath === 'packages/app-react/src/hooks/useTaskPlans.ts') {
       pushPatternViolations(
         violations,
         relPath,
@@ -262,8 +262,8 @@ export function findCoreVnextArchitectureLockViolations(files) {
         'task-legacy-classification',
       );
     }
-    if (relPath === 'packages/contracts/src/modules/task/api/task-template.dto.ts'
-      || relPath === 'packages/task/src/server/domain/aggregates/task-template.state.ts') {
+    if (relPath === 'packages/contracts/src/modules/task/api/task-plan.dto.ts'
+      || relPath === 'packages/task/src/server/domain/aggregates/task-plan.state.ts') {
       pushPatternViolations(
         violations,
         relPath,

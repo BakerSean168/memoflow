@@ -18,7 +18,7 @@ export interface DashboardGoalRecord {
   totalKeyResults: number;
 }
 
-export interface DashboardTaskTemplateRecord {
+export interface DashboardTaskPlanRecord {
   id: string;
   title: string;
   status: string;
@@ -26,7 +26,7 @@ export interface DashboardTaskTemplateRecord {
   createdAt: number;
 }
 
-export interface DashboardTaskInstanceRecord {
+export interface DashboardTaskOccurrenceRecord {
   id: string;
   templateId: string;
   status: string;
@@ -60,8 +60,8 @@ export interface DashboardReminderRecord {
  */
 export interface DashboardReadSource {
   listGoals(identityId: string): Promise<DashboardGoalRecord[]>;
-  listTaskTemplates(identityId: string): Promise<DashboardTaskTemplateRecord[]>;
-  listTaskInstances(identityId: string): Promise<DashboardTaskInstanceRecord[]>;
+  listTaskPlans(identityId: string): Promise<DashboardTaskPlanRecord[]>;
+  listTaskOccurrences(identityId: string): Promise<DashboardTaskOccurrenceRecord[]>;
   listSchedules(identityId: string): Promise<DashboardScheduleRecord[]>;
   listUpcomingReminders(identityId: string, beforeTime: number): Promise<DashboardReminderRecord[]>;
   countUnreadNotifications(identityId: string): Promise<number>;

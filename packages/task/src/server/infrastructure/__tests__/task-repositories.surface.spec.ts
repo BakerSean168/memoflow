@@ -8,8 +8,8 @@ import {
   createTaskPowerSyncRepositories,
   type TaskRepositorySet,
   type TaskWriteTransactionRunner,
-  type ITaskInstanceRepository,
-  type ITaskTemplateRepository,
+  type ITaskOccurrenceRepository,
+  type ITaskPlanRepository,
   type TaskModuleInstance,
 } from '../../../../src';
 import { createTaskPrismaModule } from '../prisma';
@@ -34,8 +34,8 @@ describe('task repository factories surface', () => {
 
   it('createTaskPrismaRepositories returns the full repository Port set', () => {
     const set = createTaskPrismaRepositories(fakePrisma);
-    expect(set).toHaveProperty('taskTemplateRepository');
-    expect(set).toHaveProperty('taskInstanceRepository');
+    expect(set).toHaveProperty('taskPlanRepository');
+    expect(set).toHaveProperty('taskOccurrenceRepository');
     expect(set).toHaveProperty('taskWriteTransactionRunner');
     const typed: TaskRepositorySet = set;
     expect(typeof typed.taskWriteTransactionRunner.run).toBe('function');
@@ -43,8 +43,8 @@ describe('task repository factories surface', () => {
 
   it('createTaskPowerSyncRepositories returns the same Port shape', () => {
     const set = createTaskPowerSyncRepositories(fakeElectronDb);
-    expect(set).toHaveProperty('taskTemplateRepository');
-    expect(set).toHaveProperty('taskInstanceRepository');
+    expect(set).toHaveProperty('taskPlanRepository');
+    expect(set).toHaveProperty('taskOccurrenceRepository');
     expect(set).toHaveProperty('taskWriteTransactionRunner');
     expect(Object.keys(set).sort()).toEqual(
       Object.keys(createTaskPrismaRepositories(fakePrisma)).sort(),
@@ -59,7 +59,7 @@ describe('task repository factories surface', () => {
     expect(typeof prismaInstance.start).toBe('function');
     expect(typeof prismaInstance.dispose).toBe('function');
     const typed: TaskModuleInstance = prismaInstance;
-    expect(typeof typed.api.createTaskTemplate).toBe('function');
+    expect(typeof typed.api.createTaskPlan).toBe('function');
 
     const powerSyncInstance = createTaskPowerSyncModule(fakeElectronDb);
     expect(powerSyncInstance).toHaveProperty('api');
@@ -69,14 +69,14 @@ describe('task repository factories surface', () => {
 
   it('does not leak concrete adapter classes through the root barrel', async () => {
     const forbidden = [
-      'TaskTemplatePrismaRepository',
-      'TaskInstancePrismaRepository',
+      'TaskPlanPrismaRepository',
+      'TaskOccurrencePrismaRepository',
       'TaskDependencyPrismaRepository',
       'TaskFolderPrismaRepository',
       'PrismaTaskWriteTransactionRunner',
       'PrismaTaskGoalOutboxDispatchStore',
-      'PowerSyncTaskTemplateRepository',
-      'PowerSyncTaskInstanceRepository',
+      'PowerSyncTaskPlanRepository',
+      'PowerSyncTaskOccurrenceRepository',
       'PowerSyncTaskDependencyRepository',
       'PowerSyncTaskFolderRepository',
       'PowerSyncTaskWriteTransactionRunner',
@@ -102,8 +102,8 @@ describe('task repository factories surface', () => {
     // reachable from @memoflow/task; the following value-level assertions pin the
     // field names so a renamed/removed port fails loudly.
     const run = (_t: TaskWriteTransactionRunner) => undefined;
-    const instance = (_t: ITaskInstanceRepository) => undefined;
-    const template = (_t: ITaskTemplateRepository) => undefined;
+    const instance = (_t: ITaskOccurrenceRepository) => undefined;
+    const template = (_t: ITaskPlanRepository) => undefined;
 
     expect(typeof run).toBe('function');
     expect(typeof instance).toBe('function');
@@ -128,14 +128,14 @@ describe('task repository factories surface', () => {
     const infraModule = await import('../index');
     const exportedNames = Object.keys(infraModule);
     for (const name of [
-      'TaskTemplatePrismaRepository',
-      'TaskInstancePrismaRepository',
+      'TaskPlanPrismaRepository',
+      'TaskOccurrencePrismaRepository',
       'TaskDependencyPrismaRepository',
       'TaskFolderPrismaRepository',
       'PrismaTaskWriteTransactionRunner',
       'PrismaTaskGoalOutboxDispatchStore',
-      'PowerSyncTaskTemplateRepository',
-      'PowerSyncTaskInstanceRepository',
+      'PowerSyncTaskPlanRepository',
+      'PowerSyncTaskOccurrenceRepository',
       'PowerSyncTaskDependencyRepository',
       'PowerSyncTaskFolderRepository',
       'PowerSyncTaskWriteTransactionRunner',

@@ -145,7 +145,7 @@ export const TaskPlanExecutionReceiptSchema = z
     workflowRunId: z.string().min(1),
     revision: z.number().int().positive(),
     status: z.enum(['success', 'partial', 'failed']),
-    taskTemplateId: z.string().min(1).optional(),
+    taskPlanId: z.string().min(1).optional(),
     taskIds: z.array(z.string().min(1)).default([]),
     failures: z.array(TaskPlanExecutionFailureSchema).default([]),
     retryable: z.boolean(),

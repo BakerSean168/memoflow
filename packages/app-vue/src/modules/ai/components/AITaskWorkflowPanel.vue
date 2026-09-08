@@ -73,7 +73,7 @@
     >
       <p class="text-sm text-muted-foreground">{{ taskWorkflowRun.result.status }}</p>
       <p class="text-sm text-muted-foreground">
-        {{ taskWorkflowRun.result.taskTemplateId || '—' }} ·
+        {{ taskWorkflowRun.result.taskPlanId || '—' }} ·
         {{ taskWorkflowRun.result.taskIds.length }} tasks
       </p>
     </div>

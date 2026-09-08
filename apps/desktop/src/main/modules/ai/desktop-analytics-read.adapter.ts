@@ -2,7 +2,7 @@ import type { IAnalyticsReadPort } from '@memoflow/ai/ports';
 import { SearchGoalsUseCase } from '@memoflow/goal/analytics';
 import type { IGoalRepository } from '@memoflow/goal';
 import { GetTaskDashboardUseCase } from '@memoflow/task/analytics';
-import type { ITaskTemplateRepository } from '@memoflow/task';
+import type { ITaskPlanRepository } from '@memoflow/task';
 import type { DashboardData } from '@memoflow/contracts/dashboard';
 
 /**
@@ -19,7 +19,7 @@ import type { DashboardData } from '@memoflow/contracts/dashboard';
  */
 export interface DesktopAnalyticsReadAdapterDependencies {
   readonly goalRepository: IGoalRepository;
-  readonly taskTemplateRepository: ITaskTemplateRepository;
+  readonly taskPlanRepository: ITaskPlanRepository;
   /** Loads the dashboard aggregation for an identity through injected repositories. 通过注入的仓储为某个 identity 加载 dashboard 聚合。 */
   readonly dashboardDataLoader: (identityId: string) => Promise<DashboardData>;
 }
@@ -28,9 +28,9 @@ export class DesktopAnalyticsReadAdapter implements IAnalyticsReadPort {
   constructor(private readonly dependencies: DesktopAnalyticsReadAdapterDependencies) {}
 
   async buildContext(identityId: string, question: string) {
-    const { goalRepository, taskTemplateRepository } = this.dependencies;
+    const { goalRepository, taskPlanRepository } = this.dependencies;
     const dashboard = await this.dependencies.dashboardDataLoader(identityId);
-    const taskDashboard = await new GetTaskDashboardUseCase(taskTemplateRepository).execute(
+    const taskDashboard = await new GetTaskDashboardUseCase(taskPlanRepository).execute(
       identityId,
     );
     const activeGoals = await goalRepository.findByIdentityId(identityId, {

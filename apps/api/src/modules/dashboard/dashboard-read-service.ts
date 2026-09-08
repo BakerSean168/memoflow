@@ -2,8 +2,8 @@ import type { PrismaClient } from '@memoflow/database';
 import {
   getDashboardData,
   toDashboardGoalRecord,
-  toDashboardTaskInstanceRecord,
-  type DashboardTaskTemplateRecord,
+  toDashboardTaskOccurrenceRecord,
+  type DashboardTaskPlanRecord,
   type DashboardScheduleRecord,
   type DashboardReminderRecord,
 } from '@memoflow/dashboard';
@@ -14,15 +14,15 @@ import { createSchedulePrismaRepository } from '@memoflow/schedule';
 import { createReminderPrismaRepositories } from '@memoflow/reminder';
 import { createNotificationPrismaRepositories } from '@memoflow/notification';
 
-/** Soft residual 1156: dual toDashboardTaskInstanceRecord retired onto @memoflow/dashboard sole. */
+/** Soft residual 1156: dual toDashboardTaskOccurrenceRecord retired onto @memoflow/dashboard sole. */
 
-function toTaskTemplateRecord(template: {
+function toTaskPlanRecord(template: {
   id: { toString(): string } | string;
   title: string;
   status: string;
   deletedAt: number | null;
   createdAt: number;
-}): DashboardTaskTemplateRecord {
+}): DashboardTaskPlanRecord {
   return {
     id: String(template.id),
     title: template.title,
@@ -109,11 +109,11 @@ export async function getApiDashboardData(
           systemView: 'active',
         })
       ).map((goal) => toDashboardGoalRecord(goal.toClientDTO(true))),
-    listTaskTemplates: async (id) =>
-      (await taskRepos.taskTemplateRepository.findByIdentityId(id)).map(toTaskTemplateRecord),
-    listTaskInstances: async (id) =>
-      (await taskRepos.taskInstanceRepository.findByIdentityId(id)).map(
-        toDashboardTaskInstanceRecord,
+    listTaskPlans: async (id) =>
+      (await taskRepos.taskPlanRepository.findByIdentityId(id)).map(toTaskPlanRecord),
+    listTaskOccurrences: async (id) =>
+      (await taskRepos.taskOccurrenceRepository.findByIdentityId(id)).map(
+        toDashboardTaskOccurrenceRecord,
       ),
     listSchedules: async (id) =>
       (await scheduleRepository.findByIdentityId(id)).map(toScheduleRecord),

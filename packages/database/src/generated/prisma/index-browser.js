@@ -589,7 +589,7 @@ exports.Prisma.GoalLabelScalarFieldEnum = {
 
 exports.Prisma.TaskLabelScalarFieldEnum = {
   identityId: 'identityId',
-  taskTemplateId: 'taskTemplateId',
+  taskPlanId: 'taskPlanId',
   labelId: 'labelId'
 };
 
@@ -1467,7 +1467,7 @@ exports.Prisma.UserSettingScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.TaskTemplateScalarFieldEnum = {
+exports.Prisma.TaskPlanScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
   name: 'name',
@@ -1508,7 +1508,7 @@ exports.Prisma.TaskTemplateScalarFieldEnum = {
   deletedAt: 'deletedAt'
 };
 
-exports.Prisma.TaskInstanceScalarFieldEnum = {
+exports.Prisma.TaskOccurrenceScalarFieldEnum = {
   id: 'id',
   templateId: 'templateId',
   identityId: 'identityId',
@@ -1529,8 +1529,8 @@ exports.Prisma.TaskInstanceScalarFieldEnum = {
 exports.Prisma.TaskGoalOutboxScalarFieldEnum = {
   eventId: 'eventId',
   identityId: 'identityId',
-  taskInstanceId: 'taskInstanceId',
-  taskTemplateId: 'taskTemplateId',
+  taskOccurrenceId: 'taskOccurrenceId',
+  taskPlanId: 'taskPlanId',
   goalId: 'goalId',
   keyResultId: 'keyResultId',
   payload: 'payload',
@@ -1544,7 +1544,7 @@ exports.Prisma.TaskGoalOutboxScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.TaskTemplateHistoryScalarFieldEnum = {
+exports.Prisma.TaskPlanHistoryScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
   templateId: 'templateId',
@@ -1732,10 +1732,10 @@ exports.Prisma.ModelName = {
   ScheduleEventConsumerReceipt: 'ScheduleEventConsumerReceipt',
   ScheduleEventDeliveryLog: 'ScheduleEventDeliveryLog',
   UserSetting: 'UserSetting',
-  TaskTemplate: 'TaskTemplate',
-  TaskInstance: 'TaskInstance',
+  TaskPlan: 'TaskPlan',
+  TaskOccurrence: 'TaskOccurrence',
   TaskGoalOutbox: 'TaskGoalOutbox',
-  TaskTemplateHistory: 'TaskTemplateHistory',
+  TaskPlanHistory: 'TaskPlanHistory',
   TaskStatistic: 'TaskStatistic',
   WalletAccount: 'WalletAccount',
   WalletTransaction: 'WalletTransaction'

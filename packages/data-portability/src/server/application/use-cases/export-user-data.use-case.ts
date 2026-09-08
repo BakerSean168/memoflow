@@ -20,7 +20,7 @@ import { RefAllocator } from '../portable-runtime';
 import type { DataPortabilityDependencies } from '../data-portability.dependencies';
 import { sanitizeSensitiveFields } from '../sanitize';
 import { projectGoals, projectGoalRecords } from './projections/goal.projection';
-import { projectTaskTemplates, projectTaskInstances } from './projections/task.projection';
+import { projectTaskPlans, projectTaskOccurrences } from './projections/task.projection';
 import { projectReminderGroups, projectReminderTemplates, projectReminderResponses, projectUserReminderPreference } from './projections/reminder.projection';
 import { projectRepositories, projectResourceFolders, projectResources } from './projections/repository.projection';
 import { projectCalendarEntries, projectScheduleTasks } from './projections/schedule.projection';
@@ -134,14 +134,14 @@ export class ExportUserDataUseCase {
 
     // ─── Tasks ───
     if (modules.includes('tasks')) {
-      const taskTemplates = await this.deps.taskTemplateRepository.findByIdentityId(identityId);
-      const taskInstances = await this.deps.taskInstanceRepository.findByIdentityId(identityId);
+      const taskPlans = await this.deps.taskPlanRepository.findByIdentityId(identityId);
+      const taskOccurrences = await this.deps.taskOccurrenceRepository.findByIdentityId(identityId);
       data.tasks = {
-        templates: projectTaskTemplates(taskTemplates, ctx),
-        instances: projectTaskInstances(taskInstances, ctx),
+        templates: projectTaskPlans(taskPlans, ctx),
+        instances: projectTaskOccurrences(taskOccurrences, ctx),
       };
-      entityCounts.taskTemplates = data.tasks.templates.length;
-      entityCounts.taskInstances = data.tasks.instances.length;
+      entityCounts.taskPlans = data.tasks.templates.length;
+      entityCounts.taskOccurrences = data.tasks.instances.length;
     }
 
     // ─── Reminders (groups + templates + responses) ───

@@ -2,16 +2,16 @@ import type {
   ReminderTimeUnit,
   TaskEventMap,
   TaskReminderType,
-  TaskTemplateServerDTO,
+  TaskPlanServerDTO,
 } from '@memoflow/contracts/task';
-import { TaskInstanceStatus, TaskTimeType } from '@memoflow/contracts/task';
+import { TaskOccurrenceStatus, TaskTimeType } from '@memoflow/contracts/task';
 import type {
   ScheduledIntent,
   SchedulingOwner,
   SchedulingPriority,
 } from '@memoflow/contracts/schedule';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
-import type { ITaskInstanceRepository, ITaskTemplateRepository } from '../domain';
+import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '../domain';
 
 const DEFAULT_ALL_DAY_REMINDER_MINUTES = 9 * 60;
 export const TASK_REMINDER_HANDLER_KEY = 'task.reminder.fire';
@@ -163,7 +163,7 @@ function calculateReminderAt(
 }
 
 function buildIntentName(
-  template: TaskTemplateServerDTO,
+  template: TaskPlanServerDTO,
   trigger: {
     type: TaskReminderType;
     absoluteTime: number | null;
@@ -181,7 +181,7 @@ function buildIntentName(
   return `${template.name} · 定时提醒`;
 }
 
-function shouldScheduleTemplate(template: TaskTemplateServerDTO): boolean {
+function shouldScheduleTemplate(template: TaskPlanServerDTO): boolean {
   return (
     template.status === 'Active' &&
     template.deletedAt === null &&
@@ -193,8 +193,8 @@ function shouldScheduleTemplate(template: TaskTemplateServerDTO): boolean {
 function isSchedulableInstance(instance: { status: string; deletedAt: number | null }): boolean {
   return (
     instance.deletedAt === null &&
-    (instance.status === TaskInstanceStatus.Pending ||
-      instance.status === TaskInstanceStatus.InProgress)
+    (instance.status === TaskOccurrenceStatus.Pending ||
+      instance.status === TaskOccurrenceStatus.InProgress)
   );
 }
 
@@ -221,8 +221,8 @@ function neutralPriority(importance: string): SchedulingPriority {
 }
 
 export function createTaskScheduleProjectionSource(deps: {
-  taskTemplateRepository: ITaskTemplateRepository;
-  taskInstanceRepository: ITaskInstanceRepository;
+  taskPlanRepository: ITaskPlanRepository;
+  taskOccurrenceRepository: ITaskOccurrenceRepository;
 }): TaskScheduleProjectionSource {
   return {
     buildTemplateOwner(templateId, identityId) {
@@ -230,13 +230,13 @@ export function createTaskScheduleProjectionSource(deps: {
     },
 
     async listTemplateRefs() {
-      const refs = await deps.taskTemplateRepository.findAllTemplateRefs();
+      const refs = await deps.taskPlanRepository.findAllTemplateRefs();
       return refs.map((ref) => ({ templateId: ref.id, identityId: ref.identityId }));
     },
 
     async buildTemplatePlan(templateId, identityId) {
       const owner = taskOwner(templateId, identityId);
-      const template = await deps.taskTemplateRepository.findByIdForIdentity(
+      const template = await deps.taskPlanRepository.findByIdForIdentity(
         identityId,
         templateId,
       );
@@ -250,7 +250,7 @@ export function createTaskScheduleProjectionSource(deps: {
         return { owner: canonicalOwner, desired: [] };
       }
 
-      const instances = await deps.taskInstanceRepository.findByTemplateId(
+      const instances = await deps.taskOccurrenceRepository.findByTemplateId(
         templateId,
         String(templateDTO.identityId),
       );
@@ -323,24 +323,24 @@ export function createTaskScheduleProjectionEventHandlers(
     'task:instance-generated': async (event) =>
       handlers.upsertTemplate(event.templateId, String(event.identityId)),
     'task:template-schedule-time-changed': async (event) =>
-      handlers.upsertTemplate(event.taskTemplate.id, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlan.id, String(event.identityId)),
     'task:template-recurrence-changed': async (event) =>
-      handlers.upsertTemplate(event.taskTemplate.id, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlan.id, String(event.identityId)),
     'task:template-resumed': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
     'task:deleted': async (event) =>
-      handlers.deleteTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.deleteTemplate(event.taskPlanId, String(event.identityId)),
     'task:template-paused': async (event) =>
-      handlers.deleteTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.deleteTemplate(event.taskPlanId, String(event.identityId)),
     'task:instance-completed': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
     'task:instance-skipped': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
     'task:instance-deleted': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
     'task:instance-uncompleted': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
     'task:rescheduled': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
   };
 }

@@ -26,8 +26,8 @@ export type { TaskApplicationPort } from '../application';
 
 // ============ Repository Ports referenced by TaskRepositorySet ============
 export type {
-  ITaskInstanceRepository,
-  ITaskTemplateRepository,
+  ITaskOccurrenceRepository,
+  ITaskPlanRepository,
 } from '../domain/repositories';
 export type { TaskWriteTransactionRunner } from '../application/use-cases/commands/task-write-support';
 

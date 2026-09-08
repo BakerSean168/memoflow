@@ -2,13 +2,13 @@
 import { computed, ref } from 'vue';
 import { Card, CardHeader, CardTitle, CardContent } from '@memoflow/ui-vue-shadcn';
 import { Calendar } from '@lucide/vue';
-import type { TaskInstanceViewModel } from '../types';
+import type { TaskOccurrenceViewModel } from '../types';
 
 // ===== Props =====
 const props = withDefaults(
   defineProps<{
     size?: string;
-    tasks?: TaskInstanceViewModel[];
+    tasks?: TaskOccurrenceViewModel[];
   }>(),
   {
     size: 'medium',

@@ -7,7 +7,7 @@ import type {
   ScheduleCalendarEventProjection,
   TaskCalendarEventProjection,
 } from '@memoflow/contracts/schedule';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import { asInstant, defaultTime, type Instant, type Ymd } from '@memoflow/time';
 
 const MINUTE_MS = 60_000;
@@ -37,8 +37,8 @@ export interface RoutineWallClockPlannerOccurrence {
 
 export interface PlannerReadProjectionInput {
   readonly calendarEntries: readonly CalendarEntryClientDTO[];
-  readonly taskOccurrences: readonly TaskInstanceClientDTO[];
-  readonly taskTemplates: readonly TaskTemplateClientDTO[];
+  readonly taskOccurrences: readonly TaskOccurrenceClientDTO[];
+  readonly taskPlans: readonly TaskPlanClientDTO[];
   readonly goals: readonly GoalClientDTO[];
   readonly routineOccurrences: readonly RoutineWallClockPlannerOccurrence[];
   readonly time?: PlannerProductTimePort;
@@ -75,8 +75,8 @@ export function projectCalendarEntry(
 }
 
 export function projectTaskOccurrence(
-  occurrence: TaskInstanceClientDTO,
-  template: TaskTemplateClientDTO | undefined,
+  occurrence: TaskOccurrenceClientDTO,
+  template: TaskPlanClientDTO | undefined,
   time: PlannerProductTimePort = defaultPlannerProductTimePort,
 ): TaskCalendarEventProjection | null {
   if (occurrence.deletedAt != null) return null;
@@ -222,7 +222,7 @@ export function projectPlannerReadModel(
 ): CalendarEventProjection[] {
   const time = input.time ?? defaultPlannerProductTimePort;
   const templateById = new Map(
-    input.taskTemplates.map((template) => [String(template.id), template]),
+    input.taskPlans.map((template) => [String(template.id), template]),
   );
   const projected: CalendarEventProjection[] = [
     ...input.calendarEntries.map(projectCalendarEntry),

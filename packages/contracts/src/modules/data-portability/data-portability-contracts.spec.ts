@@ -50,7 +50,7 @@ const validGoal = {
 };
 
 const validTask = {
-  _ref: 'taskTemplate:1',
+  _ref: 'taskPlan:1',
   title: 'Write tests',
   taskType: 'OneTime',
   importance: 'moderate',
@@ -265,7 +265,7 @@ describe('module schemas', () => {
 describe('portable reference format', () => {
   it.each([
     ['goal:1', true],
-    ['taskTemplate:42', true],
+    ['taskPlan:42', true],
     ['badref', false],
     ['Goal:1', false],
     ['goal:abc', false],

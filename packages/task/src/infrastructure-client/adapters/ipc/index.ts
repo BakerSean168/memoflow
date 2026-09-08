@@ -6,21 +6,21 @@
  */
 
 import type { IResultIpcClient } from '../types';
-import { TaskTemplateIpcAdapter } from './task-template-ipc.adapter';
-import { TaskInstanceIpcAdapter } from './task-instance-ipc.adapter';
+import { TaskPlanIpcAdapter } from './task-plan-ipc.adapter';
+import { TaskOccurrenceIpcAdapter } from './task-occurrence-ipc.adapter';
 
 // Re-export adapters
-export { TaskTemplateIpcAdapter } from './task-template-ipc.adapter';
-export { TaskInstanceIpcAdapter } from './task-instance-ipc.adapter';
-export { createTaskTemplateIpcAdapter } from './task-template-ipc.adapter';
-export { createTaskInstanceIpcAdapter } from './task-instance-ipc.adapter';
+export { TaskPlanIpcAdapter } from './task-plan-ipc.adapter';
+export { TaskOccurrenceIpcAdapter } from './task-occurrence-ipc.adapter';
+export { createTaskPlanIpcAdapter } from './task-plan-ipc.adapter';
+export { createTaskOccurrenceIpcAdapter } from './task-occurrence-ipc.adapter';
 
 /**
  * All IPC adapters for the Task module
  */
 export interface TaskIpcAdapters {
-  template: TaskTemplateIpcAdapter;
-  instance: TaskInstanceIpcAdapter;
+  template: TaskPlanIpcAdapter;
+  instance: TaskOccurrenceIpcAdapter;
 }
 
 /**
@@ -35,7 +35,7 @@ export interface TaskIpcAdapters {
  */
 export function createTaskIpcAdapters(ipcClient: IResultIpcClient): TaskIpcAdapters {
   return {
-    template: new TaskTemplateIpcAdapter(ipcClient),
-    instance: new TaskInstanceIpcAdapter(ipcClient),
+    template: new TaskPlanIpcAdapter(ipcClient),
+    instance: new TaskOccurrenceIpcAdapter(ipcClient),
   };
 }

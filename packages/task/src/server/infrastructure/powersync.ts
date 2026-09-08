@@ -17,8 +17,8 @@ import {
   type TaskRuntimeContributionsInput,
 } from './task.module';
 import {
-  PowerSyncTaskTemplateRepository,
-  PowerSyncTaskInstanceRepository,
+  PowerSyncTaskPlanRepository,
+  PowerSyncTaskOccurrenceRepository,
   PowerSyncTaskWriteTransactionRunner,
   PowerSyncTaskGoalOutboxDispatchStore,
 } from './adapters/powersync';
@@ -56,14 +56,14 @@ export function createTaskPowerSyncModule(
   runtimeContributions?: TaskRuntimeContributionsInput,
 ): TaskModuleInstance {
   const {
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
   } = createTaskPowerSyncRepositories(db);
 
   return createTaskModule({
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
     runtimeContributions,
   });
@@ -85,8 +85,8 @@ export function createTaskPowerSyncModule(
  */
 export function createTaskPowerSyncRepositories(db: IElectronDatabase): TaskRepositorySet {
   return {
-    taskTemplateRepository: new PowerSyncTaskTemplateRepository(db),
-    taskInstanceRepository: new PowerSyncTaskInstanceRepository(db),
+    taskPlanRepository: new PowerSyncTaskPlanRepository(db),
+    taskOccurrenceRepository: new PowerSyncTaskOccurrenceRepository(db),
     taskWriteTransactionRunner: new PowerSyncTaskWriteTransactionRunner(db),
   };
 }
@@ -125,12 +125,12 @@ export function createTaskPowerSyncScheduleProjectionSource(
   db: TaskPowerSyncQueryable,
 ): TaskScheduleProjectionSource {
   return createTaskScheduleProjectionSource({
-    taskTemplateRepository: new PowerSyncTaskTemplateRepository(db),
-    taskInstanceRepository: new PowerSyncTaskInstanceRepository(db),
+    taskPlanRepository: new PowerSyncTaskPlanRepository(db),
+    taskOccurrenceRepository: new PowerSyncTaskOccurrenceRepository(db),
   });
 }
 
 export {
-  PowerSyncTaskTemplateRepository,
-  PowerSyncTaskInstanceRepository,
+  PowerSyncTaskPlanRepository,
+  PowerSyncTaskOccurrenceRepository,
 };

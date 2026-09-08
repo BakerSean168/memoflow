@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { GoalStatus } from '@memoflow/contracts/goal';
-import { TaskInstanceStatus, TaskTemplateStatus } from '@memoflow/contracts/task';
+import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/contracts/task';
 import { ReminderStatus } from '@memoflow/contracts/reminder';
 import type {
   DashboardReadSource,
   DashboardGoalRecord,
-  DashboardTaskTemplateRecord,
-  DashboardTaskInstanceRecord,
+  DashboardTaskPlanRecord,
+  DashboardTaskOccurrenceRecord,
   DashboardScheduleRecord,
   DashboardReminderRecord,
 } from '../domain/types';
@@ -27,12 +27,12 @@ function makeGoal(overrides: Partial<DashboardGoalRecord> = {}): DashboardGoalRe
 }
 
 function makeTemplate(
-  overrides: Partial<DashboardTaskTemplateRecord> = {},
-): DashboardTaskTemplateRecord {
+  overrides: Partial<DashboardTaskPlanRecord> = {},
+): DashboardTaskPlanRecord {
   return {
     id: 't1',
     title: 'Task',
-    status: TaskTemplateStatus.Active,
+    status: TaskPlanStatus.Active,
     deletedAt: null,
     createdAt: Date.now(),
     ...overrides,
@@ -40,12 +40,12 @@ function makeTemplate(
 }
 
 function makeInstance(
-  overrides: Partial<DashboardTaskInstanceRecord> = {},
-): DashboardTaskInstanceRecord {
+  overrides: Partial<DashboardTaskOccurrenceRecord> = {},
+): DashboardTaskOccurrenceRecord {
   return {
     id: 'i1',
     templateId: 't1',
-    status: TaskInstanceStatus.Pending,
+    status: TaskOccurrenceStatus.Pending,
     instanceDate: Date.now(),
     actualEndTime: null,
     updatedAt: Date.now(),
@@ -81,8 +81,8 @@ function makeReminder(overrides: Partial<DashboardReminderRecord> = {}): Dashboa
 function makeSource(overrides: Partial<DashboardReadSource> = {}): DashboardReadSource {
   return {
     listGoals: async () => [],
-    listTaskTemplates: async () => [],
-    listTaskInstances: async () => [],
+    listTaskPlans: async () => [],
+    listTaskOccurrences: async () => [],
     listSchedules: async () => [],
     listUpcomingReminders: async () => [],
     countUnreadNotifications: async () => 0,
@@ -173,11 +173,11 @@ describe('getDashboardData', () => {
 
   it('filters out closed and deleted task plans', async () => {
     const source = makeSource({
-      listTaskTemplates: async () => [
-        makeTemplate({ id: 't1', status: TaskTemplateStatus.Active }),
-        makeTemplate({ id: 't2', status: TaskTemplateStatus.Paused }),
+      listTaskPlans: async () => [
+        makeTemplate({ id: 't1', status: TaskPlanStatus.Active }),
+        makeTemplate({ id: 't2', status: TaskPlanStatus.Paused }),
         makeTemplate({ id: 't3', deletedAt: Date.now() }),
-        makeTemplate({ id: 't4', status: TaskTemplateStatus.Closed }),
+        makeTemplate({ id: 't4', status: TaskPlanStatus.Closed }),
       ],
     });
 
@@ -192,25 +192,25 @@ describe('getDashboardData', () => {
     const todayMs = todayStart.getTime();
 
     const source = makeSource({
-      listTaskInstances: async () => [
+      listTaskOccurrences: async () => [
         makeInstance({
           id: 'i1',
-          status: TaskInstanceStatus.Pending,
+          status: TaskOccurrenceStatus.Pending,
           instanceDate: todayMs + 1000,
         }),
         makeInstance({
           id: 'i2',
-          status: TaskInstanceStatus.InProgress,
+          status: TaskOccurrenceStatus.InProgress,
           instanceDate: todayMs + 2000,
         }),
         makeInstance({
           id: 'i3',
-          status: TaskInstanceStatus.Completed,
+          status: TaskOccurrenceStatus.Completed,
           instanceDate: todayMs + 3000,
         }),
         makeInstance({
           id: 'i4',
-          status: TaskInstanceStatus.Pending,
+          status: TaskOccurrenceStatus.Pending,
           instanceDate: todayMs + 4000,
         }),
       ],
@@ -224,10 +224,10 @@ describe('getDashboardData', () => {
 
   it('counts overdue tasks', async () => {
     const source = makeSource({
-      listTaskInstances: async () => [
-        makeInstance({ id: 'i1', status: TaskInstanceStatus.Missed, isOverdue: () => false }),
-        makeInstance({ id: 'i2', status: TaskInstanceStatus.Pending, isOverdue: () => true }),
-        makeInstance({ id: 'i3', status: TaskInstanceStatus.Pending, isOverdue: () => false }),
+      listTaskOccurrences: async () => [
+        makeInstance({ id: 'i1', status: TaskOccurrenceStatus.Missed, isOverdue: () => false }),
+        makeInstance({ id: 'i2', status: TaskOccurrenceStatus.Pending, isOverdue: () => true }),
+        makeInstance({ id: 'i3', status: TaskOccurrenceStatus.Pending, isOverdue: () => false }),
       ],
     });
 

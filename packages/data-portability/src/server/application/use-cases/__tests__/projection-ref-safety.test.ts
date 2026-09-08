@@ -3,7 +3,7 @@ import { RefAllocator, type ExportContext } from '../../portable-runtime';
 import { projectGoalRecords } from '../projections/goal.projection';
 import { projectReminderResponses } from '../projections/reminder.projection';
 import { projectResources } from '../projections/repository.projection';
-import { projectTaskInstances } from '../projections/task.projection';
+import { projectTaskOccurrences } from '../projections/task.projection';
 
 function createExportContext(refs: Record<string, string> = {}): ExportContext {
   return {
@@ -33,7 +33,7 @@ describe('projection ref safety', () => {
     const ctx = createExportContext();
 
     expect(() =>
-      projectTaskInstances(
+      projectTaskOccurrences(
         [
           {
             id: 'instance-db-id',

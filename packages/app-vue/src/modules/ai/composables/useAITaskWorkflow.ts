@@ -60,7 +60,7 @@ export function useAITaskWorkflow(options: UseAITaskWorkflowOptions) {
     taskAgentResuming.value = true;
     try {
       const next = await options.workflowRuntime.resume({ runId: run.runId, command }); projectRun(next);
-      if (next.kind === 'task.create' && next.status === 'completed' && next.result?.taskTemplateId) await options.openCreatedTask?.(next.result.taskTemplateId);
+      if (next.kind === 'task.create' && next.status === 'completed' && next.result?.taskPlanId) await options.openCreatedTask?.(next.result.taskPlanId);
     } catch (error) { toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed')); }
     finally { taskAgentResuming.value = false; }
   }

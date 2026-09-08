@@ -82,16 +82,16 @@ export class PowerSyncLabelRepository implements LabelRepository {
     return this.replaceLabels('goal', identityId, goalId, labelIds)
   }
 
-  replaceTaskLabels(identityId: string, taskTemplateId: string, labelIds: readonly string[]): Promise<void> {
-    return this.replaceLabels('task', identityId, taskTemplateId, labelIds)
+  replaceTaskLabels(identityId: string, taskPlanId: string, labelIds: readonly string[]): Promise<void> {
+    return this.replaceLabels('task', identityId, taskPlanId, labelIds)
   }
 
   async listGoalLabels(identityId: string, goalId: string): Promise<LabelRecord[]> {
     return this.listAssigned('goal_labels', 'goal_id', identityId, goalId)
   }
 
-  async listTaskLabels(identityId: string, taskTemplateId: string): Promise<LabelRecord[]> {
-    return this.listAssigned('task_labels', 'task_template_id', identityId, taskTemplateId)
+  async listTaskLabels(identityId: string, taskPlanId: string): Promise<LabelRecord[]> {
+    return this.listAssigned('task_labels', 'task_template_id', identityId, taskPlanId)
   }
 
   async listGoalLabelsByGoalIds(
@@ -101,18 +101,18 @@ export class PowerSyncLabelRepository implements LabelRepository {
     return this.listAssignedBatch('goal_labels', 'goal_id', identityId, goalIds)
   }
 
-  async listTaskLabelsByTaskTemplateIds(
+  async listTaskLabelsByTaskPlanIds(
     identityId: string,
-    taskTemplateIds: readonly string[],
+    taskPlanIds: readonly string[],
   ): Promise<Map<string, LabelRecord[]>> {
-    return this.listAssignedBatch('task_labels', 'task_template_id', identityId, taskTemplateIds)
+    return this.listAssignedBatch('task_labels', 'task_template_id', identityId, taskPlanIds)
   }
 
   async findGoalIdsMatchingAllLabels(identityId: string, labelIds: readonly string[]): Promise<string[]> {
     return this.findAllMatches('goal_labels', 'goal_id', identityId, labelIds)
   }
 
-  async findTaskTemplateIdsMatchingAllLabels(identityId: string, labelIds: readonly string[]): Promise<string[]> {
+  async findTaskPlanIdsMatchingAllLabels(identityId: string, labelIds: readonly string[]): Promise<string[]> {
     return this.findAllMatches('task_labels', 'task_template_id', identityId, labelIds)
   }
 

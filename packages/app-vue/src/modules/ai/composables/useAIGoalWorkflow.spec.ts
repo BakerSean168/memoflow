@@ -55,7 +55,7 @@ function makeDraft(revision: number): GoalPlanDraft {
       targetDate: null,
     },
     keyResults: [],
-    taskTemplates: [],
+    taskPlans: [],
     reminders: [],
     rationale: '',
     warnings: [],

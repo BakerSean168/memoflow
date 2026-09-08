@@ -10,9 +10,9 @@ import {
 } from '@memoflow/contracts/notification';
 import {
   ReminderTimeUnit,
-  TaskInstanceStatus,
+  TaskOccurrenceStatus,
   TaskReminderType,
-  TaskTemplateStatus,
+  TaskPlanStatus,
 } from '@memoflow/contracts/task';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
 // eslint-disable-next-line @nx/enforce-module-boundaries
@@ -316,27 +316,27 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
   });
 
   it('8. NOTIF-3302: task.reminder.fire handler emits NotificationRequested and the runtime materializes ONE Task Fact', async () => {
-    const instanceId = `TaskInstanceId_${randomUUID()}`;
-    const templateId = `TaskTemplateId_${randomUUID()}`;
+    const instanceId = `TaskOccurrenceId_${randomUUID()}`;
+    const templateId = `TaskPlanId_${randomUUID()}`;
     const schedulingKey = `${instanceId}|2026-08-10T08:45:00.000Z`;
     const registration = createTaskReminderScheduledHandlerRegistration({
-      taskInstanceRepository: {
+      taskOccurrenceRepository: {
         findByIdForIdentity: async () => ({
           id: instanceId,
           identityId,
           templateId,
           occurrenceKey: null,
-          status: TaskInstanceStatus.Pending,
+          status: TaskOccurrenceStatus.Pending,
           deletedAt: null,
         }),
       },
-      taskTemplateRepository: {
+      taskPlanRepository: {
         findByIdForIdentity: async () => ({
           toServerDTO: () => ({
             id: templateId,
             identityId,
             name: 'Ship R07',
-            status: TaskTemplateStatus.Active,
+            status: TaskPlanStatus.Active,
             deletedAt: null,
             reminderConfig: {
               enabled: true,

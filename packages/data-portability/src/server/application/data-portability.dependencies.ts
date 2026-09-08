@@ -16,10 +16,10 @@ export interface GoalRecordRepoPort {
 
 // ============ Task ============
 
-export interface TaskTemplateRepoPort {
+export interface TaskPlanRepoPort {
   findByIdentityId(identityId: string): Promise<unknown[]>;
 }
-export interface TaskInstanceRepoPort {
+export interface TaskOccurrenceRepoPort {
   findByIdentityId(identityId: string): Promise<unknown[]>;
 }
 
@@ -103,8 +103,8 @@ export interface SettingRepoPort {
 export interface DataPortabilityDependencies {
   goalRepository: GoalRepoPort;
   goalRecordRepository: GoalRecordRepoPort;
-  taskTemplateRepository: TaskTemplateRepoPort;
-  taskInstanceRepository: TaskInstanceRepoPort;
+  taskPlanRepository: TaskPlanRepoPort;
+  taskOccurrenceRepository: TaskOccurrenceRepoPort;
   reminderTemplateRepository: ReminderTemplateRepoPort;
   reminderGroupRepository: ReminderGroupRepoPort;
   reminderResponseRepository: ReminderResponseRepoPort;

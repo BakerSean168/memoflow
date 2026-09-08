@@ -30,8 +30,8 @@ export interface TaskGoalContributionViewModel {
 }
 
 export interface TaskGoalBindingViewModel {
-  goalId?: string;
-  keyResultId?: string;
+  goalId: string;
+  keyResultId: string | null;
   contribution?: TaskGoalContributionViewModel;
 }
 
@@ -60,7 +60,7 @@ export interface KeyResultBindingOption {
   progress: GoalBindingProgress;
 }
 
-export interface TaskTemplateViewModel {
+export interface TaskPlanViewModel {
   id: string;
   title: string;
   description?: string;
@@ -90,12 +90,12 @@ export interface TaskTemplateViewModel {
   singleInstanceStatus?: 'Pending' | 'InProgress' | 'Completed' | 'Missed' | 'Skipped' | null;
   completionRate?: number;
   formattedCreatedAt?: string;
-  /** TaskType enum value mapped for CreateTaskTemplateReq.taskType */
+  /** TaskType enum value mapped for CreateTaskPlanReq.taskType */
   taskType?: string;
 }
 
-export interface TaskTemplateFormProps {
-  modelValue?: TaskTemplateViewModel | null;
+export interface TaskPlanFormProps {
+  modelValue?: TaskPlanViewModel | null;
   isEditMode?: boolean;
   readonly?: boolean;
   goals?: GoalBindingOption[];
@@ -109,17 +109,17 @@ export interface TaskTemplateFormProps {
   ) => Promise<KeyResultBindingOption[] | void> | void;
 }
 
-export interface TaskTemplateFormValidationState {
+export interface TaskPlanFormValidationState {
   isValid: boolean;
 }
 
-export interface TaskTemplateFormEmits {
-  'update:modelValue': [value: TaskTemplateViewModel];
-  'update:validation': [validation: TaskTemplateFormValidationState];
+export interface TaskPlanFormEmits {
+  'update:modelValue': [value: TaskPlanViewModel];
+  'update:validation': [validation: TaskPlanFormValidationState];
   close: [];
 }
 
-export interface TaskInstanceViewModel {
+export interface TaskOccurrenceViewModel {
   id: string;
   templateId?: string;
   templateTitle?: string;

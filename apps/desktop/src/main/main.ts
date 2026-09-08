@@ -286,8 +286,8 @@ async function registerBusinessModules(
   // into the shared outbox consumed by the notification durable runtime.
   scheduleOrchestrationModule.handlerRegistry.register(
     createTaskReminderScheduledHandlerRegistration({
-      taskInstanceRepository: taskComposed.repositories.taskInstanceRepository,
-      taskTemplateRepository: taskComposed.repositories.taskTemplateRepository,
+      taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
+      taskPlanRepository: taskComposed.repositories.taskPlanRepository,
       notificationRequestedWriter: notificationComposed.repositories.requestedWriter,
     }),
   );
@@ -303,8 +303,8 @@ async function registerBusinessModules(
 
   const dashboardRepositories: DashboardRepositoryDependencies = {
     goalRepository: goalComposed.repositories.goalRepository,
-    taskTemplateRepository: taskComposed.repositories.taskTemplateRepository,
-    taskInstanceRepository: taskComposed.repositories.taskInstanceRepository,
+    taskPlanRepository: taskComposed.repositories.taskPlanRepository,
+    taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
     scheduleRepository: scheduleComposed.repositories.scheduleRepository,
     scheduleTaskRepository: scheduleComposed.repositories.scheduleTaskRepository,
     reminderTemplateRepository: reminderComposed.repositories.reminderTemplateRepository,
@@ -410,7 +410,7 @@ async function registerBusinessModules(
 
   const analyticsReadAdapter = new DesktopAnalyticsReadAdapter({
     goalRepository: goalComposed.repositories.goalRepository,
-    taskTemplateRepository: taskComposed.repositories.taskTemplateRepository,
+    taskPlanRepository: taskComposed.repositories.taskPlanRepository,
     dashboardDataLoader: (identityId) => getDesktopDashboardData(identityId, dashboardRepositories),
   });
 

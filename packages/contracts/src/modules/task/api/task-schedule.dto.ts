@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
-import type { TaskInstanceId } from '../../../primitives';
-import { TaskTimeConfigSchema } from './task-template.dto';
-import type { TaskInstanceClientDTO } from '../aggregates/task-instance-client';
+import type { TaskOccurrenceId } from '../../../primitives';
+import { TaskTimeConfigSchema } from './task-plan.dto';
+import type { TaskOccurrenceClientDTO } from '../aggregates/task-occurrence-client';
 
 function requireRescheduleDate(
   value: { newTime: { startDate: number | null } },
@@ -29,7 +29,7 @@ export type RescheduleTaskInput = z.infer<typeof RescheduleTaskBodySchema>;
 /** Existing RPC shape retained and completed for Electron/typed RPC callers. */
 export const RescheduleTaskSchema = z
   .object({
-    instanceId: brandedId<TaskInstanceId>(),
+    instanceId: brandedId<TaskOccurrenceId>(),
     newTime: TaskTimeConfigSchema,
     expectedVersion: z.number().int().positive(),
   })
@@ -37,10 +37,10 @@ export const RescheduleTaskSchema = z
   .superRefine(requireRescheduleDate);
 
 export type RescheduleTaskReq = z.infer<typeof RescheduleTaskSchema>;
-export type RescheduleTaskRes = TaskInstanceClientDTO;
+export type RescheduleTaskRes = TaskOccurrenceClientDTO;
 
 export const ToggleTaskCompletionSchema = z.object({
-  instanceId: brandedId<TaskInstanceId>(),
+  instanceId: brandedId<TaskOccurrenceId>(),
   note: z.string().optional(),
 });
 

@@ -8,7 +8,7 @@ import { ResultErrorException } from '@memoflow/contracts/result';
 /**
  * 任务模板未找到错误
  */
-export class TaskTemplateNotFoundError extends ResultErrorException {
+export class TaskPlanNotFoundError extends ResultErrorException {
   constructor(templateId: string) {
     super(`任务模板未找到：${templateId}`, 'task_template_not_found', undefined, undefined, 400);
   }
@@ -17,7 +17,7 @@ export class TaskTemplateNotFoundError extends ResultErrorException {
 /**
  * 任务模板状态无效错误
  */
-export class InvalidTaskTemplateStateError extends ResultErrorException {
+export class InvalidTaskPlanStateError extends ResultErrorException {
   constructor(message: string, context?: { templateId?: string; currentStatus?: string; attemptedAction?: string }) {
     const contextStr = context ? ` (templateId: ${context.templateId}, status: ${context.currentStatus}, action: ${context.attemptedAction})` : '';
     super(
@@ -33,7 +33,7 @@ export class InvalidTaskTemplateStateError extends ResultErrorException {
 /**
  * 任务模板已归档错误
  */
-export class TaskTemplateArchivedError extends ResultErrorException {
+export class TaskPlanArchivedError extends ResultErrorException {
   constructor(templateId: string) {
     super(`任务模板已归档：${templateId}`, 'task_template_archived', undefined, undefined, 400);
   }
@@ -98,7 +98,7 @@ export class InstanceGenerationFailedError extends ResultErrorException {
 /**
  * 任务实例未找到错误
  */
-export class TaskInstanceNotFoundError extends ResultErrorException {
+export class TaskOccurrenceNotFoundError extends ResultErrorException {
   constructor(instanceId: string) {
     super(`任务实例未找到：${instanceId}`, 'task_instance_not_found', undefined, undefined, 400);
   }
@@ -107,7 +107,7 @@ export class TaskInstanceNotFoundError extends ResultErrorException {
 /**
  * 任务实例已完成错误
  */
-export class TaskInstanceAlreadyCompletedError extends ResultErrorException {
+export class TaskOccurrenceAlreadyCompletedError extends ResultErrorException {
   constructor(instanceId: string) {
     super(
       `任务实例已完成：${instanceId}`,

@@ -11,8 +11,8 @@ import type {
   DataPortabilityDependencies,
   GoalRepoPort,
   GoalRecordRepoPort,
-  TaskTemplateRepoPort,
-  TaskInstanceRepoPort,
+  TaskPlanRepoPort,
+  TaskOccurrenceRepoPort,
   ReminderTemplateRepoPort,
   ReminderGroupRepoPort,
   ReminderResponseRepoPort,
@@ -95,7 +95,7 @@ class PowerSyncGoalRecordAdapter implements GoalRecordRepoPort {
   }
 }
 
-class PowerSyncTaskTemplateAdapter implements TaskTemplateRepoPort {
+class PowerSyncTaskPlanAdapter implements TaskPlanRepoPort {
   constructor(private readonly db: IElectronDatabase) {}
   async findByIdentityId(identityId: string): Promise<unknown[]> {
     const rows = await this.db.getAll<Record<string, unknown>>(
@@ -106,7 +106,7 @@ class PowerSyncTaskTemplateAdapter implements TaskTemplateRepoPort {
   }
 }
 
-class PowerSyncTaskInstanceAdapter implements TaskInstanceRepoPort {
+class PowerSyncTaskOccurrenceAdapter implements TaskOccurrenceRepoPort {
   constructor(private readonly db: IElectronDatabase) {}
   async findByIdentityId(identityId: string): Promise<unknown[]> {
     const rows = await this.db.getAll<Record<string, unknown>>(
@@ -335,8 +335,8 @@ export function createPowerSyncDataPortabilityDependencies(
   return {
     goalRepository: new PowerSyncGoalAdapter(db),
     goalRecordRepository: new PowerSyncGoalRecordAdapter(db),
-    taskTemplateRepository: new PowerSyncTaskTemplateAdapter(db),
-    taskInstanceRepository: new PowerSyncTaskInstanceAdapter(db),
+    taskPlanRepository: new PowerSyncTaskPlanAdapter(db),
+    taskOccurrenceRepository: new PowerSyncTaskOccurrenceAdapter(db),
     reminderTemplateRepository: new PowerSyncReminderTemplateAdapter(db),
     reminderGroupRepository: new PowerSyncReminderGroupAdapter(db),
     reminderResponseRepository: new PowerSyncReminderResponseAdapter(db),

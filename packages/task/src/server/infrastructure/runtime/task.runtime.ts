@@ -42,13 +42,13 @@ const taskEventHandlers = {
     });
   },
   'task:instance-completed': (event) => {
-    logger.info(`[Task] Instance completed: ${event.taskInstanceId}`);
+    logger.info(`[Task] Instance completed: ${event.taskOccurrenceId}`);
   },
   'task:instance-skipped': (event) => {
-    logger.info(`[Task] Instance skipped: ${event.taskInstanceId}`);
+    logger.info(`[Task] Instance skipped: ${event.taskOccurrenceId}`);
   },
   'task:instance-deleted': (event) => {
-    logger.info(`[Task] Instance deleted: ${event.taskInstanceId}`);
+    logger.info(`[Task] Instance deleted: ${event.taskOccurrenceId}`);
   },
 } satisfies {
   [K in keyof TaskRuntimeEventMap]: (event: TaskRuntimeEventMap[K]) => void;

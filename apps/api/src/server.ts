@@ -264,8 +264,8 @@ async function bootstrap(): Promise<void> {
   // source executor instead of the legacy router fallback.
   scheduleOrchestrationModule.handlerRegistry.register(
     createTaskReminderScheduledHandlerRegistration({
-      taskInstanceRepository: taskComposed.taskInstanceRepository,
-      taskTemplateRepository: taskComposed.taskTemplateRepository,
+      taskOccurrenceRepository: taskComposed.taskOccurrenceRepository,
+      taskPlanRepository: taskComposed.taskPlanRepository,
       notificationRequestedWriter: notificationApiModule.repositories.requestedWriter,
     }),
   );

@@ -77,12 +77,12 @@ const i18n = createI18n({
           keyResults: 'Key Results',
           importance: 'Importance',
           selectImportance: 'Select importance',
-          taskTemplates: 'Task Templates',
-          taskTemplateName: 'Task template name',
-          taskTemplateDescription: 'Describe the task template...',
-          addTaskTemplate: 'Add Task Template',
-          removeTaskTemplate: 'Remove',
-          noTaskTemplates: 'No task templates will be created.',
+          taskPlans: 'Task Templates',
+          taskPlanName: 'Task template name',
+          taskPlanDescription: 'Describe the task template...',
+          addTaskPlan: 'Add Task Template',
+          removeTaskPlan: 'Remove',
+          noTaskPlans: 'No task templates will be created.',
           reminders: 'Reminders',
           reminderTitle: 'Reminder title',
           reminderDescription: 'Describe the reminder...',
@@ -130,7 +130,7 @@ const draft = {
       weight: 5,
     },
   ],
-  taskTemplates: [
+  taskPlans: [
     {
       name: 'Run the regression gate',
       importance: 'Important' as const,
@@ -192,7 +192,7 @@ function createPanelProps(overrides: Partial<PanelProps> = {}): PanelProps {
       targetDate: draft.goal.targetDate,
     },
     editableKeyResults: draft.keyResults.map((item) => ({ ...item, description: '' })),
-    editableTaskTemplates: draft.taskTemplates.map((item) => ({
+    editableTaskPlans: draft.taskPlans.map((item) => ({
       name: item.name,
       description: '',
       importance: item.importance,
@@ -243,7 +243,7 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
     expect(wrapper.find('[data-testid="goal-workflow-supporting-drafts-editor"]').exists()).toBe(
       true,
     );
-    expect(wrapper.find('[data-testid="goal-workflow-task-template-editor"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="goal-workflow-task-plan-editor"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="goal-workflow-reminder-editor"]').exists()).toBe(true);
 
     wrapper
@@ -303,7 +303,7 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
         status: 'success',
         goalId: 'IGoalId_550e8400-e29b-41d4-a716-446655440000',
         keyResultIds: ['IKeyResultId_550e8400-e29b-41d4-a716-446655440001'],
-        taskIds: ['ITaskTemplateId_550e8400-e29b-41d4-a716-446655440002'],
+        taskIds: ['ITaskPlanId_550e8400-e29b-41d4-a716-446655440002'],
         reminderIds: ['IReminderTemplateId_550e8400-e29b-41d4-a716-446655440003'],
         failures: [],
         retryable: false,

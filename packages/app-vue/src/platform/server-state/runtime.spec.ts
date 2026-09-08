@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createServerStateRuntime, createTestServerStateRuntime } from './runtime';
-import { notificationQueryKeys, taskTemplateQueryKeys } from './query-keys';
+import { notificationQueryKeys, taskPlanQueryKeys } from './query-keys';
 
 describe('createServerStateRuntime (plan §3.1)', () => {
   it('creates one QueryClient + dispatcher per runtime (never shared across renderers)', () => {
@@ -28,7 +28,7 @@ describe('createServerStateRuntime (plan §3.1)', () => {
   it('clearIdentity removes pilot keys for the identity through the dispatcher', async () => {
     const runtime = createTestServerStateRuntime();
     const notifKey = notificationQueryKeys.unread('id-a');
-    const taskKey = taskTemplateQueryKeys.list('id-a', { page: 1, limit: 20 });
+    const taskKey = taskPlanQueryKeys.list('id-a', { page: 1, limit: 20 });
     await runtime.queryClient.fetchQuery({ queryKey: notifKey, queryFn: async () => 1 });
     await runtime.queryClient.fetchQuery({ queryKey: taskKey, queryFn: async () => 1 });
 

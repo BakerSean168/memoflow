@@ -270,11 +270,11 @@ const GOAL_LEDGER: LedgerRow[] = [
 ];
 
 const TASK_LEDGER: LedgerRow[] = [
-  { module: 'task', method: 'post', path: '/api/v1/task-templates', status: 201, hasBody: true },
+  { module: 'task', method: 'post', path: '/api/v1/task-plans', status: 201, hasBody: true },
   {
     module: 'task',
     method: 'put',
-    path: '/api/v1/task-templates/{id}',
+    path: '/api/v1/task-plans/{id}',
     status: 200,
     hasBody: true,
     hasParams: true,
@@ -282,7 +282,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'delete',
-    path: '/api/v1/task-templates/{id}',
+    path: '/api/v1/task-plans/{id}',
     status: 200,
     hasBody: false,
     hasParams: true,
@@ -290,7 +290,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-templates/{id}/activate',
+    path: '/api/v1/task-plans/{id}/activate',
     status: 200,
     hasBody: false,
     hasParams: true,
@@ -298,7 +298,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-templates/{id}/abandon',
+    path: '/api/v1/task-plans/{id}/abandon',
     status: 200,
     hasBody: true,
     hasParams: true,
@@ -306,7 +306,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-templates/{id}/pause',
+    path: '/api/v1/task-plans/{id}/pause',
     status: 200,
     hasBody: false,
     hasParams: true,
@@ -314,7 +314,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-templates/{id}/archive',
+    path: '/api/v1/task-plans/{id}/archive',
     status: 200,
     hasBody: false,
     hasParams: true,
@@ -322,7 +322,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-templates/{id}/generate-instances',
+    path: '/api/v1/task-plans/{id}/generate-instances',
     status: 200,
     hasBody: true,
     hasParams: true,
@@ -330,7 +330,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-templates/{id}/bind-goal',
+    path: '/api/v1/task-plans/{id}/bind-goal',
     status: 200,
     hasBody: true,
     hasParams: true,
@@ -338,7 +338,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-templates/{id}/unbind-goal',
+    path: '/api/v1/task-plans/{id}/unbind-goal',
     status: 200,
     hasBody: false,
     hasParams: true,
@@ -346,7 +346,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-instances/{id}/complete',
+    path: '/api/v1/task-occurrences/{id}/complete',
     status: 200,
     hasBody: true,
     hasParams: true,
@@ -354,7 +354,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-instances/{id}/uncomplete',
+    path: '/api/v1/task-occurrences/{id}/uncomplete',
     status: 200,
     hasBody: false,
     hasParams: true,
@@ -362,7 +362,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-instances/{id}/skip',
+    path: '/api/v1/task-occurrences/{id}/skip',
     status: 200,
     hasBody: true,
     hasParams: true,
@@ -370,7 +370,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-instances/{id}/missed',
+    path: '/api/v1/task-occurrences/{id}/missed',
     status: 200,
     hasBody: true,
     hasParams: true,
@@ -378,7 +378,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-instances/{id}/start',
+    path: '/api/v1/task-occurrences/{id}/start',
     status: 200,
     hasBody: false,
     hasParams: true,
@@ -386,7 +386,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'delete',
-    path: '/api/v1/task-instances/{id}',
+    path: '/api/v1/task-occurrences/{id}',
     status: 200,
     hasBody: false,
     hasParams: true,

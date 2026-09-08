@@ -1,10 +1,10 @@
 import { RefreshControl, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { TaskTemplateStatus } from '@memoflow/contracts/task';
+import { TaskPlanStatus } from '@memoflow/contracts/task';
 
-import { TaskTemplateCard } from '../components/TaskTemplateCard';
+import { TaskPlanCard } from '../components/TaskPlanCard';
 import { useAppSession } from '../hooks/useAppSession';
-import { useTaskTemplates, type TaskSortOption, type TaskStatusFilter } from '../hooks/useTaskTemplates';
+import { useTaskPlans, type TaskSortOption, type TaskStatusFilter } from '../hooks/useTaskPlans';
 import {
   PageShell,
   PrimaryButton,
@@ -17,9 +17,9 @@ import {
 
 const FILTERS: Array<{ label: string; value: TaskStatusFilter }> = [
   { label: 'All', value: 'all' },
-  { label: 'Active', value: TaskTemplateStatus.Active },
-  { label: 'Paused', value: TaskTemplateStatus.Paused },
-  { label: 'Closed', value: TaskTemplateStatus.Closed },
+  { label: 'Active', value: TaskPlanStatus.Active },
+  { label: 'Paused', value: TaskPlanStatus.Paused },
+  { label: 'Closed', value: TaskPlanStatus.Closed },
 ];
 
 const SORTS: Array<{ label: string; value: TaskSortOption }> = [
@@ -44,9 +44,9 @@ export function TasksScreen() {
     sortBy,
     statusFilter,
     templates,
-  } = useTaskTemplates();
+  } = useTaskPlans();
 
-  const activeCount = templates.filter((item) => item.status === TaskTemplateStatus.Active).length;
+  const activeCount = templates.filter((item) => item.status === TaskPlanStatus.Active).length;
   const totalPending = templates.reduce((sum, item) => sum + item.pendingInstanceCount, 0);
   const actionSections = [
     {
@@ -139,7 +139,7 @@ export function TasksScreen() {
 
           <View style={styles.listColumn}>
             {filteredTemplates.map((template) => (
-              <TaskTemplateCard
+              <TaskPlanCard
                 key={template.id}
                 template={template}
                 onOpen={() => router.push(`./${template.id}`)}

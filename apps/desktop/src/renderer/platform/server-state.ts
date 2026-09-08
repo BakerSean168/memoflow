@@ -91,7 +91,7 @@ export function mapTablesToInvalidationIntents(
   }
   if (unique.includes('task_templates')) {
     intents.push({
-      target: 'task-template',
+      target: 'task-plan',
       identityScope,
       source: 'powersync',
       projection: 'all',

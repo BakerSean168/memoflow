@@ -72,7 +72,7 @@ describe('PowerSyncDataPortabilityImportStore', () => {
     const store = new PowerSyncDataPortabilityImportStore(db);
 
     await store.transaction((tx) =>
-      tx.createTaskTemplate({
+      tx.createTaskPlan({
         id: 'task-1',
         identityId: 'identity-1',
         name: 'Write tests',

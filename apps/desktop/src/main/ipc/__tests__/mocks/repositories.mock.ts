@@ -35,7 +35,7 @@ export function createMockGoalRepository(): MockGoalRepository {
 
 // ===== Task Repository Mocks =====
 
-export interface MockTaskTemplateRepository {
+export interface MockTaskPlanRepository {
   save: ReturnType<typeof vi.fn>;
   findById: ReturnType<typeof vi.fn>;
   findByGoalId: ReturnType<typeof vi.fn>;
@@ -44,7 +44,7 @@ export interface MockTaskTemplateRepository {
   exists: ReturnType<typeof vi.fn>;
 }
 
-export function createMockTaskTemplateRepository(): MockTaskTemplateRepository {
+export function createMockTaskPlanRepository(): MockTaskPlanRepository {
   return {
     save: vi.fn().mockResolvedValue(undefined),
     findById: vi.fn().mockResolvedValue(null),
@@ -55,7 +55,7 @@ export function createMockTaskTemplateRepository(): MockTaskTemplateRepository {
   };
 }
 
-export interface MockTaskInstanceRepository {
+export interface MockTaskOccurrenceRepository {
   save: ReturnType<typeof vi.fn>;
   findById: ReturnType<typeof vi.fn>;
   findByTemplateId: ReturnType<typeof vi.fn>;
@@ -65,7 +65,7 @@ export interface MockTaskInstanceRepository {
   exists: ReturnType<typeof vi.fn>;
 }
 
-export function createMockTaskInstanceRepository(): MockTaskInstanceRepository {
+export function createMockTaskOccurrenceRepository(): MockTaskOccurrenceRepository {
   return {
     save: vi.fn().mockResolvedValue(undefined),
     findById: vi.fn().mockResolvedValue(null),

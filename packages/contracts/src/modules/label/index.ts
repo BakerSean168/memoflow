@@ -71,5 +71,5 @@ export interface GoalLabelAssignmentCommand extends LabelAssignmentCommand {
 }
 
 export interface TaskLabelAssignmentCommand extends LabelAssignmentCommand {
-  readonly taskTemplateId: string;
+  readonly taskPlanId: string;
 }

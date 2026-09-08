@@ -2,7 +2,7 @@ import type {
   GoalPlanExecutionFailure,
   GoalPlanExecutionReceipt,
   GoalPlanReminder,
-  GoalPlanTaskTemplate,
+  GoalPlanTaskPlan,
 } from '@memoflow/contracts/ai';
 import type { CreateGoalReq } from '@memoflow/contracts/goal';
 import {
@@ -16,7 +16,7 @@ import {
   TaskGoalBindingTrigger,
   TaskTimeType,
   TaskType,
-  type CreateTaskTemplateReq,
+  type CreateTaskPlanReq,
 } from '@memoflow/contracts/task';
 import { goalWorkflowEntityId } from './deterministic-entity-id';
 import type {
@@ -24,7 +24,7 @@ import type {
   GoalMutationResult,
   GoalPlanMutationPort,
   ReminderMutationResult,
-  TaskTemplateMutationResult,
+  TaskPlanMutationResult,
 } from './goal-plan-mutation.port';
 
 const DAILY_MINUTES = 24 * 60;
@@ -149,7 +149,7 @@ function combineAnchorAndTime(anchorMs: number, timeOfDay: string, timeZone: str
 }
 
 function taskRequest(
-  task: GoalPlanTaskTemplate,
+  task: GoalPlanTaskPlan,
   input: {
     id: string;
     goalId: string;
@@ -157,10 +157,10 @@ function taskRequest(
     goalStartDate: number | null;
     labelIds: readonly string[];
   },
-): CreateTaskTemplateReq {
+): CreateTaskPlanReq {
   const startDate = task.startDate ?? input.goalStartDate;
   const timePoint = task.timeOfDay ? parseMinuteOfDay(task.timeOfDay) : null;
-  const recurrenceRule: CreateTaskTemplateReq['recurrenceRule'] =
+  const recurrenceRule: CreateTaskPlanReq['recurrenceRule'] =
     task.cadence === 'once'
       ? null
       : {
@@ -169,7 +169,7 @@ function taskRequest(
           daysOfWeek:
             task.cadence === 'weekly'
               ? (task.daysOfWeek as NonNullable<
-                  CreateTaskTemplateReq['recurrenceRule']
+                  CreateTaskPlanReq['recurrenceRule']
                 >['daysOfWeek'])
               : [],
           endDate: null,
@@ -179,7 +179,7 @@ function taskRequest(
     task.keyResultIndex === undefined ? undefined : input.keyResultIds[task.keyResultIndex];
 
   return {
-    id: input.id as NonNullable<CreateTaskTemplateReq['id']>,
+    id: input.id as NonNullable<CreateTaskPlanReq['id']>,
     name: task.name,
     description: task.description ?? null,
     taskType: task.cadence === 'once' ? TaskType.OneTime : TaskType.Recurring,
@@ -195,9 +195,9 @@ function taskRequest(
     labelIds: [...input.labelIds],
     goalBinding: keyResultId
       ? {
-          goalId: input.goalId as NonNullable<NonNullable<CreateTaskTemplateReq['goalBinding']>['goalId']>,
+          goalId: input.goalId as NonNullable<NonNullable<CreateTaskPlanReq['goalBinding']>['goalId']>,
           keyResultId:
-            keyResultId as NonNullable<NonNullable<CreateTaskTemplateReq['goalBinding']>['keyResultId']>,
+            keyResultId as NonNullable<NonNullable<CreateTaskPlanReq['goalBinding']>['keyResultId']>,
           contribution: {
             value: task.contributionValue,
             trigger: TaskGoalBindingTrigger.EachCompletion,
@@ -292,7 +292,7 @@ export class ApplyGoalPlanService {
         index,
       }),
     );
-    const expectedTaskIds = draft.taskTemplates.map((_, index) =>
+    const expectedTaskIds = draft.taskPlans.map((_, index) =>
       goalWorkflowEntityId({
         workflowRunId,
         revision: draft.revision,
@@ -412,7 +412,7 @@ export class ApplyGoalPlanService {
       };
     }
 
-    for (const [index, task] of draft.taskTemplates.entries()) {
+    for (const [index, task] of draft.taskPlans.entries()) {
       const expectedId = expectedTaskIds[index]!;
       if (taskIds.includes(expectedId)) continue;
 
@@ -422,9 +422,9 @@ export class ApplyGoalPlanService {
         continue;
       }
 
-      let result: Result<TaskTemplateMutationResult> | undefined;
+      let result: Result<TaskPlanMutationResult> | undefined;
       try {
-        result = await this.mutations.createTaskTemplate(
+        result = await this.mutations.createTaskPlan(
           taskRequest(task, {
             id: expectedId,
             goalId,

@@ -61,13 +61,13 @@ describe('RemoveTaskGoalContributionUseCase', () => {
       keyResultId: keyResult.id as never,
       identityId: 'identity-1' as never,
       value: 3,
-      source: { type: 'TASK_INSTANCE', id: 'task-instance-1' },
+      source: { type: 'TASK_INSTANCE', id: 'task-occurrence-1' },
     });
     vi.mocked(goalRecordRepository.findBySource).mockResolvedValue(record);
     vi.mocked(goalRecordRepository.findByKeyResultId).mockResolvedValue([record]);
     vi.mocked(goalRepository.findByKeyResultIdForIdentity).mockResolvedValue(goal);
 
-    const result = await useCase.execute('identity-1', 'TASK_INSTANCE', 'task-instance-1');
+    const result = await useCase.execute('identity-1', 'TASK_INSTANCE', 'task-occurrence-1');
 
     expect(result).toBeOk();
     expect(goalRecordRepository.delete).toHaveBeenCalledWith('identity-1', String(record.id));
@@ -77,7 +77,7 @@ describe('RemoveTaskGoalContributionUseCase', () => {
   });
 
   it('is idempotent when the source contribution is already absent', async () => {
-    const result = await useCase.execute('identity-1', 'TASK_INSTANCE', 'task-instance-1');
+    const result = await useCase.execute('identity-1', 'TASK_INSTANCE', 'task-occurrence-1');
 
     expect(result).toBeOk();
     expect(goalRecordRepository.delete).not.toHaveBeenCalled();
@@ -90,7 +90,7 @@ describe('RemoveTaskGoalContributionUseCase', () => {
       keyResultId: keyResult.id as never,
       identityId: 'identity-1' as never,
       value: 3,
-      source: { type: 'TASK_INSTANCE', id: 'task-instance-1' },
+      source: { type: 'TASK_INSTANCE', id: 'task-occurrence-1' },
     });
     vi.mocked(goalRecordRepository.findBySource).mockResolvedValue(record);
     vi.mocked(goalRecordRepository.findByKeyResultId).mockResolvedValue([record]);
@@ -99,7 +99,7 @@ describe('RemoveTaskGoalContributionUseCase', () => {
       new GoalVersionConflictError(),
     );
 
-    const result = await useCase.execute('identity-1', 'TASK_INSTANCE', 'task-instance-1');
+    const result = await useCase.execute('identity-1', 'TASK_INSTANCE', 'task-occurrence-1');
 
     expect(result).toBeErrorWithCode('CONFLICT');
     expect(goalRecordRepository.delete).not.toHaveBeenCalled();

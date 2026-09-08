@@ -1,12 +1,12 @@
 /** Task module mock factories. Keep these structurally typed so contract drift fails compilation. */
 import { faker } from '@faker-js/faker';
-import type { TaskTemplateClientDTO } from '../modules/task/aggregates/task-template-client';
-import type { TaskInstanceClientDTO } from '../modules/task/aggregates/task-instance-client';
-import type { TaskTemplateId, TaskInstanceId, IdentityId } from '../primitives';
+import type { TaskPlanClientDTO } from '../modules/task/aggregates/task-plan-client';
+import type { TaskOccurrenceClientDTO } from '../modules/task/aggregates/task-occurrence-client';
+import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '../primitives';
 
-export function createMockTaskTemplate(
-  overrides: Partial<TaskTemplateClientDTO> = {},
-): TaskTemplateClientDTO {
+export function createMockTaskPlan(
+  overrides: Partial<TaskPlanClientDTO> = {},
+): TaskPlanClientDTO {
   const now = Date.now();
   const startDate = faker.date.recent({ days: 30 }).getTime();
   const status = faker.helpers.arrayElement(['Active', 'Paused', 'Closed'] as const);
@@ -16,7 +16,7 @@ export function createMockTaskTemplate(
       : ('Open' as const);
 
   return {
-    id: faker.string.uuid() as TaskTemplateId,
+    id: faker.string.uuid() as TaskPlanId,
     identityId: faker.string.uuid() as IdentityId,
     name: faker.lorem.words({ min: 2, max: 5 }),
     description: faker.datatype.boolean() ? faker.lorem.sentence() : null,
@@ -70,16 +70,16 @@ export function createMockTaskTemplate(
   };
 }
 
-export function createMockTaskTemplateList(
+export function createMockTaskPlanList(
   count = 5,
-  overrides: Partial<TaskTemplateClientDTO> = {},
-): TaskTemplateClientDTO[] {
-  return Array.from({ length: count }, () => createMockTaskTemplate(overrides));
+  overrides: Partial<TaskPlanClientDTO> = {},
+): TaskPlanClientDTO[] {
+  return Array.from({ length: count }, () => createMockTaskPlan(overrides));
 }
 
-export function createMockTaskInstance(
-  overrides: Partial<TaskInstanceClientDTO> = {},
-): TaskInstanceClientDTO {
+export function createMockTaskOccurrence(
+  overrides: Partial<TaskOccurrenceClientDTO> = {},
+): TaskOccurrenceClientDTO {
   const now = Date.now();
   const instanceDate = faker.date.soon({ days: 7 }).getTime();
   const status = faker.helpers.arrayElement([
@@ -91,8 +91,8 @@ export function createMockTaskInstance(
   ] as const);
 
   return {
-    id: faker.string.uuid() as TaskInstanceId,
-    templateId: faker.string.uuid() as TaskTemplateId,
+    id: faker.string.uuid() as TaskOccurrenceId,
+    templateId: faker.string.uuid() as TaskPlanId,
     identityId: faker.string.uuid() as IdentityId,
     instanceDate,
     timeConfig: {
@@ -121,9 +121,9 @@ export function createMockTaskInstance(
   };
 }
 
-export function createMockTaskInstanceList(
+export function createMockTaskOccurrenceList(
   count = 5,
-  overrides: Partial<TaskInstanceClientDTO> = {},
-): TaskInstanceClientDTO[] {
-  return Array.from({ length: count }, () => createMockTaskInstance(overrides));
+  overrides: Partial<TaskOccurrenceClientDTO> = {},
+): TaskOccurrenceClientDTO[] {
+  return Array.from({ length: count }, () => createMockTaskOccurrence(overrides));
 }

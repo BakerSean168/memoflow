@@ -79,8 +79,8 @@ export function createPrismaDataPortabilityDependencies(
   return {
     goalRepository: goalRepos.goalRepository,
     goalRecordRepository: goalRepos.goalRecordRepository,
-    taskTemplateRepository: taskRepos.taskTemplateRepository,
-    taskInstanceRepository: taskRepos.taskInstanceRepository,
+    taskPlanRepository: taskRepos.taskPlanRepository,
+    taskOccurrenceRepository: taskRepos.taskOccurrenceRepository,
     reminderTemplateRepository: reminderRepos.reminderTemplateRepository,
     reminderGroupRepository: reminderRepos.reminderGroupRepository,
     reminderResponseRepository: reminderRepos.reminderResponseRepository,

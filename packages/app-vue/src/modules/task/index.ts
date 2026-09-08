@@ -13,9 +13,9 @@ export type { TaskStoreType } from './stores/task-store';
 // Composables
 export { useTask } from './composables/useTask';
 export {
-  useTaskTemplateListQuery,
-  useTaskTemplateDetailQuery,
-  useTaskTemplateMutations,
+  useTaskPlanListQuery,
+  useTaskPlanDetailQuery,
+  useTaskPlanMutations,
   type CreateTemplateFeedbackIntent,
 } from './composables';
 

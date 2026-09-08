@@ -88,7 +88,7 @@ describe('API host Task -> Goal restart recovery', () => {
     if (!keyResultId) return;
 
     const taskModule = createTaskPrismaModule(prisma);
-    const createdTask = await taskModule.api.createTaskTemplate({
+    const createdTask = await taskModule.api.createTaskPlan({
       identityId,
       name: 'Persist contribution before host exit',
       taskType: TaskType.OneTime,
@@ -109,7 +109,7 @@ describe('API host Task -> Goal restart recovery', () => {
     expect(createdTask.ok).toBe(true);
     if (!createdTask.ok) return;
 
-    const taskInstance = await prisma.taskInstance.findFirstOrThrow({
+    const taskOccurrence = await prisma.taskOccurrence.findFirstOrThrow({
       where: { templateId: createdTask.data.template.id },
     });
     const fixturePath = path.resolve(__dirname, 'fixtures/complete-task-and-exit.ts');
@@ -126,7 +126,7 @@ describe('API host Task -> Goal restart recovery', () => {
         '--tsconfig',
         workspaceTsconfigPath,
         fixturePath,
-        taskInstance.id,
+        taskOccurrence.id,
         String(identityId),
       ],
       { env: process.env },
@@ -135,7 +135,7 @@ describe('API host Task -> Goal restart recovery', () => {
 
     await expect(
       prisma.taskGoalOutbox.findFirstOrThrow({
-        where: { taskInstanceId: taskInstance.id },
+        where: { taskOccurrenceId: taskOccurrence.id },
       }),
     ).resolves.toMatchObject({ status: 'PENDING' });
     await expect(prisma.goalRecord.count({ where: { keyResultId } })).resolves.toBe(0);
@@ -156,7 +156,7 @@ describe('API host Task -> Goal restart recovery', () => {
         async () =>
           (
             await prisma.taskGoalOutbox.findFirstOrThrow({
-              where: { taskInstanceId: taskInstance.id },
+              where: { taskOccurrenceId: taskOccurrence.id },
               select: { status: true },
             })
           ).status,

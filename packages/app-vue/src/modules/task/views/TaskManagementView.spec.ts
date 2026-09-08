@@ -31,7 +31,7 @@ describe('TaskManagementView occurrence-first surface', () => {
   });
 
   it('uses the shared plan editor and authoritative occurrence commands', () => {
-    expect(source).toContain('<TaskTemplateDialog');
+    expect(source).toContain('<TaskPlanDialog');
     expect(source).toContain('@save="handleSubmit"');
     for (const operation of [
       'completeInstance',

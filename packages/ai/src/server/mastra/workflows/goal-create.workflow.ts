@@ -61,7 +61,7 @@ const dangerousPatchKeys = new Set(['__proto__', 'prototype', 'constructor']);
 const allowedDraftPatchKeys = new Set([
   'goal',
   'keyResults',
-  'taskTemplates',
+  'taskPlans',
   'reminders',
   'rationale',
   'warnings',

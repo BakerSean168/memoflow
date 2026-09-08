@@ -7,12 +7,12 @@
  *
  * @example
  * ```typescript
- * const mockRepo = createMockRepo<ITaskTemplateRepository>({
- *   findById: vi.fn().mockResolvedValue(aTaskTemplate),
+ * const mockRepo = createMockRepo<ITaskPlanRepository>({
+ *   findById: vi.fn().mockResolvedValue(aTaskPlan),
  *   save: vi.fn().mockResolvedValue(undefined),
  * });
  *
- * const useCase = new CreateTaskTemplate(mockRepo, mockInstanceRepo);
+ * const useCase = new CreateTaskPlan(mockRepo, mockInstanceRepo);
  * ```
  */
 

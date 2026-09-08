@@ -72,13 +72,13 @@ function mastraRequestContext(requestId: string): RequestContext {
 
 function mutationPort(): TaskPlanMutationPort & {
   resolveLabels: ReturnType<typeof vi.fn>;
-  createTaskTemplate: ReturnType<typeof vi.fn>;
+  createTaskPlan: ReturnType<typeof vi.fn>;
 } {
   return {
     resolveLabels: vi.fn(async (names: readonly string[]) =>
       ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
     ),
-    createTaskTemplate: vi.fn(async (request) => ok({ taskId: String(request.id) })),
+    createTaskPlan: vi.fn(async (request) => ok({ taskId: String(request.id) })),
   };
 }
 
@@ -171,9 +171,9 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       outcome: 'completed',
       receipt: { workflowRunId: runId, revision: 1, status: 'success' },
     });
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(1);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);
     // Domain mutation uses the current approval entry context, not the start context.
-    expect(mutations.createTaskTemplate.mock.calls[0]?.[1]).toMatchObject({
+    expect(mutations.createTaskPlan.mock.calls[0]?.[1]).toMatchObject({
       requestId: 'request-approve',
       source: 'http',
       identityId: workflowInput.identityId,
@@ -202,7 +202,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       requestContext: mastraRequestContext('request-cancel'),
     });
     expect(cancelled.result).toMatchObject({ outcome: 'cancelled' });
-    expect(mutations.createTaskTemplate).not.toHaveBeenCalled();
+    expect(mutations.createTaskPlan).not.toHaveBeenCalled();
   });
 
   it('maps an explicit contribution and does not invent one when omitted', async () => {
@@ -225,7 +225,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       draft: { ...linkedDraft, revision: 1 },
       context,
     });
-    expect(mutations.createTaskTemplate.mock.calls[0]?.[0]).toMatchObject({
+    expect(mutations.createTaskPlan.mock.calls[0]?.[0]).toMatchObject({
       labelIds: ['label:planning'],
       goalBinding: {
         goalId: 'goal-1',
@@ -249,7 +249,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       draft: { ...noContributionDraft, revision: 1 },
       context,
     });
-    expect(noContributionMutations.createTaskTemplate.mock.calls[0]?.[0]).toMatchObject({
+    expect(noContributionMutations.createTaskPlan.mock.calls[0]?.[0]).toMatchObject({
       goalBinding: { goalId: 'goal-1', keyResultId: 'kr-1', contribution: null },
     });
   });
@@ -268,7 +268,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       context,
     });
     expect(first.status).toBe('success');
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(1);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);
 
     // Retry with the prior successful receipt short-circuits the mutation port,
     // so a double approve can never create a duplicate task template.
@@ -279,7 +279,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       priorReceipt: first,
     });
     expect(again.status).toBe('success');
-    expect(again.taskTemplateId).toBe(first.taskTemplateId);
-    expect(mutations.createTaskTemplate).toHaveBeenCalledTimes(1);
+    expect(again.taskPlanId).toBe(first.taskPlanId);
+    expect(mutations.createTaskPlan).toHaveBeenCalledTimes(1);
   });
 });

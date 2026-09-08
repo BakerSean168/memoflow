@@ -78,8 +78,8 @@ model Account {
   walletAccounts                  WalletAccount[]
   walletTransactions              WalletTransaction[]              @relation("AccountWalletTransactions")
   activityLedger                  ActivityLedger[]
-  taskTemplates                   TaskTemplate[]
-  taskInstances                   TaskInstance[]
+  taskPlans                       TaskPlan[]
+  taskOccurrences                 TaskOccurrence[]
   taskStatistics                  TaskStatistic?
   userSettings                    UserSetting?
   notifications                   Notification[]
@@ -92,7 +92,7 @@ model Account {
   dashboardConfigs                DashboardConfig?
 
   // PowerSync: denormalized identity relations
-  taskTemplateHistory                    TaskTemplateHistory[]                   @relation("AccountTaskTemplateHistory")
+  taskPlanHistory                        TaskPlanHistory[]                       @relation("AccountTaskPlanHistory")
   scheduleExecutions                     ScheduleExecution[]                     @relation("AccountScheduleExecutions")
   reminderHistory                        ReminderHistory[]                       @relation("AccountReminderHistory")
   reminderResponses                      ReminderResponse[]                      @relation("AccountReminderResponses")
@@ -600,7 +600,7 @@ model KeyResult {
   updatedAt             DateTime @updatedAt @map("updated_at")
 
   goal                     Goal                      @relation("GoalKeyResults", fields: [goalId, identityId], references: [id, identityId], onDelete: Cascade)
-  linkedTaskTemplates      TaskTemplate[]            @relation("KeyResultTaskTemplates")
+  linkedTaskPlans          TaskPlan[]                @relation("KeyResultTaskPlans")
   records                  GoalRecord[]
   keyResultWeightSnapshots KeyResultWeightSnapshot[]
 
@@ -843,16 +843,16 @@ model GoalLabel {
 }
 
 model TaskLabel {
-  identityId     String @map("identity_id")
-  taskTemplateId String @map("task_template_id")
-  labelId        String @map("label_id")
+  identityId String @map("identity_id")
+  taskPlanId String @map("task_template_id")
+  labelId    String @map("label_id")
 
-  account      Account      @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  taskTemplate TaskTemplate @relation(fields: [taskTemplateId, identityId], references: [id, identityId], onDelete: Cascade)
-  label        Label        @relation(fields: [labelId, identityId], references: [id, identityId], onDelete: Cascade)
+  account  Account  @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  taskPlan TaskPlan @relation(fields: [taskPlanId, identityId], references: [id, identityId], onDelete: Cascade)
+  label    Label    @relation(fields: [labelId, identityId], references: [id, identityId], onDelete: Cascade)
 
-  @@id([identityId, taskTemplateId, labelId])
-  @@index([identityId, labelId, taskTemplateId])
+  @@id([identityId, taskPlanId, labelId])
+  @@index([identityId, labelId, taskPlanId])
   @@map("task_labels")
 }
 
@@ -2187,9 +2187,9 @@ model UserSetting {
 // 任务计划、实例、历史、统计
 // ==========================================
 
-/// TaskTemplate 聚合根 - 任务模板
+/// TaskPlan 聚合根 - 任务模板
 /// 管理任务的完整定义，包括时间配置、重复规则、提醒、Goal绑定等
-model TaskTemplate {
+model TaskPlan {
   // ============ 主键与外键 ============
   id         String @id
   identityId String @map("identity_id")
@@ -2248,11 +2248,11 @@ model TaskTemplate {
 
   // ============ 关系映射 ============
   account   Account    @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  keyResult KeyResult? @relation("KeyResultTaskTemplates", fields: [keyResultId, goalId, identityId], references: [id, goalId, identityId], onDelete: Restrict)
+  keyResult KeyResult? @relation("KeyResultTaskPlans", fields: [keyResultId, goalId, identityId], references: [id, goalId, identityId], onDelete: Restrict)
 
   // 实例
-  instances  TaskInstance[]
-  history    TaskTemplateHistory[]
+  instances  TaskOccurrence[]
+  history    TaskPlanHistory[]
   labelLinks TaskLabel[]
 
   // ============ 索引优化 ============
@@ -2266,9 +2266,9 @@ model TaskTemplate {
   @@map("task_templates")
 }
 
-/// TaskInstance 聚合根 - 任务实例
+/// TaskOccurrence 聚合根 - 任务实例
 /// 从模板生成的具体任务实例，包含执行状态和时间追踪
-model TaskInstance {
+model TaskOccurrence {
   // ============ 主键与外键 ============
   id         String @id
   templateId String @map("template_id")
@@ -2277,7 +2277,7 @@ model TaskInstance {
   // ============ 实例基本信息 ============
   instanceDate  DateTime @map("instance_date")
   occurrenceKey String?  @map("occurrence_key") /// R2-1 幂等键 templateId:localDate
-  status        String /// TaskInstanceStatus
+  status        String /// TaskOccurrenceStatus
   importance    String   @default("moderate") /// ImportanceLevel
 
   // ============ 时间追踪 ============
@@ -2295,8 +2295,8 @@ model TaskInstance {
   deletedAt DateTime? @map("deleted_at")
 
   // ============ 关系映射 ============
-  account  Account      @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  account  Account  @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  template TaskPlan @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   // R2-1：同一模板同一天最多一个实例（幂等键，防双宿主/并发重复生成）。
   @@unique([templateId, occurrenceKey])
@@ -2310,29 +2310,29 @@ model TaskInstance {
 /// Durable delivery log for completed tasks that contribute Goal progress.
 /// It is intentionally task-specific rather than a generic application outbox.
 model TaskGoalOutbox {
-  eventId        String    @id @map("event_id")
-  identityId     String    @map("identity_id")
-  taskInstanceId String    @map("task_instance_id")
-  taskTemplateId String    @map("task_template_id")
-  goalId         String    @map("goal_id")
-  keyResultId    String    @map("key_result_id")
-  payload        String
-  action         String    @default("complete")
-  status         String    @default("PENDING")
-  attempts       Int       @default(0)
-  availableAt    DateTime  @default(now()) @map("available_at")
-  lastError      String?   @map("last_error")
-  dispatchedAt   DateTime? @map("dispatched_at")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  eventId          String    @id @map("event_id")
+  identityId       String    @map("identity_id")
+  taskOccurrenceId String    @map("task_instance_id")
+  taskPlanId       String    @map("task_template_id")
+  goalId           String    @map("goal_id")
+  keyResultId      String    @map("key_result_id")
+  payload          String
+  action           String    @default("complete")
+  status           String    @default("PENDING")
+  attempts         Int       @default(0)
+  availableAt      DateTime  @default(now()) @map("available_at")
+  lastError        String?   @map("last_error")
+  dispatchedAt     DateTime? @map("dispatched_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   @@index([identityId, status, availableAt])
   @@index([status, availableAt])
-  @@index([taskInstanceId])
+  @@index([taskOccurrenceId])
   @@map("task_goal_outbox")
 }
 
-model TaskTemplateHistory {
+model TaskPlanHistory {
   id         String   @id
   identityId String   @map("identity_id")
   templateId String   @map("template_id")
@@ -2340,8 +2340,8 @@ model TaskTemplateHistory {
   changes    String?
   createdAt  DateTime @default(now()) @map("created_at")
 
-  identity Account      @relation("AccountTaskTemplateHistory", fields: [identityId], references: [id])
-  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  identity Account  @relation("AccountTaskPlanHistory", fields: [identityId], references: [id])
+  template TaskPlan @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
   @@index([templateId])

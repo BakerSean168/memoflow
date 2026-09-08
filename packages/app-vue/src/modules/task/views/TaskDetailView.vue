@@ -205,7 +205,7 @@
       </div>
     </main>
 
-    <TaskTemplateDialog
+    <TaskPlanDialog
       v-model="showEditDialog"
       mode="edit"
       :template="viewModel"
@@ -239,17 +239,17 @@ import type { RecurrenceRuleDTO, TaskReminderConfigDTO } from '@memoflow/contrac
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import { formatProductDate } from '../../../shared/utils/product-time';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
-import TaskTemplateDialog from '../components/dialogs/TaskTemplateDialog.vue';
-import type { TaskTemplateViewModel } from '../components/types';
+import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
+import type { TaskPlanViewModel } from '../components/types';
 import { useTaskStore } from '../stores/task-store';
-import { useTaskInstances } from '../composables/useTaskInstances';
-import { useTaskTemplateDetailQuery } from '../composables/useTaskTemplateDetailQuery';
-import { useTaskTemplateMutations } from '../composables/useTaskTemplateMutations';
+import { useTaskOccurrences } from '../composables/useTaskOccurrences';
+import { useTaskPlanDetailQuery } from '../composables/useTaskPlanDetailQuery';
+import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import {
   getTaskTimeValueDisplay,
-  mapTaskTemplateDtoToViewModel,
+  mapTaskPlanDtoToViewModel,
   toTaskTimeConfigPayload,
-} from '../utils/task-template-presentation';
+} from '../utils/task-plan-presentation';
 import {
   getTaskOccurrencePosition,
   sortTaskOccurrences,
@@ -264,7 +264,7 @@ const {
   isLoading: templateLoading,
   isError: templateError,
   refetch,
-} = useTaskTemplateDetailQuery(id);
+} = useTaskPlanDetailQuery(id);
 const {
   updateTemplateSafe,
   activateTemplateSafe,
@@ -272,13 +272,13 @@ const {
   archiveTemplateSafe,
   deleteTemplateSafe,
   isSaving,
-} = useTaskTemplateMutations();
+} = useTaskPlanMutations();
 const { fetchInstances, completeInstance, uncompleteInstance, markInstanceMissed, skipInstance } =
-  useTaskInstances();
+  useTaskOccurrences();
 const taskStore = useTaskStore();
 const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
 const viewModel = computed(() =>
-  currentTemplate.value ? mapTaskTemplateDtoToViewModel(currentTemplate.value, t) : null,
+  currentTemplate.value ? mapTaskPlanDtoToViewModel(currentTemplate.value, t) : null,
 );
 const showEditDialog = ref(false);
 const busyOccurrenceId = ref<string | null>(null);
@@ -341,7 +341,7 @@ const goalBindingText = computed(() =>
 function openEdit() {
   showEditDialog.value = true;
 }
-function goalBinding(vm: TaskTemplateViewModel) {
+function goalBinding(vm: TaskPlanViewModel) {
   if (!vm.goalBinding?.goalId || !vm.goalBinding.keyResultId) return null;
   return {
     goalId: vm.goalBinding.goalId as GoalId,
@@ -349,7 +349,7 @@ function goalBinding(vm: TaskTemplateViewModel) {
     contribution: vm.goalBinding.contribution ?? null,
   };
 }
-async function saveEdit(vm: TaskTemplateViewModel) {
+async function saveEdit(vm: TaskPlanViewModel) {
   const result = await updateTemplateSafe(id.value, {
     name: vm.title,
     description: vm.description ?? null,

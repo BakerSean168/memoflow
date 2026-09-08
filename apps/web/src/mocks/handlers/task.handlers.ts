@@ -1,33 +1,33 @@
 import { http, HttpResponse } from 'msw';
 import {
-  createMockTaskTemplate,
-  createMockTaskTemplateList,
-  createMockTaskInstance,
-  createMockTaskInstanceList,
+  createMockTaskPlan,
+  createMockTaskPlanList,
+  createMockTaskOccurrence,
+  createMockTaskOccurrenceList,
 } from '@memoflow/contracts/mocks';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
-const TEMPLATES = `${API_BASE}/task-templates`;
-const INSTANCES = `${API_BASE}/task-instances`;
+const TEMPLATES = `${API_BASE}/task-plans`;
+const INSTANCES = `${API_BASE}/task-occurrences`;
 
 export const taskMockRoutes = {
   templates: TEMPLATES,
   instances: INSTANCES,
 };
 
-type MockTaskTemplateOverrides = NonNullable<Parameters<typeof createMockTaskTemplate>[0]>;
-type MockTaskInstanceOverrides = NonNullable<Parameters<typeof createMockTaskInstance>[0]>;
-type TaskTemplateId = NonNullable<MockTaskTemplateOverrides['id']>;
-type TaskInstanceId = NonNullable<MockTaskInstanceOverrides['id']>;
+type MockTaskPlanOverrides = NonNullable<Parameters<typeof createMockTaskPlan>[0]>;
+type MockTaskOccurrenceOverrides = NonNullable<Parameters<typeof createMockTaskOccurrence>[0]>;
+type TaskPlanId = NonNullable<MockTaskPlanOverrides['id']>;
+type TaskOccurrenceId = NonNullable<MockTaskOccurrenceOverrides['id']>;
 
-const toTaskTemplateId = (value: string | readonly string[] | undefined): TaskTemplateId =>
-  (Array.isArray(value) ? value[0] : (value ?? '')) as TaskTemplateId;
+const toTaskPlanId = (value: string | readonly string[] | undefined): TaskPlanId =>
+  (Array.isArray(value) ? value[0] : (value ?? '')) as TaskPlanId;
 
-const toTaskInstanceId = (value: string | readonly string[] | undefined): TaskInstanceId =>
-  (Array.isArray(value) ? value[0] : (value ?? '')) as TaskInstanceId;
+const toTaskOccurrenceId = (value: string | readonly string[] | undefined): TaskOccurrenceId =>
+  (Array.isArray(value) ? value[0] : (value ?? '')) as TaskOccurrenceId;
 export const taskHandlers = [
   http.get(TEMPLATES, () => {
-    const templates = createMockTaskTemplateList(10);
+    const templates = createMockTaskPlanList(10);
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -44,7 +44,7 @@ export const taskHandlers = [
         ok: true,
         code: 200,
         message: 'Created',
-        data: createMockTaskTemplate({ name: body.name as string }),
+        data: createMockTaskPlan({ name: body.name as string }),
         timestamp: Date.now(),
       },
       { status: 201 },
@@ -56,7 +56,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Success',
-      data: createMockTaskInstanceList(8),
+      data: createMockTaskOccurrenceList(8),
       timestamp: Date.now(),
     });
   }),
@@ -66,7 +66,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Started',
-      data: createMockTaskInstance({ id: toTaskInstanceId(params.id), status: 'InProgress' }),
+      data: createMockTaskOccurrence({ id: toTaskOccurrenceId(params.id), status: 'InProgress' }),
       timestamp: Date.now(),
     });
   }),
@@ -76,7 +76,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Completed',
-      data: createMockTaskInstance({ id: toTaskInstanceId(params.id), status: 'Completed' }),
+      data: createMockTaskOccurrence({ id: toTaskOccurrenceId(params.id), status: 'Completed' }),
       timestamp: Date.now(),
     });
   }),
@@ -86,7 +86,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Missed',
-      data: createMockTaskInstance({ id: toTaskInstanceId(params.id), status: 'Missed' }),
+      data: createMockTaskOccurrence({ id: toTaskOccurrenceId(params.id), status: 'Missed' }),
       timestamp: Date.now(),
     });
   }),
@@ -96,7 +96,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Skipped',
-      data: createMockTaskInstance({ id: toTaskInstanceId(params.id), status: 'Skipped' }),
+      data: createMockTaskOccurrence({ id: toTaskOccurrenceId(params.id), status: 'Skipped' }),
       timestamp: Date.now(),
     });
   }),
@@ -106,7 +106,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Success',
-      data: createMockTaskInstance({ id: toTaskInstanceId(params.id) }),
+      data: createMockTaskOccurrence({ id: toTaskOccurrenceId(params.id) }),
       timestamp: Date.now(),
     });
   }),
@@ -126,7 +126,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Success',
-      data: createMockTaskInstanceList(5, { templateId: toTaskTemplateId(params.id) }),
+      data: createMockTaskOccurrenceList(5, { templateId: toTaskPlanId(params.id) }),
       timestamp: Date.now(),
     });
   }),
@@ -136,7 +136,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Generated',
-      data: createMockTaskInstanceList(3, { templateId: toTaskTemplateId(params.id) }),
+      data: createMockTaskOccurrenceList(3, { templateId: toTaskPlanId(params.id) }),
       timestamp: Date.now(),
     });
   }),
@@ -146,7 +146,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Activated',
-      data: createMockTaskTemplate({ id: toTaskTemplateId(params.id), status: 'Active' }),
+      data: createMockTaskPlan({ id: toTaskPlanId(params.id), status: 'Active' }),
       timestamp: Date.now(),
     });
   }),
@@ -156,7 +156,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Paused',
-      data: createMockTaskTemplate({ id: toTaskTemplateId(params.id), status: 'Paused' }),
+      data: createMockTaskPlan({ id: toTaskPlanId(params.id), status: 'Paused' }),
       timestamp: Date.now(),
     });
   }),
@@ -166,8 +166,8 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Archived',
-      data: createMockTaskTemplate({
-        id: toTaskTemplateId(params.id),
+      data: createMockTaskPlan({
+        id: toTaskPlanId(params.id),
         status: 'Active',
         archivedAt: Date.now(),
       }),
@@ -180,7 +180,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Bound',
-      data: createMockTaskTemplate({ id: toTaskTemplateId(params.id) }),
+      data: createMockTaskPlan({ id: toTaskPlanId(params.id) }),
       timestamp: Date.now(),
     });
   }),
@@ -190,7 +190,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Unbound',
-      data: createMockTaskTemplate({ id: toTaskTemplateId(params.id), goalBinding: null }),
+      data: createMockTaskPlan({ id: toTaskPlanId(params.id), goalBinding: null }),
       timestamp: Date.now(),
     });
   }),
@@ -200,7 +200,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Success',
-      data: createMockTaskTemplate({ id: toTaskTemplateId(params.id) }),
+      data: createMockTaskPlan({ id: toTaskPlanId(params.id) }),
       timestamp: Date.now(),
     });
   }),
@@ -211,7 +211,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Updated',
-      data: createMockTaskTemplate({ id: toTaskTemplateId(params.id), ...(body as object) }),
+      data: createMockTaskPlan({ id: toTaskPlanId(params.id), ...(body as object) }),
       timestamp: Date.now(),
     });
   }),
@@ -222,7 +222,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Updated',
-      data: createMockTaskTemplate({ id: toTaskTemplateId(params.id), ...(body as object) }),
+      data: createMockTaskPlan({ id: toTaskPlanId(params.id), ...(body as object) }),
       timestamp: Date.now(),
     });
   }),

@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
   RecurrenceFrequency,
-  TaskInstanceStatus,
+  TaskOccurrenceStatus,
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
   TaskType,
   type TaskPlanOutcomeValue,
 } from '@memoflow/contracts/task';
-import { TaskTemplate } from '../aggregates/task-template';
-import { TaskTemplateId } from '../value-objects/task-template-id';
-import { TaskTemplateStatus } from '../value-objects/task-template-status';
+import { TaskPlan } from '../aggregates/task-plan';
+import { TaskPlanId } from '../value-objects/task-plan-id';
+import { TaskPlanStatus } from '../value-objects/task-plan-status';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createTaskRecurrenceDateAdapter } from '../aggregates/task-recurrence-date.adapter';
@@ -28,14 +28,14 @@ describe('Task vNext performance budgets', () => {
     const occurrenceCount = 20_000;
     const evaluator = new TaskPlanOutcomeEvaluator();
     const now = Date.now();
-    const template = TaskTemplate.load({
-      id: TaskTemplateId.generate(),
+    const template = TaskPlan.load({
+      id: TaskPlanId.generate(),
       identityId: IdentityId.generate(),
       title: 'Performance benchmark template',
       description: null,
       taskType: TaskType.Recurring,
       importance: ImportanceLevel.Moderate,
-      status: TaskTemplateStatus.Active,
+      status: TaskPlanStatus.Active,
       outcome: TaskPlanOutcome.Open,
       completionPolicy: TaskPlanCompletionPolicy.AllowCorrection,
       closedAt: null,
@@ -66,7 +66,7 @@ describe('Task vNext performance budgets', () => {
       version: 1,
     });
     const occurrences = Array.from({ length: occurrenceCount }, () => ({
-      status: TaskInstanceStatus.Completed,
+      status: TaskOccurrenceStatus.Completed,
       deletedAt: null,
     }));
 

@@ -23,7 +23,7 @@ test.describe('Planner owner-command acceptance', () => {
       template: { id: string };
       todayInstanceCreated: boolean;
     }>(
-      await page.request.post(`${API_CONFIG.API_PREFIX}/task-templates`, {
+      await page.request.post(`${API_CONFIG.API_PREFIX}/task-plans`, {
         data: {
           name: taskName,
           description: 'HARD-7103 Fixture J owner-command rollback',
@@ -65,7 +65,7 @@ test.describe('Planner owner-command acceptance', () => {
     expect(before).not.toBeNull();
 
     let reschedulePayload: unknown = null;
-    await page.route('**/api/v1/task-instances/*/reschedule', async (route) => {
+    await page.route('**/api/v1/task-occurrences/*/reschedule', async (route) => {
       reschedulePayload = route.request().postDataJSON();
       await route.fulfill({
         status: 409,
@@ -83,7 +83,7 @@ test.describe('Planner owner-command acceptance', () => {
     const requestPromise = page.waitForRequest(
       (request) =>
         request.method() === 'POST' &&
-        /\/api\/v1\/task-instances\/[^/]+\/reschedule$/.test(new URL(request.url()).pathname),
+        /\/api\/v1\/task-occurrences\/[^/]+\/reschedule$/.test(new URL(request.url()).pathname),
     );
 
     await page.mouse.move(before!.x + before!.width / 2, before!.y + before!.height / 2);

@@ -8,9 +8,9 @@ describe('mapTablesToInvalidationIntents (plan §3.3 pilot table mapping)', () =
     ]);
   });
 
-  it('maps task_templates → task-template projection all (lists/graphs/details)', () => {
+  it('maps task_templates → task-plan projection all (lists/graphs/details)', () => {
     expect(mapTablesToInvalidationIntents(['task_templates'], 'id-1')).toEqual([
-      { target: 'task-template', identityScope: 'id-1', source: 'powersync', projection: 'all' },
+      { target: 'task-plan', identityScope: 'id-1', source: 'powersync', projection: 'all' },
     ]);
   });
 
@@ -35,7 +35,7 @@ describe('mapTablesToInvalidationIntents (plan §3.3 pilot table mapping)', () =
     expect(intents.map((i) => `${i.target}:${i.projection ?? ''}`).sort()).toEqual([
       'governance:all',
       'notification:',
-      'task-template:all',
+      'task-plan:all',
     ]);
   });
 

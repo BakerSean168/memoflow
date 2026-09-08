@@ -1,47 +1,47 @@
 import type { Result } from '@memoflow/contracts/result';
 import type {
-  CreateTaskTemplateReq,
-  UpdateTaskTemplateReq,
+  CreateTaskPlanReq,
+  UpdateTaskPlanReq,
   GenerateInstancesReq,
   BindToGoalReq,
   AbandonTaskPlanReq,
-  CompleteTaskInstanceReq,
-  MarkTaskInstanceMissedReq,
-  SkipTaskInstanceReq,
+  CompleteTaskOccurrenceReq,
+  MarkTaskOccurrenceMissedReq,
+  SkipTaskOccurrenceReq,
   RescheduleTaskInput,
 } from '@memoflow/contracts/task';
-import type { TaskTemplateListParams } from './ports/task-template-api-client.port';
-import type { TaskTemplate } from '../domain-client/aggregates/task-template';
-import type { TaskInstance } from '../domain-client/aggregates/task-instance';
+import type { TaskPlanListParams } from './ports/task-plan-api-client.port';
+import type { TaskPlan } from '../domain-client/aggregates/task-plan';
+import type { TaskOccurrence } from '../domain-client/aggregates/task-occurrence';
 
 export interface TaskClientPort {
   // Task Template Operations
   createTemplate(
-    request: CreateTaskTemplateReq,
+    request: CreateTaskPlanReq,
   ): Promise<
-    Result<{ template: TaskTemplate; instanceCount: number; todayInstanceCreated: boolean }>
+    Result<{ template: TaskPlan; instanceCount: number; todayInstanceCreated: boolean }>
   >;
   listTemplates(
-    params?: TaskTemplateListParams,
-  ): Promise<Result<{ templates: TaskTemplate[]; total: number }>>;
-  getTemplate(id: string): Promise<Result<TaskTemplate>>;
-  updateTemplate(id: string, request: UpdateTaskTemplateReq): Promise<Result<TaskTemplate>>;
+    params?: TaskPlanListParams,
+  ): Promise<Result<{ templates: TaskPlan[]; total: number }>>;
+  getTemplate(id: string): Promise<Result<TaskPlan>>;
+  updateTemplate(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlan>>;
   deleteTemplate(id: string): Promise<Result<void>>;
-  activateTemplate(id: string): Promise<Result<TaskTemplate>>;
-  pauseTemplate(id: string): Promise<Result<TaskTemplate>>;
-  archiveTemplate(id: string): Promise<Result<TaskTemplate>>;
-  abandonPlan(id: string, request?: AbandonTaskPlanReq): Promise<Result<TaskTemplate>>;
+  activateTemplate(id: string): Promise<Result<TaskPlan>>;
+  pauseTemplate(id: string): Promise<Result<TaskPlan>>;
+  archiveTemplate(id: string): Promise<Result<TaskPlan>>;
+  abandonPlan(id: string, request?: AbandonTaskPlanReq): Promise<Result<TaskPlan>>;
   generateInstances(
     templateId: string,
     request: GenerateInstancesReq,
-  ): Promise<Result<TaskInstance[]>>;
+  ): Promise<Result<TaskOccurrence[]>>;
   getInstancesByDateRange(
     templateId: string,
     from: number,
     to: number,
-  ): Promise<Result<TaskInstance[]>>;
-  bindToGoal(templateId: string, request: BindToGoalReq): Promise<Result<TaskTemplate>>;
-  unbindFromGoal(templateId: string): Promise<Result<TaskTemplate>>;
+  ): Promise<Result<TaskOccurrence[]>>;
+  bindToGoal(templateId: string, request: BindToGoalReq): Promise<Result<TaskPlan>>;
+  unbindFromGoal(templateId: string): Promise<Result<TaskPlan>>;
 
   // Task Instance Operations
   listInstances(params?: {
@@ -49,17 +49,17 @@ export interface TaskClientPort {
     limit?: number;
     templateId?: string;
     status?: string;
-  }): Promise<Result<TaskInstance[]>>;
-  listInstancesByDateRange(from: number, to: number): Promise<Result<TaskInstance[]>>;
-  getInstance(id: string): Promise<Result<TaskInstance>>;
+  }): Promise<Result<TaskOccurrence[]>>;
+  listInstancesByDateRange(from: number, to: number): Promise<Result<TaskOccurrence[]>>;
+  getInstance(id: string): Promise<Result<TaskOccurrence>>;
   deleteInstance(id: string): Promise<Result<void>>;
-  startInstance(id: string): Promise<Result<TaskInstance>>;
-  completeInstance(id: string, request?: CompleteTaskInstanceReq): Promise<Result<TaskInstance>>;
-  uncompleteInstance(id: string): Promise<Result<TaskInstance>>;
-  skipInstance(id: string, request?: SkipTaskInstanceReq): Promise<Result<TaskInstance>>;
+  startInstance(id: string): Promise<Result<TaskOccurrence>>;
+  completeInstance(id: string, request?: CompleteTaskOccurrenceReq): Promise<Result<TaskOccurrence>>;
+  uncompleteInstance(id: string): Promise<Result<TaskOccurrence>>;
+  skipInstance(id: string, request?: SkipTaskOccurrenceReq): Promise<Result<TaskOccurrence>>;
   markInstanceMissed(
     id: string,
-    request?: MarkTaskInstanceMissedReq,
-  ): Promise<Result<TaskInstance>>;
-  rescheduleInstance(id: string, request: RescheduleTaskInput): Promise<Result<TaskInstance>>;
+    request?: MarkTaskOccurrenceMissedReq,
+  ): Promise<Result<TaskOccurrence>>;
+  rescheduleInstance(id: string, request: RescheduleTaskInput): Promise<Result<TaskOccurrence>>;
 }

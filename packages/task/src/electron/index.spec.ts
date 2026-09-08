@@ -56,28 +56,28 @@ function createApiStub(): TaskApplicationPort {
   const templateFn = vi.fn(() => ok([] as never));
   const instanceFn = vi.fn(() => ok([] as never));
   return {
-    createTaskTemplate: noop,
-    updateTaskTemplate: noop,
-    activateTaskTemplate: noop,
-    pauseTaskTemplate: noop,
-    archiveTaskTemplate: noop,
-    deleteTaskTemplate: noop,
-    generateTaskInstances: noop,
+    createTaskPlan: noop,
+    updateTaskPlan: noop,
+    activateTaskPlan: noop,
+    pauseTaskPlan: noop,
+    archiveTaskPlan: noop,
+    deleteTaskPlan: noop,
+    generateTaskOccurrences: noop,
     bindTaskToGoal: noop,
     unbindTaskFromGoal: noop,
-    getTaskTemplate: templateFn,
-    listTaskTemplates: templateFn,
-    completeTaskInstance: instanceFn,
-    uncompleteTaskInstance: instanceFn,
-    skipTaskInstance: instanceFn,
-    startTaskInstance: instanceFn,
-    deleteTaskInstance: instanceFn,
-    markTaskInstanceMissed: instanceFn,
-    getTaskInstance: instanceFn,
-    listTaskInstancesByAccount: instanceFn,
-    listTaskInstancesByTemplate: instanceFn,
-    listTaskInstancesByStatus: instanceFn,
-    getTaskInstancesByDateRange: instanceFn,
+    getTaskPlan: templateFn,
+    listTaskPlans: templateFn,
+    completeTaskOccurrence: instanceFn,
+    uncompleteTaskOccurrence: instanceFn,
+    skipTaskOccurrence: instanceFn,
+    startTaskOccurrence: instanceFn,
+    deleteTaskOccurrence: instanceFn,
+    markTaskOccurrenceMissed: instanceFn,
+    getTaskOccurrence: instanceFn,
+    listTaskOccurrencesByAccount: instanceFn,
+    listTaskOccurrencesByTemplate: instanceFn,
+    listTaskOccurrencesByStatus: instanceFn,
+    getTaskOccurrencesByDateRange: instanceFn,
   } as TaskApplicationPort;
 }
 
@@ -161,11 +161,11 @@ describe('createTaskElectronModule IPC lifecycle', () => {
 
     const listResult = await registered(TaskChannels.TEMPLATE_LIST)(undefined, {});
     expect(listResult).toMatchObject({ ok: true });
-    expect(fake.api.listTaskTemplates).toHaveBeenCalledTimes(1);
+    expect(fake.api.listTaskPlans).toHaveBeenCalledTimes(1);
 
     const instanceResult = await registered(TaskChannels.INSTANCE_LIST)(undefined, {});
     expect(instanceResult).toMatchObject({ ok: true });
-    expect(fake.api.listTaskInstancesByAccount).toHaveBeenCalledTimes(1);
+    expect(fake.api.listTaskOccurrencesByAccount).toHaveBeenCalledTimes(1);
   });
 
   it('destroy removes all channels and disposes exactly once (second call no-ops)', async () => {

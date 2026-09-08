@@ -2,7 +2,7 @@
  * Dual registry suite (elegance E3b tax cut).
  * Merged 13 dual-retired surface locks from this directory.
  * Behavior/assertions preserved; individual *-dual.surface.spec.ts removed.
- * Sources: recurrence-rule-dual.surface.spec.ts, task-goal-binding-dual.surface.spec.ts, task-goal-binding-reminder-dual.surface.spec.ts, task-instance-schedule-task-client-dto-dual.surface.spec.ts, task-instance-range-op-res-dual.surface.spec.ts, task-instance-res-dual.surface.spec.ts, task-time-config-dual.surface.spec.ts
+ * Sources: recurrence-rule-dual.surface.spec.ts, task-goal-binding-dual.surface.spec.ts, task-goal-binding-reminder-dual.surface.spec.ts, task-occurrence-schedule-task-client-dto-dual.surface.spec.ts, task-occurrence-range-op-res-dual.surface.spec.ts, task-occurrence-res-dual.surface.spec.ts, task-time-config-dual.surface.spec.ts
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
   describe('task recurrence-rule dual retired (residual 743)', () => {
     const apiDir = __dirname;
     const vo = readFileSync(resolve(apiDir, '../value-objects/recurrence-rule.ts'), 'utf8');
-    const templateDto = readFileSync(resolve(apiDir, 'task-template.dto.ts'), 'utf8');
+    const templateDto = readFileSync(resolve(apiDir, 'task-plan.dto.ts'), 'utf8');
 
     it('exports RecurrenceConfigSchema as sole shape from VO module', () => {
       expect(vo).toContain('Residual 743');
@@ -33,7 +33,7 @@ import { describe, expect, it } from 'vitest';
       expect(vo).toContain('export interface RecurrenceRule {');
     });
 
-    it('task-template.dto re-exports VO-owned schema (no local dual body)', () => {
+    it('task-plan.dto re-exports VO-owned schema (no local dual body)', () => {
       expect(templateDto).toContain('Residual 743');
       expect(templateDto).toContain("from '../value-objects/recurrence-rule'");
       expect(templateDto).toContain('export { RecurrenceConfigSchema }');
@@ -50,17 +50,17 @@ import { describe, expect, it } from 'vitest';
    * Residual 667: bind-to-goal request dual body retired.
    * Live bind-goal OpenAPI/controller parse TaskGoalBindingSchema only.
    * Residual 739: TaskGoalBindingSchema ownership moved to value-objects;
-   * task-template.dto re-exports the VO-owned schema (no local dual body).
+   * task-plan.dto re-exports the VO-owned schema (no local dual body).
    */
   describe('task bind-to-goal request dual retired (residual 667)', () => {
     const apiDir = __dirname;
-    const dto = readFileSync(resolve(apiDir, 'task-template.dto.ts'), 'utf8');
+    const dto = readFileSync(resolve(apiDir, 'task-plan.dto.ts'), 'utf8');
     const routes = readFileSync(
-      resolve(apiDir, '../../../../../task/src/api/routes/task-template.routes.ts'),
+      resolve(apiDir, '../../../../../task/src/api/routes/task-plan.routes.ts'),
       'utf8',
     );
     const controller = readFileSync(
-      resolve(apiDir, '../../../../../task/src/server/transport/task-template.controller.ts'),
+      resolve(apiDir, '../../../../../task/src/server/transport/task-plan.controller.ts'),
       'utf8',
     );
 
@@ -95,7 +95,7 @@ import { describe, expect, it } from 'vitest';
       resolve(apiDir, '../value-objects/task-reminder-config.ts'),
       'utf8',
     );
-    const templateDto = readFileSync(resolve(apiDir, 'task-template.dto.ts'), 'utf8');
+    const templateDto = readFileSync(resolve(apiDir, 'task-plan.dto.ts'), 'utf8');
 
     it('exports one ADR-056 link schema with nested contribution and the reminder schema', () => {
       expect(binding).toContain('export const TaskGoalLinkSchema = z.object({');
@@ -118,7 +118,7 @@ import { describe, expect, it } from 'vitest';
       expect(reminder).not.toMatch(/export interface TaskReminderConfigDTO\b/);
     });
 
-    it('task-template.dto re-exports VO-owned schemas (no local dual bodies)', () => {
+    it('task-plan.dto re-exports VO-owned schemas (no local dual bodies)', () => {
       expect(templateDto).toContain('Residual 739');
       expect(templateDto).toContain("from '../value-objects/task-goal-binding'");
       expect(templateDto).toContain("from '../value-objects/task-reminder-config'");
@@ -135,18 +135,18 @@ import { describe, expect, it } from 'vitest';
 }
 
 
-// --- merged from task-instance-schedule-task-client-dto-dual.surface.spec.ts ---
+// --- merged from task-occurrence-schedule-task-client-dto-dual.surface.spec.ts ---
 {
   /**
-   * Residual 831: TaskInstanceClientDTO / ScheduleTaskClientDTO
+   * Residual 831: TaskOccurrenceClientDTO / ScheduleTaskClientDTO
    * dual bodies retired. Sole *ResponseSchema + z.infer.
-   * TaskFolder transport contracts are retired; TaskTemplateHistory remains independently covered.
+   * TaskFolder transport contracts are retired; TaskPlanHistory remains independently covered.
    */
   describe('task/schedule client dto duals retired (residual 831)', () => {
     const taskApi = __dirname;
     const scheduleApi = resolve(taskApi, '../../schedule/api');
     const instance = readFileSync(
-      resolve(taskApi, '../aggregates/task-instance-client.ts'),
+      resolve(taskApi, '../aggregates/task-occurrence-client.ts'),
       'utf8',
     );
     const scheduleTask = readFileSync(
@@ -157,20 +157,20 @@ import { describe, expect, it } from 'vitest';
     const scheduleSchemas = readFileSync(resolve(scheduleApi, 'response-schemas.ts'), 'utf8');
 
 
-    it('owns TaskInstanceClientDTO as z.infer of TaskInstanceResponseSchema', () => {
+    it('owns TaskOccurrenceClientDTO as z.infer of TaskOccurrenceResponseSchema', () => {
       expect(instance).toContain('Residual 831');
       expect(instance).toContain(
-        'export type TaskInstanceClientDTO = z.infer<typeof TaskInstanceResponseSchema>',
+        'export type TaskOccurrenceClientDTO = z.infer<typeof TaskOccurrenceResponseSchema>',
       );
-      expect(instance).not.toMatch(/export interface TaskInstanceClientDTO\b/);
-      expect(taskSchemas).toContain('export const TaskInstanceResponseSchema = z.object({');
+      expect(instance).not.toMatch(/export interface TaskOccurrenceClientDTO\b/);
+      expect(taskSchemas).toContain('export const TaskOccurrenceResponseSchema = z.object({');
       expect(taskSchemas).toContain('timeConfig: TaskTimeConfigSchema');
       const instRoutes = readFileSync(
-        resolve(taskApi, '../../../../../task/src/api/routes/task-instance.routes.ts'),
+        resolve(taskApi, '../../../../../task/src/api/routes/task-occurrence.routes.ts'),
         'utf8',
       );
-      expect(instRoutes).toContain('TaskInstanceResponseSchema');
-      expect(instRoutes).toContain("successResponse(TaskInstanceResponseSchema, '获取成功')");
+      expect(instRoutes).toContain('TaskOccurrenceResponseSchema');
+      expect(instRoutes).toContain("successResponse(TaskOccurrenceResponseSchema, '获取成功')");
     });
 
     it('owns ScheduleTaskClientDTO as z.infer of ScheduleTaskResponseSchema', () => {
@@ -194,42 +194,42 @@ import { describe, expect, it } from 'vitest';
   });
 }
 
-// --- merged from task-instance-range-op-res-dual.surface.spec.ts ---
+// --- merged from task-occurrence-range-op-res-dual.surface.spec.ts ---
 {
   /**
-   * Residual 789: GetTaskInstancesByRangeRes / TaskInstanceOperationRes dual bodies retired.
-   * Sole *ResSchema + z.infer nesting TaskInstanceResponseSchema.
+   * Residual 789: GetTaskOccurrencesByRangeRes / TaskOccurrenceOperationRes dual bodies retired.
+   * Sole *ResSchema + z.infer nesting TaskOccurrenceResponseSchema.
    */
   describe('task instance range/op res duals retired (residual 789)', () => {
     const apiDir = __dirname;
-    const dto = readFileSync(resolve(apiDir, 'task-instance.dto.ts'), 'utf8');
+    const dto = readFileSync(resolve(apiDir, 'task-occurrence.dto.ts'), 'utf8');
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
 
     it('owns by-range and operation ResSchema + z.infer aliases', () => {
       expect(dto).toContain('Residual 789');
-      expect(dto).toContain('export const GetTaskInstancesByRangeResSchema = z.object({');
+      expect(dto).toContain('export const GetTaskOccurrencesByRangeResSchema = z.object({');
       expect(dto).toContain(
-        'export type GetTaskInstancesByRangeRes = z.infer<typeof GetTaskInstancesByRangeResSchema>',
+        'export type GetTaskOccurrencesByRangeRes = z.infer<typeof GetTaskOccurrencesByRangeResSchema>',
       );
-      expect(dto).toContain('export const TaskInstanceOperationResSchema = z.object({');
+      expect(dto).toContain('export const TaskOccurrenceOperationResSchema = z.object({');
       expect(dto).toContain(
-        'export type TaskInstanceOperationRes = z.infer<typeof TaskInstanceOperationResSchema>',
+        'export type TaskOccurrenceOperationRes = z.infer<typeof TaskOccurrenceOperationResSchema>',
       );
-      expect(dto).toContain('data: z.array(TaskInstanceResponseSchema)');
-      expect(dto).toContain('instance: TaskInstanceResponseSchema');
-      expect(dto).not.toMatch(/export interface GetTaskInstancesByRangeRes\b/);
-      expect(dto).not.toMatch(/export interface TaskInstanceOperationRes\b/);
+      expect(dto).toContain('data: z.array(TaskOccurrenceResponseSchema)');
+      expect(dto).toContain('instance: TaskOccurrenceResponseSchema');
+      expect(dto).not.toMatch(/export interface GetTaskOccurrencesByRangeRes\b/);
+      expect(dto).not.toMatch(/export interface TaskOccurrenceOperationRes\b/);
     });
 
-    it('nests TaskInstanceResponseSchema from response-schemas', () => {
-      expect(responseSchemas).toContain('export const TaskInstanceResponseSchema = z.object({');
+    it('nests TaskOccurrenceResponseSchema from response-schemas', () => {
+      expect(responseSchemas).toContain('export const TaskOccurrenceResponseSchema = z.object({');
       expect(dto).toContain("from './response-schemas'");
-      expect(dto).toContain('TaskInstanceResponseSchema');
+      expect(dto).toContain('TaskOccurrenceResponseSchema');
     });
   });
 }
 
-// --- merged from task-instance-res-dual.surface.spec.ts ---
+// --- merged from task-occurrence-res-dual.surface.spec.ts ---
 {
   /**
    * Residual 262: task contracts drop identity dual response aliases and
@@ -237,36 +237,36 @@ import { describe, expect, it } from 'vitest';
    */
   describe('task instance Res dual single-track surface', () => {
     const apiDir = __dirname;
-    const instanceDto = readFileSync(resolve(apiDir, 'task-instance.dto.ts'), 'utf8');
+    const instanceDto = readFileSync(resolve(apiDir, 'task-occurrence.dto.ts'), 'utf8');
     const rpcMap = readFileSync(resolve(apiDir, '../protocol/task-rpc-map.ts'), 'utf8');
     const eventsIndex = readFileSync(resolve(apiDir, '../domain/events/index.ts'), 'utf8');
 
-    it('does not dual-alias Complete/Skip TaskInstanceRes', () => {
-      expect(instanceDto).not.toMatch(/export type CompleteTaskInstanceRes\s*=/);
-      expect(instanceDto).not.toMatch(/export type SkipTaskInstanceRes\s*=/);
+    it('does not dual-alias Complete/Skip TaskOccurrenceRes', () => {
+      expect(instanceDto).not.toMatch(/export type CompleteTaskOccurrenceRes\s*=/);
+      expect(instanceDto).not.toMatch(/export type SkipTaskOccurrenceRes\s*=/);
       // Soft residual 789: operation Res dual retired — ResSchema + z.infer only.
       expect(instanceDto).toContain('Residual 789');
-      expect(instanceDto).toContain('export const TaskInstanceOperationResSchema = z.object({');
+      expect(instanceDto).toContain('export const TaskOccurrenceOperationResSchema = z.object({');
       expect(instanceDto).toContain(
-        'export type TaskInstanceOperationRes = z.infer<typeof TaskInstanceOperationResSchema>',
+        'export type TaskOccurrenceOperationRes = z.infer<typeof TaskOccurrenceOperationResSchema>',
       );
-      expect(instanceDto).not.toMatch(/export interface TaskInstanceOperationRes\b/);
+      expect(instanceDto).not.toMatch(/export interface TaskOccurrenceOperationRes\b/);
     });
 
-    it('rpc map uses shared TaskInstanceResponse alias for complete/skip (Phase 4)', () => {
+    it('rpc map uses shared TaskOccurrenceResponse alias for complete/skip (Phase 4)', () => {
       // Phase 4: the RPC map uses channel-aligned keys and the exported
       // inferred response alias (ADR-047: maps import inferred types from
       // `../api` only) instead of kebab keys + OperationRes or inline z.infer.
       expect(rpcMap).toMatch(
-        /'task:instance:complete':\s*\[\s*CompleteTaskInstanceInvocation,\s*TaskInstanceResponse/,
+        /'task:instance:complete':\s*\[\s*CompleteTaskOccurrenceInvocation,\s*TaskOccurrenceResponse/,
       );
       expect(rpcMap).toMatch(
-        /'task:instance:skip':\s*\[\s*SkipTaskInstanceInvocation,\s*TaskInstanceResponse/,
+        /'task:instance:skip':\s*\[\s*SkipTaskOccurrenceInvocation,\s*TaskOccurrenceResponse/,
       );
-      expect(rpcMap).toContain('TaskInstanceResponse');
+      expect(rpcMap).toContain('TaskOccurrenceResponse');
       expect(rpcMap).not.toContain('z.infer');
-      expect(rpcMap).not.toContain('CompleteTaskInstanceRes');
-      expect(rpcMap).not.toContain('SkipTaskInstanceRes');
+      expect(rpcMap).not.toContain('CompleteTaskOccurrenceRes');
+      expect(rpcMap).not.toContain('SkipTaskOccurrenceRes');
     });
 
     it('does not dual-export TaskDomainEvent = TaskCreatedEvent', () => {
@@ -283,13 +283,13 @@ import { describe, expect, it } from 'vitest';
    * TaskTimeConfigDTO reuses TaskTimeConfigSchema only.
    * Domain TaskTimeConfig (Instant startDate + startDay Ymd) — ADR-037; schema is transfer sole.
    *
-   * Soft residual 831: TaskInstanceClientDTO dual retired via TaskInstanceResponseSchema
-   * (see task-instance-dependency-schedule-task-client-dto-dual surface).
+   * Soft residual 831: TaskOccurrenceClientDTO dual retired via TaskOccurrenceResponseSchema
+   * (see task-occurrence-dependency-schedule-task-client-dto-dual surface).
    */
   describe('task time-config dual retired (residual 747)', () => {
     const apiDir = __dirname;
     const vo = readFileSync(resolve(apiDir, '../value-objects/task-time-config.ts'), 'utf8');
-    const templateDto = readFileSync(resolve(apiDir, 'task-template.dto.ts'), 'utf8');
+    const templateDto = readFileSync(resolve(apiDir, 'task-plan.dto.ts'), 'utf8');
 
     it('exports TaskTimeConfigSchema as sole shape from VO module', () => {
       expect(vo).toContain('Residual 747');
@@ -303,7 +303,7 @@ import { describe, expect, it } from 'vitest';
       expect(vo).toContain('startDate: Instant | null');
     });
 
-    it('task-template.dto re-exports VO-owned schema (no local dual body)', () => {
+    it('task-plan.dto re-exports VO-owned schema (no local dual body)', () => {
       expect(templateDto).toContain('Residual 747');
       expect(templateDto).toContain("from '../value-objects/task-time-config'");
       expect(templateDto).toContain('export { TaskTimeConfigSchema }');

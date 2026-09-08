@@ -6,7 +6,7 @@ export type GoalWorkflowEntityKind = 'goal' | 'key_result' | 'task_template' | '
 const prefixByKind: Readonly<Record<GoalWorkflowEntityKind, string>> = {
   goal: ID_PREFIXES.GoalId,
   key_result: ID_PREFIXES.KeyResultId,
-  task_template: ID_PREFIXES.TaskTemplateId,
+  task_template: ID_PREFIXES.TaskPlanId,
   reminder: ID_PREFIXES.ReminderTemplateId,
 };
 
@@ -50,7 +50,7 @@ export function goalWorkflowEntityId(input: {
 export type TaskWorkflowEntityKind = 'task_template';
 
 const taskPrefixByKind: Readonly<Record<TaskWorkflowEntityKind, string>> = {
-  task_template: ID_PREFIXES.TaskTemplateId,
+  task_template: ID_PREFIXES.TaskPlanId,
 };
 
 /**

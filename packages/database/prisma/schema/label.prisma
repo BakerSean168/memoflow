@@ -38,14 +38,14 @@ model GoalLabel {
 
 model TaskLabel {
   identityId    String @map("identity_id")
-  taskTemplateId String @map("task_template_id")
+  taskPlanId String @map("task_template_id")
   labelId       String @map("label_id")
 
   account      Account      @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  taskTemplate TaskTemplate @relation(fields: [taskTemplateId, identityId], references: [id, identityId], onDelete: Cascade)
+  taskPlan TaskPlan @relation(fields: [taskPlanId, identityId], references: [id, identityId], onDelete: Cascade)
   label        Label        @relation(fields: [labelId, identityId], references: [id, identityId], onDelete: Cascade)
 
-  @@id([identityId, taskTemplateId, labelId])
-  @@index([identityId, labelId, taskTemplateId])
+  @@id([identityId, taskPlanId, labelId])
+  @@index([identityId, labelId, taskPlanId])
   @@map("task_labels")
 }

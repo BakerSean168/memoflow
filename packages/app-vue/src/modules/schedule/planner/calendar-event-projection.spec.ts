@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import type { GoalClientDTO } from '@memoflow/contracts/goal';
 import type { CalendarEntryClientDTO, CalendarEventProjection } from '@memoflow/contracts/schedule';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import { asInstant, asYmd, type Instant, type Ymd } from '@memoflow/time';
 import {
   projectCalendarEntry,
@@ -45,10 +45,10 @@ function calendarEntry(): CalendarEntryClientDTO {
   } as CalendarEntryClientDTO;
 }
 
-function taskOccurrence(overrides: Partial<TaskInstanceClientDTO> = {}): TaskInstanceClientDTO {
+function taskOccurrence(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
   return {
     id: 'task-occurrence-1',
-    templateId: 'task-template-1',
+    templateId: 'task-plan-1',
     identityId: 'identity-1',
     instanceDate: Number(taskDay),
     timeConfig: {
@@ -67,13 +67,13 @@ function taskOccurrence(overrides: Partial<TaskInstanceClientDTO> = {}): TaskIns
     updatedAt: Number(taskDay),
     deletedAt: null,
     ...overrides,
-  } as TaskInstanceClientDTO;
+  } as TaskOccurrenceClientDTO;
 }
 
-const taskTemplate = {
-  id: 'task-template-1',
+const taskPlan = {
+  id: 'task-plan-1',
   name: 'Review Core vNext PR',
-} as TaskTemplateClientDTO;
+} as TaskPlanClientDTO;
 
 function goal(): GoalClientDTO {
   return {
@@ -133,7 +133,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
   });
 
   it('projects TaskOccurrence time semantics without leaking Date or Scheduler types', () => {
-    const allDay = projectTaskOccurrence(taskOccurrence(), taskTemplate, time)!;
+    const allDay = projectTaskOccurrence(taskOccurrence(), taskPlan, time)!;
     expect(allDay).toMatchObject({
       sourceType: 'task',
       sourceId: 'task-occurrence-1',
@@ -155,7 +155,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
           timeRange: { start: 14 * 60, end: 15 * 60 + 30 },
         },
       }),
-      taskTemplate,
+      taskPlan,
       time,
     )!;
     if (timed.allDay) throw new Error('Expected timed task');
@@ -198,7 +198,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
     const input = {
       calendarEntries: [calendarEntry()],
       taskOccurrences: [taskOccurrence()],
-      taskTemplates: [taskTemplate],
+      taskPlans: [taskPlan],
       goals: [goal()],
       routineOccurrences: [routineOccurrence],
       time,
