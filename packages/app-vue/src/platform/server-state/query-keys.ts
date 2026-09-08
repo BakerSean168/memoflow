@@ -79,15 +79,15 @@ export const notificationQueryKeys = {
  * Canonical, transport-safe Task template list query used inside the cache key.
  * 进入 cache key 的规范化任务模板列表查询（仅 transport 接受的 primitive 字段）。
  *
- * Field order is frozen: `page/limit/status/goalId/tags`.
- * 字段顺序冻结为：`page/limit/status/goalId/tags`。
+ * Field order is frozen: `page/limit/status/goalId/labelIdsAll`.
+ * 字段顺序冻结为：`page/limit/status/goalId/labelIdsAll`。
  */
 export interface CanonicalTaskTemplateListQuery {
   page: number;
   limit: number;
   status?: string[];
   goalId?: string;
-  tags?: string[];
+  labelIdsAll?: string[];
 }
 
 /** Input accepted by the Task canonicalizer (may omit defaults/undefined). */
@@ -105,20 +105,20 @@ function normalizeStringArray(value: string[] | undefined): string[] | undefined
 
 /**
  * Materialize a Task template list query into its canonical, key-safe form.
- * 把任务模板列表查询规范化为键安全形态：补齐分页默认值、规范化 status/tags 数组、删除空字段。
+ * 把任务模板列表查询规范化为键安全形态：补齐分页默认值、规范化 status/labelIdsAll 数组、删除空字段。
  */
 export function canonicalizeTaskTemplateListQuery(
   query?: TaskTemplateListQueryInput,
 ): CanonicalTaskTemplateListQuery {
-  const { page, limit, status, goalId, tags } = query ?? {};
+  const { page, limit, status, goalId, labelIdsAll } = query ?? {};
   const normalizedStatus = normalizeStringArray(status);
-  const normalizedTags = normalizeStringArray(tags);
+  const normalizedLabelIds = normalizeStringArray(labelIdsAll);
   return {
     page: page ?? 1,
     limit: limit ?? 20,
     ...(normalizedStatus !== undefined ? { status: normalizedStatus } : {}),
     ...(goalId !== undefined ? { goalId } : {}),
-    ...(normalizedTags !== undefined ? { tags: normalizedTags } : {}),
+    ...(normalizedLabelIds !== undefined ? { labelIdsAll: normalizedLabelIds } : {}),
   };
 }
 

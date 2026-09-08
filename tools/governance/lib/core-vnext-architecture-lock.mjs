@@ -51,6 +51,10 @@ export const UI_SCHEDULER_INTERNAL_IMPORT_PATTERN =
   /['"`](@memoflow\/scheduler\/(?:server|scheduling|electron)(?:\/[a-zA-Z0-9_.\/-]*)?)['"`]/;
 export const UI_SCHEDULED_INVOCATION_MUTATION_PATTERN =
   /\b(ScheduledInvocation|SchedulingPort|createScheduleTask|updateScheduleTask|deleteScheduleTask|pauseScheduleTask|resumeScheduleTask|cancelScheduleTask|completeScheduleTask)\b|\bschedulerService\.(?:create|update|delete|pause|resume|cancel|complete)\b/;
+export const TASK_LEGACY_CLASSIFICATION_PATTERN =
+  /\b(?:template|dto|vm|task)\.tags\b|\btask-tag-filter\b|\bfindByTags\b|\bupdateTags\b|\bupdateColor\b/;
+export const TASK_LEGACY_CONTRACT_FIELD_PATTERN = /\b(?:tags|color)\??\s*:/;
+export const TASK_LEGACY_PRISMA_FIELD_PATTERN = /^\s*(?:tags|color)\s+String\??(?:\s|$)/m;
 
 export function isTestLikePath(relPath) {
   return /(?:^|\/)(?:__tests__|__mocks__|test|tests|e2e|stories)(?:\/|$)/.test(relPath)
@@ -213,6 +217,50 @@ export function findCoreVnextArchitectureLockViolations(files) {
         'ui-scheduled-invocation-mutation',
       );
     }
+
+    // ADR-054: Task classification is single-track Shared Label. These locks
+    // intentionally target only Task-owned product/contract files so Reminder,
+    // Governance and Scheduler metadata may keep their unrelated tag/color semantics.
+    if (relPath.startsWith('packages/task/src/')
+      || relPath.startsWith('packages/app-vue/src/modules/task/')
+      || relPath.startsWith('packages/app-react/src/screens/Task')
+      || relPath === 'packages/app-react/src/hooks/useTaskTemplates.ts') {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        TASK_LEGACY_CLASSIFICATION_PATTERN,
+        'task-legacy-classification',
+      );
+    }
+    if (relPath === 'packages/contracts/src/modules/task/api/task-template.dto.ts'
+      || relPath === 'packages/task/src/server/domain/aggregates/task-template.state.ts') {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        TASK_LEGACY_CONTRACT_FIELD_PATTERN,
+        'task-legacy-classification',
+      );
+    }
+    if (relPath === 'packages/contracts/src/modules/ai/api/ai-task-create-workflow.dto.ts') {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        /\btags\s*:\s*z\./,
+        'task-legacy-classification',
+      );
+    }
+    if (relPath === 'packages/database/prisma/schema/task.prisma') {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        TASK_LEGACY_PRISMA_FIELD_PATTERN,
+        'task-legacy-classification',
+      );
+    }
   }
 
   // Canonical Notification path is a positive lock, not merely absence of the
@@ -261,6 +309,7 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
     'contracts-third-party-time-dto': 'Contracts must not expose third-party recurrence/calendar DTO types',
     'ui-scheduler-internal-import': 'UI may use read-only scheduler/client diagnostics, never Scheduler internals',
     'ui-scheduled-invocation-mutation': 'UI must not mutate ScheduledInvocation/ScheduleTask worker state directly',
+    'task-legacy-classification': 'Task classification must use Shared Label; legacy string tags/custom Task color are forbidden',
   };
   return `${file}:${line}: ${messages[kind] ?? kind} [${text}]`;
 }

@@ -4,47 +4,48 @@
   "shards": [
     {
       "shard": 1,
-      "estimatedDurationMs": 253478,
+      "estimatedDurationMs": 317877,
       "specs": [
-        "ai/goal-workflow.spec.ts",
-        "user-settings/persistence.spec.ts",
-        "authentication/auth-login.spec.ts",
-        "authentication/auth-page-contract.spec.ts",
-        "authentication/auth-register.spec.ts"
-      ]
-    },
-    {
-      "shard": 2,
-      "estimatedDurationMs": 254607,
-      "specs": [
-        "user-settings/data-portability.spec.ts",
-        "notification/notification-center.spec.ts",
-        "authentication/auth-flow.spec.ts",
-        "notification/reminder-notification-loop.spec.ts",
-        "task/task-completion-loop.spec.ts"
-      ]
-    },
-    {
-      "shard": 3,
-      "estimatedDurationMs": 257794,
-      "specs": [
-        "dashboard/dashboard-overview.spec.ts",
-        "goal/goal-crud.spec.ts",
+        "schedule/planner-task-revert.spec.ts",
         "schedule/schedule-calendar.spec.ts",
-        "ai/multi-engine-host.spec.ts",
+        "notification/reminder-notification-loop.spec.ts",
         "note/legacy-note-mutation-boundary.spec.ts"
       ]
     },
     {
-      "shard": 4,
-      "estimatedDurationMs": 254664,
+      "shard": 2,
+      "estimatedDurationMs": 317296,
       "specs": [
-        "reminder/reminder-template-crud.spec.ts",
-        "task/task-template-crud.spec.ts",
+        "ai/goal-workflow.spec.ts",
+        "goal/goal-crud.spec.ts",
         "user-settings/notifications.spec.ts",
+        "ai/multi-engine-host.spec.ts",
+        "task/task-completion-loop.spec.ts",
+        "note/note-workspace.spec.ts"
+      ]
+    },
+    {
+      "shard": 3,
+      "estimatedDurationMs": 310305,
+      "specs": [
+        "user-settings/data-portability.spec.ts",
+        "task/task-template-crud.spec.ts",
+        "user-settings/persistence.spec.ts",
+        "authentication/auth-flow.spec.ts",
         "authentication/auth-password.spec.ts",
-        "note/note-workspace.spec.ts",
         "authentication/auth-oauth.spec.ts"
+      ]
+    },
+    {
+      "shard": 4,
+      "estimatedDurationMs": 315065,
+      "specs": [
+        "dashboard/dashboard-overview.spec.ts",
+        "reminder/reminder-template-crud.spec.ts",
+        "notification/notification-center.spec.ts",
+        "authentication/auth-login.spec.ts",
+        "authentication/auth-page-contract.spec.ts",
+        "authentication/auth-register.spec.ts"
       ]
     }
   ]

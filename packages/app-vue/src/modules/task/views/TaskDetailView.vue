@@ -94,8 +94,10 @@
           <p v-if="viewModel.description" class="mt-4 text-sm leading-6 text-muted-foreground">
             {{ viewModel.description }}
           </p>
-          <div v-if="viewModel.tags?.length" class="mt-4 flex flex-wrap gap-1.5">
-            <Badge v-for="tag in viewModel.tags" :key="tag" variant="outline">{{ tag }}</Badge>
+          <div v-if="viewModel.labels?.length" class="mt-4 flex flex-wrap gap-1.5">
+            <Badge v-for="label in viewModel.labels" :key="label.id" variant="outline">
+              {{ label.name }}
+            </Badge>
           </div>
         </article>
 
@@ -355,8 +357,7 @@ async function saveEdit(vm: TaskTemplateViewModel) {
     recurrenceRule: (vm.recurrenceRule as unknown as RecurrenceRuleDTO) ?? null,
     reminderConfig: (vm.reminderConfig as never) ?? null,
     importance: (vm.importance as ImportanceLevel) ?? ImportanceLevel.Moderate,
-    tags: vm.tags ?? [],
-    color: vm.color ?? null,
+    labelIds: vm.labelIds ?? vm.labels?.map((label) => label.id) ?? [],
     goalBinding: goalBinding(vm),
   });
   if (result) {

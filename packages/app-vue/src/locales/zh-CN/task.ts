@@ -57,8 +57,8 @@ export default {
     "filter": {
       "status": "按发生项状态筛选",
       "allStatuses": "全部状态",
-      "tag": "按标签筛选",
-      "allTags": "全部标签",
+      "label": "按标签筛选",
+      "allLabels": "全部标签",
       "goal": "按 Goal 绑定筛选",
       "allGoals": "全部 Goal 绑定",
       "goalLinked": "已绑定 Goal",
@@ -91,7 +91,6 @@ export default {
     "timeType": "时间类型",
     "timeValue": "时间值",
     "description": "描述",
-    "tags": "标签",
     "goalBinding": "目标贡献",
     "linkedGoal": "关联目标",
     "keyResult": "关键结果",
@@ -332,13 +331,6 @@ export default {
       "maxValue": "增量值不能超过1000"
     }
   },
-  "schedulingPolicy": {
-    "title": "调度策略",
-    "alertDescription": "调度策略用于控制任务在日历视图中的显示方式和执行规则。",
-    "alertMessage": "高级调度策略功能即将推出，敬请期待。",
-    "label": "标签",
-    "tagPlaceholder": "按回车键添加新标签"
-  },
   "metadata": {
     "title": "任务属性",
     "taskType": "任务类型",
@@ -357,27 +349,12 @@ export default {
     "importanceLowSub": "可延后处理",
     "importanceMinimal": "极低",
     "importanceMinimalSub": "空闲时处理",
-    "colorMark": "颜色标记",
-    "selectColor": "选择颜色",
-    "clearColor": "清除颜色",
-    "tags": "任务标签",
-    "tagPlaceholder": "按回车键添加新标签",
-    "tagWork": "工作",
-    "tagPersonal": "个人",
-    "tagStudy": "学习",
-    "tagHealth": "健康",
-    "tagFinance": "财务",
-    "tagSocial": "社交",
-    "tagCreative": "创意",
-    "tagTravel": "旅行",
-    "tagHome": "家务",
-    "tagShopping": "购物",
-    "tagExercise": "运动",
-    "tagReading": "阅读",
-    "tagMeeting": "会议",
-    "tagDeadline": "截止日期",
-    "tagUrgent": "紧急",
-    "tagReview": "复盘"
+    "labels": "标签",
+    "labelsPlaceholder": "添加标签",
+    "searchLabels": "搜索标签…",
+    "noLabels": "暂无标签",
+    "createLabel": "创建标签",
+    "labelCreateFailed": "创建标签失败"
   },
   "weekday": {
     "title": "选择星期",

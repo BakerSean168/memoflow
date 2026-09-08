@@ -33,11 +33,11 @@ describe('PrismaTaskBindingReadPort (W4 P2-3)', () => {
 
     await prisma.taskTemplate.createMany({
       data: [
-        { id: `tpl-a1`, identityId: identityA, name: 'A1', status: 'Active', tags: '[]', goalId: goalA, createdAt: now, updatedAt: now },
-        { id: `tpl-a2`, identityId: identityA, name: 'A2', status: 'Active', tags: '[]', goalId: goalA, createdAt: now, updatedAt: now },
-        { id: `tpl-a3`, identityId: identityA, name: 'A3', status: 'Active', tags: '[]', goalId: goalB, createdAt: now, updatedAt: now },
-        { id: `tpl-a4`, identityId: identityA, name: 'A4 (soft-deleted)', status: 'Archived', tags: '[]', goalId: goalA, createdAt: now, updatedAt: now, deletedAt: new Date(now.getTime() + 1000) },
-        { id: `tpl-b1`, identityId: identityB, name: 'B1', status: 'Active', tags: '[]', goalId: goalA, createdAt: now, updatedAt: now },
+        { id: `tpl-a1`, identityId: identityA, name: 'A1', status: 'Active', goalId: goalA, createdAt: now, updatedAt: now },
+        { id: `tpl-a2`, identityId: identityA, name: 'A2', status: 'Active', goalId: goalA, createdAt: now, updatedAt: now },
+        { id: `tpl-a3`, identityId: identityA, name: 'A3', status: 'Active', goalId: goalB, createdAt: now, updatedAt: now },
+        { id: `tpl-a4`, identityId: identityA, name: 'A4 (soft-deleted)', status: 'Archived', goalId: goalA, createdAt: now, updatedAt: now, deletedAt: new Date(now.getTime() + 1000) },
+        { id: `tpl-b1`, identityId: identityB, name: 'B1', status: 'Active', goalId: goalA, createdAt: now, updatedAt: now },
       ],
     });
 

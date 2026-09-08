@@ -276,6 +276,7 @@ async function bootstrap(): Promise<void> {
   if (!env.DATABASE_URL) {
     throw new Error('AI Mastra runtime requires DATABASE_URL after environment normalization');
   }
+  const labelService = new LabelService(new PrismaLabelRepository(prisma));
   const aiApiModule = composeAI({
     db: prisma,
     repositoryApiPort: repositoryApiModule.getApplicationPort(),
@@ -283,6 +284,7 @@ async function bootstrap(): Promise<void> {
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
     reminderApplicationPort: reminderComposed.executorReminderPort,
+    labelService,
     mastraStorage: { kind: 'postgres', connectionString: env.DATABASE_URL },
   });
   const governanceApiModule = composeGovernance({ db: prisma });
@@ -290,9 +292,7 @@ async function bootstrap(): Promise<void> {
   // runtime composer/factory closure BEFORE registration; register() only
   // mounts routes against the transport-only context.
   const powerSyncApiModule = composePowerSyncApiModule({ db: prisma });
-  const labelApiModule = composeLabelApiModule({
-    service: new LabelService(new PrismaLabelRepository(prisma)),
-  });
+  const labelApiModule = composeLabelApiModule({ service: labelService });
   const dashboardApiModule = composeDashboardApiModule({
     dashboardReadPort: new PrismaDashboardReadPort(prisma),
     activityLedgerRuntime: createActivityLedgerRecorder(new PrismaActivityLedgerWriter(prisma)),

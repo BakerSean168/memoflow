@@ -49,7 +49,6 @@ describe('ListTaskTemplatesUseCase', () => {
       findByIdentityId: vi.fn().mockResolvedValue([]),
       findByStatus: vi.fn().mockResolvedValue([]),
       findByGoalId: vi.fn().mockResolvedValue([]),
-      findByTags: vi.fn().mockResolvedValue([]),
       save: vi.fn().mockResolvedValue(undefined),
     });
     instanceRepo = createMockRepo<ITaskInstanceRepository>({
@@ -87,15 +86,6 @@ describe('ListTaskTemplatesUseCase', () => {
       });
 
       expect(templateRepo.findByGoalId).toHaveBeenCalledWith(testIdentityId, 'goal-1');
-    });
-
-    it('should filter by tags when provided (and no status/goalId)', async () => {
-      await useCase.execute({
-        identityId: testIdentityId,
-        tags: ['work', 'urgent'],
-      });
-
-      expect(templateRepo.findByTags).toHaveBeenCalledWith(testIdentityId, ['work', 'urgent']);
     });
 
     it('should fallback to findByIdentityId when no filters provided', async () => {

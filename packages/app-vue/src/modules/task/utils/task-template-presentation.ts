@@ -6,7 +6,6 @@ import type {
 } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { TaskTemplateViewModel, TaskTimeConfigViewModel } from '../components/types';
-import { findNamedColor } from '../../../shared/constants/color-palette';
 import { formatHHmmParts } from '../../../shared/utils/format-hhmm-parts';
 import { formatProductDate } from '../../../shared/utils/product-time';
 
@@ -148,8 +147,6 @@ export function mapTaskTemplateDtoToViewModel(
   t: Translate,
 ): TaskTemplateViewModel {
   const status = statusMap[dto.status] ?? dto.status;
-  const colorOption = findNamedColor(dto.color);
-
   return {
     id: dto.id,
     title: dto.name,
@@ -164,9 +161,8 @@ export function mapTaskTemplateDtoToViewModel(
     estimatedMinutes: dto.estimatedMinutes,
     dueDate: dto.dueDate ?? null,
     recurrenceText: getTaskRecurrenceText(t, dto),
-    tags: dto.tags ?? [],
-    tagSummaryText:
-      dto.tags && dto.tags.length > 0 ? dto.tags.join(', ') : t('task.templateCard.noTags'),
+    labels: dto.labels ?? [],
+    labelIds: (dto.labels ?? []).map((label) => label.id),
     goalBinding: dto.goalBinding
       ? {
           goalId: dto.goalBinding.goalId,
@@ -195,7 +191,5 @@ export function mapTaskTemplateDtoToViewModel(
     completionRate: dto.completionRate ?? 0,
     formattedCreatedAt: dto.createdAt ? formatProductDate(dto.createdAt) : undefined,
     taskType: dto.recurrenceRule ? 'Recurring' : 'OneTime',
-    color: dto.color,
-    colorLabel: colorOption ? t(colorOption.labelKey) : t('task.metadata.selectColor'),
   };
 }

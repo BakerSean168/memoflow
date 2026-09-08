@@ -92,7 +92,7 @@ export function TasksScreen() {
             <PrimaryTextField
               autoCapitalize="none"
               autoCorrect={false}
-              hint="Search by name, description, or tags."
+              hint="Search by name, description, or labels."
               onChangeText={setSearchQuery}
               placeholder="Search templates"
               value={searchQuery}

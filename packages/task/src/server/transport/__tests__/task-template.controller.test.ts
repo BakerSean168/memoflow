@@ -27,7 +27,7 @@ const FAKE_TEMPLATE_DTO: TaskTemplateClientDTO = {
   taskType: TaskType.Recurring,
   status: 'Active',
   importance: 'Moderate',
-  tags: [],
+  labels: [],
   createdAt: 1000,
   updatedAt: 1000,
 } as unknown as TaskTemplateClientDTO;
@@ -223,7 +223,7 @@ describe('TaskTemplateController', () => {
       expect(args.status).toEqual(['Active']);
     });
 
-    it('should pass through goalId and tags filters', async () => {
+    it('should pass through goalId and Shared Label filters', async () => {
       (useCases.listTemplates as ReturnType<typeof vi.fn>).mockResolvedValue(
         ok({ templates: [], total: 0 }),
       );
@@ -231,14 +231,14 @@ describe('TaskTemplateController', () => {
       await controller.listTemplates(
         {
           goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440002' as any,
-          tags: ['tag1', 'tag2'],
+          labelIdsAll: ['label-1', 'label-2'],
         },
         ctx,
       );
 
       const args = (useCases.listTemplates as ReturnType<typeof vi.fn>).mock.calls[0][0];
       expect(args.goalId).toBe('GoalId_550e8400-e29b-41d4-a716-446655440002');
-      expect(args.tags).toEqual(['tag1', 'tag2']);
+      expect(args.labelIdsAll).toEqual(['label-1', 'label-2']);
     });
 
     it('should return templates and total', async () => {
@@ -284,10 +284,13 @@ describe('TaskTemplateController', () => {
       expect(useCases.updateTemplate).toHaveBeenCalledWith('tmpl_1', TEST_IDENTITY_ID, {
         name: 'Updated Name',
         description: undefined,
+        timeConfig: undefined,
         recurrenceRule: undefined,
+        reminderConfig: undefined,
         importance: undefined,
-        tags: undefined,
-        color: undefined,
+        labelIds: undefined,
+        goalBinding: undefined,
+        completionPolicy: undefined,
       });
     });
 

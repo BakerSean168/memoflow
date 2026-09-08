@@ -88,6 +88,6 @@ const selectedOption = computed(() => findNamedColor(props.modelValue) ?? null);
 const selectedColorValue = computed(() => selectedOption.value?.value ?? props.defaultValue);
 const selectedColorLabel = computed(() => {
   if (selectedOption.value) return t(selectedOption.value.labelKey);
-  return props.emptyLabel || t('task.metadata.selectColor');
+  return props.emptyLabel;
 });
 </script>

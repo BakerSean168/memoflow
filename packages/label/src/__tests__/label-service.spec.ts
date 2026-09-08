@@ -32,6 +32,38 @@ describe('shared label semantics', () => {
     expect(() => validateLabelName('x'.repeat(51))).toThrow('at most 50')
   })
 
+  it('resolves AI-proposed label names onto canonical identity-owned labels', async () => {
+    const repository = repositoryMock()
+    vi.mocked(repository.list).mockResolvedValue([
+      {
+        id: 'label-work',
+        identityId: 'identity-1',
+        name: 'Work',
+        normalizedName: 'work',
+        color: null,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    ])
+    const service = new LabelService(repository, { now: () => 123, idFactory: () => 'label-health' })
+
+    const resolved = await service.resolveNames('identity-1', ['  WORK ', 'Health', 'health'])
+
+    expect(resolved.map((label) => [label.id, label.name])).toEqual([
+      ['label-work', 'Work'],
+      ['label-health', 'Health'],
+    ])
+    expect(repository.create).toHaveBeenCalledTimes(1)
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'label-health',
+        identityId: 'identity-1',
+        name: 'Health',
+        normalizedName: 'health',
+      }),
+    )
+  })
+
   it('deduplicates labelIds before replacing Goal and Task assignments', async () => {
     const repository = repositoryMock()
     const service = new LabelService(repository, {

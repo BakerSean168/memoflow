@@ -1,4 +1,5 @@
 import type { TaskGoalBindingTriggerValue } from '@memoflow/contracts/task';
+import type { LabelClientDTO } from '@memoflow/contracts/label';
 
 export type UIPriority = 'high' | 'normal' | 'low' | 'urgent';
 
@@ -8,7 +9,6 @@ export interface EditableTaskUI {
   estimatedHours: number;
   priority: UIPriority;
   dependencies?: number[];
-  tags?: string[];
   selected: boolean;
 }
 
@@ -74,8 +74,8 @@ export interface TaskTemplateViewModel {
   estimatedMinutes?: number | null;
   dueDate?: string | number | null;
   recurrenceText?: string;
-  tags?: string[];
-  tagSummaryText?: string;
+  labels?: LabelClientDTO[];
+  labelIds?: string[];
   goalBinding?: TaskGoalBindingViewModel | null;
   timeConfig: TaskTimeConfigViewModel;
   recurrenceRule?: Record<string, unknown> | null;
@@ -92,9 +92,6 @@ export interface TaskTemplateViewModel {
   formattedCreatedAt?: string;
   /** TaskType enum value mapped for CreateTaskTemplateReq.taskType */
   taskType?: string;
-  /** Colour swatch hex string */
-  color?: string | null;
-  colorLabel?: string;
 }
 
 export interface TaskTemplateFormProps {

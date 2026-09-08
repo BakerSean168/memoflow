@@ -113,8 +113,6 @@ export class CreateTaskTemplateUseCase {
             recurrenceRule,
             reminderConfig,
             importance: request.importance,
-            tags: request.tags,
-            color: request.color ?? undefined,
             completionPolicy: request.completionPolicy,
             goalBinding: request.goalBinding
               ? {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { LabelClientDTO } from '@memoflow/contracts/label';
 import type {
   TaskTemplateClientDTO,
   TaskTemplateStatus,
@@ -29,7 +30,7 @@ export type TaskTemplateSummary = {
   completionWindowDays: 30;
   futurePendingInstanceCount: number;
   singleInstanceStatus: TaskTemplateClientDTO['singleInstanceStatus'];
-  tags: string[];
+  labels: LabelClientDTO[];
   updatedAt: number;
 };
 
@@ -64,7 +65,7 @@ function mapTemplate(template: TaskTemplate): TaskTemplateSummary {
     completionWindowDays: template.completionWindowDays,
     futurePendingInstanceCount: template.futurePendingInstanceCount,
     singleInstanceStatus: template.singleInstanceStatus,
-    tags: template.tags,
+    labels: template.labels,
     updatedAt: template.updatedAt,
   };
 }
@@ -174,7 +175,7 @@ export function useTaskTemplates() {
       normalizedQuery.length === 0
         ? templates
         : templates.filter((template) =>
-            [template.name, template.description ?? '', template.tags.join(' ')]
+            [template.name, template.description ?? '', template.labels.map((label) => label.name).join(' ')]
               .join(' ')
               .toLowerCase()
               .includes(normalizedQuery),

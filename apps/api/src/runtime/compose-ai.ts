@@ -33,6 +33,7 @@ import type { RepositoryApplicationPort } from '@memoflow/repository';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { TaskApplicationPort } from '@memoflow/task';
 import type { ReminderApplicationPort } from '@memoflow/reminder';
+import type { LabelService } from '@memoflow/label';
 import { GoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
 import { TaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
 import { ControlledAnalyticsReadAdapter } from '../modules/ai/controlled-analytics-read.adapter';
@@ -53,6 +54,8 @@ export interface ComposeAIDependencies {
   readonly taskApplicationPort: TaskApplicationPort;
   /** The Reminder application port wired for the AI executor. */
   readonly reminderApplicationPort: ReminderApplicationPort;
+  /** Identity-scoped Shared Label resolver reused by AI workflow application. */
+  readonly labelService: LabelService;
   /** Host-selected persistent Mastra storage; API uses PostgreSQL. */
   readonly mastraStorage: MastraStorageConfig;
 }
@@ -75,8 +78,12 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
     dependencies.goalApplicationPort,
     dependencies.taskApplicationPort,
     dependencies.reminderApplicationPort,
+    dependencies.labelService,
   );
-  const taskPlanMutationPort = new TaskPlanMutationAdapter(dependencies.taskApplicationPort);
+  const taskPlanMutationPort = new TaskPlanMutationAdapter(
+    dependencies.taskApplicationPort,
+    dependencies.labelService,
+  );
   const knowledgeNotePersistence = new RepositoryKnowledgeNotePersistenceAdapter(
     dependencies.repositoryApiPort,
   );

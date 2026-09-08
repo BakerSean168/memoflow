@@ -63,6 +63,7 @@ export class GoalPlannerWorker implements GoalPlannerPort {
           'Use epoch milliseconds for dates. Never infer a server-local timezone; preserve the provided timezone or use explicit UTC when the user supplied no local timezone.',
           'Every task keyResultIndex must point to an existing key result. Weekly tasks must provide daysOfWeek using 0=Sunday through 6=Saturday.',
           'Every reminder should provide a deterministic first scheduledAt epoch when timing is known; timeOfDay is HH:mm and timezone is an IANA zone when known.',
+          'For Goal and Task classification, use labels only as human-readable Shared Label names. Never invent label IDs or legacy Task tags/custom Task colors.',
           `Write user-visible titles, explanations and questions in ${language}.`,
         ].join('\n');
       },

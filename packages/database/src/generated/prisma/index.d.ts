@@ -118218,8 +118218,6 @@ export namespace Prisma {
     archivedAt: Date | null
     abandonedReason: string | null
     importance: string | null
-    color: string | null
-    tags: string | null
     timeConfigType: string | null
     timeConfigStartTime: Date | null
     timeConfigEndTime: Date | null
@@ -118261,8 +118259,6 @@ export namespace Prisma {
     archivedAt: Date | null
     abandonedReason: string | null
     importance: string | null
-    color: string | null
-    tags: string | null
     timeConfigType: string | null
     timeConfigStartTime: Date | null
     timeConfigEndTime: Date | null
@@ -118304,8 +118300,6 @@ export namespace Prisma {
     archivedAt: number
     abandonedReason: number
     importance: number
-    color: number
-    tags: number
     timeConfigType: number
     timeConfigStartTime: number
     timeConfigEndTime: number
@@ -118375,8 +118369,6 @@ export namespace Prisma {
     archivedAt?: true
     abandonedReason?: true
     importance?: true
-    color?: true
-    tags?: true
     timeConfigType?: true
     timeConfigStartTime?: true
     timeConfigEndTime?: true
@@ -118418,8 +118410,6 @@ export namespace Prisma {
     archivedAt?: true
     abandonedReason?: true
     importance?: true
-    color?: true
-    tags?: true
     timeConfigType?: true
     timeConfigStartTime?: true
     timeConfigEndTime?: true
@@ -118461,8 +118451,6 @@ export namespace Prisma {
     archivedAt?: true
     abandonedReason?: true
     importance?: true
-    color?: true
-    tags?: true
     timeConfigType?: true
     timeConfigStartTime?: true
     timeConfigEndTime?: true
@@ -118591,8 +118579,6 @@ export namespace Prisma {
     archivedAt: Date | null
     abandonedReason: string | null
     importance: string
-    color: string | null
-    tags: string
     timeConfigType: string | null
     timeConfigStartTime: Date | null
     timeConfigEndTime: Date | null
@@ -118653,8 +118639,6 @@ export namespace Prisma {
     archivedAt?: boolean
     abandonedReason?: boolean
     importance?: boolean
-    color?: boolean
-    tags?: boolean
     timeConfigType?: boolean
     timeConfigStartTime?: boolean
     timeConfigEndTime?: boolean
@@ -118702,8 +118686,6 @@ export namespace Prisma {
     archivedAt?: boolean
     abandonedReason?: boolean
     importance?: boolean
-    color?: boolean
-    tags?: boolean
     timeConfigType?: boolean
     timeConfigStartTime?: boolean
     timeConfigEndTime?: boolean
@@ -118747,8 +118729,6 @@ export namespace Prisma {
     archivedAt?: boolean
     abandonedReason?: boolean
     importance?: boolean
-    color?: boolean
-    tags?: boolean
     timeConfigType?: boolean
     timeConfigStartTime?: boolean
     timeConfigEndTime?: boolean
@@ -118792,8 +118772,6 @@ export namespace Prisma {
     archivedAt?: boolean
     abandonedReason?: boolean
     importance?: boolean
-    color?: boolean
-    tags?: boolean
     timeConfigType?: boolean
     timeConfigStartTime?: boolean
     timeConfigEndTime?: boolean
@@ -118823,7 +118801,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type TaskTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "status" | "outcome" | "completionPolicy" | "closedAt" | "archivedAt" | "abandonedReason" | "importance" | "color" | "tags" | "timeConfigType" | "timeConfigStartTime" | "timeConfigEndTime" | "timeConfigDurationMinutes" | "timeConfigTimePoint" | "timeConfigTimeRangeStart" | "timeConfigTimeRangeEnd" | "recurrenceRuleType" | "recurrenceRuleInterval" | "recurrenceRuleDaysOfWeek" | "recurrenceRuleEndDate" | "recurrenceRuleCount" | "reminderConfigEnabled" | "reminderConfigTimeOffsetMinutes" | "reminderConfigUnit" | "reminderConfigChannel" | "lastGeneratedDate" | "generateAheadDays" | "goalId" | "keyResultId" | "goalRecordValue" | "goalProgressTrigger" | "checklist" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["taskTemplate"]>
+  export type TaskTemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "status" | "outcome" | "completionPolicy" | "closedAt" | "archivedAt" | "abandonedReason" | "importance" | "timeConfigType" | "timeConfigStartTime" | "timeConfigEndTime" | "timeConfigDurationMinutes" | "timeConfigTimePoint" | "timeConfigTimeRangeStart" | "timeConfigTimeRangeEnd" | "recurrenceRuleType" | "recurrenceRuleInterval" | "recurrenceRuleDaysOfWeek" | "recurrenceRuleEndDate" | "recurrenceRuleCount" | "reminderConfigEnabled" | "reminderConfigTimeOffsetMinutes" | "reminderConfigUnit" | "reminderConfigChannel" | "lastGeneratedDate" | "generateAheadDays" | "goalId" | "keyResultId" | "goalRecordValue" | "goalProgressTrigger" | "checklist" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["taskTemplate"]>
   export type TaskTemplateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     keyResult?: boolean | TaskTemplate$keyResultArgs<ExtArgs>
@@ -118871,11 +118849,6 @@ export namespace Prisma {
        * ImportanceLevel
        */
       importance: string
-      color: string | null
-      /**
-       * JSON: string[]
-       */
-      tags: string
       timeConfigType: string | null
       timeConfigStartTime: Date | null
       timeConfigEndTime: Date | null
@@ -119354,8 +119327,6 @@ export namespace Prisma {
     readonly archivedAt: FieldRef<"TaskTemplate", 'DateTime'>
     readonly abandonedReason: FieldRef<"TaskTemplate", 'String'>
     readonly importance: FieldRef<"TaskTemplate", 'String'>
-    readonly color: FieldRef<"TaskTemplate", 'String'>
-    readonly tags: FieldRef<"TaskTemplate", 'String'>
     readonly timeConfigType: FieldRef<"TaskTemplate", 'String'>
     readonly timeConfigStartTime: FieldRef<"TaskTemplate", 'DateTime'>
     readonly timeConfigEndTime: FieldRef<"TaskTemplate", 'DateTime'>
@@ -128908,8 +128879,6 @@ export namespace Prisma {
     archivedAt: 'archivedAt',
     abandonedReason: 'abandonedReason',
     importance: 'importance',
-    color: 'color',
-    tags: 'tags',
     timeConfigType: 'timeConfigType',
     timeConfigStartTime: 'timeConfigStartTime',
     timeConfigEndTime: 'timeConfigEndTime',
@@ -137824,8 +137793,6 @@ export namespace Prisma {
     archivedAt?: DateTimeNullableFilter<"TaskTemplate"> | Date | string | null
     abandonedReason?: StringNullableFilter<"TaskTemplate"> | string | null
     importance?: StringFilter<"TaskTemplate"> | string
-    color?: StringNullableFilter<"TaskTemplate"> | string | null
-    tags?: StringFilter<"TaskTemplate"> | string
     timeConfigType?: StringNullableFilter<"TaskTemplate"> | string | null
     timeConfigStartTime?: DateTimeNullableFilter<"TaskTemplate"> | Date | string | null
     timeConfigEndTime?: DateTimeNullableFilter<"TaskTemplate"> | Date | string | null
@@ -137872,8 +137839,6 @@ export namespace Prisma {
     archivedAt?: SortOrderInput | SortOrder
     abandonedReason?: SortOrderInput | SortOrder
     importance?: SortOrder
-    color?: SortOrderInput | SortOrder
-    tags?: SortOrder
     timeConfigType?: SortOrderInput | SortOrder
     timeConfigStartTime?: SortOrderInput | SortOrder
     timeConfigEndTime?: SortOrderInput | SortOrder
@@ -137924,8 +137889,6 @@ export namespace Prisma {
     archivedAt?: DateTimeNullableFilter<"TaskTemplate"> | Date | string | null
     abandonedReason?: StringNullableFilter<"TaskTemplate"> | string | null
     importance?: StringFilter<"TaskTemplate"> | string
-    color?: StringNullableFilter<"TaskTemplate"> | string | null
-    tags?: StringFilter<"TaskTemplate"> | string
     timeConfigType?: StringNullableFilter<"TaskTemplate"> | string | null
     timeConfigStartTime?: DateTimeNullableFilter<"TaskTemplate"> | Date | string | null
     timeConfigEndTime?: DateTimeNullableFilter<"TaskTemplate"> | Date | string | null
@@ -137972,8 +137935,6 @@ export namespace Prisma {
     archivedAt?: SortOrderInput | SortOrder
     abandonedReason?: SortOrderInput | SortOrder
     importance?: SortOrder
-    color?: SortOrderInput | SortOrder
-    tags?: SortOrder
     timeConfigType?: SortOrderInput | SortOrder
     timeConfigStartTime?: SortOrderInput | SortOrder
     timeConfigEndTime?: SortOrderInput | SortOrder
@@ -138023,8 +137984,6 @@ export namespace Prisma {
     archivedAt?: DateTimeNullableWithAggregatesFilter<"TaskTemplate"> | Date | string | null
     abandonedReason?: StringNullableWithAggregatesFilter<"TaskTemplate"> | string | null
     importance?: StringWithAggregatesFilter<"TaskTemplate"> | string
-    color?: StringNullableWithAggregatesFilter<"TaskTemplate"> | string | null
-    tags?: StringWithAggregatesFilter<"TaskTemplate"> | string
     timeConfigType?: StringNullableWithAggregatesFilter<"TaskTemplate"> | string | null
     timeConfigStartTime?: DateTimeNullableWithAggregatesFilter<"TaskTemplate"> | Date | string | null
     timeConfigEndTime?: DateTimeNullableWithAggregatesFilter<"TaskTemplate"> | Date | string | null
@@ -148427,8 +148386,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -148473,8 +148430,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -148518,8 +148473,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -148564,8 +148517,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -148610,8 +148561,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -148652,8 +148601,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -148693,8 +148640,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -155506,8 +155451,6 @@ export namespace Prisma {
     archivedAt?: SortOrder
     abandonedReason?: SortOrder
     importance?: SortOrder
-    color?: SortOrder
-    tags?: SortOrder
     timeConfigType?: SortOrder
     timeConfigStartTime?: SortOrder
     timeConfigEndTime?: SortOrder
@@ -155562,8 +155505,6 @@ export namespace Prisma {
     archivedAt?: SortOrder
     abandonedReason?: SortOrder
     importance?: SortOrder
-    color?: SortOrder
-    tags?: SortOrder
     timeConfigType?: SortOrder
     timeConfigStartTime?: SortOrder
     timeConfigEndTime?: SortOrder
@@ -155605,8 +155546,6 @@ export namespace Prisma {
     archivedAt?: SortOrder
     abandonedReason?: SortOrder
     importance?: SortOrder
-    color?: SortOrder
-    tags?: SortOrder
     timeConfigType?: SortOrder
     timeConfigStartTime?: SortOrder
     timeConfigEndTime?: SortOrder
@@ -163897,8 +163836,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -163941,8 +163878,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -166330,8 +166265,6 @@ export namespace Prisma {
     archivedAt?: DateTimeNullableFilter<"TaskTemplate"> | Date | string | null
     abandonedReason?: StringNullableFilter<"TaskTemplate"> | string | null
     importance?: StringFilter<"TaskTemplate"> | string
-    color?: StringNullableFilter<"TaskTemplate"> | string | null
-    tags?: StringFilter<"TaskTemplate"> | string
     timeConfigType?: StringNullableFilter<"TaskTemplate"> | string | null
     timeConfigStartTime?: DateTimeNullableFilter<"TaskTemplate"> | Date | string | null
     timeConfigEndTime?: DateTimeNullableFilter<"TaskTemplate"> | Date | string | null
@@ -173558,8 +173491,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -173602,8 +173533,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -176132,8 +176061,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -176177,8 +176104,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -176431,8 +176356,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -176476,8 +176399,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -193312,8 +193233,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -193357,8 +193276,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -193584,8 +193501,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -193629,8 +193544,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -193834,8 +193747,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -193879,8 +193790,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -194106,8 +194015,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -194151,8 +194058,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -195663,8 +195568,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -197292,8 +197195,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -197336,8 +197237,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -197381,8 +197280,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -199197,8 +199094,6 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    color?: string | null
-    tags: string
     timeConfigType?: string | null
     timeConfigStartTime?: Date | string | null
     timeConfigEndTime?: Date | string | null
@@ -199260,8 +199155,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -199304,8 +199197,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -199347,8 +199238,6 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    color?: NullableStringFieldUpdateOperationsInput | string | null
-    tags?: StringFieldUpdateOperationsInput | string
     timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
     timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

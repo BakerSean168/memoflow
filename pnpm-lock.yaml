@@ -1180,6 +1180,9 @@ importers:
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
+      '@memoflow/label':
+        specifier: workspace:*
+        version: link:../label
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification

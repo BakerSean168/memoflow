@@ -49,6 +49,7 @@ function parseMinuteOfDay(value: string): number {
 function taskRequest(
   draft: import('@memoflow/contracts/ai').TaskPlanDraft,
   id: string,
+  labelIds: readonly string[],
 ): CreateTaskTemplateReq {
   const task = draft.task;
   const timePoint = task.timeOfDay ? parseMinuteOfDay(task.timeOfDay) : null;
@@ -82,8 +83,7 @@ function taskRequest(
     recurrenceRule,
     reminderConfig: null,
     importance: task.importance,
-    tags: task.tags,
-    color: null,
+    labelIds: [...labelIds],
     goalBinding:
       task.goalId && task.keyResultId
         ? {
@@ -140,9 +140,22 @@ export class ApplyTaskPlanService {
     let taskIds: string[] = prior?.taskIds ?? [];
 
     if (!created) {
+      const labelsResult = await this.mutations.resolveLabels(draft.task.labels, context);
+      if (!labelsResult.ok) {
+        const labelFailure = failure(labelsResult.error);
+        return {
+          workflowRunId,
+          revision: draft.revision,
+          status: 'failed',
+          taskIds: [],
+          failures: [labelFailure],
+          retryable: labelFailure.retryable,
+        };
+      }
+
       let request: CreateTaskTemplateReq;
       try {
-        request = taskRequest(draft, expectedTaskId);
+        request = taskRequest(draft, expectedTaskId, labelsResult.data);
       } catch (cause) {
         return {
           workflowRunId,

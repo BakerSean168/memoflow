@@ -298,9 +298,8 @@ async function registerBusinessModules(
     taskBindingReadPort: new PowerSyncTaskBindingReadPort(db),
   });
 
-  const labelElectronModule = createLabelElectronModule({
-    service: new LabelService(new PowerSyncLabelRepository(db)),
-  });
+  const labelService = new LabelService(new PowerSyncLabelRepository(db));
+  const labelElectronModule = createLabelElectronModule({ service: labelService });
 
   const dashboardRepositories: DashboardRepositoryDependencies = {
     goalRepository: goalComposed.repositories.goalRepository,
@@ -423,6 +422,7 @@ async function registerBusinessModules(
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
     reminderApplicationPort: reminderComposed.applicationPort,
+    labelService,
     mastraStorage: {
       kind: 'libsql',
       url: pathToFileURL(path.join(profilePaths.storageDir, 'mastra.db')).href,

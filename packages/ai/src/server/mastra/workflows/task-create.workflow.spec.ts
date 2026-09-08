@@ -39,7 +39,7 @@ const draftContent = TaskPlanDraftContentSchema.parse({
     daysOfWeek: [1],
     startDate: Date.UTC(2026, 8, 1),
     timeOfDay: '09:00',
-    tags: ['reporting'],
+    labels: ['Reporting'],
   },
   rationale: 'The user asked for a recurring weekly task.',
   warnings: [],
@@ -70,8 +70,14 @@ function mastraRequestContext(requestId: string): RequestContext {
   return context;
 }
 
-function mutationPort(): TaskPlanMutationPort & { createTaskTemplate: ReturnType<typeof vi.fn> } {
+function mutationPort(): TaskPlanMutationPort & {
+  resolveLabels: ReturnType<typeof vi.fn>;
+  createTaskTemplate: ReturnType<typeof vi.fn>;
+} {
   return {
+    resolveLabels: vi.fn(async (names: readonly string[]) =>
+      ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
+    ),
     createTaskTemplate: vi.fn(async (request) => ok({ taskId: String(request.id) })),
   };
 }
@@ -211,7 +217,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
         goalId: 'goal-1',
         keyResultId: 'kr-1',
         contributionValue: 3,
-        tags: ['planning'],
+        labels: ['Planning'],
       },
     });
     await service.apply({
@@ -220,7 +226,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       context,
     });
     expect(mutations.createTaskTemplate.mock.calls[0]?.[0]).toMatchObject({
-      tags: ['planning'],
+      labelIds: ['label:planning'],
       goalBinding: {
         goalId: 'goal-1',
         keyResultId: 'kr-1',

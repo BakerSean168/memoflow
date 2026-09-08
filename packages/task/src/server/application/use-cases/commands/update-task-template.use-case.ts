@@ -163,12 +163,6 @@ export class UpdateTaskTemplateUseCase {
         if (importanceChanged && request.importance !== undefined) {
           template.updatePriority(request.importance);
         }
-        if (request.tags !== undefined) {
-          template.updateTags(request.tags);
-        }
-        if (request.color !== undefined) {
-          template.updateColor(request.color ?? null);
-        }
         if (recurrenceChanged && nextRecurrenceRule) {
           template.updateRecurrenceRule(nextRecurrenceRule);
         }

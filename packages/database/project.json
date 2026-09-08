@@ -153,7 +153,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "packages/database",
-        "command": "tsx ./scripts/prepare-ai-knowledge-index-pgvector.ts && tsx ./scripts/prepare-ai-vnext-runtime-state-retirement.ts && tsx ./scripts/prepare-notification-preference-hierarchy.ts && tsx ./scripts/prepare-vnext-unique-constraints.ts && tsx ./scripts/prepare-legacy-cloud-auth-migration.ts && prisma db push --config ./prisma/prisma.config.ts && tsx ./scripts/ensure-task-goal-binding-constraint.ts && tsx ./scripts/prepare-ai-provider-onboarding-sessions.ts"
+        "command": "tsx ./scripts/prepare-ai-knowledge-index-pgvector.ts && tsx ./scripts/prepare-ai-vnext-runtime-state-retirement.ts && tsx ./scripts/prepare-notification-preference-hierarchy.ts && tsx ./scripts/prepare-vnext-unique-constraints.ts && tsx ./scripts/prepare-legacy-cloud-auth-migration.ts && tsx ./scripts/prepare-task-shared-label-migration.ts && prisma db push --config ./prisma/prisma.config.ts && tsx ./scripts/ensure-task-goal-binding-constraint.ts && tsx ./scripts/prepare-ai-provider-onboarding-sessions.ts"
       },
       "cache": false
     },

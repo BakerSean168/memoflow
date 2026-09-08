@@ -75,6 +75,18 @@ describe('HARD-7102 core vNext architecture lock', () => {
         relPath: 'packages/app-vue/src/modules/schedule/use-worker.ts',
         content: `import type { SchedulingPort } from '@memoflow/scheduler/scheduling'; const x: ScheduledInvocation = y;`,
       },
+      {
+        relPath: 'packages/task/src/server/domain/legacy-classification.ts',
+        content: `function read(template) { return template.tags; }`,
+      },
+      {
+        relPath: 'packages/contracts/src/modules/task/api/task-template.dto.ts',
+        content: `export interface LegacyTaskInput { tags?: string[]; color?: string | null; }`,
+      },
+      {
+        relPath: 'packages/database/prisma/schema/task.prisma',
+        content: `model TaskTemplate {\n  id String @id\n  tags String\n}`,
+      },
     );
     const kinds = new Set(violations.map((v) => v.kind));
     expect(kinds).toEqual(expect.objectContaining({}));
@@ -92,6 +104,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
       'contracts-third-party-time-dto',
       'ui-scheduler-internal-import',
       'ui-scheduled-invocation-mutation',
+      'task-legacy-classification',
     ]) {
       expect(kinds.has(kind), `missing violation kind ${kind}`).toBe(true);
     }
@@ -134,6 +147,22 @@ describe('HARD-7102 core vNext architecture lock', () => {
       {
         relPath: 'packages/contracts/src/modules/schedule/product-time.ts',
         content: `export interface RecurrenceRule { frequency: 'daily' | 'weekly'; }`,
+      },
+      {
+        relPath: 'packages/contracts/src/modules/task/api/task-template.dto.ts',
+        content: `export interface TaskInput { labelIds?: string[]; }`,
+      },
+      {
+        relPath: 'packages/task/src/server/domain/aggregates/task-template.state.ts',
+        content: `export interface TaskTemplateState { labels: readonly string[]; }`,
+      },
+      {
+        relPath: 'packages/database/prisma/schema/task.prisma',
+        content: `model TaskTemplate { id String @id }\nmodel TaskLabel { labelId String }`,
+      },
+      {
+        relPath: 'packages/app-vue/src/modules/task/TaskView.vue',
+        content: `const labelIds = template.labels.map((label) => label.id);`,
       },
     );
     expect(violations).toHaveLength(0);

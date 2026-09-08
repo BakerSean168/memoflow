@@ -38,8 +38,6 @@ export interface OneTimeTaskOverrides {
   dueDate?: number;
   estimatedMinutes?: number;
   note?: string;
-  tags?: string[];
-  color?: string;
 }
 
 export function aOneTimeTask(overrides: OneTimeTaskOverrides = {}): TaskTemplate {
@@ -52,8 +50,6 @@ export function aOneTimeTask(overrides: OneTimeTaskOverrides = {}): TaskTemplate
     dueDate: overrides.dueDate,
     estimatedMinutes: overrides.estimatedMinutes,
     note: overrides.note,
-    tags: overrides.tags,
-    color: overrides.color,
   });
 }
 
@@ -65,8 +61,6 @@ export interface RecurringTaskOverrides {
   timeConfig?: TaskTimeConfig;
   recurrenceRule?: RecurrenceRule;
   reminderConfig?: TaskReminderConfig;
-  tags?: string[];
-  color?: string;
   generateAheadDays?: number;
 }
 
@@ -79,8 +73,6 @@ export function aRecurringTask(overrides: RecurringTaskOverrides = {}): TaskTemp
     timeConfig: overrides.timeConfig ?? anAllDayTimeConfig(),
     recurrenceRule: overrides.recurrenceRule ?? aDailyRecurrenceRule(),
     reminderConfig: overrides.reminderConfig,
-    tags: overrides.tags,
-    color: overrides.color,
     generateAheadDays: overrides.generateAheadDays,
   });
 }
@@ -96,8 +88,6 @@ export function aTaskTemplateState(overrides: Partial<TaskTemplateState> = {}): 
     description: overrides.description ?? null,
     taskType: overrides.taskType ?? TaskType.OneTime,
     importance: overrides.importance ?? ImportanceLevel.Moderate,
-    tags: overrides.tags ?? [],
-    color: overrides.color ?? null,
     status: overrides.status ?? TaskTemplateStatus.Active,
     outcome: overrides.outcome ?? TaskPlanOutcome.Open,
     completionPolicy: overrides.completionPolicy ?? TaskPlanCompletionPolicy.AllowCorrection,

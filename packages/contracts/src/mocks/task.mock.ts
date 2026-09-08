@@ -37,11 +37,6 @@ export function createMockTaskTemplate(
     ] as const),
     goalBinding: null,
     labels: [],
-    tags: faker.helpers.arrayElements(
-      ['work', 'personal', 'health', 'learning'],
-      faker.number.int({ min: 0, max: 2 }),
-    ),
-    color: faker.datatype.boolean() ? faker.color.rgb({ format: 'hex', casing: 'upper' }) : null,
     status,
     outcome,
     completionPolicy: 'AllowCorrection',

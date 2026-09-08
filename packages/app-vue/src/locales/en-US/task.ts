@@ -57,8 +57,8 @@ export default {
     "filter": {
       "status": "Filter by occurrence status",
       "allStatuses": "All statuses",
-      "tag": "Filter by tag",
-      "allTags": "All tags",
+      "label": "Filter by label",
+      "allLabels": "All labels",
       "goal": "Filter by Goal binding",
       "allGoals": "All Goal bindings",
       "goalLinked": "Linked to a Goal",
@@ -91,7 +91,6 @@ export default {
     "timeType": "Time Type",
     "timeValue": "Time Value",
     "description": "Description",
-    "tags": "Tags",
     "goalBinding": "Goal contribution",
     "linkedGoal": "Linked goal",
     "keyResult": "Key result",
@@ -332,13 +331,6 @@ export default {
       "maxValue": "Increment value cannot exceed 1000"
     }
   },
-  "schedulingPolicy": {
-    "title": "Scheduling Policy",
-    "alertDescription": "Scheduling policy controls how tasks appear in calendar view and execution rules.",
-    "alertMessage": "Advanced scheduling policy features coming soon.",
-    "label": "Tags",
-    "tagPlaceholder": "Press Enter to add a tag"
-  },
   "metadata": {
     "title": "Task Properties",
     "taskType": "Task Type",
@@ -357,27 +349,12 @@ export default {
     "importanceLowSub": "Can be deferred",
     "importanceMinimal": "Minimal",
     "importanceMinimalSub": "Handle when free",
-    "colorMark": "Color Mark",
-    "selectColor": "Select color",
-    "clearColor": "Clear color",
-    "tags": "Tags",
-    "tagPlaceholder": "Press Enter to add a tag",
-    "tagWork": "Work",
-    "tagPersonal": "Personal",
-    "tagStudy": "Study",
-    "tagHealth": "Health",
-    "tagFinance": "Finance",
-    "tagSocial": "Social",
-    "tagCreative": "Creative",
-    "tagTravel": "Travel",
-    "tagHome": "Home",
-    "tagShopping": "Shopping",
-    "tagExercise": "Exercise",
-    "tagReading": "Reading",
-    "tagMeeting": "Meeting",
-    "tagDeadline": "Deadline",
-    "tagUrgent": "Urgent",
-    "tagReview": "Review"
+    "labels": "Labels",
+    "labelsPlaceholder": "Add labels",
+    "searchLabels": "Search labels…",
+    "noLabels": "No labels found",
+    "createLabel": "Create label",
+    "labelCreateFailed": "Failed to create label"
   },
   "weekday": {
     "title": "Select Days",

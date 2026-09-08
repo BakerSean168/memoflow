@@ -119,8 +119,6 @@ export class PrismaTaskTemplateMapper {
         } as Parameters<typeof TaskGoalBinding.fromDTO>[0])
       : null;
 
-    const tags = data.tags ? JSON.parse(data.tags) : [];
-
     const checklist = data.checklist
       ? (JSON.parse(data.checklist) as Array<{ title: string; order: number }>).map((item) =>
           ChecklistItemDefinition.fromDTO(item),
@@ -139,8 +137,6 @@ export class PrismaTaskTemplateMapper {
       importance: data.importance as ImportanceLevel,
       goalBinding,
       checklist,
-      tags,
-      color: data.color,
       status: data.status as TaskTemplateStatus,
       outcome: (vnext.outcome ?? TaskPlanOutcome.Open) as TaskPlanOutcomeValue,
       completionPolicy: (vnext.completionPolicy ?? TaskPlanCompletionPolicy.AllowCorrection) as TaskPlanCompletionPolicyValue,
@@ -206,8 +202,6 @@ export class PrismaTaskTemplateMapper {
       archivedAt: toDateOrNull(dto.archivedAt),
       abandonedReason: dto.abandonedReason,
       importance: dto.importance,
-      color: dto.color,
-      tags: typeof dto.tags === 'string' ? dto.tags : JSON.stringify(dto.tags),
       timeConfigType,
       timeConfigStartTime,
       timeConfigEndTime,

@@ -51,13 +51,13 @@ function parseTemplateFilters(query: Record<string, unknown> | undefined): ListT
     typeof query?.goalId === 'string'
       ? (query.goalId as ListTaskTemplateFilters['goalId'])
       : undefined;
-  const tags = Array.isArray(query?.tags)
-    ? (query!.tags as string[])
-    : typeof query?.tags === 'string'
-      ? [query!.tags as string]
+  const labelIdsAll = Array.isArray(query?.labelIdsAll)
+    ? (query!.labelIdsAll as string[])
+    : typeof query?.labelIdsAll === 'string'
+      ? [query!.labelIdsAll as string]
       : undefined;
 
-  return { status, goalId, tags };
+  return { status, goalId, labelIdsAll };
 }
 
 function parseTemplateInstancesRange(query: Record<string, unknown> | undefined): {

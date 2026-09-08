@@ -14,6 +14,7 @@ const draft = {
     feasibilityAnalysis: 'One focused hour per day is available.',
     startDate: 1_773_000_000_000,
     dueDate: 1_783_000_000_000,
+    labels: ['Learning'],
   },
   keyResults: [
     {
@@ -34,6 +35,7 @@ const draft = {
       cadence: 'daily',
       occurrences: 120,
       keyResultIndex: 0,
+      labels: ['Japanese'],
     },
   ],
   reminders: [
@@ -73,6 +75,14 @@ describe('ADR-052 goal.create workflow contracts', () => {
     const parsed = GoalPlanDraftSchema.parse(draft);
     expect(parsed.revision).toBe(1);
     expect(parsed.taskTemplates[0].keyResultIndex).toBe(0);
+    expect(parsed.goal.labels).toEqual(['Learning']);
+    expect(parsed.taskTemplates[0].labels).toEqual(['Japanese']);
+    expect(
+      GoalPlanDraftSchema.safeParse({
+        ...draft,
+        taskTemplates: [{ ...draft.taskTemplates[0], tags: ['legacy'] }],
+      }).success,
+    ).toBe(false);
 
     expect(
       GoalPlanDraftSchema.safeParse({

@@ -32,13 +32,14 @@ describe('TaskPlanTaskSchema AI-6101 contract', () => {
       goalId: 'goal-1',
       keyResultId: 'kr-1',
       contributionValue: 2,
-      tags: ['reporting'],
+      labels: ['Reporting'],
     });
     expect(linked).toMatchObject({
       goalId: 'goal-1',
       keyResultId: 'kr-1',
       contributionValue: 2,
-      tags: ['reporting'],
+      labels: ['Reporting'],
     });
+    expect(TaskPlanTaskSchema.safeParse({ ...baseTask, tags: ['legacy'] }).success).toBe(false);
   });
 });

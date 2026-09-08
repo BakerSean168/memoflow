@@ -2204,8 +2204,6 @@ model TaskTemplate {
   archivedAt       DateTime? @map("archived_at")
   abandonedReason  String?   @map("abandoned_reason")
   importance       String    @default("moderate") /// ImportanceLevel
-  color            String?
-  tags             String /// JSON: string[]
 
   // ============ 时间配置（展开值对象） ============
   timeConfigType            String?   @map("time_config_type")

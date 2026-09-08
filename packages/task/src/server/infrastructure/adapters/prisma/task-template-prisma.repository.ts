@@ -218,24 +218,6 @@ export class TaskTemplatePrismaRepository
     );
   }
 
-  async findByTags(identityId: string, tags: string[]): Promise<TaskTemplate[]> {
-    const data = await this.db.taskTemplate.findMany({
-      where: { identityId, deletedAt: null },
-      orderBy: { createdAt: 'desc' },
-    });
-    const templates = data
-      .filter((record: PrismaTaskTemplate) => {
-        try {
-          const rowTags = JSON.parse(record.tags || '[]');
-          return tags.some((tag) => rowTags.includes(tag));
-        } catch {
-          return false;
-        }
-      })
-      .map((record: PrismaTaskTemplate) => this.mapToEntity(record));
-    return this.hydrateTemplates(identityId, templates);
-  }
-
   async findByLabelIdsAll(
     identityId: string,
     labelIds: readonly string[],

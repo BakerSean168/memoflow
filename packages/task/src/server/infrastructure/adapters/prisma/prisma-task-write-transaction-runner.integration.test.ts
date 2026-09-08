@@ -34,7 +34,6 @@ async function seedPlanWithPropagationStates() {
     timeConfig: TaskTimeConfig.createAllDay(new Date(now - 2 * DAY_MS)),
     recurrenceRule: RecurrenceRule.createDaily(1),
     importance: ImportanceLevel.Moderate,
-    tags: [],
   });
   await module.taskTemplateRepository.save(template);
 
@@ -94,8 +93,7 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
       timeConfig: TaskTimeConfig.createAllDay(new Date()),
       recurrenceRule: RecurrenceRule.createDaily(1),
       importance: ImportanceLevel.Moderate,
-      tags: [],
-    });
+      });
 
     let sentBeforeCommit = false;
 
@@ -151,8 +149,7 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
         occurrences: null,
       },
       importance: ImportanceLevel.Moderate,
-      tags: [],
-    });
+      });
 
     expect(result).toBeErrorWithCode('INTERNAL_ERROR');
     expect(await prisma.taskTemplate.count()).toBe(0);
@@ -283,8 +280,7 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
         occurrences: null,
       },
       importance: ImportanceLevel.Moderate,
-      tags: [],
-      goalBinding: {
+        goalBinding: {
         goalId,
         keyResultId,
         contribution: { value: 1, trigger: TaskGoalBindingTrigger.EachCompletion },

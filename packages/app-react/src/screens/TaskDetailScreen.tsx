@@ -367,13 +367,13 @@ export function TaskDetailScreen() {
             />
             <MetricRow label="Comment" value={template.comment ?? 'No comment'} />
             <View style={styles.tagRow}>
-              {template.tags.length > 0 ? (
-                template.tags.map((tag) => (
-                  <StatusPill key={tag} label={`#${tag}`} tone="textSecondary" />
+              {template.labels.length > 0 ? (
+                template.labels.map((label) => (
+                  <StatusPill key={label.id} label={label.name} tone="textSecondary" />
                 ))
               ) : (
                 <ThemedText type="small" themeColor="textSecondary">
-                  No tags
+                  No labels
                 </ThemedText>
               )}
             </View>

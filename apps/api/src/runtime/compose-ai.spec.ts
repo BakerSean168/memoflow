@@ -98,6 +98,7 @@ const repositoryApiPort = { tag: 'repository-port' } as unknown as RepositoryApp
 const goalApplicationPort = { tag: 'goal-port' } as unknown as GoalApplicationPort;
 const taskApplicationPort = { tag: 'task-port' } as unknown as TaskApplicationPort;
 const reminderApplicationPort = { tag: 'reminder-port' } as unknown as ReminderApplicationPort;
+const labelService = { tag: 'label-service' } as never;
 const repositoryStorageBaseDir = '/tmp/memoflow-ai-compose-test';
 const mastraStorage = {
   kind: 'postgres' as const,
@@ -110,6 +111,7 @@ const dependencies = {
   goalApplicationPort,
   taskApplicationPort,
   reminderApplicationPort,
+  labelService,
   mastraStorage,
 };
 
@@ -151,8 +153,9 @@ describe('API composeAI Mastra-only ownership', () => {
       goalApplicationPort,
       taskApplicationPort,
       reminderApplicationPort,
+      labelService,
     );
-    expect(TaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort);
+    expect(TaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort, labelService);
 
     const persistence = vi.mocked(RepositoryKnowledgeNotePersistenceAdapter).mock.results[0].value;
     expect(KnowledgeCapturePersistenceAdapter).toHaveBeenCalledWith(persistence);

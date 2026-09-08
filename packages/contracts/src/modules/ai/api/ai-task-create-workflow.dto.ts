@@ -52,7 +52,7 @@ export const TaskPlanTaskSchema = z
     goalId: z.string().trim().min(1).nullable().default(null),
     keyResultId: z.string().trim().min(1).nullable().default(null),
     contributionValue: z.number().positive().nullable().default(null),
-    tags: z.array(z.string().trim().min(1).max(50)).max(50).default([]),
+    labels: z.array(z.string().trim().min(1).max(50)).max(50).default([]),
   })
   .strict()
   .superRefine((value, ctx) => {

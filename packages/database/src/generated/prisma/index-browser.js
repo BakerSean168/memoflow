@@ -1479,8 +1479,6 @@ exports.Prisma.TaskTemplateScalarFieldEnum = {
   archivedAt: 'archivedAt',
   abandonedReason: 'abandonedReason',
   importance: 'importance',
-  color: 'color',
-  tags: 'tags',
   timeConfigType: 'timeConfigType',
   timeConfigStartTime: 'timeConfigStartTime',
   timeConfigEndTime: 'timeConfigEndTime',

@@ -48,7 +48,7 @@ const template = {
   id: 'plan-1',
   name: 'Morning review',
   description: null,
-  tags: ['focus'],
+  labels: [{ id: 'label-focus', name: 'Focus', color: null }],
   goalBinding: { goalId: 'goal-1', keyResultId: 'kr-1', contribution: null },
   recurrenceRule: {
     frequency: 'Daily',

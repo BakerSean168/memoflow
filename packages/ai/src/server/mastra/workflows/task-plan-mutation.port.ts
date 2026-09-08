@@ -13,6 +13,10 @@ import type { TaskTemplateMutationResult } from './goal-plan-mutation.port';
  * are never performed directly by the Mastra agent/workflow.
  */
 export interface TaskPlanMutationPort {
+  resolveLabels(
+    names: readonly string[],
+    context: ExecutionContext,
+  ): Promise<Result<string[]>>;
   createTaskTemplate(
     request: CreateTaskTemplateReq,
     context: ExecutionContext,

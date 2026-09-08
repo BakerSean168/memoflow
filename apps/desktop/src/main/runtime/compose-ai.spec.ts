@@ -69,6 +69,7 @@ const analyticsReadPort = { tag: 'analytics-read' } as never;
 const goalApplicationPort = { tag: 'goal-application' } as never;
 const taskApplicationPort = { tag: 'task-application' } as never;
 const reminderApplicationPort = { tag: 'reminder-application' } as never;
+const labelService = { tag: 'label-service' } as never;
 const mastraStorage = {
   kind: 'libsql' as const,
   url: 'file:///profiles/profile-1/storage/mastra.db',
@@ -89,6 +90,7 @@ const dependencies = {
   goalApplicationPort,
   taskApplicationPort,
   reminderApplicationPort,
+  labelService,
   mastraStorage,
 };
 
@@ -123,8 +125,9 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       goalApplicationPort,
       taskApplicationPort,
       reminderApplicationPort,
+      labelService,
     );
-    expect(DesktopTaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort);
+    expect(DesktopTaskPlanMutationAdapter).toHaveBeenCalledWith(taskApplicationPort, labelService);
     expect(KnowledgeCapturePersistenceAdapter).toHaveBeenCalledWith(knowledgeNotePersistence);
 
     expect(MastraAIRuntime).toHaveBeenCalledTimes(1);

@@ -32,8 +32,7 @@ function validCreatePayload() {
     recurrenceRule: null,
     reminderConfig: null,
     importance: ImportanceLevel.Moderate,
-    tags: ['planning'],
-    color: null,
+    labelIds: ['label-planning'],
     goalBinding: null,
   };
 }
@@ -49,9 +48,7 @@ function validTemplateResponse() {
     reminderConfig: null,
     importance: ImportanceLevel.Moderate,
     goalBinding: null,
-    tags: ['planning'],
-    labels: [],
-    color: null,
+    labels: [{ id: 'label-planning', name: 'Planning', color: null, createdAt: 1, updatedAt: 1 }],
     status: TaskTemplateStatus.Active,
     outcome: TaskPlanOutcome.Open,
     completionPolicy: TaskPlanCompletionPolicy.AllowCorrection,
@@ -85,6 +82,13 @@ function validTemplateResponse() {
 describe('task template contracts', () => {
   it('accepts a valid create payload', () => {
     expect(CreateTaskTemplateSchema.safeParse(validCreatePayload()).success).toBe(true);
+  });
+
+  it('rejects retired Task string tags and custom color in favor of Shared Label IDs', () => {
+    expect(CreateTaskTemplateSchema.safeParse({ ...validCreatePayload(), tags: ['legacy'] }).success).toBe(false);
+    expect(CreateTaskTemplateSchema.safeParse({ ...validCreatePayload(), color: '#ff0000' }).success).toBe(false);
+    expect(UpdateTaskTemplateSchema.safeParse({ tags: ['legacy'] }).success).toBe(false);
+    expect(UpdateTaskTemplateSchema.safeParse({ color: '#ff0000' }).success).toBe(false);
   });
 
   it('rejects unknown create and update properties', () => {

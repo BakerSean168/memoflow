@@ -1,6 +1,7 @@
 import type { TaskPlanMutationPort } from '@memoflow/ai';
 import type { IdentityId } from '@memoflow/contracts/primitives';
-import { ok } from '@memoflow/contracts/result';
+import { error, ok } from '@memoflow/contracts/result';
+import type { LabelService } from '@memoflow/label';
 import type { TaskApplicationPort } from '@memoflow/task';
 
 /**
@@ -9,7 +10,25 @@ import type { TaskApplicationPort } from '@memoflow/task';
  * rules.
  */
 export class TaskPlanMutationAdapter implements TaskPlanMutationPort {
-  constructor(private readonly task: TaskApplicationPort) {}
+  constructor(
+    private readonly task: TaskApplicationPort,
+    private readonly labels: LabelService,
+  ) {}
+
+  async resolveLabels(
+    names: readonly string[],
+    context: Parameters<TaskPlanMutationPort['resolveLabels']>[1],
+  ) {
+    try {
+      const labels = await this.labels.resolveNames(context.identityId, names);
+      return ok(labels.map((label) => label.id));
+    } catch (cause) {
+      return error(
+        'AI_LABEL_RESOLUTION_FAILED',
+        cause instanceof Error ? cause.message : 'Failed to resolve Shared Labels',
+      );
+    }
+  }
 
   async createTaskTemplate(
     request: Parameters<TaskPlanMutationPort['createTaskTemplate']>[0],

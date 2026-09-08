@@ -130,7 +130,7 @@
         {
           "runner": "notification-unit",
           "file": "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
-          "title": "keeps the Inbox Fact unread when Desktop delivery is suppressed by DND"
+          "title": "Fixture I: DND keeps the Inbox Fact unread when Desktop delivery is suppressed"
         }
       ]
     },
@@ -174,7 +174,7 @@
         {
           "runner": "api-integration",
           "file": "apps/api/src/__tests__/integration/task-goal-host-restart.integration.test.ts",
-          "title": "delivers a committed Task contribution after the completing host exits"
+          "title": "Fixture B API: EachCompletion survives host restart, stays idempotent, and updates Goal once"
         }
       ]
     },

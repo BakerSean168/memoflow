@@ -43,6 +43,7 @@ export const GoalPlanGoalSchema = z
     feasibilityAnalysis: z.string().trim().max(2000).optional(),
     startDate: z.number().int().nonnegative().nullable().default(null),
     dueDate: z.number().int().nonnegative().nullable().default(null),
+    labels: z.array(z.string().trim().min(1).max(50)).max(50).default([]),
   })
   .strict()
   .superRefine((value, ctx) => {
@@ -88,7 +89,7 @@ export const GoalPlanTaskTemplateSchema = z
     occurrences: z.number().int().positive().nullable().default(null),
     keyResultIndex: z.number().int().nonnegative().optional(),
     contributionValue: z.number().nonnegative().default(1),
-    tags: z.array(z.string().trim().min(1).max(50)).max(50).default([]),
+    labels: z.array(z.string().trim().min(1).max(50)).max(50).default([]),
   })
   .strict()
   .superRefine((value, ctx) => {

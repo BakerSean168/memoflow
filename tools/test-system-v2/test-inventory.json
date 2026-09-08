@@ -5613,6 +5613,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/database/src/schema/task-shared-label-migration.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/database/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/database/src/schema/vnext-unique-constraints.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11127,7 +11135,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 9
+      "fileCount": 10
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11848,7 +11856,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1016,
+    "unit": 1017,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,

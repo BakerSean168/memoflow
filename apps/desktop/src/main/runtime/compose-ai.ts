@@ -19,6 +19,7 @@ import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { ReminderApplicationPort } from '@memoflow/reminder';
 import type { TaskApplicationPort } from '@memoflow/task';
+import type { LabelService } from '@memoflow/label';
 import {
   AIEvaluationReportFileAdapter,
   createAIModule,
@@ -45,6 +46,7 @@ export interface ComposeAIElectronDependencies {
   readonly goalApplicationPort: GoalApplicationPort;
   readonly taskApplicationPort: TaskApplicationPort;
   readonly reminderApplicationPort: ReminderApplicationPort;
+  readonly labelService: LabelService;
   readonly mastraStorage: MastraStorageConfig;
 }
 
@@ -64,8 +66,12 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
     dependencies.goalApplicationPort,
     dependencies.taskApplicationPort,
     dependencies.reminderApplicationPort,
+    dependencies.labelService,
   );
-  const taskPlanMutationAdapter = new DesktopTaskPlanMutationAdapter(dependencies.taskApplicationPort);
+  const taskPlanMutationAdapter = new DesktopTaskPlanMutationAdapter(
+    dependencies.taskApplicationPort,
+    dependencies.labelService,
+  );
   const mastraRuntime = new MastraAIRuntime({
     storage: createMastraStorage(dependencies.mastraStorage),
     modelResolver: new MastraModelResolver(providerConfigRepository),

@@ -54,7 +54,7 @@ const taskDraft = TaskPlanDraftContentSchema.parse({
     cadence: 'weekly',
     daysOfWeek: [1],
     startDate: Date.UTC(2026, 8, 1),
-    tags: ['reporting'],
+    labels: ['Reporting'],
   },
   rationale: 'A concrete recurring task.',
   warnings: [],
@@ -80,11 +80,15 @@ function context(identityId: string, requestId: string): ExecutionContext {
 }
 
 function mutationPort(): GoalPlanMutationPort & {
+  resolveLabels: ReturnType<typeof vi.fn>;
   createGoal: ReturnType<typeof vi.fn>;
   createTaskTemplate: ReturnType<typeof vi.fn>;
   createReminder: ReturnType<typeof vi.fn>;
 } {
   return {
+    resolveLabels: vi.fn(async (names: readonly string[]) =>
+      ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
+    ),
     createGoal: vi.fn(async (request) =>
       ok({
         goalId: String(request.id),
@@ -118,7 +122,12 @@ async function createRuntime() {
     modelResolver: new MastraModelResolver({} as never, vi.fn() as unknown as typeof fetch),
     transcriptBootstrapSource: { load: vi.fn(async () => null) },
     goalPlanMutationPort: mutations,
-    taskPlanMutationPort: { createTaskTemplate },
+    taskPlanMutationPort: {
+      resolveLabels: vi.fn(async (names: readonly string[]) =>
+        ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
+      ),
+      createTaskTemplate,
+    },
     knowledgeCaptureMutationPort: { saveKnowledgeNote },
     usageReadPort: { summarizeUsage },
   });

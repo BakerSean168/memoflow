@@ -90,11 +90,15 @@ function mastraRequestContext(requestId: string): RequestContext {
 }
 
 function mutationPort(): GoalPlanMutationPort & {
+  resolveLabels: ReturnType<typeof vi.fn>;
   createGoal: ReturnType<typeof vi.fn>;
   createTaskTemplate: ReturnType<typeof vi.fn>;
   createReminder: ReturnType<typeof vi.fn>;
 } {
   return {
+    resolveLabels: vi.fn(async (names: readonly string[]) =>
+      ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
+    ),
     createGoal: vi.fn(async (request) =>
       ok({
         goalId: String(request.id),

@@ -193,8 +193,6 @@ const task_templates = new Table({
   archived_at: column.text,
   abandoned_reason: column.text,
   importance: column.text,
-  color: column.text,
-  tags: column.text, // JSON array
   time_config_type: column.text,
   time_config_start_time: column.text,
   time_config_end_time: column.text,
