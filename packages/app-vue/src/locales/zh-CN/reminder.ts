@@ -24,7 +24,17 @@ export default {
     "profileFallbackDescription": "Profile 只是场景闸门；暂停或重新激活都不会改写作息自身开关。",
     "routineCountValue": "{count} 条作息",
     "runningCountValue": "{count} 条可运行",
-    "sidebarProfilePaused": "当前 Profile 闸门暂停了 {count} 条作息"
+    "sidebarProfilePaused": "当前 Profile 闸门暂停了 {count} 条作息",
+    "methodLibraryTitle": "方法库",
+    "methodLibraryDescription": "从少量、可验证的方法开始配置作息。WallClock 方法可以直接预填作息；Protocol 方法继续由确定性的 Protocol runtime 执行。",
+    "methodApply": "使用预设",
+    "methodProtocolOwned": "Protocol runtime",
+    "methodRuntimeProtocol": "Protocol",
+    "methodRuntimeWallClock": "墙钟时间",
+    "methodEveryMinutes": "建议：每 {minutes} 分钟",
+    "methodAtTime": "建议：{time}",
+    "methodProtocolSummary": "建议：专注 {focus} / 休息 {breakMinutes} 分钟 × {cycles} 轮",
+    "methodIntervention": "默认干预：{value}",
   },
   "action": {
     "createReminder": "新建作息",

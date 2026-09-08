@@ -7479,6 +7479,16 @@
       ]
     },
     {
+      "path": "packages/reminder/src/method-library/method-library.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reminder/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/reminder/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/reminder/src/server/application/mappers/reminder-template-client.mapper.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10743,7 +10753,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "packages/reminder/vitest.mappers.config.ts",
@@ -11205,7 +11215,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "packages/repository/vitest.config.ts",
@@ -11646,6 +11656,7 @@
       "packages/reminder/src/electron/reminder-electron.surface.spec.ts",
       "packages/reminder/src/infrastructure-client/adapters/http/reminder-http.adapter.test.ts",
       "packages/reminder/src/infrastructure-client/adapters/ipc/reminder-ipc.adapter.surface.spec.ts",
+      "packages/reminder/src/method-library/method-library.spec.ts",
       "packages/reminder/src/server/application/mappers/reminder-template-client.mapper.test.ts",
       "packages/reminder/src/server/application/services/reminder-group-application-service.test.ts",
       "packages/reminder/src/server/application/services/reminder-preferences-application-service.test.ts",
@@ -11856,7 +11867,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1017,
+    "unit": 1018,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,

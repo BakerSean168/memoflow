@@ -44,6 +44,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './schedule-projection',
     './schedule-projection/routine',
     './routine-runtime',
+    './method-library',
     './server',
   ],
   contracts: [

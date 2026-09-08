@@ -364,6 +364,7 @@ import type {
   UpdateReminderTemplateReq,
 } from '@memoflow/contracts/reminder';
 import type { ReminderTemplateClientDTO } from '@memoflow/contracts/reminder';
+import type { RoutineMethodTemplatePreset } from '@memoflow/reminder/method-library';
 import { ColorPickerField } from '../../../shared/components';
 import { defaultNamedColor } from '../../../shared/constants/color-palette';
 import { getUserTimezone } from '../utils/user-timezone';
@@ -502,6 +503,23 @@ const openForCreate = () => {
   emit('open-change', true);
 };
 
+const openForPreset = (preset: RoutineMethodTemplatePreset) => {
+  resetForm();
+  Object.assign(formData, {
+    title: preset.title,
+    description: preset.description,
+    importanceLevel: preset.importanceLevel,
+    triggerType: preset.trigger.type,
+    fixedTime: preset.trigger.type === 'FixedTime' ? preset.trigger.fixedTime : '09:00',
+    intervalMinutes: preset.trigger.type === 'Interval' ? preset.trigger.intervalMinutes : 60,
+    icon: preset.icon,
+    tags: [...preset.tags],
+  });
+  tagsInput.value = preset.tags.join(', ');
+  visible.value = true;
+  emit('open-change', true);
+};
+
 const openForEdit = (template: ReminderTemplateClientDTO) => {
   loadTemplateData(template);
   visible.value = true;
@@ -589,5 +607,5 @@ const handleSave = async () => {
   }
 };
 
-defineExpose({ open, openForCreate, openForEdit, close });
+defineExpose({ open, openForCreate, openForPreset, openForEdit, close });
 </script>

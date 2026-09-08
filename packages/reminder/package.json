@@ -49,6 +49,10 @@
     "./electron": {
       "types": "./dist/electron/index.d.ts",
       "import": "./dist/electron/index.js"
+    },
+    "./method-library": {
+      "types": "./dist/method-library/index.d.ts",
+      "import": "./dist/method-library/index.js"
     }
   },
   "scripts": {},
