@@ -33,6 +33,9 @@ import type { RepositoryApplicationPort } from '@memoflow/repository';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { TaskApplicationPort } from '@memoflow/task';
 import type { ReminderApplicationPort } from '@memoflow/reminder';
+import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
+import type { IScheduleRepository } from '@memoflow/schedule';
+import type { INotificationRepository } from '@memoflow/notification';
 import type { LabelService } from '@memoflow/label';
 import { GoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
 import { TaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
@@ -40,6 +43,9 @@ import { ControlledAnalyticsReadAdapter } from '../modules/ai/controlled-analyti
 import { RepositoryKnowledgeIndexStatusAdapter } from '../modules/ai/repository-knowledge-index-status.adapter';
 import { RepositoryKnowledgeNotePersistenceAdapter } from '../modules/ai/repository-knowledge-note-persistence.adapter';
 import { RepositoryKnowledgeSourceAdapter } from '../modules/ai/repository-knowledge-source.adapter';
+import { RoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
+import { PlannerAIReadAdapter } from '../modules/ai/planner-read.adapter';
+import { NotificationAIReadAdapter } from '../modules/ai/notification-read.adapter';
 
 export interface ComposeAIDependencies {
   /** Shared API-lane Prisma client owned by apps/api. */
@@ -56,6 +62,9 @@ export interface ComposeAIDependencies {
   readonly reminderApplicationPort: ReminderApplicationPort;
   /** Identity-scoped Shared Label resolver reused by AI workflow application. */
   readonly labelService: LabelService;
+  readonly routineCommandPort: RoutineCoachCommandPort;
+  readonly scheduleRepository: IScheduleRepository;
+  readonly notificationRepository: INotificationRepository;
   /** Host-selected persistent Mastra storage; API uses PostgreSQL. */
   readonly mastraStorage: MastraStorageConfig;
 }
@@ -98,6 +107,15 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
     knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(knowledgeNotePersistence),
     executionLogPort: repositorySet.executionLogPort,
     usageReadPort: repositorySet.executionLogPort,
+    routineCommandPort: new RoutineAICommandAdapter(
+      dependencies.reminderApplicationPort,
+      dependencies.routineCommandPort,
+    ),
+    plannerReadPort: new PlannerAIReadAdapter(
+      dependencies.scheduleRepository,
+      dependencies.taskApplicationPort,
+    ),
+    notificationReadPort: new NotificationAIReadAdapter(dependencies.notificationRepository),
   });
   const knowledgeSourcePort = new RepositoryKnowledgeSourceAdapter(
     dependencies.db,

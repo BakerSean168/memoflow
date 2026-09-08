@@ -22,6 +22,8 @@ import {
   UserReminderPreferencePowerSyncRepository,
 } from './adapters/powersync';
 import { PowerSyncRoutineProfileStore } from './routine-vnext/routine-profile-store.powersync';
+import { PowerSyncProtocolSessionStore } from './routine-vnext/protocol-session-store.powersync';
+import { PowerSyncRoutineTemporaryOverrideStore } from './routine-schedule/routine-temporary-override-store.powersync';
 import { ReminderScheduleExecutionPowerSyncCommitAdapter } from './adapters/powersync/reminder-schedule-execution-commit.powersync.adapter';
 import type { ReminderScheduleExecutionSource } from '../../schedule-execution';
 import type { ReminderScheduleExecutionCommitPort } from './schedule-execution-commit.port';
@@ -34,6 +36,8 @@ import type {
   IReminderResponseRepository,
   IUserReminderPreferenceRepository,
   RoutineProfileStore,
+  ProtocolSessionStore,
+  RoutineTemporaryOverrideStore,
 } from '../domain';
 
 type Queryable = IElectronDatabase;
@@ -87,6 +91,8 @@ export interface ReminderPowerSyncRepositorySet {
   readonly reminderResponseRepository: IReminderResponseRepository;
   readonly userReminderPreferenceRepository: IUserReminderPreferenceRepository;
   readonly routineProfileStore: RoutineProfileStore;
+  readonly routineTemporaryOverrideStore: RoutineTemporaryOverrideStore;
+  readonly protocolSessionStore: ProtocolSessionStore;
   readonly closureChecker: (identityId: string) => Promise<boolean>;
 }
 
@@ -112,6 +118,8 @@ export function createReminderPowerSyncRepositories(db: Queryable): ReminderPowe
     reminderResponseRepository: new ReminderResponsePowerSyncRepository(db),
     userReminderPreferenceRepository: new UserReminderPreferencePowerSyncRepository(db),
     routineProfileStore: new PowerSyncRoutineProfileStore(db),
+    routineTemporaryOverrideStore: new PowerSyncRoutineTemporaryOverrideStore(db),
+    protocolSessionStore: new PowerSyncProtocolSessionStore(db),
     closureChecker: createPowerSyncClosureChecker(db),
   };
 }

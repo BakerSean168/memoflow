@@ -422,6 +422,9 @@ async function registerBusinessModules(
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
     reminderApplicationPort: reminderComposed.applicationPort,
+    routineCommandPort: reminderComposed.routineCommandPort,
+    scheduleRepository: scheduleComposed.repositories.scheduleRepository,
+    notificationRepository: notificationComposed.repositories.notificationRepository,
     labelService,
     mastraStorage: {
       kind: 'libsql',

@@ -35,6 +35,8 @@ import type { ReminderScheduleExecutionCommitPort } from './schedule-execution-c
 import type { ReminderScheduleProjectionSource } from '../../schedule-projection';
 import { PrismaOperationAuditRepository } from '@memoflow/patterns/operations';
 import { PrismaRoutineProfileStore } from './routine-vnext/routine-profile-store.prisma';
+import { PrismaProtocolSessionStore } from './routine-vnext/protocol-session-store.prisma';
+import { PrismaRoutineTemporaryOverrideStore } from './routine-schedule/routine-temporary-override-store.prisma';
 import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 import type { ReminderReliableOperationPort } from '@memoflow/contracts/reliable-messaging';
 import type { ReminderTransactionRunner } from '../domain/ports/reminder-transaction-runner.port';
@@ -45,6 +47,8 @@ import type {
   IReminderResponseRepository,
   IUserReminderPreferenceRepository,
   RoutineProfileStore,
+  ProtocolSessionStore,
+  RoutineTemporaryOverrideStore,
 } from '../domain';
 
 export interface CreateReminderPrismaModuleOptions {
@@ -72,6 +76,8 @@ export interface ReminderPrismaRepositorySet {
   readonly reminderResponseRepository: IReminderResponseRepository;
   readonly userReminderPreferenceRepository: IUserReminderPreferenceRepository;
   readonly routineProfileStore: RoutineProfileStore;
+  readonly routineTemporaryOverrideStore: RoutineTemporaryOverrideStore;
+  readonly protocolSessionStore: ProtocolSessionStore;
   readonly reliablePort: ReminderReliableOperationPort;
   readonly transactionRunner: ReminderTransactionRunner;
   /** Canonical snooze command writer backed by RoutineTemporaryOverride. */
@@ -142,6 +148,8 @@ export function createReminderPrismaRepositories(db: PrismaClient): ReminderPris
     reminderResponseRepository: new ReminderResponsePrismaRepository(db),
     userReminderPreferenceRepository: new UserReminderPreferencePrismaRepository(db),
     routineProfileStore: new PrismaRoutineProfileStore(db),
+    routineTemporaryOverrideStore: new PrismaRoutineTemporaryOverrideStore(db),
+    protocolSessionStore: new PrismaProtocolSessionStore(db),
     reliablePort: new ReminderReliableOperationPrismaAdapter(db),
     transactionRunner: new PrismaReminderWriteTransactionRunner(db),
     snoozeOverrideWriter: createReminderSnoozeOverrideWriterPrisma(db),

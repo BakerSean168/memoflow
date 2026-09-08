@@ -569,6 +569,14 @@ const routine_profile_memberships = new Table({
   updated_at: column.text,
 });
 
+const routine_temporary_overrides = new Table({
+  identity_id: column.text,
+  routine_id: column.text,
+  override_json: column.text,
+  created_at: column.text,
+  updated_at: column.text,
+});
+
 const routine_protocol_definitions = new Table({
   identity_id: column.text,
   name: column.text,
@@ -1122,6 +1130,7 @@ export const PowerSyncAppSchema = new Schema({
   routine_definitions,
   routine_profiles,
   routine_profile_memberships,
+  routine_temporary_overrides,
   routine_protocol_definitions,
   routine_protocol_sessions,
   // Notification

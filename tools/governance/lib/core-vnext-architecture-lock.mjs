@@ -24,6 +24,11 @@ const UI_ROOTS = [
   'apps/desktop/src/renderer/',
   'apps/web/src/',
 ];
+const AI_PRODUCT_TOOL_ROOTS = [
+  'packages/ai/src/server/mastra/tools/',
+  'apps/api/src/modules/ai/',
+  'apps/desktop/src/main/modules/ai/',
+];
 
 export const FEATURE_SCHEDULER_IMPORT_PATTERN =
   /['"`](@memoflow\/scheduler(?:\/[a-zA-Z0-9_.\/-]*)?)['"`]/;
@@ -51,6 +56,8 @@ export const UI_SCHEDULER_INTERNAL_IMPORT_PATTERN =
   /['"`](@memoflow\/scheduler\/(?:server|scheduling|electron)(?:\/[a-zA-Z0-9_.\/-]*)?)['"`]/;
 export const UI_SCHEDULED_INVOCATION_MUTATION_PATTERN =
   /\b(ScheduledInvocation|SchedulingPort|createScheduleTask|updateScheduleTask|deleteScheduleTask|pauseScheduleTask|resumeScheduleTask|cancelScheduleTask|completeScheduleTask)\b|\bschedulerService\.(?:create|update|delete|pause|resume|cancel|complete)\b/;
+export const AI_RAW_SCHEDULER_ACCESS_PATTERN =
+  /['"`]@memoflow\/scheduler(?:\/[^'"`]*)?['"`]|\b(ScheduledInvocation|ScheduleTask|SchedulingPort|createScheduleTask|updateScheduleTask|deleteScheduleTask|pauseScheduleTask|resumeScheduleTask|cancelScheduleTask|completeScheduleTask)\b|\bschedulerService\.(?:create|update|delete|pause|resume|cancel|complete)\b/;
 export const TASK_LEGACY_CLASSIFICATION_PATTERN =
   /\b(?:template|dto|vm|task)\.tags\b|\btask-tag-filter\b|\bfindByTags\b|\bupdateTags\b|\bupdateColor\b/;
 export const TASK_LEGACY_CONTRACT_FIELD_PATTERN = /\b(?:tags|color)\??\s*:/;
@@ -218,6 +225,16 @@ export function findCoreVnextArchitectureLockViolations(files) {
       );
     }
 
+    if (startsWithAny(relPath, AI_PRODUCT_TOOL_ROOTS)) {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        AI_RAW_SCHEDULER_ACCESS_PATTERN,
+        'ai-raw-scheduler-access',
+      );
+    }
+
     // ADR-054: Task classification is single-track Shared Label. These locks
     // intentionally target only Task-owned product/contract files so Reminder,
     // Governance and Scheduler metadata may keep their unrelated tag/color semantics.
@@ -309,6 +326,7 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
     'contracts-third-party-time-dto': 'Contracts must not expose third-party recurrence/calendar DTO types',
     'ui-scheduler-internal-import': 'UI may use read-only scheduler/client diagnostics, never Scheduler internals',
     'ui-scheduled-invocation-mutation': 'UI must not mutate ScheduledInvocation/ScheduleTask worker state directly',
+    'ai-raw-scheduler-access': 'AI tools/adapters may read Planner/Notification product projections but must never import or mutate raw Scheduler worker state',
     'task-legacy-classification': 'Task classification must use Shared Label; legacy string tags/custom Task color are forbidden',
   };
   return `${file}:${line}: ${messages[kind] ?? kind} [${text}]`;

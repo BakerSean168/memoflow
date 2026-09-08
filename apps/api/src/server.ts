@@ -284,6 +284,9 @@ async function bootstrap(): Promise<void> {
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
     reminderApplicationPort: reminderComposed.executorReminderPort,
+    routineCommandPort: reminderComposed.routineCommandPort,
+    scheduleRepository: scheduleApiModule.repositories.scheduleRepository,
+    notificationRepository: notificationApiModule.repositories.notificationRepository,
     labelService,
     mastraStorage: { kind: 'postgres', connectionString: env.DATABASE_URL },
   });

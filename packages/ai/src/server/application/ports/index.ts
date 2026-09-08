@@ -74,3 +74,22 @@ export type { IAIProviderEndpointPolicyPort, ProviderEndpointValidationInput } f
 export type { IAIProviderOnboardingSessionRepository, AIProviderOnboardingSessionRecord, CreateAIProviderOnboardingSessionInput } from './provider-onboarding-session.repository';
 
 export type { IAIProviderOnboardingCommitPort, AIProviderOnboardingCommitOutcome } from './provider-onboarding-commit.port';
+export type {
+  AIRoutineMethodId,
+  AIProtocolMethodId,
+  AIRoutineCreateInput,
+  AIRoutineCommandReceipt,
+  IAIRoutineCommandPort,
+} from './routine-command.port';
+export type {
+  AIPlannerCalendarItem,
+  AIPlannerTaskItem,
+  AIPlannerWindowSummary,
+  AIPlannerConflictSummary,
+  IAIPlannerReadPort,
+} from './planner-read.port';
+export type {
+  AIUnreadNotificationItem,
+  AIUnreadNotificationSummary,
+  IAINotificationReadPort,
+} from './notification-read.port';

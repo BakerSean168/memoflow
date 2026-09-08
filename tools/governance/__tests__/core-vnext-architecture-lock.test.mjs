@@ -76,6 +76,10 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `import type { SchedulingPort } from '@memoflow/scheduler/scheduling'; const x: ScheduledInvocation = y;`,
       },
       {
+        relPath: 'packages/ai/src/server/mastra/tools/raw-scheduler.ts',
+        content: `import { SchedulingPort } from '@memoflow/scheduler'; const job: ScheduleTask = x;`,
+      },
+      {
         relPath: 'packages/task/src/server/domain/legacy-classification.ts',
         content: `function read(template) { return template.tags; }`,
       },
@@ -104,6 +108,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
       'contracts-third-party-time-dto',
       'ui-scheduler-internal-import',
       'ui-scheduled-invocation-mutation',
+      'ai-raw-scheduler-access',
       'task-legacy-classification',
     ]) {
       expect(kinds.has(kind), `missing violation kind ${kind}`).toBe(true);
@@ -139,6 +144,10 @@ describe('HARD-7102 core vNext architecture lock', () => {
       {
         relPath: 'packages/app-react/src/hooks/useScheduleTasks.ts',
         content: `import type { ScheduleTask } from '@memoflow/scheduler/client'; schedulerService.listTasks();`,
+      },
+      {
+        relPath: 'packages/ai/src/server/mastra/tools/planner-summary.ts',
+        content: `import type { IAIPlannerReadPort } from '../../application/ports'; plannerReadPort.getWindowSummary(input);`,
       },
       {
         relPath: 'apps/web/src/mocks/handlers/schedule.handlers.ts',

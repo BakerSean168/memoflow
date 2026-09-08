@@ -74,3 +74,13 @@ export {
   type ProtocolBreakCreditReport,
   type ProtocolBreakCreditRuntime,
 } from '../server/runtime/protocol-break-credit';
+export {
+  createRoutineCoachCommandService,
+  type CreateRoutineCoachCommandServiceOptions,
+  type RoutineCoachCommandPort,
+  type RoutineProfileActivationReceipt,
+  type RoutineProtocolMethodId,
+  type RoutineProtocolSessionReceipt,
+  type RoutineTemporaryOverrideReceipt,
+} from '../server/application/services/routine-coach-command.service';
+export { createRoutineOverrideChangedNotifier } from '../server/infrastructure/routine-schedule/routine-override-change-notifier';
