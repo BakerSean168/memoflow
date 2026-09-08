@@ -88,18 +88,13 @@ export class TaskPlanController {
    * Create new task template (with Zod validation)
    * Identity is injected from Context, not from request payload
    */
-  async createTemplate(
-    input: CreateTaskPlanReq,
-    ctx: Context,
-  ): Promise<Result<CreateTaskPlanRes>> {
+  async createTemplate(input: CreateTaskPlanReq, ctx: Context): Promise<Result<CreateTaskPlanRes>> {
     // Assemble internal input with identityId from Context
     const createInput: CreateTaskPlanInput = {
       identityId: IdentityId.of(ctx.identityId),
       name: input.name,
       description: input.description,
-      taskType: input.taskType,
-      timeConfig: input.timeConfig,
-      recurrenceRule: input.recurrenceRule,
+      schedule: input.schedule,
       reminderConfig: input.reminderConfig,
       importance: input.importance,
       labelIds: input.labelIds,
@@ -165,8 +160,7 @@ export class TaskPlanController {
     return await this.useCases.updateTemplate(id, ctx.identityId, {
       name: input.name,
       description: input.description,
-      timeConfig: input.timeConfig,
-      recurrenceRule: input.recurrenceRule,
+      schedule: input.schedule,
       reminderConfig: input.reminderConfig,
       importance: input.importance,
       labelIds: input.labelIds,
@@ -227,7 +221,6 @@ export class TaskPlanController {
   ): Promise<Result<TaskPlanClientDTO>> {
     return await this.useCases.abandonPlan(id, ctx.identityId, request);
   }
-
 
   /**
    * Generate instances for a template

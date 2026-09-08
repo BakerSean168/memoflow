@@ -289,11 +289,7 @@ import {
   RefreshCw,
   Search,
 } from '@lucide/vue';
-import {
-  TaskType,
-  type RecurrenceRuleDTO,
-  type TaskOccurrenceClientDTO,
-} from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
@@ -306,7 +302,7 @@ import { useTaskPlanListQuery } from '../composables/useTaskPlanListQuery';
 import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import {
   mapTaskPlanDtoToViewModel,
-  toTaskTimeConfigPayload,
+  toTaskPlanSchedulePayload,
 } from '../utils/task-plan-presentation';
 import {
   getTaskOccurrencePosition,
@@ -363,7 +359,9 @@ const planViewModels = computed(() =>
 );
 const availableLabels = computed(() => {
   const byId = new Map(
-    templates.value.flatMap((template) => template.labels).map((label) => [label.id, label] as const),
+    templates.value
+      .flatMap((template) => template.labels)
+      .map((label) => [label.id, label] as const),
   );
   return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
 });
@@ -383,7 +381,11 @@ function templateMatchesFilters(templateId: string): boolean {
   ) {
     return false;
   }
-  if (labelFilter.value !== 'all' && !template.labels.some((label) => label.id === labelFilter.value)) return false;
+  if (
+    labelFilter.value !== 'all' &&
+    !template.labels.some((label) => label.id === labelFilter.value)
+  )
+    return false;
   if (goalFilter.value === 'linked' && !template.goalBinding) return false;
   if (goalFilter.value === 'unlinked' && template.goalBinding) return false;
   return true;
@@ -464,11 +466,11 @@ function closeDialog() {
 }
 
 function goalBinding(vm: TaskPlanViewModel) {
-  if (!vm.goalBinding?.goalId || !vm.goalBinding.keyResultId) return null;
+  if (!vm.goalBinding?.goalId) return null;
   return {
     goalId: vm.goalBinding.goalId as GoalId,
-    keyResultId: vm.goalBinding.keyResultId as KeyResultId,
-    contribution: vm.goalBinding.contribution ?? null,
+    keyResultId: vm.goalBinding.keyResultId ? (vm.goalBinding.keyResultId as KeyResultId) : null,
+    contribution: vm.goalBinding.keyResultId ? (vm.goalBinding.contribution ?? null) : null,
   };
 }
 
@@ -476,8 +478,7 @@ async function handleSubmit(vm: TaskPlanViewModel) {
   const common = {
     name: vm.title,
     description: vm.description ?? null,
-    timeConfig: toTaskTimeConfigPayload(vm.timeConfig),
-    recurrenceRule: (vm.recurrenceRule as unknown as RecurrenceRuleDTO) ?? null,
+    schedule: toTaskPlanSchedulePayload(vm),
     reminderConfig: (vm.reminderConfig as never) ?? null,
     importance: (vm.importance as ImportanceLevel) ?? ImportanceLevel.Moderate,
     labelIds: vm.labelIds ?? vm.labels?.map((label) => label.id) ?? [],
@@ -486,10 +487,7 @@ async function handleSubmit(vm: TaskPlanViewModel) {
   const saved =
     dialogMode.value === 'edit' && vm.id
       ? await updateTemplateSafe(vm.id, common)
-      : await createTemplateSafe({
-          ...common,
-          taskType: vm.recurrenceRule ? TaskType.Recurring : TaskType.OneTime,
-        });
+      : await createTemplateSafe(common);
   if (saved) {
     closeDialog();
     await reloadSurface();

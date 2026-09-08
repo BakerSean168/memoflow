@@ -214,6 +214,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       task: {
         title: 'Contribute to KR',
         cadence: 'once',
+        startDate: Date.UTC(2026, 8, 8),
         goalId: 'goal-1',
         keyResultId: 'kr-1',
         contributionValue: 3,
@@ -240,6 +241,7 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
       task: {
         title: 'Linked context only',
         cadence: 'once',
+        startDate: Date.UTC(2026, 8, 8),
         goalId: 'goal-1',
         keyResultId: 'kr-1',
       },

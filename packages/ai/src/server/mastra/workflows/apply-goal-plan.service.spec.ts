@@ -132,13 +132,17 @@ describe('ApplyGoalPlanService', () => {
     });
     expect(port.createTaskPlan.mock.calls[0]?.[0]).toMatchObject({
       id: expected.task0,
-      taskType: 'Recurring',
-      timeConfig: {
-        timeType: 'TimePoint',
-        timePoint: 20 * 60,
-        startDate: draft.goal.startDate,
+      schedule: {
+        kind: 'Recurring',
+        startDate: '2026-09-01',
+        timing: { kind: 'At', time: '20:00' },
+        recurrence: {
+          frequency: 'Daily',
+          interval: 1,
+          byWeekday: [],
+          end: { kind: 'Never' },
+        },
       },
-      recurrenceRule: { frequency: 'Daily', interval: 1 },
       labelIds: ['label:japanese'],
       goalBinding: {
         goalId: expected.goal,
@@ -148,7 +152,16 @@ describe('ApplyGoalPlanService', () => {
     });
     expect(port.createTaskPlan.mock.calls[1]?.[0]).toMatchObject({
       id: expected.task1,
-      recurrenceRule: { frequency: 'Weekly', daysOfWeek: [6], occurrences: 8 },
+      schedule: {
+        kind: 'Recurring',
+        startDate: '2026-09-01',
+        recurrence: {
+          frequency: 'Weekly',
+          interval: 1,
+          byWeekday: [6],
+          end: { kind: 'Count', count: 8 },
+        },
+      },
     });
     expect(port.createReminder.mock.calls[0]?.[0]).toMatchObject({
       id: expected.reminder0,

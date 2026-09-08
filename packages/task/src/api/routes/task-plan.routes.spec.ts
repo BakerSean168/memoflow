@@ -134,12 +134,7 @@ describe('task-plan route contracts', () => {
       bodySchema.safeParse({
         name: 'My Task',
         importance: 'Important',
-        timeConfig: {
-          timeType: 'AllDay',
-          startDate: null,
-          timePoint: null,
-          timeRange: null,
-        },
+        schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
       }).success,
     ).toBe(true);
     // Empty object should fail (name required)
@@ -165,7 +160,6 @@ describe('task-plan route contracts', () => {
     // Query with status array should pass
     expect(querySchema.safeParse({ status: ['active'] }).success).toBe(true);
   });
-
 
   it('GET /{id} detail uses TaskPlanResponseSchema', () => {
     const registry = new TestOpenApiRegistry();
@@ -412,8 +406,7 @@ describe('task template mutation routes run the real validation adapter (Phase 4
     await handler(
       createReq({
         name: 'My Task',
-        taskType: 'OneTime',
-        timeConfig: { timeType: 'AllDay', startDate: null, timePoint: null },
+        schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
         importance: 'Moderate',
       }),
       validRes,

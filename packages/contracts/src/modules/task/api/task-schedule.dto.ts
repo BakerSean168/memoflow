@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
 import type { TaskOccurrenceId } from '../../../primitives';
-import { TaskTimeConfigSchema } from './task-plan.dto';
+import { TaskTimeConfigSchema } from '../value-objects/task-time-config';
 import type { TaskOccurrenceClientDTO } from '../aggregates/task-occurrence-client';
 
 function requireRescheduleDate(

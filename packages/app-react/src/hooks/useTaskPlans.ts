@@ -2,11 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
-import type {
-  TaskPlanClientDTO,
-  TaskPlanStatus,
-  TaskTimeConfigDTO,
-} from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO, TaskPlanStatus, TaskPlanSchedule } from '@memoflow/contracts/task';
 import type { TaskPlan } from '@memoflow/task/client';
 import { presentErrorMessage } from '@memoflow/http-client';
 
@@ -39,7 +35,7 @@ export type TaskSortOption = 'updated' | 'pending' | 'completion';
 
 export type TaskPlanDetail = TaskPlanSummary & {
   createdAt: number;
-  timeConfig: TaskTimeConfigDTO;
+  schedule: TaskPlanSchedule;
 };
 
 function mapTemplate(template: TaskPlan): TaskPlanSummary {
@@ -69,12 +65,7 @@ export function mapTaskPlanDetail(template: TaskPlan): TaskPlanDetail {
   return {
     ...mapTemplate(template),
     createdAt: template.createdAt,
-    timeConfig: {
-      timeType: template.timeConfig.timeType,
-      startDate: template.timeConfig.startDate ?? null,
-      timePoint: template.timeConfig.timePoint,
-      timeRange: template.timeConfig.timeRange ?? null,
-    },
+    schedule: structuredClone(template.schedule),
   };
 }
 

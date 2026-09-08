@@ -156,8 +156,7 @@ interface RowSpec {
 
 const validCreateTemplate = {
   name: 'My Task',
-  taskType: 'OneTime',
-  timeConfig: { timeType: 'AllDay', startDate: null, timePoint: null },
+  schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
   importance: 'Moderate',
 };
 const malformedCreateTemplate = { name: '' };

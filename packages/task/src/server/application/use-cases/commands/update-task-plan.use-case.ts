@@ -4,63 +4,29 @@
 
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
-import { RecurrenceRule } from '../../../domain/value-objects/recurrence-rule';
-import { TaskTimeConfig } from '../../../domain/value-objects/task-time-config';
+import { TaskPlanSchedule } from '../../../domain/value-objects/task-plan-schedule';
 import { TaskReminderConfig } from '../../../domain/value-objects/task-reminder-config';
 import {
   TaskGoalBindingTrigger,
   TaskOccurrenceStatus,
   TaskPlanStatus,
-  TaskType,
-  type RecurrenceRuleDTO,
+  TaskPlanScheduleKind,
+  TaskRecurrenceEndKind,
   type TaskPlanClientDTO,
-  type TaskTimeConfigDTO,
   type UpdateTaskPlanReq,
 } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { error, fail, ok } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
-import { asInstant, createTimeFacade } from '@memoflow/time';
-import { isFiniteTaskPlan } from '../../../domain/aggregates/task-plan-goal.policy';
 import {
   mapTaskWriteErrorToResultError,
   type TaskWriteTransactionRunner,
 } from './task-write-support';
 
-const taskTime = createTimeFacade();
-
-function sameCalendarAnchor(
-  left: number | null | undefined,
-  right: number | null | undefined,
-): boolean {
-  if (left == null || right == null) return left == null && right == null;
-  return taskTime.calendar.toYmd(asInstant(left)) === taskTime.calendar.toYmd(asInstant(right));
-}
-
-function sameTimeConfig(left: TaskTimeConfigDTO | null, right: TaskTimeConfigDTO | null): boolean {
+function isFiniteSchedule(schedule: TaskPlanSchedule): boolean {
   return (
-    left?.timeType === right?.timeType &&
-    sameCalendarAnchor(left?.startDate, right?.startDate) &&
-    left?.timePoint === right?.timePoint &&
-    left?.timeRange?.start === right?.timeRange?.start &&
-    left?.timeRange?.end === right?.timeRange?.end
-  );
-}
-
-function sameRecurrenceRule(
-  left: RecurrenceRuleDTO | null,
-  right: RecurrenceRuleDTO | null,
-): boolean {
-  if (!left || !right) {
-    return left === right;
-  }
-
-  return (
-    left.frequency === right.frequency &&
-    left.interval === right.interval &&
-    left.endDate === right.endDate &&
-    left.occurrences === right.occurrences &&
-    [...left.daysOfWeek].sort().join(',') === [...right.daysOfWeek].sort().join(',')
+    schedule.kind === TaskPlanScheduleKind.OneTime ||
+    (schedule.recurrence != null && schedule.recurrence.end.kind !== TaskRecurrenceEndKind.Never)
   );
 }
 
@@ -106,32 +72,13 @@ export class UpdateTaskPlanUseCase {
             );
           }
 
-          if (request.timeConfig === null) {
-            return error('BAD_REQUEST', 'A task plan must keep a time configuration');
-          }
-          if (template.taskType === TaskType.Recurring && request.recurrenceRule === null) {
-            return error('BAD_REQUEST', 'A recurring task plan must keep a recurrence rule');
-          }
-
-          const currentTimeConfig = template.timeConfig?.toDTO() ?? null;
-          const currentRecurrenceRule = template.recurrenceRule?.toDTO() ?? null;
-          const nextTimeConfig =
-            request.timeConfig === undefined
-              ? template.timeConfig
-              : TaskTimeConfig.fromDTO(request.timeConfig);
-          const nextRecurrenceRule =
-            request.recurrenceRule === undefined
-              ? template.recurrenceRule
-              : request.recurrenceRule === null
-                ? null
-                : RecurrenceRule.fromDTO(request.recurrenceRule);
-          const timeChanged =
-            request.timeConfig !== undefined &&
-            !sameTimeConfig(currentTimeConfig, nextTimeConfig?.toDTO() ?? null);
-          const recurrenceChanged =
-            request.recurrenceRule !== undefined &&
-            !sameRecurrenceRule(currentRecurrenceRule, nextRecurrenceRule?.toDTO() ?? null);
-          const scheduleChanged = timeChanged || recurrenceChanged;
+          const nextSchedule =
+            request.schedule === undefined
+              ? template.schedule
+              : TaskPlanSchedule.create(request.schedule);
+          const scheduleChanged =
+            request.schedule !== undefined &&
+            JSON.stringify(template.schedule.toDTO()) !== JSON.stringify(nextSchedule.toDTO());
           const importanceChanged =
             request.importance !== undefined && request.importance !== template.importance;
           const nextProgressTrigger =
@@ -141,7 +88,7 @@ export class UpdateTaskPlanUseCase {
 
           if (
             nextProgressTrigger === TaskGoalBindingTrigger.PlanCompletion &&
-            !isFiniteTaskPlan(template.taskType, nextRecurrenceRule)
+            !isFiniteSchedule(nextSchedule)
           ) {
             return error(
               'BAD_REQUEST',
@@ -167,14 +114,11 @@ export class UpdateTaskPlanUseCase {
           if (request.description !== undefined) {
             template.updateDescription(request.description ?? null);
           }
-          if (timeChanged) {
-            template.updateTimeConfig(nextTimeConfig);
+          if (scheduleChanged) {
+            template.updateSchedule(nextSchedule);
           }
           if (importanceChanged && request.importance !== undefined) {
             template.updatePriority(request.importance);
-          }
-          if (recurrenceChanged && nextRecurrenceRule) {
-            template.updateRecurrenceRule(nextRecurrenceRule);
           }
           if (request.reminderConfig !== undefined) {
             const nextReminderConfig = request.reminderConfig
@@ -216,11 +160,7 @@ export class UpdateTaskPlanUseCase {
               originalGenerationHorizon ?? 0,
               ...affectedPendingInstances.map((instance) => instance.instanceDate),
             );
-            if (
-              template.status === TaskPlanStatus.Active &&
-              nextTimeConfig &&
-              generationHorizon > effectiveFrom
-            ) {
+            if (template.status === TaskPlanStatus.Active && generationHorizon > effectiveFrom) {
               const regenerated = template.generateInstances(effectiveFrom, generationHorizon);
               if (regenerated.length > 0) {
                 await instanceRepository.saveMany(regenerated);

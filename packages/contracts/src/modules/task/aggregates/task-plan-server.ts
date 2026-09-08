@@ -2,18 +2,13 @@
  * TaskPlan Aggregate Root - Server Interface
  */
 
-import type {
-  TaskPlanId,
-  IdentityId,
-  TransferDate,
-} from '../../../primitives';
+import type { TaskPlanId, IdentityId, TransferDate } from '../../../primitives';
 import type { TaskPlanStatus } from '../value-objects/task-plan-status';
 import type { TaskPlanOutcome } from '../value-objects/task-plan-outcome';
 import type { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-policy';
 import type { TaskOccurrenceServerDTO } from './task-occurrence-server';
 import type {
-  TaskTimeConfigDTO,
-  RecurrenceRuleDTO,
+  TaskPlanSchedule,
   TaskReminderConfigDTO,
   TaskGoalBindingDTO,
   ChecklistItemDefinitionDTO,
@@ -34,8 +29,7 @@ export interface TaskPlanServerDTO {
   name: string;
   description: string | null;
 
-  timeConfig: TaskTimeConfigDTO | null;
-  recurrenceRule: RecurrenceRuleDTO | null;
+  schedule: TaskPlanSchedule;
   reminderConfig: TaskReminderConfigDTO | null;
   lastGeneratedDate: TransferDate | null;
   generateAheadDays: number | null;
@@ -51,7 +45,6 @@ export interface TaskPlanServerDTO {
   goalBinding: TaskGoalBindingDTO | null;
 
   checklist: ChecklistItemDefinitionDTO[]; // To be defined later
-
 
   // === Other ===
   version: number;

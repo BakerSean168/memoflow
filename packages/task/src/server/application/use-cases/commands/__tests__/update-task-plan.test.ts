@@ -13,6 +13,7 @@ import { UpdateTaskPlanUseCase } from '../update-task-plan.use-case';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskGoalBindingTrigger, TaskType } from '@memoflow/contracts/task';
 import { RecurrenceRule } from '../../../../domain/value-objects/recurrence-rule';
+import { TaskPlanSchedule } from '../../../../domain/value-objects/task-plan-schedule';
 import {
   createInlineTaskWriteTransactionRunner,
   type TaskWriteTransactionRunner,
@@ -44,9 +45,7 @@ describe('UpdateTaskPlanUseCase', () => {
   });
 
   it('throws an error if transactionRunner is missing', () => {
-    expect(
-      () => new UpdateTaskPlanUseCase(templateRepo, instanceRepo, undefined as any),
-    ).toThrow(
+    expect(() => new UpdateTaskPlanUseCase(templateRepo, instanceRepo, undefined as any)).toThrow(
       'TaskWriteTransactionRunner must be explicitly provided to UpdateTaskPlanUseCase',
     );
   });
@@ -364,7 +363,11 @@ describe('UpdateTaskPlanUseCase', () => {
     const newTimeConfig = aTimePointConfig(600, new Date(effectiveFrom - day));
 
     const result = await useCase.execute(template.id, template.identityId, {
-      timeConfig: newTimeConfig.toDTO(),
+      schedule: TaskPlanSchedule.fromLegacy(
+        TaskType.Recurring,
+        newTimeConfig,
+        RecurrenceRule.createDaily(),
+      ).toDTO(),
     });
 
     expect(result).toBeOk();
@@ -402,7 +405,11 @@ describe('UpdateTaskPlanUseCase', () => {
     );
 
     const result = await useCase.execute(template.id, template.identityId, {
-      timeConfig: aTimePointConfig(600, new Date(effectiveFrom - day)).toDTO(),
+      schedule: TaskPlanSchedule.fromLegacy(
+        TaskType.Recurring,
+        aTimePointConfig(600, new Date(effectiveFrom - day)),
+        RecurrenceRule.createDaily(),
+      ).toDTO(),
     });
 
     expect(result).toBeOk();

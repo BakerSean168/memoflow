@@ -12,9 +12,9 @@ import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '../../../primitiv
 import {
   TaskGoalBindingSchema,
   TaskReminderConfigSchema,
-  TaskTimeConfigSchema,
-  RecurrenceConfigSchema,
+  TaskPlanScheduleSchema,
 } from './task-plan.dto';
+import { TaskTimeConfigSchema } from '../value-objects/task-time-config';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { TaskOccurrenceStatus } from '../value-objects/task-occurrence-status';
 import { TaskPlanStatus } from '../value-objects/task-plan-status';
@@ -28,8 +28,7 @@ export const TaskPlanResponseSchema = z.object({
   identityId: brandedId<IdentityId>(),
   name: z.string(),
   description: z.string().nullable(),
-  timeConfig: TaskTimeConfigSchema,
-  recurrenceRule: RecurrenceConfigSchema.nullable(),
+  schedule: TaskPlanScheduleSchema,
   reminderConfig: TaskReminderConfigSchema.nullable(),
   importance: z.enum(ImportanceLevel),
   goalBinding: TaskGoalBindingSchema.nullable(),

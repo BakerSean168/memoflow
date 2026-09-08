@@ -10,12 +10,7 @@ import type { TaskPlanOutcome } from '../value-objects/task-plan-outcome';
 import type { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-policy';
 import type { TaskOccurrenceStatus } from '../value-objects/task-occurrence-status';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
-import type {
-  TaskTimeConfigDTO,
-  RecurrenceRuleDTO,
-  TaskReminderConfigDTO,
-  TaskGoalBindingDTO,
-} from '../value-objects';
+import type { TaskPlanSchedule, TaskReminderConfigDTO, TaskGoalBindingDTO } from '../value-objects';
 
 // Residual 879: intentional Client≠Server dual (client extra projection fields vs server checklist).
 export interface TaskPlanClientDTO {
@@ -24,8 +19,7 @@ export interface TaskPlanClientDTO {
   name: string;
   description: string | null;
 
-  timeConfig: TaskTimeConfigDTO;
-  recurrenceRule: RecurrenceRuleDTO | null;
+  schedule: TaskPlanSchedule;
   reminderConfig: TaskReminderConfigDTO | null;
   importance: ImportanceLevel;
 

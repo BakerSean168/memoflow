@@ -4,27 +4,16 @@ import type { IdentityId, GoalId, TaskPlanId } from '../../../primitives';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import type { TaskPlanClientDTO } from '../aggregates/task-plan-client';
 import type { TaskOccurrenceClientDTO } from '../aggregates/task-occurrence-client';
-import { TaskType } from '../value-objects/task-type';
 import { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-policy';
 import { TaskReminderConfigSchema } from '../value-objects/task-reminder-config';
 import { TaskGoalBindingSchema } from '../value-objects/task-goal-binding';
-import { RecurrenceConfigSchema } from '../value-objects/recurrence-rule';
-import { TaskTimeConfigSchema } from '../value-objects/task-time-config';
+import { TaskPlanScheduleSchema } from '../value-objects/task-plan-schedule';
 
 // Residual 739: TaskReminderConfigSchema / TaskGoalBindingSchema owned by value-objects
 // (semantic DTOs are z.infer aliases). Re-export for OpenAPI/route consumers.
 export { TaskReminderConfigSchema, TaskGoalBindingSchema };
 
-// Residual 743: RecurrenceConfigSchema owned by value-objects
-// (semantic RecurrenceRuleDTO / RecurrenceConfigReq are z.infer aliases).
-export { RecurrenceConfigSchema };
-export type { RecurrenceConfigReq } from '../value-objects/recurrence-rule';
-
-// Residual 747: TaskTimeConfigSchema owned by value-objects
-// (semantic TaskTimeConfigDTO / TaskTimeConfigReq are z.infer aliases).
-// Domain TaskTimeConfig startDate is Instant (ADR-037; intentional dual interface names).
-export { TaskTimeConfigSchema };
-export type { TaskTimeConfigReq } from '../value-objects/task-time-config';
+export { TaskPlanScheduleSchema };
 
 // Public transport schema - NO identityId (injected from Context)
 export const CreateTaskPlanSchema = z
@@ -32,9 +21,7 @@ export const CreateTaskPlanSchema = z
     id: brandedId<TaskPlanId>().optional(),
     name: z.string().min(1, '标题不能为空'),
     description: z.string().optional().nullable(),
-    taskType: z.enum([TaskType.OneTime, TaskType.Recurring]).default(TaskType.Recurring),
-    timeConfig: TaskTimeConfigSchema,
-    recurrenceRule: RecurrenceConfigSchema.optional().nullable(),
+    schedule: TaskPlanScheduleSchema,
     reminderConfig: TaskReminderConfigSchema.optional().nullable(),
     importance: z.enum(ImportanceLevel),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
@@ -60,8 +47,7 @@ export const UpdateTaskPlanSchema = z
     templateId: brandedId<TaskPlanId>().optional(),
     name: z.string().min(1).optional(),
     description: z.string().optional().nullable(),
-    timeConfig: TaskTimeConfigSchema.optional().nullable(),
-    recurrenceRule: RecurrenceConfigSchema.optional().nullable(),
+    schedule: TaskPlanScheduleSchema.optional(),
     reminderConfig: TaskReminderConfigSchema.optional().nullable(),
     importance: z.enum(ImportanceLevel).optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),

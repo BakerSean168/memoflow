@@ -455,6 +455,25 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     });
   }
 
+  /** Replaces the canonical schedule. Future occurrence reconciliation is application-owned. */
+  public updateSchedule(newSchedule: TaskPlanSchedule): void {
+    const oldSchedule = this._props.schedule.toDTO();
+    const nextSchedule = newSchedule.toDTO();
+    if (JSON.stringify(oldSchedule) === JSON.stringify(nextSchedule)) return;
+    this._props.schedule = newSchedule;
+    this._props.updatedAt = Date.now();
+    this.addHistory('schedule_updated', { oldSchedule, newSchedule: nextSchedule });
+    this.addDomainEvent<TaskEventMap['task:template-schedule-time-changed']>(
+      'task:template-schedule-time-changed',
+      {
+        identityId: this._props.identityId,
+        taskPlan: this.toServerDTO(),
+        oldTimeConfig: null,
+        newTimeConfig: null,
+      },
+    );
+  }
+
   /**
    * Updates the time configuration.
    */
@@ -616,8 +635,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       identityId: this._props.identityId,
       name: this._props.title,
       description: this._props.description,
-      timeConfig: this.timeConfig.toDTO(),
-      recurrenceRule: this.recurrenceRule?.toDTO() ?? null,
+      schedule: this._props.schedule.toDTO(),
       reminderConfig: this._props.reminderConfig?.toDTO() ?? null,
       importance: this._props.importance,
       goalBinding: this._props.goalBinding?.toDTO() ?? null,
@@ -667,8 +685,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       identityId: this._props.identityId,
       name: this._props.title,
       description: this._props.description,
-      timeConfig: this.timeConfig.toDTO(),
-      recurrenceRule: this.recurrenceRule?.toDTO() ?? null,
+      schedule: this._props.schedule.toDTO(),
       reminderConfig: this._props.reminderConfig?.toDTO() ?? null,
       importance: this._props.importance,
       goalBinding: this._props.goalBinding?.toDTO() ?? null,
@@ -809,9 +826,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     identityId: IdentityId;
     title: string;
     description?: string;
-    taskType: TaskType;
-    timeConfig: TaskTimeConfig;
-    recurrenceRule?: RecurrenceRule;
+    schedule: TaskPlanSchedule;
     reminderConfig?: TaskReminderConfig;
     importance?: ImportanceLevel;
     generateAheadDays?: number;
@@ -824,29 +839,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   }): TaskPlan {
     TaskPlan.assertIdentityId(params.identityId, 'create');
     const title = TaskPlan.normalizeTitle(params.title, 'create');
-
-    if (!params.timeConfig) {
-      throw new InvalidTaskPlanStateError('Time configuration is required', {
-        templateId: '',
-        currentStatus: 'N/A',
-        attemptedAction: 'create',
-      });
-    }
-
-    if (params.taskType === TaskType.Recurring && !params.recurrenceRule) {
-      throw new InvalidTaskPlanStateError('Recurrence rule is required for Recurring tasks', {
-        templateId: '',
-        currentStatus: 'N/A',
-        attemptedAction: 'create',
-      });
-    }
-    if (params.taskType === TaskType.Recurring && params.timeConfig.startDate == null) {
-      throw new InvalidTaskPlanStateError('Recurring Task requires a date', {
-        templateId: '',
-        currentStatus: 'N/A',
-        attemptedAction: 'create',
-      });
-    }
 
     const now = Date.now();
     const template = TaskPlan.instantiate({
@@ -869,11 +861,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
           })
         : null,
       checklist: [],
-      schedule: TaskPlanSchedule.fromLegacy(
-        params.taskType,
-        params.timeConfig,
-        params.recurrenceRule ?? null,
-      ),
+      schedule: params.schedule,
       reminderConfig: params.reminderConfig ?? null,
       lastGeneratedDate: null,
       generateAheadDays: params.generateAheadDays ?? 30,

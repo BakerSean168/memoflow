@@ -166,26 +166,28 @@ export class PrismaTaskPlanMapper {
    */
   static toPersistence(template: TaskPlan) {
     const dto = template.toServerDTO();
-    // Flatten nested timeConfig
-    const timeConfigType = dto.timeConfig?.timeType ?? null;
-    const timeConfigStartTime = toDateOrNull(dto.timeConfig?.startDate);
+    // Transitional old-column writer derived from canonical TaskPlan.schedule.
+    const timeConfig = template.timeConfig;
+    const recurrenceRule = template.recurrenceRule;
+    const timeConfigType = timeConfig.timeType;
+    const timeConfigStartTime = toDateOrNull(timeConfig.startDate);
     const timeConfigEndTime = null;
-    const timeConfigTimePoint = dto.timeConfig?.timePoint ?? null;
-    const timeConfigTimeRangeStart = dto.timeConfig?.timeRange?.start ?? null;
-    const timeConfigTimeRangeEnd = dto.timeConfig?.timeRange?.end ?? null;
+    const timeConfigTimePoint = timeConfig.timePoint ?? null;
+    const timeConfigTimeRangeStart = timeConfig.timeRange?.start ?? null;
+    const timeConfigTimeRangeEnd = timeConfig.timeRange?.end ?? null;
     const timeConfigDurationMinutes =
       timeConfigTimeRangeEnd != null && timeConfigTimeRangeStart != null
         ? timeConfigTimeRangeEnd - timeConfigTimeRangeStart
         : null;
 
     // Flatten nested recurrenceRule
-    const recurrenceRuleType = dto.recurrenceRule?.frequency ?? null;
-    const recurrenceRuleInterval = dto.recurrenceRule?.interval ?? null;
-    const recurrenceRuleDaysOfWeek = dto.recurrenceRule?.daysOfWeek
-      ? JSON.stringify(dto.recurrenceRule.daysOfWeek)
+    const recurrenceRuleType = recurrenceRule?.frequency ?? null;
+    const recurrenceRuleInterval = recurrenceRule?.interval ?? null;
+    const recurrenceRuleDaysOfWeek = recurrenceRule
+      ? JSON.stringify(recurrenceRule.daysOfWeek)
       : null;
-    const recurrenceRuleEndDate = toDateOrNull(dto.recurrenceRule?.endDate);
-    const recurrenceRuleCount = dto.recurrenceRule?.occurrences ?? null;
+    const recurrenceRuleEndDate = toDateOrNull(recurrenceRule?.endDate);
+    const recurrenceRuleCount = recurrenceRule?.occurrences ?? null;
 
     // Flatten nested reminderConfig
     const reminderConfigEnabled = dto.reminderConfig?.enabled ?? null;

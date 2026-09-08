@@ -9,7 +9,12 @@ import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskGoalBindingTrigger, TaskPlanOutcome, TaskType } from '@memoflow/contracts/task';
 import { eventBus } from '@memoflow/utils/domain';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
-import { RecurrenceRule, TaskOccurrenceId, TaskTimeConfig } from '../../../domain/value-objects';
+import {
+  RecurrenceRule,
+  TaskOccurrenceId,
+  TaskPlanSchedule,
+  TaskTimeConfig,
+} from '../../../domain/value-objects';
 import { anIdentityId } from '../../../../testing';
 import { createTaskPowerSyncModule } from '../../powersync';
 import { PowerSyncTaskOccurrenceRepository } from './task-occurrence-powersync.repository';
@@ -165,7 +170,10 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
       if (existing) {
         // Apply the status update (status follows occurrence_key in TASK-2204) so the
         // rollback assertion is a REAL proof, not a vacuous one.
-        const status = parameters?.[4] == null ? (existing as { status?: string }).status : String(parameters[4]);
+        const status =
+          parameters?.[4] == null
+            ? (existing as { status?: string }).status
+            : String(parameters[4]);
         state.instances.set(id, { ...existing, status });
       } else {
         state.instances.set(id, { id, template_id: String(parameters?.[0]), status: 'Pending' });
@@ -259,13 +267,18 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
       return null;
     }
 
-    if (sql.includes('SELECT id FROM task_instances WHERE template_id = ? AND identity_id = ? AND occurrence_key = ?')) {
+    if (
+      sql.includes(
+        'SELECT id FROM task_instances WHERE template_id = ? AND identity_id = ? AND occurrence_key = ?',
+      )
+    ) {
       const [templateId, identityId, occurrenceKey] = (parameters ?? []).map(String);
-      const match = Array.from(state.instances.values()).find((row) =>
-        String((row as any).template_id) === templateId &&
-        String((row as any).identity_id) === identityId &&
-        String((row as any).occurrence_key) === occurrenceKey &&
-        (row as any).deleted_at == null,
+      const match = Array.from(state.instances.values()).find(
+        (row) =>
+          String((row as any).template_id) === templateId &&
+          String((row as any).identity_id) === identityId &&
+          String((row as any).occurrence_key) === occurrenceKey &&
+          (row as any).deleted_at == null,
       ) as { id?: string } | undefined;
       return (match?.id ? { id: match.id } : null) as T | null;
     }
@@ -278,7 +291,9 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
     if (sql.includes('SELECT status FROM task_instances WHERE id = ?')) {
       const id = String(parameters?.[0]);
       const row = state.instances.get(id);
-      return (row ? { status: (row as { status?: string }).status ?? 'pending' } : null) as T | null;
+      return (
+        row ? { status: (row as { status?: string }).status ?? 'pending' } : null
+      ) as T | null;
     }
 
     if (sql.includes('FROM task_instances WHERE id = ? AND identity_id = ?')) {
@@ -307,9 +322,11 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const template = TaskPlan.create({
       identityId: anIdentityId(),
       title: 'PowerSync write',
-      taskType: TaskType.Recurring,
-      timeConfig: TaskTimeConfig.createAllDay(new Date()),
-      recurrenceRule: RecurrenceRule.createDaily(1),
+      schedule: TaskPlanSchedule.fromLegacy(
+        TaskType.Recurring,
+        TaskTimeConfig.createAllDay(new Date()),
+        RecurrenceRule.createDaily(1),
+      ),
       importance: ImportanceLevel.Moderate,
     });
 
@@ -345,20 +362,11 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const result = await module.api.createTaskPlan({
       identityId: anIdentityId(),
       name: 'Daily Review',
-      taskType: TaskType.Recurring,
-      timeConfig: {
-        timeType: 'AllDay',
-        startDate: Date.now(),
-        timePoint: null,
-        timeRange: null,
-      },
-      recurrenceRule: {
-        frequency: 'Daily',
-        interval: 1,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: null,
-      },
+      schedule: TaskPlanSchedule.fromLegacy(
+        TaskType.Recurring,
+        TaskTimeConfig.createAllDay(new Date()),
+        RecurrenceRule.createDaily(1),
+      ).toDTO(),
       importance: ImportanceLevel.Moderate,
     });
 
@@ -377,9 +385,11 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const template = TaskPlan.create({
       identityId,
       title: 'PowerSync finite plan',
-      taskType: TaskType.Recurring,
-      timeConfig: TaskTimeConfig.createAllDay(new Date()),
-      recurrenceRule: RecurrenceRule.createDaily(1).setOccurrences(15),
+      schedule: TaskPlanSchedule.fromLegacy(
+        TaskType.Recurring,
+        TaskTimeConfig.createAllDay(new Date()),
+        RecurrenceRule.createDaily(1).setOccurrences(15),
+      ),
       importance: ImportanceLevel.Moderate,
       goalBinding: {
         goalId: 'goal-1',
@@ -410,20 +420,11 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const createRes = await module.api.createTaskPlan({
       identityId,
       name: 'Goal Task',
-      taskType: TaskType.Recurring,
-      timeConfig: {
-        timeType: 'AllDay',
-        startDate: Date.now(),
-        timePoint: null,
-        timeRange: null,
-      },
-      recurrenceRule: {
-        frequency: 'Daily',
-        interval: 1,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: null,
-      },
+      schedule: TaskPlanSchedule.fromLegacy(
+        TaskType.Recurring,
+        TaskTimeConfig.createAllDay(new Date()),
+        RecurrenceRule.createDaily(1),
+      ).toDTO(),
       importance: ImportanceLevel.Moderate,
       goalBinding: {
         goalId: 'goal-1',

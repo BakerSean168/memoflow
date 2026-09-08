@@ -85,6 +85,7 @@ export const GoalPlanTaskPlanSchema = z
     cadence: GoalPlanCadenceSchema,
     startDate: z.number().int().nonnegative().nullable().optional(),
     timeOfDay: TimeOfDaySchema.optional(),
+    timezone: z.string().trim().min(1).max(100).default('UTC'),
     daysOfWeek: z.array(z.number().int().min(0).max(6)).max(7).default([]),
     occurrences: z.number().int().positive().nullable().default(null),
     keyResultIndex: z.number().int().nonnegative().optional(),

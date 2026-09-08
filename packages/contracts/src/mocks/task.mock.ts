@@ -18,13 +18,13 @@ export function createMockTaskPlan(overrides: Partial<TaskPlanClientDTO> = {}): 
     identityId: faker.string.uuid() as IdentityId,
     name: faker.lorem.words({ min: 2, max: 5 }),
     description: faker.datatype.boolean() ? faker.lorem.sentence() : null,
-    timeConfig: {
-      timeType: 'AllDay',
-      startDate,
-      timePoint: null,
-      timeRange: null,
+    schedule: {
+      kind: 'OneTime',
+      date: new Date(startDate)
+        .toISOString()
+        .slice(0, 10) as TaskPlanClientDTO['schedule'] extends { date: infer D } ? D : never,
+      timing: { kind: 'AllDay' },
     },
-    recurrenceRule: null,
     reminderConfig: null,
     importance: faker.helpers.arrayElement([
       'Vital',

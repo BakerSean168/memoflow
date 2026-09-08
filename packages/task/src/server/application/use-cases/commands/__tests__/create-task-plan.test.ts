@@ -5,7 +5,7 @@ import { anIdentityId } from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import type { CreateTaskPlanUseCaseReq } from '@memoflow/contracts/task';
-import { TaskGoalBindingTrigger, TaskType } from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { CreateTaskPlanUseCase } from '../create-task-plan.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
@@ -42,19 +42,32 @@ describe('CreateTaskPlanUseCase', () => {
   let instanceRepo: ReturnType<typeof createMockRepo<ITaskOccurrenceRepository>>;
   let useCase: CreateTaskPlanUseCase;
 
+  function oneTimeSchedule(): CreateTaskPlanUseCaseReq['schedule'] {
+    return {
+      kind: 'OneTime',
+      date: '2026-09-08',
+      timing: { kind: 'AllDay' },
+    } as CreateTaskPlanUseCaseReq['schedule'];
+  }
+
+  function recurringSchedule(
+    end: { kind: 'Never' } | { kind: 'Count'; count: number } = { kind: 'Never' },
+  ): CreateTaskPlanUseCaseReq['schedule'] {
+    return {
+      kind: 'Recurring',
+      startDate: '2026-09-08',
+      timing: { kind: 'AllDay' },
+      recurrence: { frequency: 'Daily', interval: 1, byWeekday: [], end },
+    } as CreateTaskPlanUseCaseReq['schedule'];
+  }
+
   function aCreateRequest(
     overrides: Partial<CreateTaskPlanUseCaseReq> = {},
   ): CreateTaskPlanUseCaseReq {
     return {
       identityId: anIdentityId(),
       name: 'Test Task',
-      taskType: TaskType.OneTime,
-      timeConfig: {
-        timeType: 'AllDay',
-        startDate: Date.now(),
-        timePoint: null,
-        timeRange: null,
-      },
+      schedule: oneTimeSchedule(),
       importance: ImportanceLevel.Moderate,
       ...overrides,
     } as CreateTaskPlanUseCaseReq;
@@ -85,15 +98,13 @@ describe('CreateTaskPlanUseCase', () => {
   });
 
   it('throws an error if transactionRunner is missing', () => {
-    expect(
-      () => new CreateTaskPlanUseCase(templateRepo, instanceRepo, undefined as any),
-    ).toThrow(
+    expect(() => new CreateTaskPlanUseCase(templateRepo, instanceRepo, undefined as any)).toThrow(
       'TaskWriteTransactionRunner must be explicitly provided to CreateTaskPlanUseCase',
     );
   });
 
   it('should create a one-time task template', async () => {
-    const request = aCreateRequest({ name: 'Buy groceries', taskType: TaskType.OneTime });
+    const request = aCreateRequest({ name: 'Buy groceries' });
 
     const result = await useCase.execute(request);
 
@@ -165,14 +176,7 @@ describe('CreateTaskPlanUseCase', () => {
   it('should create a recurring task template', async () => {
     const request = aCreateRequest({
       name: 'Daily standup',
-      taskType: TaskType.Recurring,
-      recurrenceRule: {
-        frequency: 'Daily',
-        interval: 1,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: null,
-      },
+      schedule: recurringSchedule(),
     });
 
     const result = await useCase.execute(request);
@@ -182,14 +186,7 @@ describe('CreateTaskPlanUseCase', () => {
 
   it('rejects whole-plan progress for an unlimited recurring task', async () => {
     const request = aCreateRequest({
-      taskType: TaskType.Recurring,
-      recurrenceRule: {
-        frequency: 'Daily',
-        interval: 1,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: null,
-      },
+      schedule: recurringSchedule(),
       goalBinding: {
         goalId: 'goal-1',
         keyResultId: 'kr-1',
@@ -229,14 +226,7 @@ describe('CreateTaskPlanUseCase', () => {
       const fakeInstances = [{}, {}, {}];
       mockGenerateInstances.mockReturnValue(fakeInstances);
       const request = aCreateRequest({
-        taskType: TaskType.Recurring,
-        recurrenceRule: {
-          frequency: 'Daily',
-          interval: 1,
-          daysOfWeek: [],
-          endDate: null,
-          occurrences: null,
-        },
+        schedule: recurringSchedule(),
       });
 
       const result = await useCase.execute(request);

@@ -191,8 +191,7 @@ export function mapUpdateToDtoPatch(req: UpdateTaskPlanReq): Record<string, unkn
     ...(req.description !== undefined ? { description: req.description } : {}),
     ...(req.importance !== undefined ? { importance: req.importance } : {}),
     ...(req.goalBinding !== undefined ? { goalBinding: req.goalBinding } : {}),
-    ...(req.timeConfig !== undefined ? { timeConfig: req.timeConfig } : {}),
-    ...(req.recurrenceRule !== undefined ? { recurrenceRule: req.recurrenceRule } : {}),
+    ...(req.schedule !== undefined ? { schedule: req.schedule } : {}),
     ...(req.reminderConfig !== undefined ? { reminderConfig: req.reminderConfig } : {}),
   };
 }
@@ -224,10 +223,7 @@ export function mergeTaskPlanUpdate(
  * 等待指定 query key 进入终态（`success`/`error`）或被移除；成功或失败/移除都会 resolve，
  * 保证命令式 facade 调用方不会永久挂起；每个终态路径都会取消订阅。
  */
-export function waitForTaskPlanQuery(
-  queryClient: QueryClient,
-  queryKey: QueryKey,
-): Promise<void> {
+export function waitForTaskPlanQuery(queryClient: QueryClient, queryKey: QueryKey): Promise<void> {
   const state = queryClient.getQueryState(queryKey);
   if (state) {
     if (state.status === 'success' || state.status === 'error') {

@@ -36,8 +36,12 @@
               })
             }}
           </span>
-          <span v-else-if="template.recurrenceRule">{{ t('task.occurrence.recurring') }}</span>
-          <span v-if="template.labels.length">{{ template.labels.map((label) => label.name).join(' · ') }}</span>
+          <span v-else-if="template.schedule.kind === 'Recurring'">{{
+            t('task.occurrence.recurring')
+          }}</span>
+          <span v-if="template.labels.length">{{
+            template.labels.map((label) => label.name).join(' · ')
+          }}</span>
         </div>
       </button>
 

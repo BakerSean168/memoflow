@@ -176,8 +176,8 @@ export class PowerSyncTaskPlanMapper {
 
   static toPersistence(template: TaskPlan) {
     const dto = template.toServerDTO();
-    const timeConfig = dto.timeConfig;
-    const recurrenceRule = dto.recurrenceRule;
+    const timeConfig = template.timeConfig;
+    const recurrenceRule = template.recurrenceRule;
     const reminderTrigger = dto.reminderConfig?.triggers?.[0] ?? null;
 
     return {

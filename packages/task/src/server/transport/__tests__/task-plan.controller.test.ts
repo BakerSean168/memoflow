@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ok, fail, isOk } from '@memoflow/contracts/result';
 import type { QueryTaskPlanGraphRes, TaskPlanClientDTO } from '@memoflow/contracts/task';
-import { TaskType } from '@memoflow/contracts/task';
 import { TaskPlanController, type TaskPlanUseCases } from '../task-plan.controller';
 
 // ---------------------------------------------------------------------------
@@ -24,7 +23,6 @@ function createMockUseCases(): TaskPlanUseCases {
 const FAKE_TEMPLATE_DTO: TaskPlanClientDTO = {
   id: 'tmpl_abc123',
   name: 'Test Template',
-  taskType: TaskType.Recurring,
   status: 'Active',
   importance: 'Moderate',
   labels: [],
@@ -34,8 +32,7 @@ const FAKE_TEMPLATE_DTO: TaskPlanClientDTO = {
 
 const VALID_CREATE_INPUT = {
   name: 'My Task',
-  taskType: TaskType.OneTime,
-  timeConfig: { timeType: 'AllDay', startDate: null, timePoint: null },
+  schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
   importance: 'Moderate',
 };
 
@@ -87,7 +84,7 @@ describe('TaskPlanController', () => {
       const args = (useCases.createTemplate as ReturnType<typeof vi.fn>).mock.calls[0][0];
       expect(args.identityId).toBe(TEST_IDENTITY_ID);
       expect(args.name).toBe('My Task');
-      expect(args.taskType).toBe(TaskType.OneTime);
+      expect(args.schedule.kind).toBe('OneTime');
       expect(args.importance).toBe('Moderate');
     });
 
@@ -135,12 +132,16 @@ describe('TaskPlanController', () => {
       const result = await controller.createTemplate(
         {
           ...VALID_CREATE_INPUT,
-          recurrenceRule: {
-            frequency: 'Daily',
-            interval: 1,
-            daysOfWeek: [],
-            endDate: Date.now() + 86400000,
-            occurrences: 3,
+          schedule: {
+            kind: 'Recurring',
+            startDate: '2026-09-08',
+            timing: { kind: 'AllDay' },
+            recurrence: {
+              frequency: 'Daily',
+              interval: 1,
+              byWeekday: [],
+              end: { kind: 'Count', count: 3 },
+            },
           },
         },
         ctx,
@@ -256,7 +257,6 @@ describe('TaskPlanController', () => {
     });
   });
 
-
   // =========================================================================
   // updateTemplate
   // =========================================================================
@@ -284,8 +284,7 @@ describe('TaskPlanController', () => {
       expect(useCases.updateTemplate).toHaveBeenCalledWith('tmpl_1', TEST_IDENTITY_ID, {
         name: 'Updated Name',
         description: undefined,
-        timeConfig: undefined,
-        recurrenceRule: undefined,
+        schedule: undefined,
         reminderConfig: undefined,
         importance: undefined,
         labelIds: undefined,

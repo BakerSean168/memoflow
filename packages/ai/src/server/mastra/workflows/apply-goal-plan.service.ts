@@ -12,13 +12,9 @@ import {
   type CreateReminderTemplateReq,
 } from '@memoflow/contracts/reminder';
 import type { Result, ResultError } from '@memoflow/contracts/result';
-import {
-  TaskGoalBindingTrigger,
-  TaskTimeType,
-  TaskType,
-  type CreateTaskPlanReq,
-} from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger, type CreateTaskPlanReq } from '@memoflow/contracts/task';
 import { goalWorkflowEntityId } from './deterministic-entity-id';
+import { taskPlanScheduleFromDraft } from './task-plan-schedule.mapper';
 import type {
   ApplyGoalPlanInput,
   GoalMutationResult,
@@ -77,7 +73,11 @@ function throwToFailure(
     {
       code: 'INTERNAL_ERROR',
       message: cause instanceof Error ? cause.message : String(cause),
-      failure: { code: 'INTERNAL_ERROR', category: 'unavailable', retryHint: { kind: 'transient' } },
+      failure: {
+        code: 'INTERNAL_ERROR',
+        category: 'unavailable',
+        retryHint: { kind: 'transient' },
+      },
     },
     index,
   );
@@ -96,7 +96,10 @@ function parseMinuteOfDay(value: string): number {
   return hour * 60 + minute;
 }
 
-function localParts(epochMs: number, timeZone: string): {
+function localParts(
+  epochMs: number,
+  timeZone: string,
+): {
   year: number;
   month: number;
   day: number;
@@ -159,22 +162,14 @@ function taskRequest(
   },
 ): CreateTaskPlanReq {
   const startDate = task.startDate ?? input.goalStartDate;
-  const timePoint = task.timeOfDay ? parseMinuteOfDay(task.timeOfDay) : null;
-  const recurrenceRule: CreateTaskPlanReq['recurrenceRule'] =
-    task.cadence === 'once'
-      ? null
-      : {
-          frequency: task.cadence === 'daily' ? ('Daily' as const) : ('Weekly' as const),
-          interval: 1,
-          daysOfWeek:
-            task.cadence === 'weekly'
-              ? (task.daysOfWeek as NonNullable<
-                  CreateTaskPlanReq['recurrenceRule']
-                >['daysOfWeek'])
-              : [],
-          endDate: null,
-          occurrences: task.occurrences,
-        };
+  const schedule = taskPlanScheduleFromDraft({
+    cadence: task.cadence,
+    startDate,
+    timeOfDay: task.timeOfDay,
+    timezone: task.timezone,
+    daysOfWeek: task.daysOfWeek,
+    occurrences: task.occurrences,
+  });
   const keyResultId =
     task.keyResultIndex === undefined ? undefined : input.keyResultIds[task.keyResultIndex];
 
@@ -182,28 +177,22 @@ function taskRequest(
     id: input.id as NonNullable<CreateTaskPlanReq['id']>,
     name: task.name,
     description: task.description ?? null,
-    taskType: task.cadence === 'once' ? TaskType.OneTime : TaskType.Recurring,
-    timeConfig: {
-      timeType: timePoint === null ? TaskTimeType.AllDay : TaskTimeType.TimePoint,
-      startDate,
-      timePoint,
-      timeRange: null,
-    },
-    recurrenceRule,
+    schedule,
     reminderConfig: null,
     importance: task.importance,
     labelIds: [...input.labelIds],
-    goalBinding: keyResultId
-      ? {
-          goalId: input.goalId as NonNullable<NonNullable<CreateTaskPlanReq['goalBinding']>['goalId']>,
-          keyResultId:
-            keyResultId as NonNullable<NonNullable<CreateTaskPlanReq['goalBinding']>['keyResultId']>,
-          contribution: {
+    goalBinding: {
+      goalId: input.goalId as NonNullable<NonNullable<CreateTaskPlanReq['goalBinding']>['goalId']>,
+      keyResultId: (keyResultId ?? null) as NonNullable<
+        CreateTaskPlanReq['goalBinding']
+      >['keyResultId'],
+      contribution: keyResultId
+        ? {
             value: task.contributionValue,
             trigger: TaskGoalBindingTrigger.EachCompletion,
-          },
-        }
-      : null,
+          }
+        : null,
+    },
   };
 }
 
@@ -312,8 +301,7 @@ export class ApplyGoalPlanService {
     let goalId = prior?.goalId === expectedGoalId ? prior.goalId : undefined;
     let keyResultIds = prior?.keyResultIds.filter((id) => expectedKeyResultIds.includes(id)) ?? [];
     const taskIds = prior?.taskIds.filter((id) => expectedTaskIds.includes(id)) ?? [];
-    const reminderIds =
-      prior?.reminderIds.filter((id) => expectedReminderIds.includes(id)) ?? [];
+    const reminderIds = prior?.reminderIds.filter((id) => expectedReminderIds.includes(id)) ?? [];
     const failures: GoalPlanExecutionFailure[] = [];
 
     const goalFullyApplied =
@@ -393,11 +381,15 @@ export class ApplyGoalPlanService {
       keyResultIds = uniqueInOrder(result.data.keyResultIds);
     }
 
-    if (goalId !== expectedGoalId || !expectedKeyResultIds.every((id) => keyResultIds.includes(id))) {
+    if (
+      goalId !== expectedGoalId ||
+      !expectedKeyResultIds.every((id) => keyResultIds.includes(id))
+    ) {
       failures.push({
         operation: 'goal',
         code: 'AI_WORKFLOW_MUTATION_ID_MISMATCH',
-        message: 'Goal application port returned entity IDs that do not match the workflow mutation identity',
+        message:
+          'Goal application port returned entity IDs that do not match the workflow mutation identity',
         retryable: false,
       });
       return {

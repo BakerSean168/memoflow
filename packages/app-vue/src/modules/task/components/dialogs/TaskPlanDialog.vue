@@ -64,8 +64,6 @@
         @close="handleCancel"
       />
 
-
-
       <template #footer>
         <Button variant="ghost" :disabled="saving" @click="handleCancel">{{
           t('task.templateDialog.cancel')
@@ -92,7 +90,8 @@ import { Dialog, Button } from '@memoflow/ui-vue-shadcn';
 import { Copy, Pencil, PlusCircle } from '@lucide/vue';
 import TaskPlanForm from '../TaskPlanForm/TaskPlanForm.vue';
 import type { TaskPlanViewModel } from '../types';
-import { TaskType } from '@memoflow/contracts/task';
+import { TaskPlanScheduleSchema, TaskType } from '@memoflow/contracts/task';
+import { getProductTime } from '../../../../shared/utils/product-time';
 import { useTaskGoalBindingOptions } from '../../composables/useTaskGoalBindingOptions';
 import { ProductDialogShell } from '../../../../shared/components';
 import { useDialogDraftStore } from '../../../../layouts/shell/dialog-draft-store';
@@ -123,17 +122,22 @@ function createBlankTemplate(): TaskPlanViewModel {
     labels: [],
     labelIds: [],
     goalBinding: null,
+    schedule: TaskPlanScheduleSchema.parse({
+      kind: 'OneTime',
+      date: getProductTime().input.dateValue(Date.now()),
+      timing: { kind: 'AllDay' },
+    }),
     timeConfig: {
       timeType: 'AllDay',
       timePoint: null,
       timeRange: null,
-      startDate: Date.now(),
+      startDate: getProductTime().input.dateValue(Date.now()),
     },
     recurrenceRule: null,
     reminderConfig: null,
     instanceCount: 0,
     completionRate: 0,
-    taskType: TaskType.Recurring,
+    taskType: TaskType.OneTime,
   };
 }
 
@@ -327,5 +331,4 @@ const handleSave = () => {
   if (!localTemplate.value || !canSave.value) return;
   emit('save', localTemplate.value);
 };
-
 </script>

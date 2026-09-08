@@ -7,7 +7,12 @@ import { presentErrorMessage } from '@memoflow/http-client';
 
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
-import { TaskTimeType, TaskType, type CreateTaskPlanReq, type UpdateTaskPlanReq } from '@memoflow/contracts/task';
+import {
+  TaskPlanScheduleSchema,
+  TaskTimeType,
+  type CreateTaskPlanReq,
+  type UpdateTaskPlanReq,
+} from '@memoflow/contracts/task';
 
 import { useTaskPlanDetail } from '../hooks/useTaskPlanDetail';
 import { useTaskService } from '../hooks/useTaskService';
@@ -31,52 +36,45 @@ const IMPORTANCE_OPTIONS = [
   ImportanceLevel.Trivial,
 ] as const;
 
-const TIME_TYPE_OPTIONS = [TaskTimeType.AllDay, TaskTimeType.TimePoint, TaskTimeType.TimeRange] as const;
+const TIME_TYPE_OPTIONS = [
+  TaskTimeType.AllDay,
+  TaskTimeType.TimePoint,
+  TaskTimeType.TimeRange,
+] as const;
 
-/**
- * Soft residual 1228: app-react task toDateInput — falsy → today's UTC YMD (not empty string).
- * Same ISO slice body as GoalEditor when timestamp present; empty-default differs (no force-merge).
- */
-function toDateInput(timestamp: number | null) {
-  if (!timestamp) {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  return new Date(timestamp).toISOString().slice(0, 10);
+function todayYmd(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
-/**
- * Residual 1231 keep-boundary: app-react task toTimeInput — epoch → local HH:mm.
- * Task editor helper; falsy → '09:00'; getHours/getMinutes padStart (local clock).
- * Soft residual 1231: schedule UTC ISO slice + utils formatTimeToInput Date+date-fns differ (no force-merge).
- */
-function toTimeInput(timestamp: number | null) {
-  if (!timestamp) {
-    return '09:00';
-  }
-
-  const date = new Date(timestamp);
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${hours}:${minutes}`;
+function scheduleDate(schedule: CreateTaskPlanReq['schedule']): string {
+  return schedule.kind === 'OneTime' ? schedule.date : schedule.startDate;
 }
 
-/**
- * Residual 1234 keep-boundary: app-react task combineDateAndTime — YMD+HH:mm → local epoch ms.
- * Local Date(y,m-1,d,h,min) constructor; always returns number (no empty/NaN null path).
- * Soft residual 1234: schedule parseTimestamp trim+Date.parse+null differs (no force-merge).
- */
-function combineDateAndTime(dateValue: string, timeValue: string) {
-  const [year, month, day] = dateValue.split('-').map(Number);
-  const [hours, minutes] = timeValue.split(':').map(Number);
-  const date = new Date(year, (month || 1) - 1, day || 1, hours || 0, minutes || 0, 0, 0);
-  return date.getTime();
+function timingUiKind(schedule: CreateTaskPlanReq['schedule']): (typeof TIME_TYPE_OPTIONS)[number] {
+  return schedule.timing.kind === 'AllDay'
+    ? TaskTimeType.AllDay
+    : schedule.timing.kind === 'At'
+      ? TaskTimeType.TimePoint
+      : TaskTimeType.TimeRange;
+}
+
+function scheduleTime(schedule: CreateTaskPlanReq['schedule']): string {
+  return schedule.timing.kind === 'At'
+    ? schedule.timing.time
+    : schedule.timing.kind === 'Window'
+      ? schedule.timing.start
+      : '09:00';
+}
+
+function scheduleEndTime(schedule: CreateTaskPlanReq['schedule']): string {
+  return schedule.timing.kind === 'Window' ? schedule.timing.end : '10:00';
 }
 
 export function TaskEditorScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string | string[] }>();
-  const taskId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
+  const taskId =
+    typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
   const isEditing = !!taskId;
   const service = useTaskService();
   const labelService = useLabelService();
@@ -84,12 +82,14 @@ export function TaskEditorScreen() {
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [importance, setImportance] = useState<(typeof IMPORTANCE_OPTIONS)[number]>(ImportanceLevel.Moderate);
+  const [importance, setImportance] = useState<(typeof IMPORTANCE_OPTIONS)[number]>(
+    ImportanceLevel.Moderate,
+  );
   const [labels, setLabels] = useState<LabelClientDTO[]>([]);
   const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
   const [newLabelName, setNewLabelName] = useState('');
   const [timeType, setTimeType] = useState<(typeof TIME_TYPE_OPTIONS)[number]>(TaskTimeType.AllDay);
-  const [dateValue, setDateValue] = useState(toDateInput(null));
+  const [dateValue, setDateValue] = useState(todayYmd());
   const [timeValue, setTimeValue] = useState('09:00');
   const [endTimeValue, setEndTimeValue] = useState('10:00');
   const [formError, setFormError] = useState<string | null>(null);
@@ -104,19 +104,11 @@ export function TaskEditorScreen() {
     setDescription(template.description ?? '');
     setImportance(template.importance);
     setSelectedLabelIds(template.labels.map((label) => label.id));
-    setTimeType(template.timeConfig.timeType);
-    setDateValue(toDateInput(template.timeConfig.startDate));
-
-    if (template.timeConfig.timePoint !== null) {
-      setTimeValue(toTimeInput(template.timeConfig.timePoint));
-    }
-
-    if (template.timeConfig.timeRange) {
-      setTimeValue(toTimeInput(template.timeConfig.timeRange.start));
-      setEndTimeValue(toTimeInput(template.timeConfig.timeRange.end));
-    }
+    setTimeType(timingUiKind(template.schedule));
+    setDateValue(scheduleDate(template.schedule));
+    setTimeValue(scheduleTime(template.schedule));
+    setEndTimeValue(scheduleEndTime(template.schedule));
   }, [template]);
-
 
   useEffect(() => {
     let cancelled = false;
@@ -167,18 +159,17 @@ export function TaskEditorScreen() {
     setFormError(null);
     setIsSaving(true);
 
-    const baseTimeConfig = {
-      timeType,
-      startDate: combineDateAndTime(dateValue, '00:00'),
-      timePoint: timeType === TaskTimeType.TimePoint ? combineDateAndTime(dateValue, timeValue) : null,
-      timeRange:
-        timeType === TaskTimeType.TimeRange
-          ? {
-              start: combineDateAndTime(dateValue, timeValue),
-              end: combineDateAndTime(dateValue, endTimeValue),
-            }
-          : null,
-    };
+    const timing =
+      timeType === TaskTimeType.TimePoint
+        ? { kind: 'At' as const, time: timeValue }
+        : timeType === TaskTimeType.TimeRange
+          ? { kind: 'Window' as const, start: timeValue, end: endTimeValue }
+          : { kind: 'AllDay' as const };
+    const schedule = TaskPlanScheduleSchema.parse(
+      isEditing && template?.schedule.kind === 'Recurring'
+        ? { ...template.schedule, startDate: dateValue, timing }
+        : { kind: 'OneTime', date: dateValue, timing },
+    );
 
     if (isEditing && taskId) {
       const request: UpdateTaskPlanReq = {
@@ -186,7 +177,7 @@ export function TaskEditorScreen() {
         description: description.trim() || null,
         importance,
         labelIds: selectedLabelIds,
-        timeConfig: baseTimeConfig,
+        schedule,
       };
 
       const result = await service.updateTemplate(taskId, request);
@@ -206,9 +197,7 @@ export function TaskEditorScreen() {
       description: description.trim() || null,
       importance,
       labelIds: selectedLabelIds,
-      taskType: TaskType.OneTime,
-      timeConfig: baseTimeConfig,
-      recurrenceRule: null,
+      schedule,
       reminderConfig: null,
       goalBinding: null,
     };
@@ -228,16 +217,31 @@ export function TaskEditorScreen() {
     <PageShell
       eyebrow="Tasks"
       title={isEditing ? 'Edit template' : 'Create template'}
-      subtitle="移动端编辑页使用与 Web/Desktop 相同的 Shared Label、重要性和时间配置语义。">
-      <SectionCard title="Navigation" description="创建和编辑都走单独 screen，不在列表页里弹复杂桌面对话框。">
+      subtitle="移动端编辑页使用与 Web/Desktop 相同的 Shared Label、重要性和时间配置语义。"
+    >
+      <SectionCard
+        title="Navigation"
+        description="创建和编辑都走单独 screen，不在列表页里弹复杂桌面对话框。"
+      >
         <View style={styles.actionRow}>
           <PrimaryButton label="Back" onPress={() => router.back()} variant="secondary" />
-          {taskId ? <PrimaryButton label="Open detail" onPress={() => router.replace(`../${taskId}`)} variant="ghost" /> : null}
+          {taskId ? (
+            <PrimaryButton
+              label="Open detail"
+              onPress={() => router.replace(`../${taskId}`)}
+              variant="ghost"
+            />
+          ) : null}
         </View>
       </SectionCard>
 
       <SectionCard title="Basic info" description="先把最小创建链路打通，复杂表单以后再扩。">
-        <PrimaryTextField label="Name" onChangeText={setName} placeholder="Task template name" value={name} />
+        <PrimaryTextField
+          label="Name"
+          onChangeText={setName}
+          placeholder="Task template name"
+          value={name}
+        />
         <PrimaryTextField
           label="Description"
           multiline
@@ -250,7 +254,10 @@ export function TaskEditorScreen() {
         />
       </SectionCard>
 
-      <SectionCard title="Labels" description="Shared Labels are the single classification system across Goal and Task.">
+      <SectionCard
+        title="Labels"
+        description="Shared Labels are the single classification system across Goal and Task."
+      >
         <View style={styles.optionRow}>
           {labels.map((label) => (
             <PrimaryButton
@@ -261,7 +268,9 @@ export function TaskEditorScreen() {
             />
           ))}
           {labels.length === 0 ? (
-            <ThemedText type="small" themeColor="textSecondary">No labels yet.</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              No labels yet.
+            </ThemedText>
           ) : null}
         </View>
         <PrimaryTextField
@@ -270,10 +279,17 @@ export function TaskEditorScreen() {
           placeholder="Work"
           value={newLabelName}
         />
-        <PrimaryButton label="Create and select" onPress={() => void handleCreateLabel()} variant="secondary" />
+        <PrimaryButton
+          label="Create and select"
+          onPress={() => void handleCreateLabel()}
+          variant="secondary"
+        />
       </SectionCard>
 
-      <SectionCard title="Importance" description="先保留单选按钮，后续再接更完整的设计系统表单原语。">
+      <SectionCard
+        title="Importance"
+        description="先保留单选按钮，后续再接更完整的设计系统表单原语。"
+      >
         <View style={styles.optionRow}>
           {IMPORTANCE_OPTIONS.map((option) => (
             <PrimaryButton
@@ -298,16 +314,36 @@ export function TaskEditorScreen() {
           ))}
         </View>
 
-        <PrimaryTextField label="Date" onChangeText={setDateValue} placeholder="YYYY-MM-DD" value={dateValue} />
+        <PrimaryTextField
+          label="Date"
+          onChangeText={setDateValue}
+          placeholder="YYYY-MM-DD"
+          value={dateValue}
+        />
 
         {timeType === TaskTimeType.TimePoint ? (
-          <PrimaryTextField label="Time" onChangeText={setTimeValue} placeholder="09:00" value={timeValue} />
+          <PrimaryTextField
+            label="Time"
+            onChangeText={setTimeValue}
+            placeholder="09:00"
+            value={timeValue}
+          />
         ) : null}
 
         {timeType === TaskTimeType.TimeRange ? (
           <View style={styles.rangeColumn}>
-            <PrimaryTextField label="Start time" onChangeText={setTimeValue} placeholder="09:00" value={timeValue} />
-            <PrimaryTextField label="End time" onChangeText={setEndTimeValue} placeholder="10:00" value={endTimeValue} />
+            <PrimaryTextField
+              label="Start time"
+              onChangeText={setTimeValue}
+              placeholder="09:00"
+              value={timeValue}
+            />
+            <PrimaryTextField
+              label="End time"
+              onChangeText={setEndTimeValue}
+              placeholder="10:00"
+              value={endTimeValue}
+            />
           </View>
         ) : null}
       </SectionCard>
@@ -315,7 +351,10 @@ export function TaskEditorScreen() {
       {template && isEditing ? (
         <SectionCard title="Current state" description="编辑时保留当前模板的运行状态提示。">
           <View style={styles.optionRow}>
-            <StatusPill label={template.status} tone={template.status === 'Active' ? 'success' : 'warning'} />
+            <StatusPill
+              label={template.status}
+              tone={template.status === 'Active' ? 'success' : 'warning'}
+            />
             <StatusPill label={`${template.pendingInstanceCount} pending`} tone="textSecondary" />
             <StatusPill label={`${Math.round(template.completionRate)}% done`} tone="tint" />
           </View>
@@ -333,11 +372,22 @@ export function TaskEditorScreen() {
       <SectionCard title="Save" description="这一版先保证 create / edit 主链路可用。">
         <View style={styles.actionRow}>
           <PrimaryButton
-            label={isSaving || isDetailLoading ? 'Saving…' : isEditing ? 'Save changes' : 'Create template'}
+            label={
+              isSaving || isDetailLoading
+                ? 'Saving…'
+                : isEditing
+                  ? 'Save changes'
+                  : 'Create template'
+            }
             onPress={handleSave}
             disabled={isSaving || isDetailLoading}
           />
-          <PrimaryButton label="Cancel" onPress={() => router.back()} variant="ghost" disabled={isSaving} />
+          <PrimaryButton
+            label="Cancel"
+            onPress={() => router.back()}
+            variant="ghost"
+            disabled={isSaving}
+          />
         </View>
       </SectionCard>
     </PageShell>

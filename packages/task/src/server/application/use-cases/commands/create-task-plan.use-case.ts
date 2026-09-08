@@ -8,7 +8,7 @@
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
-import { TaskTimeConfig, RecurrenceRule, TaskReminderConfig } from '../../../domain/value-objects';
+import { TaskPlanSchedule, TaskReminderConfig } from '../../../domain/value-objects';
 import { TaskPlanId } from '../../../domain/value-objects/task-plan-id';
 import { TaskOccurrenceGenerationService } from '../../../domain/services/index';
 import type { CreateTaskPlanInput, CreateTaskPlanRes } from '@memoflow/contracts/task';
@@ -20,8 +20,11 @@ import {
   mapTaskWriteErrorToResultError,
   type TaskWriteTransactionRunner,
 } from './task-write-support';
-import { isFiniteTaskPlan } from '../../../domain/aggregates/task-plan-goal.policy';
-import { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
+import {
+  TaskGoalBindingTrigger,
+  TaskPlanScheduleKind,
+  TaskRecurrenceEndKind,
+} from '@memoflow/contracts/task';
 
 /**
  * Create Task Template Service
@@ -85,17 +88,18 @@ export class CreateTaskPlanUseCase {
             if (replay) return replay;
           }
 
-          const timeConfig = TaskTimeConfig.fromDTO(request.timeConfig);
-          const recurrenceRule = request.recurrenceRule
-            ? RecurrenceRule.fromDTO(request.recurrenceRule)
-            : undefined;
+          const schedule = TaskPlanSchedule.create(request.schedule);
           const reminderConfig = request.reminderConfig
             ? TaskReminderConfig.fromDTO(request.reminderConfig)
             : undefined;
 
+          const isFinitePlan =
+            schedule.kind === TaskPlanScheduleKind.OneTime ||
+            (schedule.recurrence != null &&
+              schedule.recurrence.end.kind !== TaskRecurrenceEndKind.Never);
           if (
             request.goalBinding?.contribution?.trigger === TaskGoalBindingTrigger.PlanCompletion &&
-            !isFiniteTaskPlan(request.taskType, recurrenceRule)
+            !isFinitePlan
           ) {
             return error(
               'BAD_REQUEST',
@@ -108,9 +112,7 @@ export class CreateTaskPlanUseCase {
             identityId: request.identityId,
             title: request.name,
             description: request.description ?? undefined,
-            taskType: request.taskType,
-            timeConfig,
-            recurrenceRule,
+            schedule,
             reminderConfig,
             importance: request.importance,
             completionPolicy: request.completionPolicy,

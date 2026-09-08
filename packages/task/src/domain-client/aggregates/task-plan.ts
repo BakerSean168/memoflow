@@ -11,10 +11,7 @@
 
 import type {
   TaskPlanClientDTO,
-  TaskTimeConfig,
-  TaskTimeConfigDTO,
-  RecurrenceRule,
-  RecurrenceRuleDTO,
+  TaskPlanSchedule,
   TaskReminderConfig,
   TaskReminderConfigDTO,
   TaskGoalBinding,
@@ -35,8 +32,7 @@ export interface TaskPlanState {
   identityId: IdentityId;
   name: string;
   description: string | null;
-  timeConfig: TaskTimeConfig;
-  recurrenceRule: RecurrenceRule | null;
+  schedule: TaskPlanSchedule;
   reminderConfig: TaskReminderConfig | null;
   importance: ImportanceLevel;
   goalBinding: TaskGoalBinding | null;
@@ -89,12 +85,8 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     return this._props.description;
   }
 
-  get timeConfig(): TaskTimeConfig {
-    return this._props.timeConfig;
-  }
-
-  get recurrenceRule(): RecurrenceRule | null {
-    return this._props.recurrenceRule;
+  get schedule(): TaskPlanSchedule {
+    return structuredClone(this._props.schedule);
   }
 
   get reminderConfig(): TaskReminderConfig | null {
@@ -223,10 +215,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       identityId: String(this._props.identityId) as TaskPlanClientDTO['identityId'],
       name: this._props.name,
       description: this._props.description,
-      timeConfig: this.serializeTimeConfig(this._props.timeConfig),
-      recurrenceRule: this._props.recurrenceRule
-        ? this.serializeRecurrenceRule(this._props.recurrenceRule)
-        : null,
+      schedule: structuredClone(this._props.schedule),
       reminderConfig: this._props.reminderConfig as TaskReminderConfigDTO | null,
       importance: this._props.importance,
       goalBinding: this._props.goalBinding
@@ -256,25 +245,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       completionRate: this._props.completionRate,
       history: this._props.history ? [...this._props.history] : undefined,
       instances: this._props.instances ? [...this._props.instances] : undefined,
-    };
-  }
-
-  private serializeTimeConfig(config: TaskTimeConfig): TaskTimeConfigDTO {
-    return {
-      timeType: config.timeType,
-      startDate: config.startDate ? Number(config.startDate) : null,
-      timePoint: config.timePoint,
-      timeRange: config.timeRange,
-    };
-  }
-
-  private serializeRecurrenceRule(rule: RecurrenceRule): RecurrenceRuleDTO {
-    return {
-      frequency: rule.frequency,
-      interval: rule.interval,
-      daysOfWeek: rule.daysOfWeek,
-      endDate: rule.endDate ?? null,
-      occurrences: rule.occurrences,
     };
   }
 

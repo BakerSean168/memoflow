@@ -335,7 +335,7 @@ export class PowerSyncTaskPlanRepository
     const now = Date.now();
     const end = now + daysAhead * 86400000;
     return rows.filter((template) => {
-      const startDate = template.toServerDTO().timeConfig?.startDate;
+      const startDate = template.timeConfig.startDate;
       return startDate != null && startDate >= now && startDate <= end;
     });
   }

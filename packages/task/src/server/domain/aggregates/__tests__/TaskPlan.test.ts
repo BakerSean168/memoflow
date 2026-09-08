@@ -344,8 +344,7 @@ describe('TaskPlan Aggregate', () => {
         const template = TaskPlan.create({
           identityId: makeIdentityId(),
           title: 'Generic task',
-          taskType: TaskType.OneTime,
-          timeConfig,
+          schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, timeConfig, null),
         });
 
         expect(template.taskType).toBe(TaskType.OneTime);
@@ -361,32 +360,18 @@ describe('TaskPlan Aggregate', () => {
         const template = TaskPlan.create({
           identityId: makeIdentityId(),
           title: 'Recurring via create',
-          taskType: TaskType.Recurring,
-          timeConfig,
-          recurrenceRule,
+          schedule: TaskPlanSchedule.fromLegacy(TaskType.Recurring, timeConfig, recurrenceRule),
         });
 
         expect(template.taskType).toBe(TaskType.Recurring);
         expect(template.recurrenceRule?.toDTO()).toEqual(recurrenceRule.toDTO());
       });
 
-      it('should throw when recurring task is missing recurrenceRule', () => {
-        expect(() =>
-          TaskPlan.create({
-            identityId: makeIdentityId(),
-            title: 'Task',
-            taskType: TaskType.Recurring,
-            timeConfig: makeAllDayTimeConfig(),
-          }),
-        ).toThrow(InvalidTaskPlanStateError);
-      });
-
       it('should emit task:create during aggregate construction', () => {
         const template = TaskPlan.create({
           identityId: makeIdentityId(),
           title: 'Task',
-          taskType: TaskType.OneTime,
-          timeConfig: makeAllDayTimeConfig(),
+          schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, makeAllDayTimeConfig(), null),
         });
 
         const events = template.domainEvents;
@@ -1397,8 +1382,7 @@ describe('TaskPlan Aggregate', () => {
       const template = TaskPlan.create({
         identityId: makeIdentityId(),
         title: 'Goal task',
-        taskType: TaskType.OneTime,
-        timeConfig: makeAllDayTimeConfig(),
+        schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, makeAllDayTimeConfig(), null),
         goalBinding: {
           goalId: 'goal-123',
           keyResultId: 'kr-456',
@@ -1420,8 +1404,7 @@ describe('TaskPlan Aggregate', () => {
         TaskPlan.create({
           identityId: makeIdentityId(),
           title: 'Incomplete goal task',
-          taskType: TaskType.OneTime,
-          timeConfig: makeAllDayTimeConfig(),
+          schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, makeAllDayTimeConfig(), null),
           goalBinding: {
             goalId: 'goal-123',
             contribution: { value: 10, trigger: TaskGoalBindingTrigger.EachCompletion },
@@ -1638,8 +1621,8 @@ describe('TaskPlan Aggregate', () => {
         });
 
         const dto = template.toClientDTO();
-        expect(dto.timeConfig).toBeDefined();
-        expect(dto.timeConfig.timeType).toBe('AllDay');
+        expect(dto.schedule.kind).toBe('OneTime');
+        expect(dto.schedule.timing.kind).toBe('AllDay');
       });
     });
   });
@@ -1650,8 +1633,7 @@ describe('TaskPlan Aggregate', () => {
       const template = TaskPlan.create({
         identityId: makeIdentityId(),
         title: 'Task',
-        taskType: TaskType.OneTime,
-        timeConfig: makeAllDayTimeConfig(),
+        schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, makeAllDayTimeConfig(), null),
       });
 
       const events = template.pullDomainEvents();
@@ -1690,8 +1672,7 @@ describe('TaskPlan Aggregate', () => {
       const template = TaskPlan.create({
         identityId: makeIdentityId(),
         title: 'Task',
-        taskType: TaskType.OneTime,
-        timeConfig: makeAllDayTimeConfig(),
+        schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, makeAllDayTimeConfig(), null),
       });
 
       const events = template.domainEvents;
