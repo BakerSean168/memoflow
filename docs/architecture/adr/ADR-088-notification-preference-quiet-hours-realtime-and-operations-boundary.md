@@ -8,14 +8,14 @@ tags:
   - operations
 description: 分离用户通知偏好、QuietHours、系统 delivery guard、设备覆盖，并拆开 Inbox realtime 与 delivery operations surface
 created: 2026-09-08T22:00:00+08:00
-updated: 2026-09-08T22:00:00+08:00
+updated: 2026-09-08T23:26:00+08:00
 ---
 
 # ADR-088: Notification Preference、QuietHours、Realtime 与 Operations Boundary
 
-**状态：** 已采纳（待实施）  
-**日期：** 2026-09-08  
-**影响范围：** notification、time、contracts、app-vue、desktop、api、operations  
+**状态：** 已采纳（待实施）
+**日期：** 2026-09-08
+**影响范围：** notification、time、contracts、app-vue、desktop、api、operations
 **关联：** ADR-037、ADR-063、ADR-079、ADR-084~087
 
 ## 1. 决策摘要
@@ -415,3 +415,22 @@ retry count
 - Desktop local DND 不改 cloud Fact；
 - SSE reconnect/catch-up 行为不退化；
 - device sound/vibration 不再是 NotificationFact business state。
+
+## 18. 2026-09-08 Settings Hub ownership clarification
+
+ADR-092/094 进一步冻结 Settings 页面与 Notification ownership 的关系：
+
+```text
+Settings Hub
+  -> composition only
+
+NotificationPreference / QuietHours
+  -> Notification owner
+
+sound / native-vs-custom presentation / OS capability
+  -> Device Surface owner
+```
+
+因此当前 `UserSetting.preferences.notification` 不作为长期 compatibility truth；其中 user delivery flags 迁入 Notification owner，device presentation flags 迁入 local device owner，完成后整类删除。
+
+Settings Hub 可以继续把两类配置放在同一“Notifications”页面，但 mutation/read 必须分别调用 canonical owner port。

@@ -4,7 +4,7 @@ tags:
   - index
 description: 架构决策记录索引
 created: 2025-11-23T15:00:00
-updated: 2026-09-08T21:25:00+08:00
+updated: 2026-09-08T23:26:00+08:00
 ---
 
 # ADR 索引
@@ -108,6 +108,10 @@ updated: 2026-09-08T21:25:00+08:00
 | [ADR-089](./ADR-089-knowledge-space-source-binding-and-health-boundaries.md) | KnowledgeSpace、Source Binding 与 Health/Observation Boundary | 已采纳（待实施） | 2026-09-08 |
 | [ADR-090](./ADR-090-stable-knowledge-document-identity.md) | Stable KnowledgeDocument Identity | 已采纳（待实施） | 2026-09-08 |
 | [ADR-091](./ADR-091-knowledge-projection-index-and-operation-boundaries.md) | Knowledge Projection、AI Index 与 Operation Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-092](./ADR-092-settings-hub-and-preference-ownership-boundary.md) | Settings Hub 与 Preference Ownership Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-093](./ADR-093-user-preference-profile-and-product-time-context.md) | User Preference Profile 与 Product Time Context | 已采纳（待实施） | 2026-09-08 |
+| [ADR-094](./ADR-094-device-preference-feature-policy-and-consent-boundary.md) | Device Preference、Feature Policy 与 Consent Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-095](./ADR-095-preference-persistence-sync-migration-and-portability.md) | Preference Persistence、Sync、Migration 与 Portability | 已采纳（待实施） | 2026-09-08 |
 
 ## 维护规则
 

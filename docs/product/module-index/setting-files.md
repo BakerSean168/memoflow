@@ -5,7 +5,7 @@ tags:
   - setting
 description: 设置模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-07-22T00:00:00
+updated: 2026-09-08T23:26:00+08:00
 ---
 
 # 设置模块文件索引
@@ -72,7 +72,7 @@ updated: 2026-07-22T00:00:00
 | 文件 | 说明 |
 | --- | --- |
 | [`packages/contracts/src/modules/setting/aggregates/user-setting-server.ts`](../../../packages/contracts/src/modules/setting/aggregates/user-setting-server.ts) | UserSetting 服务端 DTO |
-| [`packages/contracts/src/modules/setting/preferences/schemas/index.ts`](../../../packages/contracts/src/modules/setting/preferences/schemas/index.ts) | UserPreferences Zod schema（10 个 category） |
+| [`packages/contracts/src/modules/setting/preferences/schemas/index.ts`](../../../packages/contracts/src/modules/setting/preferences/schemas/index.ts) | UserPreferences Zod schema（当前 9 个 category） |
 | [`packages/contracts/src/modules/setting/preferences/defaults.ts`](../../../packages/contracts/src/modules/setting/preferences/defaults.ts) | 默认偏好值 |
 | [`packages/contracts/src/modules/setting/api/user-setting.dto.ts`](../../../packages/contracts/src/modules/setting/api/user-setting.dto.ts) | 设置 API DTO |
 | [`packages/contracts/src/modules/setting/protocol/setting-event-map.ts`](../../../packages/contracts/src/modules/setting/protocol/setting-event-map.ts) | 设置事件 map |
@@ -93,3 +93,16 @@ updated: 2026-07-22T00:00:00
 - 平台差异设置（桌面路径、快捷键、通知权限）。
 - 设置与其他模块运行时配置的边界。
 - JSONB 存储的查询性能和索引策略。
+
+## Target-design 文档（2026-09-08）
+
+| 文件 | 说明 |
+| --- | --- |
+| [`ADR-092`](../../architecture/adr/ADR-092-settings-hub-and-preference-ownership-boundary.md) | Settings Hub 与 preference ownership 边界 |
+| [`ADR-093`](../../architecture/adr/ADR-093-user-preference-profile-and-product-time-context.md) | UserPreferenceProfile 与 Product Time Context |
+| [`ADR-094`](../../architecture/adr/ADR-094-device-preference-feature-policy-and-consent-boundary.md) | Device/Feature/Consent 边界 |
+| [`ADR-095`](../../architecture/adr/ADR-095-preference-persistence-sync-migration-and-portability.md) | namespace persistence、PowerSync、migration、portability |
+| [`Setting current-system map`](../../analysis/2026-09-08-setting-vnext-current-system-map.md) | 当前源码事实、双真值与迁移基线 |
+| [`Setting reference study`](../../analysis/2026-09-08-setting-vnext-reference-study.md) | VS Code scope/sync 与 Feature Flag 参考 |
+| [`Setting vNext Settings Hub`](../setting-vnext-settings-hub.md) | 目标产品 UI / interaction / host scope |
+| [`Setting vNext active plan`](../../plan/active/2026-09-08-setting-vnext-model-convergence.md) | 实施 ticket、依赖、测试与 DoD |

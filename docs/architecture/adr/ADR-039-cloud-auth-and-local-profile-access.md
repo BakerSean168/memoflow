@@ -7,13 +7,13 @@ tags:
   - local-first
 description: Better Auth 云端认证内核与 Desktop 本地 Profile Access 分离决策
 created: 2026-08-02T00:00:00
-updated: 2026-08-02T00:00:00
+updated: 2026-09-08T23:26:00+08:00
 ---
 
 # ADR-039: Cloud Auth 与 Local Profile Access 分离
 
-**Status:** Accepted  
-**Date:** 2026-08-02  
+**Status:** Accepted
+**Date:** 2026-08-02
 **Supersedes:** ADR-036 §1 及其中依赖自建 `AuthIdentity` / `AuthSession` 的实现决策
 
 ## Context
@@ -68,3 +68,24 @@ MemoFlow Desktop 同时存在本地 Profile 访问、访客身份、离线恢复
 - [Desktop Profile 与云端认证一次性重写](../../plan/active/2026-08-02-desktop-profile-and-cloud-auth-rewrite.md)
 - [ADR-036](./ADR-036-auth-account-boundary-and-verification.md)
 - [Better Auth](https://www.better-auth.com/)
+
+## 2026-09-08 Preference ownership clarification
+
+ADR-092/093 进一步明确：Account 不再作为 theme/language/timezone/notification preference owner。
+
+目标：
+
+```text
+Account
+= identity/profile/contact/lifecycle/security-facing metadata
+
+User Preferences
+= presentation + regional/time
+
+NotificationPreference
+= notification delivery preference
+```
+
+因此当前 `Account.settings` 是待迁移 legacy convenience bundle；在 Setting vNext cutover 完成后删除，不保留 shadow truth。
+
+这不改变本 ADR 的核心规则：Cloud Auth 与 Desktop Local Profile Access 继续分离，guest/local profile 不因 cloud session 失效而不可访问。

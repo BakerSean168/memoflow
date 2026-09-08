@@ -9,7 +9,7 @@ tags:
   - date-fns
 description: ADR-037 - 产品时间体系：Instant/Ymd 契约、TransferDate 对齐、DomainDate 退役、门面与风格治理
 created: 2026-07-26T00:00:00
-updated: 2026-07-26T00:00:00
+updated: 2026-09-08T23:26:00+08:00
 ---
 
 # ADR-037: 产品时间体系（Product Time System）
@@ -247,3 +247,25 @@ L1 Platform             → Date / Intl / 可注入 Clock
 |------|------|
 | 2026-07-26 | 初版采纳：产品时间体系 + Transfer≡Instant + DomainDate 退役 + `@memoflow/time` |
 | 2026-07-26 | T10：删除 DomainDate 类型与 Codec from/toDomainDate；registry 仅 canonical |
+
+## 8. 2026-09-08 Setting vNext clarification
+
+ADR-093 采纳后，ADR-037 中“第一版不强制多用户业务时区”只保留为历史实施阶段描述，不再是 vNext 目标边界。
+
+User-level timezone source 现在明确为：
+
+```text
+UserPreferenceProfile.regional.timeZone
+  -> UserTimeContextPort
+  -> Product Time consumers
+```
+
+其中：
+
+- IANA validation/TimeStyle/Calendar/Recurrence 仍由 `@memoflow/time` owner；
+- Preferences 只拥有“用户选择的 zone/style 值”；
+- server 不允许回退 ambient host timezone；
+- Task/Routine 等实体自己的 explicit schedule timezone snapshot 不因 user preference change 被静默追溯修改；
+- first-profile device timezone 只能作为显式 initialization input，不成为 Time package 对 Setting 的反向依赖。
+
+详见 [ADR-093](./ADR-093-user-preference-profile-and-product-time-context.md)。
