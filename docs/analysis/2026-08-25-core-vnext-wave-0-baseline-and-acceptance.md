@@ -13,7 +13,7 @@ updated: 2026-08-25T21:20:00+08:00
 
 # Core vNext Wave 0 — Baseline / Acceptance / Shared-Train Evidence
 
-Execution truth remains [`2026-08-25-core-vnext-orchestration.md`](../plan/active/2026-08-25-core-vnext-orchestration.md).
+The completed orchestration record is archived at [`2026-08-25-core-vnext-orchestration.md`](../plan/archive/2026-08-25-core-vnext-orchestration.md).
 This document closes `CORE-0001~0004` and supplies the evidence consumed by `CORE-0005`.
 
 ## 1. Frozen baseline

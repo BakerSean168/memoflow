@@ -24,7 +24,7 @@ updated: 2026-08-25T21:25:00+08:00
 >
 > The metadata envelope remains only as a compatibility carrier for the existing `ScheduleTask` aggregate/worker and is a W3 deletion target after Goal/Task/Routine projector cutover. It is not a new public contract.
 
-> Execution truth remains `docs/plan/active/2026-08-25-core-vnext-orchestration.md`.
+> Historical execution truth is archived at `docs/plan/archive/2026-08-25-core-vnext-orchestration.md`; this handoff is not an active execution queue.
 > This file is a handoff only. It does not create a second active plan.
 
 ## Lane / base

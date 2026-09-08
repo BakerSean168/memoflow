@@ -12,7 +12,7 @@ updated: 2026-08-26
 
 # Core vNext Task Domain — Wave 2 Handoff
 
-> Execution truth remains `docs/plan/active/2026-08-25-core-vnext-orchestration.md`.
+> Historical execution truth is archived at `docs/plan/archive/2026-08-25-core-vnext-orchestration.md`; this handoff is not an active execution queue.
 > This file records the completed Task lane and integration constraints; it is not a second active plan.
 
 ## Lane / base / delivered commits

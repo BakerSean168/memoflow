@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-06T21:38:22+08:00
+updated: 2026-09-08T12:14:00+08:00
 ---
 
 # Active Plans
@@ -13,9 +13,13 @@ updated: 2026-09-06T21:38:22+08:00
 
 ## 当前计划
 
-| 计划                                                                                             | 当前状态                                                                                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [MemoFlow Core vNext — Unified Refactor Orchestration](./2026-08-25-core-vnext-orchestration.md) | **v0.11 milestone closed / residual-only active**：Wave 0–5 主产品面已完成；真实 residual 收敛为 Routine method library、AI parity、Mobile parity、ScheduleTask/SourceModule legacy cleanup、pg-boss 决策与最终 hardening。 |
+当前没有仍在推进中的 active plan。
+
+## 本轮已归档（2026-09-08）
+
+| 计划 | 结果 |
+| --- | --- |
+| [MemoFlow Core vNext — Unified Refactor Orchestration](../archive/2026-08-25-core-vnext-orchestration.md) | Goal/Task/Routine/Planner/Scheduler/Notification/EventBus 全面收口；产品 parity、Schedule/Scheduler 物理拆分、HARD-7101~7105 全部完成；PR #338 第四轮 exact-head CI 19/19 全绿并合入 `088a9f16499`。 |
 
 ## 本轮已归档（2026-09-06）
 

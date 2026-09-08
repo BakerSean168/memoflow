@@ -5,21 +5,21 @@ tags:
   - hardening
   - review
   - acceptance
-description: MemoFlow Core vNext HARD-7105 five-layer final review, focused repair, and pre-delivery acceptance evidence
+description: MemoFlow Core vNext HARD-7105 five-layer final review, focused CI repair, exact-head validation, and merged delivery evidence
 created: 2026-09-08T10:27:00+08:00
-updated: 2026-09-08T11:55:00+08:00
-status: accepted-pre-delivery
+updated: 2026-09-08T12:14:00+08:00
+status: completed
 ---
 
 # HARD-7105 — Final review and focused repair evidence
 
 ## Decision
 
-**Five-layer review: PASS for implementation and pre-delivery acceptance.**
+**Five-layer review: PASS; delivery: COMPLETE.**
 
-No unresolved P0/P1 finding remains in the Core vNext residual scope. The initial five-layer implementation review accepted `3f7f7023f127`; the pre-delivery evidence was then committed and opened as PR #338. GitHub's first independent CI pass correctly rejected delivery on fresh-workspace / acceptance-fixture drift that local cached runs had not exposed. Those delivery-gate findings were repaired in `e314e6da344` without widening any vNext product contract.
+No unresolved P0/P1 finding remains in the Core vNext residual scope. The initial five-layer implementation review accepted `3f7f7023f127`; the initial pre-delivery evidence was then committed and opened as PR #338. GitHub's first independent CI pass correctly rejected delivery on fresh-workspace / acceptance-fixture drift that local cached runs had not exposed. Those delivery-gate findings were repaired in `e314e6da344` without widening any vNext product contract.
 
-This document does **not** claim merge/archive completion. The first delivery repair is `e314e6da344`; the second fresh-integration repair is `ce603b6e612`; the third CI-only test-harness repair is `9d505c5f655`. PR #338 must pass a new exact-head GitHub CI run after these repairs and merge into `main` before the umbrella plan can be archived.
+Delivery is now complete. The accepted source head `8b92dd2893c81083a5b493c4c294409a300cf585` passed the fourth exact-head CI run `34184886598` with all 19 checks successful, and PR #338 squash-merged into `main` as `088a9f16499fd4d7a91e502789de6562dcc553aa`.
 
 ## 1. Contract correctness
 
@@ -182,8 +182,8 @@ Post-repair local acceptance:
 
 Focused repair commit: `9d505c5f655 test(ci): respect test-system module boundaries`.
 
-## Final pre-delivery verdict
+## 9. Fourth exact-head CI and merge closure
 
-**ACCEPTED — no unresolved P0/P1.**
+Fourth exact-head CI run `34184886598` at `8b92dd2893c81083a5b493c4c294409a300cf585` completed with **19/19 SUCCESS**. PR #338 then squash-merged to `main` as `088a9f16499fd4d7a91e502789de6562dcc553aa`.
 
-Archive is gated only by durable GitHub delivery evidence, not by additional Core vNext implementation work.
+**DELIVERED / ACCEPTED — no unresolved P0/P1.** The final delivery gate is closed and the umbrella plan may be archived from merged `main`.

@@ -15,7 +15,7 @@ status: superseded
 
 # Goal / Task vNext — Personal Outcome & Execution Refactor
 
-> **Archived 2026-08-29:** detailed Goal/Task business design is retained here for reference. Execution order and remaining post-v0.11 work are owned by `../active/2026-08-25-core-vnext-orchestration.md`; this child plan is no longer an independent active execution truth.
+> **Archived 2026-08-29:** detailed Goal/Task business design is retained here for reference. The completed orchestration record is archived at `./2026-08-25-core-vnext-orchestration.md`; this child plan is historical reference only and is not an active execution truth.
 
 > **Orchestration notice (2026-08-25):** 本文件保留 Goal/Task 的业务细节与验收场景；实际实施顺序、并行 lane、shared Contract/Schema Train 与跨模块依赖以 `2026-08-25-core-vnext-orchestration.md` 为唯一真值。不要再按本文 Phase 1→12 独立顺序执行。
 >

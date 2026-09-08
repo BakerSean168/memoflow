@@ -16,7 +16,7 @@ updated: 2026-08-25T19:18:00+08:00
 
 # Scheduling / Notification vNext — Boundary & Reliability Refactor
 
-> **Archived 2026-08-29:** detailed Scheduling/Notification design is retained here for reference. Execution order and remaining post-v0.11 work are owned by `../active/2026-08-25-core-vnext-orchestration.md`; this child plan is no longer an independent active execution truth.
+> **Archived 2026-08-29:** detailed Scheduling/Notification design is retained here for reference. The completed orchestration record is archived at `./2026-08-25-core-vnext-orchestration.md`; this child plan is historical reference only and is not an active execution truth.
 
 > **Orchestration notice (2026-08-25):** 本文件保留 Scheduling/Notification 的专项设计与 ticket 细节；实际实施顺序、并行 lane、与 Goal/Task/Routine 的 contract freeze 点以 `2026-08-25-core-vnext-orchestration.md` 为唯一真值。不要先迁旧 Task projector 后再重写 Task vNext。
 >

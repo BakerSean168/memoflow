@@ -14,7 +14,7 @@ updated: 2026-08-26
 
 # Task Wave 2 — Shared Contract / Schema Train Handoff
 
-Authority: `docs/plan/active/2026-08-25-core-vnext-orchestration.md`.
+Historical authority record: `docs/plan/archive/2026-08-25-core-vnext-orchestration.md`; this handoff is not active.
 
 This handoff exists because Wave 2 has a single-writer rule for `packages/contracts/**`, Prisma schema and the root PowerSync schema. The Task feature branch contains a working **proposal implementation** of these shared changes so the Task domain could be characterized and tested end-to-end, but the Contract/Schema Trains own the canonical landing of the equivalent changes.
 

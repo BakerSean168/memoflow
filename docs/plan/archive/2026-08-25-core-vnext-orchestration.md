@@ -1,7 +1,7 @@
 ---
 tags:
   - plan
-  - active
+  - archive
   - core-vnext
   - orchestration
   - goal
@@ -14,11 +14,13 @@ tags:
   - parallel
 description: MemoFlow Goal/Task/Routine/Planner/Scheduler/Notification/EventBus 的总重构编排计划，按依赖、共享热点和可并行 lane 组织，并为每个标准能力指定 Build/Borrow/Imitate 来源
 created: 2026-08-25T19:18:00+08:00
-updated: 2026-09-08T10:27:00+08:00
-status: active
+updated: 2026-09-08T12:14:00+08:00
+status: completed
 ---
 
 # MemoFlow Core vNext — Unified Refactor Orchestration
+
+> **Archived 2026-09-08:** Core vNext is complete. PR #338 passed its fourth exact-head CI run (run `34184886598`) with all 19 checks successful at source head `8b92dd2893c81083a5b493c4c294409a300cf585`, then squash-merged into `main` as `088a9f16499fd4d7a91e502789de6562dcc553aa`. HARD-7101~7105 are closed with no unresolved P0/P1; the product-parity, scheduling-convergence, hardening, acceptance, documentation-truth and delivery gates are all complete.
 
 ## 0. Executive decision
 
@@ -63,9 +65,9 @@ Explicitly **deferred post-v0.11** and therefore not merge blockers for this mil
 
 The final merge-readiness review found **no unresolved P0/P1 inside the v0.11 milestone scope**. Evidence and the deferred ledger are recorded in `docs/analysis/2026-08-29-core-vnext-v011-merge-readiness.md`. The remaining Desktop GitHub installation live test is a **release acceptance gate on the newly built Windows package**, not an integration-branch merge gate.
 
-## 0.2 Active-plan truth audit — 2026-09-04
+## 0.2 Historical active-plan truth audit — 2026-09-04
 
-This umbrella remains active **only for post-v0.11 residuals**. Wave 0–5 must not be restarted by future agents. The previous §19 checklist was stale because it left already-verified milestone work unchecked.
+At this checkpoint, the umbrella remained active **only for post-v0.11 residuals**. Wave 0–5 were already closed and must not be restarted by future agents. The previous §19 checklist was stale because it left already-verified milestone work unchecked.
 
 Verified complete in current `main`:
 
@@ -83,11 +85,20 @@ Post-v0.11 residual truth — 2026-09-08:
 - `MOBILE-6201/6202`: **DONE by parity audit + focused repair** — React/mobile consumes current Goal/Task/Notification contracts, Task Shared Label editing is wired, and no Folder/Dependency/ValueType/raw Scheduler mutation surface remains;
 - `CLEAN-6301~6304`: **DONE** — owner-domain direct `ScheduleTask.create(...)`, `SourceModule` execution fallback, raw product worker mutation surfaces, Reminder scanner/ControlMode and obsolete product duplicates are removed; `packages/schedule` owns Planner/Calendar while `packages/scheduler` owns the Temporal Engine;
 - `POC-6401`: **DONE / Keep custom** — pg-boss 12.30.0 remains a reproducible dev-only candidate, not production infrastructure;
-- `HARD-7101~7104`: **DONE** — 22/22 failure matrix, production architecture locks, full A-J/host/local-Docker/schema acceptance and documentation/ADR truth closure are complete. `HARD-7105` is the only remaining umbrella ticket.
+- `HARD-7101~7105`: **DONE** — 22/22 failure matrix, production architecture locks, full A-J/host/local-Docker/schema acceptance, documentation/ADR truth closure, independent final review, focused CI repairs, fourth exact-head CI and PR #338 merge are complete.
 
 Execution priority is redefined in §20 below; historical Wave 0/1 text remains evidence only.
 
-## 0.3 Historical implementation checkpoint — Wave 0 / Wave 1
+## 0.3 Final closure — 2026-09-08
+
+- exact accepted source: `8b92dd2893c81083a5b493c4c294409a300cf585`;
+- GitHub CI run `34184886598`: **19/19 checks SUCCESS**, including Governance, Static Analysis, Unit Tests, Typecheck, Build, Verification Children, all four Web Flow shards, Boundary/Integration/Coverage/Performance/Validate/Web Flow Oracles and Delivery Observation;
+- PR #338: **MERGED** on 2026-09-08;
+- merged `main`: `088a9f16499fd4d7a91e502789de6562dcc553aa`;
+- final review: **no unresolved P0/P1**;
+- archive action is performed from merged `main`, satisfying the plan's final delivery gate.
+
+## 0.4 Historical implementation checkpoint — Wave 0 / Wave 1
 
 Wave 0 evidence is frozen in [`Core vNext Wave 0 — Baseline / Acceptance / Shared-Train Evidence`](../../analysis/2026-08-25-core-vnext-wave-0-baseline-and-acceptance.md).
 
@@ -2379,7 +2390,7 @@ P0/P1 findings create focused repair passes before plan archive.
 
 Canonical evidence: `docs/analysis/2026-09-08-hard-7105-final-review-evidence.md`.
 
-**Review verdict: ACCEPTED — no unresolved P0/P1. All three focused CI repairs are locally re-accepted.** The plan intentionally remains active until PR #338 passes a new exact-head GitHub CI run and merges into `main`; archive occurs from merged `main`, not before delivery.
+**Final verdict: DELIVERED / ACCEPTED — no unresolved P0/P1.** All three focused CI repairs were re-accepted, the fourth exact-head CI passed 19/19, PR #338 merged into `main`, and this plan is now archived from the merged source of truth.
 
 ---
 
@@ -2634,13 +2645,13 @@ Core vNext can close only when all of the following hold:
 - [x] API/Desktop/PowerSync/Prisma parity passes for the completed primary product scope;
 - [x] full governance/docs checks green for the completed milestone and current main;
 - [x] residual grep proves completed convergence paths are single-track — raw ScheduleTask product mutations, SourceModule execution fallback, Goal/Task legacy surfaces, Reminder ControlMode/scanner/duplicate state, Task string tags/color and AI raw Scheduler access are gone;
-- [ ] final residual batch review has no P0/P1 unresolved finding.
+- [x] final residual batch review has no P0/P1 unresolved finding; fourth exact-head CI passed and PR #338 merged to `main`.
 
 ---
 
-# 20. Immediate next implementation batch
+# 20. Final closure state
 
-Do **not** restart Wave 0–5, Product parity, CLEAN convergence, or dependency PoCs. All of those lanes are closed. The only executable residual is:
+Do **not** restart Wave 0–5, Product parity, CLEAN convergence, dependency PoCs, or HARD-7101~7105. All lanes are closed; there is no remaining executable Core vNext residual.
 
 ```text
 A. Product parity          DONE — ROUTINE-5302, AI-6101~6103, MOBILE-6201/6202
@@ -2650,7 +2661,7 @@ C. Final closure
    HARD-7102              DONE — architecture locks / anti-resurrection
    HARD-7103              DONE — A-J + host + local-Docker + schema acceptance
    HARD-7104              DONE — ADR/docs/reuse/plan truth closure
-   HARD-7105              REVIEW PASS + CI REPAIRS PASS — no unresolved P0/P1; PR #338 fourth exact-head CI + merge + archive remain
+   HARD-7105              DONE — no unresolved P0/P1; fourth exact-head CI 19/19 SUCCESS; PR #338 merged as 088a9f16499
 ```
 
-HARD-7105 implementation/review and all focused CI repairs are accepted. Keep the final DoD checkbox open until PR #338 passes CI on the repaired exact head and merges into `main`; then archive this umbrella plan from merged `main`.
+HARD-7105 is complete. PR #338 passed the repaired exact-head CI and merged into `main`; this umbrella plan is archived from that merged `main` state.
