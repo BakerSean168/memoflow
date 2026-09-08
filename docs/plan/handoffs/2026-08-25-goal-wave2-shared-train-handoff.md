@@ -3,7 +3,7 @@
 Date: 2026-08-25
 Lane: `core-vnext/goal-domain`
 Base: `9982e1918447e8710b31f6036c338d8dc51616e0`
-Authority: `docs/plan/active/2026-08-25-core-vnext-orchestration.md`
+Historical authority record: `docs/plan/archive/2026-08-25-core-vnext-orchestration.md`; this handoff is not active.
 
 This handoff records only central/shared train work that the Goal lane intentionally does not own. Goal-owned contracts, domain/application code, adapters and tests are implemented in this lane. Do not restore retired Goal semantics while applying this train.
 

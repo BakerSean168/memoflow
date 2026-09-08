@@ -4,7 +4,7 @@ tags:
   - archive
 description: 归档计划目录
 created: 2026-04-26T00:00:00
-updated: 2026-09-06T13:08:00+08:00
+updated: 2026-09-08T12:14:00+08:00
 ---
 
 # Archived Plans
@@ -27,6 +27,7 @@ updated: 2026-09-06T13:08:00+08:00
 
 | 日期       | 计划                                                                                                     | 结果                                                                                                                                                                                            |
 | ---------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-08 | [MemoFlow Core vNext — Unified Refactor Orchestration](./2026-08-25-core-vnext-orchestration.md) | Goal/Task/Routine/Planner/Scheduler/Notification/EventBus 重构与 residual 全闭环；HARD-7101~7105 完成，PR #338 exact-head CI 19/19 全绿并合入 `088a9f16499` |
 | 2026-09-06 | [MemoFlow Delivery Platform V3](./2026-09-02-delivery-platform-v3.md)                                    | Phase 1–4 完成；exact candidate/staging/release/production authority、v0.13.3 live rollout、retain-split timing、Action pinning、macOS trust capability 与 final CI/Coverage observation 全闭环 |
 | 2026-09-04 | [AI Provider Onboarding V2](./2026-08-25-ai-provider-onboarding-v2.md)                                   | CC Switch/LobeChat 风格 onboarding、SSRF / DNS pinning、one-time handle、atomic encrypted save/replacement、Custom + real OpenRouter E2E、PR required CI/local Docker acceptance 全闭环         |
 | 2026-08-23 | [MemoFlow AI vNext — Mastra-native 一次性大重构](./2026-08-20-mastra-native-ai-vnext-refactor.md)        | AI-VNEXT-01–09 完成；PR #252 全绿合并；Mastra 唯一 runtime、legacy hard-delete、eval/usage/local Docker 验收闭合                                                                                |

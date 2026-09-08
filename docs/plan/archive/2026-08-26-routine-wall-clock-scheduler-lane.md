@@ -5,7 +5,7 @@
 ## Status
 
 ROUTINE-3401 and ROUTINE-3402 implementation complete on the Core vNext continuation lane.
-Canonical orchestration truth: `docs/plan/active/2026-08-25-core-vnext-orchestration.md`.
+Historical canonical orchestration record: `docs/plan/archive/2026-08-25-core-vnext-orchestration.md`. This lane is archived and must not be resumed as active work.
 
 ## Objective
 

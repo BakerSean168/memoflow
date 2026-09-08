@@ -14,7 +14,7 @@ updated: 2026-08-26T00:46:00+08:00
 
 # Core vNext Notification Fact — Shared Train Handoff
 
-> Execution truth remains `docs/plan/active/2026-08-25-core-vnext-orchestration.md`.
+> Historical execution truth is archived at `docs/plan/archive/2026-08-25-core-vnext-orchestration.md`; this handoff is not an active execution queue.
 > This file is a handoff only. It does not create a second active plan.
 
 ## Lane / base
