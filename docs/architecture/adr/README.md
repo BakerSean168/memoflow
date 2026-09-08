@@ -4,7 +4,7 @@ tags:
   - index
 description: 架构决策记录索引
 created: 2025-11-23T15:00:00
-updated: 2026-09-08T17:55:00+08:00
+updated: 2026-09-08T20:45:00+08:00
 ---
 
 # ADR 索引
@@ -76,7 +76,7 @@ updated: 2026-09-08T17:55:00+08:00
 | [ADR-058](./ADR-058-oss-first-standard-capability-reuse.md) | OSS-first 标准能力复用与领域所有权边界 | 已采纳（从 Goal / Task vNext 开始执行） | 2026-08-25 |
 | [ADR-059](./ADR-059-routine-coach-domain-runtime-and-surfaces.md) | Routine Coach 领域、Runtime 与交互 Surface | 已采纳（待实施） | 2026-08-25 |
 | [ADR-060](./ADR-060-schedule-planner-and-scheduler-boundary.md) | Schedule / Planner 与 Scheduler / Temporal Engine 分离 | 已采纳并实施 | 2026-08-25 |
-| [ADR-061](./ADR-061-business-module-scheduling-port-and-handler-registry.md) | 业务模块通过 Scheduling Port 与 Handler Registry 接入 Scheduler | 已采纳（待实施） | 2026-08-25 |
+| [ADR-061](./ADR-061-business-module-scheduling-port-and-handler-registry.md) | 业务模块通过 Scheduling Port 与 Handler Registry 接入 Scheduler | 已采纳并实施（由 ADR-081~083 继续收敛） | 2026-08-25 |
 | [ADR-062](./ADR-062-reminder-routine-single-scheduling-authority.md) | Reminder / Routine 单一调度权与可靠 Occurrence 执行 | 已采纳（待实施） | 2026-08-25 |
 | [ADR-063](./ADR-063-notification-fact-delivery-policy-and-device-surfaces.md) | Notification Fact、Delivery Policy 与 Device Surface 分离 | 已采纳（待实施） | 2026-08-25 |
 | [ADR-064](./ADR-064-emittery-runtime-event-delivery.md) | Runtime EventBus 采用 Emittery 与 Delivery-scoped Async Publish | 已采纳并实施 | 2026-08-25 |
@@ -95,6 +95,11 @@ updated: 2026-09-08T17:55:00+08:00
 | [ADR-077](./ADR-077-routine-occurrence-interaction-and-reliability-boundary.md) | Routine Occurrence、Interaction 与 Reliability Boundary | 已采纳（待实施） | 2026-09-08 |
 | [ADR-078](./ADR-078-routine-profile-eligibility-runtime-context-and-overrides.md) | Routine Profile、Eligibility、Runtime Context 与 Temporary Override | 已采纳（待实施） | 2026-09-08 |
 | [ADR-079](./ADR-079-routine-intervention-policy-notification-and-surface-boundary.md) | Routine Intervention Policy、Notification 与 Device Surface 边界 | 已采纳（待实施） | 2026-09-08 |
+
+| [ADR-080](./ADR-080-planner-calendar-range-occupancy-and-conflict-model.md) | Planner Calendar Range、Occupancy 与 Conflict Model | 已采纳（待实施） | 2026-09-08 |
+| [ADR-081](./ADR-081-scheduled-invocation-model-and-legacy-schedule-task-retirement.md) | ScheduledInvocation Model 与 Legacy ScheduleTask 退役 | 已采纳（待实施） | 2026-09-08 |
+| [ADR-082](./ADR-082-scheduler-invocation-attempt-and-runtime-state-machine.md) | Scheduler Invocation Attempt 与 Runtime State Machine | 已采纳（待实施） | 2026-09-08 |
+| [ADR-083](./ADR-083-schedule-scheduler-contract-diagnostics-and-persistence-boundary.md) | Schedule / Scheduler Contract、Diagnostics 与 Persistence Boundary | 已采纳（待实施） | 2026-09-08 |
 
 ## 维护规则
 
