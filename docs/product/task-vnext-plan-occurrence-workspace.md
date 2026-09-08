@@ -5,7 +5,7 @@ tags:
   - vnext
 description: Task Plan / Occurrence / Workspace 最终产品模型与创建、执行、详情交互
 created: 2026-09-08T19:30:00+08:00
-updated: 2026-09-08T19:30:00+08:00
+updated: 2026-09-08T21:25:00+08:00
 ---
 
 # Task vNext — Plan / Occurrence / Workspace
@@ -91,4 +91,4 @@ Plan 定义步骤；Occurrence 独立保存本次勾选状态。修改 Plan chec
 
 ## 6. Notes / Goal context
 
-Task Detail 能看到 Goal/KR 和相关 Note，但它们是 cross-module context projection，不成为 TaskPlan owned state。
+Task Detail 能看到 Goal/KR 和相关 Note，但它们是 cross-module context projection，不成为 TaskPlan owned state。Note durable reference 使用 ADR-090 `KnowledgeDocumentRef`；禁止把 path-derived projection id 固化为长期关联。

@@ -4,7 +4,7 @@ tags:
   - index
 description: 架构决策记录索引
 created: 2025-11-23T15:00:00
-updated: 2026-09-08T20:45:00+08:00
+updated: 2026-09-08T21:25:00+08:00
 ---
 
 # ADR 索引
@@ -105,6 +105,9 @@ updated: 2026-09-08T20:45:00+08:00
 | [ADR-086](./ADR-086-notification-delivery-plan-projection-and-channel-retirement.md) | Notification DeliveryPlan、Projection 与 Legacy Channel 退役 | 已采纳（待实施） | 2026-09-08 |
 | [ADR-087](./ADR-087-notification-interaction-and-typed-action-intents.md) | Notification Interaction 与 Typed Action Intents | 已采纳（待实施） | 2026-09-08 |
 | [ADR-088](./ADR-088-notification-preference-quiet-hours-realtime-and-operations-boundary.md) | Notification Preference、QuietHours、Realtime 与 Operations Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-089](./ADR-089-knowledge-space-source-binding-and-health-boundaries.md) | KnowledgeSpace、Source Binding 与 Health/Observation Boundary | 已采纳（待实施） | 2026-09-08 |
+| [ADR-090](./ADR-090-stable-knowledge-document-identity.md) | Stable KnowledgeDocument Identity | 已采纳（待实施） | 2026-09-08 |
+| [ADR-091](./ADR-091-knowledge-projection-index-and-operation-boundaries.md) | Knowledge Projection、AI Index 与 Operation Boundary | 已采纳（待实施） | 2026-09-08 |
 
 ## 维护规则
 

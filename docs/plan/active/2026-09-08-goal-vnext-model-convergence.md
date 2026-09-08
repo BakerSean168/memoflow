@@ -11,7 +11,7 @@ tags:
   - migration
 description: Goal vNext 产品模型、KR Measurement V3、Task/Knowledge Context、AI Plan 与 Linear-style UI 的一次性收敛实施计划
 created: 2026-09-08T17:55:00+08:00
-updated: 2026-09-08T17:55:00+08:00
+updated: 2026-09-08T21:25:00+08:00
 status: active
 ---
 
@@ -64,6 +64,8 @@ UI
 5. [Goal vNext Workspace & Create UI](../../product/goal-vnext-workspace-and-create-ui.md)
 6. [Current System Map](../../analysis/2026-09-08-goal-vnext-current-system-map.md)
 7. [Linear Reference Study](../../analysis/2026-09-08-goal-vnext-linear-reference-study.md)
+8. [ADR-090 — Stable KnowledgeDocument Identity](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md) — Goal/Knowledge durable relation 的外部硬依赖
+9. [Knowledge Repository vNext](../../product/knowledge-repository-vnext.md) — Knowledge owner/read-model 边界
 
 旧 ADR-052 至 ADR-056 仍保留历史决策；被新 ADR 修订的部分以 ADR-067 至 ADR-070 为目标真值。实施完成前，当前代码事实仍以 current-system map 与实际源码/测试为准。
 
@@ -211,6 +213,7 @@ GoalWorkspaceReadModel
 12. Scheduler 继续是单一 temporal execution authority；
 13. HTTP/IPC 与 Prisma/PowerSync 必须保持 parity；
 14. 不保留长期 old/new dual public contract。
+15. Goal/Task durable Knowledge relation 只允许指向 stable `KnowledgeDocumentId`；禁止把 path-derived `KnowledgeNoteProjection.id` 固化进 Relation。
 
 ## 6. Explicit non-goals
 
@@ -429,7 +432,7 @@ Core identity    Target/time        KR Measurement V3
 
 ### GOAL-7206 — Promote Relation to shared capability and implement Goal Knowledge links
 
-**Goal:** Goal can link reusable Knowledge Notes through a shared Relation owner on both Prisma and PowerSync lanes.
+**Goal:** Goal can link reusable Knowledge Documents through a shared Relation owner on both Prisma and PowerSync lanes, using ADR-090 stable `KnowledgeDocumentId`.
 
 **Scope:**
 
@@ -438,26 +441,28 @@ Core identity    Target/time        KR Measurement V3
 - Prisma adapter parity;
 - add PowerSync adapter/schema/repository;
 - typed GoalKnowledge facade;
-- `Goal --related--> Note` canonical product relation;
+- `Goal --related--> KnowledgeDocumentRef` canonical product relation；禁止 path-derived projection id；
 - deletion/unlink rules;
 - Repository/Knowledge note resolution.
 
 **Implementation:**
 
 1. add surface locks around current Relation contract before moving ownership;
-2. create shared relation package/module without changing serialized semantics;
-3. move Prisma adapter and tests;
-4. implement PowerSync lane and round-trip tests;
-5. add typed goal-knowledge application intents;
-6. add cleanup on Goal delete without deleting Note;
-7. add reverse Note -> Goals query;
-8. remove generic Relation ownership from Goal package.
+2. add a hard characterization lock that no durable Goal relation persists `KnowledgeNoteProjection.id` / relativePath as target identity;
+3. create shared relation package/module without changing serialized semantics;
+4. move Prisma adapter and tests;
+5. implement PowerSync lane and round-trip tests;
+6. consume Repository/Knowledge stable `KnowledgeDocumentRef` from ADR-090;
+7. add typed goal-knowledge application intents;
+8. add cleanup on Goal delete without deleting KnowledgeDocument;
+9. add reverse KnowledgeDocument -> Goals query;
+10. remove generic Relation ownership from Goal package.
 
-**Acceptance:** Web/Desktop can create/read/delete Goal Note relations offline/online; Note survives unlink/Goal delete; no Goal.noteIds or Note.goalId dual truth.
+**Acceptance:** Web/Desktop can create/read/delete Goal Knowledge relations offline/online; KnowledgeDocument survives unlink/Goal delete and rename/move keeps the relation resolvable; no Goal.noteIds/Note.goalId/path-derived relation dual truth.
 
-**Dependencies:** GOAL-7201; GOAL-7202 migration consumes Goal Brief path once available.
+**Dependencies:** GOAL-7201; GOAL-7202 migration consumes Goal Brief path once available; **hard external gate: ADR-090 stable KnowledgeDocument identity must be implemented before durable relation persistence is enabled.**
 
-**Risks:** current Relation is Prisma-only; parity must land before UI declares Notes a core Goal property.
+**Risks:** current Relation is Prisma-only; parity must land before UI declares Knowledge a core Goal property. Repository projection ids are path-derived today, so using them before ADR-090 would create rename-broken links.
 
 ## 12. Phase 4 — Goal Workspace read composition
 

@@ -5,7 +5,7 @@ tags:
   - repository
 description: 资源库模块当前实现、本地 Vault、可选 GitHub 同步与跨端边界
 created: 2026-06-02T00:00:00
-updated: 2026-07-21T00:00:00
+updated: 2026-09-08T21:25:00+08:00
 ---
 
 # 资源库模块说明
@@ -15,6 +15,39 @@ updated: 2026-07-21T00:00:00
 资源库模块负责把用户的 Markdown 知识资产接入 MemoFlow 的浏览、搜索、引用、AI 和跨端流程。长期定位不是独立知识编辑器，而是本地 Obsidian Vault、可选 GitHub private repository 和 Memory Flow 业务能力之间的边界。
 
 [ADR-034](../../architecture/adr/ADR-034-obsidian-vault-repository.md) 已采纳：本地 Vault 优先；GitHub 登录与仓库授权解耦；用户需要同步时再连接 GitHub；绑定后 Web 可以安全地快捷创建新笔记。
+
+## 1.1 vNext 已采纳建模方向（待实施）
+
+2026-09-08 已完成 Repository/Knowledge vNext 建模冻结，但当前代码仍以本文件“当前实现”和 current-system map 为准。vNext 不恢复旧 Repository/Folder/Resource Aggregate，而是收敛为：
+
+```text
+KnowledgeSpace
+├── LocalVaultBinding + LocalVaultHealth
+├── KnowledgeRemoteBinding + RemoteRepositoryObservation
+├── RemoteHistoryFence
+├── KnowledgeProjectionCheckpoint
+├── Stable KnowledgeDocumentId
+├── Document/Asset Projection
+└── KnowledgeCommitOperation
+```
+
+同时明确：
+
+- `KnowledgeDocumentId` 与 path 分离，跨模块 Goal/Task Relation 不得引用 path-derived projection id；
+- AI 独占 knowledge index state，Repository projection 不再长期保存 `indexStatus` 双真值；
+- Web confirmed commit、Webhook 与 reconciliation 最终共用单一 `KnowledgeProjectionEngine`；
+- Local Vault ownership 从 online identity 收敛到 Local Profile / KnowledgeSpace 语义；
+- 现有 GitHub InstallationIntent、local-first Git、no-force-push、conflict pause、webhook dedup、lease、confirmed-write idempotency 等作为 protected assets。
+
+权威设计包：
+
+- [Knowledge Repository vNext](../knowledge-repository-vnext.md)
+- [Current System Map](../../analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md)
+- [ADR-089](../../architecture/adr/ADR-089-knowledge-space-source-binding-and-health-boundaries.md)
+- [ADR-090](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
+- [ADR-091](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
+
+**这些文档只冻结目标模型，不表示生产实现已经迁移。**
 
 ## 2. 当前实现
 
@@ -117,6 +150,8 @@ Web create
 
 ## 8. 当前差距
 
+除以下已知交付差距外，Repository/Knowledge vNext 的模型迁移尚未开始；不得把 ADR-089~091 的目标态描述成当前代码事实。
+
 - 真实 GitHub App fixture E2E 仍依赖外部凭据与受控 private repository。
 - Mobile 尚未接入服务端 GitHub 投影的只读浏览、搜索与预览。
 - 统一 Agent Host 的完整 proposal/capability/tool-policy 协议由 ADR-035 和对应 active plan 继续收口。
@@ -133,8 +168,13 @@ Web create
 ## 10. 相关资料
 
 - [ADR-034: 本地 Obsidian Vault 与可选 GitHub 知识仓库](../../architecture/adr/ADR-034-obsidian-vault-repository.md)
+- [Knowledge Repository vNext](../knowledge-repository-vnext.md)
+- [ADR-089: KnowledgeSpace、Source Binding 与 Health/Observation Boundary](../../architecture/adr/ADR-089-knowledge-space-source-binding-and-health-boundaries.md)
+- [ADR-090: Stable KnowledgeDocument Identity](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
+- [ADR-091: Knowledge Projection、AI Index 与 Operation Boundary](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
+- [Knowledge Repository vNext Current System Map](../../analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md)
 - [ADR-035: 统一助手与可插拔 Agent Host](../../architecture/adr/ADR-035-unified-assistant-agent-host.md)
-- [统一助手与可插拔 Agent Host 实施方案](../../plan/active/2026-07-17-unified-assistant-agent-host.md)
+- [统一助手与可插拔 Agent Host 实施方案](../../plan/archive/2026-07-17-unified-assistant-agent-host.md)
 - [Obsidian Vault 与 GitHub 知识仓库后续优化方案](../../plan/archive/2026-07-16-obsidian-vault-repository-optimization.md)
 - [编辑器模块说明](./editor.md)
 - [AI 模块说明](./ai.md)

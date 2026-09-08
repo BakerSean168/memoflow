@@ -6,14 +6,14 @@ tags:
   - refactor
 description: Task Plan / Occurrence 聚合边界、Schedule ADT、Result/Checklist、Reminder parity、Goal/Workspace 一次性收敛实施计划
 created: 2026-09-08T19:35:00+08:00
-updated: 2026-09-08T19:35:00+08:00
+updated: 2026-09-08T21:25:00+08:00
 ---
 
 # Task vNext Model Convergence
 
 **状态：ACTIVE / implementation started**
 **分支：** `feat/task-vnext-model-convergence`
-**上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）
+**上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）
 **基线：** Task Vitest 71 files / 717 tests PASS
 
 ## 1. Objective
@@ -42,6 +42,7 @@ TaskWorkspace  = Plan + Occurrences + Cross-module Context
 - 不增加通用 completion-policy DSL；
 - 不让 Task 自己拥有 Scheduler runtime；
 - 不把 Related Notes 存成 `noteIds[]`；
+- 不把 path-derived `KnowledgeNoteProjection.id` / relativePath 当成 durable Note relation identity；
 - 不把 Overdue/Missed 混为一谈。
 
 ## 4. Work items
@@ -109,6 +110,8 @@ TaskWorkspace  = Plan + Occurrences + Cross-module Context
 ### TASK-7308 — Context read model
 
 - TaskPlanWorkspace：labels + Goal/KR + occurrence summary + recent occurrences + linked notes；
+- linked notes 使用 ADR-090 `KnowledgeDocumentRef`，rename/move 后 relation 仍可解析；
+- 在 stable document identity 未实施前，不落 path-derived durable relation；
 - 不把 context 塞回 Aggregate；
 - 与 ADR-069 shared Relation 实施保持单一 ownership。
 
