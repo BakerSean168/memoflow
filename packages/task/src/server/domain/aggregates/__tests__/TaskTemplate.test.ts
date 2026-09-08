@@ -260,7 +260,6 @@ describe('TaskTemplate Aggregate', () => {
         expect(template.startDate).toEqual(sameDate);
         expect(template.dueDate).toEqual(sameDate);
       });
-
     });
 
     describe('createRecurringTask()', () => {
@@ -1167,7 +1166,9 @@ describe('TaskTemplate Aggregate', () => {
           }),
         );
 
-        expect(template.shouldGenerateInstance(new Date(2026, 0, 2, 12, 0, 0).getTime())).toBe(true);
+        expect(template.shouldGenerateInstance(new Date(2026, 0, 2, 12, 0, 0).getTime())).toBe(
+          true,
+        );
       });
 
       it('should respect daily recurrence interval from start date', () => {
@@ -1654,7 +1655,7 @@ describe('TaskTemplate Aggregate', () => {
             contribution: { value: 10, trigger: TaskGoalBindingTrigger.EachCompletion },
           } as never,
         }),
-      ).toThrow('Key Result ID is required');
+      ).toThrow('Goal contribution requires a Key Result');
     });
 
     describe('bindToGoal()', () => {
@@ -1664,6 +1665,17 @@ describe('TaskTemplate Aggregate', () => {
         template.bindToGoal('goal-123', 'kr-456');
         expect(template.isLinkedToGoal()).toBe(true);
         expect(template.goalBinding).not.toBeNull();
+      });
+
+      it('allows a goal-level link without forcing an artificial key result', () => {
+        const template = TaskTemplate.load(makeState({ status: TaskTemplateStatus.Active }));
+
+        template.bindToGoal('goal-123');
+        expect(template.goalBinding?.toDTO()).toEqual({
+          goalId: 'goal-123',
+          keyResultId: null,
+          contribution: null,
+        });
       });
 
       it('should throw for empty goalId', () => {
@@ -1689,9 +1701,7 @@ describe('TaskTemplate Aggregate', () => {
         const template = TaskTemplate.load(
           makeState({ status: TaskTemplateStatus.Closed, outcome: TaskPlanOutcome.Succeeded }),
         );
-        expect(() => template.bindToGoal('goal-123', 'kr-456')).toThrow(
-          InvalidGoalBindingError,
-        );
+        expect(() => template.bindToGoal('goal-123', 'kr-456')).toThrow(InvalidGoalBindingError);
       });
     });
 
@@ -1718,14 +1728,16 @@ describe('TaskTemplate Aggregate', () => {
           contribution: { value: 10, trigger: TaskGoalBindingTrigger.PlanCompletion },
         });
         const template = TaskTemplate.load(
-          makeState({ status: TaskTemplateStatus.Closed, outcome: TaskPlanOutcome.Succeeded, goalBinding: binding }),
+          makeState({
+            status: TaskTemplateStatus.Closed,
+            outcome: TaskPlanOutcome.Succeeded,
+            goalBinding: binding,
+          }),
         );
         expect(() => template.unbindFromGoal()).toThrow(InvalidGoalBindingError);
       });
     });
-
   });
-
 
   // ==================== History ====================
   describe('History', () => {
@@ -1791,8 +1803,6 @@ describe('TaskTemplate Aggregate', () => {
         expect(dto.instances).toBeDefined();
         expect(dto.instances!.length).toBe(1);
       });
-
-
     });
 
     describe('toClientDTO()', () => {

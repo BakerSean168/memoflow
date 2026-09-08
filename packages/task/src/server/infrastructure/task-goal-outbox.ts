@@ -71,6 +71,7 @@ export function toTaskGoalOutboxRecord(event: IDomainEvent): TaskGoalOutboxRecor
   if (
     !binding ||
     !contribution ||
+    !binding.keyResultId ||
     contribution.trigger !== TaskGoalBindingTrigger.EachCompletion
   ) {
     return null;
@@ -118,6 +119,7 @@ function planOutcomeSettlementRecord(
   if (
     !binding ||
     !contribution ||
+    !binding.keyResultId ||
     contribution.trigger !== TaskGoalBindingTrigger.PlanCompletion ||
     payload.previousOutcome === payload.nextOutcome
   ) {

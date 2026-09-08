@@ -32,14 +32,22 @@ export function isFiniteTaskPlan(
 export function bindToGoal(
   ctx: GoalOperationContext,
   goalId: string,
-  keyResultId: string,
+  keyResultId: string | null = null,
   contribution: GoalContributionRule | null = null,
 ): void {
-  if (!goalId || !keyResultId) {
-    throw new InvalidGoalBindingError('Goal ID and Key Result ID are required');
+  if (!goalId) {
+    throw new InvalidGoalBindingError('Goal ID is required');
+  }
+  if (keyResultId === '') {
+    throw new InvalidGoalBindingError('Key Result ID cannot be empty');
+  }
+  if (contribution && !keyResultId) {
+    throw new InvalidGoalBindingError('Automatic Goal contribution requires a Key Result');
   }
   if (ctx.props.status === TaskTemplateStatus.Closed || ctx.props.deletedAt !== null) {
-    throw new InvalidGoalBindingError('Cannot change goal binding on a closed or deleted task plan');
+    throw new InvalidGoalBindingError(
+      'Cannot change goal binding on a closed or deleted task plan',
+    );
   }
   if (ctx.props.goalBinding) {
     throw new InvalidGoalBindingError('Template is already bound to a goal');
@@ -48,9 +56,7 @@ export function bindToGoal(
     contribution?.trigger === TaskGoalBindingTrigger.PlanCompletion &&
     !isFiniteTaskPlan(ctx.props.taskType, ctx.props.recurrenceRule)
   ) {
-    throw new InvalidGoalBindingError(
-      'Whole-plan goal progress requires a finite task plan',
-    );
+    throw new InvalidGoalBindingError('Whole-plan goal progress requires a finite task plan');
   }
 
   ctx.props.goalBinding = TaskGoalBinding.create({
@@ -68,7 +74,9 @@ export function unbindFromGoal(ctx: GoalOperationContext): void {
     throw new InvalidGoalBindingError('Template is not bound to any goal');
   }
   if (ctx.props.status === TaskTemplateStatus.Closed || ctx.props.deletedAt !== null) {
-    throw new InvalidGoalBindingError('Cannot change goal binding on a closed or deleted task plan');
+    throw new InvalidGoalBindingError(
+      'Cannot change goal binding on a closed or deleted task plan',
+    );
   }
 
   const { goalId: oldGoalId, keyResultId: oldKeyResultId } = ctx.props.goalBinding;

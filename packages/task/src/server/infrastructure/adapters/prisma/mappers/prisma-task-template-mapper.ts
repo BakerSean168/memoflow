@@ -120,8 +120,13 @@ export class PrismaTaskTemplateMapper {
       : null;
 
     const checklist = data.checklist
-      ? (JSON.parse(data.checklist) as Array<{ title: string; order: number }>).map((item) =>
-          ChecklistItemDefinition.fromDTO(item),
+      ? (JSON.parse(data.checklist) as Array<{ id?: string; title: string; order: number }>).map(
+          (item) =>
+            ChecklistItemDefinition.of(
+              item.title,
+              item.order,
+              item.id ?? `legacy-checklist-${item.order}`,
+            ),
         )
       : [];
 
@@ -139,7 +144,8 @@ export class PrismaTaskTemplateMapper {
       checklist,
       status: data.status as TaskTemplateStatus,
       outcome: (vnext.outcome ?? TaskPlanOutcome.Open) as TaskPlanOutcomeValue,
-      completionPolicy: (vnext.completionPolicy ?? TaskPlanCompletionPolicy.AllowCorrection) as TaskPlanCompletionPolicyValue,
+      completionPolicy: (vnext.completionPolicy ??
+        TaskPlanCompletionPolicy.AllowCorrection) as TaskPlanCompletionPolicyValue,
       closedAt: optionalInstant(vnext.closedAt),
       archivedAt: optionalInstant(vnext.archivedAt),
       abandonedReason: vnext.abandonedReason ?? null,

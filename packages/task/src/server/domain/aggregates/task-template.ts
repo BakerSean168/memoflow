@@ -701,7 +701,7 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
 
   public bindToGoal(
     goalId: string,
-    keyResultId: string,
+    keyResultId: string | null = null,
     contribution: GoalContributionRule | null = null,
   ): void {
     goalPolicy.bindToGoal(this, goalId, keyResultId, contribution);
@@ -994,7 +994,7 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
     generateAheadDays?: number;
     goalBinding?: {
       goalId: string;
-      keyResultId: string;
+      keyResultId?: string | null;
       contribution?: GoalContributionRule | null;
     } | null;
     completionPolicy?: (typeof TaskPlanCompletionPolicy)[keyof typeof TaskPlanCompletionPolicy];
@@ -1042,7 +1042,7 @@ export class TaskTemplate extends AggregateRoot<TaskTemplateId> {
       goalBinding: params.goalBinding
         ? TaskGoalBinding.create({
             goalId: params.goalBinding.goalId as TaskGoalBinding['goalId'],
-            keyResultId: params.goalBinding.keyResultId as TaskGoalBinding['keyResultId'],
+            keyResultId: (params.goalBinding.keyResultId ?? null) as TaskGoalBinding['keyResultId'],
             contribution: params.goalBinding.contribution ?? null,
           })
         : null,

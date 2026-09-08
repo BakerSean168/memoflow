@@ -14,8 +14,10 @@ import { DayOfWeek, DependencyType, ReminderTimeUnit } from '@memoflow/contracts
 
 describe('task domain value objects', () => {
   it('covers recurrence rules and reminder configuration', () => {
-    const rule = RecurrenceRule.createWeekly([DayOfWeek.Monday, DayOfWeek.Friday], 2)
-      .setOccurrences(3);
+    const rule = RecurrenceRule.createWeekly(
+      [DayOfWeek.Monday, DayOfWeek.Friday],
+      2,
+    ).setOccurrences(3);
     expect(rule.isWeekly).toBe(true);
     expect(rule.hasEndCondition).toBe(true);
     expect(rule.getDescription()).toContain('周一');
@@ -61,18 +63,19 @@ describe('task domain value objects', () => {
 
     const items = ChecklistItemDefinition.fromTitles(['A', 'B']);
     expect(items[1].order).toBe(1);
+    const originalId = items[0].id;
     expect(items[0].updateTitle('Updated').updateOrder(3).toDTO()).toEqual({
+      id: originalId,
       title: 'Updated',
       order: 3,
     });
   });
 
   it('covers goal binding and status helper objects', () => {
-    const binding = TaskGoalBinding.bindToGoal(
-      'GoalId_1',
-      'KeyResultId_1',
-      { value: 5, trigger: TaskGoalBindingTrigger.PlanCompletion },
-    );
+    const binding = TaskGoalBinding.bindToGoal('GoalId_1', 'KeyResultId_1', {
+      value: 5,
+      trigger: TaskGoalBindingTrigger.PlanCompletion,
+    });
 
     expect(binding.hasContribution).toBe(true);
     expect(binding.getDisplayText()).toContain('PlanCompletion');

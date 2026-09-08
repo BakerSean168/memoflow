@@ -177,7 +177,7 @@ full CI exact-head
 - [x] Baseline inventory
 - [x] Baseline Task tests 71/717 PASS
 - [x] ADR-071～075 frozen
-- [ ] TASK-7301
+- [x] TASK-7301
 - [ ] TASK-7302
 - [ ] TASK-7303
 - [ ] TASK-7304

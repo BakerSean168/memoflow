@@ -3,7 +3,13 @@ import type { TaskTemplateState } from '../../../../domain/aggregates/task-templ
 import { TaskTemplateId } from '../../../../domain/value-objects/task-template-id';
 import { TaskTemplateStatus } from '../../../../domain/value-objects/task-template-status';
 import { IdentityId } from '@memoflow/domain-shared';
-import { TaskPlanCompletionPolicy, TaskPlanOutcome, TaskType, type TaskPlanCompletionPolicyValue, type TaskPlanOutcomeValue } from '@memoflow/contracts/task';
+import {
+  TaskPlanCompletionPolicy,
+  TaskPlanOutcome,
+  TaskType,
+  type TaskPlanCompletionPolicyValue,
+  type TaskPlanOutcomeValue,
+} from '@memoflow/contracts/task';
 import type { RecurrenceFrequency, ReminderTimeUnit, TaskTimeType } from '@memoflow/contracts/task';
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import {
@@ -120,7 +126,8 @@ export class PowerSyncTaskTemplateMapper {
       importance: data.importance as ImportanceLevel,
       status: (data.status as TaskTemplateStatus) ?? TaskTemplateStatus.Active,
       outcome: (data.outcome ?? TaskPlanOutcome.Open) as TaskPlanOutcomeValue,
-      completionPolicy: (data.completion_policy ?? TaskPlanCompletionPolicy.AllowCorrection) as TaskPlanCompletionPolicyValue,
+      completionPolicy: (data.completion_policy ??
+        TaskPlanCompletionPolicy.AllowCorrection) as TaskPlanCompletionPolicyValue,
       closedAt: data.closed_at ? new Date(data.closed_at).getTime() : null,
       archivedAt: data.archived_at ? new Date(data.archived_at).getTime() : null,
       abandonedReason: data.abandoned_reason ?? null,
@@ -142,11 +149,18 @@ export class PowerSyncTaskTemplateMapper {
             } as Parameters<typeof TaskGoalBinding.fromDTO>[0])
           : null,
       checklist: data.checklist
-        ? (JSON.parse(data.checklist) as Array<{ title: string; order: number }>).map((item) =>
-            ChecklistItemDefinition.fromDTO(item),
+        ? (JSON.parse(data.checklist) as Array<{ id?: string; title: string; order: number }>).map(
+            (item) =>
+              ChecklistItemDefinition.of(
+                item.title,
+                item.order,
+                item.id ?? `legacy-checklist-${item.order}`,
+              ),
           )
         : [],
-      lastGeneratedDate: data.last_generated_date ? new Date(data.last_generated_date).getTime() : null,
+      lastGeneratedDate: data.last_generated_date
+        ? new Date(data.last_generated_date).getTime()
+        : null,
       generateAheadDays: data.generate_ahead_days ?? null,
       startDate: null,
       dueDate: null,
