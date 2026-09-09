@@ -203,7 +203,7 @@ legacy TimeStyle adapter
 
 ### TIME-1203 — Make Calendar/Input wall-clock operations timezone-aware
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-09**
 
 **Goal:** 让 Product Time 业务日历语义真正由 TimeContext 决定。
 
@@ -230,6 +230,16 @@ Ymd+Hm -> Instant
 **Acceptance:** 相同 `Instant + TimeContext` 跨 host zone结果一致；DST fixtures green。
 
 **Dependencies:** TIME-1202。
+
+**Closure evidence:**
+
+- canonical Calendar (`toYmd`, start/end of day, add/diff calendar day/week, week start, same-day/today) now evaluates against explicit `TimeContext`, not host-local `Date` semantics;
+- Input date/time values and Codec Ymd/start-of-Ymd resolution use the same context timezone;
+- wall-clock conversion moved into one `timezone/wall-clock` primitive shared by Calendar/Codec/Input and the rrule adapter; duplicate timezone resolution code was removed from the date-fns engine;
+- explicit policy is frozen as DST gap `shift-forward` and overlap `earlier`; Tokyo host-independence and New York 23-hour DST-day fixtures are executable;
+- Time suite: 9 files / 48 tests PASS; Time typecheck PASS;
+- Task recurrence/DST consumers were fixed to use one coherent local TimeContext per operation instead of mixing a module-captured facade with a later `local` zone; Task full suite: 71 files / 690 tests PASS; Task typecheck PASS;
+- focused Routine trigger/persistence 23/23, Goal schedule projection 7/7, app-vue Planner 15/15 PASS.
 
 ---
 
@@ -469,12 +479,13 @@ Time 与 Label 两条 lane 可以高度并行；共享冲突主要在 contracts 
 FOUNDATION-1001 DONE — docs only
 TIME-1201 DONE — executable characterization
 TIME-1202 DONE — canonical context/presentation split
-TIME-1203..1206 PLANNED
+TIME-1203 DONE — timezone-aware Calendar/Input + shared wall-clock resolver
+TIME-1204..1206 PLANNED
 LABEL-1301..1305 PLANNED
 FOUNDATION-1401 PLANNED
 ```
 
-Time lane 已进入实施期；当前 production semantics 尚未切换，TIME-1201 只增加可执行 characterization 与迁移证据。
+Time lane 已进入实施期；TIME-1203 已把 canonical Calendar/Input 切到显式 TimeContext。剩余 host-local/static consumer fallback 由 TIME-1204/1205/1206 继续删除。
 
 ## 8. Definition of Done
 

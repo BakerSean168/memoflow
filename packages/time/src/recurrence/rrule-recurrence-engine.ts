@@ -1,12 +1,7 @@
 import * as rruleNamespace from 'rrule';
 import type { Options, Weekday } from 'rrule';
-import {
-  asHm,
-  asYmd,
-  isHmShape,
-  isYmdShape,
-} from '../codec/brand';
-import { combineYmdHmWithTimeZone } from '../engine/date-fns-engine';
+import { asHm, asYmd, isHmShape, isYmdShape } from '../codec/brand';
+import { combineYmdHmWithTimeZone } from '../timezone/wall-clock';
 import { isIanaTimeZoneId } from '../timezone/time-zone';
 import type { Instant } from '../types';
 import type {
@@ -156,10 +151,7 @@ function toOptions(schedule: RecurrenceSchedule): Partial<Options> {
         ? schedule.byWeekday.map((weekday) => WEEKDAY_MAP[weekday])
         : null,
     count: schedule.count,
-    until:
-      schedule.until == null
-        ? null
-        : instantToFloatingDate(schedule.until, schedule.timeZone),
+    until: schedule.until == null ? null : instantToFloatingDate(schedule.until, schedule.timeZone),
     // Keep rrule in floating calendar space; ADR-037 owns IANA conversion.
     tzid: null,
   };

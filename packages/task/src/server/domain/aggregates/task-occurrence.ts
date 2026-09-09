@@ -27,11 +27,15 @@ import {
   asHm,
   asInstant,
   combineYmdHmWithTimeZone,
+  createTimeContext,
   createTimeFacade,
   resolveTimeZoneId,
 } from '@memoflow/time';
 
-const taskTime = createTimeFacade();
+function createLocalTaskTime() {
+  const timeZone = resolveTimeZoneId('local');
+  return createTimeFacade({ context: createTimeContext({ timeZone, weekStartsOn: 1 }) });
+}
 
 function minuteOfDayToHm(minute: number): ReturnType<typeof asHm> {
   const hours = Math.floor(minute / 60);
@@ -107,6 +111,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
    * The recurrence/generation path supplies `instanceDate` as the occurrence-day anchor.
    */
   public get dueDate(): number | null {
+    const taskTime = createLocalTaskTime();
     const dayStart = taskTime.calendar.startOfDay(asInstant(this._props.instanceDate));
     if (this._props.timeConfig.timeType === TimeType.AllDay) {
       return taskTime.calendar.endOfDay(dayStart);
@@ -119,7 +124,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     if (minute == null) return null;
 
     const day = taskTime.calendar.toYmd(dayStart);
-    return combineYmdHmWithTimeZone(day, minuteOfDayToHm(minute), resolveTimeZoneId('local'));
+    return combineYmdHmWithTimeZone(day, minuteOfDayToHm(minute), taskTime.context.timeZone);
   }
 
   public get status(): TaskOccurrenceStatus {
@@ -322,7 +327,9 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
       throw new Error('Rescheduled task requires startDate');
     }
 
-    const nextInstanceDate = taskTime.calendar.startOfDay(asInstant(newTime.startDate));
+    const nextInstanceDate = createLocalTaskTime().calendar.startOfDay(
+      asInstant(newTime.startDate),
+    );
     const normalizedTime = newTime.setStartDate(asInstant(nextInstanceDate));
     const current = this._props.timeConfig.toDTO();
     const next = normalizedTime.toDTO();
@@ -509,7 +516,10 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
       templateId: params.templateId,
       identityId: params.identityId,
       instanceDate: params.instanceDate,
-      occurrenceKey: buildTaskOccurrenceOccurrenceKey(String(params.templateId), params.instanceDate),
+      occurrenceKey: buildTaskOccurrenceOccurrenceKey(
+        String(params.templateId),
+        params.instanceDate,
+      ),
       timeConfig: params.timeConfig,
       importance: params.importance,
       status: TaskOccurrenceStatus.Pending,

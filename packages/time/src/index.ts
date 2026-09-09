@@ -74,7 +74,16 @@ export {
   requireTimeZoneId,
   resolveTimeZoneId,
 } from './timezone/time-zone';
-export { createDateFnsEngine, combineYmdHmWithTimeZone } from './engine/date-fns-engine';
+export { createDateFnsEngine } from './engine/date-fns-engine';
+export {
+  WALL_CLOCK_RESOLUTION_POLICY,
+  addYmdDays,
+  combineYmdHmWithTimeZone,
+  instantToYmdInTimeZone,
+  instantToHmInTimeZone,
+  startOfYmdInTimeZone,
+  type WallClockResolutionPolicy,
+} from './timezone/wall-clock';
 
 // Free-function helpers (thin defaultTime wrappers). Prefer facade.format.* when Style injection is available.
 export {

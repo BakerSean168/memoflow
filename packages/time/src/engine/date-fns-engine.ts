@@ -21,7 +21,9 @@ function toDate(instant: Instant): Date {
   return new Date(instant);
 }
 
-function densityToDateFnsPattern(density: TimeStyleDisplay['date'] | TimeStyleDisplay['dateTime']): string {
+function densityToDateFnsPattern(
+  density: TimeStyleDisplay['date'] | TimeStyleDisplay['dateTime'],
+): string {
   switch (density) {
     case 'short':
       return 'yyyy/M/d';
@@ -44,90 +46,6 @@ function densityToDateOnlyPattern(density: TimeStyleDisplay['date']): string {
       return 'yyyy-MM-dd';
   }
 }
-
-
-/**
- * Wall-clock Ymd+Hm → Instant under TimeZonePolicy (P11).
- * `local` uses host local calendar; IANA ids use Intl offset fixup (no date-fns-tz).
- */
-export function combineYmdHmWithTimeZone(
-  ymd: Ymd,
-  hm: Hm,
-  timeZone: string,
-): Instant | null {
-  if (!isYmdShape(ymd) || !isHmShape(hm)) return null;
-  const [ys, ms, ds] = ymd.split('-');
-  const [hs, mins] = hm.split(':');
-  const y = Number(ys);
-  const m = Number(ms);
-  const d = Number(ds);
-  const hour = Number(hs);
-  const minute = Number(mins);
-  if (![y, m, d, hour, minute].every((n) => Number.isFinite(n))) return null;
-
-  if (timeZone === 'local') {
-    const instant = new Date(y, m - 1, d, hour, minute, 0, 0);
-    if (!isValid(instant)) return null;
-    return asInstant(instant.getTime());
-  }
-
-  // Initial guess: treat wall as UTC, then correct by observed TZ offset.
-  let utcGuess = Date.UTC(y, m - 1, d, hour, minute, 0, 0);
-  for (let i = 0; i < 3; i++) {
-    const parts = getZonedParts(utcGuess, timeZone);
-    if (parts == null) return null;
-    const asUtc = Date.UTC(parts.y, parts.m - 1, parts.d, parts.h, parts.min, 0, 0);
-    const desired = Date.UTC(y, m - 1, d, hour, minute, 0, 0);
-    const delta = desired - asUtc;
-    if (delta === 0) break;
-    utcGuess += delta;
-  }
-  // Verify
-  const check = getZonedParts(utcGuess, timeZone);
-  if (
-    check == null ||
-    check.y !== y ||
-    check.m !== m ||
-    check.d !== d ||
-    check.h !== hour ||
-    check.min !== minute
-  ) {
-    // Still return best effort when DST gaps; null only if Intl failed
-    if (check == null) return null;
-  }
-  return asInstant(utcGuess);
-}
-
-function getZonedParts(
-  utcMs: number,
-  timeZone: string,
-): { y: number; m: number; d: number; h: number; min: number } | null {
-  try {
-    const dtf = new Intl.DateTimeFormat('en-US', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hourCycle: 'h23',
-    });
-    const bag: Record<string, string> = {};
-    for (const p of dtf.formatToParts(new Date(utcMs))) {
-      if (p.type !== 'literal') bag[p.type] = p.value;
-    }
-    return {
-      y: Number(bag.year),
-      m: Number(bag.month),
-      d: Number(bag.day),
-      h: Number(bag.hour),
-      min: Number(bag.minute),
-    };
-  } catch {
-    return null;
-  }
-}
-
 
 export function createDateFnsEngine(): TimeEngine {
   return {
@@ -232,9 +150,7 @@ export function createDateFnsEngine(): TimeEngine {
     },
 
     startOfWeek(instant: Instant, weekStartsOn: TimeStyleCalendar['weekStartsOn']): Instant {
-      return asInstant(
-        dfStartOfWeek(toDate(instant), { weekStartsOn }).getTime(),
-      );
+      return asInstant(dfStartOfWeek(toDate(instant), { weekStartsOn }).getTime());
     },
 
     isSameDay(a: Instant, b: Instant): boolean {
@@ -242,7 +158,11 @@ export function createDateFnsEngine(): TimeEngine {
     },
 
     isValidInstant(instant: Instant | number): boolean {
-      return typeof instant === 'number' && Number.isFinite(instant) && isValid(toDate(instant as Instant));
+      return (
+        typeof instant === 'number' &&
+        Number.isFinite(instant) &&
+        isValid(toDate(instant as Instant))
+      );
     },
   };
 }

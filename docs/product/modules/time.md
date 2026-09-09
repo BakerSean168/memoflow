@@ -62,7 +62,7 @@ Instant | number canonical APIs
   -> Instant canonical + boundary compatibility
 ```
 
-TIME-1201/1202 已实施；Calendar/Input 的 timezone-aware 语义仍由 TIME-1203 继续迁移，因此当前 host-local Calendar 行为在该 ticket 完成前仍是行为真值。
+TIME-1201/1202/1203 已实施；canonical Calendar/Input/Codec 已使用显式 TimeContext 与共享 wall-clock resolver。Format 的 locale/timezone-aware 展示仍由 TIME-1204 收敛，跨模块 UserTimeContext 注入与 legacy Date/number surface 由 TIME-1205/1206 继续删除。
 
 ## 4. Primary consumers
 

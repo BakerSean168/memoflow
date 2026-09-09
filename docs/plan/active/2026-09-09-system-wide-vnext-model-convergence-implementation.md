@@ -180,7 +180,7 @@ Order:
 
 1. TIME-1201 **DONE** — host drift / IANA / DST / locale / week-start + recurrence characterization frozen;
 2. TIME-1202 **DONE** — branded `TimeZoneId`, `TimeContext`, `TimePresentationStyle`; the temporary legacy adapter is now deletion debt under ADR-111;
-3. TIME-1203 timezone-aware Calendar/Input;
+3. TIME-1203 **DONE** — timezone-aware Calendar/Input + shared wall-clock resolver;
 4. TIME-1204 locale/timezone-aware Format;
 5. TIME-1205 atomically switch cross-module consumers;
 6. TIME-1206 remove raw number/Date compatibility and host-local fallbacks.
@@ -538,4 +538,4 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 ## 7. Immediate next ticket
 
-**TIME-1203 — make Calendar/Input timezone-aware** is now the next single-writer foundation ticket. TIME-1202 established a branded explicit `TimeContext` and split presentation from calendar semantics without changing legacy host-local Calendar behavior; TIME-1203 can now move day boundaries and Ymd/Instant conversion onto that explicit context.
+**TIME-1204 — make Format locale/timezone aware** is now the next single-writer Product Time ticket. TIME-1203 made Calendar/Input/Codec day and wall-clock semantics explicit and host-independent; TIME-1204 now owns human-facing locale/timezone formatting and removal of fixed Chinese display assumptions.

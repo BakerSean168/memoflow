@@ -3,6 +3,7 @@ import {
   asHm,
   asInstant,
   createRecurrenceEngine,
+  createTimeContext,
   createTimeFacade,
   resolveTimeZoneId,
   type RecurrenceEnginePort,
@@ -11,8 +12,6 @@ import {
   type RecurrenceWeekday,
 } from '@memoflow/time';
 import type { RecurrenceRule, TaskTimeConfig } from '../value-objects';
-
-const taskTime = createTimeFacade();
 
 const FREQUENCY_MAP: Record<
   (typeof TaskRecurrenceFrequency)[keyof typeof TaskRecurrenceFrequency],
@@ -25,16 +24,35 @@ const FREQUENCY_MAP: Record<
 };
 
 export interface TaskRecurrenceDateAdapter {
-  between(rule: RecurrenceRule, timeConfig: TaskTimeConfig | null, from: number, to: number): number[];
+  between(
+    rule: RecurrenceRule,
+    timeConfig: TaskTimeConfig | null,
+    from: number,
+    to: number,
+  ): number[];
   occursOn(rule: RecurrenceRule, timeConfig: TaskTimeConfig | null, date: number): boolean;
   next(rule: RecurrenceRule, timeConfig: TaskTimeConfig | null, after: number): number | null;
 }
 
-function toSchedule(rule: RecurrenceRule, timeConfig: TaskTimeConfig | null): RecurrenceSchedule {
+function createTaskLocalTime() {
+  const timeZone = resolveTimeZoneId('local');
+  return {
+    timeZone,
+    time: createTimeFacade({
+      context: createTimeContext({ timeZone, weekStartsOn: 1 }),
+    }),
+  };
+}
+
+function toSchedule(
+  rule: RecurrenceRule,
+  timeConfig: TaskTimeConfig | null,
+  local = createTaskLocalTime(),
+): RecurrenceSchedule {
   if (timeConfig?.startDate == null) {
     throw new Error('Recurring Task requires an anchored local date');
   }
-  const startDate = taskTime.calendar.toYmd(asInstant(timeConfig.startDate));
+  const startDate = local.time.calendar.toYmd(asInstant(timeConfig.startDate));
 
   return {
     startDate,
@@ -43,16 +61,13 @@ function toSchedule(rule: RecurrenceRule, timeConfig: TaskTimeConfig | null): Re
     localTime: asHm('00:00'),
     // Task vNext is a floating-local-date product contract: use the current
     // device/system IANA zone. Unlike Routine, Task does not persist a zone.
-    timeZone: resolveTimeZoneId('local'),
+    timeZone: local.timeZone,
     frequency: FREQUENCY_MAP[rule.frequency],
     interval: rule.interval,
     byWeekday: rule.daysOfWeek as RecurrenceWeekday[],
     count: rule.occurrences,
     // Existing Task semantics define endDate as inclusive for that local day.
-    until:
-      rule.endDate == null
-        ? null
-        : taskTime.calendar.endOfDay(asInstant(rule.endDate)),
+    until: rule.endDate == null ? null : local.time.calendar.endOfDay(asInstant(rule.endDate)),
   };
 }
 
@@ -61,7 +76,8 @@ export function createTaskRecurrenceDateAdapter(
 ): TaskRecurrenceDateAdapter {
   return {
     between(rule, timeConfig, from, to) {
-      return recurrenceEngine.between(toSchedule(rule, timeConfig), {
+      const local = createTaskLocalTime();
+      return recurrenceEngine.between(toSchedule(rule, timeConfig, local), {
         from: asInstant(from),
         to: asInstant(to),
         inclusive: true,
@@ -69,17 +85,21 @@ export function createTaskRecurrenceDateAdapter(
     },
 
     occursOn(rule, timeConfig, date) {
-      const dayStart = taskTime.calendar.startOfDay(asInstant(date));
-      const dayEnd = taskTime.calendar.endOfDay(asInstant(date));
-      return recurrenceEngine.between(toSchedule(rule, timeConfig), {
-        from: dayStart,
-        to: dayEnd,
-        inclusive: true,
-      }).length > 0;
+      const local = createTaskLocalTime();
+      const dayStart = local.time.calendar.startOfDay(asInstant(date));
+      const dayEnd = local.time.calendar.endOfDay(asInstant(date));
+      return (
+        recurrenceEngine.between(toSchedule(rule, timeConfig, local), {
+          from: dayStart,
+          to: dayEnd,
+          inclusive: true,
+        }).length > 0
+      );
     },
 
     next(rule, timeConfig, after) {
-      return recurrenceEngine.next(toSchedule(rule, timeConfig), asInstant(after), false);
+      const local = createTaskLocalTime();
+      return recurrenceEngine.next(toSchedule(rule, timeConfig, local), asInstant(after), false);
     },
   };
 }

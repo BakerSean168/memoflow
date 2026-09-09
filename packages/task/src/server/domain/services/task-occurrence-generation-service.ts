@@ -8,11 +8,14 @@
 
 import { TaskPlan, TaskOccurrence } from '../aggregates';
 import { TASK_INSTANCE_GENERATION_CONFIG } from '@memoflow/contracts/task';
-import { createTimeFacade } from '@memoflow/time';
+import { createTimeContext, createTimeFacade, resolveTimeZoneId } from '@memoflow/time';
 
-const { TARGET_GENERATE_AHEAD_DAYS, REFILL_THRESHOLD_DAYS } =
-  TASK_INSTANCE_GENERATION_CONFIG;
-const taskTime = createTimeFacade();
+const { TARGET_GENERATE_AHEAD_DAYS, REFILL_THRESHOLD_DAYS } = TASK_INSTANCE_GENERATION_CONFIG;
+
+function createLocalTaskTime() {
+  const timeZone = resolveTimeZoneId('local');
+  return createTimeFacade({ context: createTimeContext({ timeZone, weekStartsOn: 1 }) });
+}
 
 export class TaskOccurrenceGenerationService {
   constructor() {}
@@ -34,6 +37,7 @@ export class TaskOccurrenceGenerationService {
     } = {},
   ): TaskOccurrence[] {
     const now = Date.now();
+    const taskTime = createLocalTaskTime();
     const { forceGenerate = false } = options;
 
     // 1. 计算起始日期：显式 fromDate 优先；否则从上次生成日期的下一天，
@@ -41,9 +45,7 @@ export class TaskOccurrenceGenerationService {
     const lastGeneratedTime = template.lastGeneratedDate;
     const fromDate =
       options.fromDate ??
-      (!forceGenerate && lastGeneratedTime
-        ? taskTime.calendar.addDays(lastGeneratedTime, 1)
-        : now);
+      (!forceGenerate && lastGeneratedTime ? taskTime.calendar.addDays(lastGeneratedTime, 1) : now);
 
     // 2. 计算目标结束日期：默认未来 100 天
     const targetDays = TARGET_GENERATE_AHEAD_DAYS;
@@ -71,6 +73,7 @@ export class TaskOccurrenceGenerationService {
     }
 
     const now = Date.now();
+    const taskTime = createLocalTaskTime();
 
     // 检查最远实例的日期
     const lastGenerated = template.lastGeneratedDate || 0;
@@ -84,6 +87,6 @@ export class TaskOccurrenceGenerationService {
    * 计算补充实例的目标日期
    */
   calculateRefillTargetDate(): number {
-    return taskTime.calendar.addDays(Date.now(), TARGET_GENERATE_AHEAD_DAYS);
+    return createLocalTaskTime().calendar.addDays(Date.now(), TARGET_GENERATE_AHEAD_DAYS);
   }
 }

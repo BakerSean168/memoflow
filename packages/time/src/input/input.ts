@@ -1,7 +1,8 @@
 import type { Hm, Instant, Ymd } from '@memoflow/contracts/primitives';
 import type { TimeCodec } from '../codec/codec';
-import type { TimeEngine, TimeStyle } from '../types';
+import type { TimeContext, TimeStyle } from '../types';
 import { asInstant } from '../codec/brand';
+import { instantToHmInTimeZone } from '../timezone/wall-clock';
 
 export interface InputApi {
   dateValue(instantOrYmd: Instant | number | Ymd | string | null | undefined): string;
@@ -11,11 +12,7 @@ export interface InputApi {
   combine(ymd: Ymd | string, hm: Hm | string): Instant | null;
 }
 
-export function createInput(
-  style: TimeStyle,
-  codec: TimeCodec,
-  engine: TimeEngine,
-): InputApi {
+export function createInput(style: TimeStyle, context: TimeContext, codec: TimeCodec): InputApi {
   return {
     dateValue(instantOrYmd) {
       if (instantOrYmd == null || instantOrYmd === '') return style.empty.input;
@@ -23,18 +20,18 @@ export function createInput(
         return codec.parseYmd(instantOrYmd) ?? style.empty.input;
       }
       if (typeof instantOrYmd === 'number') {
-        const i = codec.fromTransfer(instantOrYmd);
-        if (i == null) return style.empty.input;
-        return engine.toYmd(i);
+        const instant = codec.fromTransfer(instantOrYmd);
+        if (instant == null) return style.empty.input;
+        return codec.toYmd(instant);
       }
       return style.empty.input;
     },
 
     timeValue(instant) {
       if (instant == null) return style.empty.input;
-      const i = codec.fromTransfer(instant as number);
-      if (i == null) return style.empty.input;
-      return engine.formatHm(i, 'HH:mm');
+      const parsed = codec.fromTransfer(instant as number);
+      if (parsed == null) return style.empty.input;
+      return instantToHmInTimeZone(parsed, context.timeZone);
     },
 
     parseDateValue(raw) {

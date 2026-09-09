@@ -6,6 +6,7 @@ import {
   combineYmdHmWithTimeZone,
   createDateFnsEngine,
   createTimeFacade,
+  requireTimeZoneId,
 } from '../index';
 
 const originalTz = process.env.TZ;
@@ -59,10 +60,10 @@ describe('TIME-1201 host-timezone characterization', () => {
     const hm = asHm('09:15');
 
     process.env.TZ = 'UTC';
-    const fromUtcHost = combineYmdHmWithTimeZone(ymd, hm, 'Asia/Tokyo');
+    const fromUtcHost = combineYmdHmWithTimeZone(ymd, hm, requireTimeZoneId('Asia/Tokyo'));
 
     process.env.TZ = 'America/Los_Angeles';
-    const fromLaHost = combineYmdHmWithTimeZone(ymd, hm, 'Asia/Tokyo');
+    const fromLaHost = combineYmdHmWithTimeZone(ymd, hm, requireTimeZoneId('Asia/Tokyo'));
 
     expect(fromUtcHost).toBe(Date.parse('2026-01-01T00:15:00.000Z'));
     expect(fromLaHost).toBe(fromUtcHost);
@@ -72,7 +73,7 @@ describe('TIME-1201 host-timezone characterization', () => {
     const resolved = combineYmdHmWithTimeZone(
       asYmd('2026-03-08'),
       asHm('02:30'),
-      'America/New_York',
+      requireTimeZoneId('America/New_York'),
     );
 
     expect(resolved).toBe(Date.parse('2026-03-08T07:30:00.000Z'));
@@ -82,7 +83,7 @@ describe('TIME-1201 host-timezone characterization', () => {
     const resolved = combineYmdHmWithTimeZone(
       asYmd('2026-11-01'),
       asHm('01:30'),
-      'America/New_York',
+      requireTimeZoneId('America/New_York'),
     );
 
     expect(resolved).toBe(Date.parse('2026-11-01T05:30:00.000Z'));

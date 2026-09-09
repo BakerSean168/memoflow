@@ -84,10 +84,10 @@ export function createTimeFacade(options: TimeFacadeOptions = {}): TimeFacade {
         });
   const clock = options.clock ?? createSystemClock();
   const engine = options.engine ?? createDateFnsEngine();
-  const codec = createCodec(engine, context.timeZone);
+  const codec = createCodec(context.timeZone);
   const format = createFormat(style, engine, clock);
-  const input = createInput(style, codec, engine);
-  const calendar = createCalendar(style, engine, clock);
+  const input = createInput(style, context, codec);
+  const calendar = createCalendar(context, clock);
 
   const facade: TimeFacade = {
     context,

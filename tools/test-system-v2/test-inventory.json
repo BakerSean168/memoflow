@@ -10194,6 +10194,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/time/src/__tests__/time-context-calendar.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/time/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/time/src/__tests__/time-context.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11373,7 +11381,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 8
+      "fileCount": 9
     },
     {
       "id": "packages/ui-core/vitest.config.ts",
@@ -11982,7 +11990,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1028,
+    "unit": 1029,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,
