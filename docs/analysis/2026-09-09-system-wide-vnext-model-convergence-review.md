@@ -1,6 +1,6 @@
 ---
 tags: [analysis, architecture, convergence, vnext, review]
-description: ADR-067~109 系统级 ownership、冲突、依赖与退休语义统一审查
+description: ADR-067~110 系统级 ownership、冲突、依赖与退休语义统一审查
 created: 2026-09-09T00:31:00+08:00
 updated: 2026-09-09T00:31:00+08:00
 ---
@@ -27,7 +27,7 @@ Cloud Auth           ADR-105 (+ ADR-039)
 Data Portability     ADR-106
 Editor retirement    ADR-107
 Dashboard retirement ADR-108
-Governance→Knowledge ADR-109
+Governance reference   ADR-110 (supersedes ADR-109)
 ```
 
 目标不是检查文字风格，而是回答：**同一个事实是否只有一个 owner；一个 runtime 是否只有一个 durable truth；跨模块是否使用稳定 contract 而不是互相复制内部状态。**
@@ -51,14 +51,14 @@ Governance→Knowledge ADR-109
 | exact reliable wake-up                  | Scheduler                                 | receives ScheduledIntent                | cron/business recurrence in worker aggregate   |
 | user-visible notification fact          | NotificationFact                          | owner emits requested intent            | delivery status as Fact child truth            |
 | notification delivery                   | Notification policy/runtime               | device final presentation               | Routine/Task owns channels/DND                 |
-| knowledge document content              | Vault/Git + Knowledge projection          | Goal/Task reference stable documentId   | DB Resource / Governance Rule text truth       |
+| knowledge document content              | Vault/Git + Knowledge projection          | Goal/Task reference stable documentId   | legacy DB Resource as knowledge truth          |
 | stable knowledge identity               | KnowledgeDocumentId                       | AI index/ref use it                     | path-derived ids                               |
 | AI thread/workflow state                | Mastra                                    | thin Conversation shell/read projection | UI localStorage full workflow snapshot         |
 | AI provider secret                      | Secret boundary                           | provider connection references it       | plaintext domain/client DTO                    |
 | portable backup orchestration           | Data Portability                          | owner capability supplies schema/apply  | giant cloned module DTO model                  |
 | Home overview                           | UI composition + owner read models        | cross-widget composition                | Dashboard bounded context/God DTO              |
-| coding standards knowledge              | Knowledge documents                       | Git history + AI index                  | product Governance Rule/Revision DB            |
-| engineering governance                  | repository tools/docs/CI                  | all packages obey                       | product Governance DB pretending enforcement   |
+| structured coding/architecture rules    | Governance Rule/RuleRevision              | Knowledge/AI may reference/project      | Knowledge document replacing Rule lifecycle    |
+| engineering governance                  | repository tools/docs/CI                  | consume versioned Governance bundles    | CI depending on live developer Rule DB         |
 
 **Result:** no unresolved canonical-owner collision remains in the target model. Existing collisions are migration work, not target ambiguity.
 
@@ -105,9 +105,9 @@ Data Portability owns envelope/order/safety/migration, while each domain owns th
 
 Home is a view composition, not a domain. No new `OverviewData` replacement God DTO is allowed.
 
-### 3.10 Governance/Knowledge — resolved by migration
+### 3.10 Governance/Knowledge/Engineering Governance — resolved by explicit layering
 
-Product coding standards become Knowledge documents. Engineering governance remains repository infrastructure. The word “Governance” no longer names two product/system concepts after migration.
+ADR-110 supersedes the earlier retirement proposal. Product/Reference Governance keeps Rule/RuleRevision as canonical structured standards truth and remains a permanent executable feature. Knowledge may link/index Governance rules but does not replace their lifecycle or revisions. Repository Engineering Governance remains deterministic tooling/docs/CI and may consume only explicitly published, versioned Governance rule bundles rather than a live developer database.
 
 ## 4. Retired vocabulary / no-return table
 
@@ -128,7 +128,6 @@ Product coding standards become Knowledge documents. Engineering governance rema
 | AI full workflow localStorage snapshot       | Mastra run + UI pointer/unsaved state        |
 | Dashboard bounded context                    | Home owner-read-model composition            |
 | Editor bounded context                       | Knowledge preview/external editor capability |
-| product Governance Rule/Revision             | Knowledge Standards                          |
 | Data Portability cloned internal schemas     | owner-driven PortableCapability              |
 
 Architecture locks should reject reintroduction after each migration closes.
@@ -150,7 +149,7 @@ PowerSync parity infrastructure
 Result / failure contracts
 ```
 
-A shared package is justified only when the concept is domain-neutral and multiple owner modules use the same semantics. `Dashboard`, `Editor`, generic Repository and generic Governance do not meet that test.
+A shared package is justified only when the concept is domain-neutral and multiple owner modules use the same semantics. `Dashboard`, `Editor` and generic Repository do not meet that test. Governance remains intentionally independent for a different reason: it is a permanent executable reference feature, not a generic shared utility.
 
 ## 6. Dependency review
 
@@ -161,8 +160,10 @@ Time + Preferences + Account/Auth + DataPortability V3 foundation
              │
              ├──────── Knowledge stable identity / projection engine
              │              │
-             │              ├── Governance -> Knowledge Standards
              │              └── AI Knowledge index
+             │
+             ├──────── Governance reference-module hardening
+             │              └── versioned rule-bundle bridge to engineering governance
              │
              └──────── Goal + Task convergence
                             │

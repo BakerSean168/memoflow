@@ -24,12 +24,12 @@ This file is evidence, not a second execution plan. Cross-module order remains o
 | Data Portability V2  | server-held disclosure is non-importable; portable user-data import is identity-scoped; legacy Editor rows are still V2 backup compatibility only                                                     | `import-server-held-disclosure-rejected.test.ts`, `portable-editor-backup-boundary.surface.spec.ts`, PowerSync round-trip tests     |
 | Knowledge projection | GitHub/Vault projection remains the knowledge read truth and lease/checkpoint/reconciliation behavior is protected                                                                                    | `knowledge-repository-projection.service.spec.ts`, projection ledger integration, local Vault runtime tests                         |
 | Dashboard            | `/dashboard` is compatibility redirect only; Home/Goal capsule and API/Desktop AI analytics are the remaining consumers that block package deletion                                                   | `dashboard-retirement-characterization.surface.spec.ts`, `TodayOverviewPanel.spec.ts`, `GoalCapsulePreview.spec.ts`                 |
-| Product Governance   | Rule fields that must survive Rule -> Knowledge Standard migration are frozen before writing the migrator                                                                                             | `rule-migration-characterization.spec.ts`, Rule aggregate/revision suites                                                           |
+| Product Governance   | Rule/RuleRevision behavior and canonical fields are frozen because Governance is a permanent executable reference feature, not a migration source                                                     | `rule-reference-module-characterization.spec.ts`, Rule aggregate/revision suites                                                    |
 | Editor               | runtime package/API/Electron/editor route stay deleted; only Prisma/PowerSync/Data Portability backup residue remains until V3 portability cutover                                                    | `legacy-editor-repository-runtime.surface.spec.ts`, `portable-editor-backup-boundary.surface.spec.ts`                               |
 
 ## Destructive-delete gate
 
-Every legacy surface scheduled for deletion now has one of these two forms of evidence:
+Every legacy surface scheduled for deletion now has one of these two forms of evidence. Governance is intentionally excluded from this deletion set by ADR-110:
 
 1. a behavior/migration characterization suite; or
 2. a no-runtime/no-consumer architecture surface assertion.

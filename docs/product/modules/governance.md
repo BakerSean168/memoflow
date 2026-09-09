@@ -3,83 +3,151 @@ tags:
   - product
   - module
   - governance
-description: 治理模块当前功能资产说明
+description: Governance 可执行参考模块与开发模式编码规范工作台
 created: 2026-06-02T00:00:00
-updated: 2026-06-02T00:00:00
+updated: 2026-09-09T10:35:00+09:00
 ---
 
-# 治理模块说明
+# Governance 模块说明
 
-> **2026-09-09 convergence notice:** ADR-109 决定将产品 Rule/RuleRevision 迁入 Knowledge Standards 后退休产品 Governance bounded context。`tools/governance` / `docs/governance` / CI engineering governance 不受影响。
+> **2026-09-09 convergence decision:** ADR-110 明确 Governance 永久保留。它既是可以真实管理编码/架构规范的 development workbench，也是 MemoFlow feature architecture 的 executable reference module。ADR-109 的 Knowledge retirement 提案已被取代。
 
 ## 1. 功能定位
 
-治理模块用于管理产品内的治理规则。它围绕规则列表、规则详情、规则编辑、修订历史和治理状态形成闭环，是用户可见的治理入口。需要注意区分产品内治理功能和仓库级治理规范（docs/governance/）。
+Governance 有两个正式且长期保留的定位：
+
+1. **开发模式规范工作台**：真实管理编码规范、架构规范、示例、标签、状态和修订历史；
+2. **可执行参考模块**：用一套低业务复杂度但完整的 vertical slice 展示 MemoFlow 标准 feature package 应该如何实现。
+
+它不是仅用于截图或测试的 fake，也不是面向普通终端用户必须长期占据主导航的核心业务功能。
 
 ## 2. 当前功能说明
 
-- 规则管理：创建、更新、删除和搜索治理规则。
-- 规则状态管理：Draft → Active → Deprecated 状态流转。
-- 规则严重度：Mandatory（强制）和 Recommended（推荐）两种级别。
-- 修订历史：每次规则变更自动记录修订，包含变更字段、前后值和变更类型。
-- 代码示例：每个规则可配置 good examples 和 bad examples 代码片段。
-- 标签管理：为规则添加标签，支持按标签筛选。
-- 搜索：支持按标题、代码、描述和标签搜索，带相关性评分和状态权重。
-- 规则代码：每个规则有唯一的 code 标识符（如 ARCH-001）。
-- 实时引用：每个规则可关联 live reference location（如文件路径或 URL）。
-- 角色控制：创建/更新/删除操作需要 TechLead 或 Architect 角色。
+- 规则管理：创建、更新、删除、搜索规范；
+- 状态管理：Draft → Active → Deprecated；
+- 严重度：Mandatory / Recommended；
+- 修订历史：每次变更记录不可变 RuleRevision；
+- 代码示例：good examples / bad examples；
+- 标签与筛选；
+- rule code 唯一标识；
+- live reference location；
+- Prisma 与 PowerSync 双 persistence；
+- HTTP 与 IPC 双 transport；
+- Web/Desktop client；
+- Vue list/detail/editor/history；
+- composition-root / transport-parity / public-surface reference tests。
 
-## 3. 用户路径
+## 3. 用户/开发者路径
 
-- 规则浏览路径：用户进入治理规则列表页，通过搜索、状态筛选、严重度筛选和标签筛选查找规则，点击进入规则详情。
-- 规则创建路径：用户点击新建规则，填写代码、标题、描述、严重度、标签和代码示例，保存后规则为 Draft 状态。
-- 规则编辑路径：用户在规则详情页点击编辑，修改规则内容，保存后自动创建修订记录。
-- 规则状态管理路径：用户将 Draft 规则激活为 Active，或将 Active 规则标记为 Deprecated。
-- 修订历史路径：用户在规则详情页查看修订时间线，或进入完整修订历史页面。
+```text
+打开 Governance 开发工作台
+        ↓
+浏览/搜索规范
+        ↓
+创建或编辑 Rule
+        ↓
+状态/严重度/示例/引用校验
+        ↓
+持久化 Rule
+        ↓
+自动生成 RuleRevision
+        ↓
+查看历史 / 后续发布给工程治理
+```
+
+开发模式必须能够真实走通该路径。
 
 ## 4. 业务规则
 
-- Rule 是治理模块核心聚合，RuleRevision 是关联实体（不可变审计记录）。
-- 规则状态机：Draft → Active → Deprecated。Mandatory 规则必须先降级为 Recommended 才能废弃。Draft 不能直接到 Deprecated。
-- 每次规则变更（创建、更新、废弃、重新激活）都自动创建 RuleRevision 记录。
-- RuleRevision 记录变更字段、前后值、变更类型和作者，是 write-once 不可修改的。
-- 搜索相关性评分：title exact > title partial > code > description > tags，Active > Draft > Deprecated。
-- 规则 code 全局唯一，格式由 GOVERNANCE_VALIDATION_CONFIG 定义。
-- 客户端通过 HTTP 或 IPC 适配器访问治理能力，服务端通过模块组合根装配用例和仓储实现。
+- Rule 是核心聚合；
+- RuleRevision 是 write-once audit entity；
+- code 维持唯一和格式约束；
+- Rule lifecycle 保持显式；
+- Good/Bad Example 是结构化规范内容，不迁成 Knowledge canonical state；
+- Knowledge 可以链接/索引 Rule，但不拥有 Rule lifecycle/revision；
+- Engineering Governance 不直接读取动态本地 DB 作为 CI 真值。
 
-## 5. 相关文件索引
+## 5. Reference Module contract
 
-详细文件清单见 [治理模块文件索引](../module-index/governance-files.md)。
+Governance 应长期展示并测试以下标准：
 
-## 6. 当前问题
+```text
+central contracts
+canonical public seams
+server/domain
+server/application
+server/transport
+server/infrastructure
+host-owned composition
+Prisma / PowerSync parity
+HTTP / IPC parity
+client seam
+Vue composition
+Result/failure contracts
+focused characterization tests
+```
 
-- 产品内治理功能和仓库级治理规范（docs/governance/）不要混淆：产品内是用户可见的规则管理 UI，仓库级是开发规范文档。
-- 规则编辑、修订历史和真实生效规则之间的边界需要确认：当前规则是文档性质的，不直接约束代码行为。
-- 治理模块目前没有与其他模块的直接集成（如自动检查代码是否符合规则）。
-- 角色控制（TechLead/Architect）的角色分配机制需要确认。
+对全仓 feature architecture 的重大结构调整，优先用 Governance 证明一个完整可执行 vertical slice。
 
-## 7. 优化机会
+## 6. 与 Engineering Governance 的关系
 
-- 考虑治理规则与 CI/CD 的集成，自动检查代码是否符合规则。
-- 为规则提供更好的组织方式（如按项目、按团队分组）。
-- 强化规则的可视化和统计能力。
-- 考虑规则的版本对比能力。
+```text
+packages/governance
+= structured rules + revisions + executable reference feature
 
-## 8. 风险点
+tools/governance + docs/governance + docs/standards + CI
+= repository engineering governance
+```
 
-- 产品内治理功能和仓库级治理规范的混淆。
-- 规则编辑和修订历史的准确性。
-- 规则 code 的唯一性约束。
-- 角色控制的权限管理。
+未来可以增加显式：
 
-## 9. 后续待确认
+```text
+Rule
+→ Published GovernanceRuleBundle
+→ tools/governance adapter
+→ check/report/autofix proposal
+```
 
-- 治理规则是否需要与 CI/CD 集成。
-- 规则的组织方式是否需要更丰富。
-- 角色分配的管理机制。
-- 规则的有效性评估策略。
+但 CI 消费的是固定版本/hash 的 bundle，而不是实时开发数据库。
+
+## 7. 与 Knowledge 的关系
+
+Knowledge 不再是 Governance 的替代目标。
+
+允许：
+
+- standards note 引用 Rule；
+- Rule live reference 指向 Knowledge/doc/repository path；
+- AI 将 Rule projection 作为受控 context。
+
+禁止：
+
+- 删除 Rule DB 改存 Markdown；
+- Git history 替代 RuleRevision；
+- 把 Governance 退化成 Knowledge 的一个 folder。
+
+## 8. 当前优化方向
+
+- 正式定义 development-mode surface policy；
+- 保持 reference module 与全仓 canonical feature shape 同步；
+- 建立 deterministic published rule bundle；
+- 增加 check/report/autofix adapter，而不是让 Rule DB 直接绑死 CI；
+- 更新 authorization policy，使其明确服务开发/reference 场景；
+- 保持 Web/Desktop/Prisma/PowerSync parity 的教材价值。
+
+## 9. 保护项
+
+以下不得进入 retirement queue：
+
+- `packages/governance`；
+- Governance contracts；
+- Rule/RuleRevision persistence；
+- API/IPC/client/UI vertical slice；
+- reference-module architecture tests。
 
 ## 10. 相关资料
 
+- [ADR-110](../../architecture/adr/ADR-110-governance-permanent-executable-reference-module.md)
+- [Governance Current-System Map](../../analysis/2026-09-09-governance-product-current-system-map.md)
 - [仓库级治理规范](../../governance/README.md)
-- [治理模块文件索引](../module-index/governance-files.md)
+- [Governance 文件索引](../module-index/governance-files.md)

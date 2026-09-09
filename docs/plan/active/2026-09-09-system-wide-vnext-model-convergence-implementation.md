@@ -28,6 +28,7 @@ Preferences  typed presentation/regional
 AI           Mastra runtime + typed drafts/context/owner ports
 Time         shared product-time foundation
 Label        shared registry; owner assignments
+Governance   permanent executable reference feature + dev standards workbench
 ```
 
 并物理退休：
@@ -38,7 +39,6 @@ legacy ScheduleTask model
 legacy Repository/Folder/Resource
 legacy Editor
 standalone Dashboard
-product Governance Rule DB
 Account.settings
 AI legacy product/runtime persistence
 stale PortableUserDataV2 internal-model clones
@@ -64,7 +64,8 @@ stale PortableUserDataV2 internal-model clones
 9. PowerSync offline parity；
 10. host-owned `ExecutionContext.identityId`；
 11. failure/operation governance contracts；
-12. existing current-user deep links unless an ADR explicitly provides redirect/migration.
+12. existing current-user deep links unless an ADR explicitly provides redirect/migration;
+13. Governance executable reference feature: Rule/RuleRevision + Prisma/PowerSync + API/IPC + client/Vue + reference tests.
 
 ## 4. Global dependency order
 
@@ -76,10 +77,12 @@ PHASE 1  Foundations
    ├─ Preferences + Account/Auth
    ├─ Label Registry
    └─ Data Portability V3 skeleton
+
+PARALLEL  Governance reference hardening (GOV-1901..1904)
+          starts after Phase 0 and is never a retirement lane
    │
 PHASE 2  Knowledge identity/projection
-   ├─ Editor retirement
-   └─ Governance -> Knowledge migration
+   └─ Editor retirement
    │
 PHASE 3  Goal + Task
    │
@@ -107,7 +110,7 @@ Within a phase, lanes may run in parallel only when they do not write the same c
 **Implementation:**
 
 1. record exact HEAD and clean-worktree baseline;
-2. add/refresh focused characterization for Time host timezone, Account/Auth closure, DataPortability V2 import safety, Knowledge projection, Dashboard live consumers, Governance migration projection and Editor no-runtime boundary;
+2. add/refresh focused characterization for Time host timezone, Account/Auth closure, DataPortability V2 import safety, Knowledge projection, Dashboard live consumers, Governance executable reference behavior and Editor no-runtime boundary;
 3. update test inventory only because implementation now legitimately changes test surfaces;
 4. ensure each future delete has a consumer search fixture or architecture lock.
 
@@ -122,7 +125,7 @@ Within a phase, lanes may run in parallel only when they do not write the same c
 - Data Portability disclosure rejection + legacy Editor backup-only boundary green;
 - Knowledge projection + legacy Editor no-runtime boundary green;
 - Dashboard remaining Home/Goal/AI consumers frozen in an executable surface test;
-- Governance Rule migration-required field inventory frozen;
+- Governance Rule/Revision executable reference behavior and canonical field inventory frozen;
 - evidence map: `docs/analysis/2026-09-09-system-vnext-characterization-baseline.md`.
 
 ## SYS-0002 — Retire unused Dashboard page-only Vue components
@@ -160,7 +163,7 @@ Locks activate only after the replacement ticket closes; never fail current code
 
 - `tools/governance/vnext-retirement-manifest.json` owns active/staged retirement locks;
 - active locks protect already-retired Dashboard page-only surfaces and Editor runtime package;
-- future Dashboard bounded context, Editor persistence, product Governance, Account.settings and legacy Reminder/Scheduler/Notification surfaces remain staged;
+- future Dashboard bounded context, Editor persistence, Account.settings and legacy Reminder/Scheduler/Notification surfaces remain staged; Governance is explicitly excluded from retirement locks by ADR-110;
 - audit is part of `memoflow:governance-check` and has dedicated governance-tools tests.
 
 ---
@@ -285,23 +288,44 @@ After 1701:
 - natural-key script/tests;
 - editor projection/importer/adapters/contracts.
 
-## GOV-1901 — Define deterministic Rule -> Knowledge Standard migrator
+# Parallel Governance reference lane — permanent, non-retirement
 
-Pure transformation + fixtures preserving all meaningful Rule fields.
+ADR-110 supersedes the earlier Governance -> Knowledge retirement plan. Governance stays as a deliberately simple but fully executable reference feature.
 
-## GOV-1902 — Execute/verify Governance migration path
+## GOV-1901 — Freeze executable reference-module invariants
 
-Use Knowledge write/migration service with no overwrite. Generate manifest: rule id/code -> documentId/path/contentHash.
+**Goal:** make the reference responsibility explicit and executable.
 
-## GOV-1903 — Move UI route to Knowledge Standards surface
+**Implementation:**
 
-Preserve `/governance/**` compatibility resolver temporarily; new canonical navigation is Knowledge/Standards.
+1. characterize Rule CRUD/search/lifecycle/revision behavior;
+2. characterize Prisma/PowerSync parity and HTTP/IPC transport parity;
+3. lock canonical public seams and host-owned composition;
+4. keep README / QUICK_REFERENCE synchronized with the actual package shape.
 
-## GOV-1904 — Delete product Governance bounded context
+**Acceptance:** a developer can use Governance as the canonical example for a complete MemoFlow feature without consulting a retired/legacy seam.
 
-Remove Rule/Revision package/contracts/Prisma/PowerSync/API/IPC/Vue. Replace repository standards that cite Governance as reference implementation with a maintained real module.
+## GOV-1902 — Define development-surface policy and smoke path
 
-**Hard guard:** repository engineering governance remains fully operational.
+Governance must remain actually runnable in development/diagnostic mode. Define the surface gate without allowing hidden navigation to become dead code. Add a smoke path that opens the rule list, creates/updates a rule and observes RuleRevision.
+
+**Protected:** package/API/IPC/persistence/UI remain real; production navigation visibility is policy, not ownership.
+
+## GOV-1903 — Add deterministic published rule-bundle boundary
+
+Define a versioned/hashable `GovernanceRuleBundle` projection/export containing Active rules, revision/provenance and executable metadata needed by engineering adapters. Bundle generation must be deterministic and must not mutate repository source.
+
+**Acceptance:** same Governance state + same bundle schema version produces the same semantic bundle/hash.
+
+## GOV-1904 — Bridge Governance rules to engineering check/report/autofix adapters
+
+Add an explicit adapter from a pinned/versioned rule bundle into `tools/governance`-style check/report/autofix proposal flows. CI must consume a repository-versioned or otherwise pinned snapshot, never a developer's live Rule DB. Autofix produces reviewable diffs/proposals rather than silently changing product source.
+
+**Hard guards:**
+
+- never migrate Rule/RuleRevision to Knowledge as replacement truth;
+- never place `packages/governance` or Governance contracts in retirement manifests;
+- repository engineering governance remains deterministic and independently runnable.
 
 ---
 
@@ -443,7 +467,7 @@ Delete only after capability cutovers:
 - NotificationTemplate/History/Channel legacy models;
 - AI legacy quota/generation/message rows as approved by AI characterization;
 - Account settings/contact residue;
-- any orphan Dashboard/Editor/Governance schema.
+- any orphan Dashboard/Editor schema. Governance schema is permanent reference-feature state and is not a deletion candidate.
 
 Prisma + PowerSync parity is mandatory in the same batch.
 
@@ -495,11 +519,12 @@ Plus affected integration/E2E, PowerSync parity, Prisma migration checks, local 
 | Time           | Label, portability skeleton | Setting regional contracts, Task schedule contracts during same edit |
 | Label Registry | Time, Auth                  | Goal/Task assignment schema migration                                |
 | Account/Auth   | Time, Portability skeleton  | Setting preference contract cutover                                  |
-| Knowledge      | Account/Auth                | Governance migration, AI index schema                                |
+| Knowledge      | Account/Auth                | AI index schema                                                      |
 | Goal           | Routine foundation          | Task shared relation/contracts without coordination                  |
 | Task           | Routine foundation          | Goal shared link/contracts without coordination                      |
 | Scheduler      | Notification                | Planner shared schedule contracts                                    |
 | Notification   | Scheduler                   | Routine intervention contracts without coordination                  |
+| Governance     | most owner-domain lanes     | tools/governance adapters while SYS governance manifests are edited  |
 | AI             | Home cleanup                | owner workflow DTOs until owner contracts frozen                     |
 | Portability    | most lanes                  | destructive owner-table deletion before portable migration           |
 

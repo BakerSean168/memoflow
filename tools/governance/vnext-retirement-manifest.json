@@ -35,12 +35,6 @@
       "forbiddenPaths": ["packages/database/prisma/schema/editor.prisma"]
     },
     {
-      "id": "product-governance-bounded-context",
-      "status": "staged",
-      "decision": "ADR-109 / GOV-1904",
-      "forbiddenPaths": ["packages/governance", "packages/contracts/src/modules/governance"]
-    },
-    {
       "id": "account-settings-legacy",
       "status": "staged",
       "decision": "ADR-104 / ACC-1403",

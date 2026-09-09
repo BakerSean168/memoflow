@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated": "2026-07-26",
+  "generated": "2026-09-09",
   "baseline": {
     "dual_surface": 237,
     "keep_boundary": 66,
@@ -9,17 +9,17 @@
   "post_e3b": {
     "dual_surface_files": 71,
     "drop_from_baseline": 166,
-    "drop_pct": 70,
-    "registry_suites": 122
+    "drop_pct": 70.0,
+    "registry_suites": 121
   },
   "counts": {
-    "total": 122,
+    "total": 121,
     "by_class": {
-      "keep_boundary": 51,
+      "keep_boundary": 50,
       "retired": 71
     },
     "dual_surface_files": 71,
-    "keep_boundary_files": 51
+    "keep_boundary_files": 50
   },
   "entries": [
     {

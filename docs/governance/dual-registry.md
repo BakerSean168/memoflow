@@ -4,7 +4,7 @@ tags:
   - dual-registry
 description: Dual Registry — retired locks vs keep-boundary vs open dual debt
 created: 2026-07-26T00:00:00
-updated: 2026-08-22T15:38:00+08:00
+updated: 2026-09-09T10:40:00+09:00
 ---
 
 # Dual Registry
@@ -18,19 +18,19 @@ updated: 2026-08-22T15:38:00+08:00
 | 项 | 值 |
 |----|----|
 | 基线 dual-surface 文件 | 237 |
-| 当前 dual-surface 文件 | 84 |
-| E3b 降幅 | 64.6%（目标 ≥25%） |
-| Registry suites | 25 |
-| keep-boundary 文件 | 66 |
-| 登记条目总数 | 150 |
+| 当前 dual-surface 文件 | 71 |
+| E3b 降幅 | 70.0%（目标 ≥25%） |
+| Registry suites | 121 |
+| keep-boundary 文件 | 50 |
+| 登记条目总数 | 121 |
 | 未分类 | 0（覆盖率 100%） |
 
 ### 按 class
 
 | class | count |
 |-------|------:|
-| `keep_boundary` | 66 |
-| `retired` | 84 |
+| `keep_boundary` | 50 |
+| `retired` | 71 |
 
 ## 分类规则（摘要）
 
@@ -49,13 +49,13 @@ updated: 2026-08-22T15:38:00+08:00
 | package | retired | keep_boundary | other |
 |---------|--------:|--------------:|------:|
 | `apps/api` | 0 | 3 | 0 |
-| `apps/desktop` | 6 | 7 | 0 |
+| `apps/desktop` | 3 | 1 | 0 |
 | `apps/web` | 2 | 1 | 0 |
 | `packages/account` | 1 | 1 | 0 |
 | `packages/ai` | 4 | 7 | 0 |
-| `packages/app-vue` | 10 | 25 | 0 |
+| `packages/app-vue` | 7 | 20 | 0 |
 | `packages/authentication` | 3 | 2 | 0 |
-| `packages/contracts` | 32 | 5 | 0 |
+| `packages/contracts` | 28 | 2 | 0 |
 | `packages/dashboard` | 1 | 1 | 0 |
 | `packages/data-portability` | 3 | 4 | 0 |
 | `packages/goal` | 3 | 3 | 0 |

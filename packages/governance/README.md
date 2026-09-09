@@ -1,5 +1,7 @@
 # @memoflow/governance
 
+> **ADR-110 protected reference feature:** 本包永久保留为 MemoFlow 的可执行架构参考模块，并在 development / diagnostic 场景中真实提供编码规范管理能力。不得把它当成临时示例或 Knowledge migration residue 删除。
+
 治理模块（活文档）— 当前仓库的参考模块。它展示的是目标架构，而不是历史兼容结构：公共 contracts 集中、public seam 收敛、服务端内部统一为 `server/*` 切片。
 
 ## 公开 seam

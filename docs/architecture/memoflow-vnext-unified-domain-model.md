@@ -31,6 +31,8 @@ Goal ─┼──── Task ───── Routine ───── Planner    
                                                                        │
 Assistant/Mastra ── ContextAssembler ── typed owner ports ─────────────┘
 
+Governance Reference Feature ──> versioned rule bundle ──> Engineering Governance
+
 Settings UI = composition of owner capabilities
 Home UI     = composition of owner read models
 Portability = composition of owner portable capabilities
@@ -47,6 +49,7 @@ Portability = composition of owner portable capabilities
 - **Knowledge** = Stable Document Identity + Source Binding + Projection.
 - **Account** = Product Profile + Product Lifecycle.
 - **AI** = Reasoning/Workflow Capability; never owner-domain truth.
+- **Governance** = intentionally simple executable Reference Feature + development standards workbench.
 
 ## 3. Composition surfaces, not domains
 
@@ -65,7 +68,6 @@ They compose capabilities/read models from real owners.
 
 - legacy Editor;
 - standalone Dashboard;
-- product Governance Rule DB;
 - old generic Repository/Folder/Resource knowledge model;
 - generic ReminderTemplate-as-routine model.
 
@@ -88,6 +90,8 @@ Label Registry -> Goal/Task repositories
 AI -> raw Prisma owner tables
 Dashboard -> all module internals
 DataPortability -> all persistence repositories
+Knowledge -> Governance Rule lifecycle/revision truth
+Engineering CI -> live developer Governance DB
 Scheduler -> business recurrence/domain meaning
 ```
 
@@ -103,3 +107,4 @@ Every state family has exactly one durable authority:
 - notification delivery: delivery operation facts;
 - user preferences: typed preference records;
 - portable backup: generated snapshot, never live product truth.
+- governance rules/revisions: Governance bounded context; engineering enforcement consumes repository-versioned inputs.

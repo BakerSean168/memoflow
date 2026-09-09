@@ -3,8 +3,8 @@ import { Rule } from '../rule';
 import { Language } from '../../value-objects/language';
 import { RuleSeverity } from '../../value-objects/rule-severity';
 
-describe('Governance -> Knowledge Standard migration characterization (SYS-0001 / ADR-109)', () => {
-  it('freezes every meaningful Rule field that the future migrator must preserve', () => {
+describe('Governance executable reference-module characterization (SYS-0001 / ADR-110)', () => {
+  it('freezes the canonical Rule surface that the permanent reference feature must preserve', () => {
     const created = Rule.create({
       code: 'ARCH-042',
       title: 'Keep owner boundaries explicit',

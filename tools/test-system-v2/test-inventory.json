@@ -6713,7 +6713,7 @@
       ]
     },
     {
-      "path": "packages/governance/src/server/domain/aggregates/__tests__/rule-migration-characterization.spec.ts",
+      "path": "packages/governance/src/server/domain/aggregates/__tests__/rule-reference-module-characterization.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/governance/vitest.config.ts"
@@ -10634,6 +10634,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/governance-reference-preservation.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/governance/__tests__/local-docker-product-validation.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -11057,7 +11065,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 13
+      "fileCount": 14
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -11698,7 +11706,7 @@
       "packages/governance/src/server/application/use-cases/queries/__tests__/get-rule.use-case.test.ts",
       "packages/governance/src/server/application/use-cases/queries/__tests__/list-rules.use-case.test.ts",
       "packages/governance/src/server/application/use-cases/queries/__tests__/search-rules.use-case.test.ts",
-      "packages/governance/src/server/domain/aggregates/__tests__/rule-migration-characterization.spec.ts",
+      "packages/governance/src/server/domain/aggregates/__tests__/rule-reference-module-characterization.spec.ts",
       "packages/governance/src/server/domain/aggregates/__tests__/rule.test.ts",
       "packages/governance/src/server/domain/entities/__tests__/rule-revision.test.ts",
       "packages/governance/src/server/domain/value-objects/__tests__/governance-enums.spec.ts",
@@ -11981,6 +11989,6 @@
     "boundary-main": 6,
     "e2e": 60,
     "perf": 1,
-    "governance": 51
+    "governance": 52
   }
 }
