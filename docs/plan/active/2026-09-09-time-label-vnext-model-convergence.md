@@ -150,7 +150,7 @@ Goal/Task/Routine/...
 
 ### TIME-1202 — Introduce branded TimeZoneId, TimeContext and PresentationStyle
 
-**状态：PLANNED**
+**状态：DONE（2026-09-09）**
 
 **Goal:** 建立新 canonical contract，不先大规模迁 consumer。
 
@@ -178,6 +178,17 @@ legacy TimeStyle adapter
 **Acceptance:** 新 API strict typed；无任意 string canonical zone；legacy adapter有 retire marker。
 
 **Dependencies:** TIME-1201。
+
+**Closure evidence:**
+
+- `TimeZoneId` is now a validated branded type; `parseTimeZoneId` / `requireTimeZoneId` / `createTimeContext` own raw-string boundaries;
+- canonical `TimeContext { timeZone, weekStartsOn }` and `TimePresentationStyle` are exported from `@memoflow/time`;
+- `TimeFacade` exposes `context`, `presentation`, `withContext` and `withPresentation`;
+- legacy mixed `TimeStyle` remains explicitly deprecated behind `adaptLegacyTimeStyle` / `composeLegacyTimeStyle`;
+- Codec receives canonical context timezone instead of deriving its default from mixed presentation style;
+- Time package imports no Setting/Account code;
+- full Time suite 44/44 PASS; Task recurrence 10/10, Routine trigger/persistence 18/18, Planner projection/router 12/12 PASS;
+- Time, Task, Reminder, Goal and app-vue typechecks passed (app-vue completed successfully before the outer remote-command timeout); Time lint has 0 errors / 1 inherited warning.
 
 ---
 
@@ -448,7 +459,8 @@ Time 与 Label 两条 lane 可以高度并行；共享冲突主要在 contracts 
 ```text
 FOUNDATION-1001 DONE — docs only
 TIME-1201 DONE — executable characterization
-TIME-1202..1206 PLANNED
+TIME-1202 DONE — canonical context/presentation split
+TIME-1203..1206 PLANNED
 LABEL-1301..1305 PLANNED
 FOUNDATION-1401 PLANNED
 ```

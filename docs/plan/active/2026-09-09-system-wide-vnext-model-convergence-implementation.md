@@ -174,7 +174,7 @@ Canonical detail: `2026-09-09-time-label-vnext-model-convergence.md`.
 Order:
 
 1. TIME-1201 **DONE** — host drift / IANA / DST / locale / week-start + recurrence characterization frozen;
-2. TIME-1202 branded `TimeZoneId`, `TimeContext`, `TimePresentationStyle`;
+2. TIME-1202 **DONE** — branded `TimeZoneId`, `TimeContext`, `TimePresentationStyle` + bounded legacy adapter;
 3. TIME-1203 timezone-aware Calendar/Input;
 4. TIME-1204 locale/timezone-aware Format;
 5. TIME-1205 migrate cross-module consumers;
@@ -513,4 +513,4 @@ Plus affected integration/E2E, PowerSync parity, Prisma migration checks, local 
 
 ## 7. Immediate next ticket
 
-**TIME-1202 — introduce branded TimeZoneId, TimeContext and TimePresentationStyle** is now the next single-writer foundation ticket. Phase 0 is closed: SYS-0001, SYS-0002 and SYS-0003 all have executable evidence and clean no-return locks. TIME-1201 characterization is also complete, so TimeContext can be added additively before any cross-module consumer migration.
+**TIME-1203 — make Calendar/Input timezone-aware** is now the next single-writer foundation ticket. TIME-1202 established a branded explicit `TimeContext` and split presentation from calendar semantics without changing legacy host-local Calendar behavior; TIME-1203 can now move day boundaries and Ymd/Instant conversion onto that explicit context.

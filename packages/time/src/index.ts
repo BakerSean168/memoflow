@@ -12,6 +12,10 @@ export type {
   Clock,
   TimeStyle,
   PartialTimeStyle,
+  PartialTimePresentationStyle,
+  TimeContext,
+  TimePresentationStyle,
+  Weekday,
   TimeEngine,
   OnInvalid,
   LocaleId,
@@ -24,7 +28,9 @@ export {
   defaultTime,
   createSystemClock,
   createFixedClock,
+  DEFAULT_TIME_PRESENTATION_STYLE,
   DEFAULT_TIME_STYLE,
+  mergeTimePresentationStyle,
   mergeTimeStyle,
   type TimeFacade,
   type TimeFacadeOptions,
@@ -62,7 +68,10 @@ export type { TimeZoneSource } from './timezone/time-zone';
 export {
   createFixedTimeZoneSource,
   createSystemTimeZoneSource,
+  createTimeContext,
   isIanaTimeZoneId,
+  parseTimeZoneId,
+  requireTimeZoneId,
   resolveTimeZoneId,
 } from './timezone/time-zone';
 export { createDateFnsEngine, combineYmdHmWithTimeZone } from './engine/date-fns-engine';
@@ -90,3 +99,5 @@ export {
   type TimeEmptyKind,
   type ResolveEmptyLabelOptions,
 } from './empty-catalog';
+
+export { adaptLegacyTimeStyle, composeLegacyTimeStyle } from './style/legacy-time-style-adapter';

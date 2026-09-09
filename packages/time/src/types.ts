@@ -6,13 +6,37 @@ export type { Instant, TransferDate, Ymd, Hm };
 export type OnInvalid = 'null' | 'throw';
 
 export type LocaleId = string;
-export type TimeZoneId = string;
 
-export type TimeZonePolicy = 'local' | TimeZoneId;
+/** Sunday=0 ... Saturday=6. Shared by TimeContext and calendar policies. */
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+declare const timeZoneIdBrand: unique symbol;
+
+/**
+ * Validated IANA time-zone identifier.
+ *
+ * Runtime construction is owned by the timezone helpers; arbitrary string casts
+ * are not a canonical creation path.
+ */
+export type TimeZoneId = string & { readonly [timeZoneIdBrand]: 'TimeZoneId' };
+
+/**
+ * Legacy compatibility input used by TimeStyle/Codec migration surfaces.
+ * Canonical product state uses TimeContext.timeZone: TimeZoneId.
+ *
+ * @deprecated Prefer validated `TimeZoneId` inside `TimeContext`.
+ */
+export type TimeZonePolicy = 'local' | string;
+
+/** Canonical product-time context affecting calendar/wall-clock semantics. */
+export interface TimeContext {
+  timeZone: TimeZoneId;
+  weekStartsOn: Weekday;
+}
 
 export interface TimeStyleCalendar {
   dayBoundary: 'local-midnight';
-  weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  weekStartsOn: Weekday;
 }
 
 export interface TimeStyleEmpty {
@@ -37,11 +61,7 @@ export interface TimeStyleDisplay {
 }
 
 /** Named display slot keys for format.slot */
-export type TimeDisplaySlot =
-  | 'periodDay'
-  | 'periodMonth'
-  | 'periodWeekDay'
-  | 'chartMonthDay';
+export type TimeDisplaySlot = 'periodDay' | 'periodMonth' | 'periodWeekDay' | 'chartMonthDay';
 
 export interface TimeStyleRelative {
   enabled: boolean;
@@ -55,28 +75,37 @@ export interface TimeStyleDuration {
   zero: string;
 }
 
-/**
- * Product presentation + calendar policy for time.
- * Change empty.display once to affect list empty-time rendering.
- */
-export interface TimeStyle {
+/** Canonical presentation-only time preferences. */
+export interface TimePresentationStyle {
   locale: LocaleId;
-  timeZone: TimeZonePolicy;
-  calendar: TimeStyleCalendar;
   empty: TimeStyleEmpty;
   display: TimeStyleDisplay;
   relative: TimeStyleRelative;
   duration: TimeStyleDuration;
 }
 
-export type PartialTimeStyle = {
+export type PartialTimePresentationStyle = {
   locale?: LocaleId;
-  timeZone?: TimeZonePolicy;
-  calendar?: Partial<TimeStyleCalendar>;
   empty?: Partial<TimeStyleEmpty>;
   display?: Partial<TimeStyleDisplay>;
   relative?: Partial<TimeStyleRelative>;
   duration?: Partial<TimeStyleDuration>;
+};
+
+/**
+ * Legacy mixed presentation + calendar style.
+ *
+ * @deprecated Canonical callers use `TimeContext` + `TimePresentationStyle`.
+ */
+export interface TimeStyle extends TimePresentationStyle {
+  timeZone: TimeZonePolicy;
+  calendar: TimeStyleCalendar;
+}
+
+/** @deprecated Canonical callers use `TimeContext` + `PartialTimePresentationStyle`. */
+export type PartialTimeStyle = PartialTimePresentationStyle & {
+  timeZone?: TimeZonePolicy;
+  calendar?: Partial<TimeStyleCalendar>;
 };
 
 export interface Clock {
@@ -98,8 +127,8 @@ export interface TimeEngine {
   endOfDay(instant: Instant): Instant;
   addDays(instant: Instant, n: number): Instant;
   diffCalendarDays(a: Instant, b: Instant): number;
-  diffCalendarWeeks(a: Instant, b: Instant, weekStartsOn?: TimeStyleCalendar['weekStartsOn']): number;
-  startOfWeek(instant: Instant, weekStartsOn: TimeStyleCalendar['weekStartsOn']): Instant;
+  diffCalendarWeeks(a: Instant, b: Instant, weekStartsOn?: Weekday): number;
+  startOfWeek(instant: Instant, weekStartsOn: Weekday): Instant;
   isSameDay(a: Instant, b: Instant): boolean;
   isValidInstant(instant: Instant | number): boolean;
   padTwoDigits(n: number): string;

@@ -10194,6 +10194,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/time/src/__tests__/time-context.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/time/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/time/src/__tests__/time-zone-source.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11357,7 +11365,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 7
+      "fileCount": 8
     },
     {
       "id": "packages/ui-core/vitest.config.ts",
@@ -11966,7 +11974,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1027,
+    "unit": 1028,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,

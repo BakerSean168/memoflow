@@ -1,5 +1,5 @@
 import type { Hm, Instant, TransferDate, Ymd } from '@memoflow/contracts/primitives';
-import type { OnInvalid, TimeEngine, TimeStyle, TimeZonePolicy } from '../types';
+import type { OnInvalid, TimeEngine, TimeZonePolicy } from '../types';
 import {
   asHm,
   asInstant,
@@ -33,10 +33,7 @@ export interface TimeCodec {
   startOfYmd(ymd: Ymd, options?: CodecOptions): Instant;
 }
 
-function resolveInvalid<T>(
-  options: CodecOptions | undefined,
-  message: string,
-): T | null {
+function resolveInvalid<T>(options: CodecOptions | undefined, message: string): T | null {
   const policy = options?.onInvalid ?? 'null';
   if (policy === 'throw') {
     throw new TypeError(message);
@@ -44,9 +41,7 @@ function resolveInvalid<T>(
   return null;
 }
 
-export function createCodec(engine: TimeEngine, style?: Pick<TimeStyle, 'timeZone'>): TimeCodec {
-  const defaultZone: TimeZonePolicy = style?.timeZone ?? 'local';
-
+export function createCodec(engine: TimeEngine, defaultZone: TimeZonePolicy = 'local'): TimeCodec {
   return {
     isInstant(value: unknown): value is Instant {
       return isFiniteInstantMs(value);

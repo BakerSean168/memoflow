@@ -35,7 +35,9 @@ RecurrenceEnginePort
 - branded `Instant / Ymd / Hm` primitives；
 - `TimeFacade`；
 - date-fns engine boundary；
-- `TimeZoneSource` 与 IANA validator；
+- branded `TimeZoneId`、`TimeZoneSource` 与 validated `TimeContext` boundary；
+- `TimePresentationStyle` 与 legacy `TimeStyle` bounded adapter；
+- `TimeFacade.context/presentation/withContext/withPresentation`；
 - `RecurrenceEnginePort + rrule` adapter；
 - recurrence conformance / fixed clock / boundary tests；
 - direct date-fns import治理。
@@ -58,7 +60,7 @@ Instant | number canonical APIs
   -> Instant canonical + boundary compatibility
 ```
 
-实施完成前，当前代码仍是行为真值。
+TIME-1201/1202 已实施；Calendar/Input 的 timezone-aware 语义仍由 TIME-1203 继续迁移，因此当前 host-local Calendar 行为在该 ticket 完成前仍是行为真值。
 
 ## 4. Primary consumers
 

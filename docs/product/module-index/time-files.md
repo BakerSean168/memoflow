@@ -21,7 +21,8 @@ updated: 2026-09-09T00:00:00+08:00
 | calendar                   | `packages/time/src/calendar/calendar.ts`                         |
 | format                     | `packages/time/src/format/**`                                    |
 | input                      | `packages/time/src/input/input.ts`                               |
-| timezone                   | `packages/time/src/timezone/time-zone.ts`                        |
+| timezone/context           | `packages/time/src/timezone/time-zone.ts`                        |
+| legacy style adapter       | `packages/time/src/style/legacy-time-style-adapter.ts`           |
 | engine                     | `packages/time/src/engine/date-fns-engine.ts`                    |
 | recurrence                 | `packages/time/src/recurrence/**`                                |
 | governance                 | `tools/governance/time-registry.json`                            |
@@ -36,4 +37,4 @@ updated: 2026-09-09T00:00:00+08:00
 - `docs/architecture/adr/ADR-101-product-time-presentation-and-compatibility-surface.md`
 - `docs/plan/active/2026-09-09-time-label-vnext-model-convergence.md`
 
-这些 target docs 尚未表示生产代码已经完成第二轮收敛。
+TIME-1201/1202 已进入生产实现；TIME-1203..1206 与 Label lane 仍以 active plan 为准。
