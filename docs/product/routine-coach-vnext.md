@@ -14,6 +14,8 @@ updated: 2026-09-08T20:20:00+08:00
 
 # Routine Coach vNext：习惯节律、健康干预与专注协议
 
+> **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
+
 > 本文记录 2026-08-25 对现有 Reminder 模块的重新定性与 vNext 设计讨论。
 >
 > **实现状态（2026-09-08）：Core vNext 目标态已经落地。物理包仍名为 `reminder`，`ReminderTemplate` 继续作为兼容写入入口，但写入会投影 canonical RoutineDefinition/ProfileMembership；`ControlMode`、single-group ownership 与独立 cron scanner 已退休。本文中“当前/需要退役”字样若出现在历史推演章节，应按本 checkpoint 理解为 2026-08-25 的迁移背景。**
@@ -57,7 +59,7 @@ Notification       = Notification Fact + per-channel delivery
 Device Surface     = 实际设备呈现
 ```
 
-Legacy `ReminderTemplate / ReminderGroup / ReminderHistory / ReminderResponse / ReminderInstance / ReminderOccurrence` 不再作为长期新能力承载面；后续实施应以迁移后删除为目标，而不是继续双写。
+Legacy `ReminderTemplate / ReminderGroup / ReminderHistory / ReminderResponse / ReminderInstance / ReminderOccurrence` 不再作为长期新能力承载面；ADR-111 下 current consumers 切到 Routine 后直接删除，不写旧 row converter，也不继续双写。
 
 详细决策：
 
@@ -1596,7 +1598,7 @@ vNext 原则：
 
 ### 18.3 当前代码事实（2026-09-08）
 
-- `packages/reminder` 仍是物理包名，`ReminderTemplate` 是兼容写入入口；create/update 会投影 canonical `RoutineDefinition` 与 M:N `ProfileMembership`；
+- `packages/reminder` 仍是当前物理包名，`ReminderTemplate` 是现状中的兼容写入入口；ADR-111 要求最终 cutover 时移除该入口，只保留 canonical `RoutineDefinition` 与 M:N `ProfileMembership`；
 - Profile 只作为 Gate；`ControlMode` 与 single-group ownership 已删除；
 - WallClock 由 Scheduler 唯一 durable wake-up authority 驱动，旧 `ReminderSchedulerService` / cron scanner 已删除；
 - ActiveUsage runtime 与 activity sensor 在 Desktop 本地执行，端能力不伪造；

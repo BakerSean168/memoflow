@@ -22,7 +22,7 @@ updated: 2026-09-09T00:31:00+08:00
 | [Setting vNext Model Convergence](./2026-09-08-setting-vnext-model-convergence.md)                        | **ACTIVE / design frozen** — Settings Hub ownership、UserPreference presentation/regional、Product Time Context、Notification/device split、namespace persistence/PowerSync/Portability 已冻结；`SETTING-9201` 文档完成，其余实施待开始。                   |
 | [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)                                  | **ACTIVE / design frozen** — 保留 Mastra 单一 runtime，收敛 Conversation shell、Provider Secret/Model Capability、AI Context、Knowledge stable identity、Workflow Draft/Apply、ExecutionRecord；`AI-9601` 文档完成，其余 production implementation 未开始。 |
 | [Time + Label vNext Model Convergence](./2026-09-09-time-label-vnext-model-convergence.md)                | **ACTIVE / design frozen** — TimeContext/timezone-aware Calendar/Presentation 与 pure Shared Label Registry/owner assignment 边界已冻结；`FOUNDATION-1001` 文档完成，其余 production implementation 未开始。                                                |
-| [System-wide vNext Model Convergence](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) | **ACTIVE / canonical execution order** — ADR-067～109 统一 ownership review 已通过；协调所有 module subplan 的依赖、共享 schema 单写者、迁移/删除与最终 exact-head closure。                                                                                |
+| [System-wide vNext Model Convergence](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) | **ACTIVE / canonical execution order** — ADR-067～111 统一 ownership review 已通过；ADR-111 明确零旧数据 destructive cutover，协调所有 module subplan 的依赖、共享 schema 单写者、直接删除与最终 exact-head closure。                                       |
 
 ## 本轮已归档（2026-09-08）
 

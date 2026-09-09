@@ -1,6 +1,6 @@
 ---
 tags: [analysis, architecture, convergence, vnext, review]
-description: ADR-067~110 系统级 ownership、冲突、依赖与退休语义统一审查
+description: ADR-067~111 系统级 ownership、冲突、依赖、退休语义与 destructive-cutover 统一审查
 created: 2026-09-09T00:31:00+08:00
 updated: 2026-09-09T00:31:00+08:00
 ---
@@ -28,6 +28,7 @@ Data Portability     ADR-106
 Editor retirement    ADR-107
 Dashboard retirement ADR-108
 Governance reference   ADR-110 (supersedes ADR-109)
+Cutover policy         ADR-111
 ```
 
 目标不是检查文字风格，而是回答：**同一个事实是否只有一个 owner；一个 runtime 是否只有一个 durable truth；跨模块是否使用稳定 contract 而不是互相复制内部状态。**
@@ -177,6 +178,26 @@ Time + Preferences + Account/Auth + DataPortability V3 foundation
 DataPortability V3 must precede destructive legacy-table deletion.
 ```
 
+## 7. Execution policy convergence — ADR-111
+
+本轮不再以旧 MemoFlow 数据或旧客户端兼容为约束。ADR-111 supersede ADR-067~110 中所有仅为 legacy data preservation / compatibility window 服务的实施条款。
+
+因此统一执行语义改为：
+
+```text
+old model / old schema / old API
+        ↓
+change all current consumers in one coordinated batch
+        ↓
+delete old surface immediately
+        ↓
+reset/reseed database
+```
+
+不再要求 legacy row backfill、V2 reader/migrator、old-route redirect、bounded dual-read/write、before/after old-data parity。
+
+这不改变本文件前面的 owner/domain 决策，也不削弱 Scheduler/Notification/Auth/Knowledge/AI runtime 等 reliability/security invariants。
+
 ## 7. Remaining intentional questions, not model conflicts
 
 1. ActivityLedger: keep as independent activity feed only if characterization finds a real Home/AI consumer; otherwise delete.
@@ -186,6 +207,6 @@ DataPortability V3 must precede destructive legacy-table deletion.
 
 None blocks the unified model.
 
-## 8. Review verdict
+## 9. Review verdict
 
-**PASS WITH MIGRATION WORK.** Target ADRs are mutually compatible. All discovered target-level ownership collisions have one canonical resolution. Remaining contradictions are in current code/schema/portable contracts and are explicitly represented in the implementation plan.
+**PASS — READY FOR DESTRUCTIVE IMPLEMENTATION.** Target ADRs are mutually compatible. ADR-111 removes the remaining legacy-data/compatibility burden. Remaining contradictions are implementation residue in current code/schema and can be deleted through coordinated canonical cutovers rather than migrated.

@@ -11,7 +11,16 @@ updated: 2026-09-08T21:25:00+08:00
 
 # Task vNext Model Convergence
 
-> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive migration gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+>
+> **ADR-111 zero-legacy-data override:** 本文中所有仅用于保存当前旧数据/旧备份/旧客户端的 migration、backfill、compatibility reader/adapter、dual-read/write、redirect window、before/after old-data parity 要求均已被 ADR-111 supersede。领域目标与行为验收继续有效；实施时直接切 current consumers、删除旧 surface、reset/reseed persistence。
+
+## ADR-111 execution rewrite
+
+- `TASK-7305` is a direct Prisma/PowerSync canonical schema cutover, not an old-row migration;
+- `TASK-7306` switches all current application/HTTP/IPC/AI consumers in the same coordinated batch;
+- old `TaskTemplate`/`TaskInstance` persistence and compatibility DTOs are deleted rather than translated;
+- no legacy round-trip fixture is required; fresh TaskPlan/TaskOccurrence round-trip remains required.
 
 **状态：ACTIVE / implementation started**
 **分支：** `feat/task-vnext-model-convergence`
@@ -84,7 +93,7 @@ TaskWorkspace  = Plan + Occurrences + Cross-module Context
 - generation cursor/runtime state 不进入产品 DTO；
 - finite plan outcome 不依赖 public `lastGeneratedDate`。
 
-### TASK-7305 — Persistence single-track migration
+### TASK-7305 — Persistence single-track cutover
 
 - Prisma / PowerSync 同步新 Plan/Occurrence shape；
 - reminder full JSON；
@@ -93,7 +102,7 @@ TaskWorkspace  = Plan + Occurrences + Cross-module Context
 - 删除旧 reminder/time/recurrence 展开列；
 - migration fixture + round-trip parity。
 
-### TASK-7306 — Application / HTTP / IPC / AI migration
+### TASK-7306 — Application / HTTP / IPC / AI cutover
 
 - Create/Update/Query 迁移到 Plan/Occurrence contract；
 - Planner projection / SchedulingPort / handler registry 更新；

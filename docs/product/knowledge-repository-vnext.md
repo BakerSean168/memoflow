@@ -13,6 +13,8 @@ updated: 2026-09-08T21:25:00+08:00
 
 # Knowledge Repository vNext
 
+> **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
+
 ## 1. 一句话定义
 
 > **KnowledgeSpace = 用户在 MemoFlow 中的逻辑知识空间。**
@@ -523,7 +525,7 @@ RepositoryExplorer
 RepositoryStatistic
 ```
 
-短期只作为 data-portability / historical backup boundary 保留。未来 retirement 必须先独立迁移：
+ADR-111 下不再作为 data-portability / historical backup boundary 保留。current consumers 清零后直接删除：
 
 ```text
 portable export/import

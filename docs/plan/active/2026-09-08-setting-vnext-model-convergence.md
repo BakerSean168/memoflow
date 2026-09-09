@@ -12,7 +12,21 @@ updated: 2026-09-08T23:26:00+08:00
 
 # Setting vNext Model Convergence
 
-> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive migration gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+>
+> **ADR-111 zero-legacy-data override:** 本文中所有仅用于保存当前旧数据/旧备份/旧客户端的 migration、backfill、compatibility reader/adapter、dual-read/write、redirect window、before/after old-data parity 要求均已被 ADR-111 supersede。领域目标与行为验收继续有效；实施时直接切 current consumers、删除旧 surface、reset/reseed persistence。
+
+## ADR-111 execution rewrite
+
+The preference ownership model remains valid, but all legacy-data precedence/backfill work is removed:
+
+- `SETTING-9203`: create canonical presentation/regional preferences directly and delete `Account.settings` / old giant-tree truth; no timezone/value precedence backfill;
+- `SETTING-9204`: move current code to Notification/device owners without seeding values from legacy flags;
+- `SETTING-9208`: V3-only strict import/export; delete v1/v2 migrator/warnings instead of maintaining them;
+- `SETTING-9209`: direct Prisma/PowerSync cutover and old-field deletion; no compatibility reader;
+- consent remains fail-closed by target semantics, but no old consent flag needs migration reporting.
+
+Migration-oriented subsections below are retained only as historical reasoning and are superseded for execution by this block and the system-wide plan.
 
 **状态：ACTIVE / design frozen, implementation not started**
 **设计分支：** `docs/setting-vnext-model`
@@ -525,7 +539,7 @@ Settings root 不再持有 privacy/experimental fake form shadow；每个 mutati
 
 `SETTING-9203`, `SETTING-9204`, `SETTING-9205`, `SETTING-9206`
 
-### SETTING-9208 — Versioned preference import/export + Data Portability owner migration
+### SETTING-9208 — V3-only preference import/export + Data Portability owner contract
 
 **状态：PLANNED**
 
@@ -579,7 +593,7 @@ Data Portability：
 
 `SETTING-9203`, `SETTING-9204`, `SETTING-9205`, `SETTING-9206`
 
-### SETTING-9209 — Persistence/sync cutover and legacy deletion
+### SETTING-9209 — Direct persistence/sync cutover and legacy deletion
 
 **状态：PLANNED**
 

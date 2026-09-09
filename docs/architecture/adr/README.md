@@ -127,6 +127,7 @@ updated: 2026-09-09T00:30:00+08:00
 | [ADR-108](./ADR-108-dashboard-retirement-and-home-composition.md) | Dashboard Retirement 与 Home Composition | 已采纳（待实施） | 2026-09-09 |
 | [ADR-109](./ADR-109-product-governance-to-knowledge-standards.md) | Product Governance → Knowledge Standards | 已被 ADR-110 取代 | 2026-09-09 |
 | [ADR-110](./ADR-110-governance-permanent-executable-reference-module.md) | Governance 永久可执行参考模块与开发规范工作台 | 已采纳 | 2026-09-09 |
+| [ADR-111](./ADR-111-zero-legacy-data-destructive-cutover-policy.md) | Zero-Legacy-Data Destructive Cutover Policy | 已采纳（立即生效） | 2026-09-09 |
 
 ## 维护规则
 

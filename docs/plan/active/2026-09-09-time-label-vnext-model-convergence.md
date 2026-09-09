@@ -13,7 +13,16 @@ updated: 2026-09-09T00:00:00+08:00
 
 # Time + Label vNext Model Convergence
 
-> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive migration gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+>
+> **ADR-111 zero-legacy-data override:** 本文中所有仅用于保存当前旧数据/旧备份/旧客户端的 migration、backfill、compatibility reader/adapter、dual-read/write、redirect window、before/after old-data parity 要求均已被 ADR-111 supersede。领域目标与行为验收继续有效；实施时直接切 current consumers、删除旧 surface、reset/reseed persistence。
+
+## ADR-111 execution rewrite
+
+- the temporary legacy `TimeStyle` adapter introduced by TIME-1202 is now explicit deletion debt, not a compatibility promise;
+- `TIME-1205` switches all current product consumers to strict TimeContext/branded primitives, then `TIME-1206` deletes Date/number/legacy style surfaces;
+- `LABEL-1303/1304` move assignment ownership directly to Goal/Task; no temporary assignment compatibility seam;
+- `LABEL-1305` chooses the target color contract from current UI requirements; no existing-value data migration is required.
 
 **状态：ACTIVE / implementation started**
 **设计分支：** `docs/time-label-vnext-model-convergence`
@@ -247,7 +256,7 @@ Ymd+Hm -> Instant
 
 ---
 
-### TIME-1205 — Migrate cross-module Product Time consumers
+### TIME-1205 — Switch cross-module Product Time consumers
 
 **状态：PLANNED**
 

@@ -1,8 +1,8 @@
 ---
 tags: [plan, active, vnext, system-wide, convergence]
-description: MemoFlow 全模块模型收敛唯一执行顺序、依赖、迁移、验证与最终删除计划
+description: MemoFlow 全模块模型收敛唯一执行顺序、destructive cutover、验证与最终删除计划
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-09T00:31:00+08:00
+updated: 2026-09-09T11:15:00+09:00
 ---
 
 # MemoFlow System-wide vNext Model Convergence — Implementation Plan
@@ -10,6 +10,8 @@ updated: 2026-09-09T00:31:00+08:00
 > **Execution-order authority:** 本文是本轮系统级重构的唯一执行顺序真值。Goal/Task/Setting/AI/Time+Label 既有 active plans 继续提供模块内部实施细节，但不得绕过本文依赖顺序并行写同一 contract/schema。
 >
 > **Control plane:** Pixel control plane `127.0.0.1:8320` 在本计划创建时不可用，因此当前 canonical execution truth 是 GCP Dev repository branch/commit + 本计划。Pixel 恢复后只允许 attach/recover 一个 durable plan，不创建重复 writer。
+>
+> **ADR-111 execution override:** 当前无需要保留的 MemoFlow 生产业务数据，也不要求兼容旧客户端/旧备份。本计划从此采用 destructive cutover：不写 legacy data backfill、不保留 old/new dual-read/write、不保留 V2 reader/migrator、不保留旧 route/API alias。当前 consumer 原子切到 canonical contract 后直接删除旧 surface，并 reset/reseed persistence。
 
 ## 1. Outcome
 
@@ -48,7 +50,7 @@ stale PortableUserDataV2 internal-model clones
 
 - 不重写 Mastra、Better Auth、PowerSync、Prisma、rrule 或 date-fns；
 - 不创建新的 generic God modules（HomeData, EntitySettings, GenericAssignment, GenericRepository 等）；
-- 不为了兼容无真实生产价值的 legacy runtime rows 永久维护双轨；
+- 不为旧 MemoFlow 数据、旧客户端或旧备份维护任何 compatibility layer / migration window；
 - 不把 system-wide convergence 与新的社交、团队、RBAC、mobile editor 等产品功能混在一起。
 
 ## 3. Protected assets
@@ -64,7 +66,7 @@ stale PortableUserDataV2 internal-model clones
 9. PowerSync offline parity；
 10. host-owned `ExecutionContext.identityId`；
 11. failure/operation governance contracts；
-12. existing current-user deep links unless an ADR explicitly provides redirect/migration;
+12. canonical current-user journeys/deep links；legacy redirects/aliases are not protected under ADR-111；
 13. Governance executable reference feature: Rule/RuleRevision + Prisma/PowerSync + API/IPC + client/Vue + reference tests.
 
 ## 4. Global dependency order
@@ -90,12 +92,12 @@ PHASE 4  Routine + Planner/Scheduler + Notification
    │
 PHASE 5  Home/Dashboard retirement + AI semantic alignment
    │
-PHASE 6  Portable owner cutover + destructive legacy deletion
+PHASE 6  Portable V3 owner registration + whole-schema residue deletion
    │
 PHASE 7  whole-system review / exact-head CI / release closure
 ```
 
-Within a phase, lanes may run in parallel only when they do not write the same contracts/schema/migration.
+Within a phase, lanes may run in parallel only when they do not write the same contracts/schema. No data-migration lane exists under ADR-111.
 
 ---
 
@@ -110,19 +112,19 @@ Within a phase, lanes may run in parallel only when they do not write the same c
 **Implementation:**
 
 1. record exact HEAD and clean-worktree baseline;
-2. add/refresh focused characterization for Time host timezone, Account/Auth closure, DataPortability V2 import safety, Knowledge projection, Dashboard live consumers, Governance executable reference behavior and Editor no-runtime boundary;
+2. add/refresh focused characterization for Time host timezone, Account/Auth closure, Knowledge projection, Dashboard live consumers, Governance executable reference behavior and Editor no-runtime boundary; legacy V2 import behavior is not a preservation target;
 3. update test inventory only because implementation now legitimately changes test surfaces;
 4. ensure each future delete has a consumer search fixture or architecture lock.
 
 **Tests:** focused package tests + `pnpm test:inventory` + governance.
 
-**Acceptance:** every legacy surface scheduled for deletion is either covered by a migration test or proven to have zero production consumer.
+**Acceptance:** every legacy surface scheduled for deletion is either behavior-characterized for surviving semantics or proven to have zero required current consumer. No old-data migration test is required.
 
 **Closure evidence:**
 
 - Time host drift + explicit IANA + DST gap/overlap + locale/week-start characterization added; recurrence conformance remains green;
 - Account closure coordinator and raw Better Auth closure enforcement integration tests green;
-- Data Portability disclosure rejection + legacy Editor backup-only boundary green;
+- Data Portability security boundary characterization exists; ADR-111 supersedes legacy Editor/V2 backup restoration obligations;
 - Knowledge projection + legacy Editor no-runtime boundary green;
 - Dashboard remaining Home/Goal/AI consumers frozen in an executable surface test;
 - Governance Rule/Revision executable reference behavior and canonical field inventory frozen;
@@ -157,7 +159,7 @@ Within a phase, lanes may run in parallel only when they do not write the same c
 
 **Goal:** encode retired vocabulary/ownership boundaries from system-wide review as staged governance locks.
 
-Locks activate only after the replacement ticket closes; never fail current code before migration is possible.
+Locks activate when the canonical replacement ticket closes; then reintroducing the retired surface fails governance. ADR-111 removes compatibility-window requirements.
 
 **Closure evidence:**
 
@@ -177,10 +179,10 @@ Canonical detail: `2026-09-09-time-label-vnext-model-convergence.md`.
 Order:
 
 1. TIME-1201 **DONE** — host drift / IANA / DST / locale / week-start + recurrence characterization frozen;
-2. TIME-1202 **DONE** — branded `TimeZoneId`, `TimeContext`, `TimePresentationStyle` + bounded legacy adapter;
+2. TIME-1202 **DONE** — branded `TimeZoneId`, `TimeContext`, `TimePresentationStyle`; the temporary legacy adapter is now deletion debt under ADR-111;
 3. TIME-1203 timezone-aware Calendar/Input;
 4. TIME-1204 locale/timezone-aware Format;
-5. TIME-1205 migrate cross-module consumers;
+5. TIME-1205 atomically switch cross-module consumers;
 6. TIME-1206 remove raw number/Date compatibility and host-local fallbacks.
 
 **Global gate:** no server business calendar semantics may read ambient host timezone.
@@ -201,7 +203,6 @@ Execute existing Setting plan foundation before Account settings deletion.
 
 **Goal:** UI can display profile + login email verification without Account owning mutable auth email.
 
-- keep current routes compatible initially;
 - compose CloudPrincipal/CloudAuth user safe summary at host/application boundary;
 - no token/provider secret fields.
 
@@ -209,7 +210,7 @@ Execute existing Setting plan foundation before Account settings deletion.
 
 Depends on Setting presentation/regional + Notification preference consumers being live.
 
-Delete AccountSettings VO, `/me/settings`, event, DTO field and persistence column only after migration tests prove parity.
+Delete AccountSettings VO, `/me/settings`, event, DTO field and persistence column in the canonical preference cutover batch. No value backfill or compatibility reader.
 
 ### ACC-1404 — Simplify Account lifecycle
 
@@ -241,19 +242,19 @@ Ensure closure coordinator is the only product path deciding Account closure; au
 
 ### PORT-1601 — Introduce V3 envelope and PortableCapability contract
 
-Add versioned `PortableBackupEnvelopeV3` and a typed capability registration seam without deleting V2 reader yet.
+Add `PortableBackupEnvelopeV3` and a typed capability registration seam as the only supported portable format. Do not retain the V2 reader.
 
 ### PORT-1602 — Implement registry/coordinator/dry-run pipeline
 
 - topological capability order;
 - host-owned identity;
-- strict decode/migration/validate/apply;
+- strict decode/validate/apply for V3;
 - stable portable references;
 - receipt and warning ledger.
 
-### PORT-1603 — Add explicit V2 reader/migrator policy
+### PORT-1603 — Delete V2 portability compatibility
 
-No V2 writer. V2 remains input-only during migration window; retired Editor/Dashboard/runtime sections produce deterministic warnings instead of recreating dead state.
+Remove V2 reader/writer/migrator contracts and tests. Old backups are unsupported in this refactor. V3 contains only surviving owner facts.
 
 ---
 
@@ -277,7 +278,7 @@ Unify webhook, confirmed web commit and reconciliation projection application. A
 
 ## EDITOR-1701 — Remove Editor capability from Portability V3
 
-V3 exports no Editor section; V2 reader returns explicit ignored/retired warning.
+V3 exports no Editor section. Delete V2 Editor payload handling entirely; no compatibility warning/import path is required.
 
 ## EDITOR-1702 — Drop legacy editor persistence
 
@@ -362,15 +363,15 @@ Core outputs:
 
 # Phase 4 — Routine, Planner/Scheduler and Notification
 
-## ROUTINE-2201 — Legacy Reminder -> Routine migration
+## ROUTINE-2201 — Replace Legacy Reminder with Routine
 
 Implement ADR-076~079:
 
 - Definition/Profile/Trigger/RuntimeContext/TemporaryOverride;
 - WallClock/Elapsed/ActiveUsage;
 - Occurrence + Interaction;
-- preserve reliability/fencing until scheduler path proves parity;
-- delete ReminderTemplate/Group/Instance/Response legacy paths after migration.
+- preserve reliability/fencing behavior through characterization while changing the model;
+- delete ReminderTemplate/Group/Instance/Response storage/contracts in the same coordinated cutover; no row converter.
 
 ## PLAN-2301 — CalendarEntry vNext
 
@@ -386,7 +387,7 @@ Implement ADR-080:
 
 Implement ADR-081~083 while preserving SchedulingPort/reconcile and runtime reliability.
 
-Delete legacy ScheduleTask/config/source-module only after parity.
+Delete legacy ScheduleTask/config/source-module in the canonical Scheduler cutover once reliability behavior tests are green. No legacy row conversion.
 
 ## NOTIF-2401 — NotificationFact + Inbox lifecycle
 
@@ -430,7 +431,7 @@ If direct current product value exists, move to a narrow ActivityFeed capability
 
 ## HOME-1805 — Hard-delete Dashboard
 
-Remove package/contracts/API/IPC/Vue module/DashboardConfig/PowerSync mappings and update `/dashboard` compatibility tests.
+Remove package/contracts/API/IPC/Vue module/DashboardConfig/PowerSync mappings and delete the `/dashboard` compatibility redirect/tests.
 
 ## AI lane — execute AI-9602..9612 after owner contracts stabilize
 
@@ -447,15 +448,15 @@ Critical order:
 
 ---
 
-# Phase 6 — Portable owner cutover and destructive residue deletion
+# Phase 6 — Portable V3 owner registration and destructive residue deletion
 
 ## PORT-1610 — Implement owner capabilities for all surviving product facts
 
 Each module registers its canonical V3 portable capability. No central persistence-shaped clone.
 
-## PORT-1611 — Remove legacy V2 writer and old mini repository ports
+## PORT-1611 — Assert V3-only portability surface
 
-V2 remains input migrator only for the agreed window; no newly exported backup uses old shapes.
+Delete any remaining V1/V2 reader/writer/migrator code, old mini repository ports and compatibility fixtures. Only V3 owner capabilities remain.
 
 ## CLEAN-2601 — Whole-schema legacy sweep
 
@@ -503,7 +504,7 @@ pnpm test
 pnpm build
 ```
 
-Plus affected integration/E2E, PowerSync parity, Prisma migration checks, local Docker product journeys, AI eval replay, and exact-head CI.
+Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset checks, local Docker product journeys, AI eval replay, and exact-head CI.
 
 ## SYS-3004 — Documentation truth and plan archive
 
@@ -517,7 +518,7 @@ Plus affected integration/E2E, PowerSync parity, Prisma migration checks, local 
 | Lane           | Can parallel with           | Must not share writer with                                           |
 | -------------- | --------------------------- | -------------------------------------------------------------------- |
 | Time           | Label, portability skeleton | Setting regional contracts, Task schedule contracts during same edit |
-| Label Registry | Time, Auth                  | Goal/Task assignment schema migration                                |
+| Label Registry | Time, Auth                  | Goal/Task assignment schema cutover                                  |
 | Account/Auth   | Time, Portability skeleton  | Setting preference contract cutover                                  |
 | Knowledge      | Account/Auth                | AI index schema                                                      |
 | Goal           | Routine foundation          | Task shared relation/contracts without coordination                  |
@@ -526,15 +527,14 @@ Plus affected integration/E2E, PowerSync parity, Prisma migration checks, local 
 | Notification   | Scheduler                   | Routine intervention contracts without coordination                  |
 | Governance     | most owner-domain lanes     | tools/governance adapters while SYS governance manifests are edited  |
 | AI             | Home cleanup                | owner workflow DTOs until owner contracts frozen                     |
-| Portability    | most lanes                  | destructive owner-table deletion before portable migration           |
+| Portability    | most lanes                  | owner contract/schema edits in the same batch                        |
 
 ## 6. Rollback strategy
 
-- additive foundations first, destructive deletes last;
-- each phase has a clean commit/checkpoint before deleting old paths;
-- no long-lived runtime dual truth: compatibility adapters may exist only during a bounded phase;
-- schema deletion requires both Prisma/PowerSync parity and importer migration evidence;
-- if a vertical journey fails after cutover, revert the coherent batch rather than revive a second permanent truth.
+- each destructive batch starts from a clean commit/checkpoint;
+- rollback means source/deployment rollback plus database reset/reseed, not runtime compatibility code;
+- Prisma and PowerSync canonical parity must land in the same coherent batch;
+- if a vertical journey fails after cutover, revert the coherent batch and recreate persistence from the prior source revision; never revive a second permanent truth.
 
 ## 7. Immediate next ticket
 

@@ -10,6 +10,8 @@ updated: 2026-09-09T00:00:00+08:00
 
 # AI 模块说明
 
+> **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
+
 > **2026-09-09 target convergence notice：** 当前 2026-08 已实施的 Mastra-native runtime 继续是 production truth；Conversation/Provider/Context/Workflow Draft/Knowledge Index/Execution persistence 的下一目标由 ADR-096～099 与 `docs/plan/active/2026-09-09-ai-vnext-model-convergence.md` 冻结。实施完成前，本文件以下“当前”描述仍以现有代码为准，不把新目标冒充成已经落地。
 
 ## 1. 功能定位

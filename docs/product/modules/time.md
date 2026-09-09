@@ -11,6 +11,8 @@ updated: 2026-09-09T00:00:00+08:00
 
 # Time Foundation 模块说明
 
+> **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
+
 ## 1. 定位
 
 `@memoflow/time` 不是 Goal/Task 的私有工具包，而是 MemoFlow 全产品共享的 Product Time foundation。
@@ -36,7 +38,7 @@ RecurrenceEnginePort
 - `TimeFacade`；
 - date-fns engine boundary；
 - branded `TimeZoneId`、`TimeZoneSource` 与 validated `TimeContext` boundary；
-- `TimePresentationStyle` 与 legacy `TimeStyle` bounded adapter；
+- `TimePresentationStyle` 已建立；legacy `TimeStyle` adapter 是 ADR-111 下待立即删除的实现残留，不再承担兼容职责；
 - `TimeFacade.context/presentation/withContext/withPresentation`；
 - `RecurrenceEnginePort + rrule` adapter；
 - recurrence conformance / fixed clock / boundary tests；

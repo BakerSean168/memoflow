@@ -17,7 +17,21 @@ status: active
 
 # Goal vNext Model Convergence — Active Plan
 
-> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive migration gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+>
+> **ADR-111 zero-legacy-data override:** 本文中所有仅用于保存当前旧数据/旧备份/旧客户端的 migration、backfill、compatibility reader/adapter、dual-read/write、redirect window、before/after old-data parity 要求均已被 ADR-111 supersede。领域目标与行为验收继续有效；实施时直接切 current consumers、删除旧 surface、reset/reseed persistence。
+
+## ADR-111 execution rewrite
+
+The target Goal/KR model is unchanged, but legacy-data preservation work is deleted from scope:
+
+- `GOAL-7202`: replace lifecycle/text fields directly; do not copy old description/motivation/feasibility rows into Knowledge;
+- `GOAL-7203`: replace `dueDate` with Goal Target semantics for new state; no old dueDate backfill;
+- `GOAL-7204`: install KR V3 directly; no V2 percentage/current-value preservation fixture;
+- `GOAL-7210`: delete old schema/contracts/adapters immediately after current consumers compile on the canonical model;
+- Section 18 data-migration containment is superseded; rollback is source rollback + DB reset/reseed.
+
+Any deeper “migration preserves old values/content” wording below is historical planning rationale, not executable acceptance criteria.
 
 ## 1. Executive decision
 
@@ -569,9 +583,9 @@ Core identity    Target/time        KR Measurement V3
 
 **Dependencies:** GOAL-7202~7208; can develop components in parallel behind new contracts after those contracts freeze.
 
-## 15. Phase 7 — Migration, cleanup and truth convergence
+## 15. Phase 7 — Direct cleanup and truth convergence
 
-### GOAL-7210 — Remove legacy Goal/KR dual tracks and finalize migration
+### GOAL-7210 — Remove legacy Goal/KR tracks and finalize cutover
 
 **Goal:** After all consumers move, final repository truth contains only new Goal vNext model.
 
@@ -675,7 +689,7 @@ Then GOAL-7207 is the integration read-model seam. GOAL-7208 and GOAL-7209 may o
 
 Do not run multiple writers against the same Goal contract/schema migration files without explicit worktree ownership.
 
-## 18. Migration / rollback containment
+## 18. Rollback containment (ADR-111 supersedes data migration)
 
 During implementation:
 

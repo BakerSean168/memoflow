@@ -12,6 +12,8 @@ updated: 2026-09-08T20:45:00+08:00
 
 # Schedule / Planner + Scheduler / Temporal Engine vNext
 
+> **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
+
 ## 1. 一句话模型
 
 ```text

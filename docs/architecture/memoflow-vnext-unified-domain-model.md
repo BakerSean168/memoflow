@@ -108,3 +108,7 @@ Every state family has exactly one durable authority:
 - user preferences: typed preference records;
 - portable backup: generated snapshot, never live product truth.
 - governance rules/revisions: Governance bounded context; engineering enforcement consumes repository-versioned inputs.
+
+## 7. Current vNext cutover policy
+
+ADR-111 applies to this convergence: there is no legacy MemoFlow business data to preserve and no old-client compatibility requirement. Implement canonical owner models directly, switch current consumers atomically, delete old surfaces, and reset/reseed persistence. Do not introduce migration-only dual tracks.

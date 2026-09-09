@@ -16,7 +16,19 @@ updated: 2026-09-09T00:00:00+08:00
 
 # AI vNext Model Convergence
 
-> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive migration gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+>
+> **ADR-111 zero-legacy-data override:** 本文中所有仅用于保存当前旧数据/旧备份/旧客户端的 migration、backfill、compatibility reader/adapter、dual-read/write、redirect window、before/after old-data parity 要求均已被 ADR-111 supersede。领域目标与行为验收继续有效；实施时直接切 current consumers、删除旧 surface、reset/reseed persistence。
+
+## ADR-111 execution rewrite
+
+- `AI-9602` characterizes Mastra/runtime authority only; legacy `AiMessage` transcript rows do not need preservation/import;
+- provider configuration/secret target contracts are rebuilt directly; no DB secret migration is required;
+- `AI-9607` switches Knowledge index/citations to stable `KnowledgeDocumentId` without repairing old indexed rows or path-derived relations;
+- `AI-9610` deletes obsolete quota/generation/message persistence directly after current-code consumer removal;
+- no old usage-history aggregation parity or V2 portability migration is required.
+
+Runtime recovery/HITL/idempotency/security tests remain protected because they are behavioral invariants, not legacy-data compatibility.
 
 **状态：ACTIVE / design frozen, implementation not started**
 **实施分支：** 尚未创建；本轮提交只冻结 docs/design，不开始 AI production code 重构
@@ -226,7 +238,7 @@ AIExecutionRecord != Workflow state != Accounting ledger
 - [x] no-runtime-rewrite non-goal 明确；
 - [x] direct reuse / thin adapter / do-not-build ledger 明确。
 
-### AI-9602 — Characterize runtime authority and conversation/message migration before deletion
+### AI-9602 — Characterize runtime authority before legacy persistence deletion
 
 **状态：PLANNED**
 
@@ -527,7 +539,7 @@ Goal/Task/Knowledge planner 不再各自实现互相漂移的 timezone/trust con
 
 `AI-9601`
 
-### AI-9607 — Migrate Knowledge index to stable document identity and remove index-status dual truth
+### AI-9607 — Cut Knowledge index to stable document identity and remove index-status dual truth
 
 **状态：PLANNED**
 

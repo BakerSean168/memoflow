@@ -12,6 +12,8 @@ updated: 2026-09-08T22:00:00+08:00
 
 # Notification vNext
 
+> **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
+
 ## 1. 一句话定义
 
 > **Notification = User-visible Fact + Inbox State。**  
@@ -509,24 +511,24 @@ Notification Center 的实时新增不能依赖某个 channel delivered。
 
 ## 22. Legacy retirement map
 
-| Legacy                               | Target                                       |
-| ------------------------------------ | -------------------------------------------- |
-| `Notification`                       | `NotificationFact` ubiquitous language       |
-| `notificationChannels[]`             | remove from Fact                             |
-| `NotificationChannel`                | DeliveryProjection compatibility then retire |
-| `NotificationHistory`                | typed Interaction or delete                  |
-| `NotificationTemplate`               | WorkflowDefinition + Renderer Registry       |
-| `NotificationType`                   | NotificationTone                             |
-| `NotificationCategory`               | workflow presentation/group metadata         |
-| `RelatedEntityType`                  | EntityRef                                    |
-| `isRead` persisted truth             | derive from readAt                           |
-| user delete                          | archive                                      |
-| `metadata.sound`                     | Device Surface                               |
-| `metadata.data: unknown`             | workflow-schema data                         |
-| ApiCall/Custom action                | typed OwnerCommand                           |
-| DND host-local time                  | QuietHours(TimeZoneId,Hm)                    |
-| Preference rateLimit mixed semantics | User Preference + System Guard               |
-| one Product/Ops port                 | InboxPort + OperationsPort                   |
+| Legacy                               | Target                                            |
+| ------------------------------------ | ------------------------------------------------- |
+| `Notification`                       | `NotificationFact` ubiquitous language            |
+| `notificationChannels[]`             | remove from Fact                                  |
+| `NotificationChannel`                | direct cutover to DeliveryProjection, then delete |
+| `NotificationHistory`                | typed Interaction or delete                       |
+| `NotificationTemplate`               | WorkflowDefinition + Renderer Registry            |
+| `NotificationType`                   | NotificationTone                                  |
+| `NotificationCategory`               | workflow presentation/group metadata              |
+| `RelatedEntityType`                  | EntityRef                                         |
+| `isRead` persisted truth             | derive from readAt                                |
+| user delete                          | archive                                           |
+| `metadata.sound`                     | Device Surface                                    |
+| `metadata.data: unknown`             | workflow-schema data                              |
+| ApiCall/Custom action                | typed OwnerCommand                                |
+| DND host-local time                  | QuietHours(TimeZoneId,Hm)                         |
+| Preference rateLimit mixed semantics | User Preference + System Guard                    |
+| one Product/Ops port                 | InboxPort + OperationsPort                        |
 
 ## 23. Protected assets
 
