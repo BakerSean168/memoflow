@@ -100,6 +100,8 @@ Within a phase, lanes may run in parallel only when they do not write the same c
 
 ## SYS-0001 — Capture exact current-system characterization
 
+**状态：DONE — 2026-09-09 characterization baseline frozen**
+
 **Goal:** turn every target-changing behavior into executable characterization before destructive edits.
 
 **Implementation:**
@@ -112,6 +114,16 @@ Within a phase, lanes may run in parallel only when they do not write the same c
 **Tests:** focused package tests + `pnpm test:inventory` + governance.
 
 **Acceptance:** every legacy surface scheduled for deletion is either covered by a migration test or proven to have zero production consumer.
+
+**Closure evidence:**
+
+- Time host drift + explicit IANA + DST gap/overlap + locale/week-start characterization added; recurrence conformance remains green;
+- Account closure coordinator and raw Better Auth closure enforcement integration tests green;
+- Data Portability disclosure rejection + legacy Editor backup-only boundary green;
+- Knowledge projection + legacy Editor no-runtime boundary green;
+- Dashboard remaining Home/Goal/AI consumers frozen in an executable surface test;
+- Governance Rule migration-required field inventory frozen;
+- evidence map: `docs/analysis/2026-09-09-system-vnext-characterization-baseline.md`.
 
 ## SYS-0002 — Retire unused Dashboard page-only Vue components
 
@@ -138,9 +150,18 @@ Within a phase, lanes may run in parallel only when they do not write the same c
 
 ## SYS-0003 — Add target no-return architecture manifest
 
+**状态：DONE — staged no-return governance active**
+
 **Goal:** encode retired vocabulary/ownership boundaries from system-wide review as staged governance locks.
 
 Locks activate only after the replacement ticket closes; never fail current code before migration is possible.
+
+**Closure evidence:**
+
+- `tools/governance/vnext-retirement-manifest.json` owns active/staged retirement locks;
+- active locks protect already-retired Dashboard page-only surfaces and Editor runtime package;
+- future Dashboard bounded context, Editor persistence, product Governance, Account.settings and legacy Reminder/Scheduler/Notification surfaces remain staged;
+- audit is part of `memoflow:governance-check` and has dedicated governance-tools tests.
 
 ---
 
@@ -152,7 +173,7 @@ Canonical detail: `2026-09-09-time-label-vnext-model-convergence.md`.
 
 Order:
 
-1. TIME-1201 characterization including `TZ=UTC/Asia/Tokyo/America/New_York` fixtures and DST gap/overlap;
+1. TIME-1201 **DONE** — host drift / IANA / DST / locale / week-start + recurrence characterization frozen;
 2. TIME-1202 branded `TimeZoneId`, `TimeContext`, `TimePresentationStyle`;
 3. TIME-1203 timezone-aware Calendar/Input;
 4. TIME-1204 locale/timezone-aware Format;
@@ -492,4 +513,4 @@ Plus affected integration/E2E, PowerSync parity, Prisma migration checks, local 
 
 ## 7. Immediate next ticket
 
-**SYS-0001 — capture exact current-system characterization** is now the next system-level ticket. SYS-0002 has closed the first low-risk dead surface; before broader contract/schema migrations, Phase 0 must establish executable characterization for Time timezone behavior, Account/Auth closure, Data Portability V2 safety, Knowledge projection, remaining Dashboard live consumers, Governance migration and Editor no-runtime residue.
+**TIME-1202 — introduce branded TimeZoneId, TimeContext and TimePresentationStyle** is now the next single-writer foundation ticket. Phase 0 is closed: SYS-0001, SYS-0002 and SYS-0003 all have executable evidence and clean no-return locks. TIME-1201 characterization is also complete, so TimeContext can be added additively before any cross-module consumer migration.

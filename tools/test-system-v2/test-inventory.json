@@ -5243,6 +5243,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/dashboard/src/__tests__/dashboard-retirement-characterization.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/dashboard/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/dashboard/src/dashboard-contracts-export.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6696,6 +6704,16 @@
     },
     {
       "path": "packages/governance/src/server/application/use-cases/queries/__tests__/search-rules.use-case.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/governance/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/governance/src/server/domain/aggregates/__tests__/rule-migration-characterization.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/governance/vitest.config.ts"
@@ -10144,6 +10162,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/time/src/__tests__/host-timezone-characterization.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/time/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/time/src/__tests__/recurrence.conformance.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10664,6 +10690,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/vnext-retirement.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/runtime/load-profiles.spec.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -10805,7 +10839,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 25
+      "fileCount": 26
     },
     {
       "id": "packages/notification/vitest.config.ts",
@@ -11015,7 +11049,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 13
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -11190,7 +11224,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 4
+      "fileCount": 5
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -11225,7 +11259,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 25
+      "fileCount": 26
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -11323,7 +11357,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 6
+      "fileCount": 7
     },
     {
       "id": "packages/ui-core/vitest.config.ts",
@@ -11656,6 +11690,7 @@
       "packages/governance/src/server/application/use-cases/queries/__tests__/get-rule.use-case.test.ts",
       "packages/governance/src/server/application/use-cases/queries/__tests__/list-rules.use-case.test.ts",
       "packages/governance/src/server/application/use-cases/queries/__tests__/search-rules.use-case.test.ts",
+      "packages/governance/src/server/domain/aggregates/__tests__/rule-migration-characterization.spec.ts",
       "packages/governance/src/server/domain/aggregates/__tests__/rule.test.ts",
       "packages/governance/src/server/domain/entities/__tests__/rule-revision.test.ts",
       "packages/governance/src/server/domain/value-objects/__tests__/governance-enums.spec.ts",
@@ -11931,13 +11966,13 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1024,
+    "unit": 1027,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,
     "boundary-main": 6,
     "e2e": 60,
     "perf": 1,
-    "governance": 50
+    "governance": 51
   }
 }

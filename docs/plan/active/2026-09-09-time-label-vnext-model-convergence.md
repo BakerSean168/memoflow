@@ -15,7 +15,7 @@ updated: 2026-09-09T00:00:00+08:00
 
 > **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive migration gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
 
-**状态：ACTIVE / design frozen, implementation not started**
+**状态：ACTIVE / implementation started**
 **设计分支：** `docs/time-label-vnext-model-convergence`
 **目标 ADR：** ADR-100～103
 **关联 ADR：** ADR-037、ADR-054、ADR-072、ADR-076～083、ADR-088、ADR-093、ADR-098
@@ -108,7 +108,7 @@ Goal/Task/Routine/...
 
 ### TIME-1201 — Characterize host-local drift and DST semantics
 
-**状态：PLANNED**
+**状态：DONE（2026-09-09）**
 
 **Goal:** 在改 Time API 前，先把当前 timezone 行为和目标 invariant 做成可失败 fixture。
 
@@ -136,6 +136,15 @@ Goal/Task/Routine/...
 **Acceptance:** 能清楚证明 host TZ 改变目前哪些结果，并有目标 invariant tests。
 
 **Dependencies:** FOUNDATION-1001。
+
+**Closure evidence:**
+
+- new `host-timezone-characterization.spec.ts` proves legacy Calendar drift under process `TZ`;
+- explicit Asia/Tokyo wall-clock conversion is host-independent;
+- New York spring gap is frozen as shift-forward and fall overlap as earlier occurrence;
+- locale is characterized as currently ignored by date/dateTime engine formatting, while `weekStartsOn` is honored;
+- existing recurrence conformance protects Tokyo/New York DST behavior;
+- compatibility inventory records `defaultTime`, `Instant | number` and JS `Date` surfaces for TIME-1202..1206 retirement.
 
 ---
 
@@ -438,12 +447,13 @@ Time 与 Label 两条 lane 可以高度并行；共享冲突主要在 contracts 
 
 ```text
 FOUNDATION-1001 DONE — docs only
-TIME-1201..1206 PLANNED
+TIME-1201 DONE — executable characterization
+TIME-1202..1206 PLANNED
 LABEL-1301..1305 PLANNED
 FOUNDATION-1401 PLANNED
 ```
 
-此状态不表示任何 Time/Label vNext production code 已实施。
+Time lane 已进入实施期；当前 production semantics 尚未切换，TIME-1201 只增加可执行 characterization 与迁移证据。
 
 ## 8. Definition of Done
 
