@@ -13,12 +13,27 @@ import {
   startOfDay as dfStartOfDay,
   startOfWeek as dfStartOfWeek,
 } from 'date-fns';
+import { TZDateMini } from '@date-fns/tz';
 import type { Hm, Instant, Ymd } from '@memoflow/contracts/primitives';
-import type { TimeEngine, TimeStyleCalendar, TimeStyleDisplay } from '../types';
+import type { TimeEngine, TimeStyleCalendar, TimeStyleDisplay, TimeZoneId } from '../types';
 import { asHm, asInstant, asYmd, isHmShape, isYmdShape } from '../codec/brand';
 
 function toDate(instant: Instant): Date {
   return new Date(instant);
+}
+
+/**
+ * Date-fns fixed-pattern/chart/export escape hatch. TZDateMini is deliberately
+ * kept inside the engine so date-fns receives the explicit context zone
+ * without leaking @date-fns/tz into product contracts. The MemoFlow callers
+ * currently use numeric date/time fields, `MMM d`, and `X`/`x` offsets; named
+ * human presentation belongs to the Intl formatters instead.
+ */
+function toPatternDate(
+  instant: Instant,
+  timeZone: TimeZoneId,
+): InstanceType<typeof TZDateMini> {
+  return new TZDateMini(instant, timeZone);
 }
 
 function densityToDateFnsPattern(
@@ -76,8 +91,8 @@ export function createDateFnsEngine(): TimeEngine {
       return dfFormat(d, densityToDateFnsPattern(density));
     },
 
-    formatPattern(instant: Instant, pattern: string): string {
-      const d = toDate(instant);
+    formatPattern(instant: Instant, pattern: string, timeZone: TimeZoneId): string {
+      const d = toPatternDate(instant, timeZone);
       if (!isValid(d)) return '';
       return dfFormat(d, pattern);
     },

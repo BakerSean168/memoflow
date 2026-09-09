@@ -18,8 +18,9 @@ export function adaptLegacyTimeStyle(
     }),
     presentation: {
       locale: style.locale,
+      dateStyle: style.dateStyle,
+      timeStyle: style.timeStyle,
       empty: { ...style.empty },
-      display: { ...style.display },
       relative: { ...style.relative },
       duration: { ...style.duration },
     },
@@ -40,6 +41,15 @@ export function composeLegacyTimeStyle(
 ): TimeStyle {
   return {
     ...presentation,
+    display: {
+      date: presentation.dateStyle,
+      dateTime: presentation.dateStyle,
+      hm: presentation.timeStyle === '12h' ? 'h:mm a' : 'HH:mm',
+      periodDay: 'EEEE, yyyy MMMM d',
+      periodMonth: 'yyyy MMMM',
+      periodWeekDay: 'EEEE',
+      chartMonthDay: 'MMM d',
+    },
     timeZone: options?.timeZonePolicy ?? context.timeZone,
     calendar: {
       dayBoundary: options?.dayBoundary ?? 'local-midnight',

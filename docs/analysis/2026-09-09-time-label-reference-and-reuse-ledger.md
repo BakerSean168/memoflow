@@ -22,6 +22,7 @@ updated: 2026-09-09T00:00:00+08:00
 | ---------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------- |
 | date arithmetic              | **REUSE date-fns**                                                    | 只通过 Time engine/adapter；业务不得 direct import             |
 | locale/timezone presentation | **REUSE Intl.DateTimeFormat / RelativeTimeFormat**                    | Product Style/Context 由 MemoFlow 定义                         |
+| date-fns timezone adapter    | **REUSE `@date-fns/tz` `TZDateMini`**                                 | fixed chart/export pattern engine only；third-party type不外泄 |
 | UI calendar date values      | **REUSE `@internationalized/date` where current UI adapter needs it** | UI adapter boundary only                                       |
 | recurrence                   | **REUSE rrule 2.8.1**                                                 | `RecurrenceEnginePort` terminates third-party types            |
 | timezone registry            | **REUSE platform Intl IANA support**                                  | MemoFlow validates/brands `TimeZoneId`;不自建 tzdb             |
@@ -35,6 +36,7 @@ updated: 2026-09-09T00:00:00+08:00
 - 不自研 tz database；
 - 不自研 RRULE parser；
 - 不把 date-fns re-export 当产品 API；
+- 不自研 Date/TZDate 仿真实现；
 - 不引入 Moment/Day.js 与现有体系并行；
 - 不要求 Temporal 才能完成本轮收敛。
 

@@ -48,9 +48,13 @@ export interface TimeStyleEmpty {
   unknown: string;
 }
 
+export type TimeDateStyle = 'short' | 'medium' | 'long';
+export type TimeHourStyle = '12h' | '24h';
+
+/** Legacy pre-vNext display/pattern bag. Canonical presentation uses dateStyle/timeStyle. */
 export interface TimeStyleDisplay {
-  date: 'short' | 'medium' | 'long';
-  dateTime: 'short' | 'medium' | 'long';
+  date: TimeDateStyle;
+  dateTime: TimeDateStyle;
   /** Pattern for format.hm — product default HH:mm */
   hm: string;
   /** Named calendar chrome slots (P6) — date-fns patterns */
@@ -78,16 +82,18 @@ export interface TimeStyleDuration {
 /** Canonical presentation-only time preferences. */
 export interface TimePresentationStyle {
   locale: LocaleId;
+  dateStyle: TimeDateStyle;
+  timeStyle: TimeHourStyle;
   empty: TimeStyleEmpty;
-  display: TimeStyleDisplay;
   relative: TimeStyleRelative;
   duration: TimeStyleDuration;
 }
 
 export type PartialTimePresentationStyle = {
   locale?: LocaleId;
+  dateStyle?: TimeDateStyle;
+  timeStyle?: TimeHourStyle;
   empty?: Partial<TimeStyleEmpty>;
-  display?: Partial<TimeStyleDisplay>;
   relative?: Partial<TimeStyleRelative>;
   duration?: Partial<TimeStyleDuration>;
 };
@@ -98,12 +104,15 @@ export type PartialTimePresentationStyle = {
  * @deprecated Canonical callers use `TimeContext` + `TimePresentationStyle`.
  */
 export interface TimeStyle extends TimePresentationStyle {
+  /** @deprecated Legacy pattern bag; canonical presentation does not expose format tokens. */
+  display: TimeStyleDisplay;
   timeZone: TimeZonePolicy;
   calendar: TimeStyleCalendar;
 }
 
 /** @deprecated Canonical callers use `TimeContext` + `PartialTimePresentationStyle`. */
 export type PartialTimeStyle = PartialTimePresentationStyle & {
+  display?: Partial<TimeStyleDisplay>;
   timeZone?: TimeZonePolicy;
   calendar?: Partial<TimeStyleCalendar>;
 };
@@ -116,8 +125,8 @@ export interface TimeEngine {
   formatHm(instant: Instant, pattern: string): string;
   formatDate(instant: Instant, locale: string, density: TimeStyleDisplay['date']): string;
   formatDateTime(instant: Instant, locale: string, density: TimeStyleDisplay['dateTime']): string;
-  /** Arbitrary date-fns-compatible pattern (engine-only; prefer named format.*). */
-  formatPattern(instant: Instant, pattern: string): string;
+  /** Registered fixed chart/export pattern (engine-only; prefer named format.*). */
+  formatPattern(instant: Instant, pattern: string, timeZone: TimeZoneId): string;
   toYmd(instant: Instant): Ymd;
   fromYmdStart(ymd: Ymd): Instant;
   parseYmd(raw: string): Ymd | null;

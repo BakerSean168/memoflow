@@ -9,13 +9,14 @@ TimeContext
 
 TimePresentationStyle
 ├── locale
+├── dateStyle: short | medium | long
+├── timeStyle: 12h | 24h
 ├── empty
-├── display
 ├── relative
 └── duration
 ```
 
-The old mixed `TimeStyle` remains only as a bounded compatibility projection while TIME-1203..1206 migrate existing callers.
+The old mixed `TimeStyle` remains only as deletion debt while TIME-1205/1206 switch current callers and remove the legacy surface. ADR-111 does not require old-client or old-data compatibility.
 
 ## Canonical construction
 
@@ -23,7 +24,12 @@ The old mixed `TimeStyle` remains only as a bounded compatibility projection whi
 const context = createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 });
 const time = createTimeFacade({
   context,
-  presentation: { locale: 'en-US', empty: { display: 'N/A' } },
+  presentation: {
+    locale: 'en-US',
+    dateStyle: 'medium',
+    timeStyle: '24h',
+    empty: { display: 'N/A' },
+  },
 });
 ```
 
@@ -31,15 +37,15 @@ Untrusted time-zone strings cross the boundary through `parseTimeZoneId`, `requi
 
 ## Presentation fields
 
-| Path                        | Effect                                                             |
-| --------------------------- | ------------------------------------------------------------------ |
-| `empty.display`             | `format.hm/date/dateTime/relative(null)` and list empty-time cells |
-| `empty.input`               | Form date/time empty string                                        |
-| `empty.unknown`             | Unparseable display                                                |
-| `display.hm`                | `format.hm` pattern (default `HH:mm`)                              |
-| `display.date` / `dateTime` | Density: short / medium / long                                     |
-| `locale`                    | Intl + relative                                                    |
-| `relative.maxAgeMs`         | Beyond → absolute `dateTime`                                       |
+| Path                | Effect                                                                |
+| ------------------- | --------------------------------------------------------------------- |
+| `locale`            | `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` locale              |
+| `dateStyle`         | semantic date density: `short` / `medium` / `long`                    |
+| `timeStyle`         | explicit `12h` / `24h`; 24-hour presentation uses `h23`               |
+| `empty.display`     | `format.hm/date/dateTime/relative(null)` and list empty-time cells    |
+| `empty.input`       | Form date/time empty string                                           |
+| `empty.unknown`     | Unknown / unparseable display                                         |
+| `relative.maxAgeMs` | Beyond → the same locale/timezone-aware absolute `dateTime` formatter |
 
 ## Semantic priority
 
@@ -50,9 +56,9 @@ canonical TimeContext
       > DEFAULT_TIME_PRESENTATION_STYLE / DEFAULT_TIME_STYLE compatibility defaults
 ```
 
-Use `withContext(...)` for product timezone/week-start changes and `withPresentation(...)` for locale/display changes. `withStyle(...)` exists only for migration compatibility.
+Use `withContext(...)` for product timezone/week-start changes and `withPresentation(...)` for locale/date/time display changes. `withStyle(...)` is legacy deletion debt for TIME-1206.
 
-Domain code must **not** read UI locale for business rules. Calendar timezone behavior is migrated in TIME-1203 and Format timezone/locale behavior in TIME-1204; TIME-1202 establishes the ownership split without silently changing existing host-local calendar behavior.
+Domain code must **not** read UI locale for business rules. TIME-1203 made Calendar/Input timezone-aware; TIME-1204 made human presentation locale/timezone-aware. TIME-1205/1206 finish current-consumer cutover and delete the remaining legacy surface.
 
 ## Third-party conversion boundaries
 
@@ -60,7 +66,9 @@ Domain code must **not** read UI locale for business rules. Calendar timezone be
 
 - the internal UI adapter converts `Ymd/Hm` to and from `@internationalized/date` `CalendarDate/Time` values;
 - recurrence consumers use MemoFlow-owned `RecurrenceSchedule` / `RecurrenceEnginePort`; `rrule` types stop inside the recurrence adapter;
-- feature contracts under `@memoflow/contracts` must not import `rrule`, `ical.js`, or `@internationalized/date`;
+- fixed chart/export patterns stay inside the date-fns engine and use official `@date-fns/tz` `TZDateMini` for explicit-zone formatting;
+- ordinary product UI uses semantic Intl formatters and does not persist date-fns pattern tokens;
+- feature contracts under `@memoflow/contracts` must not import `rrule`, `ical.js`, `@internationalized/date`, or `@date-fns/tz`;
 - recurrence receives a branded, resolved IANA zone through the Time boundary;
 - the package does not import Setting: Setting will supply `TimeContext` through an application adapter.
 

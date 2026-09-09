@@ -40,6 +40,9 @@ RecurrenceEnginePort
 - branded `TimeZoneId`、`TimeZoneSource` 与 validated `TimeContext` boundary；
 - `TimePresentationStyle` 已建立；legacy `TimeStyle` adapter 是 ADR-111 下待立即删除的实现残留，不再承担兼容职责；
 - `TimeFacade.context/presentation/withContext/withPresentation`；
+- locale/timezone-aware `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` presentation；
+- semantic `dateStyle: short|medium|long` 与 `timeStyle: 12h|24h`；
+- fixed chart/export pattern 通过内部 date-fns engine + 官方 `@date-fns/tz` `TZDateMini` 处理显式 IANA zone；
 - `RecurrenceEnginePort + rrule` adapter；
 - recurrence conformance / fixed clock / boundary tests；
 - direct date-fns import治理。
@@ -62,7 +65,7 @@ Instant | number canonical APIs
   -> Instant canonical + boundary compatibility
 ```
 
-TIME-1201/1202/1203 已实施；canonical Calendar/Input/Codec 已使用显式 TimeContext 与共享 wall-clock resolver。Format 的 locale/timezone-aware 展示仍由 TIME-1204 收敛，跨模块 UserTimeContext 注入与 legacy Date/number surface 由 TIME-1205/1206 继续删除。
+TIME-1201/1202/1203/1204 已实施；canonical Calendar/Input/Codec 已使用显式 TimeContext 与共享 wall-clock resolver，Format 也已经按 locale + IANA timezone + semantic date/time style 渲染。跨模块 UserTimeContext 注入与 legacy Date/number/TimeStyle surface 由 TIME-1205/1206 继续直接删除。
 
 ## 4. Primary consumers
 

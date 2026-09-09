@@ -12,7 +12,7 @@ export const WALL_CLOCK_RESOLUTION_POLICY = Object.freeze({
 
 export type WallClockResolutionPolicy = typeof WALL_CLOCK_RESOLUTION_POLICY;
 
-interface ZonedParts {
+export interface ZonedDateTimeParts {
   year: number;
   month: number;
   day: number;
@@ -42,7 +42,7 @@ function getFormatter(timeZone: string): Intl.DateTimeFormat {
   return formatter;
 }
 
-function getZonedParts(instantMs: number, timeZone: string): ZonedParts | null {
+function getZonedParts(instantMs: number, timeZone: string): ZonedDateTimeParts | null {
   try {
     const bag: Record<string, string> = {};
     for (const part of getFormatter(timeZone).formatToParts(new Date(instantMs))) {
@@ -69,6 +69,13 @@ function getZonedParts(instantMs: number, timeZone: string): ZonedParts | null {
   } catch {
     return null;
   }
+}
+
+/** Internal presentation primitive: zoned calendar fields for an Instant. */
+export function getZonedDateTimeParts(instant: Instant, timeZone: TimeZoneId): ZonedDateTimeParts {
+  const parts = getZonedParts(instant, timeZone);
+  if (parts == null) throw new TypeError(`Unable to resolve Instant in timeZone=${timeZone}`);
+  return parts;
 }
 
 function parseYmdParts(ymd: Ymd): { year: number; month: number; day: number } | null {
@@ -100,7 +107,7 @@ export function addYmdDays(ymd: Ymd, amount: number): Ymd {
   return ymdFromParts(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
 }
 
-function resolveWallClockParts(parts: ZonedParts, timeZone: string): Instant | null {
+function resolveWallClockParts(parts: ZonedDateTimeParts, timeZone: string): Instant | null {
   const desiredUtc = Date.UTC(
     parts.year,
     parts.month - 1,

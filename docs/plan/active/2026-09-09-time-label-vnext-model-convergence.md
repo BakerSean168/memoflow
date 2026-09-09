@@ -245,7 +245,7 @@ Ymd+Hm -> Instant
 
 ### TIME-1204 — Make Format locale/timezone aware
 
-**状态：PLANNED**
+**状态：DONE**
 
 **Goal:** 兑现 PresentationStyle 的 locale/timezone contract。
 
@@ -263,6 +263,18 @@ Ymd+Hm -> Instant
 **Acceptance:** zh-CN/en-US + timezone fixtures是真实行为差异而非 ignored params。
 
 **Dependencies:** TIME-1202, TIME-1203。
+
+**Closure evidence:**
+
+- canonical `format.date/dateTime/hm/relative/ymdDisplay/slot` now uses `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` with explicit `TimeContext.timeZone` and `TimePresentationStyle.locale`;
+- `TimePresentationStyle` now owns semantic `dateStyle: short|medium|long` and `timeStyle: 12h|24h`; the legacy date-fns pattern bag remains only inside deprecated `TimeStyle` for TIME-1206 deletion;
+- 24-hour rendering uses explicit `h23`; Tokyo / Los Angeles fixtures prove context-zone display differences, and zh-CN / en-US fixtures prove locale is no longer ignored;
+- `Ymd` display/validation is host-independent, including a Pacific/Apia skipped-calendar-day fixture;
+- named calendar slots are semantic Intl presets rather than preference-stored format tokens;
+- the fixed chart/export pattern escape hatch is isolated behind `TimeEngine` and now reuses official `@date-fns/tz@1.5.0` `TZDateMini`; no timezone type leaks into `@memoflow/contracts`;
+- all current production fixed patterns (`yyyy-MM-dd HH:mm`, `MM-dd`, `MM-dd HH:mm`, `yyyy-MM-dd'T'HH:mm`, `MMM d`) are covered by a host-timezone-independence fixture; an explicit offset fixture also covers a host DST gap;
+- independent reviewer verification with Nx cache disabled: Time 10 files / 56 tests PASS, Time typecheck PASS, Time lint PASS; focused app-vue Product Time/Schedule 5 files / 15 tests PASS;
+- Codex implementation verification after the reviewer repair: app-react typecheck PASS, app-vue typecheck PASS, Time build PASS.
 
 ---
 
@@ -480,12 +492,13 @@ FOUNDATION-1001 DONE — docs only
 TIME-1201 DONE — executable characterization
 TIME-1202 DONE — canonical context/presentation split
 TIME-1203 DONE — timezone-aware Calendar/Input + shared wall-clock resolver
-TIME-1204..1206 PLANNED
+TIME-1204 DONE — locale/timezone-aware Intl presentation + official date-fns/tz pattern adapter
+TIME-1205..1206 PLANNED
 LABEL-1301..1305 PLANNED
 FOUNDATION-1401 PLANNED
 ```
 
-Time lane 已进入实施期；TIME-1203 已把 canonical Calendar/Input 切到显式 TimeContext。剩余 host-local/static consumer fallback 由 TIME-1204/1205/1206 继续删除。
+Time lane 已进入实施期；TIME-1203 已把 canonical Calendar/Input 切到显式 TimeContext，TIME-1204 已让 human-visible Format 真正消费 locale/timezone/dateStyle/timeStyle。剩余跨模块 host-local/static consumer fallback 与 legacy Date/number/TimeStyle surface 由 TIME-1205/1206 直接删除。
 
 ## 8. Definition of Done
 

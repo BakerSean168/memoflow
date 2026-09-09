@@ -31,14 +31,18 @@ describe('TIME-1201 host-timezone characterization', () => {
     expect(utcYmd).not.toBe(tokyoYmd);
   });
 
-  it('documents that locale is currently presentation metadata ignored by date/dateTime engine formatting', () => {
+  it('proves locale now changes canonical date presentation', () => {
     process.env.TZ = 'UTC';
     const instant = asInstant(Date.parse('2026-01-07T12:00:00.000Z'));
-    const zh = createTimeFacade({ style: { locale: 'zh-CN' } }).format.date(instant);
-    const en = createTimeFacade({ style: { locale: 'en-US' } }).format.date(instant);
+    const zh = createTimeFacade({ presentation: { locale: 'zh-CN' } }).format.date(instant);
+    const en = createTimeFacade({ presentation: { locale: 'en-US' } }).format.date(instant);
 
-    expect(zh).toBe('2026-01-07');
-    expect(en).toBe(zh);
+    expect(zh).toContain('2026');
+    expect(zh).toContain('1');
+    expect(zh).toContain('7');
+    expect(en).toContain('Jan');
+    expect(en).toContain('2026');
+    expect(en).not.toBe(zh);
   });
 
   it('honors weekStartsOn even while day boundaries are still host-local', () => {

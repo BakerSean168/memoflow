@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   createFixedClock,
+  createTimeContext,
   createTimeFacade,
   DEFAULT_TIME_STYLE,
   asInstant,
@@ -23,12 +24,12 @@ describe('@memoflow/time facade', () => {
     expect(time.clock.now()).toBe(time.now());
   });
 
-  it('format.hm uses Style pattern and empty.display for null', () => {
+  it('format.hm uses canonical hour style and empty.display for null', () => {
     const time = createTimeFacade({
       clock: createFixedClock(localNoon),
       style: {
         empty: { display: 'EMPTY' },
-        display: { hm: 'HH:mm' },
+        timeStyle: '24h',
       },
     });
     expect(time.format.hm(null)).toBe('EMPTY');
@@ -53,9 +54,7 @@ describe('@memoflow/time facade', () => {
     // Clock must not advance / substitute now on invalid
     expect(time.now()).toBe(before);
 
-    expect(() => time.codec.fromTransfer(Number.NaN, { onInvalid: 'throw' })).toThrow(
-      TypeError,
-    );
+    expect(() => time.codec.fromTransfer(Number.NaN, { onInvalid: 'throw' })).toThrow(TypeError);
 
     const ymd = time.codec.parseYmd('2026-07-26');
     expect(ymd).toBe(asYmd('2026-07-26'));
@@ -112,7 +111,6 @@ describe('@memoflow/time facade', () => {
   });
 });
 
-
 describe('empty catalog (P1)', () => {
   it('resolveEmptyLabel yields distinct kinds and format.date honors override', () => {
     expect(resolveEmptyLabel('emdash')).toBe(DEFAULT_EMPTY_LITERALS.emdash);
@@ -134,9 +132,9 @@ describe('empty catalog (P1)', () => {
     });
     expect(time.format.date(null)).toBe('N/A');
     expect(time.format.date(undefined)).toBe('N/A');
-    expect(
-      time.format.date(null, { empty: { display: resolveEmptyLabel('notSet') } }),
-    ).toBe('Not set');
+    expect(time.format.date(null, { empty: { display: resolveEmptyLabel('notSet') } })).toBe(
+      'Not set',
+    );
   });
 });
 
@@ -163,7 +161,6 @@ describe('TimeStyle preference + empty.display single point (W8)', () => {
   });
 });
 
-
 describe('duration + display slots (P4/P6)', () => {
   it('splitDurationMinutes / durationMinutes arithmetic sole', () => {
     const time = createTimeFacade({ style: { duration: { zero: '0m', style: 'narrow' } } });
@@ -179,21 +176,15 @@ describe('duration + display slots (P4/P6)', () => {
     expect(time.format.durationMs(3_600_000)).toMatch(/1h/);
   });
 
-  it('format.slot uses Style.display named patterns', () => {
-    const localNoon = new Date(2026, 6, 26, 14, 5, 0).getTime();
+  it('format.slot uses named semantic Intl slots rather than persisted format tokens', () => {
+    const instant = asInstant(Date.parse('2026-07-26T14:05:00.000Z'));
     const time = createTimeFacade({
-      clock: createFixedClock(localNoon),
-      style: {
-        display: {
-          periodDay: 'yyyy-MM-dd',
-          periodMonth: 'yyyy-MM',
-          chartMonthDay: 'MM-dd',
-        },
-      },
+      context: createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      presentation: { locale: 'en-US' },
     });
-    expect(time.format.slot('periodDay', localNoon)).toBe('2026-07-26');
-    expect(time.format.slot('periodMonth', localNoon)).toBe('2026-07');
-    expect(time.format.slot('chartMonthDay', localNoon)).toBe('07-26');
+    expect(time.format.slot('periodDay', instant)).toBe('Sunday, July 26, 2026');
+    expect(time.format.slot('periodMonth', instant)).toBe('July 2026');
+    expect(time.format.slot('chartMonthDay', instant)).toBe('Jul 26');
     expect(time.format.slot('periodDay', null)).toBe(DEFAULT_TIME_STYLE.empty.display);
   });
 });
@@ -210,14 +201,15 @@ describe('IANA timeZone policy + engine seam (P11)', () => {
     expect(combined).toBe(Date.UTC(2026, 6, 26, 14, 5, 0));
   });
 
-  it('withEngine swaps adapter without changing Style entry', () => {
+  it('withEngine only affects the explicit fixed-pattern escape hatch', () => {
     const base = createTimeFacade({ style: { empty: { display: 'X' } } });
     const double = {
       ...base.engine,
-      formatHm: () => '99:99',
+      formatPattern: () => 'PATTERN',
     };
     const swapped = base.withEngine(double);
     expect(swapped.style.empty.display).toBe('X');
-    expect(swapped.format.hm(Date.now())).toBe('99:99');
+    expect(swapped.format.pattern(Date.now(), 'yyyy-MM-dd')).toBe('PATTERN');
+    expect(swapped.format.hm(Date.now())).not.toBe('PATTERN');
   });
 });
