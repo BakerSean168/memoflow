@@ -10,12 +10,12 @@ tags:
   - vnext
 description: ADR-095 - User Preferences 按 namespace 持久化、revision/CAS、PowerSync parity、versioned migration 与 Data Portability 边界
 created: 2026-09-08T23:26:00+08:00
-updated: 2026-09-08T23:26:00+08:00
+updated: 2026-09-09T12:00:00+08:00
 ---
 
 # ADR-095: Preference Persistence、Sync、Migration 与 Portability
 
-**状态：** 已采纳（待实施）
+**状态：** 已采纳（SETTING-9202 foundation 已实施；consumer cutover 待 SETTING-9203）
 **日期：** 2026-09-08
 **影响范围：** Setting/Preferences、Database、PowerSync、HTTP/IPC、Data Portability、Account、Notification、Desktop
 

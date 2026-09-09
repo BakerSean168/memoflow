@@ -220,6 +220,26 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/powersync/user-preference-crud-executor.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/powersync/user-preference-sync.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/outbox/prisma-outbox-writer.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5059,6 +5079,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/setting/preferences/canonical.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/setting/preferences/product-feature-map-public.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5148,6 +5176,14 @@
     },
     {
       "path": "packages/contracts/src/primitives/command.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/primitives/time-zone-id.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -9361,6 +9397,36 @@
       ]
     },
     {
+      "path": "packages/setting/src/server/infrastructure/adapters/powersync/user-preference-powersync.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/setting/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/setting/src/server/infrastructure/adapters/prisma/user-preference-prisma.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/setting/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/setting/src/server/preferences/user-preference-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/setting/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10808,7 +10874,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 65
+      "fileCount": 67
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -10941,7 +11007,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 18
+      "fileCount": 21
     },
     {
       "id": "packages/task/vitest.config.ts",
@@ -11186,7 +11252,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 65
+      "fileCount": 67
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -11249,7 +11315,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 70
+      "fileCount": 72
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11375,7 +11441,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 18
+      "fileCount": 21
     },
     {
       "id": "packages/task/vitest.config.ts",
@@ -11432,6 +11498,8 @@
       "apps/api/src/modules/powersync/powersync-schema-result-envelope.surface.spec.ts",
       "apps/api/src/modules/powersync/snapshot-builder.spec.ts",
       "apps/api/src/modules/powersync/snapshot-storage.spec.ts",
+      "apps/api/src/modules/powersync/user-preference-crud-executor.spec.ts",
+      "apps/api/src/modules/powersync/user-preference-sync.surface.spec.ts",
       "apps/api/src/outbox/prisma-outbox-writer.spec.ts",
       "apps/api/src/runtime/compose-account.spec.ts",
       "apps/api/src/runtime/compose-account.surface.spec.ts",
@@ -11920,6 +11988,9 @@
       "packages/setting/src/server/domain/value-objects/__tests__/setting-id.spec.ts",
       "packages/setting/src/server/infrastructure/__tests__/setting-module-partial-start.spec.ts",
       "packages/setting/src/server/infrastructure/__tests__/setting-repositories.surface.spec.ts",
+      "packages/setting/src/server/infrastructure/adapters/powersync/user-preference-powersync.repository.spec.ts",
+      "packages/setting/src/server/infrastructure/adapters/prisma/user-preference-prisma.repository.spec.ts",
+      "packages/setting/src/server/preferences/user-preference-service.spec.ts",
       "packages/task/src/api/module-lifecycle.spec.ts",
       "packages/task/src/api/routes/get-first-query-value-dual.surface.spec.ts",
       "packages/task/src/api/routes/task-occurrence.routes.spec.ts",
@@ -11998,7 +12069,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1030,
+    "unit": 1037,
     "integration": 34,
     "smoke": 3,
     "boundary-ipc": 9,

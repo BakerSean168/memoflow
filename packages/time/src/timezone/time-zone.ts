@@ -1,4 +1,11 @@
+import { requireTimeZoneId } from '@memoflow/contracts/primitives';
 import type { TimeContext, TimeZoneId, TimeZonePolicy, Weekday } from '../types';
+
+export {
+  isIanaTimeZoneId,
+  parseTimeZoneId,
+  requireTimeZoneId,
+} from '@memoflow/contracts/primitives';
 
 /**
  * Explicit input source for the host/user IANA zone.
@@ -6,28 +13,6 @@ import type { TimeContext, TimeZoneId, TimeZonePolicy, Weekday } from '../types'
  */
 export interface TimeZoneSource {
   currentTimeZoneId(): TimeZoneId;
-}
-
-export function isIanaTimeZoneId(value: string): value is TimeZoneId {
-  if (value.length === 0 || value === 'local') return false;
-  try {
-    new Intl.DateTimeFormat('en-US', { timeZone: value }).format(0);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/** Parses an untrusted string into the canonical branded time-zone id. */
-export function parseTimeZoneId(value: string): TimeZoneId | null {
-  return isIanaTimeZoneId(value) ? value : null;
-}
-
-/** Validates and returns the canonical branded time-zone id. */
-export function requireTimeZoneId(value: string): TimeZoneId {
-  const parsed = parseTimeZoneId(value);
-  if (parsed == null) throw new TypeError(`Invalid IANA time zone: ${value}`);
-  return parsed;
 }
 
 function isWeekday(value: number): value is Weekday {

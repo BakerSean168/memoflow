@@ -10,11 +10,19 @@ function getColumnType(tableName: keyof typeof PowerSyncAppSchema.props, columnN
 
 describe('PowerSyncAppSchema', () => {
   it('keeps the key sync tables in the exported schema', () => {
+    expect(PowerSyncAppSchema.props).toHaveProperty('user_preference_records');
     expect(PowerSyncAppSchema.props).toHaveProperty('task_templates');
     expect(PowerSyncAppSchema.props).toHaveProperty('schedule_tasks');
     expect(PowerSyncAppSchema.props).toHaveProperty('notifications');
     expect(PowerSyncAppSchema.props).toHaveProperty('repositories');
     expect(PowerSyncAppSchema.tables).toHaveLength(Object.keys(PowerSyncAppSchema.props).length);
+  });
+
+  it('keeps canonical preference namespace rows as independent typed sync units', () => {
+    expect(getColumnType('user_preference_records', 'identity_id')).toBe('TEXT');
+    expect(getColumnType('user_preference_records', 'namespace')).toBe('TEXT');
+    expect(getColumnType('user_preference_records', 'payload')).toBe('TEXT');
+    expect(getColumnType('user_preference_records', 'revision')).toBe('INTEGER');
   });
 
   it('preserves critical task relation and schedule column types', () => {

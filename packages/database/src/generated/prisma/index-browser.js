@@ -1467,6 +1467,16 @@ exports.Prisma.UserSettingScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.UserPreferenceRecordScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  namespace: 'namespace',
+  payload: 'payload',
+  revision: 'revision',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.TaskPlanScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1732,6 +1742,7 @@ exports.Prisma.ModelName = {
   ScheduleEventConsumerReceipt: 'ScheduleEventConsumerReceipt',
   ScheduleEventDeliveryLog: 'ScheduleEventDeliveryLog',
   UserSetting: 'UserSetting',
+  UserPreferenceRecord: 'UserPreferenceRecord',
   TaskPlan: 'TaskPlan',
   TaskOccurrence: 'TaskOccurrence',
   TaskGoalOutbox: 'TaskGoalOutbox',

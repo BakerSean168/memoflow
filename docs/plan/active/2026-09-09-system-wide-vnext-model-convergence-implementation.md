@@ -181,7 +181,7 @@ Order:
 1. TIME-1201 **DONE** — host drift / IANA / DST / locale / week-start + recurrence characterization frozen;
 2. TIME-1202 **DONE** — branded `TimeZoneId`, `TimeContext`, `TimePresentationStyle`; the temporary legacy adapter is now deletion debt under ADR-111;
 3. TIME-1203 **DONE** — timezone-aware Calendar/Input + shared wall-clock resolver;
-4. TIME-1204 locale/timezone-aware Format;
+4. TIME-1204 **DONE** — locale/timezone-aware Format + official `@date-fns/tz` fixed-pattern adapter;
 5. TIME-1205 atomically switch cross-module consumers;
 6. TIME-1206 remove raw number/Date compatibility and host-local fallbacks.
 
@@ -197,7 +197,11 @@ Order:
 
 ### SETTING-9202 — Canonical preference namespace foundation
 
-Execute existing Setting plan foundation before Account settings deletion.
+**状态：DONE — 2026-09-09**
+
+Canonical `presentation | regional` contracts, portable `TimeZoneId`, per-namespace Prisma/PowerSync rows, real revision CAS and creation-race recovery are implemented. Current transports intentionally remain on legacy `UserSetting` until the immediate coordinated cutover; there is no backfill/dual-read/dual-write compatibility lane.
+
+**Next coordination gate:** execute `SETTING-9203` together with `TIME-1205` consumer cutover before retiring Account/Setting legacy preference truth.
 
 ### ACC-1402 — Introduce AccountView + CloudIdentitySummary composition
 

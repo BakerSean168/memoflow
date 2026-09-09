@@ -14,6 +14,7 @@
 export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
   accounts: new Set(['profile', 'settings']),
   user_settings: new Set(['preferences']),
+  user_preference_records: new Set(['payload']),
   goals: new Set(['tags']),
   repositories: new Set(['config', 'stats']),
   folders: new Set(['metadata']),

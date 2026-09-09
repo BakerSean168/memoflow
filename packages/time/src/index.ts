@@ -74,6 +74,7 @@ export {
   requireTimeZoneId,
   resolveTimeZoneId,
 } from './timezone/time-zone';
+export { TimeZoneIdSchema } from '@memoflow/contracts/primitives';
 export { createDateFnsEngine } from './engine/date-fns-engine';
 export {
   WALL_CLOCK_RESOLUTION_POLICY,

@@ -29,5 +29,10 @@ export {
   type SettingPrismaRepositorySet,
   type SettingPowerSyncRepositorySet,
   type IUserSettingRepository,
+  createUserPreferenceService,
+  type UserPreferenceService,
+  type IUserPreferenceRepository,
+  type PreferenceMutationResult,
+  type ResetUserPreferencesResult,
 } from './server';
 export type { SettingApplicationPort } from './server';

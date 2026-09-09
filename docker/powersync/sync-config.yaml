@@ -9,6 +9,7 @@ streams:
     priority: 1
     queries:
       - SELECT * FROM user_settings WHERE identity_id = auth.user_id()
+      - SELECT * FROM user_preference_records WHERE identity_id = auth.user_id()
       - SELECT * FROM goals WHERE identity_id = auth.user_id()
       - SELECT * FROM key_results WHERE identity_id = auth.user_id()
       - SELECT * FROM goal_records WHERE identity_id = auth.user_id()

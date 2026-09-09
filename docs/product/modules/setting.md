@@ -5,12 +5,12 @@ tags:
   - setting
 description: 设置模块当前功能资产说明与 Setting vNext target-design 入口
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T23:26:00+08:00
+updated: 2026-09-09T12:00:00+08:00
 ---
 
 # 设置模块说明
 
-> **Target-design notice（2026-09-08）**：本文件描述当前实现真值。Setting vNext 已由 [ADR-092](../../architecture/adr/ADR-092-settings-hub-and-preference-ownership-boundary.md)～[ADR-095](../../architecture/adr/ADR-095-preference-persistence-sync-migration-and-portability.md) 采纳为目标设计：Settings 页面将作为多 capability composition hub；cloud User Preferences 收缩为 presentation + regional/time；Account/Notification/device/feature/consent 等回归各自 owner。实施前不得把该目标态描述成当前代码事实。详见 [current-system map](../../analysis/2026-09-08-setting-vnext-current-system-map.md)、[reference study](../../analysis/2026-09-08-setting-vnext-reference-study.md)、[product target](../setting-vnext-settings-hub.md) 与 [active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md)。
+> **vNext implementation notice（2026-09-09）**：本文继续区分“当前运行路径”和“已落地 foundation”。`SETTING-9202` 已建立 canonical `presentation | regional` contracts、`user_preference_records`、Prisma/PowerSync CAS repositories 与 application seam；但当前 Settings HTTP/IPC/UI 仍只装配 legacy `UserSetting` repository。不存在 backfill、dual-read 或 dual-write。`SETTING-9203` 才会切 current consumers 并删除旧 Account/Setting preference truth。完整目标仍见 [ADR-092](../../architecture/adr/ADR-092-settings-hub-and-preference-ownership-boundary.md)～[ADR-095](../../architecture/adr/ADR-095-preference-persistence-sync-migration-and-portability.md)、[product target](../setting-vnext-settings-hub.md) 与 [active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md)。
 
 ## 1. 当前功能定位
 
@@ -84,6 +84,8 @@ advanced
 
 ## 4. 当前持久化与同步
 
+### 4.1 当前运行路径：legacy `UserSetting`
+
 Prisma：
 
 ```text
@@ -100,6 +102,25 @@ PowerSync 也以一条 `user_settings` row + JSON string 同步。
 所有 category 因此共享整条 singleton JSON persistence/sync 粒度。
 
 当前 Aggregate 会 `version += 1`，但 Prisma `upsert` 不带 `expectedVersion` compare-and-swap，所以 version 不是实际 optimistic-concurrency fence。
+
+### 4.2 已落地但尚未切 current transport：canonical Preferences foundation
+
+`SETTING-9202` 已增加：
+
+```text
+user_preference_records
+├── identity_id
+├── namespace = presentation | regional
+├── payload
+├── revision
+└── timestamps
+```
+
+其中 `(identity_id, namespace)` 唯一，每个 namespace 是独立 persistence/sync/CAS unit。Prisma 与 PowerSync 都以 `expected revision` 作为真实 compare-and-swap fence；首次写入 revision `1`，不存在 namespace 的纯读取使用 virtual revision `0` 且不 persistence-on-read。
+
+当前 host repository set 同时暴露 legacy `userSettingRepository` 与 canonical `userPreferenceRepository`，但现有 `createSettingModule`、HTTP/IPC/UI 仍只消费前者。因此此阶段是“canonical foundation 可用、current consumers 尚未 cutover”，**不是**新旧 truth 的 dual-read/dual-write compatibility 机制。下一票 `SETTING-9203` 会直接切 consumer 并删除旧 preference truth。
+
+PowerSync 云端链路也已登记 canonical table：server sync stream 会下发 `user_preference_records`，Desktop pre-hydration 会等待该表，API upload 对这张表使用专用 revision-CAS handler 而不是 generic last-write-wins `upsert/update`。并发冲突返回 HTTP `409`，因此 foundation 已保证“冲突不静默覆盖”；当前 Settings consumer 尚未切换，所以冲突 reload/reapply 的用户交互由 `SETTING-9203` 接续。
 
 ## 5. 当前重复 truth
 

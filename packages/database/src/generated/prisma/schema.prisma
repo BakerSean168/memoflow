@@ -82,6 +82,7 @@ model Account {
   taskOccurrences                 TaskOccurrence[]
   taskStatistics                  TaskStatistic?
   userSettings                    UserSetting?
+  userPreferenceRecords           UserPreferenceRecord[]
   notifications                   Notification[]
   aiConversations                 AiConversation[]
   aiGenerationTasks               AiGenerationTask[]
@@ -2180,6 +2181,23 @@ model UserSetting {
 
   @@index([identityId])
   @@map("user_settings")
+}
+
+// Canonical Setting vNext preferences. Namespace rows are the sync/CAS unit.
+model UserPreferenceRecord {
+  id         String   @id @default(uuid())
+  identityId String   @map("identity_id")
+  namespace  String
+  payload    Json
+  revision   Int      @default(1)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@unique([identityId, namespace])
+  @@index([identityId])
+  @@map("user_preference_records")
 }
 
 // ==========================================

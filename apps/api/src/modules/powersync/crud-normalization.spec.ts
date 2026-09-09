@@ -8,6 +8,16 @@ describe('normalizeCrudData', () => {
     });
   });
 
+  it('decodes canonical preference payload JSON before Prisma persistence', () => {
+    expect(
+      normalizeCrudData('user_preference_records', {
+        payload: '{"theme":"dark","language":"zh-CN"}',
+      }),
+    ).toEqual({
+      payload: { theme: 'dark', language: 'zh-CN' },
+    });
+  });
+
   it('keeps JSON-looking text when the Prisma column is intentionally a string', () => {
     expect(normalizeCrudData('task_templates', { tags: '["work"]' })).toEqual({
       tags: '["work"]',

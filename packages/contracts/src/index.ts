@@ -38,7 +38,7 @@
 // Primitives
 // ============================================================
 export { brandedId } from './primitives';
-export type { IdentityId } from './primitives';
+export type { IdentityId, TimeZoneId } from './primitives';
 
 // ============================================================
 // Operations (W7 统一 operation timeline / replay / audit)

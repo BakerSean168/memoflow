@@ -210,7 +210,7 @@ Data Portability owner orchestration
 
 ### SETTING-9202 — Introduce canonical strict UserPreference contracts + namespace foundation
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-09 canonical foundation checkpoint**
 
 #### Goal
 
@@ -234,7 +234,7 @@ PreferenceRevisionConflict
 
 - strict Zod schemas；
 - unknown key/namespace reject；
-- `TimeZoneId` 用 `@memoflow/time` validator；
+- portable `TimeZoneId` + IANA validator/schema canonicalized in `@memoflow/contracts/primitives`; `@memoflow/time` consumes/re-exports it so contracts never depend back on Time；
 - date/time style 使用受控 enum，不接受 arbitrary format token；
 - defaults 是 pure value，不 fake UserSetting DTO；
 - repository/application port 面向 namespace/profile。
@@ -270,6 +270,20 @@ revision
 - no fake identity defaults；
 - presentation/regional rows 可独立保存；
 - stale expectedRevision 不静默覆盖。
+
+#### Closure evidence
+
+- `PreferenceNamespace` closed registry only permits `presentation | regional`; both namespace payloads and patches are strict Zod contracts, with pure UTC-backed defaults and no fake identity/entity construction path；
+- portable `TimeZoneId` + IANA validation moved to `@memoflow/contracts/primitives`, while `@memoflow/time` keeps `TimeContext`/Clock/Calendar/Format behavior and re-exports the primitive; package dependency remains one-way `time -> contracts`；
+- `UserPreferenceDocument + UserPreferenceService + IUserPreferenceRepository` form the new lightweight canonical seam; reads of absent namespaces are virtual revision `0`, while every write materializes revision `1`；
+- canonical mutation receipts/conflicts are parsed through their runtime schemas; review fixed the missing-reset edge so no revision-0 mutation receipt can escape；
+- Prisma adds `user_preference_records` with `unique(identityId, namespace)` and real `updateMany(identityId + namespace + revision)` CAS; `P2002` create races re-read the unique winner instead of overwriting it；
+- PowerSync has the same per-namespace row and `UPDATE ... WHERE identity_id + namespace + revision` fence; zero affected rows re-read latest, and insert races only resolve as `exists` when a canonical winner can actually be read；server sync rules、API CRUD normalization/table mapping 与 Desktop pre-hydration bootstrap 也已登记 `user_preference_records`；
+- canonical preference cloud uploads bypass the generic PowerSync last-write-wins `upsert/update` path: `PUT` only creates revision `1`, `PATCH` derives and enforces the previous revision through Prisma `updateMany(id + identityId + revision)`, create/update races surface explicit conflicts, and `/powersync/crud` returns HTTP `409` instead of silently overwriting. Current Desktop uploader leaves the conflicting transaction pending; conflict reload/reapply UX belongs to the immediate `SETTING-9203` consumer cutover, not this foundation ticket；
+- both persistence adapters reject create revisions other than `1` and CAS documents that do not advance exactly one revision；
+- current HTTP/IPC/UI module assembly still receives only the legacy `userSettingRepository`; the canonical repository is exposed as a separate host ingredient for `SETTING-9203`. There is no legacy backfill, fallback, mirroring or dual write in this checkpoint；
+- focused verification: canonical contract suites `7/7` PASS; Setting `21 files / 138 tests` PASS; Time `10 files / 56 tests` PASS; PowerSync schema `5/5` PASS; canonical PowerSync cloud-upload/control-plane tests `4 files / 22 tests` PASS, and the PowerSync API module + CAS/control-plane rerun is `4 files / 20 tests` PASS; Setting/Time/PowerSync/API/Desktop typechecks all PASS after the upload-CAS patch; the final provider-neutral Prisma-error boundary repair then re-passed the PowerSync API `4 files / 20 tests`, API lint and full governance; API lint PASS with 0 warnings/errors, Desktop lint PASS with 3 inherited warnings / 0 errors, Setting lint PASS with 7 inherited warnings / 0 errors; API Setting composition `7/7` and Desktop composition surface `34/34` PASS; test inventory regenerated to `1202` files；
+- full `contracts:test` still contains 11 inherited Task/Goal/docs-surface failures unrelated to this ticket; the new TimeZoneId/canonical-preference contract suites themselves are green.
 
 #### Dependencies
 
@@ -804,7 +818,7 @@ Lane D: SETTING-9206 device/local seams
 
 ```text
 SETTING-9201  DONE — docs/design package only
-SETTING-9202  PLANNED
+SETTING-9202  DONE — canonical contracts + namespace persistence/CAS foundation
 SETTING-9203  PLANNED
 SETTING-9204  PLANNED
 SETTING-9205  PLANNED
@@ -815,7 +829,7 @@ SETTING-9209  PLANNED
 SETTING-9210  PLANNED
 ```
 
-本状态不表示任何 production Setting vNext code 已实施。
+SETTING-9202 已落地 production foundation，但当前 Settings HTTP/IPC/UI 仍未切到 canonical Preferences；`SETTING-9203` 才负责 consumer cutover 与旧 Account/Setting preference truth 删除。
 
 ## 10. Definition of Done
 

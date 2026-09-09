@@ -14,13 +14,13 @@ import {
   type SettingModuleInstance,
   type SettingModuleRuntimeContribution,
 } from './index';
-import { UserSettingPrismaRepository } from './adapters/prisma';
+import { UserPreferencePrismaRepository, UserSettingPrismaRepository } from './adapters/prisma';
 import type { IUserSettingRepository } from '../domain/repositories/i-user-setting-repository';
+import type { IUserPreferenceRepository } from '../preferences';
 
 export interface CreateSettingPrismaModuleOptions {
   readonly runtimeContributions?:
-    | SettingModuleRuntimeContribution
-    | readonly SettingModuleRuntimeContribution[];
+    SettingModuleRuntimeContribution | readonly SettingModuleRuntimeContribution[];
 }
 
 /**
@@ -29,6 +29,7 @@ export interface CreateSettingPrismaModuleOptions {
  */
 export interface SettingPrismaRepositorySet {
   readonly userSettingRepository: IUserSettingRepository;
+  readonly userPreferenceRepository: IUserPreferenceRepository;
 }
 
 /**
@@ -47,6 +48,7 @@ export interface SettingPrismaRepositorySet {
 export function createSettingPrismaRepositories(db: PrismaClient): SettingPrismaRepositorySet {
   return {
     userSettingRepository: new UserSettingPrismaRepository(db),
+    userPreferenceRepository: new UserPreferencePrismaRepository(db),
   };
 }
 

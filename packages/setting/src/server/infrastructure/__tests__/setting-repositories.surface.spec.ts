@@ -12,6 +12,7 @@ import {
   type SettingPowerSyncRepositorySet,
   type SettingModuleInstance,
   type IUserSettingRepository,
+  type IUserPreferenceRepository,
 } from '../../../../src';
 
 /**
@@ -31,21 +32,29 @@ describe('setting repository factories surface', () => {
   const fakePrisma = {} as unknown as PrismaClient;
   const fakeElectronDb = {
     getOptional: async () => null,
-    execute: async () => undefined,
+    getAll: async () => [],
+    get: async () => {
+      throw new Error('not found');
+    },
+    execute: async () => ({ rowsAffected: 0 }),
   };
 
-  it('createSettingPrismaRepositories returns the one-field Prisma set', () => {
+  it('createSettingPrismaRepositories returns legacy + canonical Prisma repositories', () => {
     const set = createSettingPrismaRepositories(fakePrisma);
     expect(set).toHaveProperty('userSettingRepository');
+    expect(set).toHaveProperty('userPreferenceRepository');
     const typed: SettingPrismaRepositorySet = set;
     expect(typeof typed.userSettingRepository.findByIdentityId).toBe('function');
+    expect(typeof typed.userPreferenceRepository.compareAndSwap).toBe('function');
   });
 
-  it('createSettingPowerSyncRepositories returns the one-field PowerSync set', () => {
+  it('createSettingPowerSyncRepositories returns legacy + canonical PowerSync repositories', () => {
     const set = createSettingPowerSyncRepositories(fakeElectronDb);
     expect(set).toHaveProperty('userSettingRepository');
+    expect(set).toHaveProperty('userPreferenceRepository');
     const typed: SettingPowerSyncRepositorySet = set;
     expect(typeof typed.userSettingRepository.findByIdentityId).toBe('function');
+    expect(typeof typed.userPreferenceRepository.compareAndSwap).toBe('function');
   });
 
   it('Prisma and PowerSync sets agree on all field names', () => {
@@ -79,7 +88,12 @@ describe('setting repository factories surface', () => {
   });
 
   it('does not leak concrete adapter classes through the root barrel', async () => {
-    const forbidden = ['UserSettingPrismaRepository', 'UserSettingPowerSyncRepository'];
+    const forbidden = [
+      'UserSettingPrismaRepository',
+      'UserSettingPowerSyncRepository',
+      'UserPreferencePrismaRepository',
+      'UserPreferencePowerSyncRepository',
+    ];
 
     const root = readFileSync(resolve(__dirname, '../../../index.ts'), 'utf8');
     for (const name of forbidden) {
@@ -99,7 +113,9 @@ describe('setting repository factories surface', () => {
   });
 
   it('root barrel type-exports the set field type (compile-time lock)', () => {
-    const repo = (_t: IUserSettingRepository) => undefined;
-    expect(typeof repo).toBe('function');
+    const legacyRepo = (_t: IUserSettingRepository) => undefined;
+    const canonicalRepo = (_t: IUserPreferenceRepository) => undefined;
+    expect(typeof legacyRepo).toBe('function');
+    expect(typeof canonicalRepo).toBe('function');
   });
 });

@@ -16,6 +16,7 @@
  */
 export const IDENTITY_ID_TABLES = new Set([
   'user_settings',
+  'user_preference_records',
   'goals',
   'key_results',
   'goal_records',
@@ -66,6 +67,7 @@ export const IDENTITY_ID_TABLES = new Set([
 const TABLE_TO_MODEL: Record<string, string> = {
   accounts: 'account',
   user_settings: 'userSetting',
+  user_preference_records: 'userPreferenceRecord',
   goals: 'goal',
   key_results: 'keyResult',
   goal_records: 'goalRecord',

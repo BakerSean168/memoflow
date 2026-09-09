@@ -100,6 +100,15 @@ const user_settings = new Table({
   updated_at: column.text,
 });
 
+const user_preference_records = new Table({
+  identity_id: column.text,
+  namespace: column.text,
+  payload: column.text, // JSON
+  revision: column.integer,
+  created_at: column.text,
+  updated_at: column.text,
+});
+
 // ──────────────────────────────────────────────
 // Goal — Core vNext Direction + Measurement
 // ──────────────────────────────────────────────
@@ -1097,6 +1106,7 @@ export const PowerSyncAppSchema = new Schema({
   account_profile_sync_outbox,
   account_closure_requested,
   user_settings,
+  user_preference_records,
   // Goal
   goals,
   key_results,

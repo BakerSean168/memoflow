@@ -8,14 +8,12 @@
  * 面向宿主的 Electron lane 组合原料：仓储集合类型、仓储工厂与委托式便捷模块工厂。
  */
 
+import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import type { IUserSettingRepository } from '../domain/repositories/i-user-setting-repository';
+import type { IUserPreferenceRepository } from '../preferences';
 import { createSettingModule, type SettingModuleInstance } from './setting.module';
+import { UserPreferencePowerSyncRepository } from './adapters/powersync/user-preference-powersync.repository';
 import { UserSettingPowerSyncRepository } from './adapters/powersync/user-setting-powersync.repository';
-
-type Queryable = {
-  getOptional<T>(sql: string, parameters?: unknown[]): Promise<T | null>;
-  execute(sql: string, parameters?: unknown[]): Promise<unknown>;
-};
 
 /**
  * Host-facing setting repository set for the PowerSync lane.
@@ -23,6 +21,7 @@ type Queryable = {
  */
 export interface SettingPowerSyncRepositorySet {
   readonly userSettingRepository: IUserSettingRepository;
+  readonly userPreferenceRepository: IUserPreferenceRepository;
 }
 
 /**
@@ -40,16 +39,19 @@ export interface SettingPowerSyncRepositorySet {
  *          返回基于 PowerSync 适配器的仓储集合。
  */
 export function createSettingPowerSyncRepositories(
-  dbConnection: Queryable,
+  dbConnection: IElectronDatabaseTransaction,
 ): SettingPowerSyncRepositorySet {
   return {
     userSettingRepository: new UserSettingPowerSyncRepository(
       dbConnection,
     ) as IUserSettingRepository,
+    userPreferenceRepository: new UserPreferencePowerSyncRepository(dbConnection),
   };
 }
 
-export function createSettingPowerSyncModule(dbConnection: Queryable): SettingModuleInstance {
+export function createSettingPowerSyncModule(
+  dbConnection: IElectronDatabaseTransaction,
+): SettingModuleInstance {
   const repositories = createSettingPowerSyncRepositories(dbConnection);
 
   return createSettingModule({
