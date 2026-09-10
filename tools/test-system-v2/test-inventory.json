@@ -10899,6 +10899,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/server-feature-shape.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/governance/__tests__/source-scan.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -11274,7 +11282,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 14
+      "fileCount": 15
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -12202,6 +12210,6 @@
     "boundary-main": 6,
     "e2e": 60,
     "perf": 1,
-    "governance": 52
+    "governance": 53
   }
 }

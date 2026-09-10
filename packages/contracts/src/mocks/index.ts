@@ -16,7 +16,6 @@
  *   createMockNotification,
  *   createMockRule,
  *   createMockRuleRevision,
- *   createMockUserSetting,
  * } from '@memoflow/contracts/mocks';
  * ```
  */

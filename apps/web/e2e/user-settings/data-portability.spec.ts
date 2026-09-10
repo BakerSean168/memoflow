@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { UserDataExportEnvelopeV2Schema } from '@memoflow/contracts/data-portability';
 import { API_CONFIG } from '../config';
-import { ensureUserSettingsRecord, registerAndLogin } from '../helpers/testHelpers';
+import { registerAndLogin } from '../helpers/testHelpers';
 
 const VALID_DATA_KEYS = [
   'settings',
@@ -110,7 +110,6 @@ test.describe('Data Portability', () => {
       password: 'Test123456!',
       landingPath: '/settings',
     });
-    await ensureUserSettingsRecord(page);
   });
 
   test('[P1] export returns valid envelope with expected structure', async ({ page }) => {
