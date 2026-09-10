@@ -295,11 +295,15 @@ Current checkpoint: the strict V3 envelope, unique/versioned capability entries,
 
 ### PORT-1602 — Implement registry/coordinator/dry-run pipeline
 
+**状态：IN PROGRESS — 2026-09-10 generic coordinator complete; production owner wiring pending**
+
 - topological capability order;
 - host-owned identity;
 - strict decode/validate/apply for V3;
 - stable portable references;
 - receipt and warning ledger.
+
+Current checkpoint: `PortableCapabilityCoordinator` now performs dependency-ordered export/dry-run/apply, exact capability-version checks and full owner-payload prevalidation before any mutation-capable apply call. `PortableReferenceRegistry` provides operation-local capability-scoped refs without serializing source/target persistence IDs, and receipts aggregate per-owner created/updated/skipped counts plus namespaced warnings. Export output is reparsed through the V3 safety boundary so owner schemas cannot accidentally emit persistent identity, secrets or non-JSON values. Evidence: V3 contracts 7/7; registry/coordinator 12/12; focused source + test strict typecheck PASS through worktree source aliases; focused ESLint 0 errors; test inventory 1225 files; `git diff --check` PASS. Production `ExportUserDataUseCase`/`ImportUserDataUseCase` still run V2 because real owner capabilities have not yet been composed, so no production cutover is claimed.
 
 ### PORT-1603 — Delete V2 portability compatibility
 
