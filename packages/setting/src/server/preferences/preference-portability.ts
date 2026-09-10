@@ -8,7 +8,6 @@ import {
   type PreferenceNamespace,
   type PreferenceNamespaceResponse,
   type PreferencePortablePayloadV3,
-  type UserPreferenceProfile,
 } from '@memoflow/contracts/setting';
 import type { UserPreferenceService } from './user-preference-service';
 

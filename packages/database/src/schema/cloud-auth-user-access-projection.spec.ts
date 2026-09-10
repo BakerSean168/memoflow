@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { prisma } from '@memoflow/database';
+import { prisma } from '../client.js';
 
 describe('CloudAuthUser access projection physical schema', () => {
   it('has disabled_at and no status column', async () => {
