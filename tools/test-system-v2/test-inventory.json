@@ -4987,6 +4987,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/data-portability/portable-v3-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/goal/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5534,6 +5542,16 @@
     },
     {
       "path": "packages/data-portability/src/server/application/use-cases/__tests__/portable-boundary-re-lock.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-registry.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/data-portability/vitest.config.ts"
@@ -11071,7 +11089,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 32
+      "fileCount": 33
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11484,7 +11502,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 78
+      "fileCount": 79
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11498,7 +11516,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 32
+      "fileCount": 33
     },
     {
       "id": "packages/database/vitest.config.ts",
@@ -11842,6 +11860,7 @@
       "packages/data-portability/src/server/application/use-cases/__tests__/export-server-held-data-disclosure.use-case.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/import-server-held-disclosure-rejected.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-boundary-re-lock.surface.spec.ts",
+      "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-registry.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-editor-backup-boundary.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-runtime.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/projection-powersync-rows.test.ts",
@@ -12242,7 +12261,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1053,
+    "unit": 1055,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

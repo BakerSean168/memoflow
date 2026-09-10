@@ -10,4 +10,5 @@ export * from './portable-editor.dto';
 export * from './portable-ai.dto';
 export * from './portable-user-data.dto';
 export * from './portable-envelope.dto';
+export * from './portable-v3.dto';
 export * from './server-held-data-disclosure.dto';
