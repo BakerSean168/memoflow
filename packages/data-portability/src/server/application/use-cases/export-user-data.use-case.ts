@@ -63,10 +63,12 @@ export class ExportUserDataUseCase {
     // ─── Settings (singleton) ───
     if (modules.includes('settings')) {
       const preferences = await this.deps.userPreferenceRepository.list(identityId);
-      if (preferences.length > 0) {
-        data.settings = projectSettings(preferences);
-        entityCounts.settings = 1;
-      }
+      // The temporary V2 outer envelope is backed exclusively by canonical preferences.
+      // A new identity may not have persisted namespace rows yet, but its logical profile
+      // still exists through canonical defaults. Preserve an explicitly requested settings
+      // owner by projecting those defaults instead of silently omitting the module.
+      data.settings = projectSettings(preferences);
+      entityCounts.settings = 1;
     }
 
     // ─── Notification Preference (singleton) ───

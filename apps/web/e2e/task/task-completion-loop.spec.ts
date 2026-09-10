@@ -18,6 +18,14 @@ test.describe('Task completion closed loop', () => {
       landingPath: '/',
     });
 
+    const taskDate = await page.evaluate(() => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    });
+
     const headers = {};
 
     const goalReceipt = await expectApiData<{
@@ -63,14 +71,11 @@ test.describe('Task completion closed loop', () => {
         data: {
           name: taskName,
           description: 'Created for the P0 completion closed loop.',
-          taskType: 'OneTime',
-          timeConfig: {
-            timeType: 'AllDay',
-            startDate: Date.now(),
-            timePoint: null,
-            timeRange: null,
+          schedule: {
+            kind: 'OneTime',
+            date: taskDate,
+            timing: { kind: 'AllDay' },
           },
-          recurrenceRule: null,
           reminderConfig: null,
           importance: 'Moderate',
           labelIds: [],

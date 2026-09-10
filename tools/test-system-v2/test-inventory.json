@@ -4377,6 +4377,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/task/utils/task-plan-presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/task/views/TaskDetailView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5520,6 +5528,16 @@
     },
     {
       "path": "packages/data-portability/src/server/application/use-cases/__tests__/export-server-held-data-disclosure.use-case.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/data-portability/src/server/application/use-cases/__tests__/export-user-data.use-case.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/data-portability/vitest.config.ts"
@@ -11057,7 +11075,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 34
+      "fileCount": 35
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11442,7 +11460,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 203
+      "fileCount": 204
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11477,7 +11495,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 34
+      "fileCount": 35
     },
     {
       "id": "packages/database/vitest.config.ts",
@@ -11818,6 +11836,7 @@
       "packages/data-portability/src/infrastructure-client/adapters/http/data-portability-http.adapter.test.ts",
       "packages/data-portability/src/infrastructure-client/adapters/ipc/__tests__/data-portability-ipc-adapter.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/export-server-held-data-disclosure.use-case.test.ts",
+      "packages/data-portability/src/server/application/use-cases/__tests__/export-user-data.use-case.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/import-server-held-disclosure-rejected.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-boundary-re-lock.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-coordinator.test.ts",
@@ -12218,7 +12237,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1052,
+    "unit": 1054,
     "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,

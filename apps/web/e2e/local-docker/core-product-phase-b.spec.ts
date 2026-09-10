@@ -69,7 +69,7 @@ test.describe('Local Docker core product Phase B', () => {
     await page.getByTestId('task-plan-title-input').fill(planName);
     await page.getByTestId('task-plan-description-input').fill('完整任务计划');
     await page.getByTestId('task-dialog-save-button').click();
-    const planCreation = await expectApiData<TaskPlanCreation>(await planCreationPromise);
+    await expectApiData<TaskPlanCreation>(await planCreationPromise);
     await expect(page.getByText(/任务计划已创建/).first()).toBeVisible();
     await showPlansSurface(page);
     await expect(taskCard(page, planName)).toBeVisible();
@@ -81,25 +81,30 @@ test.describe('Local Docker core product Phase B', () => {
       .getByRole('button', { name: '取消', exact: true })
       .click();
 
+    const recurringStartDate = await page.evaluate(() => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    });
+
     const recurringCreation = await expectApiData<TaskPlanCreation>(
       await page.request.post(`${API_CONFIG.FULL_URL}/task-plans`, {
         headers,
         data: {
           name: recurringPlanName,
           description: 'Verifies future Pending propagation.',
-          taskType: 'Recurring',
-          timeConfig: {
-            timeType: 'AllDay',
-            startDate: Date.now(),
-            timePoint: null,
-            timeRange: null,
-          },
-          recurrenceRule: {
-            frequency: 'Daily',
-            interval: 1,
-            daysOfWeek: [],
-            endDate: null,
-            occurrences: 5,
+          schedule: {
+            kind: 'Recurring',
+            startDate: recurringStartDate,
+            timing: { kind: 'AllDay' },
+            recurrence: {
+              frequency: 'Daily',
+              interval: 1,
+              byWeekday: [],
+              end: { kind: 'Count', count: 5 },
+            },
           },
           reminderConfig: null,
           importance: 'Moderate',

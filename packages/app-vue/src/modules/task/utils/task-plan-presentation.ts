@@ -283,7 +283,10 @@ export function mapTaskPlanDtoToViewModel(dto: TaskPlanClientDTO, t: Translate):
             : undefined,
         }
       : null,
-    schedule: structuredClone(dto.schedule),
+    // TanStack Vue Query exposes cached DTOs through reactive proxies. Parse at the
+    // presentation boundary to validate the canonical schedule and materialize plain data;
+    // native structuredClone cannot clone Vue Proxy objects.
+    schedule: TaskPlanScheduleSchema.parse(dto.schedule),
     timeConfig: scheduleToTimeConfigProjection(dto.schedule),
     reminderConfig: (dto.reminderConfig as unknown as Record<string, unknown>) ?? null,
     recurrenceRule: scheduleToRecurrenceProjection(dto.schedule),
