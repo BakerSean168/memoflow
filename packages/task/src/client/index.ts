@@ -11,7 +11,8 @@ import {
   createTaskServiceFromHttpClient,
   type TaskClientPort,
 } from '../application-client';
-import { TaskOccurrence, TaskPlan } from '../domain-client';
+import { TaskOccurrence } from '../domain-client/aggregates/task-occurrence';
+import { TaskPlan } from '../domain-client/aggregates/task-plan';
 import {
   TaskOccurrenceHttpAdapter,
   TaskPlanHttpAdapter,

@@ -32,16 +32,13 @@ import type { ITaskPlanApiClient, TaskPlanListParams } from './ports/task-plan-a
 import type { ITaskOccurrenceApiClient } from './ports/task-occurrence-api-client.port';
 import { TaskPlan } from '../domain-client/aggregates/task-plan';
 import { TaskOccurrence } from '../domain-client/aggregates/task-occurrence';
-import { TaskPlanId } from '../server/domain/value-objects/task-plan-id';
-import { TaskOccurrenceId } from '../server/domain/value-objects/task-occurrence-id';
-import { IdentityId } from '@memoflow/domain-shared';
 
 // ===== DTO-to-State Mappers =====
 
 function taskPlanFromDTO(dto: TaskPlanClientDTO): TaskPlan {
   return TaskPlan.load({
-    id: TaskPlanId.of(dto.id),
-    identityId: IdentityId.of(dto.identityId),
+    id: dto.id,
+    identityId: dto.identityId,
     name: dto.name,
     description: dto.description,
     schedule: structuredClone(dto.schedule),
@@ -77,9 +74,9 @@ function taskPlanFromDTO(dto: TaskPlanClientDTO): TaskPlan {
 
 function taskOccurrenceFromDTO(dto: TaskOccurrenceClientDTO): TaskOccurrence {
   return TaskOccurrence.load({
-    id: TaskOccurrenceId.of(dto.id),
-    templateId: TaskPlanId.of(dto.templateId),
-    identityId: IdentityId.of(dto.identityId),
+    id: dto.id,
+    templateId: dto.templateId,
+    identityId: dto.identityId,
     instanceDate: dto.instanceDate,
     timeConfig: parseTimeConfig(dto.timeConfig),
     importance: dto.importance,

@@ -9344,6 +9344,16 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/scheduler/src/server/infrastructure/lease/schedule-lease-coordinator.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9595,6 +9605,16 @@
     },
     {
       "path": "packages/task/src/api/routes/task-void-success-envelope.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/task/src/client/task-client-browser-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -11121,7 +11141,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 31
+      "fileCount": 32
     },
     {
       "id": "packages/scheduler/vitest.mappers.config.ts",
@@ -11149,7 +11169,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 71
+      "fileCount": 72
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -11562,7 +11582,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 31
+      "fileCount": 32
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -11576,7 +11596,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 71
+      "fileCount": 72
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -12097,6 +12117,7 @@
       "packages/scheduler/src/server/infrastructure/adapters/prisma/__tests__/schedule-task-ownership.surface.spec.ts",
       "packages/scheduler/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-execution-mapper.spec.ts",
       "packages/scheduler/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-task-mapper.spec.ts",
+      "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-task-prisma.repository.spec.ts",
       "packages/scheduler/src/server/infrastructure/lease/schedule-lease-coordinator.spec.ts",
       "packages/scheduler/src/server/infrastructure/lease/schedule-lease.repository.spec.ts",
       "packages/scheduler/src/server/infrastructure/runtime/schedule-runtime-ownership.surface.spec.ts",
@@ -12123,6 +12144,7 @@
       "packages/task/src/api/routes/task-occurrence.routes.spec.ts",
       "packages/task/src/api/routes/task-plan.routes.spec.ts",
       "packages/task/src/api/routes/task-void-success-envelope.surface.spec.ts",
+      "packages/task/src/client/task-client-browser-boundary.surface.spec.ts",
       "packages/task/src/electron/authenticated-ipc.spec.ts",
       "packages/task/src/electron/index.spec.ts",
       "packages/task/src/electron/task-electron.surface.spec.ts",
@@ -12196,7 +12218,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1050,
+    "unit": 1052,
     "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,

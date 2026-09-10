@@ -22,10 +22,8 @@ import type {
 } from '@memoflow/contracts/task';
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
-import type { GoalId, KeyResultId, Instant } from '@memoflow/contracts/primitives';
+import type { GoalId, IdentityId, KeyResultId, Instant, TaskPlanId } from '@memoflow/contracts/primitives';
 import { AggregateRoot } from '@memoflow/utils/domain';
-import { TaskPlanId } from '../../server/domain/value-objects/task-plan-id';
-import { IdentityId } from '@memoflow/domain-shared';
 
 export interface TaskPlanState {
   id: TaskPlanId;

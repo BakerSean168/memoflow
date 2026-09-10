@@ -19,6 +19,14 @@ test.describe('Planner owner-command acceptance', () => {
       landingPath: '/tasks',
     });
 
+    const taskDate = await page.evaluate(() => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    });
+
     const creation = await expectApiData<{
       template: { id: string };
       todayInstanceCreated: boolean;
@@ -27,14 +35,11 @@ test.describe('Planner owner-command acceptance', () => {
         data: {
           name: taskName,
           description: 'HARD-7103 Fixture J owner-command rollback',
-          taskType: 'OneTime',
-          timeConfig: {
-            timeType: 'TimePoint',
-            startDate: Date.now(),
-            timePoint: 14 * 60,
-            timeRange: null,
+          schedule: {
+            kind: 'OneTime',
+            date: taskDate,
+            timing: { kind: 'At', time: '14:00' },
           },
-          recurrenceRule: null,
           reminderConfig: null,
           importance: 'Moderate',
           labelIds: [],

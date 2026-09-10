@@ -1,4 +1,4 @@
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { IdentityId, Instant, TaskOccurrenceId, TaskPlanId } from '@memoflow/contracts/primitives';
 /**
  * TaskOccurrence Aggregate Root - Domain Client
  * 任务实例聚合根 - 领域客户端
@@ -18,9 +18,6 @@ import type {
 } from '@memoflow/contracts/task';
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import { AggregateRoot } from '@memoflow/utils/domain';
-import { TaskOccurrenceId } from '../../server/domain/value-objects/task-occurrence-id';
-import { TaskPlanId } from '../../server/domain/value-objects/task-plan-id';
-import { IdentityId } from '@memoflow/domain-shared';
 
 export interface TaskOccurrenceState {
   id: TaskOccurrenceId;
