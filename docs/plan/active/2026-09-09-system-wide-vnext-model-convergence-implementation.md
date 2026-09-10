@@ -287,7 +287,11 @@ Removed `CloudAuthUser.status` from the Prisma schema and regenerated Prisma; `C
 
 ### PORT-1601 — Introduce V3 envelope and PortableCapability contract
 
+**状态：IN PROGRESS — 2026-09-10 foundation landed; production V3 cutover pending**
+
 Add `PortableBackupEnvelopeV3` and a typed capability registration seam as the only supported portable format. Do not retain the V2 reader.
+
+Current checkpoint: the strict V3 envelope, unique/versioned capability entries, V3 import safety parser and owner-typed `PortableCapabilityRegistry` seam are implemented. Every registered owner payload is validated through the owner-provided Zod schema at export/dry-run/apply boundaries, and host-owned identity remains outside the payload. The existing production V2 export/import path is intentionally still present until `PORT-1602` wires real owner capabilities/coordinator; therefore this ticket is not marked DONE and no V3 production cutover is claimed yet. Focused evidence: V3 contracts 6/6, capability registry 3/3, contracts typecheck PASS, isolated registry strict typecheck PASS, `git diff --check` PASS.
 
 ### PORT-1602 — Implement registry/coordinator/dry-run pipeline
 
@@ -581,6 +585,12 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 - Prisma and PowerSync canonical parity must land in the same coherent batch;
 - if a vertical journey fails after cutover, revert the coherent batch and recreate persistence from the prior source revision; never revive a second permanent truth.
 
-## 7. Immediate next ticket
+## 7. Immediate next tickets
 
-**TIME-1204 — make Format locale/timezone aware** is now the next single-writer Product Time ticket. TIME-1203 made Calendar/Input/Codec day and wall-clock semantics explicit and host-independent; TIME-1204 now owns human-facing locale/timezone formatting and removal of fixed Chinese display assumptions.
+The former TIME-1204 footer is obsolete: TIME-1204..1206 and LABEL-1301..1305 are already complete. Current dependency-ready work is:
+
+1. `SETTING-9206` — establish device-local preference persistence/scope without creating a generic device settings bag;
+2. `PORT-1602` — build the V3 coordinator/topological capability pipeline on the `PORT-1601` typed registry foundation;
+3. after those foundations are stable, continue Knowledge foundation before Goal/Task durable note relations.
+
+`PORT-1601` remains IN PROGRESS until the production V2 reader/export path can be removed coherently with the real owner-capability coordinator.
