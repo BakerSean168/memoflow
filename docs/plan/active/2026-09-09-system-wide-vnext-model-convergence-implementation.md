@@ -213,6 +213,12 @@ Completed in the same coordinated batch as `TIME-1205`: canonical preference HTT
 
 `UserSetting.notification` is retired from canonical Setting contracts/runtime/UI. User-level InApp/Push/Email delivery preferences are owned by `NotificationPreference`; Desktop presentation mode and notification sound are owned by the typed `DesktopNotificationPreference` device capability/store, with strict IPC validation and no Web fallback. No legacy notification-setting values were migrated or seeded under ADR-111. Focused evidence: contracts 3 files / 10 tests, Setting 1 / 21, App Vue 3 / 12, Desktop service/store 2 / 17, Desktop IPC 1 / 13; contracts/Setting/App Vue typechecks PASS; Desktop 9204-path filtered typecheck has 0 errors; app-vue `./di` declarations rebuilt; `git diff --check` and ownership residual scans PASS. Device persistence/scope remains SETTING-9206.
 
+### SETTING-9205 — Retire dead/fake UserSetting categories and misleading UI
+
+**状态：DONE — 2026-09-10**
+
+Live legacy `UserSetting` remainder is now strict `appearance + locale` only. Workflow/privacy/shortcuts/experimental/ui/ai categories and `locale.currency` are retired from canonical contracts, mocks and Settings UI; old/unknown imports fail closed, and `privacy.shareUsageData=true` explicitly requires future re-consent rather than being converted. The misleading Help -> cloud shortcut-editor entry was removed with that retired surface. Reviewer gates: contracts 10/10, Setting 39/39, App Vue 19/19; production residue scan and `git diff --check` PASS. Device/local scope remains SETTING-9206; final `user_settings` persistence retirement remains SETTING-9209.
+
 ### ACC-1402 — Introduce AccountView + CloudIdentitySummary composition
 
 **状态：DONE — 2026-09-09**

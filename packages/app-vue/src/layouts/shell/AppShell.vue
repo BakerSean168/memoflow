@@ -784,7 +784,6 @@ function panelCacheKey(
           @open-search="handleNewConversation"
           @open-settings="openSettings"
           @open-account="openAccount"
-          @open-help="openSettings('/settings?tab=advanced')"
           @open-cloud-connection="openCloudConnection"
           @logout="() => void handleLogout()"
           @start-resize="startSidebarResize"

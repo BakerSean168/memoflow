@@ -3,7 +3,7 @@
  * UserSettingsView — 设置页（UI 重构 V2 § Settings / §7；沿 V1 §13 分组方案）
  *
  * 10 个平铺 Tab 重组为 7 组：
- *   外观与语言 / 知识库 / AI / 通知与提醒 / 账户与隐私（账户中心迁入）/ 数据 / 高级
+ *   外观与语言 / 知识库 / AI / 通知与提醒 / 账户（账户中心迁入）/ 数据 / 高级
  * 分组定义集中在 `GROUP_DEFINITIONS` 单一模型（值 + i18n label key），
  * `groups` 与 `GROUP_VALUES` 均由其派生，避免注释/代码漂移。
  * 设置内容容器窄于 1024px 时使用顶部分组 tabs；宽容器使用左侧垂直分组导航
@@ -24,10 +24,7 @@ import AppearanceSettings from '../components/AppearanceSettings.vue';
 import AISettings from '../components/AISettings.vue';
 import LocaleSettings from '../components/LocaleSettings.vue';
 import KnowledgeRepositorySettings from '../components/KnowledgeRepositorySettings.vue';
-import PrivacySettings from '../components/PrivacySettings.vue';
-import ShortcutSettings from '../components/ShortcutSettings.vue';
 import NotificationSettings from '../components/NotificationSettings.vue';
-import ExperimentalSettings from '../components/ExperimentalSettings.vue';
 import SettingAdvancedActions from '../components/SettingAdvancedActions.vue';
 import SettingsResetSection from '../components/SettingsResetSection.vue';
 import UserFilesSettings from '../components/UserFilesSettings.vue';
@@ -45,7 +42,6 @@ import type {
   PresentationPreferences,
   RegionalPreferences,
   UserPreferenceProfile,
-  UserSettingPreferences,
 } from '@memoflow/contracts/setting';
 import { inject } from 'vue';
 import { AUTH_SERVICE_KEY, DESKTOP_AUTH_API_KEY } from '../../../di/keys';
@@ -69,8 +65,7 @@ const isNarrow = computed(() => contentWidth.value < SETTINGS_NARROW_VIEWPORT);
 const settingsContentRef = ref<HTMLElement | null>(null);
 let settingsResizeObserver: ResizeObserver | null = null;
 
-const { userSetting, isLoading, getCategory, loadSettings, exportSettings, importSettings } =
-  useUserSetting();
+const { isLoading, loadSettings, exportSettings, importSettings } = useUserSetting();
 
 const {
   presentation: presentationPreference,
@@ -152,13 +147,6 @@ type OpenTextResult = {
   content: string | null;
 };
 
-interface ShortcutCategory {
-  name: string;
-  label: string;
-  iconComponent: unknown;
-  shortcuts: { id: string; label: string; description: string; key: string; defaultKey: string }[];
-}
-
 interface Backup {
   key: string;
   label: string;
@@ -172,24 +160,6 @@ const locale = ref<LocaleFormState>({
   language: DEFAULT_USER_PREFERENCE_PROFILE.presentation.language,
   ...DEFAULT_USER_PREFERENCE_PROFILE.regional,
 });
-
-const privacy = ref({
-  profileVisibility: 'PRIVATE',
-  showOnlineStatus: false,
-  allowSearchByEmail: true,
-  allowSearchByPhone: false,
-  shareUsageData: false,
-});
-
-const experimental = ref({
-  enabled: false,
-  features: [] as string[],
-});
-
-// Shortcut state (read-only display for now)
-const shortcutCategories = ref<ShortcutCategory[]>([]);
-const editingShortcut = ref(null);
-const editingKey = ref('');
 
 // Advanced state
 const backups = ref<Backup[]>([]);
@@ -336,16 +306,7 @@ function hydrateCanonicalPreferences() {
   setProductTimePreferences(profile);
 }
 
-function hydrateLegacySettings() {
-  const p = getCategory('privacy');
-  if (p) Object.assign(privacy.value, p);
-
-  const exp = getCategory('experimental');
-  if (exp) Object.assign(experimental.value, exp);
-}
-
 watch([presentationPreference, regionalPreference], hydrateCanonicalPreferences);
-watch(userSetting, hydrateLegacySettings);
 
 onMounted(async () => {
   if (typeof ResizeObserver !== 'undefined' && settingsContentRef.value) {
@@ -355,7 +316,6 @@ onMounted(async () => {
     settingsResizeObserver.observe(settingsContentRef.value);
   }
   await Promise.all([loadSettings(), loadPreferences()]);
-  hydrateLegacySettings();
   hydrateCanonicalPreferences();
 });
 
@@ -446,7 +406,6 @@ onBeforeUnmount(() => {
           <template v-else-if="activeTab === 'account'">
             <AccountProfileSection />
             <CloudPasswordSection v-if="cloudPasswordService" />
-            <PrivacySettings v-model="privacy" />
           </template>
 
           <template v-else-if="activeTab === 'data'">
@@ -470,13 +429,7 @@ onBeforeUnmount(() => {
           </template>
 
           <template v-else-if="activeTab === 'advanced'">
-            <ShortcutSettings
-              :categories="shortcutCategories"
-              :editing-shortcut="editingShortcut"
-              :editing-key="editingKey"
-            />
             <SettingsResetSection />
-            <ExperimentalSettings v-model="experimental" />
           </template>
         </div>
       </div>

@@ -8,12 +8,6 @@
 export type {
   AppearancePreferences,
   LocalePreferences,
-  WorkflowPreferences,
-  PrivacyPreferences,
-  ShortcutPreferences,
-  ExperimentalPreferences,
-  UIStatePreferences,
-  AIPreferences,
   UserSettingPreferences,
 } from './types';
 
@@ -22,12 +16,6 @@ export { getDefaultPreferences, PREFERENCE_CATEGORIES, type PreferenceCategory }
 export {
   AppearanceSchema,
   LocaleSchema,
-  WorkflowSchema,
-  PrivacySchema,
-  ShortcutsSchema,
-  ExperimentalSchema,
-  UISchema,
-  AISchema,
   UserPreferencesSchema,
   CATEGORY_SCHEMAS,
 } from './schemas';

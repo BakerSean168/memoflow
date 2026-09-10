@@ -59,7 +59,6 @@ describe('UserSetting Aggregate Root', () => {
 
       expect(setting.toPreferences().locale.language).toBe('en-US');
       expect(setting.toPreferences().locale.timezone).toBe('America/New_York');
-      expect(setting.toPreferences().locale.currency).toBe('CNY'); // default preserved
     });
 
     it('should reject the retired notification category', () => {
@@ -187,7 +186,6 @@ describe('UserSetting Aggregate Root', () => {
           timezone: 'America/New_York',
           dateFormat: 'MM/DD/YYYY',
           timeFormat: '12H',
-          currency: 'USD',
           weekStartsOn: 0,
         },
       });

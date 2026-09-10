@@ -42,7 +42,6 @@ function createSetting(overrides: Partial<UserSettingClientDTO> = {}): UserSetti
         timezone: 'UTC',
         dateFormat: 'YYYY-MM-DD',
         timeFormat: '24H',
-        currency: 'USD',
         weekStartsOn: 1,
       },
     } as UserSettingPreferences,

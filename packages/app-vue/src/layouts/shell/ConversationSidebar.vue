@@ -3,13 +3,12 @@
  * ConversationSidebar (UI 重构 V2 壳)
  *
  * 左侧栏 = 纯 AI 会话列表（V2 §5 决策 #4，无 Projects 树、无业务对象）。
- * 结构：品牌 + 搜索 → 「新对话」→ 会话列表（按时间分组）→ 底部账户菜单 + 帮助菜单。
+ * 结构：品牌 + 搜索 → 「新对话」→ 会话列表（按时间分组）→ 底部账户菜单。
  *
  * 账户入口（诊断修订 §9）：头像打开账户菜单，不再直达 Settings。
- * 帮助入口独立，不跳转设置。
  */
 import { useI18n } from 'vue-i18n';
-import { HelpCircle, Search, SquarePen, X } from '@lucide/vue';
+import { Search, SquarePen, X } from '@lucide/vue';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,7 +54,6 @@ const emit = defineEmits<{
   (e: 'open-account'): void;
   (e: 'open-cloud-connection'): void;
   (e: 'logout'): void;
-  (e: 'open-help'): void;
   (e: 'start-resize', event: MouseEvent): void;
   (e: 'resize-by', delta: number): void;
 }>();
@@ -143,10 +141,8 @@ const identityLabel = () => {
       </div>
     </nav>
 
-    <!-- 底：账户菜单 + 帮助菜单 -->
-    <div
-      class="flex h-[52px] shrink-0 items-center justify-between border-t border-sidebar-border/40 px-3.5"
-    >
+    <!-- 底：账户菜单 -->
+    <div class="flex h-[52px] shrink-0 items-center border-t border-sidebar-border/40 px-3.5">
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
           <button
@@ -194,27 +190,6 @@ const identityLabel = () => {
             @click="emit('open-cloud-connection')"
           >
             {{ t('shell.account.connectCloud') }}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <button
-            type="button"
-            data-testid="shell-help-menu"
-            class="rounded p-1.5 text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
-            :title="t('shell.help')"
-            :aria-label="t('shell.help')"
-          >
-            <HelpCircle class="h-4 w-4" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" side="top" class="w-52">
-          <!-- Phase 5：Help 只显示已实现入口——快捷键跳转设置「高级」组（ShortcutSettings 已实现）；
-               未实现的 guide/feedback/about 不再以 disabled + soon 展示。 -->
-          <DropdownMenuItem data-testid="shell-help-shortcuts" @click="emit('open-help')">
-            {{ t('shell.helpMenu.shortcuts') }}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

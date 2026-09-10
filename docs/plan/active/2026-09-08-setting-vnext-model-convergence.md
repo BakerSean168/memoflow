@@ -410,7 +410,7 @@ UserSetting 不再含 notification category；Notification 与 Device Surface �
 
 ### SETTING-9205 — Retire dead/fake UserSetting categories and misleading UI
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-10**
 
 #### Goal
 
@@ -456,12 +456,19 @@ legacy shareUsageData=true
 - contracts/mocks no retired category；
 - UI no fake controls；
 - no unknown old key accepted；
-- import returns explicit retired/re-consent warning；
+- import fail-closes retired/unknown categories；`privacy.shareUsageData=true` returns an explicit re-consent-required rejection；
 - Wallet currency never changed by old locale.currency。
 
 #### Acceptance
 
-旧 fields 只允许出现在 migration fixture/历史 ADR/current-system evidence 中。
+旧 fields 只允许出现在 explicit rejection guards/tests、历史 ADR/current-system evidence 中；production UserSetting/UI 不再把它们作为可配置 truth。
+
+#### Closure evidence
+
+- `UserPreferencesSchema` 已 strict 收缩到 legacy remainder `appearance + locale`；`locale.currency` 与 workflow/privacy/shortcuts/experimental/ui/ai categories 已退出 live contract；
+- `ImportSettings` 对 retired/unknown category、`locale.currency` fail closed；`privacy.shareUsageData=true` 明确要求 future re-consent，绝不自动转换；
+- Vue Settings 删除 fake Privacy/Experimental/Shortcut editors 及 local shadow refs；原 Help -> cloud shortcut 假入口同步删除；
+- reviewer focused gates：contracts 2 files / 10 tests、Setting 2 / 39、App Vue 4 / 19 PASS；production residue scan 与 `git diff --check` PASS。
 
 #### Dependencies
 
@@ -822,7 +829,7 @@ SETTING-9201  DONE — docs/design package only
 SETTING-9202  DONE — canonical contracts + namespace persistence/CAS foundation
 SETTING-9203  DONE — 2026-09-09
 SETTING-9204  DONE — 2026-09-10
-SETTING-9205  PLANNED
+SETTING-9205  DONE — 2026-09-10
 SETTING-9206  PLANNED
 SETTING-9207  PLANNED
 SETTING-9208  PLANNED
@@ -830,7 +837,7 @@ SETTING-9209  PLANNED
 SETTING-9210  PLANNED
 ```
 
-SETTING-9202/9203 已完成 canonical presentation/regional HTTP/IPC/UI 与 Product Time cutover，并完成 `Account.settings` retirement；非 presentation legacy categories 仍由 `SETTING-9205`/`9206`/`9209` 处理。
+SETTING-9202/9203 已完成 canonical presentation/regional HTTP/IPC/UI 与 Product Time cutover，并完成 `Account.settings` retirement；fake/dead legacy categories 已由 `SETTING-9205` 退休；device/local scope 与最终 legacy persistence deletion 仍由 `SETTING-9206`/`9209` 处理。
 
 ## 10. Definition of Done
 

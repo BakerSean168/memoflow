@@ -21,7 +21,7 @@ type ResetTarget = 'all' | Extract<keyof UserSettingPreferences, string>;
 const target = ref<ResetTarget>('all');
 const resetting = ref(false);
 
-const categories: ResetTarget[] = ['all', 'appearance', 'locale', 'privacy', 'experimental'];
+const categories: ResetTarget[] = ['all', 'appearance', 'locale'];
 
 const theme = computed(() => userSetting.value?.preferences?.appearance?.theme);
 

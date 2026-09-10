@@ -10,7 +10,7 @@ updated: 2026-09-09T12:00:00+08:00
 
 # 设置模块说明
 
-> **vNext implementation notice（2026-09-09）**：本文继续区分“当前运行路径”和“已落地 foundation”。`SETTING-9202` 已建立 canonical `presentation | regional` contracts、`user_preference_records`、Prisma/PowerSync CAS repositories 与 application seam；但当前 Settings HTTP/IPC/UI 仍只装配 legacy `UserSetting` repository。不存在 backfill、dual-read 或 dual-write。`SETTING-9203` 才会切 current consumers 并删除旧 Account/Setting preference truth。完整目标仍见 [ADR-092](../../architecture/adr/ADR-092-settings-hub-and-preference-ownership-boundary.md)～[ADR-095](../../architecture/adr/ADR-095-preference-persistence-sync-migration-and-portability.md)、[product target](../setting-vnext-settings-hub.md) 与 [active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md)。
+> **vNext implementation notice（2026-09-10）**：本文把当前运行路径与历史/目标 rationale 分开记录。`SETTING-9203`/`9204`/`9205` 已完成 Account/Notification shadow retirement、canonical presentation/regional consumer cutover，以及 dead/fake UserSetting surface retirement；legacy `UserSetting` 只保留 appearance + locale remainder。Canonical `presentation | regional` contracts、owner-specific seams 与 Settings Hub composition 是当前实现边界。不存在 backfill、dual-read 或 dual-write。完整目标仍见 [ADR-092](../../architecture/adr/ADR-092-settings-hub-and-preference-ownership-boundary.md)～[ADR-095](../../architecture/adr/ADR-095-preference-persistence-sync-migration-and-portability.md)、[product target](../setting-vnext-settings-hub.md) 与 [active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md)。
 
 ## 1. 当前功能定位
 
@@ -28,31 +28,19 @@ UserSetting
 
 ## 2. 当前 `UserSetting` 功能
 
-当前 `UserSetting.preferences` 有 9 个 category：
+当前 legacy `UserSetting.preferences` 只保留 live legacy remainder 两个 category：
 
 ```text
 appearance
 locale
-workflow
-privacy
-notification
-shortcuts
-experimental
-ui
-ai
 ```
 
 其中成熟度并不相同：
 
 - `appearance`：theme 有真实 Settings UI、bootstrap 与即时应用路径。
-- `locale`：language/timezone/date/time/week/currency schema 存在；language/theme 有 presentation consumer；timezone 存在与 Account 双真值问题。
-- `notification`：`useCustomNotification` 有 Desktop runtime consumer，但 channel preference 已另由 Notification module 管理。
-- `workflow`：schema/mock/i18n 存在，生产消费者基本为空，并含已过时 `defaultGoalView=TREE` 等语义。
-- `privacy`：有 UI/schema，但当前 Settings root 只改 local `v-model`，没有稳定 UserSetting persistence handler；同时 UI `FRIENDS` 与 contract `FRIENDS_ONLY` 漂移。
-- `shortcuts`：schema 和组件存在，但 root `shortcutCategories` 当前为空，未形成 CommandRegistry + persistence 产品链。
-- `experimental`：UI hard-code feature strings，但没有真实 feature evaluator；root 当前也没有稳定 save/apply handler。
-- `ui`：`startPage/sidebarCollapsed` schema 存在，没有稳定 cloud behavior consumer。
-- `ai`：schema 是空 object；真正 AI provider/model/secret 已由 AI module 管理。
+- `locale`：language/timezone/date/time/week remainder 由 legacy Settings 保留；`locale.currency` 已 retired，canonical presentation/regional seams 承担当前 preference truth。
+- `workflow`、`privacy`、`notification`、`shortcuts`、`experimental`、`ui`、`ai`：作为 legacy UserSetting categories 已 retired；它们的真实 capability 由对应 owner 管理，或等待明确的 future owner，不再由 fake UserSetting editor 表示。
+- 当前实现不含已退役的 in-app `editor` category；portable `editor_*` backup tables 仍归 Data Portability owner 管理。
 
 ## 3. 当前 Settings UI 分组
 
@@ -75,16 +63,16 @@ advanced
 | Appearance    | UserSetting appearance/locale + presentation bootstrap               |
 | Repository    | Repository/Knowledge                                                 |
 | AI            | AI provider/onboarding                                               |
-| Notifications | UserSetting device-style residue + NotificationPreference            |
-| Account       | Account/Profile、Cloud Auth/Password、Privacy UI shell               |
+| Notifications | NotificationPreference + retained device-local notification surface |
+| Account       | Account/Profile、Cloud Auth/Password                               |
 | Data          | UserFiles Desktop IPC、Settings JSON export/import、Data Portability |
-| Advanced      | Shortcut UI shell、Reset、Experimental UI shell                      |
+| Advanced      | Settings import/export、reset 与其他 retained actions               |
 
-当前已有 `?tab=` 深链与 `settings-tab-{value}` 测试 contract。
+当前已有 `?tab=` 深链与 `settings-tab-{value}` 测试 contract；Advanced 只承载真实的数据导入导出、reset 与其他 retained actions，不再挂载 fake workflow/privacy/shortcut/experimental editor。
 
 ## 4. 当前持久化与同步
 
-### 4.1 当前运行路径：legacy `UserSetting`
+### 4.1 当前运行路径：retained legacy `UserSetting`
 
 Prisma：
 
@@ -99,11 +87,11 @@ user_settings
 
 PowerSync 也以一条 `user_settings` row + JSON string 同步。
 
-所有 category 因此共享整条 singleton JSON persistence/sync 粒度。
+目前保留的 appearance/locale remainder 仍可由 legacy aggregate 读取/reset；canonical presentation/regional preference 已是 current Settings consumer 的真值。
 
 当前 Aggregate 会 `version += 1`，但 Prisma `upsert` 不带 `expectedVersion` compare-and-swap，所以 version 不是实际 optimistic-concurrency fence。
 
-### 4.2 已落地但尚未切 current transport：canonical Preferences foundation
+### 4.2 当前 canonical Preferences seam
 
 `SETTING-9202` 已增加：
 
@@ -118,28 +106,15 @@ user_preference_records
 
 其中 `(identity_id, namespace)` 唯一，每个 namespace 是独立 persistence/sync/CAS unit。Prisma 与 PowerSync 都以 `expected revision` 作为真实 compare-and-swap fence；首次写入 revision `1`，不存在 namespace 的纯读取使用 virtual revision `0` 且不 persistence-on-read。
 
-当前 host repository set 同时暴露 legacy `userSettingRepository` 与 canonical `userPreferenceRepository`，但现有 `createSettingModule`、HTTP/IPC/UI 仍只消费前者。因此此阶段是“canonical foundation 可用、current consumers 尚未 cutover”，**不是**新旧 truth 的 dual-read/dual-write compatibility 机制。下一票 `SETTING-9203` 会直接切 consumer 并删除旧 preference truth。
+当前 host repository set 暴露 legacy remainder 与 canonical `userPreferenceRepository`；Settings HTTP/IPC/UI 的 presentation/regional consumers 走 canonical seam。legacy aggregate 只保留当前 retained appearance/locale 的窄边界，**不是**新旧 truth 的 dual-read/dual-write compatibility 机制。
 
-PowerSync 云端链路也已登记 canonical table：server sync stream 会下发 `user_preference_records`，Desktop pre-hydration 会等待该表，API upload 对这张表使用专用 revision-CAS handler 而不是 generic last-write-wins `upsert/update`。并发冲突返回 HTTP `409`，因此 foundation 已保证“冲突不静默覆盖”；当前 Settings consumer 尚未切换，所以冲突 reload/reapply 的用户交互由 `SETTING-9203` 接续。
+PowerSync 云端链路也已登记 canonical table：server sync stream 会下发 `user_preference_records`，Desktop pre-hydration 会等待该表，API upload 对这张表使用专用 revision-CAS handler 而不是 generic last-write-wins `upsert/update`。并发冲突返回 HTTP `409`，因此 current canonical path 已保证“冲突不静默覆盖”；具体 owner action 由对应 module seam 处理。
 
 ## 5. 当前重复 truth
 
-### Account vs UserSetting
+### Account / Notification owner seams
 
-当前 Account 仍拥有：
-
-```text
-theme
-language
-timezone
-notificationEnabled
-```
-
-UserSetting 同时拥有对应 preference，因此形成双真值。
-
-### Notification vs UserSetting
-
-当前 Notification module 已拥有：
+Account 与 Notification shadow 已在 SETTING-9203/9204 中移除；当前 owner seams 是：
 
 ```text
 NotificationPreference
@@ -149,31 +124,11 @@ NotificationPreference
 └── rateLimit
 ```
 
-UserSetting 仍有 `notification.email/push/inApp/sound/useCustomNotification`，形成第二层双轨。
+legacy `UserSetting` 不再保存 Account 或 Notification category。
 
 ## 6. 当前 timezone 行为风险
 
-Settings 页面更新：
-
-```text
-UserSetting.preferences.locale.timezone
-```
-
-但 Reminder server 的 Account timezone adapter 当前读取：
-
-```text
-Account.settings.timezone
-```
-
-Renderer helper 又按：
-
-```text
-Account timezone -> UserSetting timezone -> host timezone
-```
-
-取值。
-
-因此同一用户可能在 Settings UI 看到一个 timezone，而 Reminder server 按另一个 timezone 计算。这是 Setting vNext 最高优先级语义债之一。
+当前 regional preference 由 canonical seam 提供 timezone/date/time/week context；历史上的 Account vs UserSetting timezone 双真值只保留在下方 target rationale/历史资料中，不是当前实现契约。
 
 ## 7. 当前导入/导出
 
@@ -249,26 +204,27 @@ usage analytics consent         -> future explicit Consent owner
 
 详细 target 见 [Setting vNext Settings Hub](../setting-vnext-settings-hub.md)。
 
-## 11. 当前风险与实施优先级
+## 11. 已解决债务与剩余实施优先级
 
-```text
-P0/P1 semantic
-1. timezone 双真值影响业务时间
-2. Account.settings vs UserSetting
-3. NotificationPreference vs UserSetting.notification
+### 已解决的历史债务
 
-P1 architecture/data
-4. giant JSON persistence + fake revision
-5. loose import/migration
+以下问题是 9203/9204/9205 的实施背景，不是当前风险：
 
-P2 product truth
-6. fake privacy controls
-7. fake experimental controls
-8. shortcut shell
-9. workflow/ui/ai dead categories
-```
+- timezone 双真值，以及 `Account.settings` 与 `UserSetting` 的重复 truth（SETTING-9203）；
+- `NotificationPreference` 与 `UserSetting.notification` 的 shadow truth（SETTING-9204）；
+- fake privacy / experimental / shortcut / workflow / ui / ai surfaces（SETTING-9205）。
 
-实施顺序以 [Setting vNext active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md) 为真值。
+当前代码已经完成这些 owner cutover 或 dead/fake surface retirement；不要把它们重新描述为待修复的产品能力。
+
+### 当前仍剩余的实施债务
+
+1. legacy appearance/locale remainder，以及 giant JSON persistence + fake legacy revision，随 SETTING-9209 完成最终删除；
+2. device/local persistence 与 scope seams，按 SETTING-9206 实施；
+3. strict portability/migration cutover，按 SETTING-9208 实施；
+4. legacy fields/runtime 的最终删除，按 SETTING-9209 实施；
+5. review、evidence 收口与 archive，按 SETTING-9210 实施。
+
+实施顺序以 [Setting vNext active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md) 为真值，并受 ADR-111 的 zero-legacy-data destructive cutover policy 约束。
 
 ## 12. 相关资料
 

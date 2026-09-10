@@ -46,4 +46,19 @@ describe('UserSettingsView desktop settings IA (Phase 3)', () => {
     // Desktop must degrade by capability, not by a platform-name branch.
     expect(source).not.toMatch(/isDesktop[^\n]*CloudPasswordSection/);
   });
+
+  it('does not mount retired privacy, experimental, or cloud shortcut editors', () => {
+    expect(source).not.toContain('PrivacySettings');
+    expect(source).not.toContain('ExperimentalSettings');
+    expect(source).not.toContain('ShortcutSettings');
+    expect(source).not.toContain('shareUsageData');
+    expect(source).not.toContain('shortcutCategories');
+  });
+
+  it('keeps real AI and canonical appearance/locale surfaces', () => {
+    expect(source).toContain('<AISettings />');
+    expect(source).toContain('<AppearanceSettings');
+    expect(source).toContain('<LocaleSettings');
+    expect(source).not.toContain('currency');
+  });
 });

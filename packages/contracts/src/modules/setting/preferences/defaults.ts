@@ -2,7 +2,7 @@
  * Setting Preference Defaults — Driven by Zod schemas
  *
  * `getDefaultPreferences()` parses an empty object through UserPreferencesSchema,
- * which fills in all `.default()` values automatically.
+ * which fills in the live legacy remainder defaults automatically.
  * No manual default constants needed.
  */
 

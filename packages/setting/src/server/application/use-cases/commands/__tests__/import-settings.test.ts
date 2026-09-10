@@ -123,4 +123,42 @@ describe('ImportSettings', () => {
     expect(result.preferences).toBeDefined();
     expect(typeof result.version).toBe('number');
   });
+
+  it.each(['workflow', 'privacy', 'shortcuts', 'experimental', 'ui', 'ai'])(
+    'rejects retired category %s before saving',
+    async (category) => {
+      await expect(
+        useCase.execute(identityId, anImportPayload({ settings: { [category]: {} } })),
+      ).rejects.toThrow(`Rejected retired UserSetting category: ${category}`);
+      expect(repo.findByIdentityId).not.toHaveBeenCalled();
+      expect(repo.save).not.toHaveBeenCalled();
+    },
+  );
+
+  it('rejects legacy shareUsageData=true with an explicit re-consent error', async () => {
+    await expect(
+      useCase.execute(
+        identityId,
+        anImportPayload({ settings: { privacy: { shareUsageData: true } } }),
+      ),
+    ).rejects.toThrow(/shareUsageData=true.*re-consent/);
+    expect(repo.findByIdentityId).not.toHaveBeenCalled();
+    expect(repo.save).not.toHaveBeenCalled();
+  });
+
+  it('rejects locale.currency without applying or saving it', async () => {
+    await expect(
+      useCase.execute(identityId, anImportPayload({ settings: { locale: { currency: 'USD' } } })),
+    ).rejects.toThrow(/locale\.currency.*not imported or applied/);
+    expect(repo.findByIdentityId).not.toHaveBeenCalled();
+    expect(repo.save).not.toHaveBeenCalled();
+  });
+
+  it('rejects unknown legacy keys instead of silently stripping them', async () => {
+    await expect(
+      useCase.execute(identityId, anImportPayload({ settings: { locale: { unknown: true } } })),
+    ).rejects.toThrow(/Rejected invalid UserSetting import/);
+    expect(repo.findByIdentityId).not.toHaveBeenCalled();
+    expect(repo.save).not.toHaveBeenCalled();
+  });
 });
