@@ -5,6 +5,7 @@ import {
   TaskTimingKind,
   type TaskPlanSchedule,
 } from '@memoflow/contracts/task';
+import { createTimeContext, createTimeFacade } from '@memoflow/time';
 
 export interface DraftTaskScheduleInput {
   readonly cadence: 'once' | 'daily' | 'weekly';
@@ -16,21 +17,10 @@ export interface DraftTaskScheduleInput {
 }
 
 function calendarDateAt(epochMs: number, timeZone: string): string {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(new Date(epochMs));
-  const value = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((part) => part.type === type)?.value;
-  const year = value('year');
-  const month = value('month');
-  const day = value('day');
-  if (!year || !month || !day) {
-    throw new Error(`Unable to resolve Task calendar date in timezone ${timeZone}`);
-  }
-  return `${year}-${month}-${day}`;
+  const time = createTimeFacade({
+    context: createTimeContext({ timeZone, weekStartsOn: 1 }),
+  });
+  return String(time.calendar.toYmd(epochMs));
 }
 
 /**

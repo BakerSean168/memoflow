@@ -38,12 +38,7 @@ export class DesktopCloudConnectionService {
       await this.reconcileLocalProfileToCloud(token, auth.account.email);
       phase = 'profile_binding';
       this.assertTargetProfile(profileId);
-      await this.runtime.bindCurrentProfile(
-        auth.account.id,
-        auth.account.name,
-        auth.account.email,
-        auth.account.emailVerified,
-      );
+      await this.runtime.bindCurrentProfile(auth.account.id, auth.account.name, auth.account.email);
       profileBound = true;
       phase = 'session_persistence';
       await this.sessions.save(profileId, {
@@ -67,10 +62,7 @@ export class DesktopCloudConnectionService {
       if (!profileBound) {
         await this.revoke(token);
       } else if (!sessionPersisted) {
-        await Promise.allSettled([
-          this.sessions.remove(profileId),
-          this.revoke(token),
-        ]);
+        await Promise.allSettled([this.sessions.remove(profileId), this.revoke(token)]);
         return fail({
           code: 'PROFILE_CLOUD_REAUTH_REQUIRED',
           message: '本地 Profile 已连接该账号，但无法安全保存云端会话，请重新认证',

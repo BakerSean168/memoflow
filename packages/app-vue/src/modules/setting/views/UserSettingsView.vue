@@ -34,11 +34,19 @@ import UserFilesSettings from '../components/UserFilesSettings.vue';
 import { AccountProfileSection, CloudPasswordSection } from '../../account/components';
 
 import { useUserSetting } from '../composables/useUserSetting';
+import { useUserPreferences } from '../composables/useUserPreferences';
 import { useDataPortability } from '../composables/useDataPortability';
 import { applyThemeMode } from '../composables';
+import { setProductTimePreferences } from '../../../shared/utils/product-time';
 import { usePresentationPreferenceStore } from '../stores/presentation-preference-store';
 import type { AppLocale } from '../../../plugins/i18n';
-import type { UserSettingPreferences } from '@memoflow/contracts/setting';
+import { DEFAULT_USER_PREFERENCE_PROFILE } from '@memoflow/contracts/setting';
+import type {
+  PresentationPreferences,
+  RegionalPreferences,
+  UserPreferenceProfile,
+  UserSettingPreferences,
+} from '@memoflow/contracts/setting';
 import { inject } from 'vue';
 import { AUTH_SERVICE_KEY, DESKTOP_AUTH_API_KEY } from '../../../di/keys';
 
@@ -61,16 +69,19 @@ const isNarrow = computed(() => contentWidth.value < SETTINGS_NARROW_VIEWPORT);
 const settingsContentRef = ref<HTMLElement | null>(null);
 let settingsResizeObserver: ResizeObserver | null = null;
 
+const { userSetting, isLoading, getCategory, loadSettings, exportSettings, importSettings } =
+  useUserSetting();
+
 const {
-  userSetting,
-  defaults,
-  isLoading,
-  getCategory,
-  loadSettings,
-  exportSettings,
-  importSettings,
-  updateCategory,
-} = useUserSetting();
+  presentation: presentationPreference,
+  regional: regionalPreference,
+  isLoading: isPreferenceLoading,
+  loadPreferences,
+  patchPresentation,
+  patchRegional,
+} = useUserPreferences();
+
+const isPageLoading = computed(() => isLoading.value || isPreferenceLoading.value);
 
 const {
   isAvailable: isDataPortabilityAvailable,
@@ -132,17 +143,9 @@ function selectGroup(group: SettingsGroup) {
   }
 }
 
-const isHydratingAppearance = ref(true);
 const fileInput = ref<HTMLInputElement | null>(null);
-type LocaleFormState = Required<UserSettingPreferences['locale']>;
-type LocaleSettingsInput = {
-  language?: string;
-  timezone?: string;
-  dateFormat?: string;
-  timeFormat?: string;
-  weekStartsOn?: number;
-  currency?: string;
-};
+type LocaleFormState = RegionalPreferences & { language: PresentationPreferences['language'] };
+type LocaleSettingsInput = LocaleFormState;
 
 type OpenTextResult = {
   canceled: boolean;
@@ -163,17 +166,11 @@ interface Backup {
 }
 
 // ── Section models — local reactive copies for v-model ──
-const appearance = ref({
-  theme: 'auto' as UserSettingPreferences['appearance']['theme'],
-});
+const appearance = ref<{ theme: PresentationPreferences['theme'] }>({ theme: 'auto' });
 
 const locale = ref<LocaleFormState>({
-  language: 'zh-CN',
-  timezone: 'Asia/Shanghai',
-  dateFormat: 'YYYY-MM-DD',
-  timeFormat: '24H',
-  weekStartsOn: 1,
-  currency: 'CNY',
+  language: DEFAULT_USER_PREFERENCE_PROFILE.presentation.language,
+  ...DEFAULT_USER_PREFERENCE_PROFILE.regional,
 });
 
 const privacy = ref({
@@ -201,13 +198,6 @@ const syncing = ref(false);
 
 function isSupportedLocale(value: unknown): value is AppLocale {
   return value === 'zh-CN' || value === 'en-US';
-}
-
-function normalizeTimeFormat(
-  value: string | undefined,
-  fallback: LocaleFormState['timeFormat'],
-): LocaleFormState['timeFormat'] {
-  return value === '12H' || value === '24H' ? value : fallback;
 }
 
 /** Wrap importSettings for the @import event (which has no payload). */
@@ -294,82 +284,68 @@ async function onFileSelected(event: Event) {
   reader.readAsText(file);
 }
 
+async function handleAppearanceUpdate(value: { theme?: PresentationPreferences['theme'] }) {
+  const nextTheme = value.theme ?? appearance.value.theme;
+  const previous = appearance.value.theme;
+  if (nextTheme === previous) return;
+
+  appearance.value = { theme: nextTheme };
+  presentationStore.setTheme(nextTheme);
+  applyThemeMode(nextTheme);
+
+  if (await patchPresentation({ theme: nextTheme })) return;
+
+  appearance.value = { theme: previous };
+  presentationStore.setTheme(previous);
+  applyThemeMode(previous);
+}
+
 async function handleLocaleUpdate(value: LocaleSettingsInput) {
   const previous = { ...locale.value };
-  const next: LocaleFormState = {
-    ...locale.value,
-    ...value,
-    timeFormat: normalizeTimeFormat(value.timeFormat, locale.value.timeFormat),
-  };
-  locale.value = next;
+  locale.value = { ...value };
 
-  if (isSupportedLocale(next.language)) {
-    presentationStore.setLocale(next.language);
+  if (isSupportedLocale(value.language)) presentationStore.setLocale(value.language);
+
+  const presentationChanged = value.language !== previous.language;
+  const regionalPatch: Partial<RegionalPreferences> = {};
+  for (const key of ['timeZone', 'dateStyle', 'timeStyle', 'weekStartsOn'] as const) {
+    if (value[key] !== previous[key]) regionalPatch[key] = value[key] as never;
   }
 
-  const result = await updateCategory('locale', next);
-  if (result) {
-    return;
-  }
+  const presentationOk = presentationChanged
+    ? await patchPresentation({ language: value.language })
+    : true;
+  const regionalOk =
+    Object.keys(regionalPatch).length > 0 ? await patchRegional(regionalPatch) : true;
 
-  locale.value = previous;
-  if (isSupportedLocale(previous.language)) {
-    presentationStore.setLocale(previous.language);
-  }
+  if (presentationOk && regionalOk) return;
+  await loadPreferences();
+  hydrateCanonicalPreferences();
 }
 
-// ── Hydrate from store when settings load ──
-function hydrateFromStore() {
-  isHydratingAppearance.value = true;
+function hydrateCanonicalPreferences() {
+  const presentation = presentationPreference.value?.preferences;
+  const regional = regionalPreference.value?.preferences;
+  if (!presentation || !regional) return;
 
-  try {
-    const a = getCategory('appearance');
-    if (a) Object.assign(appearance.value, a);
+  appearance.value = { theme: presentation.theme };
+  locale.value = { language: presentation.language, ...regional };
 
-    const l = getCategory('locale');
-    if (l) Object.assign(locale.value, l);
-
-    const p = getCategory('privacy');
-    if (p) Object.assign(privacy.value, p);
-
-    const exp = getCategory('experimental');
-    if (exp) Object.assign(experimental.value, exp);
-  } finally {
-    // Keep the hydration guard active until the appearance watcher has run in
-    // the reactive flush. Resetting synchronously would let the watcher see the
-    // hydrated theme and echo a redundant updateCategory write to the server
-    // (and, on a failed write, pollute the store error with a spurious message).
-    void nextTick(() => {
-      isHydratingAppearance.value = false;
-    });
-  }
+  const profile: UserPreferenceProfile = { presentation, regional };
+  presentationStore.syncFromUserPreferenceProfile(profile);
+  setProductTimePreferences(profile);
 }
 
-watch(userSetting, () => hydrateFromStore());
+function hydrateLegacySettings() {
+  const p = getCategory('privacy');
+  if (p) Object.assign(privacy.value, p);
 
-// The root presentation bootstrap loads defaults concurrently with the
-// settings record. When defaults land after the settings record, re-hydrate
-// so a brand-new user (no persisted appearance/locale) still sees the server
-// defaults in the UI instead of the view's initial literals.
-watch(defaults, () => hydrateFromStore());
+  const exp = getCategory('experimental');
+  if (exp) Object.assign(experimental.value, exp);
+}
 
-watch(
-  () => appearance.value.theme,
-  async (theme, previousTheme) => {
-    if (isHydratingAppearance.value) {
-      return;
-    }
-
-    applyThemeMode(theme);
-
-    if (theme === previousTheme || previousTheme === undefined) {
-      return;
-    }
-
-    await updateCategory('appearance', { theme });
-  },
-  { immediate: true },
-);
+watch([presentationPreference, regionalPreference], hydrateCanonicalPreferences);
+watch(userSetting, hydrateLegacySettings);
 
 onMounted(async () => {
   if (typeof ResizeObserver !== 'undefined' && settingsContentRef.value) {
@@ -378,8 +354,9 @@ onMounted(async () => {
     });
     settingsResizeObserver.observe(settingsContentRef.value);
   }
-  await loadSettings();
-  hydrateFromStore();
+  await Promise.all([loadSettings(), loadPreferences()]);
+  hydrateLegacySettings();
+  hydrateCanonicalPreferences();
 });
 
 onBeforeUnmount(() => {
@@ -406,7 +383,7 @@ onBeforeUnmount(() => {
 
     <div class="mx-auto max-w-5xl px-6 py-8">
       <!-- Loading state -->
-      <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <div v-if="isPageLoading" class="flex items-center justify-center py-12">
         <Loader2 class="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
 
@@ -447,7 +424,10 @@ onBeforeUnmount(() => {
         <!-- 右侧内容 max-w-3xl（§13-3） -->
         <div class="min-w-0 max-w-3xl flex-1 space-y-8">
           <template v-if="activeTab === 'appearance'">
-            <AppearanceSettings v-model="appearance" />
+            <AppearanceSettings
+              :model-value="appearance"
+              @update:model-value="handleAppearanceUpdate"
+            />
             <LocaleSettings :model-value="locale" @update:model-value="handleLocaleUpdate" />
           </template>
 

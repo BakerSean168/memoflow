@@ -34,7 +34,11 @@ import { IdentityId } from '@memoflow/domain-shared';
 import { GoalId, KeyResultWeightSnapshotId, KeyResultId } from '../value-objects';
 import type { GoalEventMap } from '@memoflow/contracts/goal';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
-import type { SnapshotTrigger, GoalReminderConfigDTO, GoalReviewSystemContext } from '@memoflow/contracts/goal';
+import type {
+  SnapshotTrigger,
+  GoalReminderConfigDTO,
+  GoalReviewSystemContext,
+} from '@memoflow/contracts/goal';
 import type {
   GoalServerDTO,
   GoalReviewServerDTO,
@@ -49,8 +53,6 @@ import {
   KeyResultNotFoundInGoalError,
   GoalNameRequiredError,
   GoalInvalidDateRangeError,
-  GoalInvalidDateModificationError,
-  GoalDueDateNotSetError,
   GoalKeyResultNotFoundError,
   GoalReviewNotFoundError,
   GoalDeletedError,
@@ -60,7 +62,6 @@ import {
 } from '../value-objects';
 
 // ================ 常量定义 ================
-const DAY_MS = 1000 * 60 * 60 * 24;
 
 /**
  * Goal 内部状态接口
@@ -376,22 +377,6 @@ export class Goal extends AggregateRoot<GoalId> {
       goal: this.toServerDTO(true),
       changes,
     });
-  }
-
-  public extendDueDate(extensionDays: number): void {
-    if (extensionDays <= 0) throw new GoalInvalidDateModificationError('Extend', extensionDays);
-    if (!this._props.dueDate) throw new GoalDueDateNotSetError();
-    this.updateTimeRange({ dueDate: this._props.dueDate + extensionDays * DAY_MS });
-  }
-
-  public shortenDueDate(shortenDays: number): void {
-    if (shortenDays <= 0) throw new GoalInvalidDateModificationError('Shorten', shortenDays);
-    if (!this._props.dueDate) throw new GoalDueDateNotSetError();
-    const newDueDate = this._props.dueDate - shortenDays * DAY_MS;
-    if (this._props.startDate && newDueDate <= this._props.startDate) {
-      throw new GoalInvalidDateRangeError(this._props.startDate, newDueDate);
-    }
-    this.updateTimeRange({ dueDate: newDueDate });
   }
 
   /**
@@ -810,7 +795,6 @@ export class Goal extends AggregateRoot<GoalId> {
     return Math.round(progress * 100) / 100;
   }
 
-
   /**
    * 📊 检查是否所有关键结果都已完成
    */
@@ -951,24 +935,6 @@ export class Goal extends AggregateRoot<GoalId> {
     if (this._props.deletedAt !== null) {
       throw new GoalDeletedError();
     }
-  }
-
-  /**
-   * 📊 是否已过期
-   */
-  public isOverdue(): boolean {
-    if (!this._props.dueDate || this._props.status !== GoalStatus.Active || this._props.archivedAt)
-      return false;
-    return Date.now() > this._props.dueDate;
-  }
-
-  /**
-   * 📊 获取剩余天数
-   */
-  public getRemainingDays(): number | null {
-    if (!this._props.dueDate) return null;
-    const diff = this._props.dueDate - Date.now();
-    return Math.ceil(diff / DAY_MS);
   }
 
   // ================= 8. 序列化 (Serialization) =================

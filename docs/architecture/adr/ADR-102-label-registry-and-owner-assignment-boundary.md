@@ -8,12 +8,12 @@ tags:
   - vnext
 description: ADR-102 - Shared Label Registry 与 Goal/Task owner-owned assignment 的单向依赖边界
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-09T23:24:35+08:00
 ---
 
 # ADR-102: Label Registry 与 Owner Assignment Boundary
 
-**状态：** 已采纳（待实施）
+**状态：** 已采纳（已实施，LABEL-1302～1304）
 **日期：** 2026-09-09
 **修订：** ADR-054 实现层 ownership
 
@@ -180,3 +180,13 @@ packages/label
 - AND filter语义不变；
 - foreign identity labels继续 fail closed；
 - Prisma/PowerSync parity继续通过。
+
+## 11. Implementation closure
+
+LABEL-1302～1304 已完成本 ADR：
+
+- `@memoflow/label` production/contracts 只保留 Registry contract；
+- Goal/Task 分别拥有 assignment replace/query/AND filter 与 Prisma/PowerSync adapter；
+- foreign identity assignment fail closed；
+- host-level PostgreSQL lifecycle test 验证 rename identity稳定、Label delete只 cascade assignment joins；
+- root `label-registry-ownership-audit` 阻止 Goal/Task-specific symbols/table ownership重新进入 Label package。

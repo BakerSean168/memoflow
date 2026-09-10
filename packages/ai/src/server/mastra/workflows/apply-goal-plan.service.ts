@@ -13,6 +13,7 @@ import {
 } from '@memoflow/contracts/reminder';
 import type { Result, ResultError } from '@memoflow/contracts/result';
 import { TaskGoalBindingTrigger, type CreateTaskPlanReq } from '@memoflow/contracts/task';
+import { createTimeContext, createTimeFacade } from '@memoflow/time';
 import { goalWorkflowEntityId } from './deterministic-entity-id';
 import { taskPlanScheduleFromDraft } from './task-plan-schedule.mapper';
 import type {
@@ -87,68 +88,23 @@ function uniqueInOrder(values: readonly string[]): string[] {
   return Array.from(new Set(values));
 }
 
-function parseMinuteOfDay(value: string): number {
-  const match = /^(\d{2}):(\d{2})$/.exec(value);
-  if (!match) throw new Error(`Invalid timeOfDay: ${value}`);
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  if (hour > 23 || minute > 59) throw new Error(`Invalid timeOfDay: ${value}`);
-  return hour * 60 + minute;
+function productTime(timeZone: string) {
+  return createTimeFacade({
+    context: createTimeContext({ timeZone, weekStartsOn: 1 }),
+  });
 }
 
-function localParts(
-  epochMs: number,
-  timeZone: string,
-): {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-} {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(new Date(epochMs));
-  const value = (type: Intl.DateTimeFormatPartTypes) =>
-    Number(parts.find((part) => part.type === type)?.value ?? Number.NaN);
-  return {
-    year: value('year'),
-    month: value('month'),
-    day: value('day'),
-    hour: value('hour'),
-    minute: value('minute'),
-  };
-}
-
-/** Resolve local calendar day + HH:mm without ever consulting the server timezone. */
+/** Resolve local calendar day + HH:mm through canonical Product Time wall-clock semantics. */
 function combineAnchorAndTime(anchorMs: number, timeOfDay: string, timeZone: string): number {
-  const anchor = localParts(anchorMs, timeZone);
-  const minuteOfDay = parseMinuteOfDay(timeOfDay);
-  const hour = Math.floor(minuteOfDay / 60);
-  const minute = minuteOfDay % 60;
-  let candidate = Date.UTC(anchor.year, anchor.month - 1, anchor.day, hour, minute);
-
-  // Convert the UTC-shaped candidate into the requested zone. Repeating once
-  // handles DST offset transitions for ordinary wall-clock reminder times.
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const observed = localParts(candidate, timeZone);
-    const desiredAsUtc = Date.UTC(anchor.year, anchor.month - 1, anchor.day, hour, minute);
-    const observedAsUtc = Date.UTC(
-      observed.year,
-      observed.month - 1,
-      observed.day,
-      observed.hour,
-      observed.minute,
+  const time = productTime(timeZone);
+  const ymd = time.calendar.toYmd(anchorMs);
+  const instant = time.input.combine(ymd, timeOfDay);
+  if (instant == null) {
+    throw new TypeError(
+      `Unable to resolve reminder wall clock ${String(ymd)} ${timeOfDay} in ${timeZone}`,
     );
-    candidate += desiredAsUtc - observedAsUtc;
   }
-  return candidate;
+  return Number(instant);
 }
 
 function taskRequest(
@@ -208,12 +164,7 @@ function reminderRequest(
   const startTime = reminder.timeOfDay
     ? combineAnchorAndTime(baseAnchor, reminder.timeOfDay, timeZone)
     : baseAnchor;
-  const timeOfDay =
-    reminder.timeOfDay ??
-    (() => {
-      const parts = localParts(startTime, timeZone);
-      return `${String(parts.hour).padStart(2, '0')}:${String(parts.minute).padStart(2, '0')}`;
-    })();
+  const timeOfDay = reminder.timeOfDay ?? productTime(timeZone).input.timeValue(startTime);
   const oneTime = reminder.cadence === 'once';
 
   return {

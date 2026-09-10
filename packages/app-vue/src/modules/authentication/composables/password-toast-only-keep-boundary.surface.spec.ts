@@ -3,24 +3,20 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Residual 1075: password + account checkAvailability toast-only keep-boundary.
+ * Residual 1075: password toast-only keep-boundary.
  * These paths translate Result errors and toast without store.setError / without
  * createComposableHandleError (setError + report dual shape).
  * W6-C: password mutations additionally write a structured receipt through the
  * dedicated store action `setPasswordMutationError` (never the generic setError
  * nor the handleError sole), keeping the toast path while making the failure
  * survive page reloads.
- * Soft residual 1055: useSession/useAccount other ops still use handleError toast cluster.
+ * Soft residual 1055: useSession/useAccount use the shared handleError toast cluster.
  * Soft residual 1065: goal createGoalErrorHandler rich-log keep-boundary remains.
  * Does not flip §13.2 checkboxes.
  */
-describe('password/checkAvailability toast-only keep-boundary (residual 1075)', () => {
+describe('password toast-only keep-boundary (residual 1075)', () => {
   const authDir = __dirname;
   const password = readFileSync(resolve(authDir, 'usePassword.ts'), 'utf8');
-  const account = readFileSync(
-    resolve(authDir, '../../account/composables/useAccount.ts'),
-    'utf8',
-  );
   const handleErrorSole = readFileSync(
     resolve(authDir, '../../../shared/utils/create-composable-handle-error.ts'),
     'utf8',
@@ -46,25 +42,6 @@ describe('password/checkAvailability toast-only keep-boundary (residual 1075)', 
     expect(password).toMatch(/store\.setPasswordMutationError\s*\(/);
     // The structured receipt path must never fall back to the generic setError.
     expect(password).not.toMatch(/store\.setError\s*\(/);
-  });
-
-  it('useAccount checkAvailability owns Residual 1075 toast-only keep-boundary', () => {
-    expect(account).toContain('Residual 1075 keep-boundary');
-    expect(account).toContain('checkAvailability');
-    expect(account).toContain('checkAvailabilityFailed');
-    expect(account).toContain('toast.error');
-    expect(account).toContain('translateResultError');
-    // checkAvailability must not call setError; other account ops still use sole
-    expect(account).toContain('createComposableHandleError');
-    expect(account).toContain('Residual 1055');
-    // Inline keep-boundary comment near checkAvailability failure path
-    const idx = account.indexOf('async function checkAvailability');
-    expect(idx).toBeGreaterThanOrEqual(0);
-    const nextFunction = account.indexOf('async function updateSettings', idx);
-    const slice = account.slice(idx, nextFunction);
-    expect(slice).toContain('Residual 1075 keep-boundary');
-    expect(slice).not.toContain('setError(');
-    expect(slice).toContain('toast.error');
   });
 
   it('differs from createComposableHandleError sole shape (no force-merge)', () => {

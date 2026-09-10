@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { aTaskOccurrence } from '../../../../../testing';
+import { aTaskOccurrence, TASK_TEST_OCCURRENCE_PROJECTION } from '../../../../../testing';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { UncompleteTaskOccurrenceUseCase } from '../uncomplete-task-occurrence.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
@@ -18,6 +18,7 @@ describe('UncompleteTaskOccurrenceUseCase', () => {
     useCase = new UncompleteTaskOccurrenceUseCase(
       instanceRepository,
       createInlineTaskWriteTransactionRunner({ instanceRepository }),
+      TASK_TEST_OCCURRENCE_PROJECTION,
     );
   });
 

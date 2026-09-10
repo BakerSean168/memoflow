@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * Residual 1081: account PowerSync private parseJson keep-boundary.
- * Throws on invalid JSON for required string profile/settings columns.
+ * Throws on invalid JSON for the required string profile column.
+ * Account.settings was retired by SETTING-9203 and stays outside this mapper.
  * Intentionally not merged into utils persistence parseJson / parseJsonSafe
  * (null/undefined input + fallback, never throw).
  * Soft residual 1025: notification parseJsonSafe dual retired onto utils sole.
@@ -29,7 +30,7 @@ describe('account PowerSync parseJson keep-boundary (residual 1081)', () => {
     expect(mapper).toMatch(/private static parseJson\b/);
     expect(mapper).toContain('JSON.parse(value)');
     expect(mapper).toContain('row.profile');
-    expect(mapper).toContain('row.settings');
+    expect(mapper).not.toContain('row.settings');
     // required string signature (not null/undefined + fallback)
     expect(mapper).toMatch(/private static parseJson<T>\(value: string\): T/);
     // Soft keep-boundary docs may name utils symbols; assert no import/call

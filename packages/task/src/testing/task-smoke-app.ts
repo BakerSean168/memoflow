@@ -16,6 +16,7 @@ import express, {
 import { randomUUID } from 'node:crypto';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import { vi } from 'vitest';
+import { createTimeContext } from '@memoflow/time';
 import { TaskPlanController } from '../server/transport/task-plan.controller';
 import { TaskOccurrenceController } from '../server/transport/task-occurrence.controller';
 import {
@@ -55,8 +56,6 @@ export function createMockTemplateRepo(): ITaskPlanRepository {
     findOneTimeTasks: vi.fn().mockResolvedValue([]),
     findRecurringTasks: vi.fn().mockResolvedValue([]),
     findByKeyResultId: vi.fn().mockResolvedValue([]),
-    findUpcomingTasks: vi.fn().mockResolvedValue([]),
-    findTodayTasks: vi.fn().mockResolvedValue([]),
     countTasks: vi.fn().mockResolvedValue(0),
     saveBatch: vi.fn().mockResolvedValue(undefined),
     deleteBatch: vi.fn().mockResolvedValue(undefined),
@@ -112,6 +111,9 @@ export function createTaskSmokeApp(): TaskSmokeApp {
     taskOccurrenceRepository: instanceRepo,
     taskWriteTransactionRunner: {
       run: (work) => work({ templateRepository: templateRepo, instanceRepository: instanceRepo }),
+    },
+    userTimeContextPort: {
+      getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
     },
   } satisfies TaskModuleDependencies);
   const handlers = createTaskTransportHandlers(taskModule.api);

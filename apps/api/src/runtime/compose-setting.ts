@@ -84,10 +84,12 @@ export interface ComposeSettingDependencies {
 export function composeSetting(
   dependencies: ComposeSettingDependencies,
 ): SettingApiModuleDef {
-  const { userSettingRepository } = createSettingPrismaRepositories(dependencies.db);
+  const { userSettingRepository, userPreferenceRepository } =
+    createSettingPrismaRepositories(dependencies.db);
 
   const instance = createSettingModule({
     userSettingRepository,
+    userPreferenceRepository,
     runtimeContributions: [createSettingRuntimeContribution()],
   });
 

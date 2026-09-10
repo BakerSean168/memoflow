@@ -10,6 +10,7 @@ import { TaskOccurrenceStatus } from '../../../domain/value-objects';
 import type { GetTaskPlanRes } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
+import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 
 /**
  * Get Task Template Service
@@ -18,6 +19,8 @@ export class GetTaskPlanUseCase {
   constructor(
     private readonly templateRepository: ITaskPlanRepository,
     private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly userTimeContextPort: UserTimeContextPort,
+    private readonly now: () => number = Date.now,
   ) {}
 
   async execute(
@@ -33,16 +36,22 @@ export class GetTaskPlanUseCase {
       return ok(null);
     }
 
-    const dto = template.toClientDTO(includeChildren);
+    const asOf = this.now();
+    const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
+    const taskTime = createTimeFacade({ context: timeContext });
+    const windowStart = Number(
+      taskTime.calendar.startOfDay(taskTime.calendar.addDays(asOf, -29)),
+    );
+    const dto = template.toClientDTOAt(timeContext, includeChildren, asOf);
 
     if (!includeChildren) {
-      let stats = ((await this.instanceRepository.getTemplateStats([id], identityId)) ?? {})[id];
+      let stats = (
+        (await this.instanceRepository.getTemplateStats([id], identityId, { windowStart, asOf })) ?? {}
+      )[id];
 
       if (!stats) {
         const instances = (await this.instanceRepository.findByTemplateId(id, identityId)) ?? [];
-        const asOf = Date.now();
         const completionWindowDays = 30 as const;
-        const windowStart = asOf - completionWindowDays * 24 * 60 * 60 * 1000;
         const completedInstanceCount = instances.filter(
           (instance) => instance.status === TaskOccurrenceStatus.Completed,
         ).length;

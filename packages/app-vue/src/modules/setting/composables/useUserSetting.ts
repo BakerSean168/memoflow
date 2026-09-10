@@ -11,7 +11,6 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { unwrapOrThrowError } from '@memoflow/contracts/result';
 import { useUserSettingStore } from '../stores/user-setting-store';
-import { usePresentationPreferenceStore } from '../stores/presentation-preference-store';
 import { SETTING_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { sanitizeForIpc } from '../../../shared/utils/ipc';
@@ -27,7 +26,6 @@ export function useUserSetting() {
   const { t } = useI18n();
   const service = useStrictInject(SETTING_SERVICE_KEY, 'SettingService');
   const store = useUserSettingStore();
-  const presentationStore = usePresentationPreferenceStore();
 
   const isLoading = computed(() => store.isLoading);
   const error = computed(() => store.error);
@@ -58,7 +56,6 @@ export function useUserSetting() {
       const data = unwrapOrThrowError<UserSettingClientDTO>(await service.getUserSettings());
       store.setUserSetting(data);
       store.setInitialized(true);
-      presentationStore.syncFromUserSetting(data.preferences);
     } catch (e: unknown) {
       handleError(e, 'setting.errors.loadFailed');
     } finally {
@@ -88,7 +85,6 @@ export function useUserSetting() {
       );
       store.setUserSetting(data);
       store.setInitialized(true);
-      presentationStore.syncFromUserSetting(data.preferences);
       return data;
     } catch (e: unknown) {
       handleError(e, 'setting.errors.updateFailed');
@@ -105,7 +101,6 @@ export function useUserSetting() {
       );
       store.setUserSetting(data);
       store.setInitialized(true);
-      presentationStore.syncFromUserSetting(data.preferences);
     } catch (e: unknown) {
       handleError(e, 'setting.errors.resetFailed');
     }
@@ -128,7 +123,6 @@ export function useUserSetting() {
       );
       store.setUserSetting(result);
       store.setInitialized(true);
-      presentationStore.syncFromUserSetting(result.preferences);
     } catch (e: unknown) {
       handleError(e, 'setting.errors.importFailed');
     }

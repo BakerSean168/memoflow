@@ -227,7 +227,7 @@ export class PowerSyncTaskOccurrenceRepository
   async getTemplateStats(
     templateIds: string[],
     identityId: string,
-    asOf: number = Date.now(),
+    window: { windowStart: number; asOf: number },
   ): Promise<Record<string, TaskPlanInstanceStats>> {
     if (templateIds.length === 0) {
       return {};
@@ -235,8 +235,8 @@ export class PowerSyncTaskOccurrenceRepository
 
     const placeholders = templateIds.map(() => '?').join(', ');
     const completionWindowDays = 30 as const;
-    const windowStart = new Date(asOf - completionWindowDays * 24 * 60 * 60 * 1000).toISOString();
-    const windowEnd = new Date(asOf).toISOString();
+    const windowStart = new Date(window.windowStart).toISOString();
+    const windowEnd = new Date(window.asOf).toISOString();
     const rows = await this.db.getAll<{
       templateId: string;
       instanceCount: number;

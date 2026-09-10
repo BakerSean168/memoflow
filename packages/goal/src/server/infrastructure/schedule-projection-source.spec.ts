@@ -7,7 +7,13 @@ import {
 } from './schedule-projection-source';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
-import { defaultTime } from '@memoflow/time';
+import { createTimeContext, createTimeFacade } from '@memoflow/time';
+
+
+const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: vi.fn().mockResolvedValue(TEST_TIME_CONTEXT),
+};
 
 type GoalDto = {
   id: string;
@@ -52,9 +58,13 @@ function buildGoalDto(overrides: Partial<GoalDto> = {}): GoalDto {
   };
 }
 
-function createSource(goalRepository: Record<string, unknown>) {
+function createSource(
+  goalRepository: Record<string, unknown>,
+  userTimeContextPort = TEST_USER_TIME_CONTEXT_PORT,
+) {
   return createGoalScheduleProjectionSource({
     goalRepository: goalRepository as never,
+    userTimeContextPort,
   });
 }
 
@@ -93,7 +103,10 @@ describe('createGoalScheduleProjectionSource', () => {
     });
     expect(plan.desired).toHaveLength(1);
 
-    const expectedRunAt = defaultTime.calendar.addDays(goalDto.dueDate as number, -7);
+    const expectedRunAt = createTimeFacade({ context: TEST_TIME_CONTEXT }).calendar.addDays(
+      goalDto.dueDate as number,
+      -7,
+    );
     const intent = plan.desired[0];
     expect(intent?.handlerKey).toBe(GOAL_REMINDER_HANDLER_KEY);
     expect(intent?.payloadVersion).toBe(GOAL_REMINDER_PAYLOAD_VERSION);
@@ -116,6 +129,52 @@ describe('createGoalScheduleProjectionSource', () => {
     expect(again.desired.map((item) => item.schedulingKey)).toEqual([expectedKey]);
 
     vi.useRealTimers();
+  });
+
+  it('uses the identity TimeContext for RemainingDays across DST and ignores host timezone', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2030-03-01T00:00:00.000Z'));
+    const newYorkContext = createTimeContext({
+      timeZone: 'America/New_York',
+      weekStartsOn: 0,
+    });
+    const userTimeContextPort = {
+      getUserTimeContext: vi.fn().mockResolvedValue(newYorkContext),
+    };
+    // 2030-03-10 09:00 EDT. One calendar day earlier is
+    // 2030-03-09 09:00 EST, which is 23 elapsed hours earlier across the DST jump.
+    const dueDate = Date.parse('2030-03-10T13:00:00.000Z');
+    const goalDto = buildGoalDto({
+      dueDate,
+      reminderConfig: {
+        enabled: true,
+        triggers: [{ enabled: true, type: ReminderTriggerType.RemainingDays, value: 1 }],
+      },
+    });
+    const source = createSource(
+      {
+        findByIdForIdentity: vi.fn().mockResolvedValue({
+          toServerDTO: vi.fn().mockReturnValue(goalDto),
+        }),
+      },
+      userTimeContextPort,
+    );
+
+    const previousHostTz = process.env.TZ;
+    try {
+      process.env.TZ = 'UTC';
+      const fromUtcHost = await source.buildGoalPlan('GoalId_goal-1', 'IdentityId_goal-owner');
+      process.env.TZ = 'Asia/Tokyo';
+      const fromTokyoHost = await source.buildGoalPlan('GoalId_goal-1', 'IdentityId_goal-owner');
+
+      expect(fromUtcHost.desired[0]?.runAt).toBe(Date.parse('2030-03-09T14:00:00.000Z'));
+      expect(fromTokyoHost.desired[0]?.runAt).toBe(fromUtcHost.desired[0]?.runAt);
+      expect(dueDate - Number(fromUtcHost.desired[0]?.runAt)).toBe(23 * 60 * 60 * 1000);
+      expect(userTimeContextPort.getUserTimeContext).toHaveBeenCalledWith('IdentityId_goal-owner');
+    } finally {
+      process.env.TZ = previousHostTz;
+      vi.useRealTimers();
+    }
   });
 
   it('projects a TimeProgressPercentage reminder proportionally between start and due', async () => {

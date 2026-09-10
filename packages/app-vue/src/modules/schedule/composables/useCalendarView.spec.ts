@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { setProductTimePreferences } from '../../../shared/utils/product-time';
 import { taskOccurrencesToEvents, toLocalDateKey } from './useCalendarView';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '@memoflow/contracts/primitives';
@@ -70,6 +72,7 @@ function makeInstance(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOcc
 }
 
 describe('useCalendarView helpers', () => {
+  afterEach(() => setProductTimePreferences(createDefaultUserPreferenceProfile()));
   it('maps all-day task instances to all-day calendar events', () => {
     const [event] = taskOccurrencesToEvents([makeInstance()], [makeTemplate()]);
 
@@ -106,6 +109,17 @@ describe('useCalendarView helpers', () => {
     expect(new Date(event.startTime).getHours()).toBe(9);
     expect(new Date(event.endTime).getHours()).toBe(10);
     expect(new Date(event.endTime).getMinutes()).toBe(30);
+  });
+
+  it('uses the session Product Time calendar day instead of the host timezone', () => {
+    const profile = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({
+      ...profile,
+      regional: { ...profile.regional, timeZone: 'America/New_York' },
+    });
+
+    const instant = Date.parse('2026-03-08T04:30:00.000Z'); // Mar 7 23:30 in New York
+    expect(toLocalDateKey(instant)).toBe('2026-03-07');
   });
 
   it('formats local date keys without UTC day drift', () => {

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
+import { requireYmd } from '@memoflow/contracts/primitives';
 import ProfileForm from './ProfileForm.vue';
 
 const meta = {
@@ -24,7 +25,7 @@ const mockProfile = {
   avatarUrl: null,
   bio: '一个热爱编程和生活的全栈开发者。',
   gender: 'Male' as const,
-  birthday: new Date('1995-06-15').getTime(),
+  birthday: requireYmd('1995-06-15'),
 };
 
 export const Default: Story = {

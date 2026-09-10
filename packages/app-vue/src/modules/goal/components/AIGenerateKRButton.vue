@@ -142,6 +142,11 @@ import { Label } from '@memoflow/ui-vue-shadcn';
 import { Textarea } from '@memoflow/ui-vue-shadcn';
 import { Alert, AlertTitle, AlertDescription } from '@memoflow/ui-vue-shadcn';
 import { Sparkles, Info, AlertCircle } from '@lucide/vue';
+import {
+  fromProductDateInputValue,
+  getProductTime,
+  toProductDateInputValue,
+} from '../../../shared/utils/product-time';
 
 const props = withDefaults(
   defineProps<{
@@ -164,7 +169,11 @@ const props = withDefaults(
 const { t } = useI18n();
 
 const emit = defineEmits<{
-  generated: [result: { keyResults?: Array<{ title: string; targetValue: number; unit: string; weight?: number }> }];
+  generated: [
+    result: {
+      keyResults?: Array<{ title: string; targetValue: number; unit: string; weight?: number }>;
+    },
+  ];
   error: [error: string];
   generate: [data: Record<string, unknown>];
   loadQuota: [];
@@ -185,16 +194,18 @@ const formValid = computed(() => {
     formData.value.goalTitle &&
     formData.value.startDate &&
     formData.value.endDate &&
-    new Date(formData.value.endDate) >= new Date(formData.value.startDate)
+    formData.value.endDate >= formData.value.startDate
   );
 });
 
 function dateToTimestamp(dateStr: string): number {
-  return new Date(dateStr).getTime();
+  const instant = fromProductDateInputValue(dateStr);
+  if (instant == null) throw new TypeError(`Invalid Product Time date: ${dateStr}`);
+  return instant;
 }
 
 function timestampToDateStr(timestamp: number): string {
-  return new Date(timestamp).toISOString().split('T')[0];
+  return toProductDateInputValue(timestamp);
 }
 
 async function openDialog() {
@@ -206,15 +217,17 @@ async function openDialog() {
   if (props.initialGoalDescription) {
     formData.value.goalDescription = props.initialGoalDescription;
   }
+  const now = Date.now();
   if (props.initialStartDate) {
     formData.value.startDate = timestampToDateStr(props.initialStartDate);
   } else {
-    formData.value.startDate = timestampToDateStr(Date.now());
+    formData.value.startDate = timestampToDateStr(now);
   }
   if (props.initialEndDate) {
     formData.value.endDate = timestampToDateStr(props.initialEndDate);
   } else {
-    formData.value.endDate = timestampToDateStr(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const defaultEnd = getProductTime().calendar.addDays(now, 30);
+    formData.value.endDate = timestampToDateStr(Number(defaultEnd));
   }
 
   emit('loadQuota');

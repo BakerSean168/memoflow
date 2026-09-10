@@ -10,12 +10,16 @@ import type {
 } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
+import type { TaskOccurrenceProjectionService } from '../../services/task-occurrence-projection.service';
 
 /**
  * Get Task Instances By Date Range Service
  */
 export class GetTaskOccurrencesByDateRangeUseCase {
-  constructor(private readonly instanceRepository: ITaskOccurrenceRepository) {}
+  constructor(
+    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly projection: TaskOccurrenceProjectionService,
+  ) {}
 
   async execute(identityId: string, startDate: number, endDate: number): Promise<Result<GetTaskOccurrencesByRangeRes>> {
     const instances = await this.instanceRepository.findByDateRange(
@@ -25,7 +29,7 @@ export class GetTaskOccurrencesByDateRangeUseCase {
     );
 
     return ok({
-      data: instances.map((i) => i.toClientDTO()),
+      data: await this.projection.projectMany(identityId, instances),
       total: instances.length,
     });
   }

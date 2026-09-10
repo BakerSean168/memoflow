@@ -14,6 +14,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import { createTimeContext } from '@memoflow/time';
 import type { GoalWriteTransactionRunner } from '../../application/use-cases/commands/goal-write-support';
 import type {
   IGoalRecordRepository,
@@ -48,6 +49,9 @@ function makeDeps(runtimeContributions: GoalModuleRuntimeContribution[]): GoalMo
     goalRecordRepository: {} as unknown as IGoalRecordRepository,
     goalWriteTransactionRunner: {} as unknown as GoalWriteTransactionRunner,
     taskBindingReadPort: {} as unknown as GoalDependencyReadPort,
+    userTimeContextPort: {
+      getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+    },
     runtimeContributions,
   };
 }

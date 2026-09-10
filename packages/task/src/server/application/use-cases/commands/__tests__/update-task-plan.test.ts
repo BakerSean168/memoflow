@@ -6,6 +6,7 @@ import {
   aLoadedTaskPlan,
   aTaskOccurrence,
   aTimePointConfig,
+  TASK_TEST_TIME_CONTEXT,
 } from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
@@ -18,6 +19,10 @@ import {
   createInlineTaskWriteTransactionRunner,
   type TaskWriteTransactionRunner,
 } from '../task-write-support';
+
+const userTimeContextPort = {
+  getUserTimeContext: vi.fn().mockResolvedValue(TASK_TEST_TIME_CONTEXT),
+};
 
 describe('UpdateTaskPlanUseCase', () => {
   let templateRepo: ReturnType<typeof createMockRepo<ITaskPlanRepository>>;
@@ -41,6 +46,7 @@ describe('UpdateTaskPlanUseCase', () => {
         templateRepository: templateRepo,
         instanceRepository: instanceRepo,
       }),
+      userTimeContextPort,
     );
   });
 
@@ -276,6 +282,7 @@ describe('UpdateTaskPlanUseCase', () => {
         templateRepository: templateRepo,
         instanceRepository: instanceRepo,
       }),
+      userTimeContextPort,
       () => effectiveFrom,
     );
 
@@ -310,6 +317,7 @@ describe('UpdateTaskPlanUseCase', () => {
         templateRepository: templateRepo,
         instanceRepository: instanceRepo,
       }),
+      userTimeContextPort,
       () => effectiveFrom,
     );
 
@@ -358,6 +366,7 @@ describe('UpdateTaskPlanUseCase', () => {
         templateRepository: templateRepo,
         instanceRepository: instanceRepo,
       }),
+      userTimeContextPort,
       () => effectiveFrom,
     );
     const newTimeConfig = aTimePointConfig(600, new Date(effectiveFrom - day));
@@ -367,6 +376,7 @@ describe('UpdateTaskPlanUseCase', () => {
         TaskType.Recurring,
         newTimeConfig,
         RecurrenceRule.createDaily(),
+        TASK_TEST_TIME_CONTEXT,
       ).toDTO(),
     });
 
@@ -401,6 +411,7 @@ describe('UpdateTaskPlanUseCase', () => {
         templateRepository: templateRepo,
         instanceRepository: instanceRepo,
       }),
+      userTimeContextPort,
       () => effectiveFrom,
     );
 
@@ -409,13 +420,14 @@ describe('UpdateTaskPlanUseCase', () => {
         TaskType.Recurring,
         aTimePointConfig(600, new Date(effectiveFrom - day)),
         RecurrenceRule.createDaily(),
+        TASK_TEST_TIME_CONTEXT,
       ).toDTO(),
     });
 
     expect(result).toBeOk();
     expect(instanceRepo.deleteMany).not.toHaveBeenCalled();
     expect(instanceRepo.saveMany).not.toHaveBeenCalled();
-    expect(template.timeConfig?.timePoint).toBe(600);
+    expect(template.schedule.toLegacyTimeConfig(TASK_TEST_TIME_CONTEXT).timePoint).toBe(600);
   });
 
   it('runs template and instance writes through the provided transaction boundary', async () => {
@@ -426,7 +438,12 @@ describe('UpdateTaskPlanUseCase', () => {
         work({ templateRepository: templateRepo, instanceRepository: instanceRepo }),
       ),
     };
-    useCase = new UpdateTaskPlanUseCase(templateRepo, instanceRepo, transactionRunner);
+    useCase = new UpdateTaskPlanUseCase(
+      templateRepo,
+      instanceRepo,
+      transactionRunner,
+      userTimeContextPort,
+    );
 
     const result = await useCase.execute(template.id, template.identityId, {
       name: 'Transactional',

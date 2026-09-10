@@ -15,6 +15,7 @@
  */
 import type { IAnalyticsReadPort } from '@memoflow/ai/ports';
 import type { PrismaClient } from '@memoflow/database';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { SearchGoalsUseCase } from '@memoflow/goal/analytics';
 import { createGoalPrismaModule } from '@memoflow/goal';
 import { PrismaTaskBindingReadPort } from '@memoflow/task';
@@ -24,17 +25,23 @@ import { createTaskPrismaRepositories } from '@memoflow/task';
 import { getApiDashboardData } from '../dashboard/dashboard-read-service';
 
 export class ControlledAnalyticsReadAdapter implements IAnalyticsReadPort {
-  constructor(private readonly db: PrismaClient) {}
+  constructor(
+    private readonly db: PrismaClient,
+    private readonly userTimeContextPort: UserTimeContextPort,
+  ) {}
 
   async buildContext(identityId: string, question: string) {
+    const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
     const goalModule = createGoalPrismaModule(this.db, {
       taskBindingReadPort: new PrismaTaskBindingReadPort(this.db),
+      userTimeContextPort: this.userTimeContextPort,
     });
     const taskRepos = createTaskPrismaRepositories(this.db);
     const dashboard = await getApiDashboardData(this.db, identityId);
     const taskDashboard = await new GetTaskDashboardUseCase(
       taskRepos.taskPlanRepository,
       taskRepos.taskOccurrenceRepository,
+      this.userTimeContextPort,
     ).execute(identityId);
     const activeGoals = await goalModule.goalRepository.findByIdentityId(identityId, {
       includeChildren: true,
@@ -47,6 +54,7 @@ export class ControlledAnalyticsReadAdapter implements IAnalyticsReadPort {
     );
 
     return {
+      timeContext,
       dashboard: dashboard as unknown as Record<string, unknown>,
       taskDashboard: taskDashboard.ok
         ? (taskDashboard.data as unknown as Record<string, unknown>)

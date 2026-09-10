@@ -50,9 +50,7 @@ describe('GOAL-2101 canonical lifecycle', () => {
   it('uses dueDate consistently in aggregate state', () => {
     const goal = createGoal();
     expect(goal.dueDate).toBe(1_800_000_000_000);
-    goal.extendDueDate(2);
-    expect(goal.dueDate).toBe(1_800_172_800_000);
-    goal.shortenDueDate(1);
+    goal.updateTimeRange({ dueDate: 1_800_086_400_000 });
     expect(goal.dueDate).toBe(1_800_086_400_000);
     expect(goal.toServerDTO().dueDate).toBe(goal.dueDate);
     expect('targetDate' in goal.toServerDTO()).toBe(false);

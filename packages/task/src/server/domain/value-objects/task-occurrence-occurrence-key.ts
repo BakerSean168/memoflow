@@ -1,30 +1,25 @@
-import { createTimeFacade } from '@memoflow/time';
-
-const taskTime = createTimeFacade();
+import { createTimeFacade, type TimeContext } from '@memoflow/time';
 
 /**
- * TaskOccurrence occurrence key（R2-1 / P0-03）
+ * TaskOccurrence occurrence key (R2-1 / P0-03).
  *
- * 确定性幂等键：`{templateId}:{localDate}`。同一模板同一天最多一个实例，
- * 数据库层加 `@@unique([templateId, occurrenceKey])` 唯一约束，杜绝
- * 并发/双宿主重复生成。
- *
- * 说明：key 基于本地时区日期（startOfLocalDay 语义），不使用 UTC 日期，
- * 避免 DST/跨时区把同一天拆成两天。
+ * Deterministic idempotency key: `{templateId}:{calendarDate}`. The calendar
+ * date is always resolved from an explicit Product Time context; server host
+ * timezone is never a business input.
  */
-
-export function startOfLocalDay(value: number): number {
-  return taskTime.calendar.startOfDay(value);
+export function startOfLocalDay(value: number, timeContext: TimeContext): number {
+  return createTimeFacade({ context: timeContext }).calendar.startOfDay(value);
 }
 
-/** 本地时区 YYYY-MM-DD（非 UTC）。 */
-export function toLocalDateKey(dayStartMs: number): string {
-  return taskTime.calendar.toYmd(dayStartMs);
+/** Context-scoped YYYY-MM-DD (never ambient host-local). */
+export function toLocalDateKey(dayStartMs: number, timeContext: TimeContext): string {
+  return createTimeFacade({ context: timeContext }).calendar.toYmd(dayStartMs);
 }
 
 export function buildTaskOccurrenceOccurrenceKey(
   templateId: string,
   instanceDate: number,
+  timeContext: TimeContext,
 ): string {
-  return `${templateId}:${toLocalDateKey(startOfLocalDay(instanceDate))}`;
+  return `${templateId}:${toLocalDateKey(startOfLocalDay(instanceDate, timeContext), timeContext)}`;
 }

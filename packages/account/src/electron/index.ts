@@ -76,12 +76,7 @@
 import { ipcMain } from 'electron';
 import { ok } from '@memoflow/contracts/result';
 import { AccountChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import type {
-  CheckAvailabilityReq,
-  CloseAccountReq,
-  UpdateAccountReq,
-  UpdateAccountSettingsReq,
-} from '@memoflow/contracts/account';
+import type { CloseAccountReq, UpdateAccountReq } from '@memoflow/contracts/account';
 import { CloseAccountSchema } from '@memoflow/contracts/account';
 import { fail } from '@memoflow/contracts/result';
 import { formatZodErrors } from '@memoflow/utils/result';
@@ -214,21 +209,6 @@ export function createAccountElectronModule(
           },
         );
         installed.push(AccountChannels.UPDATE_PROFILE);
-
-        ipcMain.handle(
-          AccountChannels.UPDATE_SETTINGS,
-          async (_event, payload: UpdateAccountSettingsReq) => {
-            return withAuthenticatedValue(ctx, (requestContext) =>
-              options.instance.api.updateSettings(payload, requestContext),
-            );
-          },
-        );
-        installed.push(AccountChannels.UPDATE_SETTINGS);
-
-        ipcMain.handle(AccountChannels.CHECK_AVAILABILITY, (_event, data: CheckAvailabilityReq) =>
-          options.instance.api.checkAvailability(data),
-        );
-        installed.push(AccountChannels.CHECK_AVAILABILITY);
 
         ipcMain.handle(AccountChannels.CLOSE, async (_event, payload: CloseAccountReq) => {
           return withAuthenticatedValue(ctx, async (requestContext) => {

@@ -1,4 +1,11 @@
 import type { IUserSettingRepository } from '../domain/repositories/i-user-setting-repository';
+import {
+  createUserPreferenceService,
+  PreferenceUserTimeContextAdapter,
+  type IUserPreferenceRepository,
+  type UserPreferenceService,
+} from '../preferences';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 import {
   GetUserSetting,
@@ -26,6 +33,7 @@ export type SettingRuntimeContributionsInput =
 /** Explicit dependencies for the setting server runtime. Setting 服务端运行时的显式依赖。 */
 export interface SettingModuleDependencies {
   readonly userSettingRepository: IUserSettingRepository;
+  readonly userPreferenceRepository: IUserPreferenceRepository;
   readonly runtimeContributions?: SettingRuntimeContributionsInput;
   readonly persistMissingSettingOnRead?: boolean;
 }
@@ -42,6 +50,9 @@ export interface SettingModuleUseCases {
 
 export interface SettingModuleInstance {
   readonly userSettingRepository: IUserSettingRepository;
+  readonly userPreferenceRepository: IUserPreferenceRepository;
+  readonly preferenceService: UserPreferenceService;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly useCases: SettingModuleUseCases;
   readonly api: SettingApplicationPort;
   start(): void;
@@ -84,15 +95,29 @@ function normalizeRuntimeContributions(
 export function createSettingModule(
   dependencies: SettingModuleDependencies,
 ): SettingModuleInstance {
-  const { userSettingRepository } = dependencies;
+  const { userSettingRepository, userPreferenceRepository } = dependencies;
   const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
   const useCases = createSettingUseCases(dependencies);
+  const preferenceService = createUserPreferenceService(userPreferenceRepository);
+  const userTimeContextPort = new PreferenceUserTimeContextAdapter(preferenceService);
   let started = false;
 
   return {
     userSettingRepository,
+    userPreferenceRepository,
+    preferenceService,
+    userTimeContextPort,
     useCases,
     api: {
+      getPreferenceProfile: (identityId) => preferenceService.getPreferenceProfile(identityId),
+      getPreferenceNamespace: (identityId, namespace) =>
+        preferenceService.getPreferenceNamespace(identityId, namespace),
+      patchPreferenceNamespace: (identityId, namespace, patch, expectedRevision) =>
+        preferenceService.patchPreferenceNamespace(identityId, namespace, patch, expectedRevision),
+      resetPreferenceNamespace: (identityId, namespace, expectedRevision) =>
+        preferenceService.resetPreferenceNamespace(identityId, namespace, expectedRevision),
+      resetUserPreferences: (identityId, expectedRevisions) =>
+        preferenceService.resetUserPreferences(identityId, expectedRevisions),
       getUserSetting: (identityId) => useCases.getUserSetting.execute(identityId),
       patchUserSetting: (identityId, category, patch) =>
         useCases.patchUserSetting.execute(identityId, category, patch),

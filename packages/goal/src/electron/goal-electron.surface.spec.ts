@@ -2,6 +2,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { GoalChannels } from '@memoflow/contracts/electron';
+import { createTimeContext } from '@memoflow/time';
+
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+};
 
 vi.mock('electron', () => ({
   ipcMain: {
@@ -76,6 +81,7 @@ describe('GoalElectronModule.register() startup (W4 P2-1)', () => {
         taskBindingReadPort: {
           checkActiveTaskBindings: async () => ({ hasActiveBindings: false, activeCount: 0 }),
         },
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       }),
     ).not.toThrow();
   });

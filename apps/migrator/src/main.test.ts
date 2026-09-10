@@ -36,7 +36,6 @@ describe('migrator interface', () => {
       'prepare editor-workspace natural key',
       'prepare notification preference hierarchy',
       'prepare vNext unique constraints',
-      'migrate legacy authentication to Better Auth',
       'reconcile Prisma schema',
       'prepare AI provider onboarding sessions',
       'prepare AI provider default invariant',

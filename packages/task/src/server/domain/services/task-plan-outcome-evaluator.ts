@@ -2,10 +2,11 @@ import {
   TaskOccurrenceStatus,
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
-  TaskType,
+  TaskRecurrenceEndKind,
   type TaskPlanOutcomeValue,
 } from '@memoflow/contracts/task';
 import type { TaskPlan } from '../aggregates/task-plan';
+import { createTimeFacade, type TimeContext } from '@memoflow/time';
 
 export interface TaskPlanOccurrenceFact {
   status: (typeof TaskOccurrenceStatus)[keyof typeof TaskOccurrenceStatus];
@@ -14,7 +15,11 @@ export interface TaskPlanOccurrenceFact {
 
 /** Deterministic Task-owned evaluator. Goal and recurrence engines do not decide Task outcome. */
 export class TaskPlanOutcomeEvaluator {
-  evaluate(template: TaskPlan, instances: readonly TaskPlanOccurrenceFact[]): TaskPlanOutcomeValue {
+  evaluate(
+    template: TaskPlan,
+    instances: readonly TaskPlanOccurrenceFact[],
+    timeContext: TimeContext,
+  ): TaskPlanOutcomeValue {
     if (template.outcome === TaskPlanOutcome.Abandoned) return TaskPlanOutcome.Abandoned;
     if (!this.isFinite(template)) return TaskPlanOutcome.Open;
 
@@ -28,7 +33,7 @@ export class TaskPlanOutcomeEvaluator {
       return TaskPlanOutcome.Failed;
     }
 
-    if (!this.isScopeFullyKnown(template, relevant.length)) return TaskPlanOutcome.Open;
+    if (!this.isScopeFullyKnown(template, relevant.length, timeContext)) return TaskPlanOutcome.Open;
 
     // Skipped is a waiver: it is excluded from required completion scope.
     const required = relevant.filter((instance) => instance.status !== TaskOccurrenceStatus.Skipped);
@@ -42,14 +47,28 @@ export class TaskPlanOutcomeEvaluator {
   }
 
   private isFinite(template: TaskPlan): boolean {
-    return template.taskType === TaskType.OneTime || Boolean(template.recurrenceRule?.hasEndCondition);
+    if (!template.schedule.isRecurring) return true;
+    const recurrence = template.schedule.recurrence;
+    return recurrence != null && recurrence.end.kind !== TaskRecurrenceEndKind.Never;
   }
 
-  private isScopeFullyKnown(template: TaskPlan, instanceCount: number): boolean {
-    if (template.taskType === TaskType.OneTime) return instanceCount >= 1;
-    const rule = template.recurrenceRule;
-    if (!rule) return false;
-    if (rule.occurrences !== null) return instanceCount >= rule.occurrences;
-    return rule.endDate !== null && template.lastGeneratedDate !== null && template.lastGeneratedDate >= rule.endDate;
+  private isScopeFullyKnown(
+    template: TaskPlan,
+    instanceCount: number,
+    timeContext: TimeContext,
+  ): boolean {
+    if (!template.schedule.isRecurring) return instanceCount >= 1;
+    const recurrence = template.schedule.recurrence;
+    if (!recurrence) return false;
+    if (recurrence.end.kind === TaskRecurrenceEndKind.Count) {
+      return instanceCount >= recurrence.end.count;
+    }
+    if (recurrence.end.kind !== TaskRecurrenceEndKind.Until || template.lastGeneratedDate === null) {
+      return false;
+    }
+    const generatedThrough = String(
+      createTimeFacade({ context: timeContext }).calendar.toYmd(template.lastGeneratedDate),
+    );
+    return generatedThrough >= String(recurrence.end.date);
   }
 }

@@ -3,6 +3,7 @@ import type { TaskPlanState } from '../../../../domain/aggregates/task-plan.stat
 import { TaskPlanId } from '../../../../domain/value-objects/task-plan-id';
 import { TaskPlanStatus } from '../../../../domain/value-objects/task-plan-status';
 import { IdentityId } from '@memoflow/domain-shared';
+import { createTimeContext } from '@memoflow/time';
 import {
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
@@ -20,6 +21,8 @@ import {
   TaskReminderConfig,
 } from '../../../../domain/value-objects';
 import { TaskTimeConfig } from '../../../../domain/value-objects/task-time-config';
+
+const PERSISTED_DATE_ONLY_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
 
 export type PowerSyncTaskPlanRow = {
   id: string;
@@ -124,6 +127,7 @@ export class PowerSyncTaskPlanMapper {
         recurrenceRule ? TaskType.Recurring : TaskType.OneTime,
         timeConfig,
         recurrenceRule,
+        PERSISTED_DATE_ONLY_CONTEXT,
       ),
       reminderConfig,
       importance: data.importance as ImportanceLevel,
@@ -176,8 +180,8 @@ export class PowerSyncTaskPlanMapper {
 
   static toPersistence(template: TaskPlan) {
     const dto = template.toServerDTO();
-    const timeConfig = template.timeConfig;
-    const recurrenceRule = template.recurrenceRule;
+    const timeConfig = template.schedule.toLegacyTimeConfig(PERSISTED_DATE_ONLY_CONTEXT);
+    const recurrenceRule = template.schedule.toLegacyRecurrenceRule(PERSISTED_DATE_ONLY_CONTEXT);
     const reminderTrigger = dto.reminderConfig?.triggers?.[0] ?? null;
 
     return {

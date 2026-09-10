@@ -27,20 +27,9 @@ import { column, Schema, Table } from '@powersync/common';
 const accounts = new Table({
   status: column.text,
   profile: column.text, // JSON
-  settings: column.text, // JSON
-  email_address: column.text,
-  email_is_verified: column.integer, // boolean
-  email_verified_at: column.text, // DateTime
-  email_is_primary: column.integer, // boolean
-  phone_country_code: column.text,
-  phone_number: column.text,
-  phone_full_number: column.text,
-  phone_is_verified: column.integer, // boolean
-  phone_verified_at: column.text, // DateTime
-  version: column.integer,
   created_at: column.text, // DateTime
   updated_at: column.text, // DateTime
-  deleted_at: column.text, // DateTime
+  closed_at: column.text, // DateTime
 });
 
 /**

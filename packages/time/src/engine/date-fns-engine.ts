@@ -15,7 +15,7 @@ import {
 } from 'date-fns';
 import { TZDateMini } from '@date-fns/tz';
 import type { Hm, Instant, Ymd } from '@memoflow/contracts/primitives';
-import type { TimeEngine, TimeStyleCalendar, TimeStyleDisplay, TimeZoneId } from '../types';
+import type { TimeDateStyle, TimeEngine, TimeZoneId, Weekday } from '../types';
 import { asHm, asInstant, asYmd, isHmShape, isYmdShape } from '../codec/brand';
 
 function toDate(instant: Instant): Date {
@@ -29,16 +29,11 @@ function toDate(instant: Instant): Date {
  * currently use numeric date/time fields, `MMM d`, and `X`/`x` offsets; named
  * human presentation belongs to the Intl formatters instead.
  */
-function toPatternDate(
-  instant: Instant,
-  timeZone: TimeZoneId,
-): InstanceType<typeof TZDateMini> {
+function toPatternDate(instant: Instant, timeZone: TimeZoneId): InstanceType<typeof TZDateMini> {
   return new TZDateMini(instant, timeZone);
 }
 
-function densityToDateFnsPattern(
-  density: TimeStyleDisplay['date'] | TimeStyleDisplay['dateTime'],
-): string {
+function densityToDateFnsPattern(density: TimeDateStyle): string {
   switch (density) {
     case 'short':
       return 'yyyy/M/d';
@@ -50,7 +45,7 @@ function densityToDateFnsPattern(
   }
 }
 
-function densityToDateOnlyPattern(density: TimeStyleDisplay['date']): string {
+function densityToDateOnlyPattern(density: TimeDateStyle): string {
   switch (density) {
     case 'short':
       return 'M/d';
@@ -75,17 +70,13 @@ export function createDateFnsEngine(): TimeEngine {
       return dfFormat(d, pattern || 'HH:mm');
     },
 
-    formatDate(instant: Instant, _locale: string, density: TimeStyleDisplay['date']): string {
+    formatDate(instant: Instant, _locale: string, density: TimeDateStyle): string {
       const d = toDate(instant);
       if (!isValid(d)) return '';
       return dfFormat(d, densityToDateOnlyPattern(density));
     },
 
-    formatDateTime(
-      instant: Instant,
-      _locale: string,
-      density: TimeStyleDisplay['dateTime'],
-    ): string {
+    formatDateTime(instant: Instant, _locale: string, density: TimeDateStyle): string {
       const d = toDate(instant);
       if (!isValid(d)) return '';
       return dfFormat(d, densityToDateFnsPattern(density));
@@ -156,15 +147,11 @@ export function createDateFnsEngine(): TimeEngine {
       return differenceInCalendarDays(toDate(a), toDate(b));
     },
 
-    diffCalendarWeeks(
-      a: Instant,
-      b: Instant,
-      weekStartsOn: TimeStyleCalendar['weekStartsOn'] = 1,
-    ): number {
+    diffCalendarWeeks(a: Instant, b: Instant, weekStartsOn: Weekday = 1): number {
       return differenceInCalendarWeeks(toDate(a), toDate(b), { weekStartsOn });
     },
 
-    startOfWeek(instant: Instant, weekStartsOn: TimeStyleCalendar['weekStartsOn']): Instant {
+    startOfWeek(instant: Instant, weekStartsOn: Weekday): Instant {
       return asInstant(dfStartOfWeek(toDate(instant), { weekStartsOn }).getTime());
     },
 

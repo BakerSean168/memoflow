@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { anIdentityId } from '../../../../../testing';
+import { anIdentityId, TASK_TEST_TIME_CONTEXT } from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import type { CreateTaskPlanUseCaseReq } from '@memoflow/contracts/task';
@@ -9,6 +9,10 @@ import { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { CreateTaskPlanUseCase } from '../create-task-plan.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
+
+const userTimeContextPort = {
+  getUserTimeContext: vi.fn().mockResolvedValue(TASK_TEST_TIME_CONTEXT),
+};
 
 vi.mock('@memoflow/utils', async () => {
   const actual = await vi.importActual<typeof import('@memoflow/utils')>('@memoflow/utils');
@@ -90,7 +94,12 @@ describe('CreateTaskPlanUseCase', () => {
       instanceRepository: instanceRepo,
     });
 
-    useCase = new CreateTaskPlanUseCase(templateRepo, instanceRepo, transactionRunner);
+    useCase = new CreateTaskPlanUseCase(
+      templateRepo,
+      instanceRepo,
+      transactionRunner,
+      userTimeContextPort,
+    );
   });
 
   afterEach(() => {

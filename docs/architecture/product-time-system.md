@@ -12,7 +12,7 @@ updated: 2026-09-09T00:30:00+08:00
 
 # 产品时间体系（Product Time System）
 
-> **2026-09-09 target notice：** 本文仍是 ADR-037 的现有详设；Time vNext 第二轮目标以 ADR-100/101 与 `docs/architecture/time-label-vnext-foundations.md` 为准。实施完成前不要把 timezone-aware target 冒充成当前代码行为。
+> **2026-09-09 vNext closure：** ADR-100/101 与 TIME-1201～1206 已实施；本文的 current API 段落按 context-required Product Time 更新。后文迁移波次保留为历史实施记录，不再定义兼容 surface。
 
 > **宪法：** [ADR-037](./adr/ADR-037-product-time-system.md)（已采纳）  
 > 本文是可实施的详设；与 ADR 冲突时以 ADR 决策为准，并回头修正本文。
@@ -276,11 +276,12 @@ calendar.isToday(instant): boolean
 ### 6.6 装配
 
 ```text
-createTimeFacade({ style, clock, engine }): TimeFacade
-time.withStyle(partial): TimeFacade
+createTimeFacade({ context, presentation?, clock?, engine? }): TimeFacade
+time.withContext(context): TimeFacade
+time.withPresentation(partial): TimeFacade
 ```
 
-App bootstrap `provide` / React Context；Server 请求级 `withStyle({ locale })`。
+`context` 必填；不存在 `defaultTime` / mixed `TimeStyle` / `withStyle`。App bootstrap 可以显式用 device `TimeZoneSource` 初始化 guest context；登录态由 canonical Preference `UserTimeContextPort` 覆盖。
 
 ---
 
@@ -290,26 +291,25 @@ App bootstrap `provide` / React Context；Server 请求级 `withStyle({ locale }
 packages/time/                          @memoflow/time
   src/
     types.ts                            re-export primitives + 本地辅助
-    style/
     clock/
     codec/
     format/
     input/
     calendar/
+    recurrence/
+    timezone/                           IANA context + wall-clock adapter
     engine/
-      date-fns-engine.ts
-      intl-display-engine.ts
+      date-fns-engine.ts                production 唯一 date-fns importer
       types.ts
-    facade.ts
+    facade.ts                           context-required facade
     index.ts
-    free/format-helpers.ts              公开 free helpers（非 legacy）
+    free/format-helpers.ts              仅纯字符串/Ymd presentation helper
   README.md
 packages/contracts/src/primitives/
   instant.ts / transfer-date.ts         brand ≡
   ymd.ts / hm.ts
 
-packages/app-vue/src/shared/utils/format-*  → re-export @memoflow/time（dual 路径稳定）
-packages/app-vue/src/shared/utils/product-time.ts  session facade + empty-label override```
+packages/app-vue/src/shared/utils/product-time.ts  explicit session context + presentation facade```
 
 Nx：`time` project；依赖 `contracts`、`date-fns`；被 app-*、domain packages 依赖。
 
@@ -320,11 +320,12 @@ Nx：`time` project；依赖 `contracts`、`date-fns`；被 app-*、domain packa
 ### 8.1 Time Registry（`tools/governance/time-registry.json` + 人读 md）
 
 ```text
-kind: canonical | boundary | legacy | exemption
+kind: canonical | boundary
 path / symbol
 reason
 owner
-retire_by?   // legacy/exemption 必填
+
+TIME-1206 后 registry 不再作为 legacy date-fns allowlist。
 ````
 
 ### 8.2 ESLint（目标）
@@ -334,7 +335,7 @@ retire_by?   // legacy/exemption 必填
 3. 限制组件内新建 `function formatDate|formatTime|formatTimestamp`
 4. 限制业务 `new Date()` 作为「现在」（鼓励 clock.now）；infra/codec 白名单
 
-分阶段：warn → error + legacy 名单。
+当前状态：error；production `date-fns` 仅允许 `packages/time/src/engine/**`，无 legacy importer exemption。
 
 ### 8.3 Surface / 测试
 
@@ -352,7 +353,7 @@ retire_by?   // legacy/exemption 必填
 | dual-retired 文件锁税    | 时间宪法与调用合法性                  |
 | keep_boundary 语义双实现 | 时间 boundary 与 Domain/Transfer 语义 |
 
-format 类 keep-boundary 迁移期双写，长期以 Time Registry + canonical API 为准。
+历史 keep-boundary 记录仍由 Dual Registry 保存；Product Time current source 只以 Time Registry canonical/boundary + canonical API 为准。
 
 ---
 
@@ -423,13 +424,13 @@ Prisma DateTime → codec.fromJsDate → Instant → 领域
 
 ## 12. 成功图像
 
-1. `date-fns` importers ⊆ `packages/time/engine`（+ 空 legacy 表）。
+1. production `date-fns` importers = `packages/time/src/engine/**` only。
 2. apps 无产品私有 `formatDate`/`formatTime`（测试除外）。
-3. 改 `TimeStyle.empty.display` 一处，列表空时间全局变。
+3. 改 `TimePresentationStyle.empty.display` 一处，统一影响 Product Time 空值展示。
 4. FixedClock 下关键文案稳定可测。
 5. 新 contracts 字段无 `DomainDate`；TransferDate 为 brand Instant。
 6. 全天/生日为 Ymd，不再用午夜 Date 冒充。
-7. Time Registry legacy → 0 有截止日期趋势。
+7. Time Registry legacy/exemption importer = 0；anti-resurrection audit 已接入 governance。
 8. 设计/产品能读 `packages/time/TIME_STYLE.md` 提相对时间阈值而不改业务代码。
 
 ---

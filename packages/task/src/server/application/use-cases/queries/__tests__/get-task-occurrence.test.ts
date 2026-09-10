@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { aTaskOccurrence } from '../../../../../testing';
+import { aTaskOccurrence, TASK_TEST_OCCURRENCE_PROJECTION } from '../../../../../testing';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { GetTaskOccurrenceUseCase } from '../get-task-occurrence.use-case';
 
@@ -14,7 +14,7 @@ describe('GetTaskOccurrenceUseCase', () => {
     instanceRepo = createMockRepo<ITaskOccurrenceRepository>({
       findByIdForIdentity: vi.fn(),
     });
-    useCase = new GetTaskOccurrenceUseCase(instanceRepo);
+    useCase = new GetTaskOccurrenceUseCase(instanceRepo, TASK_TEST_OCCURRENCE_PROJECTION);
   });
 
   it('should return null when instance does not exist', async () => {

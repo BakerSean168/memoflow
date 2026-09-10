@@ -7,6 +7,12 @@ import type {
 } from '@memoflow/contracts/electron';
 import { GoalPowerSyncRepository } from '../goal-powersync.repository';
 import { createGoalScheduleProjectionSource } from '../../../schedule-projection-source';
+import { createTimeContext } from '@memoflow/time';
+
+const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => TEST_TIME_CONTEXT,
+};
 
 function createTestSqliteDatabase(): IElectronDatabase {
   const sqlite = new Database(':memory:');
@@ -133,6 +139,7 @@ describe('GoalPowerSyncRepository scheduling identity (GOAL-3201 startup reconci
 
     const source = createGoalScheduleProjectionSource({
       goalRepository: new GoalPowerSyncRepository(db),
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
     });
 
     await expect(source.listGoalRefs?.()).resolves.toEqual([

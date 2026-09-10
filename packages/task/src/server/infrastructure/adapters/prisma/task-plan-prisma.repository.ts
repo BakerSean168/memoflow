@@ -15,7 +15,7 @@ import {
   type TaskFilters,
 } from '../../../domain/repositories/i-task-plan-repository';
 import type { TaskPlanStatus } from '@memoflow/contracts/task';
-import type { LabelClientDTO } from '@memoflow/contracts/label';
+import { LabelColorSchema, type LabelClientDTO } from '@memoflow/contracts/label';
 import { AggregateRepositoryBase, createEventBusAdapter, type IEventBus } from '@memoflow/patterns';
 import { eventBus } from '@memoflow/utils/domain';
 import { PrismaTaskPlanMapper } from './mappers/prisma-task-plan-mapper';
@@ -59,7 +59,7 @@ export class TaskPlanPrismaRepository
     return {
       id: row.id,
       name: row.name,
-      color: row.color,
+      color: row.color == null ? null : LabelColorSchema.parse(row.color),
       createdAt: row.createdAt.getTime(),
       updatedAt: row.updatedAt.getTime(),
     };
@@ -368,25 +368,6 @@ export class TaskPlanPrismaRepository
       identityId,
       data.map((record: PrismaTaskPlan) => this.mapToEntity(record)),
     );
-  }
-
-  async findUpcomingTasks(identityId: string, _daysAhead: number): Promise<TaskPlan[]> {
-    const data = await this.db.taskPlan.findMany({
-      where: {
-        identityId,
-        status: 'Active',
-        deletedAt: null,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-    return this.hydrateTemplates(
-      identityId,
-      data.map((record: PrismaTaskPlan) => this.mapToEntity(record)),
-    );
-  }
-
-  async findTodayTasks(identityId: string): Promise<TaskPlan[]> {
-    return this.findUpcomingTasks(identityId, 1);
   }
 
   async countTasks(identityId: string, filters?: TaskFilters): Promise<number> {

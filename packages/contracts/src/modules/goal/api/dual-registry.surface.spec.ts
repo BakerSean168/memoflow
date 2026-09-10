@@ -30,7 +30,6 @@ import { describe, expect, it } from 'vitest';
         resolve(modules, 'repository/api/knowledge-repository-connection.dto.ts'),
         ['CreateKnowledgeRepositoryConnectionRes'],
       ],
-      [resolve(modules, 'account/api/account-settings.dto.ts'), ['GetAccountSettingsRes']],
       [resolve(modules, 'task/api/task-schedule.dto.ts'), ['ToggleTaskCompletionRes']],
       [resolve(modules, 'setting/api/sync.dto.ts'), ['SyncSettingsRes']],
       [resolve(modules, 'governance/api/rule-revisions.ts'), ['GetRuleRevisionRes']],

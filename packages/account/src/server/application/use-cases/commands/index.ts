@@ -5,4 +5,3 @@
 
 export { CloseAccountUseCase } from './close-account.use-case';
 export { UpdateAccountProfileUseCase } from './update-account-profile.use-case';
-export { UpdateAccountSettingsUseCase } from './update-account-settings.use-case';

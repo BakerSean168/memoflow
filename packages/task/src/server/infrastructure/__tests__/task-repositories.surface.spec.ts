@@ -14,6 +14,7 @@ import {
 } from '../../../../src';
 import { createTaskPrismaModule } from '../prisma';
 import { createTaskPowerSyncModule } from '../powersync';
+import { TASK_TEST_USER_TIME_CONTEXT_PORT } from '../../../testing';
 
 /**
  * Task repository seam surface.
@@ -54,14 +55,18 @@ describe('task repository factories surface', () => {
   });
 
   it('convenience module factories still expose api/start/dispose', () => {
-    const prismaInstance = createTaskPrismaModule(fakePrisma);
+    const prismaInstance = createTaskPrismaModule(fakePrisma, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     expect(prismaInstance).toHaveProperty('api');
     expect(typeof prismaInstance.start).toBe('function');
     expect(typeof prismaInstance.dispose).toBe('function');
     const typed: TaskModuleInstance = prismaInstance;
     expect(typeof typed.api.createTaskPlan).toBe('function');
 
-    const powerSyncInstance = createTaskPowerSyncModule(fakeElectronDb);
+    const powerSyncInstance = createTaskPowerSyncModule(fakeElectronDb, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     expect(powerSyncInstance).toHaveProperty('api');
     expect(typeof powerSyncInstance.start).toBe('function');
     expect(typeof powerSyncInstance.dispose).toBe('function');

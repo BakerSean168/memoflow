@@ -14,6 +14,7 @@ import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error, fail } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   mapTaskWriteErrorToResultError,
   type TaskWriteTransactionRunner,
@@ -31,6 +32,7 @@ export class ActivateTaskPlanUseCase {
     private readonly templateRepository: ITaskPlanRepository,
     private readonly instanceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
+    private readonly userTimeContextPort: UserTimeContextPort,
   ) {
     if (!transactionRunner) {
       throw new Error('TaskWriteTransactionRunner must be explicitly provided to ActivateTaskPlanUseCase');
@@ -44,6 +46,7 @@ export class ActivateTaskPlanUseCase {
     identityId: string,
   ): Promise<Result<{ template: TaskPlanClientDTO; instancesGenerated: number }>> {
     try {
+      const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
       return await this.transactionRunner.run(async ({ templateRepository, instanceRepository }) => {
         const template = await templateRepository!.findByIdForIdentity(identityId, id);
         if (!template) {
@@ -57,7 +60,7 @@ export class ActivateTaskPlanUseCase {
         // generation horizon after deleting future incomplete occurrences.
         const existingInstances = await instanceRepository.findByTemplateId(id, identityId);
         existingInstances.forEach((instance) => template.addInstance(instance));
-        const instances = this.generationService.generateInstances(template, {
+        const instances = this.generationService.generateInstances(template, timeContext, {
           forceGenerate: true,
           fromDate: Date.now(),
         });
@@ -71,7 +74,7 @@ export class ActivateTaskPlanUseCase {
         await templateRepository!.save(template);
 
         return ok({
-          template: template.toClientDTO(),
+          template: template.toClientDTOAt(timeContext),
           instancesGenerated,
         });
       });

@@ -220,10 +220,12 @@ import {
 import { Repeat, Info, Calendar as CalendarIcon } from '@lucide/vue';
 import { formatDisplayDate } from '../../../../../shared/utils/format-display-date';
 import { handleCalendarSelect } from '../../../../../shared/utils/handle-calendar-select';
+import { getProductTime } from '../../../../../shared/utils/product-time';
+import { addYmdDays } from '@memoflow/time';
 
 const { t, locale } = useI18n();
 
-// Residual 1249 / Residual 1252: formatEndDateDisplay dual retired onto formatDisplayDate sole; formatDateToYMD dual retired onto shared sole (Residual 1252).
+// TIME-1206: recurrence date display consumes canonical Ymd and never routes through Date -> Ymd compatibility helpers.
 // Residual 1267: handleEndDateCalendarSelect dual retired onto handleCalendarSelect sole (setter → endDate ref).
 
 /** Convert endDate string to Date for Calendar :selected */
@@ -244,9 +246,8 @@ function handleEndDateCalendarSelect(date: unknown) {
  * 获取默认结束日期（今天 + 配置的天数）
  */
 const getDefaultEndDate = (): string => {
-  const date = new Date();
-  date.setDate(date.getDate() + RECURRENCE_RULE_DEFAULTS.DEFAULT_END_DATE_DAYS);
-  return date.toISOString().split('T')[0];
+  const today = getProductTime().calendar.toYmd(Date.now());
+  return String(addYmdDays(today, RECURRENCE_RULE_DEFAULTS.DEFAULT_END_DATE_DAYS));
 };
 
 const props = defineProps<{

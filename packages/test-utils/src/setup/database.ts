@@ -273,10 +273,29 @@ export async function cleanAllTables(prisma: {
   if (tables.length === 0) return;
 
   const tableNames = tables.map((t) => `"${t.tablename}"`).join(', ');
-  await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${tableNames} CASCADE`);
+  const statement = `TRUNCATE TABLE ${tableNames} CASCADE`;
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      await prisma.$executeRawUnsafe(statement);
+      return;
+    } catch (error) {
+      if (!isPostgresDeadlock(error) || attempt === 3) throw error;
+      await sleep(25 * attempt);
+    }
+  }
 }
 
 // ─── Internal Helpers ──────────────────────────────────────────────
+
+function isPostgresDeadlock(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const candidate = error as {
+    code?: unknown;
+    meta?: { code?: unknown };
+  };
+  return candidate.code === '40P01' || candidate.meta?.code === '40P01';
+}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));

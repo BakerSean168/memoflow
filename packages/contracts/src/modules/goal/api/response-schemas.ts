@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { LabelColorSchema } from '../../label';
 import { brandedId } from '../../../primitives';
 import type {
   GoalId,
@@ -78,9 +79,9 @@ export const GoalLabelProjectionSchema = z.object({
   identityId: z.string().min(1),
   name: z.string(),
   normalizedName: z.string(),
-  color: z.string().nullable(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
+  color: LabelColorSchema.nullable(),
+  createdAt: z.number().finite(),
+  updatedAt: z.number().finite(),
 });
 export type GoalLabelProjection = z.infer<typeof GoalLabelProjectionSchema>;
 
@@ -241,7 +242,6 @@ export const GoalReviewListResSchema = z.object({
 // ============================================================================
 // Simple Response Schemas
 // ============================================================================
-
 
 // ============================================================================
 // Request Schemas

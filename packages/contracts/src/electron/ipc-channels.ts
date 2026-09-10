@@ -105,8 +105,6 @@ export const DashboardChannels = {
 export const AccountChannels = {
   GET_ME: 'account:get-me',
   UPDATE_PROFILE: 'account:update-profile',
-  UPDATE_SETTINGS: 'account:update-settings',
-  CHECK_AVAILABILITY: 'account:check-availability',
   CLOSE: 'account:close',
 } as const;
 
@@ -232,6 +230,11 @@ export const SettingChannels = {
   RESET: 'setting:reset',
   IMPORT: 'setting:import',
   EXPORT: 'setting:export',
+  PREFERENCES_PROFILE_GET: 'setting:preferences:profile',
+  PREFERENCES_RESET: 'setting:preferences:reset',
+  PREFERENCE_GET: 'setting:preference:get',
+  PREFERENCE_PATCH: 'setting:preference:patch',
+  PREFERENCE_RESET: 'setting:preference:reset',
 } as const;
 
 export const SystemChannels = {

@@ -17,6 +17,11 @@ describe('SettingIpcAdapter channel surface', () => {
     expect(source).toContain('SettingChannels.RESET');
     expect(source).toContain('SettingChannels.IMPORT');
     expect(source).toContain('SettingChannels.EXPORT');
+    expect(source).toContain('SettingChannels.PREFERENCES_PROFILE_GET');
+    expect(source).toContain('SettingChannels.PREFERENCE_GET');
+    expect(source).toContain('SettingChannels.PREFERENCE_PATCH');
+    expect(source).toContain('SettingChannels.PREFERENCE_RESET');
+    expect(source).toContain('SettingChannels.PREFERENCES_RESET');
     expect(source).not.toMatch(/\$\{this\.channel\}/);
     expect(source).not.toContain("private readonly channel = 'setting'");
   });
@@ -29,6 +34,11 @@ describe('SettingIpcAdapter channel surface', () => {
       'setting:reset',
       'setting:import',
       'setting:export',
+      'setting:preferences:profile',
+      'setting:preferences:reset',
+      'setting:preference:get',
+      'setting:preference:patch',
+      'setting:preference:reset',
     ]);
   });
 });

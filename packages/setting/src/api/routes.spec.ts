@@ -25,6 +25,11 @@ const authMiddleware = ((_, __, next) => next()) as RequestHandler;
 
 function createSettingApiStub(): SettingApplicationPort {
   return {
+    getPreferenceProfile: vi.fn(),
+    getPreferenceNamespace: vi.fn(),
+    patchPreferenceNamespace: vi.fn(),
+    resetPreferenceNamespace: vi.fn(),
+    resetUserPreferences: vi.fn(),
     getUserSetting: vi.fn(),
     patchUserSetting: vi.fn(),
     resetUserSetting: vi.fn(),
@@ -39,7 +44,9 @@ function getRegisteredRoute(
   method: string,
   path: string,
 ): RegisteredRoute {
-  const route = registry.paths.find((candidate) => candidate.method === method && candidate.path === path);
+  const route = registry.paths.find(
+    (candidate) => candidate.method === method && candidate.path === path,
+  );
 
   expect(route).toBeDefined();
   return route!;
@@ -52,20 +59,34 @@ function getResponseSchema(
   safeParse: (value: unknown) => { success: boolean };
   _def?: { typeName?: string };
 } {
-  const responses = route.responses as Record<string, { content?: Record<string, unknown> }> | undefined;
+  const responses = route.responses as
+    Record<string, { content?: Record<string, unknown> }> | undefined;
   const response = responses?.[String(status)];
   const schema = (response?.content as Record<string, unknown> | undefined)?.[
     'application/json'
-  ] as { schema?: { safeParse: (value: unknown) => { success: boolean }; _def?: { typeName?: string } } } | undefined;
-  return schema?.schema ?? (response as unknown as { safeParse: (value: unknown) => { success: boolean } });
+  ] as
+    | {
+        schema?: {
+          safeParse: (value: unknown) => { success: boolean };
+          _def?: { typeName?: string };
+        };
+      }
+    | undefined;
+  return (
+    schema?.schema ??
+    (response as unknown as { safeParse: (value: unknown) => { success: boolean } })
+  );
 }
 
 function getJsonBodySchema(route: RegisteredRoute): {
   safeParse: (value: unknown) => { success: boolean };
 } {
-  return (((route.request?.body as Record<string, unknown> | undefined)?.content as
-    | Record<string, unknown>
-    | undefined)?.['application/json'] as Record<string, unknown> | undefined)?.schema as {
+  return (
+    (
+      (route.request?.body as Record<string, unknown> | undefined)?.content as
+        Record<string, unknown> | undefined
+    )?.['application/json'] as Record<string, unknown> | undefined
+  )?.schema as {
     safeParse: (value: unknown) => { success: boolean };
   };
 }
@@ -73,6 +94,38 @@ function getJsonBodySchema(route: RegisteredRoute): {
 const BASE = '/api/v1/settings';
 
 describe('setting route contracts', () => {
+  it('registers the canonical preference profile and namespace routes', () => {
+    const registry = new TestOpenApiRegistry();
+    registerSettingRoutes(
+      createSettingApiStub(),
+      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
+      registry,
+    );
+
+    expect(getRegisteredRoute(registry, 'get', `${BASE}/preferences`)).toBeDefined();
+    const patch = getRegisteredRoute(registry, 'patch', `${BASE}/preferences/{namespace}`);
+    expect(patch.responses).toHaveProperty('409');
+    expect(
+      getRegisteredRoute(registry, 'post', `${BASE}/preferences/{namespace}/reset`),
+    ).toBeDefined();
+    expect(getRegisteredRoute(registry, 'post', `${BASE}/preferences/reset-all`)).toBeDefined();
+  });
+
+  it('canonical preference PATCH uses a strict typed body', () => {
+    const registry = new TestOpenApiRegistry();
+    registerSettingRoutes(
+      createSettingApiStub(),
+      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
+      registry,
+    );
+
+    const route = getRegisteredRoute(registry, 'patch', `${BASE}/preferences/{namespace}`);
+    const body = getJsonBodySchema(route);
+    expect(body.safeParse({ patch: { theme: 'dark' }, expectedRevision: 2 }).success).toBe(true);
+    expect(body.safeParse({ patch: { typo: true } }).success).toBe(false);
+    expect(body.safeParse({ patch: { theme: 'dark' }, unexpected: true }).success).toBe(false);
+  });
+
   it('GET / is registered with correct path', () => {
     const registry = new TestOpenApiRegistry();
 

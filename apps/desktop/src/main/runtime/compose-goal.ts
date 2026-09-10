@@ -68,6 +68,7 @@ import {
 } from '@memoflow/goal';
 import { createGoalElectronModule, type GoalElectronModuleDef } from '@memoflow/goal/electron';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 /**
  * Dependencies the goal composer needs from the desktop host runtime.
@@ -78,6 +79,7 @@ export interface ComposeGoalDependencies {
   readonly db: IElectronDatabase;
   /** Host-provided Task→Goal dependency read port (PowerSyncTaskBindingReadPort). 宿主提供的 Task→Goal 依赖读取端口。 */
   readonly taskBindingReadPort: GoalDependencyReadPort;
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Extra runtime contributions from the host (e.g. schedule projection). 宿主提供的额外运行时贡献。 */
   readonly runtimeContributions?: GoalRuntimeContributionsInput;
 }
@@ -165,6 +167,7 @@ export function composeGoal(dependencies: ComposeGoalDependencies): ComposeGoalR
     goalRecordRepository,
     goalWriteTransactionRunner,
     taskBindingReadPort: dependencies.taskBindingReadPort,
+    userTimeContextPort: dependencies.userTimeContextPort,
     runtimeContributions,
   });
 

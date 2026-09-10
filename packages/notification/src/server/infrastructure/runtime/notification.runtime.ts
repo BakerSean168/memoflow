@@ -99,6 +99,7 @@ export interface NotificationReliableOperationPort {
 import { NotificationMetricsService, globalNotificationMetrics, type NotificationMetricsSnapshot } from '../../domain/services/notification-metrics-service';
 import { NotificationSseAdapter } from '../adapters/sse/notification-sse.adapter';
 import { randomUUID } from 'crypto';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   RealDesktopChannelDeliverer,
   RealInAppChannelDeliverer,
@@ -146,6 +147,7 @@ export interface NotificationRuntimeDeps {
   readonly repository?: INotificationRepository;
   readonly preferenceRepository?: INotificationPreferenceRepository;
   readonly closureChecker?: (identityId: string) => Promise<boolean>;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly reliableAdapter?: NotificationReliableOperationPort;
   readonly sseAdapter?: NotificationSseAdapter;
   readonly deliverer?: NotificationChannelDeliverer;
@@ -212,6 +214,9 @@ export function createNotificationRuntimeContribution(
       '[FAIL-FAST] NotificationRuntime requires a reliableAdapter. Non-durable repository fallback is strictly prohibited.',
     );
   }
+  if (!deps.userTimeContextPort) {
+    throw new Error('[FAIL-FAST] NotificationRuntime requires userTimeContextPort');
+  }
 
   const env =
     deps?.environment ??
@@ -244,6 +249,7 @@ export function createNotificationRuntimeContribution(
         repository as INotificationRepository,
         preferenceRepository as INotificationPreferenceRepository,
         closureChecker,
+        deps.userTimeContextPort,
       );
     }
     return createNotificationUseCase;
@@ -987,6 +993,7 @@ export function createNotificationDurableRuntime(deps: {
   readonly notificationRepository: INotificationRepository;
   readonly preferenceRepository?: INotificationPreferenceRepository;
   readonly closureChecker?: (identityId: string) => Promise<boolean>;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly reliableAdapter: NotificationReliableOperationPort;
   readonly channelCapabilities: ChannelCapabilitySpec[];
   readonly transport?: unknown;
@@ -1004,6 +1011,7 @@ export function createNotificationDurableRuntime(deps: {
     repository: deps.notificationRepository,
     preferenceRepository: deps.preferenceRepository,
     closureChecker: deps.closureChecker,
+    userTimeContextPort: deps.userTimeContextPort,
     reliableAdapter: deps.reliableAdapter,
     delivererRegistry: defaultDeliverers,
     channelCapabilities: deps.channelCapabilities,

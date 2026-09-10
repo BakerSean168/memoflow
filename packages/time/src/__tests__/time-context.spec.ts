@@ -1,25 +1,18 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  adaptLegacyTimeStyle,
-  composeLegacyTimeStyle,
   createFixedTimeZoneSource,
   createTimeContext,
   createTimeFacade,
-  DEFAULT_TIME_STYLE,
   requireTimeZoneId,
 } from '../index';
 
-describe('TimeContext + TimePresentationStyle (TIME-1202)', () => {
-  it('adapts the legacy local policy through an explicit zone source', () => {
+describe('TimeContext + TimePresentationStyle canonical split (TIME-1206)', () => {
+  it('keeps device/host zone lookup as an explicit boundary source', () => {
     const source = createFixedTimeZoneSource(requireTimeZoneId('Asia/Tokyo'));
-    const adapted = adaptLegacyTimeStyle(DEFAULT_TIME_STYLE, source);
-
-    expect(adapted.context).toEqual({
-      timeZone: 'Asia/Tokyo',
-      weekStartsOn: DEFAULT_TIME_STYLE.calendar.weekStartsOn,
-    });
-    expect(adapted.presentation.locale).toBe(DEFAULT_TIME_STYLE.locale);
-    expect(DEFAULT_TIME_STYLE.timeZone).toBe('local');
+    const context = createTimeContext({ timeZone: source.currentTimeZoneId(), weekStartsOn: 1 });
+    expect(context).toEqual({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 });
   });
 
   it('accepts canonical context and presentation without exposing a second semantic truth', () => {
@@ -35,23 +28,11 @@ describe('TimeContext + TimePresentationStyle (TIME-1202)', () => {
     expect(time.context).toEqual(context);
     expect(time.presentation.locale).toBe('en-US');
     expect(time.presentation.empty.display).toBe('EMPTY');
-    expect(time.style.timeZone).toBe('UTC');
-    expect(time.style.calendar.weekStartsOn).toBe(0);
-    expect(time.style.locale).toBe('en-US');
     expect(time.format.hm(null)).toBe('EMPTY');
+    expect('style' in time).toBe(false);
   });
 
-  it('keeps legacy TimeStyle as an explicit compatibility projection', () => {
-    const context = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 1 });
-    const time = createTimeFacade({ context });
-    const projected = composeLegacyTimeStyle(context, time.presentation);
-
-    expect(projected.timeZone).toBe('America/New_York');
-    expect(projected.calendar.weekStartsOn).toBe(1);
-    expect(projected.locale).toBe(time.presentation.locale);
-  });
-
-  it('withContext and withPresentation preserve the split ownership', () => {
+  it('withContext and withPresentation preserve split ownership', () => {
     const base = createTimeFacade({
       context: createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
       presentation: { locale: 'zh-CN' },
@@ -61,26 +42,27 @@ describe('TimeContext + TimePresentationStyle (TIME-1202)', () => {
     expect(moved.context).toEqual({ timeZone: 'Asia/Tokyo', weekStartsOn: 0 });
     expect(moved.presentation.locale).toBe('zh-CN');
 
-    const translated = moved.withPresentation({
-      locale: 'en-US',
-      empty: { display: 'N/A' },
-    });
+    const translated = moved.withPresentation({ locale: 'en-US', empty: { display: 'N/A' } });
     expect(translated.context).toEqual(moved.context);
     expect(translated.presentation.locale).toBe('en-US');
     expect(translated.presentation.empty.display).toBe('N/A');
   });
 
-  it('legacy withStyle remains bounded and can still resolve local deterministically', () => {
-    const source = createFixedTimeZoneSource(requireTimeZoneId('Asia/Tokyo'));
-    const legacy = createTimeFacade({
-      style: { timeZone: 'local', calendar: { weekStartsOn: 1 } },
-      timeZoneSource: source,
-    });
+  it('public facade source has no ambient or mixed-style fallback', () => {
+    const facade = readFileSync(resolve(__dirname, '../facade.ts'), 'utf8');
+    const index = readFileSync(resolve(__dirname, '../index.ts'), 'utf8');
 
-    expect(legacy.style.timeZone).toBe('local');
-    expect(legacy.context.timeZone).toBe('Asia/Tokyo');
-
-    const changed = legacy.withStyle({ timeZone: 'UTC', calendar: { weekStartsOn: 0 } });
-    expect(changed.context).toEqual({ timeZone: 'UTC', weekStartsOn: 0 });
+    for (const forbidden of [
+      'defaultTime',
+      'withStyle',
+      'PartialTimeStyle',
+      'DEFAULT_TIME_STYLE',
+      'mergeTimeStyle',
+      'timeZoneSource?:',
+    ]) {
+      expect(facade).not.toContain(forbidden);
+      expect(index).not.toContain(forbidden);
+    }
+    expect(facade).toContain('context: TimeContext');
   });
 });

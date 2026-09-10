@@ -14,6 +14,7 @@ import { BusinessRuleViolationError } from '@memoflow/utils/errors';
 import type { NotificationPreference } from '../aggregates/notification-preference';
 import type { DoNotDisturbConfig } from '../value-objects/do-not-disturb-config';
 import type { RateLimit } from '../value-objects/rate-limit';
+import type { TimeContext } from '@memoflow/time';
 
 export interface NotificationDeliveryDecision {
   channel: NotificationChannelType;
@@ -31,6 +32,7 @@ export interface NotificationPolicyContext {
   rateLimit?: RateLimit | null;
   rateLimitUsage?: { hourCount: number; dayCount: number };
   now?: Date;
+  timeContext: TimeContext;
 }
 
 export class NotificationPolicy {
@@ -89,7 +91,7 @@ export class NotificationPolicy {
 
     const now = context.now ?? new Date();
     if (
-      context.doNotDisturb?.isActiveAt(now)
+      context.doNotDisturb?.isActiveAt(now, context.timeContext)
       && capability.dndBehavior !== NotificationDndBehavior.Bypass
     ) {
       if (capability.dndBehavior === NotificationDndBehavior.Suppress) {
@@ -100,7 +102,7 @@ export class NotificationPolicy {
           preferenceSource: source,
         };
       }
-      const retryAt = context.doNotDisturb.nextInactiveAt(now);
+      const retryAt = context.doNotDisturb.nextInactiveAt(now, context.timeContext);
       return {
         channel: context.channel,
         outcome: NotificationDeliveryPlanOutcome.Deferred,

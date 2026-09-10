@@ -20,10 +20,10 @@ describe('goal desktop runtime composer surface', () => {
   const main = readFileSync(resolve(dir, 'main.ts'), 'utf8');
   const composer = readFileSync(resolve(__dirname, 'compose-goal.ts'), 'utf8');
 
-  it('main.ts composes goal via composeGoal({ db, taskBindingReadPort: new PowerSyncTaskBindingReadPort(db) })', () => {
+  it('main.ts composes goal with Task binding and canonical UserTimeContext ports', () => {
     expect(main).toContain("from './runtime/compose-goal'");
     expect(main).toMatch(
-      /composeGoal\(\{\s*db,\s*taskBindingReadPort: new PowerSyncTaskBindingReadPort\(db\),?\s*\}/,
+      /composeGoal\(\{\s*db,\s*taskBindingReadPort: new PowerSyncTaskBindingReadPort\(db\),\s*userTimeContextPort: settingElectronModule\.userTimeContextPort,?\s*\}/,
     );
     expect(main).toContain('.register(goalComposed.module)');
   });

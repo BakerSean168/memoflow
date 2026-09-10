@@ -18,6 +18,7 @@ import {
 import type { Result } from '@memoflow/contracts/result';
 import { error, fail, ok } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   mapTaskWriteErrorToResultError,
   type TaskWriteTransactionRunner,
@@ -38,6 +39,7 @@ export class UpdateTaskPlanUseCase {
     private readonly templateRepository: ITaskPlanRepository,
     private readonly instanceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
+    private readonly userTimeContextPort: UserTimeContextPort,
     private readonly now: () => number = Date.now,
   ) {
     if (!transactionRunner) {
@@ -54,6 +56,7 @@ export class UpdateTaskPlanUseCase {
     request: Partial<UpdateTaskPlanReq>,
   ): Promise<Result<TaskPlanClientDTO>> {
     try {
+      const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
       return await this.transactionRunner.run(
         async ({ templateRepository, instanceRepository }) => {
           const template = await templateRepository!.findByIdForIdentity(identityId, id);
@@ -161,7 +164,11 @@ export class UpdateTaskPlanUseCase {
               ...affectedPendingInstances.map((instance) => instance.instanceDate),
             );
             if (template.status === TaskPlanStatus.Active && generationHorizon > effectiveFrom) {
-              const regenerated = template.generateInstances(effectiveFrom, generationHorizon);
+              const regenerated = template.generateInstances(
+                effectiveFrom,
+                generationHorizon,
+                timeContext,
+              );
               if (regenerated.length > 0) {
                 await instanceRepository.saveMany(regenerated);
               }
@@ -189,7 +196,7 @@ export class UpdateTaskPlanUseCase {
             );
             template.hydrateLabels(labels);
           }
-          return ok(template.toClientDTO());
+          return ok(template.toClientDTOAt(timeContext, false, effectiveFrom));
         },
       );
     } catch (caughtError) {

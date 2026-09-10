@@ -67,13 +67,8 @@ async function seedContext(): Promise<Seed> {
   await prisma.account.create({
     data: {
       id: identityId,
-      status: 'ACTIVE',
+      status: 'Active',
       profile: {},
-      settings: {},
-      emailAddress: `wr-${identityId}@example.test`,
-      emailIsVerified: true,
-      emailVerifiedAt: new Date(),
-      emailIsPrimary: true,
     },
   });
   const connectionId = randomUUID();
@@ -318,7 +313,9 @@ function createGithubAppClient(
     }),
     getFullMarkdownSnapshot: async () => ({
       commitSha,
-      files: [{ relativePath: 'notes/webhook.md', blobSha: 'b'.repeat(40), markdownContent: '# Webhook' }],
+      files: [
+        { relativePath: 'notes/webhook.md', blobSha: 'b'.repeat(40), markdownContent: '# Webhook' },
+      ],
     }),
     getBlob: async () => ({ blobSha: 'b'.repeat(40), byteSize: 1, bytes: new Uint8Array() }),
     createFileCommit: async (_installationId, input): Promise<GitHubFileCommitResult> => ({
@@ -341,7 +338,9 @@ interface TestRuntime {
 
 async function startRuntime(
   seed: Seed,
-  options: { metrics?: import('@memoflow/patterns/operations').UnifiedOperationMetricsRecorder } = {},
+  options: {
+    metrics?: import('@memoflow/patterns/operations').UnifiedOperationMetricsRecorder;
+  } = {},
 ): Promise<TestRuntime> {
   const connectionRepo = new GatedConnectionRepository(
     new KnowledgeRepositoryConnectionPrismaRepository(prisma),
@@ -556,7 +555,9 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
       error?: { code: string; message: string };
     };
     if (commitResponse.status !== 200) {
-      process.stdout.write(`DBG commit status ${commitResponse.status} body ${JSON.stringify(commitBody)}\n`);
+      process.stdout.write(
+        `DBG commit status ${commitResponse.status} body ${JSON.stringify(commitBody)}\n`,
+      );
     }
     expect(commitBody.ok).toBe(true);
     expect(commitBody.data?.status).toBe('Committed');
@@ -569,7 +570,15 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     });
     const ledger = (await listed.json()) as {
       ok: boolean;
-      data?: { writeRequests: Array<{ id: string; status: string; projectionStatus: string; projectionAttempts: number; projectionErrorCode: string | null }> };
+      data?: {
+        writeRequests: Array<{
+          id: string;
+          status: string;
+          projectionStatus: string;
+          projectionAttempts: number;
+          projectionErrorCode: string | null;
+        }>;
+      };
     };
     expect(ledger.ok).toBe(true);
     const row = ledger.data?.writeRequests.find((r) => r.status === 'Committed');
@@ -589,7 +598,10 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(replayBody.data?.status).toBe('Succeeded');
 
     // 4. The HTTP DTO now reports Succeeded with the projection row written.
-    const after = await runtime.writeRequestRepo.findByIdForIdentity(seed.identityId, writeRequestId);
+    const after = await runtime.writeRequestRepo.findByIdForIdentity(
+      seed.identityId,
+      writeRequestId,
+    );
     expect(after?.projectionStatus).toBe('Succeeded');
     expect(after?.projectionErrorCode).toBeNull();
     expect(after?.projectionAttempts).toBe(2);
@@ -626,7 +638,9 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
       }),
     });
     expect(commitResponse.status).toBe(200);
-    const writeRequests = await runtime.writeRequestRepo.listForIdentity(seed.identityId, { limit: 50 });
+    const writeRequests = await runtime.writeRequestRepo.listForIdentity(seed.identityId, {
+      limit: 50,
+    });
     const refreshTarget = writeRequests.find((r) => r.projectionStatus !== 'Succeeded');
     expect(refreshTarget).toBeDefined();
     const commitSha = refreshTarget!.commitSha;
@@ -668,7 +682,10 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     await waitForDeliveryStatus(runtime, delivery!.id, 'Processed');
 
     // 3. The real delivery processing refreshed the write request to Succeeded.
-    const row = await runtime.writeRequestRepo.findByIdForIdentity(seed.identityId, refreshTarget!.id);
+    const row = await runtime.writeRequestRepo.findByIdForIdentity(
+      seed.identityId,
+      refreshTarget!.id,
+    );
     expect(row?.projectionStatus).toBe('Succeeded');
     expect(row?.projectedAt).not.toBeNull();
 
@@ -749,20 +766,24 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     });
     const ledger = (await listed.json()) as {
       ok: boolean;
-      data?: { writeRequests: Array<{ id: string; projectionStatus: string; projectionAttempts: number }> };
+      data?: {
+        writeRequests: Array<{ id: string; projectionStatus: string; projectionAttempts: number }>;
+      };
     };
     const row = ledger.data?.writeRequests.find((r) => r.projectionStatus === 'Succeeded');
     expect(row).toBeDefined();
     const attemptsBefore = row!.projectionAttempts;
 
-    const first = await fetch(
-      `${runtime.baseUrl}/knowledge-write-requests/${row!.id}/replay`,
-      { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' },
-    );
-    const second = await fetch(
-      `${runtime.baseUrl}/knowledge-write-requests/${row!.id}/replay`,
-      { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' },
-    );
+    const first = await fetch(`${runtime.baseUrl}/knowledge-write-requests/${row!.id}/replay`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+    });
+    const second = await fetch(`${runtime.baseUrl}/knowledge-write-requests/${row!.id}/replay`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+    });
     const firstBody = (await first.json()) as { ok: boolean; data?: { status: string } };
     const secondBody = (await second.json()) as { ok: boolean; data?: { status: string } };
     expect(firstBody.data?.status).toBe('Succeeded');
@@ -802,7 +823,10 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(replayBody.data?.status).toBe('Succeeded');
 
     // Ledger advanced, projection row written, HTTP DTO reflects both.
-    const after = await runtime.writeRequestRepo.findByIdForIdentity(seed.identityId, writeRequestId);
+    const after = await runtime.writeRequestRepo.findByIdForIdentity(
+      seed.identityId,
+      writeRequestId,
+    );
     expect(after?.projectionStatus).toBe('Succeeded');
     expect(after?.projectionErrorCode).toBeNull();
     expect(after?.projectionAttempts).toBe(1);
@@ -910,7 +934,10 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(resultB.ok).toBe(false);
     expect(resultB.error.code).toBe('CONFLICT');
 
-    const after = await runtime.writeRequestRepo.findByIdForIdentity(seed.identityId, writeRequestId);
+    const after = await runtime.writeRequestRepo.findByIdForIdentity(
+      seed.identityId,
+      writeRequestId,
+    );
     expect(after?.projectionStatus).toBe('Succeeded');
     expect(after?.projectionErrorCode).toBeNull();
     // Exactly one transition incremented the attempt counter.
@@ -944,7 +971,10 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
       writeRequestId,
     );
     expect(failedReplay.ok).toBe(false);
-    const afterFail = await runtime.writeRequestRepo.findByIdForIdentity(seed.identityId, writeRequestId);
+    const afterFail = await runtime.writeRequestRepo.findByIdForIdentity(
+      seed.identityId,
+      writeRequestId,
+    );
     expect(afterFail?.projectionStatus).toBe('Failed');
     expect(afterFail?.projectionErrorCode).toBe('PROJECTION_REPLAY_FAILED');
     expect(afterFail?.projectionAttempts).toBe(1);
@@ -959,7 +989,10 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(succeededReplay.ok).toBe(true);
     expect(succeededReplay.data?.status).toBe('Succeeded');
 
-    const after = await runtime.writeRequestRepo.findByIdForIdentity(seed.identityId, writeRequestId);
+    const after = await runtime.writeRequestRepo.findByIdForIdentity(
+      seed.identityId,
+      writeRequestId,
+    );
     expect(after?.projectionStatus).toBe('Succeeded');
     expect(after?.projectionErrorCode).toBeNull();
     expect(after?.projectionAttempts).toBe(2);
@@ -1016,7 +1049,10 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(resultB.error.code).toBe('SERVICE_UNAVAILABLE');
 
     // Ledger row never regressed: still Succeeded, no error, single attempt.
-    const after = await runtime.writeRequestRepo.findByIdForIdentity(seed.identityId, writeRequestId);
+    const after = await runtime.writeRequestRepo.findByIdForIdentity(
+      seed.identityId,
+      writeRequestId,
+    );
     expect(after?.projectionStatus).toBe('Succeeded');
     expect(after?.projectionErrorCode).toBeNull();
     expect(after?.projectionAttempts).toBe(1);
@@ -1091,15 +1127,18 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(auditRes.ok).toBe(true);
     const audit = auditRes.ok ? (auditRes.data as any[]) : [];
     const replayAudit = audit.find(
-      (a) => a.operationId === writeRequestId && a.action === 'replay' && a.source === 'knowledge-projection',
+      (a) =>
+        a.operationId === writeRequestId &&
+        a.action === 'replay' &&
+        a.source === 'knowledge-projection',
     );
     expect(replayAudit).toBeDefined();
     expect(replayAudit.actorIdentityId).toBe(seed.identityId);
 
     const timelineAfter = await runtime.module.api.queryKnowledgeTimeline(ctx);
-    const entryAfter = (
-      timelineAfter.ok ? (timelineAfter.data as any[]) : []
-    ).find((e) => e.operationId === writeRequestId);
+    const entryAfter = (timelineAfter.ok ? (timelineAfter.data as any[]) : []).find(
+      (e) => e.operationId === writeRequestId,
+    );
     expect(entryAfter.status).toBe('succeeded');
     expect(entryAfter.replayable).toBe(false);
 
@@ -1128,7 +1167,10 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     }
 
     // No external projection ran and durable ledger state is unchanged.
-    const after = await runtime.writeRequestRepo.findByIdForIdentity(seed.identityId, writeRequestId);
+    const after = await runtime.writeRequestRepo.findByIdForIdentity(
+      seed.identityId,
+      writeRequestId,
+    );
     expect(after?.projectionStatus).toBe('Pending');
     expect(after?.projectionAttempts).toBe(0);
 
@@ -1142,7 +1184,11 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
   it('P1-4: knowledge replay audit write failure fails closed before any external projection (audit-first)', async () => {
     const seed = await seedContext();
     const runtime = await startRuntime(seed);
-    const writeRequestId = await seedPendingWriteRequest(runtime, seed, 'notes/audit-write-fail.md');
+    const writeRequestId = await seedPendingWriteRequest(
+      runtime,
+      seed,
+      'notes/audit-write-fail.md',
+    );
 
     const failingAudit = {
       record: async () => {
@@ -1166,7 +1212,10 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(replayRes.ok).toBe(false);
 
     // Audit-first: the external projection must NOT have run — durable state unchanged.
-    const after = await runtime.writeRequestRepo.findByIdForIdentity(seed.identityId, writeRequestId);
+    const after = await runtime.writeRequestRepo.findByIdForIdentity(
+      seed.identityId,
+      writeRequestId,
+    );
     expect(after?.projectionStatus).toBe('Pending');
     expect(after?.projectionAttempts).toBe(0);
 
@@ -1196,9 +1245,9 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     });
 
     const ctx = { identityId: seed.identityId } as never;
-    await expect(
-      moduleWithFailingAudit.api.queryKnowledgeTimeline(ctx),
-    ).rejects.toThrow('audit write failure injected');
+    await expect(moduleWithFailingAudit.api.queryKnowledgeTimeline(ctx)).rejects.toThrow(
+      'audit write failure injected',
+    );
 
     moduleWithFailingAudit.dispose();
     await runtime.close();

@@ -2,14 +2,16 @@
 tags: [adr, account, profile, lifecycle, vnext]
 description: Account 收敛为 Product Profile + Lifecycle，并退休 settings 与重复 Cloud identity truth
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-09T00:31:00+08:00
+updated: 2026-09-10T00:55:00+08:00
 ---
 
 # ADR-104: Account Profile, Lifecycle and Cloud Identity Projection
 
-**状态：** 已采纳，待实施
+**状态：** 已实施（ACC-1401～1407 已收口；AUTH-1501/AUTH-1502 未开始）
 **日期：** 2026-09-09
 **依赖：** ADR-039, ADR-092, ADR-093, ADR-100
+
+> 2026-09-10 implementation checkpoint: `Account.settings` 已退休；`AccountView + CloudIdentitySummary` 已上线；Account lifecycle 已收敛为 `Active | Closed + closedAt`；无真实 capability 的 `ContactPhone` 与五个 phone persistence columns 已物理删除。ADR-111 的 destructive cutover 规则适用，因此本轮不保留 legacy backfill/dual-read compatibility。`ACC-1406` 已进一步退休 Account auth-email shadow、dead availability 与 legacy-auth bootstrap。`ACC-1407` 已删除 Account product `version`，保留 `AccountClosureOperation.version` 作为真实 CAS，并将 Account 创建/资料更新/关闭时间统一为显式 `Instant` + 注入式 `Clock`；Account persistence 不再以 ambient time 补缺。
 
 ## Decision
 

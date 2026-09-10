@@ -81,6 +81,7 @@ import { composePowerSyncApiModule } from './modules/powersync/module.js';
 import { composeDashboardApiModule } from './modules/dashboard/module.js';
 import { composeLabelApiModule } from './modules/label/module.js';
 import { LabelService, PrismaLabelRepository } from '@memoflow/label';
+import { createSystemClock } from '@memoflow/time';
 import { PrismaDashboardReadPort } from './modules/dashboard/dashboard-read-port.js';
 import {
   PrismaActivityLedgerWriter,
@@ -140,10 +141,10 @@ async function bootstrap(): Promise<void> {
   const accountActiveChecker = async (identityId: string) =>
     (await closureRepo.findActiveByIdentityId(identityId)) !== null;
   // Executor-visible closure predicate frozen from merge-base: block when the
-  // account is missing / Deactivated / Closed, or an active closure operation
+  // account is missing / Closed, or an active closure operation
   // exists in requested|revoking|closing. The AI executor MUST see this
   // predicate, not the shared account-active checker.
-  // 从 merge-base 冻结的 executor 可见闭户谓词：账户缺失 / Deactivated / Closed
+  // 从 merge-base 冻结的 executor 可见闭户谓词：账户缺失 / Closed
   // 或存在 requested|revoking|closing 阶段的有效闭户操作时阻断。AI executor
   // 必须看到该谓词，而不是共享的账户激活检查器。
   const executorClosureChecker = createExecutorClosureChecker(prisma);
@@ -164,7 +165,7 @@ async function bootstrap(): Promise<void> {
       env.MEMOFLOW_WEB_URL,
     ),
     github: githubOAuthConfig ?? undefined,
-    userProvisioner: createCloudAccountProvisioner(prisma),
+    userProvisioner: createCloudAccountProvisioner(prisma, createSystemClock()),
     emailDelivery: testEmailLinks?.delivery ?? baseEmailDelivery,
     closureChecker: accountActiveChecker,
     rateLimit: env.LOCAL_VALIDATION
@@ -190,10 +191,13 @@ async function bootstrap(): Promise<void> {
   const accountApiModule = composeAccount({
     db: prisma,
     cloudAuth,
+    clock: createSystemClock(),
   });
+  const settingApiModule = composeSetting({ db: prisma });
   const notificationApiModule = composeNotification({
     db: prisma,
     closureChecker: accountActiveChecker,
+    userTimeContextPort: settingApiModule.userTimeContextPort,
     channelCapabilities: [
       {
         channelType: 'InApp',
@@ -205,6 +209,7 @@ async function bootstrap(): Promise<void> {
   const reminderComposed = composeReminder({
     db: prisma,
     notificationRequestedWriter: notificationApiModule.requestedWriter,
+    userTimeContextPort: settingApiModule.userTimeContextPort,
     closureChecker: accountActiveChecker,
     executorClosureChecker,
   });
@@ -215,7 +220,6 @@ async function bootstrap(): Promise<void> {
     githubApp: getGithubAppConfig() ?? undefined,
     knowledgeRepositoryCloudDataPurger: new RepositoryKnowledgeCloudDataPurgerAdapter(prisma),
   });
-  const settingApiModule = composeSetting({ db: prisma });
   const dataPortabilityApiModule = composeDataPortability({ db: prisma });
 
   // CLEAN-6304: Calendar and Temporal Engine own separate repository sets.
@@ -228,11 +232,17 @@ async function bootstrap(): Promise<void> {
   const routineExecutionDeps = createRoutinePrismaScheduleExecutionDeps(prisma);
   const scheduleOrchestrationModule = createScheduleOrchestrationModule({
     taskProjection: {
-      source: createTaskPrismaScheduleProjectionSource(prisma),
+      source: createTaskPrismaScheduleProjectionSource(
+        prisma,
+        settingApiModule.userTimeContextPort,
+      ),
       scheduleTaskRepository: schedulerRepositorySet.scheduleTaskRepository,
     },
     goalProjection: {
-      source: createGoalPrismaScheduleProjectionSource(prisma),
+      source: createGoalPrismaScheduleProjectionSource(
+        prisma,
+        settingApiModule.userTimeContextPort,
+      ),
     },
     reminderProjection: {
       source: reminderComposed.scheduleProjectionSource,
@@ -258,6 +268,7 @@ async function bootstrap(): Promise<void> {
     db: prisma,
     runtimeContributions: scheduleOrchestrationModule.projectionRuntime,
     goalProgressHandler: createGoalTaskProgressPrismaHandler(prisma),
+    userTimeContextPort: settingApiModule.userTimeContextPort,
   });
   // Register the Task reminder fire handler so scheduled `task.reminder` work
   // (e.g. a one-time task + relative reminder) is executed by the registry-based
@@ -272,11 +283,14 @@ async function bootstrap(): Promise<void> {
   const goalComposed = composeGoal({
     db: prisma,
     taskBindingReadPort: new PrismaTaskBindingReadPort(prisma),
+    userTimeContextPort: settingApiModule.userTimeContextPort,
   });
   if (!env.DATABASE_URL) {
     throw new Error('AI Mastra runtime requires DATABASE_URL after environment normalization');
   }
-  const labelService = new LabelService(new PrismaLabelRepository(prisma));
+  const labelService = new LabelService(new PrismaLabelRepository(prisma), {
+    clock: createSystemClock(),
+  });
   const aiApiModule = composeAI({
     db: prisma,
     repositoryApiPort: repositoryApiModule.getApplicationPort(),
@@ -287,6 +301,7 @@ async function bootstrap(): Promise<void> {
     routineCommandPort: reminderComposed.routineCommandPort,
     scheduleRepository: scheduleApiModule.repositories.scheduleRepository,
     notificationRepository: notificationApiModule.repositories.notificationRepository,
+    userTimeContextPort: settingApiModule.userTimeContextPort,
     labelService,
     mastraStorage: { kind: 'postgres', connectionString: env.DATABASE_URL },
   });

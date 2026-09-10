@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import { TaskGoalBindingTrigger, TaskPlanOutcome } from '@memoflow/contracts/task';
-import { aLoadedTaskPlan, aTaskOccurrence } from '../../../../../testing';
+import { aLoadedTaskPlan, aTaskOccurrence, TASK_TEST_OCCURRENCE_PROJECTION } from '../../../../../testing';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import { CompleteTaskOccurrenceUseCase } from '../complete-task-occurrence.use-case';
@@ -32,6 +32,7 @@ describe('CompleteTaskOccurrenceUseCase', () => {
         instanceRepository: instanceRepo,
         templateRepository: templateRepo,
       }),
+      TASK_TEST_OCCURRENCE_PROJECTION,
     );
   });
 

@@ -9,6 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BrowserWindow, Notification } from 'electron';
 import { NotificationService, type NotificationOptions } from './notification.service';
 import type { CustomNotificationManager } from './custom-notification.manager';
+import { eventBus } from '@memoflow/utils/domain';
 
 function createService(): { service: NotificationService; dispatch: ReturnType<typeof vi.fn> } {
   const dispatch = vi.fn();
@@ -88,6 +89,21 @@ describe('NotificationService routing', () => {
     expect(Notification.lastInstance()?.show).toHaveBeenCalled();
   });
 
+  it('canonical delivery bypasses legacy renderer DND because policy was already evaluated upstream', () => {
+    const { service, dispatch } = createService();
+    service.setMainWindow(window);
+    service.enableDND();
+
+    const rendered = service.showCanonicalDelivery({ title: 'Canonical', body: 'Delivered once' });
+
+    expect(rendered).toBe(true);
+    expect(dispatch).toHaveBeenCalledOnce();
+    expect(window.webContents.send).not.toHaveBeenCalledWith(
+      'notification:suppressed',
+      expect.anything(),
+    );
+  });
+
   it('suppresses native notifications when Do Not Disturb is manually enabled', () => {
     const { service } = createService();
     service.setMainWindow(window);
@@ -100,6 +116,24 @@ describe('NotificationService routing', () => {
       'notification:suppressed',
       expect.objectContaining({ title: 'Suppressed', body: 'x' }),
     );
+  });
+
+  it('does not render again when the canonical desktop-dispatch event is published', async () => {
+    const { dispatch } = createService();
+
+    await eventBus.dispatch('notification:dispatch_desktop', {
+      id: 'NotificationId_once',
+      identityId: 'IdentityId_once',
+      title: 'Already rendered by durable transport',
+      body: 'Do not render twice',
+      category: 'System',
+      type: 'Info',
+      importance: 'Normal',
+      data: {},
+      sound: { enabled: true, name: null },
+    } as never);
+
+    expect(dispatch).not.toHaveBeenCalled();
   });
 
   it('returns null when native notifications are unsupported', () => {

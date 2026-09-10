@@ -21,6 +21,12 @@ import { PowerSyncNotificationPreferenceRepository } from '../notification-prefe
 import { Notification } from '../../../../domain/aggregates/notification';
 import { NotificationChannel } from '../../../../domain/entities/notification-channel';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { createTimeContext } from '@memoflow/time';
+
+const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: vi.fn().mockResolvedValue(TEST_TIME_CONTEXT),
+};
 
 function createTestSqliteDatabase(): IElectronDatabase {
   const sqlite = new Database(':memory:');
@@ -462,6 +468,7 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
     });
 
     const moduleInstance = createNotificationPowerSyncModule(db, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       transport: { deliver: transportDeliverSpy },
     });
 
@@ -474,6 +481,7 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
       moduleInstance.notificationRepository,
       moduleInstance.preferenceRepository,
       async () => false,
+      TEST_USER_TIME_CONTEXT_PORT,
     );
 
     const createResult = await useCase.execute({
@@ -570,6 +578,40 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
     expect(channelObj.response).toBeDefined();
     const respDTO = typeof channelObj.response.toDTO === 'function' ? channelObj.response.toDTO() : channelObj.response;
     expect((respDTO.data as any).ack.ackId).toBe('ack-999');
+  });
+
+  it('createDefaultElectronDesktopTransport fail-closes until the late-bound renderer succeeds and then deduplicates by ack', async () => {
+    const renderer = vi.fn()
+      .mockReturnValueOnce(false)
+      .mockReturnValueOnce(true);
+    const transport: any = createDefaultElectronDesktopTransport({ renderer });
+    const context = {
+      deliveryId: 'delivery-renderer-1',
+      identityId: 'user-renderer-1',
+      idempotencyKey: 'notification:user-renderer-1:desktop-1',
+    };
+
+    const unavailable = await transport.deliver(
+      { title: 'Late-bound', content: 'Not ready yet' },
+      context,
+    );
+    expect(unavailable.status).toBe('failed');
+
+    const delivered = await transport.deliver(
+      { title: 'Late-bound', content: 'Ready now' },
+      context,
+    );
+    expect(delivered.status).toBe('delivered');
+
+    const replay = await transport.deliver(
+      { title: 'Late-bound', content: 'Must not render twice' },
+      context,
+    );
+    expect(replay).toMatchObject({
+      status: 'delivered',
+      ackId: delivered.ackId,
+    });
+    expect(renderer).toHaveBeenCalledTimes(2);
   });
 
   it('createDefaultElectronDesktopTransport fail-closes when electron native Notification is unavailable', async () => {
@@ -686,6 +728,7 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
       };
 
       const moduleInstance1 = createNotificationPowerSyncModule(instance1.db, {
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
         transport: mockTransportObj1,
       });
 
@@ -693,6 +736,7 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
         moduleInstance1.notificationRepository,
         moduleInstance1.preferenceRepository,
         async () => false,
+        TEST_USER_TIME_CONTEXT_PORT,
       );
 
       const createRes = await useCase1.execute({
@@ -769,6 +813,7 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
       };
 
       const moduleInstance2 = createNotificationPowerSyncModule(instance2.db, {
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
         transport: mockTransportObj2,
       });
 
@@ -821,6 +866,7 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
       };
 
       const moduleInstance1 = createNotificationPowerSyncModule(instance1.db, {
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
         transport: mockTransportObj1,
       });
 
@@ -828,6 +874,7 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
         moduleInstance1.notificationRepository,
         moduleInstance1.preferenceRepository,
         async () => false,
+        TEST_USER_TIME_CONTEXT_PORT,
       );
 
       const createRes = await useCase1.execute({
@@ -891,6 +938,7 @@ describe('PowerSync Notification Durable Worker & Composition Root', () => {
       };
 
       const moduleInstance2 = createNotificationPowerSyncModule(instance2.db, {
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
         transport: mockTransportObj2,
       });
 

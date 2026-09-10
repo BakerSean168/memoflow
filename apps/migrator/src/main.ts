@@ -106,12 +106,6 @@ export function createMigrationCommands(workspaceRoot: string): Command[] {
         label: 'prepare vNext unique constraints',
       },
       {
-        executable: process.execPath,
-        args: [resolve(runtimeScripts, 'prepare-legacy-cloud-auth-migration.js')],
-        cwd: databaseRoot,
-        label: 'migrate legacy authentication to Better Auth',
-      },
-      {
         executable: prismaBin,
         args: [
           'db',

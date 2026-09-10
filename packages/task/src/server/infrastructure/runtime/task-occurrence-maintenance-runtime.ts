@@ -12,16 +12,24 @@ import { TASK_INSTANCE_GENERATION_CONFIG } from '@memoflow/contracts/task';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '../../domain/repositories';
 import type { TaskModuleRuntimeContribution } from '../task.module';
 import { TaskOccurrenceGenerationService } from '../../domain/services';
+import { createTimeContext, createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 
 const { TARGET_GENERATE_AHEAD_DAYS } = TASK_INSTANCE_GENERATION_CONFIG;
 
 const DEFAULT_REFILL_INTERVAL_MS = 5 * 60 * 1000;
+
+// Repository filtering is only a deterministic candidate superset. The actual
+// generation horizon is calculated below in each identity's Product Time context.
+const CANDIDATE_SCAN_TIME = createTimeFacade({
+  context: createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+});
 
 const logger = createLogger('TaskOccurrenceMaintenanceRuntime');
 
 export interface TaskOccurrenceMaintenanceRuntimeDeps {
   readonly taskPlanRepository: ITaskPlanRepository;
   readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
+  readonly userTimeContextPort: UserTimeContextPort;
   /** 补充周期（默认 5 分钟）。 */
   readonly intervalMs?: number;
   /** 时间源（测试注入）。 */
@@ -45,11 +53,25 @@ export function createTaskOccurrenceMaintenanceRuntime(
     running = true;
     try {
       const now = (deps.now ?? Date.now)();
-      const horizon = now + TARGET_GENERATE_AHEAD_DAYS * 86400000;
-      const templates = await deps.taskPlanRepository.findNeedGenerateInstances(horizon);
+      const candidateHorizon = Number(
+        CANDIDATE_SCAN_TIME.calendar.addDays(now, TARGET_GENERATE_AHEAD_DAYS + 1),
+      );
+      const templates = await deps.taskPlanRepository.findNeedGenerateInstances(candidateHorizon);
 
       for (const template of templates) {
-        const instances = generationService.generateInstances(template);
+        const timeContext = await deps.userTimeContextPort.getUserTimeContext(
+          String(template.identityId),
+        );
+        const targetDate = Number(
+          createTimeFacade({ context: timeContext }).calendar.addDays(
+            now,
+            TARGET_GENERATE_AHEAD_DAYS,
+          ),
+        );
+        const instances = generationService.generateInstances(template, timeContext, {
+          now,
+          targetDate,
+        });
         if (instances.length > 0) {
           await deps.taskOccurrenceRepository.saveMany(instances);
           await deps.taskPlanRepository.save(template);

@@ -17,7 +17,9 @@ import {
   aLoadedTaskPlan,
   anAllDayTimeConfig,
   aDailyRecurrenceRule,
+  TASK_TEST_TIME_CONTEXT,
 } from '../../../testing';
+import { createTimeContext, createTimeFacade } from '@memoflow/time';
 
 const DAY_MS = 86400000;
 
@@ -40,7 +42,7 @@ describe('TaskOccurrenceGenerationService', () => {
   describe('generateInstances', () => {
     it('should generate instances for a recurring template with no prior generation', () => {
       const template = aRecurringTask({ title: 'Daily standup' });
-      const instances = service.generateInstances(template);
+      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT);
 
       // With 100-day target and daily recurrence, expect ~100 instances
       expect(instances.length).toBeGreaterThan(0);
@@ -52,7 +54,7 @@ describe('TaskOccurrenceGenerationService', () => {
       const now = Date.now();
       const tenDaysLater = now + 10 * DAY_MS;
 
-      const instances = service.generateInstances(template, { targetDate: tenDaysLater });
+      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT, { targetDate: tenDaysLater });
 
       // Should generate at most ~10 instances
       expect(instances.length).toBeLessThanOrEqual(11);
@@ -67,7 +69,7 @@ describe('TaskOccurrenceGenerationService', () => {
         recurrenceRule: aDailyRecurrenceRule().setOccurrences(3),
       });
 
-      const instances = service.generateInstances(template);
+      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT);
 
       expect(instances).toHaveLength(3);
     });
@@ -83,7 +85,7 @@ describe('TaskOccurrenceGenerationService', () => {
         status: TaskPlanStatus.Active,
       });
 
-      const instances = service.generateInstances(template);
+      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT);
       expect(instances).toHaveLength(0);
     });
 
@@ -99,45 +101,42 @@ describe('TaskOccurrenceGenerationService', () => {
         });
 
       // Without forceGenerate — starts from lastGeneratedDate + 1 day = today
-      const normal = service.generateInstances(createTemplate(), { forceGenerate: false });
+      const normal = service.generateInstances(createTemplate(), TASK_TEST_TIME_CONTEXT, { forceGenerate: false });
 
       // With forceGenerate — starts from today regardless
-      const forced = service.generateInstances(createTemplate(), { forceGenerate: true });
+      const forced = service.generateInstances(createTemplate(), TASK_TEST_TIME_CONTEXT, { forceGenerate: true });
 
       // Use isolated aggregates because a generation mutates the template's instance collection.
       expect(normal.length).toBeGreaterThan(0);
       expect(forced.length).toBeGreaterThan(0);
     });
 
-    it('advances the generation cursor by a local calendar day across DST', () => {
-      const originalTz = process.env.TZ;
-      process.env.TZ = 'America/New_York';
-      try {
-        const lastGeneratedDate = new Date(2026, 2, 8, 0, 0, 0).getTime();
-        const template = aLoadedTaskPlan({
-          taskType: TaskType.Recurring,
-          status: TaskPlanStatus.Active,
-          timeConfig: anAllDayTimeConfig(new Date(lastGeneratedDate)),
-          recurrenceRule: aDailyRecurrenceRule(),
-          lastGeneratedDate,
-        });
-        const spy = vi.spyOn(template, 'generateInstances').mockReturnValue([]);
-        service.generateInstances(template, {
-          targetDate: new Date(2026, 2, 12, 0, 0, 0).getTime(),
-        });
-        const [fromDate] = spy.mock.calls[0];
-        expect(new Date(fromDate).toString()).toContain('Mon Mar 09 2026 00:00:00');
-      } finally {
-        if (originalTz === undefined) delete process.env.TZ;
-          else process.env.TZ = originalTz;
-      }
+    it('advances the generation cursor by a Product Time calendar day across DST', () => {
+      const timeContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });
+      const time = createTimeFacade({ context: timeContext });
+      const lastGeneratedDate = Date.parse('2026-03-08T05:00:00.000Z');
+      const template = aLoadedTaskPlan({
+        taskType: TaskType.Recurring,
+        status: TaskPlanStatus.Active,
+        timeConfig: anAllDayTimeConfig(new Date(lastGeneratedDate)),
+        recurrenceRule: aDailyRecurrenceRule(),
+        lastGeneratedDate,
+      });
+      const spy = vi.spyOn(template, 'generateInstances').mockReturnValue([]);
+      service.generateInstances(template, timeContext, {
+        targetDate: Date.parse('2026-03-12T04:00:00.000Z'),
+      });
+      const [fromDate, , delegatedContext] = spy.mock.calls[0];
+      expect(String(time.calendar.toYmd(fromDate))).toBe('2026-03-09');
+      expect(fromDate - lastGeneratedDate).toBe(23 * 60 * 60 * 1000);
+      expect(delegatedContext).toEqual(timeContext);
     });
 
     it('should delegate to template.generateInstances with correct date range', () => {
       const template = aRecurringTask({ title: 'Spy test' });
       const spy = vi.spyOn(template, 'generateInstances');
 
-      service.generateInstances(template);
+      service.generateInstances(template, TASK_TEST_TIME_CONTEXT);
 
       expect(spy).toHaveBeenCalledOnce();
       const [fromDate, toDate] = spy.mock.calls[0];
@@ -158,7 +157,7 @@ describe('TaskOccurrenceGenerationService', () => {
         recurrenceRule: aDailyRecurrenceRule(),
       });
 
-      expect(service.shouldRefillInstances(paused)).toBe(false);
+      expect(service.shouldRefillInstances(paused, TASK_TEST_TIME_CONTEXT)).toBe(false);
     });
 
     it('archive metadata does not stop an otherwise Active recurring plan', () => {
@@ -170,7 +169,7 @@ describe('TaskOccurrenceGenerationService', () => {
         recurrenceRule: aDailyRecurrenceRule(),
         lastGeneratedDate: null,
       });
-      expect(service.shouldRefillInstances(archived)).toBe(true);
+      expect(service.shouldRefillInstances(archived, TASK_TEST_TIME_CONTEXT)).toBe(true);
     });
 
     it('should return true for Active template with no lastGeneratedDate', () => {
@@ -183,7 +182,7 @@ describe('TaskOccurrenceGenerationService', () => {
       });
 
       // lastGeneratedDate is null => 0 ms => daysRemaining is negative => needs refill
-      expect(service.shouldRefillInstances(template)).toBe(true);
+      expect(service.shouldRefillInstances(template, TASK_TEST_TIME_CONTEXT)).toBe(true);
     });
 
     it('should return true when remaining days is below threshold', () => {
@@ -197,7 +196,7 @@ describe('TaskOccurrenceGenerationService', () => {
         lastGeneratedDate: tenDaysAhead,
       });
 
-      expect(service.shouldRefillInstances(template)).toBe(true);
+      expect(service.shouldRefillInstances(template, TASK_TEST_TIME_CONTEXT)).toBe(true);
     });
 
     it('should return false when remaining days exceeds threshold', () => {
@@ -211,7 +210,7 @@ describe('TaskOccurrenceGenerationService', () => {
         lastGeneratedDate: farAhead,
       });
 
-      expect(service.shouldRefillInstances(template)).toBe(false);
+      expect(service.shouldRefillInstances(template, TASK_TEST_TIME_CONTEXT)).toBe(false);
     });
   });
 
@@ -219,7 +218,7 @@ describe('TaskOccurrenceGenerationService', () => {
 
   describe('calculateRefillTargetDate', () => {
     it('should return a date 100 days from now', () => {
-      const target = service.calculateRefillTargetDate();
+      const target = service.calculateRefillTargetDate(TASK_TEST_TIME_CONTEXT);
       const expected = Date.now() + 100 * DAY_MS;
 
       // Allow small tolerance for execution time

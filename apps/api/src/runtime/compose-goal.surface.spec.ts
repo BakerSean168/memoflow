@@ -20,10 +20,10 @@ describe('goal API runtime composer surface', () => {
   const server = readFileSync(resolve(dir, 'server.ts'), 'utf8');
   const composer = readFileSync(resolve(dir, 'runtime/compose-goal.ts'), 'utf8');
 
-  it('server.ts composes goal via composeGoal({ db: prisma, taskBindingReadPort: new PrismaTaskBindingReadPort(prisma) })', () => {
+  it('server.ts composes goal via composeGoal({ db: prisma, taskBindingReadPort: new PrismaTaskBindingReadPort(prisma), userTimeContextPort: settingApiModule.userTimeContextPort })', () => {
     expect(server).toContain("from './runtime/compose-goal'");
     expect(server).toMatch(
-      /composeGoal\(\{\s*db: prisma,\s*taskBindingReadPort: new PrismaTaskBindingReadPort\(prisma\),?\s*\}/,
+      /composeGoal\(\{\s*db: prisma,\s*taskBindingReadPort: new PrismaTaskBindingReadPort\(prisma\),\s*userTimeContextPort: settingApiModule\.userTimeContextPort,?\s*\}/,
     );
     expect(server).toContain('.register(goalComposed.module)');
   });

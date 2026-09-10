@@ -8,26 +8,24 @@ import type {
   GetUpcomingRemindersRes,
 } from '@memoflow/contracts/reminder';
 import type { IReminderTemplateRepository } from '../../domain/repositories/i-reminder-template-repository';
-import type { AccountTimezonePort } from '../../domain/ports/account-timezone.port';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { UpcomingReminderCalculationService } from '../../domain/services/upcoming-reminder-calculation-service';
 
 export interface ReminderScheduleQueryApplicationServiceDependencies {
   readonly reminderTemplateRepository: IReminderTemplateRepository;
-  readonly accountTimezonePort?: AccountTimezonePort;
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
 export class ReminderScheduleQueryApplicationService {
   private readonly reminderTemplateRepository: IReminderTemplateRepository;
-  private readonly accountTimezonePort?: AccountTimezonePort;
+  private readonly userTimeContextPort: UserTimeContextPort;
 
   constructor(dependencies: ReminderScheduleQueryApplicationServiceDependencies) {
     this.reminderTemplateRepository = dependencies.reminderTemplateRepository;
-    this.accountTimezonePort = dependencies.accountTimezonePort;
+    this.userTimeContextPort = dependencies.userTimeContextPort;
   }
 
-  /**
-   * 兜底链解析时区：请求时区 → 账号时区 → 显式默认('UTC')。无静默服务器时区。
-   */
+  /** Explicit request timezone wins; otherwise resolve the identity-scoped canonical Product Time context. */
   private async resolveTimezone(
     requestTimezone: string | undefined | null,
     identityId: string,
@@ -35,17 +33,8 @@ export class ReminderScheduleQueryApplicationService {
     if (requestTimezone && requestTimezone.trim().length > 0) {
       return requestTimezone;
     }
-    if (this.accountTimezonePort && identityId) {
-      try {
-        const accountTz = await this.accountTimezonePort.getUserTimezone(identityId);
-        if (accountTz && accountTz.trim().length > 0) {
-          return accountTz;
-        }
-      } catch {
-        // Fall back to explicit default on port error
-      }
-    }
-    return 'UTC';
+    const context = await this.userTimeContextPort.getUserTimeContext(identityId);
+    return context.timeZone;
   }
 
   async getUpcomingReminders(

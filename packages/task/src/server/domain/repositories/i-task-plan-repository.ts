@@ -127,16 +127,6 @@ export interface ITaskPlanRepository {
   findByKeyResultId(identityId: string, keyResultId: string): Promise<TaskPlan[]>;
 
   /**
-   * 查找即将到期的任务（未来N天内）
-   */
-  findUpcomingTasks(identityId: string, daysAhead: number): Promise<TaskPlan[]>;
-
-  /**
-   * 查找今日任务
-   */
-  findTodayTasks(identityId: string): Promise<TaskPlan[]>;
-
-  /**
    * 统计任务数量（按条件）
    */
   countTasks(identityId: string, filters?: TaskFilters): Promise<number>;

@@ -9,22 +9,16 @@ import type {
   TaskEventMap,
   GoalContributionRule,
 } from '@memoflow/contracts/task';
-import {
-  RecurrenceEndConditionType,
-  TaskPlanCompletionPolicy,
-  TaskPlanOutcome,
-} from '@memoflow/contracts/task';
+import { TaskPlanCompletionPolicy, TaskPlanOutcome } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskType } from '../value-objects';
-import { TaskOccurrenceStatus, TaskTimeType as TimeType } from '../../domain/value-objects';
+import { TaskOccurrenceStatus } from '../../domain/value-objects';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { TaskPlanId } from '../../domain/value-objects/task-plan-id';
 import type { TaskOccurrenceId } from '../../domain/value-objects/task-occurrence-id';
 import { IdentityId } from '@memoflow/domain-shared';
 import type { Instant } from '@memoflow/contracts/primitives';
-import { createTimeFacade } from '@memoflow/time';
-
-const taskTime = createTimeFacade();
+import { createTimeFacade, type TimeContext } from '@memoflow/time';
 
 import { AggregateRoot } from '@memoflow/utils/domain';
 import {
@@ -41,8 +35,7 @@ import type { TaskPlanProps, TaskPlanState } from './task-plan.state';
 import * as instanceGen from './instance-generation.policy';
 import * as goalPolicy from './task-plan-goal.policy';
 import * as lifecyclePolicy from './task-plan-lifecycle.policy';
-import * as recurrencePolicy from './task-plan-recurrence.policy';
-import { InvalidTaskPlanStateError, InvalidDateRangeError } from '../value-objects/task-errors';
+import { InvalidTaskPlanStateError } from '../value-objects/task-errors';
 
 /** TaskPlan aggregate root. */
 export class TaskPlan extends AggregateRoot<TaskPlanId> {
@@ -168,16 +161,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     return this._props.schedule.isRecurring ? TaskType.Recurring : TaskType.OneTime;
   }
 
-  /** Transitional derived compatibility; canonical state is schedule. */
-  public get timeConfig(): TaskTimeConfig {
-    return this._props.schedule.toLegacyTimeConfig();
-  }
-
-  /** Transitional derived compatibility; canonical state is schedule. */
-  public get recurrenceRule(): RecurrenceRule | null {
-    return this._props.schedule.toLegacyRecurrenceRule();
-  }
-
   public get reminderConfig(): TaskReminderConfig | null {
     return this._props.reminderConfig;
   }
@@ -269,9 +252,13 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   // ===== Instance Generation Methods (delegated to instance-generation.policy) =====
 
   /** Generates task instances within the specified date range. */
-  public generateInstances(fromDate: number, toDate: number): TaskOccurrence[] {
+  public generateInstances(
+    fromDate: number,
+    toDate: number,
+    timeContext: TimeContext,
+  ): TaskOccurrence[] {
     const { instances, lastGeneratedDate } = instanceGen.generateInstances(
-      this.getInstanceContext(),
+      this.getInstanceContext(timeContext),
       fromDate,
       toDate,
     );
@@ -291,28 +278,30 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   }
 
   /** Gets the task instance for a specific date. */
-  public getInstanceForDate(date: number): TaskOccurrence | null {
-    const targetDay = TaskPlan.startOfLocalDay(date);
+  public getInstanceForDate(date: number, timeContext: TimeContext): TaskOccurrence | null {
+    const time = createTimeFacade({ context: timeContext });
+    const targetDay = time.calendar.startOfDay(date);
     return (
-      this._instances.find((i) => TaskPlan.startOfLocalDay(i.instanceDate) === targetDay) ?? null
+      this._instances.find((i) => time.calendar.startOfDay(i.instanceDate) === targetDay) ?? null
     );
   }
 
   /** Determines whether an instance should be generated for the given date. */
-  public shouldGenerateInstance(date: number): boolean {
-    return instanceGen.shouldGenerateInstance(this.getInstanceContext(), date);
+  public shouldGenerateInstance(date: number, timeContext: TimeContext): boolean {
+    return instanceGen.shouldGenerateInstance(this.getInstanceContext(timeContext), date);
   }
 
-  private getInstanceContext(): instanceGen.InstanceGenerationContext {
+  private getInstanceContext(timeContext: TimeContext): instanceGen.InstanceGenerationContext {
     return {
       templateId: this.id,
       identityId: this._props.identityId,
       status: this._props.status,
       taskType: this.taskType,
-      timeConfig: this.timeConfig,
-      recurrenceRule: this.recurrenceRule,
+      timeConfig: this._props.schedule.toLegacyTimeConfig(timeContext),
+      recurrenceRule: this._props.schedule.toLegacyRecurrenceRule(timeContext),
       importance: this._props.importance,
       existingInstances: this._instances,
+      timeContext,
     };
   }
 
@@ -395,12 +384,12 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
 
   // ===== Time-related methods (delegated to instance-generation.policy) =====
 
-  public isActiveOnDate(date: number): boolean {
-    return instanceGen.isActiveOnDate(this.getInstanceContext(), date);
+  public isActiveOnDate(date: number, timeContext: TimeContext): boolean {
+    return instanceGen.isActiveOnDate(this.getInstanceContext(timeContext), date);
   }
 
-  public getNextOccurrence(afterDate: number): number | null {
-    return instanceGen.getNextOccurrence(this.getInstanceContext(), afterDate);
+  public getNextOccurrence(afterDate: number, timeContext: TimeContext): number | null {
+    return instanceGen.getNextOccurrence(this.getInstanceContext(timeContext), afterDate);
   }
 
   // ===== One-time task time methods =====
@@ -474,61 +463,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     );
   }
 
-  /**
-   * Updates the time configuration.
-   */
-  public updateTimeConfig(newTimeConfig: TaskTimeConfig | null): void {
-    if (this.taskType === TaskType.Recurring && newTimeConfig?.startDate == null) {
-      throw new InvalidTaskPlanStateError('Recurring Task requires a date', {
-        templateId: this.id,
-        currentStatus: this._props.status,
-        attemptedAction: 'updateTimeConfig',
-      });
-    }
-    const oldTimeConfig = this.timeConfig.toDTO();
-    if (!newTimeConfig) {
-      throw new InvalidTaskPlanStateError('Task Plan schedule cannot be cleared', {
-        templateId: this.id,
-        currentStatus: this._props.status,
-        attemptedAction: 'updateTimeConfig',
-      });
-    }
-    this._props.schedule = TaskPlanSchedule.fromLegacy(
-      this.taskType,
-      newTimeConfig,
-      this.recurrenceRule,
-    );
-    this._props.updatedAt = Date.now();
-
-    this.addHistory('time_config_updated', {
-      oldTimeConfig,
-      newTimeConfig: newTimeConfig?.toDTO() ?? null,
-    });
-
-    this.addDomainEvent<TaskEventMap['task:template-schedule-time-changed']>(
-      'task:template-schedule-time-changed',
-      {
-        identityId: this._props.identityId,
-        taskPlan: this.toServerDTO(),
-        oldTimeConfig,
-        newTimeConfig: newTimeConfig?.toDTO() ?? null,
-      },
-    );
-  }
-
-  // ===== Recurrence Methods (delegated to task-plan-recurrence.policy) =====
-
-  public updateRecurrenceRule(newRule: RecurrenceRule): void {
-    recurrencePolicy.updateRecurrenceRule(this, newRule);
-  }
-
-  public updateRecurrenceEndCondition(
-    endConditionType: RecurrenceEndConditionType,
-    customValue?: number,
-  ): void {
-    recurrencePolicy.updateRecurrenceEndCondition(this, endConditionType, customValue);
-  }
-
   /** Updates the importance level. */
   public updatePriority(newImportance: ImportanceLevel): void {
     const oldImportance = this._props.importance;
@@ -595,8 +529,14 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   // ===== Instance Management Methods =====
 
   /** Creates an instance from this template. */
-  public createInstance(params: instanceGen.CreateInstanceParams): string {
-    const instance = instanceGen.createInstanceFromTemplate(this.getInstanceContext(), params);
+  public createInstance(
+    params: instanceGen.CreateInstanceParams,
+    timeContext: TimeContext,
+  ): string {
+    const instance = instanceGen.createInstanceFromTemplate(
+      this.getInstanceContext(timeContext),
+      params,
+    );
     this._instances.push(instance);
     this._props.updatedAt = Date.now();
     return instance.id;
@@ -629,7 +569,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
 
   // ===== DTO Conversion =====
 
-  public toServerDTO(includeChildren: boolean = false): TaskPlanServerDTO {
+  public toServerDTO(): TaskPlanServerDTO {
     return {
       id: this.id,
       identityId: this._props.identityId,
@@ -652,16 +592,20 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       updatedAt: this._props.updatedAt,
       deletedAt: this._props.deletedAt ?? null,
       version: this._props.version,
-      instances: includeChildren
-        ? this._instances.map((instance) => instance.toServerDTO())
-        : undefined,
     };
   }
 
-  public toClientDTO(includeChildren: boolean = false): TaskPlanClientDTO {
-    const asOf = Date.now();
+  /** Product-Time-aware client projection for current Task consumers. */
+  public toClientDTOAt(
+    timeContext: TimeContext,
+    includeChildren: boolean = false,
+    asOf: number = Date.now(),
+  ): TaskPlanClientDTO {
+    const time = createTimeFacade({ context: timeContext });
     const completionWindowDays = 30 as const;
-    const completionWindowStart = asOf - completionWindowDays * 24 * 60 * 60 * 1000;
+    const completionWindowStart = Number(
+      time.calendar.startOfDay(time.calendar.addDays(asOf, -(completionWindowDays - 1))),
+    );
     const completedCount = this._instances.filter(
       (instance) => instance.status === TaskOccurrenceStatus.Completed,
     ).length;
@@ -704,7 +648,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       version: this._props.version,
       history: includeChildren ? this._history.map((entry) => entry.toClientDTO()) : undefined,
       instances: includeChildren
-        ? this._instances.map((instance) => instance.toClientDTO())
+        ? this._instances.map((instance) => instance.toClientDTOAt(timeContext, asOf))
         : undefined,
       instanceCount: totalCount,
       completedInstanceCount: completedCount,
@@ -730,12 +674,14 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     description?: string;
     importance?: ImportanceLevel;
     startDate?: Instant;
+    timeContext: TimeContext;
   }): TaskPlan {
     TaskPlan.assertIdentityId(params.identityId, 'createOneTimeTask');
     const title = TaskPlan.normalizeTitle(params.title, 'createOneTimeTask');
 
     const now = Date.now();
-    const occurrenceDate = params.startDate ?? taskTime.calendar.startOfDay(now);
+    const time = createTimeFacade({ context: params.timeContext });
+    const occurrenceDate = params.startDate ?? time.calendar.startOfDay(now);
     const template = TaskPlan.instantiate({
       id: params.id ?? TaskPlanId.generate(),
       identityId: params.identityId,
@@ -754,6 +700,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
         TaskType.OneTime,
         TaskTimeConfig.createAllDay(occurrenceDate),
         null,
+        params.timeContext,
       ),
       reminderConfig: null,
       lastGeneratedDate: null,
@@ -777,6 +724,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     reminderConfig?: TaskReminderConfig;
     importance?: ImportanceLevel;
     generateAheadDays?: number;
+    timeContext: TimeContext;
   }): TaskPlan {
     TaskPlan.assertIdentityId(params.identityId, 'createRecurringTask');
     const title = TaskPlan.normalizeTitle(params.title, 'createRecurringTask');
@@ -807,6 +755,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
         TaskType.Recurring,
         params.timeConfig,
         params.recurrenceRule,
+        params.timeContext,
       ),
       reminderConfig: params.reminderConfig ?? null,
       lastGeneratedDate: null,
@@ -884,9 +833,5 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
 
   public static load(state: TaskPlanState): TaskPlan {
     return TaskPlan.instantiate(state);
-  }
-
-  static startOfLocalDay(value: number): number {
-    return taskTime.calendar.startOfDay(value);
   }
 }

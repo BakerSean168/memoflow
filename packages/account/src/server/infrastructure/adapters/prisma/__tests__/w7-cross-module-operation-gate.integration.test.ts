@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { createSystemClock, createTimeContext } from '@memoflow/time';
 import { createHash, createHmac, randomUUID } from 'node:crypto';
 import { prisma } from '@memoflow/database';
 import {
@@ -42,13 +43,8 @@ describe('W7 cross-module operation gate (real DB)', () => {
     await prisma.account.create({
       data: {
         id: identityId,
-        status: 'ACTIVE',
+        status: 'Active',
         profile: {},
-        settings: {},
-        emailAddress: `gate-${identityId}@example.test`,
-        emailIsVerified: true,
-        emailVerifiedAt: new Date(),
-        emailIsPrimary: true,
       },
     });
   });
@@ -78,7 +74,10 @@ describe('W7 cross-module operation gate (real DB)', () => {
         color: null,
         icon: null,
         nextTriggerAt: now,
-        trigger: JSON.stringify({ type: 'FixedTime', fixedTime: { time: '10:00', timezone: 'UTC' } }),
+        trigger: JSON.stringify({
+          type: 'FixedTime',
+          fixedTime: { time: '10:00', timezone: 'UTC' },
+        }),
         recurrence: null,
         activeTime: JSON.stringify({ activatedAt: now.getTime() }),
         activeHours: null,
@@ -139,7 +138,9 @@ describe('W7 cross-module operation gate (real DB)', () => {
         updatedAt: now,
       },
     });
-    const notificationRow = await prisma.notification.findUniqueOrThrow({ where: { id: notificationId } });
+    const notificationRow = await prisma.notification.findUniqueOrThrow({
+      where: { id: notificationId },
+    });
     const notifOccurrenceKey = `${notificationRow.id}:in-app`;
     const notifIdempotencyKey = buildIdempotencyKeyString({
       identityId,
@@ -241,9 +242,17 @@ describe('W7 cross-module operation gate (real DB)', () => {
     });
 
     // ── Wire all five modules ──
-    const reminder = createReminderPrismaModule(prisma, { closureChecker: async () => false });
+    const reminder = createReminderPrismaModule(prisma, {
+      closureChecker: async () => false,
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
+    });
     const notifModule = createNotificationPrismaModule(prisma, {
       closureChecker: async () => false,
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
     });
     const schedule = createSchedulePrismaModule(prisma, {
       wireDeliveryLogConsumer: false,
@@ -254,6 +263,7 @@ describe('W7 cross-module operation gate (real DB)', () => {
       },
     });
     const account = createAccountPrismaModule(prisma, {
+      clock: createSystemClock(),
       cloudAuth: {
         revokeAllSessions: async () => ({ revokedSessions: 0 }),
         deleteUserData: async () => ({ deletedRecords: 0 }),
@@ -356,9 +366,9 @@ describe('W7 cross-module operation gate (real DB)', () => {
     expect(auditedOperations).toEqual(
       [accountOp, knowledgeOp, knowledgeOp, notificationOp, reminderOp, scheduleOp].sort(),
     );
-    const knowledgeAudits = auditRows.filter((r) => r.operationId === knowledgeOp).sort(
-      (a, b) => (a.createdAt < b.createdAt ? -1 : 1),
-    );
+    const knowledgeAudits = auditRows
+      .filter((r) => r.operationId === knowledgeOp)
+      .sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
     expect(knowledgeAudits.length).toBe(2);
     expect(knowledgeAudits[0].details).toContain('replay intent');
     expect(knowledgeAudits[1].details).toContain('status ->');

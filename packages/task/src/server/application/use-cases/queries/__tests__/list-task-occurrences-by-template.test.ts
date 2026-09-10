@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { aTaskOccurrence, aTaskPlanId, aOneTimeTask } from '../../../../../testing';
+import { aTaskOccurrence, aTaskPlanId, aOneTimeTask, TASK_TEST_OCCURRENCE_PROJECTION } from '../../../../../testing';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import { ListTaskOccurrencesByTemplateUseCase } from '../list-task-occurrences-by-template.use-case';
@@ -19,7 +19,11 @@ describe('ListTaskOccurrencesByTemplateUseCase', () => {
     templateRepo = createMockRepo<ITaskPlanRepository>({
       findByIdForIdentity: vi.fn(),
     });
-    useCase = new ListTaskOccurrencesByTemplateUseCase(instanceRepo, templateRepo);
+    useCase = new ListTaskOccurrencesByTemplateUseCase(
+      instanceRepo,
+      templateRepo,
+      TASK_TEST_OCCURRENCE_PROJECTION,
+    );
   });
 
   it('should return empty array when template is not owned', async () => {

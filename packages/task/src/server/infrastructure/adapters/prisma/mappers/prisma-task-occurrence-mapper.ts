@@ -31,7 +31,6 @@ function optionalInstant(value: Date | string | number | null | undefined): numb
   return Number.isFinite(n) ? n : null;
 }
 
-
 export class PrismaTaskOccurrenceMapper {
   /**
    * Prisma record → TaskOccurrence aggregate root
@@ -62,13 +61,16 @@ export class PrismaTaskOccurrenceMapper {
    * TaskOccurrence 聚合根 → Prisma write data
    */
   static toPersistence(instance: TaskOccurrence) {
-    const dto = instance.toServerDTO();
+    const dto = instance.toPersistenceState();
     return {
       templateId: dto.templateId,
       identityId: dto.identityId,
       instanceDate: toDateOrNull(dto.instanceDate) ?? new Date(),
       occurrenceKey: instance.occurrenceKey,
-      timeConfig: typeof dto.timeConfig === 'string' ? dto.timeConfig : JSON.stringify(dto.timeConfig) || '{}',
+      timeConfig:
+        typeof dto.timeConfig === 'string'
+          ? dto.timeConfig
+          : JSON.stringify(dto.timeConfig) || '{}',
       importance: dto.importance || 'Moderate',
       status: dto.status,
       actualStartTime: toDateOrNull(dto.actualStartTime),

@@ -6,6 +6,7 @@ import {
   aLoadedTaskPlan,
   aRecurringTask,
   anIdentityId,
+  TASK_TEST_USER_TIME_CONTEXT_PORT,
 } from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
@@ -55,7 +56,11 @@ describe('ListTaskPlansUseCase', () => {
       saveMany: vi.fn().mockResolvedValue(undefined),
     });
 
-    useCase = new ListTaskPlansUseCase(templateRepo, instanceRepo);
+    useCase = new ListTaskPlansUseCase(
+      templateRepo,
+      instanceRepo,
+      TASK_TEST_USER_TIME_CONTEXT_PORT,
+    );
   });
 
   describe('filtering', () => {

@@ -15,6 +15,12 @@ import { NotificationPreference } from '../../../../domain/aggregates/notificati
 import { DoNotDisturbConfig } from '../../../../domain/value-objects/do-not-disturb-config';
 import { RateLimit } from '../../../../domain/value-objects/rate-limit';
 import { CreateNotificationUseCase } from '../create-notification.use-case';
+import { createTimeContext } from '@memoflow/time';
+
+const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const userTimeContextPort = {
+  getUserTimeContext: vi.fn().mockResolvedValue(TEST_TIME_CONTEXT),
+};
 
 describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
   let notificationRepo: ReturnType<typeof createMockRepo<INotificationRepository>>;
@@ -31,7 +37,12 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
     preferenceRepo = createMockRepo<INotificationPreferenceRepository>({
       findByIdentityId: vi.fn().mockResolvedValue(null),
     });
-    useCase = new CreateNotificationUseCase(notificationRepo, preferenceRepo, async () => false);
+    useCase = new CreateNotificationUseCase(
+      notificationRepo,
+      preferenceRepo,
+      async () => false,
+      userTimeContextPort,
+    );
   });
 
   it('creates an unread Fact without a root delivery status', async () => {
@@ -90,19 +101,22 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
 
   it('Fixture I: DND keeps the Inbox Fact unread when Desktop delivery is suppressed', async () => {
     const identityId = anIdentityId();
-    const now = new Date('2026-08-25T23:30:00');
+    const now = new Date('2026-08-25T23:30:00.000Z');
     const preference = NotificationPreference.create({ identityId });
-    preference.setDoNotDisturb(DoNotDisturbConfig.create({
-      enabled: true,
-      startTime: '22:00',
-      endTime: '08:00',
-      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-    }));
+    preference.setDoNotDisturb(
+      DoNotDisturbConfig.create({
+        enabled: true,
+        startTime: '22:00',
+        endTime: '08:00',
+        daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+      }),
+    );
     vi.mocked(preferenceRepo.findByIdentityId).mockResolvedValue(preference);
     const duringDnd = new CreateNotificationUseCase(
       notificationRepo,
       preferenceRepo,
       async () => false,
+      userTimeContextPort,
       () => now,
     );
 
@@ -131,7 +145,7 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
 
   it('Fixture I: DND preserves defer semantics for an allowed InApp delivery', async () => {
     const identityId = anIdentityId();
-    const now = new Date('2026-08-25T23:30:00');
+    const now = new Date('2026-08-25T23:30:00.000Z');
     const dnd = DoNotDisturbConfig.create({
       enabled: true,
       startTime: '22:00',
@@ -145,6 +159,7 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
       notificationRepo,
       preferenceRepo,
       async () => false,
+      userTimeContextPort,
       () => now,
     );
 
@@ -158,7 +173,9 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
       channels: [NotificationChannelType.InApp],
     });
     const [, outbox, decisions] = vi.mocked(notificationRepo.save).mock.calls[0];
-    expect(outbox?.[0].deferUntil?.toISOString()).toBe(dnd.nextInactiveAt(now)?.toISOString());
+    expect(outbox?.[0].deferUntil?.toISOString()).toBe(
+      dnd.nextInactiveAt(now, TEST_TIME_CONTEXT)?.toISOString(),
+    );
     expect(decisions?.[0]).toMatchObject({
       outcome: NotificationDeliveryPlanOutcome.Deferred,
       reason: NotificationDeliveryReason.DndActive,
@@ -272,7 +289,12 @@ describe('NOTIF-2401 CreateNotificationUseCase Fact / DeliveryPlan', () => {
   });
 
   it('keeps the fail-closed account-closure contract', async () => {
-    const closed = new CreateNotificationUseCase(notificationRepo, preferenceRepo, async () => true);
+    const closed = new CreateNotificationUseCase(
+      notificationRepo,
+      preferenceRepo,
+      async () => true,
+      userTimeContextPort,
+    );
     const result = await closed.execute({
       identityId: anIdentityId(),
       title: 'Blocked',

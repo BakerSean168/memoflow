@@ -12,7 +12,7 @@ updated: 2026-09-09T00:00:00+08:00
 
 # ADR-101: Product Time Presentation 与 Compatibility Surface
 
-**状态：** 已采纳（待实施）
+**状态：** 已采纳（已实施，TIME-1202～1206）
 **日期：** 2026-09-09
 **依赖：** ADR-100
 
@@ -93,27 +93,27 @@ Raw number / Date 的转换集中在 Codec/mapper/UI adapter。
 - arbitrary pattern 不作为 UserPreference 持久化值；
 - business modules 不通过 pattern API重新创造自己的产品时间风格。
 
-## 6. Default context
+## 6. Context-required facade
 
-`defaultTime` 作为便捷全局 facade 可以继续存在于纯 presentation/legacy surface，但：
+TIME-1206 已删除 `defaultTime` 与无参 `createTimeFacade()`。当前规则：
 
-- server business logic 不得依赖其 host-local default；
-  -需要 timezone/day-boundary 的业务逻辑必须显式注入 context/facade；
-- tests 必须使用 fixed Clock + fixed TimeContext。
+- 任何 Calendar / wall-clock / timezone-aware Format 行为必须显式持有 `TimeContext`；
+- device timezone 只能在 app/bootstrap boundary 通过 `TimeZoneSource` 解析成显式 context；
+- signed-in user context 来自 canonical Preference `UserTimeContextPort`；
+- tests 使用 fixed Clock + fixed TimeContext，不允许依赖执行宿主 timezone。
 
-## 7. Compatibility migration
+## 7. Compatibility retirement result
 
-按顺序：
+TIME-1202～1206 已完成直接切换：
 
-1. 增加新 Context/Presentation contract；
-2. 保留短期旧 `TimeStyle` adapter；
-3. 迁移 user/business consumers；
-4. 迁移 UI formatter；
-5. 收窄 `Instant | number`；
-6. 将 `Date` helper 降为 boundary-only export 或删除；
-7. 更新 Time Registry/ESLint surface lock。
+1. `TimeContext` 与 `TimePresentationStyle` 成为独立 canonical contract；
+2. mixed `TimeStyle/PartialTimeStyle`、`withStyle`、`DEFAULT_TIME_STYLE` 删除；
+3. user/business/UI current consumers 已迁到 explicit context；
+4. ambient `defaultTime`、Date→Ymd/HH:mm convenience 与 deprecated Format wrappers 删除；
+5. boundary/persistence 需要的 raw conversion 保留在 Codec/mapper/UI adapter，并要求明确语义；
+6. Time Registry/ESLint/date-fns audit 与 Product Time surface audit 阻止旧 API 复活。
 
-禁止长期双 API 都被文档称为 canonical。
+ADR-111 下不保留旧客户端/旧数据 compatibility promise。
 
 ## 8. Acceptance
 
@@ -121,4 +121,4 @@ Raw number / Date 的转换集中在 Codec/mapper/UI adapter。
 - TimeContext.timeZone 真正影响 display date/time；
 - ordinary module code 无 direct date-fns / toLocale product formatting；
 - canonical calendar/business APIs 不再接受裸 number；
-- legacy helpers 有明确 retire list。
+- retired ambient/mixed helpers 在 production source 中为 0，并由 anti-resurrection governance gate 持续约束。

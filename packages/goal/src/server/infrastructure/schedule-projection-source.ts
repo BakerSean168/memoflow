@@ -2,7 +2,7 @@ import type { GoalEventMap, GoalServerDTO, ReminderTrigger } from '@memoflow/con
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
 import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
-import { defaultTime, type TimeFacade } from '@memoflow/time';
+import { createTimeFacade, type TimeFacade, type UserTimeContextPort } from '@memoflow/time';
 import type { IGoalRepository } from '../domain';
 
 export const GOAL_REMINDER_HANDLER_KEY = 'goal.reminder.fire';
@@ -116,10 +116,8 @@ export const goalScheduleProjectionEventNames = [
 
 export function createGoalScheduleProjectionSource(deps: {
   goalRepository: IGoalRepository;
-  time?: TimeFacade;
+  userTimeContextPort: UserTimeContextPort;
 }): GoalScheduleProjectionSource {
-  const time = deps.time ?? defaultTime;
-
   return {
     buildGoalOwner(goalId, identityId) {
       return goalOwner(goalId, identityId);
@@ -132,6 +130,9 @@ export function createGoalScheduleProjectionSource(deps: {
 
     async buildGoalPlan(goalId, identityId) {
       const owner = goalOwner(goalId, identityId);
+      const time = createTimeFacade({
+        context: await deps.userTimeContextPort.getUserTimeContext(identityId),
+      });
       const goal = await deps.goalRepository.findByIdForIdentity(identityId, goalId, {
         includeChildren: true,
       });

@@ -22,8 +22,6 @@ function createFakeInstance() {
     listAccounts: vi.fn(),
     getProfile: vi.fn(),
     updateProfile: vi.fn(),
-    updateSettings: vi.fn(),
-    checkAvailability: vi.fn(),
     closeAccount: vi.fn(),
     queryClosureTimeline: vi.fn(),
     replayClosure: vi.fn(),

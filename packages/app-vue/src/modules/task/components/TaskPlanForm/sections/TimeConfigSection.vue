@@ -81,7 +81,7 @@
             <PopoverContent class="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                :selected="parseToDate(startDate)"
+                :selected="parseToCalendarDate(startDate)"
                 @update:model-value="
                   (d: unknown) =>
                     handleCalendarSelect(d, (v) => {
@@ -264,14 +264,14 @@ import {
 import { Calendar as CalendarIcon, Clock3 } from '@lucide/vue';
 import { translateResultError } from '../../../../../shared/utils/translate-result-error';
 import { getProductTime } from '../../../../../shared/utils/product-time';
-import { parseToDate } from '../../../../../shared/utils/parse-to-date';
+import { parseToCalendarDate } from '../../../../../shared/utils/parse-to-date';
 import { handleCalendarSelect } from '../../../../../shared/utils/handle-calendar-select';
 import { formatDisplayDate } from '../../../../../shared/utils/format-display-date';
 import { padTwoDigits } from '../../../../../shared/utils/pad-two-digits';
 
 const { t, locale } = useI18n();
 
-// Residual 1249 / Residual 1252: formatDisplayDate dual retired onto shared sole; formatDateToYMD dual retired onto shared sole (Residual 1252); parseInputToDate dual retired onto parseToDate sole (Residual 1255); handleCalendarSelect dual retired onto shared sole (Residual 1258).
+// TIME-1206: date-only display stays on the Ymd helper; calendar selection uses the CalendarDate <-> Ymd boundary without Date conversion.
 
 const props = withDefaults(
   defineProps<{

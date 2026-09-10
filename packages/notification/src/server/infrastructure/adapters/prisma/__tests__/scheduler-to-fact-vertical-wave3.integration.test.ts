@@ -1,5 +1,6 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'crypto';
+import { createTimeContext } from '@memoflow/time';
 import type {
   ScheduledIntent,
   ScheduledInvocationContext,
@@ -83,6 +84,11 @@ const FIXTURE_F = {
   nextOccurrenceAt: Date.parse('2026-08-26T15:30:00.000Z'),
 } as const;
 
+const TEST_NOTIFICATION_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => TEST_NOTIFICATION_TIME_CONTEXT,
+};
+
 describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> Notification Fact (WAVE3-0002)', () => {
   let prisma: ReturnType<typeof getPrisma>;
   let reliableAdapter: NotificationReliableOperationPrismaAdapter;
@@ -112,6 +118,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
 
   function buildNotificationRuntime() {
     return createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       ownerToken: `worker-${randomUUID()}`,
       repository: notificationRepo,
@@ -257,7 +264,9 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     expect(fact.relatedEntityType).toBe(RelatedEntityType.Task);
     expect(fact.relatedEntityId).toBe(instanceId);
     expect(
-      await prisma.notification.count({ where: { identityId, idempotencyKey: shared.idempotencyKey! } }),
+      await prisma.notification.count({
+        where: { identityId, idempotencyKey: shared.idempotencyKey! },
+      }),
     ).toBe(1);
   });
 
@@ -344,7 +353,9 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     expect(fact.relatedEntityType).toBe(RelatedEntityType.Goal);
     expect(fact.relatedEntityId).toBe(goalId);
     expect(
-      await prisma.notification.count({ where: { identityId, idempotencyKey: shared.idempotencyKey! } }),
+      await prisma.notification.count({
+        where: { identityId, idempotencyKey: shared.idempotencyKey! },
+      }),
     ).toBe(1);
   });
 
@@ -408,7 +419,9 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     expect(fact.relatedEntityType).toBe('routine');
     expect(fact.relatedEntityId).toBe(routineId);
     expect(
-      await prisma.notification.count({ where: { identityId, idempotencyKey: shared.idempotencyKey! } }),
+      await prisma.notification.count({
+        where: { identityId, idempotencyKey: shared.idempotencyKey! },
+      }),
     ).toBe(1);
   });
 });

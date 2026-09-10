@@ -3,8 +3,13 @@ import { aPrefixedUuid } from '@memoflow/test-utils/fixtures';
 import { PrismaTaskPlanMapper } from './prisma-task-plan-mapper';
 import type { TaskPlan as PrismaTaskPlan } from '@memoflow/database';
 import { TaskPlan } from '../../../../domain/aggregates/task-plan';
+import { TASK_TEST_TIME_CONTEXT } from '../../../../../testing';
 
 describe('PrismaTaskPlanMapper', () => {
+  const legacyTimeConfig = (domain: TaskPlan) =>
+    domain.schedule.toLegacyTimeConfig(TASK_TEST_TIME_CONTEXT);
+  const legacyRecurrenceRule = (domain: TaskPlan) =>
+    domain.schedule.toLegacyRecurrenceRule(TASK_TEST_TIME_CONTEXT);
   const TEMPLATE_ID_1 = aPrefixedUuid('ITaskPlanId', 'task-plan-1');
   const TEMPLATE_ID_2 = aPrefixedUuid('ITaskPlanId', 'task-plan-2');
   const TEMPLATE_ID_3 = aPrefixedUuid('ITaskPlanId', 'task-plan-3');
@@ -118,8 +123,8 @@ describe('PrismaTaskPlanMapper', () => {
       expect(domain.importance).toBe('Moderate');
       expect(domain.status).toBe('Active');
       expect(domain.version).toBe(1);
-      expect(domain.timeConfig.timeType).toBe('AllDay');
-      expect(domain.recurrenceRule).toBeNull();
+      expect(legacyTimeConfig(domain).timeType).toBe('AllDay');
+      expect(legacyRecurrenceRule(domain)).toBeNull();
       expect(domain.reminderConfig).toBeNull();
       expect(domain.goalBinding).toBeNull();
       expect(domain.checklist).toEqual([]);
@@ -141,33 +146,33 @@ describe('PrismaTaskPlanMapper', () => {
       const row = createFullRow();
       const domain = PrismaTaskPlanMapper.toDomain(row);
 
-      expect(domain.timeConfig).toBeDefined();
-      expect(domain.timeConfig.timeType).toBe('TimeRange');
-      expect(domain.timeConfig.timeRange).toEqual({ start: 540, end: 1020 });
+      expect(legacyTimeConfig(domain)).toBeDefined();
+      expect(legacyTimeConfig(domain).timeType).toBe('TimeRange');
+      expect(legacyTimeConfig(domain).timeRange).toEqual({ start: 540, end: 1020 });
     });
 
     it('returns null timeConfig when not configured', () => {
       const row = createMinimalRow();
       const domain = PrismaTaskPlanMapper.toDomain(row);
 
-      expect(domain.timeConfig.timeType).toBe('AllDay');
+      expect(legacyTimeConfig(domain).timeType).toBe('AllDay');
     });
 
     it('parses recurrenceRule when present', () => {
       const row = createFullRow();
       const domain = PrismaTaskPlanMapper.toDomain(row);
 
-      expect(domain.recurrenceRule).toBeDefined();
-      expect(domain.recurrenceRule?.frequency).toBe('Daily');
-      expect(domain.recurrenceRule?.interval).toBe(1);
-      expect(domain.recurrenceRule?.daysOfWeek).toEqual([]);
+      expect(legacyRecurrenceRule(domain)).toBeDefined();
+      expect(legacyRecurrenceRule(domain)?.frequency).toBe('Daily');
+      expect(legacyRecurrenceRule(domain)?.interval).toBe(1);
+      expect(legacyRecurrenceRule(domain)?.daysOfWeek).toEqual([]);
     });
 
     it('returns null recurrenceRule when not configured', () => {
       const row = createMinimalRow();
       const domain = PrismaTaskPlanMapper.toDomain(row);
 
-      expect(domain.recurrenceRule).toBeNull();
+      expect(legacyRecurrenceRule(domain)).toBeNull();
     });
 
     it('parses reminderConfig when enabled', () => {
@@ -239,6 +244,23 @@ describe('PrismaTaskPlanMapper', () => {
       expect(persistence.goalRecordValue).toBeNull();
       expect(persistence.goalProgressTrigger).toBeNull();
       expect(persistence.checklist).toBeNull();
+    });
+
+    it('writes canonical calendar dates as UTC-midnight compatibility values', () => {
+      const aggregate = createTestAggregate({
+        timeConfigStartTime: new Date('2026-03-08T00:00:00.000Z'),
+        recurrenceRuleType: 'Daily',
+        recurrenceRuleInterval: 1,
+        recurrenceRuleDaysOfWeek: JSON.stringify([]),
+        recurrenceRuleEndDate: new Date('2026-03-09T00:00:00.000Z'),
+      });
+
+      expect(String(aggregate.schedule.calendarDate)).toBe('2026-03-08');
+      expect(aggregate.schedule.recurrence?.end).toEqual({ kind: 'Until', date: '2026-03-09' });
+
+      const persistence = PrismaTaskPlanMapper.toPersistence(aggregate);
+      expect(persistence.timeConfigStartTime?.toISOString()).toBe('2026-03-08T00:00:00.000Z');
+      expect(persistence.recurrenceRuleEndDate?.toISOString()).toBe('2026-03-09T00:00:00.000Z');
     });
 
     it('converts full aggregate with all fields to persistence', () => {

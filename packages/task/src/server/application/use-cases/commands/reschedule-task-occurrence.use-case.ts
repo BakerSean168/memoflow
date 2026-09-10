@@ -1,16 +1,17 @@
 import type { RescheduleTaskInput, TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import { error, fail, ok, type Result } from '@memoflow/contracts/result';
-import { asInstant, createTimeFacade } from '@memoflow/time';
+import { asInstant, createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 import { TaskTimeConfig } from '../../../domain/value-objects/task-time-config';
-import { buildTaskOccurrenceOccurrenceKey } from '../../../domain/value-objects/task-occurrence-occurrence-key';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import { mapTaskWriteErrorToResultError } from './task-write-support';
 
-const time = createTimeFacade();
 
 /** Owner command for one TaskOccurrence. It never mutates TaskPlan or Scheduler persistence. */
 export class RescheduleTaskOccurrenceUseCase {
-  constructor(private readonly instanceRepository: ITaskOccurrenceRepository) {}
+  constructor(
+    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly userTimeContextPort: UserTimeContextPort,
+  ) {}
 
   async execute(
     id: string,
@@ -33,11 +34,10 @@ export class RescheduleTaskOccurrenceUseCase {
         return error('VALIDATION_ERROR', 'Rescheduled task requires startDate');
       }
 
+      const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
+      const time = createTimeFacade({ context: timeContext });
       const targetDay = time.calendar.startOfDay(asInstant(request.newTime.startDate));
-      const targetKey = buildTaskOccurrenceOccurrenceKey(
-        String(instance.templateId),
-        Number(targetDay),
-      );
+      const targetKey = String(instance.templateId) + ":" + time.calendar.toYmd(targetDay);
       const siblings = await this.instanceRepository.findByTemplateIdAndDateRange(
         String(instance.templateId),
         identityId,
@@ -53,10 +53,11 @@ export class RescheduleTaskOccurrenceUseCase {
 
       const changed = instance.reschedule(
         TaskTimeConfig.fromDTO({ ...request.newTime, startDate: targetDay }),
+        timeContext,
       );
-      if (!changed) return ok(instance.toClientDTO());
+      if (!changed) return ok(instance.toClientDTOAt(timeContext));
       await this.instanceRepository.save(instance);
-      return ok(instance.toClientDTO());
+      return ok(instance.toClientDTOAt(timeContext));
     } catch (caughtError) {
       return fail(
         mapTaskWriteErrorToResultError(caughtError, 'Failed to reschedule task instance'),

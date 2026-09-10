@@ -15,6 +15,7 @@ import type {
 } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
+import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 
 /**
  * List Task Templates Service
@@ -23,6 +24,8 @@ export class ListTaskPlansUseCase {
   constructor(
     private readonly templateRepository: ITaskPlanRepository,
     private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly userTimeContextPort: UserTimeContextPort,
+    private readonly now: () => number = Date.now,
   ) {}
 
   async execute(request: QueryTaskPlansInternal): Promise<Result<QueryTaskPlansRes>> {
@@ -57,17 +60,25 @@ export class ListTaskPlansUseCase {
       templates = await this.templateRepository.findByIdentityId(request.identityId);
     }
 
-    // R2-3：列表查询保持纯读——实例补充由显式 maintenance worker 负责
-    // （task-occurrence-maintenance-runtime），不再在查询路径写库。
+    // R2-3：列表查询保持纯读——实例补充由显式 maintenance worker 负责。
+    // Completion statistics use the same identity-scoped Product Time window
+    // in both Prisma and PowerSync lanes.
+    const asOf = this.now();
+    const timeContext = await this.userTimeContextPort.getUserTimeContext(request.identityId);
+    const taskTime = createTimeFacade({ context: timeContext });
+    const windowStart = Number(
+      taskTime.calendar.startOfDay(taskTime.calendar.addDays(asOf, -29)),
+    );
     const statsByTemplateId =
       (await this.instanceRepository.getTemplateStats(
         templates.map((template) => template.id),
         request.identityId,
+        { windowStart, asOf },
       )) ?? {};
 
     return ok({
       templates: templates.map((template) => {
-        const dto = template.toClientDTO();
+        const dto = template.toClientDTOAt(timeContext, false, asOf);
         const stats = statsByTemplateId[template.id];
 
         if (!stats) {

@@ -1,8 +1,10 @@
 import { mount } from '@vue/test-utils';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { asInstant } from '@memoflow/time';
 import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
 import PlannerCalendar from './PlannerCalendar.vue';
+import { setProductTimePreferences } from '../../../shared/utils/product-time';
 
 const scheduleProjection: Extract<CalendarEventProjection, { sourceType: 'schedule' }> = {
   identityId: 'identity-1',
@@ -19,6 +21,7 @@ const scheduleProjection: Extract<CalendarEventProjection, { sourceType: 'schedu
 };
 
 describe('PlannerCalendar production renderer (PLAN-4304)', () => {
+  afterEach(() => setProductTimePreferences(createDefaultUserPreferenceProfile()));
   it('renders canonical projections and emits the FullCalendar-owned visible range', async () => {
     const wrapper = mount(PlannerCalendar, {
       attachTo: document.body,
@@ -96,6 +99,32 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
       ),
     );
 
+    wrapper.unmount();
+  });
+
+  it('binds FullCalendar day boundaries to the session IANA timezone across DST', async () => {
+    const profile = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({
+      ...profile,
+      regional: { ...profile.regional, timeZone: 'America/New_York', weekStartsOn: 0 },
+    });
+
+    const wrapper = mount(PlannerCalendar, {
+      attachTo: document.body,
+      props: {
+        projections: [],
+        ownerCommands: {
+          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+        },
+        view: 'day',
+        initialDate: Date.parse('2026-03-08T16:00:00.000Z'),
+      },
+    });
+
+    await vi.waitFor(() => expect(wrapper.emitted('range-change')?.length).toBeGreaterThan(0));
+    const range = wrapper.emitted('range-change')?.at(-1)?.[0] as { start: number; end: number };
+    expect(range.start).toBe(Date.parse('2026-03-08T05:00:00.000Z'));
+    expect(range.end).toBe(Date.parse('2026-03-09T03:59:59.999Z'));
     wrapper.unmount();
   });
 

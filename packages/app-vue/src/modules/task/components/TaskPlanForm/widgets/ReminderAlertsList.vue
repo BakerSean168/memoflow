@@ -114,6 +114,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { Plus, Trash2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
+import { getProductTime } from '../../../../../shared/utils/product-time';
 
 const { t } = useI18n();
 
@@ -184,9 +185,7 @@ const errorMessage = computed(() => {
 const formatAbsoluteTimeInput = (alert: ReminderAlert): string => {
   const value = alert.timing.absoluteTime;
   if (!value) return '';
-  const hours = String(value.getHours()).padStart(2, '0');
-  const minutes = String(value.getMinutes()).padStart(2, '0');
-  return `${hours}:${minutes}`;
+  return String(getProductTime().input.timeValue(value.getTime()));
 };
 
 const handleAbsoluteTimeChange = (timeValue: string, alertIndex: number) => {
@@ -200,9 +199,13 @@ const handleAbsoluteTimeChange = (timeValue: string, alertIndex: number) => {
       return;
     }
 
-    // 创建新的 Date，使用当前日期和用户选择的时间
-    const now = new Date();
-    const absoluteTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+    const time = getProductTime();
+    const ymd = time.calendar.toYmd(time.now());
+    const hm = time.input.parseTimeValue(timeValue);
+    if (hm == null) return;
+    const instant = time.input.combine(ymd, hm);
+    if (instant == null) return;
+    const absoluteTime = new Date(Number(instant));
 
     // 只更新指定的提醒项
     const updatedAlerts = [...localAlerts.value];

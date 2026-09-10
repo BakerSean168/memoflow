@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { setProductTimePreferences } from '../../../shared/utils/product-time';
 import {
   formatCapsuleTime,
   formatScheduleCapsuleLabel,
@@ -6,7 +8,10 @@ import {
   type CalendarEventItem,
 } from './useCalendarView';
 
-function event(partial: Partial<CalendarEventItem> & Pick<CalendarEventItem, 'id' | 'title' | 'startTime' | 'endTime'>): CalendarEventItem {
+function event(
+  partial: Partial<CalendarEventItem> &
+    Pick<CalendarEventItem, 'id' | 'title' | 'startTime' | 'endTime'>,
+): CalendarEventItem {
   return {
     displayMode: 'timed',
     source: 'schedule',
@@ -16,6 +21,7 @@ function event(partial: Partial<CalendarEventItem> & Pick<CalendarEventItem, 'id
 }
 
 describe('schedule capsule helpers (V2 §2 / §6.3)', () => {
+  afterEach(() => setProductTimePreferences(createDefaultUserPreferenceProfile()));
   const day = new Date(2026, 6, 13, 12, 0, 0, 0); // local noon
   const now = day.getTime();
 
@@ -82,6 +88,16 @@ describe('schedule capsule helpers (V2 §2 / §6.3)', () => {
     const upcomingLabel = formatScheduleCapsuleLabel(upcomingSnap, t);
     expect(upcomingLabel).toContain('shell.schedule.upcoming');
     expect(upcomingLabel).toContain('30');
+  });
+
+  it('formats capsule time in the session timezone across spring-forward', () => {
+    const profile = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({
+      ...profile,
+      regional: { ...profile.regional, timeZone: 'America/New_York' },
+    });
+
+    expect(formatCapsuleTime(Date.parse('2026-03-08T13:05:00.000Z'))).toBe('09:05');
   });
 
   it('formats local HH:mm without locale drift', () => {

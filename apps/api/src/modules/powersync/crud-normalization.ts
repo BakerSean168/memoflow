@@ -12,7 +12,7 @@
  */
 
 export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
-  accounts: new Set(['profile', 'settings']),
+  accounts: new Set(['profile']),
   user_settings: new Set(['preferences']),
   user_preference_records: new Set(['payload']),
   goals: new Set(['tags']),
@@ -27,7 +27,6 @@ export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
 };
 
 export const BOOLEAN_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
-  accounts: new Set(['email_is_verified', 'email_is_primary', 'phone_is_verified']),
   task_templates: new Set(['reminder_config_enabled', 'is_blocked']),
   schedules: new Set(['has_conflict']),
   schedule_tasks: new Set(['enabled']),

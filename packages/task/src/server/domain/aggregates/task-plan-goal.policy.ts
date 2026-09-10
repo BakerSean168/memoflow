@@ -6,10 +6,9 @@
  */
 
 import type { GoalContributionRule } from '@memoflow/contracts/task';
-import { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger, TaskRecurrenceEndKind } from '@memoflow/contracts/task';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
-import { TaskType } from '../value-objects';
-import { TaskGoalBinding, type RecurrenceRule } from '../value-objects';
+import { TaskGoalBinding, type TaskPlanSchedule } from '../value-objects';
 import { InvalidGoalBindingError } from '../value-objects/task-errors';
 import type { TaskPlanProps } from './task-plan.state';
 
@@ -21,11 +20,10 @@ export interface GoalOperationContext {
 }
 
 /** Whole-plan progress is meaningful only when the task has a closed execution scope. */
-export function isFiniteTaskPlan(
-  taskType: TaskType,
-  recurrenceRule: RecurrenceRule | null | undefined,
-): boolean {
-  return taskType === TaskType.OneTime || Boolean(recurrenceRule?.hasEndCondition);
+export function isFiniteTaskPlan(schedule: TaskPlanSchedule): boolean {
+  if (!schedule.isRecurring) return true;
+  const recurrence = schedule.recurrence;
+  return recurrence != null && recurrence.end.kind !== TaskRecurrenceEndKind.Never;
 }
 
 /** Binds the template to a goal. */
@@ -54,10 +52,7 @@ export function bindToGoal(
   }
   if (
     contribution?.trigger === TaskGoalBindingTrigger.PlanCompletion &&
-    !isFiniteTaskPlan(
-      ctx.props.schedule.isRecurring ? TaskType.Recurring : TaskType.OneTime,
-      ctx.props.schedule.toLegacyRecurrenceRule(),
-    )
+    !isFiniteTaskPlan(ctx.props.schedule)
   ) {
     throw new InvalidGoalBindingError('Whole-plan goal progress requires a finite task plan');
   }

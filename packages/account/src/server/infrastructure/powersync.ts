@@ -21,9 +21,11 @@ import {
   type AccountRuntimeContributionsInput,
 } from './runtime';
 import type { IAccountRepository } from '../domain';
+import type { Clock } from '@memoflow/time';
 
 export interface CreateAccountPowerSyncModuleOptions {
   readonly runtimeContributions?: AccountRuntimeContributionsInput;
+  readonly clock: Clock;
 }
 
 /**
@@ -54,7 +56,9 @@ export interface AccountPowerSyncRepositorySet {
  * @param db - Electron database adapter owned by the desktop main runtime. 桌面主进程持有的 Electron 数据库适配器。
  * @returns Repository set backed by the PowerSync adapter. 基于 PowerSync 适配器的仓储集合。
  */
-export function createAccountPowerSyncRepositories(db: Transactional): AccountPowerSyncRepositorySet {
+export function createAccountPowerSyncRepositories(
+  db: Transactional,
+): AccountPowerSyncRepositorySet {
   return {
     accountRepository: new PowerSyncAccountRepository(db),
   };
@@ -62,12 +66,13 @@ export function createAccountPowerSyncRepositories(db: Transactional): AccountPo
 
 export function createAccountPowerSyncModule(
   db: Transactional,
-  options: CreateAccountPowerSyncModuleOptions = {},
+  options: CreateAccountPowerSyncModuleOptions,
 ): AccountModuleInstance {
   const { accountRepository } = createAccountPowerSyncRepositories(db);
 
   return createAccountModule({
     accountRepository,
+    clock: options.clock,
     laneCapability: 'desktop',
     runtimeContributions: createAccountRuntimeContributions(
       accountRepository,

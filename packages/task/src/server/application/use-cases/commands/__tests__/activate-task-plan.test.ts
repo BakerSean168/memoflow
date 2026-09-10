@@ -1,12 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { aLoadedTaskPlan } from '../../../../../testing';
+import { aLoadedTaskPlan, TASK_TEST_TIME_CONTEXT } from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { TaskPlanStatus } from '@memoflow/contracts/task';
 import { ActivateTaskPlanUseCase } from '../activate-task-plan.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
+
+const userTimeContextPort = {
+  getUserTimeContext: vi.fn().mockResolvedValue(TASK_TEST_TIME_CONTEXT),
+};
 
 const mockGenerateInstances = vi.fn().mockReturnValue([]);
 vi.mock('../../../../domain/services', () => {
@@ -45,6 +49,7 @@ describe('ActivateTaskPlanUseCase', () => {
         templateRepository: templateRepo,
         instanceRepository: instanceRepo,
       }),
+      userTimeContextPort,
     );
   });
 
@@ -103,10 +108,14 @@ describe('ActivateTaskPlanUseCase', () => {
 
     await useCase.execute(template.id, template.identityId);
 
-    expect(mockGenerateInstances).toHaveBeenCalledWith(template, {
-      forceGenerate: true,
-      fromDate: expect.any(Number),
-    });
+    expect(mockGenerateInstances).toHaveBeenCalledWith(
+      template,
+      TASK_TEST_TIME_CONTEXT,
+      {
+        forceGenerate: true,
+        fromDate: expect.any(Number),
+      },
+    );
   });
 
   it('should save generated instances when there are some', async () => {

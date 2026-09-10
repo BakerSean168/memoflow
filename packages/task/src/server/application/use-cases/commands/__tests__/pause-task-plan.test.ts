@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { aLoadedTaskPlan } from '../../../../../testing';
+import { aLoadedTaskPlan, TASK_TEST_USER_TIME_CONTEXT_PORT } from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { TaskPlanStatus } from '@memoflow/contracts/task';
@@ -30,6 +30,7 @@ describe('PauseTaskPlanUseCase', () => {
         templateRepository: templateRepo,
         instanceRepository: instanceRepo,
       }),
+      TASK_TEST_USER_TIME_CONTEXT_PORT,
     );
   });
 

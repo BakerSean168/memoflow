@@ -11,6 +11,7 @@ import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error, fail } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   mapTaskWriteErrorToResultError,
   type TaskWriteTransactionRunner,
@@ -25,6 +26,7 @@ export class GenerateTaskOccurrencesUseCase {
     private readonly templateRepository: ITaskPlanRepository,
     private readonly instanceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
+    private readonly userTimeContextPort: UserTimeContextPort,
   ) {
     if (!transactionRunner) {
       throw new Error('TaskWriteTransactionRunner must be explicitly provided to GenerateTaskOccurrencesUseCase');
@@ -39,6 +41,7 @@ export class GenerateTaskOccurrencesUseCase {
     request: { fromDate: number; toDate: number },
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
     try {
+      const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
       return await this.transactionRunner.run(async ({ templateRepository, instanceRepository }) => {
         const template = await templateRepository!.findByIdForIdentity(identityId, templateId);
         if (!template) {
@@ -48,7 +51,7 @@ export class GenerateTaskOccurrencesUseCase {
         const existingInstances = await instanceRepository.findByTemplateId(templateId, identityId);
         existingInstances.forEach((instance) => template.addInstance(instance));
 
-        const instances = this.generationService.generateInstances(template, {
+        const instances = this.generationService.generateInstances(template, timeContext, {
           forceGenerate: true,
           targetDate: request.toDate,
           // R2-2：force 路径不再忽略请求区间——从 fromDate 生成到 toDate。
@@ -60,7 +63,7 @@ export class GenerateTaskOccurrencesUseCase {
           await templateRepository!.save(template);
         }
 
-        return ok(instances.map((instance) => instance.toClientDTO()));
+        return ok(instances.map((instance) => instance.toClientDTOAt(timeContext)));
       });
     } catch (caughtError) {
       this.logger.error('Failed to generate task instances', { error: caughtError });

@@ -177,6 +177,43 @@ describe('ApplyGoalPlanService', () => {
     expect(port.createReminder.mock.calls[0]?.[1]).toBe(context);
   });
 
+  it('resolves reminder wall-clock time through its explicit IANA timezone across spring-forward', async () => {
+    const port = mutationPort();
+    const service = new ApplyGoalPlanService(port);
+    const dstDraft = GoalPlanDraftSchema.parse({
+      ...draft,
+      taskPlans: [],
+      reminders: [
+        {
+          title: 'New York morning',
+          importance: 'Moderate',
+          cadence: 'once',
+          scheduledAt: Date.parse('2026-03-08T12:00:00.000Z'),
+          timeOfDay: '09:30',
+          timezone: 'America/New_York',
+          channels: ['InApp'],
+          tags: [],
+        },
+      ],
+    });
+
+    const receipt = await service.apply({
+      workflowRunId: 'workflow-dst',
+      draft: dstDraft,
+      context,
+    });
+
+    expect(receipt.status).toBe('success');
+    expect(port.createReminder).toHaveBeenCalledTimes(1);
+    expect(port.createReminder.mock.calls[0]?.[0]).toMatchObject({
+      activeTime: { activatedAt: Date.parse('2026-03-08T13:30:00.000Z') },
+      trigger: {
+        type: 'FixedTime',
+        fixedTime: { time: '09:30', timezone: 'America/New_York' },
+      },
+    });
+  });
+
   it('uses the prior partial receipt as a checkpoint and retries only missing children', async () => {
     const port = mutationPort();
     const service = new ApplyGoalPlanService(port);

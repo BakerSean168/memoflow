@@ -3,28 +3,11 @@ import type {
   AccountProfileDTO,
   AccountProfile as IAccountProfile,
 } from '@memoflow/contracts/account';
-import type { Instant, Ymd } from '@memoflow/contracts/primitives';
-import { createTimeFacade } from '@memoflow/time';
+import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
 import { GenderType } from './gender-type';
 
-const time = createTimeFacade();
-
 function normalizeBirthday(value: AccountProfileDTO['birthday']): Ymd | null {
-  if (value == null) return null;
-  if (typeof value === 'string') {
-    return time.codec.parseYmd(value);
-  }
-  if (typeof value === 'number') {
-    // Legacy epoch-ms birthday → local Ymd
-    const instant = time.codec.fromTransfer(value);
-    if (instant == null) return null;
-    return time.codec.toYmd(instant);
-  }
-  return null;
-}
-
-function ymdToSortableInstant(ymd: Ymd): Instant {
-  return time.codec.startOfYmd(ymd);
+  return value == null ? null : requireYmd(value);
 }
 
 export class AccountProfile extends ValueObject<AccountProfileDTO> implements IAccountProfile {
@@ -34,12 +17,12 @@ export class AccountProfile extends ValueObject<AccountProfileDTO> implements IA
 
   public static create(props: AccountProfileDTO): AccountProfile {
     this.validate(props);
-    const birthday = normalizeBirthday(props.birthday);
-    return new AccountProfile({ ...props, birthday });
+    return new AccountProfile({ ...props, birthday: normalizeBirthday(props.birthday) });
   }
 
-  public static createDefault(email: string): AccountProfile {
-    const defaultNickname = email.split('@')[0].slice(0, 10);
+  public static createDefault(displayNameSeed: string): AccountProfile {
+    const trimmed = displayNameSeed.trim();
+    const defaultNickname = (trimmed.length >= 2 ? trimmed : 'User').slice(0, 20);
 
     return new AccountProfile({
       nickname: defaultNickname,
@@ -59,6 +42,7 @@ export class AccountProfile extends ValueObject<AccountProfileDTO> implements IA
       throw new Error('Nickname must be at least 2 characters');
     }
     GenderType.of(props.gender);
+    if (props.birthday != null) requireYmd(props.birthday);
   }
 
   public updateNickname(nickname: string): AccountProfile {
@@ -84,34 +68,25 @@ export class AccountProfile extends ValueObject<AccountProfileDTO> implements IA
     return new AccountProfile({ ...this.props, gender });
   }
 
-  /**
-   * Set birthday from Ymd or legacy epoch ms.
-   */
-  public setBirthday(birthday: Ymd | Instant | string | number): AccountProfile {
-    let ymd: Ymd | null = null;
-    if (typeof birthday === 'string') {
-      ymd = time.codec.parseYmd(birthday);
-      if (!ymd) throw new Error('Invalid birthday Ymd');
-    } else if (typeof birthday === 'number') {
-      const instant = time.codec.fromTransfer(birthday);
-      if (instant == null) throw new Error('Invalid birthday Instant');
-      ymd = time.codec.toYmd(instant);
-    }
-    if (ymd == null) throw new Error('Invalid birthday');
-    if (ymdToSortableInstant(ymd) > time.now()) {
+  /** Set a birthday against an explicit reference calendar day. */
+  public setBirthday(birthday: Ymd | string, referenceDate: Ymd | string): AccountProfile {
+    const birthdayYmd = requireYmd(birthday);
+    const referenceYmd = requireYmd(referenceDate);
+    if (birthdayYmd > referenceYmd) {
       throw new Error('Birthday cannot be in the future');
     }
-    return new AccountProfile({ ...this.props, birthday: ymd });
+    return new AccountProfile({ ...this.props, birthday: birthdayYmd });
   }
 
-  public getAge(): number | null {
-    if (!this.props.birthday || typeof this.props.birthday !== 'string') return null;
-    // Whole years from Ymd parts (not Instant math).
-    const [by, bm, bd] = this.props.birthday.split('-').map(Number);
-    const nowYmd = time.codec.toYmd(time.now());
-    const [ty, tm, td] = nowYmd.split('-').map(Number);
-    let age = ty - by;
-    if (tm < bm || (tm === bm && td < bd)) age--;
+  /** Whole-year age at an explicit reference calendar day. */
+  public getAgeAt(referenceDate: Ymd | string): number | null {
+    if (!this.props.birthday) return null;
+    const birthday = requireYmd(this.props.birthday);
+    const reference = requireYmd(referenceDate);
+    const [by, bm, bd] = birthday.split('-').map(Number);
+    const [ry, rm, rd] = reference.split('-').map(Number);
+    let age = ry - by;
+    if (rm < bm || (rm === bm && rd < bd)) age--;
     return age;
   }
 
@@ -134,13 +109,8 @@ export class AccountProfile extends ValueObject<AccountProfileDTO> implements IA
   get gender(): GenderType {
     return GenderType.of(this.props.gender);
   }
-  /** ADR-037: birthday is Ymd, not DomainDate. */
   get birthday(): Ymd | null {
-    if (this.props.birthday == null) return null;
-    if (typeof this.props.birthday === 'string') {
-      return time.codec.parseYmd(this.props.birthday);
-    }
-    return normalizeBirthday(this.props.birthday);
+    return this.props.birthday == null ? null : requireYmd(this.props.birthday);
   }
 
   public toDTO(): AccountProfileDTO {

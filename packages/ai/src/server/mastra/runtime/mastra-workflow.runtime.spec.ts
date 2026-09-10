@@ -11,9 +11,14 @@ import {
 import { ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createTimeContext } from '@memoflow/time';
 import { MastraModelResolver } from '../models';
 import type { GoalPlanMutationPort } from '../workflows';
 import { MastraAIRuntime } from './mastra-ai.runtime';
+
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 }),
+};
 
 const resources: Array<{ runtime: MastraAIRuntime; file: string }> = [];
 
@@ -130,6 +135,7 @@ async function createRuntime() {
     },
     knowledgeCaptureMutationPort: { saveKnowledgeNote },
     usageReadPort: { summarizeUsage },
+    userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
   });
   vi.spyOn(runtime.goalPlanner, 'plan').mockResolvedValue({
     status: 'draft_ready',
@@ -163,6 +169,12 @@ describe('MastraAIRuntime goal.create product projection', () => {
         input: { idea: 'Ship the Mastra reference workflow' },
         locale: 'en-US',
       },
+    });
+
+    const plannerContext = vi.mocked(runtime.goalPlanner.plan).mock.calls[0]?.[1];
+    expect(plannerContext?.getRaw('timeContext')).toEqual({
+      timeZone: 'Asia/Tokyo',
+      weekStartsOn: 1,
     });
 
     expect(started).toMatchObject({

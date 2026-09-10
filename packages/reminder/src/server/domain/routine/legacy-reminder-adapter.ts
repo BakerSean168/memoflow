@@ -1,5 +1,5 @@
 import { ReminderStatus, ReminderType, TriggerType } from '@memoflow/contracts/reminder';
-import { asInstant, type Instant } from '@memoflow/time';
+import { asInstant, createTimeContext, createTimeFacade, type Instant } from '@memoflow/time';
 import type { ReminderGroup } from '../aggregates/reminder-group';
 import type { ReminderTemplate } from '../aggregates/reminder-template';
 import { RoutineDefinition, RoutineProfile } from './model';
@@ -115,18 +115,9 @@ export function adaptLegacyReminderTrigger(
 }
 
 function ymdAtInstant(instant: Instant, timeZone: string): string {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(new Date(Number(instant)));
-  const bag: Record<string, string> = {};
-  for (const part of parts) {
-    if (part.type !== 'literal') bag[part.type] = part.value;
-  }
-  if (!bag.year || !bag.month || !bag.day) {
-    throw new TypeError(`Could not derive legacy start date in time zone ${timeZone}`);
-  }
-  return `${bag.year}-${bag.month}-${bag.day}`;
+  return String(
+    createTimeFacade({
+      context: createTimeContext({ timeZone, weekStartsOn: 1 }),
+    }).calendar.toYmd(instant),
+  );
 }

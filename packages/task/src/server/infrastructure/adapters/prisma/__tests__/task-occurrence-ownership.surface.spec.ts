@@ -117,9 +117,10 @@ describe('task instance ownership surface', () => {
     expect(port).toContain('deleteIncompleteInstancesFrom(');
     expect(prisma).toContain('where: { templateId, identityId }');
     expect(prisma).toMatch(/getTemplateStats\([\s\S]*identityId/);
-    expect(getTemplate).toContain('getTemplateStats([id], identityId)');
+    expect(getTemplate).toContain('getTemplateStats([id], identityId, { windowStart, asOf })');
     expect(listTemplates).toContain('getTemplateStats(');
     expect(listTemplates).toContain('request.identityId');
+    expect(listTemplates).toContain('{ windowStart, asOf }');
     expect(pauseTemplate).toContain('deleteIncompleteInstancesFrom(');
     expect(pauseTemplate).toContain('identityId');
     expect(deleteTemplate).toContain('deleteByTemplateId(id, identityId)');

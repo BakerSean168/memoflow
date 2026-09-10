@@ -267,7 +267,7 @@ UserPreferenceProfile.regional.timeZone
 
 其中：
 
-- IANA validation/TimeStyle/Calendar/Recurrence 仍由 `@memoflow/time` owner；
+- IANA validation/TimeContext/TimePresentationStyle/Calendar/Recurrence 仍由 `@memoflow/time` owner；
 - Preferences 只拥有“用户选择的 zone/style 值”；
 - server 不允许回退 ambient host timezone；
 - Task/Routine 等实体自己的 explicit schedule timezone snapshot 不因 user preference change 被静默追溯修改；

@@ -6,7 +6,7 @@ import {
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import type { TaskPlanStatus } from '@memoflow/contracts/task';
-import type { LabelClientDTO } from '@memoflow/contracts/label';
+import { LabelColorSchema, type LabelClientDTO } from '@memoflow/contracts/label';
 import { AggregateRepositoryBase, createEventBusAdapter, type IEventBus } from '@memoflow/patterns';
 import { eventBus } from '@memoflow/utils/domain';
 import {
@@ -35,7 +35,7 @@ export class PowerSyncTaskPlanRepository
     return {
       id: String(row.id),
       name: String(row.name),
-      color: row.color == null ? null : String(row.color),
+      color: row.color == null ? null : LabelColorSchema.parse(String(row.color)),
       createdAt: Date.parse(String(row.created_at)),
       updatedAt: Date.parse(String(row.updated_at)),
     };
@@ -328,20 +328,6 @@ export class PowerSyncTaskPlanRepository
       'SELECT * FROM task_templates WHERE identity_id = ? AND key_result_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
       [identityId, keyResultId],
     );
-  }
-
-  async findUpcomingTasks(identityId: string, daysAhead: number): Promise<TaskPlan[]> {
-    const rows = await this.findOneTimeTasks(identityId, { status: 'Active' });
-    const now = Date.now();
-    const end = now + daysAhead * 86400000;
-    return rows.filter((template) => {
-      const startDate = template.timeConfig.startDate;
-      return startDate != null && startDate >= now && startDate <= end;
-    });
-  }
-
-  async findTodayTasks(identityId: string): Promise<TaskPlan[]> {
-    return this.findUpcomingTasks(identityId, 1);
   }
 
   async countTasks(identityId: string, filters?: TaskFilters): Promise<number> {

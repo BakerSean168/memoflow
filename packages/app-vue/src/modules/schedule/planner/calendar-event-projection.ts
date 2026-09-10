@@ -8,7 +8,8 @@ import type {
   TaskCalendarEventProjection,
 } from '@memoflow/contracts/schedule';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
-import { asInstant, defaultTime, type Instant, type Ymd } from '@memoflow/time';
+import { asInstant, type Instant, type Ymd } from '@memoflow/time';
+import { getProductTime } from '../../../shared/utils/product-time';
 
 const MINUTE_MS = 60_000;
 
@@ -18,8 +19,8 @@ export interface PlannerProductTimePort {
 }
 
 export const defaultPlannerProductTimePort: PlannerProductTimePort = {
-  toYmd: (instant) => defaultTime.calendar.toYmd(instant),
-  startOfDay: (instant) => defaultTime.calendar.startOfDay(instant),
+  toYmd: (instant) => getProductTime().calendar.toYmd(instant),
+  startOfDay: (instant) => getProductTime().calendar.startOfDay(instant),
 };
 
 export interface RoutineWallClockPlannerOccurrence {

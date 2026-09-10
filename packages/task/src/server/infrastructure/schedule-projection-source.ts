@@ -12,6 +12,13 @@ import type {
 } from '@memoflow/contracts/schedule';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '../domain';
+import {
+  asHm,
+  combineYmdHmWithTimeZone,
+  createTimeFacade,
+  type TimeContext,
+  type UserTimeContextPort,
+} from '@memoflow/time';
 
 const DEFAULT_ALL_DAY_REMINDER_MINUTES = 9 * 60;
 export const TASK_REMINDER_HANDLER_KEY = 'task.reminder.fire';
@@ -94,43 +101,53 @@ function formatUnit(unit: ReminderTimeUnit): string {
   }
 }
 
-function convertUnitToMs(value: number, unit: ReminderTimeUnit): number {
+function convertDurationUnitToMs(value: number, unit: ReminderTimeUnit): number {
   switch (unit) {
     case 'Minutes':
       return value * 60 * 1000;
     case 'Hours':
       return value * 60 * 60 * 1000;
     case 'Days':
-      return value * 24 * 60 * 60 * 1000;
+      throw new Error('Days are calendar-relative and must not be converted to 24h duration');
     default:
       return 0;
   }
 }
 
-function getInstanceAnchorTime(instance: {
-  instanceDate: number;
-  timeConfig: {
-    timeType: string;
-    timePoint: number | null;
-    timeRange?: { start: number; end: number } | null;
-  };
-}): number {
-  const dayStart = instance.instanceDate;
+function minuteOfDayToHm(minute: number) {
+  const hours = Math.floor(minute / 60);
+  const minutes = minute % 60;
+  return asHm(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`);
+}
 
-  if (instance.timeConfig.timeType === TaskTimeType.TimePoint) {
-    return (
-      dayStart + (instance.timeConfig.timePoint ?? DEFAULT_ALL_DAY_REMINDER_MINUTES) * 60 * 1000
-    );
+function getInstanceAnchorTime(
+  instance: {
+    instanceDate: number;
+    timeConfig: {
+      timeType: string;
+      timePoint: number | null;
+      timeRange?: { start: number; end: number } | null;
+    };
+  },
+  timeContext: TimeContext,
+): number {
+  const time = createTimeFacade({ context: timeContext });
+  const day = time.calendar.toYmd(instance.instanceDate);
+  const minute =
+    instance.timeConfig.timeType === TaskTimeType.TimePoint
+      ? (instance.timeConfig.timePoint ?? DEFAULT_ALL_DAY_REMINDER_MINUTES)
+      : instance.timeConfig.timeType === TaskTimeType.TimeRange
+        ? (instance.timeConfig.timeRange?.start ?? DEFAULT_ALL_DAY_REMINDER_MINUTES)
+        : DEFAULT_ALL_DAY_REMINDER_MINUTES;
+  const anchor = combineYmdHmWithTimeZone(
+    day,
+    minuteOfDayToHm(minute),
+    timeContext.timeZone,
+  );
+  if (anchor == null) {
+    throw new Error(`Could not resolve Task reminder anchor ${day} ${minuteOfDayToHm(minute)}`);
   }
-
-  if (instance.timeConfig.timeType === TaskTimeType.TimeRange) {
-    return (
-      dayStart +
-      (instance.timeConfig.timeRange?.start ?? DEFAULT_ALL_DAY_REMINDER_MINUTES) * 60 * 1000
-    );
-  }
-
-  return dayStart + DEFAULT_ALL_DAY_REMINDER_MINUTES * 60 * 1000;
+  return Number(anchor);
 }
 
 function calculateReminderAt(
@@ -148,6 +165,7 @@ function calculateReminderAt(
     relativeValue: number | null;
     relativeUnit: ReminderTimeUnit | null;
   },
+  timeContext: TimeContext,
 ): number | null {
   if (trigger.type === 'Absolute') {
     return trigger.absoluteTime;
@@ -157,9 +175,17 @@ function calculateReminderAt(
     return null;
   }
 
-  return (
-    getInstanceAnchorTime(instance) - convertUnitToMs(trigger.relativeValue, trigger.relativeUnit)
-  );
+  const anchorTime = getInstanceAnchorTime(instance, timeContext);
+  if (trigger.relativeUnit === 'Days') {
+    return Number(
+      createTimeFacade({ context: timeContext }).calendar.addDays(
+        anchorTime,
+        -trigger.relativeValue,
+      ),
+    );
+  }
+
+  return anchorTime - convertDurationUnitToMs(trigger.relativeValue, trigger.relativeUnit);
 }
 
 function buildIntentName(
@@ -223,6 +249,7 @@ function neutralPriority(importance: string): SchedulingPriority {
 export function createTaskScheduleProjectionSource(deps: {
   taskPlanRepository: ITaskPlanRepository;
   taskOccurrenceRepository: ITaskOccurrenceRepository;
+  userTimeContextPort: UserTimeContextPort;
 }): TaskScheduleProjectionSource {
   return {
     buildTemplateOwner(templateId, identityId) {
@@ -244,6 +271,7 @@ export function createTaskScheduleProjectionSource(deps: {
         return { owner, desired: [] };
       }
 
+      const timeContext = await deps.userTimeContextPort.getUserTimeContext(identityId);
       const templateDTO = template.toServerDTO();
       const canonicalOwner = taskOwner(templateId, String(templateDTO.identityId));
       if (!shouldScheduleTemplate(templateDTO) || !templateDTO.reminderConfig) {
@@ -259,10 +287,10 @@ export function createTaskScheduleProjectionSource(deps: {
 
       for (const instance of instances.filter(isSchedulableInstance)) {
         const occurrenceIdentity = instance.occurrenceKey ?? instance.id;
-        const anchorTime = getInstanceAnchorTime(instance);
+        const anchorTime = getInstanceAnchorTime(instance, timeContext);
 
         for (const trigger of templateDTO.reminderConfig.triggers) {
-          const reminderAt = calculateReminderAt(instance, trigger);
+          const reminderAt = calculateReminderAt(instance, trigger, timeContext);
           if (reminderAt === null || reminderAt <= now) continue;
 
           const schedulingKey = buildSchedulingKey(

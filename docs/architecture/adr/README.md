@@ -109,17 +109,17 @@ updated: 2026-09-09T00:30:00+08:00
 | [ADR-090](./ADR-090-stable-knowledge-document-identity.md) | Stable KnowledgeDocument Identity | 已采纳（待实施） | 2026-09-08 |
 | [ADR-091](./ADR-091-knowledge-projection-index-and-operation-boundaries.md) | Knowledge Projection、AI Index 与 Operation Boundary | 已采纳（待实施） | 2026-09-08 |
 | [ADR-092](./ADR-092-settings-hub-and-preference-ownership-boundary.md) | Settings Hub 与 Preference Ownership Boundary | 已采纳（待实施） | 2026-09-08 |
-| [ADR-093](./ADR-093-user-preference-profile-and-product-time-context.md) | User Preference Profile 与 Product Time Context | 已采纳（待实施） | 2026-09-08 |
+| [ADR-093](./ADR-093-user-preference-profile-and-product-time-context.md) | User Preference Profile 与 Product Time Context | 已采纳（已实施） | 2026-09-08 |
 | [ADR-094](./ADR-094-device-preference-feature-policy-and-consent-boundary.md) | Device Preference、Feature Policy 与 Consent Boundary | 已采纳（待实施） | 2026-09-08 |
 | [ADR-095](./ADR-095-preference-persistence-sync-migration-and-portability.md) | Preference Persistence、Sync、Migration 与 Portability | 已采纳（待实施） | 2026-09-08 |
 | [ADR-096](./ADR-096-assistant-conversation-shell-and-mastra-runtime-state-boundary.md) | Assistant Conversation Shell 与 Mastra Runtime State Boundary | 已采纳（待实施） | 2026-09-09 |
 | [ADR-097](./ADR-097-ai-provider-connection-secret-and-model-capability-boundary.md) | AI Provider Connection、Secret 与 Model Capability Boundary | 已采纳（待实施） | 2026-09-09 |
 | [ADR-098](./ADR-098-ai-context-knowledge-index-and-owner-contract-boundary.md) | AI Context、Knowledge Index 与 Owner Contract Boundary | 已采纳（待实施） | 2026-09-09 |
 | [ADR-099](./ADR-099-ai-workflow-draft-apply-and-execution-record-boundary.md) | AI Workflow Draft、Apply 与 Execution Record Boundary | 已采纳（待实施） | 2026-09-09 |
-| [ADR-100](./ADR-100-product-time-context-and-timezone-aware-calendar.md) | Product Time Context 与 Timezone-aware Calendar | 已采纳（待实施） | 2026-09-09 |
-| [ADR-101](./ADR-101-product-time-presentation-and-compatibility-surface.md) | Product Time Presentation 与 Compatibility Surface | 已采纳（待实施） | 2026-09-09 |
-| [ADR-102](./ADR-102-label-registry-and-owner-assignment-boundary.md) | Label Registry 与 Owner Assignment Boundary | 已采纳（待实施） | 2026-09-09 |
-| [ADR-103](./ADR-103-label-identity-normalization-time-and-color-contract.md) | Label Identity、Normalization、Time 与 Color Contract | 已采纳（待实施） | 2026-09-09 |
+| [ADR-100](./ADR-100-product-time-context-and-timezone-aware-calendar.md) | Product Time Context 与 Timezone-aware Calendar | 已采纳（已实施） | 2026-09-09 |
+| [ADR-101](./ADR-101-product-time-presentation-and-compatibility-surface.md) | Product Time Presentation 与 Compatibility Surface | 已采纳（已实施） | 2026-09-09 |
+| [ADR-102](./ADR-102-label-registry-and-owner-assignment-boundary.md) | Label Registry 与 Owner Assignment Boundary | 已采纳（已实施） | 2026-09-09 |
+| [ADR-103](./ADR-103-label-identity-normalization-time-and-color-contract.md) | Label Identity、Normalization、Time 与 Color Contract | 已采纳（已实施） | 2026-09-09 |
 | [ADR-104](./ADR-104-account-profile-lifecycle-and-cloud-identity-projection.md) | Account Profile、Lifecycle 与 Cloud Identity Projection | 已采纳（待实施） | 2026-09-09 |
 | [ADR-105](./ADR-105-cloud-auth-access-enforcement-and-local-profile-boundary.md) | Cloud Auth、Access Enforcement 与 Local Profile Boundary | 已采纳（待实施） | 2026-09-09 |
 | [ADR-106](./ADR-106-owner-driven-data-portability-v3.md) | Owner-driven Data Portability V3 | 已采纳（待实施） | 2026-09-09 |

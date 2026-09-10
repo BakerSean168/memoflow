@@ -37,23 +37,9 @@ export function createMockAccount(overrides: Partial<AccountClientDTO> = {}): Ac
       gender: faker.helpers.arrayElement(['Male', 'Female', 'Other', 'PreferNotToSay'] as const),
       birthday: null,
     },
-    settings: {
-      theme: faker.helpers.arrayElement(['Light', 'Dark', 'System'] as const),
-      language: faker.helpers.arrayElement(['zh-CN', 'en-US', 'ja-JP'] as const),
-      timezone: faker.location.timeZone(),
-      notificationEnabled: faker.datatype.boolean(),
-    },
-    email: {
-      address: faker.internet.email(),
-      isVerified: true,
-      verifiedAt: Date.now(),
-      isPrimary: true,
-    },
-    phone: null,
-    version: 1,
     createdAt: now - faker.number.int({ min: 0, max: 365 * 24 * 60 * 60 * 1000 }),
     updatedAt: now,
-    deletedAt: null,
+    closedAt: null,
     ...overrides,
   } as AccountClientDTO;
 }

@@ -8,7 +8,7 @@ import {
 } from '@memoflow/contracts/task';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
-import { aLoadedTaskPlan, aTaskOccurrence } from '../../../../../testing';
+import { aLoadedTaskPlan, aTaskOccurrence, TASK_TEST_OCCURRENCE_PROJECTION } from '../../../../../testing';
 import { MarkTaskOccurrenceMissedUseCase } from '../mark-task-occurrence-missed.use-case';
 import { CompleteTaskOccurrenceUseCase } from '../complete-task-occurrence.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
@@ -34,7 +34,11 @@ describe('Task plan outcome transaction integration (TASK-2202)', () => {
     });
     const runner = createInlineTaskWriteTransactionRunner({ templateRepository, instanceRepository });
 
-    const missed = await new MarkTaskOccurrenceMissedUseCase(instanceRepository, runner).execute(
+    const missed = await new MarkTaskOccurrenceMissedUseCase(
+      instanceRepository,
+      runner,
+      TASK_TEST_OCCURRENCE_PROJECTION,
+    ).execute(
       instance.id,
       instance.identityId,
       { reason: 'day not completed' },
@@ -49,6 +53,7 @@ describe('Task plan outcome transaction integration (TASK-2202)', () => {
       instanceRepository,
       templateRepository,
       runner,
+      TASK_TEST_OCCURRENCE_PROJECTION,
     ).execute(instance.id, instance.identityId);
 
     expect(corrected).toBeOk();

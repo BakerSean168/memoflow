@@ -7,10 +7,8 @@ import { ReminderAccountClosedConsumer } from '@memoflow/reminder/server';
 import { NotificationAccountClosedConsumer } from '@memoflow/notification/server';
 import { RepositoryAccountClosedConsumer } from '@memoflow/repository/server';
 import { AccountClosedWorker } from '@memoflow/account/server';
-import {
-  cleanAll,
-  disconnectPrisma,
-} from '@memoflow/test-utils/setup/integration-helpers';
+import { cleanAll, disconnectPrisma } from '@memoflow/test-utils/setup/integration-helpers';
+import { asInstant, createSystemClock } from '@memoflow/time';
 
 /**
  * W3 real-path integration: closure saga -> account-closed outbox ->
@@ -41,9 +39,11 @@ describe('API host account-closed consumer chain', () => {
 
     const account = Account.create({
       id: IdentityId.of(identityId),
-      email: `chain-${identityId}@example.com`,
+      nicknameSeed: 'Chain User',
+      now: asInstant(1_700_000_000_000),
     });
     const module = createAccountPrismaModule(prisma, {
+      clock: createSystemClock(),
       revocationPort: { revokeAll: async () => ({ revokedSessions: 1 }) },
     });
     await module.accountRepository.save(account);
@@ -146,10 +146,10 @@ describe('API host account-closed consumer chain', () => {
     });
 
     // Full closure saga via the real use-case
-    const result = await module.useCases.closeAccount.execute(
-      { reason: 'Chain test' },
-      { identityId, deviceId: 'device-1' } as never,
-    );
+    const result = await module.useCases.closeAccount.execute({ reason: 'Chain test' }, {
+      identityId,
+      deviceId: 'device-1',
+    } as never);
     expect(result.ok).toBe(true);
 
     // Worker consumes the outbox with REAL consumers

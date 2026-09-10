@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { asInstant, createTimeFacade } from '@memoflow/time';
+import { asInstant, createTimeContext, createTimeFacade } from '@memoflow/time';
 import {
   aTaskOccurrence,
   aTaskPlanId,
@@ -11,7 +11,11 @@ import {
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { RescheduleTaskOccurrenceUseCase } from '../reschedule-task-occurrence.use-case';
 
-const time = createTimeFacade();
+const timeContext = createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 });
+const time = createTimeFacade({ context: timeContext });
+const userTimeContextPort = {
+  getUserTimeContext: vi.fn().mockResolvedValue(timeContext),
+};
 
 function target(dayOffset = 1, minute = 16 * 60) {
   const start = time.calendar.startOfDay(asInstant(Date.now() + dayOffset * 86_400_000));
@@ -40,7 +44,7 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
       findByTemplateIdAndDateRange: vi.fn().mockResolvedValue([]),
       save: vi.fn().mockResolvedValue(undefined),
     });
-    const useCase = new RescheduleTaskOccurrenceUseCase(repo);
+    const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
     const { start, newTime } = target(1, 16 * 60);
 
     const result = await useCase.execute(instance.id, String(identityId), {
@@ -63,7 +67,7 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
       findByTemplateIdAndDateRange: vi.fn(),
       save: vi.fn(),
     });
-    const useCase = new RescheduleTaskOccurrenceUseCase(repo);
+    const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
 
     const result = await useCase.execute(instance.id, String(identityId), {
       newTime: target().newTime,
@@ -86,13 +90,14 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
       templateId,
       instanceDate: Number(start),
       timeConfig: aTimePointConfig(9 * 60, new Date(Number(start))),
+      timeContext,
     });
     const repo = createMockRepo<ITaskOccurrenceRepository>({
       findByIdForIdentity: vi.fn().mockResolvedValue(source),
       findByTemplateIdAndDateRange: vi.fn().mockResolvedValue([collision]),
       save: vi.fn(),
     });
-    const useCase = new RescheduleTaskOccurrenceUseCase(repo);
+    const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
 
     const result = await useCase.execute(source.id, String(identityId), {
       newTime,
@@ -112,7 +117,7 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
       findByTemplateIdAndDateRange: vi.fn(),
       save: vi.fn(),
     });
-    const useCase = new RescheduleTaskOccurrenceUseCase(repo);
+    const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
 
     const result = await useCase.execute(instance.id, String(identityId), {
       newTime: target().newTime,

@@ -3,6 +3,7 @@
  * 目标模块 Prisma 运行时组合便捷工厂。
  */
 
+import type { UserTimeContextPort } from '@memoflow/time';
 import type { PrismaClient } from '@memoflow/database';
 import {
   createGoalModule,
@@ -88,10 +89,15 @@ export function createGoalPrismaModule(
     runtimeContributions?: GoalRuntimeContributionsInput;
     /** Required: W0 GoalDependencyReadPort implementation (provided by the Task package). */
     taskBindingReadPort: GoalDependencyReadPort;
+    /** Required because the Prisma lane enables Habit. */
+    userTimeContextPort: UserTimeContextPort;
   },
 ): GoalModuleInstance {
   if (!options?.taskBindingReadPort) {
     throw new Error('[FAIL-CLOSED] createGoalPrismaModule requires options.taskBindingReadPort');
+  }
+  if (!options?.userTimeContextPort) {
+    throw new Error('[FAIL-CLOSED] createGoalPrismaModule requires options.userTimeContextPort');
   }
   const {
     goalRepository,
@@ -106,6 +112,7 @@ export function createGoalPrismaModule(
     goalRecordRepository,
     goalWriteTransactionRunner,
     taskBindingReadPort: options.taskBindingReadPort,
+    userTimeContextPort: options.userTimeContextPort,
     runtimeContributions: options?.runtimeContributions,
     habitRepository,
     relationRepository,
@@ -153,11 +160,13 @@ export function createGoalTaskProgressPrismaHandler(db: PrismaClient) {
 
 export function createGoalPrismaScheduleProjectionSource(
   db: PrismaClient,
+  userTimeContextPort: UserTimeContextPort,
 ): GoalScheduleProjectionSource {
   const repositories = createGoalPrismaRepositories(db);
 
   return createGoalScheduleProjectionSource({
     goalRepository: repositories.goalRepository,
+    userTimeContextPort,
   });
 }
 

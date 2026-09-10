@@ -20,6 +20,7 @@
       "@memoflow/contracts/repository": ["../contracts/src/modules/repository/index.ts"],
       "@memoflow/contracts/result": ["../contracts/src/result/index.ts"],
       "@memoflow/contracts/shared": ["../contracts/src/shared/index.ts"],
+      "@memoflow/time": ["../time/src/index.ts"],
       "@memoflow/utils": ["../utils/src/index.ts"],
       "@memoflow/utils/result": ["../utils/src/result/index.ts"]
     }

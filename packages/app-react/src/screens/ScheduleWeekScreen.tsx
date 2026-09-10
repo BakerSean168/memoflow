@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
 import { useScheduleAgenda } from '../hooks/useScheduleAgenda';
+import { useAppPreferences } from '../providers/app-preference-provider';
+import { getProductTime } from '../utils/product-time';
 
 import {
   PageShell,
@@ -15,37 +17,33 @@ import {
   ThemedView,
 } from '@memoflow/ui-react-native';
 
-function startOfWeek(date: Date) {
-  const next = new Date(date);
-  const day = next.getDay();
-  const offset = day === 0 ? 6 : day - 1;
-  next.setDate(next.getDate() - offset);
-  next.setHours(0, 0, 0, 0);
-  return next;
+function startOfWeek(timestamp: number) {
+  return Number(getProductTime().calendar.startOfWeek(timestamp));
 }
 
-function endOfWeek(start: Date) {
-  const next = new Date(start);
-  next.setDate(start.getDate() + 6);
-  next.setHours(23, 59, 59, 999);
-  return next;
+function endOfWeek(start: number) {
+  const time = getProductTime();
+  return Number(time.calendar.endOfDay(time.calendar.addDays(start, 6)));
 }
 
-function formatRangeLabel(start: Date, end: Date) {
-  const formatter = new Intl.DateTimeFormat('zh-CN', {
-    month: 'short',
-    day: 'numeric',
-  });
-  return `${formatter.format(start)} - ${formatter.format(end)}`;
+function formatRangeLabel(start: number, end: number) {
+  const time = getProductTime();
+  return `${time.format.pattern(start, 'MMM d')} - ${time.format.pattern(end, 'MMM d')}`;
 }
 
 export function ScheduleWeekScreen() {
   const router = useRouter();
-  const [weekAnchor, setWeekAnchor] = useState(() => startOfWeek(new Date()));
-  const weekEnd = useMemo(() => endOfWeek(weekAnchor), [weekAnchor]);
+  const { profile } = useAppPreferences();
+  const [weekAnchor, setWeekAnchor] = useState(() => startOfWeek(Date.now()));
+  const weekEnd = useMemo(() => endOfWeek(weekAnchor), [weekAnchor, profile]);
+
+  useEffect(() => {
+    setWeekAnchor((current) => startOfWeek(current));
+  }, [profile]);
+
   const { groupedEntries, isLoading, error, refresh } = useScheduleAgenda({
-    startTime: weekAnchor.getTime(),
-    endTime: weekEnd.getTime(),
+    startTime: weekAnchor,
+    endTime: weekEnd,
   });
 
   const totalConflicts = useMemo(
@@ -86,9 +84,9 @@ export function ScheduleWeekScreen() {
       refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}>
       <SectionCard title={formatRangeLabel(weekAnchor, weekEnd)} description="未来和历史周都可以快速滑动查看。">
         <View style={styles.actionRow}>
-          <PrimaryButton label="Prev week" onPress={() => setWeekAnchor((current) => startOfWeek(new Date(current.getTime() - 7 * 24 * 60 * 60 * 1000)))} variant="ghost" />
-          <PrimaryButton label="This week" onPress={() => setWeekAnchor(startOfWeek(new Date()))} variant="secondary" />
-          <PrimaryButton label="Next week" onPress={() => setWeekAnchor((current) => startOfWeek(new Date(current.getTime() + 7 * 24 * 60 * 60 * 1000)))} variant="ghost" />
+          <PrimaryButton label="Prev week" onPress={() => setWeekAnchor((current) => Number(getProductTime().calendar.addDays(current, -7)))} variant="ghost" />
+          <PrimaryButton label="This week" onPress={() => setWeekAnchor(startOfWeek(Date.now()))} variant="secondary" />
+          <PrimaryButton label="Next week" onPress={() => setWeekAnchor((current) => Number(getProductTime().calendar.addDays(current, 7)))} variant="ghost" />
         </View>
         <View style={styles.pillRow}>
           <StatusPill label={`${groupedEntries.length} active days`} tone="tint" />

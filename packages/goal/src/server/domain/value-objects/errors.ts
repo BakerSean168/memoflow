@@ -34,33 +34,6 @@ export class GoalInvalidDateRangeError extends ResultErrorException {
 }
 
 /**
- * Goal due-date modification error
- */
-export class GoalInvalidDateModificationError extends ResultErrorException {
-  constructor(
-    public readonly operation: 'Extend' | 'Shorten',
-    public readonly days: number,
-  ) {
-    super(
-      `无效的日期${operation === 'Extend' ? '延长' : '缩短'}操作：天数 ${days} 必须为正数`,
-      'goal_invalid_date_modification',
-      undefined,
-      undefined,
-      400,
-    );
-  }
-}
-
-/**
- * 目标截止日期未设置错误
- */
-export class GoalDueDateNotSetError extends ResultErrorException {
-  constructor() {
-    super('截止日期未设置', 'goal_due_date_not_set', undefined, undefined, 400);
-  }
-}
-
-/**
  * 关键结果未找到错误
  */
 export class GoalKeyResultNotFoundError extends ResultErrorException {

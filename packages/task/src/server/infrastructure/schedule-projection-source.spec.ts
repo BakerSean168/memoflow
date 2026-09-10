@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TaskType } from '@memoflow/contracts/task';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
+import { createTimeContext } from '@memoflow/time';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { ITaskOccurrenceRepository } from '../domain/repositories/i-task-occurrence-repository';
 import type { ITaskPlanRepository } from '../domain/repositories/i-task-plan-repository';
@@ -26,6 +27,9 @@ function repos(input: {
   const findByIdForIdentity = vi.fn().mockResolvedValue(input.template);
   const findById = vi.fn();
   return {
+    userTimeContextPort: {
+      getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+    },
     findById,
     findByIdForIdentity,
     taskPlanRepository: createMockRepo<ITaskPlanRepository>({
@@ -99,6 +103,55 @@ describe('task schedule projection source -> ScheduledIntent', () => {
           'relative:30:Minutes',
         ),
       );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('uses canonical wall-clock and calendar-day semantics across spring DST', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2030-03-01T00:00:00.000Z'));
+    try {
+      const identityId = anIdentityId();
+      const newYorkContext = createTimeContext({
+        timeZone: 'America/New_York',
+        weekStartsOn: 0,
+      });
+      // 2030-03-10 is the spring-forward day in New York. Local midnight is
+      // 05:00Z, while local 09:00 is 13:00Z after the DST jump.
+      const instanceDay = new Date('2030-03-10T05:00:00.000Z');
+      const timeConfig = aTimePointConfig(9 * 60, instanceDay);
+      const template = aLoadedTaskPlan({
+        identityId,
+        title: 'DST-safe task',
+        taskType: TaskType.OneTime,
+        timeConfig,
+        reminderConfig: aRelativeReminder(1, 'Days'),
+      });
+      const instance = await aTaskOccurrence({
+        identityId,
+        templateId: template.id,
+        instanceDate: instanceDay.getTime(),
+        timeConfig,
+        timeContext: newYorkContext,
+      });
+      const dependencies = repos({ template, instances: [instance] });
+      dependencies.userTimeContextPort.getUserTimeContext = async () => newYorkContext;
+      const source = createTaskScheduleProjectionSource(dependencies);
+
+      const plan = await source.buildTemplatePlan(template.id, String(identityId));
+
+      expect(plan.desired).toHaveLength(1);
+      expect(plan.desired[0]).toMatchObject({
+        runAt: Date.parse('2030-03-09T14:00:00.000Z'), // 09:00 EST, one calendar day earlier
+        payload: {
+          anchorTime: Date.parse('2030-03-10T13:00:00.000Z'), // 09:00 EDT
+          reminderTime: Date.parse('2030-03-09T14:00:00.000Z'),
+        },
+      });
+      expect(
+        plan.desired[0]!.payload.anchorTime - plan.desired[0]!.payload.reminderTime,
+      ).toBe(23 * 60 * 60 * 1000);
     } finally {
       vi.useRealTimers();
     }

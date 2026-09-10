@@ -2,6 +2,7 @@ import { TaskPlanOutcome, TaskPlanStatus } from '@memoflow/contracts/task';
 import type { TaskOccurrenceId } from '@memoflow/contracts/primitives';
 import { TaskPlanOutcomeEvaluator } from '../../../domain/services/task-plan-outcome-evaluator';
 import type { TaskWriteRepositories } from './task-write-support';
+import type { TimeContext } from '@memoflow/time';
 
 const evaluator = new TaskPlanOutcomeEvaluator();
 
@@ -14,13 +15,14 @@ export async function reevaluateTaskPlanOutcome(
   identityId: string,
   templateId: string,
   triggeringTaskOccurrenceId: TaskOccurrenceId,
+  timeContext: TimeContext,
 ): Promise<boolean> {
   if (!repositories.templateRepository) return false;
   const template = await repositories.templateRepository.findByIdForIdentity(identityId, templateId);
   if (!template || template.outcome === TaskPlanOutcome.Abandoned) return false;
 
   const instances = await repositories.instanceRepository.findByTemplateId(templateId, identityId);
-  const next = evaluator.evaluate(template, instances);
+  const next = evaluator.evaluate(template, instances, timeContext);
   const needsLifecycleRepair =
     (next === TaskPlanOutcome.Open && template.status === TaskPlanStatus.Closed) ||
     (next !== TaskPlanOutcome.Open && template.status !== TaskPlanStatus.Closed);

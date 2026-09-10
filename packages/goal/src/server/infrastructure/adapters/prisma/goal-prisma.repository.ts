@@ -19,7 +19,7 @@ import {
 } from '../../../domain';
 import { Goal } from '../../../domain';
 import type { GoalSystemView, KeyResultServerDTO } from '@memoflow/contracts/goal';
-import type { LabelDto } from '@memoflow/contracts/label';
+import { LabelColorSchema, type LabelDto } from '@memoflow/contracts/label';
 import {
   AggregateRepositoryBase,
   createEventBusAdapter,
@@ -76,7 +76,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
       identityId: row.identityId,
       name: row.name,
       normalizedName: row.normalizedName,
-      color: row.color,
+      color: row.color == null ? null : LabelColorSchema.parse(row.color),
       createdAt: row.createdAt.getTime(),
       updatedAt: row.updatedAt.getTime(),
     };

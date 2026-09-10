@@ -8,8 +8,7 @@ import type {
   TimePresentationStyle,
 } from '../types';
 import { mergeTimePresentationStyle } from '../style/default-style';
-import { asInstant, isFiniteInstantMs } from '../codec/brand';
-import { instantToYmdInTimeZone } from '../timezone/wall-clock';
+import { isFiniteInstantMs } from '../codec/brand';
 import {
   formatInstantDate,
   formatInstantDateTime,
@@ -94,9 +93,6 @@ export interface FormatApi {
   splitDurationMs(ms: number): DurationParts;
   splitDurationMinutes(totalMinutes: number): DurationParts;
   /** @deprecated TIME-1206: use hm() through an explicit facade. */
-  localHHmm(ms: number | null | undefined, styleOverride?: PartialTimePresentationStyle): string;
-  /** @deprecated TIME-1206: JS Date is a boundary type; prefer Codec + Ymd. */
-  dateToYmd(date: Date | null | undefined, styleOverride?: PartialTimePresentationStyle): string;
   hhmmParts(hour: number, minute: number): string;
   hourLabel(hour: number): string;
   padTwoDigits(n: number): string;
@@ -225,18 +221,6 @@ export function createFormat(
       } catch {
         return formatInstantDateTime(value, context, style);
       }
-    },
-
-    localHHmm(ms, styleOverride) {
-      return this.hm(ms, styleOverride);
-    },
-
-    dateToYmd(date, styleOverride) {
-      const style = resolveStyle(presentation, styleOverride);
-      if (!date || !(date instanceof Date) || Number.isNaN(date.getTime())) {
-        return style.empty.input;
-      }
-      return instantToYmdInTimeZone(asInstant(date.getTime()), context.timeZone);
     },
 
     hhmmParts(hour, minute) {

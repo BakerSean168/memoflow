@@ -14,6 +14,7 @@
 export { RootLayout } from './root-layout';
 export { AppProviders } from './providers/app-providers';
 export { AppClientRegistryProvider } from './providers/app-client-registry-provider';
+export { AppPreferenceProvider, useAppPreferences } from './providers/app-preference-provider';
 export { AppSessionProvider } from './providers/app-session-provider';
 
 // ── Screens ──

@@ -52,6 +52,7 @@ import {
   BatchUpdateKeyResultWeightsUseCase,
 } from '../application';
 import type { GoalSystemView } from '@memoflow/contracts/goal';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { GoalReviewContextBuilder } from '../application';
 import { createLogger } from '@memoflow/utils/logger';
 import type { GoalApplicationPort } from '../application';
@@ -96,6 +97,8 @@ export interface GoalModuleDependencies {
   readonly runtimeContributions?: GoalRuntimeContributionsInput;
   /** R4：习惯仓储（可选；提供时启用 habit use cases）。 */
   readonly habitRepository?: IHabitRepository;
+  /** Canonical identity-scoped Product Time context for all Goal calendar-day semantics. */
+  readonly userTimeContextPort: UserTimeContextPort;
   /** R5：关系仓储（可选；提供时启用 relation use cases）。 */
   readonly relationRepository?: IRelationRepository;
   /** R7：钱包仓储（可选；提供时启用 wallet use cases）。 */
@@ -225,6 +228,10 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
   const goalPolicy = new GoalPolicy();
 
   const habitRepository: IHabitRepository | undefined = deps.habitRepository;
+  const userTimeContextPort = deps.userTimeContextPort;
+  if (!userTimeContextPort) {
+    throw new Error('userTimeContextPort must be explicitly provided to GoalModule');
+  }
   const relationRepository: IRelationRepository | undefined = deps.relationRepository;
   const walletRepository: IWalletRepository | undefined = deps.walletRepository;
 
@@ -233,9 +240,9 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
     ...(habitRepository
       ? {
           habit: {
-            create: new CreateHabitUseCase(habitRepository),
-            checkIn: new RecordHabitCheckInUseCase(habitRepository),
-            list: new ListHabitUseCase(habitRepository),
+            create: new CreateHabitUseCase(habitRepository, userTimeContextPort),
+            checkIn: new RecordHabitCheckInUseCase(habitRepository, userTimeContextPort),
+            list: new ListHabitUseCase(habitRepository, userTimeContextPort),
           },
         }
       : {}),
@@ -282,11 +289,13 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
       goalRepository,
       goalPolicy,
       new GoalReviewContextBuilder(goalRecordRepository),
+      userTimeContextPort,
     ),
     listReviews: new ListGoalReviewsUseCase(goalRepository),
     getReviewContext: new GetGoalReviewContextUseCase(
       goalRepository,
       new GoalReviewContextBuilder(goalRecordRepository),
+      userTimeContextPort,
     ),
     updateReview: new UpdateGoalReviewUseCase(goalRepository, goalPolicy),
     deleteReview: new DeleteGoalReviewUseCase(goalRepository, goalPolicy),

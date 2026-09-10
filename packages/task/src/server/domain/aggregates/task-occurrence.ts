@@ -27,15 +27,9 @@ import {
   asHm,
   asInstant,
   combineYmdHmWithTimeZone,
-  createTimeContext,
   createTimeFacade,
-  resolveTimeZoneId,
+  type TimeContext,
 } from '@memoflow/time';
-
-function createLocalTaskTime() {
-  const timeZone = resolveTimeZoneId('local');
-  return createTimeFacade({ context: createTimeContext({ timeZone, weekStartsOn: 1 }) });
-}
 
 function minuteOfDayToHm(minute: number): ReturnType<typeof asHm> {
   const hours = Math.floor(minute / 60);
@@ -110,8 +104,9 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
    * `timePoint` / `timeRange` are local-day minutes, never epoch timestamps.
    * The recurrence/generation path supplies `instanceDate` as the occurrence-day anchor.
    */
-  public get dueDate(): number | null {
-    const taskTime = createLocalTaskTime();
+
+  public dueDateAt(timeContext: TimeContext): number | null {
+    const taskTime = createTimeFacade({ context: timeContext });
     const dayStart = taskTime.calendar.startOfDay(asInstant(this._props.instanceDate));
     if (this._props.timeConfig.timeType === TimeType.AllDay) {
       return taskTime.calendar.endOfDay(dayStart);
@@ -319,7 +314,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
   }
 
   /** Planner/user-owned occurrence reschedule; never mutates the TaskPlan. */
-  public reschedule(newTime: TaskTimeConfig, now = Date.now()): boolean {
+  public reschedule(newTime: TaskTimeConfig, timeContext: TimeContext, now = Date.now()): boolean {
     if (!this.canReschedule()) {
       throw new Error('Cannot reschedule task in current state');
     }
@@ -327,9 +322,8 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
       throw new Error('Rescheduled task requires startDate');
     }
 
-    const nextInstanceDate = createLocalTaskTime().calendar.startOfDay(
-      asInstant(newTime.startDate),
-    );
+    const taskTime = createTimeFacade({ context: timeContext });
+    const nextInstanceDate = taskTime.calendar.startOfDay(asInstant(newTime.startDate));
     const normalizedTime = newTime.setStartDate(asInstant(nextInstanceDate));
     const current = this._props.timeConfig.toDTO();
     const next = normalizedTime.toDTO();
@@ -340,16 +334,17 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
       return false;
     }
 
-    const previousDueDate = this.dueDate;
+    const previousDueDate = this.dueDateAt(timeContext);
     this._props.instanceDate = Number(nextInstanceDate);
     this._props.occurrenceKey = buildTaskOccurrenceOccurrenceKey(
       String(this._props.templateId),
       Number(nextInstanceDate),
+      timeContext,
     );
     this._props.timeConfig = normalizedTime;
     this._props.updatedAt = asInstant(now);
     this.advanceVersion();
-    const newDueDate = this.dueDate;
+    const newDueDate = this.dueDateAt(timeContext);
     if (previousDueDate == null || newDueDate == null) {
       throw new Error('Rescheduled task must have a canonical due date');
     }
@@ -428,7 +423,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
   }
 
   /** Derived only: clock movement never mutates persisted occurrence status. */
-  public isOverdue(now = Date.now()): boolean {
+  public isOverdueAt(timeContext: TimeContext, now = Date.now()): boolean {
     if (
       this._props.status !== TaskOccurrenceStatus.Pending &&
       this._props.status !== TaskOccurrenceStatus.InProgress
@@ -436,13 +431,13 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
       return false;
     }
 
-    const dueAt = this.dueDate;
+    const dueAt = this.dueDateAt(timeContext);
     return dueAt !== null && now > dueAt;
   }
 
   // ===== 6. Serialization =====
-
-  public toServerDTO(): TaskOccurrenceServerDTO {
+  /** Raw context-free state for persistence adapters; derived read fields are excluded. */
+  public toPersistenceState() {
     return {
       id: this.id.toString() as TaskOccurrenceId,
       templateId: this._props.templateId.toString() as TaskPlanId,
@@ -451,7 +446,26 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
       timeConfig: this._props.timeConfig.toDTO(),
       importance: this._props.importance,
       status: this._props.status,
-      isOverdue: this.isOverdue(),
+      actualStartTime: this._props.actualStartTime,
+      actualEndTime: this._props.actualEndTime,
+      comment: this._props.note,
+      createdAt: this._props.createdAt,
+      updatedAt: this._props.updatedAt,
+      version: this._props.version,
+      deletedAt: this._props.deletedAt ?? null,
+    };
+  }
+
+  public toServerDTOAt(timeContext: TimeContext, now = Date.now()): TaskOccurrenceServerDTO {
+    return {
+      id: this.id.toString() as TaskOccurrenceId,
+      templateId: this._props.templateId.toString() as TaskPlanId,
+      identityId: this._props.identityId.toString() as IdentityId,
+      instanceDate: this._props.instanceDate,
+      timeConfig: this._props.timeConfig.toDTO(),
+      importance: this._props.importance,
+      status: this._props.status,
+      isOverdue: this.isOverdueAt(timeContext, now),
       actualStartTime: this._props.actualStartTime,
       actualEndTime: this._props.actualEndTime,
       comment: this._props.note,
@@ -462,7 +476,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     };
   }
 
-  public toClientDTO(): TaskOccurrenceClientDTO {
+  public toClientDTOAt(timeContext: TimeContext, now = Date.now()): TaskOccurrenceClientDTO {
     return {
       id: this.id.toString() as TaskOccurrenceId,
       templateId: this._props.templateId.toString() as TaskPlanId,
@@ -471,7 +485,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
       timeConfig: this._props.timeConfig.toDTO(),
       importance: this._props.importance,
       status: this._props.status,
-      isOverdue: this.isOverdue(),
+      isOverdue: this.isOverdueAt(timeContext, now),
       actualStartTime: this._props.actualStartTime,
       actualEndTime: this._props.actualEndTime,
       comment: this._props.note,
@@ -496,6 +510,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     instanceDate: number;
     timeConfig: TaskTimeConfig;
     importance: ImportanceLevel;
+    timeContext: TimeContext;
   }): TaskOccurrence {
     if (!params.templateId) {
       throw new Error('Template ID is required');
@@ -519,6 +534,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
       occurrenceKey: buildTaskOccurrenceOccurrenceKey(
         String(params.templateId),
         params.instanceDate,
+        params.timeContext,
       ),
       timeConfig: params.timeConfig,
       importance: params.importance,

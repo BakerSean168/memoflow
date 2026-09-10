@@ -62,14 +62,40 @@
 
 import { ipcMain } from 'electron';
 import { SettingChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import type { PreferenceCategory } from '@memoflow/contracts/setting';
+import {
+  PatchPreferenceNamespaceBodySchema,
+  PreferenceNamespaceSchema,
+  ResetPreferenceNamespaceBodySchema,
+  ResetUserPreferencesBodySchema,
+  parsePreferenceNamespacePatch,
+  type PreferenceCategory,
+  type PreferenceRevisionConflict,
+} from '@memoflow/contracts/setting';
+import { fail } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type { SettingModuleInstance } from '../server/infrastructure';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { withAuthenticatedIdentity } from './authenticated-ipc';
 
 const logger = createLogger('SettingElectron');
 
 const allChannels = Object.values(SettingChannels);
+
+function isPreferenceConflict(value: unknown): value is PreferenceRevisionConflict {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'code' in value &&
+    value.code === 'preference_revision_conflict'
+  );
+}
+
+function preferenceConflictResult(conflict: PreferenceRevisionConflict) {
+  return fail({
+    code: 'CONFLICT',
+    message: `Preference ${conflict.namespace} changed on another writer`,
+  });
+}
 
 /**
  * Per-handle lifecycle state. Only 'created' may enter 'registered' (or
@@ -93,6 +119,7 @@ type ModuleHandleState = 'created' | 'registered' | 'disposed' | 'failed';
  */
 export interface SettingElectronModuleDef {
   readonly name: string;
+  readonly userTimeContextPort: UserTimeContextPort;
   register(context: IElectronModuleContext): void;
   destroy?(): void;
 }
@@ -133,6 +160,7 @@ export function createSettingElectronModule(
 
   return {
     name: 'Setting',
+    userTimeContextPort: options.instance.userTimeContextPort,
 
     register(ctx: IElectronModuleContext): void {
       if (state !== 'created') {
@@ -155,6 +183,89 @@ export function createSettingElectronModule(
           Promise.resolve(mod.api.getDefaultSettings()),
         );
         installed.push(SettingChannels.GET_DEFAULTS);
+
+        ipcMain.handle(SettingChannels.PREFERENCES_PROFILE_GET, () =>
+          withAuthenticatedIdentity(ctx, (identityId) => mod.api.getPreferenceProfile(identityId)),
+        );
+        installed.push(SettingChannels.PREFERENCES_PROFILE_GET);
+
+        ipcMain.handle(SettingChannels.PREFERENCE_GET, (_event, namespaceInput) => {
+          const namespace = PreferenceNamespaceSchema.safeParse(namespaceInput);
+          if (!namespace.success) {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Invalid preference namespace' }),
+            );
+          }
+          return withAuthenticatedIdentity(ctx, (identityId) =>
+            mod.api.getPreferenceNamespace(identityId, namespace.data),
+          );
+        });
+        installed.push(SettingChannels.PREFERENCE_GET);
+
+        ipcMain.handle(SettingChannels.PREFERENCE_PATCH, (_event, input) => {
+          const raw = (input && typeof input === 'object' ? input : {}) as Record<string, unknown>;
+          const namespace = PreferenceNamespaceSchema.safeParse(raw.namespace);
+          const body = PatchPreferenceNamespaceBodySchema.safeParse(raw.body);
+          if (!namespace.success || !body.success) {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Invalid preference mutation' }),
+            );
+          }
+          let patch;
+          try {
+            patch = parsePreferenceNamespacePatch(namespace.data, body.data.patch);
+          } catch {
+            return Promise.resolve(
+              fail({
+                code: 'VALIDATION_ERROR',
+                message: 'Preference patch does not match namespace',
+              }),
+            );
+          }
+          return withAuthenticatedIdentity(ctx, async (identityId) => {
+            const result = await mod.api.patchPreferenceNamespace(
+              identityId,
+              namespace.data,
+              patch,
+              body.data.expectedRevision,
+            );
+            return isPreferenceConflict(result) ? preferenceConflictResult(result) : result;
+          });
+        });
+        installed.push(SettingChannels.PREFERENCE_PATCH);
+
+        ipcMain.handle(SettingChannels.PREFERENCE_RESET, (_event, input) => {
+          const raw = (input && typeof input === 'object' ? input : {}) as Record<string, unknown>;
+          const namespace = PreferenceNamespaceSchema.safeParse(raw.namespace);
+          const body = ResetPreferenceNamespaceBodySchema.safeParse(raw.body);
+          if (!namespace.success || !body.success) {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Invalid preference reset' }),
+            );
+          }
+          return withAuthenticatedIdentity(ctx, async (identityId) => {
+            const result = await mod.api.resetPreferenceNamespace(
+              identityId,
+              namespace.data,
+              body.data.expectedRevision,
+            );
+            return isPreferenceConflict(result) ? preferenceConflictResult(result) : result;
+          });
+        });
+        installed.push(SettingChannels.PREFERENCE_RESET);
+
+        ipcMain.handle(SettingChannels.PREFERENCES_RESET, (_event, input) => {
+          const body = ResetUserPreferencesBodySchema.safeParse(input ?? {});
+          if (!body.success) {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Invalid preference reset request' }),
+            );
+          }
+          return withAuthenticatedIdentity(ctx, (identityId) =>
+            mod.api.resetUserPreferences(identityId, body.data.expectedRevisions),
+          );
+        });
+        installed.push(SettingChannels.PREFERENCES_RESET);
 
         ipcMain.handle(SettingChannels.PATCH, (_event, dto) => {
           const payload = (dto && typeof dto === 'object' ? dto : {}) as Record<string, unknown>;

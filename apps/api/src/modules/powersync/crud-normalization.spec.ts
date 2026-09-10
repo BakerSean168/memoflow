@@ -8,6 +8,32 @@ describe('normalizeCrudData', () => {
     });
   });
 
+  it('does not normalize retired Account.settings as a writable JSON field', () => {
+    expect(
+      normalizeCrudData('accounts', {
+        profile: '{"nickname":"Sean"}',
+        settings: '{"timezone":"UTC"}',
+      }),
+    ).toEqual({
+      profile: { nickname: 'Sean' },
+      settings: '{"timezone":"UTC"}',
+    });
+  });
+
+  it('does not treat retired Account auth/contact flags as owned booleans', () => {
+    expect(
+      normalizeCrudData('accounts', {
+        email_is_verified: 1,
+        email_is_primary: 'false',
+        phone_is_verified: 0,
+      }),
+    ).toEqual({
+      emailIsVerified: 1,
+      emailIsPrimary: 'false',
+      phoneIsVerified: 0,
+    });
+  });
+
   it('decodes canonical preference payload JSON before Prisma persistence', () => {
     expect(
       normalizeCrudData('user_preference_records', {

@@ -8,9 +8,13 @@ import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-pl
 import type { TaskPlanClientDTO, BindToGoalReq } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 export class BindTaskToGoalUseCase {
-  constructor(private readonly templateRepository: ITaskPlanRepository) {}
+  constructor(
+    private readonly templateRepository: ITaskPlanRepository,
+    private readonly userTimeContextPort: UserTimeContextPort,
+  ) {}
 
   async execute(
     templateId: string,
@@ -22,9 +26,10 @@ export class BindTaskToGoalUseCase {
       return error('NOT_FOUND', `TaskPlan ${templateId} not found`);
     }
 
+    const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
     template.bindToGoal(request.goalId, request.keyResultId, request.contribution ?? null);
     await this.templateRepository.save(template);
 
-    return ok(template.toClientDTO());
+    return ok(template.toClientDTOAt(timeContext));
   }
 }

@@ -7,9 +7,7 @@ import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
-import { createTimeFacade } from '@memoflow/time';
-
-const taskTime = createTimeFacade();
+import { createTimeFacade, type TimeContext, type UserTimeContextPort } from '@memoflow/time';
 
 interface TaskDashboardResponse {
   todayTasks: TaskOccurrenceClientDTO[];
@@ -33,28 +31,34 @@ export class GetTaskDashboardUseCase {
   constructor(
     private readonly planRepository: ITaskPlanRepository,
     private readonly occurrenceRepository: ITaskOccurrenceRepository,
+    private readonly userTimeContextPort: UserTimeContextPort,
     private readonly now: () => number = Date.now,
   ) {}
 
   async execute(identityId: string): Promise<Result<TaskDashboardResponse>> {
     const now = this.now();
+    const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
+    const taskTime = createTimeFacade({ context: timeContext });
     const todayStart = Number(taskTime.calendar.startOfDay(now));
     const todayEnd = Number(taskTime.calendar.endOfDay(todayStart));
-    const upcomingEnd = Number(taskTime.calendar.endOfDay(now + 7 * 24 * 60 * 60 * 1000));
+    const upcomingEnd = Number(taskTime.calendar.endOfDay(taskTime.calendar.addDays(now, 7)));
 
-    const [todayOccurrences, overdue, upcoming, highPriority, totalActive, totalClosed] =
+    const [todayOccurrences, overdueCandidates, upcoming, highPriority, totalActive, totalClosed] =
       await Promise.all([
         this.occurrenceRepository.findByDateRange(identityId, todayStart, todayEnd),
-        this.occurrenceRepository.findOverdueInstances(identityId),
+        this.occurrenceRepository.findByIdentityId(identityId),
         this.occurrenceRepository.findByDateRange(identityId, todayEnd + 1, upcomingEnd),
-        this.getHighPriorityTasks(identityId, 5),
+        this.getHighPriorityTasks(identityId, 5, timeContext, now),
         this.countTasks(identityId, { status: TaskPlanStatus.Active }),
         this.countTasks(identityId, { status: TaskPlanStatus.Closed }),
       ]);
 
-    const today = todayOccurrences.map((occurrence) => occurrence.toClientDTO());
-    const overdueDtos = overdue.map((occurrence) => occurrence.toClientDTO());
-    const upcomingDtos = upcoming.map((occurrence) => occurrence.toClientDTO());
+    const overdue = overdueCandidates.filter((occurrence) =>
+      occurrence.isOverdueAt(timeContext, now),
+    );
+    const today = todayOccurrences.map((occurrence) => occurrence.toClientDTOAt(timeContext, now));
+    const overdueDtos = overdue.map((occurrence) => occurrence.toClientDTOAt(timeContext, now));
+    const upcomingDtos = upcoming.map((occurrence) => occurrence.toClientDTOAt(timeContext, now));
     const completedToday = todayOccurrences.filter(
       (occurrence) => occurrence.status === TaskOccurrenceStatus.Completed,
     ).length;
@@ -77,6 +81,8 @@ export class GetTaskDashboardUseCase {
   private async getHighPriorityTasks(
     identityId: string,
     limit: number,
+    timeContext: TimeContext,
+    now: number,
   ): Promise<TaskPlanClientDTO[]> {
     const rank: Record<string, number> = {
       [ImportanceLevel.Vital]: 0,
@@ -89,7 +95,7 @@ export class GetTaskDashboardUseCase {
     return tasks
       .sort((left, right) => rank[left.importance] - rank[right.importance])
       .slice(0, limit)
-      .map((task) => task.toClientDTO());
+      .map((task) => task.toClientDTOAt(timeContext, false, now));
   }
 
   private countTasks(identityId: string, filters?: TaskFilters): Promise<number> {

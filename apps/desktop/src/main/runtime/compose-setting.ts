@@ -86,10 +86,12 @@ export interface ComposeSettingDesktopDependencies {
 export function composeSetting(
   dependencies: ComposeSettingDesktopDependencies,
 ): SettingElectronModuleDef {
-  const { userSettingRepository } = createSettingPowerSyncRepositories(dependencies.db);
+  const { userSettingRepository, userPreferenceRepository } =
+    createSettingPowerSyncRepositories(dependencies.db);
 
   const instance = createSettingModule({
     userSettingRepository,
+    userPreferenceRepository,
     runtimeContributions: [createSettingRuntimeContribution()],
   });
 

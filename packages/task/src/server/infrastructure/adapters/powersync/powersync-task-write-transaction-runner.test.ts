@@ -15,7 +15,11 @@ import {
   TaskPlanSchedule,
   TaskTimeConfig,
 } from '../../../domain/value-objects';
-import { anIdentityId } from '../../../../testing';
+import {
+  anIdentityId,
+  TASK_TEST_TIME_CONTEXT,
+  TASK_TEST_USER_TIME_CONTEXT_PORT,
+} from '../../../../testing';
 import { createTaskPowerSyncModule } from '../../powersync';
 import { PowerSyncTaskOccurrenceRepository } from './task-occurrence-powersync.repository';
 import { PowerSyncTaskWriteTransactionRunner } from './powersync-task-write-transaction-runner';
@@ -326,6 +330,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
         TaskType.Recurring,
         TaskTimeConfig.createAllDay(new Date()),
         RecurrenceRule.createDaily(1),
+        TASK_TEST_TIME_CONTEXT,
       ),
       importance: ImportanceLevel.Moderate,
     });
@@ -353,7 +358,9 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
 
   it('rolls back task module writes and publishes nothing when instance persistence fails', async () => {
     const db = new FakePowerSyncTaskDb();
-    const module = createTaskPowerSyncModule(db);
+    const module = createTaskPowerSyncModule(db, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
     vi.spyOn(PowerSyncTaskOccurrenceRepository.prototype, 'saveMany').mockRejectedValue(
       new Error('saveMany failed'),
@@ -366,6 +373,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
         TaskType.Recurring,
         TaskTimeConfig.createAllDay(new Date()),
         RecurrenceRule.createDaily(1),
+        TASK_TEST_TIME_CONTEXT,
       ).toDTO(),
       importance: ImportanceLevel.Moderate,
     });
@@ -380,7 +388,9 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
 
   it('persists PlanCompletion outcome settlement through the same PowerSync transaction boundary', async () => {
     const db = new FakePowerSyncTaskDb();
-    const module = createTaskPowerSyncModule(db);
+    const module = createTaskPowerSyncModule(db, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     const identityId = anIdentityId();
     const template = TaskPlan.create({
       identityId,
@@ -389,6 +399,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
         TaskType.Recurring,
         TaskTimeConfig.createAllDay(new Date()),
         RecurrenceRule.createDaily(1).setOccurrences(15),
+        TASK_TEST_TIME_CONTEXT,
       ),
       importance: ImportanceLevel.Moderate,
       goalBinding: {
@@ -413,7 +424,9 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
 
   it('rolls back task module writes, outbox and publishes nothing when task_goal_outbox insert fails', async () => {
     const db = new FakePowerSyncTaskDb();
-    const module = createTaskPowerSyncModule(db);
+    const module = createTaskPowerSyncModule(db, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
 
     const identityId = anIdentityId();
@@ -424,6 +437,7 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
         TaskType.Recurring,
         TaskTimeConfig.createAllDay(new Date()),
         RecurrenceRule.createDaily(1),
+        TASK_TEST_TIME_CONTEXT,
       ).toDTO(),
       importance: ImportanceLevel.Moderate,
       goalBinding: {

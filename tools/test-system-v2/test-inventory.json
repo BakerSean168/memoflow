@@ -18,6 +18,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/__tests__/integration/label-owner-lifecycle.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/__tests__/integration/task-goal-host-restart.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -2075,16 +2083,6 @@
       ]
     },
     {
-      "path": "packages/account/src/server/application/use-cases/commands/__tests__/update-account-settings.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/account/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/account/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/account/src/server/application/use-cases/queries/__tests__/check-availability.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2869,6 +2867,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/mastra/agents/user-time-context.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/mastra/ai-vnext-no-legacy.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2990,6 +2998,16 @@
     },
     {
       "path": "packages/ai/src/server/mastra/workflows/task-create.workflow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/mastra/workflows/task-plan-schedule.mapper.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -3267,6 +3285,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/account/components/account-birthday-ymd.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/account/components/account-logout-locale.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3464,6 +3490,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/dashboard/dashboard-types-export.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/components/AIGenerateKRButton.time-semantics.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4775,6 +4809,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/account/api/account-birthday-ymd.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/account/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4887,6 +4929,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/goal/api/goal-label-projection-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/goal/protocol/goal-rpc-map.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4920,6 +4970,14 @@
     },
     {
       "path": "packages/contracts/src/modules/governance/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/label/label-contract.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5184,6 +5242,14 @@
     },
     {
       "path": "packages/contracts/src/primitives/time-zone-id.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/primitives/ymd.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -6141,6 +6207,17 @@
       ]
     },
     {
+      "path": "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-review-context.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts",
+        "packages/goal/vitest.use-cases.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6358,6 +6435,16 @@
     },
     {
       "path": "packages/goal/src/server/infrastructure/adapters/goal-write-buffered-event-bus.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-label-assignment.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -6907,6 +6994,22 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/ipc-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/label/src/__tests__/label-registry-characterization.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/label/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/label/src/__tests__/label-registry-ownership.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/label/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -7960,16 +8063,6 @@
     },
     {
       "path": "packages/reminder/src/server/infrastructure/__tests__/reminder-repositories.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/reminder/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/reminder/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/reminder/src/server/infrastructure/adapters/__tests__/account-timezone-adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/reminder/vitest.config.ts"
@@ -9260,6 +9353,16 @@
     },
     {
       "path": "packages/setting/src/electron/setting-electron.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/setting/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/setting/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/setting/vitest.config.ts"
@@ -10881,14 +10984,14 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 27
+      "fileCount": 26
     },
     {
       "id": "packages/ai/vitest.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 76
+      "fileCount": 78
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -10916,7 +11019,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 79
+      "fileCount": 81
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -10930,7 +11033,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 28
+      "fileCount": 29
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -10951,7 +11054,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 75
+      "fileCount": 74
     },
     {
       "id": "packages/reminder/vitest.mappers.config.ts",
@@ -11007,7 +11110,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 21
+      "fileCount": 22
     },
     {
       "id": "packages/task/vitest.config.ts",
@@ -11154,7 +11257,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 3
+      "fileCount": 4
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -11280,21 +11383,21 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 27
+      "fileCount": 26
     },
     {
       "id": "packages/ai/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 76
+      "fileCount": 78
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 200
+      "fileCount": 202
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11315,7 +11418,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 76
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11350,7 +11453,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 79
+      "fileCount": 81
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11378,7 +11481,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 3
+      "fileCount": 5
     },
     {
       "id": "packages/notification/vitest.config.ts",
@@ -11406,7 +11509,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 75
+      "fileCount": 74
     },
     {
       "id": "packages/repository/vitest.config.ts",
@@ -11441,7 +11544,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 21
+      "fileCount": 22
     },
     {
       "id": "packages/task/vitest.config.ts",
@@ -11559,7 +11662,6 @@
       "packages/account/src/server/application/services/__tests__/account-closure-coordinator.spec.ts",
       "packages/account/src/server/application/use-cases/commands/__tests__/close-account.test.ts",
       "packages/account/src/server/application/use-cases/commands/__tests__/update-account-profile.test.ts",
-      "packages/account/src/server/application/use-cases/commands/__tests__/update-account-settings.test.ts",
       "packages/account/src/server/application/use-cases/queries/__tests__/check-availability.test.ts",
       "packages/account/src/server/application/use-cases/queries/__tests__/get-account-profile.test.ts",
       "packages/account/src/server/domain/aggregates/__tests__/Account.test.ts",
@@ -11636,6 +11738,7 @@
       "packages/ai/src/server/infrastructure/security/provider-endpoint-policy.spec.ts",
       "packages/ai/src/server/infrastructure/security/provider-safe-fetch.spec.ts",
       "packages/ai/src/server/mastra/agents/planner-observability.spec.ts",
+      "packages/ai/src/server/mastra/agents/user-time-context.spec.ts",
       "packages/ai/src/server/mastra/ai-vnext-no-legacy.surface.spec.ts",
       "packages/ai/src/server/mastra/mastra-vnext-architecture.surface.spec.ts",
       "packages/ai/src/server/mastra/models/model-resolver.spec.ts",
@@ -11649,6 +11752,7 @@
       "packages/ai/src/server/mastra/workflows/goal-create.workflow.spec.ts",
       "packages/ai/src/server/mastra/workflows/knowledge-capture-persistence.adapter.spec.ts",
       "packages/ai/src/server/mastra/workflows/task-create.workflow.spec.ts",
+      "packages/ai/src/server/mastra/workflows/task-plan-schedule.mapper.spec.ts",
       "packages/ai/src/server/shared/__tests__/assemble-capabilities.spec.ts",
       "packages/ai/src/server/transport/ai-provider-config.controller.onboarding-v2.spec.ts",
       "packages/app-vue/src/modules/account/stores/accountStore.spec.ts",
@@ -11733,6 +11837,7 @@
       "packages/goal/src/server/application/use-cases/commands/__tests__/update-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/wallet.use-cases.spec.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-aggregate.test.ts",
+      "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-review-context.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/get-goal.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/goal-cross-module-query-service.test.ts",
       "packages/goal/src/server/application/use-cases/queries/__tests__/list-goal-records.test.ts",
@@ -11755,6 +11860,7 @@
       "packages/goal/src/server/infrastructure/__tests__/goal-repositories.surface.spec.ts",
       "packages/goal/src/server/infrastructure/__tests__/schedule-source-ownership.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/goal-write-buffered-event-bus.spec.ts",
+      "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-label-assignment.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/goal-powersync-schedule-projection.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/powersync/__tests__/powersync-goal-reliable-operation.adapter.test.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-ownership.surface.spec.ts",
@@ -11892,7 +11998,6 @@
       "packages/reminder/src/server/infrastructure/__tests__/powersync.closure-checker.spec.ts",
       "packages/reminder/src/server/infrastructure/__tests__/reminder-module-partial-start.spec.ts",
       "packages/reminder/src/server/infrastructure/__tests__/reminder-repositories.surface.spec.ts",
-      "packages/reminder/src/server/infrastructure/adapters/__tests__/account-timezone-adapter.spec.ts",
       "packages/reminder/src/server/infrastructure/adapters/prisma/__tests__/reminder-response-ownership.surface.spec.ts",
       "packages/reminder/src/server/infrastructure/adapters/prisma/__tests__/reminder-template-ownership.surface.spec.ts",
       "packages/reminder/src/server/infrastructure/adapters/prisma/mappers/prisma-reminder-group-mapper.spec.ts",
@@ -11976,6 +12081,7 @@
       "packages/setting/src/application-client/setting-client-port-dual.surface.spec.ts",
       "packages/setting/src/electron/index-lifecycle.spec.ts",
       "packages/setting/src/electron/setting-electron.surface.spec.ts",
+      "packages/setting/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
       "packages/setting/src/infrastructure-client/adapters/ipc/setting-ipc.adapter.surface.spec.ts",
       "packages/setting/src/server/application/use-cases/commands/__tests__/import-settings.test.ts",
       "packages/setting/src/server/application/use-cases/commands/__tests__/patch-user-setting.test.ts",
@@ -12069,8 +12175,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1037,
-    "integration": 34,
+    "unit": 1048,
+    "integration": 35,
     "smoke": 3,
     "boundary-ipc": 9,
     "boundary-main": 6,

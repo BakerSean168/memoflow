@@ -8,7 +8,7 @@ tags:
   - refactor
 description: Time + Label vNext Foundations——timezone-aware Product Time 与 pure Shared Label Registry 单轨收敛实施计划
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-09T23:24:35+08:00
 ---
 
 # Time + Label vNext Model Convergence
@@ -19,12 +19,12 @@ updated: 2026-09-09T00:00:00+08:00
 
 ## ADR-111 execution rewrite
 
-- the temporary legacy `TimeStyle` adapter introduced by TIME-1202 is now explicit deletion debt, not a compatibility promise;
-- `TIME-1205` switches all current product consumers to strict TimeContext/branded primitives, then `TIME-1206` deletes Date/number/legacy style surfaces;
+- the temporary legacy `TimeStyle` adapter introduced by TIME-1202 was deletion debt, not a compatibility promise, and was removed by TIME-1206;
+- `TIME-1205` switched all current product consumers to strict TimeContext/branded primitives; `TIME-1206` then deleted Date/number/legacy style surfaces and locked the result with governance;
 - `LABEL-1303/1304` move assignment ownership directly to Goal/Task; no temporary assignment compatibility seam;
 - `LABEL-1305` chooses the target color contract from current UI requirements; no existing-value data migration is required.
 
-**状态：ACTIVE / implementation started**
+**状态：ACTIVE — local closure complete / exact-head CI pending**
 **设计分支：** `docs/time-label-vnext-model-convergence`
 **目标 ADR：** ADR-100～103
 **关联 ADR：** ADR-037、ADR-054、ADR-072、ADR-076～083、ADR-088、ADR-093、ADR-098
@@ -267,7 +267,7 @@ Ymd+Hm -> Instant
 **Closure evidence:**
 
 - canonical `format.date/dateTime/hm/relative/ymdDisplay/slot` now uses `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` with explicit `TimeContext.timeZone` and `TimePresentationStyle.locale`;
-- `TimePresentationStyle` now owns semantic `dateStyle: short|medium|long` and `timeStyle: 12h|24h`; the legacy date-fns pattern bag remains only inside deprecated `TimeStyle` for TIME-1206 deletion;
+- `TimePresentationStyle` now owns semantic `dateStyle: short|medium|long` and `timeStyle: 12h|24h`; the temporary mixed `TimeStyle` used during this stage was subsequently removed by TIME-1206;
 - 24-hour rendering uses explicit `h23`; Tokyo / Los Angeles fixtures prove context-zone display differences, and zh-CN / en-US fixtures prove locale is no longer ignored;
 - `Ymd` display/validation is host-independent, including a Pacific/Apia skipped-calendar-day fixture;
 - named calendar slots are semantic Intl presets rather than preference-stored format tokens;
@@ -280,7 +280,7 @@ Ymd+Hm -> Instant
 
 ### TIME-1205 — Switch cross-module Product Time consumers
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-09**
 
 **Goal:** Goal/Task/Routine/Planner/Notification/AI/Settings 使用统一新 context，不保留 host-local业务 fallback。
 
@@ -299,13 +299,24 @@ F UI presentation facades
 
 **Acceptance:** business server paths不依赖 ambient host timezone；explicit schedule snapshot仍稳定。
 
+**Closure evidence:**
+
+- Goal Review/Habit、Task recurrence/generation/dashboard/stats/outcome、Routine/Reminder upcoming/today schedule、Task/Goal schedule projection 均由 identity-scoped `UserTimeContextPort` 或显式 schedule snapshot 解析 calendar/wall-clock；New York spring-forward 23h day 有行为锁；
+- Notification QuietHours fail-closed 获取 identity `TimeContext`；rolling `maxPerHour/maxPerDay`、retention 与 response-analysis lookback 明确保留 duration semantics，不误改为 calendar-day；
+- Setting 的 `PreferenceUserTimeContextAdapter` 以 canonical `presentation | regional` preference 为唯一 Product Time 来源；`SETTING-9203` 与本 ticket 同批完成；
+- AI runtime 将 identity time context 注入 Mastra request context；Task/Goal planning mapper 统一复用 `@memoflow/time` wall-clock/Ymd primitive，不再维护私有 `Intl + UTC guess` 算法；
+- Planner FullCalendar 绑定 session IANA `timeZone + weekStartsOn`，Vue calendar key/HH:mm/date input/default +30 days 统一走 session Product Time；显式 schedule timezone snapshot 仍保持其 owner 语义；
+- verification：Goal `80 files / 446 tests` + typecheck PASS；Task `71 / 698` + typecheck PASS；Reminder `74 / 470` + typecheck PASS；Notification `45 / 244` + typecheck PASS；Setting `22 / 142` + typecheck PASS；Schedule `20 / 130` + typecheck PASS；Account `26 / 189` + typecheck PASS；AI focused `3 / 14` + typecheck PASS；App Vue Planner/Product-Time focused `6 / 23` PASS；canonical Settings UI focused `3 / 7` PASS；
+- App Vue/Web package-wide typecheck仍被当前工作树既有的 `@memoflow/app-vue/web-*` 与 `ai/label/schedule client` declaration baseline 阻塞；相关错误不落在 TIME-1205 修改文件，focused behavior gates 已覆盖本 ticket；
+- 无 current production caller 的 Task/Goal ambient compatibility facade、legacy Date/number helpers 与 demo-only defaultTime wrappers 明确进入 `TIME-1206`，不在本 ticket 扩大 owner-model 删除范围。
+
 **Dependencies:** TIME-1203, TIME-1204；与对应 owner vNext计划协调。
 
 ---
 
 ### TIME-1206 — Retire legacy Date/number/TimeStyle compatibility surfaces
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-09**
 
 **Goal:** 新模型成为 sole canonical API。
 
@@ -319,13 +330,23 @@ F UI presentation facades
 
 **Acceptance:** production canonical Calendar/Format APIs以 branded primitives为主；legacy names只在明确 boundary或 migration fixture。
 
+**Closure evidence:**
+
+- `createTimeFacade` 现在强制显式 `TimeContext`；`defaultTime`、mixed `TimeStyle/PartialTimeStyle`、`withStyle`、`DEFAULT_TIME_STYLE`、ambient `formatLocalHHmm/formatDateToYMD` 与 deprecated `FormatApi.localHHmm/dateToYmd` 已从 production public surface 删除；
+- Account birthday 从 wire/domain/exported Vue surface 统一为 validated `Ymd | null`，拒绝 legacy epoch；年龄/未来日期判断要求显式 reference Ymd；
+- Task 删除 dead recurrence/day-query convenience，legacy schedule persistence projection 只接受显式 `TimeContext`；TaskOccurrence persistence 与 Product Time 派生 read DTO 分离，occurrence key/overdue/due projection 强制 context；
+- Goal 删除无 production caller 的 `GoalTimeRange` 行为类与 `extend/shorten/isOverdue/getRemainingDays` 固定 24h/ambient-now convenience；
+- Vue/React session bootstrap 显式从 boundary device IANA zone 构造 guest context，登录后由 canonical preferences 覆盖；CalendarDate 只在 UI adapter 与 `Ymd` 往返，不再经 browser-local epoch；
+- Time Registry v2 不再含 legacy/exemption importer；ESLint date-fns ignores 收敛到 `packages/time/src/engine/**`；`date-fns-import-audit` 不再支持 legacy allowlist；新增 `product-time-surface-audit` 并接入 root governance gate，禁止 ambient/mixed surface resurrection；
+- verification：Time `10 files / 52 tests` + typecheck + lint PASS；Task `71 / 678` + typecheck PASS；Goal `80 / 446` + typecheck PASS；Reminder `74 / 470` + typecheck PASS；Notification `45 / 244` + typecheck PASS；Setting `22 / 142` + typecheck PASS；Schedule `20 / 130` + typecheck PASS；Account `26 / 190` + typecheck PASS；AI `78 / 420` + typecheck PASS；App Vue Product Time focused `8 / 27` PASS；governance-tools `14 / 120` PASS；`git diff --check`、Product Time/date-fns focused audits PASS。
+
 **Dependencies:** TIME-1205。
 
 ---
 
 ### LABEL-1301 — Characterize Label registry and assignment behavior before ownership move
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-09**
 
 **Goal:** 锁住当前用户行为，避免 ownership migration破坏功能。
 
@@ -333,13 +354,22 @@ F UI presentation facades
 
 **Acceptance:** registry行为和 owner-assignment行为分开有 characterization suite。
 
+**Closure evidence:**
+
+- Registry characterization 独立覆盖 canonical create、rename/recolor、normalized search、identity isolation、delete、AI `resolveNames` first-seen dedupe 与 concurrent unique-race exact re-read；
+- Assignment characterization 独立覆盖 Goal/Task replace dedupe、empty clear、same-identity validation、duplicate-insensitive AND filter、batch projection empty-owner shape；
+- Prisma real-DB suite 锁住 identity-scoped normalized uniqueness、CRUD/search stable ordering、foreign label/owner fail-before-replace、Label→GoalLabel/TaskLabel cascade 与 owner-specific cascade；
+- PowerSync suite 锁住 transaction ordering、validation-before-delete、deduped inserts、Goal/Task AND 与 batch projection parity；
+- SETTING-9203 follow-up finding：shared `seedAccount()` 与四个 direct Prisma integration fixtures 仍写已删除 `Account.settings`，已清除；Label integration 从 seed-stage 3/3 failure 恢复并扩为 5/5 PASS；Goal 7/7、Setting 2/2、Repository 17/17 affected integration fixtures PASS；
+- verification：Label unit `5 files / 20 tests` PASS；Prisma integration `5/5` PASS；Label typecheck/lint/diff-check PASS；`@memoflow/test-utils` typecheck PASS。
+
 **Dependencies:** FOUNDATION-1001。
 
 ---
 
 ### LABEL-1302 — Pure Label Registry repository/service contract
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-09**
 
 **Goal:** Label package不再认识 Goal/Task。
 
@@ -353,13 +383,21 @@ resolveNames
 
 **Implementation:**
 
-1. 增加 batch lookup；
-2. 修改 resolveNames；
-3. 新建纯 registry interface；
-4. 保留短期 assignment compatibility seam；
-5. 增加 architecture test禁止 Goal/Task symbols进入 Label domain/application contract。
+1. 增加 exact batch `findByNormalizedNames` lookup；
+2. `resolveNames` 从最多扫描 500 labels 改为按目标 normalized names 精确查询，并保留 unique-race exact re-read；
+3. `LabelRepository` 收敛为纯 registry interface；Prisma adapter 只 `Pick<PrismaClient, 'label'>`，PowerSync adapter 只访问 `labels`；
+4. 审查确认旧 `LabelService.setGoalLabels/setTaskLabels` 与 Label-side Goal/Task assignment repository **production caller = 0**，且 Goal/Task 已各自拥有完整 assignment seam，因此直接删除重复实现，不制造临时 compatibility port；
+5. 删除 Label contracts 中 `LabelAssignmentCommand / GoalLabelAssignmentCommand / TaskLabelAssignmentCommand`；
+6. package-local ownership surface test + root `label-registry-ownership-audit` 禁止 Goal/Task assignment symbols/table names回流 Label。
 
-**Acceptance:** pure registry单测/Prisma/PowerSync registry tests green。
+**Closure evidence:**
+
+- Label production/contracts owner-specific residual scan = 0；Label build 生成的 `.d.ts` 同样无 Goal/Task assignment symbol；
+- Label unit `5 files / 15 tests` PASS；Prisma Registry integration `1 file / 3 tests` PASS；typecheck/lint/build/diff-check PASS；
+- PowerSync Registry suite锁住 exact batch lookup、normalized substring search/limit、identity-scoped find/delete 与“registry CRUD 不开 owner-assignment transaction”；
+- `resolveNames` first-seen dedupe、existing lookup 与 concurrent unique-race recovery全部走 exact normalized-name API。
+
+**Acceptance:** pure registry单测/Prisma/PowerSync registry tests green；Label package不认识 Goal/Task assignment。
 
 **Dependencies:** LABEL-1301。
 
@@ -367,22 +405,25 @@ resolveNames
 
 ### LABEL-1303 — Move GoalLabel assignment/query ownership into Goal
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-09**
 
 **Goal:** Goal成为 GoalLabel唯一 owner。
 
 **Scope:** Goal assignment mutation、list projection、batch projection、`labelIdsAll` AND filter、Prisma/PowerSync adapters/contracts。
 
-**Implementation:**
+**Implementation result:**
 
-1. Goal-side repository/application seam；
-2. same-identity Label validation via registry；
-3. move Prisma/PowerSync logic；
-4. move GoalLabelAssignmentCommand contract；
-5. host/API/UI behavior保持；
-6. remove Label Goal methods only after parity。
+审查发现 Goal-side ownership 已在当前 production path 完整存在，不需要再搬一次代码：`IGoalRepository.replaceLabels`、Prisma/PowerSync adapters、create/update application wiring、projection 与 `labelIdsAll` AND filter 均由 Goal owner。1302 删除了 Label duplicate path，本 ticket 只补齐缺失 parity evidence 并确认 host behavior。
 
-**Acceptance:** Goal user path无行为回退；Label package无 Goal-specific method。
+**Closure evidence:**
+
+- Goal Prisma real-DB integration 已覆盖 replace、projection、duplicate-insensitive AND 与 foreign label -> `GoalLabelOwnershipError`；
+- 新增 Goal PowerSync real SQLite parity：replacement dedupe、projection、AND、foreign label fail-before-delete、foreign owner rejection 与原 assignment 保留，`2/2` PASS；
+- Goal create/update/list application tests继续验证 owner repository wiring 与 typed error mapping；
+- Goal full unit `81 files / 448 tests` PASS；integration `4 files / 21 tests` PASS；direct TypeScript check PASS；
+- Label production/contracts 已无 Goal-specific method/command/table SQL。
+
+**Acceptance:** Goal user path无行为回退；Goal为 GoalLabel唯一 application/persistence owner；Label package无 Goal-specific method。
 
 **Dependencies:** LABEL-1302。
 
@@ -390,13 +431,22 @@ resolveNames
 
 ### LABEL-1304 — Move TaskLabel assignment/query ownership into Task
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-09**
 
-同 LABEL-1303，但针对 TaskPlan / TaskLabel。
+同 LABEL-1303，但针对 TaskPlan / TaskLabel。审查确认 Task owner path 已完整存在：`ITaskPlanRepository.replaceLabels / findByLabelIdsAll`、Prisma/PowerSync、create/update/list application wiring 都是当前 production truth；1302 删除的是 Label duplicate path。
 
-**Protected:** Task vNext canonical `TaskPlan` vocabulary；DB legacy column mapping `task_template_id` 可在独立 schema migration处理，不能重新把 `TaskTemplate` domain symbol带回。
+**Protected:** Task vNext canonical `TaskPlan` vocabulary；DB legacy column mapping `task_template_id` 仅作为 persistence schema name保留，不能重新把 `TaskTemplate` domain symbol带回。
 
-**Acceptance:** Task AND filter/projection/AI apply parity；Label package无 Task-specific method。
+**Closure evidence:**
+
+- Task Prisma real-DB integration覆盖 replace、projection、AND 与 foreign label typed rejection；
+- Task PowerSync suite覆盖 duplicate-insensitive AND、label projection、foreign label -> `TaskLabelOwnershipError` 且 no-write；
+- create/update/list application tests继续验证 owner-side assignment/filter wiring，AI apply 只经 `LabelService.resolveNames` 取 IDs 后进入 Task application port；
+- cross-package review 额外发现 TIME-1206 test/build seams：performance evaluator缺显式 context、host-local UTC expected、integration `TaskOccurrence.create`/module options/legacy schedule request；均迁为 explicit `TimeContext` + canonical schedule；
+- Task unit `71 files / 678 tests` PASS；integration `6 files / 31 tests` PASS；build + direct TypeScript check PASS；
+- Label production/contracts 无 Task-specific assignment method/command/table SQL。
+
+**Acceptance:** Task AND filter/projection/AI apply parity；Task为 TaskLabel唯一 application/persistence owner；Label package无 Task-specific method。
 
 **Dependencies:** LABEL-1302。
 
@@ -404,7 +454,7 @@ resolveNames
 
 ### LABEL-1305 — Converge Label primitives: Instant, normalization fixture, color policy
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-09**
 
 **Goal:** Shared Label foundation自身 contract 收紧。
 
@@ -417,15 +467,33 @@ resolveNames
 - strict client/server schema；
 - migration if existing color values require it。
 
-**Acceptance:** no `Date.now()` in Label app/domain；normalization parity；color不接受 arbitrary string。
+**Implementation result:**
 
-**Dependencies:** LABEL-1302；可与 1303/1304部分并行，但 schema migration owner单写者。
+- `LabelDto.createdAt/updatedAt` 收敛到 canonical `Instant` type；runtime client/Goal projection timestamps 要求 finite number；
+- `LabelService` 必须注入最窄 `Clock.now()` seam；create 单次采样同时写 created/updated，update 显式把 Clock Instant 传给 repository；API/Desktop composition 都注入 `createSystemClock()`；
+- Prisma update 不再依赖 DB `@updatedAt` 当前时间，PowerSync 删除自己的 `Date.now()`；Label application/domain ambient current-time scan = 0；
+- canonical normalization fixture 位于 `tools/test/fixtures/label-normalization.json`，同时驱动 Label server semantics 与 legacy Task -> Shared Label migration；Nx unit/coverage inputs 显式包含 fixture，避免 fixture 修改命中旧 cache；
+- 基于真实 UI/data inventory 选择 ADR-103 Option B：`LabelColor = #RRGGBB | null`，输入允许 hex 大小写但 canonicalize 为 lowercase `#rrggbb`；当前 Label UI 无 palette-token picker，未发现 production Label 非 6 位 hex/null 数据，因此不需要 color data migration；
+- Label transport/service/Prisma/PowerSync 以及 Goal/Task owner-side Label projection 全部复用 `LabelColorSchema`；Task read contract直接复用 `LabelClientDTOSchema`，Goal projection复用 `LabelColorSchema`；
+- 新增 root `label-primitive-audit`，持续禁止 Label app/domain ambient time、缺失 Clock injection、任意 color contract 与 owner projection bypass。
+
+**Closure evidence:**
+
+- Contracts Label + Goal projection focused `2 files / 14 tests` PASS；Database canonical normalization migration `1 / 4` PASS；
+- Label unit `5 files / 17 tests` PASS；Prisma integration `1 / 3` PASS；package direct TSC 0 errors、build PASS、lint PASS；
+- Goal `81 files / 448 tests` + integration `4 / 21` PASS；1305-related direct TSC diagnostics = 0（workspace仍有独立 utils declaration/build-order baseline）；
+- Task `71 files / 678 tests` + integration `6 / 31` PASS；
+- `label-registry-ownership-audit`、`label-primitive-audit`、`git diff --check` PASS。
+
+**Acceptance:** no `Date.now()` in Label app/domain；normalization parity；color不接受 arbitrary string；所有 production Clock/color read path 有 anti-resurrection guard。
+
+**Dependencies:** LABEL-1302；与已完成的 LABEL-1303/1304 owner path 对齐。
 
 ---
 
 ### FOUNDATION-1401 — Five-layer review, governance and closure
 
-**状态：PLANNED**
+**状态：LOCAL CLOSURE COMPLETE — 2026-09-09 / exact-head CI pending**
 
 **Goal:** Time/Label new model成为代码真值后完成系统级 closure。
 
@@ -468,6 +536,21 @@ resolveNames
 
 **Dependencies:** TIME-1206, LABEL-1303, LABEL-1304, LABEL-1305。
 
+**Local closure evidence (2026-09-09):**
+
+- Layer 1 / Product Time：canonical Time suite 在 `TZ=UTC` 与 `TZ=Asia/Tokyo` 下均为 `10 files / 52 tests PASS`；TimeContext、DST/wall-clock resolver、locale/presentation contract 均保持显式 context；
+- Layer 1 / Label：Label registry-only ownership、identity-scoped CRUD/search、strict `LabelColor`、`Instant + injected Clock`、canonical normalization fixture 均由 package tests + root anti-resurrection audit锁定；
+- Layer 2：Goal `81/448 unit + 4/21 integration`，Task `71/678 unit + 6/31 integration`，Reminder/Routine `74/470 unit + 7/28 integration`，schedule-orchestration `9/34`，Notification `45/244 unit + 3/35 integration`，Setting `22/142 unit + 1/2 integration`，Schedule `20/130 unit + 2/24 integration` 全绿；
+- Layer 2 / UI：App Vue Product Time / Planner / presentation focused gate `13 files / 48 tests PASS`，package direct `vue-tsc` exit 0，production build PASS；
+- Layer 3 / Label lifecycle：host-level PostgreSQL integration验证 Label rename 后 Goal/Task assignment继续指向同一 LabelId；删除 Label 只 cascade join rows，不删除 Goal/Task owner；create race、AND filter、foreign identity分别由 registry/Goal/Task owner tests锁定；
+- Layer 3 / Notification：终审发现 UTC DND fixtures 使用 timezone-less ISO，受同进程 `process.env.TZ` 修改污染；改为显式 `Z` 后 full unit suite连续两次 `244/244 PASS`；旧 Prisma integration builders补齐 required `UserTimeContextPort` 后 `35/35 PASS`；
+- Layer 3 / integration infrastructure：共享 PostgreSQL清库只对 transient `40P01 deadlock` 做最多 3 次短重试，其他错误继续 fail closed；
+- Layer 4：`product-time-surface-audit`、`date-fns-import-audit`、`label-registry-ownership-audit`、`label-primitive-audit` 全绿；补充源码 scan确认 Label owner leakage = 0、polymorphic assignment bag = 0、业务层 date-fns direct import = 0；governance-tools `14 files / 120 tests PASS`；
+- Layer 4 / lint：终审发现并删除 Task 4 个 TIME-1206 stale symbols，并把 App Vue 11 个 reactive dependency reads从 bare expression改为 `void productTimeRevision.value`；Task/App Vue lint恢复 0 errors，行为回归仍分别 `678/678` 与 `48/48`；
+- Layer 5 / build：Time、Label、Goal、Task、Reminder、Notification、Setting、Schedule、schedule-orchestration、App Vue 共 10 个影响域 production build PASS；Task/Notification/Setting/Schedule typecheck 与 App Vue direct `vue-tsc` PASS。
+
+**Remaining delivery gate:** 当前工作树尚未形成可引用的提交 SHA，因此不能声称 exact-head required CI green。FOUNDATION-1401 的本地五层 closure 已完成；正式 `DONE` 只在 convergence changes提交/推送后、required CI 对该 exact HEAD 全绿时落账。
+
 ## 6. Dependency graph
 
 ```text
@@ -493,12 +576,17 @@ TIME-1201 DONE — executable characterization
 TIME-1202 DONE — canonical context/presentation split
 TIME-1203 DONE — timezone-aware Calendar/Input + shared wall-clock resolver
 TIME-1204 DONE — locale/timezone-aware Intl presentation + official date-fns/tz pattern adapter
-TIME-1205..1206 PLANNED
-LABEL-1301..1305 PLANNED
-FOUNDATION-1401 PLANNED
+TIME-1205 DONE — cross-module Product Time consumers
+TIME-1206 DONE — legacy Date/number/TimeStyle surface retired + anti-resurrection governance
+LABEL-1301 DONE — registry/assignment characterization
+LABEL-1302 DONE — pure Shared Label Registry
+LABEL-1303 DONE — Goal-owned GoalLabel assignment/query
+LABEL-1304 DONE — Task-owned TaskLabel assignment/query
+LABEL-1305 DONE — Instant/Clock/normalization/typed color primitives
+FOUNDATION-1401 LOCAL CLOSURE COMPLETE — exact-head CI pending
 ```
 
-Time lane 已进入实施期；TIME-1203 已把 canonical Calendar/Input 切到显式 TimeContext，TIME-1204 已让 human-visible Format 真正消费 locale/timezone/dateStyle/timeStyle。剩余跨模块 host-local/static consumer fallback 与 legacy Date/number/TimeStyle surface 由 TIME-1205/1206 直接删除。
+Time lane（TIME-1201～1206）与 Label lane（LABEL-1301～1305）均已闭合并接入 anti-resurrection governance；FOUNDATION-1401 本地五层终审已完成。剩余仅为提交后的 exact-head required CI delivery gate。
 
 ## 8. Definition of Done
 

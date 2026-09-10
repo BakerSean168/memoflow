@@ -1,6 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
+import { createTimeContext } from '@memoflow/time';
 import { Goal } from '../../../domain/aggregates/goal';
 import { GoalLabelOwnershipError, GoalReminderConfig } from '../../../domain';
 import { GoalPrismaRepository } from './goal-prisma.repository';
@@ -240,10 +241,8 @@ describe('Goal durable completion receipt idempotency (W4 P1-3)', () => {
       update: {},
       create: {
         id: identityId,
-        emailAddress: `${identityId}@example.com`,
-        status: 'ACTIVE',
+        status: 'Active',
         profile: {},
-        settings: {},
       },
     });
     goalId = `goal-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
@@ -376,6 +375,9 @@ describe('GoalApiModule.register() lifecycle (W4 P2-1)', () => {
       ...repositories,
       taskBindingReadPort: {
         checkActiveTaskBindings: async () => ({ hasActiveBindings: false, activeCount: 0 }),
+      },
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
       },
       runtimeContributions: [createGoalRuntimeContribution(), listenerRuntime],
     });

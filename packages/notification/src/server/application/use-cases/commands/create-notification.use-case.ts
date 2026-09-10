@@ -31,6 +31,7 @@ import {
   defaultNotificationWorkflowKey,
 } from '../../../domain/services/notification-workflow-catalog';
 import { toNotificationClientDTO } from './notification-dto-converters';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 export class CreateNotificationUseCase {
   private readonly policy = new NotificationPolicy();
@@ -39,6 +40,7 @@ export class CreateNotificationUseCase {
     private readonly notificationRepository: INotificationRepository,
     private readonly preferenceRepository: INotificationPreferenceRepository,
     private readonly closureChecker: (identityId: string) => Promise<boolean>,
+    private readonly userTimeContextPort: UserTimeContextPort,
     private readonly clock: () => Date = () => new Date(),
     private readonly workflowCatalog: NotificationWorkflowCatalog = new NotificationWorkflowCatalog(),
   ) {
@@ -85,6 +87,7 @@ export class CreateNotificationUseCase {
     }
 
     const preference = await this.preferenceRepository.findByIdentityId(params.identityId);
+    const timeContext = await this.userTimeContextPort.getUserTimeContext(params.identityId);
     const requestedChannels = [...new Set(params.channels ?? [ChannelType.InApp])];
     const now = this.clock();
     const notification = Notification.create({
@@ -128,6 +131,7 @@ export class CreateNotificationUseCase {
         rateLimit: preference?.rateLimit,
         rateLimitUsage,
         now,
+        timeContext,
       });
       deliveryDecisions.push(decision);
 

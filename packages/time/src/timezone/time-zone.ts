@@ -1,5 +1,5 @@
 import { requireTimeZoneId } from '@memoflow/contracts/primitives';
-import type { TimeContext, TimeZoneId, TimeZonePolicy, Weekday } from '../types';
+import type { TimeContext, TimeZoneId, Weekday } from '../types';
 
 export {
   isIanaTimeZoneId,
@@ -51,15 +51,4 @@ export function createFixedTimeZoneSource(timeZoneId: TimeZoneId): TimeZoneSourc
   return {
     currentTimeZoneId: () => validated,
   };
-}
-
-const systemTimeZoneSource = createSystemTimeZoneSource();
-
-/** Resolves the legacy `local | string` policy into canonical branded state. */
-export function resolveTimeZoneId(
-  policy: TimeZonePolicy,
-  source: TimeZoneSource = systemTimeZoneSource,
-): TimeZoneId {
-  const zone = policy === 'local' ? source.currentTimeZoneId() : policy;
-  return requireTimeZoneId(zone);
 }

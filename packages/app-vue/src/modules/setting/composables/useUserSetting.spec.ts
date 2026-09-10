@@ -6,7 +6,6 @@ import { ok } from '@memoflow/contracts/result';
 import type { UserSettingClientDTO, UserSettingPreferences } from '@memoflow/contracts/setting';
 import { createTestPinia } from '@memoflow/test-utils';
 import { SETTING_SERVICE_KEY } from '../../../di/keys';
-import { usePresentationPreferenceStore } from '../stores/presentation-preference-store';
 import { useUserSettingStore } from '../stores/user-setting-store';
 import { useUserSetting } from './useUserSetting';
 
@@ -32,9 +31,7 @@ const i18n = createI18n({
   },
 });
 
-function createSetting(
-  overrides: Partial<UserSettingClientDTO> = {},
-): UserSettingClientDTO {
+function createSetting(overrides: Partial<UserSettingClientDTO> = {}): UserSettingClientDTO {
   return {
     id: 'setting-1' as UserSettingClientDTO['id'],
     identityId: 'identity-1' as UserSettingClientDTO['identityId'],
@@ -131,13 +128,9 @@ describe('useUserSetting', () => {
     await composable.loadSettings();
 
     const userSettingStore = useUserSettingStore();
-    const presentationStore = usePresentationPreferenceStore();
-
     expect(service.getUserSettings).toHaveBeenCalledTimes(1);
     expect(userSettingStore.userSetting).toEqual(setting);
     expect(composable.getCategory('notification')?.useCustomNotification).toBe(false);
-    expect(presentationStore.theme).toBe('light');
-    expect(presentationStore.locale).toBe('en-US');
   });
 
   it('unwraps successful patch results before updating derived state', async () => {

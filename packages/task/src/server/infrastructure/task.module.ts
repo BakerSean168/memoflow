@@ -43,7 +43,9 @@ import { MarkTaskOccurrenceMissedUseCase } from '../application/use-cases/comman
 import { RescheduleTaskOccurrenceUseCase } from '../application/use-cases/commands/reschedule-task-occurrence.use-case';
 import type { TaskWriteTransactionRunner } from '../application/use-cases/commands/task-write-support';
 import type { TaskApplicationPort } from '../application';
+import { TaskOccurrenceProjectionService } from '../application/services/task-occurrence-projection.service';
 import { createLogger } from '@memoflow/utils/logger';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 const logger = createLogger('TaskModule');
 
@@ -80,6 +82,7 @@ export interface TaskModuleDependencies {
   readonly taskPlanRepository: ITaskPlanRepository;
   readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   readonly taskWriteTransactionRunner: TaskWriteTransactionRunner;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?: TaskRuntimeContributionsInput;
 }
 
@@ -185,9 +188,13 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
 
   const { taskPlanRepository, taskOccurrenceRepository, taskWriteTransactionRunner } =
     dependencies;
+  const occurrenceProjection = new TaskOccurrenceProjectionService(
+    dependencies.userTimeContextPort,
+  );
   const listTaskPlans = new ListTaskPlansUseCase(
     taskPlanRepository,
     taskOccurrenceRepository,
+    dependencies.userTimeContextPort,
   );
 
   return {
@@ -196,24 +203,35 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
       taskPlanRepository,
       taskOccurrenceRepository,
       taskWriteTransactionRunner,
+      dependencies.userTimeContextPort,
     ),
     updateTaskPlan: new UpdateTaskPlanUseCase(
       taskPlanRepository,
       taskOccurrenceRepository,
       taskWriteTransactionRunner,
+      dependencies.userTimeContextPort,
     ),
     activateTaskPlan: new ActivateTaskPlanUseCase(
       taskPlanRepository,
       taskOccurrenceRepository,
       taskWriteTransactionRunner,
+      dependencies.userTimeContextPort,
     ),
     pauseTaskPlan: new PauseTaskPlanUseCase(
       taskPlanRepository,
       taskOccurrenceRepository,
       taskWriteTransactionRunner,
+      dependencies.userTimeContextPort,
     ),
-    archiveTaskPlan: new ArchiveTaskPlanUseCase(taskPlanRepository),
-    abandonTaskPlan: new AbandonTaskPlanUseCase(taskPlanRepository, taskWriteTransactionRunner),
+    archiveTaskPlan: new ArchiveTaskPlanUseCase(
+      taskPlanRepository,
+      dependencies.userTimeContextPort,
+    ),
+    abandonTaskPlan: new AbandonTaskPlanUseCase(
+      taskPlanRepository,
+      taskWriteTransactionRunner,
+      dependencies.userTimeContextPort,
+    ),
     deleteTaskPlan: new DeleteTaskPlanUseCase(
       taskPlanRepository,
       taskOccurrenceRepository,
@@ -223,12 +241,23 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
       taskPlanRepository,
       taskOccurrenceRepository,
       taskWriteTransactionRunner,
+      dependencies.userTimeContextPort,
     ),
-    bindTaskToGoal: new BindTaskToGoalUseCase(taskPlanRepository),
-    unbindTaskFromGoal: new UnbindTaskFromGoalUseCase(taskPlanRepository),
+    bindTaskToGoal: new BindTaskToGoalUseCase(
+      taskPlanRepository,
+      dependencies.userTimeContextPort,
+    ),
+    unbindTaskFromGoal: new UnbindTaskFromGoalUseCase(
+      taskPlanRepository,
+      dependencies.userTimeContextPort,
+    ),
 
     // Template queries
-    getTaskPlan: new GetTaskPlanUseCase(taskPlanRepository, taskOccurrenceRepository),
+    getTaskPlan: new GetTaskPlanUseCase(
+      taskPlanRepository,
+      taskOccurrenceRepository,
+      dependencies.userTimeContextPort,
+    ),
     listTaskPlans,
 
     // Instance commands
@@ -236,32 +265,52 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
       taskOccurrenceRepository,
       taskPlanRepository,
       taskWriteTransactionRunner,
+      occurrenceProjection,
     ),
     uncompleteTaskOccurrence: new UncompleteTaskOccurrenceUseCase(
       taskOccurrenceRepository,
       taskWriteTransactionRunner,
+      occurrenceProjection,
     ),
     skipTaskOccurrence: new SkipTaskOccurrenceUseCase(
       taskOccurrenceRepository,
       taskWriteTransactionRunner,
+      occurrenceProjection,
     ),
     markTaskOccurrenceMissed: new MarkTaskOccurrenceMissedUseCase(
       taskOccurrenceRepository,
       taskWriteTransactionRunner,
+      occurrenceProjection,
     ),
-    startTaskOccurrence: new StartTaskOccurrenceUseCase(taskOccurrenceRepository),
+    startTaskOccurrence: new StartTaskOccurrenceUseCase(
+      taskOccurrenceRepository,
+      occurrenceProjection,
+    ),
     deleteTaskOccurrence: new DeleteTaskOccurrenceUseCase(taskOccurrenceRepository),
-    rescheduleTaskOccurrence: new RescheduleTaskOccurrenceUseCase(taskOccurrenceRepository),
+    rescheduleTaskOccurrence: new RescheduleTaskOccurrenceUseCase(
+      taskOccurrenceRepository,
+      dependencies.userTimeContextPort,
+    ),
 
     // Instance queries
-    getTaskOccurrence: new GetTaskOccurrenceUseCase(taskOccurrenceRepository),
-    listTaskOccurrencesByAccount: new ListTaskOccurrencesByAccountUseCase(taskOccurrenceRepository),
+    getTaskOccurrence: new GetTaskOccurrenceUseCase(taskOccurrenceRepository, occurrenceProjection),
+    listTaskOccurrencesByAccount: new ListTaskOccurrencesByAccountUseCase(
+      taskOccurrenceRepository,
+      occurrenceProjection,
+    ),
     listTaskOccurrencesByTemplate: new ListTaskOccurrencesByTemplateUseCase(
       taskOccurrenceRepository,
       taskPlanRepository,
+      occurrenceProjection,
     ),
-    listTaskOccurrencesByStatus: new ListTaskOccurrencesByStatusUseCase(taskOccurrenceRepository),
-    getTaskOccurrencesByDateRange: new GetTaskOccurrencesByDateRangeUseCase(taskOccurrenceRepository),
+    listTaskOccurrencesByStatus: new ListTaskOccurrencesByStatusUseCase(
+      taskOccurrenceRepository,
+      occurrenceProjection,
+    ),
+    getTaskOccurrencesByDateRange: new GetTaskOccurrencesByDateRangeUseCase(
+      taskOccurrenceRepository,
+      occurrenceProjection,
+    ),
   };
 }
 
@@ -291,6 +340,7 @@ export function createTaskModule(dependencies: TaskModuleDependencies): TaskModu
     createTaskOccurrenceMaintenanceRuntime({
       taskPlanRepository: dependencies.taskPlanRepository,
       taskOccurrenceRepository: dependencies.taskOccurrenceRepository,
+      userTimeContextPort: dependencies.userTimeContextPort,
     }),
     ...normalizeRuntimeContributions(dependencies.runtimeContributions),
   ];

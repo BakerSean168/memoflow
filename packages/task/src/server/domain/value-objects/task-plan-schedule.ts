@@ -12,11 +12,9 @@ import {
   TaskTimingKind,
   TaskType,
 } from '@memoflow/contracts/task';
-import { asHm, createTimeFacade } from '@memoflow/time';
+import { asHm, createTimeFacade, type TimeContext, type TimeFacade } from '@memoflow/time';
 import { TaskTimeConfig } from './task-time-config';
 import { RecurrenceRule } from './recurrence-rule';
-
-const time = createTimeFacade();
 
 function minutesToHm(minutes: number) {
   const hours = Math.floor(minutes / 60);
@@ -44,10 +42,10 @@ function timingFromLegacy(config: TaskTimeConfig): TaskTiming {
   };
 }
 
-function timingToLegacy(timing: TaskTiming, date: Ymd) {
-  const ymd = time.codec.parseYmd(date, { onInvalid: 'throw' });
+function timingToLegacy(timing: TaskTiming, date: Ymd, facade: TimeFacade) {
+  const ymd = facade.codec.parseYmd(date, { onInvalid: 'throw' });
   if (!ymd) throw new Error(`Invalid Task schedule date: ${date}`);
-  const anchor = time.codec.startOfYmd(ymd);
+  const anchor = facade.codec.startOfYmd(ymd);
   if (timing.kind === TaskTimingKind.AllDay) return TaskTimeConfig.createAllDay(anchor);
   if (timing.kind === TaskTimingKind.At) {
     return TaskTimeConfig.createTimePoint(anchor, hmToMinutes(timing.time));
@@ -65,20 +63,24 @@ export class TaskPlanSchedule extends ValueObject<TaskPlanScheduleDTO> {
     return new TaskPlanSchedule(TaskPlanScheduleSchema.parse(props));
   }
 
+  /** Explicit-context legacy decoder for bounded persistence/migration adapters. */
   static fromLegacy(
     taskType: (typeof TaskType)[keyof typeof TaskType],
     timeConfig: TaskTimeConfig | null,
     recurrenceRule: RecurrenceRule | null,
+    timeContext: TimeContext,
   ): TaskPlanSchedule {
-    if (!timeConfig?.startDay) {
+    if (timeConfig?.startDate == null) {
       throw new Error('Task Plan schedule requires a calendar date');
     }
+    const facade = createTimeFacade({ context: timeContext });
+    const startDay = facade.calendar.toYmd(timeConfig.startDate);
     const timing = timingFromLegacy(timeConfig);
     if (taskType === TaskType.OneTime) {
       if (recurrenceRule) throw new Error('One-time Task Plan cannot have recurrence');
       return TaskPlanSchedule.create({
         kind: TaskPlanScheduleKind.OneTime,
-        date: timeConfig.startDay,
+        date: startDay,
         timing,
       });
     }
@@ -93,13 +95,13 @@ export class TaskPlanSchedule extends ValueObject<TaskPlanScheduleDTO> {
           : recurrenceRule.endDate != null
             ? {
                 kind: TaskRecurrenceEndKind.Until,
-                date: time.calendar.toYmd(recurrenceRule.endDate),
+                date: facade.calendar.toYmd(recurrenceRule.endDate),
               }
             : { kind: TaskRecurrenceEndKind.Never },
     };
     return TaskPlanSchedule.create({
       kind: TaskPlanScheduleKind.Recurring,
-      startDate: timeConfig.startDay,
+      startDate: startDay,
       timing,
       recurrence,
     });
@@ -137,20 +139,25 @@ export class TaskPlanSchedule extends ValueObject<TaskPlanScheduleDTO> {
     return structuredClone(this.props);
   }
 
-  /** Transitional adapter for legacy consumers; remove after transport/UI migration. */
-  toLegacyTimeConfig(): TaskTimeConfig {
-    return timingToLegacy(this.props.timing, this.calendarDate);
+  /** Explicit-context legacy projection for bounded persistence/migration adapters. */
+  toLegacyTimeConfig(timeContext: TimeContext): TaskTimeConfig {
+    return timingToLegacy(
+      this.props.timing,
+      this.calendarDate,
+      createTimeFacade({ context: timeContext }),
+    );
   }
 
-  /** Transitional adapter for recurrence engine/persistence; remove after adapter migration. */
-  toLegacyRecurrenceRule(): RecurrenceRule | null {
+  /** Product-Time-aware recurrence projection for current Task consumers. */
+  toLegacyRecurrenceRule(timeContext: TimeContext): RecurrenceRule | null {
     if (this.props.kind !== TaskPlanScheduleKind.Recurring) return null;
+    const facade = createTimeFacade({ context: timeContext });
     const end = this.props.recurrence.end;
     return RecurrenceRule.create({
       frequency: this.props.recurrence.frequency,
       interval: this.props.recurrence.interval,
       daysOfWeek: [...this.props.recurrence.byWeekday],
-      endDate: end.kind === TaskRecurrenceEndKind.Until ? time.codec.startOfYmd(end.date) : null,
+      endDate: end.kind === TaskRecurrenceEndKind.Until ? facade.codec.startOfYmd(end.date) : null,
       occurrences: end.kind === TaskRecurrenceEndKind.Count ? end.count : null,
     });
   }

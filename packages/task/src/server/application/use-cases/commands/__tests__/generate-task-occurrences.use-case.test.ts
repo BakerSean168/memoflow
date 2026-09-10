@@ -7,6 +7,7 @@ import {
   aLoadedTaskPlan,
   anAllDayTimeConfig,
   aTaskOccurrence,
+  TASK_TEST_USER_TIME_CONTEXT_PORT,
 } from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
@@ -34,12 +35,13 @@ describe('GenerateTaskOccurrencesUseCase (TASK-2204)', () => {
         templateRepository: templateRepo,
         instanceRepository: instanceRepo,
       }),
+      TASK_TEST_USER_TIME_CONTEXT_PORT,
     );
   });
 
   it('filters already persisted occurrence days before returning generated DTOs', async () => {
-    const start = new Date(2026, 0, 1, 0, 0, 0).getTime();
-    const secondDay = new Date(2026, 0, 2, 0, 0, 0).getTime();
+    const start = Date.UTC(2026, 0, 1, 0, 0, 0);
+    const secondDay = Date.UTC(2026, 0, 2, 0, 0, 0);
     const timeConfig = anAllDayTimeConfig(new Date(start));
     const template = aLoadedTaskPlan({
       taskType: TaskType.Recurring,
@@ -58,7 +60,7 @@ describe('GenerateTaskOccurrencesUseCase (TASK-2204)', () => {
 
     const result = await useCase.execute(String(template.id), String(template.identityId), {
       fromDate: start,
-      toDate: new Date(2026, 0, 2, 23, 59, 59, 999).getTime(),
+      toDate: Date.UTC(2026, 0, 2, 23, 59, 59, 999),
     });
 
     expect(result).toBeOk();

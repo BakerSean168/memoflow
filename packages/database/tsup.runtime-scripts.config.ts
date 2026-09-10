@@ -7,7 +7,6 @@ export default defineConfig({
     'scripts/prepare-goal-record-source-correlation.ts',
     'scripts/prepare-notification-preference-hierarchy.ts',
     'scripts/prepare-vnext-unique-constraints.ts',
-    'scripts/prepare-legacy-cloud-auth-migration.ts',
     'scripts/prepare-ai-provider-onboarding-sessions.ts',
     'scripts/prepare-ai-provider-default-invariant.ts',
     'scripts/prepare-editor-workspace-natural-key.ts',

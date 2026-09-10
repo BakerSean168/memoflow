@@ -10,6 +10,15 @@ import type {
   DoNotDisturbConfig as IDoNotDisturbConfig,
   DoNotDisturbConfigDTO,
 } from '@memoflow/contracts/notification';
+import {
+  addYmdDays,
+  asHm,
+  asInstant,
+  combineYmdHmWithTimeZone,
+  instantToHmInTimeZone,
+  instantToYmdInTimeZone,
+  type TimeContext,
+} from '@memoflow/time';
 
 /**
  * DoNotDisturbConfig 值对象实现
@@ -123,13 +132,21 @@ export class DoNotDisturbConfig extends ValueObject<DoNotDisturbConfigDTO> imple
     return this.props.daysOfWeek.length === 7;
   }
 
-  public isActiveAt(time: Date): boolean {
+  public isActiveAt(time: Date | number, timeContext: TimeContext): boolean {
     if (!this.props.enabled) return false;
-    
-    const day = time.getDay();
+
+    const instant = asInstant(time instanceof Date ? time.getTime() : time);
+    const ymd = instantToYmdInTimeZone(instant, timeContext.timeZone);
+    const [year, month, dayOfMonth] = String(ymd).split('-').map(Number);
+    const day = new Date(Date.UTC(year, month - 1, dayOfMonth)).getUTCDay();
     if (!this.props.daysOfWeek.includes(day)) return false;
 
-    const currentMinutes = time.getHours() * 60 + time.getMinutes();
+    const [currentH, currentM] = String(
+      instantToHmInTimeZone(instant, timeContext.timeZone),
+    )
+      .split(':')
+      .map(Number);
+    const currentMinutes = currentH * 60 + currentM;
     const [startH, startM] = this.props.startTime.split(':').map(Number);
     const [endH, endM] = this.props.endTime.split(':').map(Number);
     const startMinutes = startH * 60 + startM;
@@ -137,31 +154,36 @@ export class DoNotDisturbConfig extends ValueObject<DoNotDisturbConfigDTO> imple
 
     if (startMinutes < endMinutes) {
       return currentMinutes >= startMinutes && currentMinutes < endMinutes;
-    } else {
-      // 跨午夜
-      return currentMinutes >= startMinutes || currentMinutes < endMinutes;
     }
+    return currentMinutes >= startMinutes || currentMinutes < endMinutes;
   }
 
-  /** Returns the first local wall-clock instant at which the current DND window is inactive. */
-  public nextInactiveAt(time: Date): Date | null {
-    if (!this.isActiveAt(time)) return null;
+  /** Returns the first wall-clock instant at which the current DND window is inactive. */
+  public nextInactiveAt(time: Date | number, timeContext: TimeContext): Date | null {
+    if (!this.isActiveAt(time, timeContext)) return null;
 
-    const [endH, endM] = this.props.endTime.split(':').map(Number);
+    const instant = asInstant(time instanceof Date ? time.getTime() : time);
+    const currentYmd = instantToYmdInTimeZone(instant, timeContext.timeZone);
+    const [currentH, currentM] = String(
+      instantToHmInTimeZone(instant, timeContext.timeZone),
+    )
+      .split(':')
+      .map(Number);
+    const currentMinutes = currentH * 60 + currentM;
     const [startH, startM] = this.props.startTime.split(':').map(Number);
+    const [endH, endM] = this.props.endTime.split(':').map(Number);
     const startMinutes = startH * 60 + startM;
     const endMinutes = endH * 60 + endM;
-    const currentMinutes = time.getHours() * 60 + time.getMinutes();
-    const end = new Date(time);
-    end.setHours(endH, endM, 0, 0);
 
-    if (startMinutes >= endMinutes && currentMinutes >= startMinutes) {
-      end.setDate(end.getDate() + 1);
-    } else if (end.getTime() <= time.getTime()) {
-      end.setDate(end.getDate() + 1);
-    }
-
-    return end;
+    const endsNextCalendarDay =
+      startMinutes >= endMinutes && currentMinutes >= startMinutes;
+    const endYmd = endsNextCalendarDay ? addYmdDays(currentYmd, 1) : currentYmd;
+    const resolved = combineYmdHmWithTimeZone(
+      endYmd,
+      asHm(this.props.endTime),
+      timeContext.timeZone,
+    );
+    return resolved == null ? null : new Date(Number(resolved));
   }
 
   // ================= 序列化 =================

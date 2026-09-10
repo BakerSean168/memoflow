@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { aTaskOccurrence } from '../../../../../testing';
+import {
+  aTaskOccurrence,
+  TASK_TEST_OCCURRENCE_PROJECTION,
+  TASK_TEST_TIME_CONTEXT,
+} from '../../../../../testing';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { StartTaskOccurrenceUseCase } from '../start-task-occurrence.use-case';
 
@@ -14,7 +18,7 @@ describe('StartTaskOccurrenceUseCase', () => {
       findByIdForIdentity: vi.fn(),
       save: vi.fn().mockResolvedValue(undefined),
     });
-    useCase = new StartTaskOccurrenceUseCase(instanceRepo);
+    useCase = new StartTaskOccurrenceUseCase(instanceRepo, TASK_TEST_OCCURRENCE_PROJECTION);
   });
 
   it('should return NOT_FOUND when instance does not exist', async () => {
@@ -58,7 +62,7 @@ describe('StartTaskOccurrenceUseCase', () => {
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data).toEqual(instance.toClientDTO());
+      expect(result.data).toEqual(instance.toClientDTOAt(TASK_TEST_TIME_CONTEXT));
     }
   });
 });

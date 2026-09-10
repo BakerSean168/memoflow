@@ -6,7 +6,6 @@
  * Routes:
  *   GET    /me             — 获取当前用户资料
  *   PUT    /me             — 更新当前用户资料 (UpdateAccountSchema)
- *   POST   /availability   — 检查可用性 (CheckAvailabilitySchema)
  *   POST   /me/close       — 注销账户 (CloseAccountSchema)
  *   DELETE /me             — 注销账户（别名）
  */
@@ -22,12 +21,16 @@ import {
 } from '@memoflow/utils/result';
 import {
   UpdateAccountSchema,
-  UpdateAccountSettingsSchema,
-  CheckAvailabilitySchema,
   CloseAccountSchema,
-  AccountResponseSchema,
-  AvailabilityResponseSchema,
-  AccountClosureReceiptSchema,} from '@memoflow/contracts/account';
+  AccountViewSchema,
+  AccountClosureReceiptSchema,
+} from '@memoflow/contracts/account';
+import type {
+  AccountClientDTO,
+  AccountView,
+  CloudIdentitySummary,
+} from '@memoflow/contracts/account';
+import { map as mapResult } from '@memoflow/contracts/result';
 import {
   OperationTimelineEntrySchema,
   OperationAuditRecordSchema,
@@ -39,6 +42,27 @@ interface PlatformMiddleware {
   readonly auth: RequestHandler;
   requireRole(roles: string[]): RequestHandler;
   readonly requireEmailVerified?: RequestHandler;
+}
+
+type AccountIdentityRequest = {
+  readonly user?: {
+    readonly identityId?: string;
+    readonly email?: string;
+    readonly emailVerified?: boolean;
+  };
+};
+
+/** Compose product Account data with a safe Cloud Auth identity projection. */
+export function composeAccountView(
+  account: AccountClientDTO,
+  request: AccountIdentityRequest,
+): AccountView {
+  const user = request.user;
+  const cloudIdentity: CloudIdentitySummary | null =
+    typeof user?.email === 'string' && typeof user.emailVerified === 'boolean'
+      ? { identityId: account.id, email: user.email, emailVerified: user.emailVerified }
+      : null;
+  return { account, cloudIdentity };
 }
 
 // ============ Route Registration ============
@@ -68,12 +92,13 @@ export function registerAccountRoutes(
       path: '/me',
       summary: '获取当前用户资料',
       responses: {
-        200: successResponse(AccountResponseSchema, '获取成功'),
+        200: successResponse(AccountViewSchema, '获取成功'),
         401: errorResponse('未认证'),
       },
     },
     [...readAuth],
-    (_req, ctx) => controller.getProfile(ctx),
+    async (req, ctx) =>
+      mapResult(await controller.getProfile(ctx), (account) => composeAccountView(account, req)),
   );
 
   // PUT /me — 更新当前用户资料
@@ -84,44 +109,15 @@ export function registerAccountRoutes(
       summary: '更新当前用户资料',
       request: { body: { content: { 'application/json': { schema: UpdateAccountSchema } } } },
       responses: {
-        200: successResponse(AccountResponseSchema, '更新成功'),
+        200: successResponse(AccountViewSchema, '更新成功'),
         400: errorResponse('参数错误'),
       },
     },
     [...writeAuth],
-    (req, ctx) => controller.updateProfile(req.body, ctx),
-  );
-
-  r.route(
-    {
-      method: 'patch',
-      path: '/me/settings',
-      summary: '更新账户设置',
-      request: {
-        body: { content: { 'application/json': { schema: UpdateAccountSettingsSchema } } },
-      },
-      responses: {
-        200: successResponse(AccountResponseSchema.shape.settings, '更新成功'),
-        400: errorResponse('参数错误'),
-      },
-    },
-    [...writeAuth],
-    (req, ctx) => controller.updateSettings(req.body, ctx),
-  );
-
-  // POST /availability — 检查可用性
-  r.route(
-    {
-      method: 'post',
-      path: '/availability',
-      summary: '检查账号可用性',
-      request: { body: { content: { 'application/json': { schema: CheckAvailabilitySchema } } } },
-      responses: {
-        200: successResponse(AvailabilityResponseSchema, '检查成功'),
-      },
-    },
-    [...writeAuth],
-    (req) => controller.checkAvailability(req.body),
+    async (req, ctx) =>
+      mapResult(await controller.updateProfile(req.body, ctx), (account) =>
+        composeAccountView(account, req),
+      ),
   );
 
   // POST /me/close — 注销账户

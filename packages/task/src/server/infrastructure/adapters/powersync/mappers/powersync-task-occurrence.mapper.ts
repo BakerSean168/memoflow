@@ -48,7 +48,7 @@ export class PowerSyncTaskOccurrenceMapper {
   }
 
   static toPersistence(instance: TaskOccurrence) {
-    const dto = instance.toServerDTO();
+    const dto = instance.toPersistenceState();
     return {
       id: String(dto.id),
       templateId: String(dto.templateId),

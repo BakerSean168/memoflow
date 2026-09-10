@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { TASK_TEST_TIME_CONTEXT } from '../../../../testing';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
@@ -38,6 +39,7 @@ describe('TaskPlanPrismaRepository integration', () => {
       description: 'Finish the quarterly project',
       importance: ImportanceLevel.Important,
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
 
     await repository.save(template);
@@ -73,6 +75,7 @@ describe('TaskPlanPrismaRepository integration', () => {
       importance: ImportanceLevel.Moderate,
       timeConfig,
       recurrenceRule,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
 
     await repository.save(template);
@@ -82,7 +85,7 @@ describe('TaskPlanPrismaRepository integration', () => {
     expect(saved).not.toBeNull();
     expect(saved?.id).toBe(template.id);
     expect(saved?.taskType).toBe('Recurring');
-    expect(saved?.recurrenceRule).toBeDefined();
+    expect(saved?.schedule.recurrence).toBeDefined();
   });
 
   it('lists templates by identity', async () => {
@@ -100,6 +103,7 @@ describe('TaskPlanPrismaRepository integration', () => {
       title: 'Task 1',
       importance: ImportanceLevel.Important,
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
 
     const nextDay = new Date();
@@ -110,6 +114,7 @@ describe('TaskPlanPrismaRepository integration', () => {
       title: 'Task 2',
       importance: ImportanceLevel.Minor,
       dueDate: nextDay,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
 
     await repository.save(template1);
@@ -138,6 +143,7 @@ describe('TaskPlanPrismaRepository integration', () => {
       description: 'A high-importance task',
       importance: ImportanceLevel.Important,
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
 
     await repository.save(template);
@@ -162,6 +168,7 @@ describe('TaskPlanPrismaRepository integration', () => {
       title: 'Original Title',
       importance: ImportanceLevel.Minor,
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
 
     await repository.save(template);
@@ -193,6 +200,7 @@ describe('TaskPlanPrismaRepository integration', () => {
       title: 'To Delete',
       importance: ImportanceLevel.Moderate,
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
 
     await repository.save(template);
@@ -221,13 +229,14 @@ describe('TaskPlanPrismaRepository integration', () => {
       title: 'One-time Task',
       importance: ImportanceLevel.Moderate,
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
 
     await repository.save(template);
     const saved = await repository.findByIdForIdentity(identityId, template.id);
 
     expect(saved?.taskType).toBe('OneTime');
-    expect(saved?.recurrenceRule).toBeNull();
+    expect(saved?.schedule.recurrence).toBeNull();
   });
 
   it('round-trip: domain -> persistence -> domain preserves data integrity', async () => {
@@ -250,6 +259,7 @@ describe('TaskPlanPrismaRepository integration', () => {
       importance: ImportanceLevel.Moderate,
       timeConfig,
       recurrenceRule,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
 
     await repository.save(original);
@@ -274,12 +284,14 @@ describe('TaskPlanPrismaRepository integration', () => {
       title: 'Work and AI',
       importance: ImportanceLevel.Important,
       dueDate: new Date(Date.now() + 86400000),
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
     const second = TaskPlan.createOneTimeTask({
       identityId,
       title: 'Work only',
       importance: ImportanceLevel.Moderate,
       dueDate: new Date(Date.now() + 2 * 86400000),
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
     await repository.save(first);
     await repository.save(second);

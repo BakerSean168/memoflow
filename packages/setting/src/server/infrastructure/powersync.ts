@@ -56,6 +56,7 @@ export function createSettingPowerSyncModule(
 
   return createSettingModule({
     userSettingRepository: repositories.userSettingRepository,
+    userPreferenceRepository: repositories.userPreferenceRepository,
     persistMissingSettingOnRead: false,
   });
 }

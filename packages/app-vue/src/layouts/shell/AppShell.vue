@@ -68,6 +68,7 @@ import {
   MODULE_CAPSULES_KEY,
 } from '../../di/keys';
 import { defaultModuleCapsules } from '../../di/navigation';
+import { getProductTime } from '../../shared/utils/product-time';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -218,10 +219,9 @@ function conversationTimestamp(item: ConversationSummary): number {
 
 /** 今天 / 近 7 天 / 更早（本地时区自然日边界，V2 §5）。 */
 const conversationGroups = computed(() => {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-  const todayMs = startOfToday.getTime();
-  const weekMs = todayMs - 6 * 24 * 60 * 60 * 1000;
+  const time = getProductTime();
+  const todayMs = Number(time.calendar.startOfDay(Date.now()));
+  const weekMs = Number(time.calendar.addDays(todayMs, -6));
 
   const buckets: Record<'today' | 'last7Days' | 'earlier', { id: string; title: string }[]> = {
     today: [],

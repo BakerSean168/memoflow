@@ -27,3 +27,4 @@ export { settingRoutes } from './router';
 
 // Components
 export * from './components';
+export { useUserPreferences } from './composables/useUserPreferences';

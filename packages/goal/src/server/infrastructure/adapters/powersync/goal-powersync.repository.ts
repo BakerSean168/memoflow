@@ -5,7 +5,7 @@ import {
 } from '../../../domain';
 import { Goal } from '../../../domain';
 import type { GoalSystemView, KeyResultWeightSnapshotDTO } from '@memoflow/contracts/goal';
-import type { LabelDto } from '@memoflow/contracts/label';
+import { LabelColorSchema, type LabelDto } from '@memoflow/contracts/label';
 import {
   AggregateRepositoryBase,
   createEventBusAdapter,
@@ -38,7 +38,7 @@ export class GoalPowerSyncRepository
       identityId: String(row.identity_id),
       name: String(row.name),
       normalizedName: String(row.normalized_name),
-      color: row.color == null ? null : String(row.color),
+      color: row.color == null ? null : LabelColorSchema.parse(String(row.color)),
       createdAt: Date.parse(String(row.created_at)),
       updatedAt: Date.parse(String(row.updated_at)),
     };

@@ -25,13 +25,8 @@ async function seedAccount() {
   await prisma.account.create({
     data: {
       id: identityId,
-      status: 'ACTIVE',
+      status: 'Active',
       profile: {},
-      settings: {},
-      emailAddress: `set-${identityId}@example.test`,
-      emailIsVerified: true,
-      emailVerifiedAt: new Date(),
-      emailIsPrimary: true,
     },
   });
   return identityId;
@@ -61,7 +56,9 @@ describe('ResetUserSetting no-record materialize (W6-B real DB)', () => {
     const row = await prisma.userSetting.findUnique({ where: { identityId } });
     expect(row).not.toBeNull();
     expect(
-      typeof row!.preferences === 'string' ? JSON.parse(row!.preferences as string) : row!.preferences,
+      typeof row!.preferences === 'string'
+        ? JSON.parse(row!.preferences as string)
+        : row!.preferences,
     ).toEqual(defaults);
 
     const again = await useCase.execute(identityId);

@@ -1,8 +1,8 @@
 /**
  * TaskTimeConfig 值对象
- * 
+ *
  * 【规范说明：Class 类型值对象 - 参考 domain-class-value-object-spec.md】
- * 
+ *
  * 任务时间配置：时间类型、开始日期、时间点/时间范围
  * 不可变性（所有修改返回新实例）
  */
@@ -13,14 +13,11 @@ import type {
   TaskTimeConfigDTO,
   TaskTimeType,
 } from '@memoflow/contracts/task';
-import type { Instant, Ymd } from '@memoflow/contracts/primitives';
-import { createTimeFacade } from '@memoflow/time';
-
-const time = createTimeFacade();
+import type { Instant } from '@memoflow/contracts/primitives';
 
 /**
  * TaskTimeConfig 值对象实现
- * 
+ *
  * 包含：
  * - timeType: 时间类型（AllDay, TimePoint, TimeRange）
  * - startDate: 开始日期（存储为时间戳）
@@ -28,7 +25,6 @@ const time = createTimeFacade();
  * - timeRange: 时间范围（可选，{ start, end } 分钟数）
  */
 export class TaskTimeConfig extends ValueObject<TaskTimeConfigDTO> implements ITaskTimeConfig {
-
   private constructor(props: TaskTimeConfigDTO) {
     super(props);
   }
@@ -145,12 +141,6 @@ export class TaskTimeConfig extends ValueObject<TaskTimeConfigDTO> implements IT
     return this.props.startDate;
   }
 
-  /** ADR-037 W5: calendar day for all-day / day-anchored tasks. */
-  public get startDay(): Ymd | null {
-    if (this.props.startDate === null) return null;
-    return time.codec.toYmd(this.props.startDate);
-  }
-
   public get timePoint(): number | null {
     return this.props.timePoint;
   }
@@ -166,11 +156,7 @@ export class TaskTimeConfig extends ValueObject<TaskTimeConfigDTO> implements IT
    */
   public setStartDate(startDate: Instant | Date | null): TaskTimeConfig {
     const instant =
-      startDate == null
-        ? null
-        : startDate instanceof Date
-          ? startDate.getTime()
-          : startDate;
+      startDate == null ? null : startDate instanceof Date ? startDate.getTime() : startDate;
     const newProps = {
       ...this.props,
       startDate: instant,
@@ -262,5 +248,4 @@ export class TaskTimeConfig extends ValueObject<TaskTimeConfigDTO> implements IT
       timeRange: this.props.timeRange ? { ...this.props.timeRange } : null,
     };
   }
-
 }

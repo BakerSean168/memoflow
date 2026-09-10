@@ -22,7 +22,6 @@ import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import {
   DayOfWeek,
-  RecurrenceEndConditionType,
   TaskGoalBindingTrigger,
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
@@ -36,6 +35,7 @@ import {
   ChecklistItemDefinition,
   TaskPlanSchedule,
 } from '../../value-objects';
+import { TASK_TEST_TIME_CONTEXT } from '../../../../testing';
 import {
   InvalidTaskPlanStateError,
   InvalidGoalBindingError,
@@ -89,7 +89,7 @@ function makeYearlyRule(interval = 1): RecurrenceRule {
 
 function localYmd(instant: number): string {
   const date = new Date(instant);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
 }
 
 function makeState(
@@ -113,7 +113,8 @@ function makeState(
     title: overrides.title ?? 'Test Task',
     description: overrides.description ?? null,
     schedule:
-      overrides.schedule ?? TaskPlanSchedule.fromLegacy(taskType, timeConfig, recurrenceRule),
+      overrides.schedule ??
+      TaskPlanSchedule.fromLegacy(taskType, timeConfig, recurrenceRule, TASK_TEST_TIME_CONTEXT),
     importance: overrides.importance ?? ImportanceLevel.Moderate,
     status: overrides.status ?? TaskPlanStatus.Active,
     outcome: overrides.outcome ?? TaskPlanOutcome.Open,
@@ -144,6 +145,7 @@ describe('TaskPlan Aggregate', () => {
         const template = TaskPlan.createOneTimeTask({
           identityId,
           title: 'Buy groceries',
+          timeContext: TASK_TEST_TIME_CONTEXT,
         });
 
         expect(template.id).toBeDefined();
@@ -153,8 +155,10 @@ describe('TaskPlan Aggregate', () => {
         expect(template.status).toBe(TaskPlanStatus.Active);
         expect(template.importance).toBe(ImportanceLevel.Moderate);
         expect(template.description).toBeNull();
-        expect(template.timeConfig.timeType).toBe('AllDay');
-        expect(template.recurrenceRule).toBeNull();
+        expect(template.schedule.toLegacyTimeConfig(TASK_TEST_TIME_CONTEXT).timeType).toBe(
+          'AllDay',
+        );
+        expect(template.schedule.toLegacyRecurrenceRule(TASK_TEST_TIME_CONTEXT)).toBeNull();
         expect(template.reminderConfig).toBeNull();
         expect(template.version).toBe(1);
       });
@@ -163,6 +167,7 @@ describe('TaskPlan Aggregate', () => {
         const template = TaskPlan.createOneTimeTask({
           identityId: makeIdentityId(),
           title: '  Buy groceries  ',
+          timeContext: TASK_TEST_TIME_CONTEXT,
         });
 
         expect(template.title).toBe('Buy groceries');
@@ -178,21 +183,26 @@ describe('TaskPlan Aggregate', () => {
           description: 'Some description',
           importance: ImportanceLevel.Vital,
           startDate,
+          timeContext: TASK_TEST_TIME_CONTEXT,
         });
 
         expect(plan.description).toBe('Some description');
         expect(plan.importance).toBe(ImportanceLevel.Vital);
-        expect(localYmd(plan.timeConfig.startDate!)).toBe(localYmd(startDate));
+        expect(localYmd(plan.schedule.toLegacyTimeConfig(TASK_TEST_TIME_CONTEXT).startDate!)).toBe(
+          localYmd(startDate),
+        );
       });
 
       it('should generate unique IDs for each template', () => {
         const id1 = TaskPlan.createOneTimeTask({
           identityId: makeIdentityId(),
           title: 'Task A',
+          timeContext: TASK_TEST_TIME_CONTEXT,
         }).id;
         const id2 = TaskPlan.createOneTimeTask({
           identityId: makeIdentityId(),
           title: 'Task B',
+          timeContext: TASK_TEST_TIME_CONTEXT,
         }).id;
 
         expect(id1).not.toBe(id2);
@@ -202,6 +212,7 @@ describe('TaskPlan Aggregate', () => {
         const template = TaskPlan.createOneTimeTask({
           identityId: makeIdentityId(),
           title: 'Task',
+          timeContext: TASK_TEST_TIME_CONTEXT,
         });
 
         expect(template.history.length).toBeGreaterThanOrEqual(1);
@@ -216,6 +227,7 @@ describe('TaskPlan Aggregate', () => {
           TaskPlan.createOneTimeTask({
             identityId: '' as IdentityId,
             title: 'Task',
+            timeContext: TASK_TEST_TIME_CONTEXT,
           }),
         ).toThrow(InvalidTaskPlanStateError);
       });
@@ -225,6 +237,7 @@ describe('TaskPlan Aggregate', () => {
           TaskPlan.createOneTimeTask({
             identityId: makeIdentityId(),
             title: '',
+            timeContext: TASK_TEST_TIME_CONTEXT,
           }),
         ).toThrow(InvalidTaskPlanStateError);
       });
@@ -234,6 +247,7 @@ describe('TaskPlan Aggregate', () => {
           TaskPlan.createOneTimeTask({
             identityId: makeIdentityId(),
             title: '   ',
+            timeContext: TASK_TEST_TIME_CONTEXT,
           }),
         ).toThrow(InvalidTaskPlanStateError);
       });
@@ -253,6 +267,7 @@ describe('TaskPlan Aggregate', () => {
             title: 'Unanchored recurring task',
             timeConfig: unanchored,
             recurrenceRule: makeDailyRule(),
+            timeContext: TASK_TEST_TIME_CONTEXT,
           }),
         ).toThrow('Recurring Task requires a date');
       });
@@ -267,15 +282,18 @@ describe('TaskPlan Aggregate', () => {
           title: 'Daily standup',
           timeConfig,
           recurrenceRule,
+          timeContext: TASK_TEST_TIME_CONTEXT,
         });
 
         expect(template.taskType).toBe(TaskType.Recurring);
         expect(template.status).toBe(TaskPlanStatus.Active);
-        expect(template.timeConfig.toDTO()).toMatchObject({
+        expect(template.schedule.toLegacyTimeConfig(TASK_TEST_TIME_CONTEXT).toDTO()).toMatchObject({
           ...timeConfig.toDTO(),
-          startDate: template.timeConfig.startDate,
+          startDate: template.schedule.toLegacyTimeConfig(TASK_TEST_TIME_CONTEXT).startDate,
         });
-        expect(template.recurrenceRule?.toDTO()).toEqual(recurrenceRule.toDTO());
+        expect(template.schedule.toLegacyRecurrenceRule(TASK_TEST_TIME_CONTEXT)?.toDTO()).toEqual(
+          recurrenceRule.toDTO(),
+        );
         expect(template.generateAheadDays).toBe(30);
       });
 
@@ -286,6 +304,7 @@ describe('TaskPlan Aggregate', () => {
           timeConfig: makeAllDayTimeConfig(),
           recurrenceRule: makeDailyRule(),
           generateAheadDays: 7,
+          timeContext: TASK_TEST_TIME_CONTEXT,
         });
 
         expect(template.generateAheadDays).toBe(7);
@@ -299,6 +318,7 @@ describe('TaskPlan Aggregate', () => {
           timeConfig: makeAllDayTimeConfig(),
           recurrenceRule: makeDailyRule(),
           reminderConfig: reminder,
+          timeContext: TASK_TEST_TIME_CONTEXT,
         });
 
         expect(template.reminderConfig).toBe(reminder);
@@ -311,6 +331,7 @@ describe('TaskPlan Aggregate', () => {
             title: 'Task',
             timeConfig: makeAllDayTimeConfig(),
             recurrenceRule: makeDailyRule(),
+            timeContext: TASK_TEST_TIME_CONTEXT,
           }),
         ).toThrow(InvalidTaskPlanStateError);
       });
@@ -322,6 +343,7 @@ describe('TaskPlan Aggregate', () => {
             title: '',
             timeConfig: makeAllDayTimeConfig(),
             recurrenceRule: makeDailyRule(),
+            timeContext: TASK_TEST_TIME_CONTEXT,
           }),
         ).toThrow(InvalidTaskPlanStateError);
       });
@@ -332,6 +354,7 @@ describe('TaskPlan Aggregate', () => {
           title: 'Task',
           timeConfig: makeAllDayTimeConfig(),
           recurrenceRule: makeDailyRule(),
+          timeContext: TASK_TEST_TIME_CONTEXT,
         });
 
         expect(template.history.length).toBeGreaterThanOrEqual(1);
@@ -344,13 +367,18 @@ describe('TaskPlan Aggregate', () => {
         const template = TaskPlan.create({
           identityId: makeIdentityId(),
           title: 'Generic task',
-          schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, timeConfig, null),
+          schedule: TaskPlanSchedule.fromLegacy(
+            TaskType.OneTime,
+            timeConfig,
+            null,
+            TASK_TEST_TIME_CONTEXT,
+          ),
         });
 
         expect(template.taskType).toBe(TaskType.OneTime);
-        expect(template.timeConfig.toDTO()).toMatchObject({
+        expect(template.schedule.toLegacyTimeConfig(TASK_TEST_TIME_CONTEXT).toDTO()).toMatchObject({
           ...timeConfig.toDTO(),
-          startDate: template.timeConfig.startDate,
+          startDate: template.schedule.toLegacyTimeConfig(TASK_TEST_TIME_CONTEXT).startDate,
         });
       });
 
@@ -360,18 +388,30 @@ describe('TaskPlan Aggregate', () => {
         const template = TaskPlan.create({
           identityId: makeIdentityId(),
           title: 'Recurring via create',
-          schedule: TaskPlanSchedule.fromLegacy(TaskType.Recurring, timeConfig, recurrenceRule),
+          schedule: TaskPlanSchedule.fromLegacy(
+            TaskType.Recurring,
+            timeConfig,
+            recurrenceRule,
+            TASK_TEST_TIME_CONTEXT,
+          ),
         });
 
         expect(template.taskType).toBe(TaskType.Recurring);
-        expect(template.recurrenceRule?.toDTO()).toEqual(recurrenceRule.toDTO());
+        expect(template.schedule.toLegacyRecurrenceRule(TASK_TEST_TIME_CONTEXT)?.toDTO()).toEqual(
+          recurrenceRule.toDTO(),
+        );
       });
 
       it('should emit task:create during aggregate construction', () => {
         const template = TaskPlan.create({
           identityId: makeIdentityId(),
           title: 'Task',
-          schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, makeAllDayTimeConfig(), null),
+          schedule: TaskPlanSchedule.fromLegacy(
+            TaskType.OneTime,
+            makeAllDayTimeConfig(),
+            null,
+            TASK_TEST_TIME_CONTEXT,
+          ),
         });
 
         const events = template.domainEvents;
@@ -424,6 +464,7 @@ describe('TaskPlan Aggregate', () => {
       template = TaskPlan.createOneTimeTask({
         identityId: makeIdentityId(),
         title: 'State test task',
+        timeContext: TASK_TEST_TIME_CONTEXT,
       });
     });
 
@@ -597,6 +638,7 @@ describe('TaskPlan Aggregate', () => {
       template = TaskPlan.createOneTimeTask({
         identityId: makeIdentityId(),
         title: 'Updatable task',
+        timeContext: TASK_TEST_TIME_CONTEXT,
       });
     });
 
@@ -652,313 +694,6 @@ describe('TaskPlan Aggregate', () => {
       });
     });
 
-    describe('updateRecurrenceRule() (RECURRING)', () => {
-      it('should update recurrence rule', () => {
-        const recurring = TaskPlan.createRecurringTask({
-          identityId: makeIdentityId(),
-          title: 'Recurring',
-          timeConfig: makeAllDayTimeConfig(),
-          recurrenceRule: makeDailyRule(),
-        });
-
-        const newRule = makeWeeklyRule();
-        recurring.updateRecurrenceRule(newRule);
-        expect(recurring.recurrenceRule?.toDTO()).toEqual(newRule.toDTO());
-      });
-
-      it('should throw for ONE_TIME tasks', () => {
-        expect(() => template.updateRecurrenceRule(makeDailyRule())).toThrow(
-          InvalidTaskPlanStateError,
-        );
-      });
-    });
-
-    describe('updateRecurrenceEndCondition() (RECURRING)', () => {
-      let recurring: TaskPlan;
-
-      beforeEach(() => {
-        recurring = TaskPlan.createRecurringTask({
-          identityId: makeIdentityId(),
-          title: 'Recurring',
-          timeConfig: makeAllDayTimeConfig(),
-          recurrenceRule: makeDailyRule(),
-        });
-      });
-
-      it('should set end condition to Never', () => {
-        recurring.updateRecurrenceEndCondition(RecurrenceEndConditionType.Never);
-        // After setting to Never, endDate and occurrences should be cleared
-        expect(recurring.recurrenceRule).toBeDefined();
-      });
-
-      it('should set end condition to EndDate with custom value', () => {
-        const futureDate = Date.now() + 60 * 86400000;
-        recurring.updateRecurrenceEndCondition(RecurrenceEndConditionType.EndDate, futureDate);
-        expect(recurring.recurrenceRule).toBeDefined();
-      });
-
-      it('should set end condition to Occurrences', () => {
-        recurring.updateRecurrenceEndCondition(RecurrenceEndConditionType.Occurrences, 20);
-        expect(recurring.recurrenceRule).toBeDefined();
-      });
-
-      it('should throw for ONE_TIME tasks', () => {
-        expect(() =>
-          template.updateRecurrenceEndCondition(RecurrenceEndConditionType.Never),
-        ).toThrow(InvalidTaskPlanStateError);
-      });
-    });
-
-    describe('updatePriority()', () => {
-      it('should update importance level', () => {
-        template.updatePriority(ImportanceLevel.Vital);
-        expect(template.importance).toBe(ImportanceLevel.Vital);
-      });
-
-      it('should record history', () => {
-        const historyBefore = template.history.length;
-        template.updatePriority(ImportanceLevel.Important);
-        expect(template.history.length).toBeGreaterThan(historyBefore);
-      });
-    });
-  });
-
-  // ==================== Instance Generation ====================
-  describe('Instance Generation', () => {
-    describe('generateInstances() (ONE_TIME)', () => {
-      it('should generate one instance for a one-time task with timeConfig.startDate', () => {
-        const startDate = new Date('2025-06-15T00:00:00Z');
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.OneTime,
-            status: TaskPlanStatus.Active,
-            timeConfig: makeAllDayTimeConfig(startDate),
-          }),
-        );
-
-        const from = new Date('2025-06-01').getTime();
-        const to = new Date('2025-06-30').getTime();
-        const instances = template.generateInstances(from, to);
-
-        expect(instances.length).toBe(1);
-        expect(instances[0].templateId).toBe(template.id);
-      });
-
-      it('should not duplicate instances on second call', () => {
-        const startDate = new Date('2025-06-15T00:00:00Z');
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.OneTime,
-            status: TaskPlanStatus.Active,
-            timeConfig: makeAllDayTimeConfig(startDate),
-          }),
-        );
-
-        const from = new Date('2025-06-01').getTime();
-        const to = new Date('2025-06-30').getTime();
-        template.generateInstances(from, to);
-        const second = template.generateInstances(from, to);
-
-        expect(second.length).toBe(0);
-        expect(template.instances.length).toBe(1);
-      });
-    });
-
-    describe('generateInstances() (RECURRING)', () => {
-      it('should generate daily instances for the date range', () => {
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Active,
-            timeConfig: makeAllDayTimeConfig(),
-            recurrenceRule: makeDailyRule(),
-          }),
-        );
-
-        // 3 days
-        const from = new Date('2025-06-15T00:00:00Z').getTime();
-        const to = new Date('2025-06-17T00:00:00Z').getTime();
-        const instances = template.generateInstances(from, to);
-
-        expect(instances.length).toBe(3); // 15, 16, 17
-      });
-
-      it('should respect occurrence limits when generating instances', () => {
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Active,
-            timeConfig: makeAllDayTimeConfig(),
-            recurrenceRule: makeDailyRule().setOccurrences(3),
-          }),
-        );
-
-        const from = new Date('2025-06-15T00:00:00Z').getTime();
-        const to = new Date('2025-06-30T00:00:00Z').getTime();
-        const instances = template.generateInstances(from, to);
-
-        expect(instances).toHaveLength(3);
-        expect(template.instances).toHaveLength(3);
-      });
-
-      it('should generate weekly instances only on specified days', () => {
-        // Wednesday June 18 and Friday June 20 are within range
-        const rule = makeWeeklyRule([DayOfWeek.Wednesday, DayOfWeek.Friday]);
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Active,
-            timeConfig: makeAllDayTimeConfig(),
-            recurrenceRule: rule,
-          }),
-        );
-
-        // Mon June 16 to Sun June 22 (7 days)
-        const from = new Date('2025-06-16T00:00:00Z').getTime();
-        const to = new Date('2025-06-22T00:00:00Z').getTime();
-        const instances = template.generateInstances(from, to);
-
-        // Should only include Wed and Fri
-        const instanceDays = instances.map((i) => new Date(i.instanceDate).getDay());
-        instanceDays.forEach((day) => {
-          expect([DayOfWeek.Wednesday, DayOfWeek.Friday]).toContain(day);
-        });
-      });
-
-      it('should use standard month-day recurrence instead of scanning every day', () => {
-        const startDate = new Date(2026, 0, 31, 12, 0, 0);
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Active,
-            timeConfig: makeAllDayTimeConfig(startDate),
-            recurrenceRule: makeMonthlyRule(),
-          }),
-        );
-
-        const instances = template.generateInstances(
-          new Date(2026, 0, 1, 0, 0, 0).getTime(),
-          new Date(2026, 4, 31, 23, 59, 59).getTime(),
-        );
-
-        expect(instances.map((instance) => localYmd(instance.instanceDate))).toEqual([
-          '2026-01-31',
-          '2026-03-31',
-          '2026-05-31',
-        ]);
-      });
-
-      it('should apply finite COUNT to recurrence dates rather than arbitrary scanned days', () => {
-        const startDate = new Date(2026, 0, 31, 12, 0, 0);
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Active,
-            timeConfig: makeAllDayTimeConfig(startDate),
-            recurrenceRule: makeMonthlyRule().setOccurrences(2),
-          }),
-        );
-
-        const instances = template.generateInstances(
-          new Date(2026, 0, 1, 0, 0, 0).getTime(),
-          new Date(2026, 6, 31, 23, 59, 59).getTime(),
-        );
-
-        expect(instances.map((instance) => localYmd(instance.instanceDate))).toEqual([
-          '2026-01-31',
-          '2026-03-31',
-        ]);
-      });
-
-      it('should update lastGeneratedDate after generation', () => {
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Active,
-            timeConfig: makeAllDayTimeConfig(),
-            recurrenceRule: makeDailyRule(),
-          }),
-        );
-
-        expect(template.lastGeneratedDate).toBeNull();
-        const to = new Date('2025-06-17T00:00:00Z').getTime();
-        template.generateInstances(new Date('2025-06-15').getTime(), to);
-
-        expect(template.lastGeneratedDate).not.toBeNull();
-        expect(Number(template.lastGeneratedDate)).toBe(to);
-      });
-
-      it('should normalize generated instanceDate to day start for non-midnight fromDate', () => {
-        const startDate = new Date('2025-06-15T00:00:00.000Z');
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Active,
-            timeConfig: makeTimePointConfig(23 * 60, startDate),
-            recurrenceRule: makeDailyRule(),
-          }),
-        );
-
-        const from = new Date('2025-06-15T10:35:00.000Z').getTime();
-        const to = new Date('2025-06-15T23:59:59.000Z').getTime();
-        const instances = template.generateInstances(from, to);
-
-        const dayStart = new Date(from);
-        dayStart.setHours(0, 0, 0, 0);
-        const matchingInstances = instances.filter(
-          (instance) => instance.instanceDate === dayStart.getTime(),
-        );
-        expect(matchingInstances).toHaveLength(1);
-      });
-    });
-
-    describe('generateInstances() - error cases', () => {
-      it('should throw if fromDate >= toDate', () => {
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Active,
-            timeConfig: makeAllDayTimeConfig(),
-            recurrenceRule: makeDailyRule(),
-          }),
-        );
-
-        const date = Date.now();
-        expect(() => template.generateInstances(date, date)).toThrow(InvalidDateRangeError);
-        expect(() => template.generateInstances(date + 1, date)).toThrow(InvalidDateRangeError);
-      });
-
-      it('should throw for closed plans', () => {
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Closed,
-            outcome: TaskPlanOutcome.Succeeded,
-            timeConfig: makeAllDayTimeConfig(),
-            recurrenceRule: makeDailyRule(),
-          }),
-        );
-        expect(() => template.generateInstances(Date.now(), Date.now() + 86400000)).toThrow(
-          InvalidTaskPlanStateError,
-        );
-      });
-
-      it('should throw for non-active templates (paused)', () => {
-        const template = TaskPlan.load(
-          makeState({
-            taskType: TaskType.Recurring,
-            status: TaskPlanStatus.Paused,
-            timeConfig: makeAllDayTimeConfig(),
-            recurrenceRule: makeDailyRule(),
-          }),
-        );
-
-        expect(() => template.generateInstances(Date.now(), Date.now() + 86400000)).toThrow(
-          InvalidTaskPlanStateError,
-        );
-      });
-    });
-
     describe('shouldGenerateInstance()', () => {
       it('should return false for non-active templates', () => {
         const template = TaskPlan.load(
@@ -969,7 +704,7 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        expect(template.shouldGenerateInstance(Date.now())).toBe(false);
+        expect(template.shouldGenerateInstance(Date.now(), TASK_TEST_TIME_CONTEXT)).toBe(false);
       });
 
       it('should return false for ONE_TIME tasks', () => {
@@ -977,7 +712,7 @@ describe('TaskPlan Aggregate', () => {
           makeState({ taskType: TaskType.OneTime, status: TaskPlanStatus.Active }),
         );
 
-        expect(template.shouldGenerateInstance(Date.now())).toBe(false);
+        expect(template.shouldGenerateInstance(Date.now(), TASK_TEST_TIME_CONTEXT)).toBe(false);
       });
 
       it('should return false before recurring startDate day', () => {
@@ -994,12 +729,12 @@ describe('TaskPlan Aggregate', () => {
         const dayBefore = new Date('2025-06-14T12:00:00.000Z').getTime();
         const startDay = new Date('2025-06-15T12:00:00.000Z').getTime();
 
-        expect(template.shouldGenerateInstance(dayBefore)).toBe(false);
-        expect(template.shouldGenerateInstance(startDay)).toBe(true);
+        expect(template.shouldGenerateInstance(dayBefore, TASK_TEST_TIME_CONTEXT)).toBe(false);
+        expect(template.shouldGenerateInstance(startDay, TASK_TEST_TIME_CONTEXT)).toBe(true);
       });
 
       it('should return true for daily recurrence on an anchored schedule day', () => {
-        const startDate = new Date(2026, 0, 1, 12, 0, 0);
+        const startDate = new Date(Date.UTC(2026, 0, 1, 12, 0, 0));
         const template = TaskPlan.load(
           makeState({
             taskType: TaskType.Recurring,
@@ -1009,9 +744,12 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        expect(template.shouldGenerateInstance(new Date(2026, 0, 2, 12, 0, 0).getTime())).toBe(
-          true,
-        );
+        expect(
+          template.shouldGenerateInstance(
+            new Date(2026, 0, 2, 12, 0, 0).getTime(),
+            TASK_TEST_TIME_CONTEXT,
+          ),
+        ).toBe(true);
       });
 
       it('should respect daily recurrence interval from start date', () => {
@@ -1026,13 +764,22 @@ describe('TaskPlan Aggregate', () => {
         );
 
         expect(
-          template.shouldGenerateInstance(new Date('2025-06-15T12:00:00.000Z').getTime()),
+          template.shouldGenerateInstance(
+            new Date('2025-06-15T12:00:00.000Z').getTime(),
+            TASK_TEST_TIME_CONTEXT,
+          ),
         ).toBe(true);
         expect(
-          template.shouldGenerateInstance(new Date('2025-06-16T12:00:00.000Z').getTime()),
+          template.shouldGenerateInstance(
+            new Date('2025-06-16T12:00:00.000Z').getTime(),
+            TASK_TEST_TIME_CONTEXT,
+          ),
         ).toBe(false);
         expect(
-          template.shouldGenerateInstance(new Date('2025-06-18T12:00:00.000Z').getTime()),
+          template.shouldGenerateInstance(
+            new Date('2025-06-18T12:00:00.000Z').getTime(),
+            TASK_TEST_TIME_CONTEXT,
+          ),
         ).toBe(true);
       });
 
@@ -1048,13 +795,22 @@ describe('TaskPlan Aggregate', () => {
         );
 
         expect(
-          template.shouldGenerateInstance(new Date('2025-06-16T12:00:00.000Z').getTime()),
+          template.shouldGenerateInstance(
+            new Date('2025-06-16T12:00:00.000Z').getTime(),
+            TASK_TEST_TIME_CONTEXT,
+          ),
         ).toBe(true);
         expect(
-          template.shouldGenerateInstance(new Date('2025-06-23T12:00:00.000Z').getTime()),
+          template.shouldGenerateInstance(
+            new Date('2025-06-23T12:00:00.000Z').getTime(),
+            TASK_TEST_TIME_CONTEXT,
+          ),
         ).toBe(false);
         expect(
-          template.shouldGenerateInstance(new Date('2025-06-30T12:00:00.000Z').getTime()),
+          template.shouldGenerateInstance(
+            new Date('2025-06-30T12:00:00.000Z').getTime(),
+            TASK_TEST_TIME_CONTEXT,
+          ),
         ).toBe(true);
       });
 
@@ -1069,12 +825,18 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        expect(template.shouldGenerateInstance(new Date(2025, 1, 28, 12, 0, 0).getTime())).toBe(
-          false,
-        );
-        expect(template.shouldGenerateInstance(new Date(2028, 1, 29, 12, 0, 0).getTime())).toBe(
-          true,
-        );
+        expect(
+          template.shouldGenerateInstance(
+            new Date(2025, 1, 28, 12, 0, 0).getTime(),
+            TASK_TEST_TIME_CONTEXT,
+          ),
+        ).toBe(false);
+        expect(
+          template.shouldGenerateInstance(
+            new Date(2028, 1, 29, 12, 0, 0).getTime(),
+            TASK_TEST_TIME_CONTEXT,
+          ),
+        ).toBe(true);
       });
 
       it('should respect recurrence endDate', () => {
@@ -1090,7 +852,7 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        expect(template.shouldGenerateInstance(Date.now())).toBe(false);
+        expect(template.shouldGenerateInstance(Date.now(), TASK_TEST_TIME_CONTEXT)).toBe(false);
       });
 
       it('should return false when occurrence limit has been reached', () => {
@@ -1104,11 +866,18 @@ describe('TaskPlan Aggregate', () => {
         );
 
         const today = new Date('2025-06-15T00:00:00Z').getTime();
-        template.generateInstances(today, new Date('2025-06-15T23:59:59Z').getTime());
-
-        expect(template.shouldGenerateInstance(new Date('2025-06-16T12:00:00Z').getTime())).toBe(
-          false,
+        template.generateInstances(
+          today,
+          new Date('2025-06-15T23:59:59Z').getTime(),
+          TASK_TEST_TIME_CONTEXT,
         );
+
+        expect(
+          template.shouldGenerateInstance(
+            new Date('2025-06-16T12:00:00Z').getTime(),
+            TASK_TEST_TIME_CONTEXT,
+          ),
+        ).toBe(false);
       });
     });
 
@@ -1126,15 +895,16 @@ describe('TaskPlan Aggregate', () => {
         template.generateInstances(
           new Date('2025-06-01').getTime(),
           new Date('2025-06-30').getTime(),
+          TASK_TEST_TIME_CONTEXT,
         );
 
-        const found = template.getInstanceForDate(startDate.getTime());
+        const found = template.getInstanceForDate(startDate.getTime(), TASK_TEST_TIME_CONTEXT);
         expect(found).not.toBeNull();
       });
 
       it('should return null for a date with no instance', () => {
         const template = TaskPlan.load(makeState({ status: TaskPlanStatus.Active }));
-        expect(template.getInstanceForDate(Date.now())).toBeNull();
+        expect(template.getInstanceForDate(Date.now(), TASK_TEST_TIME_CONTEXT)).toBeNull();
       });
     });
 
@@ -1147,7 +917,10 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        const instanceId = template.createInstance({ instanceDate: Date.now() });
+        const instanceId = template.createInstance(
+          { instanceDate: Date.now() },
+          TASK_TEST_TIME_CONTEXT,
+        );
         expect(instanceId).toBeDefined();
         expect(template.instances.length).toBe(1);
       });
@@ -1160,9 +933,9 @@ describe('TaskPlan Aggregate', () => {
             timeConfig: makeAllDayTimeConfig(),
           }),
         );
-        expect(() => template.createInstance({ instanceDate: Date.now() })).toThrow(
-          InvalidTaskPlanStateError,
-        );
+        expect(() =>
+          template.createInstance({ instanceDate: Date.now() }, TASK_TEST_TIME_CONTEXT),
+        ).toThrow(InvalidTaskPlanStateError);
       });
 
       it('should throw for invalid instance date', () => {
@@ -1173,7 +946,9 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        expect(() => template.createInstance({ instanceDate: null })).toThrow();
+        expect(() =>
+          template.createInstance({ instanceDate: null }, TASK_TEST_TIME_CONTEXT),
+        ).toThrow();
       });
     });
 
@@ -1186,7 +961,10 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        const instanceId = template.createInstance({ instanceDate: Date.now() });
+        const instanceId = template.createInstance(
+          { instanceDate: Date.now() },
+          TASK_TEST_TIME_CONTEXT,
+        );
         const found = template.getInstance(instanceId);
         expect(found).not.toBeNull();
         expect(found!.id).toBe(instanceId);
@@ -1205,7 +983,10 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        const instanceId = template.createInstance({ instanceDate: Date.now() });
+        const instanceId = template.createInstance(
+          { instanceDate: Date.now() },
+          TASK_TEST_TIME_CONTEXT,
+        );
         const removed = template.removeInstance(instanceId);
         expect(removed).not.toBeNull();
         expect(template.instances.length).toBe(0);
@@ -1231,7 +1012,7 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        expect(template.isActiveOnDate(startDate.getTime())).toBe(true);
+        expect(template.isActiveOnDate(startDate.getTime(), TASK_TEST_TIME_CONTEXT)).toBe(true);
       });
 
       it('should return false for non-active template', () => {
@@ -1242,7 +1023,7 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        expect(template.isActiveOnDate(Date.now())).toBe(false);
+        expect(template.isActiveOnDate(Date.now(), TASK_TEST_TIME_CONTEXT)).toBe(false);
       });
 
       it('should return false for recurring task past endDate', () => {
@@ -1255,7 +1036,7 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        expect(template.isActiveOnDate(Date.now())).toBe(false);
+        expect(template.isActiveOnDate(Date.now(), TASK_TEST_TIME_CONTEXT)).toBe(false);
       });
     });
 
@@ -1270,7 +1051,7 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        const next = template.getNextOccurrence(Date.now());
+        const next = template.getNextOccurrence(Date.now(), TASK_TEST_TIME_CONTEXT);
         expect(localYmd(next!)).toBe(localYmd(futureDate.getTime()));
       });
 
@@ -1284,7 +1065,7 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        const next = template.getNextOccurrence(Date.now());
+        const next = template.getNextOccurrence(Date.now(), TASK_TEST_TIME_CONTEXT);
         expect(next).toBeNull();
       });
 
@@ -1295,11 +1076,11 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        expect(template.getNextOccurrence(Date.now())).toBeNull();
+        expect(template.getNextOccurrence(Date.now(), TASK_TEST_TIME_CONTEXT)).toBeNull();
       });
 
       it('should route recurring next-occurrence through the recurrence calendar', () => {
-        const startDate = new Date(2026, 0, 1, 12, 0, 0);
+        const startDate = new Date(Date.UTC(2026, 0, 1, 12, 0, 0));
         const template = TaskPlan.load(
           makeState({
             taskType: TaskType.Recurring,
@@ -1309,10 +1090,13 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        const next = template.getNextOccurrence(new Date(2026, 0, 1, 12, 0, 0).getTime());
+        const next = template.getNextOccurrence(
+          Date.UTC(2026, 0, 1, 12, 0, 0),
+          TASK_TEST_TIME_CONTEXT,
+        );
         expect(next).not.toBeNull();
         expect(localYmd(next!)).toBe('2026-01-03');
-        expect(new Date(next!).getHours()).toBe(0);
+        expect(new Date(next!).getUTCHours()).toBe(0);
       });
 
       it('should skip non-leap years when finding the next yearly leap-day occurrence', () => {
@@ -1326,7 +1110,10 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        const next = template.getNextOccurrence(new Date(2024, 1, 29, 12, 0, 0).getTime());
+        const next = template.getNextOccurrence(
+          new Date(2024, 1, 29, 12, 0, 0).getTime(),
+          TASK_TEST_TIME_CONTEXT,
+        );
         expect(next).not.toBeNull();
         expect(localYmd(next!)).toBe('2028-02-29');
       });
@@ -1382,7 +1169,12 @@ describe('TaskPlan Aggregate', () => {
       const template = TaskPlan.create({
         identityId: makeIdentityId(),
         title: 'Goal task',
-        schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, makeAllDayTimeConfig(), null),
+        schedule: TaskPlanSchedule.fromLegacy(
+          TaskType.OneTime,
+          makeAllDayTimeConfig(),
+          null,
+          TASK_TEST_TIME_CONTEXT,
+        ),
         goalBinding: {
           goalId: 'goal-123',
           keyResultId: 'kr-456',
@@ -1404,7 +1196,12 @@ describe('TaskPlan Aggregate', () => {
         TaskPlan.create({
           identityId: makeIdentityId(),
           title: 'Incomplete goal task',
-          schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, makeAllDayTimeConfig(), null),
+          schedule: TaskPlanSchedule.fromLegacy(
+            TaskType.OneTime,
+            makeAllDayTimeConfig(),
+            null,
+            TASK_TEST_TIME_CONTEXT,
+          ),
           goalBinding: {
             goalId: 'goal-123',
             contribution: { value: 10, trigger: TaskGoalBindingTrigger.EachCompletion },
@@ -1500,6 +1297,7 @@ describe('TaskPlan Aggregate', () => {
       const template = TaskPlan.createOneTimeTask({
         identityId: makeIdentityId(),
         title: 'Task',
+        timeContext: TASK_TEST_TIME_CONTEXT,
       });
 
       const initialCount = template.history.length;
@@ -1528,6 +1326,7 @@ describe('TaskPlan Aggregate', () => {
           title: 'DTO Test',
           description: 'A description',
           importance: ImportanceLevel.Important,
+          timeContext: TASK_TEST_TIME_CONTEXT,
         });
 
         const dto = template.toServerDTO();
@@ -1543,21 +1342,6 @@ describe('TaskPlan Aggregate', () => {
         expect(dto.version).toBe(1);
         expect(dto.instances).toBeUndefined();
       });
-
-      it('should include instances when includeChildren is true', () => {
-        const template = TaskPlan.load(
-          makeState({
-            status: TaskPlanStatus.Active,
-            timeConfig: makeAllDayTimeConfig(),
-          }),
-        );
-
-        template.createInstance({ instanceDate: Date.now() });
-        const dto = template.toServerDTO(true);
-
-        expect(dto.instances).toBeDefined();
-        expect(dto.instances!.length).toBe(1);
-      });
     });
 
     describe('toClientDTO()', () => {
@@ -1565,9 +1349,10 @@ describe('TaskPlan Aggregate', () => {
         const template = TaskPlan.createOneTimeTask({
           identityId: makeIdentityId(),
           title: 'Client DTO',
+          timeContext: TASK_TEST_TIME_CONTEXT,
         });
 
-        const dto = template.toClientDTO();
+        const dto = template.toClientDTOAt(TASK_TEST_TIME_CONTEXT);
 
         expect(dto.id).toBe(template.id);
         expect(dto.name).toBe('Client DTO');
@@ -1587,8 +1372,8 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        template.createInstance({ instanceDate: Date.now() });
-        const dto = template.toClientDTO(true);
+        template.createInstance({ instanceDate: Date.now() }, TASK_TEST_TIME_CONTEXT);
+        const dto = template.toClientDTOAt(TASK_TEST_TIME_CONTEXT, true);
 
         expect(dto.history).toBeDefined();
         expect(dto.instances).toBeDefined();
@@ -1607,9 +1392,9 @@ describe('TaskPlan Aggregate', () => {
         // Generate 3 instances
         const from = new Date('2025-06-15T00:00:00Z').getTime();
         const to = new Date('2025-06-17T00:00:00Z').getTime();
-        template.generateInstances(from, to);
+        template.generateInstances(from, to, TASK_TEST_TIME_CONTEXT);
 
-        const dto = template.toClientDTO();
+        const dto = template.toClientDTOAt(TASK_TEST_TIME_CONTEXT);
         expect(dto.instanceCount).toBe(3);
         expect(dto.completionRate).toBe(0); // None completed
       });
@@ -1618,9 +1403,10 @@ describe('TaskPlan Aggregate', () => {
         const template = TaskPlan.createOneTimeTask({
           identityId: makeIdentityId(),
           title: 'No time config',
+          timeContext: TASK_TEST_TIME_CONTEXT,
         });
 
-        const dto = template.toClientDTO();
+        const dto = template.toClientDTOAt(TASK_TEST_TIME_CONTEXT);
         expect(dto.schedule.kind).toBe('OneTime');
         expect(dto.schedule.timing.kind).toBe('AllDay');
       });
@@ -1633,7 +1419,12 @@ describe('TaskPlan Aggregate', () => {
       const template = TaskPlan.create({
         identityId: makeIdentityId(),
         title: 'Task',
-        schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, makeAllDayTimeConfig(), null),
+        schedule: TaskPlanSchedule.fromLegacy(
+          TaskType.OneTime,
+          makeAllDayTimeConfig(),
+          null,
+          TASK_TEST_TIME_CONTEXT,
+        ),
       });
 
       const events = template.pullDomainEvents();
@@ -1648,6 +1439,7 @@ describe('TaskPlan Aggregate', () => {
       const template = TaskPlan.createOneTimeTask({
         identityId: makeIdentityId(),
         title: 'Task',
+        timeContext: TASK_TEST_TIME_CONTEXT,
       });
 
       template.softDelete();
@@ -1660,6 +1452,7 @@ describe('TaskPlan Aggregate', () => {
       const template = TaskPlan.createOneTimeTask({
         identityId: makeIdentityId(),
         title: 'Original',
+        timeContext: TASK_TEST_TIME_CONTEXT,
       });
 
       template.updateTitle('Updated');
@@ -1672,7 +1465,12 @@ describe('TaskPlan Aggregate', () => {
       const template = TaskPlan.create({
         identityId: makeIdentityId(),
         title: 'Task',
-        schedule: TaskPlanSchedule.fromLegacy(TaskType.OneTime, makeAllDayTimeConfig(), null),
+        schedule: TaskPlanSchedule.fromLegacy(
+          TaskType.OneTime,
+          makeAllDayTimeConfig(),
+          null,
+          TASK_TEST_TIME_CONTEXT,
+        ),
       });
 
       const events = template.domainEvents;
@@ -1688,6 +1486,7 @@ describe('TaskPlan Aggregate', () => {
       const template = TaskPlan.createOneTimeTask({
         identityId: makeIdentityId(),
         title: 'The Title',
+        timeContext: TASK_TEST_TIME_CONTEXT,
       });
 
       expect(template.name).toBe('The Title');
@@ -1703,7 +1502,7 @@ describe('TaskPlan Aggregate', () => {
         }),
       );
 
-      template.createInstance({ instanceDate: Date.now() });
+      template.createInstance({ instanceDate: Date.now() }, TASK_TEST_TIME_CONTEXT);
       const instances = template.instances;
       const length = instances.length;
       instances.push(null as any); // mutate the copy

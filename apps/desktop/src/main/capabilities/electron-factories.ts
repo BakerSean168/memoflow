@@ -110,7 +110,7 @@ export function createElectronNotificationPort(
     setDNDSchedule: (startHour, endHour) => service.setDNDSchedule(startHour, endHour),
     disableDNDSchedule: () => service.disableDNDSchedule(),
     getDNDConfig: () => service.getDNDConfig(),
-    show: (config) => service.showNotification(config) !== null,
+    show: (config) => service.showCanonicalDelivery(config),
     showReminder: (config) =>
       service.showReminderNotification(config) !== null,
     showSchedule: (config) => service.showScheduleNotification(config) !== null,

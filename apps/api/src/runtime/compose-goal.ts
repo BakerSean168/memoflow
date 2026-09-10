@@ -51,6 +51,7 @@ import {
   type GoalApiModuleDef,
 } from '@memoflow/goal/api';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 /**
  * Dependencies the goal composer needs from the API host runtime.
@@ -61,6 +62,8 @@ export interface ComposeGoalDependencies {
   readonly db: PrismaClient;
   /** Host-provided Task→Goal dependency read port (PrismaTaskBindingReadPort). 宿主提供的 Task→Goal 依赖读取端口。 */
   readonly taskBindingReadPort: GoalDependencyReadPort;
+  /** Canonical identity-scoped Product Time context; required because Prisma enables Habit. */
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Extra runtime contributions from the host (e.g. schedule projection). 宿主提供的额外运行时贡献。 */
   readonly runtimeContributions?: GoalRuntimeContributionsInput;
 }
@@ -140,6 +143,7 @@ export function composeGoal(
     relationRepository,
     walletRepository,
     taskBindingReadPort: dependencies.taskBindingReadPort,
+    userTimeContextPort: dependencies.userTimeContextPort,
     runtimeContributions,
   });
 

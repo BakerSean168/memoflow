@@ -14,6 +14,7 @@ import { TaskOccurrenceGenerationService } from '../../../domain/services/index'
 import type { CreateTaskPlanInput, CreateTaskPlanRes } from '@memoflow/contracts/task';
 import { TaskPlanStatus } from '@memoflow/contracts/task';
 import { createLogger } from '@memoflow/utils/logger';
+import { createTimeFacade, type TimeContext, type UserTimeContextPort } from '@memoflow/time';
 import type { Result } from '@memoflow/contracts/result';
 import { error, fail, ok } from '@memoflow/contracts/result';
 import {
@@ -38,6 +39,7 @@ export class CreateTaskPlanUseCase {
     private readonly templateRepository: ITaskPlanRepository,
     private readonly instanceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
+    private readonly userTimeContextPort: UserTimeContextPort,
   ) {
     if (!transactionRunner) {
       throw new Error(
@@ -53,29 +55,30 @@ export class CreateTaskPlanUseCase {
     id: string,
     templateRepository: ITaskPlanRepository,
     instanceRepository: ITaskOccurrenceRepository,
+    timeContext: TimeContext,
   ): Promise<Result<CreateTaskPlanRes> | null> {
     const existing = await templateRepository.findByIdForIdentity(identityId, id);
     if (!existing) return null;
 
     const instances = await instanceRepository.findByTemplateId(id, identityId);
-    const now = new Date();
+    const time = createTimeFacade({ context: timeContext });
+    const today = time.calendar.toYmd(Date.now());
     return ok({
-      template: existing.toClientDTO(),
+      template: existing.toClientDTOAt(timeContext),
       instanceCount: instances.length,
-      todayInstanceCreated: instances.some((instance) => {
-        if (!Number.isFinite(instance.instanceDate)) return false;
-        const date = new Date(instance.instanceDate);
-        return (
-          date.getFullYear() === now.getFullYear() &&
-          date.getMonth() === now.getMonth() &&
-          date.getDate() === now.getDate()
-        );
-      }),
+      todayInstanceCreated: instances.some(
+        (instance) =>
+          Number.isFinite(instance.instanceDate) &&
+          time.calendar.toYmd(instance.instanceDate) === today,
+      ),
     });
   }
 
   async execute(request: CreateTaskPlanInput): Promise<Result<CreateTaskPlanRes>> {
+    let timeContext: TimeContext | null = null;
     try {
+      const resolvedTimeContext = await this.userTimeContextPort.getUserTimeContext(request.identityId);
+      timeContext = resolvedTimeContext;
       return await this.transactionRunner.run(
         async ({ templateRepository, instanceRepository }) => {
           if (request.id) {
@@ -84,6 +87,7 @@ export class CreateTaskPlanUseCase {
               request.id,
               templateRepository!,
               instanceRepository,
+              resolvedTimeContext,
             );
             if (replay) return replay;
           }
@@ -130,7 +134,7 @@ export class CreateTaskPlanUseCase {
           // 最后 saveMany 实例。
           const instances =
             template.status === TaskPlanStatus.Active
-              ? this.generationService.generateInstances(template)
+              ? this.generationService.generateInstances(template, resolvedTimeContext)
               : [];
 
           await templateRepository!.save(template);
@@ -146,22 +150,19 @@ export class CreateTaskPlanUseCase {
             await instanceRepository.saveMany(instances);
           }
 
+          const time = createTimeFacade({ context: resolvedTimeContext });
+          const today = time.calendar.toYmd(Date.now());
           const generation = {
             instanceCount: instances.length,
-            todayInstanceCreated: instances.some((instance) => {
-              if (!Number.isFinite(instance.instanceDate)) return false;
-              const d = new Date(instance.instanceDate);
-              const now = new Date();
-              return (
-                d.getFullYear() === now.getFullYear() &&
-                d.getMonth() === now.getMonth() &&
-                d.getDate() === now.getDate()
-              );
-            }),
+            todayInstanceCreated: instances.some(
+              (instance) =>
+                Number.isFinite(instance.instanceDate) &&
+                time.calendar.toYmd(instance.instanceDate) === today,
+            ),
           };
 
           return ok({
-            template: template.toClientDTO(),
+            template: template.toClientDTOAt(resolvedTimeContext),
             ...generation,
           });
         },
@@ -170,13 +171,14 @@ export class CreateTaskPlanUseCase {
       // The concurrent-create window is closed outside the failed transaction:
       // if another worker committed the same deterministic aggregate ID first,
       // return that durable fact as an idempotent replay.
-      if (request.id) {
+      if (request.id && timeContext) {
         try {
           const replay = await this.replayExisting(
             request.identityId,
             request.id,
             this.templateRepository,
             this.instanceRepository,
+            timeContext,
           );
           if (replay) return replay;
         } catch {

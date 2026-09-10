@@ -20,7 +20,8 @@
     "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/http-client": "workspace:*",
-    "@memoflow/ipc-client": "workspace:*"
+    "@memoflow/ipc-client": "workspace:*",
+    "@memoflow/time": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",

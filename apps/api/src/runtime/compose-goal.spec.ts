@@ -31,6 +31,7 @@ import type { PrismaClient } from '@memoflow/database';
 import type { GoalApiModuleContext } from '@memoflow/goal/api';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
 import type { GoalRuntimeContributionsInput } from '@memoflow/goal';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 vi.mock('@memoflow/goal', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@memoflow/goal')>();
@@ -62,6 +63,7 @@ import { createGoalApiModule } from '@memoflow/goal/api';
 
 const fakeDb = {} as unknown as PrismaClient;
 const fakeReadPort = {} as unknown as GoalDependencyReadPort;
+const fakeTimeContextPort = {} as unknown as UserTimeContextPort;
 const hostRuntime: GoalRuntimeContributionsInput = { start: () => {}, stop: () => {} };
 
 describe('composeGoal assembly order', () => {
@@ -70,7 +72,7 @@ describe('composeGoal assembly order', () => {
   });
 
   it('assembles in plan §3.1 order: repositories → listeners → base runtime → module → api module', () => {
-    composeGoal({ db: fakeDb, taskBindingReadPort: fakeReadPort });
+    composeGoal({ db: fakeDb, taskBindingReadPort: fakeReadPort, userTimeContextPort: fakeTimeContextPort });
 
     const reposOrder = createGoalPrismaRepositories.mock.invocationCallOrder[0];
     const listenersOrder = createGoalEventListenersRuntime.mock.invocationCallOrder[0];
@@ -88,6 +90,7 @@ describe('composeGoal assembly order', () => {
     composeGoal({
       db: fakeDb,
       taskBindingReadPort: fakeReadPort,
+      userTimeContextPort: fakeTimeContextPort,
       runtimeContributions: hostRuntime,
     });
 
@@ -109,6 +112,7 @@ describe('composeGoal assembly order', () => {
       relationRepository: repoSet.relationRepository,
       walletRepository: repoSet.walletRepository,
       taskBindingReadPort: fakeReadPort,
+      userTimeContextPort: fakeTimeContextPort,
     });
     expect(moduleCall.runtimeContributions).toContain(
       createGoalEventListenersRuntime.mock.results[0].value,
@@ -123,7 +127,7 @@ describe('composeGoal assembly order', () => {
   });
 
   it('returns a module handle with name Goal plus register and destroy, and the same instance.api as applicationPort', () => {
-    const composed = composeGoal({ db: fakeDb, taskBindingReadPort: fakeReadPort });
+    const composed = composeGoal({ db: fakeDb, taskBindingReadPort: fakeReadPort, userTimeContextPort: fakeTimeContextPort });
 
     expect(composed.module).toMatchObject({ name: 'Goal' });
     expect(typeof composed.module.register).toBe('function');
@@ -155,7 +159,7 @@ describe('composeGoal structural registration', () => {
   });
 
   it('mounts /goals on the router and starts the owned instance', () => {
-    const composed = composeGoal({ db: fakeDb, taskBindingReadPort: fakeReadPort });
+    const composed = composeGoal({ db: fakeDb, taskBindingReadPort: fakeReadPort, userTimeContextPort: fakeTimeContextPort });
 
     const instance = createGoalModule.mock.results[0].value;
     const startSpy = vi.spyOn(instance, 'start');

@@ -7,7 +7,7 @@ tags:
   - refactor
 description: Setting vNext — Settings Hub ownership、UserPreference、Product Time Context、Device/Feature/Consent、Persistence/PowerSync/Portability 单轨收敛实施计划
 created: 2026-09-08T23:26:00+08:00
-updated: 2026-09-08T23:26:00+08:00
+updated: 2026-09-09T19:11:00+08:00
 ---
 
 # Setting vNext Model Convergence
@@ -28,7 +28,7 @@ The preference ownership model remains valid, but all legacy-data precedence/bac
 
 Migration-oriented subsections below are retained only as historical reasoning and are superseded for execution by this block and the system-wide plan.
 
-**状态：ACTIVE / design frozen, implementation not started**
+**状态：ACTIVE / staged implementation in progress — SETTING-9202/9203 DONE**
 **设计分支：** `docs/setting-vnext-model`
 **当前源码 truth：** `packages/setting` + `packages/account` + `packages/notification` + Desktop/PowerSync 现状
 **目标 ADR：** ADR-092～095
@@ -291,7 +291,7 @@ revision
 
 ### SETTING-9203 — Converge theme/language/timezone and retire `Account.settings` duplicate truth
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-09**
 
 #### Goal
 
@@ -299,39 +299,29 @@ revision
 
 #### Scope
 
-迁移 precedence：
+按 ADR-111 执行 direct destructive cutover，不做 legacy value backfill、precedence fallback、dual-read 或 dual-write：
 
-```text
-UserSetting valid value
-  > Account.settings valid fallback
-  > explicit product default/UTC policy
-```
-
-实现：
-
-- backfill `presentation` / `regional`；
-- `UserTimeContextPort`；
-- Reminder/Routine/Task/Planner/Scheduler/Notification user-time consumers 改走 canonical context；
-- Presentation bootstrap 改读 UserPreferenceProfile；
-- Account UI 需要 theme/language/timezone 时通过 Settings Hub composition，不把值塞回 Account DTO；
-- 完成读写 cutover 后删除 AccountSettings VO/API/DB JSON。
+- canonical `presentation | regional` namespace 成为 theme/language/timezone/dateStyle/timeStyle/weekStartsOn sole truth；
+- `PreferenceUserTimeContextAdapter` 实现 `UserTimeContextPort`；
+- Reminder/Routine/Task/Planner/Scheduler/Notification/AI user-time consumers 与 `TIME-1205` 同批切到 canonical context；
+- Presentation bootstrap 与 Settings General UI 只读写 `UserPreferenceProfile` / namespace CAS API，canonical load 失败时不回退 legacy preference；
+- Account UI 不再承载 theme/language/timezone；
+- 删除 `AccountSettings` VO、API、event、DTO、Prisma/PowerSync persistence field 与 Web mock route；PowerSync CRUD normalization 不再接受 `accounts.settings` 作为 JSON field。
 
 #### Protected contracts
 
 - Account profile/auth 行为；
 - schedule explicit timezone snapshot；
 - server no ambient timezone；
-- guest mode local TimeZoneSource。
+- guest/device presentation defaults只作为未加载 canonical profile 时的本地显示默认，不成为 cloud business truth。
 
 #### Tests
 
-- conflicting legacy timezone fixture：UserSetting wins；
-- invalid UserSetting + valid Account fallback；
-- both invalid -> explicit UTC + warning；
-- host timezone changes but business results stable；
-- theme/language mapping；
-- Reminder server no longer imports/reads Account timezone；
-- Account response schema no settings after cutover；
+- host timezone / DST changes but business results stable；
+- theme/language/timezone mapping from canonical profile；
+- canonical preference load failure does not fall back to legacy settings；
+- Reminder/Task/Goal/Planner/Notification/AI server consumers use explicit identity context；
+- Account response/domain/persistence no settings after cutover；
 - anti-resurrection grep/surface lock。
 
 #### Acceptance
@@ -347,9 +337,18 @@ AccountSettings
 AccountApplicationTimezoneAdapter
 ```
 
+#### Closure evidence
+
+- final production grep for the acceptance symbols is empty；Prisma `Account` schema、generated client、PowerSync local `accounts` table 均无 `settings`；
+- Account PowerSync mapper 的旧 `row.settings` source lock 已反转为 anti-resurrection；API PowerSync JSON registry 仅保留 `accounts.profile`，旧 `settings` payload 不再被 normalization 当作可写 JSON；
+- canonical `/settings/preferences` HTTP/IPC + namespace CAS、`useUserPreferences`、`usePresentationBootstrap`、`UserSettingsView` 均走 canonical preference；
+- verification：Setting `22 files / 142 tests` + typecheck PASS；Account `26 / 189` + typecheck PASS；Account contracts `1 / 6` PASS；PowerSync API focused `3 / 15` PASS；App Vue canonical Settings `3 / 7` PASS；
+- App Vue/Web package-wide typecheck仍有与本 ticket 无关的 workspace declaration baseline（`@memoflow/app-vue/web-*`、`ai/label/schedule client`），不影响上述 focused cutover gates；
+- legacy giant-tree `UserSetting` 中 privacy/experimental/device/notification 等非 presentation/regional owner 仍由 SETTING-9204/9205/9206/9209 后续 destructive convergence 处理，不重新成为 Product Time fallback。
+
 #### Dependencies
 
-`SETTING-9202`
+`SETTING-9202`；与 `TIME-1205` coordinated cutover 同批完成。
 
 ### SETTING-9204 — Converge Notification user/device preference ownership
 

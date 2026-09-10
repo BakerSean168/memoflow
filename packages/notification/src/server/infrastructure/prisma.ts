@@ -12,6 +12,7 @@
  */
 
 import type { PrismaClient } from '@memoflow/database';
+import type { UserTimeContextPort } from '@memoflow/time';
 import type { ScheduleNotificationPort } from '../../schedule-execution';
 import { createNotificationScheduleNotificationPort } from './schedule-notification-port';
 import {
@@ -45,6 +46,7 @@ import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 
 export interface CreateNotificationPrismaModuleOptions {
   readonly closureChecker: (identityId: string) => Promise<boolean>;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?: NotificationRuntimeContributionsInput;
   readonly durableRuntime?: import('./runtime/notification.runtime').NotificationDurableRuntimePort;
   readonly channelDeliverer?: import('./runtime/notification.runtime').NotificationChannelDeliverer;
@@ -113,6 +115,9 @@ export function createNotificationPrismaModule(
   if (!options?.closureChecker) {
     throw new Error('[FAIL-CLOSED] createNotificationPrismaModule requires options.closureChecker');
   }
+  if (!options.userTimeContextPort) {
+    throw new Error('[FAIL-CLOSED] createNotificationPrismaModule requires options.userTimeContextPort');
+  }
 
   const metricsService = options.metricsService ?? globalNotificationMetrics;
   const repositories = createNotificationPrismaRepositories(db, metricsService);
@@ -133,6 +138,7 @@ export function createNotificationPrismaModule(
     repository: notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
     closureChecker: options.closureChecker,
+    userTimeContextPort: options.userTimeContextPort,
     reliableAdapter,
     deliverer: options.channelDeliverer,
     delivererRegistry: defaultDeliverers,
@@ -147,6 +153,7 @@ export function createNotificationPrismaModule(
     preferenceRepository: repositories.notificationPreferenceRepository,
     templateRepository: repositories.notificationTemplateRepository,
     closureChecker: options.closureChecker,
+    userTimeContextPort: options.userTimeContextPort,
     durableRuntime,
     runtimeContributions: options.runtimeContributions ?? [durableRuntime],
     auditRepository: repositories.auditRepository,
@@ -156,6 +163,7 @@ export function createNotificationPrismaModule(
 export function createNotificationPrismaScheduleNotificationPort(
   db: PrismaClient,
   closureChecker: (identityId: string) => Promise<boolean>,
+  userTimeContextPort: UserTimeContextPort,
 ): ScheduleNotificationPort {
   const repositories = createNotificationPrismaRepositories(db);
 
@@ -163,5 +171,6 @@ export function createNotificationPrismaScheduleNotificationPort(
     notificationRepository: repositories.notificationRepository,
     notificationPreferenceRepository: repositories.notificationPreferenceRepository,
     closureChecker,
+    userTimeContextPort,
   });
 }

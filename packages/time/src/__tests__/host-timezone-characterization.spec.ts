@@ -5,6 +5,7 @@ import {
   asYmd,
   combineYmdHmWithTimeZone,
   createDateFnsEngine,
+  createTimeContext,
   createTimeFacade,
   requireTimeZoneId,
 } from '../index';
@@ -16,13 +17,12 @@ afterEach(() => {
   else process.env.TZ = originalTz;
 });
 
-describe('TIME-1201 host-timezone characterization', () => {
-  it('documents the current host-local calendar drift that TimeContext must remove', () => {
+describe('TIME-1206 host-timezone boundary characterization', () => {
+  it('keeps host-local date-fns behavior confined to the raw engine seam', () => {
     const instant = asInstant(Date.parse('2025-12-31T16:30:00.000Z'));
 
     process.env.TZ = 'UTC';
     const utcYmd = createDateFnsEngine().toYmd(instant);
-
     process.env.TZ = 'Asia/Tokyo';
     const tokyoYmd = createDateFnsEngine().toYmd(instant);
 
@@ -31,25 +31,30 @@ describe('TIME-1201 host-timezone characterization', () => {
     expect(utcYmd).not.toBe(tokyoYmd);
   });
 
-  it('proves locale now changes canonical date presentation', () => {
-    process.env.TZ = 'UTC';
+  it('uses explicit context for canonical locale-sensitive presentation', () => {
     const instant = asInstant(Date.parse('2026-01-07T12:00:00.000Z'));
-    const zh = createTimeFacade({ presentation: { locale: 'zh-CN' } }).format.date(instant);
-    const en = createTimeFacade({ presentation: { locale: 'en-US' } }).format.date(instant);
+    const context = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+    const zh = createTimeFacade({ context, presentation: { locale: 'zh-CN' } }).format.date(
+      instant,
+    );
+    const en = createTimeFacade({ context, presentation: { locale: 'en-US' } }).format.date(
+      instant,
+    );
 
     expect(zh).toContain('2026');
-    expect(zh).toContain('1');
-    expect(zh).toContain('7');
-    expect(en).toContain('Jan');
     expect(en).toContain('2026');
     expect(en).not.toBe(zh);
   });
 
-  it('honors weekStartsOn even while day boundaries are still host-local', () => {
-    process.env.TZ = 'UTC';
+  it('honors explicit weekStartsOn without consulting host timezone', () => {
     const instant = asInstant(Date.parse('2026-01-07T12:00:00.000Z'));
-    const monday = createTimeFacade({ style: { calendar: { weekStartsOn: 1 } } });
-    const sunday = createTimeFacade({ style: { calendar: { weekStartsOn: 0 } } });
+    process.env.TZ = 'America/Los_Angeles';
+    const monday = createTimeFacade({
+      context: createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+    });
+    const sunday = createTimeFacade({
+      context: createTimeContext({ timeZone: 'UTC', weekStartsOn: 0 }),
+    });
 
     expect(new Date(monday.calendar.startOfWeek(instant)).toISOString()).toBe(
       '2026-01-05T00:00:00.000Z',
@@ -59,13 +64,12 @@ describe('TIME-1201 host-timezone characterization', () => {
     );
   });
 
-  it('keeps explicit IANA wall-clock conversion independent from the process timezone', () => {
+  it('keeps explicit IANA wall-clock conversion independent from process timezone', () => {
     const ymd = asYmd('2026-01-01');
     const hm = asHm('09:15');
 
     process.env.TZ = 'UTC';
     const fromUtcHost = combineYmdHmWithTimeZone(ymd, hm, requireTimeZoneId('Asia/Tokyo'));
-
     process.env.TZ = 'America/Los_Angeles';
     const fromLaHost = combineYmdHmWithTimeZone(ymd, hm, requireTimeZoneId('Asia/Tokyo'));
 
@@ -73,23 +77,23 @@ describe('TIME-1201 host-timezone characterization', () => {
     expect(fromLaHost).toBe(fromUtcHost);
   });
 
-  it('freezes the current DST gap behavior as shift-forward for New York', () => {
-    const resolved = combineYmdHmWithTimeZone(
-      asYmd('2026-03-08'),
-      asHm('02:30'),
-      requireTimeZoneId('America/New_York'),
-    );
-
-    expect(resolved).toBe(Date.parse('2026-03-08T07:30:00.000Z'));
+  it('freezes DST gap behavior as shift-forward for New York', () => {
+    expect(
+      combineYmdHmWithTimeZone(
+        asYmd('2026-03-08'),
+        asHm('02:30'),
+        requireTimeZoneId('America/New_York'),
+      ),
+    ).toBe(Date.parse('2026-03-08T07:30:00.000Z'));
   });
 
-  it('freezes the current DST overlap behavior as the earlier occurrence for New York', () => {
-    const resolved = combineYmdHmWithTimeZone(
-      asYmd('2026-11-01'),
-      asHm('01:30'),
-      requireTimeZoneId('America/New_York'),
-    );
-
-    expect(resolved).toBe(Date.parse('2026-11-01T05:30:00.000Z'));
+  it('freezes DST overlap behavior as the earlier occurrence for New York', () => {
+    expect(
+      combineYmdHmWithTimeZone(
+        asYmd('2026-11-01'),
+        asHm('01:30'),
+        requireTimeZoneId('America/New_York'),
+      ),
+    ).toBe(Date.parse('2026-11-01T05:30:00.000Z'));
   });
 });

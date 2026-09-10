@@ -46,6 +46,7 @@ import type {
 } from '@memoflow/patterns/operations';
 import { runTimelineQueryWithAudit } from '@memoflow/patterns/operations';
 import { createLogger } from '@memoflow/utils/logger';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 const logger = createLogger('NotificationModule');
 
@@ -63,6 +64,7 @@ export interface NotificationModuleDependencies {
   readonly preferenceRepository: INotificationPreferenceRepository;
   readonly templateRepository: INotificationTemplateRepository;
   readonly closureChecker: (identityId: string) => Promise<boolean>;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?: NotificationRuntimeContributionsInput;
   readonly durableRuntime: NotificationDurableRuntimePort;
   readonly auditRepository?: OperationAuditRepository;
@@ -103,6 +105,7 @@ export function createNotificationUseCases(
       notificationRepository,
       preferenceRepository,
       deps.closureChecker,
+      deps.userTimeContextPort,
     ),
     updateNotification: new UpdateNotificationUseCase(notificationRepository),
     markAsRead: new MarkNotificationAsReadUseCase(notificationRepository),

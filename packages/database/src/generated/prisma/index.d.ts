@@ -11072,140 +11072,60 @@ export namespace Prisma {
 
   export type AggregateAccount = {
     _count: AccountCountAggregateOutputType | null
-    _avg: AccountAvgAggregateOutputType | null
-    _sum: AccountSumAggregateOutputType | null
     _min: AccountMinAggregateOutputType | null
     _max: AccountMaxAggregateOutputType | null
-  }
-
-  export type AccountAvgAggregateOutputType = {
-    version: number | null
-  }
-
-  export type AccountSumAggregateOutputType = {
-    version: number | null
   }
 
   export type AccountMinAggregateOutputType = {
     id: string | null
     status: string | null
-    emailAddress: string | null
-    emailIsVerified: boolean | null
-    emailVerifiedAt: Date | null
-    emailIsPrimary: boolean | null
-    phoneCountryCode: string | null
-    phoneNumber: string | null
-    phoneFullNumber: string | null
-    phoneIsVerified: boolean | null
-    phoneVerifiedAt: Date | null
-    version: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    deletedAt: Date | null
+    closedAt: Date | null
   }
 
   export type AccountMaxAggregateOutputType = {
     id: string | null
     status: string | null
-    emailAddress: string | null
-    emailIsVerified: boolean | null
-    emailVerifiedAt: Date | null
-    emailIsPrimary: boolean | null
-    phoneCountryCode: string | null
-    phoneNumber: string | null
-    phoneFullNumber: string | null
-    phoneIsVerified: boolean | null
-    phoneVerifiedAt: Date | null
-    version: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    deletedAt: Date | null
+    closedAt: Date | null
   }
 
   export type AccountCountAggregateOutputType = {
     id: number
     status: number
     profile: number
-    settings: number
-    emailAddress: number
-    emailIsVerified: number
-    emailVerifiedAt: number
-    emailIsPrimary: number
-    phoneCountryCode: number
-    phoneNumber: number
-    phoneFullNumber: number
-    phoneIsVerified: number
-    phoneVerifiedAt: number
-    version: number
     createdAt: number
     updatedAt: number
-    deletedAt: number
+    closedAt: number
     _all: number
   }
 
 
-  export type AccountAvgAggregateInputType = {
-    version?: true
-  }
-
-  export type AccountSumAggregateInputType = {
-    version?: true
-  }
-
   export type AccountMinAggregateInputType = {
     id?: true
     status?: true
-    emailAddress?: true
-    emailIsVerified?: true
-    emailVerifiedAt?: true
-    emailIsPrimary?: true
-    phoneCountryCode?: true
-    phoneNumber?: true
-    phoneFullNumber?: true
-    phoneIsVerified?: true
-    phoneVerifiedAt?: true
-    version?: true
     createdAt?: true
     updatedAt?: true
-    deletedAt?: true
+    closedAt?: true
   }
 
   export type AccountMaxAggregateInputType = {
     id?: true
     status?: true
-    emailAddress?: true
-    emailIsVerified?: true
-    emailVerifiedAt?: true
-    emailIsPrimary?: true
-    phoneCountryCode?: true
-    phoneNumber?: true
-    phoneFullNumber?: true
-    phoneIsVerified?: true
-    phoneVerifiedAt?: true
-    version?: true
     createdAt?: true
     updatedAt?: true
-    deletedAt?: true
+    closedAt?: true
   }
 
   export type AccountCountAggregateInputType = {
     id?: true
     status?: true
     profile?: true
-    settings?: true
-    emailAddress?: true
-    emailIsVerified?: true
-    emailVerifiedAt?: true
-    emailIsPrimary?: true
-    phoneCountryCode?: true
-    phoneNumber?: true
-    phoneFullNumber?: true
-    phoneIsVerified?: true
-    phoneVerifiedAt?: true
-    version?: true
     createdAt?: true
     updatedAt?: true
-    deletedAt?: true
+    closedAt?: true
     _all?: true
   }
 
@@ -11247,18 +11167,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
-     * Select which fields to average
-    **/
-    _avg?: AccountAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: AccountSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
      * Select which fields to find the minimum value
     **/
     _min?: AccountMinAggregateInputType
@@ -11289,8 +11197,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: AccountCountAggregateInputType | true
-    _avg?: AccountAvgAggregateInputType
-    _sum?: AccountSumAggregateInputType
     _min?: AccountMinAggregateInputType
     _max?: AccountMaxAggregateInputType
   }
@@ -11299,23 +11205,10 @@ export namespace Prisma {
     id: string
     status: string
     profile: JsonValue
-    settings: JsonValue
-    emailAddress: string
-    emailIsVerified: boolean
-    emailVerifiedAt: Date | null
-    emailIsPrimary: boolean
-    phoneCountryCode: string | null
-    phoneNumber: string | null
-    phoneFullNumber: string | null
-    phoneIsVerified: boolean | null
-    phoneVerifiedAt: Date | null
-    version: number
     createdAt: Date
     updatedAt: Date
-    deletedAt: Date | null
+    closedAt: Date | null
     _count: AccountCountAggregateOutputType | null
-    _avg: AccountAvgAggregateOutputType | null
-    _sum: AccountSumAggregateOutputType | null
     _min: AccountMinAggregateOutputType | null
     _max: AccountMaxAggregateOutputType | null
   }
@@ -11338,20 +11231,9 @@ export namespace Prisma {
     id?: boolean
     status?: boolean
     profile?: boolean
-    settings?: boolean
-    emailAddress?: boolean
-    emailIsVerified?: boolean
-    emailVerifiedAt?: boolean
-    emailIsPrimary?: boolean
-    phoneCountryCode?: boolean
-    phoneNumber?: boolean
-    phoneFullNumber?: boolean
-    phoneIsVerified?: boolean
-    phoneVerifiedAt?: boolean
-    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    deletedAt?: boolean
+    closedAt?: boolean
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
     editorWorkspaces?: boolean | Account$editorWorkspacesArgs<ExtArgs>
     editorWorkspaceSessions?: boolean | Account$editorWorkspaceSessionsArgs<ExtArgs>
@@ -11420,20 +11302,9 @@ export namespace Prisma {
     id?: boolean
     status?: boolean
     profile?: boolean
-    settings?: boolean
-    emailAddress?: boolean
-    emailIsVerified?: boolean
-    emailVerifiedAt?: boolean
-    emailIsPrimary?: boolean
-    phoneCountryCode?: boolean
-    phoneNumber?: boolean
-    phoneFullNumber?: boolean
-    phoneIsVerified?: boolean
-    phoneVerifiedAt?: boolean
-    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    deletedAt?: boolean
+    closedAt?: boolean
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["account"]>
 
@@ -11441,20 +11312,9 @@ export namespace Prisma {
     id?: boolean
     status?: boolean
     profile?: boolean
-    settings?: boolean
-    emailAddress?: boolean
-    emailIsVerified?: boolean
-    emailVerifiedAt?: boolean
-    emailIsPrimary?: boolean
-    phoneCountryCode?: boolean
-    phoneNumber?: boolean
-    phoneFullNumber?: boolean
-    phoneIsVerified?: boolean
-    phoneVerifiedAt?: boolean
-    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    deletedAt?: boolean
+    closedAt?: boolean
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["account"]>
 
@@ -11462,23 +11322,12 @@ export namespace Prisma {
     id?: boolean
     status?: boolean
     profile?: boolean
-    settings?: boolean
-    emailAddress?: boolean
-    emailIsVerified?: boolean
-    emailVerifiedAt?: boolean
-    emailIsPrimary?: boolean
-    phoneCountryCode?: boolean
-    phoneNumber?: boolean
-    phoneFullNumber?: boolean
-    phoneIsVerified?: boolean
-    phoneVerifiedAt?: boolean
-    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    deletedAt?: boolean
+    closedAt?: boolean
   }
 
-  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "profile" | "settings" | "emailAddress" | "emailIsVerified" | "emailVerifiedAt" | "emailIsPrimary" | "phoneCountryCode" | "phoneNumber" | "phoneFullNumber" | "phoneIsVerified" | "phoneVerifiedAt" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["account"]>
+  export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "profile" | "createdAt" | "updatedAt" | "closedAt", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
     editorWorkspaces?: boolean | Account$editorWorkspacesArgs<ExtArgs>
@@ -11619,20 +11468,9 @@ export namespace Prisma {
       id: string
       status: string
       profile: Prisma.JsonValue
-      settings: Prisma.JsonValue
-      emailAddress: string
-      emailIsVerified: boolean
-      emailVerifiedAt: Date | null
-      emailIsPrimary: boolean
-      phoneCountryCode: string | null
-      phoneNumber: string | null
-      phoneFullNumber: string | null
-      phoneIsVerified: boolean | null
-      phoneVerifiedAt: Date | null
-      version: number
       createdAt: Date
       updatedAt: Date
-      deletedAt: Date | null
+      closedAt: Date | null
     }, ExtArgs["result"]["account"]>
     composites: {}
   }
@@ -12120,20 +11958,9 @@ export namespace Prisma {
     readonly id: FieldRef<"Account", 'String'>
     readonly status: FieldRef<"Account", 'String'>
     readonly profile: FieldRef<"Account", 'Json'>
-    readonly settings: FieldRef<"Account", 'Json'>
-    readonly emailAddress: FieldRef<"Account", 'String'>
-    readonly emailIsVerified: FieldRef<"Account", 'Boolean'>
-    readonly emailVerifiedAt: FieldRef<"Account", 'DateTime'>
-    readonly emailIsPrimary: FieldRef<"Account", 'Boolean'>
-    readonly phoneCountryCode: FieldRef<"Account", 'String'>
-    readonly phoneNumber: FieldRef<"Account", 'String'>
-    readonly phoneFullNumber: FieldRef<"Account", 'String'>
-    readonly phoneIsVerified: FieldRef<"Account", 'Boolean'>
-    readonly phoneVerifiedAt: FieldRef<"Account", 'DateTime'>
-    readonly version: FieldRef<"Account", 'Int'>
     readonly createdAt: FieldRef<"Account", 'DateTime'>
     readonly updatedAt: FieldRef<"Account", 'DateTime'>
-    readonly deletedAt: FieldRef<"Account", 'DateTime'>
+    readonly closedAt: FieldRef<"Account", 'DateTime'>
   }
 
 
@@ -25822,7 +25649,6 @@ export namespace Prisma {
     email: string | null
     emailVerified: boolean | null
     image: string | null
-    status: string | null
     disabledAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -25834,7 +25660,6 @@ export namespace Prisma {
     email: string | null
     emailVerified: boolean | null
     image: string | null
-    status: string | null
     disabledAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -25846,7 +25671,6 @@ export namespace Prisma {
     email: number
     emailVerified: number
     image: number
-    status: number
     disabledAt: number
     createdAt: number
     updatedAt: number
@@ -25860,7 +25684,6 @@ export namespace Prisma {
     email?: true
     emailVerified?: true
     image?: true
-    status?: true
     disabledAt?: true
     createdAt?: true
     updatedAt?: true
@@ -25872,7 +25695,6 @@ export namespace Prisma {
     email?: true
     emailVerified?: true
     image?: true
-    status?: true
     disabledAt?: true
     createdAt?: true
     updatedAt?: true
@@ -25884,7 +25706,6 @@ export namespace Prisma {
     email?: true
     emailVerified?: true
     image?: true
-    status?: true
     disabledAt?: true
     createdAt?: true
     updatedAt?: true
@@ -25969,7 +25790,6 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image: string | null
-    status: string
     disabledAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -25998,7 +25818,6 @@ export namespace Prisma {
     email?: boolean
     emailVerified?: boolean
     image?: boolean
-    status?: boolean
     disabledAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -26015,7 +25834,6 @@ export namespace Prisma {
     email?: boolean
     emailVerified?: boolean
     image?: boolean
-    status?: boolean
     disabledAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -26027,7 +25845,6 @@ export namespace Prisma {
     email?: boolean
     emailVerified?: boolean
     image?: boolean
-    status?: boolean
     disabledAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -26039,13 +25856,12 @@ export namespace Prisma {
     email?: boolean
     emailVerified?: boolean
     image?: boolean
-    status?: boolean
     disabledAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CloudAuthUserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "status" | "disabledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["cloudAuthUser"]>
+  export type CloudAuthUserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "disabledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["cloudAuthUser"]>
   export type CloudAuthUserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | CloudAuthUser$sessionsArgs<ExtArgs>
     providerAccounts?: boolean | CloudAuthUser$providerAccountsArgs<ExtArgs>
@@ -26070,7 +25886,6 @@ export namespace Prisma {
       email: string
       emailVerified: boolean
       image: string | null
-      status: string
       disabledAt: Date | null
       createdAt: Date
       updatedAt: Date
@@ -26506,7 +26321,6 @@ export namespace Prisma {
     readonly email: FieldRef<"CloudAuthUser", 'String'>
     readonly emailVerified: FieldRef<"CloudAuthUser", 'Boolean'>
     readonly image: FieldRef<"CloudAuthUser", 'String'>
-    readonly status: FieldRef<"CloudAuthUser", 'String'>
     readonly disabledAt: FieldRef<"CloudAuthUser", 'DateTime'>
     readonly createdAt: FieldRef<"CloudAuthUser", 'DateTime'>
     readonly updatedAt: FieldRef<"CloudAuthUser", 'DateTime'>
@@ -128504,20 +128318,9 @@ export namespace Prisma {
     id: 'id',
     status: 'status',
     profile: 'profile',
-    settings: 'settings',
-    emailAddress: 'emailAddress',
-    emailIsVerified: 'emailIsVerified',
-    emailVerifiedAt: 'emailVerifiedAt',
-    emailIsPrimary: 'emailIsPrimary',
-    phoneCountryCode: 'phoneCountryCode',
-    phoneNumber: 'phoneNumber',
-    phoneFullNumber: 'phoneFullNumber',
-    phoneIsVerified: 'phoneIsVerified',
-    phoneVerifiedAt: 'phoneVerifiedAt',
-    version: 'version',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt'
+    closedAt: 'closedAt'
   };
 
   export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]
@@ -128718,7 +128521,6 @@ export namespace Prisma {
     email: 'email',
     emailVerified: 'emailVerified',
     image: 'image',
-    status: 'status',
     disabledAt: 'disabledAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -130374,13 +130176,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-
-
-
-  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -130419,6 +130214,13 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
 
 
 
@@ -130474,20 +130276,9 @@ export namespace Prisma {
     id?: StringFilter<"Account"> | string
     status?: StringFilter<"Account"> | string
     profile?: JsonFilter<"Account">
-    settings?: JsonFilter<"Account">
-    emailAddress?: StringFilter<"Account"> | string
-    emailIsVerified?: BoolFilter<"Account"> | boolean
-    emailVerifiedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
-    emailIsPrimary?: BoolFilter<"Account"> | boolean
-    phoneCountryCode?: StringNullableFilter<"Account"> | string | null
-    phoneNumber?: StringNullableFilter<"Account"> | string | null
-    phoneFullNumber?: StringNullableFilter<"Account"> | string | null
-    phoneIsVerified?: BoolNullableFilter<"Account"> | boolean | null
-    phoneVerifiedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
-    version?: IntFilter<"Account"> | number
     createdAt?: DateTimeFilter<"Account"> | Date | string
     updatedAt?: DateTimeFilter<"Account"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
+    closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
     editorWorkspaces?: EditorWorkspaceListRelationFilter
     editorWorkspaceSessions?: EditorWorkspaceSessionListRelationFilter
@@ -130555,20 +130346,9 @@ export namespace Prisma {
     id?: SortOrder
     status?: SortOrder
     profile?: SortOrder
-    settings?: SortOrder
-    emailAddress?: SortOrder
-    emailIsVerified?: SortOrder
-    emailVerifiedAt?: SortOrderInput | SortOrder
-    emailIsPrimary?: SortOrder
-    phoneCountryCode?: SortOrderInput | SortOrder
-    phoneNumber?: SortOrderInput | SortOrder
-    phoneFullNumber?: SortOrderInput | SortOrder
-    phoneIsVerified?: SortOrderInput | SortOrder
-    phoneVerifiedAt?: SortOrderInput | SortOrder
-    version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
+    closedAt?: SortOrderInput | SortOrder
     cloudUser?: CloudAuthUserOrderByWithRelationInput
     editorWorkspaces?: EditorWorkspaceOrderByRelationAggregateInput
     editorWorkspaceSessions?: EditorWorkspaceSessionOrderByRelationAggregateInput
@@ -130634,25 +130414,14 @@ export namespace Prisma {
 
   export type AccountWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    emailAddress?: string
     AND?: AccountWhereInput | AccountWhereInput[]
     OR?: AccountWhereInput[]
     NOT?: AccountWhereInput | AccountWhereInput[]
     status?: StringFilter<"Account"> | string
     profile?: JsonFilter<"Account">
-    settings?: JsonFilter<"Account">
-    emailIsVerified?: BoolFilter<"Account"> | boolean
-    emailVerifiedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
-    emailIsPrimary?: BoolFilter<"Account"> | boolean
-    phoneCountryCode?: StringNullableFilter<"Account"> | string | null
-    phoneNumber?: StringNullableFilter<"Account"> | string | null
-    phoneFullNumber?: StringNullableFilter<"Account"> | string | null
-    phoneIsVerified?: BoolNullableFilter<"Account"> | boolean | null
-    phoneVerifiedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
-    version?: IntFilter<"Account"> | number
     createdAt?: DateTimeFilter<"Account"> | Date | string
     updatedAt?: DateTimeFilter<"Account"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
+    closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
     editorWorkspaces?: EditorWorkspaceListRelationFilter
     editorWorkspaceSessions?: EditorWorkspaceSessionListRelationFilter
@@ -130714,31 +130483,18 @@ export namespace Prisma {
     knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionListRelationFilter
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentListRelationFilter
     knowledgeWriteRequests?: KnowledgeWriteRequestListRelationFilter
-  }, "id" | "emailAddress">
+  }, "id">
 
   export type AccountOrderByWithAggregationInput = {
     id?: SortOrder
     status?: SortOrder
     profile?: SortOrder
-    settings?: SortOrder
-    emailAddress?: SortOrder
-    emailIsVerified?: SortOrder
-    emailVerifiedAt?: SortOrderInput | SortOrder
-    emailIsPrimary?: SortOrder
-    phoneCountryCode?: SortOrderInput | SortOrder
-    phoneNumber?: SortOrderInput | SortOrder
-    phoneFullNumber?: SortOrderInput | SortOrder
-    phoneIsVerified?: SortOrderInput | SortOrder
-    phoneVerifiedAt?: SortOrderInput | SortOrder
-    version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
+    closedAt?: SortOrderInput | SortOrder
     _count?: AccountCountOrderByAggregateInput
-    _avg?: AccountAvgOrderByAggregateInput
     _max?: AccountMaxOrderByAggregateInput
     _min?: AccountMinOrderByAggregateInput
-    _sum?: AccountSumOrderByAggregateInput
   }
 
   export type AccountScalarWhereWithAggregatesInput = {
@@ -130748,20 +130504,9 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Account"> | string
     status?: StringWithAggregatesFilter<"Account"> | string
     profile?: JsonWithAggregatesFilter<"Account">
-    settings?: JsonWithAggregatesFilter<"Account">
-    emailAddress?: StringWithAggregatesFilter<"Account"> | string
-    emailIsVerified?: BoolWithAggregatesFilter<"Account"> | boolean
-    emailVerifiedAt?: DateTimeNullableWithAggregatesFilter<"Account"> | Date | string | null
-    emailIsPrimary?: BoolWithAggregatesFilter<"Account"> | boolean
-    phoneCountryCode?: StringNullableWithAggregatesFilter<"Account"> | string | null
-    phoneNumber?: StringNullableWithAggregatesFilter<"Account"> | string | null
-    phoneFullNumber?: StringNullableWithAggregatesFilter<"Account"> | string | null
-    phoneIsVerified?: BoolNullableWithAggregatesFilter<"Account"> | boolean | null
-    phoneVerifiedAt?: DateTimeNullableWithAggregatesFilter<"Account"> | Date | string | null
-    version?: IntWithAggregatesFilter<"Account"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Account"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Account"> | Date | string
-    deletedAt?: DateTimeNullableWithAggregatesFilter<"Account"> | Date | string | null
+    closedAt?: DateTimeNullableWithAggregatesFilter<"Account"> | Date | string | null
   }
 
   export type ActivityLedgerWhereInput = {
@@ -131734,7 +131479,6 @@ export namespace Prisma {
     email?: StringFilter<"CloudAuthUser"> | string
     emailVerified?: BoolFilter<"CloudAuthUser"> | boolean
     image?: StringNullableFilter<"CloudAuthUser"> | string | null
-    status?: StringFilter<"CloudAuthUser"> | string
     disabledAt?: DateTimeNullableFilter<"CloudAuthUser"> | Date | string | null
     createdAt?: DateTimeFilter<"CloudAuthUser"> | Date | string
     updatedAt?: DateTimeFilter<"CloudAuthUser"> | Date | string
@@ -131750,7 +131494,6 @@ export namespace Prisma {
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrderInput | SortOrder
-    status?: SortOrder
     disabledAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -131769,7 +131512,6 @@ export namespace Prisma {
     name?: StringFilter<"CloudAuthUser"> | string
     emailVerified?: BoolFilter<"CloudAuthUser"> | boolean
     image?: StringNullableFilter<"CloudAuthUser"> | string | null
-    status?: StringFilter<"CloudAuthUser"> | string
     disabledAt?: DateTimeNullableFilter<"CloudAuthUser"> | Date | string | null
     createdAt?: DateTimeFilter<"CloudAuthUser"> | Date | string
     updatedAt?: DateTimeFilter<"CloudAuthUser"> | Date | string
@@ -131785,7 +131527,6 @@ export namespace Prisma {
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrderInput | SortOrder
-    status?: SortOrder
     disabledAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -131803,7 +131544,6 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"CloudAuthUser"> | string
     emailVerified?: BoolWithAggregatesFilter<"CloudAuthUser"> | boolean
     image?: StringNullableWithAggregatesFilter<"CloudAuthUser"> | string | null
-    status?: StringWithAggregatesFilter<"CloudAuthUser"> | string
     disabledAt?: DateTimeNullableWithAggregatesFilter<"CloudAuthUser"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"CloudAuthUser"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"CloudAuthUser"> | Date | string
@@ -139972,20 +139712,9 @@ export namespace Prisma {
   export type AccountCreateInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -140053,20 +139782,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -140132,20 +139850,9 @@ export namespace Prisma {
   export type AccountUpdateInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -140213,20 +139920,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -140293,59 +139989,26 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
   }
 
   export type AccountUpdateManyMutationInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type AccountUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ActivityLedgerCreateInput = {
@@ -141458,7 +141121,6 @@ export namespace Prisma {
     email: string
     emailVerified?: boolean
     image?: string | null
-    status?: string
     disabledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -141474,7 +141136,6 @@ export namespace Prisma {
     email: string
     emailVerified?: boolean
     image?: string | null
-    status?: string
     disabledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -141490,7 +141151,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -141506,7 +141166,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -141522,7 +141181,6 @@ export namespace Prisma {
     email: string
     emailVerified?: boolean
     image?: string | null
-    status?: string
     disabledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -141534,7 +141192,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -141546,7 +141203,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -150828,9 +150484,15 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
+  export type DateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
@@ -150842,48 +150504,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type BoolNullableFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
-  }
-
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
-  }
-
-  export type DateTimeFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
   export type CloudAuthUserScalarRelationFilter = {
@@ -151460,64 +151080,25 @@ export namespace Prisma {
     id?: SortOrder
     status?: SortOrder
     profile?: SortOrder
-    settings?: SortOrder
-    emailAddress?: SortOrder
-    emailIsVerified?: SortOrder
-    emailVerifiedAt?: SortOrder
-    emailIsPrimary?: SortOrder
-    phoneCountryCode?: SortOrder
-    phoneNumber?: SortOrder
-    phoneFullNumber?: SortOrder
-    phoneIsVerified?: SortOrder
-    phoneVerifiedAt?: SortOrder
-    version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type AccountAvgOrderByAggregateInput = {
-    version?: SortOrder
+    closedAt?: SortOrder
   }
 
   export type AccountMaxOrderByAggregateInput = {
     id?: SortOrder
     status?: SortOrder
-    emailAddress?: SortOrder
-    emailIsVerified?: SortOrder
-    emailVerifiedAt?: SortOrder
-    emailIsPrimary?: SortOrder
-    phoneCountryCode?: SortOrder
-    phoneNumber?: SortOrder
-    phoneFullNumber?: SortOrder
-    phoneIsVerified?: SortOrder
-    phoneVerifiedAt?: SortOrder
-    version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    deletedAt?: SortOrder
+    closedAt?: SortOrder
   }
 
   export type AccountMinOrderByAggregateInput = {
     id?: SortOrder
     status?: SortOrder
-    emailAddress?: SortOrder
-    emailIsVerified?: SortOrder
-    emailVerifiedAt?: SortOrder
-    emailIsPrimary?: SortOrder
-    phoneCountryCode?: SortOrder
-    phoneNumber?: SortOrder
-    phoneFullNumber?: SortOrder
-    phoneIsVerified?: SortOrder
-    phoneVerifiedAt?: SortOrder
-    version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type AccountSumOrderByAggregateInput = {
-    version?: SortOrder
+    closedAt?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -151564,12 +151145,18 @@ export namespace Prisma {
     _max?: NestedJsonFilter<$PrismaModel>
   }
 
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -151586,7 +151173,7 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+  export type StringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
     notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -151598,48 +151185,7 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedBoolNullableFilter<$PrismaModel>
-    _max?: NestedBoolNullableFilter<$PrismaModel>
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type AccountScalarRelationFilter = {
@@ -151695,6 +151241,35 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
   export type AiConversationCountOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
@@ -151742,6 +151317,22 @@ export namespace Prisma {
   export type AiConversationSumOrderByAggregateInput = {
     messageCount?: SortOrder
     version?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type AiConversationScalarRelationFilter = {
@@ -151976,6 +151567,11 @@ export namespace Prisma {
     version?: SortOrder
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type AiProviderConfigIdentityIdNameCompoundUniqueInput = {
     identityId: string
     name: string
@@ -152043,6 +151639,14 @@ export namespace Prisma {
   export type AiProviderConfigSumOrderByAggregateInput = {
     priority?: SortOrder
     version?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type AiProviderOnboardingSessionCountOrderByAggregateInput = {
@@ -152338,7 +151942,6 @@ export namespace Prisma {
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrder
-    status?: SortOrder
     disabledAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -152350,7 +151953,6 @@ export namespace Prisma {
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrder
-    status?: SortOrder
     disabledAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -152362,7 +151964,6 @@ export namespace Prisma {
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrder
-    status?: SortOrder
     disabledAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -156372,6 +155973,11 @@ export namespace Prisma {
     version?: SortOrder
   }
 
+  export type BoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
   export type SchedulingReconcileOperationCountOrderByAggregateInput = {
     operationId?: SortOrder
     identityId?: SortOrder
@@ -156443,6 +156049,14 @@ export namespace Prisma {
     updatedCount?: SortOrder
     deletedCount?: SortOrder
     unchangedCount?: SortOrder
+  }
+
+  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type ScheduleTaskScalarRelationFilter = {
@@ -158313,32 +157927,12 @@ export namespace Prisma {
     set?: string
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
-  }
-
-  export type NullableBoolFieldUpdateOperationsInput = {
-    set?: boolean | null
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
-  export type DateTimeFieldUpdateOperationsInput = {
-    set?: Date | string
   }
 
   export type CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput = {
@@ -159971,6 +159565,10 @@ export namespace Prisma {
     connect?: AccountWhereUniqueInput
   }
 
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
   export type AccountUpdateOneRequiredWithoutActivityLedgerNestedInput = {
     create?: XOR<AccountCreateWithoutActivityLedgerInput, AccountUncheckedCreateWithoutActivityLedgerInput>
     connectOrCreate?: AccountCreateOrConnectWithoutActivityLedgerInput
@@ -159997,6 +159595,14 @@ export namespace Prisma {
     connectOrCreate?: AiMessageCreateOrConnectWithoutConversationInput | AiMessageCreateOrConnectWithoutConversationInput[]
     createMany?: AiMessageCreateManyConversationInputEnvelope
     connect?: AiMessageWhereUniqueInput | AiMessageWhereUniqueInput[]
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type AccountUpdateOneRequiredWithoutAiConversationsNestedInput = {
@@ -160111,6 +159717,10 @@ export namespace Prisma {
     create?: XOR<AccountCreateWithoutAiProviderConfigsInput, AccountUncheckedCreateWithoutAiProviderConfigsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutAiProviderConfigsInput
     connect?: AccountWhereUniqueInput
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type AccountUpdateOneRequiredWithoutAiProviderConfigsNestedInput = {
@@ -163336,6 +162946,10 @@ export namespace Prisma {
     connect?: AccountWhereUniqueInput
   }
 
+  export type NullableBoolFieldUpdateOperationsInput = {
+    set?: boolean | null
+  }
+
   export type AccountUpdateOneRequiredWithoutSchedulingReconcileOperationsNestedInput = {
     create?: XOR<AccountCreateWithoutSchedulingReconcileOperationsInput, AccountUncheckedCreateWithoutSchedulingReconcileOperationsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutSchedulingReconcileOperationsInput
@@ -163746,9 +163360,15 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
+  export type NestedDateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
@@ -163760,47 +163380,6 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type NestedStringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedBoolNullableFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
-  }
-
-  export type NestedIntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
-  }
-
-  export type NestedDateTimeFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -163818,6 +163397,17 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type NestedIntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
   }
   export type NestedJsonFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -163843,12 +163433,18 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -163876,6 +163472,20 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -163891,14 +163501,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedBoolNullableFilter<$PrismaModel>
-    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -163926,20 +163528,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
-  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type NestedFloatNullableFilter<$PrismaModel = never> = {
@@ -163983,6 +163571,19 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
   export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -164068,6 +163669,19 @@ export namespace Prisma {
     _max?: NestedBytesFilter<$PrismaModel>
   }
 
+  export type NestedBoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
+
   export type NestedDecimalFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
@@ -164101,7 +163715,6 @@ export namespace Prisma {
     email: string
     emailVerified?: boolean
     image?: string | null
-    status?: string
     disabledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -164116,7 +163729,6 @@ export namespace Prisma {
     email: string
     emailVerified?: boolean
     image?: string | null
-    status?: string
     disabledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -166679,7 +166291,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -166694,7 +166305,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -168893,20 +168503,9 @@ export namespace Prisma {
   export type AccountCreateWithoutActivityLedgerInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -168973,20 +168572,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -169067,20 +168655,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutActivityLedgerInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -169147,20 +168724,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -169225,20 +168791,9 @@ export namespace Prisma {
   export type AccountCreateWithoutAiConversationsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -169305,20 +168860,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -169427,20 +168971,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutAiConversationsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -169507,20 +169040,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -169601,20 +169123,9 @@ export namespace Prisma {
   export type AccountCreateWithoutAiMessagesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -169681,20 +169192,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -169806,20 +169306,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutAiMessagesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -169886,20 +169375,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -170001,20 +169479,9 @@ export namespace Prisma {
   export type AccountCreateWithoutAiGenerationTasksInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -170081,20 +169548,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -170175,20 +169631,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutAiGenerationTasksInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -170255,20 +169700,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -170333,20 +169767,9 @@ export namespace Prisma {
   export type AccountCreateWithoutAiUsageQuotasInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -170413,20 +169836,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -170507,20 +169919,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutAiUsageQuotasInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -170587,20 +169988,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -170665,20 +170055,9 @@ export namespace Prisma {
   export type AccountCreateWithoutAiProviderConfigsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -170745,20 +170124,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -170839,20 +170207,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutAiProviderConfigsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -170919,20 +170276,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -170997,20 +170343,9 @@ export namespace Prisma {
   export type AccountCreateWithoutAiProviderOnboardingSessionsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -171077,20 +170412,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -171171,20 +170495,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutAiProviderOnboardingSessionsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -171251,20 +170564,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -171329,20 +170631,9 @@ export namespace Prisma {
   export type AccountCreateWithoutAiKnowledgeIndexEntriesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -171409,20 +170700,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -171503,20 +170783,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutAiKnowledgeIndexEntriesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -171583,20 +170852,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -171661,20 +170919,9 @@ export namespace Prisma {
   export type AccountCreateWithoutDashboardConfigsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -171741,20 +170988,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -171835,20 +171071,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutDashboardConfigsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -171915,20 +171140,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -172097,20 +171311,9 @@ export namespace Prisma {
   export type AccountCreateWithoutCloudUserInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
@@ -172176,20 +171379,9 @@ export namespace Prisma {
   export type AccountUncheckedCreateWithoutCloudUserInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -172368,20 +171560,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutCloudUserInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
@@ -172447,20 +171628,9 @@ export namespace Prisma {
   export type AccountUncheckedUpdateWithoutCloudUserInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -172529,7 +171699,6 @@ export namespace Prisma {
     email: string
     emailVerified?: boolean
     image?: string | null
-    status?: string
     disabledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -172544,7 +171713,6 @@ export namespace Prisma {
     email: string
     emailVerified?: boolean
     image?: string | null
-    status?: string
     disabledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -172575,7 +171743,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -172590,7 +171757,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -172605,7 +171771,6 @@ export namespace Prisma {
     email: string
     emailVerified?: boolean
     image?: string | null
-    status?: string
     disabledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -172620,7 +171785,6 @@ export namespace Prisma {
     email: string
     emailVerified?: boolean
     image?: string | null
-    status?: string
     disabledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -172651,7 +171815,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -172666,7 +171829,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -172681,7 +171843,6 @@ export namespace Prisma {
     email: string
     emailVerified?: boolean
     image?: string | null
-    status?: string
     disabledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -172696,7 +171857,6 @@ export namespace Prisma {
     email: string
     emailVerified?: boolean
     image?: string | null
-    status?: string
     disabledAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -172727,7 +171887,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -172742,7 +171901,6 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: StringFieldUpdateOperationsInput | string
     disabledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -172790,20 +171948,9 @@ export namespace Prisma {
   export type AccountCreateWithoutEditorWorkspacesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
@@ -172870,20 +172017,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
@@ -172980,20 +172116,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutEditorWorkspacesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
@@ -173060,20 +172185,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
@@ -173176,20 +172290,9 @@ export namespace Prisma {
   export type AccountCreateWithoutEditorWorkspaceSessionsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
@@ -173256,20 +172359,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
@@ -173405,20 +172497,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutEditorWorkspaceSessionsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
@@ -173485,20 +172566,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
@@ -173654,20 +172724,9 @@ export namespace Prisma {
   export type AccountCreateWithoutEditorWorkspaceSessionGroupsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -173734,20 +172793,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
@@ -173875,20 +172923,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutEditorWorkspaceSessionGroupsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -173955,20 +172992,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
@@ -174070,20 +173096,9 @@ export namespace Prisma {
   export type AccountCreateWithoutEditorWorkspaceSessionGroupTabsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -174150,20 +173165,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -174277,20 +173281,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutEditorWorkspaceSessionGroupTabsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -174357,20 +173350,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -174474,20 +173456,9 @@ export namespace Prisma {
   export type AccountCreateWithoutGoalsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -174554,20 +173525,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -174783,20 +173743,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutGoalsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -174863,20 +173812,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -175947,20 +174885,9 @@ export namespace Prisma {
   export type AccountCreateWithoutHabitsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -176027,20 +174954,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -176170,20 +175086,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutHabitsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -176250,20 +175155,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -176630,20 +175524,9 @@ export namespace Prisma {
   export type AccountCreateWithoutLabelsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -176710,20 +175593,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -176842,20 +175714,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutLabelsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -176922,20 +175783,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -177032,20 +175882,9 @@ export namespace Prisma {
   export type AccountCreateWithoutGoalLabelsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -177112,20 +175951,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -177284,20 +176112,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutGoalLabelsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -177364,20 +176181,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -177532,20 +176338,9 @@ export namespace Prisma {
   export type AccountCreateWithoutTaskLabelsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -177612,20 +176407,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -177823,20 +176607,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutTaskLabelsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -177903,20 +176676,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -178276,20 +177038,9 @@ export namespace Prisma {
   export type AccountCreateWithoutNotificationsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -178356,20 +177107,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -178530,20 +177270,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutNotificationsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -178610,20 +177339,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -178688,20 +177406,9 @@ export namespace Prisma {
   export type AccountCreateWithoutNotificationChannelsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -178768,20 +177475,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -178929,20 +177625,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutNotificationChannelsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -179009,20 +177694,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -179160,20 +177834,9 @@ export namespace Prisma {
   export type AccountCreateWithoutNotificationHistoryInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -179240,20 +177903,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -179401,20 +178053,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutNotificationHistoryInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -179481,20 +178122,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -179839,20 +178469,9 @@ export namespace Prisma {
   export type AccountCreateWithoutNotificationDispatchOutboxesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -179919,20 +178538,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -180086,20 +178694,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutNotificationDispatchOutboxesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -180166,20 +178763,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -180244,20 +178830,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRelationsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -180324,20 +178899,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -180418,20 +178982,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRelationsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -180498,20 +179051,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -180734,20 +179276,9 @@ export namespace Prisma {
   export type AccountCreateWithoutReminderTemplatesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -180814,20 +179345,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -180972,20 +179492,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutReminderTemplatesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -181052,20 +179561,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -181130,20 +179628,9 @@ export namespace Prisma {
   export type AccountCreateWithoutReminderGroupsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -181210,20 +179697,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -181304,20 +179780,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutReminderGroupsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -181384,20 +179849,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -181462,20 +179916,9 @@ export namespace Prisma {
   export type AccountCreateWithoutReminderInstancesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -181542,20 +179985,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -181697,20 +180129,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutReminderInstancesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -181777,20 +180198,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -181922,20 +180332,9 @@ export namespace Prisma {
   export type AccountCreateWithoutReminderHistoryInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -182002,20 +180401,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -182157,20 +180545,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutReminderHistoryInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -182237,20 +180614,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -182382,20 +180748,9 @@ export namespace Prisma {
   export type AccountCreateWithoutReminderStatisticsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -182462,20 +180817,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -182556,20 +180900,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutReminderStatisticsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -182636,20 +180969,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -182714,20 +181036,9 @@ export namespace Prisma {
   export type AccountCreateWithoutReminderResponsesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -182794,20 +181105,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -182949,20 +181249,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutReminderResponsesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -183029,20 +181318,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -183174,20 +181452,9 @@ export namespace Prisma {
   export type AccountCreateWithoutUserReminderPreferencesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -183254,20 +181521,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -183348,20 +181604,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutUserReminderPreferencesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -183428,20 +181673,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -183567,20 +181801,9 @@ export namespace Prisma {
   export type AccountCreateWithoutReminderOccurrencesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -183647,20 +181870,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -183808,20 +182020,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutReminderOccurrencesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -183888,20 +182089,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -183966,20 +182156,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRoutineDefinitionsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -184046,20 +182225,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -184246,20 +182414,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRoutineDefinitionsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -184326,20 +182483,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -184460,20 +182606,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRoutineProfilesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -184540,20 +182675,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -184661,20 +182785,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRoutineProfilesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -184741,20 +182854,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -184835,20 +182937,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRoutineProfileMembershipsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -184915,20 +183006,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -185071,20 +183151,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRoutineProfileMembershipsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -185151,20 +183220,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -185303,20 +183361,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRoutineProtocolDefinitionsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -185383,20 +183430,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -185512,20 +183548,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRoutineProtocolDefinitionsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -185592,20 +183617,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -185686,20 +183700,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRoutineProtocolSessionsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -185766,20 +183769,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -185885,20 +183877,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRoutineProtocolSessionsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -185965,20 +183946,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -186107,20 +184077,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRoutineOccurrencesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -186187,20 +184146,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -186320,20 +184268,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRoutineOccurrencesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -186400,20 +184337,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -186511,20 +184437,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRoutineTemporaryOverridesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -186591,20 +184506,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -186724,20 +184628,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRoutineTemporaryOverridesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -186804,20 +184697,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -186882,20 +184764,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRepositoriesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -186962,20 +184833,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -187244,20 +185104,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRepositoriesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -187324,20 +185173,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -187466,20 +185304,9 @@ export namespace Prisma {
   export type AccountCreateWithoutFoldersInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -187546,20 +185373,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -187762,20 +185578,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutFoldersInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -187842,20 +185647,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -188032,20 +185826,9 @@ export namespace Prisma {
   export type AccountCreateWithoutResourcesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -188112,20 +185895,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -188257,20 +186029,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutResourcesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -188337,20 +186098,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -188514,20 +186264,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRepositoryResourcesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -188594,20 +186333,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -188835,20 +186563,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRepositoryResourcesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -188915,20 +186632,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -189408,20 +187114,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRepositoryExplorersInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -189488,20 +187183,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -189633,20 +187317,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRepositoryExplorersInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -189713,20 +187386,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -189848,20 +187510,9 @@ export namespace Prisma {
   export type AccountCreateWithoutRepositoryStatisticsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -189928,20 +187579,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -190022,20 +187662,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutRepositoryStatisticsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -190102,20 +187731,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -190180,20 +187798,9 @@ export namespace Prisma {
   export type AccountCreateWithoutKnowledgeRepositoryInstallationIntentsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -190260,20 +187867,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -190354,20 +187950,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutKnowledgeRepositoryInstallationIntentsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -190434,20 +188019,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -190512,20 +188086,9 @@ export namespace Prisma {
   export type AccountCreateWithoutKnowledgeRepositoryConnectionsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -190592,20 +188155,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -190874,20 +188426,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutKnowledgeRepositoryConnectionsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -190954,20 +188495,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -191623,20 +189153,9 @@ export namespace Prisma {
   export type AccountCreateWithoutKnowledgeWriteRequestsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -191703,20 +189222,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -191850,20 +189358,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutKnowledgeWriteRequestsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -191930,20 +189427,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -192067,20 +189553,9 @@ export namespace Prisma {
   export type AccountCreateWithoutSchedulesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -192147,20 +189622,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -192241,20 +189705,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutSchedulesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -192321,20 +189774,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -192433,20 +189875,9 @@ export namespace Prisma {
   export type AccountCreateWithoutScheduleTasksInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -192513,20 +189944,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -192623,20 +190043,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutScheduleTasksInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -192703,20 +190112,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -192781,20 +190179,9 @@ export namespace Prisma {
   export type AccountCreateWithoutSchedulingReconcileOperationsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -192861,20 +190248,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -192955,20 +190331,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutSchedulingReconcileOperationsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -193035,20 +190400,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -193113,20 +190467,9 @@ export namespace Prisma {
   export type AccountCreateWithoutScheduleExecutionsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -193193,20 +190536,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -193374,20 +190706,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutScheduleExecutionsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -193454,20 +190775,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -193625,20 +190935,9 @@ export namespace Prisma {
   export type AccountCreateWithoutScheduleStatisticsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -193705,20 +191004,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -193799,20 +191087,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutScheduleStatisticsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -193879,20 +191156,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -193957,20 +191223,9 @@ export namespace Prisma {
   export type AccountCreateWithoutUserSettingsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -194037,20 +191292,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -194131,20 +191375,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutUserSettingsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -194211,20 +191444,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -194289,20 +191511,9 @@ export namespace Prisma {
   export type AccountCreateWithoutUserPreferenceRecordsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -194369,20 +191580,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -194463,20 +191663,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutUserPreferenceRecordsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -194543,20 +191732,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -194621,20 +191799,9 @@ export namespace Prisma {
   export type AccountCreateWithoutTaskPlansInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -194701,20 +191868,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -194928,20 +192084,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutTaskPlansInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -195008,20 +192153,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -195184,20 +192318,9 @@ export namespace Prisma {
   export type AccountCreateWithoutTaskOccurrencesInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -195264,20 +192387,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -195448,20 +192560,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutTaskOccurrencesInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -195528,20 +192629,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -195702,20 +192792,9 @@ export namespace Prisma {
   export type AccountCreateWithoutTaskPlanHistoryInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -195782,20 +192861,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -195966,20 +193034,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutTaskPlanHistoryInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -196046,20 +193103,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -196220,20 +193266,9 @@ export namespace Prisma {
   export type AccountCreateWithoutTaskStatisticsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -196300,20 +193335,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -196394,20 +193418,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutTaskStatisticsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -196474,20 +193487,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -196552,20 +193554,9 @@ export namespace Prisma {
   export type AccountCreateWithoutWalletAccountsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -196632,20 +193623,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -196760,20 +193740,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutWalletAccountsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -196840,20 +193809,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
@@ -196959,20 +193917,9 @@ export namespace Prisma {
   export type AccountCreateWithoutWalletTransactionsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
@@ -197039,20 +193986,9 @@ export namespace Prisma {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
-    settings: JsonNullValueInput | InputJsonValue
-    emailAddress: string
-    emailIsVerified?: boolean
-    emailVerifiedAt?: Date | string | null
-    emailIsPrimary?: boolean
-    phoneCountryCode?: string | null
-    phoneNumber?: string | null
-    phoneFullNumber?: string | null
-    phoneIsVerified?: boolean | null
-    phoneVerifiedAt?: Date | string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
+    closedAt?: Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
@@ -197164,20 +194100,9 @@ export namespace Prisma {
   export type AccountUpdateWithoutWalletTransactionsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
@@ -197244,20 +194169,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
-    settings?: JsonNullValueInput | InputJsonValue
-    emailAddress?: StringFieldUpdateOperationsInput | string
-    emailIsVerified?: BoolFieldUpdateOperationsInput | boolean
-    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    emailIsPrimary?: BoolFieldUpdateOperationsInput | boolean
-    phoneCountryCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneFullNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    phoneIsVerified?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    phoneVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
     editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput

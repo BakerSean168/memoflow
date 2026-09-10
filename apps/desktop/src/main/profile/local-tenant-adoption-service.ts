@@ -23,12 +23,14 @@ export class LocalTenantAdoptionService {
     toOwnerId: string;
     displayName: string;
     identifier: string;
-    emailVerified: boolean;
   }): Promise<void> {
-    const { fromOwnerId, toOwnerId, displayName, identifier, emailVerified } = input;
+    const { fromOwnerId, toOwnerId, displayName, identifier } = input;
     if (fromOwnerId === toOwnerId) return;
     await this.db.writeTransaction(async (tx) => {
-      const conflict = await tx.getOptional<{ id: string }>('SELECT id FROM accounts WHERE id = ? LIMIT 1', [toOwnerId]);
+      const conflict = await tx.getOptional<{ id: string }>(
+        'SELECT id FROM accounts WHERE id = ? LIMIT 1',
+        [toOwnerId],
+      );
       if (conflict) throw new Error('目标云端账号已存在本地数据，拒绝静默合并');
       await tx.execute(
         `INSERT OR REPLACE INTO profile_adoption_journal
@@ -41,51 +43,27 @@ export class LocalTenantAdoptionService {
            id,
            status,
            profile,
-           settings,
-           email_address,
-           email_is_verified,
-           email_verified_at,
-           email_is_primary,
-           phone_country_code,
-           phone_number,
-           phone_full_number,
-           phone_is_verified,
-           phone_verified_at,
            version,
            created_at,
            updated_at,
-           deleted_at
+           closed_at
          )
          SELECT ?,
                 status,
                 profile,
-                settings,
-                ?,
-                ?,
-                ?,
-                1,
-                phone_country_code,
-                phone_number,
-                phone_full_number,
-                phone_is_verified,
-                phone_verified_at,
                 version,
                 created_at,
                 ?,
-                deleted_at
+                closed_at
          FROM accounts
          WHERE id = ?`,
-        [
-          toOwnerId,
-          identifier,
-          emailVerified ? 1 : 0,
-          emailVerified ? new Date().toISOString() : null,
-          new Date().toISOString(),
-          fromOwnerId,
-        ],
+        [toOwnerId, new Date().toISOString(), fromOwnerId],
       );
       for (const table of IDENTITY_OWNED_TABLES) {
-        await tx.execute(`UPDATE ${table} SET identity_id = ? WHERE identity_id = ?`, [toOwnerId, fromOwnerId]);
+        await tx.execute(`UPDATE ${table} SET identity_id = ? WHERE identity_id = ?`, [
+          toOwnerId,
+          fromOwnerId,
+        ]);
       }
       await tx.execute('DELETE FROM accounts WHERE id = ?', [fromOwnerId]);
     });

@@ -7,6 +7,8 @@ import {
   type TaskWriteTransactionRunner,
 } from './task-write-support';
 import { reevaluateTaskPlanOutcome } from './task-plan-outcome-reevaluation';
+import type { TimeContext } from '@memoflow/time';
+import type { TaskOccurrenceProjectionService } from '../../services/task-occurrence-projection.service';
 
 /**
  * Uncomplete Task Instance Use Case
@@ -21,6 +23,7 @@ export class UncompleteTaskOccurrenceUseCase {
   constructor(
     private readonly instanceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
+    private readonly projection: TaskOccurrenceProjectionService,
   ) {
     if (!transactionRunner) {
       throw new Error('TaskWriteTransactionRunner must be explicitly provided to UncompleteTaskOccurrenceUseCase');
@@ -29,8 +32,9 @@ export class UncompleteTaskOccurrenceUseCase {
   }
 
   async execute(id: string, identityId: string): Promise<Result<TaskOccurrenceOperationRes>> {
+    const timeContext = await this.projection.getTimeContext(identityId);
     return this.transactionRunner.run((repositories) =>
-      this.executeInTransaction(repositories, id, identityId),
+      this.executeInTransaction(repositories, id, identityId, timeContext),
     );
   }
 
@@ -38,6 +42,7 @@ export class UncompleteTaskOccurrenceUseCase {
     repositories: TaskWriteRepositories,
     id: string,
     identityId: string,
+    timeContext: TimeContext,
   ): Promise<Result<TaskOccurrenceOperationRes>> {
     const instance = await repositories.instanceRepository.findByIdForIdentity(identityId, id);
     if (!instance) {
@@ -49,7 +54,13 @@ export class UncompleteTaskOccurrenceUseCase {
 
     instance.uncomplete();
     await repositories.instanceRepository.save(instance);
-    await reevaluateTaskPlanOutcome(repositories, identityId, String(instance.templateId), instance.id);
-    return ok({ instance: instance.toClientDTO() });
+    await reevaluateTaskPlanOutcome(
+      repositories,
+      identityId,
+      String(instance.templateId),
+      instance.id,
+      timeContext,
+    );
+    return ok({ instance: this.projection.projectWithContext(instance, timeContext) });
   }
 }

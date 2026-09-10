@@ -6,7 +6,8 @@ import { TaskGoalBindingTrigger, TaskType } from '@memoflow/contracts/task';
 import { eventBus } from '@memoflow/utils/domain';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
-import { RecurrenceRule, TaskTimeConfig } from '../../../domain/value-objects';
+import { TASK_TEST_TIME_CONTEXT, TASK_TEST_USER_TIME_CONTEXT_PORT } from '../../../../testing';
+import { RecurrenceRule, TaskPlanSchedule, TaskTimeConfig } from '../../../domain/value-objects';
 import { createTaskPrismaModule } from '../../prisma';
 import {
   cleanTaskTables,
@@ -25,20 +26,26 @@ async function seedPlanWithPropagationStates() {
   await seedAccount({ id: identityId });
 
   const prisma = await getPrisma();
-  const module = createTaskPrismaModule(prisma);
+  const module = createTaskPrismaModule(prisma, {
+    userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+  });
   const now = Date.now();
   const template = TaskPlan.create({
     identityId,
     title: 'Propagation plan',
-    taskType: TaskType.Recurring,
-    timeConfig: TaskTimeConfig.createAllDay(new Date(now - 2 * DAY_MS)),
-    recurrenceRule: RecurrenceRule.createDaily(1),
+    schedule: TaskPlanSchedule.fromLegacy(
+      TaskType.Recurring,
+      TaskTimeConfig.createAllDay(new Date(now - 2 * DAY_MS)),
+      RecurrenceRule.createDaily(1),
+      TASK_TEST_TIME_CONTEXT,
+    ),
     importance: ImportanceLevel.Moderate,
   });
   await module.taskPlanRepository.save(template);
 
   const createInstance = (instanceDate: number) =>
     TaskOccurrence.create({
+      timeContext: TASK_TEST_TIME_CONTEXT,
       templateId: template.id,
       identityId,
       instanceDate,
@@ -49,11 +56,7 @@ async function seedPlanWithPropagationStates() {
   const futurePending = createInstance(now + DAY_MS);
   const futureInProgress = createInstance(now + 2 * DAY_MS);
   futureInProgress.start();
-  await module.taskOccurrenceRepository.saveMany([
-    pastPending,
-    futurePending,
-    futureInProgress,
-  ]);
+  await module.taskOccurrenceRepository.saveMany([pastPending, futurePending, futureInProgress]);
 
   return {
     identityId,
@@ -89,11 +92,14 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     const template = TaskPlan.create({
       identityId,
       title: 'Daily Review',
-      taskType: TaskType.Recurring,
-      timeConfig: TaskTimeConfig.createAllDay(new Date()),
-      recurrenceRule: RecurrenceRule.createDaily(1),
+      schedule: TaskPlanSchedule.fromLegacy(
+        TaskType.Recurring,
+        TaskTimeConfig.createAllDay(new Date()),
+        RecurrenceRule.createDaily(1),
+        TASK_TEST_TIME_CONTEXT,
+      ),
       importance: ImportanceLevel.Moderate,
-      });
+    });
 
     let sentBeforeCommit = false;
 
@@ -125,7 +131,9 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     await seedAccount({ id: identityId });
 
     const prisma = await getPrisma();
-    const module = createTaskPrismaModule(prisma);
+    const module = createTaskPrismaModule(prisma, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
     vi.spyOn(TaskOccurrencePrismaRepository.prototype, 'saveMany').mockRejectedValue(
       new Error('saveMany failed'),
@@ -149,7 +157,7 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
         occurrences: null,
       },
       importance: ImportanceLevel.Moderate,
-      });
+    });
 
     expect(result).toBeErrorWithCode('INTERNAL_ERROR');
     expect(await prisma.taskPlan.count()).toBe(0);
@@ -161,15 +169,8 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
 
   it('propagates plan updates only to future pending instances through the production module', async () => {
     vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
-    const {
-      identityId,
-      prisma,
-      module,
-      template,
-      pastPending,
-      futurePending,
-      futureInProgress,
-    } = await seedPlanWithPropagationStates();
+    const { identityId, prisma, module, template, pastPending, futurePending, futureInProgress } =
+      await seedPlanWithPropagationStates();
 
     const result = await module.api.updateTaskPlan(String(template.id), String(identityId), {
       name: 'Updated propagation plan',
@@ -202,8 +203,7 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
 
   it('rolls back future pending propagation when the template write fails', async () => {
     vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
-    const { identityId, module, template, futurePending } =
-      await seedPlanWithPropagationStates();
+    const { identityId, module, template, futurePending } = await seedPlanWithPropagationStates();
     vi.spyOn(
       TaskPlanPrismaRepository.prototype as unknown as { persist: () => Promise<void> },
       'persist',
@@ -259,28 +259,23 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
         weight: 1,
       },
     });
-    const module = createTaskPrismaModule(prisma);
+    const module = createTaskPrismaModule(prisma, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
 
+    const createSchedule = TaskPlanSchedule.fromLegacy(
+      TaskType.Recurring,
+      TaskTimeConfig.createAllDay(new Date()),
+      RecurrenceRule.createDaily(1),
+      TASK_TEST_TIME_CONTEXT,
+    );
     const createRes = await module.api.createTaskPlan({
       identityId,
       name: 'Goal Task',
-      taskType: TaskType.Recurring,
-      timeConfig: {
-        timeType: 'AllDay',
-        startDate: Date.now(),
-        timePoint: null,
-        timeRange: null,
-      },
-      recurrenceRule: {
-        frequency: 'Daily',
-        interval: 1,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: null,
-      },
+      schedule: createSchedule.toDTO(),
       importance: ImportanceLevel.Moderate,
-        goalBinding: {
+      goalBinding: {
         goalId,
         keyResultId,
         contribution: { value: 1, trigger: TaskGoalBindingTrigger.EachCompletion },

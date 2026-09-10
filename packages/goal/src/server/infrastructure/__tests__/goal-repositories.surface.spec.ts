@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import { createTimeContext } from '@memoflow/time';
 import {
   createGoalPrismaRepositories,
   createGoalPowerSyncRepositories,
@@ -79,6 +80,7 @@ describe('goal repository factories surface', () => {
 
     const prismaInstance = createGoalPrismaModule(fakePrisma, {
       taskBindingReadPort: fakeReadPort,
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
     });
     expect(prismaInstance).toHaveProperty('api');
     expect(typeof prismaInstance.start).toBe('function');
@@ -88,6 +90,7 @@ describe('goal repository factories surface', () => {
 
     const powerSyncInstance = createGoalPowerSyncModule(fakeElectronDb, {
       taskBindingReadPort: fakeReadPort,
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
     });
     expect(powerSyncInstance).toHaveProperty('api');
     expect(typeof powerSyncInstance.start).toBe('function');
@@ -193,3 +196,6 @@ describe('goal repository factories surface', () => {
     }
   });
 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+};

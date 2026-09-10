@@ -9,7 +9,8 @@ import {
 } from '@memoflow/contracts/task';
 import { TaskPlan } from '../domain/aggregates/task-plan';
 import { TaskOccurrence } from '../domain/aggregates/task-occurrence';
-import { RecurrenceRule, TaskTimeConfig } from '../domain/value-objects';
+import { TASK_TEST_TIME_CONTEXT, TASK_TEST_USER_TIME_CONTEXT_PORT } from '../../testing';
+import { RecurrenceRule, TaskPlanSchedule, TaskTimeConfig } from '../domain/value-objects';
 import { createTaskPrismaModule } from './prisma';
 import {
   cleanTaskTables,
@@ -54,14 +55,19 @@ async function seedFifteenOccurrencePlan(
     },
   });
 
-  const module = createTaskPrismaModule(prisma);
+  const module = createTaskPrismaModule(prisma, {
+    userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+  });
   const start = Date.now() - 14 * DAY_MS;
   const template = TaskPlan.create({
     identityId,
     title: 'Plant check-in 15-day plan',
-    taskType: TaskType.Recurring,
-    timeConfig: TaskTimeConfig.createAllDay(new Date(start)),
-    recurrenceRule: RecurrenceRule.createDaily(1).setOccurrences(15),
+    schedule: TaskPlanSchedule.fromLegacy(
+      TaskType.Recurring,
+      TaskTimeConfig.createAllDay(new Date(start)),
+      RecurrenceRule.createDaily(1).setOccurrences(15),
+      TASK_TEST_TIME_CONTEXT,
+    ),
     importance: ImportanceLevel.Moderate,
     completionPolicy,
     goalBinding: {
@@ -76,6 +82,7 @@ async function seedFifteenOccurrencePlan(
   const instances: TaskOccurrence[] = [];
   for (let index = 0; index < 15; index += 1) {
     const instance = TaskOccurrence.create({
+      timeContext: TASK_TEST_TIME_CONTEXT,
       templateId: template.id,
       identityId,
       instanceDate: start + index * DAY_MS,
@@ -145,10 +152,12 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
 
     expect(await prisma.taskGoalOutbox.count({ where })).toBe(0);
     expect(
-      (await seed.module.api.completeTaskOccurrence(
-        String(seed.finalInstance.id),
-        String(seed.identityId),
-      )).ok,
+      (
+        await seed.module.api.completeTaskOccurrence(
+          String(seed.finalInstance.id),
+          String(seed.identityId),
+        )
+      ).ok,
     ).toBe(true);
     expect(await loadOutcome(seed)).toBe(TaskPlanOutcome.Succeeded);
 
@@ -160,10 +169,12 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
     });
 
     expect(
-      (await seed.module.api.uncompleteTaskOccurrence(
-        String(seed.finalInstance.id),
-        String(seed.identityId),
-      )).ok,
+      (
+        await seed.module.api.uncompleteTaskOccurrence(
+          String(seed.finalInstance.id),
+          String(seed.identityId),
+        )
+      ).ok,
     ).toBe(true);
     expect(await loadOutcome(seed)).toBe(TaskPlanOutcome.Open);
     const afterRevert = (await prisma.taskGoalOutbox.findMany({ where })).map((row) => ({
@@ -173,15 +184,18 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
     expect(
       afterRevert.some(
         ({ payload }) =>
-          payload.action === 'revert' && payload.sources?.some((source) => source.type === 'TaskPlan'),
+          payload.action === 'revert' &&
+          payload.sources?.some((source) => source.type === 'TaskPlan'),
       ),
     ).toBe(true);
 
     expect(
-      (await seed.module.api.completeTaskOccurrence(
-        String(seed.finalInstance.id),
-        String(seed.identityId),
-      )).ok,
+      (
+        await seed.module.api.completeTaskOccurrence(
+          String(seed.finalInstance.id),
+          String(seed.identityId),
+        )
+      ).ok,
     ).toBe(true);
     expect(await loadOutcome(seed)).toBe(TaskPlanOutcome.Succeeded);
     const planApplyIds = (await prisma.taskGoalOutbox.findMany({ where }))

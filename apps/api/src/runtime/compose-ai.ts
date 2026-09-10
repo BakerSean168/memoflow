@@ -37,6 +37,7 @@ import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime
 import type { IScheduleRepository } from '@memoflow/schedule';
 import type { INotificationRepository } from '@memoflow/notification';
 import type { LabelService } from '@memoflow/label';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { GoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
 import { TaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
 import { ControlledAnalyticsReadAdapter } from '../modules/ai/controlled-analytics-read.adapter';
@@ -65,6 +66,7 @@ export interface ComposeAIDependencies {
   readonly routineCommandPort: RoutineCoachCommandPort;
   readonly scheduleRepository: IScheduleRepository;
   readonly notificationRepository: INotificationRepository;
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Host-selected persistent Mastra storage; API uses PostgreSQL. */
   readonly mastraStorage: MastraStorageConfig;
 }
@@ -116,6 +118,7 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
       dependencies.taskApplicationPort,
     ),
     notificationReadPort: new NotificationAIReadAdapter(dependencies.notificationRepository),
+    userTimeContextPort: dependencies.userTimeContextPort,
   });
   const knowledgeSourcePort = new RepositoryKnowledgeSourceAdapter(
     dependencies.db,
@@ -124,7 +127,10 @@ export function composeAI(dependencies: ComposeAIDependencies): AIApiModuleDef {
   const knowledgeIndexStatusPort = new RepositoryKnowledgeIndexStatusAdapter(
     dependencies.repositoryApiPort,
   );
-  const analyticsReadPort = new ControlledAnalyticsReadAdapter(dependencies.db);
+  const analyticsReadPort = new ControlledAnalyticsReadAdapter(
+    dependencies.db,
+    dependencies.userTimeContextPort,
+  );
   const evaluationReportPort = new AIEvaluationReportFileAdapter();
 
   const instance = createAIModule({

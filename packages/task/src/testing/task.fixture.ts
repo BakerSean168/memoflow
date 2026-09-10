@@ -14,6 +14,8 @@ import {
   TaskPlanOutcome,
 } from '@memoflow/contracts/task';
 import { anIdentityId } from '@memoflow/test-utils/fixtures';
+import { createTimeContext, type TimeContext, type UserTimeContextPort } from '@memoflow/time';
+import { TaskOccurrenceProjectionService } from '../server/application/services/task-occurrence-projection.service';
 import {
   TaskPlanId,
   TaskOccurrenceId,
@@ -27,6 +29,14 @@ import {
 } from '../server/domain';
 import { TaskOccurrence, TaskPlan } from '../server/domain';
 import type { TaskPlanState } from '../server/domain';
+
+export const TASK_TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+export const TASK_TEST_USER_TIME_CONTEXT_PORT: UserTimeContextPort = {
+  getUserTimeContext: async () => TASK_TEST_TIME_CONTEXT,
+};
+export const TASK_TEST_OCCURRENCE_PROJECTION = new TaskOccurrenceProjectionService(
+  TASK_TEST_USER_TIME_CONTEXT_PORT,
+);
 
 function titleFor(prefix: string): string {
   return `${prefix} ${Math.random().toString(36).slice(2, 8)}`;
@@ -50,6 +60,7 @@ export function aOneTimeTask(overrides: OneTimeTaskOverrides = {}): TaskPlan {
     description: overrides.description,
     importance: overrides.importance ?? ImportanceLevel.Moderate,
     startDate: overrides.startDate ?? Date.now(),
+    timeContext: TASK_TEST_TIME_CONTEXT,
   });
 }
 
@@ -74,6 +85,7 @@ export function aRecurringTask(overrides: RecurringTaskOverrides = {}): TaskPlan
     recurrenceRule: overrides.recurrenceRule ?? aDailyRecurrenceRule(),
     reminderConfig: overrides.reminderConfig,
     generateAheadDays: overrides.generateAheadDays,
+    timeContext: TASK_TEST_TIME_CONTEXT,
   });
 }
 
@@ -98,6 +110,7 @@ export function aTaskPlanState(
         overrides.taskType ?? (overrides.recurrenceRule ? TaskType.Recurring : TaskType.OneTime),
         overrides.timeConfig ?? anAllDayTimeConfig(),
         overrides.recurrenceRule ?? null,
+        TASK_TEST_TIME_CONTEXT,
       ),
     importance: overrides.importance ?? ImportanceLevel.Moderate,
     status: overrides.status ?? TaskPlanStatus.Active,
@@ -128,6 +141,7 @@ export interface TaskOccurrenceOverrides {
   instanceDate?: number;
   timeConfig?: TaskTimeConfig;
   importance?: ImportanceLevel;
+  timeContext?: TimeContext;
 }
 
 export async function aTaskOccurrence(overrides: TaskOccurrenceOverrides = {}) {
@@ -137,6 +151,7 @@ export async function aTaskOccurrence(overrides: TaskOccurrenceOverrides = {}) {
     instanceDate: overrides.instanceDate ?? Date.now(),
     timeConfig: overrides.timeConfig ?? anAllDayTimeConfig(),
     importance: overrides.importance ?? ImportanceLevel.Moderate,
+    timeContext: overrides.timeContext ?? TASK_TEST_TIME_CONTEXT,
   });
 }
 

@@ -2,38 +2,72 @@
  * App-react session product time facade (ADR-037 P1/P2).
  * Single session — Screens must not createTimeFacade for routine display.
  */
+import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
 import {
+  createSystemTimeZoneSource,
+  createTimeContext,
   createTimeFacade,
   resolveEmptyLabel,
   type TimeFacade,
-  type PartialTimeStyle,
   type TimeEmptyKind,
   type ResolveEmptyLabelOptions,
 } from '@memoflow/time';
 
-let sessionTime: TimeFacade = createTimeFacade({
-  style: {
-    locale: 'en-US',
-    empty: {
-      display: resolveEmptyLabel('emdash'),
-      unknown: resolveEmptyLabel('unknown'),
+function resolveSystemLocale(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().locale || 'en-US';
+  } catch {
+    return 'en-US';
+  }
+}
+
+function createLocalSessionTime(): TimeFacade {
+  const timeZoneSource = createSystemTimeZoneSource();
+  return createTimeFacade({
+    context: createTimeContext({
+      timeZone: timeZoneSource.currentTimeZoneId(),
+      weekStartsOn: 1,
+    }),
+    presentation: {
+      locale: resolveSystemLocale(),
+      empty: {
+        display: resolveEmptyLabel('emdash'),
+        unknown: resolveEmptyLabel('unknown'),
+      },
     },
-  },
-});
+  });
+}
+
+let sessionTime: TimeFacade = createLocalSessionTime();
 
 export function getProductTime(): TimeFacade {
   return sessionTime;
 }
 
-export function setProductTimeStyle(partial: PartialTimeStyle): TimeFacade {
-  sessionTime = sessionTime.withStyle(partial);
+/** Apply canonical cross-device presentation/regional preferences to the React session facade. */
+export function setProductTimePreferences(profile: UserPreferenceProfile): TimeFacade {
+  sessionTime = sessionTime
+    .withContext(
+      createTimeContext({
+        timeZone: profile.regional.timeZone,
+        weekStartsOn: profile.regional.weekStartsOn,
+      }),
+    )
+    .withPresentation({
+      locale: profile.presentation.language,
+      dateStyle: profile.regional.dateStyle,
+      timeStyle: profile.regional.timeStyle,
+    });
   return sessionTime;
 }
 
-export function emptyKind(
-  kind: TimeEmptyKind,
-  options?: ResolveEmptyLabelOptions,
-): string {
+/** Restore guest/signed-out Product Time to the device locale/timezone source. */
+export function resetProductTimePreferences(): TimeFacade {
+  sessionTime = createLocalSessionTime();
+  return sessionTime;
+}
+
+export function emptyKind(kind: TimeEmptyKind, options?: ResolveEmptyLabelOptions): string {
   return resolveEmptyLabel(kind, options);
 }
 
@@ -54,7 +88,7 @@ export function formatProductDate(
   empty?: string,
 ): string {
   const ms = toMs(value);
-  if (ms == null) return empty ?? sessionTime.style.empty.display;
+  if (ms == null) return empty ?? sessionTime.presentation.empty.display;
   return sessionTime.format.date(ms, empty != null ? { empty: { display: empty } } : undefined);
 }
 
@@ -64,20 +98,17 @@ export function formatProductDateTime(
   empty?: string,
 ): string {
   const ms = toMs(value);
-  if (ms == null) return empty ?? sessionTime.style.empty.display;
+  if (ms == null) return empty ?? sessionTime.presentation.empty.display;
   return sessionTime.format.dateTime(ms, empty != null ? { empty: { display: empty } } : undefined);
 }
 
 /** Relative product time via session facade. */
-export function formatProductRelative(
-  value: number | null | undefined,
-  empty?: string,
-): string {
+export function formatProductRelative(value: number | null | undefined, empty?: string): string {
   if (value == null || !Number.isFinite(value)) {
-    return empty ?? sessionTime.style.empty.display;
+    return empty ?? sessionTime.presentation.empty.display;
   }
   return sessionTime.format.relative(value);
 }
 
 export { resolveEmptyLabel };
-export type { TimeEmptyKind, PartialTimeStyle, TimeFacade };
+export type { TimeEmptyKind, TimeFacade };

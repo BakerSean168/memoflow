@@ -1,4 +1,4 @@
-import type { CloudAuth } from '@memoflow/cloud-auth/server';
+import type { CloudSessionCapability } from '@memoflow/cloud-auth/server';
 import type { NextFunction, Response } from 'express';
 import { describe, expect, it, vi } from 'vitest';
 import type { ILogger } from '@memoflow/utils/logger';
@@ -25,7 +25,7 @@ describe('cloud auth middleware', () => {
   it('returns a structured unauthorized response when no cloud session resolves', async () => {
     const cloudAuth = {
       resolveNodePrincipal: vi.fn().mockResolvedValue(null),
-    } as unknown as CloudAuth;
+    } as unknown as CloudSessionCapability;
     const req = requestStub();
     const res = responseStub();
     const next = vi.fn() as unknown as NextFunction;
@@ -51,7 +51,7 @@ describe('cloud auth middleware', () => {
         email: 'user@example.com',
         emailVerified: true,
       }),
-    } as unknown as CloudAuth;
+    } as unknown as CloudSessionCapability;
     const req = requestStub();
     const res = responseStub();
     const next = vi.fn() as unknown as NextFunction;
@@ -76,7 +76,7 @@ describe('cloud auth middleware', () => {
         email: 'user@example.com',
         emailVerified: true,
       }),
-    } as unknown as CloudAuth;
+    } as unknown as CloudSessionCapability;
     const req = requestStub();
     const res = responseStub();
     const next = vi.fn() as unknown as NextFunction;
@@ -98,9 +98,9 @@ describe('cloud auth middleware', () => {
         email: 'user@example.com',
         emailVerified: true,
       }),
-    } as unknown as CloudAuth;
+    } as unknown as CloudSessionCapability;
     const database = {
-      account: { findUnique: vi.fn().mockResolvedValue({ status: 'Deactivated' }) },
+      account: { findUnique: vi.fn().mockResolvedValue({ status: 'Closed' }) },
     };
     const req = requestStub();
     const res = responseStub();
@@ -120,7 +120,7 @@ describe('cloud auth middleware', () => {
         email: 'user@example.com',
         emailVerified: true,
       }),
-    } as unknown as CloudAuth;
+    } as unknown as CloudSessionCapability;
     const database = {
       account: { findUnique: vi.fn().mockResolvedValue({ status: 'Active' }) },
     };
@@ -136,7 +136,7 @@ describe('cloud auth middleware', () => {
   it('uses the shared structured logger with correlation metadata on unexpected failures', async () => {
     const cloudAuth = {
       resolveNodePrincipal: vi.fn().mockRejectedValue(new Error('cloud down')),
-    } as unknown as CloudAuth;
+    } as unknown as CloudSessionCapability;
     const logger = {
       error: vi.fn(),
     };

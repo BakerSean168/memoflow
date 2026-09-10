@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 
 import { useAccountProfile } from '../hooks/useAccountProfile';
 import { useAppSession } from '../hooks/useAppSession';
+import { useAppPreferences } from '../providers/app-preference-provider';
 
 import {
   PageShell,
@@ -20,7 +21,9 @@ import { formatDateNotSet as formatDate } from '../utils/format-date-not-set';
 export function AccountScreen() {
   const router = useRouter();
   const { signOut } = useAppSession();
-  const { account, error, isLoading, isRemoteAuthenticated, refresh } = useAccountProfile();
+  const { profile: preferenceProfile, refresh: refreshPreferences } = useAppPreferences();
+  const { account, loginEmail, isEmailVerified, error, isLoading, isRemoteAuthenticated, refresh } =
+    useAccountProfile();
   const actionSections = [
     {
       title: 'Account',
@@ -42,7 +45,13 @@ export function AccountScreen() {
       eyebrow="More"
       title="Account"
       subtitle="账户资料和偏好摘要。"
-      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}>
+      refreshControl={
+        <RefreshControl
+          refreshing={isLoading}
+          onRefresh={() => Promise.all([refresh(), refreshPreferences()])}
+        />
+      }
+    >
       {!isRemoteAuthenticated ? (
         <SectionCard title="Sign in required" description="登录后可查看账户资料。">
           <ThemedText type="small" themeColor="textSecondary">
@@ -69,22 +78,34 @@ export function AccountScreen() {
               <SectionCard title="Profile" description={account.profile.bio ?? 'No bio yet.'}>
                 <View style={styles.pillRow}>
                   <StatusPill label={account.status} tone="tint" />
-                  <StatusPill label={account.settings.language} tone="textSecondary" />
-                  <StatusPill label={account.settings.theme} tone="success" />
+                  {preferenceProfile ? (
+                    <StatusPill
+                      label={preferenceProfile.presentation.language}
+                      tone="textSecondary"
+                    />
+                  ) : null}
+                  {preferenceProfile ? (
+                    <StatusPill label={preferenceProfile.presentation.theme} tone="success" />
+                  ) : null}
                 </View>
                 <MetaRow label="Nickname" value={account.profile.nickname} />
                 <MetaRow label="Real name" value={account.profile.realName ?? 'Not set'} />
-                <MetaRow label="Email" value={account.email.address} />
-                <MetaRow label="Phone" value={account.phone?.fullNumber ?? 'Not set'} />
+                <MetaRow label="Email" value={loginEmail ?? 'Not set'} />
+                <MetaRow label="Email verified" value={isEmailVerified ? 'Yes' : 'No'} />
                 <MetaRow label="Birthday" value={formatDate(account.profile.birthday)} />
               </SectionCard>
 
-              <SectionCard title="Preferences" description="账户级偏好和基础本地化摘要。">
-                <MetaRow label="Timezone" value={account.settings.timezone} />
-                <MetaRow label="Language" value={account.settings.language} />
-                <MetaRow label="Theme" value={account.settings.theme} />
-                <MetaRow label="Notifications" value={account.settings.notificationEnabled ? 'Enabled' : 'Disabled'} />
-              </SectionCard>
+              {preferenceProfile ? (
+                <SectionCard
+                  title="Preferences"
+                  description="Canonical presentation/regional preferences; Account no longer owns this truth."
+                >
+                  <MetaRow label="Timezone" value={preferenceProfile.regional.timeZone} />
+                  <MetaRow label="Language" value={preferenceProfile.presentation.language} />
+                  <MetaRow label="Theme" value={preferenceProfile.presentation.theme} />
+                  <MetaRow label="Time style" value={preferenceProfile.regional.timeStyle} />
+                </SectionCard>
+              ) : null}
             </>
           ) : null}
         </>
@@ -114,4 +135,3 @@ const styles = StyleSheet.create({
     gap: Spacing.half,
   },
 });
-

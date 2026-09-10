@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { createTimeContext } from '@memoflow/time';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { ReminderType } from '@memoflow/contracts/reminder';
@@ -885,6 +886,9 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
 
     const moduleInstance = createReminderPrismaModule(prisma, {
       closureChecker: async () => false,
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
     });
 
     const templateRepo = new ReminderTemplatePrismaRepository(prisma);
@@ -1033,6 +1037,9 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
       userReminderPreferenceRepository: new UserReminderPreferencePrismaRepository(prisma),
       routineProfileStore: new PrismaRoutineProfileStore(prisma),
       closureChecker: async () => false,
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       reliablePort: new ReminderReliableOperationPrismaAdapter(prisma),
       auditRepository: failingAudit as never,
     });
@@ -1082,6 +1089,9 @@ describe('W1 Reminder LeaseClaim & Reliable Operations Integration Tests', () =>
       userReminderPreferenceRepository: new UserReminderPreferencePrismaRepository(prisma),
       routineProfileStore: new PrismaRoutineProfileStore(prisma),
       closureChecker: async () => false,
+      userTimeContextPort: {
+        getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      },
       reliablePort: new ReminderReliableOperationPrismaAdapter(prisma),
       auditRepository: failingAudit as never,
     });

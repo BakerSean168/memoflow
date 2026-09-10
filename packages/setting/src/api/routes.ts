@@ -26,6 +26,14 @@ import {
   UserSettingResponseSchema,
   ExportSettingsResponseSchema,
   ImportSettingsResponseSchema,
+  PatchPreferenceNamespaceBodySchema,
+  PreferenceMutationReceiptSchema,
+  PreferenceNamespacePathSchema,
+  PreferenceNamespaceResponseSchema,
+  ResetPreferenceNamespaceBodySchema,
+  ResetUserPreferencesBodySchema,
+  ResetUserPreferencesResponseSchema,
+  UserPreferenceProfileSchema,
 } from '@memoflow/contracts/setting';
 import { SettingController } from '../server/transport';
 import type { SettingApplicationPort } from '../server/application';
@@ -51,6 +59,88 @@ export function registerSettingRoutes(
     defaultTags: ['Setting'],
     defaultSecurity: [{ bearerAuth: [] }],
   });
+
+  // Canonical User Preferences — presentation/regional only.
+  r.route(
+    {
+      method: 'get',
+      path: '/preferences',
+      summary: '获取规范用户偏好',
+      responses: { 200: successResponse(UserPreferenceProfileSchema, '获取成功') },
+    },
+    [auth],
+    (_req, ctx) => controller.getPreferenceProfile(ctx),
+  );
+
+  r.route(
+    {
+      method: 'get',
+      path: '/preferences/:namespace',
+      summary: '获取偏好命名空间',
+      request: { params: PreferenceNamespacePathSchema },
+      responses: {
+        200: successResponse(PreferenceNamespaceResponseSchema, '获取成功'),
+        400: errorResponse('参数错误'),
+      },
+    },
+    [auth],
+    (req, ctx) => controller.getPreferenceNamespace(req.params!.namespace, ctx),
+  );
+
+  r.route(
+    {
+      method: 'patch',
+      path: '/preferences/:namespace',
+      summary: '更新偏好命名空间',
+      request: {
+        params: PreferenceNamespacePathSchema,
+        body: { content: { 'application/json': { schema: PatchPreferenceNamespaceBodySchema } } },
+      },
+      responses: {
+        200: successResponse(PreferenceMutationReceiptSchema, '更新成功'),
+        400: errorResponse('参数错误'),
+        409: errorResponse('偏好版本冲突'),
+      },
+    },
+    [auth],
+    (req, ctx) => controller.patchPreferenceNamespace(req.params!.namespace, req.body, ctx),
+  );
+
+  r.route(
+    {
+      method: 'post',
+      path: '/preferences/:namespace/reset',
+      summary: '重置偏好命名空间',
+      request: {
+        params: PreferenceNamespacePathSchema,
+        body: { content: { 'application/json': { schema: ResetPreferenceNamespaceBodySchema } } },
+      },
+      responses: {
+        200: successResponse(PreferenceMutationReceiptSchema, '重置成功'),
+        400: errorResponse('参数错误'),
+        409: errorResponse('偏好版本冲突'),
+      },
+    },
+    [auth],
+    (req, ctx) => controller.resetPreferenceNamespace(req.params!.namespace, req.body, ctx),
+  );
+
+  r.route(
+    {
+      method: 'post',
+      path: '/preferences/reset-all',
+      summary: '重置外观与区域偏好',
+      request: {
+        body: { content: { 'application/json': { schema: ResetUserPreferencesBodySchema } } },
+      },
+      responses: {
+        200: successResponse(ResetUserPreferencesResponseSchema, '重置成功'),
+        400: errorResponse('参数错误'),
+      },
+    },
+    [auth],
+    (req, ctx) => controller.resetUserPreferences(req.body, ctx),
+  );
 
   // GET / — 获取用户设置
   r.route(

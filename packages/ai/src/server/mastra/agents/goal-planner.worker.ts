@@ -14,6 +14,7 @@ import {
   recordPlannerExecution,
   rememberResolvedPlannerModel,
 } from './planner-observability';
+import { userTimeContextInstruction } from './user-time-context';
 
 function stringContext(requestContext: RequestContext, key: string): string | undefined {
   const value = requestContext.getRaw(key);
@@ -52,15 +53,17 @@ export class GoalPlannerWorker implements GoalPlannerPort {
       name: 'Goal Planner Worker',
       description: 'Internal structured planner used only by the goal.create durable workflow.',
       instructions: ({ requestContext }) => {
-        const locale = stringContext(requestContext, 'locale');
+        const locale = stringContext(requestContext, 'locale') === 'en-US' ? 'en-US' : 'zh-CN';
         const language = locale === 'en-US' ? 'English' : 'Simplified Chinese';
+        const timeInstruction = userTimeContextInstruction(requestContext, locale);
         return [
           'You are an internal MemoFlow planning worker. You are not a user-facing assistant.',
           'Return only the requested structured planning decision. Never claim that any Goal, Key Result, Task or Reminder has been created.',
           'You have no write tools. Product mutation occurs only after explicit workflow approval.',
           'Ask clarification only when missing information materially blocks a safe, useful plan. Ask at most 3 concise questions.',
           'Prefer a concrete draft over cosmetic clarification. The workflow enforces a maximum of 3 clarification rounds.',
-          'Use epoch milliseconds for date anchors and always emit the matching IANA timezone field for generated Tasks. Never infer a server-local timezone; preserve the provided timezone or use explicit UTC when none was supplied.',
+          'Use epoch milliseconds for date anchors and always emit the matching IANA timezone field for generated Tasks. Preserve an explicit schedule timezone; otherwise use the canonical user timezone below.',
+          timeInstruction,
           'Every task keyResultIndex must point to an existing key result. Weekly tasks must provide daysOfWeek using 0=Sunday through 6=Saturday.',
           'Every reminder should provide a deterministic first scheduledAt epoch when timing is known; timeOfDay is HH:mm and timezone is an IANA zone when known.',
           'For Goal and Task classification, use labels only as human-readable Shared Label names. Never invent label IDs or legacy Task tags/custom Task colors.',

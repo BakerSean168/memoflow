@@ -3,8 +3,11 @@ import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { IGoalRepository } from '../../../../domain/repositories/i-goal-repository';
 import { AddGoalReviewUseCase } from '../add-goal-review.use-case';
+import { createTimeContext, createTimeFacade } from '@memoflow/time';
 
 const NOW = Date.UTC(2026, 7, 26, 0, 0, 0);
+const UTC_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const UTC_TIME_PORT = { getUserTimeContext: vi.fn().mockResolvedValue(UTC_CONTEXT) };
 const context = {
   windowStartAt: NOW - 7 * 24 * 60 * 60 * 1000,
   windowEndAt: NOW,
@@ -40,7 +43,7 @@ function createUseCase(goal: any, contextBuilder = { build: vi.fn().mockResolved
     saveRootWithExpectedVersion: vi.fn().mockResolvedValue(undefined),
   });
   return {
-    useCase: new AddGoalReviewUseCase(goalRepo, goalPolicy, contextBuilder as any, () => NOW),
+    useCase: new AddGoalReviewUseCase(goalRepo, goalPolicy, contextBuilder as any, UTC_TIME_PORT, () => NOW),
     goalRepo,
     goalPolicy,
     contextBuilder,
@@ -67,6 +70,36 @@ describe('AddGoalReviewUseCase', () => {
       systemContext: context,
     });
     expect(goalRepo.saveRootWithExpectedVersion).toHaveBeenCalledWith(goal, 1);
+  });
+
+  it('uses calendar days across spring-forward DST instead of fixed 24-hour subtraction', async () => {
+    const goal = createGoalFixture();
+    const contextBuilder = { build: vi.fn().mockResolvedValue(context) };
+    const goalPolicy = { ensureGoalCanBeModified: vi.fn() } as any;
+    const goalRepo = createMockRepo<IGoalRepository>({
+      findByIdForIdentity: vi.fn().mockResolvedValue(goal),
+      saveRootWithExpectedVersion: vi.fn().mockResolvedValue(undefined),
+    });
+    const nyContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });
+    const nyPort = { getUserTimeContext: vi.fn().mockResolvedValue(nyContext) };
+    const now = Date.parse('2026-03-09T03:30:00.000Z'); // Mar 8 23:30 after spring-forward
+    const useCase = new AddGoalReviewUseCase(
+      goalRepo,
+      goalPolicy,
+      contextBuilder as any,
+      nyPort,
+      () => now,
+    );
+
+    await useCase.execute('goal-id-1', 'identity-1', aReviewInput({ windowDays: 1 }));
+
+    const expectedStart = Number(createTimeFacade({ context: nyContext }).calendar.addDays(now, -1));
+    expect(now - expectedStart).toBe(23 * 60 * 60 * 1000);
+    expect(contextBuilder.build).toHaveBeenCalledWith(goal, {
+      windowStartAt: expectedStart,
+      windowEndAt: now,
+    });
+    expect(nyPort.getUserTimeContext).toHaveBeenCalledWith('identity-1');
   });
 
   it('returns the committed Goal read model and review id', async () => {
@@ -97,7 +130,7 @@ describe('AddGoalReviewUseCase', () => {
     });
     const useCase = new AddGoalReviewUseCase(goalRepo, {
       ensureGoalCanBeModified: vi.fn(() => { throw new Error('Goal cannot be modified'); }),
-    } as any, contextBuilder as any, () => NOW);
+    } as any, contextBuilder as any, UTC_TIME_PORT, () => NOW);
     await expect(useCase.execute('goal-id-1', 'identity-1', aReviewInput())).rejects.toThrow(
       'Goal cannot be modified',
     );

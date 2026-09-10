@@ -5,26 +5,12 @@
 
 model Account {
   id               String    @id // same as CloudAuthUser.id for cloud accounts
-  status           String    @default("ACTIVE") // AccountStatus: ACTIVE | INACTIVE | SUSPENDED | DELETED
+  status           String    @default("Active") // AccountStatus: Active | Closed
   // profile
   profile          Json
-  // settings
-  settings         Json
-  // email object value
-  emailAddress     String    @unique @map("email_address") // jdoe@example.com
-  emailIsVerified  Boolean   @default(false) @map("email_is_verified")
-  emailVerifiedAt  DateTime? @map("email_verified_at")
-  emailIsPrimary   Boolean   @default(false) @map("email_is_primary")
-  // phone object value
-  phoneCountryCode String?   @map("phone_country_code") // +86
-  phoneNumber      String?   @map("phone_number") // 13800138000
-  phoneFullNumber  String?   @map("phone_full_number") // +8613800138000 (E.164格式)
-  phoneIsVerified  Boolean?  @default(false) @map("phone_is_verified")
-  phoneVerifiedAt  DateTime? @map("phone_verified_at")
-  version          Int       @default(1)
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
-  deletedAt        DateTime? @map("deleted_at")
+  closedAt         DateTime? @map("closed_at")
 
   // 关联关系
   cloudUser CloudAuthUser @relation(fields: [id], references: [id], onDelete: Cascade)
@@ -93,7 +79,5 @@ model Account {
   knowledgeRepositoryInstallationIntents KnowledgeRepositoryInstallationIntent[]
   knowledgeWriteRequests         KnowledgeWriteRequest[]
 
-  @@index([emailAddress])
-  @@index([phoneFullNumber])
   @@map("accounts")
 }

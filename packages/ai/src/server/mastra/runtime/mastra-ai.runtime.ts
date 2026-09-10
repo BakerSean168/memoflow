@@ -22,6 +22,7 @@ import {
   type AssistantRuntimeHistoryView,
 } from '@memoflow/contracts/ai';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { UserTimeContextPort } from '@memoflow/time';
 import type {
   AIUsageSummary,
   IAIExecutionLogPort,
@@ -120,6 +121,8 @@ export interface MastraAIRuntimeDependencies {
   readonly routineCommandPort: IAIRoutineCommandPort;
   readonly plannerReadPort: IAIPlannerReadPort;
   readonly notificationReadPort: IAINotificationReadPort;
+  /** Identity-scoped Product Time context injected into every model-facing request. */
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
 type ActiveRun = {
@@ -239,7 +242,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     await this.disposePromise;
   }
 
-  private workflowRequestContext(
+  private async workflowRequestContext(
     context: ExecutionContext,
     input: {
       conversationId: string;
@@ -247,10 +250,12 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       providerId?: string;
       modelId?: string;
     },
-  ): RequestContext {
+  ): Promise<RequestContext> {
     const requestContext = new RequestContext();
+    const timeContext = await this.deps.userTimeContextPort.getUserTimeContext(context.identityId);
     requestContext.setRaw('identityId', context.identityId);
     requestContext.setRaw('locale', input.locale ?? 'zh-CN');
+    requestContext.setRaw('timeContext', timeContext);
     if (input.providerId) requestContext.setRaw('providerId', input.providerId);
     if (input.modelId) requestContext.setRaw('modelId', input.modelId);
     // The current entry context is supplied on every start/resume. Credentials
@@ -536,7 +541,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         await run.start({
           inputData: goalInput,
           initialState: initialGoalCreateWorkflowState(goalInput),
-          requestContext: this.workflowRequestContext(input.context, goalInput),
+          requestContext: await this.workflowRequestContext(input.context, goalInput),
         });
       } catch (cause) {
         const persisted = await this.get({
@@ -559,7 +564,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         await run.start({
           inputData: taskInput,
           initialState: initialTaskCreateWorkflowState(taskInput),
-          requestContext: this.workflowRequestContext(input.context, taskInput),
+          requestContext: await this.workflowRequestContext(input.context, taskInput),
         });
       } catch (cause) {
         const persisted = await this.get({
@@ -581,7 +586,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       await run.start({
         inputData: knowledgeInput,
         initialState: initialKnowledgeCaptureWorkflowState(knowledgeInput),
-        requestContext: this.workflowRequestContext(input.context, knowledgeInput),
+        requestContext: await this.workflowRequestContext(input.context, knowledgeInput),
       });
     } catch (cause) {
       const persisted = await this.get({
@@ -674,7 +679,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       await run.resume({
         step: lifecycleStepId,
         resumeData: input.request.command,
-        requestContext: this.workflowRequestContext(input.context, workflowInput),
+        requestContext: await this.workflowRequestContext(input.context, workflowInput),
       });
     } catch (cause) {
       const persisted = await this.get({
@@ -893,7 +898,9 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       modelId: input.modelId,
     });
     const requestContext = new RequestContext();
+    const timeContext = await this.deps.userTimeContextPort.getUserTimeContext(input.identityId);
     requestContext.setRaw('identityId', input.identityId);
+    requestContext.setRaw('timeContext', timeContext);
     requestContext.setRaw('providerId', resolvedModel.providerId);
     requestContext.setRaw('modelId', resolvedModel.modelId);
     requestContext.setRaw('locale', input.locale ?? 'zh-CN');

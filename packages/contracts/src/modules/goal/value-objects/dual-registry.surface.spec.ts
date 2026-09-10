@@ -55,13 +55,12 @@ import { describe, expect, it } from 'vitest';
     });
 
     it('keeps account/task Instant duals separate', () => {
-      const email = readFileSync(resolve(accountVo, 'contact-email.ts'), 'utf8');
       const phone = readFileSync(resolve(accountVo, 'contact-phone.ts'), 'utf8');
       const profile = readFileSync(resolve(accountVo, 'account-profile.ts'), 'utf8');
+      expect(() => readFileSync(resolve(accountVo, 'contact-email.ts'), 'utf8')).toThrow();
       const completion = readFileSync(resolve(taskVo, 'completion-record.ts'), 'utf8');
 
       for (const [src, vo, dto] of [
-        [email, 'ContactEmail', 'ContactEmailDTO'],
         [phone, 'ContactPhone', 'ContactPhoneDTO'],
         [profile, 'AccountProfile', 'AccountProfileDTO'],
         [completion, 'CompletionRecord', 'CompletionRecordDTO'],
@@ -92,24 +91,15 @@ import { describe, expect, it } from 'vitest';
 {
   /**
    * Residual 853: exact-match VO/DTO duals retired (Instant/TransferDate duals left as separate interfaces).
-   * AccountSettingsDTO / ChecklistItemDefinitionDTO = sole interface + type alias.
+   * ChecklistItemDefinitionDTO = sole interface + type alias.
    * Residual 857 (soft): FrequencyAdjustmentDTO / ResponseMetricsDTO exact duals also retired.
    * Residual 859 (soft): Instant/TransferDate dual keep-boundary owned above (this block keeps Residual 853 only).
    */
   describe('exact vo dto duals retired (residual 853)', () => {
     const goalVo = __dirname;
-    const accountVo = resolve(goalVo, '../../account/value-objects');
     const taskVo = resolve(goalVo, '../../task/value-objects');
 
-    const accountSettings = readFileSync(resolve(accountVo, 'account-settings.ts'), 'utf8');
     const checklist = readFileSync(resolve(taskVo, 'checklist-item-definition.ts'), 'utf8');
-
-    it('owns AccountSettingsDTO as type alias of AccountSettings', () => {
-      expect(accountSettings).toContain('Residual 853');
-      expect(accountSettings).toMatch(/export interface AccountSettings\b/);
-      expect(accountSettings).toContain('export type AccountSettingsDTO = AccountSettings');
-      expect(accountSettings).not.toMatch(/export interface AccountSettingsDTO\b/);
-    });
 
     it('owns ChecklistItemDefinitionDTO as type alias; keeps Instant duals as interfaces', () => {
       expect(checklist).toContain('Residual 853');

@@ -24,8 +24,6 @@ import type {
   TaskPlanClientDTO,
   TaskTimeConfig,
   TaskTimeConfigDTO,
-  RecurrenceRule,
-  RecurrenceRuleDTO,
   TaskReminderConfig,
   TaskGoalBinding,
   TaskGoalBindingDTO,
@@ -103,16 +101,6 @@ function parseTimeConfig(dto: TaskTimeConfigDTO): TaskTimeConfig {
     startDate: dto.startDate ? dto.startDate : null,
     timePoint: dto.timePoint,
     timeRange: dto.timeRange,
-  };
-}
-
-function parseRecurrenceRule(dto: RecurrenceRuleDTO): RecurrenceRule {
-  return {
-    frequency: dto.frequency,
-    interval: dto.interval,
-    daysOfWeek: dto.daysOfWeek,
-    endDate: dto.endDate ? dto.endDate : null,
-    occurrences: dto.occurrences,
   };
 }
 

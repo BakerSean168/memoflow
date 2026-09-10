@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { aOneTimeTask, aLoadedTaskPlan } from '../../../../../testing';
+import {
+  aOneTimeTask,
+  aLoadedTaskPlan,
+  TASK_TEST_USER_TIME_CONTEXT_PORT,
+} from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import { ArchiveTaskPlanUseCase } from '../archive-task-plan.use-case';
 import { TaskPlanStatus } from '@memoflow/contracts/task';
@@ -15,7 +19,7 @@ describe('ArchiveTaskPlanUseCase', () => {
       findByIdForIdentity: vi.fn(),
       save: vi.fn().mockResolvedValue(undefined),
     });
-    useCase = new ArchiveTaskPlanUseCase(templateRepo);
+    useCase = new ArchiveTaskPlanUseCase(templateRepo, TASK_TEST_USER_TIME_CONTEXT_PORT);
   });
 
   it('should return NOT_FOUND when template does not exist', async () => {

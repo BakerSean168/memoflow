@@ -21,8 +21,10 @@ describe('AccountChannels surface', () => {
   it('keeps live account channels used by AccountIpcAdapter', () => {
     expect(AccountChannels.GET_ME).toBe('account:get-me');
     expect(AccountChannels.UPDATE_PROFILE).toBe('account:update-profile');
-    expect(AccountChannels.UPDATE_SETTINGS).toBe('account:update-settings');
-    expect(AccountChannels.CHECK_AVAILABILITY).toBe('account:check-availability');
+    expect(AccountChannels).not.toHaveProperty('UPDATE_SETTINGS');
+    expect(Object.values(AccountChannels)).not.toContain('account:update-settings');
+    expect(AccountChannels).not.toHaveProperty('CHECK_AVAILABILITY');
+    expect(Object.values(AccountChannels)).not.toContain('account:check-availability');
     expect(AccountChannels.CLOSE).toBe('account:close');
   });
 });

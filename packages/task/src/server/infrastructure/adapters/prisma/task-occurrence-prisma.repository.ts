@@ -257,15 +257,15 @@ export class TaskOccurrencePrismaRepository
   async getTemplateStats(
     templateIds: string[],
     identityId: string,
-    asOf: number = Date.now(),
+    window: { windowStart: number; asOf: number },
   ): Promise<Record<string, TaskPlanInstanceStats>> {
     if (templateIds.length === 0) {
       return {};
     }
 
     const completionWindowDays = 30 as const;
-    const windowStart = new Date(asOf - completionWindowDays * 24 * 60 * 60 * 1000);
-    const windowEnd = new Date(asOf);
+    const windowStart = new Date(window.windowStart);
+    const windowEnd = new Date(window.asOf);
     const grouped = await this.db.taskOccurrence.groupBy({
       by: ['templateId', 'status'],
       where: {

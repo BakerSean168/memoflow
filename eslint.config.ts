@@ -32,7 +32,12 @@ const featureScopeConstraints = [
   {
     sourceTag: 'scope:goal',
     // temporary: schedule shared-kernel until Schedule* contracts are extracted
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:goal', 'scope:schedule', 'scope:scheduler'],
+    onlyDependOnLibsWithTags: [
+      ...sharedScopeTags,
+      'scope:goal',
+      'scope:schedule',
+      'scope:scheduler',
+    ],
   },
   {
     sourceTag: 'scope:governance',
@@ -66,7 +71,12 @@ const featureScopeConstraints = [
   {
     sourceTag: 'scope:task',
     // temporary: schedule shared-kernel until Schedule* contracts are extracted
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:task', 'scope:schedule', 'scope:scheduler'],
+    onlyDependOnLibsWithTags: [
+      ...sharedScopeTags,
+      'scope:task',
+      'scope:schedule',
+      'scope:scheduler',
+    ],
   },
   {
     sourceTag: 'scope:data-portability',
@@ -330,7 +340,7 @@ const utilsRootImportRestriction = {
     {
       name: 'date-fns',
       message:
-        'ADR-037: import time from @memoflow/time. date-fns is confined to packages/time/src/engine/** (+ time-registry legacy with retire_by).',
+        'ADR-037/TIME-1206: import time from @memoflow/time. Production date-fns is confined to packages/time/src/engine/**; legacy exemptions are retired.',
     },
   ],
   patterns: [
@@ -382,24 +392,8 @@ export default tseslint.config(
         'tools/**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,vue}',
       ],
       ignores: [
-        // Engine + time-registry legacy (retire_by) may import date-fns
+        // TIME-1206: the engine is the only production date-fns import boundary.
         'packages/time/src/engine/**',
-        'packages/utils/src/shared/date.ts',
-        'packages/task/src/server/domain/aggregates/task-plan.ts',
-        'packages/task/src/server/domain/aggregates/instance-generation.policy.ts',
-        'packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue',
-        'packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.vue',
-        'packages/app-vue/src/modules/task/components/cards/TaskPlanCard.vue',
-        'packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue',
-        'packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue',
-        'packages/app-vue/src/modules/notification/components/NotificationItem.vue',
-        'packages/app-vue/src/modules/schedule/composables/useCalendarView.ts',
-        'packages/app-vue/src/modules/goal/components/ProgressBreakdownPanel.vue',
-        'packages/app-vue/src/modules/goal/components/cards/GoalReviewListCard.vue',
-        'packages/app-vue/src/modules/goal/components/weight-snapshot/**',
-        'packages/app-vue/src/modules/goal/components/GoalRecordCard.vue',
-        'packages/app-vue/src/modules/goal/components/echarts/GoalProgressChart.vue',
-        'packages/app-vue/src/layouts/shell/previews/TaskCapsulePreview.vue',
       ],
       rules: {
         'no-restricted-imports': ['error', utilsRootImportRestriction],
@@ -418,18 +412,6 @@ export default tseslint.config(
         '**/src/testing/**',
         'packages/test-utils/**',
         'packages/time/src/engine/**',
-        'packages/utils/src/shared/date.ts',
-        'packages/task/src/server/domain/aggregates/task-plan.ts',
-        'packages/task/src/server/domain/aggregates/instance-generation.policy.ts',
-        'packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue',
-        'packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.vue',
-        'packages/app-vue/src/modules/task/components/cards/TaskPlanCard.vue',
-        'packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue',
-        'packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue',
-        'packages/app-vue/src/modules/notification/components/NotificationItem.vue',
-        'packages/app-vue/src/modules/schedule/composables/useCalendarView.ts',
-        'packages/app-vue/src/modules/goal/components/**',
-        'packages/app-vue/src/layouts/shell/previews/TaskCapsulePreview.vue',
       ],
       rules: {
         // Must re-include date-fns ban: flat config replaces no-restricted-imports wholesale.
@@ -440,7 +422,7 @@ export default tseslint.config(
               {
                 name: 'date-fns',
                 message:
-                  'ADR-037: import time from @memoflow/time. date-fns is confined to packages/time/src/engine/** (+ time-registry legacy with retire_by).',
+                  'ADR-037/TIME-1206: import time from @memoflow/time. Production date-fns is confined to packages/time/src/engine/**; legacy exemptions are retired.',
               },
             ],
             patterns: [
@@ -508,15 +490,14 @@ export default tseslint.config(
           'error',
           {
             selector:
-              "FunctionDeclaration[id.name=/^(formatDate|formatTime|formatDateTime|formatTimestamp)$/]",
+              'FunctionDeclaration[id.name=/^(formatDate|formatTime|formatDateTime|formatTimestamp)$/]',
             message:
               'ADR-037 P9: no L5 formatDate|formatTime|formatDateTime|formatTimestamp — use getProductTime()/product-time helpers.',
           },
           {
             selector:
-              "VariableDeclarator[id.name=/^(formatDate|formatTime|formatDateTime|formatTimestamp)$/]",
-            message:
-              'ADR-037 P9: no L5 formatDate* bindings — use product-time / @memoflow/time.',
+              'VariableDeclarator[id.name=/^(formatDate|formatTime|formatDateTime|formatTimestamp)$/]',
+            message: 'ADR-037 P9: no L5 formatDate* bindings — use product-time / @memoflow/time.',
           },
           {
             selector: "CallExpression[callee.property.name='toLocaleDateString']",

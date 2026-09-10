@@ -2,15 +2,21 @@ import { describe, it, expect } from 'vitest';
 import { Account } from '../account';
 import { AccountStatus } from '../../value-objects/account-status';
 import { IdentityId } from '@memoflow/domain-shared/shared';
+import { asInstant } from '@memoflow/time';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function anAccount(overrides: { email?: string } = {}) {
+const CREATED_AT = asInstant(1_700_000_000_000);
+const PROFILE_UPDATED_AT = asInstant(1_700_000_000_100);
+const CLOSED_AT = asInstant(1_700_000_000_200);
+
+function anAccount(overrides: { nicknameSeed?: string } = {}) {
   return Account.create({
     id: IdentityId.generate(),
-    email: overrides.email ?? 'test@example.com',
+    nicknameSeed: overrides.nicknameSeed ?? 'TestUser',
+    now: CREATED_AT,
   });
 }
 
@@ -28,45 +34,20 @@ describe('Account', () => {
       expect(account.status).toBe(AccountStatus.Active);
     });
 
-    it('should set default profile from email', () => {
-      const account = anAccount({ email: 'john.doe@example.com' });
-      expect(account.profile.nickname).toBe('john.doe');
+    it('should set default profile from the product nickname seed', () => {
+      const account = anAccount({ nicknameSeed: 'John Doe' });
+      expect(account.profile.nickname).toBe('John Doe');
     });
 
-    it('should set default settings', () => {
+    it('uses the explicit creation Instant for createdAt and updatedAt', () => {
       const account = anAccount();
-      expect(account.settings).toBeDefined();
-      expect(account.settings.notificationEnabled).toBe(true);
+      expect(account.createdAt).toBe(CREATED_AT);
+      expect(account.updatedAt).toBe(CREATED_AT);
     });
 
-    it('should create email contact as unverified', () => {
-      const account = anAccount({ email: 'test@example.com' });
-      expect(account.email.address).toBe('test@example.com');
-      expect(account.email.isVerified).toBe(false);
-    });
-
-    it('should set phone to null', () => {
+    it('should set closedAt to null', () => {
       const account = anAccount();
-      expect(account.phone).toBeNull();
-    });
-
-    it('should set version to 1', () => {
-      const account = anAccount();
-      expect(account.version).toBe(1);
-    });
-
-    it('should set timestamps', () => {
-      const before = Date.now();
-      const account = anAccount();
-      const after = Date.now();
-      expect(Number(account.createdAt)).toBeGreaterThanOrEqual(before);
-      expect(Number(account.createdAt)).toBeLessThanOrEqual(after);
-      expect(Number(account.updatedAt)).toBeGreaterThanOrEqual(before);
-    });
-
-    it('should set deletedAt to null', () => {
-      const account = anAccount();
-      expect(account.deletedAt).toBeNull();
+      expect(account.closedAt).toBeNull();
     });
 
     it('should emit account:create domain event', () => {
@@ -75,7 +56,7 @@ describe('Account', () => {
       expect(events).toHaveLength(1);
       expect(events[0].eventType).toBe('account:created');
       expect(events[0].payload.accountId).toBe(account.id.toString());
-      expect(events[0].payload.account.email.address).toBe(account.email.address);
+      expect(events[0].payload.account.profile.nickname).toBe(account.profile.nickname);
     });
   });
 
@@ -84,21 +65,17 @@ describe('Account', () => {
   // =========================================================================
   describe('load', () => {
     it('should reconstruct from saved state', () => {
-      const original = anAccount({ email: 'loaded@example.com' });
+      const original = anAccount({ nicknameSeed: 'Loaded User' });
       // Simulate persistence round-trip
       const loaded = Account.load({
         id: original.id as any,
         profile: original.profile,
-        email: original.email,
-        settings: original.settings,
         status: original.status,
-        phone: original.phone,
-        version: original.version,
         createdAt: original.createdAt,
         updatedAt: original.updatedAt,
-        deletedAt: original.deletedAt,
+        closedAt: original.closedAt,
       });
-      expect(loaded.email.address).toBe('loaded@example.com');
+      expect(loaded.profile.nickname).toBe('Loaded User');
       expect(loaded.domainEvents).toHaveLength(0); // no events on load
     });
   });
@@ -107,53 +84,42 @@ describe('Account', () => {
   // close
   // =========================================================================
   describe('close', () => {
-    it('should change status to DEACTIVATED', () => {
+    it('should change status to CLOSED', () => {
       const account = anAccount();
-      account.close();
-      expect(account.status).toBe(AccountStatus.Deactivated);
+      account.close(CLOSED_AT);
+      expect(account.status).toBe(AccountStatus.Closed);
     });
 
     it('should emit account:close domain event', () => {
       const account = anAccount();
       account.clearDomainEvents(); // clear the create event
-      account.close();
+      account.close(CLOSED_AT);
       const events = account.domainEvents;
       expect(events).toHaveLength(1);
       expect(events[0].eventType).toBe('account:closed');
       expect(events[0].payload.accountId).toBe(account.id.toString());
-      expect(events[0].payload.account.status).toBe(AccountStatus.Deactivated);
+      expect(events[0].payload.account.status).toBe(AccountStatus.Closed);
     });
 
     it('should throw if already deactivated', () => {
       const account = anAccount();
-      account.close();
-      expect(() => account.close()).toThrow('Account is already closed.');
+      account.close(CLOSED_AT);
+      expect(() => account.close(CLOSED_AT)).toThrow('Account is already closed.');
     });
 
-    it('should throw if account is suspended', () => {
-      // Need to load with suspended status since there is no suspend method
-      const account = Account.load({
-        id: IdentityId.generate() as any,
-        profile: anAccount().profile,
-        email: anAccount().email,
-        settings: anAccount().settings,
-        status: AccountStatus.Suspended,
-        phone: null,
-        version: 1,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        deletedAt: null,
-      });
-      expect(() => account.close()).toThrow(
-        'Cannot close a suspended account. Please contact support.',
-      );
+    it('should persist an explicit closedAt lifecycle fact', () => {
+      const account = anAccount();
+      expect(account.closedAt).toBeNull();
+      account.close(CLOSED_AT);
+      expect(account.closedAt).not.toBeNull();
+      expect(account.closedAt).toBe(account.updatedAt);
     });
 
     it('should update the updatedAt timestamp', () => {
       const account = anAccount();
       const before = account.updatedAt;
       // Small delay to ensure timestamp difference
-      account.close();
+      account.close(CLOSED_AT);
       expect(Number(account.updatedAt)).toBeGreaterThanOrEqual(Number(before));
     });
   });
@@ -163,9 +129,9 @@ describe('Account', () => {
   // =========================================================================
   describe('updateProfile', () => {
     it('should replace profile with a new one', () => {
-      const account = anAccount({ email: 'update@example.com' });
+      const account = anAccount({ nicknameSeed: 'Update User' });
       const newProfile = account.profile.updateNickname('NewName');
-      account.updateProfile(newProfile);
+      account.updateProfile(newProfile, PROFILE_UPDATED_AT);
       expect(account.profile.nickname).toBe('NewName');
     });
 
@@ -173,42 +139,18 @@ describe('Account', () => {
       const account = anAccount();
       account.clearDomainEvents();
       const newProfile = account.profile.updateNickname('Updated');
-      account.updateProfile(newProfile);
+      account.updateProfile(newProfile, PROFILE_UPDATED_AT);
       const events = account.domainEvents;
       expect(events).toHaveLength(1);
       expect(events[0].eventType).toBe('account:profile-updated');
       expect(events[0].payload.account.profile.nickname).toBe('Updated');
     });
 
-    it('should refresh updatedAt', () => {
+    it('uses the explicit mutation Instant for updatedAt', () => {
       const account = anAccount();
-      const before = account.updatedAt;
       const newProfile = account.profile.updateBio('Hello');
-      account.updateProfile(newProfile);
-      expect(Number(account.updatedAt)).toBeGreaterThanOrEqual(Number(before));
-    });
-  });
-
-  // =========================================================================
-  // updateSettings
-  // =========================================================================
-  describe('updateSettings', () => {
-    it('should replace settings with new ones', () => {
-      const account = anAccount();
-      const newSettings = account.settings.disableNotification();
-      account.updateSettings(newSettings);
-      expect(account.settings.notificationEnabled).toBe(false);
-    });
-
-    it('should emit account:update-settings domain event', () => {
-      const account = anAccount();
-      account.clearDomainEvents();
-      const newSettings = account.settings.setTimezone('America/New_York');
-      account.updateSettings(newSettings);
-      const events = account.domainEvents;
-      expect(events).toHaveLength(1);
-      expect(events[0].eventType).toBe('account:settings-updated');
-      expect(events[0].payload.account.settings.timezone).toBe('America/New_York');
+      account.updateProfile(newProfile, PROFILE_UPDATED_AT);
+      expect(account.updatedAt).toBe(PROFILE_UPDATED_AT);
     });
   });
 
@@ -230,18 +172,15 @@ describe('Account', () => {
   // =========================================================================
   describe('toServerDTO', () => {
     it('should serialize all fields', () => {
-      const account = anAccount({ email: 'dto@example.com' });
+      const account = anAccount({ nicknameSeed: 'DTO User' });
       const dto = account.toServerDTO();
       expect(dto.id).toBeDefined();
       expect(dto.status).toBe(AccountStatus.Active);
       expect(dto.profile).toBeDefined();
-      expect(dto.settings).toBeDefined();
-      expect(dto.email.address).toBe('dto@example.com');
-      expect(dto.phone).toBeNull();
-      expect(dto.version).toBe(1);
+      expect(dto.profile.nickname).toBe('DTO User');
       expect(typeof dto.createdAt).toBe('number');
       expect(typeof dto.updatedAt).toBe('number');
-      expect(dto.deletedAt).toBeNull();
+      expect(dto.closedAt).toBeNull();
     });
   });
 

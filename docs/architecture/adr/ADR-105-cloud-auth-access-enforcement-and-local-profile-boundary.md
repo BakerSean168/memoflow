@@ -7,7 +7,7 @@ updated: 2026-09-09T00:31:00+08:00
 
 # ADR-105: Cloud Auth, Access Enforcement and Local Profile Boundary
 
-**状态：** 已采纳，待实施
+**状态：** 已采纳并完全实施（AUTH-1501、AUTH-1502，2026-09-10）
 **日期：** 2026-09-09
 **修订：** ADR-039 的第二轮收敛；不替换 Better Auth。
 
@@ -81,3 +81,9 @@ Server-held disclosure 如法律要求列举时也必须使用 safe metadata/red
 - 不引入第二 auth provider abstraction layer；
 - 不把 Desktop local Profile 变成 cloud user；
 - 不因 cloud session 失效而锁本地业务数据。
+
+## Implementation checkpoint
+
+AUTH-1501（2026-09-10）已完成：API auth middleware 依赖 `CloudSessionCapability`，server public surface 仅暴露 `CloudPrincipal`/session capability 与邮件适配器类型，Better Auth 私有类型未进入 emitted Cloud Auth declarations，`checkRequestAccess()` 仅保留 Account closure enforcement。
+
+AUTH-1502（2026-09-10）已完成：`CloudAuthUser.status` 已从 Prisma 与物理 PostgreSQL schema 移除，`disabledAt` 是唯一 durable auth-access enforcement projection；`revokeAllSessions()` 只撤销 session/device state，Account closure 的 Prisma revocation adapter 在撤销成功后用注入 Clock 单次写入 `disabledAt`。Cloud-auth 7 files / 40 unit tests、type/build/declaration gates、Account unit/real-DB closure gates、API express closure 4/4 与物理 schema gate 均通过。本 ADR 标记为 fully implemented；broader system-wide convergence 与 exact-head CI 不在此 checkpoint 内。

@@ -146,9 +146,8 @@
                               <CalendarIcon class="mr-2 h-4 w-4" />
                               {{
                                 getAbsoluteDatePart(trigger.absoluteTime)
-                                  ? formatDisplayDate(
+                                  ? formatAbsoluteDateDisplay(
                                       getAbsoluteDatePart(trigger.absoluteTime)!,
-                                      locale,
                                     )
                                   : t('task.reminderSection.reminderTime')
                               }}
@@ -263,14 +262,13 @@ import {
   Plus,
   Calendar as CalendarIcon,
 } from '@lucide/vue';
-import { formatDateToYMD } from '../../../../../shared/utils/format-date-to-ymd';
-import { formatDisplayDate } from '../../../../../shared/utils/format-display-date';
 import { handleCalendarSelect } from '../../../../../shared/utils/handle-calendar-select';
 import { padTwoDigits } from '../../../../../shared/utils/pad-two-digits';
+import { getProductTime } from '../../../../../shared/utils/product-time';
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
-// Residual 1249 / Residual 1252: formatDisplayDate dual retired onto shared sole; formatDateToYMD dual retired onto shared sole (Residual 1252).
+// TIME-1206: reminder date display is Ymd-only; wall-clock resolution uses the session Product Time context.
 // Residual 1270: handleAbsoluteDateSelect Date/toDate dual retired onto handleCalendarSelect sole; absoluteTime composition stays co-located.
 
 // 类型别名
@@ -286,25 +284,32 @@ const minuteOptions = Array.from({ length: 60 }, (_, i) => padTwoDigits(i));
 /** Extract date part (YYYY-MM-DD) from a timestamp */
 function getAbsoluteDatePart(ts?: number | null): string | null {
   if (!ts) return null;
-  return formatDateToYMD(new Date(ts));
+  return String(getProductTime().calendar.toYmd(ts));
+}
+
+function formatAbsoluteDateDisplay(datePart: string): string {
+  const time = getProductTime();
+  const ymd = time.input.parseDateValue(datePart);
+  if (!ymd) return datePart;
+  return time.format.date(time.codec.startOfYmd(ymd));
 }
 
 /** Residual 1312: absolute hour/minute pad dual retired onto padTwoDigits sole. */
 function getAbsoluteHour(ts?: number | null): string {
   if (!ts) return '00';
-  return padTwoDigits(new Date(ts).getHours());
+  return String(getProductTime().input.timeValue(ts)).slice(0, 2);
 }
 
 /** Residual 1312: absolute minute pad dual retired onto padTwoDigits sole. */
 function getAbsoluteMinute(ts?: number | null): string {
   if (!ts) return '00';
-  return padTwoDigits(new Date(ts).getMinutes());
+  return String(getProductTime().input.timeValue(ts)).slice(3, 5);
 }
 
 /** Get a Date for Calendar :selected from a timestamp */
 function getAbsoluteCalendarDate(ts?: number | null): Date | undefined {
-  if (!ts) return undefined;
-  return new Date(ts);
+  const datePart = getAbsoluteDatePart(ts);
+  return datePart ? new Date(`${datePart}T00:00:00`) : undefined;
 }
 
 /** Handle calendar date selection for absolute time trigger */
@@ -322,19 +327,27 @@ function handleAbsoluteDateSelect(index: number, date: unknown) {
   }
   const hour = getAbsoluteHour(triggers.value[index].absoluteTime);
   const minute = getAbsoluteMinute(triggers.value[index].absoluteTime);
-  triggers.value[index].absoluteTime = new Date(`${dateStr}T${hour}:${minute}:00`).getTime();
+  const time = getProductTime();
+  const ymd = time.input.parseDateValue(dateStr);
+  const hm = time.input.parseTimeValue(`${hour}:${minute}`);
+  const instant = ymd && hm ? time.input.combine(ymd, hm) : null;
+  triggers.value[index].absoluteTime = instant == null ? null : Number(instant);
   updateTriggers();
 }
 
 /** Update hour or minute part of absolute time */
 function updateAbsoluteTimePart(index: number, part: 'hour' | 'minute', value: string) {
   const currentTs = triggers.value[index].absoluteTime;
-  const datePart = getAbsoluteDatePart(currentTs) || formatDateToYMD(new Date());
+  const time = getProductTime();
+  const datePart = getAbsoluteDatePart(currentTs) || String(time.calendar.toYmd(time.now()));
   let hour = getAbsoluteHour(currentTs);
   let minute = getAbsoluteMinute(currentTs);
   if (part === 'hour') hour = value;
   if (part === 'minute') minute = value;
-  triggers.value[index].absoluteTime = new Date(`${datePart}T${hour}:${minute}:00`).getTime();
+  const ymd = time.input.parseDateValue(datePart);
+  const hm = time.input.parseTimeValue(`${hour}:${minute}`);
+  const instant = ymd && hm ? time.input.combine(ymd, hm) : null;
+  triggers.value[index].absoluteTime = instant == null ? null : Number(instant);
   updateTriggers();
 }
 

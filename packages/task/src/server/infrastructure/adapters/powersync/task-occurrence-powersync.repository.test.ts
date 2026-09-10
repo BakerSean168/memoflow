@@ -25,7 +25,7 @@ describe('PowerSyncTaskOccurrenceRepository template statistics', () => {
     const result = await repository.getTemplateStats(
       ['template-a', 'template-without-instances'],
       'identity-a',
-      asOf,
+      { windowStart: Date.UTC(2026, 6, 1), asOf },
     );
 
     expect(result['template-a']).toEqual({
@@ -58,9 +58,9 @@ describe('PowerSyncTaskOccurrenceRepository template statistics', () => {
     expect(sql).toContain('instance_date <= ?');
     expect(sql).toContain("status = 'Pending' AND instance_date > ?");
     expect(params).toEqual([
-      new Date(asOf - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      new Date(Date.UTC(2026, 6, 1)).toISOString(),
       new Date(asOf).toISOString(),
-      new Date(asOf - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      new Date(Date.UTC(2026, 6, 1)).toISOString(),
       new Date(asOf).toISOString(),
       new Date(asOf).toISOString(),
       'template-a',
@@ -83,7 +83,7 @@ describe('PowerSyncTaskOccurrenceRepository occurrence identity (TASK-2204)', ()
     } as unknown as IElectronDatabaseTransaction);
     const instance = {
       occurrenceKey: 'tpl-1:2026-03-08',
-      toServerDTO: () => ({
+      toPersistenceState: () => ({
         id: 'new-instance',
         templateId: 'tpl-1',
         identityId: 'identity-a',
@@ -123,7 +123,7 @@ describe('PowerSyncTaskOccurrenceRepository optimistic instance writes (PLAN-430
   function updatedInstance() {
     return {
       occurrenceKey: 'tpl-1:2026-08-28',
-      toServerDTO: () => ({
+      toPersistenceState: () => ({
         id: 'instance-1',
         templateId: 'tpl-1',
         identityId: 'identity-a',

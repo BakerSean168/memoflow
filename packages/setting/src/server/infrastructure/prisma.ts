@@ -75,6 +75,7 @@ export function createSettingPrismaModule(
 
   return createSettingModule({
     userSettingRepository: repositories.userSettingRepository,
+    userPreferenceRepository: repositories.userPreferenceRepository,
     runtimeContributions: options.runtimeContributions,
   });
 }

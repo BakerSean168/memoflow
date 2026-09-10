@@ -38,6 +38,7 @@ import {
 import { createSchedulePowerSyncRepositories } from '@memoflow/schedule';
 import { createSchedulerPowerSyncRepositories } from '@memoflow/scheduler';
 import { LabelService, PowerSyncLabelRepository } from '@memoflow/label';
+import { createSystemClock } from '@memoflow/time';
 import { createLabelElectronModule } from './modules/label/label.electron-module';
 import { composeGovernance } from './runtime/compose-governance';
 import { composeGoal } from './runtime/compose-goal';
@@ -176,8 +177,25 @@ async function registerBusinessModules(
   //    先组装通知/提醒 composer —— schedule 编排消费它们返回的 source/notification
   //    ports。桌面 channel capabilities 显式声明（InApp + Desktop），杜绝包默认值
   //    替宿主决定策略。
+  const settingElectronModule = composeSetting({ db });
   const notificationComposed = composeNotification({
     db,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
+    desktopRenderer: (dto) => {
+      const renderer = mainRuntime?.notification;
+      if (!renderer) return false;
+      const payload = dto as Record<string, unknown>;
+      return renderer.show({
+        title: String(payload.title ?? 'Notification'),
+        body: String(payload.content ?? ''),
+        data: {
+          notificationId: payload.id,
+          identityId: payload.identityId,
+          notificationType: payload.type,
+          notificationCategory: payload.category,
+        },
+      });
+    },
     channelCapabilities: [
       { channelType: 'InApp', status: 'available' },
       { channelType: 'Desktop', status: 'available' },
@@ -193,6 +211,7 @@ async function registerBusinessModules(
     db,
     identityId: profileIdentityId,
     notificationRequestedWriter: notificationComposed.requestedWriter,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
   });
   // Project the durable vNext Routine snapshot before sensors start so the first
   // activity transition cannot race ahead of registration. ROUTINE-5301 can
@@ -245,11 +264,17 @@ async function registerBusinessModules(
   //    schedule runtime 包级全局）。
   const scheduleOrchestrationModule = createScheduleOrchestrationModule({
     taskProjection: {
-      source: createTaskPowerSyncScheduleProjectionSource(db),
+      source: createTaskPowerSyncScheduleProjectionSource(
+        db,
+        settingElectronModule.userTimeContextPort,
+      ),
       scheduleTaskRepository: schedulerRepositorySet.scheduleTaskRepository,
     },
     goalProjection: {
-      source: createGoalPowerSyncScheduleProjectionSource(db),
+      source: createGoalPowerSyncScheduleProjectionSource(
+        db,
+        settingElectronModule.userTimeContextPort,
+      ),
     },
     reminderProjection: {
       source: reminderComposed.scheduleProjectionSource,
@@ -279,6 +304,7 @@ async function registerBusinessModules(
     db,
     runtimeContributions: scheduleOrchestrationModule.projectionRuntime,
     goalProgressHandler: createGoalTaskProgressPowerSyncHandler(db),
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
   });
   // Register the Task reminder fire handler so scheduled `task.reminder` work
   // (e.g. a one-time task + relative reminder) is executed by the registry-based
@@ -296,9 +322,12 @@ async function registerBusinessModules(
   const goalComposed = composeGoal({
     db,
     taskBindingReadPort: new PowerSyncTaskBindingReadPort(db),
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
   });
 
-  const labelService = new LabelService(new PowerSyncLabelRepository(db));
+  const labelService = new LabelService(new PowerSyncLabelRepository(db), {
+    clock: createSystemClock(),
+  });
   const labelElectronModule = createLabelElectronModule({ service: labelService });
 
   const dashboardRepositories: DashboardRepositoryDependencies = {
@@ -316,6 +345,7 @@ async function registerBusinessModules(
   //    account/data-portability/setting/AI/repository 均以显式实例组装。
   const accountComposed = composeAccount({
     db,
+    clock: createSystemClock(),
     syncOptions: {
       getCloudAccountId: () =>
         mainRuntime?.profileRuntimeManager.getActiveProfileDescriptorSync()?.cloudBinding
@@ -412,6 +442,7 @@ async function registerBusinessModules(
     goalRepository: goalComposed.repositories.goalRepository,
     taskPlanRepository: taskComposed.repositories.taskPlanRepository,
     taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
     dashboardDataLoader: (identityId) => getDesktopDashboardData(identityId, dashboardRepositories),
   });
 
@@ -426,6 +457,7 @@ async function registerBusinessModules(
     routineCommandPort: reminderComposed.routineCommandPort,
     scheduleRepository: scheduleComposed.repositories.scheduleRepository,
     notificationRepository: notificationComposed.repositories.notificationRepository,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
     labelService,
     mastraStorage: {
       kind: 'libsql',
@@ -434,7 +466,6 @@ async function registerBusinessModules(
   });
 
   const dataPortabilityElectronModule = composeDataPortability({ db });
-  const settingElectronModule = composeSetting({ db });
 
   const knowledgeRepositoryRemoteGateway = new KnowledgeRepositoryRemoteGateway({
     getAccessToken: getCloudAccessToken,
@@ -540,7 +571,11 @@ async function initializeShellRuntime(): Promise<void> {
   await profileRegistry.load();
   console.log('[Shell] ProfileRegistry initialized');
 
-  const profileRuntimeManager = new DesktopProfileRuntimeManager(sharedResolver, profileRegistry);
+  const profileRuntimeManager = new DesktopProfileRuntimeManager(
+    sharedResolver,
+    profileRegistry,
+    createSystemClock(),
+  );
   const cloudSessionStore = new CloudSessionStore(sharedResolver.rootDir);
   const cloudConnectionManager = new DesktopCloudConnectionManager(
     cloudSessionStore,

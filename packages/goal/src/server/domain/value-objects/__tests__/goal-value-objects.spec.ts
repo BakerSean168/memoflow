@@ -1,13 +1,13 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   GoalReminderConfig,
   GoalStatus,
-  GoalTimeRange,
   KeyResultCalculationMethod,
   KeyResultProgress,
   KeyResultSnapshot,
   KeyResultWeightSnapshot,
-  ReminderTriggerType,} from '..';
+  ReminderTriggerType,
+} from '..';
 import { InvalidWeightError } from '../weight-errors';
 
 describe('goal shared value objects', () => {
@@ -97,60 +97,7 @@ describe('goal shared value objects', () => {
     ).toThrow('Trigger value must be between 0-100 for percentage triggers');
   });
 
-  it('covers time ranges and key result snapshot helpers', () => {
-    const start = new Date('2026-04-01T00:00:00.000Z').getTime();
-    const target = new Date('2026-05-01T00:00:00.000Z').getTime();
-    const completed = new Date('2026-05-02T00:00:00.000Z').getTime();
-    const archived = new Date('2026-04-22T00:00:00.000Z').getTime();
-
-    const range = GoalTimeRange.createDefault(start).setDueDate(target);
-    expect(range.startDate).toBe(start);
-    expect(range.dueDate).toBe(target);
-    expect(range.getPlannedDays()).toBe(30);
-    // elapsed/days-to-target depend on clock.now — assert finite numbers
-    expect(typeof range.getElapsedDays()).toBe('number');
-    expect(typeof range.getDaysToDueDate()).toBe('number');
-    expect(range.isCompleted).toBe(false);
-    expect(range.isArchived).toBe(false);
-    expect(range.isTerminal).toBe(false);
-
-    const completedRange = range.markAsCompleted(completed);
-    expect(completedRange.completedAt).toBe(completed);
-    expect(completedRange.isCompleted).toBe(true);
-    expect(completedRange.isTerminal).toBe(true);
-    expect(completedRange.unmarkAsCompleted().completedAt).toBeNull();
-
-    const archivedRange = range.markAsArchived(archived);
-    expect(archivedRange.archivedAt).toBe(archived);
-    expect(archivedRange.isArchived).toBe(true);
-    expect(archivedRange.unmarkAsArchived().archivedAt).toBeNull();
-    expect(GoalTimeRange.fromDTO(range.toDTO()).toDTO()).toEqual(range.toDTO());
-    expect(() =>
-      GoalTimeRange.create({
-        startDate: target,
-        dueDate: start,
-        completedAt: null,
-        archivedAt: null,
-      }),
-    ).toThrow('Start date must be before or equal to due date');
-    const completedAndArchived = GoalTimeRange.create({
-      startDate: start,
-      dueDate: target,
-      completedAt: completed,
-      archivedAt: archived,
-    });
-    expect(completedAndArchived.isCompleted).toBe(true);
-    expect(completedAndArchived.isArchived).toBe(true);
-    expect(completedAndArchived.isTerminal).toBe(true);
-
-    const archivedOnly = GoalTimeRange.create({
-      startDate: start,
-      dueDate: target,
-      completedAt: null,
-      archivedAt: archived,
-    });
-    expect(archivedOnly.isTerminal).toBe(false);
-
+  it('covers key result snapshot helpers', () => {
     const snapshot = KeyResultSnapshot.create({
       keyResultId: 'KeyResultId_1' as never,
       title: 'Launch',

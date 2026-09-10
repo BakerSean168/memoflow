@@ -7,11 +7,13 @@ import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-pl
 import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
+import type { TaskOccurrenceProjectionService } from '../../services/task-occurrence-projection.service';
 
 export class ListTaskOccurrencesByTemplateUseCase {
   constructor(
     private readonly instanceRepository: ITaskOccurrenceRepository,
     private readonly templateRepository: ITaskPlanRepository,
+    private readonly projection: TaskOccurrenceProjectionService,
   ) {}
 
   async execute(
@@ -24,6 +26,6 @@ export class ListTaskOccurrencesByTemplateUseCase {
     }
 
     const instances = await this.instanceRepository.findByTemplateId(templateId, identityId);
-    return ok(instances.map((i) => i.toClientDTO()));
+    return ok(await this.projection.projectMany(identityId, instances));
   }
 }

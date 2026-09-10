@@ -11,6 +11,13 @@
 import type { TaskOccurrence } from '../aggregates';
 import type { TaskOccurrenceStatus } from '@memoflow/contracts/task';
 
+export interface TaskPlanStatsWindow {
+  /** Inclusive start of the Product Time calendar-date window. */
+  windowStart: number;
+  /** Query instant; future/past classification is relative to this instant. */
+  asOf: number;
+}
+
 export interface TaskPlanInstanceStats {
   templateId: string;
   instanceCount: number;
@@ -110,7 +117,7 @@ export interface ITaskOccurrenceRepository {
   getTemplateStats(
     templateIds: string[],
     identityId: string,
-    asOf?: number,
+    window: TaskPlanStatsWindow,
   ): Promise<Record<string, TaskPlanInstanceStats>>;
 
   /**

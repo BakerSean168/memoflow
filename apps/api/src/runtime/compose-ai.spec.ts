@@ -119,6 +119,7 @@ const reminderApplicationPort = { tag: 'reminder-port' } as unknown as ReminderA
 const routineCommandPort = { tag: 'routine-command-port' } as never;
 const scheduleRepository = { tag: 'schedule-repository' } as never;
 const notificationRepository = { tag: 'notification-repository' } as never;
+const userTimeContextPort = { tag: 'user-time-context-port' } as never;
 const labelService = { tag: 'label-service' } as never;
 const repositoryStorageBaseDir = '/tmp/memoflow-ai-compose-test';
 const mastraStorage = {
@@ -135,6 +136,7 @@ const dependencies = {
   routineCommandPort,
   scheduleRepository,
   notificationRepository,
+  userTimeContextPort,
   labelService,
   mastraStorage,
 };
@@ -200,6 +202,7 @@ describe('API composeAI Mastra-only ownership', () => {
       routineCommandPort: vi.mocked(RoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(PlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(NotificationAIReadAdapter).mock.results[0].value,
+      userTimeContextPort,
     });
   });
 
@@ -212,7 +215,7 @@ describe('API composeAI Mastra-only ownership', () => {
       repositoryStorageBaseDir,
     );
     expect(RepositoryKnowledgeIndexStatusAdapter).toHaveBeenCalledWith(repositoryApiPort);
-    expect(ControlledAnalyticsReadAdapter).toHaveBeenCalledWith(fakeDb);
+    expect(ControlledAnalyticsReadAdapter).toHaveBeenCalledWith(fakeDb, userTimeContextPort);
     expect(AIEvaluationReportFileAdapter).toHaveBeenCalledTimes(1);
 
     const moduleInput = vi.mocked(createAIModule).mock.calls[0][0];

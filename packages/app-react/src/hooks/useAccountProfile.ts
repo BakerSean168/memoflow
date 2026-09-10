@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import type { AccountClientDTO } from '@memoflow/contracts/account';
+import type { AccountClientDTO, CloudIdentitySummary } from '@memoflow/contracts/account';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
@@ -8,14 +8,16 @@ import { useAccountService } from './useAccountService';
 
 export function useAccountProfile() {
   const service = useAccountService();
-  const { isRemoteAuthenticated } = useAppSession();
+  const { currentIdentity, isRemoteAuthenticated } = useAppSession();
   const [account, setAccount] = useState<AccountClientDTO | null>(null);
+  const [cloudIdentity, setCloudIdentity] = useState<CloudIdentitySummary | null>(null);
   const [isLoading, setIsLoading] = useState(isRemoteAuthenticated);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
     if (!isRemoteAuthenticated) {
       setAccount(null);
+      setCloudIdentity(null);
       setIsLoading(false);
       setError(null);
       return;
@@ -27,12 +29,14 @@ export function useAccountProfile() {
     const result = await service.getMyProfile();
     if (!result.ok) {
       setAccount(null);
+      setCloudIdentity(null);
       setError(presentErrorMessage(result.error));
       setIsLoading(false);
       return;
     }
 
-    setAccount(result.data.toDTO());
+    setAccount(result.data.account.toDTO());
+    setCloudIdentity(result.data.cloudIdentity);
     setIsLoading(false);
   }
 
@@ -44,8 +48,13 @@ export function useAccountProfile() {
     await load();
   }
 
+  const loginEmail = cloudIdentity?.email ?? currentIdentity?.email ?? null;
+  const isEmailVerified = cloudIdentity?.emailVerified ?? currentIdentity?.emailVerified ?? false;
+
   return {
     account,
+    loginEmail,
+    isEmailVerified,
     error,
     isLoading,
     isRemoteAuthenticated,

@@ -6,7 +6,7 @@ import { toPrismaJson as aiToPrismaJson } from './to-prisma-json';
 /**
  * Residual 1159: toPrismaJson keep-boundary (AI deep-clone vs account DTO cast).
  * - AI sole: JSON.parse(JSON.stringify(value)) → Prisma.InputJsonValue (unknown in, deep-clone)
- * - Account private: DTO cast → Prisma.InputJsonObject (typed profile/settings, no clone)
+ * - Account private: DTO cast → Prisma.InputJsonObject (typed profile only, no clone)
  * Soft residual 979: AI Prisma adapter duals retired onto sole.
  * Soft residual 1156: toDashboardTaskOccurrenceRecord dual retired remains separate.
  * Does not flip §13.2 checkboxes.
@@ -37,7 +37,7 @@ describe('toPrismaJson keep-boundary (residual 1159)', () => {
     expect(account).toContain('Residual 1159 keep-boundary');
     expect(account).toMatch(/function toPrismaJson\b/);
     expect(account).toContain('AccountProfileDTO');
-    expect(account).toContain('AccountSettingsDTO');
+    expect(account).not.toContain('AccountSettingsDTO');
     expect(account).toContain('Prisma.InputJsonObject');
     expect(account).toContain('Soft residual 1159');
     const body = account.match(/function toPrismaJson\([\s\S]*?\n\}/)?.[0] ?? '';

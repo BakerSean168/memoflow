@@ -5,9 +5,7 @@
  * Extracted from TaskPlan aggregate to reduce aggregate size.
  */
 
-import { createTimeFacade } from '@memoflow/time';
-
-const taskTime = createTimeFacade();
+import { createTimeFacade, type TimeContext } from '@memoflow/time';
 import { TaskType } from '../value-objects';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { InvalidDateRangeError, InvalidTaskPlanStateError } from '../value-objects/task-errors';
@@ -32,6 +30,7 @@ export interface InstanceGenerationContext {
   recurrenceRule: RecurrenceRule | null;
   importance: ImportanceLevel;
   existingInstances: { instanceDate: number; deletedAt: number | null }[];
+  timeContext: TimeContext;
 }
 
 /** Result of instance generation. */
@@ -45,8 +44,8 @@ export interface CreateInstanceParams {
   instanceDate: number;
 }
 
-export function startOfLocalDay(value: number): number {
-  return taskTime.calendar.startOfDay(value);
+export function startOfLocalDay(value: number, timeContext: TimeContext): number {
+  return createTimeFacade({ context: timeContext }).calendar.startOfDay(value);
 }
 
 /**
@@ -84,6 +83,7 @@ export function createInstanceFromTemplate(
     instanceDate: params.instanceDate,
     timeConfig: ctx.timeConfig,
     importance: ctx.importance,
+    timeContext: ctx.timeContext,
   });
 }
 
@@ -96,16 +96,21 @@ function passesBusinessGenerationGuards(
   if (!ctx.recurrenceRule) return false;
 
   const alreadyGenerated = ctx.existingInstances.some(
-    (instance) => !instance.deletedAt && startOfLocalDay(instance.instanceDate) === candidateDay,
+    (instance) =>
+      !instance.deletedAt &&
+      startOfLocalDay(instance.instanceDate, ctx.timeContext) === candidateDay,
   );
   if (alreadyGenerated) return false;
 
   if (ctx.timeConfig?.startDate) {
-    const templateStartDay = startOfLocalDay(ctx.timeConfig.startDate);
+    const templateStartDay = startOfLocalDay(ctx.timeConfig.startDate, ctx.timeContext);
     if (candidateDay < templateStartDay) return false;
   }
 
-  if (ctx.recurrenceRule.endDate && candidateDay > startOfLocalDay(ctx.recurrenceRule.endDate)) {
+  if (
+    ctx.recurrenceRule.endDate &&
+    candidateDay > startOfLocalDay(ctx.recurrenceRule.endDate, ctx.timeContext)
+  ) {
     return false;
   }
 
@@ -143,9 +148,9 @@ export function generateInstances(
 
   if (ctx.taskType === TaskType.OneTime) {
     if (ctx.timeConfig?.startDate) {
-      const targetDay = startOfLocalDay(ctx.timeConfig.startDate);
+      const targetDay = startOfLocalDay(ctx.timeConfig.startDate, ctx.timeContext);
       const alreadyGenerated = ctx.existingInstances.some(
-        (inst) => startOfLocalDay(inst.instanceDate) === targetDay,
+        (inst) => startOfLocalDay(inst.instanceDate, ctx.timeContext) === targetDay,
       );
 
       if (!alreadyGenerated) {
@@ -156,13 +161,15 @@ export function generateInstances(
             instanceDate: targetDay,
             timeConfig: ctx.timeConfig,
             importance: ctx.importance,
+            timeContext: ctx.timeContext,
           }),
         );
       }
     }
   } else if (ctx.taskType === TaskType.Recurring && ctx.recurrenceRule && ctx.timeConfig) {
-    const fromDay = startOfLocalDay(fromDate);
-    const toDay = startOfLocalDay(toDate);
+    const taskTime = createTimeFacade({ context: ctx.timeContext });
+    const fromDay = startOfLocalDay(fromDate, ctx.timeContext);
+    const toDay = startOfLocalDay(toDate, ctx.timeContext);
     const rangeEnd = taskTime.calendar.endOfDay(toDay);
     const maxOccurrences = ctx.recurrenceRule.occurrences;
     const existingInstanceCount = ctx.existingInstances.filter(
@@ -178,13 +185,14 @@ export function generateInstances(
       ctx.timeConfig,
       fromDay,
       rangeEnd,
+      ctx.timeContext,
     );
 
     for (const occurrence of candidateDates) {
       if (maxOccurrences !== null && existingInstanceCount + instances.length >= maxOccurrences) {
         break;
       }
-      const candidateDay = startOfLocalDay(occurrence);
+      const candidateDay = startOfLocalDay(occurrence, ctx.timeContext);
       if (!passesBusinessGenerationGuards(ctx, candidateDay)) continue;
 
       instances.push(
@@ -194,6 +202,7 @@ export function generateInstances(
           instanceDate: candidateDay,
           timeConfig: ctx.timeConfig,
           importance: ctx.importance,
+          timeContext: ctx.timeContext,
         }),
       );
     }
@@ -207,11 +216,11 @@ export function generateInstances(
  * Determines whether an instance should be generated for the given date.
  */
 export function shouldGenerateInstance(ctx: InstanceGenerationContext, date: number): boolean {
-  const candidateDay = startOfLocalDay(date);
+  const candidateDay = startOfLocalDay(date, ctx.timeContext);
   if (!passesBusinessGenerationGuards(ctx, candidateDay)) return false;
   if (!ctx.recurrenceRule) return false;
 
-  return recurrenceOccursOn(ctx.recurrenceRule, ctx.timeConfig, candidateDay);
+  return recurrenceOccursOn(ctx.recurrenceRule, ctx.timeConfig, candidateDay, ctx.timeContext);
 }
 
 /**
@@ -224,7 +233,8 @@ export function isActiveOnDate(ctx: InstanceGenerationContext, date: number): bo
   if (ctx.taskType === TaskType.OneTime) {
     return (
       ctx.timeConfig?.startDate != null &&
-      startOfLocalDay(ctx.timeConfig.startDate) === startOfLocalDay(date)
+      startOfLocalDay(ctx.timeConfig.startDate, ctx.timeContext) ===
+      startOfLocalDay(date, ctx.timeContext)
     );
   }
   if (!ctx.recurrenceRule) {
@@ -232,7 +242,8 @@ export function isActiveOnDate(ctx: InstanceGenerationContext, date: number): bo
   }
   if (
     ctx.recurrenceRule.endDate &&
-    startOfLocalDay(date) > startOfLocalDay(ctx.recurrenceRule.endDate)
+    startOfLocalDay(date, ctx.timeContext) >
+    startOfLocalDay(ctx.recurrenceRule.endDate, ctx.timeContext)
   ) {
     return false;
   }
@@ -259,5 +270,5 @@ export function getNextOccurrence(
     return null;
   }
 
-  return nextRecurrenceDate(ctx.recurrenceRule, ctx.timeConfig, afterDate);
+  return nextRecurrenceDate(ctx.recurrenceRule, ctx.timeConfig, afterDate, ctx.timeContext);
 }

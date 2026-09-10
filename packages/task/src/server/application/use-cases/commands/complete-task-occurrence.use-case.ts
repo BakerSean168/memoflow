@@ -15,6 +15,8 @@ import {
   type TaskWriteTransactionRunner,
 } from './task-write-support';
 import { reevaluateTaskPlanOutcome } from './task-plan-outcome-reevaluation';
+import type { TimeContext } from '@memoflow/time';
+import type { TaskOccurrenceProjectionService } from '../../services/task-occurrence-projection.service';
 
 /**
  * Complete Task Instance Service
@@ -31,6 +33,7 @@ export class CompleteTaskOccurrenceUseCase {
     private readonly instanceRepository: ITaskOccurrenceRepository,
     private readonly templateRepository: ITaskPlanRepository,
     transactionRunner: TaskWriteTransactionRunner,
+    private readonly projection: TaskOccurrenceProjectionService,
   ) {
     if (!transactionRunner) {
       throw new Error('TaskWriteTransactionRunner must be explicitly provided to CompleteTaskOccurrenceUseCase');
@@ -44,8 +47,9 @@ export class CompleteTaskOccurrenceUseCase {
     request?: CompleteTaskOccurrenceReq,
   ): Promise<Result<TaskOccurrenceOperationRes>> {
     try {
+      const timeContext = await this.projection.getTimeContext(identityId);
       return await this.transactionRunner.run((repositories) =>
-        this.executeInTransaction(repositories, id, identityId, request),
+        this.executeInTransaction(repositories, id, identityId, timeContext, request),
       );
     } catch (caughtError) {
       this.logger.error('Failed to complete task instance', { error: caughtError });
@@ -59,6 +63,7 @@ export class CompleteTaskOccurrenceUseCase {
     repositories: TaskWriteRepositories,
     id: string,
     identityId: string,
+    timeContext: TimeContext,
     request?: CompleteTaskOccurrenceReq,
   ): Promise<Result<TaskOccurrenceOperationRes>> {
     const instance = await repositories.instanceRepository.findByIdForIdentity(identityId, id);
@@ -68,7 +73,7 @@ export class CompleteTaskOccurrenceUseCase {
 
     if (instance.status === TaskOccurrenceStatus.Completed) {
       return ok({
-        instance: instance.toClientDTO(),
+        instance: this.projection.projectWithContext(instance, timeContext),
       });
     }
 
@@ -88,10 +93,16 @@ export class CompleteTaskOccurrenceUseCase {
     // Mark as completed（goalContext 会被嵌入领域事件的 payload）
     instance.complete(request?.duration, request?.note, request?.rating, goalContext);
     await repositories.instanceRepository.save(instance);
-    await reevaluateTaskPlanOutcome(repositories, identityId, String(instance.templateId), instance.id);
+    await reevaluateTaskPlanOutcome(
+      repositories,
+      identityId,
+      String(instance.templateId),
+      instance.id,
+      timeContext,
+    );
 
     return ok({
-      instance: instance.toClientDTO(),
+      instance: this.projection.projectWithContext(instance, timeContext),
     });
   }
 

@@ -134,10 +134,10 @@ regional.timeStyle
 regional.weekStartsOn
          │
          ▼
-PreferenceTimeStyleAdapter
+PreferenceUserTimeContextAdapter
          │
          ▼
-@memoflow/time TimeStyle
+@memoflow/time TimeContext + TimePresentationStyle
 ```
 
 这样：

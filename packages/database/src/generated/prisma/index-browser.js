@@ -124,20 +124,9 @@ exports.Prisma.AccountScalarFieldEnum = {
   id: 'id',
   status: 'status',
   profile: 'profile',
-  settings: 'settings',
-  emailAddress: 'emailAddress',
-  emailIsVerified: 'emailIsVerified',
-  emailVerifiedAt: 'emailVerifiedAt',
-  emailIsPrimary: 'emailIsPrimary',
-  phoneCountryCode: 'phoneCountryCode',
-  phoneNumber: 'phoneNumber',
-  phoneFullNumber: 'phoneFullNumber',
-  phoneIsVerified: 'phoneIsVerified',
-  phoneVerifiedAt: 'phoneVerifiedAt',
-  version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  closedAt: 'closedAt'
 };
 
 exports.Prisma.ActivityLedgerScalarFieldEnum = {
@@ -305,7 +294,6 @@ exports.Prisma.CloudAuthUserScalarFieldEnum = {
   email: 'email',
   emailVerified: 'emailVerified',
   image: 'image',
-  status: 'status',
   disabledAt: 'disabledAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

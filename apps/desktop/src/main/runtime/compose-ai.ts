@@ -23,6 +23,7 @@ import type { IScheduleRepository } from '@memoflow/schedule';
 import type { INotificationRepository } from '@memoflow/notification';
 import type { TaskApplicationPort } from '@memoflow/task';
 import type { LabelService } from '@memoflow/label';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   AIEvaluationReportFileAdapter,
   createAIModule,
@@ -56,6 +57,7 @@ export interface ComposeAIElectronDependencies {
   readonly routineCommandPort: RoutineCoachCommandPort;
   readonly scheduleRepository: IScheduleRepository;
   readonly notificationRepository: INotificationRepository;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly mastraStorage: MastraStorageConfig;
 }
 
@@ -100,6 +102,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
       dependencies.scheduleRepository,
       dependencies.taskApplicationPort,
     ),
+    userTimeContextPort: dependencies.userTimeContextPort,
     notificationReadPort: new DesktopNotificationAIReadAdapter(dependencies.notificationRepository),
   });
 

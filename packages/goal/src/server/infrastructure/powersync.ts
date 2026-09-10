@@ -6,6 +6,7 @@
  * 对标 `packages/governance/src/infrastructure/powersync.ts`。
  */
 
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createGoalModule,
   type GoalModuleInstance,
@@ -49,10 +50,14 @@ export function createGoalPowerSyncModule(
     runtimeContributions?: GoalRuntimeContributionsInput;
     /** Required: W0 GoalDependencyReadPort implementation (provided by the Task package). */
     taskBindingReadPort: GoalDependencyReadPort;
+    userTimeContextPort: UserTimeContextPort;
   },
 ): GoalModuleInstance {
   if (!options?.taskBindingReadPort) {
     throw new Error('[FAIL-CLOSED] createGoalPowerSyncModule requires options.taskBindingReadPort');
+  }
+  if (!options?.userTimeContextPort) {
+    throw new Error('[FAIL-CLOSED] createGoalPowerSyncModule requires options.userTimeContextPort');
   }
   const { goalRepository, goalRecordRepository, goalWriteTransactionRunner } =
     createGoalPowerSyncRepositories(db);
@@ -61,6 +66,7 @@ export function createGoalPowerSyncModule(
     goalRecordRepository,
     goalWriteTransactionRunner,
     taskBindingReadPort: options.taskBindingReadPort,
+    userTimeContextPort: options.userTimeContextPort,
     runtimeContributions: options?.runtimeContributions,
   });
 }
@@ -91,9 +97,11 @@ export function createGoalPowerSyncRepositories(db: IElectronDatabase): GoalRepo
 
 export function createGoalPowerSyncScheduleProjectionSource(
   db: IElectronDatabase,
+  userTimeContextPort: UserTimeContextPort,
 ): GoalScheduleProjectionSource {
   return createGoalScheduleProjectionSource({
     goalRepository: createGoalPowerSyncRepositories(db).goalRepository,
+    userTimeContextPort,
   });
 }
 

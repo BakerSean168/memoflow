@@ -3,22 +3,12 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/database/src",
   "projectType": "library",
-  "tags": [
-    "scope:shared",
-    "type:infrastructure",
-    "platform:server",
-    "layer:infra"
-  ],
+  "tags": ["scope:shared", "type:infrastructure", "platform:server", "layer:infra"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{projectRoot}/dist"
-      ],
-      "dependsOn": [
-        "^build",
-        "prisma-generate"
-      ],
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build", "prisma-generate"],
       "options": {
         "cwd": "packages/database",
         "command": "tsc --build && node ../../tools/build/copy-with-retry.mjs src/generated/prisma dist/generated/prisma"
@@ -32,12 +22,8 @@
     },
     "compile": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{projectRoot}/dist"
-      ],
-      "dependsOn": [
-        "prisma-generate"
-      ],
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["prisma-generate"],
       "options": {
         "cwd": "packages/database",
         "command": "tsc --build && node ../../tools/build/copy-with-retry.mjs src/generated/prisma dist/generated/prisma"
@@ -45,12 +31,8 @@
     },
     "runtime-scripts:build": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        "utils:build"
-      ],
-      "outputs": [
-        "{projectRoot}/dist/runtime-scripts"
-      ],
+      "dependsOn": ["utils:build"],
+      "outputs": ["{projectRoot}/dist/runtime-scripts"],
       "options": {
         "cwd": "packages/database",
         "command": "tsup --config tsup.runtime-scripts.config.ts"
@@ -58,37 +40,25 @@
     },
     "prisma-generate": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{projectRoot}/src/generated/prisma"
-      ],
+      "outputs": ["{projectRoot}/src/generated/prisma"],
       "options": {
         "cwd": "packages/database",
         "command": "prisma generate --config ./prisma/prisma.config.ts && node ../../tools/build/normalize-generated-prisma.mjs"
       },
-      "inputs": [
-        "{projectRoot}/prisma/schema/**/*",
-        "{projectRoot}/prisma/prisma.config.ts"
-      ],
+      "inputs": ["{projectRoot}/prisma/schema/**/*", "{projectRoot}/prisma/prisma.config.ts"],
       "cache": true
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "packages/database/**/*.ts"
-        ]
+        "lintFilePatterns": ["packages/database/**/*.ts"]
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "cache": true,
-      "dependsOn": [
-        "prisma-generate",
-        "^build"
-      ],
+      "dependsOn": ["prisma-generate", "^build"],
       "options": {
         "command": "tsc --noEmit -p tsconfig.json",
         "cwd": "packages/database"
@@ -96,13 +66,8 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
@@ -153,7 +118,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "packages/database",
-        "command": "tsx ./scripts/prepare-ai-knowledge-index-pgvector.ts && tsx ./scripts/prepare-ai-vnext-runtime-state-retirement.ts && tsx ./scripts/prepare-notification-preference-hierarchy.ts && tsx ./scripts/prepare-vnext-unique-constraints.ts && tsx ./scripts/prepare-legacy-cloud-auth-migration.ts && tsx ./scripts/prepare-task-shared-label-migration.ts && prisma db push --config ./prisma/prisma.config.ts && tsx ./scripts/ensure-task-goal-binding-constraint.ts && tsx ./scripts/prepare-ai-provider-onboarding-sessions.ts"
+        "command": "tsx ./scripts/prepare-ai-knowledge-index-pgvector.ts && tsx ./scripts/prepare-ai-vnext-runtime-state-retirement.ts && tsx ./scripts/prepare-notification-preference-hierarchy.ts && tsx ./scripts/prepare-vnext-unique-constraints.ts && tsx ./scripts/prepare-task-shared-label-migration.ts && prisma db push --config ./prisma/prisma.config.ts && tsx ./scripts/ensure-task-goal-binding-constraint.ts && tsx ./scripts/prepare-ai-provider-onboarding-sessions.ts"
       },
       "cache": false
     },
@@ -202,14 +167,6 @@
       "options": {
         "cwd": "packages/database",
         "command": "tsx ./scripts/prepare-vnext-unique-constraints.ts"
-      },
-      "cache": false
-    },
-    "legacy-cloud-auth-migration-bootstrap": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "packages/database",
-        "command": "tsx ./scripts/prepare-legacy-cloud-auth-migration.ts"
       },
       "cache": false
     }

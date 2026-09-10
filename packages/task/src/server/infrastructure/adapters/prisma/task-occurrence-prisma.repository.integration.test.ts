@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { TASK_TEST_TIME_CONTEXT } from '../../../../testing';
 import { IdentityId } from '@memoflow/domain-shared';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import { TaskTimeConfig } from '../../../domain/value-objects';
@@ -42,6 +43,7 @@ describe('TaskOccurrencePrismaRepository integration', () => {
       title: 'Test Task',
       importance: 'Important',
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
     await templateRepository.save(template);
 
@@ -49,6 +51,7 @@ describe('TaskOccurrencePrismaRepository integration', () => {
     const timeConfig = makeAllDayTimeConfig(tomorrow);
 
     const instance = TaskOccurrence.create({
+      timeContext: TASK_TEST_TIME_CONTEXT,
       templateId: template.id,
       identityId,
       instanceDate: tomorrow.getTime(),
@@ -82,12 +85,14 @@ describe('TaskOccurrencePrismaRepository integration', () => {
       title: 'Test Task',
       importance: 'Moderate',
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
     await templateRepository.save(template);
 
     const timeConfig = makeAllDayTimeConfig(tomorrow);
 
     const instance1 = TaskOccurrence.create({
+      timeContext: TASK_TEST_TIME_CONTEXT,
       templateId: template.id,
       identityId,
       instanceDate: tomorrow.getTime(),
@@ -99,6 +104,7 @@ describe('TaskOccurrencePrismaRepository integration', () => {
     nextDay.setDate(nextDay.getDate() + 2);
 
     const instance2 = TaskOccurrence.create({
+      timeContext: TASK_TEST_TIME_CONTEXT,
       templateId: template.id,
       identityId,
       instanceDate: nextDay.getTime(),
@@ -132,12 +138,14 @@ describe('TaskOccurrencePrismaRepository integration', () => {
       title: 'Template for Instances',
       importance: 'Important',
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
     await templateRepository.save(template);
 
     const timeConfig = makeAllDayTimeConfig(tomorrow);
 
     const instance1 = TaskOccurrence.create({
+      timeContext: TASK_TEST_TIME_CONTEXT,
       templateId: template.id,
       identityId,
       instanceDate: tomorrow.getTime(),
@@ -149,6 +157,7 @@ describe('TaskOccurrencePrismaRepository integration', () => {
     nextDay.setDate(nextDay.getDate() + 2);
 
     const instance2 = TaskOccurrence.create({
+      timeContext: TASK_TEST_TIME_CONTEXT,
       templateId: template.id,
       identityId,
       instanceDate: nextDay.getTime(),
@@ -159,7 +168,10 @@ describe('TaskOccurrencePrismaRepository integration', () => {
     await instanceRepository.save(instance1);
     await instanceRepository.save(instance2);
 
-    const instances = await instanceRepository.findByTemplateId(template.id, String(template.identityId));
+    const instances = await instanceRepository.findByTemplateId(
+      template.id,
+      String(template.identityId),
+    );
 
     expect(instances).toHaveLength(2);
     expect(instances.map((i) => i.id)).toContain(instance1.id);
@@ -182,12 +194,14 @@ describe('TaskOccurrencePrismaRepository integration', () => {
       title: 'Task to Update',
       importance: 'Moderate',
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
     await templateRepository.save(template);
 
     const timeConfig = makeAllDayTimeConfig(tomorrow);
 
     const instance = TaskOccurrence.create({
+      timeContext: TASK_TEST_TIME_CONTEXT,
       templateId: template.id,
       identityId,
       instanceDate: tomorrow.getTime(),
@@ -222,12 +236,14 @@ describe('TaskOccurrencePrismaRepository integration', () => {
       title: 'Task to Complete',
       importance: 'Important',
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
     await templateRepository.save(template);
 
     const timeConfig = makeAllDayTimeConfig(tomorrow);
 
     const instance = TaskOccurrence.create({
+      timeContext: TASK_TEST_TIME_CONTEXT,
       templateId: template.id,
       identityId,
       instanceDate: tomorrow.getTime(),
@@ -263,12 +279,14 @@ describe('TaskOccurrencePrismaRepository integration', () => {
       title: 'Task to Delete',
       importance: 'Minor',
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
     await templateRepository.save(template);
 
     const timeConfig = makeAllDayTimeConfig(tomorrow);
 
     const instance = TaskOccurrence.create({
+      timeContext: TASK_TEST_TIME_CONTEXT,
       templateId: template.id,
       identityId,
       instanceDate: tomorrow.getTime(),
@@ -302,12 +320,14 @@ describe('TaskOccurrencePrismaRepository integration', () => {
       description: 'A complex task',
       importance: 'Important',
       dueDate: tomorrow,
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
     await templateRepository.save(template);
 
     const timeConfig = makeAllDayTimeConfig(tomorrow);
 
     const original = TaskOccurrence.create({
+      timeContext: TASK_TEST_TIME_CONTEXT,
       templateId: template.id,
       identityId,
       instanceDate: tomorrow.getTime(),
@@ -316,7 +336,10 @@ describe('TaskOccurrencePrismaRepository integration', () => {
     });
 
     await instanceRepository.save(original);
-    const loaded = await instanceRepository.findByIdForIdentity(String(original.identityId), original.id);
+    const loaded = await instanceRepository.findByIdForIdentity(
+      String(original.identityId),
+      original.id,
+    );
 
     expect(loaded).toBeDefined();
     expect(loaded?.id).toBe(original.id);
@@ -340,11 +363,13 @@ describe('TaskOccurrencePrismaRepository integration', () => {
       title: 'Thirty day statistics',
       importance: 'Moderate',
       dueDate: new Date(asOf + day),
+      timeContext: TASK_TEST_TIME_CONTEXT,
     });
     await templateRepository.save(template);
 
     const createInstance = (date: number) =>
       TaskOccurrence.create({
+        timeContext: TASK_TEST_TIME_CONTEXT,
         templateId: template.id,
         identityId,
         instanceDate: date,
@@ -365,11 +390,12 @@ describe('TaskOccurrencePrismaRepository integration', () => {
       futurePending,
     ]);
 
-    const stats = (await instanceRepository.getTemplateStats(
-      [template.id],
-      String(identityId),
-      asOf,
-    ))[template.id];
+    const stats = (
+      await instanceRepository.getTemplateStats([template.id], String(identityId), {
+        windowStart: asOf - 30 * day,
+        asOf,
+      })
+    )[template.id];
 
     expect(stats).toEqual({
       templateId: template.id,

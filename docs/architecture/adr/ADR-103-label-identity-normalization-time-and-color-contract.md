@@ -14,7 +14,7 @@ updated: 2026-09-09T00:00:00+08:00
 
 # ADR-103: Label Identity、Normalization、Time 与 Color Contract
 
-**状态：** 已采纳（待实施）
+**状态：** 已采纳（已实施，LABEL-1302/1305）
 **日期：** 2026-09-09
 **依赖：** ADR-102、ADR-037/100
 
@@ -56,7 +56,7 @@ case-insensitive normalization
 unique(identityId, normalizedName)
 ```
 
-要求：DB migration/helper、server domain、PowerSync tests 共享同一 fixture，不各自复制轻微不同的 normalize 实现。
+要求：所有**会产生 normalizedName** 的路径共享同一 fixture，不各自复制轻微不同的 normalize 语义。当前 server domain 与 legacy Task migration helper 均消费 `tools/test/fixtures/label-normalization.json`；Prisma/PowerSync repository 只消费已 canonicalize 的 `normalizedName`，不重新实现 normalize。Nx unit/coverage cache input 也显式包含该 fixture。
 
 本轮不引入 slug 化，也不自动把空格替换为 `-`。
 
@@ -74,37 +74,32 @@ findByNormalizedNames(identityId, names[])
 
 ## 5. Product Time
 
-LabelService 当前直接使用 `Date.now()` 与裸 number。
-
-目标：
+实现后：
 
 ```text
 Clock.now() -> Instant
 ```
 
+`LabelService` 构造必须注入 `Clock`；API/Desktop host 使用 `createSystemClock()`，测试使用 fixed Clock。create 只采样一次并同时写 `createdAt/updatedAt`；update 把同一个 injected Clock 产生的 Instant 显式传入 repository。Label application/domain 不再调用 `Date.now()` 或 ambient `new Date()`。
+
 Label 不需要完整 TimeFacade，只依赖最窄 `Clock`/Instant seam，避免把 presentation/calendar 依赖带进 shared registry。
 
 ## 6. Color policy
 
-实现前先按现有 UI真实需求选择一个明确策略：
-
-### Option A — palette token（优先，如果 UI 使用受控 palette）
+实现 inventory 后选择 **Option B — custom RGB**：
 
 ```text
-gray | red | orange | yellow | green | blue | purple | pink
+LabelColor = #RRGGBB | null
 ```
 
-### Option B — custom RGB
+运行时使用唯一 `LabelColorSchema`：
 
-严格：
+- 只接受 6 位 RGB hex；
+- 输入大小写均可，持久化/DTO canonicalize 为 lowercase `#rrggbb`；
+- 拒绝 `#fff`、named color、`rgb(...)`、`var(...)` 等 arbitrary CSS-like string；
+- Label/Goal/Task 的 persistence projection 都必须经过同一个 schema。
 
-```text
-#RRGGBB
-```
-
-不能继续以“任意 <=32 字符”作为稳定产品语义。
-
-如果当前产品证据不足以决定 A/B，实施 ticket 必须先 inventory 现有 label color values/UI picker；在此之前不做 destructive migration。
+选择依据：当前 Label 创建 UI 没有 palette-token picker，production Label color 使用点只需要 `null` 或 RGB hex；未发现需保留的非 6 位 hex Label 数据。ADR-111 destructive cutover 下本轮不增加无依据的 legacy color migration。
 
 ## 7. Client DTO
 
@@ -114,9 +109,10 @@ gray | red | orange | yellow | green | blue | purple | pink
 
 ## 8. Acceptance
 
-- normalization fixture跨 server/migration/Prisma/PowerSync 一致；
-- Label timestamps是 branded Instant；
+- normalization-producing paths共享 canonical fixture，repositories不重新 normalize；
+- Label timestamps使用 canonical `Instant` type + injected Clock；
 - no `Date.now()` in Label domain/application；
 - resolveNames批量查询不受 500-row list 限制；
-- color contract不接受任意 CSS-like string；
-- rename 保持 LabelId/assignments稳定。
+- color contract不接受任意 CSS-like string，所有 owner projection复用同一 schema；
+- rename 保持 LabelId/assignments稳定；
+- root governance阻止 ownership/time/color surface resurrection。

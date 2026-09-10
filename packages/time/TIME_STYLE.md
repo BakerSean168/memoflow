@@ -1,22 +1,18 @@
 # TimeContext and TimePresentationStyle
 
-Product Time now separates **calendar/wall-clock semantics** from **human-visible presentation**.
+Product Time has two separate owners. They must not be merged back into one style bag.
 
 ```text
-TimeContext
-├── timeZone: branded TimeZoneId
-└── weekStartsOn
-
-TimePresentationStyle
-├── locale
-├── dateStyle: short | medium | long
-├── timeStyle: 12h | 24h
-├── empty
-├── relative
-└── duration
+TimeContext                         TimePresentationStyle
+├── timeZone: branded TimeZoneId    ├── locale
+└── weekStartsOn                    ├── dateStyle: short | medium | long
+                                    ├── timeStyle: 12h | 24h
+                                    ├── empty
+                                    ├── relative
+                                    └── duration
 ```
 
-The old mixed `TimeStyle` remains only as deletion debt while TIME-1205/1206 switch current callers and remove the legacy surface. ADR-111 does not require old-client or old-data compatibility.
+`TimeContext` changes calendar/wall-clock meaning. `TimePresentationStyle` changes only human-visible rendering.
 
 ## Canonical construction
 
@@ -33,43 +29,49 @@ const time = createTimeFacade({
 });
 ```
 
-Untrusted time-zone strings cross the boundary through `parseTimeZoneId`, `requireTimeZoneId`, or `createTimeContext`. Canonical `TimeContext` never stores raw unvalidated strings.
+`context` is required. There is no `defaultTime`, no mixed `TimeStyle`, no `withStyle`, and no host-local fallback.
 
 ## Presentation fields
 
-| Path                | Effect                                                                |
-| ------------------- | --------------------------------------------------------------------- |
-| `locale`            | `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` locale              |
-| `dateStyle`         | semantic date density: `short` / `medium` / `long`                    |
-| `timeStyle`         | explicit `12h` / `24h`; 24-hour presentation uses `h23`               |
-| `empty.display`     | `format.hm/date/dateTime/relative(null)` and list empty-time cells    |
-| `empty.input`       | Form date/time empty string                                           |
-| `empty.unknown`     | Unknown / unparseable display                                         |
-| `relative.maxAgeMs` | Beyond → the same locale/timezone-aware absolute `dateTime` formatter |
+| Path                | Effect                                                   |
+| ------------------- | -------------------------------------------------------- |
+| `locale`            | `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` locale |
+| `dateStyle`         | semantic date density: `short` / `medium` / `long`       |
+| `timeStyle`         | explicit `12h` / `24h`                                   |
+| `empty.display`     | empty list/read presentation                             |
+| `empty.input`       | empty form date/time value                               |
+| `empty.unknown`     | unknown/unparseable display                              |
+| `relative.maxAgeMs` | elapsed-duration threshold before absolute display       |
+| `duration`          | duration-only presentation preferences                   |
 
-## Semantic priority
+Use `withContext(...)` for an explicitly resolved timezone/week-start change and `withPresentation(...)` for display changes. Domain code does not use locale as a business rule.
+
+## Where context comes from
+
+- **Signed-in server/application:** `UserTimeContextPort`, implemented by canonical Setting preferences.
+- **Signed-in UI:** session Product Time bootstrapped from canonical `UserPreferenceProfile`.
+- **Guest/device bootstrap:** an explicit validated IANA device timezone source.
+- **Persisted schedule trigger:** the timezone snapshot owned by that trigger/schedule when the contract calls for one.
+
+No layer may silently fall back to the server or browser timezone for business semantics.
+
+## Third-party boundaries
+
+- Product vocabulary is `Instant / Ymd / Hm / TimeContext`.
+- UI calendar libraries are adapter-only (`CalendarDate ↔ Ymd`, `Time ↔ Hm`).
+- Recurrence uses MemoFlow-owned `RecurrenceSchedule / RecurrenceEnginePort`; `rrule` types stay behind the adapter.
+- `date-fns` production imports are confined to `packages/time/src/engine/**`.
+- Fixed chart/export patterns may use the engine escape hatch; ordinary product UI uses semantic formatters.
+
+## Anti-resurrection gates
+
+TIME-1206 permanently retired ambient/mixed compatibility surfaces. CI enforces this with:
 
 ```text
-canonical TimeContext
-  + TimePresentationStyle override
-    > legacy TimeStyle adapter
-      > DEFAULT_TIME_PRESENTATION_STYLE / DEFAULT_TIME_STYLE compatibility defaults
+tools/governance/product-time-surface-audit.mjs
+tools/governance/date-fns-import-audit.mjs
+eslint.config.ts date-fns engine-only restriction
+tools/governance/time-registry.json canonical-only registry
 ```
 
-Use `withContext(...)` for product timezone/week-start changes and `withPresentation(...)` for locale/date/time display changes. `withStyle(...)` is legacy deletion debt for TIME-1206.
-
-Domain code must **not** read UI locale for business rules. TIME-1203 made Calendar/Input timezone-aware; TIME-1204 made human presentation locale/timezone-aware. TIME-1205/1206 finish current-consumer cutover and delete the remaining legacy surface.
-
-## Third-party conversion boundaries
-
-`Instant / Ymd / Hm` remain the only product time vocabulary. Third-party date types are adapter-only:
-
-- the internal UI adapter converts `Ymd/Hm` to and from `@internationalized/date` `CalendarDate/Time` values;
-- recurrence consumers use MemoFlow-owned `RecurrenceSchedule` / `RecurrenceEnginePort`; `rrule` types stop inside the recurrence adapter;
-- fixed chart/export patterns stay inside the date-fns engine and use official `@date-fns/tz` `TZDateMini` for explicit-zone formatting;
-- ordinary product UI uses semantic Intl formatters and does not persist date-fns pattern tokens;
-- feature contracts under `@memoflow/contracts` must not import `rrule`, `ical.js`, `@internationalized/date`, or `@date-fns/tz`;
-- recurrence receives a branded, resolved IANA zone through the Time boundary;
-- the package does not import Setting: Setting will supply `TimeContext` through an application adapter.
-
-The conformance suite includes Tokyo plus New York spring/fall DST transitions. Temporal is not a second product time model; if adopted later, it belongs at a dedicated adapter edge only.
+The conformance suite includes Tokyo plus New York spring/fall DST transitions.

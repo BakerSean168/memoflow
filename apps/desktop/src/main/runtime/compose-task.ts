@@ -76,6 +76,7 @@ import {
 } from '@memoflow/task';
 import { createTaskElectronModule, type TaskElectronModuleDef } from '@memoflow/task/electron';
 import type { TaskGoalProgressHandler } from '@memoflow/goal';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 /**
  * Dependencies the task composer needs from the desktop host runtime.
@@ -88,6 +89,7 @@ export interface ComposeTaskDependencies {
   readonly runtimeContributions?: TaskRuntimeContributionsInput;
   /** Goal's durable Task→Goal progress handler; enables the outbox runtime when present. 目标侧持久 Task→Goal 进度处理器；提供时启用 outbox runtime。 */
   readonly goalProgressHandler?: TaskGoalProgressHandler;
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
 /**
@@ -174,6 +176,7 @@ export function composeTask(dependencies: ComposeTaskDependencies): ComposeTaskR
     taskPlanRepository,
     taskOccurrenceRepository,
     taskWriteTransactionRunner,
+    userTimeContextPort: dependencies.userTimeContextPort,
     runtimeContributions,
   });
 

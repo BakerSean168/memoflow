@@ -1,4 +1,4 @@
-import type { CloudAuth } from '@memoflow/cloud-auth/server';
+import type { CloudSessionCapability } from '@memoflow/cloud-auth/server';
 import type { PrismaClient } from '@memoflow/database';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import { createLogger, type ILogger } from '@memoflow/utils/logger';
@@ -38,7 +38,7 @@ function sendInternalError(req: AuthenticatedRequest, res: Response, message: st
  * Express adapter 在 seam 处合成。
  */
 export function createAuthMiddleware(
-  cloudAuth: CloudAuth,
+  cloudAuth: CloudSessionCapability,
   database?: Pick<PrismaClient, 'account'>,
   logger: ILogger = createLogger('AuthMiddleware'),
 ): RequestHandler {
@@ -78,7 +78,7 @@ export function createAuthMiddleware(
 }
 
 export function createOptionalAuthMiddleware(
-  cloudAuth: CloudAuth,
+  cloudAuth: CloudSessionCapability,
   database?: Pick<PrismaClient, 'account'>,
   logger?: ILogger,
 ): RequestHandler {

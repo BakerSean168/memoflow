@@ -7,6 +7,7 @@ import DailyTodoWidget from '../../modules/task/components/widgets/DailyTodoWidg
 import UpcomingRemindersWidget from '../../modules/reminder/components/widgets/UpcomingRemindersWidget.vue';
 import GoalProgressWidget from '../../modules/goal/components/widgets/GoalProgressWidget.vue';
 import { useDashboard } from '../../modules/dashboard/composables/useDashboard';
+import { getProductTime, productTimeRevision } from '../../shared/utils/product-time';
 
 const props = defineProps<{ active: boolean }>();
 
@@ -14,18 +15,15 @@ const emit = defineEmits<{
   (e: 'open-route', module: 'goal' | 'task' | 'reminder', route: string): void;
 }>();
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const { goalProgress, isLoading, fetchDashboard } = useDashboard();
 const dashboardReconciliationDelays = [0, 250, 500, 1_000, 2_000] as const;
 let dashboardRefreshGeneration = 0;
 
-const todayLabel = computed(() =>
-  new Intl.DateTimeFormat(locale.value, {
-    month: 'long',
-    day: 'numeric',
-    weekday: 'short',
-  }).format(new Date()),
-);
+const todayLabel = computed(() => {
+  void productTimeRevision.value;
+  return getProductTime().format.pattern(Date.now(), 'MMMM d, EEE');
+});
 
 watch(
   () => props.active,

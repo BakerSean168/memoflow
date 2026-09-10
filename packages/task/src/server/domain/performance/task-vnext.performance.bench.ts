@@ -15,6 +15,9 @@ import { IdentityId } from '@memoflow/domain-shared';
 import { createTaskRecurrenceDateAdapter } from '../aggregates/task-recurrence-date.adapter';
 import { TaskPlanOutcomeEvaluator } from '../services/task-plan-outcome-evaluator';
 import { RecurrenceRule, TaskPlanSchedule, TaskTimeConfig } from '../value-objects';
+import { createTimeContext } from '@memoflow/time';
+
+const PERFORMANCE_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
 
 function averageDuration(iterations: number, work: () => void): number {
   for (let i = 0; i < 3; i++) work();
@@ -43,6 +46,7 @@ describe('Task vNext performance budgets', () => {
           endDate: null,
           occurrences: occurrenceCount,
         }),
+        PERFORMANCE_TIME_CONTEXT,
       ),
       importance: ImportanceLevel.Moderate,
       status: TaskPlanStatus.Active,
@@ -68,7 +72,7 @@ describe('Task vNext performance budgets', () => {
 
     let result: TaskPlanOutcomeValue = TaskPlanOutcome.Open;
     const avgMs = averageDuration(40, () => {
-      result = evaluator.evaluate(template, occurrences);
+      result = evaluator.evaluate(template, occurrences, PERFORMANCE_TIME_CONTEXT);
     });
 
     expect(result).toBe(TaskPlanOutcome.Succeeded);
@@ -77,7 +81,7 @@ describe('Task vNext performance budgets', () => {
 
   it('expands 1000 daily candidate dates through the canonical recurrence adapter', () => {
     const adapter = createTaskRecurrenceDateAdapter();
-    const anchor = new Date(2026, 0, 1, 0, 0, 0, 0);
+    const anchor = new Date(Date.UTC(2026, 0, 1, 0, 0, 0, 0));
     const timeConfig = TaskTimeConfig.createAllDay(anchor);
     const rule = RecurrenceRule.create({
       frequency: RecurrenceFrequency.Daily,
@@ -87,11 +91,17 @@ describe('Task vNext performance budgets', () => {
       occurrences: 1000,
     });
     const from = anchor.getTime();
-    const to = new Date(2030, 0, 1, 0, 0, 0, 0).getTime();
+    const to = Date.UTC(2030, 0, 1, 0, 0, 0, 0);
 
     let dates: number[] = [];
     const avgMs = averageDuration(5, () => {
-      dates = adapter.between(rule, timeConfig, from, to);
+      dates = adapter.between(
+        rule,
+        timeConfig,
+        from,
+        to,
+        createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+      );
     });
 
     expect(dates).toHaveLength(1000);

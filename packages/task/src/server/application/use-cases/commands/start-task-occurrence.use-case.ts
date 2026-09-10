@@ -6,9 +6,13 @@ import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-t
 import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
+import type { TaskOccurrenceProjectionService } from '../../services/task-occurrence-projection.service';
 
 export class StartTaskOccurrenceUseCase {
-  constructor(private readonly instanceRepository: ITaskOccurrenceRepository) {}
+  constructor(
+    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly projection: TaskOccurrenceProjectionService,
+  ) {}
 
   async execute(id: string, identityId: string): Promise<Result<TaskOccurrenceClientDTO>> {
     const instance = await this.instanceRepository.findByIdForIdentity(identityId, id);
@@ -23,6 +27,6 @@ export class StartTaskOccurrenceUseCase {
     instance.start();
     await this.instanceRepository.save(instance);
 
-    return ok(instance.toClientDTO());
+    return ok(await this.projection.project(identityId, instance));
   }
 }

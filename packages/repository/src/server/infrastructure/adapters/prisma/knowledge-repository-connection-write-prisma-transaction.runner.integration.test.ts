@@ -20,13 +20,8 @@ async function seedIdentityAndFinalizedIntent() {
   await prisma.account.create({
     data: {
       id: identityId,
-      status: 'ACTIVE',
+      status: 'Active',
       profile: {},
-      settings: {},
-      emailAddress: `install-${identityId}@example.test`,
-      emailIsVerified: true,
-      emailVerifiedAt: new Date(),
-      emailIsPrimary: true,
     },
   });
   const intentId = `intent-${randomUUID()}`;

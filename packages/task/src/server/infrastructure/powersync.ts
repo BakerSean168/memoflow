@@ -10,6 +10,7 @@
  */
 
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createTaskModule,
   type TaskModuleInstance,
@@ -53,7 +54,10 @@ type TaskPowerSyncQueryable = IElectronDatabaseTransaction;
  */
 export function createTaskPowerSyncModule(
   db: IElectronDatabase,
-  runtimeContributions?: TaskRuntimeContributionsInput,
+  options: {
+    readonly userTimeContextPort: UserTimeContextPort;
+    readonly runtimeContributions?: TaskRuntimeContributionsInput;
+  },
 ): TaskModuleInstance {
   const {
     taskPlanRepository,
@@ -65,7 +69,8 @@ export function createTaskPowerSyncModule(
     taskPlanRepository,
     taskOccurrenceRepository,
     taskWriteTransactionRunner,
-    runtimeContributions,
+    userTimeContextPort: options.userTimeContextPort,
+    runtimeContributions: options.runtimeContributions,
   });
 }
 
@@ -123,10 +128,12 @@ export function createTaskPowerSyncGoalOutboxRuntime(
 
 export function createTaskPowerSyncScheduleProjectionSource(
   db: TaskPowerSyncQueryable,
+  userTimeContextPort: UserTimeContextPort,
 ): TaskScheduleProjectionSource {
   return createTaskScheduleProjectionSource({
     taskPlanRepository: new PowerSyncTaskPlanRepository(db),
     taskOccurrenceRepository: new PowerSyncTaskOccurrenceRepository(db),
+    userTimeContextPort,
   });
 }
 

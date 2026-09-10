@@ -18,6 +18,9 @@ import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskOccurrenceId } from '../../../domain/value-objects/task-occurrence-id';
 import { TaskPlanId } from '../../../domain/value-objects/task-plan-id';
 import { IdentityId } from '@memoflow/domain-shared';
+import { createTimeContext } from '@memoflow/time';
+
+const UTC_TEST_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
@@ -47,6 +50,7 @@ function makeInstance(
   }>,
 ): TaskOccurrence {
   return TaskOccurrence.create({
+    timeContext: UTC_TEST_CONTEXT,
     templateId: overrides?.templateId ?? makeTemplateId(),
     identityId: overrides?.identityId ?? makeIdentityId(),
     instanceDate: overrides?.instanceDate ?? Date.now(),
@@ -88,6 +92,7 @@ describe('TaskOccurrence Aggregate', () => {
         const timeConfig = makeAllDayTimeConfig();
 
         const instance = TaskOccurrence.create({
+          timeContext: UTC_TEST_CONTEXT,
           templateId,
           identityId,
           instanceDate,
@@ -130,6 +135,7 @@ describe('TaskOccurrence Aggregate', () => {
       it('should throw for missing templateId', () => {
         expect(() =>
           TaskOccurrence.create({
+            timeContext: UTC_TEST_CONTEXT,
             templateId: null as any,
             identityId: makeIdentityId(),
             instanceDate: Date.now(),
@@ -142,6 +148,7 @@ describe('TaskOccurrence Aggregate', () => {
       it('should throw for missing identityId', () => {
         expect(() =>
           TaskOccurrence.create({
+            timeContext: UTC_TEST_CONTEXT,
             templateId: makeTemplateId(),
             identityId: null as any,
             instanceDate: Date.now(),
@@ -154,6 +161,7 @@ describe('TaskOccurrence Aggregate', () => {
       it('should throw for invalid instanceDate', () => {
         expect(() =>
           TaskOccurrence.create({
+            timeContext: UTC_TEST_CONTEXT,
             templateId: makeTemplateId(),
             identityId: makeIdentityId(),
             instanceDate: NaN,
@@ -166,6 +174,7 @@ describe('TaskOccurrence Aggregate', () => {
       it('should throw for missing timeConfig', () => {
         expect(() =>
           TaskOccurrence.create({
+            timeContext: UTC_TEST_CONTEXT,
             templateId: makeTemplateId(),
             identityId: makeIdentityId(),
             instanceDate: Date.now(),
@@ -556,7 +565,7 @@ describe('TaskOccurrence Aggregate', () => {
         });
 
         expect(overdueInstance.status).toBe(TaskOccurrenceStatus.Pending);
-        expect(overdueInstance.isOverdue()).toBe(true);
+        expect(overdueInstance.isOverdueAt(UTC_TEST_CONTEXT)).toBe(true);
       });
 
       it('should return true for InProgress task past due', () => {
@@ -566,7 +575,7 @@ describe('TaskOccurrence Aggregate', () => {
 
         overdueInstance.start();
         expect(overdueInstance.status).toBe(TaskOccurrenceStatus.InProgress);
-        expect(overdueInstance.isOverdue()).toBe(true);
+        expect(overdueInstance.isOverdueAt(UTC_TEST_CONTEXT)).toBe(true);
       });
 
       it('should return false for Pending task not yet due', () => {
@@ -575,7 +584,7 @@ describe('TaskOccurrence Aggregate', () => {
         });
 
         expect(freshInstance.status).toBe(TaskOccurrenceStatus.Pending);
-        expect(freshInstance.isOverdue()).toBe(false);
+        expect(freshInstance.isOverdueAt(UTC_TEST_CONTEXT)).toBe(false);
       });
 
       it('should return false for Completed task even if past due', () => {
@@ -585,7 +594,7 @@ describe('TaskOccurrence Aggregate', () => {
 
         overdueInstance.complete();
         expect(overdueInstance.status).toBe(TaskOccurrenceStatus.Completed);
-        expect(overdueInstance.isOverdue()).toBe(false);
+        expect(overdueInstance.isOverdueAt(UTC_TEST_CONTEXT)).toBe(false);
       });
 
       it('should return false for Skipped task even if past due', () => {
@@ -595,91 +604,83 @@ describe('TaskOccurrence Aggregate', () => {
 
         overdueInstance.skip();
         expect(overdueInstance.status).toBe(TaskOccurrenceStatus.Skipped);
-        expect(overdueInstance.isOverdue()).toBe(false);
+        expect(overdueInstance.isOverdueAt(UTC_TEST_CONTEXT)).toBe(false);
       });
 
       it('clock movement only derives overdue and never manufactures Missed', () => {
         const occurrenceDay = Date.now() - 2 * 86400000;
         const overdueInstance = makeInstance({ instanceDate: occurrenceDay });
 
-        expect(overdueInstance.isOverdue(occurrenceDay + 3 * 86400000)).toBe(true);
+        expect(overdueInstance.isOverdueAt(UTC_TEST_CONTEXT, occurrenceDay + 3 * 86400000)).toBe(
+          true,
+        );
         expect(overdueInstance.status).toBe(TaskOccurrenceStatus.Pending);
-        expect(overdueInstance.toClientDTO().status).toBe(TaskOccurrenceStatus.Pending);
-        expect(overdueInstance.toClientDTO().isOverdue).toBe(true);
+        expect(overdueInstance.toClientDTOAt(UTC_TEST_CONTEXT).status).toBe(
+          TaskOccurrenceStatus.Pending,
+        );
+        expect(overdueInstance.toClientDTOAt(UTC_TEST_CONTEXT).isOverdue).toBe(true);
       });
 
       it('a past-due Pending occurrence remains completable', () => {
         const occurrenceDay = Date.now() - 2 * 86400000;
         const overdueInstance = makeInstance({ instanceDate: occurrenceDay });
-        expect(overdueInstance.isOverdue()).toBe(true);
+        expect(overdueInstance.isOverdueAt(UTC_TEST_CONTEXT)).toBe(true);
         overdueInstance.complete();
         expect(overdueInstance.status).toBe(TaskOccurrenceStatus.Completed);
-        expect(overdueInstance.isOverdue()).toBe(false);
+        expect(overdueInstance.isOverdueAt(UTC_TEST_CONTEXT)).toBe(false);
       });
     });
 
     describe('dueDate (computed)', () => {
       it('should compute dueDate at the local calendar-day boundary for AllDay', () => {
-        const localDay = new Date(2025, 5, 15, 0, 0, 0);
+        const localDay = new Date(Date.UTC(2025, 5, 15, 0, 0, 0));
         const instanceDate = localDay.getTime();
         const inst = makeInstance({
           instanceDate,
           timeConfig: makeAllDayTimeConfig(localDay),
         });
 
-        expect(inst.dueDate).toBe(new Date(2025, 5, 15, 23, 59, 59, 999).getTime());
+        expect(inst.dueDateAt(UTC_TEST_CONTEXT)).toBe(Date.UTC(2025, 5, 15, 23, 59, 59, 999));
       });
 
-      it('uses the local DST day boundary for AllDay dueDate', () => {
-        const originalTz = process.env.TZ;
-        process.env.TZ = 'America/New_York';
-        try {
-          const instanceDate = new Date(2026, 2, 8, 0, 0, 0).getTime();
-          const inst = makeInstance({
-            instanceDate,
-            timeConfig: makeAllDayTimeConfig(new Date(instanceDate)),
-          });
-          expect(inst.dueDate).toBe(new Date(2026, 2, 8, 23, 59, 59, 999).getTime());
-        } finally {
-          if (originalTz === undefined) delete process.env.TZ;
-          else process.env.TZ = originalTz;
-        }
+      it('uses the explicit Product Time DST day boundary for AllDay dueDate', () => {
+        const timeContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });
+        const instanceDate = Date.parse('2026-03-08T05:00:00.000Z');
+        const inst = makeInstance({
+          instanceDate,
+          timeConfig: makeAllDayTimeConfig(new Date(instanceDate)),
+        });
+        expect(new Date(inst.dueDateAt(timeContext)!).toISOString()).toBe(
+          '2026-03-09T03:59:59.999Z',
+        );
       });
 
-      it('combines TimePoint with local wall time across spring DST', () => {
-        const originalTz = process.env.TZ;
-        process.env.TZ = 'America/New_York';
-        try {
-          const instanceDate = new Date(2026, 2, 8, 0, 0, 0).getTime();
-          const inst = makeInstance({
-            instanceDate,
-            timeConfig: makeTimePointConfig(9 * 60, new Date(instanceDate)),
-          });
-          expect(new Date(inst.dueDate!).toISOString()).toBe('2026-03-08T13:00:00.000Z');
-        } finally {
-          if (originalTz === undefined) delete process.env.TZ;
-          else process.env.TZ = originalTz;
-        }
+      it('combines TimePoint with explicit Product Time wall time across spring DST', () => {
+        const timeContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });
+        const instanceDate = Date.parse('2026-03-08T05:00:00.000Z');
+        const inst = makeInstance({
+          instanceDate,
+          timeConfig: makeTimePointConfig(9 * 60, new Date(instanceDate)),
+        });
+        expect(new Date(inst.dueDateAt(timeContext)!).toISOString()).toBe(
+          '2026-03-08T13:00:00.000Z',
+        );
       });
 
-      it('combines TimeRange end with local wall time across spring DST', () => {
-        const originalTz = process.env.TZ;
-        process.env.TZ = 'America/New_York';
-        try {
-          const instanceDate = new Date(2026, 2, 8, 0, 0, 0).getTime();
-          const inst = makeInstance({
-            instanceDate,
-            timeConfig: TaskTimeConfig.createTimeRange(new Date(instanceDate), 9 * 60, 10 * 60 + 30),
-          });
-          expect(new Date(inst.dueDate!).toISOString()).toBe('2026-03-08T14:30:00.000Z');
-        } finally {
-          if (originalTz === undefined) delete process.env.TZ;
-          else process.env.TZ = originalTz;
-        }
+      it('combines TimeRange end with explicit Product Time wall time across spring DST', () => {
+        const timeContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });
+        const instanceDate = Date.parse('2026-03-08T05:00:00.000Z');
+        const inst = makeInstance({
+          instanceDate,
+          timeConfig: TaskTimeConfig.createTimeRange(new Date(instanceDate), 9 * 60, 10 * 60 + 30),
+        });
+        expect(new Date(inst.dueDateAt(timeContext)!).toISOString()).toBe(
+          '2026-03-08T14:30:00.000Z',
+        );
       });
 
       it('should combine TimePoint with the local occurrence day', () => {
-        const localDay = new Date(2025, 5, 15, 0, 0, 0);
+        const localDay = new Date(Date.UTC(2025, 5, 15, 0, 0, 0));
         const instanceDate = localDay.getTime();
         const minutesFromMidnight = 540; // 9:00 AM
         const inst = makeInstance({
@@ -687,7 +688,7 @@ describe('TaskOccurrence Aggregate', () => {
           timeConfig: makeTimePointConfig(minutesFromMidnight, localDay),
         });
 
-        expect(inst.dueDate).toBe(new Date(2025, 5, 15, 9, 0, 0, 0).getTime());
+        expect(inst.dueDateAt(UTC_TEST_CONTEXT)).toBe(Date.UTC(2025, 5, 15, 9, 0, 0, 0));
       });
     });
   });
@@ -703,6 +704,7 @@ describe('TaskOccurrence Aggregate', () => {
       templateId = makeTemplateId();
       identityId = makeIdentityId();
       instance = TaskOccurrence.create({
+        timeContext: UTC_TEST_CONTEXT,
         templateId,
         identityId,
         instanceDate,
@@ -713,7 +715,7 @@ describe('TaskOccurrence Aggregate', () => {
 
     describe('toServerDTO()', () => {
       it('should convert to ServerDTO with correct fields', () => {
-        const dto = instance.toServerDTO();
+        const dto = instance.toServerDTOAt(UTC_TEST_CONTEXT);
 
         expect(dto.id).toBe(instance.id.toString());
         expect(dto.templateId).toBe(templateId.toString());
@@ -733,21 +735,21 @@ describe('TaskOccurrence Aggregate', () => {
 
       it('should include comment when note is set via complete()', () => {
         instance.complete(3600000, 'Done well', 5);
-        const dto = instance.toServerDTO();
+        const dto = instance.toServerDTOAt(UTC_TEST_CONTEXT);
 
         expect(dto.comment).toBe('Done well');
       });
 
       it('should include comment when note is set via skip()', () => {
         instance.skip('Too busy');
-        const dto = instance.toServerDTO();
+        const dto = instance.toServerDTOAt(UTC_TEST_CONTEXT);
 
         expect(dto.comment).toBe('Too busy');
       });
 
       it('should reflect InProgress status after start()', () => {
         instance.start();
-        const dto = instance.toServerDTO();
+        const dto = instance.toServerDTOAt(UTC_TEST_CONTEXT);
 
         expect(dto.status).toBe(TaskOccurrenceStatus.InProgress);
         expect(dto.actualStartTime).not.toBeNull();
@@ -755,7 +757,7 @@ describe('TaskOccurrence Aggregate', () => {
 
       it('should reflect Completed status after complete()', () => {
         instance.complete();
-        const dto = instance.toServerDTO();
+        const dto = instance.toServerDTOAt(UTC_TEST_CONTEXT);
 
         expect(dto.status).toBe(TaskOccurrenceStatus.Completed);
         expect(dto.actualEndTime).not.toBeNull();
@@ -764,7 +766,7 @@ describe('TaskOccurrence Aggregate', () => {
 
     describe('toClientDTO()', () => {
       it('should convert to ClientDTO with correct fields', () => {
-        const dto = instance.toClientDTO();
+        const dto = instance.toClientDTOAt(UTC_TEST_CONTEXT);
 
         expect(dto.id).toBe(instance.id.toString());
         expect(dto.templateId).toBe(templateId.toString());
@@ -780,17 +782,17 @@ describe('TaskOccurrence Aggregate', () => {
 
       it('should reflect status changes', () => {
         instance.start();
-        let dto = instance.toClientDTO();
+        let dto = instance.toClientDTOAt(UTC_TEST_CONTEXT);
         expect(dto.status).toBe(TaskOccurrenceStatus.InProgress);
 
         instance.complete();
-        dto = instance.toClientDTO();
+        dto = instance.toClientDTOAt(UTC_TEST_CONTEXT);
         expect(dto.status).toBe(TaskOccurrenceStatus.Completed);
       });
 
       it('should include comment on completed instance', () => {
         instance.complete(0, 'Test note');
-        const dto = instance.toClientDTO();
+        const dto = instance.toClientDTOAt(UTC_TEST_CONTEXT);
         expect(dto.comment).toBe('Test note');
       });
     });
@@ -799,7 +801,9 @@ describe('TaskOccurrence Aggregate', () => {
   describe('persisted status characterization', () => {
     it('rejects historical persisted Expired state instead of reviving it as canonical state', () => {
       const state = makeState({ status: 'Expired' as any });
-      expect(() => TaskOccurrence.load(state)).toThrow('Invalid persisted TaskOccurrenceStatus: Expired');
+      expect(() => TaskOccurrence.load(state)).toThrow(
+        'Invalid persisted TaskOccurrenceStatus: Expired',
+      );
     });
   });
 
@@ -912,7 +916,7 @@ describe('TaskOccurrence Aggregate', () => {
       const original = makeInstance();
       original.complete(3600000, 'Test', 5);
 
-      const dto = original.toServerDTO();
+      const dto = original.toServerDTOAt(UTC_TEST_CONTEXT);
       const restored = TaskOccurrence.load({
         id: TaskOccurrenceId.of(dto.id),
         templateId: TaskPlanId.of(dto.templateId),

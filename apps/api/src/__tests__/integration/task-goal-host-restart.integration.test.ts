@@ -22,6 +22,7 @@ import {
   disconnectPrisma,
   seedAccount,
 } from '@memoflow/test-utils/setup/integration-helpers';
+import { createTimeContext } from '@memoflow/time';
 
 const execFileAsync = promisify(execFile);
 
@@ -42,6 +43,10 @@ function composeRestartedTaskHost(): TaskApiModuleDef {
   return createTaskApiModule({ instance });
 }
 
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+};
+
 describe('API host Task -> Goal restart recovery', () => {
   beforeEach(async () => {
     await cleanAll();
@@ -58,6 +63,7 @@ describe('API host Task -> Goal restart recovery', () => {
 
     const goalModule = createGoalPrismaModule(prisma, {
       taskBindingReadPort: new PrismaTaskBindingReadPort(prisma),
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
     });
     const createdGoal = await goalModule.api.createGoal(
       {

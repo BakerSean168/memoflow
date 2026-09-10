@@ -182,8 +182,8 @@ Order:
 2. TIME-1202 **DONE** — branded `TimeZoneId`, `TimeContext`, `TimePresentationStyle`; the temporary legacy adapter is now deletion debt under ADR-111;
 3. TIME-1203 **DONE** — timezone-aware Calendar/Input + shared wall-clock resolver;
 4. TIME-1204 **DONE** — locale/timezone-aware Format + official `@date-fns/tz` fixed-pattern adapter;
-5. TIME-1205 atomically switch cross-module consumers;
-6. TIME-1206 remove raw number/Date compatibility and host-local fallbacks.
+5. TIME-1205 **DONE** — cross-module consumers atomically switched to identity/session Product Time;
+6. TIME-1206 **DONE** — raw number/Date compatibility and host-local fallbacks retired; anti-resurrection governance active.
 
 **Global gate:** no server business calendar semantics may read ambient host timezone.
 
@@ -191,48 +191,77 @@ Order:
 
 ### ACC-1401 — Characterize Account profile/lifecycle/closure
 
-- prove current Desktop local profile behavior;
-- prove cloud Account closure/revocation/retry;
-- enumerate real consumers of realName/gender/birthday/phone/Suspended/version.
+**状态：DONE — 2026-09-09**
+
+Characterization confirms Desktop guest/Profile lock/adoption behavior and the durable cloud closure/revocation/retry path. Consumer inventory: `realName` / `gender` / `birthday` have real UI consumers and stay; Account `Suspended` has no admin/moderation control plane; phone has no write capability and only speculative self-loop persistence; Account `version` has no product consumer or expected-revision CAS semantics.
 
 ### SETTING-9202 — Canonical preference namespace foundation
 
 **状态：DONE — 2026-09-09**
 
-Canonical `presentation | regional` contracts, portable `TimeZoneId`, per-namespace Prisma/PowerSync rows, real revision CAS and creation-race recovery are implemented. Current transports intentionally remain on legacy `UserSetting` until the immediate coordinated cutover; there is no backfill/dual-read/dual-write compatibility lane.
+Canonical `presentation | regional` contracts, portable `TimeZoneId`, per-namespace Prisma/PowerSync rows, real revision CAS and creation-race recovery are implemented. ADR-111 forbids backfill/dual-read/dual-write compatibility lanes.
 
-**Next coordination gate:** execute `SETTING-9203` together with `TIME-1205` consumer cutover before retiring Account/Setting legacy preference truth.
+### SETTING-9203 — Canonical presentation/regional cutover + Account.settings retirement
+
+**状态：DONE — 2026-09-09**
+
+Completed in the same coordinated batch as `TIME-1205`: canonical preference HTTP/IPC/UI transports are live, `PreferenceUserTimeContextAdapter` is the identity Product Time seam, Account preference duplicate truth is removed through contracts/domain/API/Prisma/PowerSync/Web mock surfaces, and current time consumers no longer read Account/UserSetting timezone fallback. Non-presentation legacy Setting ownership remains for SETTING-9204/9205/9206/9209.
 
 ### ACC-1402 — Introduce AccountView + CloudIdentitySummary composition
 
-**Goal:** UI can display profile + login email verification without Account owning mutable auth email.
+**状态：DONE — 2026-09-09**
 
-- compose CloudPrincipal/CloudAuth user safe summary at host/application boundary;
-- no token/provider secret fields.
+`AccountView = { account, cloudIdentity }` is the HTTP read/update surface. `CloudIdentitySummary` contains only `identityId / email / emailVerified`; session/provider/token fields are structurally excluded. HTTP composes the projection from the authenticated request seam, IPC stays local-only with `cloudIdentity: null`, and Vue/React display login email + verification from Cloud identity rather than treating Account contact email as authentication truth.
 
 ### ACC-1403 — Retire Account.settings
 
-Depends on Setting presentation/regional + Notification preference consumers being live.
+**状态：DONE — 2026-09-09**
 
-Delete AccountSettings VO, `/me/settings`, event, DTO field and persistence column in the canonical preference cutover batch. No value backfill or compatibility reader.
+Canonical presentation/regional preference consumers are live and Account settings duplicate truth is deleted through VO, contracts, `/me/settings`, event/RPC surface, Prisma/PowerSync persistence and client adapters. No backfill, compatibility reader or dual-write lane remains.
 
 ### ACC-1404 — Simplify Account lifecycle
 
-Move to Active/Closed + `closedAt`; remove Suspended if characterization confirms no production control plane. Preserve closure operation state separately.
+**状态：DONE — 2026-09-10**
+
+Account lifecycle is now exactly `Active | Closed` with `closedAt`; `Suspended / Deactivated / deletedAt` are retired from the Account owner model, contracts, Prisma/PowerSync persistence and host lifecycle gates. Durable closure-operation state remains independent. Evidence: Account unit 26 files / 192 tests before phone retirement, PostgreSQL closure 16/16, PowerSync 5/5, API auth/reminder lifecycle 23/23, contracts/account direct typecheck 0.
 
 ### ACC-1405 — Remove speculative phone verification if unused
 
-If a real consumer is found, keep only the minimum product contact semantics and move authentication verification to Cloud Auth.
+**状态：DONE — 2026-09-10**
+
+No real phone write/auth capability existed, so `ContactPhone` and all Account phone verification/persistence surfaces were destructively retired with no compatibility lane. Prisma + PowerSync Account schemas and generated Prisma client no longer contain phone fields; a real PostgreSQL `information_schema` gate proves the five old columns are physically absent. Evidence after retirement: Account unit 26 files / 179 tests, contracts Account gates 15/15, Vue Account 5/5, React typecheck 0, phone anti-resurrection 2/2, physical DB 1/1.
+
+### ACC-1406 — Retire Account auth-email shadow + dead availability
+
+**状态：DONE — 2026-09-10**
+
+Cloud Auth is now the sole login-email authority. Account `ContactEmail`, the four mirrored email columns, nickname/email availability API+IPC+repository uniqueness seams, and the legacy-auth bootstrap that depended on those columns were destructively retired. Cloud provisioning may read the login email only transiently as a nickname fallback and never persists it into Account. `AccountView.cloudIdentity` remains the safe UI projection. Evidence: Account 24 files / 150 unit tests + 6 files / 20 real-DB integration tests, contracts Account gates 14/14, Vue Account 5/5, React/Vue typecheck 0, auth-email anti-resurrection 3/3, physical DB 1/1, Desktop adoption 3/3, migrator 3/3, PowerSync normalization 7/7, Setting 2/2 + Goal 7/7 + Repository 17/17 affected integration tests.
+
+### ACC-1407 — Remove fake Account version + explicit Account Clock/Instant
+
+**状态：DONE — 2026-09-10**
+
+**Goal:** remove Account's non-CAS `version` field and all ambient `Date.now()` domain mutations. Account creation/profile update/closure timestamps must be explicit `Instant` values supplied from an injected Clock at application/host boundaries. Durable closure-operation `version` remains untouched.
+
+Implementation is complete. Account product `version` is absent from contracts, domain, Prisma, generated Prisma, and PowerSync surfaces; `AccountClosureOperation.version` remains the real CAS field. Account creation, profile update, and closure use explicit `Instant` values from injected `@memoflow/time` Clocks at application and desktop/API host boundaries. Required Account persistence timestamps reject missing/invalid values instead of reading ambient time. Evidence: Account 25 files / 152 tests, API compose-account 8/8, DesktopProfileRuntimeManager 11/11, contracts typecheck PASS, direct Account typecheck PASS, and ACC-1407 source/physical DB gates previously passing.
 
 ### AUTH-1501 — Narrow Cloud Auth product seam
+
+**状态：DONE — 2026-09-10**
 
 - document/export only CloudPrincipal/session capability;
 - verify no Better Auth private type leaks;
 - keep `checkRequestAccess` only for account-closure product policy.
 
+Implemented `CloudSessionCapability` and migrated API auth middleware to the narrow resolver seam. The server barrel and emitted declarations no longer expose broad `CloudAuth`, `CloudAuthOptions`, or `CloudUserProvisioner` types; rate-limit and dependency-injection declarations are MemoFlow-owned/opaque, and emitted `dist/server/*.d.ts` contains no Better Auth references. Removed duplicate-signup routing from `checkRequestAccess`; with `requireEmailVerification=true`, Better Auth 1.6.25 preserves its native 200 synthetic duplicate-signup privacy response, while the provider 422 code mapping remains covered separately and preserves MemoFlow `USER_ALREADY_EXISTS` UX. Evidence: cloud-auth 7 files / 37 tests, API bootstrap + middleware 10/10, real `express-auth-closure` integration 4/4, direct typecheck/build/declaration scan/diff check PASS. AUTH-1502 is completed below; the full ADR boundary is now implemented.
+
 ### AUTH-1502 — Make Auth disabled state an enforcement projection
 
 Ensure closure coordinator is the only product path deciding Account closure; auth `disabledAt` follows it and does not form a second business lifecycle.
+
+**状态：DONE — 2026-09-10**
+
+Removed `CloudAuthUser.status` from the Prisma schema and regenerated Prisma; `CloudAuthDeviceCode.status` remains intact. `CloudAuth.revokeAllSessions()` now only removes sessions and device authorization state. Account closure's `PrismaCloudAuthRevocationAdapter` is the sole product writer of `disabledAt`, writes it once after successful revocation, and uses the injected Account `Clock` in both cloud-auth and Prisma-fallback paths. Request/principal enforcement checks the active Account closure checker first, then only `disabledAt` as durable defense-in-depth. Evidence: cloud-auth 7 files / 40 tests + direct typecheck/build/declaration scan PASS; Account 27 files / 162 unit tests + adapter 2/2; Account real DB integration 7 files / 22 tests including closure -> auth revocation + `disabledAt` + Account `Closed`; API `express-auth-closure` 4/4; physical PostgreSQL schema 1/1; database compile PASS; `git diff --check` PASS. Full API integration/typecheck remain affected by unrelated dirty-tree failures in `task-goal-host-restart` and two pre-existing API type errors; broader CI/convergence is not claimed.
 
 ## LABEL lane — execute LABEL-1301..1305
 

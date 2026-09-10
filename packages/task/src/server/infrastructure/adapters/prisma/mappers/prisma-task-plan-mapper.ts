@@ -21,6 +21,7 @@ import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { ReminderTimeUnit } from '@memoflow/contracts/task';
 import { TaskPlanId } from '../../../../domain/value-objects/task-plan-id';
 import { IdentityId } from '@memoflow/domain-shared';
+import { createTimeContext } from '@memoflow/time';
 import { TaskPlanStatus } from '../../../../domain/value-objects/task-plan-status';
 import {
   TaskTimeConfig,
@@ -30,6 +31,8 @@ import {
   ChecklistItemDefinition,
   TaskPlanSchedule,
 } from '../../../../domain/value-objects';
+
+const PERSISTED_DATE_ONLY_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
 
 type PrismaTaskPlanVNext = PrismaTaskPlan & {
   outcome?: string;
@@ -140,6 +143,7 @@ export class PrismaTaskPlanMapper {
         recurrenceRule ? TaskType.Recurring : TaskType.OneTime,
         timeConfig,
         recurrenceRule,
+        PERSISTED_DATE_ONLY_CONTEXT,
       ),
       reminderConfig,
       importance: data.importance as ImportanceLevel,
@@ -167,8 +171,8 @@ export class PrismaTaskPlanMapper {
   static toPersistence(template: TaskPlan) {
     const dto = template.toServerDTO();
     // Transitional old-column writer derived from canonical TaskPlan.schedule.
-    const timeConfig = template.timeConfig;
-    const recurrenceRule = template.recurrenceRule;
+    const timeConfig = template.schedule.toLegacyTimeConfig(PERSISTED_DATE_ONLY_CONTEXT);
+    const recurrenceRule = template.schedule.toLegacyRecurrenceRule(PERSISTED_DATE_ONLY_CONTEXT);
     const timeConfigType = timeConfig.timeType;
     const timeConfigStartTime = toDateOrNull(timeConfig.startDate);
     const timeConfigEndTime = null;

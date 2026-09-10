@@ -90,6 +90,7 @@ const reminderApplicationPort = { tag: 'reminder-application' } as never;
 const routineCommandPort = { tag: 'routine-command-port' } as never;
 const scheduleRepository = { tag: 'schedule-repository' } as never;
 const notificationRepository = { tag: 'notification-repository' } as never;
+const userTimeContextPort = { tag: 'user-time-context-port' } as never;
 const labelService = { tag: 'label-service' } as never;
 const mastraStorage = {
   kind: 'libsql' as const,
@@ -114,6 +115,7 @@ const dependencies = {
   routineCommandPort,
   scheduleRepository,
   notificationRepository,
+  userTimeContextPort,
   labelService,
   mastraStorage,
 };
@@ -170,6 +172,7 @@ describe('Desktop composeAI Mastra-only ownership', () => {
       routineCommandPort: vi.mocked(DesktopRoutineAICommandAdapter).mock.results[0].value,
       plannerReadPort: vi.mocked(DesktopPlannerAIReadAdapter).mock.results[0].value,
       notificationReadPort: vi.mocked(DesktopNotificationAIReadAdapter).mock.results[0].value,
+      userTimeContextPort,
     });
   });
 

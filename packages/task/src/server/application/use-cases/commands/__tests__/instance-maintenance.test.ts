@@ -3,12 +3,20 @@ import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
-import { aLoadedTaskPlan } from '../../../../../testing';
+import {
+  aLoadedTaskPlan,
+  TASK_TEST_OCCURRENCE_PROJECTION,
+  TASK_TEST_TIME_CONTEXT,
+} from '../../../../../testing';
 import { TaskPlanStatus } from '@memoflow/contracts/task';
 import { InvalidTaskPlanStateError } from '../../../../domain/value-objects/task-errors';
 import { GenerateTaskOccurrencesUseCase } from '../generate-task-occurrences.use-case';
 import { MarkTaskOccurrenceMissedUseCase } from '../mark-task-occurrence-missed.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
+
+const userTimeContextPort = {
+  getUserTimeContext: vi.fn().mockResolvedValue(TASK_TEST_TIME_CONTEXT),
+};
 
 const mockGenerateInstances = vi.fn();
 vi.mock('../../../../domain/services', () => {
@@ -31,6 +39,7 @@ describe('Instance maintenance use-cases', () => {
         templateRepository: templateRepo,
         instanceRepository: instanceRepo,
       }),
+      userTimeContextPort,
     );
 
   beforeEach(() => {
@@ -54,7 +63,7 @@ describe('Instance maintenance use-cases', () => {
       const instance = {
         canMarkMissed: vi.fn().mockReturnValue(true),
         markMissed: vi.fn(),
-        toClientDTO: vi.fn().mockReturnValue({ id: 'i-1', status: 'Missed' }),
+        toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-1', status: 'Missed' }),
       } as any;
       vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
       vi.mocked(instanceRepo.save).mockResolvedValue(undefined);
@@ -62,6 +71,7 @@ describe('Instance maintenance use-cases', () => {
       const result = await new MarkTaskOccurrenceMissedUseCase(
         instanceRepo,
         createInlineTaskWriteTransactionRunner({ instanceRepository: instanceRepo }),
+        TASK_TEST_OCCURRENCE_PROJECTION,
       ).execute(
         'i-1',
         'identity-1',
@@ -108,11 +118,15 @@ describe('Instance maintenance use-cases', () => {
       });
 
       expect(result).toBeOkWith([] as any);
-      expect(mockGenerateInstances).toHaveBeenCalledWith(template, {
-        forceGenerate: true,
+      expect(mockGenerateInstances).toHaveBeenCalledWith(
+        template,
+        TASK_TEST_TIME_CONTEXT,
+        {
+          forceGenerate: true,
         targetDate: 2,
-        fromDate: 1,
-      });
+          fromDate: 1,
+        },
+      );
       expect(instanceRepo.saveMany).not.toHaveBeenCalled();
       expect(templateRepo.save).not.toHaveBeenCalled();
     });
@@ -120,8 +134,8 @@ describe('Instance maintenance use-cases', () => {
     it('persists generated instances and returns DTO list', async () => {
       const template = { id: 'tpl-1' } as any;
       const generated = [
-        { toClientDTO: vi.fn().mockReturnValue({ id: 'i-1' }) },
-        { toClientDTO: vi.fn().mockReturnValue({ id: 'i-2' }) },
+        { toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-1' }) },
+        { toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-2' }) },
       ];
       vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
       mockGenerateInstances.mockReturnValue(generated as any);
@@ -156,7 +170,7 @@ describe('Instance maintenance use-cases', () => {
 
     it('returns INTERNAL_ERROR when template persistence fails after generating instances', async () => {
       const template = aLoadedTaskPlan();
-      const generated = [{ toClientDTO: vi.fn().mockReturnValue({ id: 'i-1' }) }];
+      const generated = [{ toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-1' }) }];
       vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
       mockGenerateInstances.mockReturnValue(generated as any);
       vi.mocked(templateRepo.save).mockRejectedValue(new Error('save failed'));
