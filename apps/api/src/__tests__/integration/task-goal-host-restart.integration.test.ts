@@ -3,7 +3,7 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import express from 'express';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { TaskGoalBindingTrigger, TaskType } from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
@@ -16,13 +16,14 @@ import {
   createTaskPrismaRepositories,
   createTaskRuntimeContribution,
 } from '@memoflow/task';
+import { TASK_TEST_TIME_CONTEXT, TASK_TEST_USER_TIME_CONTEXT_PORT } from '@memoflow/task/testing';
 import { createTaskApiModule, type TaskApiModuleDef } from '@memoflow/task/api';
 import {
   cleanAll,
   disconnectPrisma,
   seedAccount,
 } from '@memoflow/test-utils/setup/integration-helpers';
-import { createTimeContext } from '@memoflow/time';
+import { createTimeFacade } from '@memoflow/time';
 
 const execFileAsync = promisify(execFile);
 
@@ -37,15 +38,13 @@ function composeRestartedTaskHost(): TaskApiModuleDef {
   ];
   const instance = createTaskModule({
     ...taskRepositories,
+    userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
     runtimeContributions,
   });
 
   return createTaskApiModule({ instance });
 }
 
-const TEST_USER_TIME_CONTEXT_PORT = {
-  getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
-};
 
 describe('API host Task -> Goal restart recovery', () => {
   beforeEach(async () => {
@@ -63,7 +62,7 @@ describe('API host Task -> Goal restart recovery', () => {
 
     const goalModule = createGoalPrismaModule(prisma, {
       taskBindingReadPort: new PrismaTaskBindingReadPort(prisma),
-      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
     });
     const createdGoal = await goalModule.api.createGoal(
       {
@@ -96,18 +95,13 @@ describe('API host Task -> Goal restart recovery', () => {
     const taskModule = createTaskPrismaModule(prisma, {
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
     });
+    const taskDate = createTimeFacade({ context: TASK_TEST_TIME_CONTEXT }).calendar.toYmd(Date.now());
     const createdTask = await taskModule.api.createTaskPlan({
       identityId,
       name: 'Persist contribution before host exit',
-      taskType: TaskType.OneTime,
-      timeConfig: {
-        timeType: 'AllDay',
-        startDate: Date.now(),
-        timePoint: null,
-        timeRange: null,
-      },
+      schedule: { kind: 'OneTime', date: taskDate, timing: { kind: 'AllDay' } },
       importance: ImportanceLevel.Moderate,
-      tags: [],
+      labelIds: [],
       goalBinding: {
         goalId,
         keyResultId,
