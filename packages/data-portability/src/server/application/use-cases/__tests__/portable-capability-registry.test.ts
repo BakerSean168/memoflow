@@ -4,9 +4,14 @@ import {
   PortableCapabilityRegistry,
   type PortableCapability,
 } from '../../portable-capability';
+import { PortableReferenceRegistry } from '../../portable-reference-registry';
 
 const payloadSchema = z.object({ name: z.string() }).strict();
 type Payload = z.infer<typeof payloadSchema>;
+
+function executionContext() {
+  return { identityId: 'identity-1', references: new PortableReferenceRegistry() };
+}
 
 function createCapability(overrides: Partial<PortableCapability<Payload>> = {}): PortableCapability<Payload> {
   return {
@@ -33,10 +38,10 @@ describe('PortableCapabilityRegistry', () => {
 
     const registered = registry.get('goals');
     expect(registered?.schemaVersion).toBe(3);
-    expect(await registered?.exportValidated({ identityId: 'identity-1' })).toEqual({ name: 'Goal' });
-    expect(await registered?.dryRunValidated({ name: 'abc' }, { identityId: 'identity-1' })).toMatchObject({ created: 3 });
+    expect(await registered?.exportValidated(executionContext())).toEqual({ name: 'Goal' });
+    expect(await registered?.dryRunValidated({ name: 'abc' }, executionContext())).toMatchObject({ created: 3 });
     await expect(
-      registered?.applyValidated({ name: 42 }, { identityId: 'identity-1' }),
+      registered?.applyValidated({ name: 42 }, executionContext()),
     ).rejects.toThrow('Portable capability payload validation failed for goals@3');
   });
 
@@ -61,7 +66,7 @@ describe('PortableCapabilityRegistry', () => {
       }),
     );
 
-    await expect(registry.get('goals')?.exportValidated({ identityId: 'identity-1' })).rejects.toThrow(
+    await expect(registry.get('goals')?.exportValidated(executionContext())).rejects.toThrow(
       'Portable capability payload validation failed for goals@3',
     );
   });

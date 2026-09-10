@@ -1,10 +1,12 @@
 import type { PortableCapabilityKey } from '@memoflow/contracts/data-portability';
 import { PortableCapabilityKeySchema } from '@memoflow/contracts/data-portability';
 import type { z } from 'zod';
+import type { PortableReferenceRegistry } from './portable-reference-registry';
 
 export interface PortableCapabilityExecutionContext {
   readonly identityId: string;
   readonly batchId?: string;
+  readonly references: PortableReferenceRegistry;
 }
 
 export interface PortableCapabilityReceipt {
@@ -42,6 +44,7 @@ export interface RegisteredPortableCapability {
   readonly key: PortableCapabilityKey;
   readonly schemaVersion: number;
   readonly dependsOn: readonly PortableCapabilityKey[];
+  validatePayload(payload: unknown): unknown;
   exportValidated(context: PortableCapabilityExecutionContext): Promise<unknown | null>;
   dryRunValidated(
     payload: unknown,
@@ -99,6 +102,9 @@ export class PortableCapabilityRegistry {
       key: capability.key,
       schemaVersion: capability.schemaVersion,
       dependsOn,
+      validatePayload(payload) {
+        return parsePayload(payload);
+      },
       async exportValidated(context) {
         const payload = await capability.export(context);
         return payload === null ? null : parsePayload(payload);
@@ -118,5 +124,40 @@ export class PortableCapabilityRegistry {
 
   list(): readonly RegisteredPortableCapability[] {
     return [...this.capabilities.values()];
+  }
+
+  resolveDependencyOrder(
+    requestedKeys?: readonly PortableCapabilityKey[],
+    options: { readonly requireExplicitDependencies?: boolean } = {},
+  ): readonly RegisteredPortableCapability[] {
+    const requested = requestedKeys ?? this.list().map((capability) => capability.key);
+    const explicit = new Set(requested);
+    const permanent = new Set<PortableCapabilityKey>();
+    const temporary = new Set<PortableCapabilityKey>();
+    const ordered: RegisteredPortableCapability[] = [];
+
+    const visit = (key: PortableCapabilityKey, path: readonly PortableCapabilityKey[]): void => {
+      if (permanent.has(key)) return;
+      if (temporary.has(key)) {
+        throw new Error(`Portable capability dependency cycle: ${[...path, key].join(' -> ')}`);
+      }
+      const capability = this.capabilities.get(key);
+      if (!capability) {
+        throw new Error(`Portable capability is not registered: ${key}`);
+      }
+      temporary.add(key);
+      for (const dependency of capability.dependsOn) {
+        if (options.requireExplicitDependencies && !explicit.has(dependency)) {
+          throw new Error(`Portable capability ${key} requires missing payload dependency ${dependency}`);
+        }
+        visit(dependency, [...path, key]);
+      }
+      temporary.delete(key);
+      permanent.add(key);
+      ordered.push(capability);
+    };
+
+    for (const key of requested) visit(key, []);
+    return ordered;
   }
 }

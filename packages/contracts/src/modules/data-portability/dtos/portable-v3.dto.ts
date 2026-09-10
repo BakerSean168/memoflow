@@ -11,6 +11,11 @@ export const PortableCapabilityKeySchema = z
   .regex(/^[a-z][a-z0-9-]*$/, 'Capability key must be lowercase kebab-case');
 export type PortableCapabilityKey = z.infer<typeof PortableCapabilityKeySchema>;
 
+export const PortableReferenceV3Schema = z
+  .string()
+  .regex(/^[a-z][a-z0-9-]*:[1-9][0-9]*$/, 'Portable reference must be capability-scoped');
+export type PortableReferenceV3 = z.infer<typeof PortableReferenceV3Schema>;
+
 export const PortableCapabilityEnvelopeV3Schema = z
   .object({
     key: PortableCapabilityKeySchema,

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   parsePortableBackupEnvelopeV3,
   PortableBackupEnvelopeV3Schema,
+  PortableReferenceV3Schema,
 } from './index';
 
 const baseEnvelope = {
@@ -15,6 +16,17 @@ const baseEnvelope = {
     payload: unknown;
   }>,
 };
+
+describe('PortableReferenceV3', () => {
+  it('accepts stable capability-scoped refs and rejects ambiguous forms', () => {
+    expect(PortableReferenceV3Schema.safeParse('goals:1').success).toBe(true);
+    expect(PortableReferenceV3Schema.safeParse('notification-preferences:42').success).toBe(true);
+    expect(PortableReferenceV3Schema.safeParse('Goal:1').success).toBe(false);
+    expect(PortableReferenceV3Schema.safeParse('goals:0').success).toBe(false);
+    expect(PortableReferenceV3Schema.safeParse('goals/id').success).toBe(false);
+    expect(PortableReferenceV3Schema.safeParse('goals:abc').success).toBe(false);
+  });
+});
 
 describe('PortableBackupEnvelopeV3', () => {
   it('accepts owner capability envelopes without knowing owner payload shapes', () => {

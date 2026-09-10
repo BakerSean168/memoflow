@@ -5551,6 +5551,16 @@
       ]
     },
     {
+      "path": "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-coordinator.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-registry.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11089,7 +11099,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 33
+      "fileCount": 34
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11516,7 +11526,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 33
+      "fileCount": 34
     },
     {
       "id": "packages/database/vitest.config.ts",
@@ -11860,6 +11870,7 @@
       "packages/data-portability/src/server/application/use-cases/__tests__/export-server-held-data-disclosure.use-case.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/import-server-held-disclosure-rejected.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-boundary-re-lock.surface.spec.ts",
+      "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-coordinator.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-registry.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-editor-backup-boundary.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-runtime.test.ts",
@@ -12261,7 +12272,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1055,
+    "unit": 1056,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

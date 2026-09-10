@@ -15,3 +15,5 @@ export type {
   DataPortabilityImportStore,
   DataPortabilityImportTx,
 } from './import-store/data-portability-import-store';
+export * from './portable-reference-registry';
+export * from './portable-capability-coordinator';
