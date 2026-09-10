@@ -1,4 +1,3 @@
-import type { IUserSettingRepository } from '../domain/repositories/i-user-setting-repository';
 import {
   createUserPreferenceService,
   PreferenceUserTimeContextAdapter,
@@ -9,21 +8,13 @@ import {
   type UserPreferenceService,
 } from '../preferences';
 import type { UserTimeContextPort } from '@memoflow/time';
-
-import {
-  GetUserSetting,
-  PatchUserSetting,
-  ResetUserSetting,
-  ExportSettings,
-  ImportSettings,
-  GetDefaultSettings,
-} from '../application';
+import { ExportSettings, ImportSettings } from '../application';
 import type { SettingApplicationPort } from '../application';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('SettingModule');
 
-/** Setting runtime side effects. Setting 模块拥有的运行时副作用。 */
+/** Setting runtime side effects. */
 export interface SettingModuleRuntimeContribution {
   start(): void;
   stop(): void;
@@ -33,26 +24,18 @@ export type SettingRuntimeContributionsInput =
   | SettingModuleRuntimeContribution
   | readonly SettingModuleRuntimeContribution[];
 
-/** Explicit dependencies for the setting server runtime. Setting 服务端运行时的显式依赖。 */
+/** Canonical Setting dependencies: namespace preference persistence only. */
 export interface SettingModuleDependencies {
-  readonly userSettingRepository: IUserSettingRepository;
   readonly userPreferenceRepository: IUserPreferenceRepository;
   readonly runtimeContributions?: SettingRuntimeContributionsInput;
-  readonly persistMissingSettingOnRead?: boolean;
 }
 
-/** Lower-level use case graph kept for tests and diagnostics. */
 export interface SettingModuleUseCases {
-  readonly getUserSetting: GetUserSetting;
-  readonly patchUserSetting: PatchUserSetting;
-  readonly resetUserSetting: ResetUserSetting;
   readonly exportSettings: ExportSettings;
   readonly importSettings: ImportSettings;
-  readonly getDefaultSettings: GetDefaultSettings;
 }
 
 export interface SettingModuleInstance {
-  readonly userSettingRepository: IUserSettingRepository;
   readonly userPreferenceRepository: IUserPreferenceRepository;
   readonly preferenceService: UserPreferenceService;
   readonly portableCapability: PreferencePortableCapability;
@@ -64,53 +47,37 @@ export interface SettingModuleInstance {
 }
 
 export function createSettingUseCases(
-  dependencies: SettingModuleDependencies,
   preferencePortableService: PreferencePortableService,
 ): SettingModuleUseCases {
-  const { userSettingRepository } = dependencies;
-
   return {
-    getUserSetting: new GetUserSetting(userSettingRepository, {
-      persistOnMissing: dependencies.persistMissingSettingOnRead,
-    }),
-    patchUserSetting: new PatchUserSetting(userSettingRepository),
-    resetUserSetting: new ResetUserSetting(userSettingRepository),
     exportSettings: new ExportSettings(preferencePortableService),
     importSettings: new ImportSettings(preferencePortableService),
-    getDefaultSettings: new GetDefaultSettings(),
   };
 }
 
 function normalizeRuntimeContributions(
   runtimeContributions?: SettingRuntimeContributionsInput,
 ): readonly SettingModuleRuntimeContribution[] {
-  if (!runtimeContributions) {
-    return [];
-  }
-
+  if (!runtimeContributions) return [];
   return Array.isArray(runtimeContributions)
     ? Array.from(runtimeContributions)
     : [runtimeContributions as SettingModuleRuntimeContribution];
 }
 
-/**
- * Canonical setting composition root.
- * 规范化的 setting 模块组合根。
- */
+/** Canonical Setting composition root. */
 export function createSettingModule(
   dependencies: SettingModuleDependencies,
 ): SettingModuleInstance {
-  const { userSettingRepository, userPreferenceRepository } = dependencies;
+  const { userPreferenceRepository } = dependencies;
   const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
   const preferenceService = createUserPreferenceService(userPreferenceRepository);
   const preferencePortableService = new PreferencePortableService(preferenceService);
   const portableCapability = createPreferencePortableCapability(preferenceService);
-  const useCases = createSettingUseCases(dependencies, preferencePortableService);
+  const useCases = createSettingUseCases(preferencePortableService);
   const userTimeContextPort = new PreferenceUserTimeContextAdapter(preferenceService);
   let started = false;
 
   return {
-    userSettingRepository,
     userPreferenceRepository,
     preferenceService,
     portableCapability,
@@ -126,14 +93,8 @@ export function createSettingModule(
         preferenceService.resetPreferenceNamespace(identityId, namespace, expectedRevision),
       resetUserPreferences: (identityId, expectedRevisions) =>
         preferenceService.resetUserPreferences(identityId, expectedRevisions),
-      getUserSetting: (identityId) => useCases.getUserSetting.execute(identityId),
-      patchUserSetting: (identityId, category, patch) =>
-        useCases.patchUserSetting.execute(identityId, category, patch),
-      resetUserSetting: (identityId, category) =>
-        useCases.resetUserSetting.execute(identityId, category),
       exportSettings: (identityId) => useCases.exportSettings.execute(identityId),
       importSettings: (identityId, data) => useCases.importSettings.execute(identityId, data),
-      getDefaultSettings: () => useCases.getDefaultSettings.execute(),
     },
     start(): void {
       if (started) return;
@@ -143,10 +104,6 @@ export function createSettingModule(
           runtime.start();
           startedContributions.push(runtime);
         } catch (error) {
-          // Partial-start rollback: stop the already-started contributions in
-          // REVERSE order (best-effort, logged), then rethrow the ORIGINAL
-          // error. `started` stays false, so a later dispose() is a no-op —
-          // start() owns its partial-start cleanup.
           for (const startedRuntime of [...startedContributions].reverse()) {
             try {
               startedRuntime.stop();
@@ -164,9 +121,7 @@ export function createSettingModule(
     },
     dispose(): void {
       if (!started) return;
-      for (const runtime of [...runtimeContributions].reverse()) {
-        runtime.stop();
-      }
+      for (const runtime of [...runtimeContributions].reverse()) runtime.stop();
       started = false;
     },
   };

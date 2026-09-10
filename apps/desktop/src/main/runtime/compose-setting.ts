@@ -61,7 +61,7 @@ export interface ComposeSettingDesktopDependencies {
  * 1. createSettingPowerSyncRepositories(db) — select the PowerSync adapter.
  * 2. createSettingRuntimeContribution() — build the module-owned runtime
  *    contribution.
- * 3. createSettingModule({ userSettingRepository, runtimeContributions }) —
+ * 3. createSettingModule({ userPreferenceRepository, runtimeContributions }) —
  *    assemble the transport-neutral setting instance.
  * 4. createSettingElectronModule({ instance }) — bind the instance to an
  *    IElectronModule handle (transport + lifecycle only).
@@ -69,7 +69,7 @@ export interface ComposeSettingDesktopDependencies {
  * 接线顺序：
  * 1. createSettingPowerSyncRepositories(db) —— 选择 PowerSync 适配器。
  * 2. createSettingRuntimeContribution() —— 构建模块自有运行时贡献。
- * 3. createSettingModule({ userSettingRepository, runtimeContributions })
+ * 3. createSettingModule({ userPreferenceRepository, runtimeContributions })
  *    —— 装配与传输无关的设置实例。
  * 4. createSettingElectronModule({ instance }) —— 把实例绑定到 IElectronModule
  *    handle（只负责 transport 与生命周期）。
@@ -86,11 +86,9 @@ export interface ComposeSettingDesktopDependencies {
 export function composeSetting(
   dependencies: ComposeSettingDesktopDependencies,
 ): SettingElectronModuleDef {
-  const { userSettingRepository, userPreferenceRepository } =
-    createSettingPowerSyncRepositories(dependencies.db);
+  const { userPreferenceRepository } = createSettingPowerSyncRepositories(dependencies.db);
 
   const instance = createSettingModule({
-    userSettingRepository,
     userPreferenceRepository,
     runtimeContributions: [createSettingRuntimeContribution()],
   });

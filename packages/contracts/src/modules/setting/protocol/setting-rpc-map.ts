@@ -1,10 +1,4 @@
 import type {
-  GetUserSettingPublic,
-  GetUserSettingRes,
-  PatchUserSettingReq,
-  PatchUserSettingRes,
-  ResetUserSettingPublic,
-  ResetUserSettingRes,
   ExportSettingsReq,
   ExportSettingsRes,
   ImportSettingsReq,
@@ -22,9 +16,6 @@ import type {
 } from '../preferences';
 
 export type SettingRpcMap = {
-  'setting:all': [GetUserSettingPublic, GetUserSettingRes];
-  'setting:patch': [PatchUserSettingReq, PatchUserSettingRes];
-  'setting:reset': [ResetUserSettingPublic, ResetUserSettingRes];
   'setting:export': [ExportSettingsReq, ExportSettingsRes];
   'setting:import': [ImportSettingsReq, ImportSettingsRes];
   'setting:preferences:profile': [void, UserPreferenceProfile];

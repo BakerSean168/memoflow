@@ -1,4 +1,4 @@
-/** Transport-agnostic Setting client API (HTTP / IPC). */
+/** Transport-agnostic canonical Setting client API (HTTP / IPC). */
 import type { Result } from '@memoflow/contracts/result';
 import type {
   PreferenceMutationReceipt,
@@ -9,12 +9,9 @@ import type {
   UserPreferenceProfile,
   ExportSettingsRes,
   ImportSettingsRes,
-  UserSettingClientDTO,
-  PreferenceCategory,
 } from '@memoflow/contracts/setting';
 
 export interface ISettingApiClient {
-  // Canonical presentation/regional preferences.
   getPreferenceProfile(): Promise<Result<UserPreferenceProfile>>;
   getPreferenceNamespace(
     namespace: PreferenceNamespace,
@@ -31,15 +28,6 @@ export interface ISettingApiClient {
   resetUserPreferences(
     expectedRevisions?: Partial<Record<PreferenceNamespace, number>>,
   ): Promise<Result<ResetUserPreferencesResponse>>;
-
-  // Legacy giant-tree surface retained until remaining owners migrate.
-  getUserSettings(): Promise<Result<UserSettingClientDTO>>;
-  getUserSettingDefaults(): Promise<Result<UserSettingClientDTO>>;
-  patchCategory(
-    category: PreferenceCategory,
-    patch: Record<string, unknown>,
-  ): Promise<Result<UserSettingClientDTO>>;
-  resetUserSettings(category?: string): Promise<Result<UserSettingClientDTO>>;
   exportSettings(): Promise<Result<ExportSettingsRes>>;
   importSettings(data: string): Promise<Result<ImportSettingsRes>>;
 }

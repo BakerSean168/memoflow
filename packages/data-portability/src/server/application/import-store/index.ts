@@ -1,7 +1,7 @@
 export type {
   DataPortabilityImportStore,
   DataPortabilityImportTx,
-  UpsertUserSettingInput,
+  UpsertUserPreferencesInput,
   UpsertNotificationPreferenceInput,
   UpsertUserReminderPreferenceInput,
   CreateRepositoryInput,

@@ -18,10 +18,10 @@ export interface TimestampedImportInput extends CreatedImportInput {
 
 // --- Settings (singletons) ---
 
-export interface UpsertUserSettingInput {
-  id?: string;
+export interface UpsertUserPreferencesInput {
   identityId: string;
-  preferences: Record<string, unknown>;
+  presentation: Record<string, unknown>;
+  regional: Record<string, unknown>;
 }
 
 export interface UpsertNotificationPreferenceInput {
@@ -354,7 +354,7 @@ export interface CreateAIMessageInput extends CreatedImportInput {
 
 export interface DataPortabilityImportTx {
   // Singletons (upsert)
-  upsertUserSetting(input: UpsertUserSettingInput): Promise<void>;
+  upsertUserPreferences(input: UpsertUserPreferencesInput): Promise<void>;
   upsertNotificationPreference(input: UpsertNotificationPreferenceInput): Promise<void>;
   upsertUserReminderPreference(input: UpsertUserReminderPreferenceInput): Promise<void>;
 

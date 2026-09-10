@@ -479,11 +479,6 @@ export type ScheduleEventConsumerReceipt = $Result.DefaultSelection<Prisma.$Sche
  */
 export type ScheduleEventDeliveryLog = $Result.DefaultSelection<Prisma.$ScheduleEventDeliveryLogPayload>
 /**
- * Model UserSetting
- *
- */
-export type UserSetting = $Result.DefaultSelection<Prisma.$UserSettingPayload>
-/**
  * Model UserPreferenceRecord
  *
  */
@@ -1529,16 +1524,6 @@ export class PrismaClient<
   get scheduleEventDeliveryLog(): Prisma.ScheduleEventDeliveryLogDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.userSetting`: Exposes CRUD operations for the **UserSetting** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more UserSettings
-    * const userSettings = await prisma.userSetting.findMany()
-    * ```
-    */
-  get userSetting(): Prisma.UserSettingDelegate<ExtArgs, ClientOptions>;
-
-  /**
    * `prisma.userPreferenceRecord`: Exposes CRUD operations for the **UserPreferenceRecord** model.
     * Example usage:
     * ```ts
@@ -2139,7 +2124,6 @@ export namespace Prisma {
     ScheduleDomainEventOutbox: 'ScheduleDomainEventOutbox',
     ScheduleEventConsumerReceipt: 'ScheduleEventConsumerReceipt',
     ScheduleEventDeliveryLog: 'ScheduleEventDeliveryLog',
-    UserSetting: 'UserSetting',
     UserPreferenceRecord: 'UserPreferenceRecord',
     TaskPlan: 'TaskPlan',
     TaskOccurrence: 'TaskOccurrence',
@@ -2163,7 +2147,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "editorWorkspace" | "editorWorkspaceSession" | "editorWorkspaceSessionGroup" | "editorWorkspaceSessionGroupTab" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeRepositoryConnection" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userSetting" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "taskStatistic" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "editorWorkspace" | "editorWorkspaceSession" | "editorWorkspaceSessionGroup" | "editorWorkspaceSessionGroupTab" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeRepositoryConnection" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "taskStatistic" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -8679,80 +8663,6 @@ export namespace Prisma {
           }
         }
       }
-      UserSetting: {
-        payload: Prisma.$UserSettingPayload<ExtArgs>
-        fields: Prisma.UserSettingFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.UserSettingFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserSettingPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.UserSettingFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserSettingPayload>
-          }
-          findFirst: {
-            args: Prisma.UserSettingFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserSettingPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.UserSettingFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserSettingPayload>
-          }
-          findMany: {
-            args: Prisma.UserSettingFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserSettingPayload>[]
-          }
-          create: {
-            args: Prisma.UserSettingCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserSettingPayload>
-          }
-          createMany: {
-            args: Prisma.UserSettingCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.UserSettingCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserSettingPayload>[]
-          }
-          delete: {
-            args: Prisma.UserSettingDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserSettingPayload>
-          }
-          update: {
-            args: Prisma.UserSettingUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserSettingPayload>
-          }
-          deleteMany: {
-            args: Prisma.UserSettingDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.UserSettingUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.UserSettingUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserSettingPayload>[]
-          }
-          upsert: {
-            args: Prisma.UserSettingUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserSettingPayload>
-          }
-          aggregate: {
-            args: Prisma.UserSettingAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateUserSetting>
-          }
-          groupBy: {
-            args: Prisma.UserSettingGroupByArgs<ExtArgs>
-            result: $Utils.Optional<UserSettingGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.UserSettingCountArgs<ExtArgs>
-            result: $Utils.Optional<UserSettingCountAggregateOutputType> | number
-          }
-        }
-      }
       UserPreferenceRecord: {
         payload: Prisma.$UserPreferenceRecordPayload<ExtArgs>
         fields: Prisma.UserPreferenceRecordFieldRefs
@@ -9541,7 +9451,6 @@ export namespace Prisma {
     scheduleDomainEventOutbox?: ScheduleDomainEventOutboxOmit
     scheduleEventConsumerReceipt?: ScheduleEventConsumerReceiptOmit
     scheduleEventDeliveryLog?: ScheduleEventDeliveryLogOmit
-    userSetting?: UserSettingOmit
     userPreferenceRecord?: UserPreferenceRecordOmit
     taskPlan?: TaskPlanOmit
     taskOccurrence?: TaskOccurrenceOmit
@@ -11269,7 +11178,6 @@ export namespace Prisma {
     taskPlans?: boolean | Account$taskPlansArgs<ExtArgs>
     taskOccurrences?: boolean | Account$taskOccurrencesArgs<ExtArgs>
     taskStatistics?: boolean | Account$taskStatisticsArgs<ExtArgs>
-    userSettings?: boolean | Account$userSettingsArgs<ExtArgs>
     userPreferenceRecords?: boolean | Account$userPreferenceRecordsArgs<ExtArgs>
     notifications?: boolean | Account$notificationsArgs<ExtArgs>
     aiConversations?: boolean | Account$aiConversationsArgs<ExtArgs>
@@ -11364,7 +11272,6 @@ export namespace Prisma {
     taskPlans?: boolean | Account$taskPlansArgs<ExtArgs>
     taskOccurrences?: boolean | Account$taskOccurrencesArgs<ExtArgs>
     taskStatistics?: boolean | Account$taskStatisticsArgs<ExtArgs>
-    userSettings?: boolean | Account$userSettingsArgs<ExtArgs>
     userPreferenceRecords?: boolean | Account$userPreferenceRecordsArgs<ExtArgs>
     notifications?: boolean | Account$notificationsArgs<ExtArgs>
     aiConversations?: boolean | Account$aiConversationsArgs<ExtArgs>
@@ -11437,7 +11344,6 @@ export namespace Prisma {
       taskPlans: Prisma.$TaskPlanPayload<ExtArgs>[]
       taskOccurrences: Prisma.$TaskOccurrencePayload<ExtArgs>[]
       taskStatistics: Prisma.$TaskStatisticPayload<ExtArgs> | null
-      userSettings: Prisma.$UserSettingPayload<ExtArgs> | null
       userPreferenceRecords: Prisma.$UserPreferenceRecordPayload<ExtArgs>[]
       notifications: Prisma.$NotificationPayload<ExtArgs>[]
       aiConversations: Prisma.$AiConversationPayload<ExtArgs>[]
@@ -11900,7 +11806,6 @@ export namespace Prisma {
     taskPlans<T extends Account$taskPlansArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskPlansArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     taskOccurrences<T extends Account$taskOccurrencesArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskOccurrencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskOccurrencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     taskStatistics<T extends Account$taskStatisticsArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskStatisticsArgs<ExtArgs>>): Prisma__TaskStatisticClient<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    userSettings<T extends Account$userSettingsArgs<ExtArgs> = {}>(args?: Subset<T, Account$userSettingsArgs<ExtArgs>>): Prisma__UserSettingClient<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     userPreferenceRecords<T extends Account$userPreferenceRecordsArgs<ExtArgs> = {}>(args?: Subset<T, Account$userPreferenceRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPreferenceRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notifications<T extends Account$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiConversations<T extends Account$aiConversationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -13150,25 +13055,6 @@ export namespace Prisma {
      */
     include?: TaskStatisticInclude<ExtArgs> | null
     where?: TaskStatisticWhereInput
-  }
-
-  /**
-   * Account.userSettings
-   */
-  export type Account$userSettingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingInclude<ExtArgs> | null
-    where?: UserSettingWhereInput
   }
 
   /**
@@ -117005,1112 +116891,6 @@ export namespace Prisma {
 
 
   /**
-   * Model UserSetting
-   */
-
-  export type AggregateUserSetting = {
-    _count: UserSettingCountAggregateOutputType | null
-    _avg: UserSettingAvgAggregateOutputType | null
-    _sum: UserSettingSumAggregateOutputType | null
-    _min: UserSettingMinAggregateOutputType | null
-    _max: UserSettingMaxAggregateOutputType | null
-  }
-
-  export type UserSettingAvgAggregateOutputType = {
-    version: number | null
-  }
-
-  export type UserSettingSumAggregateOutputType = {
-    version: number | null
-  }
-
-  export type UserSettingMinAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type UserSettingMaxAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type UserSettingCountAggregateOutputType = {
-    id: number
-    identityId: number
-    preferences: number
-    version: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type UserSettingAvgAggregateInputType = {
-    version?: true
-  }
-
-  export type UserSettingSumAggregateInputType = {
-    version?: true
-  }
-
-  export type UserSettingMinAggregateInputType = {
-    id?: true
-    identityId?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type UserSettingMaxAggregateInputType = {
-    id?: true
-    identityId?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type UserSettingCountAggregateInputType = {
-    id?: true
-    identityId?: true
-    preferences?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type UserSettingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which UserSetting to aggregate.
-     */
-    where?: UserSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of UserSettings to fetch.
-     */
-    orderBy?: UserSettingOrderByWithRelationInput | UserSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: UserSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` UserSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` UserSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned UserSettings
-    **/
-    _count?: true | UserSettingCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: UserSettingAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: UserSettingSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: UserSettingMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: UserSettingMaxAggregateInputType
-  }
-
-  export type GetUserSettingAggregateType<T extends UserSettingAggregateArgs> = {
-        [P in keyof T & keyof AggregateUserSetting]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateUserSetting[P]>
-      : GetScalarType<T[P], AggregateUserSetting[P]>
-  }
-
-
-
-
-  export type UserSettingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: UserSettingWhereInput
-    orderBy?: UserSettingOrderByWithAggregationInput | UserSettingOrderByWithAggregationInput[]
-    by: UserSettingScalarFieldEnum[] | UserSettingScalarFieldEnum
-    having?: UserSettingScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: UserSettingCountAggregateInputType | true
-    _avg?: UserSettingAvgAggregateInputType
-    _sum?: UserSettingSumAggregateInputType
-    _min?: UserSettingMinAggregateInputType
-    _max?: UserSettingMaxAggregateInputType
-  }
-
-  export type UserSettingGroupByOutputType = {
-    id: string
-    identityId: string
-    preferences: JsonValue
-    version: number
-    createdAt: Date
-    updatedAt: Date
-    _count: UserSettingCountAggregateOutputType | null
-    _avg: UserSettingAvgAggregateOutputType | null
-    _sum: UserSettingSumAggregateOutputType | null
-    _min: UserSettingMinAggregateOutputType | null
-    _max: UserSettingMaxAggregateOutputType | null
-  }
-
-  type GetUserSettingGroupByPayload<T extends UserSettingGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<UserSettingGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof UserSettingGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], UserSettingGroupByOutputType[P]>
-            : GetScalarType<T[P], UserSettingGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type UserSettingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    preferences?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["userSetting"]>
-
-  export type UserSettingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    preferences?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["userSetting"]>
-
-  export type UserSettingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    preferences?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["userSetting"]>
-
-  export type UserSettingSelectScalar = {
-    id?: boolean
-    identityId?: boolean
-    preferences?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type UserSettingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "preferences" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["userSetting"]>
-  export type UserSettingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type UserSettingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type UserSettingIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-
-  export type $UserSettingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "UserSetting"
-    objects: {
-      account: Prisma.$AccountPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      identityId: string
-      preferences: Prisma.JsonValue
-      version: number
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["userSetting"]>
-    composites: {}
-  }
-
-  type UserSettingGetPayload<S extends boolean | null | undefined | UserSettingDefaultArgs> = $Result.GetResult<Prisma.$UserSettingPayload, S>
-
-  type UserSettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<UserSettingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: UserSettingCountAggregateInputType | true
-    }
-
-  export interface UserSettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserSetting'], meta: { name: 'UserSetting' } }
-    /**
-     * Find zero or one UserSetting that matches the filter.
-     * @param {UserSettingFindUniqueArgs} args - Arguments to find a UserSetting
-     * @example
-     * // Get one UserSetting
-     * const userSetting = await prisma.userSetting.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends UserSettingFindUniqueArgs>(args: SelectSubset<T, UserSettingFindUniqueArgs<ExtArgs>>): Prisma__UserSettingClient<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one UserSetting that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {UserSettingFindUniqueOrThrowArgs} args - Arguments to find a UserSetting
-     * @example
-     * // Get one UserSetting
-     * const userSetting = await prisma.userSetting.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends UserSettingFindUniqueOrThrowArgs>(args: SelectSubset<T, UserSettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserSettingClient<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first UserSetting that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserSettingFindFirstArgs} args - Arguments to find a UserSetting
-     * @example
-     * // Get one UserSetting
-     * const userSetting = await prisma.userSetting.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends UserSettingFindFirstArgs>(args?: SelectSubset<T, UserSettingFindFirstArgs<ExtArgs>>): Prisma__UserSettingClient<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first UserSetting that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserSettingFindFirstOrThrowArgs} args - Arguments to find a UserSetting
-     * @example
-     * // Get one UserSetting
-     * const userSetting = await prisma.userSetting.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends UserSettingFindFirstOrThrowArgs>(args?: SelectSubset<T, UserSettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserSettingClient<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more UserSettings that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserSettingFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all UserSettings
-     * const userSettings = await prisma.userSetting.findMany()
-     *
-     * // Get first 10 UserSettings
-     * const userSettings = await prisma.userSetting.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const userSettingWithIdOnly = await prisma.userSetting.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends UserSettingFindManyArgs>(args?: SelectSubset<T, UserSettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a UserSetting.
-     * @param {UserSettingCreateArgs} args - Arguments to create a UserSetting.
-     * @example
-     * // Create one UserSetting
-     * const UserSetting = await prisma.userSetting.create({
-     *   data: {
-     *     // ... data to create a UserSetting
-     *   }
-     * })
-     *
-     */
-    create<T extends UserSettingCreateArgs>(args: SelectSubset<T, UserSettingCreateArgs<ExtArgs>>): Prisma__UserSettingClient<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many UserSettings.
-     * @param {UserSettingCreateManyArgs} args - Arguments to create many UserSettings.
-     * @example
-     * // Create many UserSettings
-     * const userSetting = await prisma.userSetting.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends UserSettingCreateManyArgs>(args?: SelectSubset<T, UserSettingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many UserSettings and returns the data saved in the database.
-     * @param {UserSettingCreateManyAndReturnArgs} args - Arguments to create many UserSettings.
-     * @example
-     * // Create many UserSettings
-     * const userSetting = await prisma.userSetting.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many UserSettings and only return the `id`
-     * const userSettingWithIdOnly = await prisma.userSetting.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends UserSettingCreateManyAndReturnArgs>(args?: SelectSubset<T, UserSettingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a UserSetting.
-     * @param {UserSettingDeleteArgs} args - Arguments to delete one UserSetting.
-     * @example
-     * // Delete one UserSetting
-     * const UserSetting = await prisma.userSetting.delete({
-     *   where: {
-     *     // ... filter to delete one UserSetting
-     *   }
-     * })
-     *
-     */
-    delete<T extends UserSettingDeleteArgs>(args: SelectSubset<T, UserSettingDeleteArgs<ExtArgs>>): Prisma__UserSettingClient<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one UserSetting.
-     * @param {UserSettingUpdateArgs} args - Arguments to update one UserSetting.
-     * @example
-     * // Update one UserSetting
-     * const userSetting = await prisma.userSetting.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends UserSettingUpdateArgs>(args: SelectSubset<T, UserSettingUpdateArgs<ExtArgs>>): Prisma__UserSettingClient<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more UserSettings.
-     * @param {UserSettingDeleteManyArgs} args - Arguments to filter UserSettings to delete.
-     * @example
-     * // Delete a few UserSettings
-     * const { count } = await prisma.userSetting.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends UserSettingDeleteManyArgs>(args?: SelectSubset<T, UserSettingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more UserSettings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserSettingUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many UserSettings
-     * const userSetting = await prisma.userSetting.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends UserSettingUpdateManyArgs>(args: SelectSubset<T, UserSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more UserSettings and returns the data updated in the database.
-     * @param {UserSettingUpdateManyAndReturnArgs} args - Arguments to update many UserSettings.
-     * @example
-     * // Update many UserSettings
-     * const userSetting = await prisma.userSetting.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more UserSettings and only return the `id`
-     * const userSettingWithIdOnly = await prisma.userSetting.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends UserSettingUpdateManyAndReturnArgs>(args: SelectSubset<T, UserSettingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one UserSetting.
-     * @param {UserSettingUpsertArgs} args - Arguments to update or create a UserSetting.
-     * @example
-     * // Update or create a UserSetting
-     * const userSetting = await prisma.userSetting.upsert({
-     *   create: {
-     *     // ... data to create a UserSetting
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the UserSetting we want to update
-     *   }
-     * })
-     */
-    upsert<T extends UserSettingUpsertArgs>(args: SelectSubset<T, UserSettingUpsertArgs<ExtArgs>>): Prisma__UserSettingClient<$Result.GetResult<Prisma.$UserSettingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of UserSettings.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserSettingCountArgs} args - Arguments to filter UserSettings to count.
-     * @example
-     * // Count the number of UserSettings
-     * const count = await prisma.userSetting.count({
-     *   where: {
-     *     // ... the filter for the UserSettings we want to count
-     *   }
-     * })
-    **/
-    count<T extends UserSettingCountArgs>(
-      args?: Subset<T, UserSettingCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], UserSettingCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a UserSetting.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserSettingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends UserSettingAggregateArgs>(args: Subset<T, UserSettingAggregateArgs>): Prisma.PrismaPromise<GetUserSettingAggregateType<T>>
-
-    /**
-     * Group by UserSetting.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {UserSettingGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends UserSettingGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: UserSettingGroupByArgs['orderBy'] }
-        : { orderBy?: UserSettingGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, UserSettingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserSettingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the UserSetting model
-   */
-  readonly fields: UserSettingFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for UserSetting.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__UserSettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the UserSetting model
-   */
-  interface UserSettingFieldRefs {
-    readonly id: FieldRef<"UserSetting", 'String'>
-    readonly identityId: FieldRef<"UserSetting", 'String'>
-    readonly preferences: FieldRef<"UserSetting", 'Json'>
-    readonly version: FieldRef<"UserSetting", 'Int'>
-    readonly createdAt: FieldRef<"UserSetting", 'DateTime'>
-    readonly updatedAt: FieldRef<"UserSetting", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * UserSetting findUnique
-   */
-  export type UserSettingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which UserSetting to fetch.
-     */
-    where: UserSettingWhereUniqueInput
-  }
-
-  /**
-   * UserSetting findUniqueOrThrow
-   */
-  export type UserSettingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which UserSetting to fetch.
-     */
-    where: UserSettingWhereUniqueInput
-  }
-
-  /**
-   * UserSetting findFirst
-   */
-  export type UserSettingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which UserSetting to fetch.
-     */
-    where?: UserSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of UserSettings to fetch.
-     */
-    orderBy?: UserSettingOrderByWithRelationInput | UserSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for UserSettings.
-     */
-    cursor?: UserSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` UserSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` UserSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of UserSettings.
-     */
-    distinct?: UserSettingScalarFieldEnum | UserSettingScalarFieldEnum[]
-  }
-
-  /**
-   * UserSetting findFirstOrThrow
-   */
-  export type UserSettingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which UserSetting to fetch.
-     */
-    where?: UserSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of UserSettings to fetch.
-     */
-    orderBy?: UserSettingOrderByWithRelationInput | UserSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for UserSettings.
-     */
-    cursor?: UserSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` UserSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` UserSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of UserSettings.
-     */
-    distinct?: UserSettingScalarFieldEnum | UserSettingScalarFieldEnum[]
-  }
-
-  /**
-   * UserSetting findMany
-   */
-  export type UserSettingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingInclude<ExtArgs> | null
-    /**
-     * Filter, which UserSettings to fetch.
-     */
-    where?: UserSettingWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of UserSettings to fetch.
-     */
-    orderBy?: UserSettingOrderByWithRelationInput | UserSettingOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing UserSettings.
-     */
-    cursor?: UserSettingWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` UserSettings from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` UserSettings.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of UserSettings.
-     */
-    distinct?: UserSettingScalarFieldEnum | UserSettingScalarFieldEnum[]
-  }
-
-  /**
-   * UserSetting create
-   */
-  export type UserSettingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingInclude<ExtArgs> | null
-    /**
-     * The data needed to create a UserSetting.
-     */
-    data: XOR<UserSettingCreateInput, UserSettingUncheckedCreateInput>
-  }
-
-  /**
-   * UserSetting createMany
-   */
-  export type UserSettingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many UserSettings.
-     */
-    data: UserSettingCreateManyInput | UserSettingCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * UserSetting createManyAndReturn
-   */
-  export type UserSettingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * The data used to create many UserSettings.
-     */
-    data: UserSettingCreateManyInput | UserSettingCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * UserSetting update
-   */
-  export type UserSettingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingInclude<ExtArgs> | null
-    /**
-     * The data needed to update a UserSetting.
-     */
-    data: XOR<UserSettingUpdateInput, UserSettingUncheckedUpdateInput>
-    /**
-     * Choose, which UserSetting to update.
-     */
-    where: UserSettingWhereUniqueInput
-  }
-
-  /**
-   * UserSetting updateMany
-   */
-  export type UserSettingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update UserSettings.
-     */
-    data: XOR<UserSettingUpdateManyMutationInput, UserSettingUncheckedUpdateManyInput>
-    /**
-     * Filter which UserSettings to update
-     */
-    where?: UserSettingWhereInput
-    /**
-     * Limit how many UserSettings to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * UserSetting updateManyAndReturn
-   */
-  export type UserSettingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * The data used to update UserSettings.
-     */
-    data: XOR<UserSettingUpdateManyMutationInput, UserSettingUncheckedUpdateManyInput>
-    /**
-     * Filter which UserSettings to update
-     */
-    where?: UserSettingWhereInput
-    /**
-     * Limit how many UserSettings to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * UserSetting upsert
-   */
-  export type UserSettingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingInclude<ExtArgs> | null
-    /**
-     * The filter to search for the UserSetting to update in case it exists.
-     */
-    where: UserSettingWhereUniqueInput
-    /**
-     * In case the UserSetting found by the `where` argument doesn't exist, create a new UserSetting with this data.
-     */
-    create: XOR<UserSettingCreateInput, UserSettingUncheckedCreateInput>
-    /**
-     * In case the UserSetting was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<UserSettingUpdateInput, UserSettingUncheckedUpdateInput>
-  }
-
-  /**
-   * UserSetting delete
-   */
-  export type UserSettingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingInclude<ExtArgs> | null
-    /**
-     * Filter which UserSetting to delete.
-     */
-    where: UserSettingWhereUniqueInput
-  }
-
-  /**
-   * UserSetting deleteMany
-   */
-  export type UserSettingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which UserSettings to delete
-     */
-    where?: UserSettingWhereInput
-    /**
-     * Limit how many UserSettings to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * UserSetting without action
-   */
-  export type UserSettingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserSetting
-     */
-    select?: UserSettingSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the UserSetting
-     */
-    omit?: UserSettingOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserSettingInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Model UserPreferenceRecord
    */
 
@@ -129904,18 +128684,6 @@ export namespace Prisma {
   export type ScheduleEventDeliveryLogScalarFieldEnum = (typeof ScheduleEventDeliveryLogScalarFieldEnum)[keyof typeof ScheduleEventDeliveryLogScalarFieldEnum]
 
 
-  export const UserSettingScalarFieldEnum: {
-    id: 'id',
-    identityId: 'identityId',
-    preferences: 'preferences',
-    version: 'version',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type UserSettingScalarFieldEnum = (typeof UserSettingScalarFieldEnum)[keyof typeof UserSettingScalarFieldEnum]
-
-
   export const UserPreferenceRecordScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -130314,7 +129082,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanListRelationFilter
     taskOccurrences?: TaskOccurrenceListRelationFilter
     taskStatistics?: XOR<TaskStatisticNullableScalarRelationFilter, TaskStatisticWhereInput> | null
-    userSettings?: XOR<UserSettingNullableScalarRelationFilter, UserSettingWhereInput> | null
     userPreferenceRecords?: UserPreferenceRecordListRelationFilter
     notifications?: NotificationListRelationFilter
     aiConversations?: AiConversationListRelationFilter
@@ -130384,7 +129151,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanOrderByRelationAggregateInput
     taskOccurrences?: TaskOccurrenceOrderByRelationAggregateInput
     taskStatistics?: TaskStatisticOrderByWithRelationInput
-    userSettings?: UserSettingOrderByWithRelationInput
     userPreferenceRecords?: UserPreferenceRecordOrderByRelationAggregateInput
     notifications?: NotificationOrderByRelationAggregateInput
     aiConversations?: AiConversationOrderByRelationAggregateInput
@@ -130457,7 +129223,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanListRelationFilter
     taskOccurrences?: TaskOccurrenceListRelationFilter
     taskStatistics?: XOR<TaskStatisticNullableScalarRelationFilter, TaskStatisticWhereInput> | null
-    userSettings?: XOR<UserSettingNullableScalarRelationFilter, UserSettingWhereInput> | null
     userPreferenceRecords?: UserPreferenceRecordListRelationFilter
     notifications?: NotificationListRelationFilter
     aiConversations?: AiConversationListRelationFilter
@@ -138719,68 +137484,6 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"ScheduleEventDeliveryLog"> | Date | string
   }
 
-  export type UserSettingWhereInput = {
-    AND?: UserSettingWhereInput | UserSettingWhereInput[]
-    OR?: UserSettingWhereInput[]
-    NOT?: UserSettingWhereInput | UserSettingWhereInput[]
-    id?: StringFilter<"UserSetting"> | string
-    identityId?: StringFilter<"UserSetting"> | string
-    preferences?: JsonFilter<"UserSetting">
-    version?: IntFilter<"UserSetting"> | number
-    createdAt?: DateTimeFilter<"UserSetting"> | Date | string
-    updatedAt?: DateTimeFilter<"UserSetting"> | Date | string
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }
-
-  export type UserSettingOrderByWithRelationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    preferences?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    account?: AccountOrderByWithRelationInput
-  }
-
-  export type UserSettingWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    identityId?: string
-    AND?: UserSettingWhereInput | UserSettingWhereInput[]
-    OR?: UserSettingWhereInput[]
-    NOT?: UserSettingWhereInput | UserSettingWhereInput[]
-    preferences?: JsonFilter<"UserSetting">
-    version?: IntFilter<"UserSetting"> | number
-    createdAt?: DateTimeFilter<"UserSetting"> | Date | string
-    updatedAt?: DateTimeFilter<"UserSetting"> | Date | string
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }, "id" | "identityId">
-
-  export type UserSettingOrderByWithAggregationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    preferences?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: UserSettingCountOrderByAggregateInput
-    _avg?: UserSettingAvgOrderByAggregateInput
-    _max?: UserSettingMaxOrderByAggregateInput
-    _min?: UserSettingMinOrderByAggregateInput
-    _sum?: UserSettingSumOrderByAggregateInput
-  }
-
-  export type UserSettingScalarWhereWithAggregatesInput = {
-    AND?: UserSettingScalarWhereWithAggregatesInput | UserSettingScalarWhereWithAggregatesInput[]
-    OR?: UserSettingScalarWhereWithAggregatesInput[]
-    NOT?: UserSettingScalarWhereWithAggregatesInput | UserSettingScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"UserSetting"> | string
-    identityId?: StringWithAggregatesFilter<"UserSetting"> | string
-    preferences?: JsonWithAggregatesFilter<"UserSetting">
-    version?: IntWithAggregatesFilter<"UserSetting"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"UserSetting"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"UserSetting"> | Date | string
-  }
-
   export type UserPreferenceRecordWhereInput = {
     AND?: UserPreferenceRecordWhereInput | UserPreferenceRecordWhereInput[]
     OR?: UserPreferenceRecordWhereInput[]
@@ -139750,7 +138453,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -139819,7 +138521,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -139888,7 +138589,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -139957,7 +138657,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -149304,68 +148003,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type UserSettingCreateInput = {
-    id?: string
-    preferences?: JsonNullValueInput | InputJsonValue
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    account: AccountCreateNestedOneWithoutUserSettingsInput
-  }
-
-  export type UserSettingUncheckedCreateInput = {
-    id?: string
-    identityId: string
-    preferences?: JsonNullValueInput | InputJsonValue
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type UserSettingUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    preferences?: JsonNullValueInput | InputJsonValue
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    account?: AccountUpdateOneRequiredWithoutUserSettingsNestedInput
-  }
-
-  export type UserSettingUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    preferences?: JsonNullValueInput | InputJsonValue
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type UserSettingCreateManyInput = {
-    id?: string
-    identityId: string
-    preferences?: JsonNullValueInput | InputJsonValue
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type UserSettingUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    preferences?: JsonNullValueInput | InputJsonValue
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type UserSettingUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    preferences?: JsonNullValueInput | InputJsonValue
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type UserPreferenceRecordCreateInput = {
     id?: string
     namespace: string
@@ -150708,11 +149345,6 @@ export namespace Prisma {
   export type TaskStatisticNullableScalarRelationFilter = {
     is?: TaskStatisticWhereInput | null
     isNot?: TaskStatisticWhereInput | null
-  }
-
-  export type UserSettingNullableScalarRelationFilter = {
-    is?: UserSettingWhereInput | null
-    isNot?: UserSettingWhereInput | null
   }
 
   export type UserPreferenceRecordListRelationFilter = {
@@ -156424,39 +155056,6 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
-  export type UserSettingCountOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    preferences?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type UserSettingAvgOrderByAggregateInput = {
-    version?: SortOrder
-  }
-
-  export type UserSettingMaxOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type UserSettingMinOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type UserSettingSumOrderByAggregateInput = {
-    version?: SortOrder
-  }
-
   export type UserPreferenceRecordIdentityIdNamespaceCompoundUniqueInput = {
     identityId: string
     namespace: string
@@ -157332,12 +155931,6 @@ export namespace Prisma {
     connect?: TaskStatisticWhereUniqueInput
   }
 
-  export type UserSettingCreateNestedOneWithoutAccountInput = {
-    create?: XOR<UserSettingCreateWithoutAccountInput, UserSettingUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: UserSettingCreateOrConnectWithoutAccountInput
-    connect?: UserSettingWhereUniqueInput
-  }
-
   export type UserPreferenceRecordCreateNestedManyWithoutAccountInput = {
     create?: XOR<UserPreferenceRecordCreateWithoutAccountInput, UserPreferenceRecordUncheckedCreateWithoutAccountInput> | UserPreferenceRecordCreateWithoutAccountInput[] | UserPreferenceRecordUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: UserPreferenceRecordCreateOrConnectWithoutAccountInput | UserPreferenceRecordCreateOrConnectWithoutAccountInput[]
@@ -157742,12 +156335,6 @@ export namespace Prisma {
     create?: XOR<TaskStatisticCreateWithoutAccountInput, TaskStatisticUncheckedCreateWithoutAccountInput>
     connectOrCreate?: TaskStatisticCreateOrConnectWithoutAccountInput
     connect?: TaskStatisticWhereUniqueInput
-  }
-
-  export type UserSettingUncheckedCreateNestedOneWithoutAccountInput = {
-    create?: XOR<UserSettingCreateWithoutAccountInput, UserSettingUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: UserSettingCreateOrConnectWithoutAccountInput
-    connect?: UserSettingWhereUniqueInput
   }
 
   export type UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput = {
@@ -158397,16 +156984,6 @@ export namespace Prisma {
     delete?: TaskStatisticWhereInput | boolean
     connect?: TaskStatisticWhereUniqueInput
     update?: XOR<XOR<TaskStatisticUpdateToOneWithWhereWithoutAccountInput, TaskStatisticUpdateWithoutAccountInput>, TaskStatisticUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type UserSettingUpdateOneWithoutAccountNestedInput = {
-    create?: XOR<UserSettingCreateWithoutAccountInput, UserSettingUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: UserSettingCreateOrConnectWithoutAccountInput
-    upsert?: UserSettingUpsertWithoutAccountInput
-    disconnect?: UserSettingWhereInput | boolean
-    delete?: UserSettingWhereInput | boolean
-    connect?: UserSettingWhereUniqueInput
-    update?: XOR<XOR<UserSettingUpdateToOneWithWhereWithoutAccountInput, UserSettingUpdateWithoutAccountInput>, UserSettingUncheckedUpdateWithoutAccountInput>
   }
 
   export type UserPreferenceRecordUpdateManyWithoutAccountNestedInput = {
@@ -159205,16 +157782,6 @@ export namespace Prisma {
     delete?: TaskStatisticWhereInput | boolean
     connect?: TaskStatisticWhereUniqueInput
     update?: XOR<XOR<TaskStatisticUpdateToOneWithWhereWithoutAccountInput, TaskStatisticUpdateWithoutAccountInput>, TaskStatisticUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type UserSettingUncheckedUpdateOneWithoutAccountNestedInput = {
-    create?: XOR<UserSettingCreateWithoutAccountInput, UserSettingUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: UserSettingCreateOrConnectWithoutAccountInput
-    upsert?: UserSettingUpsertWithoutAccountInput
-    disconnect?: UserSettingWhereInput | boolean
-    delete?: UserSettingWhereInput | boolean
-    connect?: UserSettingWhereUniqueInput
-    update?: XOR<XOR<UserSettingUpdateToOneWithWhereWithoutAccountInput, UserSettingUpdateWithoutAccountInput>, UserSettingUncheckedUpdateWithoutAccountInput>
   }
 
   export type UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -163000,20 +161567,6 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutScheduleStatisticsInput, AccountUpdateWithoutScheduleStatisticsInput>, AccountUncheckedUpdateWithoutScheduleStatisticsInput>
   }
 
-  export type AccountCreateNestedOneWithoutUserSettingsInput = {
-    create?: XOR<AccountCreateWithoutUserSettingsInput, AccountUncheckedCreateWithoutUserSettingsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutUserSettingsInput
-    connect?: AccountWhereUniqueInput
-  }
-
-  export type AccountUpdateOneRequiredWithoutUserSettingsNestedInput = {
-    create?: XOR<AccountCreateWithoutUserSettingsInput, AccountUncheckedCreateWithoutUserSettingsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutUserSettingsInput
-    upsert?: AccountUpsertWithoutUserSettingsInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutUserSettingsInput, AccountUpdateWithoutUserSettingsInput>, AccountUncheckedUpdateWithoutUserSettingsInput>
-  }
-
   export type AccountCreateNestedOneWithoutUserPreferenceRecordsInput = {
     create?: XOR<AccountCreateWithoutUserPreferenceRecordsInput, AccountUncheckedCreateWithoutUserPreferenceRecordsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutUserPreferenceRecordsInput
@@ -165158,27 +163711,6 @@ export namespace Prisma {
   export type TaskStatisticCreateOrConnectWithoutAccountInput = {
     where: TaskStatisticWhereUniqueInput
     create: XOR<TaskStatisticCreateWithoutAccountInput, TaskStatisticUncheckedCreateWithoutAccountInput>
-  }
-
-  export type UserSettingCreateWithoutAccountInput = {
-    id?: string
-    preferences?: JsonNullValueInput | InputJsonValue
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type UserSettingUncheckedCreateWithoutAccountInput = {
-    id?: string
-    preferences?: JsonNullValueInput | InputJsonValue
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type UserSettingCreateOrConnectWithoutAccountInput = {
-    where: UserSettingWhereUniqueInput
-    create: XOR<UserSettingCreateWithoutAccountInput, UserSettingUncheckedCreateWithoutAccountInput>
   }
 
   export type UserPreferenceRecordCreateWithoutAccountInput = {
@@ -167559,33 +166091,6 @@ export namespace Prisma {
     distributionByTag?: StringFieldUpdateOperationsInput | string
   }
 
-  export type UserSettingUpsertWithoutAccountInput = {
-    update: XOR<UserSettingUpdateWithoutAccountInput, UserSettingUncheckedUpdateWithoutAccountInput>
-    create: XOR<UserSettingCreateWithoutAccountInput, UserSettingUncheckedCreateWithoutAccountInput>
-    where?: UserSettingWhereInput
-  }
-
-  export type UserSettingUpdateToOneWithWhereWithoutAccountInput = {
-    where?: UserSettingWhereInput
-    data: XOR<UserSettingUpdateWithoutAccountInput, UserSettingUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type UserSettingUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    preferences?: JsonNullValueInput | InputJsonValue
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type UserSettingUncheckedUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    preferences?: JsonNullValueInput | InputJsonValue
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type UserPreferenceRecordUpsertWithWhereUniqueWithoutAccountInput = {
     where: UserPreferenceRecordWhereUniqueInput
     update: XOR<UserPreferenceRecordUpdateWithoutAccountInput, UserPreferenceRecordUncheckedUpdateWithoutAccountInput>
@@ -168540,7 +167045,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -168608,7 +167112,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -168692,7 +167195,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -168760,7 +167262,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -168829,7 +167330,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
@@ -168897,7 +167397,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
@@ -169009,7 +167508,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
@@ -169077,7 +167575,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
@@ -169161,7 +167658,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -169229,7 +167725,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -169344,7 +167839,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -169412,7 +167906,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -169517,7 +168010,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -169585,7 +168077,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -169669,7 +168160,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -169737,7 +168227,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -169805,7 +168294,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -169873,7 +168361,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -169957,7 +168444,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -170025,7 +168511,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -170093,7 +168578,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -170161,7 +168645,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -170245,7 +168728,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -170313,7 +168795,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -170381,7 +168862,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -170449,7 +168929,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -170533,7 +169012,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -170601,7 +169079,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -170669,7 +169146,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -170737,7 +169213,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -170821,7 +169296,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -170889,7 +169363,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -170957,7 +169430,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -171025,7 +169497,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -171109,7 +169580,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -171177,7 +169647,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171348,7 +169817,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -171416,7 +169884,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -171597,7 +170064,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -171665,7 +170131,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171985,7 +170450,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -172053,7 +170517,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -172153,7 +170616,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -172221,7 +170683,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -172327,7 +170788,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -172395,7 +170855,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -172534,7 +170993,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -172602,7 +171060,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -172761,7 +171218,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -172829,7 +171285,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -172960,7 +171415,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -173028,7 +171482,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -173133,7 +171586,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -173201,7 +171653,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -173318,7 +171769,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -173386,7 +171836,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -173493,7 +171942,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -173561,7 +172009,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -173780,7 +172227,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -173848,7 +172294,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -174922,7 +173367,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -174990,7 +173434,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -175123,7 +173566,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -175191,7 +173633,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -175561,7 +174002,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -175629,7 +174069,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -175751,7 +174190,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -175819,7 +174257,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -175919,7 +174356,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -175987,7 +174423,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -176149,7 +174584,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -176217,7 +174651,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -176375,7 +174808,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -176443,7 +174875,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -176644,7 +175075,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -176712,7 +175142,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -177076,7 +175505,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
@@ -177144,7 +175572,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
@@ -177308,7 +175735,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
@@ -177376,7 +175802,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
@@ -177444,7 +175869,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -177512,7 +175936,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -177663,7 +176086,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -177731,7 +176153,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -177872,7 +176293,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -177940,7 +176360,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -178091,7 +176510,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -178159,7 +176577,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -178507,7 +176924,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -178575,7 +176991,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -178732,7 +177147,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -178800,7 +177214,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -178867,7 +177280,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -178935,7 +177347,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -179019,7 +177430,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -179087,7 +177497,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -179313,7 +177722,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -179381,7 +177789,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -179529,7 +177936,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -179597,7 +178003,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -179665,7 +178070,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -179733,7 +178137,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -179817,7 +178220,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -179885,7 +178287,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -179953,7 +178354,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -180021,7 +178421,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -180166,7 +178565,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -180234,7 +178632,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -180370,7 +178767,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -180438,7 +178834,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -180583,7 +178978,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -180651,7 +179045,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -180785,7 +179178,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -180853,7 +179245,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -180937,7 +179328,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -181005,7 +179395,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -181074,7 +179463,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -181142,7 +179530,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -181287,7 +179674,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -181355,7 +179741,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -181489,7 +179874,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -181557,7 +179941,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -181641,7 +180024,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -181709,7 +180091,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -181839,7 +180220,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -181907,7 +180287,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -182058,7 +180437,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -182126,7 +180504,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -182193,7 +180570,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -182261,7 +180637,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -182451,7 +180826,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -182519,7 +180893,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -182643,7 +181016,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -182711,7 +181083,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -182822,7 +181193,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -182890,7 +181260,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -182974,7 +181343,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -183042,7 +181410,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -183188,7 +181555,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -183256,7 +181622,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -183398,7 +181763,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -183466,7 +181830,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -183585,7 +181948,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -183653,7 +182015,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -183737,7 +182098,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -183805,7 +182165,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -183914,7 +182273,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -183982,7 +182340,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -184115,7 +182472,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -184183,7 +182539,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -184306,7 +182661,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -184374,7 +182728,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -184474,7 +182827,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -184542,7 +182894,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -184665,7 +183016,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -184733,7 +183083,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -184801,7 +183150,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -184869,7 +183217,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -185141,7 +183488,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -185209,7 +183555,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -185342,7 +183687,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -185410,7 +183754,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -185616,7 +183959,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -185684,7 +184026,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -185864,7 +184205,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -185932,7 +184272,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -186067,7 +184406,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -186135,7 +184473,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -186302,7 +184639,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -186370,7 +184706,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -186601,7 +184936,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -186669,7 +185003,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -187151,7 +185484,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -187219,7 +185551,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -187354,7 +185685,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -187422,7 +185752,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -187547,7 +185876,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -187615,7 +185943,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -187699,7 +186026,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -187767,7 +186093,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -187836,7 +186161,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -187904,7 +186228,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -187988,7 +186311,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -188056,7 +186378,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -188124,7 +186445,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -188192,7 +186512,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -188464,7 +186783,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -188532,7 +186850,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -189191,7 +187508,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -189259,7 +187575,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -189396,7 +187711,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -189464,7 +187778,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -189590,7 +187903,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -189658,7 +187970,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -189742,7 +188053,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -189810,7 +188120,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -189912,7 +188221,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -189980,7 +188288,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -190080,7 +188387,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -190148,7 +188454,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -190216,7 +188521,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -190284,7 +188588,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -190368,7 +188671,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -190436,7 +188738,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -190505,7 +188806,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -190573,7 +188873,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -190744,7 +189043,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -190812,7 +189110,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -190972,7 +189269,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -191040,7 +189336,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -191124,7 +189419,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -191184,295 +189478,6 @@ export namespace Prisma {
     schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
     scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
     schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountCreateWithoutUserSettingsInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutUserSettingsInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupUncheckedCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateUncheckedCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceUncheckedCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticUncheckedCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelUncheckedCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutUserSettingsInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutUserSettingsInput, AccountUncheckedCreateWithoutUserSettingsInput>
-  }
-
-  export type AccountUpsertWithoutUserSettingsInput = {
-    update: XOR<AccountUpdateWithoutUserSettingsInput, AccountUncheckedUpdateWithoutUserSettingsInput>
-    create: XOR<AccountCreateWithoutUserSettingsInput, AccountUncheckedCreateWithoutUserSettingsInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutUserSettingsInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutUserSettingsInput, AccountUncheckedUpdateWithoutUserSettingsInput>
-  }
-
-  export type AccountUpdateWithoutUserSettingsInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutUserSettingsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUncheckedUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUncheckedUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUncheckedUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
     habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
     relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
     walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
@@ -191549,7 +189554,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
@@ -191617,7 +189621,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
@@ -191701,7 +189704,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
@@ -191769,7 +189771,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
@@ -191836,7 +189837,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -191904,7 +189904,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -192121,7 +190120,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -192189,7 +190187,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -192355,7 +190352,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -192423,7 +190419,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -192597,7 +190592,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -192665,7 +190659,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -192830,7 +190823,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -192898,7 +190890,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -193072,7 +191063,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -193140,7 +191130,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -193303,7 +191292,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -193371,7 +191359,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -193455,7 +191442,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -193523,7 +191509,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -193591,7 +191576,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -193659,7 +191643,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -193777,7 +191760,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -193845,7 +191827,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -193954,7 +191935,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -194022,7 +192002,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
     taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userSettings?: UserSettingUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -194137,7 +192116,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -194205,7 +192183,6 @@ export namespace Prisma {
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
     taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userSettings?: UserSettingUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput

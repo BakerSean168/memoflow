@@ -10,12 +10,12 @@ tags:
   - vnext
 description: ADR-095 - User Preferences 按 namespace 持久化、revision/CAS、PowerSync parity、versioned migration 与 Data Portability 边界
 created: 2026-09-08T23:26:00+08:00
-updated: 2026-09-09T12:00:00+08:00
+updated: 2026-09-10T15:45:00+09:00
 ---
 
 # ADR-095: Preference Persistence、Sync、Migration 与 Portability
 
-**状态：** 已采纳，主要路径已实施（SETTING-9202~9208；legacy persistence deletion 待 SETTING-9209）
+**状态：** 已采纳并完成 Setting 主体实施（SETTING-9202~9209；PORT-1603 负责跨模块 V2 envelope 最终退休）
 **日期：** 2026-09-08
 **影响范围：** Setting/Preferences、Database、PowerSync、HTTP/IPC、Data Portability、Account、Notification、Desktop
 
@@ -404,7 +404,7 @@ payload = UserPreferenceProfile
 
 ## 14. Existing data policy
 
-本轮无生产旧数据保留要求。`user_settings` / Account shadow 等 legacy persistence 不做 backfill；SETTING-9209 直接完成 current consumer cutover 后 destructive delete/reset/reseed。
+本轮无生产旧数据保留要求。`SETTING-9209` 已直接删除 `user_settings` / Account relation shadow 与整套 legacy Setting aggregate/protocol/client，不做 backfill；显式 migration 仅执行 destructive drop，环境通过 reset/reseed 或 source rollback 恢复。
 
 ## 15. Read cutover
 
@@ -416,20 +416,11 @@ if missing read UserSetting
 if missing read Account.settings
 ```
 
-canonical presentation/regional consumer 已切到 namespace records；剩余 legacy `user_settings` appearance/locale remainder 仅作为待 SETTING-9209 删除的当前实现债务，不是 compatibility fallback。
+`SETTING-9209` 后 production read/write 只经过 namespace records；`UserSetting` fallback、appearance/locale remainder 与 giant-tree persistence 均已不存在。
 
 ## 16. Event model
 
-当前 Setting event map：
-
-```text
-setting:user-setting-created
-setting:user-setting-patched
-setting:user-setting-reset
-setting:setting-imported
-```
-
-目标不为了形式保留全部 event。
+`SETTING-9209` 已删除 legacy UserSetting aggregate events。当前 Setting event map 只保留实际仍存在的 `setting:setting-imported`；不为了 DDD 形式保留 created/patched/reset decorative events。
 
 如果 runtime 确有跨边界消费者，只保留窄事件：
 
@@ -498,7 +489,7 @@ Preference-only V3 import 的失败 containment 为：
 | import 不信任 identityId                   | security/portability test                     |
 | device/Notification/AI/Knowledge 不混入    | strict owner payload schema tests             |
 | Account.settings 完全退出                  | source/schema surface lock                    |
-| old `user_settings` 完全退出               | SETTING-9209 Prisma/PowerSync surface lock    |
+| old `user_settings` 完全退出               | SETTING-9209 canonical-only architecture lock |
 
 ## 20. Final state
 

@@ -13,7 +13,7 @@ import type { PrismaClient, Prisma } from '@memoflow/database';
 import type {
   DataPortabilityImportStore,
   DataPortabilityImportTx,
-  UpsertUserSettingInput,
+  UpsertUserPreferencesInput,
   UpsertNotificationPreferenceInput,
   UpsertUserReminderPreferenceInput,
   CreateRepositoryInput,
@@ -43,12 +43,17 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
 
   // --- Singletons ---
 
-  async upsertUserSetting(input: UpsertUserSettingInput): Promise<void> {
-    await this.tx.userSetting.upsert({
-      where: { identityId: input.identityId },
-      create: { identityId: input.identityId, preferences: input.preferences as never },
-      update: { preferences: input.preferences as never },
-    });
+  async upsertUserPreferences(input: UpsertUserPreferencesInput): Promise<void> {
+    for (const [namespace, payload] of [
+      ['presentation', input.presentation],
+      ['regional', input.regional],
+    ] as const) {
+      await this.tx.userPreferenceRecord.upsert({
+        where: { identityId_namespace: { identityId: input.identityId, namespace } },
+        create: { identityId: input.identityId, namespace, payload: payload as never, revision: 1 },
+        update: { payload: payload as never, revision: { increment: 1 } },
+      });
+    }
   }
 
   async upsertNotificationPreference(input: UpsertNotificationPreferenceInput): Promise<void> {

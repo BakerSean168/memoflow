@@ -81,14 +81,6 @@ const account_closure_requested = new Table(
 // Settings
 // ──────────────────────────────────────────────
 
-const user_settings = new Table({
-  identity_id: column.text,
-  preferences: column.text, // JSON
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-});
-
 const user_preference_records = new Table({
   identity_id: column.text,
   namespace: column.text,
@@ -1094,7 +1086,6 @@ export const PowerSyncAppSchema = new Schema({
   profile_adoption_journal,
   account_profile_sync_outbox,
   account_closure_requested,
-  user_settings,
   user_preference_records,
   // Goal
   goals,

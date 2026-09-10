@@ -50,7 +50,6 @@ model Account {
   taskPlans                   TaskPlan[]
   taskOccurrences                   TaskOccurrence[]
   taskStatistics                  TaskStatistic?
-  userSettings                    UserSetting?
   userPreferenceRecords           UserPreferenceRecord[]
   notifications                   Notification[]
   aiConversations                 AiConversation[]

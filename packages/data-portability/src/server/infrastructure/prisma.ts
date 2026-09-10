@@ -25,7 +25,7 @@ import { createGoalPrismaRepositories } from '@memoflow/goal';
 import { createTaskPrismaRepositories } from '@memoflow/task';
 import { createReminderPrismaRepositories } from '@memoflow/reminder';
 import { createNotificationPrismaRepositories } from '@memoflow/notification';
-import { createSettingPrismaRepository } from '@memoflow/setting';
+import { createSettingPrismaRepositories } from '@memoflow/setting';
 
 export interface CreateDataPortabilityPrismaModuleOptions {
   readonly runtimeContributions?:
@@ -74,7 +74,7 @@ export function createPrismaDataPortabilityDependencies(
   const taskRepos = createTaskPrismaRepositories(db);
   const reminderRepos = createReminderPrismaRepositories(db);
   const notificationRepos = createNotificationPrismaRepositories(db);
-  const settingRepo = createSettingPrismaRepository(db);
+  const settingRepos = createSettingPrismaRepositories(db);
 
   return {
     goalRepository: goalRepos.goalRepository,
@@ -98,7 +98,7 @@ export function createPrismaDataPortabilityDependencies(
     editorTabRepository: new PrismaEditorTabAdapter(db),
     aiConversationRepository: new PrismaAIConversationAdapter(db),
     notificationPreferenceRepository: notificationRepos.notificationPreferenceRepository,
-    settingRepository: settingRepo,
+    userPreferenceRepository: settingRepos.userPreferenceRepository,
   };
 }
 

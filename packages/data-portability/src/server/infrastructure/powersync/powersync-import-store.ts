@@ -11,7 +11,7 @@ import { newId } from '@memoflow/utils';
 import type {
   DataPortabilityImportStore,
   DataPortabilityImportTx,
-  UpsertUserSettingInput,
+  UpsertUserPreferencesInput,
   UpsertNotificationPreferenceInput,
   UpsertUserReminderPreferenceInput,
   CreateRepositoryInput,
@@ -71,21 +71,27 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   // --- Singletons ---
 
-  async upsertUserSetting(input: UpsertUserSettingInput): Promise<void> {
-    const existing = await this.tx.getOptional<{ id: string }>(
-      `SELECT id FROM user_settings WHERE identity_id = ?`,
-      [input.identityId],
-    );
-    if (existing) {
-      await this.tx.execute(
-        `UPDATE user_settings SET preferences = ?, updated_at = ? WHERE identity_id = ?`,
-        [json(input.preferences), new Date().toISOString(), input.identityId],
+  async upsertUserPreferences(input: UpsertUserPreferencesInput): Promise<void> {
+    for (const [namespace, payload] of [
+      ['presentation', input.presentation],
+      ['regional', input.regional],
+    ] as const) {
+      const existing = await this.tx.getOptional<{ id: string }>(
+        `SELECT id FROM user_preference_records WHERE identity_id = ? AND namespace = ?`,
+        [input.identityId, namespace],
       );
-    } else {
-      await this.tx.execute(
-        `INSERT INTO user_settings (id, identity_id, preferences, version, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?)`,
-        [input.id ?? newId(), input.identityId, json(input.preferences), ...createdUpdated({})],
-      );
+      if (existing) {
+        await this.tx.execute(
+          `UPDATE user_preference_records SET payload = ?, revision = revision + 1, updated_at = ? WHERE identity_id = ? AND namespace = ?`,
+          [json(payload), new Date().toISOString(), input.identityId, namespace],
+        );
+      } else {
+        const now = new Date().toISOString();
+        await this.tx.execute(
+          `INSERT INTO user_preference_records (id, identity_id, namespace, payload, revision, created_at, updated_at) VALUES (?, ?, ?, ?, 1, ?, ?)`,
+          [newId(), input.identityId, namespace, json(payload), now, now],
+        );
+      }
     }
   }
 

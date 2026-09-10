@@ -4165,6 +4165,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/setting/composables/usePreferencePortability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/setting/composables/usePresentationBootstrap.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4173,25 +4181,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/setting/composables/useUserSetting.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/stores/userSettingStore.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5219,15 +5209,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/setting/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/setting/dtos/setting-overview-dual.surface.spec.ts",
+      "path": "packages/contracts/src/modules/setting/legacy-deletion.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5260,22 +5242,6 @@
     },
     {
       "path": "packages/contracts/src/modules/setting/preferences/product-module-index-paths.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/setting/preferences/retired-editor-preference.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/setting/value-objects/retired-dual-track-enums.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -9518,85 +9484,7 @@
       ]
     },
     {
-      "path": "packages/setting/src/server/application/use-cases/commands/__tests__/patch-user-setting.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/setting/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/setting/src/server/application/use-cases/commands/__tests__/reset-user-setting.integration.test.ts",
-      "primarySuite": "integration",
-      "collectors": [
-        "packages/setting/vitest.integration.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/setting/src/server/application/use-cases/commands/__tests__/reset-user-setting.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/setting/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/setting/src/server/application/use-cases/queries/__tests__/export-settings.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/setting/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/setting/src/server/application/use-cases/queries/__tests__/get-default-settings.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/setting/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/setting/src/server/application/use-cases/queries/__tests__/get-user-setting.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/setting/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/setting/src/server/domain/aggregates/__tests__/user-setting.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/setting/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/setting/src/server/domain/value-objects/__tests__/setting-enums.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/setting/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/setting/src/server/domain/value-objects/__tests__/setting-id.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/setting/vitest.config.ts"
@@ -11134,7 +11022,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 10
+      "fileCount": 9
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -11246,7 +11134,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 23
+      "fileCount": 16
     },
     {
       "id": "packages/task/vitest.config.ts",
@@ -11456,7 +11344,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 0
     },
     {
       "id": "packages/task/vitest.integration.config.ts",
@@ -11533,7 +11421,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 204
+      "fileCount": 203
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -11554,7 +11442,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 80
+      "fileCount": 77
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11680,7 +11568,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 23
+      "fileCount": 16
     },
     {
       "id": "packages/task/vitest.config.ts",
@@ -11900,7 +11788,6 @@
       "packages/app-vue/src/modules/reminder/stores/reminderStore.spec.ts",
       "packages/app-vue/src/modules/schedule/stores/scheduleStore.spec.ts",
       "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
-      "packages/app-vue/src/modules/setting/stores/userSettingStore.spec.ts",
       "packages/app-vue/src/modules/task/stores/taskStore.spec.ts",
       "packages/data-portability/src/api/module-lifecycle.spec.ts",
       "packages/data-portability/src/application-client/data-portability-client-port-dual.surface.spec.ts",
@@ -12223,14 +12110,7 @@
       "packages/setting/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
       "packages/setting/src/infrastructure-client/adapters/ipc/setting-ipc.adapter.surface.spec.ts",
       "packages/setting/src/server/application/use-cases/commands/__tests__/import-settings.test.ts",
-      "packages/setting/src/server/application/use-cases/commands/__tests__/patch-user-setting.test.ts",
-      "packages/setting/src/server/application/use-cases/commands/__tests__/reset-user-setting.test.ts",
       "packages/setting/src/server/application/use-cases/queries/__tests__/export-settings.test.ts",
-      "packages/setting/src/server/application/use-cases/queries/__tests__/get-default-settings.test.ts",
-      "packages/setting/src/server/application/use-cases/queries/__tests__/get-user-setting.test.ts",
-      "packages/setting/src/server/domain/aggregates/__tests__/user-setting.spec.ts",
-      "packages/setting/src/server/domain/value-objects/__tests__/setting-enums.spec.ts",
-      "packages/setting/src/server/domain/value-objects/__tests__/setting-id.spec.ts",
       "packages/setting/src/server/infrastructure/__tests__/setting-module-partial-start.spec.ts",
       "packages/setting/src/server/infrastructure/__tests__/setting-repositories.surface.spec.ts",
       "packages/setting/src/server/infrastructure/adapters/powersync/user-preference-powersync.repository.spec.ts",
@@ -12315,8 +12195,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1061,
-    "integration": 38,
+    "unit": 1050,
+    "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,
     "boundary-main": 6,

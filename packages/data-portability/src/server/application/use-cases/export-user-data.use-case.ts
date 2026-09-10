@@ -62,9 +62,9 @@ export class ExportUserDataUseCase {
 
     // ─── Settings (singleton) ───
     if (modules.includes('settings')) {
-      const setting = await this.deps.settingRepository.findByIdentityId(identityId);
-      if (setting) {
-        data.settings = projectSettings(setting);
+      const preferences = await this.deps.userPreferenceRepository.list(identityId);
+      if (preferences.length > 0) {
+        data.settings = projectSettings(preferences);
         entityCounts.settings = 1;
       }
     }

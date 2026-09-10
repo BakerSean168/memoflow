@@ -16,7 +16,7 @@ describe('PrismaDataPortabilityImportStore', () => {
   function createFakePrisma() {
     const writeCalls: string[] = [];
     const transactionClient = {
-      userSetting: { upsert: vi.fn(async () => undefined) },
+      userPreferenceRecord: { upsert: vi.fn(async () => undefined) },
       repository: { create: vi.fn(async () => undefined) },
       goal: { create: vi.fn(async () => undefined) },
       taskPlan: { create: vi.fn(async () => undefined) },
@@ -52,9 +52,10 @@ describe('PrismaDataPortabilityImportStore', () => {
     const store = new PrismaDataPortabilityImportStore(prisma as never);
 
     await store.transaction(async (tx) => {
-      await tx.upsertUserSetting({
+      await tx.upsertUserPreferences({
         identityId: 'identity-1',
-        preferences: { locale: 'zh-CN' },
+        presentation: { theme: 'dark', language: 'en-US' },
+        regional: { timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 },
       });
       await tx.createRepository({
         id: 'repo-1',
@@ -89,7 +90,7 @@ describe('PrismaDataPortabilityImportStore', () => {
       });
     });
 
-    expect(transactionClient.userSetting.upsert).toHaveBeenCalledTimes(1);
+    expect(transactionClient.userPreferenceRecord.upsert).toHaveBeenCalledTimes(2);
     expect(transactionClient.repository.create).toHaveBeenCalledTimes(1);
     expect(transactionClient.goal.create).toHaveBeenCalledTimes(1);
   });

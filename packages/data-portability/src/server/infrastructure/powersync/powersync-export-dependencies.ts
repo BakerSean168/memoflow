@@ -7,6 +7,7 @@
  */
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import { createSettingPowerSyncRepositories } from '@memoflow/setting';
 import type {
   DataPortabilityDependencies,
   GoalRepoPort,
@@ -30,7 +31,6 @@ import type {
   EditorTabRepoPort,
   AIConversationRepoPort,
   NotificationPreferenceRepoPort,
-  SettingRepoPort,
 } from '../../application/data-portability.dependencies';
 
 // ============ Helpers ============
@@ -316,22 +316,12 @@ class PowerSyncNotificationPreferenceAdapter implements NotificationPreferenceRe
   }
 }
 
-class PowerSyncSettingAdapter implements SettingRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByIdentityId(identityId: string): Promise<unknown | null> {
-    const row = await this.db.getOptional<Record<string, unknown>>(
-      `SELECT * FROM user_settings WHERE identity_id = ?`,
-      [identityId],
-    );
-    return row ? mapRow(row) : null;
-  }
-}
-
 // ============ Factory ============
 
 export function createPowerSyncDataPortabilityDependencies(
   db: IElectronDatabase,
 ): DataPortabilityDependencies {
+  const settingRepos = createSettingPowerSyncRepositories(db);
   return {
     goalRepository: new PowerSyncGoalAdapter(db),
     goalRecordRepository: new PowerSyncGoalRecordAdapter(db),
@@ -354,6 +344,6 @@ export function createPowerSyncDataPortabilityDependencies(
     editorTabRepository: new PowerSyncEditorTabAdapter(db),
     aiConversationRepository: new PowerSyncAIConversationAdapter(db),
     notificationPreferenceRepository: new PowerSyncNotificationPreferenceAdapter(db),
-    settingRepository: new PowerSyncSettingAdapter(db),
+    userPreferenceRepository: settingRepos.userPreferenceRepository,
   };
 }

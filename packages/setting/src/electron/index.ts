@@ -68,7 +68,6 @@ import {
   ResetPreferenceNamespaceBodySchema,
   ResetUserPreferencesBodySchema,
   parsePreferenceNamespacePatch,
-  type PreferenceCategory,
   type PreferenceRevisionConflict,
 } from '@memoflow/contracts/setting';
 import { fail } from '@memoflow/contracts/result';
@@ -177,16 +176,6 @@ export function createSettingElectronModule(
       try {
         const mod = options.instance;
 
-        ipcMain.handle(SettingChannels.GET_ALL, () =>
-          withAuthenticatedIdentity(ctx, (identityId) => mod.api.getUserSetting(identityId)),
-        );
-        installed.push(SettingChannels.GET_ALL);
-
-        ipcMain.handle(SettingChannels.GET_DEFAULTS, () =>
-          Promise.resolve(mod.api.getDefaultSettings()),
-        );
-        installed.push(SettingChannels.GET_DEFAULTS);
-
         ipcMain.handle(SettingChannels.PREFERENCES_PROFILE_GET, () =>
           withAuthenticatedIdentity(ctx, (identityId) => mod.api.getPreferenceProfile(identityId)),
         );
@@ -269,28 +258,6 @@ export function createSettingElectronModule(
           );
         });
         installed.push(SettingChannels.PREFERENCES_RESET);
-
-        ipcMain.handle(SettingChannels.PATCH, (_event, dto) => {
-          const payload = (dto && typeof dto === 'object' ? dto : {}) as Record<string, unknown>;
-          const category = payload.category as string;
-          const patch = (payload.patch as Record<string, unknown>) ?? {};
-          return withAuthenticatedIdentity(ctx, (identityId) =>
-            mod.api.patchUserSetting(identityId, category as PreferenceCategory, patch),
-          );
-        });
-        installed.push(SettingChannels.PATCH);
-
-        ipcMain.handle(SettingChannels.RESET, (_event, params) => {
-          const payload = (params && typeof params === 'object' ? params : {}) as Record<
-            string,
-            unknown
-          >;
-          const category = typeof payload.category === 'string' ? payload.category : undefined;
-          return withAuthenticatedIdentity(ctx, (identityId) =>
-            mod.api.resetUserSetting(identityId, category),
-          );
-        });
-        installed.push(SettingChannels.RESET);
 
         ipcMain.handle(SettingChannels.IMPORT, (_event, dto) => {
           const payload = (dto && typeof dto === 'object' ? dto : {}) as Record<string, unknown>;

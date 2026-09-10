@@ -27,5 +27,4 @@ export * from './account.mock';
 export * from './schedule.mock';
 export * from './reminder.mock';
 export * from './notification.mock';
-export * from './setting.mock';
 export * from './governance.mock';

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -18,25 +18,23 @@ describe('empty dual barrel re-export single-track surface (residual 661)', () =
     expect(index).toContain("export * from './api'");
   });
 
-  it('schedule/setting module indexes do not re-export empty dtos dual barrels', () => {
+  it('schedule keeps its residual empty DTO barrel while Setting deletes the DTO barrel entirely', () => {
     const schedule = readFileSync(resolve(modules, 'schedule/index.ts'), 'utf8');
     const setting = readFileSync(resolve(modules, 'setting/index.ts'), 'utf8');
     expect(schedule).toMatch(/Residual 661/);
-    expect(setting).toMatch(/Residual 661/);
     expect(schedule).not.toContain("export * from './dtos'");
     expect(setting).not.toContain("export * from './dtos'");
     expect(schedule).toContain("export * from './api'");
     expect(setting).toContain("export * from './api'");
     expect(setting).toContain("export * from './preferences'");
+    expect(existsSync(resolve(modules, 'setting/dtos'))).toBe(false);
   });
 
   it('keeps residual-empty dual barrels as note-only files', () => {
     const accountDtos = readFileSync(resolve(modules, 'account/dtos/index.ts'), 'utf8');
     const scheduleDtos = readFileSync(resolve(modules, 'schedule/dtos/index.ts'), 'utf8');
-    const settingDtos = readFileSync(resolve(modules, 'setting/dtos/index.ts'), 'utf8');
     const accountEntities = readFileSync(resolve(modules, 'account/entities/index.ts'), 'utf8');
     expect(accountDtos).toContain('export {}');
-    expect(settingDtos).toContain('export {}');
     expect(scheduleDtos).toMatch(/Residual 653/);
     expect(accountEntities).toMatch(/Residual 655/);
   });

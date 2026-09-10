@@ -597,10 +597,10 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 ## 7. Immediate next tickets
 
-The former TIME-1204 footer is obsolete: TIME-1204..1206 and LABEL-1301..1305 are already complete. `SETTING-9207` and `SETTING-9208` are also complete. Current dependency-ready work is:
+TIME-1204..1206, LABEL-1301..1305 and `SETTING-9207..9209` are complete. Current dependency-ready work is:
 
-1. `SETTING-9209` — cut every remaining current consumer to canonical presentation/regional persistence and delete legacy `user_settings` / Account shadow remnants;
-2. continue `PORT-1601/1602` owner capability registration, then execute `PORT-1603` only when V3 can replace the production full-backup path without reducing current business-data coverage;
+1. `SETTING-9210` — five-layer review, exact-head CI/build, docs integrity and Setting plan archive;
+2. continue `PORT-1601/1602` surviving owner capability registration, then execute `PORT-1603` only when V3 can replace the production full-backup path without reducing current business-data coverage;
 3. in parallel where file ownership is disjoint, continue Knowledge foundation before Goal/Task durable note relations.
 
-`PORT-1601/1602` remain IN PROGRESS until real surviving owner capabilities replace the production V2 reader/export path. `SETTING-9209` is now dependency-ready because `SETTING-9203..9208` are complete and the Settings UI no longer depends on the legacy giant-tree as a product surface.
+`SETTING-9209` deliberately kept the current V2 full-backup envelope's `settings` singleton as a strict canonical UserPreferenceProfile adapter while deleting all legacy Setting persistence/protocol/client code. Therefore PORT-1603 remains independent cross-module work rather than a reason to retain `user_settings`.

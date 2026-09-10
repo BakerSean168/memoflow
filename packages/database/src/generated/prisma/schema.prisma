@@ -67,7 +67,6 @@ model Account {
   taskPlans                       TaskPlan[]
   taskOccurrences                 TaskOccurrence[]
   taskStatistics                  TaskStatistic?
-  userSettings                    UserSetting?
   userPreferenceRecords           UserPreferenceRecord[]
   notifications                   Notification[]
   aiConversations                 AiConversation[]
@@ -2149,22 +2148,8 @@ model ScheduleEventDeliveryLog {
 
 // ==========================================
 // Setting Module
-// User settings with JSONB preferences storage
+// Canonical user preferences: namespace-scoped persistence
 // ==========================================
-
-model UserSetting {
-  id          String   @id @default(uuid())
-  identityId  String   @unique @map("identity_id")
-  preferences Json     @default("{}")
-  version     Int      @default(1)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("user_settings")
-}
 
 // Canonical Setting vNext preferences. Namespace rows are the sync/CAS unit.
 model UserPreferenceRecord {

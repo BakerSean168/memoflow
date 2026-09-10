@@ -661,57 +661,115 @@ Setting 现在提供 typed `PreferencePortableCapability` (`preferences@3`)；AP
 
 ### SETTING-9209 — Direct persistence/sync cutover and legacy deletion
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-10**
 
 #### Goal
 
-把新模型从“新表可用”变成 production sole truth，彻底删除旧轨。
+把 canonical namespace model 从“新表可用”切成 production sole truth，并按 ADR-111 destructive cutover 删除 legacy `UserSetting` 全轨。
 
-#### Scope
+#### Implemented scope
 
-- all writers -> namespace records；
-- all readers -> UserPreferenceProfile/owner ports；
-- remove legacy compatibility reader；
-- remove `user_settings` Prisma/PowerSync table；
-- remove `accounts.settings`；
-- remove old DTO/category schemas/mocks/events；
-- remove Setting Desktop Notification event coupling；
-- update data portability projection/importer names；
-- schema generated artifacts regenerate；
-- no stale docs/current wording。
-
-#### Must-be-zero production truth
+Persistence：
 
 ```text
-UserSetting.preferences giant canonical model
-user_settings table
-Account.settings
-AccountSettings
-workflow preference category
-privacy preference category
-notification preference category in Setting
-shortcuts cloud preference category
-experimental preference category
-ui cloud preference category
-ai preference category
-setting:user-setting-patched device-notification consumer
-GetDefaultSettings fake identity
+Prisma        -> only UserPreferenceRecord
+PowerSync     -> only user_preference_records
+API upload    -> dedicated preference revision-CAS executor
+Desktop watch -> only shared PowerSync schema tables
 ```
 
-历史 ADR/current-system map/migration fixtures 可保留旧名。
+已删除：
 
-#### Tests
+- Prisma `UserSetting` model / Account `userSettings` relation；
+- PowerSync `user_settings` table 与 API/Desktop table mapping；
+- legacy UserSetting aggregate/repository/mappers/use-cases；
+- `UserSettingPreferences` / `PreferenceCategory` / old DTO/category schemas/mocks/events；
+- HTTP root GET/category PATCH/legacy reset/default routes；
+- IPC `setting:all`, `setting:defaults`, `setting:patch`, `setting:reset`；
+- Vue legacy `useUserSetting` + Pinia UserSetting store；
+- unused React `useSettings`；
+- Desktop `user_settings` renderer invalidation coupling。
 
-- source surface lock；
-- Prisma validate/generate；
-- PowerSync schema mapping；
-- full portability；
-- Settings E2E；
-- Account/Notification/Reminder focused regressions。
+Current Setting RPC surface is exactly seven channels:
+
+```text
+setting:import
+setting:export
+setting:preferences:profile
+setting:preferences:reset
+setting:preference:get
+setting:preference:patch
+setting:preference:reset
+```
+
+Standalone Setting import/export remains strict `preferences@3` V3-only.
+
+#### Data Portability containment
+
+PORT-1603 尚未完成，因此 current full-backup V2 **outer envelope** 暂时仍有 `settings` singleton，避免本票删除 legacy table 时减少 Goal/Task 等现有备份覆盖。但该 singleton 已不再承载 legacy Setting shape：
+
+```text
+settings.preferences
+= strict UserPreferenceProfile
+= presentation + regional only
+
+export -> userPreferenceRepository.list(identity)
+import -> transaction upsert presentation/regional user_preference_records
+```
+
+Prisma 与 PowerSync import 都直接写 canonical namespace rows，并推进 revision。V2 envelope 的最终删除仍由 PORT-1603 负责；这不是 legacy Setting persistence compatibility。
+
+#### Schema cutover
+
+- Prisma source schema 删除 `UserSetting`；
+- generated Prisma Client 已 regenerate，`UserSetting` generated model 为零；
+- explicit/manual destructive migration：`drop-legacy-user-settings.sql`；
+- ADR-111 下不 backfill 当前旧行，部署/rollback 使用 reset/reseed 或 source rollback。
+
+#### Must-be-zero evidence
+
+Production source scan 为零：
+
+```text
+user_settings
+UserSettingPreferences
+PreferenceCategory
+UserSettingClientDTO / UserSettingServerDTO
+IUserSettingRepository
+UserSettingPrismaRepository / UserSettingPowerSyncRepository
+createSettingPrismaRepository
+userSettingRepository
+legacy get/patch/reset/default Setting application API
+legacy Setting IPC channels
+legacy UserSetting cloud events
+```
+
+历史分析/ADR 与 must-be-zero tests 可以提及旧名；production surface 不允许重新出现。
+
+#### Verification evidence
+
+- Setting full test suite: 16 files / 91 tests PASS；
+- Data Portability full test suite: 34 files / 151 tests PASS；
+- App Vue Setting module: 18 files / 68 tests PASS；
+- App React strict typecheck PASS；
+- API compose-setting: 2 files / 7 tests PASS；
+- PowerSync shared schema: 5/5 PASS；
+- API PowerSync preference/upload: 19/19 PASS；
+- Desktop main PowerSync focused: 6/6 PASS；
+- focused Setting/Data Portability contracts: 6 files / 45 tests PASS；
+- Prisma `validate` PASS and Prisma Client `generate` PASS；
+- PowerSync schema direct typecheck PASS；
+- contracts direct typecheck PASS；
+- V2 full-backup PowerSync round-trip remains green while using canonical preference rows；
+- `git diff --check` PASS。
 
 #### Acceptance
 
-无永久 dual read/write；数据库和 contracts 只有单一 canonical preference truth。
+- database/contracts/client/transport have one canonical cloud preference truth；
+- no permanent dual read/write or legacy fallback；
+- deleting `user_settings` does not reduce current full-backup coverage；
+- React/Vue/Desktop/Web no longer depend on legacy UserSetting model；
+- next Setting-only ticket is SETTING-9210 review/archive。
 
 #### Dependencies
 
@@ -877,11 +935,11 @@ SETTING-9205  DONE — 2026-09-10
 SETTING-9206  DONE — 2026-09-10
 SETTING-9207  DONE — 2026-09-10
 SETTING-9208  DONE — 2026-09-10
-SETTING-9209  PLANNED
+SETTING-9209  DONE — 2026-09-10
 SETTING-9210  PLANNED
 ```
 
-SETTING-9202/9203 已完成 canonical presentation/regional HTTP/IPC/UI 与 Product Time cutover，并完成 `Account.settings` retirement；fake/dead legacy categories 已由 `SETTING-9205` 退休；device/local profile scope 与 persistence 已由 `SETTING-9206` 收敛；Settings Hub owner composition 与 React/Mobile Notification owner parity 已由 `SETTING-9207` 收敛；Preferences V3-only portability 已由 `SETTING-9208` 收敛；最终 legacy persistence deletion 仍由 `SETTING-9209` 处理。
+SETTING-9202/9203 已完成 canonical presentation/regional HTTP/IPC/UI 与 Product Time cutover，并完成 `Account.settings` retirement；fake/dead legacy categories 已由 `SETTING-9205` 退休；device/local profile scope 与 persistence 已由 `SETTING-9206` 收敛；Settings Hub owner composition 与 React/Mobile Notification owner parity 已由 `SETTING-9207` 收敛；Preferences V3-only portability 已由 `SETTING-9208` 收敛；legacy persistence/protocol/client hard deletion 已由 `SETTING-9209` 完成。Setting 主体实现只剩 `SETTING-9210` 五层 review/exact-head closure。
 
 ## 10. Definition of Done
 

@@ -92,10 +92,15 @@ export interface NotificationPreferenceRepoPort {
   findByIdentityId(identityId: string): Promise<unknown | null>;
 }
 
-// ============ Setting ============
+// ============ User Preferences ============
 
-export interface SettingRepoPort {
-  findByIdentityId(identityId: string): Promise<unknown | null>;
+export interface UserPreferenceDocumentPort {
+  readonly namespace: 'presentation' | 'regional';
+  readonly payload: unknown;
+}
+
+export interface UserPreferenceRepoPort {
+  list(identityId: string): Promise<readonly UserPreferenceDocumentPort[]>;
 }
 
 // ============ Aggregate Dependencies ============
@@ -122,5 +127,5 @@ export interface DataPortabilityDependencies {
   editorTabRepository: EditorTabRepoPort;
   aiConversationRepository: AIConversationRepoPort;
   notificationPreferenceRepository: NotificationPreferenceRepoPort;
-  settingRepository: SettingRepoPort;
+  userPreferenceRepository: UserPreferenceRepoPort;
 }

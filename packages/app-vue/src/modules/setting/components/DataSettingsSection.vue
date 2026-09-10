@@ -4,14 +4,14 @@ import { inject, ref } from 'vue';
 import { SystemChannels } from '@memoflow/contracts/electron';
 import { isOk, type Result } from '@memoflow/contracts/result';
 import { DESKTOP_AUTH_API_KEY } from '../../../di/keys';
-import { useUserSetting } from '../composables/useUserSetting';
+import { usePreferencePortability } from '../composables/usePreferencePortability';
 import { useDataPortability } from '../composables/useDataPortability';
 import UserFilesSettings from './UserFilesSettings.vue';
 import SettingAdvancedActions from './SettingAdvancedActions.vue';
 
 const desktopApi = inject(DESKTOP_AUTH_API_KEY, undefined);
 const fileInput = ref<HTMLInputElement | null>(null);
-const { exportSettings, importSettings } = useUserSetting();
+const { exportSettings, importSettings } = usePreferencePortability();
 const {
   isAvailable: isDataPortabilityAvailable,
   isServerDisclosureAvailable,

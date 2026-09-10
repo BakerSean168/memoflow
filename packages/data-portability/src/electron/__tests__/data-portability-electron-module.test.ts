@@ -19,18 +19,17 @@ vi.mock('electron', () => ({
 function createContext(): IElectronModuleContext {
   const db: IElectronDatabase = {
     execute: vi.fn(async () => ({ rowsAffected: 1 })),
-    getAll: vi.fn(async () => []),
-    get: vi.fn(async () => ({})),
-    getOptional: vi.fn(async (sql: string) => {
-      if (sql.includes('FROM user_settings')) {
-        return {
-          id: 'settings-1',
-          identity_id: 'identity-1',
-          preferences: '{"theme":"dark"}',
-        };
+    getAll: vi.fn(async (sql: string) => {
+      if (sql.includes('FROM user_preference_records')) {
+        return [
+          { id: 'pref-presentation', identity_id: 'identity-1', namespace: 'presentation', payload: '{\"theme\":\"dark\",\"language\":\"en-US\"}', revision: 1, created_at: 1, updated_at: 1 },
+          { id: 'pref-regional', identity_id: 'identity-1', namespace: 'regional', payload: '{\"timeZone\":\"UTC\",\"dateStyle\":\"medium\",\"timeStyle\":\"24h\",\"weekStartsOn\":1}', revision: 1, created_at: 1, updated_at: 1 },
+        ];
       }
-      return null;
+      return [];
     }),
+    get: vi.fn(async () => ({})),
+    getOptional: vi.fn(async () => null),
     writeTransaction: vi.fn(async (callback) =>
       callback({
         execute: vi.fn(async () => ({ rowsAffected: 1 })),

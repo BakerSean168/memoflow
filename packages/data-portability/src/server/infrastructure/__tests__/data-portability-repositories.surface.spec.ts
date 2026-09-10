@@ -53,7 +53,7 @@ describe('data portability dependency factories surface', () => {
     'editorTabRepository',
     'aiConversationRepository',
     'notificationPreferenceRepository',
-    'settingRepository',
+    'userPreferenceRepository',
   ];
 
   it('createPrismaDataPortabilityDependencies returns the complete field set', () => {

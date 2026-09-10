@@ -91,15 +91,20 @@ describe('parseUserDataExportEnvelope V2', () => {
     expect(parseUserDataExportEnvelope(baseEnvelope).ok).toBe(false);
   });
 
-  it('rejects nested identity fields even inside open preference payloads', () => {
+  it('rejects identity fields inside the strict canonical preference profile', () => {
     const result = parseUserDataExportEnvelope({
       ...baseEnvelope,
-      data: { settings: { preferences: { profile: { identityId: 'leaked-identity' } } } },
+      data: {
+        settings: {
+          preferences: {
+            presentation: { theme: 'dark', language: 'en-US', identityId: 'leaked-identity' },
+            regional: { timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 },
+          },
+        },
+      },
     });
-    expect(result).toEqual({
-      ok: false,
-      error: 'Envelope validation failed: data.settings.preferences.profile.identityId — banned import field',
-    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain('identityId');
   });
 
   it('rejects nested auth or persistent IDs inside otherwise open metadata', () => {
@@ -258,7 +263,14 @@ describe('module schemas', () => {
     expect(PortableScheduleDataSchema.safeParse({ entries: [], tasks: [] }).success).toBe(true);
     expect(PortableEditorDataSchema.safeParse({ workspaces: [] }).success).toBe(true);
     expect(PortableAIDataSchema.safeParse({ conversations: [] }).success).toBe(true);
-    expect(PortableSettingsSchema.safeParse({ preferences: {} }).success).toBe(true);
+    expect(
+      PortableSettingsSchema.safeParse({
+        preferences: {
+          presentation: { theme: 'auto', language: 'en-US' },
+          regional: { timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 },
+        },
+      }).success,
+    ).toBe(true);
   });
 });
 

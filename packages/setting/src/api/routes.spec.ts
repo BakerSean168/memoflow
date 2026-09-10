@@ -13,243 +13,88 @@ type RegisteredRoute = {
 
 class TestOpenApiRegistry implements OpenApiRegistryLike {
   readonly paths: RegisteredRoute[] = [];
-
-  registerPath(route: Record<string, unknown>): void {
-    this.paths.push(route as RegisteredRoute);
-  }
-
+  registerPath(route: Record<string, unknown>): void { this.paths.push(route as RegisteredRoute); }
   register(): void {}
 }
 
-const authMiddleware = ((_, __, next) => next()) as RequestHandler;
+const auth = ((_, __, next) => next()) as RequestHandler;
 
-function createSettingApiStub(): SettingApplicationPort {
+function apiStub(): SettingApplicationPort {
   return {
     getPreferenceProfile: vi.fn(),
     getPreferenceNamespace: vi.fn(),
     patchPreferenceNamespace: vi.fn(),
     resetPreferenceNamespace: vi.fn(),
     resetUserPreferences: vi.fn(),
-    getUserSetting: vi.fn(),
-    patchUserSetting: vi.fn(),
-    resetUserSetting: vi.fn(),
     exportSettings: vi.fn(),
     importSettings: vi.fn(),
-    getDefaultSettings: vi.fn(),
   };
 }
 
-function getRegisteredRoute(
-  registry: TestOpenApiRegistry,
-  method: string,
-  path: string,
-): RegisteredRoute {
-  const route = registry.paths.find(
-    (candidate) => candidate.method === method && candidate.path === path,
-  );
-
-  expect(route).toBeDefined();
-  return route!;
+function register() {
+  const registry = new TestOpenApiRegistry();
+  registerSettingRoutes(apiStub(), { auth, requireRole: vi.fn(() => auth) }, registry);
+  return registry;
 }
 
-function getResponseSchema(
-  route: RegisteredRoute,
-  status: number,
-): {
-  safeParse: (value: unknown) => { success: boolean };
-  _def?: { typeName?: string };
-} {
-  const responses = route.responses as
-    Record<string, { content?: Record<string, unknown> }> | undefined;
-  const response = responses?.[String(status)];
-  const schema = (response?.content as Record<string, unknown> | undefined)?.[
+function route(registry: TestOpenApiRegistry, method: string, path: string): RegisteredRoute {
+  const found = registry.paths.find((candidate) => candidate.method === method && candidate.path === path);
+  expect(found, `${method.toUpperCase()} ${path}`).toBeDefined();
+  return found!;
+}
+
+function bodySchema(registered: RegisteredRoute): { safeParse(value: unknown): { success: boolean } } {
+  return (((registered.request?.body as Record<string, unknown>)?.content as Record<string, unknown>)?.[
     'application/json'
-  ] as
-    | {
-        schema?: {
-          safeParse: (value: unknown) => { success: boolean };
-          _def?: { typeName?: string };
-        };
-      }
-    | undefined;
-  return (
-    schema?.schema ??
-    (response as unknown as { safeParse: (value: unknown) => { success: boolean } })
-  );
-}
-
-function getJsonBodySchema(route: RegisteredRoute): {
-  safeParse: (value: unknown) => { success: boolean };
-} {
-  return (
-    (
-      (route.request?.body as Record<string, unknown> | undefined)?.content as
-        Record<string, unknown> | undefined
-    )?.['application/json'] as Record<string, unknown> | undefined
-  )?.schema as {
-    safeParse: (value: unknown) => { success: boolean };
-  };
+  ] as { schema: { safeParse(value: unknown): { success: boolean } } }).schema;
 }
 
 const BASE = '/api/v1/settings';
 
-describe('setting route contracts', () => {
-  it('registers the canonical preference profile and namespace routes', () => {
-    const registry = new TestOpenApiRegistry();
-    registerSettingRoutes(
-      createSettingApiStub(),
-      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-      registry,
-    );
+describe('canonical Setting HTTP routes', () => {
+  it('registers only namespace preferences plus V3 import/export', () => {
+    const registry = register();
+    const surfaces = registry.paths.map(({ method, path }) => `${method.toUpperCase()} ${path}`).sort();
 
-    expect(getRegisteredRoute(registry, 'get', `${BASE}/preferences`)).toBeDefined();
-    const patch = getRegisteredRoute(registry, 'patch', `${BASE}/preferences/{namespace}`);
-    expect(patch.responses).toHaveProperty('409');
-    expect(
-      getRegisteredRoute(registry, 'post', `${BASE}/preferences/{namespace}/reset`),
-    ).toBeDefined();
-    expect(getRegisteredRoute(registry, 'post', `${BASE}/preferences/reset-all`)).toBeDefined();
+    expect(surfaces).toEqual([
+      `GET ${BASE}/preferences`,
+      `GET ${BASE}/preferences/{namespace}`,
+      `PATCH ${BASE}/preferences/{namespace}`,
+      `POST ${BASE}/export`,
+      `POST ${BASE}/import`,
+      `POST ${BASE}/preferences/reset-all`,
+      `POST ${BASE}/preferences/{namespace}/reset`,
+    ].sort());
+    expect(surfaces).not.toContain(`GET ${BASE}`);
+    expect(surfaces).not.toContain(`POST ${BASE}/reset`);
+    expect(surfaces.some((entry) => entry.includes('{category}'))).toBe(false);
   });
 
-  it('canonical preference PATCH uses a strict typed body', () => {
-    const registry = new TestOpenApiRegistry();
-    registerSettingRoutes(
-      createSettingApiStub(),
-      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-      registry,
-    );
-
-    const route = getRegisteredRoute(registry, 'patch', `${BASE}/preferences/{namespace}`);
-    const body = getJsonBodySchema(route);
+  it('keeps canonical PATCH strict and conflict-aware', () => {
+    const registered = route(register(), 'patch', `${BASE}/preferences/{namespace}`);
+    const body = bodySchema(registered);
     expect(body.safeParse({ patch: { theme: 'dark' }, expectedRevision: 2 }).success).toBe(true);
-    expect(body.safeParse({ patch: { typo: true } }).success).toBe(false);
     expect(body.safeParse({ patch: { theme: 'dark' }, unexpected: true }).success).toBe(false);
+    expect(registered.responses).toHaveProperty('409');
   });
 
-  it('GET / is registered with correct path', () => {
-    const registry = new TestOpenApiRegistry();
-
-    registerSettingRoutes(
-      createSettingApiStub(),
-      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-      registry,
-    );
-
-    const route = getRegisteredRoute(registry, 'get', BASE);
-    expect(route).toBeDefined();
+  it('keeps reset-all on canonical namespace revisions', () => {
+    const registered = route(register(), 'post', `${BASE}/preferences/reset-all`);
+    const body = bodySchema(registered);
+    expect(body.safeParse({ expectedRevisions: { presentation: 2, regional: 5 } }).success).toBe(true);
+    expect(body.safeParse({ category: 'appearance' }).success).toBe(false);
   });
 
-  it('GET / has a 200 response schema', () => {
-    const registry = new TestOpenApiRegistry();
-
-    registerSettingRoutes(
-      createSettingApiStub(),
-      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-      registry,
-    );
-
-    const route = getRegisteredRoute(registry, 'get', BASE);
-    const responseSchema = getResponseSchema(route, 200);
-    expect(responseSchema).toBeDefined();
-    expect(responseSchema.safeParse).toBeDefined();
-  });
-
-  it('PATCH /{category} is registered with correct path', () => {
-    const registry = new TestOpenApiRegistry();
-
-    registerSettingRoutes(
-      createSettingApiStub(),
-      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-      registry,
-    );
-
-    const route = getRegisteredRoute(registry, 'patch', `${BASE}/{category}`);
-    expect(route).toBeDefined();
-  });
-
-  it('PATCH /{category} body schema accepts valid patch data', () => {
-    const registry = new TestOpenApiRegistry();
-
-    registerSettingRoutes(
-      createSettingApiStub(),
-      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-      registry,
-    );
-
-    const route = getRegisteredRoute(registry, 'patch', `${BASE}/{category}`);
-    const bodySchema = getJsonBodySchema(route);
-    expect(bodySchema).toBeDefined();
-    expect(bodySchema.safeParse({ key: 'value' }).success).toBe(true);
-    expect(bodySchema.safeParse({}).success).toBe(true);
-  });
-
-  it('POST /reset is registered with correct path', () => {
-    const registry = new TestOpenApiRegistry();
-
-    registerSettingRoutes(
-      createSettingApiStub(),
-      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-      registry,
-    );
-
-    const route = getRegisteredRoute(registry, 'post', `${BASE}/reset`);
-    expect(route).toBeDefined();
-  });
-
-  it('POST /reset body schema accepts valid data', () => {
-    const registry = new TestOpenApiRegistry();
-
-    registerSettingRoutes(
-      createSettingApiStub(),
-      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-      registry,
-    );
-
-    const route = getRegisteredRoute(registry, 'post', `${BASE}/reset`);
-    const bodySchema = getJsonBodySchema(route);
-    expect(bodySchema).toBeDefined();
-  });
-
-
-  it('V3 preference import accepts only JSON text and rejects legacy overwrite switches', () => {
-    const registry = new TestOpenApiRegistry();
-    registerSettingRoutes(
-      createSettingApiStub(),
-      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-      registry,
-    );
-
-    const route = getRegisteredRoute(registry, 'post', `${BASE}/import`);
-    const body = getJsonBodySchema(route);
+  it('accepts V3 import as JSON text only and has no legacy overwrite switch', () => {
+    const body = bodySchema(route(register(), 'post', `${BASE}/import`));
     expect(body.safeParse({ data: '{"schemaVersion":3}' }).success).toBe(true);
     expect(body.safeParse({ data: '{"schemaVersion":3}', overwrite: true }).success).toBe(false);
     expect(body.safeParse({ data: { schemaVersion: 3 } }).success).toBe(false);
   });
 
-  it('POST /export is registered with correct path', () => {
-    const registry = new TestOpenApiRegistry();
-
-    registerSettingRoutes(
-      createSettingApiStub(),
-      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-      registry,
-    );
-
-    const route = getRegisteredRoute(registry, 'post', `${BASE}/export`);
-    expect(route).toBeDefined();
-  });
-
-  it('POST /export body schema accepts valid data', () => {
-    const registry = new TestOpenApiRegistry();
-
-    registerSettingRoutes(
-      createSettingApiStub(),
-      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
-      registry,
-    );
-
-    const route = getRegisteredRoute(registry, 'post', `${BASE}/export`);
-    const bodySchema = getJsonBodySchema(route);
-    expect(bodySchema).toBeDefined();
+  it('keeps export request empty/strict', () => {
+    const body = bodySchema(route(register(), 'post', `${BASE}/export`));
+    expect(body.safeParse({}).success).toBe(true);
+    expect(body.safeParse({ format: 'csv' }).success).toBe(false);
   });
 });

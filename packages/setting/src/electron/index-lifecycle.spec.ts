@@ -19,7 +19,6 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SettingChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
 import type { SettingModuleInstance } from '../server/infrastructure';
 
 const mocks = vi.hoisted(() => {
@@ -51,24 +50,27 @@ import { createSettingElectronModule } from './index';
 
 function createFakeInstance() {
   const api = {
-    getUserSetting: vi.fn(() => ok(null as never)),
-    getDefaultSettings: vi.fn(() => ok({})),
-    patchUserSetting: vi.fn(() => ok(null as never)),
-    resetUserSetting: vi.fn(() => ok(null as never)),
-    importSettings: vi.fn(() => ok(null as never)),
-    exportSettings: vi.fn(() => ok({})),
+    getPreferenceProfile: vi.fn(),
+    getPreferenceNamespace: vi.fn(),
+    patchPreferenceNamespace: vi.fn(),
+    resetPreferenceNamespace: vi.fn(),
+    resetUserPreferences: vi.fn(),
+    importSettings: vi.fn(),
+    exportSettings: vi.fn(),
   };
   const portableCapability = { key: 'preferences', schemaVersion: 3 } as never;
   const start = vi.fn();
   const dispose = vi.fn();
-  const instance: SettingModuleInstance = {
-    userSettingRepository: {} as never,
+  const instance = {
+    userPreferenceRepository: {} as never,
+    preferenceService: {} as never,
+    userTimeContextPort: {} as never,
     portableCapability,
     useCases: {} as never,
     api,
     start,
     dispose,
-  } as SettingModuleInstance;
+  } as unknown as SettingModuleInstance;
   return { instance, api, portableCapability, start, dispose };
 }
 
@@ -136,13 +138,17 @@ describe('createSettingElectronModule lifecycle', () => {
     expect(() => moduleDef.register(context)).toThrow(/only register once/);
   });
 
-  it('routes IPC calls through to the same instance api', async () => {
-    fake.api.getUserSetting.mockResolvedValue(ok({ theme: 'dark' } as never));
+  it('routes the canonical preference profile channel through the same instance api', async () => {
+    const profile = {
+      presentation: { theme: 'dark', language: 'en-US' },
+      regional: { timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 },
+    };
+    fake.api.getPreferenceProfile.mockResolvedValue(profile as never);
     moduleDef.register(context);
 
-    const result = await registered(SettingChannels.GET_ALL)(undefined, undefined);
-    expect(result).toMatchObject({ ok: true });
-    expect(fake.api.getUserSetting).toHaveBeenCalledTimes(1);
+    const result = await registered(SettingChannels.PREFERENCES_PROFILE_GET)(undefined, undefined);
+    expect(result).toEqual({ ok: true, data: profile });
+    expect(fake.api.getPreferenceProfile).toHaveBeenCalledWith('identity-1');
   });
 
   it('imports only JSON-text V3 payloads with the host-owned identity', async () => {

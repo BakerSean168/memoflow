@@ -224,10 +224,6 @@ export const RepositoryChannels = {
 } as const;
 
 export const SettingChannels = {
-  GET_ALL: 'setting:all',
-  GET_DEFAULTS: 'setting:defaults',
-  PATCH: 'setting:patch',
-  RESET: 'setting:reset',
   IMPORT: 'setting:import',
   EXPORT: 'setting:export',
   PREFERENCES_PROFILE_GET: 'setting:preferences:profile',

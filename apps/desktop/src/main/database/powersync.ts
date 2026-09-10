@@ -43,7 +43,6 @@ export interface CloudCredentialProvider {
 const NON_SYNCABLE_LOCAL_TABLES = ['accounts'] as const;
 
 const PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES = [
-  'user_settings',
   'user_preference_records',
   'repositories',
   // Residual 539: editor_* bootstrap tables are portable backup continuity only —

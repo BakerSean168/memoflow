@@ -287,16 +287,20 @@ class FakePowerSyncDb {
     const table = tableFromSelect(sql);
     const identityUuid = parameters?.[0];
 
-    if (
-      table &&
-      ['user_settings', 'notification_preferences', 'user_reminder_preferences'].includes(table)
-    ) {
-      const seeded = this.liveRows(table).find((row) => row.identity_id === identityUuid);
-
-      if (seeded) {
-        return Promise.resolve(seeded as T);
+    if (table === 'user_preference_records') {
+      const namespace = parameters?.[1];
+      const seeded = this.liveRows(table).find(
+        (row) => row.identity_id === identityUuid && row.namespace === namespace,
+      );
+      if (seeded) return Promise.resolve(seeded as T);
+      if (identityUuid === this.options.existingSingletonsIdentityId) {
+        return Promise.resolve(existingPreference(identityUuid, namespace) as T);
       }
+    }
 
+    if (table && ['notification_preferences', 'user_reminder_preferences'].includes(table)) {
+      const seeded = this.liveRows(table).find((row) => row.identity_id === identityUuid);
+      if (seeded) return Promise.resolve(seeded as T);
       if (identityUuid === this.options.existingSingletonsIdentityId) {
         return Promise.resolve(existingSingleton(table, identityUuid) as T);
       }
@@ -418,16 +422,22 @@ function rowFromInsert(statement: ExecutedStatement): Row {
   );
 }
 
+function existingPreference(identityUuid: unknown, namespace: unknown): Row {
+  return {
+    id: `existing-preference-${String(namespace)}`,
+    identity_id: identityUuid,
+    namespace,
+    payload: namespace === 'presentation'
+      ? JSON.stringify({ theme: 'auto', language: 'en-US' })
+      : JSON.stringify({ timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 }),
+    revision: 1,
+    created_at: now,
+    updated_at: now,
+  };
+}
+
 function existingSingleton(table: string, identityUuid: unknown): Row {
   switch (table) {
-    case 'user_settings':
-      return {
-        id: 'existing-settings-b',
-        identity_id: identityUuid,
-        preferences: '{}',
-        created_at: now,
-        updated_at: now,
-      };
     case 'notification_preferences':
       return {
         id: 'existing-notification-b',
@@ -474,14 +484,27 @@ function existingSingleton(table: string, identityUuid: unknown): Row {
  */
 function seedProfile(identityUuid: string): SeedTables {
   return {
-    user_settings: [
+    user_preference_records: [
       {
-        id: 'settings-a',
+        id: 'preference-presentation-a',
         identity_id: identityUuid,
-        preferences: JSON.stringify({
-          appearance: { theme: 'dark' },
-          editor: { fontSize: 14 },
+        namespace: 'presentation',
+        payload: JSON.stringify({ theme: 'dark', language: 'en-US' }),
+        revision: 2,
+        created_at: now,
+        updated_at: later,
+      },
+      {
+        id: 'preference-regional-a',
+        identity_id: identityUuid,
+        namespace: 'regional',
+        payload: JSON.stringify({
+          timeZone: 'Asia/Shanghai',
+          dateStyle: 'long',
+          timeStyle: '24h',
+          weekStartsOn: 1,
         }),
+        revision: 3,
         created_at: now,
         updated_at: later,
       },
