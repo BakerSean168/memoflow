@@ -7,8 +7,7 @@ export default {
     "ai": "AI",
     "notifications": "Notifications & Reminders",
     "account": "Account & Privacy",
-    "data": "Data",
-    "advanced": "Advanced"
+    "data": "Data"
   },
   "knowledgeRepository": {
     "localTitle": "Local Obsidian Vault",
@@ -335,11 +334,10 @@ export default {
     }
   },
   "advanced": {
-    "title": "Advanced Actions",
-    "exportSettings": "Export Settings",
-    "exportJSON": "Export as JSON",
-    "exportCSV": "Export as CSV",
-    "importSettings": "Import Settings",
+    "title": "Data Transfer",
+    "preferenceDataDescription": "Export or import only your appearance, language, and regional preferences using the V3 settings format.",
+    "exportSettings": "Export Preferences",
+    "importSettings": "Import Preferences",
     "exportPortableData": "Export Importable Data",
     "exportingPortableData": "Exporting...",
     "importPortableData": "Import Data File",
@@ -347,24 +345,15 @@ export default {
     "portableDataDescription": "Creates an importable JSON backup of MemoFlow business data. It does not include local Vault files, GitHub authorization, GitHub-derived projections or attachment cache, or the RAG index. Export or clone the GitHub repository itself for the authoritative knowledge files.",
     "exportServerDataDisclosure": "Download Server-held Data Disclosure",
     "exportingServerDataDisclosure": "Preparing disclosure...",
-    "serverDataDisclosureDescription": "Web-only, non-importable JSON disclosure of repository connection metadata and the projections, cached attachment bytes, webhook/write history, and RAG index held by MemoFlow. It excludes MemoFlow-managed replayable GitHub authorization, local Vault files, and GitHub history; repository content is included verbatim.",
-    "createBackup": "Create Local Backup",
-    "restoreBackup": "Restore Backup",
-    "restoreBackupNoBackups": "Restore Backup (No backups available)",
-    "cloudSync": "Cloud Sync",
-    "syncAllDevices": "Sync All Devices",
-    "syncing": "Syncing...",
-    "viewVersionHistory": "View Version History",
-    "lastSynced": "Last Synced",
-    "version": "Version"
+    "serverDataDisclosureDescription": "Web-only, non-importable JSON disclosure of repository connection metadata and the projections, cached attachment bytes, webhook/write history, and RAG index held by MemoFlow. It excludes MemoFlow-managed replayable GitHub authorization, local Vault files, and GitHub history; repository content is included verbatim."
   },
   "resetPreferences": {
     "title": "Reset preferences",
-    "description": "Restore appearance and region preferences to their defaults. Resetting a single category leaves the other category untouched.",
-    "categoryLabel": "Category",
-    "categoryAll": "All categories",
-    "categoryAppearance": "Appearance",
-    "categoryLocale": "Region",
+    "description": "Restore presentation or regional preferences to their canonical defaults without touching AI, notifications, account, knowledge, or device-local settings.",
+    "categoryLabel": "Scope",
+    "categoryAll": "All user preferences",
+    "categoryPresentation": "Appearance & language",
+    "categoryRegional": "Region & time",
     "resetButton": "Reset",
     "resetting": "Resetting...",
     "currentTheme": "Current theme",

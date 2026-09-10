@@ -2,10 +2,12 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { unwrapOrThrowError } from '@memoflow/contracts/result';
 import type {
+  PreferenceMutationReceipt,
   PreferenceNamespacePatch,
   PreferenceNamespaceResponse,
   PresentationPreferences,
   RegionalPreferences,
+  ResetUserPreferencesResponse,
 } from '@memoflow/contracts/setting';
 import { SETTING_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
@@ -60,7 +62,7 @@ export function useUserPreferences() {
     if (!current) return false;
     error.value = null;
     try {
-      const receipt = unwrapOrThrowError(
+      const receipt = unwrapOrThrowError<PreferenceMutationReceipt>(
         await service.patchPreferenceNamespace('presentation', patch, current.revision),
       );
       presentation.value = {
@@ -81,7 +83,7 @@ export function useUserPreferences() {
     if (!current) return false;
     error.value = null;
     try {
-      const receipt = unwrapOrThrowError(
+      const receipt = unwrapOrThrowError<PreferenceMutationReceipt>(
         await service.patchPreferenceNamespace('regional', patch, current.revision),
       );
       regional.value = {
@@ -112,6 +114,34 @@ export function useUserPreferences() {
     }
   }
 
+  async function resetAllUserPreferences() {
+    const currentPresentation = presentation.value;
+    const currentRegional = regional.value;
+    if (!currentPresentation || !currentRegional) return false;
+
+    error.value = null;
+    try {
+      const result = unwrapOrThrowError<ResetUserPreferencesResponse>(
+        await service.resetUserPreferences({
+          presentation: currentPresentation.revision,
+          regional: currentRegional.revision,
+        }),
+      );
+      await Promise.all([loadNamespace('presentation'), loadNamespace('regional')]);
+      if ('code' in result.presentation || 'code' in result.regional) {
+        throw new Error('Preference revision conflict while resetting all preferences');
+      }
+      return true;
+    } catch (cause) {
+      handleError(cause, 'setting.errors.resetFailed');
+      await Promise.all([
+        loadNamespace('presentation').catch(() => undefined),
+        loadNamespace('regional').catch(() => undefined),
+      ]);
+      return false;
+    }
+  }
+
   return {
     presentation: computed(() => presentation.value),
     regional: computed(() => regional.value),
@@ -121,5 +151,6 @@ export function useUserPreferences() {
     patchPresentation,
     patchRegional,
     resetPreferenceNamespace,
+    resetAllUserPreferences,
   };
 }

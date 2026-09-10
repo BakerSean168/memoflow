@@ -7,8 +7,7 @@ export default {
     "ai": "AI",
     "notifications": "通知与提醒",
     "account": "账户与隐私",
-    "data": "数据",
-    "advanced": "高级"
+    "data": "数据"
   },
   "knowledgeRepository": {
     "localTitle": "本地知识库",
@@ -335,11 +334,10 @@ export default {
     }
   },
   "advanced": {
-    "title": "高级操作",
-    "exportSettings": "导出设置",
-    "exportJSON": "导出为 JSON",
-    "exportCSV": "导出为 CSV",
-    "importSettings": "导入设置",
+    "title": "数据迁移",
+    "preferenceDataDescription": "仅使用 V3 设置格式导出或导入外观、语言与区域偏好。",
+    "exportSettings": "导出偏好设置",
+    "importSettings": "导入偏好设置",
     "exportPortableData": "导出数据备份",
     "exportingPortableData": "正在导出数据备份…",
     "importPortableData": "导入数据备份",
@@ -347,24 +345,15 @@ export default {
     "portableDataDescription": "导出可导入的业务数据备份（任务、目标、日程等），可在其他设备导入恢复。",
     "exportServerDataDisclosure": "导出服务端数据副本",
     "exportingServerDataDisclosure": "正在导出服务端数据副本…",
-    "serverDataDisclosureDescription": "导出服务端存储的个人数据副本（仅供查阅，不支持导入）。",
-    "createBackup": "创建备份",
-    "restoreBackup": "恢复备份",
-    "restoreBackupNoBackups": "暂无可恢复的备份",
-    "cloudSync": "云同步",
-    "syncAllDevices": "同步所有设备",
-    "syncing": "正在同步…",
-    "viewVersionHistory": "查看版本历史",
-    "lastSynced": "上次同步",
-    "version": "版本"
+    "serverDataDisclosureDescription": "导出服务端存储的个人数据副本（仅供查阅，不支持导入）。"
   },
   "resetPreferences": {
     "title": "重置偏好设置",
-    "description": "将外观和区域偏好恢复到默认值。只重置单个分类时，另一个分类不受影响。",
-    "categoryLabel": "分类",
-    "categoryAll": "全部分类",
-    "categoryAppearance": "外观",
-    "categoryLocale": "区域",
+    "description": "将展示或区域偏好恢复为规范默认值，不影响 AI、通知、账户、知识库或设备本地设置。",
+    "categoryLabel": "范围",
+    "categoryAll": "全部用户偏好",
+    "categoryPresentation": "外观与语言",
+    "categoryRegional": "区域与时间",
     "resetButton": "重置",
     "resetting": "正在重置…",
     "currentTheme": "当前主题",

@@ -4077,6 +4077,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4102,6 +4110,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/SettingsResetSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/UserPreferenceSettingsSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4193,7 +4209,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/setting/views/UserSettingsView.defaults.spec.ts",
+      "path": "packages/app-vue/src/modules/setting/views/react-mobile-settings-parity.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -11517,7 +11533,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 202
+      "fileCount": 204
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12299,7 +12315,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1059,
+    "unit": 1061,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

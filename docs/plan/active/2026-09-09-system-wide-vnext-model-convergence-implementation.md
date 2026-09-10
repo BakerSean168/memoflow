@@ -597,10 +597,10 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 ## 7. Immediate next tickets
 
-The former TIME-1204 footer is obsolete: TIME-1204..1206 and LABEL-1301..1305 are already complete. Current dependency-ready work is:
+The former TIME-1204 footer is obsolete: TIME-1204..1206 and LABEL-1301..1305 are already complete. `SETTING-9207` and `SETTING-9208` are also complete. Current dependency-ready work is:
 
-1. `SETTING-9207` — converge Settings Hub UI to owner composition;
-2. `SETTING-9208` — make Preferences V3-only and register the first real owner capability on the `PORT-1601/1602` foundation;
-3. in parallel where file ownership is disjoint, begin Knowledge foundation before Goal/Task durable note relations.
+1. `SETTING-9209` — cut every remaining current consumer to canonical presentation/regional persistence and delete legacy `user_settings` / Account shadow remnants;
+2. continue `PORT-1601/1602` owner capability registration, then execute `PORT-1603` only when V3 can replace the production full-backup path without reducing current business-data coverage;
+3. in parallel where file ownership is disjoint, continue Knowledge foundation before Goal/Task durable note relations.
 
-`PORT-1601/1602` remain IN PROGRESS until real owner capabilities replace the production V2 reader/export path. `SETTING-9207` and `SETTING-9208` are now dependency-ready because `SETTING-9203..9206` are complete.
+`PORT-1601/1602` remain IN PROGRESS until real surviving owner capabilities replace the production V2 reader/export path. `SETTING-9209` is now dependency-ready because `SETTING-9203..9208` are complete and the Settings UI no longer depends on the legacy giant-tree as a product surface.

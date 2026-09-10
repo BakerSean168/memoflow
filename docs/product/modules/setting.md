@@ -10,7 +10,7 @@ updated: 2026-09-09T12:00:00+08:00
 
 # 设置模块说明
 
-> **vNext implementation notice（2026-09-10）**：本文把当前运行路径与历史/目标 rationale 分开记录。`SETTING-9203`/`9204`/`9205`/`9206` 已完成 Account/Notification shadow retirement、canonical presentation/regional consumer cutover、dead/fake UserSetting surface retirement，以及 Desktop device-local preference scope/persistence；legacy `UserSetting` 只保留 appearance + locale remainder。Canonical `presentation | regional` contracts、owner-specific seams 与 Settings Hub composition 是当前实现边界。不存在 backfill、dual-read 或 dual-write。完整目标仍见 [ADR-092](../../architecture/adr/ADR-092-settings-hub-and-preference-ownership-boundary.md)～[ADR-095](../../architecture/adr/ADR-095-preference-persistence-sync-migration-and-portability.md)、[product target](../setting-vnext-settings-hub.md) 与 [active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md)。
+> **vNext implementation notice（2026-09-10）**：本文把当前运行路径与历史/目标 rationale 分开记录。`SETTING-9203`/`9204`/`9205`/`9206`/`9207`/`9208` 已完成 Account/Notification shadow retirement、canonical presentation/regional consumer cutover、dead/fake UserSetting surface retirement、Desktop device-local preference scope/persistence、Settings Hub owner composition 与 Preferences V3-only portability；legacy `UserSetting` 只保留 appearance + locale persistence remainder。Canonical `presentation | regional` contracts、6-group owner-composed Settings Hub 与 `preferences@3` 是当前实现边界。不存在 backfill、dual-read 或 dual-write。完整目标仍见 [ADR-092](../../architecture/adr/ADR-092-settings-hub-and-preference-ownership-boundary.md)～[ADR-095](../../architecture/adr/ADR-095-preference-persistence-sync-migration-and-portability.md)、[product target](../setting-vnext-settings-hub.md) 与 [active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md)。
 
 ## 1. 当前功能定位
 
@@ -18,7 +18,7 @@ updated: 2026-09-09T12:00:00+08:00
 
 ```text
 Settings UI
-= 外观、Knowledge、AI、Notification、Account、Data、Advanced 的统一入口
+= 外观、Knowledge、AI、Notification、Account、Data 六个真实 owner capability 的统一入口
 
 UserSetting
 = identity-scoped preferences JSONB 聚合
@@ -44,7 +44,7 @@ locale
 
 ## 3. 当前 Settings UI 分组
 
-`UserSettingsView.vue` 当前 7 个 group：
+`SETTING-9207` 后 `UserSettingsView.vue` 只保留 6 个真实 owner group：
 
 ```text
 appearance
@@ -53,22 +53,24 @@ ai
 notifications
 account
 data
-advanced
 ```
 
 对应：
 
-| Group         | 当前主要 capability/owner                                            |
-| ------------- | -------------------------------------------------------------------- |
-| Appearance    | UserSetting appearance/locale + presentation bootstrap               |
-| Repository    | Repository/Knowledge                                                 |
-| AI            | AI provider/onboarding                                               |
+| Group         | 当前主要 capability/owner |
+| ------------- | ------------------------- |
+| Appearance    | canonical `presentation` / `regional` User Preferences |
+| Repository    | Repository/Knowledge |
+| AI            | AI provider/onboarding |
 | Notifications | NotificationPreference + Profile-scoped Desktop notification surface |
-| Account       | Account/Profile、Cloud Auth/Password                               |
-| Data          | UserFiles Desktop IPC、Settings JSON export/import、Data Portability |
-| Advanced      | Settings import/export、reset 与其他 retained actions               |
+| Account       | Account/Profile + capability-gated Cloud Auth/Password |
+| Data          | `preferences@3` import/export + Data Portability + Desktop UserFiles |
 
-当前已有 `?tab=` 深链与 `settings-tab-{value}` 测试 contract；Advanced 只承载真实的数据导入导出、reset 与其他 retained actions，不再挂载 fake workflow/privacy/shortcut/experimental editor。
+页面 root 只负责导航、响应式布局、`?tab=` 深链与 lazy section composition，不再持有跨 owner form shadow、backup/sync fake state 或全局 owner loading。
+
+此前 `Advanced` tab 中没有真实 handler/owner 的 CSV export、local backup/restore、cloud sync、version history 已删除；preference reset 回到 User Preferences owner，数据导入导出回到 Data owner。未来 Diagnostics/Labs/DeviceKeymap 只有在真实 capability 存在时才重新进入 Settings Hub。
+
+现有 `?tab=` / `settings-tab-{value}` contract 对 surviving 6 个 group 保持不变；旧 `advanced` 或未知 query value 回落到 `appearance`。
 
 ## 4. 当前持久化与同步
 
@@ -233,10 +235,9 @@ usage analytics consent         -> future explicit Consent owner
 ### 当前仍剩余的实施债务
 
 1. legacy appearance/locale remainder，以及 giant JSON persistence + fake legacy revision，随 SETTING-9209 完成最终删除；
-2. Settings Hub owner composition，按 SETTING-9207 实施；
-3. V3-only portability cutover，按 SETTING-9208 实施；
-4. legacy fields/runtime 的最终删除，按 SETTING-9209 实施；
-5. review、evidence 收口与 archive，按 SETTING-9210 实施。
+2. system-wide Data Portability V3 继续注册其他 surviving owner capabilities，并在 PORT-1603 完成 V2 full-backup cutover；
+3. legacy fields/runtime 的最终删除，按 SETTING-9209 实施；
+4. review、evidence 收口与 archive，按 SETTING-9210 实施。
 
 实施顺序以 [Setting vNext active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md) 为真值，并受 ADR-111 的 zero-legacy-data destructive cutover policy 约束。
 

@@ -11,36 +11,18 @@ const i18n = createI18n({
     'en-US': {
       setting: {
         advanced: {
-          title: 'Advanced',
-          exportSettings: 'Export Settings',
-          exportJSON: 'Export JSON',
-          exportCSV: 'Export CSV',
-          importSettings: 'Import Settings',
+          title: 'Data Transfer',
+          preferenceDataDescription: 'V3 preference data only.',
+          exportSettings: 'Export Preferences',
+          importSettings: 'Import Preferences',
           exportPortableData: 'Export Importable Data',
           exportingPortableData: 'Exporting...',
           importPortableData: 'Import Data File',
           importingPortableData: 'Importing...',
-          portableDataDescription:
-            'Importable JSON only; excludes Vault files, GitHub authorization, projections, cache, and RAG.',
+          portableDataDescription: 'Importable business data backup.',
           exportServerDataDisclosure: 'Download Server-held Data Disclosure',
           exportingServerDataDisclosure: 'Preparing disclosure...',
-          serverDataDisclosureDescription:
-            'Non-importable JSON with projections, cached bytes, history, and RAG; no MemoFlow-managed replayable GitHub authorization.',
-          createBackup: 'Create Backup',
-          restoreBackup: 'Restore Backup',
-          restoreBackupNoBackups: 'No Backups',
-          cloudSync: 'Cloud Sync',
-          syncing: 'Syncing...',
-          syncAllDevices: 'Sync All Devices',
-          viewVersionHistory: 'View Version History',
-          lastSynced: 'Last synced',
-          version: 'Version',
-        },
-        time: {
-          justNow: 'just now',
-          minutesAgo: '{n} minutes ago',
-          hoursAgo: '{n} hours ago',
-          daysAgo: '{n} days ago',
+          serverDataDisclosureDescription: 'Non-importable server-held data.',
         },
       },
     },
@@ -49,8 +31,8 @@ const i18n = createI18n({
 
 const PassthroughStub = defineComponent({
   name: 'PassthroughStub',
-  setup(_, { slots }) {
-    return () => h('div', slots.default?.());
+  setup(_, { attrs, slots }) {
+    return () => h('div', attrs, slots.default?.());
   },
 });
 
@@ -79,9 +61,6 @@ function mountActions(dataPortabilityAvailable: boolean, serverDataDisclosureAva
       dataPortabilityAvailable,
       serverDataDisclosureAvailable,
       exportingServerDataDisclosure: false,
-      backups: [],
-      syncStatus: null,
-      syncing: false,
       exportingData: false,
       importingData: false,
       dataPortabilityResult: null,
@@ -93,56 +72,43 @@ function mountActions(dataPortabilityAvailable: boolean, serverDataDisclosureAva
         CardHeader: PassthroughStub,
         CardTitle: PassthroughStub,
         CardContent: PassthroughStub,
-        Separator: PassthroughStub,
-        Progress: PassthroughStub,
-        DropdownMenu: PassthroughStub,
-        DropdownMenuTrigger: PassthroughStub,
-        DropdownMenuContent: PassthroughStub,
-        DropdownMenuItem: ButtonStub,
         Button: ButtonStub,
-        Settings2: true,
+        DatabaseBackup: true,
         Download: true,
         Upload: true,
-        Save: true,
-        RotateCcw: true,
-        Cloud: true,
-        CloudUpload: true,
-        History: true,
-        FileJson: true,
-        FileText: true,
       },
     },
   });
 }
 
-describe('SettingAdvancedActions', () => {
-  it('keeps settings export/import visible when full data portability is unavailable', () => {
+describe('SettingAdvancedActions owner-backed data actions', () => {
+  it('keeps V3 preference export/import visible without inventing fake advanced capabilities', () => {
     const wrapper = mountActions(false);
 
-    expect(wrapper.text()).toContain('Export Settings');
-    expect(wrapper.text()).toContain('Import Settings');
-    expect(wrapper.text()).not.toContain('Export Importable Data');
-    expect(wrapper.text()).not.toContain('Import Data File');
-    expect(wrapper.text()).not.toContain('Download Server-held Data Disclosure');
+    expect(wrapper.text()).toContain('Export Preferences');
+    expect(wrapper.text()).toContain('Import Preferences');
+    expect(wrapper.text()).not.toContain('Export CSV');
+    expect(wrapper.text()).not.toContain('Create Backup');
+    expect(wrapper.text()).not.toContain('Cloud Sync');
+    expect(wrapper.text()).not.toContain('Version History');
   });
 
-  it('shows full data export/import actions when data portability is available', () => {
+  it('shows full data export/import only when Data Portability is available', () => {
     const wrapper = mountActions(true);
 
     expect(wrapper.text()).toContain('Export Importable Data');
     expect(wrapper.text()).toContain('Import Data File');
     expect(wrapper.get('[data-testid="portable-data-scope"]').text()).toContain(
-      'excludes Vault files, GitHub authorization, projections, cache, and RAG',
+      'Importable business data backup',
     );
   });
 
-  it('shows the distinct non-importable server-held data disclosure when available', () => {
+  it('shows the distinct non-importable server-held disclosure only when available', () => {
     const wrapper = mountActions(true, true);
 
     expect(wrapper.text()).toContain('Download Server-held Data Disclosure');
     expect(wrapper.get('[data-testid="server-data-scope"]').text()).toContain(
-      'no MemoFlow-managed replayable GitHub authorization',
+      'Non-importable server-held data',
     );
-    expect(wrapper.get('[data-testid="server-data-scope"]').text()).toContain('Non-importable');
   });
 });

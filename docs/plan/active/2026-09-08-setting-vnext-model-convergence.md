@@ -523,26 +523,47 @@ legacy shareUsageData=true
 
 ### SETTING-9207 — Converge Settings Hub UI to owner composition
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-10**
 
 #### Goal
 
 让页面结构与 ownership 真正一致，并删除 root view 中跨 owner 的 local shadow refs。
 
-#### Scope
+#### Implemented scope
 
-- General -> UserPreference client；
-- Knowledge -> Repository client；
-- AI -> AI client；
-- Notifications -> Notification + Device clients；
-- Account -> Account/Auth；
-- Data -> Preference portability + DataPortability + Desktop UserFiles；
-- Advanced -> only real capabilities；
-- section lazy loading / independent error states；
-- owner-specific immediate-save receipt；
-- reset scope 收缩；
-- host capability gating；
-- Web/Desktop/React/Mobile semantic parity。
+Settings Hub 现在只保留 6 个真实 owner group：
+
+```text
+appearance     -> UserPreference presentation/regional
+repository     -> Repository/Knowledge
+ai             -> AI
+notifications  -> NotificationPreference + Desktop device-local notification preference
+account        -> Account/Auth
+Data           -> preferences@3 + Data Portability + Desktop UserFiles
+```
+
+`Advanced` group 已删除。此前只有 UI shell、没有真实 handler/owner 的 CSV export、local backup/restore、cloud sync、version history 一并移除；不为了保留一个 tab 去制造 fake capability。未来 Diagnostics/Labs/DeviceKeymap 只有在真实 owner/runtime 存在时才重新进入 Settings Hub。
+
+Root `UserSettingsView` 现在只负责：
+
+```text
+navigation
+?tab= deep-link normalization
+responsive tabs/sidebar layout
+lazy owner-section composition
+```
+
+它不再调用 `useUserSetting` / `useUserPreferences` / `useDataPortability`，也不持有 backups/sync status、preference form shadow 或页面级全局 loading。
+
+Owner sections：
+
+- `UserPreferenceSettingsSection`：独立 load/error/mutation/reset，presentation/regional 为唯一 General truth；
+- `KnowledgeRepositorySettings` / `AISettings` / `NotificationSettings`：按 tab lazy mount，某 owner failure 不阻断 General；
+- `AccountSettingsSection`：Account profile 始终按 owner mount，Cloud Password 按 `AUTH_SERVICE_KEY` capability gating；
+- `DataSettingsSection`：V3 preference import/export、full Data Portability、server-held disclosure 与 Desktop UserFiles；
+- `SettingsResetSection`：只发出 `presentation | regional | all` canonical reset scope，不再读取/重置 legacy giant-tree。
+
+React/Mobile shared Settings 也已从 legacy `useSettings().preferences.notification` 切到 Notification owner `getPreferences/updatePreferences`。共享端只暴露 user-level `Email / Push / InApp`；Desktop-only sound/presentation 不进入 React/Mobile cloud preference surface。
 
 #### Protected UI contract
 
@@ -551,20 +572,29 @@ legacy shareUsageData=true
 settings-tab-{value}
 ```
 
-在替代 deep-link/e2e contract 同时落地前保留。
+现有 `appearance / repository / ai / notifications / account / data` query values 保留；已有 appearance/notifications/account E2E anchor 未改。已退休的 `advanced` 不再是可导航 group，未知/旧值回落到 `appearance`。
 
-#### Tests
+#### Evidence
 
-- Vue unit/component；
-- Settings E2E deep link；
-- Account section no missing DI injection；
-- AI/Knowledge section failure does not block General；
-- device-only controls hidden on unsupported host；
-- React/Mobile core presentation/regional parity。
+- App Vue focused owner-composition matrix：8 files / 27 tests PASS；
+- App Vue full Setting module specs：19 files / 74 tests PASS；
+- Account capability-gating component tests PASS；
+- Notification unsupported-device-host tests PASS；
+- React/Mobile Settings source parity lock PASS；
+- `packages/app-react` direct strict typecheck PASS；
+- focused ESLint 0 errors；
+- changed-path Vue typecheck 无 9207 自身错误；isolated worktree 全包 Vue typecheck 仍受 workspace `dist` 缺失/既有 unrelated baseline 干扰；
+- fake Advanced / legacy notification residue scan PASS；
+- `git diff --check` PASS。
 
 #### Acceptance
 
-Settings root 不再持有 privacy/experimental fake form shadow；每个 mutation 能追溯到唯一 owner port。
+- Settings root 不再持有跨 owner local shadow state；
+- 每个 mutation 能追溯到唯一 owner port；
+- General 不依赖 legacy giant-tree request；
+- unsupported host capability 不 mount 对应 control；
+- React/Mobile 不再把 Notification 当 UserSetting category；
+- fake Advanced actions 为零。
 
 #### Dependencies
 
@@ -845,13 +875,13 @@ SETTING-9203  DONE — 2026-09-09
 SETTING-9204  DONE — 2026-09-10
 SETTING-9205  DONE — 2026-09-10
 SETTING-9206  DONE — 2026-09-10
-SETTING-9207  PLANNED
+SETTING-9207  DONE — 2026-09-10
 SETTING-9208  DONE — 2026-09-10
 SETTING-9209  PLANNED
 SETTING-9210  PLANNED
 ```
 
-SETTING-9202/9203 已完成 canonical presentation/regional HTTP/IPC/UI 与 Product Time cutover，并完成 `Account.settings` retirement；fake/dead legacy categories 已由 `SETTING-9205` 退休；device/local profile scope 与 persistence 已由 `SETTING-9206` 收敛；最终 legacy persistence deletion 仍由 `SETTING-9209` 处理。
+SETTING-9202/9203 已完成 canonical presentation/regional HTTP/IPC/UI 与 Product Time cutover，并完成 `Account.settings` retirement；fake/dead legacy categories 已由 `SETTING-9205` 退休；device/local profile scope 与 persistence 已由 `SETTING-9206` 收敛；Settings Hub owner composition 与 React/Mobile Notification owner parity 已由 `SETTING-9207` 收敛；Preferences V3-only portability 已由 `SETTING-9208` 收敛；最终 legacy persistence deletion 仍由 `SETTING-9209` 处理。
 
 ## 10. Definition of Done
 

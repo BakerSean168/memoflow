@@ -61,18 +61,13 @@ Settings
 │   ├── Password / Authentication
 │   └── Consent (only when a real consent product exists)
 │
-├── Data
-│   ├── Preferences export/import
-│   ├── Full data portability
-│   └── Local files location (Desktop only)
-│
-└── Advanced
-    ├── Keyboard shortcuts (only when CommandRegistry is real)
-    ├── Diagnostics
-    └── Labs (only when Feature system is real)
+└── Data
+    ├── Preferences export/import
+    ├── Full data portability
+    └── Local files location (Desktop only)
 ```
 
-当前 7-group shell 可以演进复用；不要求为了新信息架构做一次无价值全路由重写。
+当前 6-group shell 已按真实 owner capability 收敛。Advanced 不作为空壳 group 保留；Keyboard shortcuts、Diagnostics、Labs 只有在对应真实 owner/runtime 存在后才新增入口。
 
 ## 4. Scope mental model
 
@@ -392,7 +387,10 @@ Reset to default
 
 Web/Mobile 不渲染 unsupported control。
 
-## 12. Advanced
+## 12. Future Advanced capabilities（当前不渲染 Advanced group）
+
+`SETTING-9207` 已删除 Advanced 空壳。以下内容只是 future capability 条件，不是当前 UI。
+
 
 ### 12.1 Keyboard shortcuts
 
@@ -516,10 +514,9 @@ unsupported on this host
 /settings?tab=notifications
 /settings?tab=account
 /settings?tab=data
-/settings?tab=advanced
 ```
 
-这是已有产品/测试 contract，迁移期保护。
+surviving 6 个 query value 是已有产品/测试 contract，继续保护。旧 `advanced` 或未知值回落到 `appearance`。
 
 即使最终文案把 `appearance` 显示成 `General`，也不要求立刻改 query value。
 
@@ -718,9 +715,6 @@ Data
   Export preferences
   Export all data
   Local files            D:\MemoFlow   [Desktop]
-
-Advanced
-  Diagnostics
 ```
 
 没有：

@@ -1,9 +1,10 @@
 import { RefreshControl, StyleSheet, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
+import { NotificationChannelType } from '@memoflow/contracts/notification';
 
 import { useAppSession } from '../hooks/useAppSession';
-import { useSettings } from '../hooks/useSettings';
+import { useNotificationPreferences } from '../hooks/useNotificationPreferences';
 import { useAppPreferences } from '../providers/app-preference-provider';
 
 import {
@@ -20,7 +21,7 @@ const LANGUAGE_SEQUENCE = ['zh-CN', 'en-US'] as const;
 
 export function SettingsScreen() {
   const router = useRouter();
-  const { signOut } = useAppSession();
+  const { signOut, isRemoteAuthenticated } = useAppSession();
   const {
     error: preferenceError,
     isLoading: isPreferenceLoading,
@@ -35,24 +36,21 @@ export function SettingsScreen() {
     resetNamespace,
   } = useAppPreferences();
   const {
-    error: legacyError,
-    isLoading: isLegacyLoading,
-    isMutating: isLegacyMutating,
-    isRemoteAuthenticated,
-    patchCategory,
-    refresh: refreshLegacy,
-    resetCategory,
-    settings: legacySettings,
-  } = useSettings();
+    error: notificationError,
+    isLoading: isNotificationLoading,
+    isMutating: isNotificationMutating,
+    preference: notificationPreference,
+    refresh: refreshNotificationPreferences,
+    setGlobalChannel,
+  } = useNotificationPreferences();
 
-  const isLoading = isPreferenceLoading || isLegacyLoading;
-  const isMutating = isPreferenceMutating || isLegacyMutating;
+  const isLoading = isPreferenceLoading || isNotificationLoading;
+  const isMutating = isPreferenceMutating || isNotificationMutating;
   const presentation = profile?.presentation;
   const regional = profile?.regional;
-  const notification = legacySettings?.preferences.notification;
 
   async function refresh() {
-    await Promise.all([refreshPreferences(), refreshLegacy()]);
+    await Promise.all([refreshPreferences(), refreshNotificationPreferences()]);
   }
 
   async function cycleTheme() {
@@ -74,9 +72,13 @@ export function SettingsScreen() {
     await patchRegional({ timeStyle: regional.timeStyle === '24h' ? '12h' : '24h' });
   }
 
-  async function toggleNotification(key: 'email' | 'push' | 'inApp' | 'sound') {
-    if (!notification) return;
-    await patchCategory('notification', { [key]: !notification[key] });
+  async function toggleNotification(channel: NotificationChannelType) {
+    if (!notificationPreference) return;
+    await setGlobalChannel(channel, !(notificationPreference.globalChannels[channel] ?? false));
+  }
+
+  function notificationEnabled(channel: NotificationChannelType): boolean {
+    return notificationPreference?.globalChannels[channel] ?? false;
   }
 
   const actionSections = [
@@ -131,7 +133,10 @@ export function SettingsScreen() {
                   <StatusPill label="2 canonical namespaces" tone="tint" />
                   <StatusPill label={`Presentation r${presentationRevision ?? 0}`} tone="textSecondary" />
                   <StatusPill label={`Regional r${regionalRevision ?? 0}`} tone="textSecondary" />
-                  <StatusPill label={isPreferenceMutating ? 'Saving changes' : 'Ready'} tone={isPreferenceMutating ? 'warning' : 'success'} />
+                  <StatusPill
+                    label={isPreferenceMutating ? 'Saving changes' : 'Ready'}
+                    tone={isPreferenceMutating ? 'warning' : 'success'}
+                  />
                 </View>
                 <PrimaryButton
                   label="Reset presentation & regional"
@@ -147,9 +152,23 @@ export function SettingsScreen() {
                   <StatusPill label={presentation?.language ?? '—'} tone="textSecondary" />
                 </View>
                 <View style={styles.actionRow}>
-                  <PrimaryButton label={isMutating ? 'Saving…' : 'Cycle theme'} onPress={cycleTheme} disabled={isMutating} />
-                  <PrimaryButton label={isMutating ? 'Saving…' : 'Toggle language'} onPress={toggleLanguage} disabled={isMutating} variant="secondary" />
-                  <PrimaryButton label="Reset presentation" onPress={() => resetNamespace('presentation')} disabled={isMutating} variant="ghost" />
+                  <PrimaryButton
+                    label={isMutating ? 'Saving…' : 'Cycle theme'}
+                    onPress={cycleTheme}
+                    disabled={isMutating}
+                  />
+                  <PrimaryButton
+                    label={isMutating ? 'Saving…' : 'Toggle language'}
+                    onPress={toggleLanguage}
+                    disabled={isMutating}
+                    variant="secondary"
+                  />
+                  <PrimaryButton
+                    label="Reset presentation"
+                    onPress={() => resetNamespace('presentation')}
+                    disabled={isMutating}
+                    variant="ghost"
+                  />
                 </View>
               </SectionCard>
 
@@ -161,35 +180,69 @@ export function SettingsScreen() {
                   <StatusPill label={`Week starts ${regional?.weekStartsOn ?? '—'}`} tone="textSecondary" />
                 </View>
                 <View style={styles.actionRow}>
-                  <PrimaryButton label={isMutating ? 'Saving…' : 'Toggle 12h / 24h'} onPress={toggleTimeFormat} disabled={isMutating} />
-                  <PrimaryButton label="Reset regional" onPress={() => resetNamespace('regional')} disabled={isMutating} variant="ghost" />
+                  <PrimaryButton
+                    label={isMutating ? 'Saving…' : 'Toggle 12h / 24h'}
+                    onPress={toggleTimeFormat}
+                    disabled={isMutating}
+                  />
+                  <PrimaryButton
+                    label="Reset regional"
+                    onPress={() => resetNamespace('regional')}
+                    disabled={isMutating}
+                    variant="ghost"
+                  />
                 </View>
               </SectionCard>
             </>
           ) : null}
 
-          {legacyError ? (
-            <SectionCard title="Notification settings unavailable" description="Notification preference migration is handled by its owner lane.">
+          {notificationError ? (
+            <SectionCard
+              title="Notification settings unavailable"
+              description="Notification preferences are owned by the Notification module.">
               <ThemedText type="small" themeColor="warning">
-                {legacyError}
+                {notificationError}
               </ThemedText>
             </SectionCard>
           ) : null}
 
-          {notification ? (
-            <SectionCard title="Notifications" description="通知 owner cutover 前保留现有渠道开关；不再承载 theme/locale。">
+          {notificationPreference ? (
+            <SectionCard
+              title="Notifications"
+              description="User-level delivery channels are owned by NotificationPreference. Device sound and presentation remain Desktop-local.">
               <View style={styles.pillRow}>
-                <StatusPill label={`Email ${notification.email ? 'on' : 'off'}`} tone={notification.email ? 'success' : 'textSecondary'} />
-                <StatusPill label={`Push ${notification.push ? 'on' : 'off'}`} tone={notification.push ? 'success' : 'textSecondary'} />
-                <StatusPill label={`In-app ${notification.inApp ? 'on' : 'off'}`} tone={notification.inApp ? 'success' : 'textSecondary'} />
-                <StatusPill label={`Sound ${notification.sound ? 'on' : 'off'}`} tone={notification.sound ? 'success' : 'textSecondary'} />
+                <StatusPill
+                  label={`Email ${notificationEnabled(NotificationChannelType.Email) ? 'on' : 'off'}`}
+                  tone={notificationEnabled(NotificationChannelType.Email) ? 'success' : 'textSecondary'}
+                />
+                <StatusPill
+                  label={`Push ${notificationEnabled(NotificationChannelType.Push) ? 'on' : 'off'}`}
+                  tone={notificationEnabled(NotificationChannelType.Push) ? 'success' : 'textSecondary'}
+                />
+                <StatusPill
+                  label={`In-app ${notificationEnabled(NotificationChannelType.InApp) ? 'on' : 'off'}`}
+                  tone={notificationEnabled(NotificationChannelType.InApp) ? 'success' : 'textSecondary'}
+                />
               </View>
               <View style={styles.actionRow}>
-                <PrimaryButton label="Toggle email" onPress={() => toggleNotification('email')} disabled={isMutating} variant="secondary" />
-                <PrimaryButton label="Toggle push" onPress={() => toggleNotification('push')} disabled={isMutating} variant="secondary" />
-                <PrimaryButton label="Toggle in-app" onPress={() => toggleNotification('inApp')} disabled={isMutating} variant="secondary" />
-                <PrimaryButton label="Toggle sound" onPress={() => toggleNotification('sound')} disabled={isMutating} variant="secondary" />
-                <PrimaryButton label="Reset notifications" onPress={() => resetCategory('notification')} disabled={isMutating} variant="ghost" />
+                <PrimaryButton
+                  label="Toggle email"
+                  onPress={() => toggleNotification(NotificationChannelType.Email)}
+                  disabled={isMutating}
+                  variant="secondary"
+                />
+                <PrimaryButton
+                  label="Toggle push"
+                  onPress={() => toggleNotification(NotificationChannelType.Push)}
+                  disabled={isMutating}
+                  variant="secondary"
+                />
+                <PrimaryButton
+                  label="Toggle in-app"
+                  onPress={() => toggleNotification(NotificationChannelType.InApp)}
+                  disabled={isMutating}
+                  variant="secondary"
+                />
               </View>
             </SectionCard>
           ) : null}

@@ -1,12 +1,7 @@
 import { defineComponent, h } from 'vue';
-import { mount, flushPromises } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { createPinia } from 'pinia';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
-import type { UserSettingClientDTO, UserSettingPreferences } from '@memoflow/contracts/setting';
-import { SETTING_SERVICE_KEY } from '../../../di/keys';
-import { useUserSettingStore } from '../stores/user-setting-store';
+import { describe, expect, it } from 'vitest';
 import SettingsResetSection from './SettingsResetSection.vue';
 
 const i18n = createI18n({
@@ -17,17 +12,16 @@ const i18n = createI18n({
       setting: {
         resetPreferences: {
           title: 'Reset preferences',
-          description: 'Restore preferences to defaults.',
-          categoryLabel: 'Category',
-          categoryAll: 'All categories',
-          categoryAppearance: 'Appearance',
-          categoryLocale: 'Region',
+          description: 'Reset canonical preferences.',
+          categoryLabel: 'Scope',
+          categoryAll: 'All user preferences',
+          categoryPresentation: 'Appearance & language',
+          categoryRegional: 'Region & time',
           resetButton: 'Reset',
           resetting: 'Resetting...',
           currentTheme: 'Current theme',
           themeUnknown: 'Unknown',
         },
-        errors: { resetFailed: 'Reset failed' },
       },
     },
   },
@@ -59,37 +53,11 @@ const ButtonStub = defineComponent({
   },
 });
 
-function createSetting(
-  overrides: Partial<UserSettingClientDTO> = {},
-): UserSettingClientDTO {
-  return {
-    id: 'setting-1' as UserSettingClientDTO['id'],
-    identityId: 'identity-1' as UserSettingClientDTO['identityId'],
-    preferences: {
-      appearance: { theme: 'dark' },
-      locale: {
-        language: 'en-US',
-        timezone: 'UTC',
-        dateFormat: 'YYYY-MM-DD',
-        timeFormat: '24H',
-        weekStartsOn: 1,
-      },
-    } as UserSettingPreferences,
-    version: 1,
-    createdAt: 1,
-    updatedAt: 1,
-    ...overrides,
-  } as UserSettingClientDTO;
-}
-
-function mountSection(service: { resetUserSettings: (category?: string) => Promise<unknown> }) {
-  const pinia = createPinia();
-  const wrapper = mount(SettingsResetSection, {
+function mountSection(props: { currentTheme?: 'light' | 'dark' | 'auto' | null; resetting?: boolean } = {}) {
+  return mount(SettingsResetSection, {
+    props,
     global: {
-      plugins: [pinia, i18n],
-      provide: {
-        [SETTING_SERVICE_KEY as symbol]: service,
-      },
+      plugins: [i18n],
       stubs: {
         Button: ButtonStub,
         Card: PassthroughStub,
@@ -101,75 +69,32 @@ function mountSection(service: { resetUserSettings: (category?: string) => Promi
       },
     },
   });
-  return { wrapper, pinia };
 }
 
-describe('SettingsResetSection (W6 P1-2 category reset + defaults)', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe('SettingsResetSection canonical reset scope', () => {
+  it('renders the owner-provided current theme without reading the legacy UserSetting store', () => {
+    const wrapper = mountSection({ currentTheme: 'dark' });
+    expect(wrapper.get('[data-testid="settings-reset-current-theme"]').text()).toBe('dark');
   });
 
-  it('passes the selected category to the client so a category reset leaves other categories untouched', async () => {
-    // The server resets only the appearance category back to its default.
-    const resetResult = createSetting({
-      preferences: {
-        appearance: { theme: 'auto' },
-        locale: {
-          language: 'en-US',
-          timezone: 'UTC',
-          dateFormat: 'YYYY-MM-DD',
-          timeFormat: '24H',
-          weekStartsOn: 1,
-        },
-      } as UserSettingPreferences,
-      updatedAt: 2,
-    });
-    const service = {
-      resetUserSettings: vi.fn().mockResolvedValue(ok(resetResult)),
-    };
-    const { wrapper, pinia } = mountSection(service);
-    useUserSettingStore(pinia).setUserSetting(createSetting());
-
-    // Select the "appearance" category and reset it.
-    await wrapper.get('[data-testid="settings-reset-category"]').setValue('appearance');
+  it('emits presentation/regional owner reset targets', async () => {
+    const wrapper = mountSection();
+    await wrapper.get('[data-testid="settings-reset-category"]').setValue('presentation');
     await wrapper.get('[data-testid="settings-reset-button"]').trigger('click');
-    await flushPromises();
+    expect(wrapper.emitted('reset')).toEqual([['presentation']]);
 
-    expect(service.resetUserSettings).toHaveBeenCalledTimes(1);
-    expect(service.resetUserSettings).toHaveBeenCalledWith('appearance');
-
-    // The returned aggregate is applied: appearance reset, others unchanged.
-    const store = useUserSettingStore(pinia);
-    expect(store.userSetting?.preferences?.appearance).toEqual({ theme: 'auto' });
-    expect(wrapper.get('[data-testid="settings-reset-current-theme"]').text()).toBe('auto');
+    await wrapper.get('[data-testid="settings-reset-category"]').setValue('regional');
+    await wrapper.get('[data-testid="settings-reset-button"]').trigger('click');
+    expect(wrapper.emitted('reset')).toEqual([['presentation'], ['regional']]);
   });
 
-  it('performs a full reset (no category) and renders the returned aggregate', async () => {
-    const fullResetResult = createSetting({
-      preferences: {
-        appearance: { theme: 'auto' },
-        locale: {
-          language: 'en-US',
-          timezone: 'UTC',
-          dateFormat: 'YYYY-MM-DD',
-          timeFormat: '24H',
-          weekStartsOn: 1,
-        },
-      } as UserSettingPreferences,
-      updatedAt: 3,
-    });
-    const service = {
-      resetUserSettings: vi.fn().mockResolvedValue(ok(fullResetResult)),
-    };
-    const { wrapper, pinia } = mountSection(service);
-    useUserSettingStore(pinia).setUserSetting(createSetting());
-
+  it('uses all as the default owner reset scope and disables mutation while resetting', async () => {
+    const wrapper = mountSection();
     await wrapper.get('[data-testid="settings-reset-button"]').trigger('click');
-    await flushPromises();
+    expect(wrapper.emitted('reset')).toEqual([['all']]);
 
-    expect(service.resetUserSettings).toHaveBeenCalledWith(undefined);
-    expect(useUserSettingStore(pinia).userSetting).toEqual(fullResetResult);
-    // UI reflects the returned aggregate.
-    expect(wrapper.get('[data-testid="settings-reset-current-theme"]').text()).toBe('auto');
+    await wrapper.setProps({ resetting: true });
+    expect(wrapper.get('[data-testid="settings-reset-button"]').attributes('disabled')).toBeDefined();
+    expect(wrapper.text()).toContain('Resetting...');
   });
 });
