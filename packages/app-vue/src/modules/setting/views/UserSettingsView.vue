@@ -13,7 +13,7 @@
  * 作为 AppShell STATE D 独立场景渲染，不进 BusinessPanel。
  */
 
-import { ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Loader2 } from '@lucide/vue';
@@ -181,7 +181,11 @@ async function handleImport() {
       })) as Result<OpenTextResult>;
 
       if (isOk(response) && !response.data.canceled && response.data.content) {
-        await importSettings(JSON.parse(response.data.content));
+        const receipt = await importSettings(JSON.parse(response.data.content));
+        if (receipt) {
+          await loadPreferences();
+          hydrateCanonicalPreferences();
+        }
       }
     } catch (err) {
       console.error('Failed to import settings JSON from desktop file dialog:', err);
@@ -190,11 +194,6 @@ async function handleImport() {
   }
 
   fileInput.value?.click();
-}
-
-function createSettingsExportFilename(): string {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  return `memoflow-settings-${timestamp}.json`;
 }
 
 async function handleExportJson() {
@@ -208,8 +207,8 @@ async function handleExportJson() {
     try {
       const response = (await electronApi.invoke(SystemChannels.USER_FILES_SAVE_TEXT, {
         subdirectory: 'exports',
-        defaultFileName: createSettingsExportFilename(),
-        content: exported,
+        defaultFileName: exported.fileName,
+        content: exported.data,
         filters: [{ name: 'JSON', extensions: ['json'] }],
       })) as Result<{ canceled: boolean; filePath: string | null }>;
       if (isOk(response)) {
@@ -221,11 +220,11 @@ async function handleExportJson() {
     }
   }
 
-  const blob = new Blob([exported], { type: 'application/json;charset=utf-8' });
+  const blob = new Blob([exported.data], { type: 'application/json;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = createSettingsExportFilename();
+  link.download = exported.fileName;
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -243,7 +242,11 @@ async function onFileSelected(event: Event) {
     try {
       const content = e.target?.result as string;
       const data = JSON.parse(content);
-      await importSettings(data);
+      const receipt = await importSettings(data);
+      if (receipt) {
+        await loadPreferences();
+        hydrateCanonicalPreferences();
+      }
     } catch (err) {
       console.error('Failed to parse settings JSON:', err);
     } finally {

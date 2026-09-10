@@ -8,6 +8,8 @@ import type {
   PreferenceNamespaceResponse,
   ResetUserPreferencesResponse,
   UserPreferenceProfile,
+  ExportSettingsRes,
+  ImportSettingsRes,
   UserSettingClientDTO,
   PreferenceCategory,
 } from '@memoflow/contracts/setting';
@@ -72,17 +74,11 @@ export class SettingHttpAdapter implements ISettingApiClient {
     return this.httpClient.post(`${this.baseUrl}/reset`, { category });
   }
 
-  async exportSettings(): Promise<Result<string>> {
-    return this.httpClient.get(`${this.baseUrl}/export`);
+  async exportSettings(): Promise<Result<ExportSettingsRes>> {
+    return this.httpClient.post(`${this.baseUrl}/export`, {});
   }
 
-  async importSettings(
-    data: string,
-    options?: { merge?: boolean },
-  ): Promise<Result<UserSettingClientDTO>> {
-    return this.httpClient.post(`${this.baseUrl}/import`, {
-      data,
-      ...(options ? { options } : {}),
-    });
+  async importSettings(data: string): Promise<Result<ImportSettingsRes>> {
+    return this.httpClient.post(`${this.baseUrl}/import`, { data });
   }
 }

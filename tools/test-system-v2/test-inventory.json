@@ -5227,6 +5227,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/setting/preferences/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/setting/preferences/product-feature-map-public.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9622,6 +9630,16 @@
       ]
     },
     {
+      "path": "packages/setting/src/server/preferences/preference-portability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/setting/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/setting/src/server/preferences/user-preference-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11212,7 +11230,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 22
+      "fileCount": 23
     },
     {
       "id": "packages/task/vitest.config.ts",
@@ -11520,7 +11538,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 79
+      "fileCount": 80
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11646,7 +11664,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 22
+      "fileCount": 23
     },
     {
       "id": "packages/task/vitest.config.ts",
@@ -12201,6 +12219,7 @@
       "packages/setting/src/server/infrastructure/__tests__/setting-repositories.surface.spec.ts",
       "packages/setting/src/server/infrastructure/adapters/powersync/user-preference-powersync.repository.spec.ts",
       "packages/setting/src/server/infrastructure/adapters/prisma/user-preference-prisma.repository.spec.ts",
+      "packages/setting/src/server/preferences/preference-portability.spec.ts",
       "packages/setting/src/server/preferences/user-preference-service.spec.ts",
       "packages/task/src/api/module-lifecycle.spec.ts",
       "packages/task/src/api/routes/get-first-query-value-dual.surface.spec.ts",
@@ -12280,7 +12299,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1057,
+    "unit": 1059,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

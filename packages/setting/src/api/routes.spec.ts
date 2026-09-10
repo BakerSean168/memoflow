@@ -210,6 +210,22 @@ describe('setting route contracts', () => {
     expect(bodySchema).toBeDefined();
   });
 
+
+  it('V3 preference import accepts only JSON text and rejects legacy overwrite switches', () => {
+    const registry = new TestOpenApiRegistry();
+    registerSettingRoutes(
+      createSettingApiStub(),
+      { auth: authMiddleware, requireRole: vi.fn(() => authMiddleware) },
+      registry,
+    );
+
+    const route = getRegisteredRoute(registry, 'post', `${BASE}/import`);
+    const body = getJsonBodySchema(route);
+    expect(body.safeParse({ data: '{"schemaVersion":3}' }).success).toBe(true);
+    expect(body.safeParse({ data: '{"schemaVersion":3}', overwrite: true }).success).toBe(false);
+    expect(body.safeParse({ data: { schemaVersion: 3 } }).success).toBe(false);
+  });
+
   it('POST /export is registered with correct path', () => {
     const registry = new TestOpenApiRegistry();
 

@@ -572,53 +572,58 @@ Settings root 不再持有 privacy/experimental fake form shadow；每个 mutati
 
 ### SETTING-9208 — V3-only preference import/export + Data Portability owner contract
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-10**
 
 #### Goal
 
-把当前“版本字符串检查 + type cast”升级为 deterministic portability pipeline。
+把旧的“版本字符串检查 + type cast + merge/overwrite”导入路径替换为 canonical V3-only portability。
 
-#### Scope
+#### Implemented scope
 
 Preference-only format：
 
 ```text
 schemaVersion: 3
+exportedAt
 preferences.presentation
 preferences.regional
 no identityId
+no persistence revision/id
 ```
 
 Pipeline：
 
 ```text
-strict decoder
--> v1/v2 migrator
--> canonical v3
--> owner apply
--> receipt/warnings
+strict V3 decoder
+-> Setting-owned PreferencePortableService
+-> namespace CAS apply
+-> import receipt
 ```
 
-Data Portability：
+ADR-111 已 supersede 旧 migration clause，因此：
 
-- Preferences、Notification、Reminder、AI、Knowledge 等继续 owner-specific；
-- legacy settings import 可以拆分旧字段给对应 owner migrator；
-- retired/device/consent-like fields 有明确 warning 分类。
+- v1/v2 Settings backup 明确 unsupported；
+- 不存在 v1/v2 migrator、legacy category seeding、merge/overwrite compatibility option；
+- device notification preference、NotificationPreference、AI、Knowledge、UserFiles path 不进入 `preferences@3`；
+- import identity 始终来自 host ExecutionContext，portable payload 不接受 `identityId`。
 
-#### Tests
+Setting 现在提供 typed `PreferencePortableCapability` (`preferences@3`)；API/Electron host-facing Setting module handle 显式暴露该 capability，供 system-wide Data Portability V3 registry 在后续 PORT cutover 中注册。Data Portability 仍负责跨 owner orchestration，不读取 Setting repository/domain internals。
 
-- v1 fixture；
-- v2 fixture；
-- v3 round-trip；
-- injected/stolen identity rejected/ignored in favor of context；
-- legacy notification owner precedence；
-- legacy consent no auto-grant；
-- retired field receipt；
-- PowerSync/full export round-trip。
+#### Evidence
+
+- contracts V3/response focused: 3 files / 17 tests PASS；
+- Setting owner/use-case/transport/lifecycle focused: 7 files / 52 tests PASS；
+- App Vue Setting focused: 3 files / 12 tests PASS (export/import composable + canonical hydration/UI)；
+- contracts direct strict typecheck PASS；
+- Setting direct typecheck has no 9208-path errors（isolated worktree only lacks unrelated workspace package resolution for `@memoflow/ipc-client`）；
+- `git diff --check` PASS。
 
 #### Acceptance
 
-无 production `as Partial<UserSettingPreferences>` 作为 migration。
+- production Settings import/export 中无 `as Partial<UserSettingPreferences>` migration；
+- production Settings import/export 中无 `merge/overwrite` legacy semantics；
+- V3 portable preference data only contains presentation/regional owner facts；
+- old V1/V2 backups fail closed under ADR-111。
 
 #### Dependencies
 
@@ -841,7 +846,7 @@ SETTING-9204  DONE — 2026-09-10
 SETTING-9205  DONE — 2026-09-10
 SETTING-9206  DONE — 2026-09-10
 SETTING-9207  PLANNED
-SETTING-9208  PLANNED
+SETTING-9208  DONE — 2026-09-10
 SETTING-9209  PLANNED
 SETTING-9210  PLANNED
 ```

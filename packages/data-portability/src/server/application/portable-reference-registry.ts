@@ -1,5 +1,6 @@
 import type {
   PortableCapabilityKey,
+  PortableReferencePort,
   PortableReferenceV3,
 } from '@memoflow/contracts/data-portability';
 import {
@@ -11,7 +12,7 @@ import {
  * Operation-local mapping between private persistence identifiers and portable refs.
  * Private source/target identifiers never become serialized backup values.
  */
-export class PortableReferenceRegistry {
+export class PortableReferenceRegistry implements PortableReferencePort {
   private readonly counters = new Map<PortableCapabilityKey, number>();
   private readonly exportRefs = new Map<string, PortableReferenceV3>();
   private readonly importTargets = new Map<PortableReferenceV3, string>();

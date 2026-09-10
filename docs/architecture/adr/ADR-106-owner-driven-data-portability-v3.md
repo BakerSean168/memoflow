@@ -7,7 +7,7 @@ updated: 2026-09-09T00:31:00+08:00
 
 # ADR-106: Owner-driven Data Portability V3
 
-**状态：** 已采纳，待实施
+**状态：** 已采纳，部分实施（V3 framework + preferences@3 owner 已落地；full cutover pending）
 **日期：** 2026-09-09
 
 ## Problem
@@ -34,7 +34,7 @@ PortableBackupEnvelopeV3
 PortableCapabilityRegistry
 ├── export
 ├── validate/dry-run
-├── migrate legacy payload
+├── validate exact owner schema version
 ├── import/apply
 └── reference mapping
 ```
@@ -43,7 +43,7 @@ Capability implementations由 owner module 提供并在 host composition root �
 
 ### 2. Typed capability contracts
 
-Payload 不允许 unrestricted `unknown` 直通。每个 capability 有 canonical Zod/schema + versioned migrator。例如：
+Payload 不允许 unrestricted `unknown` 直通。每个 capability 有 canonical Zod/schema + explicit schema version。例如：
 
 ```text
 goal@3
@@ -67,7 +67,7 @@ capability key + portable ref
 导入分阶段：
 
 1. decode/validate；
-2. capability legacy migration；
+2. exact capability schema-version validation；
 3. dry-run and conflict plan；
 4. create identity-bearing roots；
 5. resolve cross references；
@@ -95,14 +95,15 @@ V3 不新增以下 capability：
 - old Repository/Folder/Resource projections；
 - Better Auth credentials/sessions/providers。
 
-### 6. Legacy V2 policy
+### 6. Legacy V2 policy — superseded by ADR-111
 
-因为当前项目没有需要永久保留旧 runtime facts 的产品要求，V2 reader 可以提供一次明确 migration window：
+ADR-111 已明确采用 zero-legacy-data destructive cutover：
 
-- 尽可能映射仍有意义的 user business facts；
-- editor/dashboard/runtime-only section 明确 ignored-with-warning；
-- 无法安全解释的旧字段 fail closed；
-- 不为了兼容 V2 永久保留已退休数据库表。
+- 不提供 V2 writer；
+- 不提供 V2 reader/migrator 或 compatibility window；
+- 旧 backup 明确 unsupported；
+- V3 只包含最终 surviving owner facts；
+- 当前生产 V2 路径仅是 full V3 owner coverage 完成前的实施中间态，不是兼容策略，必须由 PORT-1603 删除。
 
 ## Protected security invariants
 

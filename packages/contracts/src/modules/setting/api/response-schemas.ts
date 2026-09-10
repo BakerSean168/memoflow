@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { brandedId } from '../../../primitives';
 import type { IdentityId, SettingId } from '../../../primitives';
 import { UserPreferencesSchema } from '../preferences/schemas';
+import { PreferencePortableImportReceiptV3Schema } from '../preferences/portable-v3';
 
 /**
  * UserSetting Response Schema
@@ -25,21 +26,14 @@ export const UserSettingResponseSchema = z.object({
 });
 
 /**
- * Export Settings Response Schema
- *
- * Residual 771: sole export settings response shape (ExportSettingsRes is z.infer alias).
+ * V3 preference-only export transport artifact. The JSON document itself is in `data`.
  */
-export const ExportSettingsResponseSchema = z.object({
-  data: z.string(),
-  fileName: z.string(),
-});
+export const ExportSettingsResponseSchema = z
+  .object({
+    data: z.string(),
+    fileName: z.string(),
+  })
+  .strict();
 
-/**
- * Import Settings Response Schema
- *
- * Residual 771: sole import settings response shape (ImportSettingsRes is z.infer alias).
- */
-export const ImportSettingsResponseSchema = z.object({
-  imported: z.number(),
-  skipped: z.number(),
-});
+/** V3 preference-only import receipt — single-source alias of the canonical receipt schema. */
+export const ImportSettingsResponseSchema = PreferencePortableImportReceiptV3Schema;

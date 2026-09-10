@@ -1,26 +1,31 @@
-/**
- * Export Settings
- *
- * 导出用户设置为可传输的 JSON 对象
- */
+/** Canonical V3 preference-only export. */
+import {
+  ExportSettingsResponseSchema,
+  PreferencePortableDocumentV3Schema,
+  type ExportSettingsRes,
+} from '@memoflow/contracts/setting';
+import type { PreferencePortableService } from '../../../preferences/preference-portability';
 
-import type { IUserSettingRepository } from '../../../domain/repositories/i-user-setting-repository';
+function exportFileName(exportedAt: string): string {
+  return `memoflow-settings-${exportedAt.replace(/[:.]/g, '-')}.json`;
+}
 
 export class ExportSettings {
-  constructor(private readonly userSettingRepository: IUserSettingRepository) {}
+  constructor(
+    private readonly portableService: PreferencePortableService,
+    private readonly nowIsoString: () => string = () => new Date().toISOString(),
+  ) {}
 
-  async execute(identityId: string): Promise<Record<string, unknown>> {
-    const setting = await this.userSettingRepository.findByIdentityId(identityId);
+  async execute(identityId: string): Promise<ExportSettingsRes> {
+    const document = PreferencePortableDocumentV3Schema.parse({
+      schemaVersion: 3,
+      exportedAt: this.nowIsoString(),
+      preferences: await this.portableService.export(identityId),
+    });
 
-    if (!setting) {
-      throw new Error('User setting not found');
-    }
-
-    return {
-      version: '2.0.0',
-      exportedAt: new Date().toISOString(),
-      identityId,
-      settings: setting.toPreferences(),
-    };
+    return ExportSettingsResponseSchema.parse({
+      data: JSON.stringify(document, null, 2),
+      fileName: exportFileName(document.exportedAt),
+    });
   }
 }

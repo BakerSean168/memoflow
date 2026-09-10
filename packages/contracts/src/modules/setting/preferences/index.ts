@@ -60,3 +60,5 @@ export type {
   RegionalPreferences,
   UserPreferenceProfile,
 } from './canonical';
+
+export * from './portable-v3';

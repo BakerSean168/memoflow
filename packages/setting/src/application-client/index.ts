@@ -14,6 +14,8 @@ import type {
   PreferenceNamespaceResponse,
   ResetUserPreferencesResponse,
   UserPreferenceProfile,
+  ExportSettingsRes,
+  ImportSettingsRes,
   UserSettingClientDTO,
   PreferenceCategory,
 } from '@memoflow/contracts/setting';
@@ -26,7 +28,7 @@ export type { ISettingApiClient } from './ports/setting-api-client.port';
 
 /**
  * Application-facing client port.
- * Identical to ISettingApiClient (importSettings options included).
+ * Identical to ISettingApiClient; V3 import has no legacy merge/overwrite option.
  */
 export type SettingClientPort = ISettingApiClient;
 
@@ -102,15 +104,12 @@ export class SettingClientService implements ISettingApiClient {
     return this.apiClient.resetUserSettings(category);
   }
 
-  exportSettings(): Promise<Result<string>> {
+  exportSettings(): Promise<Result<ExportSettingsRes>> {
     return this.apiClient.exportSettings();
   }
 
-  importSettings(
-    data: string,
-    options?: { merge?: boolean },
-  ): Promise<Result<UserSettingClientDTO>> {
-    return this.apiClient.importSettings(data, options);
+  importSettings(data: string): Promise<Result<ImportSettingsRes>> {
+    return this.apiClient.importSettings(data);
   }
 }
 

@@ -58,16 +58,18 @@ function createFakeInstance() {
     importSettings: vi.fn(() => ok(null as never)),
     exportSettings: vi.fn(() => ok({})),
   };
+  const portableCapability = { key: 'preferences', schemaVersion: 3 } as never;
   const start = vi.fn();
   const dispose = vi.fn();
   const instance: SettingModuleInstance = {
     userSettingRepository: {} as never,
+    portableCapability,
     useCases: {} as never,
     api,
     start,
     dispose,
   } as SettingModuleInstance;
-  return { instance, api, start, dispose };
+  return { instance, api, portableCapability, start, dispose };
 }
 
 function createFakeContext(): IElectronModuleContext {
@@ -106,6 +108,10 @@ describe('createSettingElectronModule lifecycle', () => {
     mocks.handlers.clear();
   });
 
+  it('exposes the owner portability capability on the host-facing handle', () => {
+    expect(moduleDef.portableCapability).toBe(fake.portableCapability);
+  });
+
   it('registers all setting channels and starts the instance once', () => {
     moduleDef.register(context);
 
@@ -137,6 +143,61 @@ describe('createSettingElectronModule lifecycle', () => {
     const result = await registered(SettingChannels.GET_ALL)(undefined, undefined);
     expect(result).toMatchObject({ ok: true });
     expect(fake.api.getUserSetting).toHaveBeenCalledTimes(1);
+  });
+
+  it('imports only JSON-text V3 payloads with the host-owned identity', async () => {
+    const document = {
+      schemaVersion: 3,
+      exportedAt: '2026-09-10T05:00:00.000Z',
+      preferences: {
+        presentation: { theme: 'dark', language: 'en-US' },
+        regional: {
+          timeZone: 'Asia/Tokyo',
+          dateStyle: 'long',
+          timeStyle: '12h',
+          weekStartsOn: 0,
+        },
+      },
+    };
+    const receipt = { schemaVersion: 3, imported: 2, skipped: 0, warnings: [] };
+    fake.api.importSettings.mockResolvedValue(receipt as never);
+    moduleDef.register(context);
+
+    const result = await registered(SettingChannels.IMPORT)(undefined, {
+      data: JSON.stringify(document),
+    });
+
+    expect(fake.api.importSettings).toHaveBeenCalledWith('identity-1', document);
+    expect(result).toEqual({ ok: true, data: receipt });
+  });
+
+  it('rejects non-text or malformed preference import payloads before owner mutation', async () => {
+    moduleDef.register(context);
+    const handler = registered(SettingChannels.IMPORT);
+
+    await expect(handler(undefined, { data: { schemaVersion: 3 } })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'VALIDATION_ERROR' },
+    });
+    await expect(handler(undefined, { data: '{not-json' })).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'VALIDATION_ERROR' },
+    });
+    expect(fake.api.importSettings).not.toHaveBeenCalled();
+  });
+
+  it('returns the V3 export artifact without a second JSON encoding layer', async () => {
+    const artifact = {
+      data: '{"schemaVersion":3}',
+      fileName: 'memoflow-settings.json',
+    };
+    fake.api.exportSettings.mockResolvedValue(artifact as never);
+    moduleDef.register(context);
+
+    const result = await registered(SettingChannels.EXPORT)(undefined, undefined);
+
+    expect(fake.api.exportSettings).toHaveBeenCalledWith('identity-1');
+    expect(result).toEqual({ ok: true, data: artifact });
   });
 
   it('destroy removes all channels and disposes exactly once (second call no-ops)', () => {

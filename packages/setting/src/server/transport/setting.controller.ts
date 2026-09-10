@@ -175,11 +175,7 @@ export class SettingController {
       });
     }
 
-    return ok(
-      await this.api.importSettings(ctx.identityId, importData, {
-        merge: !parsed.data.overwrite,
-      }),
-    );
+    return ok(await this.api.importSettings(ctx.identityId, importData));
   }
 
   getDefaultSettings(): Result<unknown> {

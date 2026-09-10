@@ -9,6 +9,8 @@ import type {
   PreferenceNamespaceResponse,
   ResetUserPreferencesResponse,
   UserPreferenceProfile,
+  ExportSettingsRes,
+  ImportSettingsRes,
   UserSettingClientDTO,
   PreferenceCategory,
 } from '@memoflow/contracts/setting';
@@ -72,15 +74,12 @@ export class SettingIpcAdapter implements ISettingApiClient {
     return this.ipcClient.invoke(SettingChannels.RESET, { category });
   }
 
-  async exportSettings(): Promise<Result<string>> {
+  async exportSettings(): Promise<Result<ExportSettingsRes>> {
     return this.ipcClient.invoke(SettingChannels.EXPORT);
   }
 
-  async importSettings(
-    data: string,
-    options?: { merge?: boolean },
-  ): Promise<Result<UserSettingClientDTO>> {
-    return this.ipcClient.invoke(SettingChannels.IMPORT, { data, options });
+  async importSettings(data: string): Promise<Result<ImportSettingsRes>> {
+    return this.ipcClient.invoke(SettingChannels.IMPORT, { data });
   }
 }
 

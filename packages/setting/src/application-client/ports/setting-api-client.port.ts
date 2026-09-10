@@ -7,6 +7,8 @@ import type {
   PreferenceNamespaceResponse,
   ResetUserPreferencesResponse,
   UserPreferenceProfile,
+  ExportSettingsRes,
+  ImportSettingsRes,
   UserSettingClientDTO,
   PreferenceCategory,
 } from '@memoflow/contracts/setting';
@@ -38,9 +40,6 @@ export interface ISettingApiClient {
     patch: Record<string, unknown>,
   ): Promise<Result<UserSettingClientDTO>>;
   resetUserSettings(category?: string): Promise<Result<UserSettingClientDTO>>;
-  exportSettings(): Promise<Result<string>>;
-  importSettings(
-    data: string,
-    options?: { merge?: boolean },
-  ): Promise<Result<UserSettingClientDTO>>;
+  exportSettings(): Promise<Result<ExportSettingsRes>>;
+  importSettings(data: string): Promise<Result<ImportSettingsRes>>;
 }

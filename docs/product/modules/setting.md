@@ -146,18 +146,18 @@ legacy `UserSetting` 不再保存 Account 或 Notification category。
 
 ## 7. 当前导入/导出
 
-Standalone Settings export 当前包含：
+Standalone Settings export 已切到 V3-only preference document：
 
 ```text
-version = 2.0.0
+schemaVersion = 3
 exportedAt
-identityId
-settings/preferences
+preferences.presentation
+preferences.regional
 ```
 
-Import 只校验版本是否为 `1.0.0`/`2.0.0`，随后把 payload cast 成 `Partial<UserSettingPreferences>`；当前没有 version-specific strict decoder + deterministic migrator。
+明确不包含 `identityId`、persistence id/revision、device-local preference、NotificationPreference、AI/Knowledge 或 UserFiles path。Import 使用 strict V3 decoder + Setting-owned `PreferencePortableService`，通过当前 namespace revision/CAS 写入并返回 receipt；旧 v1/v2 Settings backup、`merge/overwrite` 选项均按 ADR-111 明确 unsupported。
 
-Full Data Portability 已经把 settings、NotificationPreference、ReminderPreference 等作为不同 owner section 处理，这个边界是 vNext 应继续采用的基础。
+Setting 同时提供 `preferences@3` 的 typed `PreferencePortableCapability`，供 system-wide Data Portability V3 registry 使用；full Data Portability 仍由跨 owner orchestrator 负责，当前完整 V3 cutover 要等其他 surviving owners 的 capability 到齐后再删除 V2 路径。
 
 ## 8. 当前 presentation bootstrap
 

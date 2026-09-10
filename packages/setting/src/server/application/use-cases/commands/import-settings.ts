@@ -1,119 +1,44 @@
-/**
- * Import Settings
- *
- * 导入用户设置 — 支持合并或覆盖模式
- */
-
-import type { IUserSettingRepository } from '../../../domain/repositories/i-user-setting-repository';
-import { UserSetting } from '../../../domain/aggregates/user-setting';
+/** Canonical V3 preference-only import. Legacy v1/v2 files are unsupported under ADR-111. */
 import {
-  CATEGORY_SCHEMAS,
-  type UserSettingClientDTO,
-  type UserSettingPreferences,
+  PreferencePortableDocumentV3Schema,
+  PreferencePortableImportReceiptV3Schema,
+  type PreferencePortableImportReceiptV3,
 } from '@memoflow/contracts/setting';
-
-const RETIRED_CATEGORIES = new Set([
-  'workflow',
-  'privacy',
-  'shortcuts',
-  'experimental',
-  'ui',
-  'ai',
-]);
-
-const LIVE_CATEGORIES = new Set(['appearance', 'locale']);
+import type { PreferencePortableService } from '../../../preferences/preference-portability';
 
 export class ImportSettings {
-  constructor(private readonly userSettingRepository: IUserSettingRepository) {}
+  constructor(private readonly portableService: PreferencePortableService) {}
 
   async execute(
     identityId: string,
-    data: Record<string, unknown>,
-    options?: { merge?: boolean },
-  ): Promise<UserSettingClientDTO> {
-    const { merge = false } = options ?? {};
-    const importedPreferences = this.validateImportData(data);
-
-    let setting = await this.userSettingRepository.findByIdentityId(identityId);
-
-    if (!setting) {
-      setting = UserSetting.create({ identityId });
-    }
-
-    if (merge) {
-      // 合并模式：只覆盖提供的分类/字段
-      setting.importPreferences(importedPreferences);
-    } else {
-      // 覆盖模式：先重置，再导入
-      setting.resetAll();
-      setting.importPreferences(importedPreferences);
-    }
-
-    await this.userSettingRepository.save(setting);
-    return setting.toClientDTO();
-  }
-
-  private validateImportData(data: Record<string, unknown>): Partial<UserSettingPreferences> {
-    if (!data.settings || typeof data.settings !== 'object' || Array.isArray(data.settings)) {
-      throw new Error('Invalid import data: missing settings field');
-    }
-
-    if (!data.version) {
-      throw new Error('Invalid import data: missing version field');
-    }
-
-    const supportedVersions = ['1.0.0', '2.0.0'];
-    if (!supportedVersions.includes(data.version as string)) {
-      throw new Error(`Unsupported settings version: ${data.version}`);
-    }
-
-    const settings = data.settings as Record<string, unknown>;
-    for (const category of Object.keys(settings)) {
-      if (RETIRED_CATEGORIES.has(category)) {
-        const privacy = settings.privacy;
-        if (
-          category === 'privacy' &&
-          privacy &&
-          typeof privacy === 'object' &&
-          !Array.isArray(privacy) &&
-          (privacy as Record<string, unknown>).shareUsageData === true
-        ) {
-          throw new Error(
-            'Rejected retired setting privacy.shareUsageData=true: explicit re-consent is required; import was not saved',
-          );
-        }
-        throw new Error(`Rejected retired UserSetting category: ${category}`);
+    data: unknown,
+  ): Promise<PreferencePortableImportReceiptV3> {
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      const raw = data as Record<string, unknown>;
+      if (raw.schemaVersion !== undefined && raw.schemaVersion !== 3) {
+        throw new Error(
+          `Unsupported preference import schemaVersion: ${String(raw.schemaVersion)}; only V3 is supported`,
+        );
       }
-      if (!LIVE_CATEGORIES.has(category)) {
-        throw new Error(`Rejected unknown UserSetting category: ${category}`);
+      if ('version' in raw || 'settings' in raw) {
+        throw new Error('Legacy preference import V1/V2 is unsupported under ADR-111');
       }
     }
 
-    const locale = settings.locale;
-    if (
-      locale &&
-      typeof locale === 'object' &&
-      !Array.isArray(locale) &&
-      Object.prototype.hasOwnProperty.call(locale, 'currency')
-    ) {
+    const parsed = PreferencePortableDocumentV3Schema.safeParse(data);
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
       throw new Error(
-        'Rejected retired setting locale.currency: currency is not imported or applied; import was not saved',
+        `Invalid preference V3 import: ${issue.path.join('.')} — ${issue.message}`,
       );
     }
 
-    const parsed: Record<string, unknown> = {};
-    for (const [category, value] of Object.entries(settings)) {
-      const schema = CATEGORY_SCHEMAS[category as keyof typeof CATEGORY_SCHEMAS];
-      const result = schema.partial().strict().safeParse(value);
-      if (!result.success) {
-        const details = result.error.issues
-          .map((issue) => `${[category, ...issue.path].join('.')}: ${issue.message}`)
-          .join('; ');
-        throw new Error(`Rejected invalid UserSetting import: ${details}`);
-      }
-      parsed[category] = result.data;
-    }
-
-    return parsed as Partial<UserSettingPreferences>;
+    const receipt = await this.portableService.apply(identityId, parsed.data.preferences);
+    return PreferencePortableImportReceiptV3Schema.parse({
+      schemaVersion: 3,
+      imported: receipt.created + receipt.updated,
+      skipped: receipt.skipped,
+      warnings: [...receipt.warnings],
+    });
   }
 }

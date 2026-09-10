@@ -55,7 +55,6 @@ export interface SettingApplicationPort {
   importSettings(
     identityId: string,
     data: Parameters<ImportSettings['execute']>[1],
-    options?: Parameters<ImportSettings['execute']>[2],
   ): Promise<Awaited<ReturnType<ImportSettings['execute']>>>;
   getDefaultSettings(): ReturnType<GetDefaultSettings['execute']>;
 }

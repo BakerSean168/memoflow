@@ -90,6 +90,8 @@ export type SettingApiModuleContext = ServerTransportModuleContext;
  */
 export interface SettingApiModuleDef extends ServerModuleHandle<SettingApiModuleContext> {
   readonly userTimeContextPort: UserTimeContextPort;
+  /** Owner-provided preferences@3 portability capability for host registry composition. */
+  readonly portableCapability: SettingModuleInstance['portableCapability'];
 }
 
 /**
@@ -123,6 +125,7 @@ export function createSettingApiModule(options: SettingApiModuleOptions): Settin
   return {
     name: 'Setting',
     userTimeContextPort: options.instance.userTimeContextPort,
+    portableCapability: options.instance.portableCapability,
 
     register(context) {
       if (state !== 'created') {

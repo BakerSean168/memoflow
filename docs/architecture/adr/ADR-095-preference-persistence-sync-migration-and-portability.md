@@ -15,7 +15,7 @@ updated: 2026-09-09T12:00:00+08:00
 
 # ADR-095: Preference Persistence、Sync、Migration 与 Portability
 
-**状态：** 已采纳（SETTING-9202 foundation 已实施；consumer cutover 待 SETTING-9203）
+**状态：** 已采纳，主要路径已实施（SETTING-9202~9208；legacy persistence deletion 待 SETTING-9209）
 **日期：** 2026-09-08
 **影响范围：** Setting/Preferences、Database、PowerSync、HTTP/IPC、Data Portability、Account、Notification、Desktop
 
@@ -360,167 +360,63 @@ local absolute path
 
 `identityId` 来自 import ExecutionContext，不从用户文件信任。
 
-## 12. Import pipeline
+## 12. Import pipeline — ADR-111 destructive-cutover truth
 
-当前实现只是：
-
-```text
-version in [1.0.0, 2.0.0]
--> cast data.settings as Partial<UserSettingPreferences>
-```
-
-目标：
+旧设计中的 v1/v2 migrator、existing-row backfill 与 compatibility reader 已被 ADR-111 supersede。本轮当前实现为：
 
 ```text
 raw JSON
   ↓
-version discriminator
+strict PreferencePortableDocumentV3 decoder
   ↓
-version-specific strict decoder
+preferences@3 owner schema
   ↓
-deterministic migrator
+PreferencePortableService dry-run/apply semantics
   ↓
-Canonical PreferenceImportV3
+presentation/regional namespace CAS
   ↓
-validate owner boundaries
-  ↓
-apply canonical namespace mutations
-  ↓
-ImportReceipt + warnings
+ImportReceipt
 ```
 
-不允许 `as Partial<...>` 代替 migration。
+明确规则：
 
-## 13. Legacy v1/v2 migration policy
+- 只接受 `schemaVersion: 3`；
+- legacy `{ version: 1.x/2.x, settings: ... }` 明确拒绝；
+- 不接受 `merge` / `overwrite` compatibility switch；
+- `identityId` 不属于 portable payload，始终来自 host execution context；
+- device-local、Notification、AI、Knowledge、Account、UserFiles path 不得混入 preference payload；
+- owner payload strict schema 在 mutation 前完成校验。
 
-### 13.1 User preference values
+## 13. Data Portability owner capability
 
-迁移到 canonical：
+Setting owner 提供：
 
 ```text
-appearance.theme -> presentation.theme
-locale.language -> presentation.language
-locale.timezone -> regional.timeZone
-locale.dateFormat -> regional.dateStyle when known
-locale.timeFormat -> regional.timeStyle
-locale.weekStartsOn -> regional.weekStartsOn
+PreferencePortableCapability
+key = preferences
+schemaVersion = 3
+payload = UserPreferenceProfile
 ```
 
-### 13.2 Retired fields
+该 capability 通过 API/Electron Setting host handle 暴露给 Data Portability composition root。Data Portability 只负责编排、版本检查、引用映射与 receipt 聚合，不读取 Setting repository 内部模型。
 
-以下不进入 UserPreferenceProfile：
+完整 Data Portability V3 cutover 仍需其他 surviving owner capabilities；在此之前不得为了提前删除 V2 而减少当前 full-backup 的业务覆盖。最终 V2 删除点由 PORT-1603 管理。
 
-```text
-locale.currency
-workflow.*
-privacy social fields
-notification.*
-shortcuts.*
-experimental.*
-ui.*
-ai.*
-```
+## 14. Existing data policy
 
-Importer 必须分类：
-
-```text
-migrated-to-owner
-retired-ignored-with-warning
-requires-explicit-device-import
-requires-new-consent
-```
-
-不得静默丢弃又报告“全部成功”。
-
-### 13.3 Notification legacy values
-
-Notification 由 ADR-088 owner。
-
-迁移优先级：
-
-```text
-existing NotificationPreference explicit value
-  > legacy UserSetting notification channel flag
-  > legacy Account.notificationEnabled fallback
-  > Notification canonical default
-```
-
-仅在 NotificationPreference 相应值缺失时才 seed legacy value；不得覆盖已经存在的 owner truth。
-
-`notification.sound/useCustomNotification` 不迁入 NotificationPreference，按 ADR-094 作为 device-only migration candidate。
-
-### 13.4 Currency
-
-`locale.currency` 不用于修改已有 WalletAccount.currency。
-
-Importer 只记录 legacy retired warning。未来如 Wallet 引入 `defaultCurrency`，必须由 Wallet 自己的 migration 决定。
-
-### 13.5 Experimental
-
-legacy `experimental.features[]` 不转换为 FeatureAssignment/entitlement。
-
-Importer 记录 retired warning，不开启任何 feature。
-
-### 13.6 Consent
-
-legacy `privacy.shareUsageData=true` 不自动生成新的 `UsageAnalyticsConsent=Granted`。
-
-Importer 最多记录：
-
-```text
-legacy consent-like flag observed; explicit re-consent required
-```
-
-## 14. Existing cloud-data migration
-
-数据库 migration 使用与 import 相同的 canonical mapping functions，避免：
-
-```text
-DB migration 一套规则
-JSON import 另一套规则
-```
-
-建议顺序：
-
-```text
-1. create user_preference_records
-2. backfill presentation/regional from UserSetting + Account fallback
-3. deploy readers that read new canonical profile
-4. switch writers to new rows
-5. migrate Notification/device ownership
-6. remove legacy readers
-7. delete user_settings
-8. remove accounts.settings
-9. add anti-resurrection schema/surface tests
-```
-
-不长期 dual-write。
+本轮无生产旧数据保留要求。`user_settings` / Account shadow 等 legacy persistence 不做 backfill；SETTING-9209 直接完成 current consumer cutover 后 destructive delete/reset/reseed。
 
 ## 15. Read cutover
 
-迁移期允许**一次性 backfill + bounded compatibility reader**，但必须有明确删除点。
-
-禁止稳定态：
+最终稳定态禁止：
 
 ```text
 read new
 if missing read UserSetting
 if missing read Account.settings
-forever
 ```
 
-最终任何 runtime grep 应无法找到 production path 读取：
-
-```text
-Account.settings.theme
-Account.settings.language
-Account.settings.timezone
-Account.settings.notificationEnabled
-UserSetting.preferences.workflow
-UserSetting.preferences.privacy
-UserSetting.preferences.experimental
-UserSetting.preferences.ai
-```
+canonical presentation/regional consumer 已切到 namespace records；剩余 legacy `user_settings` appearance/locale remainder 仅作为待 SETTING-9209 删除的当前实现债务，不是 compatibility fallback。
 
 ## 16. Event model
 
@@ -578,31 +474,31 @@ Import 也调用 owner importer，不让 Setting importer 代写别的模块表�
 
 ## 18. Rollback / containment
 
-在 migration 删除旧表之前：
+ADR-111 下 rollback 是 source/deployment rollback + development/test database reset/reseed，不通过 production compatibility reader、backfill 或 dual-write 保留旧模型。
 
-- backfill 可重跑且 deterministic；
-- 新表可从旧 canonical source 重建；
-- writer cutover 以 feature/deployment step 控制；
-- 不允许双写成为长期 rollback 机制。
+Preference-only V3 import 的失败 containment 为：
 
-一旦旧字段删除，rollback 依赖数据库备份/版本回滚 migration，而不是在生产代码里永久留 shadow model。
+- strict document/schema validation before mutation；
+- namespace CAS + bounded retry；
+- imported identity 始终由 host context 提供；
+- 任何 legacy V1/V2 document fail closed。
 
 ## 19. Verification matrix
 
 必须至少有：
 
-| Invariant                                  | Evidence                             |
-| ------------------------------------------ | ------------------------------------ |
-| theme 不覆盖 timezone                      | concurrent namespace fixture         |
-| stale revision 不静默覆盖                  | Prisma CAS integration               |
-| Prisma/PowerSync payload 等价              | round-trip fixture                   |
-| unknown namespace/key 被拒绝               | contract tests                       |
-| v1/v2 import deterministic                 | migration fixtures                   |
-| import 不信任 identityId                   | security/portability test            |
-| legacy consent 不升级 Grant                | migration regression                 |
-| Notification existing owner truth 不被覆盖 | cross-module migration fixture       |
-| Account.settings 完全退出                  | source/schema surface lock           |
-| old `user_settings` 完全退出               | Prisma/PowerSync/schema surface lock |
+| Invariant                                  | Evidence                                      |
+| ------------------------------------------ | --------------------------------------------- |
+| theme 不覆盖 timezone                      | concurrent namespace fixture                  |
+| stale revision 不静默覆盖                  | Prisma CAS integration                        |
+| Prisma/PowerSync payload 等价              | round-trip fixture                            |
+| unknown namespace/key 被拒绝               | contract tests                                |
+| V3 preference import/export strict         | V3 contract + use-case fixtures               |
+| V1/V2 preference backup 被拒绝             | destructive-cutover regression                |
+| import 不信任 identityId                   | security/portability test                     |
+| device/Notification/AI/Knowledge 不混入    | strict owner payload schema tests             |
+| Account.settings 完全退出                  | source/schema surface lock                    |
+| old `user_settings` 完全退出               | SETTING-9209 Prisma/PowerSync surface lock    |
 
 ## 20. Final state
 
@@ -613,7 +509,7 @@ User Preferences
 = small typed profile
 = namespace-scoped persistence
 = real revision semantics
-= deterministic portable migration
+= V3-only strict portable owner capability
 
 Settings Hub
 = owner capability composition
@@ -621,4 +517,5 @@ Settings Hub
 No giant settings JSON
 No Account preference shadow
 No fake feature/privacy/device cloud truth
+No V1/V2 preference compatibility reader
 ```

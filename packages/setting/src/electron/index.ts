@@ -120,6 +120,8 @@ type ModuleHandleState = 'created' | 'registered' | 'disposed' | 'failed';
 export interface SettingElectronModuleDef {
   readonly name: string;
   readonly userTimeContextPort: UserTimeContextPort;
+  /** Owner-provided preferences@3 portability capability for host registry composition. */
+  readonly portableCapability: SettingModuleInstance['portableCapability'];
   register(context: IElectronModuleContext): void;
   destroy?(): void;
 }
@@ -161,6 +163,7 @@ export function createSettingElectronModule(
   return {
     name: 'Setting',
     userTimeContextPort: options.instance.userTimeContextPort,
+    portableCapability: options.instance.portableCapability,
 
     register(ctx: IElectronModuleContext): void {
       if (state !== 'created') {
@@ -291,23 +294,25 @@ export function createSettingElectronModule(
 
         ipcMain.handle(SettingChannels.IMPORT, (_event, dto) => {
           const payload = (dto && typeof dto === 'object' ? dto : {}) as Record<string, unknown>;
-          const raw = payload.data;
-          const data: Record<string, unknown> =
-            typeof raw === 'string'
-              ? (JSON.parse(raw) as Record<string, unknown>)
-              : ((raw as Record<string, unknown>) ?? {});
-          const optionsPayload = payload.options as { merge?: boolean } | undefined;
-          return withAuthenticatedIdentity(ctx, (identityId) =>
-            mod.api.importSettings(identityId, data, optionsPayload),
-          );
+          if (typeof payload.data !== 'string') {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Preference import data must be JSON text' }),
+            );
+          }
+          let data: unknown;
+          try {
+            data = JSON.parse(payload.data) as unknown;
+          } catch {
+            return Promise.resolve(
+              fail({ code: 'VALIDATION_ERROR', message: 'Preference import data is not valid JSON' }),
+            );
+          }
+          return withAuthenticatedIdentity(ctx, (identityId) => mod.api.importSettings(identityId, data));
         });
         installed.push(SettingChannels.IMPORT);
 
         ipcMain.handle(SettingChannels.EXPORT, () =>
-          withAuthenticatedIdentity(ctx, async (identityId) => {
-            const exported = await mod.api.exportSettings(identityId);
-            return JSON.stringify(exported);
-          }),
+          withAuthenticatedIdentity(ctx, (identityId) => mod.api.exportSettings(identityId)),
         );
         installed.push(SettingChannels.EXPORT);
 

@@ -2,6 +2,9 @@ import type { IUserSettingRepository } from '../domain/repositories/i-user-setti
 import {
   createUserPreferenceService,
   PreferenceUserTimeContextAdapter,
+  PreferencePortableService,
+  createPreferencePortableCapability,
+  type PreferencePortableCapability,
   type IUserPreferenceRepository,
   type UserPreferenceService,
 } from '../preferences';
@@ -52,6 +55,7 @@ export interface SettingModuleInstance {
   readonly userSettingRepository: IUserSettingRepository;
   readonly userPreferenceRepository: IUserPreferenceRepository;
   readonly preferenceService: UserPreferenceService;
+  readonly portableCapability: PreferencePortableCapability;
   readonly userTimeContextPort: UserTimeContextPort;
   readonly useCases: SettingModuleUseCases;
   readonly api: SettingApplicationPort;
@@ -61,6 +65,7 @@ export interface SettingModuleInstance {
 
 export function createSettingUseCases(
   dependencies: SettingModuleDependencies,
+  preferencePortableService: PreferencePortableService,
 ): SettingModuleUseCases {
   const { userSettingRepository } = dependencies;
 
@@ -70,8 +75,8 @@ export function createSettingUseCases(
     }),
     patchUserSetting: new PatchUserSetting(userSettingRepository),
     resetUserSetting: new ResetUserSetting(userSettingRepository),
-    exportSettings: new ExportSettings(userSettingRepository),
-    importSettings: new ImportSettings(userSettingRepository),
+    exportSettings: new ExportSettings(preferencePortableService),
+    importSettings: new ImportSettings(preferencePortableService),
     getDefaultSettings: new GetDefaultSettings(),
   };
 }
@@ -97,8 +102,10 @@ export function createSettingModule(
 ): SettingModuleInstance {
   const { userSettingRepository, userPreferenceRepository } = dependencies;
   const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
-  const useCases = createSettingUseCases(dependencies);
   const preferenceService = createUserPreferenceService(userPreferenceRepository);
+  const preferencePortableService = new PreferencePortableService(preferenceService);
+  const portableCapability = createPreferencePortableCapability(preferenceService);
+  const useCases = createSettingUseCases(dependencies, preferencePortableService);
   const userTimeContextPort = new PreferenceUserTimeContextAdapter(preferenceService);
   let started = false;
 
@@ -106,6 +113,7 @@ export function createSettingModule(
     userSettingRepository,
     userPreferenceRepository,
     preferenceService,
+    portableCapability,
     userTimeContextPort,
     useCases,
     api: {
@@ -124,8 +132,7 @@ export function createSettingModule(
       resetUserSetting: (identityId, category) =>
         useCases.resetUserSetting.execute(identityId, category),
       exportSettings: (identityId) => useCases.exportSettings.execute(identityId),
-      importSettings: (identityId, data, options) =>
-        useCases.importSettings.execute(identityId, data, options),
+      importSettings: (identityId, data) => useCases.importSettings.execute(identityId, data),
       getDefaultSettings: () => useCases.getDefaultSettings.execute(),
     },
     start(): void {

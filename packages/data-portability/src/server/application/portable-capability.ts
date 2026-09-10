@@ -1,44 +1,16 @@
-import type { PortableCapabilityKey } from '@memoflow/contracts/data-portability';
+import type {
+  PortableCapability,
+  PortableCapabilityExecutionContext,
+  PortableCapabilityKey,
+  PortableCapabilityReceipt,
+} from '@memoflow/contracts/data-portability';
 import { PortableCapabilityKeySchema } from '@memoflow/contracts/data-portability';
-import type { z } from 'zod';
-import type { PortableReferenceRegistry } from './portable-reference-registry';
 
-export interface PortableCapabilityExecutionContext {
-  readonly identityId: string;
-  readonly batchId?: string;
-  readonly references: PortableReferenceRegistry;
-}
-
-export interface PortableCapabilityReceipt {
-  readonly created: number;
-  readonly updated: number;
-  readonly skipped: number;
-  readonly warnings: readonly string[];
-}
-
-/**
- * Owner-module contract for one portable business capability.
- *
- * The owner exposes its canonical payload schema and receives only payloads
- * that have passed that schema. The orchestration package never interprets
- * the owner's product shape.
- */
-export interface PortableCapability<TPayload> {
-  readonly key: PortableCapabilityKey;
-  readonly schemaVersion: number;
-  readonly dependsOn?: readonly PortableCapabilityKey[];
-  readonly payloadSchema: z.ZodType<TPayload>;
-
-  export(context: PortableCapabilityExecutionContext): Promise<TPayload | null>;
-  dryRun(
-    payload: TPayload,
-    context: PortableCapabilityExecutionContext,
-  ): Promise<PortableCapabilityReceipt>;
-  apply(
-    payload: TPayload,
-    context: PortableCapabilityExecutionContext,
-  ): Promise<PortableCapabilityReceipt>;
-}
+export type {
+  PortableCapability,
+  PortableCapabilityExecutionContext,
+  PortableCapabilityReceipt,
+} from '@memoflow/contracts/data-portability';
 
 export interface RegisteredPortableCapability {
   readonly key: PortableCapabilityKey;

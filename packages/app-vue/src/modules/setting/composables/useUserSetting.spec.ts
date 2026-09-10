@@ -164,7 +164,7 @@ describe('useUserSetting', () => {
         appearance: { theme: 'auto' },
       } as UserSettingPreferences,
     });
-    const { composable, service } = mountComposable({
+    const { composable } = mountComposable({
       getUserSettingDefaults: vi.fn().mockResolvedValue(ok(defaults)),
     });
 
@@ -176,4 +176,56 @@ describe('useUserSetting', () => {
     expect(composable.getValue('appearance.theme')).toBe('auto');
     expect(composable.getCategory('appearance')).toEqual({ theme: 'auto' });
   });
+
+  it('returns the V3 export artifact from the setting client', async () => {
+    const artifact = {
+      data: JSON.stringify({
+        schemaVersion: 3,
+        exportedAt: '2026-09-10T05:00:00.000Z',
+        preferences: {
+          presentation: { theme: 'dark', language: 'en-US' },
+          regional: {
+            timeZone: 'Asia/Tokyo',
+            dateStyle: 'long',
+            timeStyle: '12h',
+            weekStartsOn: 0,
+          },
+        },
+      }),
+      fileName: 'memoflow-settings.json',
+    };
+    const { composable, service } = mountComposable({
+      exportSettings: vi.fn().mockResolvedValue(ok(artifact)),
+    });
+
+    await expect(composable.exportSettings()).resolves.toEqual(artifact);
+    expect(service.exportSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it('serializes V3 import data once and returns the canonical receipt without hydrating legacy state', async () => {
+    const payload = {
+      schemaVersion: 3,
+      exportedAt: '2026-09-10T05:00:00.000Z',
+      preferences: {
+        presentation: { theme: 'dark', language: 'en-US' },
+        regional: {
+          timeZone: 'Asia/Tokyo',
+          dateStyle: 'long',
+          timeStyle: '12h',
+          weekStartsOn: 0,
+        },
+      },
+    };
+    const receipt = { schemaVersion: 3, imported: 2, skipped: 0, warnings: [] };
+    const initial = createSetting();
+    const { composable, service } = mountComposable({
+      importSettings: vi.fn().mockResolvedValue(ok(receipt)),
+    });
+    useUserSettingStore().setUserSetting(initial);
+
+    await expect(composable.importSettings(payload)).resolves.toEqual(receipt);
+    expect(service.importSettings).toHaveBeenCalledWith(JSON.stringify(payload));
+    expect(useUserSettingStore().userSetting).toEqual(initial);
+  });
+
 });

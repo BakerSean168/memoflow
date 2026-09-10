@@ -16,10 +16,11 @@ import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { sanitizeForIpc } from '../../../shared/utils/ipc';
 import type {
   PreferenceCategory,
+  ExportSettingsRes,
+  ImportSettingsRes,
   UserSettingClientDTO,
   UserSettingPreferences,
 } from '@memoflow/contracts/setting';
-import { translateResultError } from '../../../shared/utils/translate-result-error';
 import { createComposableHandleError } from '../../../shared/utils/create-composable-handle-error';
 
 export function useUserSetting() {
@@ -108,7 +109,7 @@ export function useUserSetting() {
 
   async function exportSettings() {
     try {
-      return unwrapOrThrowError<string>(await service.exportSettings());
+      return unwrapOrThrowError<ExportSettingsRes>(await service.exportSettings());
     } catch (e: unknown) {
       handleError(e, 'setting.errors.exportFailed');
       return null;
@@ -118,13 +119,14 @@ export function useUserSetting() {
   async function importSettings(data: unknown) {
     store.setError(null);
     try {
-      const result = unwrapOrThrowError<UserSettingClientDTO>(
-        await service.importSettings(sanitizeForIpc(data) as string),
-      );
-      store.setUserSetting(result);
-      store.setInitialized(true);
+      const content = JSON.stringify(sanitizeForIpc(data));
+      if (typeof content !== 'string') {
+        throw new TypeError('Preference import payload is not serializable JSON');
+      }
+      return unwrapOrThrowError<ImportSettingsRes>(await service.importSettings(content));
     } catch (e: unknown) {
       handleError(e, 'setting.errors.importFailed');
+      return null;
     }
   }
 

@@ -70,13 +70,12 @@ import { describe, expect, it } from 'vitest';
       expect(dto).not.toMatch(/export type ImportSettingsRes = \{/);
     });
 
-    it('response-schemas owns sole export/import response object bodies', () => {
-      expect(responseSchemas).toContain('Residual 771');
+    it('response-schemas owns the sole export body and aliases the canonical V3 import receipt', () => {
       expect(responseSchemas).toContain(
-        'export const ExportSettingsResponseSchema = z.object({',
+        'export const ExportSettingsResponseSchema = z',
       );
       expect(responseSchemas).toContain(
-        'export const ImportSettingsResponseSchema = z.object({',
+        'export const ImportSettingsResponseSchema = PreferencePortableImportReceiptV3Schema;',
       );
     });
 
