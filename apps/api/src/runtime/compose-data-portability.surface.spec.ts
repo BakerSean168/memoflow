@@ -20,15 +20,24 @@ describe('data-portability API runtime composer surface', () => {
   const server = readFileSync(resolve(dir, 'server.ts'), 'utf8');
   const composer = readFileSync(resolve(dir, 'runtime/compose-data-portability.ts'), 'utf8');
 
-  it('server.ts composes data-portability via composeDataPortability({ db: prisma })', () => {
+  it('server.ts composes data-portability with the stable owner V3 capabilities', () => {
     expect(server).toContain("from './runtime/compose-data-portability'");
-    expect(server).toMatch(/composeDataPortability\(\{\s*db: prisma,?\s*\}/);
+    expect(server).toMatch(/composeDataPortability\(\{[\s\S]*?db: prisma,/);
+    expect(server).toContain('settingApiModule.portableCapability');
+    expect(server).toContain('notificationApiModule.module.portableCapability');
     expect(server).toContain('.register(dataPortabilityApiModule.module)');
   });
 
   it('server.ts no longer references DataPortabilityApiModule or the data-portability/api seam', () => {
     expect(server).not.toMatch(/\bDataPortabilityApiModule\b/);
     expect(server).not.toContain("from '@memoflow/data-portability/api'");
+  });
+
+  it('composer forwards owner capabilities without importing owner internals', () => {
+    expect(composer).toContain('portableCapabilities?: readonly PortableCapability<unknown>[]');
+    expect(composer).toContain('portableCapabilities: dependencies.portableCapabilities');
+    expect(composer).not.toContain('@memoflow/setting');
+    expect(composer).not.toContain('@memoflow/notification');
   });
 
   it('composer only touches the narrow seams (no deep server import)', () => {

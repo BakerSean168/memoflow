@@ -2,7 +2,7 @@
 tags: [product, module-index, data-portability]
 description: Data Portability 当前实现与 vNext 文档入口
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-09T00:31:00+08:00
+updated: 2026-09-10T21:18:00+08:00
 ---
 
 # Data Portability 文件索引
@@ -16,6 +16,11 @@ updated: 2026-09-09T00:31:00+08:00
 - `packages/data-portability/src/server/application/use-cases/importers/`
 - `packages/contracts/src/modules/data-portability/`
 - `packages/data-portability/src/server/infrastructure/`
+- `packages/data-portability/src/server/application/portable-capability.ts`
+- `packages/data-portability/src/server/application/portable-capability-coordinator.ts`
+- `packages/data-portability/src/server/application/portable-reference-registry.ts`
+- `apps/api/src/runtime/compose-data-portability.ts`
+- `apps/desktop/src/main/runtime/compose-data-portability.ts`
 
 ## Target docs
 

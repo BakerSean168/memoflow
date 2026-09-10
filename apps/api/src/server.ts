@@ -220,7 +220,13 @@ async function bootstrap(): Promise<void> {
     githubApp: getGithubAppConfig() ?? undefined,
     knowledgeRepositoryCloudDataPurger: new RepositoryKnowledgeCloudDataPurgerAdapter(prisma),
   });
-  const dataPortabilityApiModule = composeDataPortability({ db: prisma });
+  const dataPortabilityApiModule = composeDataPortability({
+    db: prisma,
+    portableCapabilities: [
+      settingApiModule.portableCapability,
+      notificationApiModule.module.portableCapability,
+    ],
+  });
 
   // CLEAN-6304: Calendar and Temporal Engine own separate repository sets.
   // Orchestration shares the ONE Scheduler task repository; Calendar receives

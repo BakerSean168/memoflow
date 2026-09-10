@@ -5105,6 +5105,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/notification/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/notification/protocol/asset-image-key-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7227,6 +7235,16 @@
     },
     {
       "path": "packages/notification/src/infrastructure-client/adapters/ipc/notification-ipc.adapter.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/notification/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/notification/src/server/application/notification-preference-portability.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/notification/vitest.config.ts"
@@ -11117,7 +11135,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 45
+      "fileCount": 46
     },
     {
       "id": "packages/reminder/vitest.config.ts",
@@ -11481,7 +11499,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 77
+      "fileCount": 78
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11551,7 +11569,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 45
+      "fileCount": 46
     },
     {
       "id": "packages/patterns/vitest.config.ts",
@@ -11979,6 +11997,7 @@
       "packages/notification/src/electron/index-lifecycle.spec.ts",
       "packages/notification/src/electron/notification-electron.surface.spec.ts",
       "packages/notification/src/infrastructure-client/adapters/ipc/notification-ipc.adapter.surface.spec.ts",
+      "packages/notification/src/server/application/notification-preference-portability.spec.ts",
       "packages/notification/src/server/application/services/notification-maintenance-application-service.test.ts",
       "packages/notification/src/server/application/services/notification-query-application-service.test.ts",
       "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
@@ -12237,7 +12256,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1054,
+    "unit": 1056,
     "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,

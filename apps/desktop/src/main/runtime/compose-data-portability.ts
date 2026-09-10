@@ -27,6 +27,7 @@
  * transport 注册与生命周期。
  */
 
+import type { PortableCapability } from '@memoflow/contracts/data-portability';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import {
   createDataPortabilityModule,
@@ -45,6 +46,8 @@ import {
 export interface ComposeDataPortabilityDesktopDependencies {
   /** PowerSync-backed desktop business database owned by the desktop main runtime. 桌面主进程持有的 PowerSync 桌面业务数据库。 */
   readonly db: IElectronDatabase;
+  /** Owner-provided V3 capability seams; product IPC remains V2 until full owner coverage. */
+  readonly portableCapabilities?: readonly PortableCapability<unknown>[];
 }
 
 /**
@@ -87,6 +90,7 @@ export function composeDataPortability(
   const instance = createDataPortabilityModule({
     exportDependencies,
     importStore,
+    portableCapabilities: dependencies.portableCapabilities,
   });
 
   return createDataPortabilityElectronModule({ instance });

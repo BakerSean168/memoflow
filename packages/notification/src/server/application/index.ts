@@ -9,3 +9,4 @@ export type { NotificationApplicationPort } from './notification.application.por
 export type { NotificationSseDeliveryEvent } from './notification.application.port';
 export * from './use-cases';
 export * from './services';
+export * from './notification-preference-portability';

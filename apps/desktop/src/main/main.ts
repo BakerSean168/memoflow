@@ -466,7 +466,13 @@ async function registerBusinessModules(
     },
   });
 
-  const dataPortabilityElectronModule = composeDataPortability({ db });
+  const dataPortabilityElectronModule = composeDataPortability({
+    db,
+    portableCapabilities: [
+      settingElectronModule.portableCapability,
+      notificationComposed.module.portableCapability,
+    ],
+  });
 
   const knowledgeRepositoryRemoteGateway = new KnowledgeRepositoryRemoteGateway({
     getAccessToken: getCloudAccessToken,

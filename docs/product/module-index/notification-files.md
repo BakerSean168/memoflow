@@ -5,7 +5,7 @@ tags:
   - notification
 description: 通知模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T22:00:00+08:00
+updated: 2026-09-10T21:18:00+08:00
 ---
 
 # 通知模块文件索引
@@ -84,6 +84,7 @@ updated: 2026-09-08T22:00:00+08:00
 | [`packages/notification/src/server/application/use-cases/queries/get-unread-notifications.use-case.ts`](../../../packages/notification/src/server/application/use-cases/queries/get-unread-notifications.use-case.ts)                   | 获取未读通知查询                                 |
 | [`packages/notification/src/server/application/use-cases/queries/get-user-notifications.use-case.ts`](../../../packages/notification/src/server/application/use-cases/queries/get-user-notifications.use-case.ts)                       | 获取用户通知查询                                 |
 | [`packages/notification/src/server/infrastructure/notification.module.ts`](../../../packages/notification/src/server/infrastructure/notification.module.ts)                                                                             | 服务端通知模块组合根                             |
+| [`packages/notification/src/server/application/notification-preference-portability.ts`](../../../packages/notification/src/server/application/notification-preference-portability.ts)                                                   | V3 stable delivery preference owner capability   |
 | [`packages/notification/src/server/infrastructure/adapters/prisma/notification-prisma.repository.ts`](../../../packages/notification/src/server/infrastructure/adapters/prisma/notification-prisma.repository.ts)                       | Prisma 通知仓储                                  |
 | [`packages/notification/src/server/infrastructure/adapters/prisma/notification-preference-prisma.repository.ts`](../../../packages/notification/src/server/infrastructure/adapters/prisma/notification-preference-prisma.repository.ts) | Prisma 偏好仓储                                  |
 
@@ -92,6 +93,7 @@ updated: 2026-09-08T22:00:00+08:00
 | 文件                                                                                                                                                                                            | 说明                                             |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | [`packages/contracts/src/modules/notification/index.ts`](../../../packages/contracts/src/modules/notification/index.ts)                                                                         | 通知模块 contracts 入口                          |
+| [`packages/contracts/src/modules/notification/portable-v3.ts`](../../../packages/contracts/src/modules/notification/portable-v3.ts)                                                             | V3 stable delivery preference portable schema    |
 | [`packages/contracts/src/modules/notification/aggregates/notification-server.ts`](../../../packages/contracts/src/modules/notification/aggregates/notification-server.ts)                       | Notification 服务端 DTO                          |
 | [`packages/contracts/src/modules/notification/aggregates/notification-client.ts`](../../../packages/contracts/src/modules/notification/aggregates/notification-client.ts)                       | Notification 客户端 DTO                          |
 | [`packages/contracts/src/modules/notification/aggregates/notification-preference-server.ts`](../../../packages/contracts/src/modules/notification/aggregates/notification-preference-server.ts) | NotificationPreference 服务端 DTO                |

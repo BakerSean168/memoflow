@@ -5,7 +5,7 @@ tags:
   - notification
 description: Notification Fact、Workflow、DeliveryPolicy、可靠投递与 Notification Center 当前实现及 vNext 收敛边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T22:00:00+08:00
+updated: 2026-09-10T21:18:00+08:00
 ---
 
 # Notification 模块说明
@@ -48,11 +48,12 @@ Task / Goal / Routine / other producer
 - Desktop native delivery ack 与 capability fail-fast；
 - SSE cursor/reconnect/catch-up；
 - Prisma / PowerSync 两条可靠持久化 lane；
-- operations receipt/timeline/audit。
+- operations receipt/timeline/audit；
+- owner-driven Data Portability V3 seam：`notification-delivery-preferences@3` 已由 Notification module instance 创建并经 API/Desktop handle 暴露，生产 Data Portability registry 已注册；当前仅 portable 稳定的 global/workflow delivery choices，产品 export/import 入口仍为 V2。
 
 ## 3. 2026-09-08 vNext Model Convergence
 
-ADR-084~088 已冻结下一阶段 North Star，但尚未实施。
+ADR-084~088 已冻结下一阶段 North Star，当前只完成了部分边界收敛；Notification 全模型 convergence 尚未完成。
 
 目标：
 
