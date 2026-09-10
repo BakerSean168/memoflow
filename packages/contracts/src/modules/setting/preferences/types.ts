@@ -11,7 +11,6 @@ import type {
   LocaleSchema,
   WorkflowSchema,
   PrivacySchema,
-  NotificationSchema,
   ShortcutsSchema,
   ExperimentalSchema,
   UISchema,
@@ -32,10 +31,6 @@ export type WorkflowPreferences = z.infer<typeof WorkflowSchema>;
 
 /** 隐私设置 */
 export type PrivacyPreferences = z.infer<typeof PrivacySchema>;
-
-/** 通知设置 */
-export type NotificationPreferences = z.infer<typeof NotificationSchema>;
-
 
 /** 快捷键设置 */
 export type ShortcutPreferences = z.infer<typeof ShortcutsSchema>;

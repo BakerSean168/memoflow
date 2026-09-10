@@ -45,13 +45,6 @@ function createSetting(overrides: Partial<UserSettingClientDTO> = {}): UserSetti
         currency: 'USD',
         weekStartsOn: 1,
       },
-      notification: {
-        email: true,
-        push: true,
-        inApp: true,
-        sound: true,
-        useCustomNotification: true,
-      },
     } as UserSettingPreferences,
     version: 1,
     createdAt: 1,
@@ -112,13 +105,6 @@ describe('useUserSetting', () => {
       preferences: {
         ...createSetting().preferences,
         appearance: { theme: 'light' },
-        notification: {
-          email: true,
-          push: true,
-          inApp: true,
-          sound: true,
-          useCustomNotification: false,
-        },
       } as UserSettingPreferences,
     });
     const { composable, service } = mountComposable({
@@ -130,7 +116,6 @@ describe('useUserSetting', () => {
     const userSettingStore = useUserSettingStore();
     expect(service.getUserSettings).toHaveBeenCalledTimes(1);
     expect(userSettingStore.userSetting).toEqual(setting);
-    expect(composable.getCategory('notification')?.useCustomNotification).toBe(false);
   });
 
   it('unwraps successful patch results before updating derived state', async () => {
@@ -138,13 +123,6 @@ describe('useUserSetting', () => {
     const updated = createSetting({
       preferences: {
         ...initial.preferences,
-        notification: {
-          email: true,
-          push: true,
-          inApp: true,
-          sound: true,
-          useCustomNotification: false,
-        },
       } as UserSettingPreferences,
       updatedAt: 2,
     });
@@ -154,16 +132,11 @@ describe('useUserSetting', () => {
 
     useUserSettingStore().setUserSetting(initial);
 
-    const result = await composable.updateCategory('notification', {
-      useCustomNotification: false,
-    });
+    const result = await composable.updateCategory('appearance', { theme: 'dark' });
 
-    expect(service.patchCategory).toHaveBeenCalledWith('notification', {
-      useCustomNotification: false,
-    });
+    expect(service.patchCategory).toHaveBeenCalledWith('appearance', { theme: 'dark' });
     expect(result).toEqual(updated);
     expect(useUserSettingStore().userSetting).toEqual(updated);
-    expect(composable.getCategory('notification')?.useCustomNotification).toBe(false);
   });
 
   it('hydrates the defaults from the service and exposes them through the store', async () => {

@@ -10,12 +10,14 @@ import { BrowserWindow, Notification } from 'electron';
 import { NotificationService, type NotificationOptions } from './notification.service';
 import type { CustomNotificationManager } from './custom-notification.manager';
 import { eventBus } from '@memoflow/utils/domain';
+import { DesktopNotificationPreferenceStore } from './desktop-notification-preference.store';
 
-function createService(): { service: NotificationService; dispatch: ReturnType<typeof vi.fn> } {
+function createService() {
   const dispatch = vi.fn();
   const custom = { dispatch } as unknown as CustomNotificationManager;
-  const service = new NotificationService(custom);
-  return { service, dispatch };
+  const store = new DesktopNotificationPreferenceStore();
+  const service = new NotificationService(custom, store);
+  return { service, dispatch, store };
 }
 
 describe('NotificationService DND state', () => {
@@ -80,13 +82,38 @@ describe('NotificationService routing', () => {
   it('uses the native notification path when custom notifications are disabled', () => {
     const { service, dispatch } = createService();
     service.setMainWindow(window);
-    service.setUseCustomNotification(false);
+    service.updateDevicePreference({ presentationMode: 'native' });
     const options: NotificationOptions = { title: 'Native', body: 'Body' };
     const result = service.showNotification(options);
     expect(dispatch).not.toHaveBeenCalled();
     expect(result).toBeInstanceOf(Notification);
     expect(Notification.lastInstance()).toBe(result);
     expect(Notification.lastInstance()?.show).toHaveBeenCalled();
+  });
+
+  it('forces native silence when device sound is disabled', () => {
+    const { service } = createService();
+    service.updateDevicePreference({ presentationMode: 'native', soundEnabled: false });
+    service.showNotification({ title: 'Silent', body: 'Body', sound: true, silent: false });
+    expect(Notification.lastInstance()?.options.silent).toBe(true);
+  });
+
+  it('forces custom delivery sound off while preserving requested sound when enabled', () => {
+    const { service, dispatch } = createService();
+    service.updateDevicePreference({ soundEnabled: false });
+    service.showNotification({ title: 'Muted', body: 'Body', sound: true });
+    expect(dispatch).toHaveBeenLastCalledWith(expect.objectContaining({ sound: false }));
+    service.updateDevicePreference({ soundEnabled: true });
+    service.showNotification({ title: 'Audible', body: 'Body', sound: true });
+    expect(dispatch).toHaveBeenLastCalledWith(expect.objectContaining({ sound: true }));
+  });
+
+  it('reads the current store preference at render time', () => {
+    const { service, store, dispatch } = createService();
+    store.update({ presentationMode: 'native' });
+    service.showNotification({ title: 'Native', body: 'Body' });
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(Notification.lastInstance()).toBeTruthy();
   });
 
   it('canonical delivery bypasses legacy renderer DND because policy was already evaluated upstream', () => {
@@ -107,7 +134,7 @@ describe('NotificationService routing', () => {
   it('suppresses native notifications when Do Not Disturb is manually enabled', () => {
     const { service } = createService();
     service.setMainWindow(window);
-    service.setUseCustomNotification(false);
+    service.updateDevicePreference({ presentationMode: 'native' });
     service.enableDND();
     const result = service.showNotification({ title: 'Suppressed', body: 'x' });
     expect(result).toBeNull();
@@ -139,7 +166,7 @@ describe('NotificationService routing', () => {
   it('returns null when native notifications are unsupported', () => {
     const { service } = createService();
     service.setMainWindow(window);
-    service.setUseCustomNotification(false);
+    service.updateDevicePreference({ presentationMode: 'native' });
     vi.mocked(Notification.isSupported).mockReturnValueOnce(false);
     const result = service.showNotification({ title: 'nope', body: 'x' });
     expect(result).toBeNull();

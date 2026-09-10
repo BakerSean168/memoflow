@@ -79,6 +79,7 @@ async function handleAppReady(
       desktopFeaturesRuntime.tray,
       desktopFeaturesRuntime.shortcut,
       desktopFeaturesRuntime.autolaunch,
+      desktopFeaturesRuntime.notification,
     );
     console.log('[Lifecycle] System IPC handlers registered');
 

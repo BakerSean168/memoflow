@@ -13,7 +13,7 @@ updated: 2026-09-08T23:26:00+08:00
 
 # ADR-088: Notification Preference、QuietHours、Realtime 与 Operations Boundary
 
-**状态：** 已采纳（待实施）
+**状态：** 已采纳（部分实现；2026-09-10 SETTING-9204 checkpoint）
 **日期：** 2026-09-08
 **影响范围：** notification、time、contracts、app-vue、desktop、api、operations
 **关联：** ADR-037、ADR-063、ADR-079、ADR-084~087

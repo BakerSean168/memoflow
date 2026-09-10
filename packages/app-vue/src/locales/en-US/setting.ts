@@ -376,16 +376,21 @@ export default {
   "notifications": {
     "title": "Notifications",
     "description": "Choose how MemoFlow delivers system and module notifications.",
-    "useCustomNotification": "Use custom desktop notifications",
-    "useCustomNotificationDescription": "When enabled, Desktop shows MemoFlow custom notification windows instead of OS defaults.",
+    "deviceTitle": "On this device",
+    "presentationMode": "Custom desktop notifications",
+    "presentationModeDescription": "Choose MemoFlow windows or native OS notifications on this device.",
+    "soundEnabled": "Notification sound",
+    "soundEnabledDescription": "Play a sound when a desktop notification is shown.",
     "comingSoon": "This feature is under development. Stay tuned.",
-    "moduleChannelsTitle": "Module channels",
-    "moduleChannelsDescription": "Enable in-app and desktop push delivery per business module. Identity is applied by the server from your session.",
+    "deliveryTitle": "User delivery",
+    "deliveryDescription": "Choose the notification channels enabled for your account.",
+    "globalChannelsTitle": "Global channels",
     "loadPreferencesFailed": "Failed to load notification preferences",
     "updatePreferencesFailed": "Failed to update notification preferences",
     "channels": {
       "inApp": "In-app",
-      "push": "Desktop push"
+      "push": "Desktop push",
+      "email": "Email"
     },
     "modules": {
       "task": "Tasks",

@@ -11,7 +11,6 @@ import { AppearanceSchema } from './appearance.schema';
 import { LocaleSchema } from './locale.schema';
 import { WorkflowSchema } from './workflow.schema';
 import { PrivacySchema } from './privacy.schema';
-import { NotificationSchema } from './notification.schema';
 import { ShortcutsSchema } from './shortcuts.schema';
 import { ExperimentalSchema } from './experimental.schema';
 import { UISchema } from './ui.schema';
@@ -22,7 +21,6 @@ export const UserPreferencesSchema = z.object({
   locale: LocaleSchema.default(() => LocaleSchema.parse({})),
   workflow: WorkflowSchema.default(() => WorkflowSchema.parse({})),
   privacy: PrivacySchema.default(() => PrivacySchema.parse({})),
-  notification: NotificationSchema.default(() => NotificationSchema.parse({})),
   shortcuts: ShortcutsSchema.default(() => ShortcutsSchema.parse({})),
   experimental: ExperimentalSchema.default(() => ExperimentalSchema.parse({})),
   ui: UISchema.default(() => UISchema.parse({})),
@@ -35,7 +33,6 @@ export const CATEGORY_SCHEMAS = {
   locale: LocaleSchema,
   workflow: WorkflowSchema,
   privacy: PrivacySchema,
-  notification: NotificationSchema,
   shortcuts: ShortcutsSchema,
   experimental: ExperimentalSchema,
   ui: UISchema,
@@ -47,7 +44,6 @@ export {
   LocaleSchema,
   WorkflowSchema,
   PrivacySchema,
-  NotificationSchema,
   ShortcutsSchema,
   ExperimentalSchema,
   UISchema,

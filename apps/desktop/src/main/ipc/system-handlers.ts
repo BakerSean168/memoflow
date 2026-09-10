@@ -13,7 +13,7 @@
 import { app, dialog, ipcMain, shell } from 'electron';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import type { AutoLaunchPort, ShortcutPort, TrayPort } from '../capabilities/ports';
+import type { AutoLaunchPort, NotificationPort, ShortcutPort, TrayPort } from '../capabilities/ports';
 import { getIpcCache } from '../utils';
 import { getSharedPathResolver, updateUserFilesRootPath } from '../runtime-init';
 import { resolveDesktopUserFilesPath } from '../user-data-path';
@@ -21,6 +21,7 @@ import {
   DesktopFeatureChannels,
   SystemChannels,
 } from '@memoflow/contracts/electron';
+import { DesktopNotificationPreferencePatchSchema } from '@memoflow/contracts/electron';
 import { fail, ok } from '@memoflow/contracts/result';
 
 type UserFilesSubdirectory = 'exports' | 'downloads' | 'attachments';
@@ -238,6 +239,7 @@ function registerDesktopFeaturesHandlers(
   trayPort: TrayPort | null,
   shortcutPort: ShortcutPort | null,
   autoLaunchPort: AutoLaunchPort | null,
+  notificationPort: NotificationPort | null,
 ): void {
   // ========== Auto Launch ==========
   /**
@@ -333,6 +335,27 @@ function registerDesktopFeaturesHandlers(
     trayPort?.stopFlashing();
     return ok(null);
   });
+
+  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_GET, async () =>
+    notificationPort
+      ? ok(notificationPort.getDevicePreference())
+      : fail({ code: 'SERVICE_UNAVAILABLE', message: 'Desktop notification capability is unavailable' }),
+  );
+  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_UPDATE, async (_, patch) => {
+    if (!notificationPort) {
+      return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Desktop notification capability is unavailable' });
+    }
+    const parsed = DesktopNotificationPreferencePatchSchema.safeParse(patch);
+    if (!parsed.success) {
+      return fail({ code: 'VALIDATION_ERROR', message: 'Invalid desktop notification preference patch' });
+    }
+    return ok(notificationPort.updateDevicePreference(parsed.data));
+  });
+  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_RESET, async () =>
+    notificationPort
+      ? ok(notificationPort.resetDevicePreference())
+      : fail({ code: 'SERVICE_UNAVAILABLE', message: 'Desktop notification capability is unavailable' }),
+  );
 }
 
 // Flag to prevent duplicate handler registration
@@ -353,6 +376,7 @@ export function registerSystemIpcHandlers(
   trayPort: TrayPort | null,
   shortcutPort: ShortcutPort | null,
   autoLaunchPort: AutoLaunchPort | null,
+  notificationPort: NotificationPort | null = null,
 ): void {
   // Prevent duplicate registration
   if (systemHandlersRegistered) {
@@ -365,5 +389,5 @@ export function registerSystemIpcHandlers(
   registerSystemHandlers();
 
   // ========== Desktop Features Channels ==========
-  registerDesktopFeaturesHandlers(trayPort, shortcutPort, autoLaunchPort);
+  registerDesktopFeaturesHandlers(trayPort, shortcutPort, autoLaunchPort, notificationPort);
 }

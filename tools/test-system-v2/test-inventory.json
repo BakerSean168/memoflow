@@ -1224,6 +1224,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/services/desktop-notification-preference.store.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/services/notification.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2083,16 +2091,6 @@
       ]
     },
     {
-      "path": "packages/account/src/server/application/use-cases/queries/__tests__/check-availability.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/account/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/account/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/account/src/server/application/use-cases/queries/__tests__/get-account-profile.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2104,16 +2102,6 @@
     },
     {
       "path": "packages/account/src/server/domain/aggregates/__tests__/Account.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/account/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/account/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/account/src/server/domain/services/__tests__/account-uniqueness-checker.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/account/vitest.config.ts"
@@ -2143,26 +2131,6 @@
       ]
     },
     {
-      "path": "packages/account/src/server/domain/value-objects/__tests__/contact-email.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/account/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/account/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/account/src/server/domain/value-objects/__tests__/contact-phone.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/account/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/account/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/account/src/server/infrastructure/__tests__/account-module-partial-start.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2183,6 +2151,16 @@
       ]
     },
     {
+      "path": "packages/account/src/server/infrastructure/adapters/cloud-auth/cloud-auth-revocation.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/account/src/server/infrastructure/adapters/powersync/account-powersync.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2194,6 +2172,34 @@
     },
     {
       "path": "packages/account/src/server/infrastructure/adapters/powersync/mappers/account-powersync-parse-json-keep-boundary.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-auth-email-retirement.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/account/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-auth-email-retirement.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-clock-version-retirement.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/account/vitest.config.ts"
@@ -2229,12 +2235,48 @@
       ]
     },
     {
+      "path": "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-phone-retirement.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/account/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-phone-retirement.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-version-retirement.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/account/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/account/src/server/infrastructure/adapters/prisma/__tests__/w7-cross-module-operation-gate.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
         "packages/account/vitest.integration.config.ts"
       ],
       "measurementCollectors": []
+    },
+    {
+      "path": "packages/account/src/server/infrastructure/adapters/prisma/mappers/account-prisma.mapper.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
     },
     {
       "path": "packages/account/src/server/infrastructure/cloud-account-provisioner.spec.ts",
@@ -4729,7 +4771,23 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/cloud-auth/src/server/public-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/cloud-auth/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/electron/authenticated-ipc.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/electron/device-notification-preference.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -4810,6 +4868,14 @@
     },
     {
       "path": "packages/contracts/src/modules/account/api/account-birthday-ymd.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/account/api/account-view.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -5721,6 +5787,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/database/src/schema/cloud-auth-user-access-projection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/database/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/database/src/schema/editor-workspace-natural-key.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5730,14 +5804,6 @@
     },
     {
       "path": "packages/database/src/schema/goal-record-source-correlation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/database/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/database/src/schema/legacy-cloud-auth-migration.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/database/vitest.config.ts"
@@ -10984,7 +11050,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 26
+      "fileCount": 27
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -11264,7 +11330,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 4
+      "fileCount": 7
     },
     {
       "id": "packages/goal/vitest.integration.config.ts",
@@ -11362,7 +11428,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 61
+      "fileCount": 62
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -11383,7 +11449,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 26
+      "fileCount": 27
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -11411,14 +11477,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 6
+      "fileCount": 7
     },
     {
       "id": "packages/contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 76
+      "fileCount": 78
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11662,19 +11728,20 @@
       "packages/account/src/server/application/services/__tests__/account-closure-coordinator.spec.ts",
       "packages/account/src/server/application/use-cases/commands/__tests__/close-account.test.ts",
       "packages/account/src/server/application/use-cases/commands/__tests__/update-account-profile.test.ts",
-      "packages/account/src/server/application/use-cases/queries/__tests__/check-availability.test.ts",
       "packages/account/src/server/application/use-cases/queries/__tests__/get-account-profile.test.ts",
       "packages/account/src/server/domain/aggregates/__tests__/Account.test.ts",
-      "packages/account/src/server/domain/services/__tests__/account-uniqueness-checker.test.ts",
       "packages/account/src/server/domain/value-objects/__tests__/account-profile.spec.ts",
       "packages/account/src/server/domain/value-objects/__tests__/account-settings-and-enums.spec.ts",
-      "packages/account/src/server/domain/value-objects/__tests__/contact-email.spec.ts",
-      "packages/account/src/server/domain/value-objects/__tests__/contact-phone.spec.ts",
       "packages/account/src/server/infrastructure/__tests__/account-module-partial-start.spec.ts",
       "packages/account/src/server/infrastructure/__tests__/account-repositories.surface.spec.ts",
+      "packages/account/src/server/infrastructure/adapters/cloud-auth/cloud-auth-revocation.adapter.spec.ts",
       "packages/account/src/server/infrastructure/adapters/powersync/account-powersync.repository.spec.ts",
       "packages/account/src/server/infrastructure/adapters/powersync/mappers/account-powersync-parse-json-keep-boundary.surface.spec.ts",
+      "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-auth-email-retirement.surface.spec.ts",
+      "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-clock-version-retirement.surface.spec.ts",
       "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-ownership.surface.spec.ts",
+      "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-phone-retirement.surface.spec.ts",
+      "packages/account/src/server/infrastructure/adapters/prisma/mappers/account-prisma.mapper.spec.ts",
       "packages/account/src/server/infrastructure/cloud-account-provisioner.spec.ts",
       "packages/account/src/server/transport/__tests__/account.controller.test.ts",
       "packages/ai/src/api/routes/ai-chat.routes.spec.ts",
@@ -12175,8 +12242,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1048,
-    "integration": 35,
+    "unit": 1053,
+    "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,
     "boundary-main": 6,

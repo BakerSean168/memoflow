@@ -376,16 +376,21 @@ export default {
   "notifications": {
     "title": "通知",
     "description": "配置 MemoFlow 如何送达系统与业务模块通知。",
-    "useCustomNotification": "使用自定义桌面通知",
-    "useCustomNotificationDescription": "开启后，Desktop 使用 MemoFlow 自定义通知窗口，而不是系统默认通知。",
+    "deviceTitle": "此设备",
+    "presentationMode": "自定义桌面通知",
+    "presentationModeDescription": "选择此设备使用 MemoFlow 通知窗口或系统原生通知。",
+    "soundEnabled": "通知声音",
+    "soundEnabledDescription": "显示桌面通知时播放声音。",
     "comingSoon": "此功能正在开发中，敬请期待。",
-    "moduleChannelsTitle": "模块渠道",
-    "moduleChannelsDescription": "按业务模块启用应用内与桌面推送。身份由服务端从当前会话解析，界面不传 identityId。",
+    "deliveryTitle": "用户送达",
+    "deliveryDescription": "选择账户启用的通知渠道。",
+    "globalChannelsTitle": "全局渠道",
     "loadPreferencesFailed": "加载通知偏好失败",
     "updatePreferencesFailed": "更新通知偏好失败",
     "channels": {
       "inApp": "应用内",
-      "push": "桌面推送"
+      "push": "桌面推送",
+      "email": "邮件"
     },
     "modules": {
       "task": "任务",

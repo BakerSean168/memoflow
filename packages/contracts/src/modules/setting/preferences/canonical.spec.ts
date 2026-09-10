@@ -47,7 +47,7 @@ describe('canonical user preference contracts', () => {
           timeStyle: '24h',
           weekStartsOn: 1,
         },
-        notification: {},
+        notification: { useCustomNotification: true },
       }).success,
     ).toBe(false);
   });

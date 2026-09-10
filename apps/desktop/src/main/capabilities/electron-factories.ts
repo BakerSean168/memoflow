@@ -92,8 +92,8 @@ export function createElectronAutoLaunchPort(
 /**
  * Build the notification capability port from `NotificationService`.
  *
- * The service maintains Do-Not-Disturb state, subscribes to the domain event
- * bus, and renders via the custom/native renderers. The broad
+ * The service maintains Do-Not-Disturb state and renders via the custom/native
+ * renderers. The broad
  * `initNotificationService` farm is narrowed here to the port surface: boolean
  * "was rendered" returns and no Electron leakage.
  */
@@ -102,7 +102,9 @@ export function createElectronNotificationPort(
 ): NotificationPort {
   const service = initNotificationService(options.mainWindow, options.windowManager);
   return {
-    setUseCustomNotification: (useCustom) => service.setUseCustomNotification(useCustom),
+    getDevicePreference: () => service.getDevicePreference(),
+    updateDevicePreference: (patch) => service.updateDevicePreference(patch),
+    resetDevicePreference: () => service.resetDevicePreference(),
     enableDND: () => service.enableDND(),
     disableDND: () => service.disableDND(),
     toggleDND: () => service.toggleDND(),
@@ -133,4 +135,3 @@ export function createElectronExternalEditorPort(): ExternalEditorPort {
     },
   };
 }
-

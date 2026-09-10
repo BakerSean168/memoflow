@@ -19,7 +19,6 @@ describe('UserSetting Aggregate Root', () => {
       const defaults = getDefaultPreferences();
       expect(prefs.appearance).toEqual(defaults.appearance);
       expect(prefs.locale).toEqual(defaults.locale);
-      expect(prefs.notification).toEqual(defaults.notification);
     });
 
     it('should apply overrides when creating', () => {
@@ -63,21 +62,9 @@ describe('UserSetting Aggregate Root', () => {
       expect(setting.toPreferences().locale.currency).toBe('CNY'); // default preserved
     });
 
-    it('should emit UserSettingPatchedEvent', () => {
+    it('should reject the retired notification category', () => {
       const setting = UserSetting.create({ identityId: testIdentityId });
-      setting.pullDomainEvents();
-
-      setting.patchCategory('notification', { email: false });
-
-      const events = setting.pullDomainEvents();
-      expect(events.length).toBe(1);
-      expect(events[0].eventType).toBe('setting:user-setting-patched');
-      expect(events[0].payload).toMatchObject({
-        identityId: testIdentityId,
-        category: 'notification',
-        changes: { email: false },
-        newVersion: 2,
-      });
+      expect(() => setting.patchCategory('notification' as never, {})).toThrow();
     });
 
     it('should increment version on each patch', () => {
@@ -207,8 +194,6 @@ describe('UserSetting Aggregate Root', () => {
 
       expect(setting.toPreferences().appearance.theme).toBe('dark');
       expect(setting.toPreferences().locale.language).toBe('en-US');
-      // Other categories remain default
-      expect(setting.toPreferences().notification.email).toBe(true);
     });
   });
 

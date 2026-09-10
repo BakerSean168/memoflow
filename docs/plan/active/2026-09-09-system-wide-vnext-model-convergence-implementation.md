@@ -205,7 +205,13 @@ Canonical `presentation | regional` contracts, portable `TimeZoneId`, per-namesp
 
 **状态：DONE — 2026-09-09**
 
-Completed in the same coordinated batch as `TIME-1205`: canonical preference HTTP/IPC/UI transports are live, `PreferenceUserTimeContextAdapter` is the identity Product Time seam, Account preference duplicate truth is removed through contracts/domain/API/Prisma/PowerSync/Web mock surfaces, and current time consumers no longer read Account/UserSetting timezone fallback. Non-presentation legacy Setting ownership remains for SETTING-9204/9205/9206/9209.
+Completed in the same coordinated batch as `TIME-1205`: canonical preference HTTP/IPC/UI transports are live, `PreferenceUserTimeContextAdapter` is the identity Product Time seam, Account preference duplicate truth is removed through contracts/domain/API/Prisma/PowerSync/Web mock surfaces, and current time consumers no longer read Account/UserSetting timezone fallback. Non-presentation legacy Setting ownership remains for SETTING-9205/9206/9209.
+
+### SETTING-9204 — Notification user/device ownership convergence
+
+**状态：DONE — 2026-09-10**
+
+`UserSetting.notification` is retired from canonical Setting contracts/runtime/UI. User-level InApp/Push/Email delivery preferences are owned by `NotificationPreference`; Desktop presentation mode and notification sound are owned by the typed `DesktopNotificationPreference` device capability/store, with strict IPC validation and no Web fallback. No legacy notification-setting values were migrated or seeded under ADR-111. Focused evidence: contracts 3 files / 10 tests, Setting 1 / 21, App Vue 3 / 12, Desktop service/store 2 / 17, Desktop IPC 1 / 13; contracts/Setting/App Vue typechecks PASS; Desktop 9204-path filtered typecheck has 0 errors; app-vue `./di` declarations rebuilt; `git diff --check` and ownership residual scans PASS. Device persistence/scope remains SETTING-9206.
 
 ### ACC-1402 — Introduce AccountView + CloudIdentitySummary composition
 

@@ -22,13 +22,11 @@ const i18n = createI18n({
           categoryAll: 'All categories',
           categoryAppearance: 'Appearance',
           categoryLocale: 'Region',
-          categoryNotification: 'Notifications',
           categoryPrivacy: 'Privacy',
           categoryExperimental: 'Experimental',
           resetButton: 'Reset',
           resetting: 'Resetting...',
           currentTheme: 'Current theme',
-          currentNotification: 'Notifications enabled',
           themeUnknown: 'Unknown',
         },
         errors: { resetFailed: 'Reset failed' },
@@ -79,13 +77,6 @@ function createSetting(
         currency: 'USD',
         weekStartsOn: 1,
       },
-      notification: {
-        email: true,
-        push: true,
-        inApp: true,
-        sound: true,
-        useCustomNotification: true,
-      },
     } as UserSettingPreferences,
     version: 1,
     createdAt: 1,
@@ -134,13 +125,6 @@ describe('SettingsResetSection (W6 P1-2 category reset + defaults)', () => {
           currency: 'USD',
           weekStartsOn: 1,
         },
-        notification: {
-          email: true,
-          push: true,
-          inApp: true,
-          sound: true,
-          useCustomNotification: true,
-        },
       } as UserSettingPreferences,
       updatedAt: 2,
     });
@@ -161,9 +145,7 @@ describe('SettingsResetSection (W6 P1-2 category reset + defaults)', () => {
     // The returned aggregate is applied: appearance reset, others unchanged.
     const store = useUserSettingStore(pinia);
     expect(store.userSetting?.preferences?.appearance).toEqual({ theme: 'auto' });
-    expect(store.userSetting?.preferences?.notification?.useCustomNotification).toBe(true);
     expect(wrapper.get('[data-testid="settings-reset-current-theme"]').text()).toBe('auto');
-    expect(wrapper.get('[data-testid="settings-reset-current-notification"]').text()).toBe('on');
   });
 
   it('performs a full reset (no category) and renders the returned aggregate', async () => {
@@ -177,13 +159,6 @@ describe('SettingsResetSection (W6 P1-2 category reset + defaults)', () => {
           timeFormat: '24H',
           currency: 'USD',
           weekStartsOn: 1,
-        },
-        notification: {
-          email: true,
-          push: true,
-          inApp: false,
-          sound: true,
-          useCustomNotification: false,
         },
       } as UserSettingPreferences,
       updatedAt: 3,
@@ -199,8 +174,7 @@ describe('SettingsResetSection (W6 P1-2 category reset + defaults)', () => {
 
     expect(service.resetUserSettings).toHaveBeenCalledWith(undefined);
     expect(useUserSettingStore(pinia).userSetting).toEqual(fullResetResult);
-    // UI reflects the returned aggregate (theme auto, notifications off).
+    // UI reflects the returned aggregate.
     expect(wrapper.get('[data-testid="settings-reset-current-theme"]').text()).toBe('auto');
-    expect(wrapper.get('[data-testid="settings-reset-current-notification"]').text()).toBe('off');
   });
 });

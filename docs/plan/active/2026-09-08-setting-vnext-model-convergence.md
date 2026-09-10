@@ -7,7 +7,7 @@ tags:
   - refactor
 description: Setting vNext — Settings Hub ownership、UserPreference、Product Time Context、Device/Feature/Consent、Persistence/PowerSync/Portability 单轨收敛实施计划
 created: 2026-09-08T23:26:00+08:00
-updated: 2026-09-09T19:11:00+08:00
+updated: 2026-09-10T03:20:00Z
 ---
 
 # Setting vNext Model Convergence
@@ -279,9 +279,9 @@ revision
 - canonical mutation receipts/conflicts are parsed through their runtime schemas; review fixed the missing-reset edge so no revision-0 mutation receipt can escape；
 - Prisma adds `user_preference_records` with `unique(identityId, namespace)` and real `updateMany(identityId + namespace + revision)` CAS; `P2002` create races re-read the unique winner instead of overwriting it；
 - PowerSync has the same per-namespace row and `UPDATE ... WHERE identity_id + namespace + revision` fence; zero affected rows re-read latest, and insert races only resolve as `exists` when a canonical winner can actually be read；server sync rules、API CRUD normalization/table mapping 与 Desktop pre-hydration bootstrap 也已登记 `user_preference_records`；
-- canonical preference cloud uploads bypass the generic PowerSync last-write-wins `upsert/update` path: `PUT` only creates revision `1`, `PATCH` derives and enforces the previous revision through Prisma `updateMany(id + identityId + revision)`, create/update races surface explicit conflicts, and `/powersync/crud` returns HTTP `409` instead of silently overwriting. Current Desktop uploader leaves the conflicting transaction pending; conflict reload/reapply UX belongs to the immediate `SETTING-9203` consumer cutover, not this foundation ticket；
+- canonical preference cloud uploads bypass the generic PowerSync last-write-wins `upsert/update` path: `PUT` only creates revision `1`, `PATCH` derives and enforces the previous revision through Prisma `updateMany(id + identityId + revision)`, create/update races surface explicit conflicts, and `/powersync/crud` returns HTTP `409` instead of silently overwriting；
 - both persistence adapters reject create revisions other than `1` and CAS documents that do not advance exactly one revision；
-- current HTTP/IPC/UI module assembly still receives only the legacy `userSettingRepository`; the canonical repository is exposed as a separate host ingredient for `SETTING-9203`. There is no legacy backfill, fallback, mirroring or dual write in this checkpoint；
+- `SETTING-9203` completed the canonical presentation/regional HTTP/IPC/UI and Product Time cutover and retired `Account.settings`; no legacy backfill, fallback, mirroring, or dual write remains for those owners；
 - focused verification: canonical contract suites `7/7` PASS; Setting `21 files / 138 tests` PASS; Time `10 files / 56 tests` PASS; PowerSync schema `5/5` PASS; canonical PowerSync cloud-upload/control-plane tests `4 files / 22 tests` PASS, and the PowerSync API module + CAS/control-plane rerun is `4 files / 20 tests` PASS; Setting/Time/PowerSync/API/Desktop typechecks all PASS after the upload-CAS patch; the final provider-neutral Prisma-error boundary repair then re-passed the PowerSync API `4 files / 20 tests`, API lint and full governance; API lint PASS with 0 warnings/errors, Desktop lint PASS with 3 inherited warnings / 0 errors, Setting lint PASS with 7 inherited warnings / 0 errors; API Setting composition `7/7` and Desktop composition surface `34/34` PASS; test inventory regenerated to `1202` files；
 - full `contracts:test` still contains 11 inherited Task/Goal/docs-surface failures unrelated to this ticket; the new TimeZoneId/canonical-preference contract suites themselves are green.
 
@@ -344,7 +344,7 @@ AccountApplicationTimezoneAdapter
 - canonical `/settings/preferences` HTTP/IPC + namespace CAS、`useUserPreferences`、`usePresentationBootstrap`、`UserSettingsView` 均走 canonical preference；
 - verification：Setting `22 files / 142 tests` + typecheck PASS；Account `26 / 189` + typecheck PASS；Account contracts `1 / 6` PASS；PowerSync API focused `3 / 15` PASS；App Vue canonical Settings `3 / 7` PASS；
 - App Vue/Web package-wide typecheck仍有与本 ticket 无关的 workspace declaration baseline（`@memoflow/app-vue/web-*`、`ai/label/schedule client`），不影响上述 focused cutover gates；
-- legacy giant-tree `UserSetting` 中 privacy/experimental/device/notification 等非 presentation/regional owner 仍由 SETTING-9204/9205/9206/9209 后续 destructive convergence 处理，不重新成为 Product Time fallback。
+- legacy giant-tree `UserSetting` 中 privacy/experimental/device/notification 等非 presentation/regional owner 仍由 SETTING-9205/9206/9209 后续 destructive convergence 处理，不重新成为 Product Time fallback。
 
 #### Dependencies
 
@@ -352,7 +352,9 @@ AccountApplicationTimezoneAdapter
 
 ### SETTING-9204 — Converge Notification user/device preference ownership
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-10**
+
+**Evidence:** canonical presentation/regional HTTP/IPC/UI and Product Time cutover plus `Account.settings` retirement are complete. Remaining non-presentation convergence is SETTING-9205/9206/9209. ADR-088/094 remain partially implemented; device persistence/scope remains pending in SETTING-9206. Final focused repair gates: contracts 3 files/10 tests; setting 1/21; app-vue 3/12; Desktop service/store 2/17; Desktop IPC 1/13; contracts, setting, and app-vue typechecks PASS; Desktop filtered typecheck has 0 errors in all four 9204 paths (1 unrelated baseline error elsewhere); app-vue build refreshed `dist/di/keys.d.ts`; `git diff --check` and targeted residual scans PASS.
 
 #### Goal
 
@@ -818,8 +820,8 @@ Lane D: SETTING-9206 device/local seams
 ```text
 SETTING-9201  DONE — docs/design package only
 SETTING-9202  DONE — canonical contracts + namespace persistence/CAS foundation
-SETTING-9203  PLANNED
-SETTING-9204  PLANNED
+SETTING-9203  DONE — 2026-09-09
+SETTING-9204  DONE — 2026-09-10
 SETTING-9205  PLANNED
 SETTING-9206  PLANNED
 SETTING-9207  PLANNED
@@ -828,7 +830,7 @@ SETTING-9209  PLANNED
 SETTING-9210  PLANNED
 ```
 
-SETTING-9202 已落地 production foundation，但当前 Settings HTTP/IPC/UI 仍未切到 canonical Preferences；`SETTING-9203` 才负责 consumer cutover 与旧 Account/Setting preference truth 删除。
+SETTING-9202/9203 已完成 canonical presentation/regional HTTP/IPC/UI 与 Product Time cutover，并完成 `Account.settings` retirement；非 presentation legacy categories 仍由 `SETTING-9205`/`9206`/`9209` 处理。
 
 ## 10. Definition of Done
 

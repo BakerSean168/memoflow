@@ -5,8 +5,7 @@
  * 真实调用 useUserSetting().resetToDefaults(category)：
  *   - 「全部分类」走全量重置；
  *   - 选择单个分类只重置该分类，其他分类保持不变。
- * 同时把当前 appearance.theme / notification 作为只读值展示，方便用户确认
- * 即将被重置的内容，也让测试能断言 UI 与返回 aggregate 一致。
+ * 同时把当前 appearance.theme 作为只读值展示，方便用户确认即将被重置的内容。
  */
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -22,12 +21,9 @@ type ResetTarget = 'all' | Extract<keyof UserSettingPreferences, string>;
 const target = ref<ResetTarget>('all');
 const resetting = ref(false);
 
-const categories: ResetTarget[] = ['all', 'appearance', 'locale', 'notification', 'privacy', 'experimental'];
+const categories: ResetTarget[] = ['all', 'appearance', 'locale', 'privacy', 'experimental'];
 
 const theme = computed(() => userSetting.value?.preferences?.appearance?.theme);
-const notificationsEnabled = computed(
-  () => userSetting.value?.preferences?.notification?.inApp === true,
-);
 
 async function handleReset() {
   resetting.value = true;
@@ -54,12 +50,6 @@ async function handleReset() {
           <p class="text-muted-foreground">{{ t('setting.resetPreferences.currentTheme') }}</p>
           <p class="font-medium" data-testid="settings-reset-current-theme">
             {{ theme ?? t('setting.resetPreferences.themeUnknown') }}
-          </p>
-        </div>
-        <div class="space-y-1 text-sm">
-          <p class="text-muted-foreground">{{ t('setting.resetPreferences.currentNotification') }}</p>
-          <p class="font-medium" data-testid="settings-reset-current-notification">
-            {{ notificationsEnabled ? 'on' : 'off' }}
           </p>
         </div>
       </div>

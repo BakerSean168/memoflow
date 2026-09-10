@@ -46,13 +46,6 @@ export function createMockUserSetting(
         allowSearchByEmail: faker.datatype.boolean(),
         allowSearchByPhone: faker.datatype.boolean(),
       },
-      notification: {
-        email: faker.datatype.boolean(),
-        push: faker.datatype.boolean(),
-        inApp: faker.datatype.boolean(),
-        sound: faker.datatype.boolean(),
-        useCustomNotification: faker.datatype.boolean(),
-      },
       shortcuts: {
         enabled: faker.datatype.boolean(),
         custom: {},

@@ -11,22 +11,20 @@
 import { Notification, nativeImage, BrowserWindow } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createTypedEventSubscriber, eventBus } from '@memoflow/utils/domain';
 import { createLogger } from '@memoflow/utils/logger';
-import type { SettingEventMap } from '@memoflow/contracts/setting';
 import { CustomNotificationManager } from './custom-notification.manager';
 import type { WindowManager } from '../lifecycle/window-manager';
 import { resolveAssetPath, resolveAssetPathFromKey } from '../utils/asset-path';
 import { assetManifest, type AssetImageKey } from '@memoflow/assets';
 import { RendererEventChannels } from '@memoflow/contracts/electron';
+import type {
+  DesktopNotificationPreference,
+  DesktopNotificationPreferencePatch,
+} from '@memoflow/contracts/electron';
+import { DesktopNotificationPreferenceStore } from './desktop-notification-preference.store';
 
 const logger = createLogger('NotificationService');
-type NotificationServiceEventMap = Pick<
-  SettingEventMap,
-  'setting:user-setting-patched' | 'setting:user-setting-reset'
->;
-
-const notificationServiceEvents = createTypedEventSubscriber<NotificationServiceEventMap>(eventBus);
+export type DeviceNotificationPreference = DesktopNotificationPreference;
 
 /**
  * Configuration options for displaying a notification.
@@ -62,12 +60,11 @@ export class NotificationService {
   private dndEndHour: number = 7; // Default: Ends at 07:00
   private dndScheduleEnabled: boolean = false;
 
-  // Custom Notification Setting
-  private useCustomNotification: boolean = true; // Default to custom for now
-
-  constructor(private readonly customNotificationManager: CustomNotificationManager) {
+  constructor(
+    private readonly customNotificationManager: CustomNotificationManager,
+    private readonly devicePreferenceStore = new DesktopNotificationPreferenceStore(),
+  ) {
     this.initDefaultIcon();
-    this.initEventListeners();
   }
 
   /**
@@ -80,11 +77,18 @@ export class NotificationService {
     this.mainWindow = window;
   }
 
-  /**
-   * Sets whether to use custom notifications or native ones.
-   */
-  setUseCustomNotification(useCustom: boolean): void {
-    this.useCustomNotification = useCustom;
+  getDevicePreference(): DeviceNotificationPreference {
+    return this.devicePreferenceStore.get();
+  }
+
+  updateDevicePreference(
+    patch: DesktopNotificationPreferencePatch,
+  ): DeviceNotificationPreference {
+    return this.devicePreferenceStore.update(patch);
+  }
+
+  resetDevicePreference(): DeviceNotificationPreference {
+    return this.devicePreferenceStore.reset();
   }
 
   // ===== Do Not Disturb Methods =====
@@ -207,27 +211,6 @@ export class NotificationService {
   }
 
   /**
-   * Initializes internal event listeners for system events (reminders, schedules).
-   */
-  private initEventListeners(): void {
-    // Listen for setting changes to dynamically update notification style preference
-    notificationServiceEvents.on('setting:user-setting-patched', (eventData) => {
-      if (eventData.category === 'notification' && 'useCustomNotification' in eventData.changes) {
-        this.useCustomNotification = Boolean(eventData.changes.useCustomNotification);
-        console.log(
-          `[NotificationService] Updated useCustomNotification preference to: ${this.useCustomNotification}`,
-        );
-      }
-    });
-
-    notificationServiceEvents.on('setting:user-setting-reset', (eventData) => {
-      if (!eventData.category || eventData.category === 'notification') {
-        this.useCustomNotification = true;
-      }
-    });
-  }
-
-  /**
    * Displays a system notification.
    *
    * @param {NotificationOptions} options - The notification options.
@@ -237,7 +220,7 @@ export class NotificationService {
     logger.info('[Desktop][NotificationFlow] showNotification invoked', {
       title: options.title,
       bodyLength: options.body?.length ?? 0,
-      useCustomNotification: this.useCustomNotification,
+      presentationMode: this.devicePreferenceStore.get().presentationMode,
       dndEnabled: this.dndEnabled,
       dndScheduleEnabled: this.dndScheduleEnabled,
     });
@@ -274,11 +257,15 @@ export class NotificationService {
   } {
     // Device presentation is intentionally separate from Notification policy.
     // The durable Notification runtime has already evaluated QuietHours/DND.
-    if (this.useCustomNotification) {
+    const preference = this.devicePreferenceStore.get();
+    if (preference.presentationMode === 'custom') {
       logger.info('[Desktop][NotificationFlow] Routing notification to custom manager', {
         title: options.title,
       });
-      this.customNotificationManager.dispatch(options);
+      this.customNotificationManager.dispatch({
+        ...options,
+        sound: preference.soundEnabled && options.sound === true,
+      });
       return { rendered: true, notification: null };
     }
 
@@ -296,7 +283,7 @@ export class NotificationService {
       icon: options.icon
         ? nativeImage.createFromPath(this.resolveNotificationIconPath(options.icon))
         : (this.defaultIcon ?? undefined),
-      silent: options.silent ?? !options.sound,
+      silent: !preference.soundEnabled || options.silent === true || options.sound !== true,
       urgency: options.urgency ?? 'normal',
     });
 
@@ -469,7 +456,7 @@ export class NotificationService {
  */
 export function initNotificationService(mainWindow: BrowserWindow, windowManager: WindowManager): NotificationService {
   const customManager = new CustomNotificationManager(windowManager);
-  const service = new NotificationService(customManager);
+  const service = new NotificationService(customManager, new DesktopNotificationPreferenceStore());
   service.setMainWindow(mainWindow);
   return service;
 }
