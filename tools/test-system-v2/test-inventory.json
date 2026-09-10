@@ -11348,13 +11348,6 @@
       "fileCount": 1
     },
     {
-      "id": "packages/setting/vitest.integration.config.ts",
-      "type": "primary",
-      "suite": "integration",
-      "runner": "vitest",
-      "fileCount": 0
-    },
-    {
       "id": "packages/task/vitest.integration.config.ts",
       "type": "primary",
       "suite": "integration",
