@@ -7,12 +7,9 @@
 
 import { fail, type Result } from '@memoflow/contracts/result';
 import { RepositoryChannels } from '@memoflow/contracts/electron';
+import type { IResultIpcClient, IRepositoryApiClient } from '../types';
 import type {
-  IResultIpcClient,
-  IRepositoryApiClient,
-} from '../types';
-import type {
-  LocalVaultBindingClientDTO,
+  LocalVaultBindingSnapshotDTO,
   SelectLocalVaultReq,
   ScanLocalVaultRes,
   ReadLocalVaultNoteReq,
@@ -51,7 +48,6 @@ import type {
   ListKnowledgeWriteRequestsRes,
   KnowledgeWriteRequestReplayResponse,
 } from '@memoflow/contracts/repository';
-
 
 /**
  * Repository IPC Adapter
@@ -198,13 +194,13 @@ export class RepositoryIpcAdapter implements IRepositoryApiClient {
     });
   }
 
-  async getLocalVaultBinding(): Promise<Result<LocalVaultBindingClientDTO | null>> {
+  async getLocalVaultBinding(): Promise<Result<LocalVaultBindingSnapshotDTO | null>> {
     return this.ipcClient.invoke(RepositoryChannels.LOCAL_VAULT_GET);
   }
 
   async selectLocalVault(
     request: SelectLocalVaultReq = {},
-  ): Promise<Result<LocalVaultBindingClientDTO | null>> {
+  ): Promise<Result<LocalVaultBindingSnapshotDTO | null>> {
     return this.ipcClient.invoke(RepositoryChannels.LOCAL_VAULT_SELECT, request);
   }
 
@@ -233,7 +229,6 @@ export class RepositoryIpcAdapter implements IRepositoryApiClient {
   ): Promise<Result<ConfirmedLocalVaultWriteRes>> {
     return this.ipcClient.invoke(RepositoryChannels.LOCAL_VAULT_NOTE_WRITE_CONFIRMED, request);
   }
-
 
   private serverProjectionUnavailable<T>(): Result<T> {
     return fail({

@@ -6,7 +6,7 @@
 
 import type { Result } from '@memoflow/contracts/result';
 import type {
-  LocalVaultBindingClientDTO,
+  LocalVaultBindingSnapshotDTO,
   SelectLocalVaultReq,
   ScanLocalVaultRes,
   ReadLocalVaultNoteReq,
@@ -164,13 +164,13 @@ export class RepositoryClientService implements IRepositoryApiClient {
     return this.repositoryApi.replayKnowledgeWriteRequestProjection(writeRequestId);
   }
 
-  getLocalVaultBinding(): Promise<Result<LocalVaultBindingClientDTO | null>> {
+  getLocalVaultBinding(): Promise<Result<LocalVaultBindingSnapshotDTO | null>> {
     return this.repositoryApi.getLocalVaultBinding();
   }
 
   selectLocalVault(
     request?: SelectLocalVaultReq,
-  ): Promise<Result<LocalVaultBindingClientDTO | null>> {
+  ): Promise<Result<LocalVaultBindingSnapshotDTO | null>> {
     return this.repositoryApi.selectLocalVault(request);
   }
 

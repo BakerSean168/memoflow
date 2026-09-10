@@ -5,7 +5,7 @@ tags:
   - repository
 description: 资源库模块当前实现、本地 Vault、可选 GitHub 同步与跨端边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T21:25:00+08:00
+updated: 2026-09-11T00:02:00+08:00
 ---
 
 # 资源库模块说明
@@ -16,9 +16,9 @@ updated: 2026-09-08T21:25:00+08:00
 
 [ADR-034](../../architecture/adr/ADR-034-obsidian-vault-repository.md) 已采纳：本地 Vault 优先；GitHub 登录与仓库授权解耦；用户需要同步时再连接 GitHub；绑定后 Web 可以安全地快捷创建新笔记。
 
-## 1.1 vNext 已采纳建模方向（待实施）
+## 1.1 vNext 已采纳建模方向（实施中）
 
-2026-09-08 已完成 Repository/Knowledge vNext 建模冻结，但当前代码仍以本文件“当前实现”和 current-system map 为准。vNext 不恢复旧 Repository/Folder/Resource Aggregate，而是收敛为：
+2026-09-08 已完成 Repository/Knowledge vNext 建模冻结；2026-09-11 已开始按 ADR-089 destructive cutover。vNext 不恢复旧 Repository/Folder/Resource Aggregate，而是收敛为：
 
 ```text
 KnowledgeSpace
@@ -47,12 +47,40 @@ KnowledgeSpace
 - [ADR-090](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
 - [ADR-091](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
 
-**这些文档只冻结目标模型，不表示生产实现已经迁移。**
+**当前实施状态：** ADR-089 的 Desktop Local Vault 半边已经进入生产代码；Remote Binding/Observation/Fence/Checkpoint、ADR-090 stable document identity 与 ADR-091 single projection engine 仍未完成。
+
+### 1.2 2026-09-11 Local Vault checkpoint
+
+Local Vault 已从旧的 `identityId + status + obsidianVaultId + lastScannedAt` 混合 DTO 切换为：
+
+```text
+LocalVaultBinding
+├── id: LocalVaultBindingId
+├── knowledgeSpaceId: KnowledgeSpaceId
+├── localProfileId
+├── rootPath / displayName
+├── boundAt
+└── detachedAt
+
+LocalVaultHealth
+├── bindingId
+├── state: Available | Missing | Unreadable
+├── observedAt
+└── detail
+```
+
+关键行为：
+
+- binding 文件位于 per-profile storage，owner 由 Desktop composition root 注入的稳定 `profileId` 决定，不再由 cloud identity 决定；
+- `getBinding()` 只读 binding + 实时观察 filesystem health，不再因为读取而重写 owner/status/timestamp；
+- Guest profile 登录/注册后保留同一 `profileId`，因此 Vault 不搬家、不重绑；
+- 本地 Vault port 不再接收 cloud `identityId`；renderer 也不能指定 local owner；
+- schemaVersion 1 binding 不迁移、不作为兼容真值；重新选择 Vault 后写入 V2 binding，但从不删除用户 Vault 内容；
+- sync/reconciliation/auto-sync、Desktop AI、Settings/Local Vault workspace 都消费明确的 `{ binding, health }` snapshot。
 
 ## 2. 当前实现
 
-- Desktop 已支持 profile-owned 本地 Vault 选择、扫描、搜索、安全预览、Obsidian 打开和确认后写入；未连接 GitHub
-  时不上传 Vault 内容。
+- Desktop Local Vault 已完成 ADR-089 本地侧切换：稳定 profile-owned binding 与 filesystem health 分离；选择、扫描、搜索、安全预览、Obsidian 打开和确认后写入保持可用；未连接 GitHub 时不上传 Vault 内容。
 - GitHub 登录与 GitHub App 仓库授权使用独立 contract、token 和 UI；只允许连接明确选择的 private、active、admin
   repository。
 - Desktop 已实现首次对账、真实 Git commit/fetch/pull-rebase/push、冲突暂停、离线 pending commit 和 profile-scoped
@@ -150,7 +178,7 @@ Web create
 
 ## 8. 当前差距
 
-除以下已知交付差距外，Repository/Knowledge vNext 的模型迁移尚未开始；不得把 ADR-089~091 的目标态描述成当前代码事实。
+Repository/Knowledge vNext 已开始迁移，但只完成 ADR-089 的 Local Vault 半边；不得把 Remote Binding、stable document identity 或 single projection engine 描述成已完成。
 
 - 真实 GitHub App fixture E2E 仍依赖外部凭据与受控 private repository。
 - Mobile 尚未接入服务端 GitHub 投影的只读浏览、搜索与预览。

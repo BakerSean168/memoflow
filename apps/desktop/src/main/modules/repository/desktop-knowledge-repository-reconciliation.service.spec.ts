@@ -37,8 +37,25 @@ function createFixture(options?: {
   tokenExpiresAt?: number;
 }) {
   const current = connection();
+  const localBindingId = 'LocalVaultBindingId_550e8400-e29b-41d4-a716-446655440030' as never;
   const localVault = {
-    getBinding: vi.fn(async () => ({ rootPath: '/vault', status: 'Active' })),
+    getBinding: vi.fn(async () => ({
+      binding: {
+        id: localBindingId,
+        knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440031' as never,
+        localProfileId: 'p_reconciliation',
+        rootPath: '/vault',
+        displayName: 'Vault',
+        boundAt: NOW,
+        detachedAt: null,
+      },
+      health: {
+        bindingId: localBindingId,
+        state: 'Available' as const,
+        observedAt: NOW,
+        detail: null,
+      },
+    })),
     inspectSyncContent: vi.fn(async () => 'NonEmpty' as const),
   };
   const remote = {

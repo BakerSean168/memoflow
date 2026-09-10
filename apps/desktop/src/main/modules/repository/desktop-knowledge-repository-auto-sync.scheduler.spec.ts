@@ -92,8 +92,25 @@ function createFixture(options?: {
       return removeResumeListener;
     },
   };
+  const localBindingId = 'LocalVaultBindingId_550e8400-e29b-41d4-a716-446655440040' as never;
   const localVault = {
-    getBinding: vi.fn(async () => ({ rootPath: '/vault', status: 'Active' })),
+    getBinding: vi.fn(async () => ({
+      binding: {
+        id: localBindingId,
+        knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440041' as never,
+        localProfileId: 'p_auto_sync',
+        rootPath: '/vault',
+        displayName: 'Vault',
+        boundAt: NOW,
+        detachedAt: null,
+      },
+      health: {
+        bindingId: localBindingId,
+        state: 'Available' as const,
+        observedAt: NOW,
+        detail: null,
+      },
+    })),
   };
   const remote = {
     listKnowledgeRepositoryConnections: vi.fn(async () =>

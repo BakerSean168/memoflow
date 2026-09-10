@@ -57,6 +57,12 @@ export type ScheduleExecutionId = string & { readonly __brand: 'ScheduleExecutio
 /** 日程统计 ID */
 export type ScheduleStatisticId = string & { readonly __brand: 'ScheduleStatisticId' };
 
+/** Knowledge logical space ID */
+export type KnowledgeSpaceId = string & { readonly __brand: 'KnowledgeSpaceId' };
+
+/** Desktop Local Vault binding ID */
+export type LocalVaultBindingId = string & { readonly __brand: 'LocalVaultBindingId' };
+
 /** 仓库 ID */
 export type RepositoryId = string & { readonly __brand: 'RepositoryId' };
 
@@ -198,7 +204,9 @@ export const ID_PREFIXES = {
   ScheduleExecutionId: 'IScheduleExecutionId',
   ScheduleStatisticId: 'IScheduleStatisticId',
 
-  // === Repository ===
+  // === Knowledge / Repository ===
+  KnowledgeSpaceId: 'KnowledgeSpaceId',
+  LocalVaultBindingId: 'LocalVaultBindingId',
   RepositoryId: 'IRepositoryId',
   ResourceId: 'IResourceId',
   FolderId: 'IFolderId',

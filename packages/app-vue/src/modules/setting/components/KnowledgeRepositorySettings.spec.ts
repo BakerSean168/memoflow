@@ -152,6 +152,27 @@ const CheckboxStub = defineComponent({
   },
 });
 
+function availableLocalVaultSnapshot() {
+  const bindingId = 'LocalVaultBindingId_550e8400-e29b-41d4-a716-446655440000' as never;
+  return {
+    binding: {
+      id: bindingId,
+      knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440001' as never,
+      localProfileId: 'registered-profile',
+      rootPath: '/vault',
+      displayName: 'Vault',
+      boundAt: 1,
+      detachedAt: null,
+    },
+    health: {
+      bindingId,
+      state: 'Available' as const,
+      observedAt: 1,
+      detail: null,
+    },
+  };
+}
+
 function createService(overrides: Partial<IRepositoryService> = {}): IRepositoryService {
   return {
     listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [] })),
@@ -693,19 +714,7 @@ describe('KnowledgeRepositorySettings', () => {
     const wrapper = mountSettings(
       createService({
         listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [connection] })),
-        getLocalVaultBinding: vi.fn(async () =>
-          ok({
-            id: 'vault-1',
-            identityId: connection.identityId,
-            rootPath: '/vault',
-            displayName: 'Vault',
-            status: 'Active' as const,
-            obsidianVaultId: null,
-            lastScannedAt: null,
-            createdAt: 1 as never,
-            updatedAt: 1 as never,
-          }),
-        ),
+        getLocalVaultBinding: vi.fn(async () => ok(availableLocalVaultSnapshot())),
         previewKnowledgeRepositoryReconciliation,
       }),
       { invoke: vi.fn() },
@@ -763,19 +772,7 @@ describe('KnowledgeRepositorySettings', () => {
     const wrapper = mountSettings(
       createService({
         listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [connection] })),
-        getLocalVaultBinding: vi.fn(async () =>
-          ok({
-            id: 'vault-1',
-            identityId: connection.identityId,
-            rootPath: '/vault',
-            displayName: 'Vault',
-            status: 'Active' as const,
-            obsidianVaultId: null,
-            lastScannedAt: null,
-            createdAt: 1 as never,
-            updatedAt: 1 as never,
-          }),
-        ),
+        getLocalVaultBinding: vi.fn(async () => ok(availableLocalVaultSnapshot())),
         previewKnowledgeRepositoryReconciliation,
         executeKnowledgeRepositoryReconciliation,
       }),
@@ -837,19 +834,7 @@ describe('KnowledgeRepositorySettings', () => {
     const wrapper = mountSettings(
       createService({
         listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [connection] })),
-        getLocalVaultBinding: vi.fn(async () =>
-          ok({
-            id: 'vault-1',
-            identityId: connection.identityId,
-            rootPath: '/vault',
-            displayName: 'Vault',
-            status: 'Active' as const,
-            obsidianVaultId: null,
-            lastScannedAt: null,
-            createdAt: 1 as never,
-            updatedAt: 1 as never,
-          }),
-        ),
+        getLocalVaultBinding: vi.fn(async () => ok(availableLocalVaultSnapshot())),
         syncKnowledgeRepository,
       }),
       { invoke: vi.fn() },
@@ -908,19 +893,7 @@ describe('KnowledgeRepositorySettings', () => {
     const wrapper = mountSettings(
       createService({
         listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [connection] })),
-        getLocalVaultBinding: vi.fn(async () =>
-          ok({
-            id: 'vault-1',
-            identityId: connection.identityId,
-            rootPath: '/vault',
-            displayName: 'Vault',
-            status: 'Active' as const,
-            obsidianVaultId: null,
-            lastScannedAt: null,
-            createdAt: 1 as never,
-            updatedAt: 1 as never,
-          }),
-        ),
+        getLocalVaultBinding: vi.fn(async () => ok(availableLocalVaultSnapshot())),
         syncKnowledgeRepository: vi.fn(async () =>
           fail({
             code: 'CONFLICT',
@@ -981,19 +954,7 @@ describe('KnowledgeRepositorySettings', () => {
     const wrapper = mountSettings(
       createService({
         listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [connection] })),
-        getLocalVaultBinding: vi.fn(async () =>
-          ok({
-            id: 'vault-1',
-            identityId: connection.identityId,
-            rootPath: '/vault',
-            displayName: 'Vault',
-            status: 'Active' as const,
-            obsidianVaultId: null,
-            lastScannedAt: null,
-            createdAt: 1 as never,
-            updatedAt: 1 as never,
-          }),
-        ),
+        getLocalVaultBinding: vi.fn(async () => ok(availableLocalVaultSnapshot())),
       }),
       { invoke: vi.fn() },
     );

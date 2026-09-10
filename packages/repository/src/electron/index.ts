@@ -51,10 +51,7 @@
  */
 
 import { ipcMain } from 'electron';
-import {
-  RepositoryChannels,
-  type IElectronModuleContext,
-} from '@memoflow/contracts/electron';
+import { RepositoryChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
 import type {
   ExecuteKnowledgeRepositoryReconciliationRes,
   KnowledgeRepositoryContentState,
@@ -242,10 +239,14 @@ export function createRepositoryElectronModule(
           ),
         );
         installed.push(RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_START);
-        ipcMain.handle(RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_COMPLETE, (_, request) =>
-          withAuthenticatedValue(ctx, () =>
-            withKnowledgeConnection((port) => port.completeKnowledgeRepositoryInstallation(request)),
-          ),
+        ipcMain.handle(
+          RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_COMPLETE,
+          (_, request) =>
+            withAuthenticatedValue(ctx, () =>
+              withKnowledgeConnection((port) =>
+                port.completeKnowledgeRepositoryInstallation(request),
+              ),
+            ),
         );
         installed.push(RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_COMPLETE);
         ipcMain.handle(RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_STATUS, (_, request) =>
@@ -256,12 +257,14 @@ export function createRepositoryElectronModule(
           ),
         );
         installed.push(RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_STATUS);
-        ipcMain.handle(RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_FINALIZE, (_, request) =>
-          withAuthenticatedValue(ctx, () =>
-            withKnowledgeConnection((port) =>
-              port.finalizeKnowledgeRepositoryInstallationIntent(request?.intentId ?? ''),
+        ipcMain.handle(
+          RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_FINALIZE,
+          (_, request) =>
+            withAuthenticatedValue(ctx, () =>
+              withKnowledgeConnection((port) =>
+                port.finalizeKnowledgeRepositoryInstallationIntent(request?.intentId ?? ''),
+              ),
             ),
-          ),
         );
         installed.push(RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_FINALIZE);
         ipcMain.handle(RepositoryChannels.KNOWLEDGE_CONNECTION_LIST, (_) =>
@@ -292,39 +295,46 @@ export function createRepositoryElectronModule(
           }),
         );
         installed.push(RepositoryChannels.KNOWLEDGE_CONNECTION_DISCONNECT);
-        ipcMain.handle(RepositoryChannels.KNOWLEDGE_CONNECTION_RECONCILIATION_PREVIEW, (_, request) =>
-          withAuthenticatedValue(ctx, async ({ identityId }) => {
-            if (!options.localVaultPort) {
-              return fail({
-                code: 'SERVICE_UNAVAILABLE',
-                message: 'Local Vault is only available in the Desktop runtime',
-              });
-            }
-            const localState = await invokeLocalVault(() =>
-              options.localVaultPort!.inspectSyncContent(identityId),
-            );
-            if (!localState.ok) return localState;
-            return withKnowledgeConnection((port) =>
-              port.previewKnowledgeRepositoryReconciliation(request.connectionId, localState.data),
-            );
-          }),
+        ipcMain.handle(
+          RepositoryChannels.KNOWLEDGE_CONNECTION_RECONCILIATION_PREVIEW,
+          (_, request) =>
+            withAuthenticatedValue(ctx, async () => {
+              if (!options.localVaultPort) {
+                return fail({
+                  code: 'SERVICE_UNAVAILABLE',
+                  message: 'Local Vault is only available in the Desktop runtime',
+                });
+              }
+              const localState = await invokeLocalVault(() =>
+                options.localVaultPort!.inspectSyncContent(),
+              );
+              if (!localState.ok) return localState;
+              return withKnowledgeConnection((port) =>
+                port.previewKnowledgeRepositoryReconciliation(
+                  request.connectionId,
+                  localState.data,
+                ),
+              );
+            }),
         );
         installed.push(RepositoryChannels.KNOWLEDGE_CONNECTION_RECONCILIATION_PREVIEW);
-        ipcMain.handle(RepositoryChannels.KNOWLEDGE_CONNECTION_RECONCILIATION_EXECUTE, (_, request) =>
-          withAuthenticatedValue(ctx, async ({ identityId }) => {
-            if (!options.knowledgeRepositoryReconciliationPort) {
-              return fail({
-                code: 'SERVICE_UNAVAILABLE',
-                message: 'Knowledge repository Git runtime is unavailable',
-              });
-            }
-            const result = await options.knowledgeRepositoryReconciliationPort.execute(
-              identityId,
-              request,
-            );
-            if (result.ok) await refreshAutomaticSynchronization(identityId);
-            return result;
-          }),
+        ipcMain.handle(
+          RepositoryChannels.KNOWLEDGE_CONNECTION_RECONCILIATION_EXECUTE,
+          (_, request) =>
+            withAuthenticatedValue(ctx, async ({ identityId }) => {
+              if (!options.knowledgeRepositoryReconciliationPort) {
+                return fail({
+                  code: 'SERVICE_UNAVAILABLE',
+                  message: 'Knowledge repository Git runtime is unavailable',
+                });
+              }
+              const result = await options.knowledgeRepositoryReconciliationPort.execute(
+                identityId,
+                request,
+              );
+              if (result.ok) await refreshAutomaticSynchronization(identityId);
+              return result;
+            }),
         );
         installed.push(RepositoryChannels.KNOWLEDGE_CONNECTION_RECONCILIATION_EXECUTE);
         ipcMain.handle(RepositoryChannels.KNOWLEDGE_CONNECTION_SYNC, (_, request) =>
@@ -367,8 +377,7 @@ export function createRepositoryElectronModule(
 
         const localVault = options.localVaultPort;
         const withLocalVault = async <T>(
-          identityId: string,
-          operation: (port: LocalVaultElectronPort, identityId: string) => Promise<T>,
+          operation: (port: LocalVaultElectronPort) => Promise<T>,
         ): Promise<Result<T>> => {
           if (!localVault) {
             return fail({
@@ -376,20 +385,16 @@ export function createRepositoryElectronModule(
               message: 'Local Vault is only available in the Desktop runtime',
             });
           }
-          return invokeLocalVault(() => operation(localVault, identityId));
+          return invokeLocalVault(() => operation(localVault));
         };
 
         ipcMain.handle(RepositoryChannels.LOCAL_VAULT_GET, (_) =>
-          withAuthenticatedValue(ctx, ({ identityId }) =>
-            withLocalVault(identityId, (port, ownerId) => port.getBinding(ownerId)),
-          ),
+          withAuthenticatedValue(ctx, () => withLocalVault((port) => port.getBinding())),
         );
         installed.push(RepositoryChannels.LOCAL_VAULT_GET);
         ipcMain.handle(RepositoryChannels.LOCAL_VAULT_SELECT, (_, request) =>
           withAuthenticatedValue(ctx, async ({ identityId }) => {
-            const result = await withLocalVault(identityId, (port, ownerId) =>
-              port.selectVault(ownerId, request),
-            );
+            const result = await withLocalVault((port) => port.selectVault(request));
             if (result.ok) await refreshAutomaticSynchronization(identityId);
             return result;
           }),
@@ -397,41 +402,31 @@ export function createRepositoryElectronModule(
         installed.push(RepositoryChannels.LOCAL_VAULT_SELECT);
         ipcMain.handle(RepositoryChannels.LOCAL_VAULT_DETACH, (_) =>
           withAuthenticatedValue(ctx, async ({ identityId }) => {
-            const result = await withLocalVault(identityId, (port, ownerId) =>
-              port.detachVault(ownerId),
-            );
+            const result = await withLocalVault((port) => port.detachVault());
             if (result.ok) await refreshAutomaticSynchronization(identityId);
             return result;
           }),
         );
         installed.push(RepositoryChannels.LOCAL_VAULT_DETACH);
         ipcMain.handle(RepositoryChannels.LOCAL_VAULT_SCAN, (_) =>
-          withAuthenticatedValue(ctx, ({ identityId }) =>
-            withLocalVault(identityId, (port, ownerId) => port.scanVault(ownerId)),
-          ),
+          withAuthenticatedValue(ctx, () => withLocalVault((port) => port.scanVault())),
         );
         installed.push(RepositoryChannels.LOCAL_VAULT_SCAN);
         ipcMain.handle(RepositoryChannels.LOCAL_VAULT_NOTE_READ, (_, request) =>
-          withAuthenticatedValue(ctx, ({ identityId }) =>
-            withLocalVault(identityId, (port, ownerId) => port.readNote(ownerId, request)),
-          ),
+          withAuthenticatedValue(ctx, () => withLocalVault((port) => port.readNote(request))),
         );
         installed.push(RepositoryChannels.LOCAL_VAULT_NOTE_READ);
         ipcMain.handle(RepositoryChannels.LOCAL_VAULT_SEARCH, (_, request) =>
-          withAuthenticatedValue(ctx, ({ identityId }) =>
-            withLocalVault(identityId, (port, ownerId) => port.searchVault(ownerId, request)),
-          ),
+          withAuthenticatedValue(ctx, () => withLocalVault((port) => port.searchVault(request))),
         );
         installed.push(RepositoryChannels.LOCAL_VAULT_SEARCH);
         ipcMain.handle(RepositoryChannels.LOCAL_VAULT_OPEN_OBSIDIAN, (_, request) =>
-          withAuthenticatedValue(ctx, ({ identityId }) =>
-            withLocalVault(identityId, (port, ownerId) => port.openInObsidian(ownerId, request)),
-          ),
+          withAuthenticatedValue(ctx, () => withLocalVault((port) => port.openInObsidian(request))),
         );
         installed.push(RepositoryChannels.LOCAL_VAULT_OPEN_OBSIDIAN);
         ipcMain.handle(RepositoryChannels.LOCAL_VAULT_NOTE_WRITE_CONFIRMED, (_, request) =>
-          withAuthenticatedValue(ctx, ({ identityId }) =>
-            withLocalVault(identityId, (port, ownerId) => port.writeConfirmedNote(ownerId, request)),
+          withAuthenticatedValue(ctx, () =>
+            withLocalVault((port) => port.writeConfirmedNote(request)),
           ),
         );
         installed.push(RepositoryChannels.LOCAL_VAULT_NOTE_WRITE_CONFIRMED);

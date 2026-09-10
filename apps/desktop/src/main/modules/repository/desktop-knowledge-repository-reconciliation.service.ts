@@ -40,10 +40,10 @@ export class DesktopKnowledgeRepositoryReconciliationService {
 
     try {
       const [binding, connections] = await Promise.all([
-        this.options.localVault.getBinding(identityId),
+        this.options.localVault.getBinding(),
         this.options.remote.listKnowledgeRepositoryConnections(),
       ]);
-      if (!binding || binding.status !== 'Active') {
+      if (!binding || binding.health.state !== 'Available') {
         return fail({ code: 'NOT_FOUND', message: 'No active local Vault is selected' });
       }
       if (!connections.ok) return connections;
@@ -58,8 +58,8 @@ export class DesktopKnowledgeRepositoryReconciliationService {
       }
 
       const [localState, inspection] = await Promise.all([
-        this.options.localVault.inspectSyncContent(identityId),
-        this.options.gitRuntime.inspect(binding.rootPath),
+        this.options.localVault.inspectSyncContent(),
+        this.options.gitRuntime.inspect(binding.binding.rootPath),
       ]);
       const preview = await this.options.remote.previewKnowledgeRepositoryReconciliation(
         connection.id,
@@ -123,7 +123,7 @@ export class DesktopKnowledgeRepositoryReconciliationService {
       }
 
       const reconciled = await this.options.gitRuntime.reconcile({
-        rootPath: binding.rootPath,
+        rootPath: binding.binding.rootPath,
         repositoryId: connection.githubRepositoryId,
         repositoryFullName: connection.githubRepositoryFullName,
         defaultBranch: request.expectedDefaultBranch,

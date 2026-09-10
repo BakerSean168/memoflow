@@ -130,14 +130,14 @@ async function removeDirectoryQuietly(directory: string): Promise<void> {
 }
 
 afterEach(async () => {
-  await Promise.all(temporaryDirectories.splice(0).map((directory) => removeDirectoryQuietly(directory)));
+  await Promise.all(
+    temporaryDirectories.splice(0).map((directory) => removeDirectoryQuietly(directory)),
+  );
 });
 
 describe('DesktopKnowledgeRepositorySyncService acceptance', () => {
   // Residual 1332: real git clone/push under full suite load can exceed default 5s.
-  it(
-    'pulls a remote commit into the bound Vault and confirms the new HEAD',
-    async () => {
+  it('pulls a remote commit into the bound Vault and confirms the new HEAD', async () => {
     const remotePath = await createBareRemote();
     const vaultPath = await temporaryDirectory('sync-acceptance-vault');
     await fs.promises.writeFile(path.join(vaultPath, 'local.md'), 'local note\n', 'utf8');
@@ -160,8 +160,21 @@ describe('DesktopKnowledgeRepositorySyncService acceptance', () => {
     let confirmedConnection: KnowledgeRepositoryConnectionClientDTO | null = null;
     const service = new DesktopKnowledgeRepositorySyncService({
       localVault: {
-        getBinding: async (identityId: string) =>
-          identityId === IDENTITY_ID ? { rootPath: vaultPath, status: 'Active' as const } : null,
+        getBinding: async () => {
+          const bindingId = 'LocalVaultBindingId_550e8400-e29b-41d4-a716-446655440050' as never;
+          return {
+            binding: {
+              id: bindingId,
+              knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440051' as never,
+              localProfileId: 'p_sync_acceptance',
+              rootPath: vaultPath,
+              displayName: 'Vault',
+              boundAt: NOW,
+              detachedAt: null,
+            },
+            health: { bindingId, state: 'Available' as const, observedAt: NOW, detail: null },
+          };
+        },
       },
       remote: {
         listKnowledgeRepositoryConnections: async () => ok({ connections: [current] }),
@@ -197,7 +210,5 @@ describe('DesktopKnowledgeRepositorySyncService acceptance', () => {
       'created on Web\n',
     );
     expect(confirmedConnection?.lastSyncedCommitSha).toBe(remoteHead);
-  },
-    30_000,
-  );
+  }, 30_000);
 });

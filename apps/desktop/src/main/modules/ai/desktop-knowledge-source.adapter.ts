@@ -16,42 +16,34 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     query: string,
     limit: number,
   ): Promise<KnowledgeSourceNote[]> {
-    const binding = await this.localVault.getBinding(identityId);
-    if (!binding || binding.status !== 'Active') return [];
+    const snapshot = await this.localVault.getBinding();
+    if (!snapshot || snapshot.health.state !== 'Available') return [];
 
     const summaries = query.trim()
-      ? (await this.localVault.searchVault(identityId, { query, limit })).results.map(
-          (result) => result.note,
-        )
-      : (await this.localVault.scanVault(identityId)).notes.slice(0, limit);
-    return this.hydrate(identityId, binding.id, summaries.slice(0, limit));
+      ? (await this.localVault.searchVault({ query, limit })).results.map((result) => result.note)
+      : (await this.localVault.scanVault()).notes.slice(0, limit);
+    return this.hydrate(identityId, snapshot.binding.id, summaries.slice(0, limit));
   }
 
-  async listIndexableNotes(
-    identityId: string,
-    limit: number,
-  ): Promise<KnowledgeSourceNote[]> {
-    const binding = await this.localVault.getBinding(identityId);
-    if (!binding || binding.status !== 'Active') return [];
-    const scanned = await this.localVault.scanVault(identityId);
-    return this.hydrate(identityId, binding.id, scanned.notes.slice(0, limit));
+  async listIndexableNotes(identityId: string, limit: number): Promise<KnowledgeSourceNote[]> {
+    const snapshot = await this.localVault.getBinding();
+    if (!snapshot || snapshot.health.state !== 'Available') return [];
+    const scanned = await this.localVault.scanVault();
+    return this.hydrate(identityId, snapshot.binding.id, scanned.notes.slice(0, limit));
   }
 
-  async getNoteById(
-    identityId: string,
-    resourceId: string,
-  ): Promise<KnowledgeSourceNote | null> {
-    const binding = await this.localVault.getBinding(identityId);
-    if (!binding || binding.status !== 'Active') return null;
-    const scanned = await this.localVault.scanVault(identityId);
+  async getNoteById(identityId: string, resourceId: string): Promise<KnowledgeSourceNote | null> {
+    const snapshot = await this.localVault.getBinding();
+    if (!snapshot || snapshot.health.state !== 'Available') return null;
+    const scanned = await this.localVault.scanVault();
     const summary = scanned.notes.find(
       (note) => resourceIdForPath(note.relativePath) === resourceId,
     );
     if (!summary) return null;
-    const note = await this.localVault.readNote(identityId, {
+    const note = await this.localVault.readNote({
       relativePath: summary.relativePath,
     });
-    return this.toKnowledgeNote(identityId, binding.id, note);
+    return this.toKnowledgeNote(identityId, snapshot.binding.id, note);
   }
 
   private async hydrate(
@@ -64,7 +56,7 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
         this.toKnowledgeNote(
           identityId,
           repositoryId,
-          await this.localVault.readNote(identityId, {
+          await this.localVault.readNote({
             relativePath: summary.relativePath,
           }),
         ),

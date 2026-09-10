@@ -8,7 +8,7 @@ tags:
   - vnext
 description: Knowledge Repository vNext North Star：KnowledgeSpace、Local/Remote Binding、稳定文档身份、Projection、AI Index 与可靠写入边界
 created: 2026-09-08T21:25:00+08:00
-updated: 2026-09-08T21:25:00+08:00
+updated: 2026-09-11T00:02:00+08:00
 ---
 
 # Knowledge Repository vNext
@@ -24,6 +24,8 @@ updated: 2026-09-08T21:25:00+08:00
 > **AI Index = AI 对知识的检索/理解状态，由 AI 单独拥有。**
 
 Repository vNext 不重新建立数据库式 Repository/Folder/Resource 编辑器，而是在已经完成的 ADR-034 local-first 架构上，把绑定、健康状态、同步、文档身份、投影、AI 索引和可靠操作彻底分轨。
+
+> **实施 checkpoint（2026-09-11）：** ADR-089 Local Vault side 已完成：profile-owned `LocalVaultBinding` 与 read-time `LocalVaultHealth` 已分离，cloud identity 不再拥有本地 binding，旧 binding schema 不迁移。Remote Binding/Observation/Fence/Checkpoint、ADR-090、ADR-091 仍在后续阶段，本文其余目标态不能视为已全部落地。
 
 ## 2. Product Constitution
 

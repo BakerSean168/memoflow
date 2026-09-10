@@ -89,14 +89,14 @@ export class DesktopKnowledgeRepositorySyncService {
     }
 
     try {
-      const binding = await this.options.localVault.getBinding(identityId);
-      if (!binding || binding.status !== 'Active') {
+      const snapshot = await this.options.localVault.getBinding();
+      if (!snapshot || snapshot.health.state !== 'Available') {
         return fail({ code: 'NOT_FOUND', message: 'No active local Vault is selected' });
       }
       return await this.synchronizeResolved({
         connection,
         runtimeInput: {
-          rootPath: binding.rootPath,
+          rootPath: snapshot.binding.rootPath,
           repositoryId: connection.githubRepositoryId,
           repositoryFullName: connection.githubRepositoryFullName,
           defaultBranch: connection.defaultBranch,
@@ -181,12 +181,12 @@ export class DesktopKnowledgeRepositorySyncService {
     }
 
     try {
-      const binding = await this.options.localVault.getBinding(identityId);
-      if (!binding || binding.status !== 'Active') {
+      const snapshot = await this.options.localVault.getBinding();
+      if (!snapshot || snapshot.health.state !== 'Available') {
         return fail({ code: 'NOT_FOUND', message: 'No active local Vault is selected' });
       }
       const prepared = await this.options.gitRuntime.prepareSynchronization({
-        rootPath: binding.rootPath,
+        rootPath: snapshot.binding.rootPath,
         repositoryId: connection.githubRepositoryId,
         repositoryFullName: connection.githubRepositoryFullName,
         defaultBranch: connection.defaultBranch,
@@ -216,10 +216,10 @@ export class DesktopKnowledgeRepositorySyncService {
     input: SyncKnowledgeRepositoryReq,
   ): Promise<Result<ResolvedSynchronization>> {
     const [binding, connections] = await Promise.all([
-      this.options.localVault.getBinding(identityId),
+      this.options.localVault.getBinding(),
       this.options.remote.listKnowledgeRepositoryConnections(),
     ]);
-    if (!binding || binding.status !== 'Active') {
+    if (!binding || binding.health.state !== 'Available') {
       return fail({ code: 'NOT_FOUND', message: 'No active local Vault is selected' });
     }
     if (!connections.ok) return fail(connections.error);
@@ -243,7 +243,7 @@ export class DesktopKnowledgeRepositorySyncService {
     return ok({
       connection,
       runtimeInput: {
-        rootPath: binding.rootPath,
+        rootPath: binding.binding.rootPath,
         repositoryId: connection.githubRepositoryId,
         repositoryFullName: connection.githubRepositoryFullName,
         defaultBranch: connection.defaultBranch,

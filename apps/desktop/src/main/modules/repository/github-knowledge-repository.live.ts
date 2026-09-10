@@ -215,12 +215,7 @@ class LiveWriteRequestRepository implements IKnowledgeWriteRequestRepository {
     }
   }
 
-  async markFailed(
-    identityId: string,
-    id: string,
-    code: string,
-    message: string,
-  ): Promise<void> {
+  async markFailed(identityId: string, id: string, code: string, message: string): Promise<void> {
     for (const [key, record] of this.records) {
       if (record.identityId !== identityId || record.id !== id) continue;
       this.records.set(key, {
@@ -585,17 +580,26 @@ describe('live GitHub knowledge repository acceptance', () => {
     };
     const syncService = new DesktopKnowledgeRepositorySyncService({
       localVault: {
-        getBinding: async () => ({
-          id: `live-vault-${randomUUID()}`,
-          identityId,
-          rootPath: vaultPath,
-          displayName: 'Live GitHub acceptance vault',
-          status: 'Active' as const,
-          obsidianVaultId: null,
-          lastScannedAt: null,
-          createdAt: now,
-          updatedAt: now,
-        }),
+        getBinding: async () => {
+          const bindingId = `LocalVaultBindingId_${randomUUID()}` as never;
+          return {
+            binding: {
+              id: bindingId,
+              knowledgeSpaceId: `KnowledgeSpaceId_${randomUUID()}` as never,
+              localProfileId: 'p_live_github_acceptance',
+              rootPath: vaultPath,
+              displayName: 'Live GitHub acceptance vault',
+              boundAt: now,
+              detachedAt: null,
+            },
+            health: {
+              bindingId,
+              state: 'Available' as const,
+              observedAt: now,
+              detail: null,
+            },
+          };
+        },
       },
       remote: {
         listKnowledgeRepositoryConnections: async () => ok({ connections: [connection] }),

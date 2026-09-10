@@ -303,11 +303,7 @@
                 {{ t('setting.knowledgeRepository.reconciliation.execute') }}
               </Button>
               <Button
-                v-if="
-                  desktopBridge &&
-                  localVaultBinding?.status === 'Active' &&
-                  !connection.lastSyncedCommitSha
-                "
+                v-if="desktopBridge && localVaultAvailable && !connection.lastSyncedCommitSha"
                 variant="outline"
                 size="sm"
                 :disabled="busy"
@@ -491,7 +487,7 @@ import type {
   KnowledgeRepositoryConnectionClientDTO,
   KnowledgeRepositoryReconciliationPreview,
   KnowledgeRepositoryConnectionStatus,
-  LocalVaultBindingClientDTO,
+  LocalVaultBindingSnapshotDTO,
   KnowledgeRepositorySyncConflictContext,
   KnowledgeRepositorySyncOutcome,
   KnowledgeRepositorySyncPendingContext,
@@ -531,7 +527,11 @@ const isGuest = computed(() => desktopAccess.value?.profile?.profileKind === 'gu
 const connections = ref<KnowledgeRepositoryConnectionClientDTO[]>([]);
 const installationRepositories = ref<GitHubInstallationRepositoryDTO[]>([]);
 const pendingInstallationId = ref<string | null>(null);
-const localVaultBinding = ref<LocalVaultBindingClientDTO | null>(null);
+const localVaultBindingSnapshot = ref<LocalVaultBindingSnapshotDTO | null>(null);
+const localVaultBinding = computed(() => localVaultBindingSnapshot.value?.binding ?? null);
+const localVaultAvailable = computed(
+  () => localVaultBindingSnapshot.value?.health.state === 'Available',
+);
 const reconciliationPreviews = ref<Record<string, KnowledgeRepositoryReconciliationPreview>>({});
 const reconciliationCompleted = ref<Record<string, string>>({});
 const syncCompleted = ref<
@@ -586,14 +586,14 @@ async function loadConnections(): Promise<void> {
 async function loadLocalVault(): Promise<void> {
   if (!desktopBridge) return;
   const result = await service.getLocalVaultBinding();
-  if (result.ok) localVaultBinding.value = result.data;
+  if (result.ok) localVaultBindingSnapshot.value = result.data;
 }
 
 async function selectLocalVault(): Promise<void> {
   busyAction.value = 'local-vault';
   const result = await service.selectLocalVault();
   if (result.ok) {
-    localVaultBinding.value = result.data;
+    localVaultBindingSnapshot.value = result.data;
     errorMessage.value = '';
   } else {
     errorMessage.value = resultError(result, t('setting.knowledgeRepository.localSelectFailed'));
@@ -614,7 +614,7 @@ async function detachLocalVault(): Promise<void> {
   busyAction.value = 'local-vault';
   const result = await service.detachLocalVault();
   if (result.ok) {
-    localVaultBinding.value = null;
+    localVaultBindingSnapshot.value = null;
     errorMessage.value = '';
   } else {
     errorMessage.value = resultError(result, t('setting.knowledgeRepository.localDetachFailed'));
@@ -887,7 +887,7 @@ function canExecuteReconciliation(connectionId: string): boolean {
 function canSyncConnection(connection: KnowledgeRepositoryConnectionClientDTO): boolean {
   return Boolean(
     desktopBridge &&
-    localVaultBinding.value?.status === 'Active' &&
+    localVaultAvailable.value &&
     connection.status === 'Active' &&
     connection.canSync &&
     connection.lastSyncedCommitSha,

@@ -39,8 +39,25 @@ function createFixture(options?: {
   tokenExpiresAt?: number;
 }) {
   const current = options?.current ?? connection();
+  const localBindingId = 'LocalVaultBindingId_550e8400-e29b-41d4-a716-446655440020' as never;
   const localVault = {
-    getBinding: vi.fn(async () => ({ rootPath: '/vault', status: 'Active' })),
+    getBinding: vi.fn(async () => ({
+      binding: {
+        id: localBindingId,
+        knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440021' as never,
+        localProfileId: 'p_sync_service',
+        rootPath: '/vault',
+        displayName: 'Vault',
+        boundAt: NOW,
+        detachedAt: null,
+      },
+      health: {
+        bindingId: localBindingId,
+        state: 'Available' as const,
+        observedAt: NOW,
+        detail: null,
+      },
+    })),
   };
   const remote = {
     listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [current] })),
@@ -201,7 +218,7 @@ describe('DesktopKnowledgeRepositorySyncService', () => {
       }),
     );
 
-    expect(localVault.getBinding).toHaveBeenCalledWith('identity-1');
+    expect(localVault.getBinding).toHaveBeenCalledWith();
     expect(gitRuntime.prepareSynchronization).toHaveBeenCalledWith({
       rootPath: '/vault',
       repositoryId: current.githubRepositoryId,

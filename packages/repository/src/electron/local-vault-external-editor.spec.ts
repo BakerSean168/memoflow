@@ -34,6 +34,7 @@ describe('LocalVaultRuntime external editor (openInObsidian)', () => {
     runtime = new LocalVaultRuntime({
       bindingFilePath: path.join(root, 'profile', 'local-vault-binding.json'),
       writeLedgerFilePath: path.join(root, 'profile', 'local-vault-write-ledger.json'),
+      localProfileId: 'p_external_editor',
       platform,
       now: () => 1_750_000_000_000,
     });
@@ -43,9 +44,9 @@ describe('LocalVaultRuntime external editor (openInObsidian)', () => {
     await fs.promises.rm(root, { recursive: true, force: true });
   });
 
-  async function selectVault(identityId = 'identity-1'): Promise<void> {
-    const binding = await runtime.selectVault(identityId);
-    expect(binding?.status).toBe('Active');
+  async function selectVault(): Promise<void> {
+    const snapshot = await runtime.selectVault();
+    expect(snapshot?.health.state).toBe('Available');
   }
 
   function externalUri(): string {
@@ -54,7 +55,7 @@ describe('LocalVaultRuntime external editor (openInObsidian)', () => {
 
   it('opens the vault root when no note path is requested', async () => {
     await selectVault();
-    await runtime.openInObsidian('identity-1', {});
+    await runtime.openInObsidian({});
     const uri = externalUri();
     expect(uri.startsWith('obsidian://open?path=')).toBe(true);
     expect(new URL(uri).searchParams.get('path')).toBe(await fs.promises.realpath(vault));
@@ -66,40 +67,40 @@ describe('LocalVaultRuntime external editor (openInObsidian)', () => {
     const notePath = path.join(vault, 'Agent', 'My note.md');
     await fs.promises.writeFile(notePath, '# My note');
 
-    await runtime.openInObsidian('identity-1', { relativePath: 'Agent/My note.md' });
+    await runtime.openInObsidian({ relativePath: 'Agent/My note.md' });
     const uri = externalUri();
     expect(uri).toContain('obsidian://open?path=');
     expect(new URL(uri).searchParams.get('path')).toBe(await fs.promises.realpath(notePath));
   });
 
   it('throws NOT_FOUND when no vault is selected', async () => {
-    await expect(runtime.openInObsidian('identity-1', {})).rejects.toMatchObject<
-      Partial<LocalVaultRuntimeError>
-    >({ code: 'NOT_FOUND' });
+    await expect(runtime.openInObsidian({})).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>(
+      { code: 'NOT_FOUND' },
+    );
     expect(platform.openExternal).not.toHaveBeenCalled();
   });
 
   it('rejects a non-Markdown note path before opening', async () => {
     await selectVault();
-    await expect(
-      runtime.openInObsidian('identity-1', { relativePath: 'notes/todo.txt' }),
-    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'VALIDATION_ERROR' });
+    await expect(runtime.openInObsidian({ relativePath: 'notes/todo.txt' })).rejects.toMatchObject<
+      Partial<LocalVaultRuntimeError>
+    >({ code: 'VALIDATION_ERROR' });
     expect(platform.openExternal).not.toHaveBeenCalled();
   });
 
   it('rejects an absolute note path before opening', async () => {
     await selectVault();
-    await expect(
-      runtime.openInObsidian('identity-1', { relativePath: '/etc/passwd.md' }),
-    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'VALIDATION_ERROR' });
+    await expect(runtime.openInObsidian({ relativePath: '/etc/passwd.md' })).rejects.toMatchObject<
+      Partial<LocalVaultRuntimeError>
+    >({ code: 'VALIDATION_ERROR' });
     expect(platform.openExternal).not.toHaveBeenCalled();
   });
 
   it('rejects a note path that escapes the vault', async () => {
     await selectVault();
-    await expect(
-      runtime.openInObsidian('identity-1', { relativePath: '../escape.md' }),
-    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'VALIDATION_ERROR' });
+    await expect(runtime.openInObsidian({ relativePath: '../escape.md' })).rejects.toMatchObject<
+      Partial<LocalVaultRuntimeError>
+    >({ code: 'VALIDATION_ERROR' });
     expect(platform.openExternal).not.toHaveBeenCalled();
   });
 
@@ -109,23 +110,22 @@ describe('LocalVaultRuntime external editor (openInObsidian)', () => {
     await fs.promises.writeFile(outside, '# outside');
     await fs.promises.symlink(outside, path.join(vault, 'escape.md'));
 
-    await expect(
-      runtime.openInObsidian('identity-1', { relativePath: 'escape.md' }),
-    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'FORBIDDEN' });
+    await expect(runtime.openInObsidian({ relativePath: 'escape.md' })).rejects.toMatchObject<
+      Partial<LocalVaultRuntimeError>
+    >({ code: 'FORBIDDEN' });
     expect(platform.openExternal).not.toHaveBeenCalled();
   });
 
   it('throws NOT_FOUND when the requested note does not exist', async () => {
     await selectVault();
-    await expect(
-      runtime.openInObsidian('identity-1', { relativePath: 'missing.md' }),
-    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'NOT_FOUND' });
+    await expect(runtime.openInObsidian({ relativePath: 'missing.md' })).rejects.toMatchObject<
+      Partial<LocalVaultRuntimeError>
+    >({ code: 'NOT_FOUND' });
     expect(platform.openExternal).not.toHaveBeenCalled();
   });
 });
 
 describe('createElectronLocalVaultPlatform delegates to the injected external-editor port', () => {
-  const IDENTITY = 'owner-1';
   const NOW = 1750000000000;
   let root: string;
   let vault: string;
@@ -143,16 +143,16 @@ describe('createElectronLocalVaultPlatform delegates to the injected external-ed
     await fs.promises.writeFile(
       bindingFilePath,
       JSON.stringify({
-        schemaVersion: 1,
-        id: 'local-vault-owner-1',
-        identityId: IDENTITY,
-        rootPath: canonicalRoot,
-        displayName: path.basename(vault),
-        status: 'Active',
-        obsidianVaultId: null,
-        lastScannedAt: null,
-        createdAt: NOW,
-        updatedAt: NOW,
+        schemaVersion: 2,
+        binding: {
+          id: 'LocalVaultBindingId_550e8400-e29b-41d4-a716-446655440000',
+          knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440001',
+          localProfileId: 'p_injected_editor',
+          rootPath: canonicalRoot,
+          displayName: path.basename(vault),
+          boundAt: NOW,
+          detachedAt: null,
+        },
       }),
       'utf8',
     );
@@ -161,6 +161,7 @@ describe('createElectronLocalVaultPlatform delegates to the injected external-ed
     runtime = new LocalVaultRuntime({
       bindingFilePath,
       writeLedgerFilePath: path.join(root, 'ledger.json'),
+      localProfileId: 'p_injected_editor',
       platform,
       now: () => NOW,
     });
@@ -171,7 +172,7 @@ describe('createElectronLocalVaultPlatform delegates to the injected external-ed
   });
 
   it('forwards the exact obsidian URI to the injected registry-owned opener', async () => {
-    await runtime.openInObsidian(IDENTITY, {});
+    await runtime.openInObsidian({});
 
     const uri = opener.mock.calls[0]?.[0] as string;
     expect(uri.startsWith('obsidian://open?path=')).toBe(true);
@@ -184,9 +185,9 @@ describe('createElectronLocalVaultPlatform delegates to the injected external-ed
       new LocalVaultRuntimeError('INTERNAL_ERROR', 'External editor capability is unavailable'),
     );
 
-    await expect(runtime.openInObsidian(IDENTITY, {})).rejects.toMatchObject<
-      Partial<LocalVaultRuntimeError>
-    >({ code: 'INTERNAL_ERROR' });
+    await expect(runtime.openInObsidian({})).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>(
+      { code: 'INTERNAL_ERROR' },
+    );
     expect(opener).toHaveBeenCalledTimes(1);
   });
 });

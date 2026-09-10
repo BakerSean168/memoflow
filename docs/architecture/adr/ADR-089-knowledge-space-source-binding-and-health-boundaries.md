@@ -8,12 +8,12 @@ tags:
   - vnext
 description: ADR-089 - 以 KnowledgeSpace 为逻辑边界，拆分 Local/Remote Binding、Health/Observation 与 Sync/Projection cursor
 created: 2026-09-08T21:25:00+08:00
-updated: 2026-09-08T21:25:00+08:00
+updated: 2026-09-11T00:02:00+08:00
 ---
 
 # ADR-089: KnowledgeSpace、Source Binding 与 Health/Observation Boundary
 
-**状态：** 已采纳（待实施）
+**状态：** 已采纳（实施中：Local Vault split 已完成，Remote split 待完成）
 **日期：** 2026-09-08
 **影响范围：** Repository/Knowledge、Desktop、GitHub App、Web Settings、Data Portability、Goal/Task Knowledge Context
 
@@ -45,6 +45,10 @@ Projection checkpoint = 服务端投影游标
 ```
 
 四者不得继续共用一个 `status`。
+
+### 1.1 Implementation checkpoint — 2026-09-11
+
+Desktop Local Vault 已完成本 ADR 的本地侧 cutover：binding 由稳定 `localProfileId` + `KnowledgeSpaceId` 拥有，filesystem 可用性改为独立 `LocalVaultHealth` observation，读取不再持久化 mutation；旧 schemaVersion 1 binding 不迁移。Remote Binding / provider observation / history fence / projection checkpoint 仍按本文后续章节实施中。
 
 ## 2. 当前事实
 

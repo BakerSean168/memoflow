@@ -1,44 +1,50 @@
 /**
- * LocalVaultBinding — Desktop-selected Obsidian vault root for a profile.
- * 本地 Vault 绑定 —— Desktop profile 选定的 Obsidian vault 根目录。
+ * Local Vault contracts for the per-profile Desktop knowledge source.
  *
- * This is local-only metadata. It must never imply GitHub sync permission.
- * 仅本地元数据，绝不隐含 GitHub 同步授权。
- *
- * Residual 793: Res duals retired — nested DTO + Res use sole *Schema + z.infer.
- * Residual 795: Req duals retired — sole *ReqSchema + z.infer.
+ * ADR-089: binding lifecycle is durable user choice; filesystem health is an
+ * observation. Cloud identity is intentionally absent from the binding.
  */
 
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
-import type { IdentityId } from '../../../primitives';
+import { brandedId, ID_PREFIXES } from '../../../primitives';
+import type { KnowledgeSpaceId, LocalVaultBindingId } from '../../../primitives';
 
-export const LocalVaultBindingStatusSchema = z.enum([
-  'Active',
-  'Missing',
-  'Unreadable',
-  'Detached',
-]);
-export type LocalVaultBindingStatus = z.infer<typeof LocalVaultBindingStatusSchema>;
-
-export const LocalVaultBindingClientDTOSchema = z.object({
-  id: z.string(),
-  /**
-   * Profile / identity owner. Guest profiles use the deterministic guest identity.
-   * profile / 身份所有者；访客使用确定性访客 identity。
-   */
-  identityId: brandedId<IdentityId>(),
-  /** Absolute filesystem path to the vault root. */
-  rootPath: z.string(),
-  displayName: z.string(),
-  status: LocalVaultBindingStatusSchema,
-  /** Optional Obsidian vault id if known. */
-  obsidianVaultId: z.string().nullable(),
-  lastScannedAt: z.number().nullable(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-});
+export const LocalVaultBindingClientDTOSchema = z
+  .object({
+    id: brandedId<LocalVaultBindingId>(ID_PREFIXES.LocalVaultBindingId),
+    knowledgeSpaceId: brandedId<KnowledgeSpaceId>(ID_PREFIXES.KnowledgeSpaceId),
+    /** Host-owned stable Desktop profile id; never a cloud account identity. */
+    localProfileId: z.string().min(1),
+    /** Canonical absolute filesystem path to the selected Vault root. */
+    rootPath: z.string().min(1),
+    displayName: z.string().min(1),
+    boundAt: z.number(),
+    detachedAt: z.number().nullable(),
+  })
+  .strict();
 export type LocalVaultBindingClientDTO = z.infer<typeof LocalVaultBindingClientDTOSchema>;
+
+export const LocalVaultHealthStateSchema = z.enum(['Available', 'Missing', 'Unreadable']);
+export type LocalVaultHealthState = z.infer<typeof LocalVaultHealthStateSchema>;
+
+export const LocalVaultHealthDTOSchema = z
+  .object({
+    bindingId: brandedId<LocalVaultBindingId>(ID_PREFIXES.LocalVaultBindingId),
+    state: LocalVaultHealthStateSchema,
+    observedAt: z.number(),
+    detail: z.string().nullable(),
+  })
+  .strict();
+export type LocalVaultHealthDTO = z.infer<typeof LocalVaultHealthDTOSchema>;
+
+/** Read model combining the durable binding with the latest filesystem observation. */
+export const LocalVaultBindingSnapshotDTOSchema = z
+  .object({
+    binding: LocalVaultBindingClientDTOSchema,
+    health: LocalVaultHealthDTOSchema,
+  })
+  .strict();
+export type LocalVaultBindingSnapshotDTO = z.infer<typeof LocalVaultBindingSnapshotDTOSchema>;
 
 // Residual 795: select vault Req dual retired — sole ReqSchema + z.infer.
 export const SelectLocalVaultReqSchema = z.object({
@@ -67,6 +73,7 @@ export type LocalVaultNoteDTO = z.infer<typeof LocalVaultNoteDTOSchema>;
 // Residual 793: scan Res dual retired — sole ResSchema + z.infer.
 export const ScanLocalVaultResSchema = z.object({
   binding: LocalVaultBindingClientDTOSchema,
+  health: LocalVaultHealthDTOSchema,
   notes: z.array(LocalVaultNoteSummaryDTOSchema),
   scannedAt: z.number(),
 });

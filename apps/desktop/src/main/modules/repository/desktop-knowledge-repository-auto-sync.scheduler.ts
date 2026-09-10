@@ -60,7 +60,6 @@ export interface KnowledgeRepositoryAutoSyncSchedulerPort {
   stop(options?: { commitPendingChanges?: boolean }): Promise<void>;
 }
 
-
 /** Keep watcher input aligned with the paths accepted by the managed Git runtime. */
 export function shouldIgnoreKnowledgeRepositoryWatchPath(
   rootPath: string,
@@ -92,7 +91,6 @@ function selectAutomaticConnection(
   }
   return eligible[0]!;
 }
-
 
 export class DesktopKnowledgeRepositoryAutoSyncScheduler implements KnowledgeRepositoryAutoSyncSchedulerPort {
   private readonly watchFactory: (rootPath: string, options: ChokidarOptions) => FSWatcher;
@@ -216,8 +214,8 @@ export class DesktopKnowledgeRepositoryAutoSyncScheduler implements KnowledgeRep
   private async refreshInternal(identityId: string, clearPause: boolean): Promise<void> {
     if (this.stopped || identityId !== this.identityId) return;
 
-    const binding = await this.options.localVault.getBinding(identityId);
-    if (!binding || binding.status !== 'Active') {
+    const binding = await this.options.localVault.getBinding();
+    if (!binding || binding.health.state !== 'Available') {
       this.connection = null;
       this.pausedConnectionId = null;
       await this.closeWatcher();
@@ -248,7 +246,7 @@ export class DesktopKnowledgeRepositoryAutoSyncScheduler implements KnowledgeRep
       this.pausedConnectionId = null;
     }
     this.connection = connection;
-    await this.ensureWatcher(binding.rootPath);
+    await this.ensureWatcher(binding.binding.rootPath);
   }
 
   private async ensureWatcher(rootPath: string): Promise<void> {

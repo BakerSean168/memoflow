@@ -160,6 +160,7 @@ async function registerBusinessModules(
   const localVaultRuntime = createLocalVaultRuntime({
     bindingFilePath: profilePaths.localVaultBindingPath,
     writeLedgerFilePath: profilePaths.localVaultWriteLedgerPath,
+    localProfileId: profilePaths.profileId,
     platform: localVaultPlatform,
   });
 

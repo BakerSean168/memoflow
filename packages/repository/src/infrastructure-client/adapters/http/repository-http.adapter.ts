@@ -9,7 +9,7 @@ import { fail, type Result } from '@memoflow/contracts/result';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IRepositoryApiClient } from '../types';
 import type {
-  LocalVaultBindingClientDTO,
+  LocalVaultBindingSnapshotDTO,
   SelectLocalVaultReq,
   ScanLocalVaultRes,
   ReadLocalVaultNoteReq,
@@ -224,13 +224,13 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
     });
   }
 
-  async getLocalVaultBinding(): Promise<Result<LocalVaultBindingClientDTO | null>> {
+  async getLocalVaultBinding(): Promise<Result<LocalVaultBindingSnapshotDTO | null>> {
     return this.localVaultUnavailable();
   }
 
   async selectLocalVault(
     _request: SelectLocalVaultReq = {},
-  ): Promise<Result<LocalVaultBindingClientDTO | null>> {
+  ): Promise<Result<LocalVaultBindingSnapshotDTO | null>> {
     return this.localVaultUnavailable();
   }
 
