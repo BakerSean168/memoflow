@@ -34,6 +34,8 @@ export interface NotificationPortOptions {
   mainWindow: BrowserWindow;
   /** Host-owned window manager needed by the custom notification renderer. */
   windowManager: WindowManager;
+  /** Resolve the active Profile's narrow notification preference file. */
+  resolveDevicePreferencePath: () => string | null;
 }
 
 /** Options accepted by {@link createElectronAutoLaunchPort}. */
@@ -100,7 +102,11 @@ export function createElectronAutoLaunchPort(
 export function createElectronNotificationPort(
   options: NotificationPortOptions,
 ): NotificationPort {
-  const service = initNotificationService(options.mainWindow, options.windowManager);
+  const service = initNotificationService(
+    options.mainWindow,
+    options.windowManager,
+    options.resolveDevicePreferencePath,
+  );
   return {
     getDevicePreference: () => service.getDevicePreference(),
     updateDevicePreference: (patch) => service.updateDevicePreference(patch),

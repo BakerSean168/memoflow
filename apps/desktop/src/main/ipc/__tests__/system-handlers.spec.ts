@@ -159,6 +159,33 @@ describe('registerSystemIpcHandlers', () => {
     }
   });
 
+  it('returns SERVICE_UNAVAILABLE instead of leaking an inactive Profile scope exception', async () => {
+    const notificationPort = {
+      getDevicePreference: vi.fn(() => {
+        throw new Error('inactive profile');
+      }),
+      updateDevicePreference: vi.fn(() => {
+        throw new Error('inactive profile');
+      }),
+      resetDevicePreference: vi.fn(() => {
+        throw new Error('inactive profile');
+      }),
+    } as never;
+    const { registerSystemIpcHandlers } = await import('../system-handlers');
+    registerSystemIpcHandlers(null, null, null, notificationPort);
+
+    for (const [channel, payload] of [
+      [DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_GET, undefined],
+      [DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_UPDATE, { soundEnabled: false }],
+      [DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_RESET, undefined],
+    ] as const) {
+      await expect(getRegisteredHandler(channel)({}, payload)).resolves.toEqual({
+        ok: false,
+        error: expect.objectContaining({ code: 'SERVICE_UNAVAILABLE' }),
+      });
+    }
+  });
+
   it('routes device preference get/update/reset to the notification port', async () => {
     const notificationPort = {
       getDevicePreference: vi.fn(() => ({ presentationMode: 'custom', soundEnabled: true })),

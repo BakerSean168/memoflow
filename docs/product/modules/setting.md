@@ -10,7 +10,7 @@ updated: 2026-09-09T12:00:00+08:00
 
 # 设置模块说明
 
-> **vNext implementation notice（2026-09-10）**：本文把当前运行路径与历史/目标 rationale 分开记录。`SETTING-9203`/`9204`/`9205` 已完成 Account/Notification shadow retirement、canonical presentation/regional consumer cutover，以及 dead/fake UserSetting surface retirement；legacy `UserSetting` 只保留 appearance + locale remainder。Canonical `presentation | regional` contracts、owner-specific seams 与 Settings Hub composition 是当前实现边界。不存在 backfill、dual-read 或 dual-write。完整目标仍见 [ADR-092](../../architecture/adr/ADR-092-settings-hub-and-preference-ownership-boundary.md)～[ADR-095](../../architecture/adr/ADR-095-preference-persistence-sync-migration-and-portability.md)、[product target](../setting-vnext-settings-hub.md) 与 [active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md)。
+> **vNext implementation notice（2026-09-10）**：本文把当前运行路径与历史/目标 rationale 分开记录。`SETTING-9203`/`9204`/`9205`/`9206` 已完成 Account/Notification shadow retirement、canonical presentation/regional consumer cutover、dead/fake UserSetting surface retirement，以及 Desktop device-local preference scope/persistence；legacy `UserSetting` 只保留 appearance + locale remainder。Canonical `presentation | regional` contracts、owner-specific seams 与 Settings Hub composition 是当前实现边界。不存在 backfill、dual-read 或 dual-write。完整目标仍见 [ADR-092](../../architecture/adr/ADR-092-settings-hub-and-preference-ownership-boundary.md)～[ADR-095](../../architecture/adr/ADR-095-preference-persistence-sync-migration-and-portability.md)、[product target](../setting-vnext-settings-hub.md) 与 [active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md)。
 
 ## 1. 当前功能定位
 
@@ -63,7 +63,7 @@ advanced
 | Appearance    | UserSetting appearance/locale + presentation bootstrap               |
 | Repository    | Repository/Knowledge                                                 |
 | AI            | AI provider/onboarding                                               |
-| Notifications | NotificationPreference + retained device-local notification surface |
+| Notifications | NotificationPreference + Profile-scoped Desktop notification surface |
 | Account       | Account/Profile、Cloud Auth/Password                               |
 | Data          | UserFiles Desktop IPC、Settings JSON export/import、Data Portability |
 | Advanced      | Settings import/export、reset 与其他 retained actions               |
@@ -109,6 +109,20 @@ user_preference_records
 当前 host repository set 暴露 legacy remainder 与 canonical `userPreferenceRepository`；Settings HTTP/IPC/UI 的 presentation/regional consumers 走 canonical seam。legacy aggregate 只保留当前 retained appearance/locale 的窄边界，**不是**新旧 truth 的 dual-read/dual-write compatibility 机制。
 
 PowerSync 云端链路也已登记 canonical table：server sync stream 会下发 `user_preference_records`，Desktop pre-hydration 会等待该表，API upload 对这张表使用专用 revision-CAS handler 而不是 generic last-write-wins `upsert/update`。并发冲突返回 HTTP `409`，因此 current canonical path 已保证“冲突不静默覆盖”；具体 owner action 由对应 module seam 处理。
+
+### 4.3 Desktop device-local notification preference
+
+`SETTING-9206` 将 notification presentation/sound 的 device surface 落在现有 local Profile scope，而不是新建 cloud/device God store：
+
+```text
+profiles/<profileId>/ui/notification-preference.json
+└── schemaVersion: 1
+    └── preference
+        ├── presentationMode: native | custom
+        └── soundEnabled: boolean
+```
+
+`NotificationService` 通过 active Profile path resolver 动态读取这一窄 owner；Profile 切换会清空前一 Profile 的缓存并加载新 scope，missing/corrupt value fail closed 到 canonical defaults。无 active Profile 时不允许 mutation。`main-window-state.json` 继续由 Window/presentation owner 管理，UserFiles 的 `user-files-config.json` 继续属于 dedicated Desktop host capability。它们都不进入 cloud UserPreference、PowerSync 或 portability payload。
 
 ## 5. 当前重复 truth
 
@@ -219,8 +233,8 @@ usage analytics consent         -> future explicit Consent owner
 ### 当前仍剩余的实施债务
 
 1. legacy appearance/locale remainder，以及 giant JSON persistence + fake legacy revision，随 SETTING-9209 完成最终删除；
-2. device/local persistence 与 scope seams，按 SETTING-9206 实施；
-3. strict portability/migration cutover，按 SETTING-9208 实施；
+2. Settings Hub owner composition，按 SETTING-9207 实施；
+3. V3-only portability cutover，按 SETTING-9208 实施；
 4. legacy fields/runtime 的最终删除，按 SETTING-9209 实施；
 5. review、evidence 收口与 archive，按 SETTING-9210 实施。
 

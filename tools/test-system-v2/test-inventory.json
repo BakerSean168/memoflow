@@ -1224,6 +1224,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/services/desktop-notification-preference-wiring.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/services/desktop-notification-preference.store.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11456,7 +11464,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 62
+      "fileCount": 63
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12272,7 +12280,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1056,
+    "unit": 1057,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

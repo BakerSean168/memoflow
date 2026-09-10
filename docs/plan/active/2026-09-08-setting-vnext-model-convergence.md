@@ -476,7 +476,7 @@ legacy shareUsageData=true
 
 ### SETTING-9206 — Establish device-local preference seams without creating a new God store
 
-**状态：PLANNED**
+**状态：DONE — 2026-09-10**
 
 #### Goal
 
@@ -507,6 +507,15 @@ legacy shareUsageData=true
 #### Acceptance
 
 没有因为移除 cloud UserSetting fields 而重新建一个 arbitrary `deviceSettings: Record<string,unknown>`。
+
+#### Closure evidence
+
+- Desktop notification presentation/sound now persists in one narrow, versioned file at `profiles/<profileId>/ui/notification-preference.json`; the store follows the active Profile path dynamically and clears cached values on scope change.
+- Profile A/B isolation, corrupt-file fallback, inactive-profile rejection and active-profile-only reset are executable; no global device settings JSON was introduced.
+- Production `NotificationService` receives the active Profile path resolver through App Lifecycle -> Desktop Features -> Electron capability factory -> `DesktopNotificationPreferenceStore`.
+- Window state remains separately owned by `main-window-state.json`; UserFiles remains the dedicated Desktop host `user-files-config.json` path and does not enter cloud Setting/Data Portability surfaces.
+- The future `CommandRegistry` / `DeviceKeymap` boundary remains the ADR-094 design seam only; no fake editable shortcut surface or generic keymap store was created.
+- Focused reviewer gates: Desktop path/store/service/wiring 32 tests PASS; Desktop IPC 14/14 PASS; Vue Notification Settings 5/5 PASS; focused ESLint 0 errors; ownership residue scan and `git diff --check` PASS. Full Desktop typecheck is still blocked by unrelated existing Governance/database declaration baseline, with no reported error in the SETTING-9206 changed paths.
 
 #### Dependencies
 
@@ -830,14 +839,14 @@ SETTING-9202  DONE — canonical contracts + namespace persistence/CAS foundatio
 SETTING-9203  DONE — 2026-09-09
 SETTING-9204  DONE — 2026-09-10
 SETTING-9205  DONE — 2026-09-10
-SETTING-9206  PLANNED
+SETTING-9206  DONE — 2026-09-10
 SETTING-9207  PLANNED
 SETTING-9208  PLANNED
 SETTING-9209  PLANNED
 SETTING-9210  PLANNED
 ```
 
-SETTING-9202/9203 已完成 canonical presentation/regional HTTP/IPC/UI 与 Product Time cutover，并完成 `Account.settings` retirement；fake/dead legacy categories 已由 `SETTING-9205` 退休；device/local scope 与最终 legacy persistence deletion 仍由 `SETTING-9206`/`9209` 处理。
+SETTING-9202/9203 已完成 canonical presentation/regional HTTP/IPC/UI 与 Product Time cutover，并完成 `Account.settings` retirement；fake/dead legacy categories 已由 `SETTING-9205` 退休；device/local profile scope 与 persistence 已由 `SETTING-9206` 收敛；最终 legacy persistence deletion 仍由 `SETTING-9209` 处理。
 
 ## 10. Definition of Done
 

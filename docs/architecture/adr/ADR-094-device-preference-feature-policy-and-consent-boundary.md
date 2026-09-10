@@ -15,7 +15,7 @@ updated: 2026-09-08T23:26:00+08:00
 
 # ADR-094: Device Preference、Feature Policy 与 Consent Boundary
 
-**状态：** 已采纳（部分实现；2026-09-10 SETTING-9204 checkpoint）
+**状态：** 已采纳（Device Preference boundary 已实现；CommandRegistry/DeviceKeymap 保留为 future seam）
 **日期：** 2026-09-08
 **影响范围：** Setting UI、Desktop、Notification、Shortcut/Command、Feature/Labs、Privacy/Telemetry、Data Portability
 
@@ -149,6 +149,17 @@ DesktopNotificationPreferenceStore
 ```
 
 不再通过 cloud Setting domain event 驱动本地窗口样式。
+
+
+### 4.2 SETTING-9206 implementation checkpoint
+
+2026-09-10 起，Desktop notification device preference 已从 9204 的 in-memory owner 收敛为 local Profile-scoped persistence：
+
+```text
+profiles/<profileId>/ui/notification-preference.json
+```
+
+文件只保存 versioned `presentationMode + soundEnabled`，由 active Profile resolver 驱动；Profile switch 不共享缓存，无 active Profile 时 mutation fail closed。Window state 与 UserFiles 继续由各自 host/presentation owner 管理。此实现没有引入 generic device settings bag，也没有提前实现尚无真实 CommandRegistry 的 shortcut editor。
 
 ## 5. Keyboard shortcut boundary
 

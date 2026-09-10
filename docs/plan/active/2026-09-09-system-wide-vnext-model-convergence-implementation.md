@@ -219,6 +219,12 @@ Completed in the same coordinated batch as `TIME-1205`: canonical preference HTT
 
 Live legacy `UserSetting` remainder is now strict `appearance + locale` only. Workflow/privacy/shortcuts/experimental/ui/ai categories and `locale.currency` are retired from canonical contracts, mocks and Settings UI; old/unknown imports fail closed, and `privacy.shareUsageData=true` explicitly requires future re-consent rather than being converted. The misleading Help -> cloud shortcut-editor entry was removed with that retired surface. Reviewer gates: contracts 10/10, Setting 39/39, App Vue 19/19; production residue scan and `git diff --check` PASS. Device/local scope remains SETTING-9206; final `user_settings` persistence retirement remains SETTING-9209.
 
+### SETTING-9206 — Establish device-local preference scope/persistence
+
+**状态：DONE — 2026-09-10**
+
+Desktop notification presentation mode and sound now persist as a narrow Profile-scoped device surface at `profiles/<profileId>/ui/notification-preference.json`, with strict contract parsing, atomic replacement, corrupt/missing fallback to defaults, profile-switch cache isolation and inactive-profile mutation rejection. Production wiring resolves the active Profile path lazily through the Desktop capability boundary. Window state and UserFiles remain separately owned; no cloud preference/Data Portability absolute-path leakage and no generic `deviceSettings` bag were introduced. `CommandRegistry`/`DeviceKeymap` remain an explicit future ADR boundary without fake UI. Evidence: Desktop path/store/service/wiring 32 tests, Desktop IPC 14, Vue Notification Settings 5 — all PASS; focused ESLint, ownership residue scan and diff check PASS. Full Desktop typecheck remains blocked only by unrelated existing workspace declaration errors outside this ticket.
+
 ### ACC-1402 — Introduce AccountView + CloudIdentitySummary composition
 
 **状态：DONE — 2026-09-09**
@@ -593,8 +599,8 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 The former TIME-1204 footer is obsolete: TIME-1204..1206 and LABEL-1301..1305 are already complete. Current dependency-ready work is:
 
-1. `SETTING-9206` — establish device-local preference persistence/scope without creating a generic device settings bag;
-2. `PORT-1602` — build the V3 coordinator/topological capability pipeline on the `PORT-1601` typed registry foundation;
-3. after those foundations are stable, continue Knowledge foundation before Goal/Task durable note relations.
+1. `SETTING-9207` — converge Settings Hub UI to owner composition;
+2. `SETTING-9208` — make Preferences V3-only and register the first real owner capability on the `PORT-1601/1602` foundation;
+3. in parallel where file ownership is disjoint, begin Knowledge foundation before Goal/Task durable note relations.
 
-`PORT-1601` remains IN PROGRESS until the production V2 reader/export path can be removed coherently with the real owner-capability coordinator.
+`PORT-1601/1602` remain IN PROGRESS until real owner capabilities replace the production V2 reader/export path. `SETTING-9207` and `SETTING-9208` are now dependency-ready because `SETTING-9203..9206` are complete.

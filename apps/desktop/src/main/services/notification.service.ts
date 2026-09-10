@@ -21,7 +21,10 @@ import type {
   DesktopNotificationPreference,
   DesktopNotificationPreferencePatch,
 } from '@memoflow/contracts/electron';
-import { DesktopNotificationPreferenceStore } from './desktop-notification-preference.store';
+import {
+  DesktopNotificationPreferenceStore,
+  type DesktopNotificationPreferencePathResolver,
+} from './desktop-notification-preference.store';
 
 const logger = createLogger('NotificationService');
 export type DeviceNotificationPreference = DesktopNotificationPreference;
@@ -454,9 +457,16 @@ export class NotificationService {
  * @param {BrowserWindow} mainWindow - The main application window.
  * @returns {NotificationService} The initialized service instance.
  */
-export function initNotificationService(mainWindow: BrowserWindow, windowManager: WindowManager): NotificationService {
+export function initNotificationService(
+  mainWindow: BrowserWindow,
+  windowManager: WindowManager,
+  resolveDevicePreferencePath: DesktopNotificationPreferencePathResolver,
+): NotificationService {
   const customManager = new CustomNotificationManager(windowManager);
-  const service = new NotificationService(customManager, new DesktopNotificationPreferenceStore());
+  const service = new NotificationService(
+    customManager,
+    new DesktopNotificationPreferenceStore(resolveDevicePreferencePath),
+  );
   service.setMainWindow(mainWindow);
   return service;
 }

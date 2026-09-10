@@ -336,26 +336,40 @@ function registerDesktopFeaturesHandlers(
     return ok(null);
   });
 
-  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_GET, async () =>
-    notificationPort
-      ? ok(notificationPort.getDevicePreference())
-      : fail({ code: 'SERVICE_UNAVAILABLE', message: 'Desktop notification capability is unavailable' }),
-  );
-  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_UPDATE, async (_, patch) => {
-    if (!notificationPort) {
-      return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Desktop notification capability is unavailable' });
+  const devicePreferenceUnavailable = () =>
+    fail({
+      code: 'SERVICE_UNAVAILABLE',
+      message: 'Desktop notification preference requires an active Profile',
+    });
+
+  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_GET, async () => {
+    if (!notificationPort) return devicePreferenceUnavailable();
+    try {
+      return ok(notificationPort.getDevicePreference());
+    } catch {
+      return devicePreferenceUnavailable();
     }
+  });
+  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_UPDATE, async (_, patch) => {
+    if (!notificationPort) return devicePreferenceUnavailable();
     const parsed = DesktopNotificationPreferencePatchSchema.safeParse(patch);
     if (!parsed.success) {
       return fail({ code: 'VALIDATION_ERROR', message: 'Invalid desktop notification preference patch' });
     }
-    return ok(notificationPort.updateDevicePreference(parsed.data));
+    try {
+      return ok(notificationPort.updateDevicePreference(parsed.data));
+    } catch {
+      return devicePreferenceUnavailable();
+    }
   });
-  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_RESET, async () =>
-    notificationPort
-      ? ok(notificationPort.resetDevicePreference())
-      : fail({ code: 'SERVICE_UNAVAILABLE', message: 'Desktop notification capability is unavailable' }),
-  );
+  ipcMain.handle(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_RESET, async () => {
+    if (!notificationPort) return devicePreferenceUnavailable();
+    try {
+      return ok(notificationPort.resetDevicePreference());
+    } catch {
+      return devicePreferenceUnavailable();
+    }
+  });
 }
 
 // Flag to prevent duplicate handler registration

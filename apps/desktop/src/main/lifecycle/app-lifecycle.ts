@@ -66,6 +66,8 @@ async function handleAppReady(
     const desktopFeaturesRuntime = await initializeDesktopFeatures({
       mainWindow: win,
       windowManager,
+      resolveDeviceNotificationPreferencePath: () =>
+        runtimeManager.getActiveProfileResolver()?.desktopNotificationPreferencePath ?? null,
     });
     mainRuntime.setDesktopFeaturesRuntime(desktopFeaturesRuntime);
 
