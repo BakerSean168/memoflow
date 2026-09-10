@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CreateTaskPlanSchema,
-  TaskTimeConfigSchema,
+  TaskPlanScheduleSchema,
   UpdateTaskPlanSchema,
 } from './task-plan.dto';
 import { CreateTaskPlanResponseSchema, TaskPlanResponseSchema } from './response-schemas';
@@ -9,27 +9,14 @@ import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { TaskPlanStatus } from '../value-objects/task-plan-status';
 import { TaskPlanOutcome } from '../value-objects/task-plan-outcome';
 import { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-policy';
-import { TaskTimeType } from '../value-objects/task-time-type';
-import { TaskType } from '../value-objects/task-type';
 
 const uuid = '550e8400-e29b-41d4-a716-446655440000';
-
-function validTimeConfig() {
-  return {
-    timeType: TaskTimeType.AllDay,
-    startDate: null,
-    timePoint: null,
-    timeRange: null,
-  };
-}
 
 function validCreatePayload() {
   return {
     name: 'Review plan',
     description: null,
-    taskType: TaskType.OneTime,
-    timeConfig: validTimeConfig(),
-    recurrenceRule: null,
+    schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
     reminderConfig: null,
     importance: ImportanceLevel.Moderate,
     labelIds: ['label-planning'],
@@ -43,8 +30,7 @@ function validTemplateResponse() {
     identityId: `IdentityId_${uuid}`,
     name: 'Review plan',
     description: null,
-    timeConfig: validTimeConfig(),
-    recurrenceRule: null,
+    schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
     reminderConfig: null,
     importance: ImportanceLevel.Moderate,
     goalBinding: null,
@@ -136,13 +122,18 @@ describe('task template contracts', () => {
     expect(parsed.todayInstanceCreated).toBe(true);
   });
 
-  it('keeps time config validation intact', () => {
+  it('keeps task schedule validation intact', () => {
     expect(
-      TaskTimeConfigSchema.safeParse({
-        timeType: TaskTimeType.TimeRange,
-        startDate: null,
-        timePoint: null,
-        timeRange: { start: 10, end: 5 },
+      TaskPlanScheduleSchema.safeParse({
+        kind: 'Recurring',
+        startDate: '2026-09-08',
+        timing: { kind: 'Window', start: '10:00', end: '09:00' },
+        recurrence: {
+          frequency: 'Weekly',
+          interval: 1,
+          byWeekday: [],
+          end: { kind: 'Never' },
+        },
       }).success,
     ).toBe(false);
   });

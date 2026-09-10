@@ -12,7 +12,6 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { TaskType } from '@memoflow/contracts/task';
 import request from 'supertest';
 import {
   aOneTimeTask,
@@ -52,8 +51,7 @@ function makeFakeTemplate(overrides: Record<string, unknown> = {}) {
 /** Valid HTTP request body for creating a template (uses API field names) */
 const VALID_CREATE_BODY = {
   name: 'Smoke Task',
-  taskType: TaskType.OneTime,
-  timeConfig: { timeType: 'AllDay', startDate: null, timePoint: null },
+  schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
   importance: 'Moderate',
 };
 
@@ -123,7 +121,7 @@ describe('Task Template API Smoke Tests', () => {
       const res = await request(ctx.app)
         .post('/api/v1/task-plans')
         .set('Authorization', `Bearer ${ctx.token}`)
-        .send({ taskType: TaskType.OneTime }); // missing required fields
+        .send({ schedule: VALID_CREATE_BODY.schedule, importance: 'Moderate' }); // missing name
 
       expect(res.status).toBe(400);
       expect(res.body.ok).toBe(false);
