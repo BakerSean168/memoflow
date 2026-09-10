@@ -87,9 +87,9 @@ for (const rel of [
 
 for (const rel of ['apps/api/src/server.ts', 'apps/desktop/src/main/main.ts']) {
   const source = read(rel);
-  const lines = source.split('\n').filter((line) => line.includes('new LabelService'));
-  for (const line of lines) {
-    if (!line.includes('clock: createSystemClock()')) {
+  const constructions = source.match(/new LabelService\([\s\S]*?\}\s*\)/g) ?? [];
+  for (const construction of constructions) {
+    if (!construction.includes('clock: createSystemClock()')) {
       violations.push(
         `${rel}: production LabelService construction must inject createSystemClock()`,
       );
