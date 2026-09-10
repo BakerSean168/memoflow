@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { setProductTimePreferences } from '../../../shared/utils/product-time';
 import {
@@ -21,9 +21,15 @@ function event(
 }
 
 describe('schedule capsule helpers (V2 §2 / §6.3)', () => {
+  beforeEach(() => {
+    const profile = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({
+      ...profile,
+      regional: { ...profile.regional, timeZone: 'UTC' },
+    });
+  });
   afterEach(() => setProductTimePreferences(createDefaultUserPreferenceProfile()));
-  const day = new Date(2026, 6, 13, 12, 0, 0, 0); // local noon
-  const now = day.getTime();
+  const now = Date.UTC(2026, 6, 13, 12, 0, 0, 0);
 
   it('prefers an in-progress timed event as current', () => {
     const current = event({
@@ -100,8 +106,8 @@ describe('schedule capsule helpers (V2 §2 / §6.3)', () => {
     expect(formatCapsuleTime(Date.parse('2026-03-08T13:05:00.000Z'))).toBe('09:05');
   });
 
-  it('formats local HH:mm without locale drift', () => {
-    const ms = new Date(2026, 6, 13, 9, 5, 0, 0).getTime();
+  it('formats session HH:mm without host timezone drift', () => {
+    const ms = Date.UTC(2026, 6, 13, 9, 5, 0, 0);
     expect(formatCapsuleTime(ms)).toBe('09:05');
   });
 });

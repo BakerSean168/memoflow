@@ -44,7 +44,7 @@ updated: 2026-09-10T15:35:00+09:00
 
 | 文件 | 说明 |
 | --- | --- |
-| [`packages/setting/src/server/preferences/canonical.ts`](../../../packages/setting/src/server/preferences/canonical.ts) | owner preference document/service types |
+| [`packages/setting/src/server/preferences/user-preference-document.ts`](../../../packages/setting/src/server/preferences/user-preference-document.ts) | owner preference document/service types |
 | [`packages/setting/src/server/preferences/user-preference-service.ts`](../../../packages/setting/src/server/preferences/user-preference-service.ts) | namespace CAS/reset service |
 | [`packages/setting/src/server/preferences/preference-portability.ts`](../../../packages/setting/src/server/preferences/preference-portability.ts) | `preferences@3` capability/service |
 | [`packages/setting/src/server/infrastructure/adapters/prisma/user-preference-prisma.repository.ts`](../../../packages/setting/src/server/infrastructure/adapters/prisma/user-preference-prisma.repository.ts) | Prisma namespace repository |

@@ -356,7 +356,7 @@ describe('KeyResultLinksSection', () => {
     expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toMatchObject({
       title: 'Keep this title',
       description: 'Keep this description',
-      goalBinding: { goalId: 'goal-b', keyResultId: undefined },
+      goalBinding: { goalId: 'goal-b', keyResultId: null },
     });
   });
 

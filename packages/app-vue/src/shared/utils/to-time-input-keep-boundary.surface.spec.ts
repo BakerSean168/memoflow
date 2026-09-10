@@ -25,18 +25,12 @@ describe('toTimeInput keep-boundary (residual 1231)', () => {
     'utf8',
   );
 
-  it('owns Residual 1231 keep-boundary markers on task local toTimeInput', () => {
-    expect(task).toContain('Residual 1231 keep-boundary');
-    expect(task).toMatch(/function toTimeInput\b/);
-    expect(task).toContain("return '09:00'");
-    expect(task).toContain('getHours()');
-    expect(task).toContain('getMinutes()');
-    expect(task).toContain("padStart(2, '0')");
-    const body = task.match(/function toTimeInput\([\s\S]*?\n\}/)?.[0] ?? '';
-    expect(body).toContain("'09:00'");
-    expect(body).toContain('getHours()');
-    expect(body).not.toContain('toISOString()');
-    expect(body).not.toContain('format(dateObj');
+  it('retires the task-local host-time toTimeInput helper in favor of TaskPlanSchedule', () => {
+    expect(task).toContain('TaskPlanScheduleSchema');
+    expect(task).not.toMatch(/function toTimeInput\b/);
+    expect(task).not.toContain('Residual 1231 keep-boundary');
+    expect(task).not.toContain('getHours()');
+    expect(task).not.toContain('getMinutes()');
   });
 
   it('differs from schedule UTC ISO slice toTimeInput (no force-merge)', () => {

@@ -22,7 +22,7 @@ describe('api bootstrap module names (elegance E5b)', () => {
 
   it('server wires account through composeAccount as the account API module', () => {
     expect(server).toContain("from './runtime/compose-account'");
-    expect(server).toMatch(/composeAccount\(\{\s*db: prisma,\s*cloudAuth,?\s*\}/);
+    expect(server).toMatch(/composeAccount\(\{\s*db: prisma,\s*cloudAuth,\s*clock: createSystemClock\(\),?\s*\}/);
     expect(server).toContain('.register(accountApiModule)');
     expect(server).not.toMatch(/LegacyAccountModule/);
   });

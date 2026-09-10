@@ -31,8 +31,8 @@ import { describe, expect, it } from 'vitest';
       expect(index).not.toContain('domain-date');
       expect(index).toContain('Instant');
       expect(index).toContain('TransferDate');
-      expect(index).toContain('Ymd');
-      expect(index).toContain('Hm');
+      expect(index).toContain("export * from './ymd'");
+      expect(index).toContain("export type { Hm } from './hm'");
     });
 
     it('keeps goal time range Instant dual names; weight Instant dual remains separate interfaces', () => {
@@ -54,26 +54,19 @@ import { describe, expect, it } from 'vitest';
       expect(weight).not.toContain('DomainDate');
     });
 
-    it('keeps account/task Instant duals separate', () => {
-      const phone = readFileSync(resolve(accountVo, 'contact-phone.ts'), 'utf8');
+    it('keeps account calendar-day and task Instant transfer contracts explicit', () => {
       const profile = readFileSync(resolve(accountVo, 'account-profile.ts'), 'utf8');
-      expect(() => readFileSync(resolve(accountVo, 'contact-email.ts'), 'utf8')).toThrow();
       const completion = readFileSync(resolve(taskVo, 'completion-record.ts'), 'utf8');
 
-      for (const [src, vo, dto] of [
-        [phone, 'ContactPhone', 'ContactPhoneDTO'],
-        [profile, 'AccountProfile', 'AccountProfileDTO'],
-        [completion, 'CompletionRecord', 'CompletionRecordDTO'],
-      ] as const) {
-        expect(src).toMatch(new RegExp(`export interface ${vo}\\b`));
-        expect(src).toMatch(new RegExp(`export interface ${dto}\\b`));
-        expect(src).not.toContain(`export type ${dto} = ${vo}`);
-      }
-      expect(email).toContain('Instant');
-      expect(email).not.toContain('DomainDate');
-      expect(phone).toContain('Instant');
-      expect(phone).not.toContain('DomainDate');
-      expect(completion).toContain('Instant');
+      expect(profile).toMatch(/export interface AccountProfile\b/);
+      expect(profile).toMatch(/export interface AccountProfileDTO\b/);
+      expect(profile).toContain('birthday: Ymd | null');
+      expect(profile).not.toContain('DomainDate');
+
+      expect(completion).toMatch(/export interface CompletionRecord\b/);
+      expect(completion).toMatch(/export interface CompletionRecordDTO\b/);
+      expect(completion).toContain('completedAt: Instant');
+      expect(completion).toContain('completedAt: TransferDate');
       expect(completion).not.toContain('DomainDate');
     });
 
@@ -102,8 +95,10 @@ import { describe, expect, it } from 'vitest';
     const checklist = readFileSync(resolve(taskVo, 'checklist-item-definition.ts'), 'utf8');
 
     it('owns ChecklistItemDefinitionDTO as type alias; keeps Instant duals as interfaces', () => {
-      expect(checklist).toContain('Residual 853');
-      expect(checklist).toMatch(/export interface ChecklistItemDefinition\b/);
+      expect(checklist).toContain('export const ChecklistItemDefinitionSchema = z.object({');
+      expect(checklist).toContain(
+        'export type ChecklistItemDefinition = z.infer<typeof ChecklistItemDefinitionSchema>',
+      );
       expect(checklist).toContain(
         'export type ChecklistItemDefinitionDTO = ChecklistItemDefinition',
       );

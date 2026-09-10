@@ -33,12 +33,12 @@ import { describe, expect, it } from 'vitest';
       expect(vo).toContain('export interface RecurrenceRule {');
     });
 
-    it('task-plan.dto re-exports VO-owned schema (no local dual body)', () => {
-      expect(templateDto).toContain('Residual 743');
-      expect(templateDto).toContain("from '../value-objects/recurrence-rule'");
-      expect(templateDto).toContain('export { RecurrenceConfigSchema }');
-      expect(templateDto).not.toMatch(/const RecurrenceConfigSchema(?::[^=]+)? = z/);
-      expect(templateDto).toContain('recurrenceRule: RecurrenceConfigSchema');
+    it('keeps legacy recurrence schema out of the vNext TaskPlan transport', () => {
+      expect(templateDto).toContain("from '../value-objects/task-plan-schedule'");
+      expect(templateDto).toContain('export { TaskPlanScheduleSchema }');
+      expect(templateDto).toContain('schedule: TaskPlanScheduleSchema');
+      expect(templateDto).not.toContain('RecurrenceConfigSchema');
+      expect(templateDto).not.toContain('recurrenceRule:');
     });
   });
 }
@@ -98,7 +98,7 @@ import { describe, expect, it } from 'vitest';
     const templateDto = readFileSync(resolve(apiDir, 'task-plan.dto.ts'), 'utf8');
 
     it('exports one ADR-056 link schema with nested contribution and the reminder schema', () => {
-      expect(binding).toContain('export const TaskGoalLinkSchema = z.object({');
+      expect(binding).toMatch(/export const TaskGoalLinkSchema = z\s*\.object\(\{/);
       expect(binding).toContain('contribution: GoalContributionRuleSchema.nullable().optional().default(null)');
       expect(binding).toContain('export const TaskGoalBindingSchema = TaskGoalLinkSchema');
       expect(binding).not.toContain('goalRecordValue:');
@@ -303,12 +303,11 @@ import { describe, expect, it } from 'vitest';
       expect(vo).toContain('startDate: Instant | null');
     });
 
-    it('task-plan.dto re-exports VO-owned schema (no local dual body)', () => {
-      expect(templateDto).toContain('Residual 747');
-      expect(templateDto).toContain("from '../value-objects/task-time-config'");
-      expect(templateDto).toContain('export { TaskTimeConfigSchema }');
-      expect(templateDto).not.toMatch(/const TaskTimeConfigSchema(?::[^=]+)? = z/);
-      expect(templateDto).toContain('timeConfig: TaskTimeConfigSchema');
+    it('keeps legacy TaskTimeConfig out of the vNext TaskPlan transport', () => {
+      expect(templateDto).toContain("from '../value-objects/task-plan-schedule'");
+      expect(templateDto).toContain('schedule: TaskPlanScheduleSchema');
+      expect(templateDto).not.toContain('TaskTimeConfigSchema');
+      expect(templateDto).not.toContain('timeConfig:');
     });
   });
 }

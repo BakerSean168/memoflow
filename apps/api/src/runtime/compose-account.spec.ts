@@ -87,6 +87,7 @@ describe('composeAccount assembly order', () => {
 
     expect(createAccountPrismaRepositories).toHaveBeenCalledWith({
       db: fakeDb,
+      clock: fakeClock,
       cloudAuth: fakeCloudAuth,
     });
   });
