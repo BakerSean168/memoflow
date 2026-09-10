@@ -7,6 +7,7 @@ import {
   type DashboardReminderRecord,
 } from '@memoflow/dashboard';
 import type { DashboardData } from '@memoflow/contracts/dashboard';
+import type { UserTimeContextPort } from '@memoflow/time';
 import type { IGoalRepository } from '@memoflow/goal';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '@memoflow/task';
 import type { IScheduleRepository } from '@memoflow/schedule';
@@ -31,7 +32,7 @@ const logger = createLogger('DashboardReadService');
  * 实例，通过显式注入而非包级全局读取。`scheduleTaskRepository` 属于该视图，使
  * 兄弟消费者（analytics）共享同一个 instance-bound schedule task 仓储。
  */
-export interface DashboardRepositoryDependencies {
+export interface DashboardReadDependencies {
   readonly goalRepository: IGoalRepository;
   readonly taskPlanRepository: ITaskPlanRepository;
   readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
@@ -39,6 +40,7 @@ export interface DashboardRepositoryDependencies {
   readonly scheduleTaskRepository: IScheduleTaskRepository;
   readonly reminderTemplateRepository: IReminderTemplateRepository;
   readonly notificationRepository: INotificationRepository;
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
 /** Soft residual 1156: dual toDashboardTaskOccurrenceRecord retired onto @memoflow/dashboard sole. */
@@ -120,7 +122,7 @@ function toReminderRecord(reminder: {
 
 export async function getDesktopDashboardData(
   identityId: string,
-  dependencies: DashboardRepositoryDependencies,
+  dependencies: DashboardReadDependencies,
 ): Promise<DashboardData> {
   const {
     goalRepository,
@@ -129,7 +131,9 @@ export async function getDesktopDashboardData(
     scheduleRepository,
     reminderTemplateRepository,
     notificationRepository,
+    userTimeContextPort,
   } = dependencies;
+  const timeContext = await userTimeContextPort.getUserTimeContext(identityId);
 
   const data = await getDashboardData(identityId, {
     listGoals: async (id) =>
@@ -142,7 +146,9 @@ export async function getDesktopDashboardData(
     listTaskPlans: async (id) =>
       (await taskPlanRepository.findByIdentityId(id)).map(toTaskPlanRecord),
     listTaskOccurrences: async (id) =>
-      (await taskOccurrenceRepository.findByIdentityId(id)).map(toDashboardTaskOccurrenceRecord),
+      (await taskOccurrenceRepository.findByIdentityId(id)).map((instance) =>
+        toDashboardTaskOccurrenceRecord(instance.toClientDTOAt(timeContext)),
+      ),
     listSchedules: async (id) =>
       (await scheduleRepository.findByIdentityId(id)).map(toScheduleRecord),
     listUpcomingReminders: async (id, beforeTime) =>
@@ -150,7 +156,7 @@ export async function getDesktopDashboardData(
         toReminderRecord,
       ),
     countUnreadNotifications: (id) => notificationRepository.countUnread(id),
-  });
+  }, timeContext);
 
   logger.debug('Dashboard data aggregated', {
     identityId,

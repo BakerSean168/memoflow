@@ -5433,7 +5433,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/dashboard/src/start-of-day-keep-boundary.surface.spec.ts",
+      "path": "packages/dashboard/src/product-time-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/dashboard/vitest.config.ts"

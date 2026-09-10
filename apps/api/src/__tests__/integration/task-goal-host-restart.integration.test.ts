@@ -93,7 +93,9 @@ describe('API host Task -> Goal restart recovery', () => {
     expect(keyResultId).toBeDefined();
     if (!keyResultId) return;
 
-    const taskModule = createTaskPrismaModule(prisma);
+    const taskModule = createTaskPrismaModule(prisma, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
     const createdTask = await taskModule.api.createTaskPlan({
       identityId,
       name: 'Persist contribution before host exit',

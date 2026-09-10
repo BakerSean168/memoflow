@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { GoalStatus } from '@memoflow/contracts/goal';
 import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/contracts/task';
 import { ReminderStatus } from '@memoflow/contracts/reminder';
+import { createTimeContext, createTimeFacade } from '@memoflow/time';
 import type {
   DashboardReadSource,
   DashboardGoalRecord,
@@ -11,6 +12,8 @@ import type {
   DashboardReminderRecord,
 } from '../domain/types';
 import { getDashboardData } from '../domain/projection';
+
+const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
 
 function makeGoal(overrides: Partial<DashboardGoalRecord> = {}): DashboardGoalRecord {
   return {
@@ -92,7 +95,7 @@ function makeSource(overrides: Partial<DashboardReadSource> = {}): DashboardRead
 
 describe('getDashboardData', () => {
   it('returns empty dashboard with default source', async () => {
-    const data = await getDashboardData('user1', makeSource());
+    const data = await getDashboardData('user1', makeSource(), TEST_TIME_CONTEXT);
 
     expect(data.stats.activeTasks).toBe(0);
     expect(data.stats.completedToday).toBe(0);
@@ -114,7 +117,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.stats.activeGoals).toBe(2);
     expect(data.goalProgress).toHaveLength(2);
   });
@@ -124,7 +127,7 @@ describe('getDashboardData', () => {
       countUnreadNotifications: async () => 5,
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.stats.unreadNotifications).toBe(5);
   });
 
@@ -138,7 +141,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.goalProgress.map((item) => item.id)).toEqual(['g3', 'g1', 'g2']);
   });
 
@@ -148,7 +151,7 @@ describe('getDashboardData', () => {
       listGoals: async () => goals,
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.goalProgress).toHaveLength(5);
   });
 
@@ -161,7 +164,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     const progressById = Object.fromEntries(
       data.goalProgress.map((goal) => [goal.id, goal.progress]),
     );
@@ -181,15 +184,13 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.taskBoard.todo).toBe(0);
   });
 
   it('builds taskBoard from today instances', async () => {
-    const now = Date.now();
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const todayMs = todayStart.getTime();
+    const time = createTimeFacade({ context: TEST_TIME_CONTEXT });
+    const todayMs = Number(time.calendar.startOfDay(time.now()));
 
     const source = makeSource({
       listTaskOccurrences: async () => [
@@ -216,7 +217,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.taskBoard.todo).toBe(2);
     expect(data.taskBoard.inProgress).toBe(1);
     expect(data.taskBoard.done).toBe(1);
@@ -231,7 +232,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.taskBoard.overdue).toBe(1);
   });
 
@@ -244,7 +245,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.upcomingSchedule).toHaveLength(1);
     expect(data.upcomingSchedule[0].id).toBe('s1');
   });
@@ -259,7 +260,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.stats.scheduleConflicts).toBe(2);
   });
 
@@ -275,7 +276,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.stats.upcomingReminders).toBe(1);
   });
 });

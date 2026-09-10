@@ -30,12 +30,12 @@ vi.mock('@memoflow/dashboard', () => ({
 import type { DashboardData } from '@memoflow/contracts/dashboard';
 import {
   getDesktopDashboardData,
-  type DashboardRepositoryDependencies,
+  type DashboardReadDependencies,
 } from './dashboard-read-service';
 
 const identityId = 'identity-1';
 
-function createFakeDependencies(): DashboardRepositoryDependencies {
+function createFakeDependencies(): DashboardReadDependencies {
   const goalRepository = {
     findByIdentityId: vi.fn().mockResolvedValue([
       {
@@ -58,6 +58,16 @@ function createFakeDependencies(): DashboardRepositoryDependencies {
         actualEndTime: null,
         updatedAt: Date.now(),
         deletedAt: null,
+        toClientDTOAt: vi.fn(() => ({
+          id: 'i1',
+          templateId: 't1',
+          status: 'Pending',
+          instanceDate: Date.now(),
+          actualEndTime: null,
+          updatedAt: Date.now(),
+          deletedAt: null,
+          isOverdue: false,
+        })),
       },
     ]),
   };
@@ -91,10 +101,13 @@ function createFakeDependencies(): DashboardRepositoryDependencies {
     scheduleTaskRepository: {} as never,
     reminderTemplateRepository: reminderTemplateRepository as never,
     notificationRepository: notificationRepository as never,
+    userTimeContextPort: {
+      getUserTimeContext: vi.fn(async () => ({ timeZone: 'UTC', weekStartsOn: 1 })),
+    } as never,
   };
 }
 
-function captureDashboardSource(_deps: DashboardRepositoryDependencies) {
+function captureDashboardSource(_deps: DashboardReadDependencies) {
   mocks.getDashboardData.mockImplementationOnce(
     async (id: string, source: Parameters<typeof getDesktopDashboardData>[0]) => {
       await source.listGoals(id);
@@ -130,14 +143,15 @@ describe('getDesktopDashboardData instance-bound aggregation', () => {
     expect(deps.notificationRepository.countUnread).toHaveBeenCalledWith(identityId);
   });
 
-  it('does not import package-level accessors (no global repository read)', () => {
+  it('does not import package-level accessors (no global repository read)', async () => {
     const deps = createFakeDependencies();
     captureDashboardSource(deps);
 
     const identity = 'another-identity';
     mocks.getDashboardData.mockClear();
-    void getDesktopDashboardData(identity, deps);
+    await getDesktopDashboardData(identity, deps);
 
+    expect(deps.userTimeContextPort.getUserTimeContext).toHaveBeenCalledWith(identity);
     expect(mocks.getDashboardData).toHaveBeenCalledWith(
       identity,
       expect.objectContaining({
@@ -146,6 +160,7 @@ describe('getDesktopDashboardData instance-bound aggregation', () => {
         listUpcomingReminders: expect.any(Function),
         countUnreadNotifications: expect.any(Function),
       }),
+      { timeZone: 'UTC', weekStartsOn: 1 },
     );
   });
 });

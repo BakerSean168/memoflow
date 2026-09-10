@@ -17,6 +17,7 @@ import { GoalStatus } from '@memoflow/contracts/goal';
 import type { GoalId, ScheduleTaskId } from '@memoflow/contracts/primitives';
 import { ReminderStatus } from '@memoflow/contracts/reminder';
 import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/contracts/task';
+import { createTimeFacade, type CalendarApi, type TimeContext } from '@memoflow/time';
 import type {
   DashboardReadSource,
   DashboardTaskOccurrenceRecord,
@@ -37,10 +38,12 @@ const ACTIVITY_WINDOW_MS = 14 * DAY_MS;
 export async function getDashboardData(
   identityId: string,
   source: DashboardReadSource,
+  timeContext: TimeContext,
 ): Promise<DashboardData> {
-  const now = Date.now();
-  const todayStart = startOfDay(now);
-  const todayEnd = todayStart + DAY_MS - 1;
+  const time = createTimeFacade({ context: timeContext });
+  const now = Number(time.now());
+  const todayStart = Number(time.calendar.startOfDay(now));
+  const todayEnd = Number(time.calendar.endOfDay(now));
 
   const [goals, taskPlans, taskOccurrences, schedules, reminders, unreadNotifications] =
     await Promise.all([
@@ -139,7 +142,7 @@ export async function getDashboardData(
           schedules,
           now,
         }),
-    trendDays: buildTrendDays(now, activeTemplates, liveTaskOccurrences),
+    trendDays: buildTrendDays(now, activeTemplates, liveTaskOccurrences, time.calendar),
     goalProgress,
     taskBoard,
     upcomingSchedule,
@@ -150,10 +153,12 @@ function buildTrendDays(
   now: number,
   taskPlans: DashboardTaskPlanRecord[],
   taskOccurrences: DashboardTaskOccurrenceRecord[],
+  calendar: CalendarApi,
 ): TrendDay[] {
   const days = Array.from({ length: TREND_DAY_COUNT }, (_, index) => {
-    const dayStart = startOfDay(now - (TREND_DAY_COUNT - 1 - index) * DAY_MS);
-    const date = new Date(dayStart).toISOString().slice(0, 10);
+    const offset = -(TREND_DAY_COUNT - 1 - index);
+    const dayStart = Number(calendar.startOfDay(calendar.addDays(now, offset)));
+    const date = String(calendar.toYmd(dayStart));
 
     return {
       date,
@@ -166,7 +171,7 @@ function buildTrendDays(
   const dayMap = new Map(days.map((day) => [day.date, day]));
 
   for (const template of taskPlans) {
-    const day = dayMap.get(toDateKey(template.createdAt));
+    const day = dayMap.get(toDateKey(template.createdAt, calendar));
     if (day) {
       day.tasksCreated += 1;
     }
@@ -178,7 +183,7 @@ function buildTrendDays(
     }
 
     const completedAt = instance.actualEndTime ?? instance.updatedAt;
-    const day = dayMap.get(toDateKey(completedAt));
+    const day = dayMap.get(toDateKey(completedAt, calendar));
     if (day) {
       day.tasksCompleted += 1;
     }
@@ -276,16 +281,8 @@ function normalizePercentage(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-// Residual 1165 keep-boundary: dashboard projection startOfDay — timestamp ms → timestamp ms.
-// Soft residual 1165: app-react agenda startOfDay takes/returns Date (no force-merge).
-function startOfDay(timestamp: number): number {
-  const date = new Date(timestamp);
-  date.setHours(0, 0, 0, 0);
-  return date.getTime();
-}
-
-function toDateKey(timestamp: number): string {
-  return new Date(startOfDay(timestamp)).toISOString().slice(0, 10);
+function toDateKey(timestamp: number, calendar: CalendarApi): string {
+  return String(calendar.toYmd(timestamp));
 }
 
 function isWithinRange(value: number, start: number, end: number): boolean {

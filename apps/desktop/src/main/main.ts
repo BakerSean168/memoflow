@@ -69,7 +69,7 @@ import { DesktopKnowledgeNotePersistenceAdapter } from './modules/ai/desktop-kno
 import { DesktopKnowledgeSourceAdapter } from './modules/ai/desktop-knowledge-source.adapter';
 import {
   getDesktopDashboardData,
-  type DashboardRepositoryDependencies,
+  type DashboardReadDependencies,
 } from './services/dashboard-read-service';
 import { configureDesktopShellIdentity } from './utils/app-icon';
 import { getApiBaseUrl } from './utils/api-config';
@@ -112,7 +112,7 @@ let activeReminderUsageRuntime: { stop: () => void } | null = null;
 // 当前激活 profile 的组合 Goal/Task repository view。dashboard IPC handler 在
 // shell 初始化时只注册一次，而仓储要等 profile 激活（registerBusinessModules）
 // 之后才存在，因此在这里做桥接。
-let activeProfileDashboardRepositories: DashboardRepositoryDependencies | null = null;
+let activeProfileDashboardRepositories: DashboardReadDependencies | null = null;
 
 /**
  * Register all business modules on a bootstrapper for the active profile.
@@ -330,7 +330,7 @@ async function registerBusinessModules(
   });
   const labelElectronModule = createLabelElectronModule({ service: labelService });
 
-  const dashboardRepositories: DashboardRepositoryDependencies = {
+  const dashboardRepositories: DashboardReadDependencies = {
     goalRepository: goalComposed.repositories.goalRepository,
     taskPlanRepository: taskComposed.repositories.taskPlanRepository,
     taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
@@ -338,6 +338,7 @@ async function registerBusinessModules(
     scheduleTaskRepository: scheduleComposed.repositories.scheduleTaskRepository,
     reminderTemplateRepository: reminderComposed.repositories.reminderTemplateRepository,
     notificationRepository: notificationComposed.repositories.notificationRepository,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
   };
   activeProfileDashboardRepositories = dashboardRepositories;
 

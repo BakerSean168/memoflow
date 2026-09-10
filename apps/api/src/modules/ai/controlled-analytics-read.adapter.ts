@@ -37,7 +37,11 @@ export class ControlledAnalyticsReadAdapter implements IAnalyticsReadPort {
       userTimeContextPort: this.userTimeContextPort,
     });
     const taskRepos = createTaskPrismaRepositories(this.db);
-    const dashboard = await getApiDashboardData(this.db, identityId);
+    const dashboard = await getApiDashboardData(
+      this.db,
+      identityId,
+      this.userTimeContextPort,
+    );
     const taskDashboard = await new GetTaskDashboardUseCase(
       taskRepos.taskPlanRepository,
       taskRepos.taskOccurrenceRepository,

@@ -8,7 +8,7 @@ import { createLogger } from '@memoflow/utils/logger';
 import type { IElectronAuthContext } from '@memoflow/contracts/electron';
 import {
   getDesktopDashboardData,
-  type DashboardRepositoryDependencies,
+  type DashboardReadDependencies,
 } from '../services/dashboard-read-service';
 
 const CHANNEL = DashboardChannels.GET_STATS;
@@ -30,7 +30,7 @@ const logger = createLogger('DashboardIpc');
  */
 export function registerDashboardIpcHandler(
   getAuthProvider: () => IElectronAuthContext | null,
-  getRepositories: () => DashboardRepositoryDependencies,
+  getRepositories: () => DashboardReadDependencies,
 ): void {
   ipcMain.handle(CHANNEL, async () => {
     const auth = getAuthProvider();

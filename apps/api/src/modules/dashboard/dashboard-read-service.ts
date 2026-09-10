@@ -8,6 +8,7 @@ import {
   type DashboardReminderRecord,
 } from '@memoflow/dashboard';
 import type { DashboardData } from '@memoflow/contracts/dashboard';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { createGoalPrismaRepositories } from '@memoflow/goal';
 import { createTaskPrismaRepositories } from '@memoflow/task';
 import { createSchedulePrismaRepository } from '@memoflow/schedule';
@@ -94,12 +95,14 @@ function toReminderRecord(reminder: {
 export async function getApiDashboardData(
   db: PrismaClient,
   identityId: string,
+  userTimeContextPort: UserTimeContextPort,
 ): Promise<DashboardData> {
   const goalRepos = createGoalPrismaRepositories(db);
   const taskRepos = createTaskPrismaRepositories(db);
   const scheduleRepository = createSchedulePrismaRepository(db);
   const reminderRepos = createReminderPrismaRepositories(db);
   const notificationRepos = createNotificationPrismaRepositories(db);
+  const timeContext = await userTimeContextPort.getUserTimeContext(identityId);
 
   return getDashboardData(identityId, {
     listGoals: async (id) =>
@@ -112,8 +115,8 @@ export async function getApiDashboardData(
     listTaskPlans: async (id) =>
       (await taskRepos.taskPlanRepository.findByIdentityId(id)).map(toTaskPlanRecord),
     listTaskOccurrences: async (id) =>
-      (await taskRepos.taskOccurrenceRepository.findByIdentityId(id)).map(
-        toDashboardTaskOccurrenceRecord,
+      (await taskRepos.taskOccurrenceRepository.findByIdentityId(id)).map((instance) =>
+        toDashboardTaskOccurrenceRecord(instance.toClientDTOAt(timeContext)),
       ),
     listSchedules: async (id) =>
       (await scheduleRepository.findByIdentityId(id)).map(toScheduleRecord),
@@ -139,5 +142,5 @@ export async function getApiDashboardData(
         timestamp: row.occurredAt.getTime(),
       }));
     },
-  });
+  }, timeContext);
 }

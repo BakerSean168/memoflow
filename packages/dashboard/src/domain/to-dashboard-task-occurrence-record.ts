@@ -18,7 +18,7 @@ export interface DashboardTaskOccurrenceSource {
   actualEndTime: number | null;
   updatedAt: number;
   deletedAt: number | null;
-  isOverdue(): boolean;
+  isOverdue: boolean;
 }
 
 export function toDashboardTaskOccurrenceRecord(
@@ -32,6 +32,6 @@ export function toDashboardTaskOccurrenceRecord(
     actualEndTime: instance.actualEndTime,
     updatedAt: instance.updatedAt,
     deletedAt: instance.deletedAt,
-    isOverdue: () => instance.isOverdue(),
+    isOverdue: () => instance.isOverdue,
   };
 }

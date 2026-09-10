@@ -312,7 +312,7 @@ async function bootstrap(): Promise<void> {
   const powerSyncApiModule = composePowerSyncApiModule({ db: prisma });
   const labelApiModule = composeLabelApiModule({ service: labelService });
   const dashboardApiModule = composeDashboardApiModule({
-    dashboardReadPort: new PrismaDashboardReadPort(prisma),
+    dashboardReadPort: new PrismaDashboardReadPort(prisma, settingApiModule.userTimeContextPort),
     activityLedgerRuntime: createActivityLedgerRecorder(new PrismaActivityLedgerWriter(prisma)),
   });
   const app = await bootstrapper
