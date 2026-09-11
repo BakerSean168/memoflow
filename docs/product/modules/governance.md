@@ -5,7 +5,7 @@ tags:
   - governance
 description: Governance 可执行参考模块与开发模式编码规范工作台
 created: 2026-06-02T00:00:00
-updated: 2026-09-09T10:35:00+09:00
+updated: 2026-09-11T00:00:00+09:00
 ---
 
 # Governance 模块说明
@@ -31,11 +31,11 @@ Governance 有两个正式且长期保留的定位：
 - 标签与筛选；
 - rule code 唯一标识；
 - live reference location；
-- Prisma 与 PowerSync 双 persistence；
+- Prisma 与 PowerSync 双 persistence；`GOV-1901` 已锁定 Rule/RuleRevision round-trip 与 search/filter 行为 parity；
 - HTTP 与 IPC 双 transport；
 - Web/Desktop client；
 - Vue list/detail/editor/history；
-- composition-root / transport-parity / public-surface reference tests。
+- composition-root / transport-parity / persistence-parity / public-surface / docs anti-drift reference tests。
 
 ## 3. 用户/开发者路径
 
@@ -87,7 +87,7 @@ Result/failure contracts
 focused characterization tests
 ```
 
-对全仓 feature architecture 的重大结构调整，优先用 Governance 证明一个完整可执行 vertical slice。
+对全仓 feature architecture 的重大结构调整，优先用 Governance 证明一个完整可执行 vertical slice。`GOV-1901` 同时修复了一个实际 parity 漂移：Prisma search 现在与 PowerSync 一样覆盖 code/title/description/tags，并使用不区分大小写的关键词匹配。
 
 ## 6. 与 Engineering Governance 的关系
 

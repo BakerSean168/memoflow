@@ -74,3 +74,15 @@ packages/governance/src/
 > `governance` 的代码结构本身就是仓库治理标准。
 >
 > 新模块开发时，应优先对齐这套 `api/client/electron/server/*` 结构，而不是继续复制旧的 layer-named seam、模块内公共 contracts 或 UI domain-client 特例。
+
+## Reference feature executable invariants
+
+`GOV-1901` 把 ADR-110 的 reference responsibility 固化为可执行契约，而不是只依赖本文档：
+
+- Rule CRUD/search、Draft → Active → Deprecated → Active lifecycle 与 `RuleRevision` append-only audit 必须保持行为测试；
+- Prisma 与 PowerSync 必须把同一 Rule/RuleRevision 恢复为等价领域状态，并保持 search/filter 语义一致；
+- HTTP 与 IPC 必须经过同一 contracts validation 与 `GovernanceApplicationPort`，返回等价 Result/failure contract；
+- API/Desktop host composer 负责选择 Prisma/PowerSync adapter，`api` / `electron` transport module 不允许重新内嵌 composition；
+- `src/reference-module-invariants.surface.spec.ts` 会直接核对 package exports、host composer、Vue list/detail/editor/history surface 与 README/QUICK_REFERENCE，防止 gold-standard 文档和真实包形状漂移。
+
+因此，当全仓库引入新的 feature architecture pattern 时，Governance 的这组 gate 应先变绿，再把相同模式推广到复杂业务模块。

@@ -5,27 +5,38 @@ tags:
   - architecture
 description: Governance 一页速查卡 - 公开 seam、职责与改动入口
 created: 2026-03-14T00:00:00
-updated: 2026-07-06T00:00:00+08:00
+updated: 2026-09-11T00:00:00+09:00
 ---
 
 # Governance 快速参考卡
 
 ## 一页结构图
 
-| seam / 层 | 目录 / 入口 | 负责什么 |
-| --- | --- | --- |
-| Public Contracts | `@memoflow/contracts/governance` | DTO、Schema、事件、ID 类型、Protocol |
-| Contracts Mocks | `@memoflow/contracts/mocks` | governance mock 数据 |
-| Server Domain | `src/server/domain/` | 聚合根、实体、仓储接口、值对象 |
-| Server Application | `src/server/application/` | Commands / Queries / `GovernanceApplicationPort` |
-| Server Transport | `src/server/transport/` | 校验、控制器、transport 翻译 |
-| Server Infrastructure | `src/server/infrastructure/` | Prisma / PowerSync / runtime / 规范化组合根（`createGovernanceModule`）/ seed |
-| API | `@memoflow/governance/api` / `src/api/` | HTTP 传输与生命周期适配器（不含组合） |
-| Client | `@memoflow/governance/client` / `src/client/` | Web / Desktop renderer 客户端 seam |
-| Electron | `@memoflow/governance/electron` / `src/electron/` | IPC 传输与生命周期适配器（不含组合） |
-| Server Root | `@memoflow/governance` | 规范化服务端组合根 + 宿主装配 ingredient factory |
+| seam / 层             | 目录 / 入口                                       | 负责什么                                                                      |
+| --------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Public Contracts      | `@memoflow/contracts/governance`                  | DTO、Schema、事件、ID 类型、Protocol                                          |
+| Contracts Mocks       | `@memoflow/contracts/mocks`                       | governance mock 数据                                                          |
+| Server Domain         | `src/server/domain/`                              | 聚合根、实体、仓储接口、值对象                                                |
+| Server Application    | `src/server/application/`                         | Commands / Queries / `GovernanceApplicationPort`                              |
+| Server Transport      | `src/server/transport/`                           | 校验、控制器、transport 翻译                                                  |
+| Server Infrastructure | `src/server/infrastructure/`                      | Prisma / PowerSync / runtime / 规范化组合根（`createGovernanceModule`）/ seed |
+| API                   | `@memoflow/governance/api` / `src/api/`           | HTTP 传输与生命周期适配器（不含组合）                                         |
+| Client                | `@memoflow/governance/client` / `src/client/`     | Web / Desktop renderer 客户端 seam                                            |
+| Electron              | `@memoflow/governance/electron` / `src/electron/` | IPC 传输与生命周期适配器（不含组合）                                          |
+| Server Root           | `@memoflow/governance`                            | 规范化服务端组合根 + 宿主装配 ingredient factory                              |
 
 治理模块公共契约已经外提到 `packages/contracts`，`packages/governance/src/` 内不再维护第二份 contracts，也不再对外暴露 `domain-client`、`application-client`、`infrastructure-client` 这类 layer-named seam。
+
+## Reference feature 可执行验收
+
+Governance 不是静态目录样板。`GOV-1901` 长期要求以下四组 proof 同时存在：
+
+1. **业务行为**：Rule CRUD/search、Draft → Active → Deprecated → Active lifecycle，以及 append-only `RuleRevision` history；
+2. **持久化 parity**：Prisma 与 PowerSync 对同一 Rule/RuleRevision round-trip 等价，search/filter 行为一致；
+3. **transport parity**：HTTP / IPC 使用同一 contracts validation、同一 `GovernanceApplicationPort` 与一致 Result/failure contract；
+4. **composition/public seam**：`apps/api/src/runtime/compose-governance.ts` 与 `apps/desktop/src/main/runtime/compose-governance.ts` 持有 adapter 选择，公开 seam 固定为 `@memoflow/governance`、`/api`、`/client`、`/electron`。
+
+对应 anti-drift gate：`packages/governance/src/reference-module-invariants.surface.spec.ts` 与 `server/infrastructure/__tests__/governance-persistence-parity.spec.ts`。任何系统级 feature architecture 改造，应先确保这两类 reference gate 仍成立。
 
 ## 前端数据流（推荐）
 
@@ -39,22 +50,22 @@ updated: 2026-07-06T00:00:00+08:00
 
 ## 改动去哪改
 
-| 需求 | 主要文件 |
-| --- | --- |
-| 新增请求字段 | `packages/contracts/src/modules/governance/api/*.ts` + 相关 DTO |
-| 新增响应字段 | `packages/contracts/src/modules/governance/api/response-schemas.ts` + 相关 DTO |
-| 新增 RPC channel / IPC payload | `packages/contracts/src/modules/governance/protocol/*` |
-| 新增领域规则 | `src/server/domain/aggregates/rule.ts` |
-| 新增值对象 / 领域不变量 | `src/server/domain/value-objects/` |
-| 新增查询/命令 | `src/server/application/use-cases/` |
-| 新增 HTTP 端点 | `src/api/routes/*.routes.ts` |
-| 新增 transport 共享逻辑 | `src/server/transport/` |
-| 新增模块运行时副作用 | `src/server/infrastructure/runtime/` |
-| 新增宿主装配（组合根） | `apps/api/src/runtime/compose-governance.ts`（Prisma）/ `apps/desktop/src/main/runtime/compose-governance.ts`（PowerSync） |
-| 新增桌面主进程治理 IPC 接线 | `src/electron/index.ts`（仅传输 + 生命周期） |
-| 新增 Web / Renderer 调用 | `src/client/index.ts` |
-| 新增 UI 展示派生 | `packages/app-vue/src/modules/governance/display-rule.ts` |
-| 新增持久化字段 | `src/server/infrastructure/adapters/*/mappers/` |
+| 需求                           | 主要文件                                                                                                                   |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| 新增请求字段                   | `packages/contracts/src/modules/governance/api/*.ts` + 相关 DTO                                                            |
+| 新增响应字段                   | `packages/contracts/src/modules/governance/api/response-schemas.ts` + 相关 DTO                                             |
+| 新增 RPC channel / IPC payload | `packages/contracts/src/modules/governance/protocol/*`                                                                     |
+| 新增领域规则                   | `src/server/domain/aggregates/rule.ts`                                                                                     |
+| 新增值对象 / 领域不变量        | `src/server/domain/value-objects/`                                                                                         |
+| 新增查询/命令                  | `src/server/application/use-cases/`                                                                                        |
+| 新增 HTTP 端点                 | `src/api/routes/*.routes.ts`                                                                                               |
+| 新增 transport 共享逻辑        | `src/server/transport/`                                                                                                    |
+| 新增模块运行时副作用           | `src/server/infrastructure/runtime/`                                                                                       |
+| 新增宿主装配（组合根）         | `apps/api/src/runtime/compose-governance.ts`（Prisma）/ `apps/desktop/src/main/runtime/compose-governance.ts`（PowerSync） |
+| 新增桌面主进程治理 IPC 接线    | `src/electron/index.ts`（仅传输 + 生命周期）                                                                               |
+| 新增 Web / Renderer 调用       | `src/client/index.ts`                                                                                                      |
+| 新增 UI 展示派生               | `packages/app-vue/src/modules/governance/display-rule.ts`                                                                  |
+| 新增持久化字段                 | `src/server/infrastructure/adapters/*/mappers/`                                                                            |
 
 ## 路由拆分规则
 

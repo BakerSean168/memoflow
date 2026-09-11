@@ -6912,6 +6912,16 @@
       ]
     },
     {
+      "path": "packages/governance/src/reference-module-invariants.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/governance/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/governance/src/server/application/use-cases/commands/__tests__/create-rule.use-case.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7043,6 +7053,16 @@
     },
     {
       "path": "packages/governance/src/server/infrastructure/__tests__/governance-composition-root.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/governance/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/governance/src/server/infrastructure/__tests__/governance-persistence-parity.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/governance/vitest.config.ts"
@@ -11172,7 +11192,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 26
+      "fileCount": 28
     },
     {
       "id": "packages/notification/vitest.config.ts",
@@ -11585,7 +11605,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 26
+      "fileCount": 28
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -12019,6 +12039,7 @@
       "packages/governance/src/client/governance-ipc-transport-dual.surface.spec.ts",
       "packages/governance/src/dual-registry-path.surface.spec.ts",
       "packages/governance/src/electron/index.spec.ts",
+      "packages/governance/src/reference-module-invariants.surface.spec.ts",
       "packages/governance/src/server/application/use-cases/commands/__tests__/create-rule.use-case.test.ts",
       "packages/governance/src/server/application/use-cases/commands/__tests__/delete-rule.use-case.test.ts",
       "packages/governance/src/server/application/use-cases/commands/__tests__/update-rule.use-case.test.ts",
@@ -12033,6 +12054,7 @@
       "packages/governance/src/server/domain/value-objects/__tests__/governance-rich-value-objects.spec.ts",
       "packages/governance/src/server/domain/value-objects/__tests__/rule-id.spec.ts",
       "packages/governance/src/server/infrastructure/__tests__/governance-composition-root.surface.spec.ts",
+      "packages/governance/src/server/infrastructure/__tests__/governance-persistence-parity.spec.ts",
       "packages/governance/src/server/infrastructure/__tests__/governance-repositories.surface.spec.ts",
       "packages/governance/src/server/infrastructure/adapters/prisma/__tests__/governance-rule-ownership.surface.spec.ts",
       "packages/notification/src/api/__tests__/notification-lane-bootstrap.spec.ts",
@@ -12302,7 +12324,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1061,
+    "unit": 1063,
     "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,

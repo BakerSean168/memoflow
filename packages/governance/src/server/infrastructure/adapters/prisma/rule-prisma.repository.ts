@@ -251,9 +251,10 @@ export class RulePrismaRepository implements IRuleRepository {
       }
 
       const keywordConditions: Prisma.RuleWhereInput[] = [
-        { code: { contains: keyword } },
-        { title: { contains: keyword } },
-        { description: { contains: keyword } },
+        { code: { contains: keyword, mode: 'insensitive' } },
+        { title: { contains: keyword, mode: 'insensitive' } },
+        { description: { contains: keyword, mode: 'insensitive' } },
+        { tags: { contains: keyword, mode: 'insensitive' } },
       ];
 
       const where: Prisma.RuleWhereInput = {};

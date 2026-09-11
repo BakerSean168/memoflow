@@ -410,16 +410,13 @@ ADR-110 supersedes the earlier Governance -> Knowledge retirement plan. Governan
 
 ## GOV-1901 — Freeze executable reference-module invariants
 
-**Goal:** make the reference responsibility explicit and executable.
+**状态：DONE — 2026-09-11。**
 
-**Implementation:**
+Governance is now protected as an executable reference feature rather than only by ADR prose. `rule-reference-module-characterization.spec.ts` explicitly freezes the Rule DTO surface and Draft → Active → Deprecated → Active lifecycle; the existing CRUD/search/revision use-case suites remain the behavior ledger. `governance-persistence-parity.spec.ts` adds real Prisma/PowerSync mapper round-trip parity for Rule + append-only RuleRevision, equivalent blank-search behavior, and adapter query parity for code/title/description/tags + status/severity/tag filters. That gate exposed and fixed a real drift: Prisma search omitted tags and used database-default case sensitivity while PowerSync searched tags through SQLite LIKE; Prisma now includes tags and uses case-insensitive keyword matching.
 
-1. characterize Rule CRUD/search/lifecycle/revision behavior;
-2. characterize Prisma/PowerSync parity and HTTP/IPC transport parity;
-3. lock canonical public seams and host-owned composition;
-4. keep README / QUICK_REFERENCE synchronized with the actual package shape.
+`reference-module-invariants.surface.spec.ts` locks the four canonical package exports (`.`, `/api`, `/client`, `/electron`), the physical contracts/domain/application/transport/Prisma/PowerSync/UI vertical slice, API/Desktop host composers, and README/QUICK_REFERENCE synchronization. Existing transport parity and composition-root gates continue to prove common contracts validation, `GovernanceApplicationPort`, Result behavior and host-owned adapter selection. Package README, Governance QUICK_REFERENCE, product module and module index now point at the actual executable proof instead of retired layer-named seams.
 
-**Acceptance:** a developer can use Governance as the canonical example for a complete MemoFlow feature without consulting a retired/legacy seam.
+**Acceptance evidence:** Governance full suite 28 files / 194 tests PASS; focused reference/persistence/transport/composition 5 / 15 PASS; API governance composer 2 / 7 PASS; App-Vue Governance focused surfaces 5 / 23 PASS (existing missing-English-locale warnings are deferred to GOV-1902 smoke-path hardening). Governance typecheck PASS and production build PASS. Authored changed-file ESLint PASS with 0 warnings/errors; test inventory regenerated to 1232 files; docs-check PASS; governance-check PASS; `git diff --check` PASS at commit closure.
 
 ## GOV-1902 — Define development-surface policy and smoke path
 

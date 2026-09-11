@@ -4,6 +4,32 @@ import { Language } from '../../value-objects/language';
 import { RuleSeverity } from '../../value-objects/rule-severity';
 
 describe('Governance executable reference-module characterization (SYS-0001 / ADR-110)', () => {
+  it('freezes the canonical lifecycle used by the reference feature', () => {
+    const created = Rule.create({
+      code: 'ARCH-043',
+      title: 'Reference lifecycle',
+      description: 'The executable reference feature keeps its lifecycle semantics explicit.',
+      severity: RuleSeverity.Recommended,
+      tags: ['governance'],
+      goodExamples: [{ language: Language.TypeScript, content: 'rule.activate();' }],
+      badExamples: [{ language: Language.TypeScript, content: 'rule.status = "Active";' }],
+      authorId: 'identity-governance-characterization' as never,
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+
+    const rule = created.data;
+    expect(rule.status).toBe('Draft');
+    expect(rule.activate().ok).toBe(true);
+    expect(rule.status).toBe('Active');
+    expect(rule.deprecate('Replaced by a newer reference rule.').ok).toBe(true);
+    expect(rule.status).toBe('Deprecated');
+    expect(rule.deprecationReason).toBe('Replaced by a newer reference rule.');
+    expect(rule.reactivate().ok).toBe(true);
+    expect(rule.status).toBe('Active');
+    expect(rule.deprecationReason).toBeNull();
+  });
+
   it('freezes the canonical Rule surface that the permanent reference feature must preserve', () => {
     const created = Rule.create({
       code: 'ARCH-042',
