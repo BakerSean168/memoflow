@@ -32,6 +32,7 @@ export class KnowledgeWriteRequestPrismaRepository implements IKnowledgeWriteReq
           id: record.id,
           identityId: record.identityId,
           bindingId: record.connectionId,
+          knowledgeDocumentId: record.knowledgeDocumentId,
           requestId: record.requestId,
           requestHash: record.requestHash,
           relativePath: record.relativePath,
@@ -225,6 +226,8 @@ export class KnowledgeWriteRequestPrismaRepository implements IKnowledgeWriteReq
       connectionId: row.bindingId,
       requestId: row.requestId,
       requestHash: row.requestHash,
+      knowledgeDocumentId:
+        row.knowledgeDocumentId as KnowledgeWriteRequestRecord['knowledgeDocumentId'],
       relativePath: row.relativePath,
       status: row.status as KnowledgeWriteRequestStatus,
       commitSha: row.commitSha,

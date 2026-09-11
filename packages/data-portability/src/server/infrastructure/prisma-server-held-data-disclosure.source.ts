@@ -5,6 +5,7 @@ import type {
   ServerHeldGithubWebhookDelivery,
   ServerHeldKnowledgeAttachmentContentCache,
   ServerHeldKnowledgeAttachmentProjection,
+  ServerHeldKnowledgeDocumentIdentity,
   ServerHeldKnowledgeNoteProjection,
   ServerHeldKnowledgeSpace,
   ServerHeldKnowledgeRemoteBinding,
@@ -13,6 +14,10 @@ import type {
   ServerHeldKnowledgeProjectionCheckpoint,
   ServerHeldKnowledgeWriteRequest,
 } from '@memoflow/contracts/data-portability';
+import {
+  KnowledgeDocumentIdSchema,
+  KnowledgeDocumentIdentityOriginSchema,
+} from '@memoflow/contracts/repository';
 import type { ServerHeldDataDisclosureSource } from '../application/server-held-data-disclosure.source';
 
 function iso(value: Date): string {
@@ -48,10 +53,60 @@ export class PrismaServerHeldDataDisclosureSource implements ServerHeldDataDiscl
           connectedAt: true,
           disconnectedAt: true,
           version: true,
-          knowledgeSpace: { select: { id: true, createdAt: true, updatedAt: true } },
-          observation: true,
-          historyFence: true,
-          projectionCheckpoint: true,
+          knowledgeSpace: {
+            select: {
+              id: true,
+              createdAt: true,
+              updatedAt: true,
+              documentIdentities: {
+                orderBy: [{ knowledgeDocumentId: 'asc' }],
+                select: {
+                  knowledgeSpaceId: true,
+                  knowledgeDocumentId: true,
+                  origin: true,
+                  originRequestId: true,
+                  createdAt: true,
+                  updatedAt: true,
+                },
+              },
+            },
+          },
+          observation: {
+            select: {
+              bindingId: true,
+              observedAt: true,
+              accountId: true,
+              repositoryFullName: true,
+              defaultBranch: true,
+              isPrivate: true,
+              archived: true,
+              disabled: true,
+              contentsPermission: true,
+              installationSuspended: true,
+              eligibilityState: true,
+              blockReason: true,
+            },
+          },
+          historyFence: {
+            select: {
+              bindingId: true,
+              defaultBranch: true,
+              lastConfirmedRemoteHeadSha: true,
+              confirmedAt: true,
+            },
+          },
+          projectionCheckpoint: {
+            select: {
+              bindingId: true,
+              branch: true,
+              projectedCommitSha: true,
+              state: true,
+              failureCode: true,
+              failureMessage: true,
+              lastAttemptAt: true,
+              projectedAt: true,
+            },
+          },
           webhookDeliveries: {
             orderBy: [{ receivedAt: 'asc' }, { id: 'asc' }],
             select: {
@@ -73,6 +128,7 @@ export class PrismaServerHeldDataDisclosureSource implements ServerHeldDataDiscl
             select: {
               id: true,
               bindingId: true,
+              knowledgeDocumentId: true,
               relativePath: true,
               commitSha: true,
               blobSha: true,
@@ -116,6 +172,7 @@ export class PrismaServerHeldDataDisclosureSource implements ServerHeldDataDiscl
             select: {
               id: true,
               bindingId: true,
+              knowledgeDocumentId: true,
               requestId: true,
               requestHash: true,
               relativePath: true,
@@ -158,16 +215,33 @@ export class PrismaServerHeldDataDisclosureSource implements ServerHeldDataDiscl
     ]);
 
     const spaces = new Map<string, ServerHeldKnowledgeSpace>();
+    const documentIdentities = new Map<string, ServerHeldKnowledgeDocumentIdentity>();
     for (const binding of bindings) {
       spaces.set(binding.knowledgeSpace.id, {
         id: binding.knowledgeSpace.id,
         createdAt: iso(binding.knowledgeSpace.createdAt),
         updatedAt: iso(binding.knowledgeSpace.updatedAt),
       });
+      for (const identity of binding.knowledgeSpace.documentIdentities) {
+        const key = `${identity.knowledgeSpaceId}:${identity.knowledgeDocumentId}`;
+        documentIdentities.set(key, {
+          knowledgeSpaceId: identity.knowledgeSpaceId,
+          knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(identity.knowledgeDocumentId),
+          origin: KnowledgeDocumentIdentityOriginSchema.parse(identity.origin),
+          originRequestId: identity.originRequestId,
+          createdAt: iso(identity.createdAt),
+          updatedAt: iso(identity.updatedAt),
+        });
+      }
     }
 
     return {
       knowledgeSpaces: [...spaces.values()].sort((a, b) => a.id.localeCompare(b.id)),
+      knowledgeDocumentIdentities: [...documentIdentities.values()].sort(
+        (a, b) =>
+          a.knowledgeSpaceId.localeCompare(b.knowledgeSpaceId) ||
+          a.knowledgeDocumentId.localeCompare(b.knowledgeDocumentId),
+      ),
       knowledgeRemoteBindings: bindings.map((binding): ServerHeldKnowledgeRemoteBinding => ({
         id: binding.id,
         knowledgeSpaceId: binding.knowledgeSpaceId,
@@ -237,6 +311,9 @@ export class PrismaServerHeldDataDisclosureSource implements ServerHeldDataDiscl
       knowledgeNoteProjections: bindings.flatMap((binding) =>
         binding.noteProjections.map((projection): ServerHeldKnowledgeNoteProjection => ({
           ...projection,
+          knowledgeDocumentId: projection.knowledgeDocumentId
+            ? KnowledgeDocumentIdSchema.parse(projection.knowledgeDocumentId)
+            : null,
           createdAt: iso(projection.createdAt),
           updatedAt: iso(projection.updatedAt),
           deletedAt: nullableIso(projection.deletedAt),
@@ -265,6 +342,7 @@ export class PrismaServerHeldDataDisclosureSource implements ServerHeldDataDiscl
       knowledgeWriteRequests: bindings.flatMap((binding) =>
         binding.writeRequests.map((request): ServerHeldKnowledgeWriteRequest => ({
           ...request,
+          knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(request.knowledgeDocumentId),
           createdAt: iso(request.createdAt),
           updatedAt: iso(request.updatedAt),
           completedAt: nullableIso(request.completedAt),

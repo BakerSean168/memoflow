@@ -4,7 +4,7 @@ tags:
   - dual-registry
 description: Dual Registry — retired locks vs keep-boundary vs open dual debt
 created: 2026-07-26T00:00:00
-updated: 2026-09-09T10:40:00+09:00
+updated: 2026-09-11T11:05:00+08:00
 ---
 
 # Dual Registry
@@ -20,16 +20,16 @@ updated: 2026-09-09T10:40:00+09:00
 | 基线 dual-surface 文件 | 237 |
 | 当前 dual-surface 文件 | 71 |
 | E3b 降幅 | 70.0%（目标 ≥25%） |
-| Registry suites | 121 |
-| keep-boundary 文件 | 50 |
-| 登记条目总数 | 121 |
+| Registry suites | 120 |
+| keep-boundary 文件 | 49 |
+| 登记条目总数 | 120 |
 | 未分类 | 0（覆盖率 100%） |
 
 ### 按 class
 
 | class | count |
 |-------|------:|
-| `keep_boundary` | 50 |
+| `keep_boundary` | 49 |
 | `retired` | 71 |
 
 ## 分类规则（摘要）
@@ -49,7 +49,7 @@ updated: 2026-09-09T10:40:00+09:00
 | package | retired | keep_boundary | other |
 |---------|--------:|--------------:|------:|
 | `apps/api` | 0 | 3 | 0 |
-| `apps/desktop` | 3 | 1 | 0 |
+| `apps/desktop` | 3 | 0 | 0 |
 | `apps/web` | 2 | 1 | 0 |
 | `packages/account` | 1 | 1 | 0 |
 | `packages/ai` | 4 | 7 | 0 |
@@ -79,7 +79,6 @@ updated: 2026-09-09T10:40:00+09:00
 | `keep_boundary` | `apps/api/src/shared/infrastructure/config/get-cors-origins-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `apps/api/src/shared/infrastructure/load-workspace-env-keep-boundary.surface.spec.ts` |
 | `retired` | `apps/desktop/src/main/desktop-shared-ipc-channels-dual.surface.spec.ts` |
-| `keep_boundary` | `apps/desktop/src/main/modules/ai/to-knowledge-note-ref-keep-boundary.surface.spec.ts` |
 | `keep_boundary` | `apps/desktop/src/main/modules/authentication/application/auto-login-result-extension-keep-boundary.surface.spec.ts` |
 | `retired` | `apps/desktop/src/main/modules/authentication/application/dual-registry.surface.spec.ts` |
 | `keep_boundary` | `apps/desktop/src/main/modules/authentication/application/refresh-result-layered-keep-boundary.surface.spec.ts` |

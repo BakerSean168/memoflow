@@ -35,6 +35,7 @@ import {
 } from './adapters/prisma/knowledge-remote-binding-prisma.repositories';
 import { KnowledgeRepositoryInstallationIntentPrismaRepository } from './adapters/prisma/knowledge-repository-installation-intent-prisma.repository';
 import { KnowledgeRemoteBindingWritePrismaTransactionRunner } from './adapters/prisma/knowledge-remote-binding-write-prisma-transaction.runner';
+import { KnowledgeDocumentIdentityPrismaRepository } from './adapters/prisma/knowledge-document-identity-prisma.repository';
 import { GithubWebhookDeliveryPrismaRepository } from './adapters/prisma/github-webhook-delivery-prisma.repository';
 import { KnowledgeNoteProjectionPrismaRepository } from './adapters/prisma/knowledge-note-projection-prisma.repository';
 import { KnowledgeAttachmentProjectionPrismaRepository } from './adapters/prisma/knowledge-attachment-projection-prisma.repository';
@@ -57,6 +58,7 @@ import type {
 } from '../application/ports/knowledge-remote-binding.repositories';
 import type { IKnowledgeRepositoryInstallationIntentRepository } from '../application/ports/knowledge-repository-installation-intent.repository';
 import type { KnowledgeRepositoryInstallationRoutingConfig } from '../application/services/knowledge-repository-connection.service';
+import type { IKnowledgeDocumentIdentityRepository } from '../application/ports/knowledge-document-identity.repository';
 import type {
   IGithubWebhookDeliveryRepository,
   IKnowledgeNoteProjectionRepository,
@@ -106,6 +108,7 @@ export interface RepositoryPrismaRepositorySet {
   readonly installationIntentRepository: IKnowledgeRepositoryInstallationIntentRepository;
   readonly bindingWriteTransactionRunner: KnowledgeRemoteBindingWritePrismaTransactionRunner;
   readonly deliveryRepository: IGithubWebhookDeliveryRepository;
+  readonly documentIdentityRepository: IKnowledgeDocumentIdentityRepository;
   readonly noteProjectionRepository: IKnowledgeNoteProjectionRepository;
   readonly attachmentProjectionRepository: IKnowledgeAttachmentProjectionRepository;
   readonly attachmentContentCache: IKnowledgeAttachmentContentCache;
@@ -148,6 +151,7 @@ export function createRepositoryPrismaRepositories(
     installationIntentRepository: new KnowledgeRepositoryInstallationIntentPrismaRepository(db),
     bindingWriteTransactionRunner: new KnowledgeRemoteBindingWritePrismaTransactionRunner(db),
     deliveryRepository: new GithubWebhookDeliveryPrismaRepository(db),
+    documentIdentityRepository: new KnowledgeDocumentIdentityPrismaRepository(db),
     noteProjectionRepository: new KnowledgeNoteProjectionPrismaRepository(db),
     attachmentProjectionRepository: new KnowledgeAttachmentProjectionPrismaRepository(db),
     attachmentContentCache: new KnowledgeAttachmentContentCachePrismaRepository(db),
@@ -246,6 +250,7 @@ export function createRepositoryPrismaRuntimeContributions(
           observationRepository: repositories.observationRepository,
           historyFenceRepository: repositories.historyFenceRepository,
           deliveryRepository: repositories.deliveryRepository,
+          documentIdentityRepository: repositories.documentIdentityRepository,
           projectionRepository,
           attachmentRepository,
           attachmentContentCache: attachmentContentCache ?? undefined,
@@ -261,6 +266,7 @@ export function createRepositoryPrismaRuntimeContributions(
           connectionRepository: bindingRepository,
           observationRepository: repositories.observationRepository,
           historyFenceRepository: repositories.historyFenceRepository,
+          documentIdentityRepository: repositories.documentIdentityRepository,
           projectionRepository,
           writeRequestRepository: writeRequestRepository ?? repositories.writeRequestRepository,
           leaseRepository: leaseRepository ?? undefined,

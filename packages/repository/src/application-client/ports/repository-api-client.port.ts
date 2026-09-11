@@ -34,6 +34,8 @@ import type {
   SyncKnowledgeRepositoryRes,
   CreateConfirmedKnowledgeNoteReq,
   CreateConfirmedKnowledgeNoteResponse,
+  AdoptKnowledgeDocumentReq,
+  AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
   ListKnowledgeNoteProjectionsReq,
@@ -103,6 +105,9 @@ export interface IRepositoryApiClient {
   createConfirmedKnowledgeNote(
     request: CreateConfirmedKnowledgeNoteReq,
   ): Promise<Result<CreateConfirmedKnowledgeNoteResponse>>;
+  adoptKnowledgeDocument(
+    request: AdoptKnowledgeDocumentReq,
+  ): Promise<Result<AdoptKnowledgeDocumentResponse>>;
   listKnowledgeWriteRequests(
     request?: ListKnowledgeWriteRequestsReq,
   ): Promise<Result<ListKnowledgeWriteRequestsRes>>;

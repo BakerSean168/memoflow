@@ -33,6 +33,7 @@ export {
   type RepositoryPrismaRuntimeContributions,
   type GithubAppConfig,
   type IKnowledgeRemoteBindingRepository,
+  type IKnowledgeDocumentIdentityRepository,
   type IGithubWebhookDeliveryRepository,
   type IKnowledgeNoteProjectionRepository,
   type IKnowledgeWriteRequestRepository,

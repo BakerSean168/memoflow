@@ -864,7 +864,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/modules/ai/to-knowledge-note-ref-keep-boundary.surface.spec.ts",
+      "path": "apps/desktop/src/main/modules/ai/stable-knowledge-note-ref-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -2778,6 +2778,16 @@
     },
     {
       "path": "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-provider-config-ownership.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/adapters/powersync/ai-knowledge-index-powersync.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -5201,6 +5211,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/repository/api/knowledge-document-identity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/schedule/aggregates/schedule-server-static-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5856,6 +5874,14 @@
     },
     {
       "path": "packages/database/src/schema/goal-record-source-correlation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/database/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/database/src/schema/knowledge-stable-document-identity-cutover.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/database/vitest.config.ts"
@@ -8720,7 +8746,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/repository/src/server/infrastructure/adapters/prisma/__tests__/confirmed-create-only-note-boundary.surface.spec.ts",
+      "path": "packages/repository/src/server/infrastructure/adapters/prisma/__tests__/controlled-note-write-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository/vitest.config.ts"
@@ -8736,7 +8762,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/repository/src/server/infrastructure/adapters/prisma/__tests__/knowledge-repository-connection-ownership.surface.spec.ts",
+      "path": "packages/repository/src/server/infrastructure/adapters/prisma/__tests__/knowledge-remote-binding-ownership.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository/vitest.config.ts"
@@ -8776,7 +8802,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/repository/src/server/infrastructure/adapters/prisma/knowledge-repository-connection-prisma.repository.spec.ts",
+      "path": "packages/repository/src/server/infrastructure/adapters/prisma/knowledge-document-identity-prisma.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository/vitest.config.ts"
@@ -8784,7 +8810,15 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/repository/src/server/infrastructure/adapters/prisma/knowledge-repository-connection-write-prisma-transaction.runner.integration.test.ts",
+      "path": "packages/repository/src/server/infrastructure/adapters/prisma/knowledge-remote-binding-prisma.repositories.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository/src/server/infrastructure/adapters/prisma/knowledge-remote-binding-write-prisma-transaction.runner.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
         "packages/repository/vitest.integration.config.ts"
@@ -11079,7 +11113,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 78
+      "fileCount": 79
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11471,7 +11505,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 78
+      "fileCount": 79
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -11499,7 +11533,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 78
+      "fileCount": 79
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11520,7 +11554,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 10
+      "fileCount": 11
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11597,7 +11631,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 35
+      "fileCount": 36
     },
     {
       "id": "packages/schedule-orchestration/vitest.config.ts",
@@ -11807,6 +11841,7 @@
       "packages/ai/src/server/infrastructure/adapters/mastra-vnext-native-ai-adapters.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-conversation-ownership.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/memory/__tests__/ai-provider-config-ownership.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/powersync/ai-knowledge-index-powersync.repository.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/powersync/ai-provider-onboarding-commit-powersync.adapter.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-knowledge-index-prisma.repository.test.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-provider-config-ownership.surface.spec.ts",
@@ -12256,7 +12291,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1056,
+    "unit": 1060,
     "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,

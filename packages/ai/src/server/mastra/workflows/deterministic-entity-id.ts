@@ -98,3 +98,15 @@ export function knowledgeCaptureRequestId(input: {
   const seed = `memoflow:knowledge.capture:v1:${input.workflowRunId}:${input.revision}`;
   return deterministicUuidV8(seed);
 }
+
+/**
+ * Stable opaque KnowledgeDocumentId for one knowledge.capture workflow.
+ * It intentionally uses a namespace distinct from the request id so the product
+ * identity and idempotency identity cannot be confused even though both are
+ * restart-safe.
+ */
+export function knowledgeCaptureDocumentId(input: { workflowRunId: string }): string {
+  if (!input.workflowRunId.trim()) throw new Error('workflowRunId is required');
+  const seed = `memoflow:knowledge.document:v1:${input.workflowRunId}`;
+  return `${ID_PREFIXES.KnowledgeDocumentId}_${deterministicUuidV8(seed)}`;
+}

@@ -8,6 +8,7 @@ import type {
   KnowledgeRemoteBindingClientDTO,
   KnowledgeRemoteBindingServerDTO,
 } from '@memoflow/contracts/repository';
+import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
 import type { IdentityId } from '@memoflow/contracts/primitives';
 import { ok, ResultErrorException } from '@memoflow/contracts/result';
 // This opt-in acceptance file intentionally crosses the Desktop -> Repository
@@ -21,6 +22,7 @@ import type {
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import type {
   IKnowledgeNoteProjectionRepository,
+  KnowledgeNoteProjectionDeletion,
   IKnowledgeWriteRequestRepository,
   KnowledgeNoteProjectionUpsert,
   KnowledgeWriteRequestProjectionSource,
@@ -154,6 +156,22 @@ class LiveHistoryFenceRepository implements IRemoteHistoryFenceRepository {
   }
 }
 
+class LiveDocumentIdentityRepository {
+  async find(): Promise<null> {
+    return null;
+  }
+
+  async claimForCreate(): Promise<boolean> {
+    return true;
+  }
+
+  async claimForAdoption(): Promise<boolean> {
+    return true;
+  }
+
+  async observeMarker(): Promise<void> {}
+}
+
 class LiveProjectionRepository implements IKnowledgeNoteProjectionRepository {
   private readonly notes = new Map<string, KnowledgeNoteProjectionUpsert>();
 
@@ -161,7 +179,7 @@ class LiveProjectionRepository implements IKnowledgeNoteProjectionRepository {
     _connectionId: string,
     _commitSha: string,
     notes: KnowledgeNoteProjectionUpsert[],
-  ): Promise<{ id: string; relativePath: string }[]> {
+  ): Promise<KnowledgeNoteProjectionDeletion[]> {
     this.notes.clear();
     for (const note of notes) this.notes.set(note.relativePath, note);
     return [];
@@ -188,6 +206,14 @@ class LiveProjectionRepository implements IKnowledgeNoteProjectionRepository {
   async findByPath(_connectionId: string, relativePath: string): Promise<null> {
     void relativePath;
     return null;
+  }
+
+  async findLiveByDocumentId(): Promise<never[]> {
+    return [];
+  }
+
+  async listLiveByConnection(): Promise<never[]> {
+    return [];
   }
 
   async loadLinkGraphSourcesForIdentity(): Promise<null> {
@@ -557,12 +583,14 @@ describe('live GitHub knowledge repository acceptance', () => {
     const connectionRepository = new LiveConnectionRepository(serverConnection);
     const observationRepository = new LiveObservationRepository(observation);
     const historyFenceRepository = new LiveHistoryFenceRepository(historyFence);
+    const documentIdentityRepository = new LiveDocumentIdentityRepository();
     const projectionRepository = new LiveProjectionRepository();
     const writeRequestRepository = new LiveWriteRequestRepository();
     const commitService = new KnowledgeNoteCommitService({
       connectionRepository,
       observationRepository,
       historyFenceRepository,
+      documentIdentityRepository,
       projectionRepository,
       writeRequestRepository,
       githubAppClient: appClient,
@@ -575,6 +603,7 @@ describe('live GitHub knowledge repository acceptance', () => {
     const requestId = `live-github-request-${randomUUID()}`;
     const committed = await commitService.create(identityId, {
       connectionId,
+      knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(`kdoc_${randomUUID()}`),
       proposalId: `live-github-proposal-${randomUUID()}`,
       revision: 1,
       requestId,

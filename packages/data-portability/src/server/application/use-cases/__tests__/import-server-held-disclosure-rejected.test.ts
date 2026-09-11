@@ -28,6 +28,7 @@ describe('ImportUserDataUseCase rejects server-held disclosure (residual 106)', 
       },
       data: {
         knowledgeSpaces: [],
+        knowledgeDocumentIdentities: [],
         knowledgeRemoteBindings: [],
         remoteRepositoryObservations: [],
         remoteHistoryFences: [],

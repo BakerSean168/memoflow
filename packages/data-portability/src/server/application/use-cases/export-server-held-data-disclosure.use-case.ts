@@ -48,6 +48,7 @@ export class ExportServerHeldDataDisclosureUseCase {
 
     const entityCounts = {
       knowledgeSpaces: data.knowledgeSpaces.length,
+      knowledgeDocumentIdentities: data.knowledgeDocumentIdentities.length,
       knowledgeRemoteBindings: data.knowledgeRemoteBindings.length,
       remoteRepositoryObservations: data.remoteRepositoryObservations.length,
       remoteHistoryFences: data.remoteHistoryFences.length,

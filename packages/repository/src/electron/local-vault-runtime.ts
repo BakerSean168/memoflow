@@ -2,7 +2,10 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
-import { LocalVaultBindingClientDTOSchema } from '@memoflow/contracts/repository';
+import {
+  KnowledgeDocumentIdSchema,
+  LocalVaultBindingClientDTOSchema,
+} from '@memoflow/contracts/repository';
 import type {
   ConfirmedLocalVaultWriteReq,
   ConfirmedLocalVaultWriteRes,
@@ -38,12 +41,13 @@ interface WriteLedgerEntry {
   requestId: string;
   proposalId: string;
   proposalRevision: number;
+  knowledgeDocumentId: string;
   relativePath: string;
   createdAt: number;
 }
 
 interface WriteLedger {
-  schemaVersion: 1;
+  schemaVersion: 2;
   entries: WriteLedgerEntry[];
 }
 
@@ -175,6 +179,22 @@ function extractTitle(
   }
   const heading = markdownBody.match(/^#\s+(.+)$/m)?.[1]?.trim();
   return heading || path.basename(relativePath, path.extname(relativePath));
+}
+
+function readStableKnowledgeDocumentId(
+  frontmatter: Record<string, unknown>,
+): LocalVaultNoteDTO['knowledgeDocumentId'] {
+  const marker = frontmatter['memoflow_id'];
+  if (marker === undefined || marker === null) return null;
+
+  const parsed = KnowledgeDocumentIdSchema.safeParse(marker);
+  if (!parsed.success) {
+    throw new LocalVaultRuntimeError(
+      'CONFLICT',
+      'Vault note contains an invalid memoflow_id marker',
+    );
+  }
+  return parsed.data;
 }
 
 function extractTags(frontmatter: Record<string, unknown>): string[] {
@@ -310,7 +330,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
           const note = await this.readNoteFromBinding(binding, { relativePath });
           notes.push(this.toSummary(note));
         } catch (error) {
-          if (!(error instanceof LocalVaultRuntimeError)) throw error;
+          if (!(error instanceof LocalVaultRuntimeError) || error.code === 'CONFLICT') throw error;
         }
       }
     };
@@ -386,7 +406,28 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
         'Confirmed proposal metadata is required',
       );
     }
-    const contentBytes = Buffer.byteLength(request.contentMarkdown, 'utf8');
+    const parsedDocumentId = KnowledgeDocumentIdSchema.safeParse(request.knowledgeDocumentId);
+    if (!parsedDocumentId.success) {
+      throw new LocalVaultRuntimeError(
+        'VALIDATION_ERROR',
+        'Confirmed knowledge document identity is invalid',
+      );
+    }
+    const knowledgeDocumentId = parsedDocumentId.data;
+    const parsedRequestedMarkdown = matter(request.contentMarkdown);
+    const requestedFrontmatter = parsedRequestedMarkdown.data as Record<string, unknown>;
+    const embeddedDocumentId = requestedFrontmatter['memoflow_id'];
+    if (embeddedDocumentId !== undefined && embeddedDocumentId !== knowledgeDocumentId) {
+      throw new LocalVaultRuntimeError(
+        'CONFLICT',
+        'Confirmed note contains a different memoflow_id marker',
+      );
+    }
+    const contentMarkdown = matter.stringify(parsedRequestedMarkdown.content, {
+      ...requestedFrontmatter,
+      memoflow_id: knowledgeDocumentId,
+    });
+    const contentBytes = Buffer.byteLength(contentMarkdown, 'utf8');
     if (contentBytes === 0 || contentBytes > MAX_WRITE_BYTES) {
       throw new LocalVaultRuntimeError('VALIDATION_ERROR', 'Vault note content size is invalid');
     }
@@ -399,6 +440,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       if (
         replay.proposalId !== request.proposalId ||
         replay.proposalRevision !== request.proposalRevision ||
+        replay.knowledgeDocumentId !== knowledgeDocumentId ||
         replay.relativePath !== relativePath
       ) {
         throw new LocalVaultRuntimeError(
@@ -412,6 +454,16 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       };
     }
 
+    const duplicateIdentity = (await this.scanVault()).notes.find(
+      (note) => note.knowledgeDocumentId === knowledgeDocumentId,
+    );
+    if (duplicateIdentity) {
+      throw new LocalVaultRuntimeError(
+        'CONFLICT',
+        'Knowledge document identity already exists in this Vault',
+      );
+    }
+
     const root = await fs.promises.realpath(binding.rootPath);
     const candidate = path.resolve(root, relativePath);
     assertContained(root, candidate);
@@ -420,7 +472,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     let handle: fs.promises.FileHandle | null = null;
     try {
       handle = await fs.promises.open(candidate, 'wx', 0o600);
-      await handle.writeFile(request.contentMarkdown, 'utf8');
+      await handle.writeFile(contentMarkdown, 'utf8');
       await handle.sync();
     } catch (error) {
       if (
@@ -440,6 +492,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       requestId: request.requestId,
       proposalId: request.proposalId,
       proposalRevision: request.proposalRevision,
+      knowledgeDocumentId: knowledgeDocumentId,
       relativePath,
       createdAt: this.now(),
     });
@@ -553,6 +606,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     const frontmatter = parsed.data as Record<string, unknown>;
     return {
       relativePath,
+      knowledgeDocumentId: readStableKnowledgeDocumentId(frontmatter),
       title: extractTitle(relativePath, parsed.content, frontmatter),
       excerpt: buildExcerpt(parsed.content),
       tags: extractTags(frontmatter),
@@ -624,11 +678,11 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       const parsed = JSON.parse(
         await fs.promises.readFile(this.options.writeLedgerFilePath, 'utf8'),
       ) as WriteLedger;
-      return parsed.schemaVersion === 1 && Array.isArray(parsed.entries)
+      return parsed.schemaVersion === 2 && Array.isArray(parsed.entries)
         ? parsed
-        : { schemaVersion: 1, entries: [] };
+        : { schemaVersion: 2, entries: [] };
     } catch (error) {
-      if (isMissing(error)) return { schemaVersion: 1, entries: [] };
+      if (isMissing(error)) return { schemaVersion: 2, entries: [] };
       throw error;
     }
   }

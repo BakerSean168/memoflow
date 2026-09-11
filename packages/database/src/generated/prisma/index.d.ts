@@ -384,6 +384,12 @@ export type KnowledgeRepositoryInstallationIntent = $Result.DefaultSelection<Pri
  */
 export type KnowledgeSpace = $Result.DefaultSelection<Prisma.$KnowledgeSpacePayload>
 /**
+ * Model KnowledgeDocumentIdentity
+ * ADR-090 durable identity registry. `id` is a technical row key; the product key is
+ * `(knowledgeSpaceId, knowledgeDocumentId)` and the external identity is carried by Markdown.
+ */
+export type KnowledgeDocumentIdentity = $Result.DefaultSelection<Prisma.$KnowledgeDocumentIdentityPayload>
+/**
  * Model KnowledgeRemoteBinding
  * ADR-089 durable user choice: one GitHub repository is bound to a KnowledgeSpace.
  * Provider health, sync history safety and projection state live in separate models.
@@ -1384,6 +1390,16 @@ export class PrismaClient<
   get knowledgeSpace(): Prisma.KnowledgeSpaceDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.knowledgeDocumentIdentity`: Exposes CRUD operations for the **KnowledgeDocumentIdentity** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more KnowledgeDocumentIdentities
+    * const knowledgeDocumentIdentities = await prisma.knowledgeDocumentIdentity.findMany()
+    * ```
+    */
+  get knowledgeDocumentIdentity(): Prisma.KnowledgeDocumentIdentityDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.knowledgeRemoteBinding`: Exposes CRUD operations for the **KnowledgeRemoteBinding** model.
     * Example usage:
     * ```ts
@@ -2168,6 +2184,7 @@ export namespace Prisma {
     RepositoryStatistic: 'RepositoryStatistic',
     KnowledgeRepositoryInstallationIntent: 'KnowledgeRepositoryInstallationIntent',
     KnowledgeSpace: 'KnowledgeSpace',
+    KnowledgeDocumentIdentity: 'KnowledgeDocumentIdentity',
     KnowledgeRemoteBinding: 'KnowledgeRemoteBinding',
     RemoteRepositoryObservation: 'RemoteRepositoryObservation',
     RemoteHistoryFence: 'RemoteHistoryFence',
@@ -2211,7 +2228,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "editorWorkspace" | "editorWorkspaceSession" | "editorWorkspaceSessionGroup" | "editorWorkspaceSessionGroupTab" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "taskStatistic" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "editorWorkspace" | "editorWorkspaceSession" | "editorWorkspaceSessionGroup" | "editorWorkspaceSessionGroupTab" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "taskStatistic" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -7543,6 +7560,80 @@ export namespace Prisma {
           }
         }
       }
+      KnowledgeDocumentIdentity: {
+        payload: Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>
+        fields: Prisma.KnowledgeDocumentIdentityFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.KnowledgeDocumentIdentityFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeDocumentIdentityPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.KnowledgeDocumentIdentityFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeDocumentIdentityPayload>
+          }
+          findFirst: {
+            args: Prisma.KnowledgeDocumentIdentityFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeDocumentIdentityPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.KnowledgeDocumentIdentityFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeDocumentIdentityPayload>
+          }
+          findMany: {
+            args: Prisma.KnowledgeDocumentIdentityFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeDocumentIdentityPayload>[]
+          }
+          create: {
+            args: Prisma.KnowledgeDocumentIdentityCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeDocumentIdentityPayload>
+          }
+          createMany: {
+            args: Prisma.KnowledgeDocumentIdentityCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.KnowledgeDocumentIdentityCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeDocumentIdentityPayload>[]
+          }
+          delete: {
+            args: Prisma.KnowledgeDocumentIdentityDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeDocumentIdentityPayload>
+          }
+          update: {
+            args: Prisma.KnowledgeDocumentIdentityUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeDocumentIdentityPayload>
+          }
+          deleteMany: {
+            args: Prisma.KnowledgeDocumentIdentityDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.KnowledgeDocumentIdentityUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.KnowledgeDocumentIdentityUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeDocumentIdentityPayload>[]
+          }
+          upsert: {
+            args: Prisma.KnowledgeDocumentIdentityUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeDocumentIdentityPayload>
+          }
+          aggregate: {
+            args: Prisma.KnowledgeDocumentIdentityAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateKnowledgeDocumentIdentity>
+          }
+          groupBy: {
+            args: Prisma.KnowledgeDocumentIdentityGroupByArgs<ExtArgs>
+            result: $Utils.Optional<KnowledgeDocumentIdentityGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.KnowledgeDocumentIdentityCountArgs<ExtArgs>
+            result: $Utils.Optional<KnowledgeDocumentIdentityCountAggregateOutputType> | number
+          }
+        }
+      }
       KnowledgeRemoteBinding: {
         payload: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>
         fields: Prisma.KnowledgeRemoteBindingFieldRefs
@@ -9795,6 +9886,7 @@ export namespace Prisma {
     repositoryStatistic?: RepositoryStatisticOmit
     knowledgeRepositoryInstallationIntent?: KnowledgeRepositoryInstallationIntentOmit
     knowledgeSpace?: KnowledgeSpaceOmit
+    knowledgeDocumentIdentity?: KnowledgeDocumentIdentityOmit
     knowledgeRemoteBinding?: KnowledgeRemoteBindingOmit
     remoteRepositoryObservation?: RemoteRepositoryObservationOmit
     remoteHistoryFence?: RemoteHistoryFenceOmit
@@ -11163,10 +11255,12 @@ export namespace Prisma {
 
   export type KnowledgeSpaceCountOutputType = {
     remoteBindings: number
+    documentIdentities: number
   }
 
   export type KnowledgeSpaceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     remoteBindings?: boolean | KnowledgeSpaceCountOutputTypeCountRemoteBindingsArgs
+    documentIdentities?: boolean | KnowledgeSpaceCountOutputTypeCountDocumentIdentitiesArgs
   }
 
   // Custom InputTypes
@@ -11185,6 +11279,13 @@ export namespace Prisma {
    */
   export type KnowledgeSpaceCountOutputTypeCountRemoteBindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: KnowledgeRemoteBindingWhereInput
+  }
+
+  /**
+   * KnowledgeSpaceCountOutputType without action
+   */
+  export type KnowledgeSpaceCountOutputTypeCountDocumentIdentitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KnowledgeDocumentIdentityWhereInput
   }
 
 
@@ -97188,6 +97289,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     remoteBindings?: boolean | KnowledgeSpace$remoteBindingsArgs<ExtArgs>
+    documentIdentities?: boolean | KnowledgeSpace$documentIdentitiesArgs<ExtArgs>
     _count?: boolean | KnowledgeSpaceCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeSpace"]>
 
@@ -97212,6 +97314,7 @@ export namespace Prisma {
   export type KnowledgeSpaceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt", ExtArgs["result"]["knowledgeSpace"]>
   export type KnowledgeSpaceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     remoteBindings?: boolean | KnowledgeSpace$remoteBindingsArgs<ExtArgs>
+    documentIdentities?: boolean | KnowledgeSpace$documentIdentitiesArgs<ExtArgs>
     _count?: boolean | KnowledgeSpaceCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type KnowledgeSpaceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -97221,6 +97324,7 @@ export namespace Prisma {
     name: "KnowledgeSpace"
     objects: {
       remoteBindings: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>[]
+      documentIdentities: Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -97621,6 +97725,7 @@ export namespace Prisma {
   export interface Prisma__KnowledgeSpaceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     remoteBindings<T extends KnowledgeSpace$remoteBindingsArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeSpace$remoteBindingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    documentIdentities<T extends KnowledgeSpace$documentIdentitiesArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeSpace$documentIdentitiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -98070,6 +98175,30 @@ export namespace Prisma {
   }
 
   /**
+   * KnowledgeSpace.documentIdentities
+   */
+  export type KnowledgeSpace$documentIdentitiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityInclude<ExtArgs> | null
+    where?: KnowledgeDocumentIdentityWhereInput
+    orderBy?: KnowledgeDocumentIdentityOrderByWithRelationInput | KnowledgeDocumentIdentityOrderByWithRelationInput[]
+    cursor?: KnowledgeDocumentIdentityWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: KnowledgeDocumentIdentityScalarFieldEnum | KnowledgeDocumentIdentityScalarFieldEnum[]
+  }
+
+  /**
    * KnowledgeSpace without action
    */
   export type KnowledgeSpaceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -98085,6 +98214,1095 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KnowledgeSpaceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model KnowledgeDocumentIdentity
+   */
+
+  export type AggregateKnowledgeDocumentIdentity = {
+    _count: KnowledgeDocumentIdentityCountAggregateOutputType | null
+    _min: KnowledgeDocumentIdentityMinAggregateOutputType | null
+    _max: KnowledgeDocumentIdentityMaxAggregateOutputType | null
+  }
+
+  export type KnowledgeDocumentIdentityMinAggregateOutputType = {
+    id: string | null
+    knowledgeSpaceId: string | null
+    knowledgeDocumentId: string | null
+    origin: string | null
+    originRequestId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type KnowledgeDocumentIdentityMaxAggregateOutputType = {
+    id: string | null
+    knowledgeSpaceId: string | null
+    knowledgeDocumentId: string | null
+    origin: string | null
+    originRequestId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type KnowledgeDocumentIdentityCountAggregateOutputType = {
+    id: number
+    knowledgeSpaceId: number
+    knowledgeDocumentId: number
+    origin: number
+    originRequestId: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type KnowledgeDocumentIdentityMinAggregateInputType = {
+    id?: true
+    knowledgeSpaceId?: true
+    knowledgeDocumentId?: true
+    origin?: true
+    originRequestId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type KnowledgeDocumentIdentityMaxAggregateInputType = {
+    id?: true
+    knowledgeSpaceId?: true
+    knowledgeDocumentId?: true
+    origin?: true
+    originRequestId?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type KnowledgeDocumentIdentityCountAggregateInputType = {
+    id?: true
+    knowledgeSpaceId?: true
+    knowledgeDocumentId?: true
+    origin?: true
+    originRequestId?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type KnowledgeDocumentIdentityAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KnowledgeDocumentIdentity to aggregate.
+     */
+    where?: KnowledgeDocumentIdentityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeDocumentIdentities to fetch.
+     */
+    orderBy?: KnowledgeDocumentIdentityOrderByWithRelationInput | KnowledgeDocumentIdentityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: KnowledgeDocumentIdentityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeDocumentIdentities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeDocumentIdentities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned KnowledgeDocumentIdentities
+    **/
+    _count?: true | KnowledgeDocumentIdentityCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: KnowledgeDocumentIdentityMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: KnowledgeDocumentIdentityMaxAggregateInputType
+  }
+
+  export type GetKnowledgeDocumentIdentityAggregateType<T extends KnowledgeDocumentIdentityAggregateArgs> = {
+        [P in keyof T & keyof AggregateKnowledgeDocumentIdentity]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateKnowledgeDocumentIdentity[P]>
+      : GetScalarType<T[P], AggregateKnowledgeDocumentIdentity[P]>
+  }
+
+
+
+
+  export type KnowledgeDocumentIdentityGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KnowledgeDocumentIdentityWhereInput
+    orderBy?: KnowledgeDocumentIdentityOrderByWithAggregationInput | KnowledgeDocumentIdentityOrderByWithAggregationInput[]
+    by: KnowledgeDocumentIdentityScalarFieldEnum[] | KnowledgeDocumentIdentityScalarFieldEnum
+    having?: KnowledgeDocumentIdentityScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: KnowledgeDocumentIdentityCountAggregateInputType | true
+    _min?: KnowledgeDocumentIdentityMinAggregateInputType
+    _max?: KnowledgeDocumentIdentityMaxAggregateInputType
+  }
+
+  export type KnowledgeDocumentIdentityGroupByOutputType = {
+    id: string
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+    origin: string
+    originRequestId: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: KnowledgeDocumentIdentityCountAggregateOutputType | null
+    _min: KnowledgeDocumentIdentityMinAggregateOutputType | null
+    _max: KnowledgeDocumentIdentityMaxAggregateOutputType | null
+  }
+
+  type GetKnowledgeDocumentIdentityGroupByPayload<T extends KnowledgeDocumentIdentityGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<KnowledgeDocumentIdentityGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof KnowledgeDocumentIdentityGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], KnowledgeDocumentIdentityGroupByOutputType[P]>
+            : GetScalarType<T[P], KnowledgeDocumentIdentityGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type KnowledgeDocumentIdentitySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    knowledgeSpaceId?: boolean
+    knowledgeDocumentId?: boolean
+    origin?: boolean
+    originRequestId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["knowledgeDocumentIdentity"]>
+
+  export type KnowledgeDocumentIdentitySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    knowledgeSpaceId?: boolean
+    knowledgeDocumentId?: boolean
+    origin?: boolean
+    originRequestId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["knowledgeDocumentIdentity"]>
+
+  export type KnowledgeDocumentIdentitySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    knowledgeSpaceId?: boolean
+    knowledgeDocumentId?: boolean
+    origin?: boolean
+    originRequestId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["knowledgeDocumentIdentity"]>
+
+  export type KnowledgeDocumentIdentitySelectScalar = {
+    id?: boolean
+    knowledgeSpaceId?: boolean
+    knowledgeDocumentId?: boolean
+    origin?: boolean
+    originRequestId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type KnowledgeDocumentIdentityOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "knowledgeSpaceId" | "knowledgeDocumentId" | "origin" | "originRequestId" | "createdAt" | "updatedAt", ExtArgs["result"]["knowledgeDocumentIdentity"]>
+  export type KnowledgeDocumentIdentityInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+  }
+  export type KnowledgeDocumentIdentityIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+  }
+  export type KnowledgeDocumentIdentityIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+  }
+
+  export type $KnowledgeDocumentIdentityPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "KnowledgeDocumentIdentity"
+    objects: {
+      knowledgeSpace: Prisma.$KnowledgeSpacePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      knowledgeSpaceId: string
+      knowledgeDocumentId: string
+      origin: string
+      originRequestId: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["knowledgeDocumentIdentity"]>
+    composites: {}
+  }
+
+  type KnowledgeDocumentIdentityGetPayload<S extends boolean | null | undefined | KnowledgeDocumentIdentityDefaultArgs> = $Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload, S>
+
+  type KnowledgeDocumentIdentityCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<KnowledgeDocumentIdentityFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: KnowledgeDocumentIdentityCountAggregateInputType | true
+    }
+
+  export interface KnowledgeDocumentIdentityDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KnowledgeDocumentIdentity'], meta: { name: 'KnowledgeDocumentIdentity' } }
+    /**
+     * Find zero or one KnowledgeDocumentIdentity that matches the filter.
+     * @param {KnowledgeDocumentIdentityFindUniqueArgs} args - Arguments to find a KnowledgeDocumentIdentity
+     * @example
+     * // Get one KnowledgeDocumentIdentity
+     * const knowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends KnowledgeDocumentIdentityFindUniqueArgs>(args: SelectSubset<T, KnowledgeDocumentIdentityFindUniqueArgs<ExtArgs>>): Prisma__KnowledgeDocumentIdentityClient<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one KnowledgeDocumentIdentity that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {KnowledgeDocumentIdentityFindUniqueOrThrowArgs} args - Arguments to find a KnowledgeDocumentIdentity
+     * @example
+     * // Get one KnowledgeDocumentIdentity
+     * const knowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends KnowledgeDocumentIdentityFindUniqueOrThrowArgs>(args: SelectSubset<T, KnowledgeDocumentIdentityFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KnowledgeDocumentIdentityClient<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KnowledgeDocumentIdentity that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeDocumentIdentityFindFirstArgs} args - Arguments to find a KnowledgeDocumentIdentity
+     * @example
+     * // Get one KnowledgeDocumentIdentity
+     * const knowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends KnowledgeDocumentIdentityFindFirstArgs>(args?: SelectSubset<T, KnowledgeDocumentIdentityFindFirstArgs<ExtArgs>>): Prisma__KnowledgeDocumentIdentityClient<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KnowledgeDocumentIdentity that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeDocumentIdentityFindFirstOrThrowArgs} args - Arguments to find a KnowledgeDocumentIdentity
+     * @example
+     * // Get one KnowledgeDocumentIdentity
+     * const knowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends KnowledgeDocumentIdentityFindFirstOrThrowArgs>(args?: SelectSubset<T, KnowledgeDocumentIdentityFindFirstOrThrowArgs<ExtArgs>>): Prisma__KnowledgeDocumentIdentityClient<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more KnowledgeDocumentIdentities that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeDocumentIdentityFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all KnowledgeDocumentIdentities
+     * const knowledgeDocumentIdentities = await prisma.knowledgeDocumentIdentity.findMany()
+     *
+     * // Get first 10 KnowledgeDocumentIdentities
+     * const knowledgeDocumentIdentities = await prisma.knowledgeDocumentIdentity.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const knowledgeDocumentIdentityWithIdOnly = await prisma.knowledgeDocumentIdentity.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends KnowledgeDocumentIdentityFindManyArgs>(args?: SelectSubset<T, KnowledgeDocumentIdentityFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a KnowledgeDocumentIdentity.
+     * @param {KnowledgeDocumentIdentityCreateArgs} args - Arguments to create a KnowledgeDocumentIdentity.
+     * @example
+     * // Create one KnowledgeDocumentIdentity
+     * const KnowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.create({
+     *   data: {
+     *     // ... data to create a KnowledgeDocumentIdentity
+     *   }
+     * })
+     *
+     */
+    create<T extends KnowledgeDocumentIdentityCreateArgs>(args: SelectSubset<T, KnowledgeDocumentIdentityCreateArgs<ExtArgs>>): Prisma__KnowledgeDocumentIdentityClient<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many KnowledgeDocumentIdentities.
+     * @param {KnowledgeDocumentIdentityCreateManyArgs} args - Arguments to create many KnowledgeDocumentIdentities.
+     * @example
+     * // Create many KnowledgeDocumentIdentities
+     * const knowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends KnowledgeDocumentIdentityCreateManyArgs>(args?: SelectSubset<T, KnowledgeDocumentIdentityCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many KnowledgeDocumentIdentities and returns the data saved in the database.
+     * @param {KnowledgeDocumentIdentityCreateManyAndReturnArgs} args - Arguments to create many KnowledgeDocumentIdentities.
+     * @example
+     * // Create many KnowledgeDocumentIdentities
+     * const knowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many KnowledgeDocumentIdentities and only return the `id`
+     * const knowledgeDocumentIdentityWithIdOnly = await prisma.knowledgeDocumentIdentity.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends KnowledgeDocumentIdentityCreateManyAndReturnArgs>(args?: SelectSubset<T, KnowledgeDocumentIdentityCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a KnowledgeDocumentIdentity.
+     * @param {KnowledgeDocumentIdentityDeleteArgs} args - Arguments to delete one KnowledgeDocumentIdentity.
+     * @example
+     * // Delete one KnowledgeDocumentIdentity
+     * const KnowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.delete({
+     *   where: {
+     *     // ... filter to delete one KnowledgeDocumentIdentity
+     *   }
+     * })
+     *
+     */
+    delete<T extends KnowledgeDocumentIdentityDeleteArgs>(args: SelectSubset<T, KnowledgeDocumentIdentityDeleteArgs<ExtArgs>>): Prisma__KnowledgeDocumentIdentityClient<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one KnowledgeDocumentIdentity.
+     * @param {KnowledgeDocumentIdentityUpdateArgs} args - Arguments to update one KnowledgeDocumentIdentity.
+     * @example
+     * // Update one KnowledgeDocumentIdentity
+     * const knowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends KnowledgeDocumentIdentityUpdateArgs>(args: SelectSubset<T, KnowledgeDocumentIdentityUpdateArgs<ExtArgs>>): Prisma__KnowledgeDocumentIdentityClient<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more KnowledgeDocumentIdentities.
+     * @param {KnowledgeDocumentIdentityDeleteManyArgs} args - Arguments to filter KnowledgeDocumentIdentities to delete.
+     * @example
+     * // Delete a few KnowledgeDocumentIdentities
+     * const { count } = await prisma.knowledgeDocumentIdentity.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends KnowledgeDocumentIdentityDeleteManyArgs>(args?: SelectSubset<T, KnowledgeDocumentIdentityDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KnowledgeDocumentIdentities.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeDocumentIdentityUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many KnowledgeDocumentIdentities
+     * const knowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends KnowledgeDocumentIdentityUpdateManyArgs>(args: SelectSubset<T, KnowledgeDocumentIdentityUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KnowledgeDocumentIdentities and returns the data updated in the database.
+     * @param {KnowledgeDocumentIdentityUpdateManyAndReturnArgs} args - Arguments to update many KnowledgeDocumentIdentities.
+     * @example
+     * // Update many KnowledgeDocumentIdentities
+     * const knowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more KnowledgeDocumentIdentities and only return the `id`
+     * const knowledgeDocumentIdentityWithIdOnly = await prisma.knowledgeDocumentIdentity.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends KnowledgeDocumentIdentityUpdateManyAndReturnArgs>(args: SelectSubset<T, KnowledgeDocumentIdentityUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one KnowledgeDocumentIdentity.
+     * @param {KnowledgeDocumentIdentityUpsertArgs} args - Arguments to update or create a KnowledgeDocumentIdentity.
+     * @example
+     * // Update or create a KnowledgeDocumentIdentity
+     * const knowledgeDocumentIdentity = await prisma.knowledgeDocumentIdentity.upsert({
+     *   create: {
+     *     // ... data to create a KnowledgeDocumentIdentity
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the KnowledgeDocumentIdentity we want to update
+     *   }
+     * })
+     */
+    upsert<T extends KnowledgeDocumentIdentityUpsertArgs>(args: SelectSubset<T, KnowledgeDocumentIdentityUpsertArgs<ExtArgs>>): Prisma__KnowledgeDocumentIdentityClient<$Result.GetResult<Prisma.$KnowledgeDocumentIdentityPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of KnowledgeDocumentIdentities.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeDocumentIdentityCountArgs} args - Arguments to filter KnowledgeDocumentIdentities to count.
+     * @example
+     * // Count the number of KnowledgeDocumentIdentities
+     * const count = await prisma.knowledgeDocumentIdentity.count({
+     *   where: {
+     *     // ... the filter for the KnowledgeDocumentIdentities we want to count
+     *   }
+     * })
+    **/
+    count<T extends KnowledgeDocumentIdentityCountArgs>(
+      args?: Subset<T, KnowledgeDocumentIdentityCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], KnowledgeDocumentIdentityCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a KnowledgeDocumentIdentity.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeDocumentIdentityAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends KnowledgeDocumentIdentityAggregateArgs>(args: Subset<T, KnowledgeDocumentIdentityAggregateArgs>): Prisma.PrismaPromise<GetKnowledgeDocumentIdentityAggregateType<T>>
+
+    /**
+     * Group by KnowledgeDocumentIdentity.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeDocumentIdentityGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends KnowledgeDocumentIdentityGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: KnowledgeDocumentIdentityGroupByArgs['orderBy'] }
+        : { orderBy?: KnowledgeDocumentIdentityGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, KnowledgeDocumentIdentityGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKnowledgeDocumentIdentityGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the KnowledgeDocumentIdentity model
+   */
+  readonly fields: KnowledgeDocumentIdentityFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for KnowledgeDocumentIdentity.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__KnowledgeDocumentIdentityClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    knowledgeSpace<T extends KnowledgeSpaceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeSpaceDefaultArgs<ExtArgs>>): Prisma__KnowledgeSpaceClient<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the KnowledgeDocumentIdentity model
+   */
+  interface KnowledgeDocumentIdentityFieldRefs {
+    readonly id: FieldRef<"KnowledgeDocumentIdentity", 'String'>
+    readonly knowledgeSpaceId: FieldRef<"KnowledgeDocumentIdentity", 'String'>
+    readonly knowledgeDocumentId: FieldRef<"KnowledgeDocumentIdentity", 'String'>
+    readonly origin: FieldRef<"KnowledgeDocumentIdentity", 'String'>
+    readonly originRequestId: FieldRef<"KnowledgeDocumentIdentity", 'String'>
+    readonly createdAt: FieldRef<"KnowledgeDocumentIdentity", 'DateTime'>
+    readonly updatedAt: FieldRef<"KnowledgeDocumentIdentity", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * KnowledgeDocumentIdentity findUnique
+   */
+  export type KnowledgeDocumentIdentityFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeDocumentIdentity to fetch.
+     */
+    where: KnowledgeDocumentIdentityWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeDocumentIdentity findUniqueOrThrow
+   */
+  export type KnowledgeDocumentIdentityFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeDocumentIdentity to fetch.
+     */
+    where: KnowledgeDocumentIdentityWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeDocumentIdentity findFirst
+   */
+  export type KnowledgeDocumentIdentityFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeDocumentIdentity to fetch.
+     */
+    where?: KnowledgeDocumentIdentityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeDocumentIdentities to fetch.
+     */
+    orderBy?: KnowledgeDocumentIdentityOrderByWithRelationInput | KnowledgeDocumentIdentityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for KnowledgeDocumentIdentities.
+     */
+    cursor?: KnowledgeDocumentIdentityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeDocumentIdentities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeDocumentIdentities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KnowledgeDocumentIdentities.
+     */
+    distinct?: KnowledgeDocumentIdentityScalarFieldEnum | KnowledgeDocumentIdentityScalarFieldEnum[]
+  }
+
+  /**
+   * KnowledgeDocumentIdentity findFirstOrThrow
+   */
+  export type KnowledgeDocumentIdentityFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeDocumentIdentity to fetch.
+     */
+    where?: KnowledgeDocumentIdentityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeDocumentIdentities to fetch.
+     */
+    orderBy?: KnowledgeDocumentIdentityOrderByWithRelationInput | KnowledgeDocumentIdentityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for KnowledgeDocumentIdentities.
+     */
+    cursor?: KnowledgeDocumentIdentityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeDocumentIdentities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeDocumentIdentities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KnowledgeDocumentIdentities.
+     */
+    distinct?: KnowledgeDocumentIdentityScalarFieldEnum | KnowledgeDocumentIdentityScalarFieldEnum[]
+  }
+
+  /**
+   * KnowledgeDocumentIdentity findMany
+   */
+  export type KnowledgeDocumentIdentityFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeDocumentIdentities to fetch.
+     */
+    where?: KnowledgeDocumentIdentityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeDocumentIdentities to fetch.
+     */
+    orderBy?: KnowledgeDocumentIdentityOrderByWithRelationInput | KnowledgeDocumentIdentityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing KnowledgeDocumentIdentities.
+     */
+    cursor?: KnowledgeDocumentIdentityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeDocumentIdentities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeDocumentIdentities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KnowledgeDocumentIdentities.
+     */
+    distinct?: KnowledgeDocumentIdentityScalarFieldEnum | KnowledgeDocumentIdentityScalarFieldEnum[]
+  }
+
+  /**
+   * KnowledgeDocumentIdentity create
+   */
+  export type KnowledgeDocumentIdentityCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityInclude<ExtArgs> | null
+    /**
+     * The data needed to create a KnowledgeDocumentIdentity.
+     */
+    data: XOR<KnowledgeDocumentIdentityCreateInput, KnowledgeDocumentIdentityUncheckedCreateInput>
+  }
+
+  /**
+   * KnowledgeDocumentIdentity createMany
+   */
+  export type KnowledgeDocumentIdentityCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many KnowledgeDocumentIdentities.
+     */
+    data: KnowledgeDocumentIdentityCreateManyInput | KnowledgeDocumentIdentityCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KnowledgeDocumentIdentity createManyAndReturn
+   */
+  export type KnowledgeDocumentIdentityCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * The data used to create many KnowledgeDocumentIdentities.
+     */
+    data: KnowledgeDocumentIdentityCreateManyInput | KnowledgeDocumentIdentityCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * KnowledgeDocumentIdentity update
+   */
+  export type KnowledgeDocumentIdentityUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityInclude<ExtArgs> | null
+    /**
+     * The data needed to update a KnowledgeDocumentIdentity.
+     */
+    data: XOR<KnowledgeDocumentIdentityUpdateInput, KnowledgeDocumentIdentityUncheckedUpdateInput>
+    /**
+     * Choose, which KnowledgeDocumentIdentity to update.
+     */
+    where: KnowledgeDocumentIdentityWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeDocumentIdentity updateMany
+   */
+  export type KnowledgeDocumentIdentityUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update KnowledgeDocumentIdentities.
+     */
+    data: XOR<KnowledgeDocumentIdentityUpdateManyMutationInput, KnowledgeDocumentIdentityUncheckedUpdateManyInput>
+    /**
+     * Filter which KnowledgeDocumentIdentities to update
+     */
+    where?: KnowledgeDocumentIdentityWhereInput
+    /**
+     * Limit how many KnowledgeDocumentIdentities to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KnowledgeDocumentIdentity updateManyAndReturn
+   */
+  export type KnowledgeDocumentIdentityUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * The data used to update KnowledgeDocumentIdentities.
+     */
+    data: XOR<KnowledgeDocumentIdentityUpdateManyMutationInput, KnowledgeDocumentIdentityUncheckedUpdateManyInput>
+    /**
+     * Filter which KnowledgeDocumentIdentities to update
+     */
+    where?: KnowledgeDocumentIdentityWhereInput
+    /**
+     * Limit how many KnowledgeDocumentIdentities to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * KnowledgeDocumentIdentity upsert
+   */
+  export type KnowledgeDocumentIdentityUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityInclude<ExtArgs> | null
+    /**
+     * The filter to search for the KnowledgeDocumentIdentity to update in case it exists.
+     */
+    where: KnowledgeDocumentIdentityWhereUniqueInput
+    /**
+     * In case the KnowledgeDocumentIdentity found by the `where` argument doesn't exist, create a new KnowledgeDocumentIdentity with this data.
+     */
+    create: XOR<KnowledgeDocumentIdentityCreateInput, KnowledgeDocumentIdentityUncheckedCreateInput>
+    /**
+     * In case the KnowledgeDocumentIdentity was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<KnowledgeDocumentIdentityUpdateInput, KnowledgeDocumentIdentityUncheckedUpdateInput>
+  }
+
+  /**
+   * KnowledgeDocumentIdentity delete
+   */
+  export type KnowledgeDocumentIdentityDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityInclude<ExtArgs> | null
+    /**
+     * Filter which KnowledgeDocumentIdentity to delete.
+     */
+    where: KnowledgeDocumentIdentityWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeDocumentIdentity deleteMany
+   */
+  export type KnowledgeDocumentIdentityDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KnowledgeDocumentIdentities to delete
+     */
+    where?: KnowledgeDocumentIdentityWhereInput
+    /**
+     * Limit how many KnowledgeDocumentIdentities to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * KnowledgeDocumentIdentity without action
+   */
+  export type KnowledgeDocumentIdentityDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeDocumentIdentity
+     */
+    select?: KnowledgeDocumentIdentitySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeDocumentIdentity
+     */
+    omit?: KnowledgeDocumentIdentityOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeDocumentIdentityInclude<ExtArgs> | null
   }
 
 
@@ -103929,6 +105147,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionMinAggregateOutputType = {
     id: string | null
     bindingId: string | null
+    knowledgeDocumentId: string | null
     relativePath: string | null
     commitSha: string | null
     blobSha: string | null
@@ -103943,6 +105162,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionMaxAggregateOutputType = {
     id: string | null
     bindingId: string | null
+    knowledgeDocumentId: string | null
     relativePath: string | null
     commitSha: string | null
     blobSha: string | null
@@ -103957,6 +105177,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionCountAggregateOutputType = {
     id: number
     bindingId: number
+    knowledgeDocumentId: number
     relativePath: number
     commitSha: number
     blobSha: number
@@ -103974,6 +105195,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionMinAggregateInputType = {
     id?: true
     bindingId?: true
+    knowledgeDocumentId?: true
     relativePath?: true
     commitSha?: true
     blobSha?: true
@@ -103988,6 +105210,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionMaxAggregateInputType = {
     id?: true
     bindingId?: true
+    knowledgeDocumentId?: true
     relativePath?: true
     commitSha?: true
     blobSha?: true
@@ -104002,6 +105225,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionCountAggregateInputType = {
     id?: true
     bindingId?: true
+    knowledgeDocumentId?: true
     relativePath?: true
     commitSha?: true
     blobSha?: true
@@ -104090,6 +105314,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionGroupByOutputType = {
     id: string
     bindingId: string
+    knowledgeDocumentId: string | null
     relativePath: string
     commitSha: string
     blobSha: string
@@ -104122,6 +105347,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     bindingId?: boolean
+    knowledgeDocumentId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -104138,6 +105364,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     bindingId?: boolean
+    knowledgeDocumentId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -104154,6 +105381,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     bindingId?: boolean
+    knowledgeDocumentId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -104170,6 +105398,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionSelectScalar = {
     id?: boolean
     bindingId?: boolean
+    knowledgeDocumentId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -104182,7 +105411,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type KnowledgeNoteProjectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "bindingId" | "relativePath" | "commitSha" | "blobSha" | "contentHash" | "frontmatter" | "markdownContent" | "indexStatus" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["knowledgeNoteProjection"]>
+  export type KnowledgeNoteProjectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "bindingId" | "knowledgeDocumentId" | "relativePath" | "commitSha" | "blobSha" | "contentHash" | "frontmatter" | "markdownContent" | "indexStatus" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["knowledgeNoteProjection"]>
   export type KnowledgeNoteProjectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
@@ -104201,6 +105430,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       bindingId: string
+      knowledgeDocumentId: string | null
       relativePath: string
       commitSha: string
       blobSha: string
@@ -104637,6 +105867,7 @@ export namespace Prisma {
   interface KnowledgeNoteProjectionFieldRefs {
     readonly id: FieldRef<"KnowledgeNoteProjection", 'String'>
     readonly bindingId: FieldRef<"KnowledgeNoteProjection", 'String'>
+    readonly knowledgeDocumentId: FieldRef<"KnowledgeNoteProjection", 'String'>
     readonly relativePath: FieldRef<"KnowledgeNoteProjection", 'String'>
     readonly commitSha: FieldRef<"KnowledgeNoteProjection", 'String'>
     readonly blobSha: FieldRef<"KnowledgeNoteProjection", 'String'>
@@ -107362,6 +108593,7 @@ export namespace Prisma {
     id: string | null
     identityId: string | null
     bindingId: string | null
+    knowledgeDocumentId: string | null
     requestId: string | null
     requestHash: string | null
     relativePath: string | null
@@ -107385,6 +108617,7 @@ export namespace Prisma {
     id: string | null
     identityId: string | null
     bindingId: string | null
+    knowledgeDocumentId: string | null
     requestId: string | null
     requestHash: string | null
     relativePath: string | null
@@ -107408,6 +108641,7 @@ export namespace Prisma {
     id: number
     identityId: number
     bindingId: number
+    knowledgeDocumentId: number
     requestId: number
     requestHash: number
     relativePath: number
@@ -107441,6 +108675,7 @@ export namespace Prisma {
     id?: true
     identityId?: true
     bindingId?: true
+    knowledgeDocumentId?: true
     requestId?: true
     requestHash?: true
     relativePath?: true
@@ -107464,6 +108699,7 @@ export namespace Prisma {
     id?: true
     identityId?: true
     bindingId?: true
+    knowledgeDocumentId?: true
     requestId?: true
     requestHash?: true
     relativePath?: true
@@ -107487,6 +108723,7 @@ export namespace Prisma {
     id?: true
     identityId?: true
     bindingId?: true
+    knowledgeDocumentId?: true
     requestId?: true
     requestHash?: true
     relativePath?: true
@@ -107597,6 +108834,7 @@ export namespace Prisma {
     id: string
     identityId: string
     bindingId: string
+    knowledgeDocumentId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -107639,6 +108877,7 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     bindingId?: boolean
+    knowledgeDocumentId?: boolean
     requestId?: boolean
     requestHash?: boolean
     relativePath?: boolean
@@ -107664,6 +108903,7 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     bindingId?: boolean
+    knowledgeDocumentId?: boolean
     requestId?: boolean
     requestHash?: boolean
     relativePath?: boolean
@@ -107689,6 +108929,7 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     bindingId?: boolean
+    knowledgeDocumentId?: boolean
     requestId?: boolean
     requestHash?: boolean
     relativePath?: boolean
@@ -107714,6 +108955,7 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     bindingId?: boolean
+    knowledgeDocumentId?: boolean
     requestId?: boolean
     requestHash?: boolean
     relativePath?: boolean
@@ -107733,7 +108975,7 @@ export namespace Prisma {
     completedAt?: boolean
   }
 
-  export type KnowledgeWriteRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "bindingId" | "requestId" | "requestHash" | "relativePath" | "status" | "commitSha" | "errorCode" | "errorMessage" | "projectionStatus" | "projectionErrorCode" | "projectionErrorMessage" | "projectionAttempts" | "projectedAt" | "blobSha" | "markdownContent" | "createdAt" | "updatedAt" | "completedAt", ExtArgs["result"]["knowledgeWriteRequest"]>
+  export type KnowledgeWriteRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "bindingId" | "knowledgeDocumentId" | "requestId" | "requestHash" | "relativePath" | "status" | "commitSha" | "errorCode" | "errorMessage" | "projectionStatus" | "projectionErrorCode" | "projectionErrorMessage" | "projectionAttempts" | "projectedAt" | "blobSha" | "markdownContent" | "createdAt" | "updatedAt" | "completedAt", ExtArgs["result"]["knowledgeWriteRequest"]>
   export type KnowledgeWriteRequestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
@@ -107757,6 +108999,7 @@ export namespace Prisma {
       id: string
       identityId: string
       bindingId: string
+      knowledgeDocumentId: string
       requestId: string
       requestHash: string
       relativePath: string
@@ -108202,6 +109445,7 @@ export namespace Prisma {
     readonly id: FieldRef<"KnowledgeWriteRequest", 'String'>
     readonly identityId: FieldRef<"KnowledgeWriteRequest", 'String'>
     readonly bindingId: FieldRef<"KnowledgeWriteRequest", 'String'>
+    readonly knowledgeDocumentId: FieldRef<"KnowledgeWriteRequest", 'String'>
     readonly requestId: FieldRef<"KnowledgeWriteRequest", 'String'>
     readonly requestHash: FieldRef<"KnowledgeWriteRequest", 'String'>
     readonly relativePath: FieldRef<"KnowledgeWriteRequest", 'String'>
@@ -133101,6 +134345,19 @@ export namespace Prisma {
   export type KnowledgeSpaceScalarFieldEnum = (typeof KnowledgeSpaceScalarFieldEnum)[keyof typeof KnowledgeSpaceScalarFieldEnum]
 
 
+  export const KnowledgeDocumentIdentityScalarFieldEnum: {
+    id: 'id',
+    knowledgeSpaceId: 'knowledgeSpaceId',
+    knowledgeDocumentId: 'knowledgeDocumentId',
+    origin: 'origin',
+    originRequestId: 'originRequestId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type KnowledgeDocumentIdentityScalarFieldEnum = (typeof KnowledgeDocumentIdentityScalarFieldEnum)[keyof typeof KnowledgeDocumentIdentityScalarFieldEnum]
+
+
   export const KnowledgeRemoteBindingScalarFieldEnum: {
     id: 'id',
     knowledgeSpaceId: 'knowledgeSpaceId',
@@ -133179,6 +134436,7 @@ export namespace Prisma {
   export const KnowledgeNoteProjectionScalarFieldEnum: {
     id: 'id',
     bindingId: 'bindingId',
+    knowledgeDocumentId: 'knowledgeDocumentId',
     relativePath: 'relativePath',
     commitSha: 'commitSha',
     blobSha: 'blobSha',
@@ -133226,6 +134484,7 @@ export namespace Prisma {
     id: 'id',
     identityId: 'identityId',
     bindingId: 'bindingId',
+    knowledgeDocumentId: 'knowledgeDocumentId',
     requestId: 'requestId',
     requestHash: 'requestHash',
     relativePath: 'relativePath',
@@ -140596,6 +141855,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"KnowledgeSpace"> | Date | string
     updatedAt?: DateTimeFilter<"KnowledgeSpace"> | Date | string
     remoteBindings?: KnowledgeRemoteBindingListRelationFilter
+    documentIdentities?: KnowledgeDocumentIdentityListRelationFilter
   }
 
   export type KnowledgeSpaceOrderByWithRelationInput = {
@@ -140603,6 +141863,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     remoteBindings?: KnowledgeRemoteBindingOrderByRelationAggregateInput
+    documentIdentities?: KnowledgeDocumentIdentityOrderByRelationAggregateInput
   }
 
   export type KnowledgeSpaceWhereUniqueInput = Prisma.AtLeast<{
@@ -140613,6 +141874,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"KnowledgeSpace"> | Date | string
     updatedAt?: DateTimeFilter<"KnowledgeSpace"> | Date | string
     remoteBindings?: KnowledgeRemoteBindingListRelationFilter
+    documentIdentities?: KnowledgeDocumentIdentityListRelationFilter
   }, "id">
 
   export type KnowledgeSpaceOrderByWithAggregationInput = {
@@ -140631,6 +141893,72 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"KnowledgeSpace"> | string
     createdAt?: DateTimeWithAggregatesFilter<"KnowledgeSpace"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"KnowledgeSpace"> | Date | string
+  }
+
+  export type KnowledgeDocumentIdentityWhereInput = {
+    AND?: KnowledgeDocumentIdentityWhereInput | KnowledgeDocumentIdentityWhereInput[]
+    OR?: KnowledgeDocumentIdentityWhereInput[]
+    NOT?: KnowledgeDocumentIdentityWhereInput | KnowledgeDocumentIdentityWhereInput[]
+    id?: StringFilter<"KnowledgeDocumentIdentity"> | string
+    knowledgeSpaceId?: StringFilter<"KnowledgeDocumentIdentity"> | string
+    knowledgeDocumentId?: StringFilter<"KnowledgeDocumentIdentity"> | string
+    origin?: StringFilter<"KnowledgeDocumentIdentity"> | string
+    originRequestId?: StringNullableFilter<"KnowledgeDocumentIdentity"> | string | null
+    createdAt?: DateTimeFilter<"KnowledgeDocumentIdentity"> | Date | string
+    updatedAt?: DateTimeFilter<"KnowledgeDocumentIdentity"> | Date | string
+    knowledgeSpace?: XOR<KnowledgeSpaceScalarRelationFilter, KnowledgeSpaceWhereInput>
+  }
+
+  export type KnowledgeDocumentIdentityOrderByWithRelationInput = {
+    id?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    knowledgeDocumentId?: SortOrder
+    origin?: SortOrder
+    originRequestId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    knowledgeSpace?: KnowledgeSpaceOrderByWithRelationInput
+  }
+
+  export type KnowledgeDocumentIdentityWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    knowledgeSpaceId_knowledgeDocumentId?: KnowledgeDocumentIdentityKnowledgeSpaceIdKnowledgeDocumentIdCompoundUniqueInput
+    AND?: KnowledgeDocumentIdentityWhereInput | KnowledgeDocumentIdentityWhereInput[]
+    OR?: KnowledgeDocumentIdentityWhereInput[]
+    NOT?: KnowledgeDocumentIdentityWhereInput | KnowledgeDocumentIdentityWhereInput[]
+    knowledgeSpaceId?: StringFilter<"KnowledgeDocumentIdentity"> | string
+    knowledgeDocumentId?: StringFilter<"KnowledgeDocumentIdentity"> | string
+    origin?: StringFilter<"KnowledgeDocumentIdentity"> | string
+    originRequestId?: StringNullableFilter<"KnowledgeDocumentIdentity"> | string | null
+    createdAt?: DateTimeFilter<"KnowledgeDocumentIdentity"> | Date | string
+    updatedAt?: DateTimeFilter<"KnowledgeDocumentIdentity"> | Date | string
+    knowledgeSpace?: XOR<KnowledgeSpaceScalarRelationFilter, KnowledgeSpaceWhereInput>
+  }, "id" | "knowledgeSpaceId_knowledgeDocumentId">
+
+  export type KnowledgeDocumentIdentityOrderByWithAggregationInput = {
+    id?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    knowledgeDocumentId?: SortOrder
+    origin?: SortOrder
+    originRequestId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: KnowledgeDocumentIdentityCountOrderByAggregateInput
+    _max?: KnowledgeDocumentIdentityMaxOrderByAggregateInput
+    _min?: KnowledgeDocumentIdentityMinOrderByAggregateInput
+  }
+
+  export type KnowledgeDocumentIdentityScalarWhereWithAggregatesInput = {
+    AND?: KnowledgeDocumentIdentityScalarWhereWithAggregatesInput | KnowledgeDocumentIdentityScalarWhereWithAggregatesInput[]
+    OR?: KnowledgeDocumentIdentityScalarWhereWithAggregatesInput[]
+    NOT?: KnowledgeDocumentIdentityScalarWhereWithAggregatesInput | KnowledgeDocumentIdentityScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"KnowledgeDocumentIdentity"> | string
+    knowledgeSpaceId?: StringWithAggregatesFilter<"KnowledgeDocumentIdentity"> | string
+    knowledgeDocumentId?: StringWithAggregatesFilter<"KnowledgeDocumentIdentity"> | string
+    origin?: StringWithAggregatesFilter<"KnowledgeDocumentIdentity"> | string
+    originRequestId?: StringNullableWithAggregatesFilter<"KnowledgeDocumentIdentity"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"KnowledgeDocumentIdentity"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"KnowledgeDocumentIdentity"> | Date | string
   }
 
   export type KnowledgeRemoteBindingWhereInput = {
@@ -141044,6 +142372,7 @@ export namespace Prisma {
     NOT?: KnowledgeNoteProjectionWhereInput | KnowledgeNoteProjectionWhereInput[]
     id?: StringFilter<"KnowledgeNoteProjection"> | string
     bindingId?: StringFilter<"KnowledgeNoteProjection"> | string
+    knowledgeDocumentId?: StringNullableFilter<"KnowledgeNoteProjection"> | string | null
     relativePath?: StringFilter<"KnowledgeNoteProjection"> | string
     commitSha?: StringFilter<"KnowledgeNoteProjection"> | string
     blobSha?: StringFilter<"KnowledgeNoteProjection"> | string
@@ -141060,6 +142389,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionOrderByWithRelationInput = {
     id?: SortOrder
     bindingId?: SortOrder
+    knowledgeDocumentId?: SortOrderInput | SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -141080,6 +142410,7 @@ export namespace Prisma {
     OR?: KnowledgeNoteProjectionWhereInput[]
     NOT?: KnowledgeNoteProjectionWhereInput | KnowledgeNoteProjectionWhereInput[]
     bindingId?: StringFilter<"KnowledgeNoteProjection"> | string
+    knowledgeDocumentId?: StringNullableFilter<"KnowledgeNoteProjection"> | string | null
     relativePath?: StringFilter<"KnowledgeNoteProjection"> | string
     commitSha?: StringFilter<"KnowledgeNoteProjection"> | string
     blobSha?: StringFilter<"KnowledgeNoteProjection"> | string
@@ -141096,6 +142427,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionOrderByWithAggregationInput = {
     id?: SortOrder
     bindingId?: SortOrder
+    knowledgeDocumentId?: SortOrderInput | SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -141117,6 +142449,7 @@ export namespace Prisma {
     NOT?: KnowledgeNoteProjectionScalarWhereWithAggregatesInput | KnowledgeNoteProjectionScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
     bindingId?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
+    knowledgeDocumentId?: StringNullableWithAggregatesFilter<"KnowledgeNoteProjection"> | string | null
     relativePath?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
     commitSha?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
     blobSha?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
@@ -141282,6 +142615,7 @@ export namespace Prisma {
     id?: StringFilter<"KnowledgeWriteRequest"> | string
     identityId?: StringFilter<"KnowledgeWriteRequest"> | string
     bindingId?: StringFilter<"KnowledgeWriteRequest"> | string
+    knowledgeDocumentId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestHash?: StringFilter<"KnowledgeWriteRequest"> | string
     relativePath?: StringFilter<"KnowledgeWriteRequest"> | string
@@ -141307,6 +142641,7 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     bindingId?: SortOrder
+    knowledgeDocumentId?: SortOrder
     requestId?: SortOrder
     requestHash?: SortOrder
     relativePath?: SortOrder
@@ -141336,6 +142671,7 @@ export namespace Prisma {
     NOT?: KnowledgeWriteRequestWhereInput | KnowledgeWriteRequestWhereInput[]
     identityId?: StringFilter<"KnowledgeWriteRequest"> | string
     bindingId?: StringFilter<"KnowledgeWriteRequest"> | string
+    knowledgeDocumentId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestHash?: StringFilter<"KnowledgeWriteRequest"> | string
     relativePath?: StringFilter<"KnowledgeWriteRequest"> | string
@@ -141361,6 +142697,7 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     bindingId?: SortOrder
+    knowledgeDocumentId?: SortOrder
     requestId?: SortOrder
     requestHash?: SortOrder
     relativePath?: SortOrder
@@ -141392,6 +142729,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
     identityId?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
     bindingId?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
+    knowledgeDocumentId?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
     requestId?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
     requestHash?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
     relativePath?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
@@ -151073,6 +152411,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     remoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutKnowledgeSpaceInput
+    documentIdentities?: KnowledgeDocumentIdentityCreateNestedManyWithoutKnowledgeSpaceInput
   }
 
   export type KnowledgeSpaceUncheckedCreateInput = {
@@ -151080,6 +152419,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     remoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutKnowledgeSpaceInput
+    documentIdentities?: KnowledgeDocumentIdentityUncheckedCreateNestedManyWithoutKnowledgeSpaceInput
   }
 
   export type KnowledgeSpaceUpdateInput = {
@@ -151087,6 +152427,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     remoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutKnowledgeSpaceNestedInput
+    documentIdentities?: KnowledgeDocumentIdentityUpdateManyWithoutKnowledgeSpaceNestedInput
   }
 
   export type KnowledgeSpaceUncheckedUpdateInput = {
@@ -151094,6 +152435,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     remoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutKnowledgeSpaceNestedInput
+    documentIdentities?: KnowledgeDocumentIdentityUncheckedUpdateManyWithoutKnowledgeSpaceNestedInput
   }
 
   export type KnowledgeSpaceCreateManyInput = {
@@ -151110,6 +152452,75 @@ export namespace Prisma {
 
   export type KnowledgeSpaceUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KnowledgeDocumentIdentityCreateInput = {
+    id?: string
+    knowledgeDocumentId: string
+    origin: string
+    originRequestId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    knowledgeSpace: KnowledgeSpaceCreateNestedOneWithoutDocumentIdentitiesInput
+  }
+
+  export type KnowledgeDocumentIdentityUncheckedCreateInput = {
+    id?: string
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+    origin: string
+    originRequestId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KnowledgeDocumentIdentityUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    origin?: StringFieldUpdateOperationsInput | string
+    originRequestId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    knowledgeSpace?: KnowledgeSpaceUpdateOneRequiredWithoutDocumentIdentitiesNestedInput
+  }
+
+  export type KnowledgeDocumentIdentityUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    origin?: StringFieldUpdateOperationsInput | string
+    originRequestId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KnowledgeDocumentIdentityCreateManyInput = {
+    id?: string
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+    origin: string
+    originRequestId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KnowledgeDocumentIdentityUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    origin?: StringFieldUpdateOperationsInput | string
+    originRequestId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KnowledgeDocumentIdentityUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    origin?: StringFieldUpdateOperationsInput | string
+    originRequestId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -151562,6 +152973,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionCreateInput = {
     id: string
+    knowledgeDocumentId?: string | null
     relativePath: string
     commitSha: string
     blobSha: string
@@ -151578,6 +152990,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionUncheckedCreateInput = {
     id: string
     bindingId: string
+    knowledgeDocumentId?: string | null
     relativePath: string
     commitSha: string
     blobSha: string
@@ -151592,6 +153005,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: NullableStringFieldUpdateOperationsInput | string | null
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
@@ -151608,6 +153022,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     bindingId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: NullableStringFieldUpdateOperationsInput | string | null
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
@@ -151623,6 +153038,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionCreateManyInput = {
     id: string
     bindingId: string
+    knowledgeDocumentId?: string | null
     relativePath: string
     commitSha: string
     blobSha: string
@@ -151637,6 +153053,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: NullableStringFieldUpdateOperationsInput | string | null
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
@@ -151652,6 +153069,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     bindingId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: NullableStringFieldUpdateOperationsInput | string | null
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
@@ -151818,6 +153236,7 @@ export namespace Prisma {
 
   export type KnowledgeWriteRequestCreateInput = {
     id: string
+    knowledgeDocumentId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -151843,6 +153262,7 @@ export namespace Prisma {
     id: string
     identityId: string
     bindingId: string
+    knowledgeDocumentId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -151864,6 +153284,7 @@ export namespace Prisma {
 
   export type KnowledgeWriteRequestUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -151889,6 +153310,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     bindingId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -151912,6 +153334,7 @@ export namespace Prisma {
     id: string
     identityId: string
     bindingId: string
+    knowledgeDocumentId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -151933,6 +153356,7 @@ export namespace Prisma {
 
   export type KnowledgeWriteRequestUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -151956,6 +153380,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     bindingId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -159203,6 +160628,16 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type KnowledgeDocumentIdentityListRelationFilter = {
+    every?: KnowledgeDocumentIdentityWhereInput
+    some?: KnowledgeDocumentIdentityWhereInput
+    none?: KnowledgeDocumentIdentityWhereInput
+  }
+
+  export type KnowledgeDocumentIdentityOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type KnowledgeSpaceCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -159224,6 +160659,41 @@ export namespace Prisma {
   export type KnowledgeSpaceScalarRelationFilter = {
     is?: KnowledgeSpaceWhereInput
     isNot?: KnowledgeSpaceWhereInput
+  }
+
+  export type KnowledgeDocumentIdentityKnowledgeSpaceIdKnowledgeDocumentIdCompoundUniqueInput = {
+    knowledgeSpaceId: string
+    knowledgeDocumentId: string
+  }
+
+  export type KnowledgeDocumentIdentityCountOrderByAggregateInput = {
+    id?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    knowledgeDocumentId?: SortOrder
+    origin?: SortOrder
+    originRequestId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KnowledgeDocumentIdentityMaxOrderByAggregateInput = {
+    id?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    knowledgeDocumentId?: SortOrder
+    origin?: SortOrder
+    originRequestId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KnowledgeDocumentIdentityMinOrderByAggregateInput = {
+    id?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    knowledgeDocumentId?: SortOrder
+    origin?: SortOrder
+    originRequestId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type RemoteRepositoryObservationNullableScalarRelationFilter = {
@@ -159487,6 +160957,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionCountOrderByAggregateInput = {
     id?: SortOrder
     bindingId?: SortOrder
+    knowledgeDocumentId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -159502,6 +160973,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionMaxOrderByAggregateInput = {
     id?: SortOrder
     bindingId?: SortOrder
+    knowledgeDocumentId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -159516,6 +160988,7 @@ export namespace Prisma {
   export type KnowledgeNoteProjectionMinOrderByAggregateInput = {
     id?: SortOrder
     bindingId?: SortOrder
+    knowledgeDocumentId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -159645,6 +161118,7 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     bindingId?: SortOrder
+    knowledgeDocumentId?: SortOrder
     requestId?: SortOrder
     requestHash?: SortOrder
     relativePath?: SortOrder
@@ -159672,6 +161146,7 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     bindingId?: SortOrder
+    knowledgeDocumentId?: SortOrder
     requestId?: SortOrder
     requestHash?: SortOrder
     relativePath?: SortOrder
@@ -159695,6 +161170,7 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     bindingId?: SortOrder
+    knowledgeDocumentId?: SortOrder
     requestId?: SortOrder
     requestHash?: SortOrder
     relativePath?: SortOrder
@@ -166496,11 +167972,25 @@ export namespace Prisma {
     connect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
   }
 
+  export type KnowledgeDocumentIdentityCreateNestedManyWithoutKnowledgeSpaceInput = {
+    create?: XOR<KnowledgeDocumentIdentityCreateWithoutKnowledgeSpaceInput, KnowledgeDocumentIdentityUncheckedCreateWithoutKnowledgeSpaceInput> | KnowledgeDocumentIdentityCreateWithoutKnowledgeSpaceInput[] | KnowledgeDocumentIdentityUncheckedCreateWithoutKnowledgeSpaceInput[]
+    connectOrCreate?: KnowledgeDocumentIdentityCreateOrConnectWithoutKnowledgeSpaceInput | KnowledgeDocumentIdentityCreateOrConnectWithoutKnowledgeSpaceInput[]
+    createMany?: KnowledgeDocumentIdentityCreateManyKnowledgeSpaceInputEnvelope
+    connect?: KnowledgeDocumentIdentityWhereUniqueInput | KnowledgeDocumentIdentityWhereUniqueInput[]
+  }
+
   export type KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutKnowledgeSpaceInput = {
     create?: XOR<KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput, KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput> | KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput[] | KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput[]
     connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput[]
     createMany?: KnowledgeRemoteBindingCreateManyKnowledgeSpaceInputEnvelope
     connect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+  }
+
+  export type KnowledgeDocumentIdentityUncheckedCreateNestedManyWithoutKnowledgeSpaceInput = {
+    create?: XOR<KnowledgeDocumentIdentityCreateWithoutKnowledgeSpaceInput, KnowledgeDocumentIdentityUncheckedCreateWithoutKnowledgeSpaceInput> | KnowledgeDocumentIdentityCreateWithoutKnowledgeSpaceInput[] | KnowledgeDocumentIdentityUncheckedCreateWithoutKnowledgeSpaceInput[]
+    connectOrCreate?: KnowledgeDocumentIdentityCreateOrConnectWithoutKnowledgeSpaceInput | KnowledgeDocumentIdentityCreateOrConnectWithoutKnowledgeSpaceInput[]
+    createMany?: KnowledgeDocumentIdentityCreateManyKnowledgeSpaceInputEnvelope
+    connect?: KnowledgeDocumentIdentityWhereUniqueInput | KnowledgeDocumentIdentityWhereUniqueInput[]
   }
 
   export type KnowledgeRemoteBindingUpdateManyWithoutKnowledgeSpaceNestedInput = {
@@ -166517,6 +168007,20 @@ export namespace Prisma {
     deleteMany?: KnowledgeRemoteBindingScalarWhereInput | KnowledgeRemoteBindingScalarWhereInput[]
   }
 
+  export type KnowledgeDocumentIdentityUpdateManyWithoutKnowledgeSpaceNestedInput = {
+    create?: XOR<KnowledgeDocumentIdentityCreateWithoutKnowledgeSpaceInput, KnowledgeDocumentIdentityUncheckedCreateWithoutKnowledgeSpaceInput> | KnowledgeDocumentIdentityCreateWithoutKnowledgeSpaceInput[] | KnowledgeDocumentIdentityUncheckedCreateWithoutKnowledgeSpaceInput[]
+    connectOrCreate?: KnowledgeDocumentIdentityCreateOrConnectWithoutKnowledgeSpaceInput | KnowledgeDocumentIdentityCreateOrConnectWithoutKnowledgeSpaceInput[]
+    upsert?: KnowledgeDocumentIdentityUpsertWithWhereUniqueWithoutKnowledgeSpaceInput | KnowledgeDocumentIdentityUpsertWithWhereUniqueWithoutKnowledgeSpaceInput[]
+    createMany?: KnowledgeDocumentIdentityCreateManyKnowledgeSpaceInputEnvelope
+    set?: KnowledgeDocumentIdentityWhereUniqueInput | KnowledgeDocumentIdentityWhereUniqueInput[]
+    disconnect?: KnowledgeDocumentIdentityWhereUniqueInput | KnowledgeDocumentIdentityWhereUniqueInput[]
+    delete?: KnowledgeDocumentIdentityWhereUniqueInput | KnowledgeDocumentIdentityWhereUniqueInput[]
+    connect?: KnowledgeDocumentIdentityWhereUniqueInput | KnowledgeDocumentIdentityWhereUniqueInput[]
+    update?: KnowledgeDocumentIdentityUpdateWithWhereUniqueWithoutKnowledgeSpaceInput | KnowledgeDocumentIdentityUpdateWithWhereUniqueWithoutKnowledgeSpaceInput[]
+    updateMany?: KnowledgeDocumentIdentityUpdateManyWithWhereWithoutKnowledgeSpaceInput | KnowledgeDocumentIdentityUpdateManyWithWhereWithoutKnowledgeSpaceInput[]
+    deleteMany?: KnowledgeDocumentIdentityScalarWhereInput | KnowledgeDocumentIdentityScalarWhereInput[]
+  }
+
   export type KnowledgeRemoteBindingUncheckedUpdateManyWithoutKnowledgeSpaceNestedInput = {
     create?: XOR<KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput, KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput> | KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput[] | KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput[]
     connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput[]
@@ -166529,6 +168033,34 @@ export namespace Prisma {
     update?: KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutKnowledgeSpaceInput[]
     updateMany?: KnowledgeRemoteBindingUpdateManyWithWhereWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingUpdateManyWithWhereWithoutKnowledgeSpaceInput[]
     deleteMany?: KnowledgeRemoteBindingScalarWhereInput | KnowledgeRemoteBindingScalarWhereInput[]
+  }
+
+  export type KnowledgeDocumentIdentityUncheckedUpdateManyWithoutKnowledgeSpaceNestedInput = {
+    create?: XOR<KnowledgeDocumentIdentityCreateWithoutKnowledgeSpaceInput, KnowledgeDocumentIdentityUncheckedCreateWithoutKnowledgeSpaceInput> | KnowledgeDocumentIdentityCreateWithoutKnowledgeSpaceInput[] | KnowledgeDocumentIdentityUncheckedCreateWithoutKnowledgeSpaceInput[]
+    connectOrCreate?: KnowledgeDocumentIdentityCreateOrConnectWithoutKnowledgeSpaceInput | KnowledgeDocumentIdentityCreateOrConnectWithoutKnowledgeSpaceInput[]
+    upsert?: KnowledgeDocumentIdentityUpsertWithWhereUniqueWithoutKnowledgeSpaceInput | KnowledgeDocumentIdentityUpsertWithWhereUniqueWithoutKnowledgeSpaceInput[]
+    createMany?: KnowledgeDocumentIdentityCreateManyKnowledgeSpaceInputEnvelope
+    set?: KnowledgeDocumentIdentityWhereUniqueInput | KnowledgeDocumentIdentityWhereUniqueInput[]
+    disconnect?: KnowledgeDocumentIdentityWhereUniqueInput | KnowledgeDocumentIdentityWhereUniqueInput[]
+    delete?: KnowledgeDocumentIdentityWhereUniqueInput | KnowledgeDocumentIdentityWhereUniqueInput[]
+    connect?: KnowledgeDocumentIdentityWhereUniqueInput | KnowledgeDocumentIdentityWhereUniqueInput[]
+    update?: KnowledgeDocumentIdentityUpdateWithWhereUniqueWithoutKnowledgeSpaceInput | KnowledgeDocumentIdentityUpdateWithWhereUniqueWithoutKnowledgeSpaceInput[]
+    updateMany?: KnowledgeDocumentIdentityUpdateManyWithWhereWithoutKnowledgeSpaceInput | KnowledgeDocumentIdentityUpdateManyWithWhereWithoutKnowledgeSpaceInput[]
+    deleteMany?: KnowledgeDocumentIdentityScalarWhereInput | KnowledgeDocumentIdentityScalarWhereInput[]
+  }
+
+  export type KnowledgeSpaceCreateNestedOneWithoutDocumentIdentitiesInput = {
+    create?: XOR<KnowledgeSpaceCreateWithoutDocumentIdentitiesInput, KnowledgeSpaceUncheckedCreateWithoutDocumentIdentitiesInput>
+    connectOrCreate?: KnowledgeSpaceCreateOrConnectWithoutDocumentIdentitiesInput
+    connect?: KnowledgeSpaceWhereUniqueInput
+  }
+
+  export type KnowledgeSpaceUpdateOneRequiredWithoutDocumentIdentitiesNestedInput = {
+    create?: XOR<KnowledgeSpaceCreateWithoutDocumentIdentitiesInput, KnowledgeSpaceUncheckedCreateWithoutDocumentIdentitiesInput>
+    connectOrCreate?: KnowledgeSpaceCreateOrConnectWithoutDocumentIdentitiesInput
+    upsert?: KnowledgeSpaceUpsertWithoutDocumentIdentitiesInput
+    connect?: KnowledgeSpaceWhereUniqueInput
+    update?: XOR<XOR<KnowledgeSpaceUpdateToOneWithWhereWithoutDocumentIdentitiesInput, KnowledgeSpaceUpdateWithoutDocumentIdentitiesInput>, KnowledgeSpaceUncheckedUpdateWithoutDocumentIdentitiesInput>
   }
 
   export type KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput = {
@@ -170304,6 +171836,7 @@ export namespace Prisma {
 
   export type KnowledgeWriteRequestCreateWithoutAccountInput = {
     id: string
+    knowledgeDocumentId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -170327,6 +171860,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestUncheckedCreateWithoutAccountInput = {
     id: string
     bindingId: string
+    knowledgeDocumentId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -172529,6 +174063,7 @@ export namespace Prisma {
     id?: StringFilter<"KnowledgeWriteRequest"> | string
     identityId?: StringFilter<"KnowledgeWriteRequest"> | string
     bindingId?: StringFilter<"KnowledgeWriteRequest"> | string
+    knowledgeDocumentId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestHash?: StringFilter<"KnowledgeWriteRequest"> | string
     relativePath?: StringFilter<"KnowledgeWriteRequest"> | string
@@ -191997,6 +193532,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type KnowledgeDocumentIdentityCreateWithoutKnowledgeSpaceInput = {
+    id?: string
+    knowledgeDocumentId: string
+    origin: string
+    originRequestId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KnowledgeDocumentIdentityUncheckedCreateWithoutKnowledgeSpaceInput = {
+    id?: string
+    knowledgeDocumentId: string
+    origin: string
+    originRequestId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KnowledgeDocumentIdentityCreateOrConnectWithoutKnowledgeSpaceInput = {
+    where: KnowledgeDocumentIdentityWhereUniqueInput
+    create: XOR<KnowledgeDocumentIdentityCreateWithoutKnowledgeSpaceInput, KnowledgeDocumentIdentityUncheckedCreateWithoutKnowledgeSpaceInput>
+  }
+
+  export type KnowledgeDocumentIdentityCreateManyKnowledgeSpaceInputEnvelope = {
+    data: KnowledgeDocumentIdentityCreateManyKnowledgeSpaceInput | KnowledgeDocumentIdentityCreateManyKnowledgeSpaceInput[]
+    skipDuplicates?: boolean
+  }
+
   export type KnowledgeRemoteBindingUpsertWithWhereUniqueWithoutKnowledgeSpaceInput = {
     where: KnowledgeRemoteBindingWhereUniqueInput
     update: XOR<KnowledgeRemoteBindingUpdateWithoutKnowledgeSpaceInput, KnowledgeRemoteBindingUncheckedUpdateWithoutKnowledgeSpaceInput>
@@ -192013,16 +193576,91 @@ export namespace Prisma {
     data: XOR<KnowledgeRemoteBindingUpdateManyMutationInput, KnowledgeRemoteBindingUncheckedUpdateManyWithoutKnowledgeSpaceInput>
   }
 
+  export type KnowledgeDocumentIdentityUpsertWithWhereUniqueWithoutKnowledgeSpaceInput = {
+    where: KnowledgeDocumentIdentityWhereUniqueInput
+    update: XOR<KnowledgeDocumentIdentityUpdateWithoutKnowledgeSpaceInput, KnowledgeDocumentIdentityUncheckedUpdateWithoutKnowledgeSpaceInput>
+    create: XOR<KnowledgeDocumentIdentityCreateWithoutKnowledgeSpaceInput, KnowledgeDocumentIdentityUncheckedCreateWithoutKnowledgeSpaceInput>
+  }
+
+  export type KnowledgeDocumentIdentityUpdateWithWhereUniqueWithoutKnowledgeSpaceInput = {
+    where: KnowledgeDocumentIdentityWhereUniqueInput
+    data: XOR<KnowledgeDocumentIdentityUpdateWithoutKnowledgeSpaceInput, KnowledgeDocumentIdentityUncheckedUpdateWithoutKnowledgeSpaceInput>
+  }
+
+  export type KnowledgeDocumentIdentityUpdateManyWithWhereWithoutKnowledgeSpaceInput = {
+    where: KnowledgeDocumentIdentityScalarWhereInput
+    data: XOR<KnowledgeDocumentIdentityUpdateManyMutationInput, KnowledgeDocumentIdentityUncheckedUpdateManyWithoutKnowledgeSpaceInput>
+  }
+
+  export type KnowledgeDocumentIdentityScalarWhereInput = {
+    AND?: KnowledgeDocumentIdentityScalarWhereInput | KnowledgeDocumentIdentityScalarWhereInput[]
+    OR?: KnowledgeDocumentIdentityScalarWhereInput[]
+    NOT?: KnowledgeDocumentIdentityScalarWhereInput | KnowledgeDocumentIdentityScalarWhereInput[]
+    id?: StringFilter<"KnowledgeDocumentIdentity"> | string
+    knowledgeSpaceId?: StringFilter<"KnowledgeDocumentIdentity"> | string
+    knowledgeDocumentId?: StringFilter<"KnowledgeDocumentIdentity"> | string
+    origin?: StringFilter<"KnowledgeDocumentIdentity"> | string
+    originRequestId?: StringNullableFilter<"KnowledgeDocumentIdentity"> | string | null
+    createdAt?: DateTimeFilter<"KnowledgeDocumentIdentity"> | Date | string
+    updatedAt?: DateTimeFilter<"KnowledgeDocumentIdentity"> | Date | string
+  }
+
+  export type KnowledgeSpaceCreateWithoutDocumentIdentitiesInput = {
+    id: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    remoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutKnowledgeSpaceInput
+  }
+
+  export type KnowledgeSpaceUncheckedCreateWithoutDocumentIdentitiesInput = {
+    id: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    remoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutKnowledgeSpaceInput
+  }
+
+  export type KnowledgeSpaceCreateOrConnectWithoutDocumentIdentitiesInput = {
+    where: KnowledgeSpaceWhereUniqueInput
+    create: XOR<KnowledgeSpaceCreateWithoutDocumentIdentitiesInput, KnowledgeSpaceUncheckedCreateWithoutDocumentIdentitiesInput>
+  }
+
+  export type KnowledgeSpaceUpsertWithoutDocumentIdentitiesInput = {
+    update: XOR<KnowledgeSpaceUpdateWithoutDocumentIdentitiesInput, KnowledgeSpaceUncheckedUpdateWithoutDocumentIdentitiesInput>
+    create: XOR<KnowledgeSpaceCreateWithoutDocumentIdentitiesInput, KnowledgeSpaceUncheckedCreateWithoutDocumentIdentitiesInput>
+    where?: KnowledgeSpaceWhereInput
+  }
+
+  export type KnowledgeSpaceUpdateToOneWithWhereWithoutDocumentIdentitiesInput = {
+    where?: KnowledgeSpaceWhereInput
+    data: XOR<KnowledgeSpaceUpdateWithoutDocumentIdentitiesInput, KnowledgeSpaceUncheckedUpdateWithoutDocumentIdentitiesInput>
+  }
+
+  export type KnowledgeSpaceUpdateWithoutDocumentIdentitiesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    remoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutKnowledgeSpaceNestedInput
+  }
+
+  export type KnowledgeSpaceUncheckedUpdateWithoutDocumentIdentitiesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    remoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutKnowledgeSpaceNestedInput
+  }
+
   export type KnowledgeSpaceCreateWithoutRemoteBindingsInput = {
     id: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    documentIdentities?: KnowledgeDocumentIdentityCreateNestedManyWithoutKnowledgeSpaceInput
   }
 
   export type KnowledgeSpaceUncheckedCreateWithoutRemoteBindingsInput = {
     id: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    documentIdentities?: KnowledgeDocumentIdentityUncheckedCreateNestedManyWithoutKnowledgeSpaceInput
   }
 
   export type KnowledgeSpaceCreateOrConnectWithoutRemoteBindingsInput = {
@@ -192282,6 +193920,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionCreateWithoutBindingInput = {
     id: string
+    knowledgeDocumentId?: string | null
     relativePath: string
     commitSha: string
     blobSha: string
@@ -192296,6 +193935,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput = {
     id: string
+    knowledgeDocumentId?: string | null
     relativePath: string
     commitSha: string
     blobSha: string
@@ -192380,6 +194020,7 @@ export namespace Prisma {
 
   export type KnowledgeWriteRequestCreateWithoutBindingInput = {
     id: string
+    knowledgeDocumentId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -192403,6 +194044,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestUncheckedCreateWithoutBindingInput = {
     id: string
     identityId: string
+    knowledgeDocumentId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -192447,12 +194089,14 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentIdentities?: KnowledgeDocumentIdentityUpdateManyWithoutKnowledgeSpaceNestedInput
   }
 
   export type KnowledgeSpaceUncheckedUpdateWithoutRemoteBindingsInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentIdentities?: KnowledgeDocumentIdentityUncheckedUpdateManyWithoutKnowledgeSpaceNestedInput
   }
 
   export type AccountUpsertWithoutKnowledgeRemoteBindingsInput = {
@@ -192748,6 +194392,7 @@ export namespace Prisma {
     NOT?: KnowledgeNoteProjectionScalarWhereInput | KnowledgeNoteProjectionScalarWhereInput[]
     id?: StringFilter<"KnowledgeNoteProjection"> | string
     bindingId?: StringFilter<"KnowledgeNoteProjection"> | string
+    knowledgeDocumentId?: StringNullableFilter<"KnowledgeNoteProjection"> | string | null
     relativePath?: StringFilter<"KnowledgeNoteProjection"> | string
     commitSha?: StringFilter<"KnowledgeNoteProjection"> | string
     blobSha?: StringFilter<"KnowledgeNoteProjection"> | string
@@ -199037,6 +200682,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestCreateManyAccountInput = {
     id: string
     bindingId: string
+    knowledgeDocumentId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -201546,6 +203192,7 @@ export namespace Prisma {
 
   export type KnowledgeWriteRequestUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -201569,6 +203216,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestUncheckedUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     bindingId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -201591,6 +203239,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     bindingId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -203747,6 +205396,15 @@ export namespace Prisma {
     version?: number
   }
 
+  export type KnowledgeDocumentIdentityCreateManyKnowledgeSpaceInput = {
+    id?: string
+    knowledgeDocumentId: string
+    origin: string
+    originRequestId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type KnowledgeRemoteBindingUpdateWithoutKnowledgeSpaceInput = {
     id?: StringFieldUpdateOperationsInput | string
     provider?: StringFieldUpdateOperationsInput | string
@@ -203799,6 +205457,33 @@ export namespace Prisma {
     version?: IntFieldUpdateOperationsInput | number
   }
 
+  export type KnowledgeDocumentIdentityUpdateWithoutKnowledgeSpaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    origin?: StringFieldUpdateOperationsInput | string
+    originRequestId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KnowledgeDocumentIdentityUncheckedUpdateWithoutKnowledgeSpaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    origin?: StringFieldUpdateOperationsInput | string
+    originRequestId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KnowledgeDocumentIdentityUncheckedUpdateManyWithoutKnowledgeSpaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
+    origin?: StringFieldUpdateOperationsInput | string
+    originRequestId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type GithubWebhookDeliveryCreateManyBindingInput = {
     id: string
     deliveryId: string
@@ -203814,6 +205499,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionCreateManyBindingInput = {
     id: string
+    knowledgeDocumentId?: string | null
     relativePath: string
     commitSha: string
     blobSha: string
@@ -203849,6 +205535,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestCreateManyBindingInput = {
     id: string
     identityId: string
+    knowledgeDocumentId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -203909,6 +205596,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: NullableStringFieldUpdateOperationsInput | string | null
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
@@ -203923,6 +205611,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionUncheckedUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: NullableStringFieldUpdateOperationsInput | string | null
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
@@ -203937,6 +205626,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: NullableStringFieldUpdateOperationsInput | string | null
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
@@ -204011,6 +205701,7 @@ export namespace Prisma {
 
   export type KnowledgeWriteRequestUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -204034,6 +205725,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestUncheckedUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -204056,6 +205748,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
+    knowledgeDocumentId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string

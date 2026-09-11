@@ -22,7 +22,12 @@ import type {
   KnowledgeProjectionCheckpoint,
   RemoteRepositoryBlockReason,
 } from '@memoflow/contracts/repository';
-import type { IdentityId, RepositoryId, ResourceId } from '@memoflow/contracts/primitives';
+import type {
+  IdentityId,
+  KnowledgeDocumentId,
+  RepositoryId,
+  ResourceId,
+} from '@memoflow/contracts/primitives';
 import { createLogger } from '@memoflow/utils/logger';
 import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/contracts/repository';
 import { GitHubAppClientFailureError } from '../ports/github-app-client.port';
@@ -54,6 +59,7 @@ import type {
   IKnowledgeAttachmentContentCache,
   KnowledgeAttachmentContentCacheEntry,
 } from '../ports/knowledge-attachment-content-cache.port';
+import type { IKnowledgeDocumentIdentityRepository } from '../ports/knowledge-document-identity.repository';
 import type { IKnowledgeRepositoryLeaseRepository } from '../ports/knowledge-repository-lease.repository';
 import {
   publishRepositoryNoteMutation,
@@ -67,6 +73,10 @@ import {
   knowledgeRepositoryDeliveryLeaseKey,
 } from './knowledge-repository-lease-coordinator';
 import { buildRemoteRepositoryObservation } from './remote-repository-observation.policy';
+import {
+  KnowledgeDocumentIdentityConflictError,
+  readKnowledgeDocumentId,
+} from './knowledge-document-identity.policy';
 
 const logger = createLogger('KnowledgeRepositoryProjectionService');
 const DEFAULT_RECONCILIATION_INTERVAL_MS = 15 * 60 * 1_000;
@@ -109,6 +119,7 @@ export interface KnowledgeRepositoryProjectionServiceOptions {
   historyFenceRepository: IRemoteHistoryFenceRepository;
   projectionCheckpointRepository: IKnowledgeProjectionCheckpointRepository;
   deliveryRepository: IGithubWebhookDeliveryRepository;
+  documentIdentityRepository: IKnowledgeDocumentIdentityRepository;
   projectionRepository: IKnowledgeNoteProjectionRepository;
   attachmentRepository?: IKnowledgeAttachmentProjectionRepository;
   attachmentContentCache?: IKnowledgeAttachmentContentCache;
@@ -528,14 +539,30 @@ export class KnowledgeRepositoryProjectionService {
   async updateIndexStatus(
     identityId: string,
     request: {
-      projectionId: string;
+      connectionId: string;
+      resourceId: string;
       contentHash: string;
       status: KnowledgeNoteProjectionClientDTO['indexStatus'];
     },
   ): Promise<Result<{ updated: boolean }>> {
+    const ownedBinding = await this.options.connectionRepository.findByIdForIdentity(
+      identityId,
+      request.connectionId,
+    );
+    if (!ownedBinding || ownedBinding.disconnectedAt !== null) return ok({ updated: false });
+
+    let projectionId = request.resourceId;
+    if (request.resourceId.startsWith('kdoc_')) {
+      const matches = await this.options.projectionRepository.findLiveByDocumentId(
+        ownedBinding.id,
+        request.resourceId as KnowledgeDocumentId,
+      );
+      if (matches.length !== 1) return ok({ updated: false });
+      projectionId = matches[0]!.id;
+    }
     const updated = await this.options.projectionRepository.updateIndexStatusForIdentity(
       identityId,
-      request.projectionId,
+      projectionId,
       request.contentHash,
       request.status,
     );
@@ -640,6 +667,7 @@ export class KnowledgeRepositoryProjectionService {
       writeRequests: rows.map((row) => ({
         id: row.id,
         connectionId: row.connectionId,
+        knowledgeDocumentId: row.knowledgeDocumentId,
         requestId: row.requestId,
         relativePath: row.relativePath,
         status: row.status,
@@ -715,6 +743,7 @@ export class KnowledgeRepositoryProjectionService {
     const projection: KnowledgeNoteProjectionUpsert = {
       id: `knowledge-note-${createHash('sha256').update(`${connectionId}:${writeRequest.relativePath}`).digest('hex')}`,
       connectionId,
+      knowledgeDocumentId: writeRequest.knowledgeDocumentId,
       relativePath: writeRequest.relativePath,
       commitSha,
       blobSha,
@@ -981,7 +1010,9 @@ export class KnowledgeRepositoryProjectionService {
       if (error instanceof KnowledgeRepositoryLeaseLostError) return;
       await this.saveProjectionFailure(
         connection,
-        'KNOWLEDGE_PROJECTION_RECONCILIATION_FAILED',
+        error instanceof KnowledgeDocumentIdentityConflictError
+          ? error.code
+          : 'KNOWLEDGE_PROJECTION_RECONCILIATION_FAILED',
         error instanceof Error ? error.message : 'Knowledge projection reconciliation failed',
       );
       logger.warn('Knowledge projection connection reconciliation failed', {
@@ -1162,15 +1193,21 @@ export class KnowledgeRepositoryProjectionService {
             markdownContent: change.markdownContent,
           }),
         );
+        const renamedFromPaths = changes.changes
+          .filter((change) => change.previousPath)
+          .map((change) => change.previousPath!);
+        const allDeletedPaths = deletedPaths.concat(renamedFromPaths);
+        const deletedProjections = await Promise.all(
+          allDeletedPaths.map((relativePath) =>
+            this.options.projectionRepository.findByPath(connection.id, relativePath),
+          ),
+        );
+        await this.validateAndRegisterDocumentIdentities(connection, projections, allDeletedPaths);
         await this.options.projectionRepository.applyChanges(
           connection.id,
           afterSha,
           projections,
-          deletedPaths.concat(
-            changes.changes
-              .filter((change) => change.previousPath)
-              .map((change) => change.previousPath!),
-          ),
+          allDeletedPaths,
         );
         await guard.ensureHeld();
         const attachmentChanges = changes.attachmentChanges ?? [];
@@ -1213,10 +1250,25 @@ export class KnowledgeRepositoryProjectionService {
               : RepositoryNoteMutationType.ContentUpdated,
           );
           if (change.previousPath) {
-            this.publishDeletedProjectionMutation(connection, change.previousPath);
+            const previous = deletedProjections.find(
+              (candidate) => candidate?.relativePath === change.previousPath,
+            );
+            if (
+              !previous?.knowledgeDocumentId ||
+              previous.knowledgeDocumentId !== projection.knowledgeDocumentId
+            ) {
+              this.publishDeletedProjectionMutation(
+                connection,
+                change.previousPath,
+                previous ?? null,
+              );
+            }
           }
         });
-        deletedPaths.forEach((path) => this.publishDeletedProjectionMutation(connection, path));
+        deletedPaths.forEach((path) => {
+          const previous = deletedProjections.find((candidate) => candidate?.relativePath === path);
+          this.publishDeletedProjectionMutation(connection, path, previous ?? null);
+        });
       }
       await guard.ensureHeld();
       const projectedAt = this.now();
@@ -1247,7 +1299,9 @@ export class KnowledgeRepositoryProjectionService {
       await guard.ensureHeld();
       await this.saveProjectionFailure(
         connection,
-        'KNOWLEDGE_PROJECTION_INGESTION_FAILED',
+        error instanceof KnowledgeDocumentIdentityConflictError
+          ? error.code
+          : 'KNOWLEDGE_PROJECTION_INGESTION_FAILED',
         error instanceof Error ? error.message : 'Projection ingestion failed',
       );
       await this.options.deliveryRepository.updateStatus(
@@ -1280,9 +1334,11 @@ export class KnowledgeRepositoryProjectionService {
     } catch {
       frontmatter = {};
     }
+    const knowledgeDocumentId = readKnowledgeDocumentId(frontmatter);
     return {
       id: `knowledge-note-${createHash('sha256').update(`${connectionId}:${file.relativePath}`).digest('hex')}`,
       connectionId,
+      knowledgeDocumentId,
       relativePath: file.relativePath,
       commitSha,
       blobSha: file.blobSha,
@@ -1325,6 +1381,12 @@ export class KnowledgeRepositoryProjectionService {
     const attachments = (snapshot.attachments ?? []).map((file) =>
       this.toAttachmentProjection(connection.id, commitSha, file),
     );
+    const previous = await this.options.projectionRepository.listLiveByConnection(connection.id);
+    const nextPaths = new Set(projections.map((projection) => projection.relativePath));
+    const deletedPaths = previous
+      .filter((projection) => !nextPaths.has(projection.relativePath))
+      .map((projection) => projection.relativePath);
+    await this.validateAndRegisterDocumentIdentities(connection, projections, deletedPaths);
     const deleted = await this.options.projectionRepository.applySnapshot(
       connection.id,
       commitSha,
@@ -1340,15 +1402,20 @@ export class KnowledgeRepositoryProjectionService {
         RepositoryNoteMutationType.ContentUpdated,
       ),
     );
-    deleted.forEach((projection) =>
-      this.publishMutation({
-        identityId: connection.identityId as IdentityId,
-        repositoryId: String(connection.id) as RepositoryId,
-        resourceId: projection.id as ResourceId,
-        resourcePath: projection.relativePath,
-        mutation: RepositoryNoteMutationType.Deleted,
-      }),
+    const survivingManagedIds = new Set(
+      projections.flatMap((projection) =>
+        projection.knowledgeDocumentId ? [projection.knowledgeDocumentId] : [],
+      ),
     );
+    deleted
+      .filter(
+        (projection) =>
+          !projection.knowledgeDocumentId ||
+          !survivingManagedIds.has(projection.knowledgeDocumentId),
+      )
+      .forEach((projection) =>
+        this.publishDeletedProjectionMutation(connection, projection.relativePath, projection),
+      );
   }
 
   private findRepository(
@@ -1366,7 +1433,7 @@ export class KnowledgeRepositoryProjectionService {
     this.publishMutation({
       identityId: connection.identityId as IdentityId,
       repositoryId: String(connection.id) as RepositoryId,
-      resourceId: projection.id as ResourceId,
+      resourceId: (projection.knowledgeDocumentId ?? projection.id) as ResourceId,
       resourcePath: projection.relativePath,
       mutation,
     });
@@ -1375,15 +1442,89 @@ export class KnowledgeRepositoryProjectionService {
   private publishDeletedProjectionMutation(
     connection: KnowledgeRemoteBindingServerDTO,
     relativePath: string,
+    projection: { id: string; knowledgeDocumentId: KnowledgeDocumentId | null } | null = null,
   ): void {
-    const projectionId = `knowledge-note-${createHash('sha256').update(`${connection.id}:${relativePath}`).digest('hex')}`;
+    const fallbackProjectionId = `knowledge-note-${createHash('sha256').update(`${connection.id}:${relativePath}`).digest('hex')}`;
     this.publishMutation({
       identityId: connection.identityId as IdentityId,
       repositoryId: String(connection.id) as RepositoryId,
-      resourceId: projectionId as ResourceId,
+      resourceId: (projection?.knowledgeDocumentId ??
+        projection?.id ??
+        fallbackProjectionId) as ResourceId,
       resourcePath: relativePath,
       mutation: RepositoryNoteMutationType.Deleted,
     });
+  }
+
+  private async validateAndRegisterDocumentIdentities(
+    connection: KnowledgeRemoteBindingServerDTO,
+    projections: KnowledgeNoteProjectionUpsert[],
+    deletedPaths: string[],
+  ): Promise<void> {
+    const deleted = new Set(deletedPaths);
+    const incomingManaged = projections.filter(
+      (
+        projection,
+      ): projection is KnowledgeNoteProjectionUpsert & {
+        knowledgeDocumentId: KnowledgeDocumentId;
+      } => projection.knowledgeDocumentId !== null,
+    );
+    const incomingByDocumentId = new Map<KnowledgeDocumentId, string[]>();
+    for (const projection of incomingManaged) {
+      const paths = incomingByDocumentId.get(projection.knowledgeDocumentId) ?? [];
+      paths.push(projection.relativePath);
+      incomingByDocumentId.set(projection.knowledgeDocumentId, paths);
+    }
+    for (const [documentId, paths] of incomingByDocumentId) {
+      if (new Set(paths).size > 1) {
+        throw new KnowledgeDocumentIdentityConflictError(
+          'KNOWLEDGE_DOCUMENT_ID_COLLISION',
+          `Knowledge document identity ${documentId} appears at multiple live paths`,
+        );
+      }
+    }
+
+    for (const projection of projections) {
+      const existingAtPath = await this.options.projectionRepository.findByPath(
+        connection.id,
+        projection.relativePath,
+      );
+      if (existingAtPath?.deletedAt === null && existingAtPath.knowledgeDocumentId) {
+        if (!projection.knowledgeDocumentId) {
+          throw new KnowledgeDocumentIdentityConflictError(
+            'KNOWLEDGE_DOCUMENT_ID_REMOVED',
+            `Managed knowledge document at ${projection.relativePath} lost its memoflow_id marker`,
+          );
+        }
+        if (existingAtPath.knowledgeDocumentId !== projection.knowledgeDocumentId) {
+          throw new KnowledgeDocumentIdentityConflictError(
+            'KNOWLEDGE_DOCUMENT_ID_REPLACED',
+            `Managed knowledge document at ${projection.relativePath} changed its memoflow_id marker`,
+          );
+        }
+      }
+      if (!projection.knowledgeDocumentId) continue;
+      const liveMatches = await this.options.projectionRepository.findLiveByDocumentId(
+        connection.id,
+        projection.knowledgeDocumentId,
+      );
+      const collision = liveMatches.find(
+        (candidate) =>
+          candidate.relativePath !== projection.relativePath &&
+          !deleted.has(candidate.relativePath),
+      );
+      if (collision) {
+        throw new KnowledgeDocumentIdentityConflictError(
+          'KNOWLEDGE_DOCUMENT_ID_COLLISION',
+          `Knowledge document identity ${projection.knowledgeDocumentId} is already live at ${collision.relativePath}`,
+        );
+      }
+      await this.options.documentIdentityRepository.observeMarker(
+        connection.knowledgeSpaceId,
+        projection.knowledgeDocumentId,
+        this.now(),
+      );
+    }
   }
 
   private async saveProjectionCheckpoint(

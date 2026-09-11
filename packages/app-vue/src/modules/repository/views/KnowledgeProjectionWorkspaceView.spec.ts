@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fail, ok } from '@memoflow/contracts/result';
 import type {
   CreateConfirmedKnowledgeNoteReq,
+  AdoptKnowledgeDocumentReq,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeRemoteBindingClientDTO,
 } from '@memoflow/contracts/repository';
@@ -50,6 +51,13 @@ const messages = {
       noSearchResults: 'No search results',
       noNotes: 'No notes',
       readOnly: 'Read only',
+      documentId: 'Stable document identity',
+      adoptAction: 'Adopt into MemoFlow',
+      adoptTitle: 'Adopt this note',
+      adoptDescription: 'Add a stable metadata identity.',
+      adoptPatch: 'Metadata patch',
+      adoptImmutable: 'Bound to the current Git blob.',
+      adoptConfirmAction: 'Confirm metadata commit',
       noteViews: 'Knowledge note views',
       previewTab: 'Preview',
       relationsTab: 'Relations',
@@ -221,6 +229,7 @@ function projection(
   return {
     id: 'projection-1',
     connectionId: BINDING_ID,
+    knowledgeDocumentId: null,
     relativePath: 'notes/architecture.md',
     title: 'Architecture',
     commitSha: 'b'.repeat(40),
@@ -242,6 +251,7 @@ function createService(overrides: Partial<IRepositoryService> = {}): IRepository
     listKnowledgeNoteProjections: vi.fn(async () => ok({ notes: [projection()] })),
     getKnowledgeNoteProjection: vi.fn(),
     createConfirmedKnowledgeNote: vi.fn(),
+    adoptKnowledgeDocument: vi.fn(),
     ...overrides,
   } as unknown as IRepositoryService;
 }
@@ -485,6 +495,55 @@ describe('KnowledgeProjectionWorkspaceView', () => {
     );
     expect(wrapper.find('[data-testid="knowledge-projection-create-dialog"]').exists()).toBe(false);
     expect(wrapper.text()).toContain('New note');
+  });
+
+  it('shows and confirms an explicit metadata-only adoption for an unmanaged note', async () => {
+    let adoptedRequest: AdoptKnowledgeDocumentReq | undefined;
+    const adoptKnowledgeDocument = vi.fn(async (request: AdoptKnowledgeDocumentReq) => {
+      adoptedRequest = request;
+      return ok({
+        requestId: request.requestId,
+        knowledgeDocumentId: request.knowledgeDocumentId,
+        relativePath: 'notes/architecture.md',
+        commitSha: 'e'.repeat(40),
+        status: 'Committed' as const,
+      });
+    });
+    const service = createService({ adoptKnowledgeDocument });
+    const wrapper = mountWorkspace(service);
+    await flushPromises();
+
+    await wrapper.get('[data-testid="knowledge-projection-adopt"]').trigger('click');
+    await flushPromises();
+    const marker = wrapper.get('[data-testid="knowledge-projection-adopt-document-id"]').text();
+    expect(marker).toMatch(/^memoflow_id: kdoc_[0-9a-f-]{36}$/i);
+
+    await wrapper.get('[data-testid="knowledge-projection-adopt-confirm"]').trigger('click');
+    await flushPromises();
+
+    expect(adoptKnowledgeDocument).toHaveBeenCalledOnce();
+    expect(adoptedRequest).toMatchObject({
+      projectionId: 'projection-1',
+      expectedBlobSha: 'c'.repeat(40),
+      knowledgeDocumentId: expect.stringMatching(/^kdoc_[0-9a-f-]{36}$/i),
+      requestId: expect.stringMatching(/^adopt-/),
+    });
+  });
+
+  it('shows the stable id instead of adoption controls for an already managed note', async () => {
+    const managedId = 'kdoc_550e8400-e29b-41d4-a716-446655440095' as never;
+    const service = createService({
+      listKnowledgeNoteProjections: vi.fn(async () =>
+        ok({ notes: [projection({ knowledgeDocumentId: managedId })] }),
+      ),
+    });
+    const wrapper = mountWorkspace(service);
+    await flushPromises();
+
+    expect(wrapper.find('[data-testid="knowledge-projection-adopt"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="knowledge-projection-document-id"]').text()).toContain(
+      managedId,
+    );
   });
 
   it('does not seed a hidden notes directory in a new proposal', async () => {

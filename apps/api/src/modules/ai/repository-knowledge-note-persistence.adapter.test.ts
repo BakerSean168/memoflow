@@ -4,6 +4,8 @@ import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/reposi
 import type { RepositoryApplicationPort } from '@memoflow/repository';
 import { RepositoryKnowledgeNotePersistenceAdapter } from './repository-knowledge-note-persistence.adapter';
 
+const DOCUMENT_ID = 'kdoc_550e8400-e29b-41d4-a716-446655440520' as never;
+
 function binding(
   id: string,
   options: { ready?: boolean; disconnected?: boolean } = {},
@@ -45,6 +47,7 @@ function createApi(connections: KnowledgeRemoteBindingClientDTO[]) {
     createConfirmedKnowledgeNote: vi.fn(async () =>
       ok({
         requestId: 'request-1',
+        knowledgeDocumentId: DOCUMENT_ID,
         relativePath: 'notes/Approved.md',
         commitSha: 'commit-1',
         status: 'Committed' as const,
@@ -71,6 +74,7 @@ const confirmedInput = {
   proposalId: 'proposal-1',
   proposalRevision: 2,
   requestId: 'request-1',
+  knowledgeDocumentId: DOCUMENT_ID,
 };
 
 describe('RepositoryKnowledgeNotePersistenceAdapter', () => {
@@ -84,6 +88,7 @@ describe('RepositoryKnowledgeNotePersistenceAdapter', () => {
         path: 'notes/Draft.md',
         fileName: 'Draft.md',
         content: '# Draft',
+        knowledgeDocumentId: DOCUMENT_ID,
       }),
     ).rejects.toThrow(/confirmed knowledge-note proposal/i);
     expect(api.listKnowledgeRepositoryConnections).not.toHaveBeenCalled();

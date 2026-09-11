@@ -549,4 +549,299 @@ describe('GitHubAppClient', () => {
       ),
     ).rejects.toMatchObject({ failure: { kind: 'payload_too_large' } });
   });
+
+  it('updates an existing Markdown file only when its reviewed blob is unchanged', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ token: 'repository-token', expires_at: TOKEN_EXPIRY }))
+      .mockResolvedValueOnce(jsonResponse({ object: { sha: 'head-sha' } }))
+      .mockResolvedValueOnce(jsonResponse({ type: 'file', sha: 'reviewed-blob' }))
+      .mockResolvedValueOnce(jsonResponse({ tree: { sha: 'base-tree' } }))
+      .mockResolvedValueOnce(jsonResponse({ sha: 'new-blob' }))
+      .mockResolvedValueOnce(jsonResponse({ sha: 'new-tree' }))
+      .mockResolvedValueOnce(jsonResponse({ sha: 'new-commit' }))
+      .mockResolvedValueOnce(jsonResponse({ object: { sha: 'new-commit' } }));
+    const client = new GitHubAppClient({
+      appId: 'github-app-123',
+      privateKey,
+      fetchImpl,
+      now: () => NOW,
+    });
+    const repository = {
+      id: '987654321',
+      nodeId: 'R_knowledge',
+      fullName: 'owner/knowledge',
+      ownerId: '42',
+      private: true,
+      archived: false,
+      disabled: false,
+      defaultBranch: 'main',
+      permissions: { admin: true, push: true, pull: true },
+    };
+
+    await expect(
+      client.updateFileCommit('installation-7', {
+        repository,
+        path: 'notes/existing.md',
+        branch: 'main',
+        expectedBlobSha: 'reviewed-blob',
+        content: '---\nmemoflow_id: kdoc_550e8400-e29b-41d4-a716-446655440490\n---\n# Existing',
+        message: 'Adopt knowledge note: Existing',
+        requestId: 'adopt-request-1',
+      }),
+    ).resolves.toEqual({ commitSha: 'new-commit', blobSha: 'new-blob' });
+
+    expect(fetchImpl).toHaveBeenCalledTimes(8);
+    expect(String(fetchImpl.mock.calls[1]?.[0])).toContain('/git/ref/heads/main');
+    expect(String(fetchImpl.mock.calls[2]?.[0])).toContain(
+      '/contents/notes/existing.md?ref=head-sha',
+    );
+    expect(JSON.parse(String(fetchImpl.mock.calls[4]?.[1]?.body))).toEqual({
+      content: Buffer.from(
+        '---\nmemoflow_id: kdoc_550e8400-e29b-41d4-a716-446655440490\n---\n# Existing',
+        'utf8',
+      ).toString('base64'),
+      encoding: 'base64',
+    });
+    expect(JSON.parse(String(fetchImpl.mock.calls[7]?.[1]?.body))).toEqual({
+      sha: 'new-commit',
+      force: false,
+    });
+  });
+
+  it('refuses adoption before creating Git objects when the reviewed blob changed', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ token: 'repository-token', expires_at: TOKEN_EXPIRY }))
+      .mockResolvedValueOnce(jsonResponse({ object: { sha: 'head-sha' } }))
+      .mockResolvedValueOnce(jsonResponse({ type: 'file', sha: 'changed-blob' }));
+    const client = new GitHubAppClient({
+      appId: 'github-app-123',
+      privateKey,
+      fetchImpl,
+      now: () => NOW,
+    });
+
+    await expect(
+      client.updateFileCommit('installation-7', {
+        repository: {
+          id: '987654321',
+          nodeId: 'R_knowledge',
+          fullName: 'owner/knowledge',
+          ownerId: '42',
+          private: true,
+          archived: false,
+          disabled: false,
+          defaultBranch: 'main',
+          permissions: { admin: true, push: true, pull: true },
+        },
+        path: 'notes/existing.md',
+        branch: 'main',
+        expectedBlobSha: 'reviewed-blob',
+        content: '# Existing',
+        message: 'Adopt knowledge note: Existing',
+        requestId: 'adopt-request-1',
+      }),
+    ).rejects.toMatchObject({ failure: { kind: 'conflict' } });
+
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+    expect(String(fetchImpl.mock.calls[1]?.[0])).toContain('/git/ref/heads/main');
+    expect(String(fetchImpl.mock.calls[2]?.[0])).toContain(
+      '/contents/notes/existing.md?ref=head-sha',
+    );
+  });
+
+  it('rejects a mutable-branch review when the frozen head has a changed blob', async () => {
+    const requests: Array<{ method: string; url: string }> = [];
+    const fetchImpl = vi.fn<typeof fetch>().mockImplementation(async (input, init) => {
+      const url = String(input);
+      const method = init?.method ?? 'GET';
+      requests.push({ method, url });
+
+      if (url.endsWith('/app/installations/installation-7/access_tokens')) {
+        return jsonResponse({ token: 'repository-token', expires_at: TOKEN_EXPIRY });
+      }
+      if (url.endsWith('/git/ref/heads/main')) {
+        return jsonResponse({ object: { sha: 'head-b' } });
+      }
+      if (url.endsWith('/contents/notes/existing.md?ref=main')) {
+        return jsonResponse({ type: 'file', sha: 'reviewed-blob' });
+      }
+      if (url.endsWith('/contents/notes/existing.md?ref=head-b')) {
+        return jsonResponse({ type: 'file', sha: 'changed-blob' });
+      }
+      if (url.endsWith('/git/commits/head-b')) {
+        return jsonResponse({ tree: { sha: 'base-tree' } });
+      }
+      if (url.endsWith('/git/blobs')) return jsonResponse({ sha: 'new-blob' });
+      if (url.endsWith('/git/trees')) return jsonResponse({ sha: 'new-tree' });
+      if (url.endsWith('/git/commits')) return jsonResponse({ sha: 'new-commit' });
+      if (url.endsWith('/git/refs/heads/main')) {
+        return jsonResponse({ object: { sha: 'new-commit' } });
+      }
+      throw new Error(`Unexpected GitHub request: ${method} ${url}`);
+    });
+    const client = new GitHubAppClient({
+      appId: 'github-app-123',
+      privateKey,
+      fetchImpl,
+      now: () => NOW,
+    });
+
+    await expect(
+      client.updateFileCommit('installation-7', {
+        repository: {
+          id: '987654321',
+          nodeId: 'R_knowledge',
+          fullName: 'owner/knowledge',
+          ownerId: '42',
+          private: true,
+          archived: false,
+          disabled: false,
+          defaultBranch: 'main',
+          permissions: { admin: true, push: true, pull: true },
+        },
+        path: 'notes/existing.md',
+        branch: 'main',
+        expectedBlobSha: 'reviewed-blob',
+        content: '# Existing',
+        message: 'Adopt knowledge note: Existing',
+        requestId: 'adopt-request-1',
+      }),
+    ).rejects.toMatchObject({ failure: { kind: 'conflict' } });
+
+    expect(requests).toEqual([
+      {
+        method: 'POST',
+        url: 'https://api.github.com/app/installations/installation-7/access_tokens',
+      },
+      {
+        method: 'GET',
+        url: 'https://api.github.com/repos/owner/knowledge/git/ref/heads/main',
+      },
+      {
+        method: 'GET',
+        url: 'https://api.github.com/repos/owner/knowledge/contents/notes/existing.md?ref=head-b',
+      },
+    ]);
+  });
+
+  it('revalidates the frozen head and path before creating objects after a ref race', async () => {
+    const requests: Array<{ method: string; url: string }> = [];
+    let branchRefReads = 0;
+    let branchUpdates = 0;
+    const fetchImpl = vi.fn<typeof fetch>().mockImplementation(async (input, init) => {
+      const url = String(input);
+      const method = init?.method ?? 'GET';
+      requests.push({ method, url });
+
+      if (url.endsWith('/app/installations/installation-7/access_tokens')) {
+        return jsonResponse({ token: 'repository-token', expires_at: TOKEN_EXPIRY });
+      }
+      if (url.endsWith('/git/ref/heads/main')) {
+        branchRefReads += 1;
+        return jsonResponse({ object: { sha: branchRefReads === 1 ? 'head-a' : 'head-b' } });
+      }
+      if (url.includes('/contents/notes/existing.md?ref=')) {
+        const ref = new URL(url).searchParams.get('ref');
+        expect(ref).toBe(branchRefReads === 1 ? 'head-a' : 'head-b');
+        return jsonResponse({ type: 'file', sha: 'reviewed-blob' });
+      }
+      if (url.endsWith('/git/commits/head-a')) {
+        return jsonResponse({ tree: { sha: 'base-tree-a' } });
+      }
+      if (url.endsWith('/git/commits/head-b')) {
+        return jsonResponse({ tree: { sha: 'base-tree-b' } });
+      }
+      if (url.endsWith('/git/blobs')) {
+        return jsonResponse({ sha: branchRefReads === 1 ? 'new-blob-a' : 'new-blob-b' });
+      }
+      if (url.endsWith('/git/trees')) {
+        return jsonResponse({ sha: branchRefReads === 1 ? 'new-tree-a' : 'new-tree-b' });
+      }
+      if (url.endsWith('/git/commits')) {
+        return jsonResponse({ sha: branchRefReads === 1 ? 'new-commit-a' : 'new-commit-b' });
+      }
+      if (url.endsWith('/git/refs/heads/main')) {
+        branchUpdates += 1;
+        return branchUpdates === 1
+          ? jsonResponse({ message: 'branch advanced' }, 409)
+          : jsonResponse({ object: { sha: 'new-commit-b' } });
+      }
+      throw new Error(`Unexpected GitHub request: ${method} ${url}`);
+    });
+    const client = new GitHubAppClient({
+      appId: 'github-app-123',
+      privateKey,
+      fetchImpl,
+      now: () => NOW,
+    });
+
+    await expect(
+      client.updateFileCommit('installation-7', {
+        repository: {
+          id: '987654321',
+          nodeId: 'R_knowledge',
+          fullName: 'owner/knowledge',
+          ownerId: '42',
+          private: true,
+          archived: false,
+          disabled: false,
+          defaultBranch: 'main',
+          permissions: { admin: true, push: true, pull: true },
+        },
+        path: 'notes/existing.md',
+        branch: 'main',
+        expectedBlobSha: 'reviewed-blob',
+        content: '# Existing',
+        message: 'Adopt knowledge note: Existing',
+        requestId: 'adopt-request-1',
+      }),
+    ).resolves.toEqual({ commitSha: 'new-commit-b', blobSha: 'new-blob-b' });
+
+    expect(requests).toEqual([
+      {
+        method: 'POST',
+        url: 'https://api.github.com/app/installations/installation-7/access_tokens',
+      },
+      {
+        method: 'GET',
+        url: 'https://api.github.com/repos/owner/knowledge/git/ref/heads/main',
+      },
+      {
+        method: 'GET',
+        url: 'https://api.github.com/repos/owner/knowledge/contents/notes/existing.md?ref=head-a',
+      },
+      {
+        method: 'GET',
+        url: 'https://api.github.com/repos/owner/knowledge/git/commits/head-a',
+      },
+      { method: 'POST', url: 'https://api.github.com/repos/owner/knowledge/git/blobs' },
+      { method: 'POST', url: 'https://api.github.com/repos/owner/knowledge/git/trees' },
+      { method: 'POST', url: 'https://api.github.com/repos/owner/knowledge/git/commits' },
+      {
+        method: 'PATCH',
+        url: 'https://api.github.com/repos/owner/knowledge/git/refs/heads/main',
+      },
+      {
+        method: 'GET',
+        url: 'https://api.github.com/repos/owner/knowledge/git/ref/heads/main',
+      },
+      {
+        method: 'GET',
+        url: 'https://api.github.com/repos/owner/knowledge/contents/notes/existing.md?ref=head-b',
+      },
+      {
+        method: 'GET',
+        url: 'https://api.github.com/repos/owner/knowledge/git/commits/head-b',
+      },
+      { method: 'POST', url: 'https://api.github.com/repos/owner/knowledge/git/blobs' },
+      { method: 'POST', url: 'https://api.github.com/repos/owner/knowledge/git/trees' },
+      { method: 'POST', url: 'https://api.github.com/repos/owner/knowledge/git/commits' },
+      {
+        method: 'PATCH',
+        url: 'https://api.github.com/repos/owner/knowledge/git/refs/heads/main',
+      },
+    ]);
+  });
 });

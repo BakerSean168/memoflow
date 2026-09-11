@@ -114,7 +114,9 @@ async function createRuntime() {
   const storage = new LibSQLStore({ id: randomUUID(), url: `file:${file}` });
   const mutations = mutationPort();
   const createTaskPlan = taskMutationPort();
-  const saveKnowledgeNote = vi.fn(async (request) => ok({ noteId: String(request.requestId) }));
+  const createConfirmedKnowledgeNote = vi.fn(async (request) =>
+    ok({ noteId: request.knowledgeDocumentId }),
+  );
   const summarizeUsage = vi.fn(async () => ({
     executionCount: 2,
     promptTokens: 200,
@@ -133,7 +135,7 @@ async function createRuntime() {
       ),
       createTaskPlan,
     },
-    knowledgeCaptureMutationPort: { saveKnowledgeNote },
+    knowledgeCaptureMutationPort: { createConfirmedKnowledgeNote },
     usageReadPort: { summarizeUsage },
     userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
   });
@@ -153,7 +155,7 @@ async function createRuntime() {
     candidateDraft: knowledgeDraft,
   });
   resources.push({ runtime, file });
-  return { runtime, mutations, createTaskPlan, saveKnowledgeNote, summarizeUsage };
+  return { runtime, mutations, createTaskPlan, createConfirmedKnowledgeNote, summarizeUsage };
 }
 
 describe('MastraAIRuntime goal.create product projection', () => {
@@ -311,7 +313,7 @@ describe('MastraAIRuntime goal.create product projection', () => {
 
 describe('MastraAIRuntime knowledge.capture product projection', () => {
   it('owns start/get/list/resume and persists a note only after approval', async () => {
-    const { runtime, saveKnowledgeNote } = await createRuntime();
+    const { runtime, createConfirmedKnowledgeNote } = await createRuntime();
     const identityId = 'identity-knowledge';
 
     const started = await runtime.start({
@@ -337,7 +339,36 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
     expect(await runtime.get({ identityId: 'identity-b', runId: started.runId })).toBeNull();
     expect(await runtime.list({ identityId })).toHaveLength(1);
     // No note write should occur before explicit approval.
-    expect(saveKnowledgeNote).not.toHaveBeenCalled();
+    expect(createConfirmedKnowledgeNote).not.toHaveBeenCalled();
+    const reviewedDocumentId =
+      started.suspension?.type === 'knowledge_draft_review'
+        ? started.suspension.draft.knowledgeDocumentId
+        : '';
+    expect(reviewedDocumentId).toMatch(/^kdoc_[0-9a-f-]{36}$/i);
+
+    const revised = await runtime.resume({
+      context: context(identityId, 'request-kedit'),
+      request: {
+        runId: started.runId,
+        command: {
+          type: 'edit_structured',
+          patch: { title: 'Mastra durable workflow notes revised' },
+        },
+      },
+    });
+    expect(revised).toMatchObject({
+      status: 'suspended',
+      suspension: {
+        type: 'knowledge_draft_review',
+        revision: 2,
+        draft: {
+          revision: 2,
+          title: 'Mastra durable workflow notes revised',
+          knowledgeDocumentId: reviewedDocumentId,
+        },
+      },
+    });
+    expect(createConfirmedKnowledgeNote).not.toHaveBeenCalled();
 
     const completed = await runtime.resume({
       context: context(identityId, 'request-kapprove'),
@@ -348,22 +379,23 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       status: 'completed',
       result: {
         workflowRunId: started.runId,
-        revision: 1,
+        revision: 2,
         status: 'success',
       },
     });
-    expect(saveKnowledgeNote).toHaveBeenCalledTimes(1);
-    const saveCall = saveKnowledgeNote.mock.calls[0]?.[0];
-    expect(saveCall).toMatchObject({
+    expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(1);
+    const createCall = createConfirmedKnowledgeNote.mock.calls[0]?.[0];
+    expect(createCall).toMatchObject({
       workflowRunId: started.runId,
-      revision: 1,
+      revision: 2,
+      knowledgeDocumentId: reviewedDocumentId,
       path: 'Notes/Engineering',
-      title: 'Mastra durable workflow notes',
+      title: 'Mastra durable workflow notes revised',
     });
     // requestId is a deterministic idempotency key, not a caller-supplied value.
-    expect(typeof saveCall.requestId).toBe('string');
-    expect(saveCall.requestId.length).toBeGreaterThan(0);
-    expect(saveCall.context).toMatchObject({
+    expect(typeof createCall.requestId).toBe('string');
+    expect(createCall.requestId.length).toBeGreaterThan(0);
+    expect(createCall.context).toMatchObject({
       identityId,
       requestId: 'request-kapprove',
     });
@@ -374,6 +406,6 @@ describe('MastraAIRuntime knowledge.capture product projection', () => {
       request: { runId: started.runId, command: { type: 'approve' } },
     });
     expect(duplicateApprove).toEqual(completed);
-    expect(saveKnowledgeNote).toHaveBeenCalledTimes(1);
+    expect(createConfirmedKnowledgeNote).toHaveBeenCalledTimes(1);
   });
 });

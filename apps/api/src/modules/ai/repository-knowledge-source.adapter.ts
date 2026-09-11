@@ -42,6 +42,15 @@ function scoreNote(resource: KnowledgeSourceNote, query: string): number {
 }
 
 /**
+ * Ephemeral lookup key for an unmanaged projection. The projection id is a
+ * path locator and may be used for read/index lookup until explicit adoption;
+ * it must never become a durable document relation or confirmed-write id.
+ */
+function ephemeralUnmanagedProjectionResourceId(projectionId: string): string {
+  return projectionId;
+}
+
+/**
  * AI reads the GitHub-derived projection, never the legacy database resource
  * table. The projection remains rebuildable from the repository default branch.
  */
@@ -72,7 +81,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
   async getNoteById(identityId: string, resourceId: string): Promise<KnowledgeSourceNote | null> {
     const row = await this.db.knowledgeNoteProjection.findFirst({
       where: {
-        id: resourceId,
+        OR: [{ id: resourceId }, { knowledgeDocumentId: resourceId }],
         deletedAt: null,
         binding: { identityId, disconnectedAt: null },
       },
@@ -96,6 +105,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     identityId: string,
     row: {
       id: string;
+      knowledgeDocumentId: string | null;
       bindingId: string;
       relativePath: string;
       markdownContent: string;
@@ -118,7 +128,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     return {
       identityId,
       repositoryId: row.bindingId,
-      resourceId: row.id,
+      resourceId: row.knowledgeDocumentId ?? ephemeralUnmanagedProjectionResourceId(row.id),
       resourcePath: row.relativePath,
       title,
       mimeType: 'text/markdown',
@@ -129,6 +139,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
         contentHash,
         contentDigest: contentHash,
         projectionIndexStatus: row.indexStatus,
+        knowledgeDocumentId: row.knowledgeDocumentId,
         sourceType: 'github-default-branch-projection',
       },
     };

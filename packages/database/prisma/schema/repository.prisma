@@ -247,9 +247,28 @@ model KnowledgeSpace {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  remoteBindings KnowledgeRemoteBinding[]
+  remoteBindings     KnowledgeRemoteBinding[]
+  documentIdentities KnowledgeDocumentIdentity[]
 
   @@map("knowledge_spaces")
+}
+
+/// ADR-090 durable identity registry. `id` is a technical row key; the product key is
+/// `(knowledgeSpaceId, knowledgeDocumentId)` and the external identity is carried by Markdown.
+model KnowledgeDocumentIdentity {
+  id                  String   @id @default(uuid())
+  knowledgeSpaceId    String   @map("knowledge_space_id")
+  knowledgeDocumentId String   @map("knowledge_document_id")
+  origin              String
+  originRequestId     String?  @map("origin_request_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  knowledgeSpace KnowledgeSpace @relation(fields: [knowledgeSpaceId], references: [id], onDelete: Cascade)
+
+  @@unique([knowledgeSpaceId, knowledgeDocumentId])
+  @@index([knowledgeSpaceId])
+  @@map("knowledge_document_identities")
 }
 
 /// ADR-089 durable user choice: one GitHub repository is bound to a KnowledgeSpace.
@@ -357,23 +376,25 @@ model GithubWebhookDelivery {
 
 /// Rebuildable read model derived only from the connected repository default branch.
 model KnowledgeNoteProjection {
-  id              String    @id
-  bindingId       String    @map("binding_id")
-  relativePath    String    @map("relative_path")
-  commitSha       String    @map("commit_sha")
-  blobSha         String    @map("blob_sha")
-  contentHash     String    @map("content_hash")
-  frontmatter     Json      @default("{}")
-  markdownContent String    @map("markdown_content") @db.Text
-  indexStatus     String    @default("PENDING") @map("index_status")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  deletedAt       DateTime? @map("deleted_at")
+  id                  String    @id
+  bindingId           String    @map("binding_id")
+  knowledgeDocumentId String?   @map("knowledge_document_id")
+  relativePath        String    @map("relative_path")
+  commitSha           String    @map("commit_sha")
+  blobSha             String    @map("blob_sha")
+  contentHash         String    @map("content_hash")
+  frontmatter         Json      @default("{}")
+  markdownContent     String    @map("markdown_content") @db.Text
+  indexStatus         String    @default("PENDING") @map("index_status")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  deletedAt           DateTime? @map("deleted_at")
 
   binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
 
   @@unique([bindingId, relativePath])
   @@index([bindingId, commitSha])
+  @@index([knowledgeDocumentId])
   @@index([contentHash])
   @@index([indexStatus])
   @@map("knowledge_note_projections")
@@ -424,6 +445,7 @@ model KnowledgeWriteRequest {
   id                     String    @id
   identityId             String    @map("identity_id")
   bindingId              String    @map("binding_id")
+  knowledgeDocumentId    String    @map("knowledge_document_id")
   requestId              String    @map("request_id")
   requestHash            String    @map("request_hash")
   relativePath           String    @map("relative_path")
@@ -447,6 +469,7 @@ model KnowledgeWriteRequest {
 
   @@unique([identityId, requestId])
   @@index([bindingId, status])
+  @@index([knowledgeDocumentId])
   @@map("knowledge_write_requests")
 }
 

@@ -3,14 +3,13 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Confirmed-create-only note boundary (stage-6 residual 201 / §13.2 item 10):
- * Existing-note full-text edit stays closed. Runtime note writes are only
- * confirmed creates (Web projection + Desktop Local Vault). editDraft is a
- * draft-stage back-step, not an existing-note editor. AI create requires
- * confirmation. packages/editor stays deleted; portable editor_* backup
- * import/export remains data-portability-only.
+ * Controlled note-write boundary (ADR-090): generic existing-note editing stays
+ * closed. Runtime writes are confirmed create plus the one specialized Web
+ * adoption operation that only adds memoflow_id under an exact-blob CAS guard.
+ * Desktop Local Vault confirmed create remains exclusive-create. packages/editor
+ * stays deleted; portable editor_* backup remains data-portability-only.
  */
-describe('confirmed-create-only note boundary surface', () => {
+describe('controlled note-write boundary surface', () => {
   const repoRoot = resolve(__dirname, '../../../../../../../../');
 
   const applicationPort = readFileSync(
@@ -18,7 +17,10 @@ describe('confirmed-create-only note boundary surface', () => {
     'utf8',
   );
   const apiClientPort = readFileSync(
-    resolve(repoRoot, 'packages/repository/src/application-client/ports/repository-api-client.port.ts'),
+    resolve(
+      repoRoot,
+      'packages/repository/src/application-client/ports/repository-api-client.port.ts',
+    ),
     'utf8',
   );
   const clientPort = readFileSync(
@@ -71,11 +73,12 @@ describe('confirmed-create-only note boundary surface', () => {
     'utf8',
   );
 
-  it('application and client ports expose confirmed create only (no existing-note update)', () => {
+  it('application and client ports expose confirmed create plus explicit adoption only', () => {
     // Method surface lives on the application port + IRepositoryApiClient.
     // RepositoryClientPort is a residual-284 type alias (no dual method body).
     for (const source of [applicationPort, apiClientPort]) {
       expect(source).toContain('createConfirmedKnowledgeNote');
+      expect(source).toContain('adoptKnowledgeDocument');
       expect(source).not.toMatch(
         /updateKnowledgeNote(?!ProjectionIndexStatus)|updateConfirmedKnowledgeNote|saveKnowledgeNote|patchKnowledgeNote|editKnowledgeNote/,
       );
@@ -94,7 +97,7 @@ describe('confirmed-create-only note boundary surface', () => {
     expect(applicationPort).not.toContain('writeConfirmedLocalVaultNote');
   });
 
-  it('HTTP knowledge-notes surface is GET list/detail + POST confirmed create only', () => {
+  it('HTTP knowledge-notes surface allows confirmed create and specialized CAS adoption, not generic edit', () => {
     expect(knowledgeRoutes).toContain("method: 'get'");
     expect(knowledgeRoutes).toContain("path: '/knowledge-notes'");
     expect(knowledgeRoutes).toContain("path: '/knowledge-notes/:projectionId'");
@@ -103,6 +106,10 @@ describe('confirmed-create-only note boundary surface', () => {
     expect(knowledgeRoutes).toContain('只允许创建新 Markdown 文件');
     expect(knowledgeRoutes).toContain('CreateConfirmedKnowledgeNoteSchema');
     expect(knowledgeRoutes).toContain('controller.createNote');
+    expect(knowledgeRoutes).toContain("path: '/knowledge-notes/adopt'");
+    expect(knowledgeRoutes).toContain('AdoptKnowledgeDocumentSchema');
+    expect(knowledgeRoutes).toContain('controller.adoptNote');
+    expect(knowledgeRoutes).toContain('expectedBlobSha');
 
     // No full-text update / replace of an existing projection note.
     expect(knowledgeRoutes).not.toMatch(/method:\s*'put'/);
@@ -165,6 +172,8 @@ describe('confirmed-create-only note boundary surface', () => {
     expect(vueRepositoryRouter).not.toContain('/note/:id');
 
     expect(projectionWorkspace).toContain('createConfirmedKnowledgeNote');
+    expect(projectionWorkspace).toContain('adoptKnowledgeDocument');
+    expect(projectionWorkspace).toContain('knowledge-projection-adopt-document-id');
     expect(projectionWorkspace).toContain('function editDraft()');
     expect(projectionWorkspace).toContain("stage.value = 'draft'");
     expect(projectionWorkspace).toContain("stage.value = 'review'");

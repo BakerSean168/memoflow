@@ -106,6 +106,12 @@ export function createMigrationCommands(workspaceRoot: string): Command[] {
         label: 'prepare vNext unique constraints',
       },
       {
+        executable: process.execPath,
+        args: [resolve(runtimeScripts, 'prepare-knowledge-stable-document-identity-cutover.js')],
+        cwd: databaseRoot,
+        label: 'prepare stable Knowledge document identity cutover',
+      },
+      {
         executable: prismaBin,
         args: [
           'db',

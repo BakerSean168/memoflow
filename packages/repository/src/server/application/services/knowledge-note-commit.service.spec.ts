@@ -11,6 +11,10 @@ import type {
   IRemoteRepositoryObservationRepository,
 } from '../ports/knowledge-remote-binding.repositories';
 import type {
+  IKnowledgeDocumentIdentityRepository,
+  KnowledgeDocumentIdentityRecord,
+} from '../ports/knowledge-document-identity.repository';
+import type {
   IKnowledgeRepositoryLeaseRepository,
   KnowledgeRepositoryLeaseRequest,
 } from '../ports/knowledge-repository-lease.repository';
@@ -54,12 +58,16 @@ function githubRepository(): GitHubInstallationRepositoryDTO {
   };
 }
 
+const DOCUMENT_ID =
+  'kdoc_550e8400-e29b-41d4-a716-446655440090' as CreateConfirmedKnowledgeNoteReq['knowledgeDocumentId'];
+
 function request(overrides: Partial<CreateConfirmedKnowledgeNoteReq> = {}) {
   return {
     connectionId: connection().id,
     proposalId: 'proposal-1',
     revision: 1,
     requestId: 'request-1',
+    knowledgeDocumentId: DOCUMENT_ID,
     proposedPath: 'notes/new-note.md',
     title: 'New note',
     frontmatter: { tags: ['decision'] },
@@ -170,8 +178,16 @@ class MemoryProjectionRepository implements IKnowledgeNoteProjectionRepository {
     return [];
   }
 
-  async findByIdForIdentity() {
-    return null;
+  async findByIdForIdentity(_identityId: string, projectionId: string) {
+    const row = this.rows.get(projectionId);
+    if (!row) return null;
+    return {
+      ...row,
+      title: row.relativePath,
+      createdAt: 1,
+      updatedAt: 1,
+      deletedAt: null,
+    } satisfies KnowledgeNoteProjectionClientDTO;
   }
 
   async findByPath(_connectionId: string, relativePath: string) {
@@ -186,6 +202,28 @@ class MemoryProjectionRepository implements IKnowledgeNoteProjectionRepository {
       updatedAt: 1,
       deletedAt: null,
     } satisfies KnowledgeNoteProjectionClientDTO;
+  }
+
+  async findLiveByDocumentId(_connectionId: string, knowledgeDocumentId: string) {
+    return [...this.rows.values()]
+      .filter((row) => row.knowledgeDocumentId === knowledgeDocumentId)
+      .map((row) => ({
+        ...row,
+        title: row.relativePath,
+        createdAt: 1,
+        updatedAt: 1,
+        deletedAt: null,
+      })) as KnowledgeNoteProjectionClientDTO[];
+  }
+
+  async listLiveByConnection(_connectionId: string) {
+    return [...this.rows.values()].map((row) => ({
+      ...row,
+      title: row.relativePath,
+      createdAt: 1,
+      updatedAt: 1,
+      deletedAt: null,
+    })) as KnowledgeNoteProjectionClientDTO[];
   }
 
   async loadLinkGraphSourcesForIdentity() {
@@ -350,6 +388,71 @@ class MemoryWriteRequestRepository implements IKnowledgeWriteRequestRepository {
   }
 }
 
+class MemoryDocumentIdentityRepository implements IKnowledgeDocumentIdentityRepository {
+  readonly rows = new Map<string, KnowledgeDocumentIdentityRecord>();
+
+  private key(spaceId: string, documentId: string): string {
+    return `${spaceId}:${documentId}`;
+  }
+
+  async find(knowledgeSpaceId: never, knowledgeDocumentId: never) {
+    return this.rows.get(this.key(knowledgeSpaceId, knowledgeDocumentId)) ?? null;
+  }
+
+  async claimForCreate(
+    knowledgeSpaceId: never,
+    knowledgeDocumentId: never,
+    requestId: string,
+    now: number,
+  ) {
+    const key = this.key(knowledgeSpaceId, knowledgeDocumentId);
+    const existing = this.rows.get(key);
+    if (existing) return existing.originRequestId === requestId;
+    this.rows.set(key, {
+      knowledgeSpaceId,
+      knowledgeDocumentId,
+      origin: 'MemoFlowCreated',
+      originRequestId: requestId,
+      createdAt: now,
+      updatedAt: now,
+    });
+    return true;
+  }
+
+  async claimForAdoption(
+    knowledgeSpaceId: never,
+    knowledgeDocumentId: never,
+    requestId: string,
+    now: number,
+  ) {
+    const key = this.key(knowledgeSpaceId, knowledgeDocumentId);
+    const existing = this.rows.get(key);
+    if (existing) return existing.origin === 'Adopted' && existing.originRequestId === requestId;
+    this.rows.set(key, {
+      knowledgeSpaceId,
+      knowledgeDocumentId,
+      origin: 'Adopted',
+      originRequestId: requestId,
+      createdAt: now,
+      updatedAt: now,
+    } as never);
+    return true;
+  }
+
+  async observeMarker(knowledgeSpaceId: never, knowledgeDocumentId: never, now: number) {
+    const key = this.key(knowledgeSpaceId, knowledgeDocumentId);
+    if (!this.rows.has(key))
+      this.rows.set(key, {
+        knowledgeSpaceId,
+        knowledgeDocumentId,
+        origin: 'ObservedMarker',
+        originRequestId: null,
+        createdAt: now,
+        updatedAt: now,
+      });
+  }
+}
+
 class MemoryLeaseRepository implements IKnowledgeRepositoryLeaseRepository {
   readonly rows = new Map<string, { ownerToken: string; expiresAt: number }>();
 
@@ -390,6 +493,10 @@ function githubClient(overrides: Partial<IGitHubAppClient> = {}): IGitHubAppClie
       commitSha: 'a'.repeat(40),
       blobSha: 'b'.repeat(40),
     })),
+    updateFileCommit: vi.fn(async () => ({
+      commitSha: 'c'.repeat(40),
+      blobSha: 'd'.repeat(40),
+    })),
     getMarkdownChanges: vi.fn(),
     getFullMarkdownSnapshot: vi.fn(),
     getBlob: vi.fn(),
@@ -419,16 +526,19 @@ function createService(
   const connectionRepository = overrides.connectionRepository ?? new MemoryConnectionRepository();
   const observationRepository = new MemoryObservationRepository();
   const historyFenceRepository = new MemoryHistoryFenceRepository();
+  const documentIdentityRepository = new MemoryDocumentIdentityRepository();
   const publishMutation = vi.fn();
   return {
     github,
     projectionRepository,
     writeRequestRepository,
+    documentIdentityRepository,
     publishMutation,
     service: new KnowledgeNoteCommitService({
       connectionRepository,
       observationRepository,
       historyFenceRepository,
+      documentIdentityRepository,
       projectionRepository,
       writeRequestRepository,
       githubAppClient: github,
@@ -452,10 +562,11 @@ describe('KnowledgeNoteCommitService', () => {
     const first = await service.create('identity-1', input);
     const retry = await service.create('identity-1', input);
 
-    expect(first).toEqual({
+    expect(first).toMatchObject({
       ok: true,
       data: {
         requestId: 'request-1',
+        knowledgeDocumentId: DOCUMENT_ID,
         relativePath: 'notes/new-note.md',
         commitSha: 'a'.repeat(40),
         status: 'Committed',
@@ -463,6 +574,12 @@ describe('KnowledgeNoteCommitService', () => {
     });
     expect(retry).toEqual(first);
     expect(github.createFileCommit).toHaveBeenCalledOnce();
+    expect(github.createFileCommit).toHaveBeenCalledWith(
+      'installation-1',
+      expect.objectContaining({
+        content: expect.stringContaining(`memoflow_id: ${DOCUMENT_ID}`),
+      }),
+    );
     expect(writeRequestRepository.rows.values().next().value).toMatchObject({
       requestId: 'request-1',
       status: 'Committed',
@@ -475,7 +592,8 @@ describe('KnowledgeNoteCommitService', () => {
         expect.objectContaining({
           relativePath: 'notes/new-note.md',
           indexStatus: 'pending',
-          frontmatter: { tags: ['decision'], title: 'New note' },
+          knowledgeDocumentId: DOCUMENT_ID,
+          frontmatter: { tags: ['decision'], title: 'New note', memoflow_id: DOCUMENT_ID },
         }),
       ],
       [],
@@ -483,10 +601,120 @@ describe('KnowledgeNoteCommitService', () => {
     expect(publishMutation).toHaveBeenCalledWith(
       expect.objectContaining({
         identityId: 'identity-1',
+        resourceId: DOCUMENT_ID,
         resourcePath: 'notes/new-note.md',
         mutation: 'created',
       }),
     );
+  });
+
+  it('adopts an unmanaged note with one CAS metadata commit and replays the same request idempotently', async () => {
+    const projectionRepository = new MemoryProjectionRepository();
+    projectionRepository.rows.set('projection-existing', {
+      id: 'projection-existing',
+      connectionId: connection().id,
+      knowledgeDocumentId: null,
+      relativePath: 'notes/existing.md',
+      commitSha: '1'.repeat(40),
+      blobSha: '2'.repeat(40),
+      contentHash: '3'.repeat(64),
+      frontmatter: { title: 'Existing', tags: ['kept'] },
+      markdownContent:
+        '---\ntitle: Existing\ntags:\n  - kept\n---\n# Existing\n\nBody stays the same.\n',
+      indexStatus: 'indexed',
+    });
+    const updateFileCommit = vi.fn(async () => ({
+      commitSha: '4'.repeat(40),
+      blobSha: '5'.repeat(40),
+    }));
+    const github = githubClient({ updateFileCommit });
+    const { service, writeRequestRepository, documentIdentityRepository, publishMutation } =
+      createService(github, { projectionRepository });
+    const input = {
+      projectionId: 'projection-existing',
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440093' as never,
+      requestId: 'adopt-request-1',
+      expectedBlobSha: '2'.repeat(40),
+    };
+
+    const first = await service.adopt('identity-1', input);
+    const replay = await service.adopt('identity-1', input);
+
+    expect(first).toMatchObject({
+      ok: true,
+      data: {
+        requestId: 'adopt-request-1',
+        knowledgeDocumentId: input.knowledgeDocumentId,
+        relativePath: 'notes/existing.md',
+        commitSha: '4'.repeat(40),
+        status: 'Committed',
+      },
+    });
+    expect(replay).toEqual(first);
+    expect(updateFileCommit).toHaveBeenCalledOnce();
+    expect(updateFileCommit).toHaveBeenCalledWith(
+      'installation-1',
+      expect.objectContaining({
+        path: 'notes/existing.md',
+        expectedBlobSha: '2'.repeat(40),
+        requestId: 'adopt-request-1',
+        content: expect.stringContaining(`memoflow_id: ${input.knowledgeDocumentId}`),
+      }),
+    );
+    expect(updateFileCommit.mock.calls[0]?.[1].content).toContain(
+      '# Existing\n\nBody stays the same.',
+    );
+    expect(github.createFileCommit).not.toHaveBeenCalled();
+    expect(writeRequestRepository.rows.values().next().value).toMatchObject({
+      requestId: 'adopt-request-1',
+      knowledgeDocumentId: input.knowledgeDocumentId,
+      status: 'Committed',
+      projectionStatus: 'Succeeded',
+    });
+    expect(projectionRepository.rows.get('projection-existing')).toMatchObject({
+      knowledgeDocumentId: input.knowledgeDocumentId,
+      blobSha: '5'.repeat(40),
+      indexStatus: 'pending',
+    });
+    expect([...documentIdentityRepository.rows.values()][0]).toMatchObject({
+      origin: 'Adopted',
+      originRequestId: 'adopt-request-1',
+    });
+    expect(publishMutation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resourceId: input.knowledgeDocumentId,
+        resourcePath: 'notes/existing.md',
+        mutation: 'content_updated',
+      }),
+    );
+  });
+
+  it('rejects adoption when the reviewed blob is stale without mutating Git', async () => {
+    const projectionRepository = new MemoryProjectionRepository();
+    projectionRepository.rows.set('projection-existing', {
+      id: 'projection-existing',
+      connectionId: connection().id,
+      knowledgeDocumentId: null,
+      relativePath: 'notes/existing.md',
+      commitSha: '1'.repeat(40),
+      blobSha: '2'.repeat(40),
+      contentHash: '3'.repeat(64),
+      frontmatter: {},
+      markdownContent: '# Existing',
+      indexStatus: 'indexed',
+    });
+    const github = githubClient();
+    const { service } = createService(github, { projectionRepository });
+
+    const result = await service.adopt('identity-1', {
+      projectionId: 'projection-existing',
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440094' as never,
+      requestId: 'adopt-stale',
+      expectedBlobSha: '9'.repeat(40),
+    });
+
+    expect(result).toMatchObject({ ok: false, error: { code: 'CONFLICT' } });
+    expect(github.updateFileCommit).not.toHaveBeenCalled();
   });
 
   it('P1-5: write request persistence emits the unified knowledge persisted metric', async () => {
@@ -514,6 +742,26 @@ describe('KnowledgeNoteCommitService', () => {
 
     expect(result).toMatchObject({ ok: false, error: { code: 'CONFLICT' } });
     expect(github.createFileCommit).toHaveBeenCalledOnce();
+  });
+
+  it('treats KnowledgeDocumentId as immutable request identity and preserves it on retry', async () => {
+    const { service, github, documentIdentityRepository } = createService();
+    const original = request();
+
+    const first = await service.create('identity-1', original);
+    const replay = await service.create('identity-1', original);
+    const changedIdentity = await service.create(
+      'identity-1',
+      request({
+        knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440092' as never,
+      }),
+    );
+
+    expect(first).toMatchObject({ ok: true, data: { knowledgeDocumentId: DOCUMENT_ID } });
+    expect(replay).toMatchObject({ ok: true, data: { knowledgeDocumentId: DOCUMENT_ID } });
+    expect(changedIdentity).toMatchObject({ ok: false, error: { code: 'CONFLICT' } });
+    expect(github.createFileCommit).toHaveBeenCalledOnce();
+    expect(documentIdentityRepository.rows.size).toBe(1);
   });
 
   it('rejects different immutable content while the same request id is still in flight', async () => {
@@ -560,7 +808,11 @@ describe('KnowledgeNoteCommitService', () => {
     );
     const second = service.create(
       'identity-1',
-      request({ requestId: 'request-second', proposedPath: 'notes/second.md' }),
+      request({
+        requestId: 'request-second',
+        knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440091' as never,
+        proposedPath: 'notes/second.md',
+      }),
     );
 
     await vi.waitFor(() => expect(createFileCommit).toHaveBeenCalledTimes(1));

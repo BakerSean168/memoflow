@@ -25,7 +25,7 @@ updated: 2026-09-11T00:02:00+08:00
 
 Repository vNext 不重新建立数据库式 Repository/Folder/Resource 编辑器，而是在已经完成的 ADR-034 local-first 架构上，把绑定、健康状态、同步、文档身份、投影、AI 索引和可靠操作彻底分轨。
 
-> **实施 checkpoint（2026-09-11）：** ADR-089 已完整实施。Local Vault 使用 profile-owned binding + `LocalVaultHealth`；Remote 使用 `KnowledgeRemoteBinding + RemoteRepositoryObservation + RemoteHistoryFence + KnowledgeProjectionCheckpoint`，普通 list 不再调用 Provider，显式 refresh/security preflight 才观察 GitHub。Desktop Local/Remote 通过同一 `KnowledgeSpaceId` 配对，Provider loss 不会删除 binding。ADR-090 stable document identity 与 ADR-091 single projection engine 仍未实施，本文对应章节仍是下一阶段目标态。
+> **实施 checkpoint（2026-09-11）：** ADR-089 已完整实施。Local Vault 使用 profile-owned binding + `LocalVaultHealth`；Remote 使用 `KnowledgeRemoteBinding + RemoteRepositoryObservation + RemoteHistoryFence + KnowledgeProjectionCheckpoint`，普通 list 不再调用 Provider，显式 refresh/security preflight 才观察 GitHub。Desktop Local/Remote 通过同一 `KnowledgeSpaceId` 配对，Provider loss 不会删除 binding。KNOW-2002 已实施 ADR-090：confirmed create 与显式 CAS metadata adoption 使用 `memoflow_id: kdoc_<opaque UUID>`，unmanaged Markdown 不会被静默改写，rename/move 与 AI/Local Vault/PowerSync 都复用 stable ID。ADR-091 single projection engine 仍未实施，本文对应章节仍是下一阶段目标态。
 
 ## 2. Product Constitution
 
@@ -608,6 +608,4 @@ Repository Aggregate
 3. [ADR-090](../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
 4. [ADR-091](../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
 
-**当前只完成建模文档，不代表实现已开始。**
-
-后续进入实施前，必须先新建独立 active plan，重新基于当时 HEAD 做 Phase 0 characterization，并明确 Goal/Task `linkedNotes` 对 ADR-090 stable identity 的依赖；不得从聊天记录直接跳到生产代码修改。
+**当前 checkpoint：** ADR-089 与 ADR-090/KNOW-2002 已实施；ADR-091/KNOW-2003 是下一阶段工作。Goal/Task durable relation 仍等待后续 ticket 的 stable `KnowledgeDocumentRef` 接入。

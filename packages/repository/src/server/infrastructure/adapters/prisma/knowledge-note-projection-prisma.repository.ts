@@ -1,4 +1,5 @@
 import type { PrismaClient } from '@memoflow/database';
+import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type {
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionIndexStatus,
@@ -26,7 +27,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
         deletedAt: null,
         ...(paths.length ? { relativePath: { notIn: paths } } : {}),
       },
-      select: { id: true, relativePath: true },
+      select: { id: true, knowledgeDocumentId: true, relativePath: true },
     });
     await this.upsertMany(notes);
     await this.db.knowledgeNoteProjection.updateMany({
@@ -37,7 +38,11 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
       },
       data: { deletedAt: new Date(), commitSha, indexStatus: 'pending' },
     });
-    return deleted satisfies KnowledgeNoteProjectionDeletion[];
+    return deleted.map((row) => ({
+      id: row.id,
+      knowledgeDocumentId: row.knowledgeDocumentId as KnowledgeDocumentId | null,
+      relativePath: row.relativePath,
+    }));
   }
 
   async applyChanges(
@@ -106,6 +111,25 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
     );
   }
 
+  async findLiveByDocumentId(
+    connectionId: string,
+    knowledgeDocumentId: KnowledgeDocumentId,
+  ): Promise<KnowledgeNoteProjectionClientDTO[]> {
+    const rows = await this.db.knowledgeNoteProjection.findMany({
+      where: { bindingId: connectionId, knowledgeDocumentId, deletedAt: null },
+      orderBy: { relativePath: 'asc' },
+    });
+    return rows.map((row) => this.toClient(row));
+  }
+
+  async listLiveByConnection(connectionId: string): Promise<KnowledgeNoteProjectionClientDTO[]> {
+    const rows = await this.db.knowledgeNoteProjection.findMany({
+      where: { bindingId: connectionId, deletedAt: null },
+      orderBy: { relativePath: 'asc' },
+    });
+    return rows.map((row) => this.toClient(row));
+  }
+
   async loadLinkGraphSourcesForIdentity(
     identityId: string,
     centerProjectionId: string,
@@ -165,6 +189,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
         create: {
           id: note.id,
           bindingId: note.connectionId,
+          knowledgeDocumentId: note.knowledgeDocumentId,
           relativePath: note.relativePath,
           commitSha: note.commitSha,
           blobSha: note.blobSha,
@@ -174,6 +199,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
           frontmatter: note.frontmatter as never,
         },
         update: {
+          knowledgeDocumentId: note.knowledgeDocumentId,
           commitSha: note.commitSha,
           blobSha: note.blobSha,
           contentHash: note.contentHash,
@@ -202,6 +228,8 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
     return {
       id: row.id,
       connectionId: row.bindingId,
+      knowledgeDocumentId:
+        row.knowledgeDocumentId as KnowledgeNoteProjectionClientDTO['knowledgeDocumentId'],
       relativePath: row.relativePath,
       title,
       commitSha: row.commitSha,

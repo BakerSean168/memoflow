@@ -11,6 +11,7 @@ describe('RepositoryKnowledgeIndexStatusAdapter', () => {
     } as unknown as RepositoryApplicationPort);
 
     await adapter.updateIndexStatus('identity-1', {
+      repositoryId: 'binding-1',
       resourceId: 'projection-1',
       contentHash: 'content-hash-1',
       status: 'indexed',
@@ -19,7 +20,8 @@ describe('RepositoryKnowledgeIndexStatusAdapter', () => {
     expect(updateKnowledgeNoteProjectionIndexStatus).toHaveBeenCalledWith(
       { identityId: 'identity-1' },
       {
-        projectionId: 'projection-1',
+        connectionId: 'binding-1',
+        resourceId: 'projection-1',
         contentHash: 'content-hash-1',
         status: 'indexed',
       },
@@ -35,6 +37,7 @@ describe('RepositoryKnowledgeIndexStatusAdapter', () => {
 
     await expect(
       adapter.updateIndexStatus('identity-1', {
+        repositoryId: 'binding-1',
         resourceId: 'projection-1',
         contentHash: 'content-hash-1',
         status: 'failed',

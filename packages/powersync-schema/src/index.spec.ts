@@ -36,6 +36,17 @@ describe('PowerSyncAppSchema', () => {
     expect(getColumnType('schedule_tasks', 'enabled')).toBe('INTEGER');
   });
 
+  it('keeps the Desktop AI knowledge index device-local and stable-id keyed', () => {
+    const table = PowerSyncAppSchema.props.ai_knowledge_index_entries_local;
+    expect(table).toBeDefined();
+    expect(table.localOnly).toBe(true);
+    expect(getColumnType('ai_knowledge_index_entries_local', 'identity_id')).toBe('TEXT');
+    expect(getColumnType('ai_knowledge_index_entries_local', 'repository_id')).toBe('TEXT');
+    expect(getColumnType('ai_knowledge_index_entries_local', 'resource_id')).toBe('TEXT');
+    expect(getColumnType('ai_knowledge_index_entries_local', 'resource_path')).toBe('TEXT');
+    expect(getColumnType('ai_knowledge_index_entries_local', 'metadata_json')).toBe('TEXT');
+  });
+
   it('keeps notification and repository payload columns serialized as text', () => {
     expect(getColumnType('notifications', 'metadata')).toBe('TEXT');
     expect(getColumnType('notifications', 'is_read')).toBe('INTEGER');

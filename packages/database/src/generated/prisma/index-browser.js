@@ -1175,6 +1175,16 @@ exports.Prisma.KnowledgeSpaceScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.KnowledgeDocumentIdentityScalarFieldEnum = {
+  id: 'id',
+  knowledgeSpaceId: 'knowledgeSpaceId',
+  knowledgeDocumentId: 'knowledgeDocumentId',
+  origin: 'origin',
+  originRequestId: 'originRequestId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.KnowledgeRemoteBindingScalarFieldEnum = {
   id: 'id',
   knowledgeSpaceId: 'knowledgeSpaceId',
@@ -1238,6 +1248,7 @@ exports.Prisma.GithubWebhookDeliveryScalarFieldEnum = {
 exports.Prisma.KnowledgeNoteProjectionScalarFieldEnum = {
   id: 'id',
   bindingId: 'bindingId',
+  knowledgeDocumentId: 'knowledgeDocumentId',
   relativePath: 'relativePath',
   commitSha: 'commitSha',
   blobSha: 'blobSha',
@@ -1276,6 +1287,7 @@ exports.Prisma.KnowledgeWriteRequestScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
   bindingId: 'bindingId',
+  knowledgeDocumentId: 'knowledgeDocumentId',
   requestId: 'requestId',
   requestHash: 'requestHash',
   relativePath: 'relativePath',
@@ -1736,6 +1748,7 @@ exports.Prisma.ModelName = {
   RepositoryStatistic: 'RepositoryStatistic',
   KnowledgeRepositoryInstallationIntent: 'KnowledgeRepositoryInstallationIntent',
   KnowledgeSpace: 'KnowledgeSpace',
+  KnowledgeDocumentIdentity: 'KnowledgeDocumentIdentity',
   KnowledgeRemoteBinding: 'KnowledgeRemoteBinding',
   RemoteRepositoryObservation: 'RemoteRepositoryObservation',
   RemoteHistoryFence: 'RemoteHistoryFence',

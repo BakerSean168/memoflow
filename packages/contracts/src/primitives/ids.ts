@@ -57,6 +57,9 @@ export type ScheduleExecutionId = string & { readonly __brand: 'ScheduleExecutio
 /** 日程统计 ID */
 export type ScheduleStatisticId = string & { readonly __brand: 'ScheduleStatisticId' };
 
+/** Stable managed knowledge document ID carried by Markdown frontmatter. */
+export type KnowledgeDocumentId = string & { readonly __brand: 'KnowledgeDocumentId' };
+
 /** Knowledge logical space ID */
 export type KnowledgeSpaceId = string & { readonly __brand: 'KnowledgeSpaceId' };
 
@@ -208,6 +211,7 @@ export const ID_PREFIXES = {
   ScheduleStatisticId: 'IScheduleStatisticId',
 
   // === Knowledge / Repository ===
+  KnowledgeDocumentId: 'kdoc',
   KnowledgeSpaceId: 'KnowledgeSpaceId',
   LocalVaultBindingId: 'LocalVaultBindingId',
   KnowledgeRemoteBindingId: 'KnowledgeRemoteBindingId',

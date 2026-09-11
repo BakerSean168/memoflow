@@ -158,6 +158,8 @@ function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApp
         : unavailable(),
     createConfirmedKnowledgeNote: async (ctx, request) =>
       noteCommitService ? noteCommitService.create(ctx.identityId, request) : unavailable(),
+    adoptKnowledgeDocument: async (ctx, request) =>
+      noteCommitService ? noteCommitService.adopt(ctx.identityId, request) : unavailable(),
     updateKnowledgeNoteProjectionIndexStatus: async (ctx, request) =>
       projectionService
         ? projectionService.updateIndexStatus(ctx.identityId, request)

@@ -75,7 +75,7 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
 
     expect(findFirst).toHaveBeenCalledWith({
       where: {
-        id: 'projection-1',
+        OR: [{ id: 'projection-1' }, { knowledgeDocumentId: 'projection-1' }],
         deletedAt: null,
         binding: { identityId: 'identity-1', disconnectedAt: null },
       },

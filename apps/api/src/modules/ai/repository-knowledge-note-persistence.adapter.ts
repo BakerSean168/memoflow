@@ -13,8 +13,8 @@
  * 包内 `/server` 子路径（或任何包内深路径）。只有 `apps/api/src/runtime/compose-ai.ts`
  * 导入 package `/api` transport seam；app-local adapter 保持在 port 接口之后。
  */
-import { createHash } from 'node:crypto';
 import type { KnowledgeNotePersistedRef } from '@memoflow/contracts/ai';
+import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
 import { ResultErrorException } from '@memoflow/contracts/result';
 import type {
@@ -71,6 +71,7 @@ export class RepositoryKnowledgeNotePersistenceAdapter implements IKnowledgeNote
 
     const committed = await this.repositoryApi.createConfirmedKnowledgeNote(input.context, {
       connectionId: connection.id,
+      knowledgeDocumentId: input.knowledgeDocumentId,
       proposalId: input.proposalId,
       revision: input.proposalRevision,
       requestId: input.requestId,
@@ -92,28 +93,23 @@ export class RepositoryKnowledgeNotePersistenceAdapter implements IKnowledgeNote
     }
 
     return {
-      note: toKnowledgeNoteRef(input, connection.id),
+      note: toKnowledgeNoteRef(input, connection.id, committed.data.knowledgeDocumentId),
     };
   }
 }
 
 /**
- * Residual 1149 soft residual / keep-boundary: API GitHub knowledge-repo mapping.
- * id = knowledge-note-<sha256(connectionId:path)>; scope = connectionId;
- * size = Buffer.byteLength(content); timestamps = Date.now().
- * Soft residual 1149: Desktop local-Vault mapping stays separate (no force-merge).
+ * The AI-facing persisted ref now uses ADR-090 stable document identity. Path
+ * remains a locator and may change without changing `id`.
  */
 function toKnowledgeNoteRef(
   input: CreateKnowledgeNotePersistenceInput,
   connectionId: string,
+  knowledgeDocumentId: KnowledgeDocumentId,
 ): KnowledgeNotePersistedRef {
   const now = Date.now();
-  const id = `knowledge-note-${createHash('sha256')
-    .update(`${connectionId}:${input.path}`)
-    .digest('hex')}`;
-
   return {
-    id,
+    id: knowledgeDocumentId,
     repositoryScopeId: connectionId,
     name: input.fileName,
     path: input.path,

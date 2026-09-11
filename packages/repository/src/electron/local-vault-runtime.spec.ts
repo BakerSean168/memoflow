@@ -10,6 +10,8 @@ import {
 
 const NOW = 1_750_000_000_000;
 const PROFILE_ID = 'p_profile_1';
+const DOCUMENT_ID = 'kdoc_550e8400-e29b-41d4-a716-446655440510';
+const SECOND_DOCUMENT_ID = 'kdoc_550e8400-e29b-41d4-a716-446655440511';
 
 describe('LocalVaultRuntime', () => {
   let root: string;
@@ -214,11 +216,78 @@ describe('LocalVaultRuntime', () => {
     expect(new URL(uri).searchParams.get('path')).toBe(await fs.promises.realpath(notePath));
   });
 
+  it('reads valid memoflow_id markers without mutating unmanaged notes', async () => {
+    await selectVault();
+    await fs.promises.writeFile(path.join(vault, 'Unmanaged.md'), '# Unmanaged');
+    await fs.promises.writeFile(
+      path.join(vault, 'Managed.md'),
+      `---\nmemoflow_id: ${DOCUMENT_ID}\n---\n# Managed`,
+    );
+
+    const unmanagedBefore = await fs.promises.readFile(path.join(vault, 'Unmanaged.md'), 'utf8');
+    const unmanaged = await runtime.readNote({ relativePath: 'Unmanaged.md' });
+    const managed = await runtime.readNote({ relativePath: 'Managed.md' });
+
+    expect(unmanaged.knowledgeDocumentId).toBeNull();
+    expect(managed.knowledgeDocumentId).toBe(DOCUMENT_ID);
+    expect(await fs.promises.readFile(path.join(vault, 'Unmanaged.md'), 'utf8')).toBe(
+      unmanagedBefore,
+    );
+  });
+
+  it('fails closed on malformed memoflow_id markers without mutating the note', async () => {
+    await selectVault();
+    const notePath = path.join(vault, 'Malformed.md');
+    const content = '---\nmemoflow_id: not-a-kdoc\n---\n# Malformed';
+    await fs.promises.writeFile(notePath, content);
+
+    await expect(runtime.readNote({ relativePath: 'Malformed.md' })).rejects.toMatchObject<
+      Partial<LocalVaultRuntimeError>
+    >({ code: 'CONFLICT' });
+    await expect(fs.promises.readFile(notePath, 'utf8')).resolves.toBe(content);
+    await expect(runtime.scanVault()).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({
+      code: 'CONFLICT',
+    });
+  });
+
+  it('rejects missing or duplicate stable identities before creating a local note', async () => {
+    await selectVault();
+    await fs.promises.writeFile(
+      path.join(vault, 'Managed.md'),
+      `---\nmemoflow_id: ${DOCUMENT_ID}\n---\n# Managed`,
+    );
+
+    await expect(
+      runtime.writeConfirmedNote({
+        relativePath: 'Missing-id.md',
+        contentMarkdown: '# Missing id',
+        proposalId: 'proposal-missing-id',
+        proposalRevision: 1,
+        requestId: 'request-missing-id',
+      } as never),
+    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'VALIDATION_ERROR' });
+
+    await expect(
+      runtime.writeConfirmedNote({
+        relativePath: 'Duplicate.md',
+        knowledgeDocumentId: DOCUMENT_ID as never,
+        contentMarkdown: '# Duplicate',
+        proposalId: 'proposal-duplicate',
+        proposalRevision: 1,
+        requestId: 'request-duplicate',
+      }),
+    ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'CONFLICT' });
+    await expect(fs.promises.stat(path.join(vault, 'Duplicate.md'))).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
+  });
+
   it('writes an explicitly confirmed proposal once and replays the same request idempotently', async () => {
     await selectVault();
     const request = {
       relativePath: 'Agent/Approved note.md',
       contentMarkdown: '# Approved note\n\nUser reviewed this body.',
+      knowledgeDocumentId: DOCUMENT_ID as never,
       proposalId: 'proposal-1',
       proposalRevision: 2,
       requestId: 'request-1',
@@ -230,9 +299,14 @@ describe('LocalVaultRuntime', () => {
     expect(created.created).toBe(true);
     expect(replayed.created).toBe(false);
     expect(replayed.note.relativePath).toBe('Agent/Approved note.md');
-    expect(await fs.promises.readFile(path.join(vault, 'Agent', 'Approved note.md'), 'utf8')).toBe(
-      request.contentMarkdown,
+    const written = await fs.promises.readFile(
+      path.join(vault, 'Agent', 'Approved note.md'),
+      'utf8',
     );
+    expect(written).toContain(`memoflow_id: ${DOCUMENT_ID}`);
+    expect(written).toContain('# Approved note\n\nUser reviewed this body.');
+    expect(created.note.knowledgeDocumentId).toBe(DOCUMENT_ID);
+    expect(replayed.note.knowledgeDocumentId).toBe(DOCUMENT_ID);
     await expect(
       runtime.writeConfirmedNote({ ...request, proposalRevision: 3 }),
     ).rejects.toMatchObject<Partial<LocalVaultRuntimeError>>({ code: 'CONFLICT' });
@@ -247,6 +321,7 @@ describe('LocalVaultRuntime', () => {
 
     const baseRequest = {
       contentMarkdown: '# New',
+      knowledgeDocumentId: SECOND_DOCUMENT_ID as never,
       proposalId: 'proposal-2',
       proposalRevision: 1,
     };

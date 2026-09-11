@@ -75,9 +75,10 @@ export class ApplyKnowledgeNoteService {
 
     if (!noteId) {
       const fileName = draft.title.replace(/\.md$/i, '').trim() + '.md';
-      const result = await this.mutations.saveKnowledgeNote({
+      const result = await this.mutations.createConfirmedKnowledgeNote({
         workflowRunId,
         revision: draft.revision,
+        knowledgeDocumentId: draft.knowledgeDocumentId,
         path: draft.targetSubpath,
         fileName,
         title: draft.title,

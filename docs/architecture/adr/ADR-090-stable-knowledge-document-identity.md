@@ -9,18 +9,20 @@ tags:
   - vnext
 description: ADR-090 - 为 Knowledge Note 建立跨 rename/move/clone 的稳定 KnowledgeDocumentId，并作为 Goal/Task/Relation durable reference
 created: 2026-09-08T21:25:00+08:00
-updated: 2026-09-08T21:25:00+08:00
+updated: 2026-09-11T00:00:00+08:00
 ---
 
 # ADR-090: Stable KnowledgeDocument Identity
 
-**状态：** 已采纳（待实施）
+**状态：** 已采纳（KNOW-2002 已实施）
 **日期：** 2026-09-08
 **影响范围：** Repository/Knowledge、Markdown contract、Desktop/Web confirmed write、Goal/Task Relation、AI Knowledge Index、Data Portability
 
 ## 1. 决策摘要
 
 MemoFlow 引入稳定的 `KnowledgeDocumentId`，使知识文档在文件 rename/move、Git clone、跨设备同步后仍保持同一业务身份。
+
+**实施 checkpoint（2026-09-11）：** confirmed create 在用户确认前冻结 `kdoc_<opaque UUID>`，并将其写入 Markdown `memoflow_id`；未管理笔记保持可读/可索引且不会被静默改写。已有笔记仅可通过绑定预期 blob SHA 的显式 metadata-only CAS adoption 纳入管理，generic existing-note editor 仍被禁止。Local Vault 扫描不写盘，远端投影在 marker 删除、替换、重复或身份冲突时 fail closed 并记录 checkpoint failure。AI source/index 使用同一 stable ID；PowerSync AI 索引使用 local-only cache。后续 Goal/Task durable relation 与 ADR-091 projection-engine convergence 不属于本 ticket。
 
 跨模块 durable relation 只引用：
 

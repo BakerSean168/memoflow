@@ -4,9 +4,11 @@ import { DesktopKnowledgeSourceAdapter } from '../desktop-knowledge-source.adapt
 
 const BINDING_ID = 'LocalVaultBindingId_550e8400-e29b-41d4-a716-446655440010' as never;
 const SPACE_ID = 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011' as never;
+const DOCUMENT_ID = 'kdoc_550e8400-e29b-41d4-a716-446655440521' as never;
 
 const summary = {
   relativePath: 'Architecture/Runtime.md',
+  knowledgeDocumentId: DOCUMENT_ID,
   title: 'Runtime architecture',
   excerpt: 'Capability resolution',
   tags: ['architecture'],
@@ -76,6 +78,7 @@ describe('DesktopKnowledgeSourceAdapter', () => {
     expect(resources[0]).toMatchObject({
       identityId: 'identity-1',
       repositoryId: BINDING_ID,
+      resourceId: DOCUMENT_ID,
       resourcePath: 'Architecture/Runtime.md',
       title: 'Runtime architecture',
       content: '# Runtime architecture\n\nCapability resolution is explicit.',

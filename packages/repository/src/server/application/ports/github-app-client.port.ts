@@ -92,6 +92,10 @@ export interface GitHubFileCommitInput {
   requestId: string;
 }
 
+export interface GitHubFileUpdateInput extends GitHubFileCommitInput {
+  expectedBlobSha: string;
+}
+
 export interface GitHubFileCommitResult {
   commitSha: string;
   blobSha: string;
@@ -123,6 +127,10 @@ export interface IGitHubAppClient {
   createFileCommit(
     installationId: string,
     input: GitHubFileCommitInput,
+  ): Promise<GitHubFileCommitResult>;
+  updateFileCommit(
+    installationId: string,
+    input: GitHubFileUpdateInput,
   ): Promise<GitHubFileCommitResult>;
   createInstallationAccessToken(
     installationId: string,

@@ -17,6 +17,8 @@ import type {
   PreviewKnowledgeRepositoryReconciliationReq,
   CreateConfirmedKnowledgeNoteReq,
   CreateConfirmedKnowledgeNoteResponse,
+  AdoptKnowledgeDocumentReq,
+  AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
   ListKnowledgeNoteProjectionsReq,
@@ -121,10 +123,15 @@ export interface RepositoryApplicationPort {
     ctx: Context,
     request: CreateConfirmedKnowledgeNoteReq,
   ): Promise<Result<CreateConfirmedKnowledgeNoteResponse>>;
+  adoptKnowledgeDocument(
+    ctx: Context,
+    request: AdoptKnowledgeDocumentReq,
+  ): Promise<Result<AdoptKnowledgeDocumentResponse>>;
   updateKnowledgeNoteProjectionIndexStatus(
     ctx: Pick<Context, 'identityId'>,
     request: {
-      projectionId: string;
+      connectionId: string;
+      resourceId: string;
       contentHash: string;
       status: KnowledgeNoteProjectionIndexStatus;
     },

@@ -36,6 +36,7 @@ describe('migrator interface', () => {
       'prepare editor-workspace natural key',
       'prepare notification preference hierarchy',
       'prepare vNext unique constraints',
+      'prepare stable Knowledge document identity cutover',
       'reconcile Prisma schema',
       'prepare AI provider onboarding sessions',
       'prepare AI provider default invariant',

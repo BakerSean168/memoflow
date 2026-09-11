@@ -5,6 +5,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import express from 'express';
 import type { RequestHandler } from 'express';
 import { prisma } from '@memoflow/database';
+import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type {
   GitHubAppInstallationInventory,
   GitHubMarkdownChanges,
@@ -22,6 +23,7 @@ import type {
 import type { IKnowledgeRemoteBindingRepository } from '../../../../application/ports/knowledge-remote-binding.repositories';
 import type { OperationAuditRecord, OperationTimelineEntry } from '@memoflow/contracts/operations';
 import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/contracts/repository';
+import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
 import { KnowledgeNoteCommitService } from '../../../../application/services/knowledge-note-commit.service';
 import { KnowledgeRepositoryProjectionService } from '../../../../application/services/knowledge-repository-projection.service';
 import { createRepositoryModule } from '../../../../infrastructure/repository.module';
@@ -33,6 +35,7 @@ import {
   RemoteRepositoryObservationPrismaRepository,
 } from '../knowledge-remote-binding-prisma.repositories';
 import { KnowledgeNoteProjectionPrismaRepository } from '../knowledge-note-projection-prisma.repository';
+import { KnowledgeDocumentIdentityPrismaRepository } from '../knowledge-document-identity-prisma.repository';
 import { KnowledgeRepositoryLeasePrismaRepository } from '../knowledge-repository-lease-prisma.repository';
 import { KnowledgeWriteRequestPrismaRepository } from '../knowledge-write-request-prisma.repository';
 import { GithubWebhookDeliveryPrismaRepository } from '../github-webhook-delivery-prisma.repository';
@@ -199,6 +202,17 @@ class ThrowingProjectionRepository implements IKnowledgeNoteProjectionRepository
     relativePath: string,
   ): Promise<KnowledgeNoteProjectionClientDTO | null> {
     return this.delegate.findByPath(connectionId, relativePath);
+  }
+
+  findLiveByDocumentId(
+    connectionId: string,
+    knowledgeDocumentId: KnowledgeDocumentId,
+  ): Promise<KnowledgeNoteProjectionClientDTO[]> {
+    return this.delegate.findLiveByDocumentId(connectionId, knowledgeDocumentId);
+  }
+
+  listLiveByConnection(connectionId: string): Promise<KnowledgeNoteProjectionClientDTO[]> {
+    return this.delegate.listLiveByConnection(connectionId);
   }
 
   loadLinkGraphSourcesForIdentity(
@@ -374,6 +388,7 @@ async function startRuntime(
   const projectionCheckpointRepo = new KnowledgeProjectionCheckpointPrismaRepository(prisma);
   const realProjectionRepo = new KnowledgeNoteProjectionPrismaRepository(prisma);
   const projectionRepo = new ThrowingProjectionRepository(realProjectionRepo);
+  const documentIdentityRepo = new KnowledgeDocumentIdentityPrismaRepository(prisma);
   const writeRequestRepo = new KnowledgeWriteRequestPrismaRepository(prisma);
   const deliveryRepo = new GithubWebhookDeliveryPrismaRepository(prisma);
   const leaseRepo = new KnowledgeRepositoryLeasePrismaRepository(prisma);
@@ -403,6 +418,7 @@ async function startRuntime(
     connectionRepository: connectionRepo,
     observationRepository: observationRepo,
     historyFenceRepository: historyFenceRepo,
+    documentIdentityRepository: documentIdentityRepo,
     projectionRepository: projectionRepo,
     writeRequestRepository: writeRequestRepo,
     githubAppClient,
@@ -491,6 +507,7 @@ async function seedPendingWriteRequest(
     identityId: seed.identityId,
     connectionId: seed.connectionId,
     requestId: `pending-${randomUUID()}`,
+    knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(`kdoc_${randomUUID()}`),
     requestHash: createHash('sha256').update(relativePath).digest('hex'),
     relativePath,
     status: 'Committed',
@@ -571,6 +588,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         connectionId: seed.connectionId,
+        knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(`kdoc_${randomUUID()}`),
         proposalId: `proposal-${randomUUID()}`,
         revision: 1,
         requestId,
@@ -659,6 +677,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         connectionId: seed.connectionId,
+        knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(`kdoc_${randomUUID()}`),
         proposalId: `proposal-${randomUUID()}`,
         revision: 1,
         requestId,
@@ -780,6 +799,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         connectionId: seed.connectionId,
+        knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(`kdoc_${randomUUID()}`),
         proposalId: `proposal-${randomUUID()}`,
         revision: 1,
         requestId,
@@ -891,6 +911,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         connectionId: seed.connectionId,
+        knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(`kdoc_${randomUUID()}`),
         proposalId: `proposal-${randomUUID()}`,
         revision: 1,
         requestId,

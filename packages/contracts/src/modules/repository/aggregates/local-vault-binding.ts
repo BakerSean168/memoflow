@@ -8,6 +8,7 @@
 import { z } from 'zod';
 import { brandedId, ID_PREFIXES } from '../../../primitives';
 import type { KnowledgeSpaceId, LocalVaultBindingId } from '../../../primitives';
+import { KnowledgeDocumentIdSchema } from './knowledge-document-identity';
 
 export const LocalVaultBindingClientDTOSchema = z
   .object({
@@ -55,6 +56,7 @@ export type SelectLocalVaultReq = z.infer<typeof SelectLocalVaultReqSchema>;
 
 export const LocalVaultNoteSummaryDTOSchema = z.object({
   relativePath: z.string(),
+  knowledgeDocumentId: KnowledgeDocumentIdSchema.nullable(),
   title: z.string(),
   excerpt: z.string(),
   tags: z.array(z.string()),
@@ -124,6 +126,7 @@ export type OpenLocalVaultInObsidianReq = z.infer<typeof OpenLocalVaultInObsidia
 // Residual 795: confirmed write req dual retired — sole ReqSchema + z.infer.
 export const ConfirmedLocalVaultWriteReqSchema = z.object({
   relativePath: z.string(),
+  knowledgeDocumentId: KnowledgeDocumentIdSchema,
   contentMarkdown: z.string(),
   proposalId: z.string(),
   proposalRevision: z.number(),

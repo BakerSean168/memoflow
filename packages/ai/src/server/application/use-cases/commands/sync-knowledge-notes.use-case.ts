@@ -168,6 +168,7 @@ export class SyncKnowledgeNotesUseCase {
     if (!this.knowledgeIndexStatusPort) return;
     try {
       await this.knowledgeIndexStatusPort.updateIndexStatus(identityId, {
+        repositoryId: resource.repositoryId,
         resourceId: resource.resourceId,
         contentHash,
         status,

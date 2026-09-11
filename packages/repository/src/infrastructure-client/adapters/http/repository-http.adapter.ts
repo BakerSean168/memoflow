@@ -36,6 +36,8 @@ import type {
   SyncKnowledgeRepositoryRes,
   CreateConfirmedKnowledgeNoteReq,
   CreateConfirmedKnowledgeNoteResponse,
+  AdoptKnowledgeDocumentReq,
+  AdoptKnowledgeDocumentResponse,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionListResponse,
   ListKnowledgeNoteProjectionsReq,
@@ -204,6 +206,12 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
     request: CreateConfirmedKnowledgeNoteReq,
   ): Promise<Result<CreateConfirmedKnowledgeNoteResponse>> {
     return this.httpClient.post(`${this.baseUrl}/knowledge-notes`, request);
+  }
+
+  async adoptKnowledgeDocument(
+    request: AdoptKnowledgeDocumentReq,
+  ): Promise<Result<AdoptKnowledgeDocumentResponse>> {
+    return this.httpClient.post(`${this.baseUrl}/knowledge-notes/adopt`, request);
   }
 
   async listKnowledgeWriteRequests(

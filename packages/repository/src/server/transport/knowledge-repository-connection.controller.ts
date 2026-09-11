@@ -24,10 +24,13 @@ import {
   type PreviewKnowledgeRepositoryReconciliationReq,
   ListKnowledgeProjectionsSchema,
   CreateConfirmedKnowledgeNoteSchema,
+  AdoptKnowledgeDocumentSchema,
   GetKnowledgeNoteLinkGraphSchema,
   ListKnowledgeWriteRequestsSchema,
   type CreateConfirmedKnowledgeNoteReq,
   type CreateConfirmedKnowledgeNoteResponse,
+  type AdoptKnowledgeDocumentReq,
+  type AdoptKnowledgeDocumentResponse,
   type KnowledgeNoteProjectionClientDTO,
   type KnowledgeNoteProjectionListResponse,
   type ListKnowledgeNoteProjectionsReq,
@@ -115,6 +118,10 @@ export interface KnowledgeRepositoryConnectionUseCases {
     ctx: Context,
     request: CreateConfirmedKnowledgeNoteReq,
   ): Promise<Result<CreateConfirmedKnowledgeNoteResponse>>;
+  adoptKnowledgeDocument(
+    ctx: Context,
+    request: AdoptKnowledgeDocumentReq,
+  ): Promise<Result<AdoptKnowledgeDocumentResponse>>;
   listKnowledgeWriteRequests(
     ctx: Context,
     request: ListKnowledgeWriteRequestsReq,
@@ -326,6 +333,18 @@ export class KnowledgeRepositoryConnectionController {
       });
     }
     return this.useCases.createConfirmedKnowledgeNote(ctx, parsed.data);
+  }
+
+  async adoptNote(ctx: Context, input: unknown) {
+    const parsed = AdoptKnowledgeDocumentSchema.safeParse(input);
+    if (!parsed.success) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid knowledge document adoption request',
+        details: formatZodErrors(parsed.error.issues),
+      });
+    }
+    return this.useCases.adoptKnowledgeDocument(ctx, parsed.data);
   }
 
   async listWriteRequests(ctx: Context, input: unknown) {

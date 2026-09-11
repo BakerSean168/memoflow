@@ -47,7 +47,7 @@ KnowledgeSpace
 - [ADR-090](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
 - [ADR-091](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
 
-**当前实施状态：** ADR-089 已完成 Local/Remote 全部四轴 cutover；ADR-090 stable document identity 与 ADR-091 single projection engine 仍未完成。
+**当前实施状态：** ADR-089 已完成 Local/Remote 全部四轴 cutover；ADR-090 stable document identity 已由 KNOW-2002 实施；ADR-091 single projection engine 仍未完成。
 
 ### 1.2 2026-09-11 Local Vault checkpoint
 
@@ -187,15 +187,18 @@ Web create
   导入；它不是 Vault/GitHub 导出，也不是服务端持有数据披露。
 - GitHub authorization、installation token 和派生投影不得进入可导入文件。权威 Markdown/附件应从 Vault 或 GitHub
   repository 导出/clone。
-- Web 的“服务端持有数据披露”生成 `memoflow.server-held-data-disclosure` JSON；它按认证 identity 包含 repository
-  connection metadata（含不可重放 installation identifier）、Markdown/附件投影、附件 cache bytes、Webhook delivery、
-  Web write ledger 与 AI knowledge index。该 artifact 没有 import route，并明确排除本地 Vault/Git history、GitHub
-  repository history、worker lease、数据库内部 retrieval vector 及所有 MemoFlow 管理的可重放授权材料。Markdown、
-  frontmatter 和 cache bytes 属于用户仓库内容，按原样进入披露文件。
+- Web 的“服务端持有数据披露”生成 `memoflow.server-held-data-disclosure` JSON；它按认证 identity 包含
+  KnowledgeSpace metadata、去重后的 durable `KnowledgeDocumentIdentity` registry（`knowledgeSpaceId`、
+  `knowledgeDocumentId`、`origin`、`originRequestId`、`createdAt`、`updatedAt`）、repository connection metadata（含不可重放
+  installation identifier）、Markdown/附件投影、附件 cache bytes、Webhook delivery、Web write ledger 与 AI knowledge
+  index。Note projection 的 `knowledgeDocumentId` 可为 `null`，write request disclosure 始终带 stable `knowledgeDocumentId`。
+  该 artifact 没有 import route，并明确排除本地 Vault/Git history、GitHub repository history、worker lease、数据库内部
+  retrieval vector 及所有 MemoFlow 管理的可重放授权材料。Markdown、frontmatter 和 cache bytes 属于用户仓库内容，按原样
+  进入披露文件；disclosure 仍保持当前 schemaVersion 1，不是 portable backup。
 
 ## 8. 当前差距
 
-Repository/Knowledge vNext 已完成 ADR-089 的 Local/Remote binding 四轴迁移；stable document identity（ADR-090）与 single projection engine（ADR-091）仍未完成。
+Repository/Knowledge vNext 已完成 ADR-089 的 Local/Remote binding 四轴迁移与 ADR-090 stable document identity；single projection engine（ADR-091）仍未完成。
 
 - 真实 GitHub App fixture E2E 仍依赖外部凭据与受控 private repository。
 - Mobile 尚未接入服务端 GitHub 投影的只读浏览、搜索与预览。

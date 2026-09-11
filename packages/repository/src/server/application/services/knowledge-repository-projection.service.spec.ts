@@ -15,6 +15,7 @@ import type {
   IRemoteHistoryFenceRepository,
   IRemoteRepositoryObservationRepository,
 } from '../ports/knowledge-remote-binding.repositories';
+import type { IKnowledgeDocumentIdentityRepository } from '../ports/knowledge-document-identity.repository';
 import type {
   IKnowledgeRepositoryLeaseRepository,
   KnowledgeRepositoryLeaseRequest,
@@ -200,6 +201,61 @@ class MemoryProjectionCheckpointRepository implements IKnowledgeProjectionCheckp
   }
 }
 
+class MemoryDocumentIdentityRepository implements IKnowledgeDocumentIdentityRepository {
+  readonly rows = new Map<
+    string,
+    {
+      knowledgeSpaceId: never;
+      knowledgeDocumentId: never;
+      origin: 'ObservedMarker';
+      originRequestId: null;
+      createdAt: number;
+      updatedAt: number;
+    }
+  >();
+  private key(spaceId: string, documentId: string): string {
+    return `${spaceId}:${documentId}`;
+  }
+  async find(spaceId: never, documentId: never) {
+    return this.rows.get(this.key(spaceId, documentId)) ?? null;
+  }
+  async claimForCreate() {
+    return true;
+  }
+  async claimForAdoption(
+    knowledgeSpaceId: never,
+    knowledgeDocumentId: never,
+    requestId: string,
+    now: number,
+  ) {
+    const key = this.key(knowledgeSpaceId, knowledgeDocumentId);
+    const existing = this.rows.get(key);
+    if (existing) return existing.origin === 'Adopted' && existing.originRequestId === requestId;
+    this.rows.set(key, {
+      knowledgeSpaceId,
+      knowledgeDocumentId,
+      origin: 'Adopted',
+      originRequestId: requestId,
+      createdAt: now,
+      updatedAt: now,
+    } as never);
+    return true;
+  }
+
+  async observeMarker(spaceId: never, documentId: never, now: number) {
+    const key = this.key(spaceId, documentId);
+    if (!this.rows.has(key))
+      this.rows.set(key, {
+        knowledgeSpaceId: spaceId,
+        knowledgeDocumentId: documentId,
+        origin: 'ObservedMarker',
+        originRequestId: null,
+        createdAt: now,
+        updatedAt: now,
+      });
+  }
+}
+
 let latestFourAxisRepositories: ReturnType<typeof buildFourAxisRepositories> | null = null;
 
 function buildFourAxisRepositories() {
@@ -207,6 +263,7 @@ function buildFourAxisRepositories() {
     observationRepository: new MemoryObservationRepository(),
     historyFenceRepository: new MemoryHistoryFenceRepository(),
     projectionCheckpointRepository: new MemoryProjectionCheckpointRepository(),
+    documentIdentityRepository: new MemoryDocumentIdentityRepository(),
   };
 }
 
@@ -223,6 +280,11 @@ function latestCheckpointRepository(): MemoryProjectionCheckpointRepository {
 function latestObservationRepository(): MemoryObservationRepository {
   if (!latestFourAxisRepositories) throw new Error('four-axis repositories were not created');
   return latestFourAxisRepositories.observationRepository;
+}
+
+function latestDocumentIdentityRepository(): MemoryDocumentIdentityRepository {
+  if (!latestFourAxisRepositories) throw new Error('four-axis repositories were not created');
+  return latestFourAxisRepositories.documentIdentityRepository;
 }
 
 class MemoryDeliveryRepository implements IGithubWebhookDeliveryRepository {
@@ -307,7 +369,11 @@ class MemoryProjectionRepository implements IKnowledgeNoteProjectionRepository {
     async (_connectionId: string, _commitSha: string, notes: KnowledgeNoteProjectionUpsert[]) => {
       const deleted = [...this.rows.values()]
         .filter((row) => !notes.some((note) => note.relativePath === row.relativePath))
-        .map((row) => ({ id: row.id, relativePath: row.relativePath }));
+        .map((row) => ({
+          id: row.id,
+          knowledgeDocumentId: row.knowledgeDocumentId,
+          relativePath: row.relativePath,
+        }));
       this.rows.clear();
       notes.forEach((note) => this.rows.set(note.id, note));
       return deleted;
@@ -328,6 +394,16 @@ class MemoryProjectionRepository implements IKnowledgeNoteProjectionRepository {
       (candidate) => candidate.relativePath === relativePath,
     );
     return row ? this.toClient(row) : null;
+  }
+
+  async findLiveByDocumentId(_connectionId: string, knowledgeDocumentId: string) {
+    return [...this.rows.values()]
+      .filter((row) => row.knowledgeDocumentId === knowledgeDocumentId)
+      .map((row) => this.toClient(row));
+  }
+
+  async listLiveByConnection(_connectionId: string) {
+    return [...this.rows.values()].map((row) => this.toClient(row));
   }
 
   async loadLinkGraphSourcesForIdentity(
@@ -555,6 +631,228 @@ describe('KnowledgeRepositoryProjectionService', () => {
     expect(deliveryRepository.rows.size).toBe(0);
   });
 
+  it('keeps unmanaged Markdown readable without inventing or persisting document identity', async () => {
+    const projectionRepository = new MemoryProjectionRepository();
+    const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
+      webhookSecret,
+      connectionRepository: new MemoryConnectionRepository(),
+      deliveryRepository: new MemoryDeliveryRepository(),
+      projectionRepository,
+      githubAppClient: githubClient(),
+      now: () => 1_750_000_000_000,
+    });
+
+    await service.ingest({
+      deliveryId: 'delivery-unmanaged',
+      eventName: 'push',
+      ...signedPushPayload(),
+    });
+    await vi.waitFor(() => expect(projectionRepository.applyChanges).toHaveBeenCalledOnce());
+
+    const projected = [...projectionRepository.rows.values()][0]!;
+    expect(projected.knowledgeDocumentId).toBeNull();
+    expect(latestDocumentIdentityRepository().rows.size).toBe(0);
+  });
+
+  it('preserves KnowledgeDocumentId across a Git rename while technical projection identity changes', async () => {
+    const documentId = 'kdoc_550e8400-e29b-41d4-a716-446655440290';
+    const projectionRepository = new MemoryProjectionRepository();
+    const publishMutation = vi.fn();
+    const getMarkdownChanges = vi
+      .fn()
+      .mockResolvedValueOnce({
+        commitSha: 'after-sha',
+        requiresFullSnapshot: false,
+        changes: [
+          {
+            relativePath: 'notes/old-name.md',
+            blobSha: 'blob-old',
+            markdownContent: `---\ntitle: Old\nmemoflow_id: ${documentId}\n---\n\n# Old`,
+            status: 'added' as const,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        commitSha: 'after-sha-2',
+        requiresFullSnapshot: false,
+        changes: [
+          {
+            relativePath: 'notes/new-name.md',
+            previousPath: 'notes/old-name.md',
+            blobSha: 'blob-new',
+            markdownContent: `---\ntitle: New\nmemoflow_id: ${documentId}\n---\n\n# New`,
+            status: 'renamed' as const,
+          },
+        ],
+      });
+    const deliveryRepository = new MemoryDeliveryRepository();
+    const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
+      webhookSecret,
+      connectionRepository: new MemoryConnectionRepository(),
+      deliveryRepository,
+      projectionRepository,
+      githubAppClient: githubClient({ getMarkdownChanges }),
+      publishMutation,
+      now: () => 1_750_000_000_000,
+    });
+
+    await service.ingest({
+      deliveryId: 'delivery-managed-create',
+      eventName: 'push',
+      ...signedPushPayload(),
+    });
+    await vi.waitFor(() =>
+      expect(
+        [...deliveryRepository.rows.values()].find(
+          (row) => row.deliveryId === 'delivery-managed-create',
+        )?.status,
+      ).toBe('Processed'),
+    );
+    const oldProjection = [...projectionRepository.rows.values()][0]!;
+
+    await service.ingest({
+      deliveryId: 'delivery-managed-rename',
+      eventName: 'push',
+      ...signedPushPayload({ before: 'after-sha', after: 'after-sha-2' }),
+    });
+    await vi.waitFor(() =>
+      expect(
+        [...deliveryRepository.rows.values()].find(
+          (row) => row.deliveryId === 'delivery-managed-rename',
+        )?.status,
+      ).toBe('Processed'),
+    );
+    const nextProjection = [...projectionRepository.rows.values()][0]!;
+
+    expect(oldProjection.id).not.toBe(nextProjection.id);
+    expect(oldProjection.knowledgeDocumentId).toBe(documentId);
+    expect(nextProjection.knowledgeDocumentId).toBe(documentId);
+    expect(nextProjection.relativePath).toBe('notes/new-name.md');
+    expect(latestDocumentIdentityRepository().rows.size).toBe(1);
+    expect(publishMutation.mock.calls.map(([event]) => event.resourceId)).toEqual([
+      documentId,
+      documentId,
+    ]);
+    expect(publishMutation.mock.calls.some(([event]) => event.mutation === 'deleted')).toBe(false);
+  });
+
+  it('fails closed when the same memoflow_id appears at multiple live paths', async () => {
+    const documentId = 'kdoc_550e8400-e29b-41d4-a716-446655440291';
+    const deliveryRepository = new MemoryDeliveryRepository();
+    const projectionRepository = new MemoryProjectionRepository();
+    const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
+      webhookSecret,
+      connectionRepository: new MemoryConnectionRepository(),
+      deliveryRepository,
+      projectionRepository,
+      githubAppClient: githubClient({
+        getMarkdownChanges: vi.fn(async () => ({
+          commitSha: 'after-sha',
+          requiresFullSnapshot: false,
+          changes: ['one', 'two'].map((name) => ({
+            relativePath: `notes/${name}.md`,
+            blobSha: `blob-${name}`,
+            markdownContent: `---\nmemoflow_id: ${documentId}\n---\n\n# ${name}`,
+            status: 'added' as const,
+          })),
+        })),
+      }),
+    });
+
+    await service.ingest({
+      deliveryId: 'delivery-duplicate-id',
+      eventName: 'push',
+      ...signedPushPayload(),
+    });
+    await vi.waitFor(() =>
+      expect(
+        [...deliveryRepository.rows.values()].find(
+          (row) => row.deliveryId === 'delivery-duplicate-id',
+        )?.status,
+      ).toBe('Failed'),
+    );
+
+    expect(projectionRepository.applyChanges).not.toHaveBeenCalled();
+    expect(latestCheckpointRepository().rows.get(connection().id)?.failure?.code).toBe(
+      'KNOWLEDGE_DOCUMENT_ID_COLLISION',
+    );
+  });
+
+  it('fails closed when a managed document loses its memoflow_id marker', async () => {
+    const documentId = 'kdoc_550e8400-e29b-41d4-a716-446655440292';
+    const deliveryRepository = new MemoryDeliveryRepository();
+    const projectionRepository = new MemoryProjectionRepository();
+    const getMarkdownChanges = vi
+      .fn()
+      .mockResolvedValueOnce({
+        commitSha: 'after-sha',
+        requiresFullSnapshot: false,
+        changes: [
+          {
+            relativePath: 'notes/managed.md',
+            blobSha: 'blob-managed-1',
+            markdownContent: `---\nmemoflow_id: ${documentId}\n---\n\n# Managed`,
+            status: 'added' as const,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        commitSha: 'after-sha-2',
+        requiresFullSnapshot: false,
+        changes: [
+          {
+            relativePath: 'notes/managed.md',
+            blobSha: 'blob-managed-2',
+            markdownContent: '# Marker removed',
+            status: 'modified' as const,
+          },
+        ],
+      });
+    const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
+      webhookSecret,
+      connectionRepository: new MemoryConnectionRepository(),
+      deliveryRepository,
+      projectionRepository,
+      githubAppClient: githubClient({ getMarkdownChanges }),
+    });
+
+    await service.ingest({
+      deliveryId: 'delivery-marker-first',
+      eventName: 'push',
+      ...signedPushPayload(),
+    });
+    await vi.waitFor(() =>
+      expect(
+        [...deliveryRepository.rows.values()].find(
+          (row) => row.deliveryId === 'delivery-marker-first',
+        )?.status,
+      ).toBe('Processed'),
+    );
+    projectionRepository.applyChanges.mockClear();
+
+    await service.ingest({
+      deliveryId: 'delivery-marker-removed',
+      eventName: 'push',
+      ...signedPushPayload({ before: 'after-sha', after: 'after-sha-2' }),
+    });
+    await vi.waitFor(() =>
+      expect(
+        [...deliveryRepository.rows.values()].find(
+          (row) => row.deliveryId === 'delivery-marker-removed',
+        )?.status,
+      ).toBe('Failed'),
+    );
+
+    expect(projectionRepository.applyChanges).not.toHaveBeenCalled();
+    expect(latestCheckpointRepository().rows.get(connection().id)?.failure?.code).toBe(
+      'KNOWLEDGE_DOCUMENT_ID_REMOVED',
+    );
+  });
+
   it('updates index status only through the identity/content-hash guarded repository method', async () => {
     const projectionRepository = new MemoryProjectionRepository();
     const service = new KnowledgeRepositoryProjectionService({
@@ -567,14 +865,15 @@ describe('KnowledgeRepositoryProjectionService', () => {
     });
 
     await expect(
-      service.updateIndexStatus('identity-1', {
-        projectionId: 'projection-1',
+      service.updateIndexStatus(String(connection().identityId), {
+        connectionId: connection().id,
+        resourceId: 'projection-1',
         contentHash: 'content-hash-1',
         status: 'indexed',
       }),
     ).resolves.toEqual({ ok: true, data: { updated: true } });
     expect(projectionRepository.updateIndexStatusForIdentity).toHaveBeenCalledWith(
-      'identity-1',
+      String(connection().identityId),
       'projection-1',
       'content-hash-1',
       'indexed',

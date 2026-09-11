@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { goalWorkflowEntityId } from './deterministic-entity-id';
+import { goalWorkflowEntityId, knowledgeCaptureDocumentId } from './deterministic-entity-id';
 
 describe('goalWorkflowEntityId', () => {
   it('is stable, prefix-correct, child-index-sensitive and revision-sensitive', () => {
@@ -17,13 +17,23 @@ describe('goalWorkflowEntityId', () => {
     expect(goalA).not.toBe(revisedGoal);
   });
 
+  it('keeps KnowledgeDocumentId stable for one knowledge.capture run', () => {
+    const first = knowledgeCaptureDocumentId({ workflowRunId: 'knowledge-run-1' });
+    const replay = knowledgeCaptureDocumentId({ workflowRunId: 'knowledge-run-1' });
+    const other = knowledgeCaptureDocumentId({ workflowRunId: 'knowledge-run-2' });
+
+    expect(first).toBe(replay);
+    expect(first).toMatch(/^kdoc_[0-9a-f-]{36}$/i);
+    expect(other).not.toBe(first);
+  });
+
   it('rejects invalid durable mutation identities', () => {
-    expect(() =>
-      goalWorkflowEntityId({ workflowRunId: '', revision: 1, kind: 'goal' }),
-    ).toThrow('workflowRunId');
-    expect(() =>
-      goalWorkflowEntityId({ workflowRunId: 'run', revision: 0, kind: 'goal' }),
-    ).toThrow('revision');
+    expect(() => goalWorkflowEntityId({ workflowRunId: '', revision: 1, kind: 'goal' })).toThrow(
+      'workflowRunId',
+    );
+    expect(() => goalWorkflowEntityId({ workflowRunId: 'run', revision: 0, kind: 'goal' })).toThrow(
+      'revision',
+    );
     expect(() =>
       goalWorkflowEntityId({ workflowRunId: 'run', revision: 1, kind: 'reminder', index: -1 }),
     ).toThrow('index');

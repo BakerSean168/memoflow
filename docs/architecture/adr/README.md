@@ -4,7 +4,7 @@ tags:
   - index
 description: 架构决策记录索引
 created: 2025-11-23T15:00:00
-updated: 2026-09-09T00:30:00+08:00
+updated: 2026-09-11T00:02:00+08:00
 ---
 
 # ADR 索引
@@ -105,8 +105,8 @@ updated: 2026-09-09T00:30:00+08:00
 | [ADR-086](./ADR-086-notification-delivery-plan-projection-and-channel-retirement.md) | Notification DeliveryPlan、Projection 与 Legacy Channel 退役 | 已采纳（待实施） | 2026-09-08 |
 | [ADR-087](./ADR-087-notification-interaction-and-typed-action-intents.md) | Notification Interaction 与 Typed Action Intents | 已采纳（待实施） | 2026-09-08 |
 | [ADR-088](./ADR-088-notification-preference-quiet-hours-realtime-and-operations-boundary.md) | Notification Preference、QuietHours、Realtime 与 Operations Boundary | 已采纳（待实施） | 2026-09-08 |
-| [ADR-089](./ADR-089-knowledge-space-source-binding-and-health-boundaries.md) | KnowledgeSpace、Source Binding 与 Health/Observation Boundary | 已采纳（待实施） | 2026-09-08 |
-| [ADR-090](./ADR-090-stable-knowledge-document-identity.md) | Stable KnowledgeDocument Identity | 已采纳（待实施） | 2026-09-08 |
+| [ADR-089](./ADR-089-knowledge-space-source-binding-and-health-boundaries.md) | KnowledgeSpace、Source Binding 与 Health/Observation Boundary | 已采纳（已实施） | 2026-09-08 |
+| [ADR-090](./ADR-090-stable-knowledge-document-identity.md) | Stable KnowledgeDocument Identity | 已采纳（已实施） | 2026-09-08 |
 | [ADR-091](./ADR-091-knowledge-projection-index-and-operation-boundaries.md) | Knowledge Projection、AI Index 与 Operation Boundary | 已采纳（待实施） | 2026-09-08 |
 | [ADR-092](./ADR-092-settings-hub-and-preference-ownership-boundary.md) | Settings Hub 与 Preference Ownership Boundary | 已采纳（待实施） | 2026-09-08 |
 | [ADR-093](./ADR-093-user-preference-profile-and-product-time-context.md) | User Preference Profile 与 Product Time Context | 已采纳（已实施） | 2026-09-08 |

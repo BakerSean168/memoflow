@@ -15,6 +15,9 @@ import {
   PortableTaskDataSchema,
   PortableUserDataV2Schema,
   ServerHeldDataDisclosureEnvelopeV1Schema,
+  ServerHeldKnowledgeDocumentIdentitySchema,
+  ServerHeldKnowledgeNoteProjectionSchema,
+  ServerHeldKnowledgeWriteRequestSchema,
 } from './index';
 
 const baseEnvelope = {
@@ -300,6 +303,61 @@ describe('portable reference format', () => {
 });
 
 describe('server-held disclosure schema', () => {
+  it('includes stable identity registry rows and stable IDs without technical row ids', () => {
+    const identity = {
+      knowledgeSpaceId: 'space-1',
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440390',
+      origin: 'MemoFlowCreated',
+      originRequestId: 'request-1',
+      createdAt: '2026-08-26T00:00:00.000Z',
+      updatedAt: '2026-08-26T00:00:00.000Z',
+    };
+    expect(ServerHeldKnowledgeDocumentIdentitySchema.safeParse(identity).success).toBe(true);
+    expect(
+      ServerHeldKnowledgeDocumentIdentitySchema.safeParse({ ...identity, id: 'db-row-id' }).success,
+    ).toBe(false);
+    expect(
+      ServerHeldKnowledgeDocumentIdentitySchema.safeParse({
+        ...identity,
+        knowledgeDocumentId: 'path-derived-id',
+      }).success,
+    ).toBe(false);
+    expect(
+      ServerHeldKnowledgeNoteProjectionSchema.safeParse({
+        id: 'projection-1',
+        bindingId: 'binding-1',
+        knowledgeDocumentId: null,
+        relativePath: 'notes/unmanaged.md',
+        commitSha: 'commit-1',
+        blobSha: 'blob-1',
+        contentHash: 'hash-1',
+        frontmatter: {},
+        markdownContent: '# Note',
+        indexStatus: 'INDEXED',
+        createdAt: '2026-08-26T00:00:00.000Z',
+        updatedAt: '2026-08-26T00:00:00.000Z',
+        deletedAt: null,
+      }).success,
+    ).toBe(true);
+    expect(
+      ServerHeldKnowledgeWriteRequestSchema.safeParse({
+        id: 'write-1',
+        bindingId: 'binding-1',
+        knowledgeDocumentId: identity.knowledgeDocumentId,
+        requestId: 'request-1',
+        requestHash: 'hash-1',
+        relativePath: 'notes/managed.md',
+        status: 'Committed',
+        commitSha: 'commit-1',
+        errorCode: null,
+        errorMessage: null,
+        createdAt: '2026-08-26T00:00:00.000Z',
+        updatedAt: '2026-08-26T00:00:00.000Z',
+        completedAt: null,
+      }).success,
+    ).toBe(true);
+  });
+
   it('keeps disclosure explicitly non-importable', () => {
     const result = ServerHeldDataDisclosureEnvelopeV1Schema.safeParse({
       kind: 'memoflow.server-held-data-disclosure',
@@ -319,6 +377,7 @@ describe('server-held disclosure schema', () => {
       },
       data: {
         knowledgeSpaces: [],
+        knowledgeDocumentIdentities: [],
         knowledgeRemoteBindings: [],
         remoteRepositoryObservations: [],
         remoteHistoryFences: [],

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated": "2026-09-09",
+  "generated": "2026-09-11",
   "baseline": {
     "dual_surface": 237,
     "keep_boundary": 66,
@@ -9,17 +9,17 @@
   "post_e3b": {
     "dual_surface_files": 71,
     "drop_from_baseline": 166,
-    "drop_pct": 70.0,
+    "drop_pct": 70,
     "registry_suites": 121
   },
   "counts": {
-    "total": 121,
+    "total": 120,
     "by_class": {
-      "keep_boundary": 50,
+      "keep_boundary": 49,
       "retired": 71
     },
     "dual_surface_files": 71,
-    "keep_boundary_files": 50
+    "keep_boundary_files": 49
   },
   "entries": [
     {
@@ -64,17 +64,6 @@
       "blast": "surface lock (retired)",
       "next": "none",
       "residual": "256",
-      "suite_describes": 1
-    },
-    {
-      "id": "r1149",
-      "path": "apps/desktop/src/main/modules/ai/to-knowledge-note-ref-keep-boundary.surface.spec.ts",
-      "package": "apps/desktop",
-      "class": "keep_boundary",
-      "sole": "desktop-knowledge-note-persistence.adapter.ts",
-      "blast": "surface lock (keep_boundary)",
-      "next": "none",
-      "residual": "1149",
       "suite_describes": 1
     },
     {

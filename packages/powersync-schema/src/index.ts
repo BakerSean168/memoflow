@@ -911,6 +911,33 @@ const ai_provider_onboarding_sessions = new Table(
   { localOnly: true },
 );
 
+/**
+ * Device-local rebuildable AI index over the active knowledge source.
+ * It is deliberately not synced: Web/API use the Prisma index table while
+ * Desktop rebuilds this cache from the Local Vault.
+ */
+const ai_knowledge_index_entries_local = new Table(
+  {
+    identity_id: column.text,
+    repository_id: column.text,
+    resource_id: column.text,
+    resource_path: column.text,
+    title: column.text,
+    mime_type: column.text,
+    content_hash: column.text,
+    status: column.text,
+    summary: column.text,
+    keywords_json: column.text,
+    embedding_json: column.text,
+    chunks_json: column.text,
+    metadata_json: column.text,
+    error: column.text,
+    indexed_at: column.integer,
+    last_requested_at: column.integer,
+  },
+  { localOnly: true },
+);
+
 const task_goal_outbox = new Table({
   identity_id: column.text,
   task_instance_id: column.text,
@@ -1144,6 +1171,7 @@ export const PowerSyncAppSchema = new Schema({
   ai_usage_quotas,
   ai_provider_configs,
   ai_provider_onboarding_sessions,
+  ai_knowledge_index_entries_local,
   task_goal_outbox,
   dashboard_configs,
   // Repository

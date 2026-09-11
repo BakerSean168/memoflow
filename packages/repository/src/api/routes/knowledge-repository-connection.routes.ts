@@ -14,6 +14,8 @@ import {
   PreviewKnowledgeRepositoryReconciliationSchema,
   StartKnowledgeRepositoryInstallationResponseSchema,
   CreateConfirmedKnowledgeNoteResponseSchema,
+  AdoptKnowledgeDocumentSchema,
+  AdoptKnowledgeDocumentResponseSchema,
   KnowledgeNoteProjectionClientSchema,
   KnowledgeNoteProjectionListResponseSchema,
   CreateConfirmedKnowledgeNoteSchema,
@@ -288,6 +290,30 @@ export function registerKnowledgeRepositoryConnectionRoutes(
     },
     auth,
     (req, ctx) => controller.createNote(ctx, req.body),
+  );
+
+  r.route(
+    {
+      method: 'post',
+      path: '/knowledge-notes/adopt',
+      summary: '显式纳入现有 GitHub 知识笔记的稳定身份',
+      description:
+        '仅允许给当前未管理 Markdown 写入受控 memoflow_id；expectedBlobSha 不匹配时拒绝覆盖并发修改。',
+      request: {
+        body: { content: { 'application/json': { schema: AdoptKnowledgeDocumentSchema } } },
+      },
+      responses: {
+        200: successResponse(AdoptKnowledgeDocumentResponseSchema, '纳入成功'),
+        401: errorResponse('未授权，请登录'),
+        403: errorResponse('仓库不可写'),
+        404: errorResponse('笔记或连接不存在'),
+        409: errorResponse('笔记已变化、已有稳定身份或 ID 冲突'),
+        422: errorResponse('参数错误'),
+        503: errorResponse('GitHub 服务不可用'),
+      },
+    },
+    auth,
+    (req, ctx) => controller.adoptNote(ctx, req.body),
   );
 
   r.route(

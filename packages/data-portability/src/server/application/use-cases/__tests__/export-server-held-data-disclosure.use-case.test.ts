@@ -14,6 +14,16 @@ describe('ExportServerHeldDataDisclosureUseCase', () => {
             updatedAt: '2026-07-20T00:00:00.000Z',
           },
         ],
+        knowledgeDocumentIdentities: [
+          {
+            knowledgeSpaceId: 'space-1',
+            knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440390',
+            origin: 'MemoFlowCreated',
+            originRequestId: 'request-1',
+            createdAt: '2026-07-18T00:00:00.000Z',
+            updatedAt: '2026-07-20T00:00:00.000Z',
+          },
+        ],
         knowledgeRemoteBindings: [
           {
             id: 'binding-1',
@@ -35,6 +45,7 @@ describe('ExportServerHeldDataDisclosureUseCase', () => {
           {
             id: 'projection-1',
             bindingId: 'binding-1',
+            knowledgeDocumentId: null,
             relativePath: 'notes/private.md',
             commitSha: 'commit-1',
             blobSha: 'blob-1',
@@ -72,6 +83,7 @@ describe('ExportServerHeldDataDisclosureUseCase', () => {
 
     expect(result.summary.entityCounts).toMatchObject({
       knowledgeSpaces: 1,
+      knowledgeDocumentIdentities: 1,
       knowledgeRemoteBindings: 1,
       knowledgeNoteProjections: 1,
       knowledgeAttachmentContentCaches: 1,
@@ -83,8 +95,16 @@ describe('ExportServerHeldDataDisclosureUseCase', () => {
       subject: { identityId: 'identity-1' },
       scope: { importMode: 'not-importable', includesLocalVaultFiles: false },
       data: {
+        knowledgeDocumentIdentities: [
+          {
+            knowledgeSpaceId: 'space-1',
+            knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440390',
+          },
+        ],
         knowledgeRemoteBindings: [{ id: 'binding-1', repositoryId: 'repository-1' }],
-        knowledgeNoteProjections: [{ bindingId: 'binding-1', markdownContent: '# Private note' }],
+        knowledgeNoteProjections: [
+          { bindingId: 'binding-1', knowledgeDocumentId: null, markdownContent: '# Private note' },
+        ],
         knowledgeAttachmentContentCaches: [{ bindingId: 'binding-1', contentBase64: 'AQID' }],
       },
     });

@@ -3,5 +3,6 @@
  * Legacy Repository/Resource client DTOs removed after Obsidian vault migration.
  */
 
+export * from './knowledge-document-identity';
 export * from './knowledge-remote-binding';
 export * from './local-vault-binding';

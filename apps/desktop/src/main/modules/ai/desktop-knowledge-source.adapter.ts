@@ -3,7 +3,11 @@ import type { IKnowledgeSourcePort, KnowledgeSourceNote } from '@memoflow/ai/por
 import type { LocalVaultNoteDTO, LocalVaultNoteSummaryDTO } from '@memoflow/contracts/repository';
 import type { LocalVaultElectronPort } from '@memoflow/repository/electron';
 
-function resourceIdForPath(relativePath: string): string {
+/**
+ * Ephemeral AI identity for unmanaged notes only. It must never escape into
+ * durable relations; adoption replaces it with the Markdown-carried kdoc id.
+ */
+function temporaryUnmanagedResourceIdForPath(relativePath: string): string {
   return `local-vault-${createHash('sha256').update(relativePath).digest('hex').slice(0, 24)}`;
 }
 
@@ -37,7 +41,9 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     if (!snapshot || snapshot.health.state !== 'Available') return null;
     const scanned = await this.localVault.scanVault();
     const summary = scanned.notes.find(
-      (note) => resourceIdForPath(note.relativePath) === resourceId,
+      (note) =>
+        note.knowledgeDocumentId === resourceId ||
+        temporaryUnmanagedResourceIdForPath(note.relativePath) === resourceId,
     );
     if (!summary) return null;
     const note = await this.localVault.readNote({
@@ -72,7 +78,8 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     return {
       identityId,
       repositoryId,
-      resourceId: resourceIdForPath(note.relativePath),
+      resourceId:
+        note.knowledgeDocumentId ?? temporaryUnmanagedResourceIdForPath(note.relativePath),
       resourcePath: note.relativePath,
       title: note.title,
       mimeType: 'text/markdown',
@@ -82,6 +89,7 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
         tags: note.tags,
         outgoingLinks: note.outgoingLinks,
         contentDigest: createHash('sha256').update(note.contentMarkdown).digest('hex'),
+        knowledgeDocumentId: note.knowledgeDocumentId,
       },
     };
   }

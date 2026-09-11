@@ -7,12 +7,27 @@
  */
 
 import { z } from 'zod';
+import {
+  KnowledgeDocumentIdSchema,
+  KnowledgeDocumentIdentityOriginSchema,
+} from '../../repository/aggregates/knowledge-document-identity';
 
 const NullableStringSchema = z.string().nullable();
 
 export const ServerHeldKnowledgeSpaceSchema = z
   .object({
     id: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  })
+  .strict();
+
+export const ServerHeldKnowledgeDocumentIdentitySchema = z
+  .object({
+    knowledgeSpaceId: z.string(),
+    knowledgeDocumentId: KnowledgeDocumentIdSchema,
+    origin: KnowledgeDocumentIdentityOriginSchema,
+    originRequestId: NullableStringSchema,
     createdAt: z.string(),
     updatedAt: z.string(),
   })
@@ -91,6 +106,7 @@ export const ServerHeldKnowledgeNoteProjectionSchema = z
   .object({
     id: z.string(),
     bindingId: z.string(),
+    knowledgeDocumentId: KnowledgeDocumentIdSchema.nullable(),
     relativePath: z.string(),
     commitSha: z.string(),
     blobSha: z.string(),
@@ -134,6 +150,7 @@ export const ServerHeldKnowledgeWriteRequestSchema = z
   .object({
     id: z.string(),
     bindingId: z.string(),
+    knowledgeDocumentId: KnowledgeDocumentIdSchema,
     requestId: z.string(),
     requestHash: z.string(),
     relativePath: z.string(),
@@ -174,6 +191,7 @@ export const ServerHeldAiKnowledgeIndexEntrySchema = z
 export const ServerHeldDataDisclosureDataV1Schema = z
   .object({
     knowledgeSpaces: z.array(ServerHeldKnowledgeSpaceSchema),
+    knowledgeDocumentIdentities: z.array(ServerHeldKnowledgeDocumentIdentitySchema),
     knowledgeRemoteBindings: z.array(ServerHeldKnowledgeRemoteBindingSchema),
     remoteRepositoryObservations: z.array(ServerHeldRemoteRepositoryObservationSchema),
     remoteHistoryFences: z.array(ServerHeldRemoteHistoryFenceSchema),
@@ -215,6 +233,9 @@ export const ServerHeldDataDisclosureEnvelopeV1Schema = z
   .strict();
 
 export type ServerHeldKnowledgeSpace = z.infer<typeof ServerHeldKnowledgeSpaceSchema>;
+export type ServerHeldKnowledgeDocumentIdentity = z.infer<
+  typeof ServerHeldKnowledgeDocumentIdentitySchema
+>;
 export type ServerHeldKnowledgeRemoteBinding = z.infer<
   typeof ServerHeldKnowledgeRemoteBindingSchema
 >;
