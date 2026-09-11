@@ -1,4 +1,4 @@
-import { defineComponent, h, nextTick, reactive, type Component } from 'vue';
+import { defineComponent, h, nextTick, reactive, ref, type Component } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -287,6 +287,84 @@ describe('KeyResultLinksSection', () => {
     const emitted = wrapper.emitted('update:modelValue')?.at(-1)?.[0];
     expect(emitted).toMatchObject({ goalBinding: { goalId: 'goal-a', keyResultId: 'kr-a' } });
     expect(emitted.goalBinding).not.toHaveProperty('contribution');
+  });
+
+  it('keeps enable-before-selection local through a controlled parent round-trip', async () => {
+    const modelUpdates: TaskPlanViewModel[] = [];
+    const request = vi.fn(async () => []);
+    const ControlledParent = defineComponent({
+      name: 'ControlledKeyResultLinksSection',
+      setup() {
+        const modelValue = ref(makeTemplate());
+
+        return () =>
+          h(KeyResultLinksSection, {
+            modelValue: modelValue.value,
+            goals: [
+              { id: 'goal-a', title: 'Goal A' },
+              { id: 'goal-b', title: 'Goal B' },
+            ],
+            keyResultsByGoal: {},
+            onRequestKeyResults: request,
+            'onUpdate:modelValue': (value: TaskPlanViewModel) => {
+              modelUpdates.push(value);
+              modelValue.value = value;
+            },
+          });
+      },
+    });
+
+    const wrapper = mount(ControlledParent, {
+      global: {
+        plugins: [i18n],
+        stubs: {
+          Select: SelectStub,
+          Switch: SwitchStub,
+          Card: passThrough('Card'),
+          CardHeader: passThrough('CardHeader'),
+          CardTitle: passThrough('CardTitle'),
+          CardContent: passThrough('CardContent'),
+          Alert: passThrough('Alert'),
+          AlertDescription: passThrough('AlertDescription'),
+          Label: passThrough('Label', 'label'),
+          SelectTrigger: passThrough('SelectTrigger', 'button'),
+          SelectValue: true,
+          SelectContent: passThrough('SelectContent'),
+          SelectItem: passThrough('SelectItem'),
+          Input: true,
+          Badge: passThrough('Badge'),
+          Button: passThrough('Button', 'button'),
+          Target: true,
+          CheckCircle: true,
+          Info: true,
+          Flag: true,
+          PlusCircle: true,
+          Link2: true,
+          LoaderCircle: true,
+          RotateCw: true,
+        },
+      },
+    });
+
+    await wrapper.get('[role="switch"]').trigger('click');
+    await nextTick();
+
+    expect(wrapper.get('[role="switch"]').attributes('aria-checked')).toBe('true');
+    expect(modelUpdates).toHaveLength(0);
+
+    wrapper.findAllComponents(SelectStub)[0].vm.$emit('update:modelValue', 'goal-a');
+    await flushPromises();
+
+    expect(modelUpdates).toHaveLength(1);
+    expect(modelUpdates[0]).toMatchObject({
+      goalBinding: { goalId: 'goal-a', keyResultId: null },
+    });
+
+    await wrapper.get('[role="switch"]').trigger('click');
+    await nextTick();
+
+    expect(modelUpdates).toHaveLength(2);
+    expect(modelUpdates[1]).toMatchObject({ goalBinding: null });
   });
 
   it('selects a key result added after its goal without a Select focus crash', async () => {

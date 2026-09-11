@@ -422,7 +422,9 @@ const handleLinkToggle = (enabled: boolean | null) => {
     progressTrigger.value = TaskGoalBindingTrigger.EachCompletion;
   }
 
-  updateBinding();
+  if (!enabled || selectedGoalId.value) {
+    updateBinding();
+  }
   validateAndEmit();
 };
 
