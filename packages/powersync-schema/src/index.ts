@@ -97,9 +97,7 @@ const user_preference_records = new Table({
 const goals = new Table({
   identity_id: column.text,
   name: column.text,
-  description: column.text,
-  feasibility_analysis: column.text,
-  motivation: column.text,
+  summary: column.text,
   status: column.text,
   start_date: column.text,
   due_date: column.text,
@@ -744,7 +742,6 @@ const notification_templates = new Table({
   created_at: column.text,
   updated_at: column.text,
 });
-
 
 // ──────────────────────────────────────────────
 // AI

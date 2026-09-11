@@ -35,6 +35,7 @@ describe('createGoalElectronModule channel surface', () => {
   });
 
   it('keeps canonical Goal vNext status channels on contracts surface', () => {
+    expect(GoalChannels.PLAN).toBe('goal:plan');
     expect(GoalChannels.ABANDON).toBe('goal:abandon');
     expect(GoalChannels.COMPLETE).toBe('goal:complete');
     expect('ARCHIVE_EXPIRED' in GoalChannels).toBe(false);

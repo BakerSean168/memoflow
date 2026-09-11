@@ -11,9 +11,7 @@ function createGoalWithSum() {
   const goal = Goal.create({
     identityId: 'identity-1' as never,
     name: 'Running distance',
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
+    summary: null,
     startDate: null,
     dueDate: null,
     reminderConfig: null,
@@ -87,9 +85,7 @@ describe('UpdateGoalRecordUseCase', () => {
     const goal = Goal.create({
       identityId: 'identity-1' as never,
       name: 'Reach 70 kg',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
+      summary: null,
       startDate: null,
       dueDate: null,
       reminderConfig: null,

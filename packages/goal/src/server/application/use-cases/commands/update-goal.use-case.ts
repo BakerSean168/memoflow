@@ -5,7 +5,11 @@
  * 遵循 governance 模块 Result<T> 规范
  */
 
-import { GoalLabelOwnershipError, GoalVersionConflictError, type IGoalRepository } from '../../../domain';
+import {
+  GoalLabelOwnershipError,
+  GoalVersionConflictError,
+  type IGoalRepository,
+} from '../../../domain';
 import { GoalPolicy } from '../../../domain';
 import type { UpdateGoalReq, UpdateGoalRes } from '@memoflow/contracts/goal';
 import type { Result } from '@memoflow/contracts/result';
@@ -63,9 +67,7 @@ export class UpdateGoalUseCase {
     // 3. Update canonical Direction fields.
     goal.updateBasicInfo({
       name: input.name,
-      description: input.description,
-      feasibilityAnalysis: input.feasibilityAnalysis,
-      motivation: input.motivation,
+      summary: input.summary,
     });
 
     // 4. Update the product time window using canonical dueDate naming.

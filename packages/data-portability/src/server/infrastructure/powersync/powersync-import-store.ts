@@ -216,14 +216,12 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createGoal(input: CreateGoalInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO goals (id, identity_id, name, description, feasibility_analysis, motivation, status, start_date, due_date, completed_at, archived_at, sort_order, reminder_config, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
+      `INSERT INTO goals (id, identity_id, name, summary, status, start_date, due_date, completed_at, archived_at, sort_order, reminder_config, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [
         input.id,
         input.identityId,
         input.name,
-        str(input.description),
-        str(input.feasibilityAnalysis),
-        str(input.motivation),
+        str(input.summary),
         input.status,
         str(input.startDate),
         str(input.dueDate),
@@ -521,7 +519,6 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
       ],
     );
   }
-
 
   // --- AI ---
 

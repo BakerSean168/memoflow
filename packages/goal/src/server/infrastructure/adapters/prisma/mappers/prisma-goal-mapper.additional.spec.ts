@@ -7,10 +7,8 @@ describe('PrismaGoalMapper additional coverage', () => {
       id: 'goal-1',
       identityId: 'identity-1',
       name: 'Goal',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
-      status: 'Active',
+      summary: null,
+      status: 'InProgress',
       startDate: new Date(1_000),
       dueDate: new Date(2_000),
       completedAt: null,
@@ -43,7 +41,8 @@ describe('PrismaGoalMapper additional coverage', () => {
           reflection: 'summary',
           challenges: 'blocked',
           adjustments: 'adjust',
-          systemContext: '{"windowStartAt":1000,"windowEndAt":1300,"overallProgress":{"startPercentage":10,"endPercentage":30,"deltaPercentage":20},"keyResults":[],"summary":{"recordCount":2,"manualRecordCount":1,"taskContributionCount":1}}',
+          systemContext:
+            '{"windowStartAt":1000,"windowEndAt":1300,"overallProgress":{"startPercentage":10,"endPercentage":30,"deltaPercentage":20},"keyResults":[],"summary":{"recordCount":2,"manualRecordCount":1,"taskContributionCount":1}}',
           reviewedAt: new Date(1_300),
           createdAt: new Date(1_300),
           updatedAt: new Date(1_400),
@@ -85,7 +84,9 @@ describe('PrismaGoalMapper additional coverage', () => {
     expect(dto.goalReviews?.[0].challenges).toBe('blocked');
     expect(dto.goalReviews?.[0].adjustments).toBe('adjust');
     expect(dto.goalReviews?.[0].systemContext.overallProgress).toEqual({
-      startPercentage: 10, endPercentage: 30, deltaPercentage: 20,
+      startPercentage: 10,
+      endPercentage: 30,
+      deltaPercentage: 20,
     });
     expect(dto.weightSnapshots?.[0].snapshotTime).toBe(1_500);
     expect(dto.weightSnapshots?.[0].createdAt).toBe(1_600);
@@ -97,9 +98,7 @@ describe('PrismaGoalMapper additional coverage', () => {
       id: 'goal-2',
       identityId: 'identity-1',
       name: 'Goal2',
-      description: 'desc',
-      feasibilityAnalysis: 'f',
-      motivation: 'm',
+      summary: 'desc',
       status: 'Completed',
       startDate: null,
       dueDate: null,
@@ -186,10 +185,8 @@ describe('PrismaGoalMapper fallback branches (R4)', () => {
       id: 'goal-1',
       identityId: 'identity-1',
       name: 'Goal',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
-      status: 'Active',
+      summary: null,
+      status: 'InProgress',
       startDate: Date.parse('2026-01-01T00:00:00.000Z'),
       dueDate: null,
       completedAt: null,
@@ -218,7 +215,8 @@ describe('PrismaGoalMapper fallback branches (R4)', () => {
 
   it('parses required authoritative review system context', () => {
     const context = {
-      windowStartAt: 1_000, windowEndAt: 1_700,
+      windowStartAt: 1_000,
+      windowEndAt: 1_700,
       overallProgress: { startPercentage: 25, endPercentage: 50, deltaPercentage: 25 },
       keyResults: [],
       summary: { recordCount: 1, manualRecordCount: 1, taskContributionCount: 0 },

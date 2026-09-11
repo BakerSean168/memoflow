@@ -35,8 +35,7 @@ export function GoalEditorScreen() {
   const { goal, isLoading } = useGoalDetail(goalId);
 
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [motivation, setMotivation] = useState('');
+  const [summary, setSummary] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,8 +43,7 @@ export function GoalEditorScreen() {
   useEffect(() => {
     if (!goal) return;
     setName(goal.name);
-    setDescription(goal.description ?? '');
-    setMotivation(goal.motivation ?? '');
+    setSummary(goal.summary ?? '');
     setDueDate(toDateInput(goal.dueDate));
   }, [goal?.id]);
 
@@ -68,14 +66,12 @@ export function GoalEditorScreen() {
       ? await service.updateGoal(goalId, {
           name: name.trim(),
           expectedVersion: goal?.version ?? 1,
-          description: description.trim().length > 0 ? description.trim() : null,
-          motivation: motivation.trim().length > 0 ? motivation.trim() : null,
+          summary: summary.trim().length > 0 ? summary.trim() : null,
           dueDate: parsedDueDate,
         } satisfies UpdateGoalReq)
       : await service.createGoal({
           name: name.trim(),
-          description: description.trim().length > 0 ? description.trim() : undefined,
-          motivation: motivation.trim().length > 0 ? motivation.trim() : undefined,
+          summary: summary.trim().length > 0 ? summary.trim() : undefined,
           dueDate: parsedDueDate ?? undefined,
         } satisfies CreateGoalReq);
 
@@ -107,28 +103,33 @@ export function GoalEditorScreen() {
 
       {error ? (
         <SectionCard title="Goal save failed" description="Fix the form and try again.">
-          <ThemedText type="small" themeColor="warning">{error}</ThemedText>
+          <ThemedText type="small" themeColor="warning">
+            {error}
+          </ThemedText>
         </SectionCard>
       ) : null}
 
       <ScrollView contentContainerStyle={styles.formColumn}>
-        <SectionCard title="Direction" description="Describe what the goal is and why it matters.">
-          <PrimaryTextField label="Name" value={name} onChangeText={setName} placeholder="Ship mobile migration" />
+        <SectionCard
+          title="Direction"
+          description="Name the goal and keep its identity summary concise."
+        >
           <PrimaryTextField
-            label="Description"
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Describe the goal"
+            label="Name"
+            value={name}
+            onChangeText={setName}
+            placeholder="Ship mobile migration"
+          />
+          <PrimaryTextField
+            label="Summary"
+            value={summary}
+            onChangeText={setSummary}
+            placeholder="What this goal is trying to achieve"
+            maxLength={500}
             multiline
             numberOfLines={4}
             textAlignVertical="top"
             style={styles.multilineField}
-          />
-          <PrimaryTextField
-            label="Motivation"
-            value={motivation}
-            onChangeText={setMotivation}
-            placeholder="Why this goal matters"
           />
           <PrimaryTextField
             label="Due date"

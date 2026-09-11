@@ -474,6 +474,8 @@ Core outputs:
 - Goal Workspace read model;
 - AI GoalPlanDraft V2 contract.
 
+**GOAL-7202 DONE:** Goal identity is now `name + summary`; lifecycle is exactly `Planned/InProgress/Completed/Abandoned` with explicit `plan/activate/complete/abandon` actions and no automatic status rules. Prisma/PowerSync/Data Portability/App-Vue/AI apply seams have been cut over directly under ADR-111 zero-data policy. Current acceptance baseline: Goal 83/457 PASS, Contracts 81/540 PASS, Data Portability 36/148 PASS, App-Vue Goal+Calendar 15/44 PASS, App-Vue typecheck/build PASS, Goal/AI builds PASS, Prisma generate/validate PASS; React Native, Web and Desktop typechecks PASS; Dashboard 5/24 + typecheck/build PASS; Web Goal MSW 3/3, Desktop Dashboard 2/2, Schedule Goal handler 3/3, Notification integration 3/35, Task Goal DB integration 3 files / 10 tests and API Label -> Goal 1/1 PASS. Production lint PASS, test inventory 1245 current, docs-check PASS and full governance-check PASS. GOAL-7203 is the next dependency-ready Goal ticket.
+
 ## TASK lane — continue Task plan from clean checkpoint
 
 Resume only after Time/Label owner seams are ready. Continue from the existing TaskPlan/TaskOccurrence/schedule checkpoint, not from legacy templates.

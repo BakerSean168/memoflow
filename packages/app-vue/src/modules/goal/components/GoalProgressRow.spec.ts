@@ -31,10 +31,8 @@ function goal(overrides: Partial<GoalClientDTO> = {}): GoalClientDTO {
     id: 'goal-1',
     identityId: 'identity-1',
     name: 'Ship MemoFlow vNext',
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
-    status: 'Active',
+    summary: null,
+    status: 'InProgress',
     startDate: Date.UTC(2026, 7, 25),
     dueDate: Date.UTC(2026, 8, 30),
     completedAt: null,
@@ -90,10 +88,10 @@ describe('GoalProgressRow (GOAL-5101)', () => {
     vi.useRealTimers();
   });
 
-  it('derives overdue display from an active due date without persisting an overdue status', () => {
+  it('derives overdue display from an in-progress due date without persisting an overdue status', () => {
     vi.setSystemTime(new Date('2026-08-27T12:00:00Z'));
     const wrapper = mount(GoalProgressRow, {
-      props: { goal: goal({ dueDate: Date.UTC(2026, 7, 20), status: 'Active' }) },
+      props: { goal: goal({ dueDate: Date.UTC(2026, 7, 20), status: 'InProgress' }) },
       global: { plugins: [i18n] },
     });
     expect(wrapper.text()).toContain('Overdue');

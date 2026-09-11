@@ -57,9 +57,7 @@ function goalFromDTO(dto: GoalClientDTO): Goal {
     id: GoalId.of(dto.id),
     identityId: IdentityId.of(dto.identityId),
     name: dto.name,
-    description: dto.description,
-    feasibilityAnalysis: dto.feasibilityAnalysis,
-    motivation: dto.motivation,
+    summary: dto.summary,
     status: dto.status,
     startDate: dto.startDate ? dto.startDate : null,
     dueDate: dto.dueDate ? dto.dueDate : null,
@@ -140,6 +138,7 @@ export interface GoalClientPort {
   }): Promise<Result<{ goals: Goal[]; pagination: QueryGoalsRes['pagination'] }>>;
   updateGoal(id: string, request: UpdateGoalReq): Promise<Result<GoalMutationReceipt>>;
   deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>>;
+  planGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
   activateGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
   completeGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
   archiveGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
@@ -204,7 +203,10 @@ export interface GoalClientPort {
     request: CreateGoalReviewReq,
   ): Promise<Result<GoalMutationReceipt>>;
   getGoalReviews(goalId: string): Promise<Result<{ reviews: GoalReview[] }>>;
-  getGoalReviewContext(goalId: string, windowDays?: number): Promise<Result<GoalReviewSystemContext>>;
+  getGoalReviewContext(
+    goalId: string,
+    windowDays?: number,
+  ): Promise<Result<GoalReviewSystemContext>>;
   updateGoalReview(
     goalId: string,
     reviewId: string,
@@ -224,6 +226,7 @@ export class GoalClientService implements GoalClientPort {
     this.listGoals = this.listGoals.bind(this);
     this.updateGoal = this.updateGoal.bind(this);
     this.deleteGoal = this.deleteGoal.bind(this);
+    this.planGoal = this.planGoal.bind(this);
     this.activateGoal = this.activateGoal.bind(this);
     this.completeGoal = this.completeGoal.bind(this);
     this.archiveGoal = this.archiveGoal.bind(this);
@@ -287,6 +290,10 @@ export class GoalClientService implements GoalClientPort {
 
   async deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>> {
     return this.goalApi.deleteGoal(id, request);
+  }
+
+  async planGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>> {
+    return this.goalApi.planGoal(id, expectedVersion);
   }
 
   async activateGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>> {
@@ -375,7 +382,6 @@ export class GoalClientService implements GoalClientPort {
       updates,
     });
   }
-
 
   // ===== Goal Record Use Cases =====
 

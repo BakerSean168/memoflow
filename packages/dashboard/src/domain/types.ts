@@ -1,3 +1,5 @@
+import type { GoalStatus } from '@memoflow/contracts/goal';
+
 /**
  * Dashboard read-model port interface and record types.
  *
@@ -10,7 +12,7 @@
 export interface DashboardGoalRecord {
   id: string;
   name: string;
-  status: string;
+  status: GoalStatus;
   deletedAt: number | null;
   updatedAt: number;
   overallProgress: number;

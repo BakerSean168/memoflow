@@ -14,9 +14,7 @@ function createTestGoal(name = 'Test Goal'): Goal {
   return Goal.create({
     identityId: 'test-identity-id' as any,
     name,
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
+    summary: null,
     startDate: null,
     dueDate: null,
     reminderConfig: null,
@@ -59,8 +57,9 @@ describe('CompleteGoalUseCase', () => {
     }
   });
 
-  it('should complete an active goal', async () => {
+  it('should complete an in-progress goal', async () => {
     const goal = createTestGoal();
+    goal.activate();
     vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);
 
     const result = await useCase.execute(goal.id, 'identity-1', goal.version);
@@ -81,6 +80,7 @@ describe('CompleteGoalUseCase', () => {
 
   it('should be idempotent for already completed goals without extra version increments or save calls', async () => {
     const goal = createTestGoal();
+    goal.activate();
     goal.markAsCompleted();
     const initialVersion = goal.version; // e.g. 1
     const initialEventsCount = goal.domainEvents.length;
@@ -109,6 +109,7 @@ describe('CompleteGoalUseCase', () => {
 
   it('should return ok when goal is archived', async () => {
     const goal = createTestGoal();
+    goal.activate();
     goal.markAsCompleted();
     goal.archive();
     vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);
@@ -124,6 +125,7 @@ describe('CompleteGoalUseCase', () => {
 
   it('should return the client read model with children', async () => {
     const goal = createTestGoal('Complete Me');
+    goal.activate();
     goal.createAndAddKeyResult({
       title: 'KR1',
       valueType: 'NUMERIC',

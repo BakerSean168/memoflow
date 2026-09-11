@@ -44,9 +44,7 @@ export const CreateGoalSchema = z
   .object({
     id: brandedId<GoalId>().optional(),
     name: GoalNameSchema,
-    description: z.string().max(2000, '描述不能超过 2000 字符').optional(),
-    feasibilityAnalysis: z.string().max(2000).optional(),
-    motivation: z.string().max(2000).optional(),
+    summary: z.string().trim().max(500, '目标摘要不能超过 500 字符').optional(),
     startDate: z.number().int().optional(),
     dueDate: z.number().int().optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
@@ -69,9 +67,7 @@ export const UpdateGoalSchema = z
   .object({
     expectedVersion: z.number().int().min(1),
     name: GoalNameSchema.optional(),
-    description: z.string().max(2000).nullable().optional(),
-    feasibilityAnalysis: z.string().max(2000).nullable().optional(),
-    motivation: z.string().max(2000).nullable().optional(),
+    summary: z.string().trim().max(500, '目标摘要不能超过 500 字符').nullable().optional(),
     startDate: z.number().int().nullable().optional(),
     dueDate: z.number().int().nullable().optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
@@ -165,7 +161,7 @@ export type GetGoalAggregateReq = void;
 export const CloneGoalSchema = z
   .object({
     name: GoalNameSchema.optional(),
-    description: z.string().max(2000, '描述不能超过 2000 字符').optional(),
+    summary: z.string().trim().max(500, '目标摘要不能超过 500 字符').optional(),
     includeKeyResults: z.boolean().optional(),
     includeRecords: z.boolean().optional(),
   })
@@ -176,16 +172,6 @@ export type CloneGoalReq = z.infer<typeof CloneGoalSchema>;
 // ============================================================================
 // BATCH Operations
 // ============================================================================
-
-/**
- * 批量更新目标状态 Schema
- */
-export const BatchUpdateGoalStatusSchema = z.object({
-  goalIds: z.array(brandedId<GoalId>()).min(1, '至少需要选择一个目标'),
-  status: z.enum(GoalStatus),
-});
-
-export type BatchUpdateGoalStatusReq = z.infer<typeof BatchUpdateGoalStatusSchema>;
 
 /**
  * 批量删除目标 Schema

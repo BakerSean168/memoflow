@@ -19,6 +19,7 @@ export {
   DeleteGoalUseCase,
   ArchiveGoalUseCase,
   ActivateGoalUseCase,
+  PlanGoalUseCase,
   AbandonGoalUseCase,
   CompleteGoalUseCase,
   PermanentlyDeleteGoalUseCase,

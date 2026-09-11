@@ -39,7 +39,7 @@ function createFakeDependencies(): DashboardReadDependencies {
   const goalRepository = {
     findByIdentityId: vi.fn().mockResolvedValue([
       {
-        toClientDTO: () => ({ id: 'g1', name: 'Goal', status: 'Active', deletedAt: null }),
+        toClientDTO: () => ({ id: 'g1', name: 'Goal', status: 'InProgress', deletedAt: null }),
       },
     ]),
   };

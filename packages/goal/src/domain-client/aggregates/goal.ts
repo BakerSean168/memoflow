@@ -22,9 +22,7 @@ export interface GoalState {
   id: GoalId;
   identityId: IdentityId;
   name: string;
-  description: string | null;
-  feasibilityAnalysis: string | null;
-  motivation: string | null;
+  summary: string | null;
   status: GoalStatus;
   startDate: Instant | null;
   dueDate: Instant | null;
@@ -61,16 +59,8 @@ export class Goal extends AggregateRoot<GoalId> {
     return this._props.name;
   }
 
-  get description(): string | null {
-    return this._props.description;
-  }
-
-  get feasibilityAnalysis(): string | null {
-    return this._props.feasibilityAnalysis;
-  }
-
-  get motivation(): string | null {
-    return this._props.motivation;
+  get summary(): string | null {
+    return this._props.summary;
   }
 
   get status(): GoalStatus {
@@ -157,9 +147,7 @@ export class Goal extends AggregateRoot<GoalId> {
         id: String(this._props.id) as GoalClientDTO['id'],
         identityId: String(this._props.identityId) as GoalClientDTO['identityId'],
         name: this._props.name,
-        description: this._props.description,
-        feasibilityAnalysis: this._props.feasibilityAnalysis,
-        motivation: this._props.motivation,
+        summary: this._props.summary,
         status: this._props.status,
         startDate: this._props.startDate ?? null,
         dueDate: this._props.dueDate ?? null,

@@ -16,9 +16,7 @@ function createIntegrationGoal(identityId: string) {
   const goal = Goal.create({
     identityId: identityId as IdentityId,
     name: 'Harden AI Oracle',
-    description: 'Turn persistence tests into a reliable oracle',
-    feasibilityAnalysis: null,
-    motivation: 'Protect structural refactors',
+    summary: 'Turn persistence tests into a reliable oracle',
     startDate: new Date('2026-04-01T00:00:00.000Z').getTime(),
     dueDate: new Date('2026-05-01T00:00:00.000Z').getTime(),
     reminderConfig: GoalReminderConfig.create({
@@ -122,9 +120,7 @@ describe('GoalPrismaRepository integration', () => {
     const second = Goal.create({
       identityId: identityId as IdentityId,
       name: 'Only work label',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
+      summary: null,
       startDate: null,
       dueDate: null,
       reminderConfig: null,
@@ -189,9 +185,7 @@ describe('GoalPrismaRepository integration', () => {
     const secondGoal = Goal.create({
       identityId: identityId as IdentityId,
       name: 'Keep default E2E small',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
+      summary: null,
       startDate: null,
       dueDate: null,
       reminderConfig: null,
@@ -199,9 +193,7 @@ describe('GoalPrismaRepository integration', () => {
     const foreignGoal = Goal.create({
       identityId: otherIdentityId as IdentityId,
       name: 'Foreign goal',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
+      summary: null,
       startDate: null,
       dueDate: null,
       reminderConfig: null,
@@ -251,8 +243,8 @@ describe('Goal durable completion receipt idempotency (W4 P1-3)', () => {
         id: goalId,
         identityId,
         name: 'Receipt Idempotency Goal',
-        description: 'W4 receipt persistence evidence',
-        status: 'Active',
+        summary: 'W4 receipt persistence evidence',
+        status: 'InProgress',
         version: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -349,9 +341,9 @@ describe('Goal durable completion receipt idempotency (W4 P1-3)', () => {
       'Simulated receipt write failure',
     );
 
-    // Assert goal was NOT updated in DB (remains Active)
+    // Assert goal was NOT updated in DB (remains InProgress)
     const goalInDb = await prisma.goal.findUnique({ where: { id: goalId } });
-    expect(goalInDb?.status).toBe('Active');
+    expect(goalInDb?.status).toBe('InProgress');
     expect(goalInDb?.completedAt).toBeNull();
   });
 });

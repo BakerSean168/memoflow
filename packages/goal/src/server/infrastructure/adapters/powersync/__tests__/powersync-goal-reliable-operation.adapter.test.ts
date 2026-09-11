@@ -198,7 +198,7 @@ describe('PowerSyncGoalWriteTransactionRunner receipt rollback (W4 P1-1)', () =>
       `INSERT INTO goals (
          id, identity_id, name, status, version, created_at, updated_at
        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [goalId, identityId, 'Runner Rollback Goal', 'Active', 1, now, now],
+      [goalId, identityId, 'Runner Rollback Goal', 'InProgress', 1, now, now],
     );
 
     // Now make the receipt write fail (RAISE trigger keeps the table but aborts inserts)
@@ -224,6 +224,6 @@ describe('PowerSyncGoalWriteTransactionRunner receipt rollback (W4 P1-1)', () =>
     // Goal CAS write rolled back: still version 1, still Active
     const saved = await repo.findByIdForIdentity(identityId, goalId);
     expect(saved?.version).toBe(1);
-    expect(saved?.status).toBe('Active');
+    expect(saved?.status).toBe('InProgress');
   });
 });

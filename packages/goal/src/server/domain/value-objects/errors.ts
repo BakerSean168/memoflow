@@ -96,6 +96,19 @@ export class GoalArchivedError extends ResultErrorException {
   }
 }
 
+/** Explicit Goal lifecycle transition is not allowed by ADR-067. */
+export class GoalInvalidLifecycleTransitionError extends ResultErrorException {
+  constructor(from: string, to: string) {
+    super(
+      `Invalid Goal lifecycle transition: ${from} -> ${to}`,
+      'goal_invalid_lifecycle_transition',
+      undefined,
+      { from, to },
+      409,
+    );
+  }
+}
+
 /**
  * 目标标题过长错误
  */

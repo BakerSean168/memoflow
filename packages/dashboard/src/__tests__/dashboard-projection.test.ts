@@ -19,7 +19,7 @@ function makeGoal(overrides: Partial<DashboardGoalRecord> = {}): DashboardGoalRe
   return {
     id: 'g1',
     name: 'Goal',
-    status: GoalStatus.Active,
+    status: GoalStatus.InProgress,
     deletedAt: null,
     updatedAt: Date.now(),
     overallProgress: 50,
@@ -29,9 +29,7 @@ function makeGoal(overrides: Partial<DashboardGoalRecord> = {}): DashboardGoalRe
   };
 }
 
-function makeTemplate(
-  overrides: Partial<DashboardTaskPlanRecord> = {},
-): DashboardTaskPlanRecord {
+function makeTemplate(overrides: Partial<DashboardTaskPlanRecord> = {}): DashboardTaskPlanRecord {
   return {
     id: 't1',
     title: 'Task',
@@ -107,13 +105,14 @@ describe('getDashboardData', () => {
     expect(data.upcomingSchedule).toEqual([]);
   });
 
-  it('counts active goals correctly', async () => {
+  it('counts Planned and InProgress goals as the non-terminal active summary', async () => {
     const source = makeSource({
       listGoals: async () => [
-        makeGoal({ id: 'g1', status: GoalStatus.Active }),
+        makeGoal({ id: 'g1', status: GoalStatus.Planned }),
         makeGoal({ id: 'g2', status: GoalStatus.Completed }),
-        makeGoal({ id: 'g3', status: GoalStatus.Active, deletedAt: Date.now() }),
-        makeGoal({ id: 'g4', status: GoalStatus.Active }),
+        makeGoal({ id: 'g3', status: GoalStatus.InProgress, deletedAt: Date.now() }),
+        makeGoal({ id: 'g4', status: GoalStatus.InProgress }),
+        makeGoal({ id: 'g5', status: GoalStatus.Abandoned }),
       ],
     });
 

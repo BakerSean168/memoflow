@@ -53,6 +53,7 @@ export interface IGoalApiClient {
   deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>>;
 
   // Goal Status
+  planGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
   activateGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
   completeGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
   archiveGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
@@ -97,7 +98,10 @@ export interface IGoalApiClient {
     request: CreateGoalReviewReq,
   ): Promise<Result<GoalMutationReceipt>>;
   getGoalReviewsByGoal(goalId: string): Promise<Result<GetGoalReviewsRes>>;
-  getGoalReviewContext(goalId: string, windowDays?: number): Promise<Result<GoalReviewSystemContext>>;
+  getGoalReviewContext(
+    goalId: string,
+    windowDays?: number,
+  ): Promise<Result<GoalReviewSystemContext>>;
   updateGoalReview(
     goalId: string,
     reviewId: string,

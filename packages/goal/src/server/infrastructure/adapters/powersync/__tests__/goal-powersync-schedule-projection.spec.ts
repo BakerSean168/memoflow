@@ -108,17 +108,17 @@ describe('GoalPowerSyncRepository scheduling identity (GOAL-3201 startup reconci
   it('enumerates every local goal reference for the Desktop startup reconcile', async () => {
     const db = createTestSqliteDatabase();
     await db.execute(GOALS_SQL);
-    await seedGoal(db, { id: 'goal-active', identityId: 'identity-1', status: 'Active' });
+    await seedGoal(db, { id: 'goal-active', identityId: 'identity-1', status: 'InProgress' });
     await seedGoal(db, {
       id: 'goal-archived',
       identityId: 'identity-1',
-      status: 'Active',
+      status: 'InProgress',
       archivedAt: new Date().toISOString(),
     });
     await seedGoal(db, {
       id: 'goal-deleted',
       identityId: 'identity-2',
-      status: 'Active',
+      status: 'InProgress',
       deletedAt: new Date().toISOString(),
     });
 
@@ -134,8 +134,8 @@ describe('GoalPowerSyncRepository scheduling identity (GOAL-3201 startup reconci
   it('feeds the projection source listGoalRefs consumed by the runtime reconcile', async () => {
     const db = createTestSqliteDatabase();
     await db.execute(GOALS_SQL);
-    await seedGoal(db, { id: 'goal-1', identityId: 'identity-1', status: 'Active' });
-    await seedGoal(db, { id: 'goal-2', identityId: 'identity-1', status: 'Active' });
+    await seedGoal(db, { id: 'goal-1', identityId: 'identity-1', status: 'InProgress' });
+    await seedGoal(db, { id: 'goal-2', identityId: 'identity-1', status: 'InProgress' });
 
     const source = createGoalScheduleProjectionSource({
       goalRepository: new GoalPowerSyncRepository(db),

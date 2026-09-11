@@ -75,6 +75,10 @@ export class GoalHttpAdapter implements IGoalApiClient {
 
   // ===== Goal Status =====
 
+  async planGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>> {
+    return this.httpClient.post(`${this.baseUrl}/${id}/plan`, { expectedVersion });
+  }
+
   async activateGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>> {
     return this.httpClient.post(`${this.baseUrl}/${id}/activate`, { expectedVersion });
   }
@@ -144,7 +148,6 @@ export class GoalHttpAdapter implements IGoalApiClient {
   ): Promise<Result<GoalMutationReceipt>> {
     return this.httpClient.put(`${this.baseUrl}/${goalId}/key-results/batch-weight`, request);
   }
-
 
   // ===== GoalReview Management =====
 

@@ -26,7 +26,7 @@ test.describe('Goal vNext product surface', () => {
 
     const row = await createGoal(page, {
       name: goalName,
-      description: 'Direction plus measurable outcome.',
+      summary: 'Direction plus measurable outcome.',
       labelName,
       keyResult: {
         title: 'Reach 50 active users',
@@ -46,11 +46,11 @@ test.describe('Goal vNext product surface', () => {
   test('[P0] edits a goal through the progress-row action', async ({ page }) => {
     const originalName = `E2E Goal Edit ${Date.now()}`;
     const updatedName = `Updated Goal ${Date.now()}`;
-    const updatedDescription = 'Updated through the vNext Goal editor.';
+    const updatedSummary = 'Updated through the vNext Goal editor.';
 
     const createdRow = await createGoal(page, {
       name: originalName,
-      description: 'Original description.',
+      summary: 'Original summary.',
     });
     const goalId = await goalIdFromRow(createdRow);
 
@@ -59,7 +59,7 @@ test.describe('Goal vNext product surface', () => {
     const dialog = goalDialog(page);
     await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     await page.getByTestId('goal-name-input').fill(updatedName);
-    await page.getByTestId('goal-description-input').fill(updatedDescription);
+    await page.getByTestId('goal-summary-input').fill(updatedSummary);
     await goalSubmitButton(page).click();
     await expect(dialog).toBeHidden({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
 
@@ -68,14 +68,54 @@ test.describe('Goal vNext product surface', () => {
     await expect(updatedRow.getByTestId('goal-row-title')).toHaveText(updatedName);
 
     await openGoalAction(page, goalId, 'edit');
-    await expect(page.getByTestId('goal-description-input')).toHaveValue(updatedDescription);
+    await expect(page.getByTestId('goal-summary-input')).toHaveValue(updatedSummary);
+  });
+
+  test('[P0] drives the explicit four-state Goal lifecycle from the detail surface', async ({
+    page,
+  }) => {
+    const goalName = `E2E Goal Lifecycle ${Date.now()}`;
+    const createdRow = await createGoal(page, {
+      name: goalName,
+      summary: 'Lifecycle browser contract.',
+    });
+
+    await createdRow.getByTestId('goal-row-title').click();
+    await expect(page.getByTestId('goal-detail-view')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+    await expect(page.getByText('Planned', { exact: true })).toBeVisible();
+
+    await page.getByTestId('goal-start-action').click();
+    await expect(page.getByText('InProgress', { exact: true })).toBeVisible();
+
+    await page.getByTestId('goal-plan-action').click();
+    await expect(page.getByText('Planned', { exact: true })).toBeVisible();
+
+    await page.getByTestId('goal-start-action').click();
+    await expect(page.getByText('InProgress', { exact: true })).toBeVisible();
+
+    await page.getByTestId('goal-complete-action').click();
+    await expect(page.getByText('Completed', { exact: true })).toBeVisible();
+
+    await page.getByTestId('goal-reopen-action').click();
+    await expect(page.getByText('InProgress', { exact: true })).toBeVisible();
+
+    await page.getByTestId('goal-abandon-action').click();
+    const abandonDialog = page.getByRole('alertdialog');
+    await expect(abandonDialog).toBeVisible();
+    await abandonDialog.getByRole('button', { name: /^(Abandon|放弃)$/ }).click();
+    await expect(page.getByText('Abandoned', { exact: true })).toBeVisible();
+
+    await page.getByTestId('goal-resume-action').click();
+    await expect(page.getByText('InProgress', { exact: true })).toBeVisible();
   });
 
   test('[P0] deletes a goal through the progress-row action', async ({ page }) => {
     const goalName = `E2E Goal Delete ${Date.now()}`;
     const createdRow = await createGoal(page, {
       name: goalName,
-      description: 'This goal should be deleted.',
+      summary: 'This goal should be deleted.',
     });
     const goalId = await goalIdFromRow(createdRow);
 
@@ -96,11 +136,11 @@ test.describe('Goal vNext product surface', () => {
 
   test('[P1] opens goal detail from the progress-row title', async ({ page }) => {
     const goalName = `E2E Goal Detail ${Date.now()}`;
-    const goalDescription = 'Goal detail view should show this description.';
+    const goalSummary = 'Goal detail view should show this summary.';
 
     const createdRow = await createGoal(page, {
       name: goalName,
-      description: goalDescription,
+      summary: goalSummary,
     });
     const goalId = await goalIdFromRow(createdRow);
 
@@ -113,7 +153,7 @@ test.describe('Goal vNext product surface', () => {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
     await expect(page.getByTestId('goal-detail-title')).toHaveText(goalName);
-    await expect(page.getByTestId('goal-detail-view')).toContainText(goalDescription);
+    await expect(page.getByTestId('goal-detail-view')).toContainText(goalSummary);
   });
 
   test('[P0] exposes only vNext system views and preserves Label filter state while resizing', async ({
@@ -123,7 +163,7 @@ test.describe('Goal vNext product surface', () => {
     const labelName = `Filter-${Date.now()}`;
     const goalName = `E2E Goal Filter ${Date.now()}`;
 
-    await createGoal(page, { name: goalName, description: 'Label-filter fixture.', labelName });
+    await createGoal(page, { name: goalName, summary: 'Label-filter fixture.', labelName });
 
     const toolbar = page.getByTestId('goal-page-toolbar');
     const primaryCreate = page.locator('[data-primary-action="create-goal"]:visible');
@@ -191,7 +231,7 @@ async function createGoal(
   page: Page,
   data: {
     name: string;
-    description: string;
+    summary: string;
     labelName?: string;
     keyResult?: {
       title: string;
@@ -205,7 +245,7 @@ async function createGoal(
 
   const dialog = goalDialog(page);
   await page.getByTestId('goal-name-input').fill(data.name);
-  await page.getByTestId('goal-description-input').fill(data.description);
+  await page.getByTestId('goal-summary-input').fill(data.summary);
 
   if (data.labelName) {
     await page.getByTestId('label-picker-trigger').click();

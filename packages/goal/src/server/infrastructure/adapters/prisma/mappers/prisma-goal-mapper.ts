@@ -53,9 +53,7 @@ export class PrismaGoalMapper {
       id: row.id,
       identityId: row.identityId,
       name: row.name,
-      description: row.description ?? null,
-      feasibilityAnalysis: row.feasibilityAnalysis ?? null,
-      motivation: row.motivation ?? null,
+      summary: row.summary ?? null,
       status: row.status,
       startDate: optionalInstant(row.startDate),
       dueDate: optionalInstant(row.dueDate),
@@ -100,7 +98,9 @@ export class PrismaGoalMapper {
     };
   }
 
-  static parseReviewSystemContext(raw: string): import('@memoflow/contracts/goal').GoalReviewSystemContext {
+  static parseReviewSystemContext(
+    raw: string,
+  ): import('@memoflow/contracts/goal').GoalReviewSystemContext {
     return JSON.parse(raw) as import('@memoflow/contracts/goal').GoalReviewSystemContext;
   }
 

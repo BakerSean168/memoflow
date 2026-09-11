@@ -56,7 +56,9 @@ export async function getDashboardData(
     ]);
 
   const activeGoals = goals.filter(
-    (goal) => goal.status === GoalStatus.Active && goal.deletedAt === null,
+    (goal) =>
+      (goal.status === GoalStatus.Planned || goal.status === GoalStatus.InProgress) &&
+      goal.deletedAt === null,
   );
   const activeTemplates = taskPlans.filter(
     (template) => template.deletedAt === null && template.status !== TaskPlanStatus.Closed,
@@ -111,13 +113,15 @@ export async function getDashboardData(
     }));
 
   const taskBoard: TaskBoardSummary = {
-    todo: todayTaskOccurrences.filter((instance) => instance.status === TaskOccurrenceStatus.Pending)
-      .length,
+    todo: todayTaskOccurrences.filter(
+      (instance) => instance.status === TaskOccurrenceStatus.Pending,
+    ).length,
     inProgress: todayTaskOccurrences.filter(
       (instance) => instance.status === TaskOccurrenceStatus.InProgress,
     ).length,
-    done: todayTaskOccurrences.filter((instance) => instance.status === TaskOccurrenceStatus.Completed)
-      .length,
+    done: todayTaskOccurrences.filter(
+      (instance) => instance.status === TaskOccurrenceStatus.Completed,
+    ).length,
     overdue: overdueTaskCount,
   };
 

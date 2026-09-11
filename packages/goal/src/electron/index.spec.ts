@@ -60,6 +60,7 @@ function createApiStub(): GoalApplicationPort {
     deleteGoal: vi.fn(() => ok(null as never)),
     permanentlyDeleteGoal: vi.fn(() => ok(null as never)),
     archiveGoal: vi.fn(() => ok(null as never)),
+    planGoal: vi.fn(() => ok(null as never)),
     abandonGoal: vi.fn(() => ok(null as never)),
     activateGoal: vi.fn(() => ok(null as never)),
     completeGoal: vi.fn(() => ok(null as never)),
@@ -156,6 +157,14 @@ describe('createGoalElectronModule IPC lifecycle', () => {
     const listResult = await registered(GoalChannels.LIST)(undefined, {});
     expect(listResult).toMatchObject({ ok: true });
     expect(fake.api.listGoals).toHaveBeenCalledTimes(1);
+
+    const planResult = await registered(GoalChannels.PLAN)(
+      undefined,
+      'IGoalId_00000000-0000-4000-8000-000000000001',
+      { expectedVersion: 1 },
+    );
+    expect(planResult).toMatchObject({ ok: true });
+    expect(fake.api.planGoal).toHaveBeenCalledTimes(1);
 
     const abandonResult = await registered(GoalChannels.ABANDON)(
       undefined,

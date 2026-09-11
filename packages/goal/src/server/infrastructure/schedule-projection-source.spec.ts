@@ -9,7 +9,6 @@ import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
 import { createTimeContext, createTimeFacade } from '@memoflow/time';
 
-
 const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
 const TEST_USER_TIME_CONTEXT_PORT = {
   getUserTimeContext: vi.fn().mockResolvedValue(TEST_TIME_CONTEXT),
@@ -37,7 +36,7 @@ function buildGoalDto(overrides: Partial<GoalDto> = {}): GoalDto {
     id: 'GoalId_goal-1',
     identityId: 'IdentityId_goal-owner',
     name: 'Launch 1.0',
-    status: GoalStatus.Active,
+    status: GoalStatus.InProgress,
     archivedAt: null,
     completedAt: null,
     deletedAt: null,

@@ -70,6 +70,10 @@ export class GoalIpcAdapter implements IGoalApiClient {
 
   // ===== Goal Status =====
 
+  async planGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>> {
+    return this.ipcClient.invoke(GoalChannels.PLAN, id, { expectedVersion });
+  }
+
   async activateGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>> {
     return this.ipcClient.invoke(GoalChannels.ACTIVATE, id, { expectedVersion });
   }
@@ -136,7 +140,6 @@ export class GoalIpcAdapter implements IGoalApiClient {
   ): Promise<Result<GoalMutationReceipt>> {
     return this.ipcClient.invoke(GoalChannels.KEY_RESULT_BATCH_UPDATE_WEIGHTS, goalId, request);
   }
-
 
   // ===== GoalReview Management =====
 

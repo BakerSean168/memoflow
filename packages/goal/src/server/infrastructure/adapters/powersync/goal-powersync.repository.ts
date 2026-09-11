@@ -134,7 +134,7 @@ export class GoalPowerSyncRepository
 
     switch (options?.systemView) {
       case 'active':
-        filters.push("g.status = 'Active'");
+        filters.push("g.status IN ('Planned', 'InProgress')");
         break;
       case 'completed':
         filters.push("g.status = 'Completed'");
@@ -218,9 +218,7 @@ export class GoalPowerSyncRepository
           `UPDATE goals
            SET identity_id = ?,
                name = ?,
-               description = ?,
-               feasibility_analysis = ?,
-               motivation = ?,
+               summary = ?,
                status = ?,
                start_date = ?,
                due_date = ?,
@@ -235,9 +233,7 @@ export class GoalPowerSyncRepository
           [
             dto.identityId,
             dto.name,
-            dto.description,
-            dto.feasibilityAnalysis,
-            dto.motivation,
+            dto.summary,
             dto.status,
             toDbDateTime(dto.startDate),
             toDbDateTime(dto.dueDate),
@@ -254,17 +250,15 @@ export class GoalPowerSyncRepository
       } else {
         await tx.execute(
           `INSERT INTO goals (
-             id, identity_id, name, description, feasibility_analysis, motivation, status,
+             id, identity_id, name, summary, status,
              start_date, due_date, completed_at, archived_at, sort_order, reminder_config,
              version, created_at, updated_at, deleted_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             dto.id,
             dto.identityId,
             dto.name,
-            dto.description,
-            dto.feasibilityAnalysis,
-            dto.motivation,
+            dto.summary,
             dto.status,
             toDbDateTime(dto.startDate),
             toDbDateTime(dto.dueDate),
@@ -325,15 +319,12 @@ export class GoalPowerSyncRepository
   private async persistWithExpectedVersion(goal: Goal, expectedVersion: number): Promise<void> {
     const dto = goal.toServerDTO(false);
     const result = await this.db.execute(
-      `UPDATE goals SET name = ?, description = ?, feasibility_analysis = ?, motivation = ?,
-       status = ?, start_date = ?, due_date = ?, completed_at = ?, archived_at = ?,
+      `UPDATE goals SET name = ?, summary = ?, status = ?, start_date = ?, due_date = ?, completed_at = ?, archived_at = ?,
        reminder_config = ?, version = ?, updated_at = ?, deleted_at = ?
        WHERE id = ? AND identity_id = ? AND version = ?`,
       [
         dto.name,
-        dto.description,
-        dto.feasibilityAnalysis,
-        dto.motivation,
+        dto.summary,
         dto.status,
         toDbDateTime(dto.startDate),
         toDbDateTime(dto.dueDate),

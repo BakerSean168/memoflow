@@ -82,7 +82,7 @@ type IneligibleReasonCode =
   | 'GOAL_ABANDONED'
   | 'GOAL_ARCHIVED'
   | 'GOAL_DELETED'
-  | 'GOAL_NOT_ACTIVE'
+  | 'GOAL_NOT_IN_PROGRESS'
   | 'GOAL_REMINDER_DISABLED'
   | 'GOAL_TRIGGER_DISABLED';
 
@@ -105,8 +105,8 @@ function ineligibleReason(
   if (goal.deletedAt) {
     return { code: 'GOAL_DELETED', message: 'Goal has been deleted.' };
   }
-  if (goal.status !== GoalStatus.Active) {
-    return { code: 'GOAL_NOT_ACTIVE', message: 'Goal is no longer active.' };
+  if (goal.status !== GoalStatus.InProgress) {
+    return { code: 'GOAL_NOT_IN_PROGRESS', message: 'Goal is not in progress.' };
   }
   const enabled = goal.reminderConfig?.enabled === true;
   if (!enabled) {
@@ -142,7 +142,7 @@ function buildReminderContent(
   }
   return {
     title: `目标提醒：${goal.name}`,
-    content: goal.description ?? `目标「${goal.name}」已到达提醒时间。`,
+    content: goal.summary ?? `目标「${goal.name}」已到达提醒时间。`,
   };
 }
 

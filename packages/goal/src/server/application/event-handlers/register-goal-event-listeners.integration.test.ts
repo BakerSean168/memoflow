@@ -41,9 +41,7 @@ describe('GoalTaskProgressHandler V2 integration', () => {
     const goal = Goal.create({
       identityId,
       name: 'Ship Wave 2',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
+      summary: null,
       startDate: null,
       reminderConfig: null,
     });

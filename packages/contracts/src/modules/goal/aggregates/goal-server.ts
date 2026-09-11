@@ -7,17 +7,11 @@
  * `targetDate` renamed to `dueDate`. `archivedAt` is a display attribute.
  */
 
-import type {
-  TransferDate,
-  GoalId,
-  IdentityId,
-} from '../../../primitives';
+import type { TransferDate, GoalId, IdentityId } from '../../../primitives';
 import type { GoalStatus } from '../value-objects/goal-status';
 import type { KeyResultServerDTO } from '../entities/key-result-server';
 import type { GoalReviewServerDTO } from '../entities/goal-review-server';
-import type {
-  GoalReminderConfigDTO,
-} from '../value-objects';
+import type { GoalReminderConfigDTO } from '../value-objects';
 import type { KeyResultWeightSnapshotDTO } from '../value-objects/key-result-weight-snapshot';
 
 // ============ Transfer DTO ============
@@ -27,9 +21,7 @@ export interface GoalServerDTO {
   id: GoalId;
   identityId: IdentityId;
   name: string;
-  description: string | null;
-  feasibilityAnalysis: string | null;
-  motivation: string | null;
+  summary: string | null;
   status: GoalStatus;
   startDate: TransferDate | null;
   dueDate: TransferDate | null;

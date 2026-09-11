@@ -30,6 +30,7 @@ import {
   DeleteGoalUseCase,
   ArchiveGoalUseCase,
   ActivateGoalUseCase,
+  PlanGoalUseCase,
   AbandonGoalUseCase,
   CompleteGoalUseCase,
   SearchGoalsUseCase,
@@ -154,6 +155,7 @@ export interface GoalModuleUseCases {
   readonly deleteGoal: DeleteGoalUseCase;
   readonly permanentlyDeleteGoal: PermanentlyDeleteGoalUseCase;
   readonly archiveGoal: ArchiveGoalUseCase;
+  readonly planGoal: PlanGoalUseCase;
   readonly activateGoal: ActivateGoalUseCase;
   readonly abandonGoal: AbandonGoalUseCase;
   readonly completeGoal: CompleteGoalUseCase;
@@ -273,6 +275,7 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
     deleteGoal: new DeleteGoalUseCase(goalRepository, goalPolicy, taskBindingReadPort),
     permanentlyDeleteGoal: new PermanentlyDeleteGoalUseCase(goalRepository, goalPolicy),
     archiveGoal: new ArchiveGoalUseCase(goalRepository, goalPolicy, goalWriteTransactionRunner),
+    planGoal: new PlanGoalUseCase(goalRepository, goalPolicy),
     activateGoal: new ActivateGoalUseCase(goalRepository, goalPolicy),
     abandonGoal: new AbandonGoalUseCase(goalRepository, goalPolicy),
     completeGoal: new CompleteGoalUseCase(goalRepository, goalPolicy, goalWriteTransactionRunner),
@@ -399,6 +402,8 @@ export function createGoalModule(deps: GoalModuleDependencies): GoalModuleInstan
       useCases.archiveGoal.execute(id, identityId, expectedVersion),
     abandonGoal: (id, identityId, expectedVersion) =>
       useCases.abandonGoal.execute(id, identityId, expectedVersion),
+    planGoal: (id, identityId, expectedVersion) =>
+      useCases.planGoal.execute(id, identityId, expectedVersion),
     activateGoal: (id, identityId, expectedVersion) =>
       useCases.activateGoal.execute(id, identityId, expectedVersion),
     completeGoal: (id, identityId, expectedVersion) =>

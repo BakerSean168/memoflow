@@ -44,6 +44,11 @@ export interface GoalApplicationPort {
     identityId: string,
     expectedVersion: number,
   ): Promise<Result<GoalMutationReceipt>>;
+  planGoal(
+    id: string,
+    identityId: string,
+    expectedVersion: number,
+  ): Promise<Result<GoalMutationReceipt>>;
   activateGoal(
     id: string,
     identityId: string,

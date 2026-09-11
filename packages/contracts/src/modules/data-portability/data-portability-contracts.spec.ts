@@ -32,7 +32,8 @@ const baseEnvelope = {
 const validGoal = {
   _ref: 'goal:1',
   name: 'Ship Core vNext',
-  status: 'Active',
+  summary: 'Ship the vNext model with coherent Goal semantics',
+  status: 'InProgress',
   sortOrder: 0,
   keyResults: [
     {

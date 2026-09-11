@@ -9,7 +9,6 @@ export { default as GoalProgressRow } from './GoalProgressRow.vue';
 
 // Cards
 export { default as GoalRecordCardFromCards } from './cards/GoalRecordCard.vue';
-export { default as MotivateCard } from './cards/MotivateCard.vue';
 
 // Comparison
 

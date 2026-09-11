@@ -25,15 +25,17 @@ export class AbandonGoalUseCase {
       includeChildren: true,
     });
     if (!goal) return error('NOT_FOUND', `Goal not found: ${id}`);
-
-    if (goal.status === GoalStatus.Abandoned) {
-      return ok(createGoalMutationReceipt(goal));
-    }
     if (expectedVersion !== goal.version) {
       return error('CONFLICT', 'Goal has been modified by another client');
     }
+    if (goal.archivedAt || goal.deletedAt) {
+      return error('INVALID_STATE', 'Archived or deleted goals cannot be abandoned');
+    }
 
     this.goalPolicy.ensureGoalCanBeModified(goal);
+    if (goal.status === GoalStatus.Abandoned) {
+      return ok(createGoalMutationReceipt(goal));
+    }
     goal.abandon();
     goal.advanceVersion();
 

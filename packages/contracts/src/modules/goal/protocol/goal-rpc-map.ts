@@ -14,7 +14,11 @@ import type {
   ListGoalFilters,
 } from '../api/goal-crud.dto';
 import type { GetKeyResultsReq, GetKeyResultsRes } from '../api/key-result.dto';
-import type { GoalMutationReceipt, GoalReviewSystemContext, QueryGoalsRes } from '../api/response-schemas';
+import type {
+  GoalMutationReceipt,
+  GoalReviewSystemContext,
+  QueryGoalsRes,
+} from '../api/response-schemas';
 import type {
   AddKeyResultInvocation,
   BatchKeyResultWeightsInvocation,
@@ -55,6 +59,7 @@ export type GoalRpcMap = {
   'goal:update': [UpdateGoalInvocation, GoalMutationReceipt];
   'goal:delete': [DeleteGoalInvocation, GoalMutationReceipt];
   'goal:archive': [GoalStatusCommandInvocation, GoalMutationReceipt];
+  'goal:plan': [GoalStatusCommandInvocation, GoalMutationReceipt];
   'goal:activate': [GoalStatusCommandInvocation, GoalMutationReceipt];
   'goal:complete': [GoalStatusCommandInvocation, GoalMutationReceipt];
   'goal:abandon': [GoalStatusCommandInvocation, GoalMutationReceipt];

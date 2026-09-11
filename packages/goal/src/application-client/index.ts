@@ -16,13 +16,7 @@ export {
   getTemplatesByIndustry,
   getTemplateById,
 } from './goal-templates';
-export {
-  BUILT_IN_RULES,
-  sortRulesByPriority,
-  getEnabledRules,
-  findRuleById,
-  RULE_TEMPLATES,
-} from './built-in-rules';
+
 export type { GoalTemplate, KeyResultTemplate } from './goal-templates';
 
 // ===== Constructor-Injected Service (Result-based) =====

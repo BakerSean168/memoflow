@@ -7,6 +7,7 @@
 
 import { http, HttpResponse } from 'msw';
 import { faker } from '@faker-js/faker';
+import { GoalStatus } from '@memoflow/contracts/goal';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
@@ -67,7 +68,7 @@ function generateDashboardStats() {
     id: faker.string.uuid(),
     name: faker.lorem.words({ min: 2, max: 4 }),
     progress: faker.number.int({ min: 5, max: 95 }),
-    status: 'Active',
+    status: GoalStatus.InProgress,
     dueDate: now + faker.number.int({ min: 7 * DAY, max: 90 * DAY }),
     keyResultCount: faker.number.int({ min: 1, max: 5 }),
   }));

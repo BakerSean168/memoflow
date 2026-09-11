@@ -33,7 +33,7 @@ function buildIntentName(goal: GoalServerDTO, trigger: ReminderTrigger): string 
 
 function shouldScheduleGoal(goal: GoalServerDTO): boolean {
   return (
-    goal.status === GoalStatus.Active &&
+    goal.status === GoalStatus.InProgress &&
     !goal.archivedAt &&
     !goal.completedAt &&
     !goal.deletedAt &&

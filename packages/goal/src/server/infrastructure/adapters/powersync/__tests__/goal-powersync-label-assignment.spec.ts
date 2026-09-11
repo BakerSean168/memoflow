@@ -83,7 +83,7 @@ async function seedGoal(db: IElectronDatabase, id: string, identityId: string): 
   const now = '2026-09-09T00:00:00.000Z';
   await db.execute(
     `INSERT INTO goals (id, identity_id, name, status, sort_order, version, created_at, updated_at)
-     VALUES (?, ?, ?, 'Active', 0, 1, ?, ?)`,
+     VALUES (?, ?, ?, 'InProgress', 0, 1, ?, ?)`,
     [id, identityId, id, now, now],
   );
 }

@@ -49,7 +49,7 @@ function makeGoal(overrides: Record<string, unknown> = {}) {
       identityId: IDENTITY_ID,
       name: 'Ship R06',
       description: null,
-      status: GoalStatus.Active,
+      status: GoalStatus.InProgress,
       deletedAt: null,
       archivedAt: null,
       completedAt: null,
@@ -117,7 +117,7 @@ describe('buildGoalReminderOperationId', () => {
 });
 
 describe('executeGoalReminderFire', () => {
-  it('emits ONE idempotent NotificationRequested envelope for an eligible active goal', async () => {
+  it('emits ONE idempotent NotificationRequested envelope for an eligible in-progress goal', async () => {
     const findByIdForIdentity = vi.fn().mockResolvedValue(makeGoal());
     const writer = makeWriter();
     const result = await executeGoalReminderFire(
@@ -177,7 +177,7 @@ describe('executeGoalReminderFire', () => {
   it('uses the TimeProgressPercentage content for that trigger type', async () => {
     const findByIdForIdentity = vi.fn().mockResolvedValue(
       makeGoal({
-        status: GoalStatus.Active,
+        status: GoalStatus.InProgress,
         reminderConfig: {
           enabled: true,
           triggers: [
@@ -214,7 +214,7 @@ describe('executeGoalReminderFire', () => {
     ['GOAL_ABANDONED', { status: GoalStatus.Abandoned }],
     ['GOAL_ARCHIVED', { archivedAt: Date.UTC(2026, 3, 1) }],
     ['GOAL_DELETED', { deletedAt: Date.UTC(2026, 3, 1) }],
-    ['GOAL_NOT_ACTIVE', { status: 'Draft' }],
+    ['GOAL_NOT_IN_PROGRESS', { status: 'Draft' }],
     ['GOAL_REMINDER_DISABLED', { reminderConfig: { enabled: false } }],
     [
       'GOAL_TRIGGER_DISABLED',

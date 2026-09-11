@@ -23,7 +23,9 @@ describe('API host Shared Label owner lifecycle', () => {
     const goalId = 'goal-label-owner-lifecycle';
     const taskPlanId = 'task-label-owner-lifecycle';
     await seedAccount({ id: identityId });
-    await prisma.goal.create({ data: { id: goalId, identityId, name: 'Goal', status: 'Active' } });
+    await prisma.goal.create({
+      data: { id: goalId, identityId, name: 'Goal', status: 'InProgress' },
+    });
     await prisma.taskPlan.create({
       data: { id: taskPlanId, identityId, name: 'Task', status: 'Active' },
     });

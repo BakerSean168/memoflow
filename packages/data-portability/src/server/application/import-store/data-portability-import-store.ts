@@ -86,9 +86,7 @@ export interface CreateGoalInput extends TimestampedImportInput {
   id: string;
   identityId: string;
   name: string;
-  description: string | null;
-  feasibilityAnalysis: string | null;
-  motivation: string | null;
+  summary: string | null;
   status: string;
   startDate: string | null;
   dueDate: string | null;
@@ -284,7 +282,6 @@ export interface CreateReminderResponseInput extends CreatedImportInput {
   timestamp: string;
 }
 
-
 // --- AI ---
 
 export interface CreateAIConversationInput extends TimestampedImportInput {
@@ -334,7 +331,6 @@ export interface DataPortabilityImportTx {
   createReminderGroup(input: CreateReminderGroupInput): Promise<void>;
   createReminderTemplate(input: CreateReminderTemplateInput): Promise<void>;
   createReminderResponse(input: CreateReminderResponseInput): Promise<void>;
-
 
   // AI
   createAIConversation(input: CreateAIConversationInput): Promise<void>;

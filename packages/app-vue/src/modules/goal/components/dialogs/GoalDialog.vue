@@ -24,14 +24,14 @@
         </div>
 
         <div class="space-y-2">
-          <Label for="goal-description">{{ t('goal.dialog.description') }}</Label>
+          <Label for="goal-summary">{{ t('goal.dialog.summary') }}</Label>
           <Textarea
-            id="goal-description"
-            v-model="draft.description"
-            data-testid="goal-description-input"
+            id="goal-summary"
+            v-model="draft.summary"
+            data-testid="goal-summary-input"
             class="min-h-24"
-            maxlength="2000"
-            :placeholder="t('goal.dialog.descriptionPlaceholder')"
+            maxlength="500"
+            :placeholder="t('goal.dialog.summaryPlaceholder')"
           />
         </div>
 
@@ -329,7 +329,7 @@ const { options: labelOptions, isLoading: labelsLoading, createLabel } = useLabe
 
 const draft = reactive({
   name: '',
-  description: '',
+  summary: '',
   startDate: '',
   dueDate: '',
   labelIds: [] as string[],
@@ -388,7 +388,7 @@ function mapKeyResult(goalKr: NonNullable<GoalClientDTO['keyResults']>[number]):
 }
 function reset(): void {
   draft.name = props.goal?.name ?? '';
-  draft.description = props.goal?.description ?? '';
+  draft.summary = props.goal?.summary ?? '';
   draft.startDate = fromMs(props.goal?.startDate);
   draft.dueDate = fromMs(props.goal?.dueDate);
   draft.labelIds = props.goal?.labels.map((label) => label.id) ?? [];
@@ -528,7 +528,7 @@ async function save(): Promise<void> {
   const keyResults = draft.keyResults.map((item) => ({ ...item }));
   const common = {
     name: draft.name.trim(),
-    description: draft.description.trim() || undefined,
+    summary: draft.summary.trim() || undefined,
     startDate: toMs(draft.startDate),
     dueDate: toMs(draft.dueDate),
     labelIds,
@@ -538,7 +538,7 @@ async function save(): Promise<void> {
     const req: UpdateGoalReq = {
       expectedVersion: props.goal.version,
       ...common,
-      description: common.description ?? null,
+      summary: common.summary ?? null,
       startDate: common.startDate ?? null,
       dueDate: common.dueDate ?? null,
       keyResults,

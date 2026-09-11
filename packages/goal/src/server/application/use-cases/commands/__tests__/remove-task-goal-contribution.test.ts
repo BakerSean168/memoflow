@@ -12,9 +12,7 @@ function createGoalWithProgress() {
   const goal = Goal.create({
     identityId: 'identity-1' as never,
     name: 'Delivery goal',
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
+    summary: null,
     startDate: null,
     reminderConfig: null,
   });

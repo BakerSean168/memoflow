@@ -6,9 +6,7 @@ function createGoal(overrides?: Partial<Parameters<typeof Goal.create>[0]>): Goa
   return Goal.create({
     identityId: 'IdentityId_1' as never,
     name: 'Launch Goal',
-    description: ' Ship it ',
-    feasibilityAnalysis: ' Feasible ',
-    motivation: ' Momentum ',
+    summary: ' Ship it ',
     startDate: new Date('2026-04-20T00:00:00.000Z').getTime(),
     dueDate: new Date('2026-04-30T00:00:00.000Z').getTime(),
     reminderConfig: GoalReminderConfig.createDefault(),
@@ -39,15 +37,11 @@ describe('Goal aggregate management', () => {
     goal.pullDomainEvents();
     goal.updateBasicInfo({
       name: ' Launch Goal v2 ',
-      description: ' Refined ',
-      feasibilityAnalysis: ' Clear ',
-      motivation: ' Win ',
+      summary: ' Refined ',
     });
 
     expect(goal.name).toBe('Launch Goal v2');
-    expect(goal.description).toBe('Refined');
-    expect(goal.feasibilityAnalysis).toBe('Clear');
-    expect(goal.motivation).toBe('Win');
+    expect(goal.summary).toBe('Refined');
     const dto = goal.toServerDTO();
     for (const retired of [
       'color',
@@ -76,11 +70,13 @@ describe('Goal aggregate management', () => {
     goal.updateSortOrder(7);
     expect(goal.sortOrder).toBe(7);
 
-    goal.updateStatus('Completed' as never);
+    expect(goal.status).toBe('Planned');
+    goal.activate();
+    goal.markAsCompleted();
     expect(goal.completedAt).not.toBeNull();
     expect(goal.archivedAt).toBeNull();
     goal.activate();
-    expect(goal.status).toBe('Active');
+    expect(goal.status).toBe('InProgress');
     expect(goal.completedAt).toBeNull();
     goal.abandon();
     expect(goal.status).toBe('Abandoned');
@@ -88,7 +84,7 @@ describe('Goal aggregate management', () => {
     goal.activate();
 
     goal.archive();
-    expect(goal.status).toBe('Active');
+    expect(goal.status).toBe('InProgress');
     expect(goal.canBePermanentlyDeleted()).toBe(true);
     expect(goal.archivedAt).not.toBeNull();
     goal.softDelete();

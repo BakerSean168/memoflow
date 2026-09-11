@@ -278,9 +278,7 @@ export class ApplyGoalPlanService {
       const request: CreateGoalReq = {
         id: expectedGoalId as NonNullable<CreateGoalReq['id']>,
         name: draft.goal.name,
-        description: draft.goal.description,
-        motivation: draft.goal.motivation,
-        feasibilityAnalysis: draft.goal.feasibilityAnalysis,
+        summary: draft.goal.description,
         startDate: draft.goal.startDate ?? undefined,
         dueDate: draft.goal.dueDate ?? undefined,
         labelIds: goalLabelsResult.data,

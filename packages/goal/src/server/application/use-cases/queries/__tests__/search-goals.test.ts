@@ -11,7 +11,7 @@ function createGoalFixture(overrides?: Record<string, any>) {
   return {
     id: overrides?.id ?? 'goal-id-1',
     name: overrides?.name ?? 'Test Goal',
-    description: overrides?.description ?? 'Test description',
+    summary: overrides?.description ?? 'Test description',
     status: overrides?.status ?? 'IN_PROGRESS',
     title: overrides?.title ?? 'Test Goal',
     targetDate: overrides?.targetDate ?? null,
@@ -20,7 +20,7 @@ function createGoalFixture(overrides?: Record<string, any>) {
     toClientDTO: vi.fn().mockReturnValue({
       id: overrides?.id ?? 'goal-id-1',
       name: overrides?.name ?? 'Test Goal',
-      description: overrides?.description ?? 'Test description',
+      summary: overrides?.description ?? 'Test description',
       status: overrides?.status ?? 'IN_PROGRESS',
     }),
     ...overrides,
@@ -50,13 +50,13 @@ describe('SearchGoalsUseCase', () => {
     expect(goal2.toClientDTO).not.toHaveBeenCalled();
   });
 
-  it('should return goals matching the query by description', async () => {
+  it('should return goals matching the query by summary', async () => {
     const goal1 = createGoalFixture({
       id: 'goal-1',
       name: 'Goal A',
-      description: 'Improve fitness',
+      summary: 'Improve fitness',
     });
-    const goal2 = createGoalFixture({ id: 'goal-2', name: 'Goal B', description: 'Learn cooking' });
+    const goal2 = createGoalFixture({ id: 'goal-2', name: 'Goal B', summary: 'Learn cooking' });
     const goalRepo = createMockRepo<IGoalRepository>({
       findByIdentityId: vi.fn().mockResolvedValue([goal1, goal2]),
     });
@@ -101,8 +101,8 @@ describe('SearchGoalsUseCase', () => {
     expect(result.data.data).toHaveLength(1);
   });
 
-  it('should handle goals with null description', async () => {
-    const goal = createGoalFixture({ id: 'goal-1', name: 'Goal A', description: null });
+  it('should handle goals with null summary', async () => {
+    const goal = createGoalFixture({ id: 'goal-1', name: 'Goal A', summary: null });
     const goalRepo = createMockRepo<IGoalRepository>({
       findByIdentityId: vi.fn().mockResolvedValue([goal]),
     });

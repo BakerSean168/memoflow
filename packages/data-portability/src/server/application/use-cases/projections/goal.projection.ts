@@ -25,10 +25,8 @@ export function projectGoals(goals: unknown[], ctx: ExportContext): PortableGoal
     return {
       _ref: ref,
       name: String(goal.name ?? ''),
-      description: goal.description as string | null | undefined,
-      feasibilityAnalysis: goal.feasibilityAnalysis as string | null | undefined,
-      motivation: goal.motivation as string | null | undefined,
-      status: String(goal.status ?? 'Active'),
+      summary: goal.summary as string | null | undefined,
+      status: String(goal.status ?? 'Planned') as PortableGoal['status'],
       startDate: toDateString(goal.startDate),
       dueDate: toDateString(goal.dueDate),
       completedAt: toDateString(goal.completedAt),

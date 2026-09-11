@@ -315,6 +315,8 @@ Core identity    Target/time        KR Measurement V3
 
 ### GOAL-7202 — Converge Goal identity and lifecycle
 
+**Status:** DONE on `chatgpt/goal-7202-lifecycle`; integration evidence below.
+
 **Goal:** Goal public/domain model becomes `name + summary` with `Planned/InProgress/Completed/Abandoned`.
 
 **Why now:** All later UI/AI/read models depend on stable Goal identity and status.
@@ -323,32 +325,31 @@ Core identity    Target/time        KR Measurement V3
 
 - Goal domain aggregate/value objects;
 - public Goal create/update/read contracts;
-- Goal status events/use cases;
-- route/IPC fixtures;
+- explicit lifecycle command/use-case seams;
+- HTTP/IPC/client parity;
 - Prisma/PowerSync model mappings;
-- data portability;
-- current `description/motivation/feasibilityAnalysis` migration;
-- `Active -> InProgress` migration.
+- Data Portability export/import;
+- App-Vue Goal surfaces and Calendar projection;
+- deletion of retired automatic status-rule surfaces.
 
 **Protected contracts:** version/optimistic concurrency、Completed `completedAt` behavior、archive independence、Task contribution path.
 
 **Implementation:**
 
-1. add failing characterization tests for current create/update/reopen/archive paths;
-2. introduce `summary` and new status union in contracts/domain;
-3. add explicit status transition methods and migration rules;
-4. remove Goal canonical `description/motivation/feasibilityAnalysis` after migration consumers move;
-5. migrate non-empty long text to Goal Brief knowledge intent/path defined by GOAL-7206; if implementation ordering requires staging, use a one-time migration artifact, not public dual DTO;
-6. update API/IPC mappers and response schemas;
-7. add anti-resurrection tests for retired fields.
+1. Goal root identity is exactly `name + summary`; `summary` is nullable/optional and bounded to 500 characters. Root `description/motivation/feasibilityAnalysis` are removed from contracts, domain, Prisma, PowerSync, portability and UI. Key Result `description` is intentionally untouched.
+2. Goal status is exactly `Planned | InProgress | Completed | Abandoned`; new Goals default to `Planned`. There is no `Active` alias or compatibility enum.
+3. ADR-067 transitions are explicit: `Planned -> InProgress|Abandoned`; `InProgress -> Planned|Completed|Abandoned`; `Completed -> InProgress`; `Abandoned -> Planned|InProgress`. Entering Completed sets `completedAt`; reopening Completed clears it. `Planned -> Completed` fails closed.
+4. Status mutations are exposed only through version-checked `plan/activate/complete/abandon` business actions. `POST /:id/plan` and `goal:plan` IPC complete the previously missing InProgress -> Planned seam. The unused generic `BatchUpdateGoalStatus` contract was deleted so callers cannot bypass the aggregate transition matrix.
+5. Idempotent `plan/activate/abandon` calls remain true no-ops but still honor expected-version and archive/deleted guards. Completion retains its protected durable completion-receipt behavior. Archive remains orthogonal to business status.
+6. Retired automatic Goal status rules (`StatusRule`, built-in auto-status rules and `useAutoStatusRules`) were removed. Reminder/Schedule runtime eligibility is `InProgress` only; time/KR/progress/reminder/task side effects never infer a Goal status transition. Calendar date editing stays available for unarchived `Planned` and `InProgress` Goals without mutating lifecycle.
+7. ADR-111 zero-legacy-data policy is applied as a direct source/schema cutover: no backfill, no dual DTO and no migration preserving unused historical Goal text. Rollback is source rollback plus DB reset/reseed.
+8. The existing AI GoalPlanDraft V1 still owns a `description` field until GOAL-7210; its apply adapter now explicitly projects `draft.goal.description -> CreateGoalReq.summary` and cannot write any retired Goal root fields.
 
-**Tests:** focused Goal domain, route/IPC parity, persistence round trip, portability.
-
-**Acceptance:** no production public Goal model exposes the retired text fields or `Active` status.
+**Acceptance evidence:** Goal full suite 83 files / 457 tests PASS; transport parity 21/21 includes HTTP `/plan` and IPC `goal:plan`; Contracts full suite 81 / 540 PASS with a new strict four-state/retired-field anti-resurrection lock; Data Portability full suite 36 / 148 PASS including PowerSync round trip; PowerSync schema 1 / 6 PASS + typecheck; App-Vue Goal + Calendar focused suite 15 / 44 PASS, App-Vue typecheck PASS and production build PASS; AI Goal apply workflow 2 / 12 PASS and AI build PASS; Goal build PASS. React Native `app-react:typecheck` PASS; Dashboard 5 files / 24 tests + typecheck/build PASS; Web Goal MSW 3/3 + Web typecheck PASS; Desktop Dashboard 2/2 + Desktop typecheck PASS; Schedule Goal handler 3/3 PASS; Notification integration 3 files / 35 tests PASS; Task Goal binding/settlement 2 files / 5 tests plus transaction runner 5/5 PASS against the real PostgreSQL test database; API Label -> Goal integration 1/1 PASS. Prisma generate + validate PASS and generated/schema scans contain zero retired Goal root persistence fields. Full-repository scans contain zero `GoalStatus.Active`, direct Prisma Goal `Active` rows, generic status-write contracts, automatic Goal status-rule surfaces, or retired Goal root identity access; the one explicit AI Draft V1 `description -> summary` adapter is owned by GOAL-7210. Authored production ESLint PASS with 0 warnings/errors; the broader changed-file lint has 0 errors and only pre-existing test-fixture warnings. Test inventory regenerated/current at 1245 files; docs-check PASS; full governance-check PASS; `git diff --check` PASS.
 
 **Dependencies:** GOAL-7201.
 
-**Risks:** text migration can lose long historical content; migration must preserve non-empty legacy values before dropping columns.
+**Risks:** zero-data direct cutover intentionally does not preserve legacy Goal long-text rows. If useful data exists before deployment, stop and reassess ADR-111 rather than adding a compatibility path silently.
 
 ### GOAL-7203 — Replace Goal dueDate with Target Timeframe
 

@@ -74,9 +74,9 @@ function createKeyResultFixture(overrides?: Record<string, any>) {
 describe('GoalCrossModuleQueryServiceUseCase', () => {
   describe('getGoalsForTaskBinding', () => {
     it('should return ok with goals filtered by default statuses', async () => {
-      const goal1 = createGoalFixture({ id: 'g1', status: 'IN_PROGRESS', title: 'Active Goal' });
+      const goal1 = createGoalFixture({ id: 'g1', status: 'InProgress', title: 'Active Goal' });
       const goal2 = createGoalFixture({ id: 'g2', status: 'COMPLETED', title: 'Done Goal' });
-      const goal3 = createGoalFixture({ id: 'g3', status: 'NOT_STARTED', title: 'New Goal' });
+      const goal3 = createGoalFixture({ id: 'g3', status: 'Planned', title: 'New Goal' });
       const goalRepo = createMockRepo<IGoalRepository>({
         findByIdentityId: vi.fn().mockResolvedValue([goal1, goal2, goal3]),
       });
@@ -93,7 +93,7 @@ describe('GoalCrossModuleQueryServiceUseCase', () => {
 
     it('should filter by custom status list', async () => {
       const goal1 = createGoalFixture({ id: 'g1', status: 'COMPLETED' });
-      const goal2 = createGoalFixture({ id: 'g2', status: 'IN_PROGRESS' });
+      const goal2 = createGoalFixture({ id: 'g2', status: 'InProgress' });
       const goalRepo = createMockRepo<IGoalRepository>({
         findByIdentityId: vi.fn().mockResolvedValue([goal1, goal2]),
       });
@@ -131,8 +131,8 @@ describe('GoalCrossModuleQueryServiceUseCase', () => {
         id: 'g1',
         name: 'My Goal',
         title: 'My Goal',
-        description: 'Desc',
-        status: 'IN_PROGRESS',
+        summary: 'Desc',
+        status: 'InProgress',
         dueDate: 1700000000,
         progress: 75,
       });
@@ -148,8 +148,8 @@ describe('GoalCrossModuleQueryServiceUseCase', () => {
         expect(result.data[0]).toEqual({
           id: 'g1',
           title: 'My Goal',
-          description: 'Desc',
-          status: 'IN_PROGRESS',
+          summary: 'Desc',
+          status: 'InProgress',
           dueDate: 1700000000,
           progress: 75,
         });

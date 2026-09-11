@@ -1,11 +1,12 @@
 /**
- * 目标状态 — GOAL-2101 simplified
+ * 目标状态 — GOAL-7202 explicit lifecycle
  *
  * Goal answers only Direction + Measurement.
  * `archivedAt` is a display/persistence attribute, not a status value.
  */
 export const GoalStatus = {
-  Active: 'Active',
+  Planned: 'Planned',
+  InProgress: 'InProgress',
   Completed: 'Completed',
   Abandoned: 'Abandoned',
 } as const;

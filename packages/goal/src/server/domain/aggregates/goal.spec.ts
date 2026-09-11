@@ -21,9 +21,7 @@ function createTestGoal(opts?: { name?: string }): Goal {
   return Goal.create({
     identityId: 'test-identity-id' as any,
     name: opts?.name ?? 'Test Goal',
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
+    summary: null,
     startDate: null,
     reminderConfig: null,
   });
@@ -150,7 +148,6 @@ describe('Goal.calculateProgress()', () => {
   });
 });
 
-
 // ============================================================
 // T019: Weight Validation Tests
 // ============================================================
@@ -210,6 +207,7 @@ describe('Goal weight validation', () => {
 describe('Goal lifecycle guards', () => {
   it('should not allow modifying an archived goal', () => {
     const goal = createTestGoal();
+    goal.activate();
     goal.markAsCompleted();
     goal.archive();
 
@@ -220,6 +218,7 @@ describe('Goal lifecycle guards', () => {
 
   it('keeps Completed distinct from archivedAt so completion can be rolled back or adjusted', () => {
     const goal = createTestGoal();
+    goal.activate();
     goal.markAsCompleted();
 
     expect(goal.status).toBe('Completed');

@@ -85,7 +85,7 @@ const { t } = useI18n();
 const progress = computed(() => getGoalOverallProgress(props.goal));
 const isOverdue = computed(
   () =>
-    props.goal.status === 'Active' &&
+    props.goal.status === 'InProgress' &&
     props.goal.dueDate != null &&
     endOfDayMs(props.goal.dueDate) < Date.now(),
 );

@@ -164,7 +164,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
 
     switch (options?.systemView) {
       case 'active':
-        where.status = 'Active';
+        where.status = { in: ['Planned', 'InProgress'] };
         break;
       case 'completed':
         where.status = 'Completed';
@@ -250,9 +250,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
           id: dto.id as string,
           identityId: dto.identityId as string,
           name: dto.name,
-          description: dto.description,
-          feasibilityAnalysis: dto.feasibilityAnalysis,
-          motivation: dto.motivation,
+          summary: dto.summary,
           status: dto.status,
           startDate: dto.startDate ? new Date(dto.startDate) : null,
           dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
@@ -265,9 +263,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
         },
         update: {
           name: dto.name,
-          description: dto.description,
-          feasibilityAnalysis: dto.feasibilityAnalysis,
-          motivation: dto.motivation,
+          summary: dto.summary,
           status: dto.status,
           startDate: dto.startDate ? new Date(dto.startDate) : null,
           dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
@@ -422,9 +418,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
       where: { id: String(dto.id), identityId: String(dto.identityId), version: expectedVersion },
       data: {
         name: dto.name,
-        description: dto.description,
-        feasibilityAnalysis: dto.feasibilityAnalysis,
-        motivation: dto.motivation,
+        summary: dto.summary,
         status: dto.status,
         startDate: dto.startDate ? new Date(dto.startDate) : null,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : null,

@@ -243,7 +243,7 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
         id: goalId,
         identityId,
         name: 'Outbox Rollback Goal',
-        status: 'Active',
+        status: 'InProgress',
       },
     });
     await prisma.keyResult.create({

@@ -16,7 +16,7 @@ type GoalOptionDTO = {
   id: string;
   name?: string;
   title?: string;
-  description?: string | null;
+  summary?: string | null;
   status?: string;
 };
 
@@ -36,7 +36,7 @@ function mapGoalOption(goal: GoalLike): GoalBindingOption {
   return {
     id: String(dto.id),
     title: String(dto.name ?? dto.title ?? ''),
-    description: dto.description ?? undefined,
+    description: dto.summary ?? undefined,
     status: dto.status ?? undefined,
   };
 }

@@ -16,7 +16,7 @@ export type GoalSummary = {
   id: string;
   version: number;
   name: string;
-  description: string | null;
+  summary: string | null;
   status: GoalStatus;
   startDate: number | null;
   dueDate: number | null;
@@ -38,7 +38,6 @@ export interface GoalSortOption {
 }
 
 export type GoalDetail = GoalSummary & {
-  motivation: string | null;
   keyResults: Array<{
     id: string;
     title: string;
@@ -61,7 +60,7 @@ function mapGoalDTO(dto: GoalClientDTO): GoalSummary {
     id: String(dto.id),
     version: dto.version,
     name: dto.name,
-    description: dto.description,
+    summary: dto.summary,
     status: dto.status,
     startDate: dto.startDate,
     dueDate: dto.dueDate,
@@ -81,7 +80,6 @@ function mapGoal(goal: Goal): GoalSummary {
 export function mapGoalDetail(goal: GoalAggregateReadModel): GoalDetail {
   return {
     ...mapGoalDTO(goal),
-    motivation: goal.motivation,
     keyResults: goal.keyResults.map((item) => ({
       id: String(item.id),
       title: item.title,
@@ -177,11 +175,7 @@ export function useGoals() {
 
     if (normalizedQuery.length > 0) {
       result = result.filter((goal) => {
-        const text = [
-          goal.name,
-          goal.description ?? '',
-          ...goal.labels.map((label) => label.name),
-        ]
+        const text = [goal.name, goal.summary ?? '', ...goal.labels.map((label) => label.name)]
           .join(' ')
           .toLowerCase();
         return text.includes(normalizedQuery);

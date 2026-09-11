@@ -35,9 +35,7 @@ export class PowerSyncGoalMapper {
       id: String(row.id),
       identityId: String(row.identity_id),
       name: String(row.name),
-      description: row.description ? String(row.description) : null,
-      feasibilityAnalysis: row.feasibility_analysis ? String(row.feasibility_analysis) : null,
-      motivation: row.motivation ? String(row.motivation) : null,
+      summary: row.summary ? String(row.summary) : null,
       status: String(row.status),
       startDate: optionalMs(row.start_date ? String(row.start_date) : null),
       dueDate: optionalMs(row.due_date ? String(row.due_date) : null),
@@ -65,7 +63,8 @@ export class PowerSyncGoalMapper {
       description: row.description ? String(row.description) : null,
       progress: {
         startingValue: Number(row.starting_value ?? 0),
-        progressBaselineValue: row.progress_baseline_value == null ? null : Number(row.progress_baseline_value),
+        progressBaselineValue:
+          row.progress_baseline_value == null ? null : Number(row.progress_baseline_value),
         currentValue: Number(row.current_value ?? 0),
         targetValue: Number(row.target_value ?? 100),
         aggregationMethod: row.aggregation_method ? String(row.aggregation_method) : 'Last',

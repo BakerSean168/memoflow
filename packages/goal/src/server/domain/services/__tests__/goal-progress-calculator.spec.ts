@@ -21,16 +21,8 @@ function createTestGoal(opts?: { name?: string }): Goal {
   return Goal.create({
     identityId: 'test-identity-id' as any,
     name: opts?.name ?? 'Test Goal',
-    description: null,
-    color: '#3B82F6',
-    feasibilityAnalysis: null,
-    motivation: null,
-    importance: 'Moderate' as any,
-    category: null,
-    tags: [],
+    summary: null,
     startDate: null,
-    targetDate: null,
-    parentGoalId: null,
     reminderConfig: null,
   });
 }

@@ -30,6 +30,7 @@ export function createGoalTransportHandlers(api: GoalApplicationPort): GoalUseCa
     deleteGoal: api.deleteGoal,
     archiveGoal: api.archiveGoal,
     abandonGoal: api.abandonGoal,
+    planGoal: api.planGoal,
     activateGoal: api.activateGoal,
     completeGoal: api.completeGoal,
     searchGoals: api.searchGoals,

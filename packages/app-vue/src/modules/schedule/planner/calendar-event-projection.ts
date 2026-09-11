@@ -143,7 +143,8 @@ export function projectGoalDates(
 ): GoalCalendarEventProjection[] {
   if (goal.deletedAt != null) return [];
 
-  const editable = goal.status === 'Active' && goal.archivedAt == null;
+  const editable =
+    (goal.status === 'Planned' || goal.status === 'InProgress') && goal.archivedAt == null;
   const base = {
     identityId: String(goal.identityId),
     sourceType: 'goal' as const,
@@ -222,9 +223,7 @@ export function projectPlannerReadModel(
   input: PlannerReadProjectionInput,
 ): CalendarEventProjection[] {
   const time = input.time ?? defaultPlannerProductTimePort;
-  const templateById = new Map(
-    input.taskPlans.map((template) => [String(template.id), template]),
-  );
+  const templateById = new Map(input.taskPlans.map((template) => [String(template.id), template]));
   const projected: CalendarEventProjection[] = [
     ...input.calendarEntries.map(projectCalendarEntry),
     ...input.taskOccurrences.flatMap((occurrence) => {

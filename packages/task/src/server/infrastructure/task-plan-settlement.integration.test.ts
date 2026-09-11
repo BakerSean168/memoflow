@@ -39,7 +39,7 @@ async function seedFifteenOccurrencePlan(
   const keyResultId = `kr-${suffix}`;
 
   await prisma.goal.create({
-    data: { id: goalId, identityId, name: 'Graduation requirement', status: 'Active' },
+    data: { id: goalId, identityId, name: 'Graduation requirement', status: 'InProgress' },
   });
   await prisma.keyResult.create({
     data: {

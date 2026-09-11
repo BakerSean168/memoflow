@@ -7,10 +7,8 @@ model Goal {
   id                  String    @id
   identityId          String    @map("identity_id")
   name                String
-  description         String?
-  feasibilityAnalysis String?   @map("feasibility_analysis")
-  motivation          String?
-  status              String    @default("Active")
+  summary             String?
+  status              String    @default("Planned")
   startDate           DateTime? @map("start_date")
   dueDate             DateTime? @map("due_date")
   completedAt         DateTime? @map("completed_at")

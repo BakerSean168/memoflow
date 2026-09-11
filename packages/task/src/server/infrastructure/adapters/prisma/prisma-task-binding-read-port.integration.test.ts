@@ -38,9 +38,9 @@ describe('PrismaTaskBindingReadPort (W4 P2-3)', () => {
 
     await prisma.goal.createMany({
       data: [
-        { id: goalA, identityId: identityA, name: 'Goal A', status: 'Active' },
-        { id: goalB, identityId: identityA, name: 'Goal B', status: 'Active' },
-        { id: foreignGoal, identityId: identityB, name: 'Foreign goal', status: 'Active' },
+        { id: goalA, identityId: identityA, name: 'Goal A', status: 'InProgress' },
+        { id: goalB, identityId: identityA, name: 'Goal B', status: 'InProgress' },
+        { id: foreignGoal, identityId: identityB, name: 'Foreign goal', status: 'InProgress' },
       ],
     });
     await prisma.keyResult.createMany({

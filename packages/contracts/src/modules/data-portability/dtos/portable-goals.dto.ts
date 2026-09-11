@@ -2,6 +2,7 @@
 import { z } from 'zod';
 import { PortableRefSchema, IsoDateString } from './portable-common.dto';
 import { KeyResultCalculationMethod } from '../../goal/value-objects/key-result-calculation-method';
+import { GoalStatus } from '../../goal/value-objects/goal-status';
 
 export const PortableKeyResultSchema = z.object({
   _ref: PortableRefSchema,
@@ -67,10 +68,8 @@ export type PortableGoalReview = z.infer<typeof PortableGoalReviewSchema>;
 export const PortableGoalSchema = z.object({
   _ref: PortableRefSchema,
   name: z.string(),
-  description: z.string().nullable().optional(),
-  feasibilityAnalysis: z.string().nullable().optional(),
-  motivation: z.string().nullable().optional(),
-  status: z.string(),
+  summary: z.string().max(500).nullable().optional(),
+  status: z.enum(GoalStatus),
   startDate: IsoDateString.nullable().optional(),
   dueDate: IsoDateString.nullable().optional(),
   completedAt: IsoDateString.nullable().optional(),

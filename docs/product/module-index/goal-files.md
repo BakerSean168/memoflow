@@ -89,7 +89,6 @@ updated: 2026-08-26T00:00:00
 | [`packages/contracts/src/modules/goal/api/response-schemas.ts`](../../../packages/contracts/src/modules/goal/api/response-schemas.ts) | API response schemas |
 | [`packages/contracts/src/modules/goal/protocol/goal-rpc-map.ts`](../../../packages/contracts/src/modules/goal/protocol/goal-rpc-map.ts) | 目标模块 RPC map |
 | [`packages/contracts/src/modules/goal/protocol/goal-event-map.ts`](../../../packages/contracts/src/modules/goal/protocol/goal-event-map.ts) | 目标模块事件 map |
-| [`packages/contracts/src/modules/goal/rules/status-rule.ts`](../../../packages/contracts/src/modules/goal/rules/status-rule.ts) | 目标状态规则 |
 | [`packages/database/prisma/schema/goal.prisma`](../../../packages/database/prisma/schema/goal.prisma) | 目标模块 Prisma schema |
 
 ## AI Goal 相关入口

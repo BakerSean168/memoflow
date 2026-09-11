@@ -303,6 +303,33 @@ export function registerGoalCrudRoutes(
     (data, ctx) => controller.abandon(data.params.id, data.body.expectedVersion, ctx),
   );
 
+  // POST /:id/plan — 回到规划态
+  r.routeWithValidation(
+    {
+      method: 'post',
+      path: '/:id/plan',
+      summary: '将目标设为规划中',
+      request: {
+        params: GoalStatusCommandInvocationSchema.shape.params,
+        body: {
+          content: {
+            'application/json': { schema: GoalStatusCommandInvocationSchema.shape.body },
+          },
+        },
+      },
+      responses: {
+        200: successResponse(GoalMutationReceiptSchema, '已设为规划中'),
+        404: errorResponse('目标不存在'),
+      },
+      validation: {
+        schema: GoalStatusCommandInvocationSchema,
+        projectInput: (req) => ({ params: req.params, body: req.body }),
+      },
+    },
+    [auth],
+    (data, ctx) => controller.plan(data.params.id, data.body.expectedVersion, ctx),
+  );
+
   // POST /:id/activate — 激活目标
   r.routeWithValidation(
     {
@@ -372,7 +399,6 @@ export function registerGoalCrudRoutes(
     [auth],
     (req, ctx) => controller.getAggregate(req.params!.id, ctx),
   );
-
 
   // POST /:id/clone — 克隆目标
   r.routeWithValidation(

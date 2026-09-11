@@ -11,9 +11,7 @@ describe('DeleteGoalRecordUseCase', () => {
     const goal = Goal.create({
       identityId: 'identity-1' as any,
       name: 'Atomic record deletion',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
+      summary: null,
       startDate: null,
       reminderConfig: null,
     });
@@ -80,9 +78,7 @@ describe('DeleteGoalRecordUseCase', () => {
     const goal = Goal.create({
       identityId: 'identity-1' as any,
       name: 'Reach 70 kg',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
+      summary: null,
       startDate: null,
       dueDate: null,
       reminderConfig: null,

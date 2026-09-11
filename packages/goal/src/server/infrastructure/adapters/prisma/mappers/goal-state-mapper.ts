@@ -31,9 +31,7 @@ export interface RawGoalData {
   id: string;
   identityId: string;
   name: string;
-  description: string | null;
-  feasibilityAnalysis: string | null;
-  motivation: string | null;
+  summary: string | null;
   status: string;
   startDate: number | null;
   dueDate: number | null;
@@ -131,9 +129,7 @@ export function rawDataToGoalState(raw: RawGoalData): GoalState {
     id: GoalId.of(raw.id),
     identityId: IdentityId.of(raw.identityId),
     name: raw.name,
-    description: raw.description ?? null,
-    feasibilityAnalysis: raw.feasibilityAnalysis ?? null,
-    motivation: raw.motivation ?? null,
+    summary: raw.summary ?? null,
     status: raw.status as GoalStatus,
     startDate: raw.startDate ? Number(raw.startDate) : null,
     dueDate: raw.dueDate ? Number(raw.dueDate) : null,

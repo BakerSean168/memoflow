@@ -5067,6 +5067,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/goal/api/goal-lifecycle-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/goal/protocol/goal-rpc-map.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6143,6 +6151,17 @@
       ]
     },
     {
+      "path": "packages/goal/src/server/application/use-cases/commands/__tests__/abandon-goal.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts",
+        "packages/goal/vitest.use-cases.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/server/application/use-cases/commands/__tests__/activate-goal.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6276,6 +6295,17 @@
     },
     {
       "path": "packages/goal/src/server/application/use-cases/commands/__tests__/permanently-delete-goal.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts",
+        "packages/goal/vitest.use-cases.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/application/use-cases/commands/__tests__/plan-goal.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -11255,7 +11285,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 81
+      "fileCount": 83
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -11269,7 +11299,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 29
+      "fileCount": 31
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11647,7 +11677,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 80
+      "fileCount": 81
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11682,7 +11712,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 81
+      "fileCount": 83
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -12049,6 +12079,7 @@
       "packages/goal/src/server/application/event-handlers/task-goal-progress.handler.spec.ts",
       "packages/goal/src/server/application/goal-application-types-barrel.surface.spec.ts",
       "packages/goal/src/server/application/services/goal-review-context-builder.spec.ts",
+      "packages/goal/src/server/application/use-cases/commands/__tests__/abandon-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/activate-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/add-goal-key-result.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/add-goal-review.test.ts",
@@ -12062,6 +12093,7 @@
       "packages/goal/src/server/application/use-cases/commands/__tests__/delete-goal-record.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/delete-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/permanently-delete-goal.test.ts",
+      "packages/goal/src/server/application/use-cases/commands/__tests__/plan-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/relation.use-cases.spec.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/remove-task-goal-contribution.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/update-goal-key-result-progress.test.ts",
@@ -12410,7 +12442,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1069,
+    "unit": 1072,
     "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,

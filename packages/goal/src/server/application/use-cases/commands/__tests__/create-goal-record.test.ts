@@ -13,9 +13,7 @@ function createTestGoal() {
   return Goal.create({
     identityId: 'identity-1' as any,
     name: 'Graduation Goal',
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
+    summary: null,
     startDate: null,
     reminderConfig: null,
   });
@@ -149,7 +147,6 @@ describe('CreateGoalRecordUseCase', () => {
       expect(result.data.recordChanges?.upserted[0]?.valueAfter).toBe(44);
     }
   });
-
 
   it('rejects automatic Task contributions to non-Sum key results', async () => {
     const goal = createTestGoal();

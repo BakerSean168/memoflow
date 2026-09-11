@@ -3,6 +3,7 @@ import { RefreshControl, StyleSheet, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { GoalStatus } from '@memoflow/contracts/goal';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useGoalDetail } from '../hooks/useGoalDetail';
@@ -44,11 +45,37 @@ export function GoalDetailScreen() {
     await refresh();
   }
 
+  async function handlePlan() {
+    if (!goalId || !goal) return;
+    setIsMutating(true);
+    setActionError(null);
+    const result = await service.planGoal(goalId, goal.version);
+    setIsMutating(false);
+    if (!result.ok) {
+      setActionError(presentErrorMessage(result.error));
+      return;
+    }
+    await refresh();
+  }
+
   async function handleComplete() {
     if (!goalId || !goal) return;
     setIsMutating(true);
     setActionError(null);
     const result = await service.completeGoal(goalId, goal.version);
+    setIsMutating(false);
+    if (!result.ok) {
+      setActionError(presentErrorMessage(result.error));
+      return;
+    }
+    await refresh();
+  }
+
+  async function handleAbandon() {
+    if (!goalId || !goal) return;
+    setIsMutating(true);
+    setActionError(null);
+    const result = await service.abandonGoal(goalId, goal.version);
     setIsMutating(false);
     if (!result.ok) {
       setActionError(presentErrorMessage(result.error));
@@ -131,14 +158,14 @@ export function GoalDetailScreen() {
 
       {goal ? (
         <>
-          <SectionCard title="Status" description={goal.description ?? 'No description yet.'}>
+          <SectionCard title="Status" description={goal.summary ?? 'No summary yet.'}>
             <View style={styles.pillRow}>
               <StatusPill
                 label={goal.status}
                 tone={
-                  goal.status === 'Active'
+                  goal.status === GoalStatus.InProgress
                     ? 'success'
-                    : goal.status === 'Completed'
+                    : goal.status === GoalStatus.Completed
                       ? 'tint'
                       : 'textSecondary'
                 }
@@ -157,18 +184,43 @@ export function GoalDetailScreen() {
               </ThemedText>
             </ThemedView>
             <View style={styles.actionRow}>
-              {goal.status !== 'Active' ? (
+              {goal.archivedAt === null && goal.status === GoalStatus.Planned ? (
                 <PrimaryButton
-                  label={isMutating ? 'Activating…' : 'Activate'}
+                  label={isMutating ? 'Starting…' : 'Start'}
                   onPress={handleActivate}
                   disabled={isMutating}
                 />
               ) : null}
-              {goal.status === 'Active' ? (
+              {goal.archivedAt === null && goal.status === GoalStatus.InProgress ? (
+                <>
+                  <PrimaryButton
+                    label={isMutating ? 'Planning…' : 'Return to plan'}
+                    onPress={handlePlan}
+                    disabled={isMutating}
+                    variant="secondary"
+                  />
+                  <PrimaryButton
+                    label={isMutating ? 'Completing…' : 'Complete'}
+                    onPress={handleComplete}
+                    disabled={isMutating}
+                  />
+                </>
+              ) : null}
+              {goal.archivedAt === null &&
+              (goal.status === GoalStatus.Completed || goal.status === GoalStatus.Abandoned) ? (
                 <PrimaryButton
-                  label={isMutating ? 'Completing…' : 'Complete'}
-                  onPress={handleComplete}
+                  label={isMutating ? 'Reopening…' : 'Reopen'}
+                  onPress={handleActivate}
                   disabled={isMutating}
+                />
+              ) : null}
+              {goal.archivedAt === null &&
+              (goal.status === GoalStatus.Planned || goal.status === GoalStatus.InProgress) ? (
+                <PrimaryButton
+                  label={isMutating ? 'Abandoning…' : 'Abandon'}
+                  onPress={handleAbandon}
+                  disabled={isMutating}
+                  variant="ghost"
                 />
               ) : null}
               {goal.archivedAt === null ? (
@@ -187,13 +239,14 @@ export function GoalDetailScreen() {
             ) : null}
           </SectionCard>
 
-          <SectionCard title="Goal timeline" description="Direction dates, motivation, and labels.">
+          <SectionCard title="Goal timeline" description="Direction dates and labels.">
             <MetaRow label="Start date" value={formatDate(goal.startDate)} />
             <MetaRow label="Due date" value={formatDate(goal.dueDate)} />
-            <MetaRow label="Motivation" value={goal.motivation ?? 'Not set'} />
             <MetaRow
               label="Labels"
-              value={goal.labels.length > 0 ? goal.labels.map((label) => label.name).join(', ') : 'None'}
+              value={
+                goal.labels.length > 0 ? goal.labels.map((label) => label.name).join(', ') : 'None'
+              }
             />
           </SectionCard>
 

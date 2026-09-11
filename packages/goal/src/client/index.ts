@@ -9,19 +9,14 @@
 
 import type { IResultHttpClient } from '@memoflow/http-client';
 import {
-  BUILT_IN_RULES,
   BUILT_IN_TEMPLATES,
   GoalClientService,
-  RULE_TEMPLATES,
   createGoalClientService,
   createGoalServiceFromHttpClient,
-  findRuleById,
-  getEnabledRules,
   getTemplateById,
   getTemplatesByCategory,
   getTemplatesByIndustry,
   getTemplatesByRole,
-  sortRulesByPriority,
   type GoalClientPort,
   type GoalTemplate,
   type KeyResultTemplate,
@@ -60,7 +55,6 @@ export function createGoalIpcClient(ipcClient: IResultIpcClient): GoalClientPort
 }
 
 export {
-  BUILT_IN_RULES,
   BUILT_IN_TEMPLATES,
   Goal,
   GoalClientService,
@@ -69,15 +63,11 @@ export {
   GoalRecord,
   GoalReview,
   KeyResult,
-  RULE_TEMPLATES,
   createGoalClientService,
   createGoalHttpAdapters,
   createGoalIpcAdapters,
-  findRuleById,
-  getEnabledRules,
   getTemplateById,
   getTemplatesByCategory,
   getTemplatesByIndustry,
   getTemplatesByRole,
-  sortRulesByPriority,
 };

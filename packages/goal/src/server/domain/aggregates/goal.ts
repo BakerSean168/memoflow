@@ -57,6 +57,7 @@ import {
   GoalReviewNotFoundError,
   GoalDeletedError,
   GoalArchivedError,
+  GoalInvalidLifecycleTransitionError,
   GoalNameTooLongError,
   KeyResultWeightInvalidError,
 } from '../value-objects';
@@ -71,9 +72,7 @@ export interface GoalState {
   id: GoalId;
   identityId: IdentityId;
   name: string;
-  description: string | null;
-  feasibilityAnalysis: string | null;
-  motivation: string | null;
+  summary: string | null;
   status: GoalStatus;
   startDate: Instant | null;
   dueDate: Instant | null;
@@ -116,9 +115,7 @@ export class Goal extends AggregateRoot<GoalId> {
       id: params.id,
       identityId: params.identityId,
       name: params.name,
-      description: params.description ?? null,
-      feasibilityAnalysis: params.feasibilityAnalysis ?? null,
-      motivation: params.motivation ?? null,
+      summary: params.summary ?? null,
       status: params.status,
       startDate: params.startDate ?? null,
       dueDate: params.dueDate ?? null,
@@ -152,16 +149,8 @@ export class Goal extends AggregateRoot<GoalId> {
     return this._props.name;
   }
 
-  get description(): string | null {
-    return this._props.description;
-  }
-
-  get feasibilityAnalysis(): string | null {
-    return this._props.feasibilityAnalysis;
-  }
-
-  get motivation(): string | null {
-    return this._props.motivation;
+  get summary(): string | null {
+    return this._props.summary;
   }
 
   get status(): GoalStatus {
@@ -260,9 +249,7 @@ export class Goal extends AggregateRoot<GoalId> {
     id?: GoalId;
     identityId: IdentityId;
     name: string;
-    description: string | null;
-    feasibilityAnalysis: string | null;
-    motivation: string | null;
+    summary: string | null;
     startDate: Instant | null;
     dueDate: Instant | null;
     reminderConfig: GoalReminderConfig | null;
@@ -278,10 +265,8 @@ export class Goal extends AggregateRoot<GoalId> {
       id: params.id ?? GoalId.generate(),
       identityId: params.identityId,
       name: params.name.trim(),
-      description: params.description?.trim() || null,
-      feasibilityAnalysis: params.feasibilityAnalysis?.trim() || null,
-      motivation: params.motivation?.trim() || null,
-      status: GoalStatus.Active,
+      summary: params.summary?.trim() || null,
+      status: GoalStatus.Planned,
       startDate: params.startDate ?? null,
       dueDate: params.dueDate ?? null,
       completedAt: null,
@@ -328,12 +313,7 @@ export class Goal extends AggregateRoot<GoalId> {
    * @throws {GoalNameRequiredError} 当名称为空时
    * @throws {GoalNameTooLongError} 当名称超过200字符时
    */
-  public updateBasicInfo(params: {
-    name?: string;
-    description?: string | null;
-    feasibilityAnalysis?: string | null;
-    motivation?: string | null;
-  }): void {
+  public updateBasicInfo(params: { name?: string; summary?: string | null }): void {
     this.ensureModifiable();
     let hasChanges = false;
     if (params.name !== undefined && params.name !== this._props.name) {
@@ -341,20 +321,13 @@ export class Goal extends AggregateRoot<GoalId> {
       this._props.name = params.name.trim();
       hasChanges = true;
     }
-    if (params.description !== undefined && params.description !== this._props.description) {
-      this._props.description = params.description?.trim() || null;
-      hasChanges = true;
-    }
-    if (
-      params.feasibilityAnalysis !== undefined &&
-      params.feasibilityAnalysis !== this._props.feasibilityAnalysis
-    ) {
-      this._props.feasibilityAnalysis = params.feasibilityAnalysis?.trim() || null;
-      hasChanges = true;
-    }
-    if (params.motivation !== undefined && params.motivation !== this._props.motivation) {
-      this._props.motivation = params.motivation?.trim() || null;
-      hasChanges = true;
+    if (params.summary !== undefined) {
+      const summary = params.summary?.trim() || null;
+      Goal.validateSummary(summary);
+      if (summary !== this._props.summary) {
+        this._props.summary = summary;
+        hasChanges = true;
+      }
     }
     if (hasChanges) {
       this._props.updatedAt = Date.now();
@@ -379,20 +352,25 @@ export class Goal extends AggregateRoot<GoalId> {
     });
   }
 
-  /**
-   * ✅ 更新状态
-   */
-  public updateStatus(newStatus: GoalStatus): void {
-    if (newStatus === this._props.status) return;
+  /** Apply one explicit lifecycle transition from ADR-067. */
+  private transitionTo(newStatus: GoalStatus): boolean {
     this.ensureModifiable();
+    if (newStatus === this._props.status) return false;
     const previousStatus = this._props.status;
+    const allowed: Record<GoalStatus, readonly GoalStatus[]> = {
+      [GoalStatus.Planned]: [GoalStatus.InProgress, GoalStatus.Abandoned],
+      [GoalStatus.InProgress]: [GoalStatus.Planned, GoalStatus.Completed, GoalStatus.Abandoned],
+      [GoalStatus.Completed]: [GoalStatus.InProgress],
+      [GoalStatus.Abandoned]: [GoalStatus.Planned, GoalStatus.InProgress],
+    };
+    if (!allowed[previousStatus].includes(newStatus)) {
+      throw new GoalInvalidLifecycleTransitionError(previousStatus, newStatus);
+    }
+
     const now = Date.now();
     this._props.status = newStatus;
-    if (newStatus === GoalStatus.Completed) {
-      this._props.completedAt = this._props.completedAt ?? now;
-    } else if (previousStatus === GoalStatus.Completed) {
-      this._props.completedAt = null;
-    }
+    if (newStatus === GoalStatus.Completed) this._props.completedAt = now;
+    else if (previousStatus === GoalStatus.Completed) this._props.completedAt = null;
     this._props.updatedAt = now;
     this.addDomainEvent<GoalEventMap['goal:status-changed']>('goal:status-changed', {
       identityId: this._props.identityId,
@@ -400,20 +378,25 @@ export class Goal extends AggregateRoot<GoalId> {
       previousStatus,
       newStatus,
     });
+    return true;
   }
 
+  /** Move a Planned/Abandoned Goal back to the planning state. */
+  public plan(): void {
+    this.transitionTo(GoalStatus.Planned);
+  }
+
+  /** Begin or reopen active pursuit of a Goal. */
   public activate(): void {
-    this.updateStatus(GoalStatus.Active);
+    this.transitionTo(GoalStatus.InProgress);
   }
 
   public abandon(): void {
-    this.updateStatus(GoalStatus.Abandoned);
+    this.transitionTo(GoalStatus.Abandoned);
   }
 
   public markAsCompleted(): void {
-    if (this._props.status === GoalStatus.Completed && this._props.completedAt) return;
-    this.ensureModifiable();
-    this.updateStatus(GoalStatus.Completed);
+    if (!this.transitionTo(GoalStatus.Completed)) return;
     this.addDomainEvent<GoalEventMap['goal:completed']>('goal:completed', {
       identityId: this._props.identityId,
       goal: this.toServerDTO(true),
@@ -947,9 +930,7 @@ export class Goal extends AggregateRoot<GoalId> {
       id: this.id,
       identityId: this._props.identityId,
       name: this._props.name,
-      description: this._props.description,
-      feasibilityAnalysis: this._props.feasibilityAnalysis,
-      motivation: this._props.motivation,
+      summary: this._props.summary,
       status: this._props.status,
       startDate: this._props.startDate,
       dueDate: this._props.dueDate,
@@ -994,9 +975,7 @@ export class Goal extends AggregateRoot<GoalId> {
       id: this.id,
       identityId: this._props.identityId,
       name: this._props.name,
-      description: this._props.description,
-      feasibilityAnalysis: this._props.feasibilityAnalysis,
-      motivation: this._props.motivation,
+      summary: this._props.summary,
       status: this._props.status,
       startDate: this._props.startDate ?? null,
       dueDate: this._props.dueDate ?? null,
@@ -1052,6 +1031,13 @@ export class Goal extends AggregateRoot<GoalId> {
     }
     if (trimmed.length > 200) {
       throw new GoalNameTooLongError(200);
+    }
+  }
+
+  /** Validate the short Goal identity summary. */
+  public static validateSummary(summary: string | null): void {
+    if (summary !== null && summary.length > 500) {
+      throw new Error('Goal summary must not exceed 500 characters');
     }
   }
 

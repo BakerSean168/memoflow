@@ -22,11 +22,15 @@ describe('goal shared value objects', () => {
 
   it('covers enum helpers and simple domain errors', () => {
     expect(GoalStatus.getAll()).toEqual([
-      GoalStatus.Active,
+      GoalStatus.Planned,
+      GoalStatus.InProgress,
       GoalStatus.Completed,
       GoalStatus.Abandoned,
     ]);
-    expect(GoalStatus.of('Active')).toBe(GoalStatus.Active);
+    expect(GoalStatus.of('Planned')).toBe(GoalStatus.Planned);
+    expect(GoalStatus.of('InProgress')).toBe(GoalStatus.InProgress);
+    expect(GoalStatus.isPlanned(GoalStatus.Planned)).toBe(true);
+    expect(GoalStatus.isInProgress(GoalStatus.InProgress)).toBe(true);
     expect(GoalStatus.isTerminal(GoalStatus.Completed)).toBe(true);
     expect(GoalStatus.isTerminal(GoalStatus.Abandoned)).toBe(true);
     expect(() => GoalStatus.of('Bad')).toThrow('Invalid GoalStatus');

@@ -6,7 +6,14 @@
  */
 
 import type { IGoalRepository } from '../../../domain';
-import { Goal, GoalId, GoalLabelOwnershipError, GoalPolicy, GoalReminderConfig, KeyResultId } from '../../../domain';
+import {
+  Goal,
+  GoalId,
+  GoalLabelOwnershipError,
+  GoalPolicy,
+  GoalReminderConfig,
+  KeyResultId,
+} from '../../../domain';
 import { IdentityId } from '@memoflow/domain-shared';
 import type { CreateGoalReq, GoalMutationReceipt } from '@memoflow/contracts/goal';
 import type { Result } from '@memoflow/contracts/result';
@@ -58,9 +65,7 @@ export class CreateGoalUseCase {
         id: input.id ? GoalId.of(input.id) : undefined,
         identityId: IdentityId.of(cx.identityId),
         name: input.name,
-        description: input.description ?? null,
-        feasibilityAnalysis: input.feasibilityAnalysis ?? null,
-        motivation: input.motivation ?? null,
+        summary: input.summary ?? null,
         startDate: input.startDate ?? null,
         dueDate: input.dueDate ?? null,
         reminderConfig: input.reminderConfig

@@ -27,7 +27,8 @@ describe('projection from PowerSync-shaped rows', () => {
         {
           id: 'goal-db-id',
           name: 'Ship portability',
-          status: 'Active',
+          summary: 'Ship portability',
+          status: 'InProgress',
           keyResults: [
             {
               id: 'kr-db-id',
@@ -60,7 +61,8 @@ describe('projection from PowerSync-shaped rows', () => {
 
     expect(goals[0]).toMatchObject({
       _ref: 'goal:1',
-      status: 'Active',
+      summary: 'Ship portability',
+      status: 'InProgress',
       keyResults: [
         {
           _ref: 'keyResult:1',

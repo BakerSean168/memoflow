@@ -13,9 +13,7 @@ function createTestGoal(name = 'Original Goal'): Goal {
   return Goal.create({
     identityId: 'test-identity-id' as any,
     name,
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
+    summary: null,
     startDate: null,
     dueDate: null,
     reminderConfig: null,
@@ -196,6 +194,7 @@ describe('UpdateGoalUseCase', () => {
 
   it('should throw when goal is archived', async () => {
     const goal = createTestGoal();
+    goal.activate();
     goal.markAsCompleted();
     goal.archive();
     vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);

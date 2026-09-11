@@ -14,22 +14,15 @@ function createTestGoal(name = 'Test Goal'): Goal {
   return Goal.create({
     identityId: 'test-identity-id' as any,
     name,
-    description: null,
-    color: '#3B82F6',
-    feasibilityAnalysis: null,
-    motivation: null,
-    importance: 'MEDIUM' as any,
-    category: null,
-    tags: [],
+    summary: null,
     startDate: null,
-    targetDate: null,
-    parentGoalId: null,
     reminderConfig: null,
   });
 }
 
 function createCompletedGoal(name = 'Completed Goal'): Goal {
   const goal = createTestGoal(name);
+  goal.activate();
   goal.markAsCompleted();
   return goal;
 }
@@ -47,7 +40,9 @@ describe('DeleteGoalUseCase', () => {
       saveRootWithExpectedVersion: vi.fn().mockResolvedValue(undefined),
     });
     taskBindingReadPort = {
-      checkActiveTaskBindings: vi.fn().mockResolvedValue({ hasActiveBindings: false, activeCount: 0 }),
+      checkActiveTaskBindings: vi
+        .fn()
+        .mockResolvedValue({ hasActiveBindings: false, activeCount: 0 }),
     };
     useCase = new DeleteGoalUseCase(goalRepo, new GoalPolicy(), taskBindingReadPort);
   });
@@ -92,7 +87,10 @@ describe('DeleteGoalUseCase', () => {
     it('should reject deletion when active task bindings exist', async () => {
       const goal = createTestGoal();
       vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);
-      vi.mocked(taskBindingReadPort.checkActiveTaskBindings).mockResolvedValue({ hasActiveBindings: true, activeCount: 2 });
+      vi.mocked(taskBindingReadPort.checkActiveTaskBindings).mockResolvedValue({
+        hasActiveBindings: true,
+        activeCount: 2,
+      });
 
       const result = await useCase.execute(goal.id, 'identity-1', goal.version);
 
@@ -182,7 +180,10 @@ describe('DeleteGoalUseCase', () => {
     it('should report active task links when they exist', async () => {
       const goal = createTestGoal();
       vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);
-      vi.mocked(taskBindingReadPort.checkActiveTaskBindings).mockResolvedValue({ hasActiveBindings: true, activeCount: 1 });
+      vi.mocked(taskBindingReadPort.checkActiveTaskBindings).mockResolvedValue({
+        hasActiveBindings: true,
+        activeCount: 1,
+      });
 
       const result = await useCase.checkDependencies(goal.id, 'identity-1');
 

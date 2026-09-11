@@ -31092,9 +31092,7 @@ export namespace Prisma {
     id: string | null
     identityId: string | null
     name: string | null
-    description: string | null
-    feasibilityAnalysis: string | null
-    motivation: string | null
+    summary: string | null
     status: string | null
     startDate: Date | null
     dueDate: Date | null
@@ -31112,9 +31110,7 @@ export namespace Prisma {
     id: string | null
     identityId: string | null
     name: string | null
-    description: string | null
-    feasibilityAnalysis: string | null
-    motivation: string | null
+    summary: string | null
     status: string | null
     startDate: Date | null
     dueDate: Date | null
@@ -31132,9 +31128,7 @@ export namespace Prisma {
     id: number
     identityId: number
     name: number
-    description: number
-    feasibilityAnalysis: number
-    motivation: number
+    summary: number
     status: number
     startDate: number
     dueDate: number
@@ -31164,9 +31158,7 @@ export namespace Prisma {
     id?: true
     identityId?: true
     name?: true
-    description?: true
-    feasibilityAnalysis?: true
-    motivation?: true
+    summary?: true
     status?: true
     startDate?: true
     dueDate?: true
@@ -31184,9 +31176,7 @@ export namespace Prisma {
     id?: true
     identityId?: true
     name?: true
-    description?: true
-    feasibilityAnalysis?: true
-    motivation?: true
+    summary?: true
     status?: true
     startDate?: true
     dueDate?: true
@@ -31204,9 +31194,7 @@ export namespace Prisma {
     id?: true
     identityId?: true
     name?: true
-    description?: true
-    feasibilityAnalysis?: true
-    motivation?: true
+    summary?: true
     status?: true
     startDate?: true
     dueDate?: true
@@ -31311,9 +31299,7 @@ export namespace Prisma {
     id: string
     identityId: string
     name: string
-    description: string | null
-    feasibilityAnalysis: string | null
-    motivation: string | null
+    summary: string | null
     status: string
     startDate: Date | null
     dueDate: Date | null
@@ -31350,9 +31336,7 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     name?: boolean
-    description?: boolean
-    feasibilityAnalysis?: boolean
-    motivation?: boolean
+    summary?: boolean
     status?: boolean
     startDate?: boolean
     dueDate?: boolean
@@ -31376,9 +31360,7 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     name?: boolean
-    description?: boolean
-    feasibilityAnalysis?: boolean
-    motivation?: boolean
+    summary?: boolean
     status?: boolean
     startDate?: boolean
     dueDate?: boolean
@@ -31397,9 +31379,7 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     name?: boolean
-    description?: boolean
-    feasibilityAnalysis?: boolean
-    motivation?: boolean
+    summary?: boolean
     status?: boolean
     startDate?: boolean
     dueDate?: boolean
@@ -31418,9 +31398,7 @@ export namespace Prisma {
     id?: boolean
     identityId?: boolean
     name?: boolean
-    description?: boolean
-    feasibilityAnalysis?: boolean
-    motivation?: boolean
+    summary?: boolean
     status?: boolean
     startDate?: boolean
     dueDate?: boolean
@@ -31434,7 +31412,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type GoalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "feasibilityAnalysis" | "motivation" | "status" | "startDate" | "dueDate" | "completedAt" | "archivedAt" | "sortOrder" | "reminderConfig" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["goal"]>
+  export type GoalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "summary" | "status" | "startDate" | "dueDate" | "completedAt" | "archivedAt" | "sortOrder" | "reminderConfig" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["goal"]>
   export type GoalInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     keyResults?: boolean | Goal$keyResultsArgs<ExtArgs>
@@ -31463,9 +31441,7 @@ export namespace Prisma {
       id: string
       identityId: string
       name: string
-      description: string | null
-      feasibilityAnalysis: string | null
-      motivation: string | null
+      summary: string | null
       status: string
       startDate: Date | null
       dueDate: Date | null
@@ -31908,9 +31884,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Goal", 'String'>
     readonly identityId: FieldRef<"Goal", 'String'>
     readonly name: FieldRef<"Goal", 'String'>
-    readonly description: FieldRef<"Goal", 'String'>
-    readonly feasibilityAnalysis: FieldRef<"Goal", 'String'>
-    readonly motivation: FieldRef<"Goal", 'String'>
+    readonly summary: FieldRef<"Goal", 'String'>
     readonly status: FieldRef<"Goal", 'String'>
     readonly startDate: FieldRef<"Goal", 'DateTime'>
     readonly dueDate: FieldRef<"Goal", 'DateTime'>
@@ -127852,9 +127826,7 @@ export namespace Prisma {
     id: 'id',
     identityId: 'identityId',
     name: 'name',
-    description: 'description',
-    feasibilityAnalysis: 'feasibilityAnalysis',
-    motivation: 'motivation',
+    summary: 'summary',
     status: 'status',
     startDate: 'startDate',
     dueDate: 'dueDate',
@@ -131076,9 +131048,7 @@ export namespace Prisma {
     id?: StringFilter<"Goal"> | string
     identityId?: StringFilter<"Goal"> | string
     name?: StringFilter<"Goal"> | string
-    description?: StringNullableFilter<"Goal"> | string | null
-    feasibilityAnalysis?: StringNullableFilter<"Goal"> | string | null
-    motivation?: StringNullableFilter<"Goal"> | string | null
+    summary?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
     startDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
     dueDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
@@ -131101,9 +131071,7 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     name?: SortOrder
-    description?: SortOrderInput | SortOrder
-    feasibilityAnalysis?: SortOrderInput | SortOrder
-    motivation?: SortOrderInput | SortOrder
+    summary?: SortOrderInput | SortOrder
     status?: SortOrder
     startDate?: SortOrderInput | SortOrder
     dueDate?: SortOrderInput | SortOrder
@@ -131130,9 +131098,7 @@ export namespace Prisma {
     NOT?: GoalWhereInput | GoalWhereInput[]
     identityId?: StringFilter<"Goal"> | string
     name?: StringFilter<"Goal"> | string
-    description?: StringNullableFilter<"Goal"> | string | null
-    feasibilityAnalysis?: StringNullableFilter<"Goal"> | string | null
-    motivation?: StringNullableFilter<"Goal"> | string | null
+    summary?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
     startDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
     dueDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
@@ -131155,9 +131121,7 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     name?: SortOrder
-    description?: SortOrderInput | SortOrder
-    feasibilityAnalysis?: SortOrderInput | SortOrder
-    motivation?: SortOrderInput | SortOrder
+    summary?: SortOrderInput | SortOrder
     status?: SortOrder
     startDate?: SortOrderInput | SortOrder
     dueDate?: SortOrderInput | SortOrder
@@ -131183,9 +131147,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Goal"> | string
     identityId?: StringWithAggregatesFilter<"Goal"> | string
     name?: StringWithAggregatesFilter<"Goal"> | string
-    description?: StringNullableWithAggregatesFilter<"Goal"> | string | null
-    feasibilityAnalysis?: StringNullableWithAggregatesFilter<"Goal"> | string | null
-    motivation?: StringNullableWithAggregatesFilter<"Goal"> | string | null
+    summary?: StringNullableWithAggregatesFilter<"Goal"> | string | null
     status?: StringWithAggregatesFilter<"Goal"> | string
     startDate?: DateTimeNullableWithAggregatesFilter<"Goal"> | Date | string | null
     dueDate?: DateTimeNullableWithAggregatesFilter<"Goal"> | Date | string | null
@@ -140593,9 +140555,7 @@ export namespace Prisma {
   export type GoalCreateInput = {
     id: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -140618,9 +140578,7 @@ export namespace Prisma {
     id: string
     identityId: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -140641,9 +140599,7 @@ export namespace Prisma {
   export type GoalUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -140666,9 +140622,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -140690,9 +140644,7 @@ export namespace Prisma {
     id: string
     identityId: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -140709,9 +140661,7 @@ export namespace Prisma {
   export type GoalUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -140729,9 +140679,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -150985,9 +150933,7 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     name?: SortOrder
-    description?: SortOrder
-    feasibilityAnalysis?: SortOrder
-    motivation?: SortOrder
+    summary?: SortOrder
     status?: SortOrder
     startDate?: SortOrder
     dueDate?: SortOrder
@@ -151010,9 +150956,7 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     name?: SortOrder
-    description?: SortOrder
-    feasibilityAnalysis?: SortOrder
-    motivation?: SortOrder
+    summary?: SortOrder
     status?: SortOrder
     startDate?: SortOrder
     dueDate?: SortOrder
@@ -151030,9 +150974,7 @@ export namespace Prisma {
     id?: SortOrder
     identityId?: SortOrder
     name?: SortOrder
-    description?: SortOrder
-    feasibilityAnalysis?: SortOrder
-    motivation?: SortOrder
+    summary?: SortOrder
     status?: SortOrder
     startDate?: SortOrder
     dueDate?: SortOrder
@@ -162266,9 +162208,7 @@ export namespace Prisma {
   export type GoalCreateWithoutAccountInput = {
     id: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -162289,9 +162229,7 @@ export namespace Prisma {
   export type GoalUncheckedCreateWithoutAccountInput = {
     id: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -164666,9 +164604,7 @@ export namespace Prisma {
     id?: StringFilter<"Goal"> | string
     identityId?: StringFilter<"Goal"> | string
     name?: StringFilter<"Goal"> | string
-    description?: StringNullableFilter<"Goal"> | string | null
-    feasibilityAnalysis?: StringNullableFilter<"Goal"> | string | null
-    motivation?: StringNullableFilter<"Goal"> | string | null
+    summary?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
     startDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
     dueDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
@@ -170392,9 +170328,7 @@ export namespace Prisma {
   export type GoalCreateWithoutKeyResultsInput = {
     id: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -170416,9 +170350,7 @@ export namespace Prisma {
     id: string
     identityId: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -170614,9 +170546,7 @@ export namespace Prisma {
   export type GoalUpdateWithoutKeyResultsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -170638,9 +170568,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -170818,9 +170746,7 @@ export namespace Prisma {
   export type GoalCreateWithoutReviewsInput = {
     id: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -170842,9 +170768,7 @@ export namespace Prisma {
     id: string
     identityId: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -170880,9 +170804,7 @@ export namespace Prisma {
   export type GoalUpdateWithoutReviewsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -170904,9 +170826,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -170926,9 +170846,7 @@ export namespace Prisma {
   export type GoalCreateWithoutKeyResultWeightSnapshotsInput = {
     id: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -170950,9 +170868,7 @@ export namespace Prisma {
     id: string
     identityId: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -171032,9 +170948,7 @@ export namespace Prisma {
   export type GoalUpdateWithoutKeyResultWeightSnapshotsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -171056,9 +170970,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -172367,9 +172279,7 @@ export namespace Prisma {
   export type GoalCreateWithoutLabelLinksInput = {
     id: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -172391,9 +172301,7 @@ export namespace Prisma {
     id: string
     identityId: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -172593,9 +172501,7 @@ export namespace Prisma {
   export type GoalUpdateWithoutLabelLinksInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -172617,9 +172523,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -190034,9 +189938,7 @@ export namespace Prisma {
   export type GoalCreateManyAccountInput = {
     id: string
     name: string
-    description?: string | null
-    feasibilityAnalysis?: string | null
-    motivation?: string | null
+    summary?: string | null
     status?: string
     startDate?: Date | string | null
     dueDate?: Date | string | null
@@ -190797,9 +190699,7 @@ export namespace Prisma {
   export type GoalUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -190820,9 +190720,7 @@ export namespace Prisma {
   export type GoalUncheckedUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -190843,9 +190741,7 @@ export namespace Prisma {
   export type GoalUncheckedUpdateManyWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    feasibilityAnalysis?: NullableStringFieldUpdateOperationsInput | string | null
-    motivation?: NullableStringFieldUpdateOperationsInput | string | null
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

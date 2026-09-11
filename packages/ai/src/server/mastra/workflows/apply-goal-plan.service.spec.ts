@@ -127,6 +127,7 @@ describe('ApplyGoalPlanService', () => {
     expect(port.createGoal.mock.calls[0]?.[0]).toMatchObject({
       id: expected.goal,
       name: 'Pass JLPT N1',
+      summary: 'Build a durable study plan.',
       initialKeyResults: [{ id: expected.kr0, title: 'Complete mock exams' }],
       labelIds: ['label:learning'],
     });

@@ -37,6 +37,7 @@ export const GoalChannels = {
   DELETE: 'goal:delete',
   ARCHIVE: 'goal:archive',
   ABANDON: 'goal:abandon',
+  PLAN: 'goal:plan',
   ACTIVATE: 'goal:activate',
   COMPLETE: 'goal:complete',
   SEARCH: 'goal:search',

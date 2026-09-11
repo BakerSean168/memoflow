@@ -75,15 +75,13 @@ const taskPlan = {
   name: 'Review Core vNext PR',
 } as TaskPlanClientDTO;
 
-function goal(): GoalClientDTO {
+function goal(overrides: Partial<GoalClientDTO> = {}): GoalClientDTO {
   return {
     id: 'goal-1',
     identityId: 'identity-1',
     name: 'Ship Core vNext',
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
-    status: 'Active',
+    summary: null,
+    status: 'InProgress',
     startDate: Number(goalStart),
     dueDate: Number(goalDue),
     completedAt: null,
@@ -100,6 +98,7 @@ function goal(): GoalClientDTO {
     totalKeyResults: 0,
     completedKeyResults: 0,
     overallProgress: 0,
+    ...overrides,
   } as GoalClientDTO;
 }
 
@@ -178,6 +177,25 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
     const deadline = events[1]!;
     if (!deadline.allDay) throw new Error('Goal date must be all-day');
     expectTypeOf(deadline.start).toEqualTypeOf<Ymd>();
+  });
+
+  it('keeps non-terminal Goal dates editable without turning lifecycle into calendar state', () => {
+    expect(projectGoalDates(goal({ status: 'Planned' }), time)[0]?.editableCapabilities.move).toBe(
+      true,
+    );
+    expect(
+      projectGoalDates(goal({ status: 'InProgress' }), time)[0]?.editableCapabilities.move,
+    ).toBe(true);
+    expect(
+      projectGoalDates(goal({ status: 'Completed' }), time)[0]?.editableCapabilities.move,
+    ).toBe(false);
+    expect(
+      projectGoalDates(goal({ status: 'Abandoned' }), time)[0]?.editableCapabilities.move,
+    ).toBe(false);
+    expect(
+      projectGoalDates(goal({ status: 'InProgress', archivedAt: Number(goalStart) }), time)[0]
+        ?.editableCapabilities.move,
+    ).toBe(false);
   });
 
   it('projects Routine wall-clock occurrence identity, not its Scheduler invocation identity', () => {
