@@ -63,6 +63,9 @@ export type KnowledgeSpaceId = string & { readonly __brand: 'KnowledgeSpaceId' }
 /** Desktop Local Vault binding ID */
 export type LocalVaultBindingId = string & { readonly __brand: 'LocalVaultBindingId' };
 
+/** Cloud/remote knowledge source binding ID */
+export type KnowledgeRemoteBindingId = string & { readonly __brand: 'KnowledgeRemoteBindingId' };
+
 /** 仓库 ID */
 export type RepositoryId = string & { readonly __brand: 'RepositoryId' };
 
@@ -207,6 +210,7 @@ export const ID_PREFIXES = {
   // === Knowledge / Repository ===
   KnowledgeSpaceId: 'KnowledgeSpaceId',
   LocalVaultBindingId: 'LocalVaultBindingId',
+  KnowledgeRemoteBindingId: 'KnowledgeRemoteBindingId',
   RepositoryId: 'IRepositoryId',
   ResourceId: 'IResourceId',
   FolderId: 'IFolderId',

@@ -379,11 +379,31 @@ export type RepositoryStatistic = $Result.DefaultSelection<Prisma.$RepositorySta
  */
 export type KnowledgeRepositoryInstallationIntent = $Result.DefaultSelection<Prisma.$KnowledgeRepositoryInstallationIntentPayload>
 /**
- * Model KnowledgeRepositoryConnection
- * GitHub App installation bound to one explicitly selected knowledge repository.
- * This authorization is independent from AuthOAuthBinding login credentials.
+ * Model KnowledgeSpace
+ * Stable logical knowledge space shared by local/remote bindings.
  */
-export type KnowledgeRepositoryConnection = $Result.DefaultSelection<Prisma.$KnowledgeRepositoryConnectionPayload>
+export type KnowledgeSpace = $Result.DefaultSelection<Prisma.$KnowledgeSpacePayload>
+/**
+ * Model KnowledgeRemoteBinding
+ * ADR-089 durable user choice: one GitHub repository is bound to a KnowledgeSpace.
+ * Provider health, sync history safety and projection state live in separate models.
+ */
+export type KnowledgeRemoteBinding = $Result.DefaultSelection<Prisma.$KnowledgeRemoteBindingPayload>
+/**
+ * Model RemoteRepositoryObservation
+ * Latest provider observation. Provider loss never disconnects the durable binding.
+ */
+export type RemoteRepositoryObservation = $Result.DefaultSelection<Prisma.$RemoteRepositoryObservationPayload>
+/**
+ * Model RemoteHistoryFence
+ * Remote Git history safety cursor confirmed by the Desktop Git runtime + server preflight.
+ */
+export type RemoteHistoryFence = $Result.DefaultSelection<Prisma.$RemoteHistoryFencePayload>
+/**
+ * Model KnowledgeProjectionCheckpoint
+ * Server projection cursor/failure axis, independent from binding/provider state.
+ */
+export type KnowledgeProjectionCheckpoint = $Result.DefaultSelection<Prisma.$KnowledgeProjectionCheckpointPayload>
 /**
  * Model GithubWebhookDelivery
  * Deduplication and processing cursor for GitHub webhook deliveries.
@@ -1354,14 +1374,54 @@ export class PrismaClient<
   get knowledgeRepositoryInstallationIntent(): Prisma.KnowledgeRepositoryInstallationIntentDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.knowledgeRepositoryConnection`: Exposes CRUD operations for the **KnowledgeRepositoryConnection** model.
+   * `prisma.knowledgeSpace`: Exposes CRUD operations for the **KnowledgeSpace** model.
     * Example usage:
     * ```ts
-    * // Fetch zero or more KnowledgeRepositoryConnections
-    * const knowledgeRepositoryConnections = await prisma.knowledgeRepositoryConnection.findMany()
+    * // Fetch zero or more KnowledgeSpaces
+    * const knowledgeSpaces = await prisma.knowledgeSpace.findMany()
     * ```
     */
-  get knowledgeRepositoryConnection(): Prisma.KnowledgeRepositoryConnectionDelegate<ExtArgs, ClientOptions>;
+  get knowledgeSpace(): Prisma.KnowledgeSpaceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.knowledgeRemoteBinding`: Exposes CRUD operations for the **KnowledgeRemoteBinding** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more KnowledgeRemoteBindings
+    * const knowledgeRemoteBindings = await prisma.knowledgeRemoteBinding.findMany()
+    * ```
+    */
+  get knowledgeRemoteBinding(): Prisma.KnowledgeRemoteBindingDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.remoteRepositoryObservation`: Exposes CRUD operations for the **RemoteRepositoryObservation** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RemoteRepositoryObservations
+    * const remoteRepositoryObservations = await prisma.remoteRepositoryObservation.findMany()
+    * ```
+    */
+  get remoteRepositoryObservation(): Prisma.RemoteRepositoryObservationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.remoteHistoryFence`: Exposes CRUD operations for the **RemoteHistoryFence** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RemoteHistoryFences
+    * const remoteHistoryFences = await prisma.remoteHistoryFence.findMany()
+    * ```
+    */
+  get remoteHistoryFence(): Prisma.RemoteHistoryFenceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.knowledgeProjectionCheckpoint`: Exposes CRUD operations for the **KnowledgeProjectionCheckpoint** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more KnowledgeProjectionCheckpoints
+    * const knowledgeProjectionCheckpoints = await prisma.knowledgeProjectionCheckpoint.findMany()
+    * ```
+    */
+  get knowledgeProjectionCheckpoint(): Prisma.KnowledgeProjectionCheckpointDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.githubWebhookDelivery`: Exposes CRUD operations for the **GithubWebhookDelivery** model.
@@ -2107,7 +2167,11 @@ export namespace Prisma {
     RepositoryExplorer: 'RepositoryExplorer',
     RepositoryStatistic: 'RepositoryStatistic',
     KnowledgeRepositoryInstallationIntent: 'KnowledgeRepositoryInstallationIntent',
-    KnowledgeRepositoryConnection: 'KnowledgeRepositoryConnection',
+    KnowledgeSpace: 'KnowledgeSpace',
+    KnowledgeRemoteBinding: 'KnowledgeRemoteBinding',
+    RemoteRepositoryObservation: 'RemoteRepositoryObservation',
+    RemoteHistoryFence: 'RemoteHistoryFence',
+    KnowledgeProjectionCheckpoint: 'KnowledgeProjectionCheckpoint',
     GithubWebhookDelivery: 'GithubWebhookDelivery',
     KnowledgeNoteProjection: 'KnowledgeNoteProjection',
     KnowledgeAttachmentProjection: 'KnowledgeAttachmentProjection',
@@ -2147,7 +2211,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "editorWorkspace" | "editorWorkspaceSession" | "editorWorkspaceSessionGroup" | "editorWorkspaceSessionGroupTab" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeRepositoryConnection" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "taskStatistic" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "editorWorkspace" | "editorWorkspaceSession" | "editorWorkspaceSessionGroup" | "editorWorkspaceSessionGroupTab" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "taskStatistic" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -7405,77 +7469,373 @@ export namespace Prisma {
           }
         }
       }
-      KnowledgeRepositoryConnection: {
-        payload: Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>
-        fields: Prisma.KnowledgeRepositoryConnectionFieldRefs
+      KnowledgeSpace: {
+        payload: Prisma.$KnowledgeSpacePayload<ExtArgs>
+        fields: Prisma.KnowledgeSpaceFieldRefs
         operations: {
           findUnique: {
-            args: Prisma.KnowledgeRepositoryConnectionFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeRepositoryConnectionPayload> | null
+            args: Prisma.KnowledgeSpaceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeSpacePayload> | null
           }
           findUniqueOrThrow: {
-            args: Prisma.KnowledgeRepositoryConnectionFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeRepositoryConnectionPayload>
+            args: Prisma.KnowledgeSpaceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeSpacePayload>
           }
           findFirst: {
-            args: Prisma.KnowledgeRepositoryConnectionFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeRepositoryConnectionPayload> | null
+            args: Prisma.KnowledgeSpaceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeSpacePayload> | null
           }
           findFirstOrThrow: {
-            args: Prisma.KnowledgeRepositoryConnectionFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeRepositoryConnectionPayload>
+            args: Prisma.KnowledgeSpaceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeSpacePayload>
           }
           findMany: {
-            args: Prisma.KnowledgeRepositoryConnectionFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeRepositoryConnectionPayload>[]
+            args: Prisma.KnowledgeSpaceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeSpacePayload>[]
           }
           create: {
-            args: Prisma.KnowledgeRepositoryConnectionCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeRepositoryConnectionPayload>
+            args: Prisma.KnowledgeSpaceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeSpacePayload>
           }
           createMany: {
-            args: Prisma.KnowledgeRepositoryConnectionCreateManyArgs<ExtArgs>
+            args: Prisma.KnowledgeSpaceCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
           createManyAndReturn: {
-            args: Prisma.KnowledgeRepositoryConnectionCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeRepositoryConnectionPayload>[]
+            args: Prisma.KnowledgeSpaceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeSpacePayload>[]
           }
           delete: {
-            args: Prisma.KnowledgeRepositoryConnectionDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeRepositoryConnectionPayload>
+            args: Prisma.KnowledgeSpaceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeSpacePayload>
           }
           update: {
-            args: Prisma.KnowledgeRepositoryConnectionUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeRepositoryConnectionPayload>
+            args: Prisma.KnowledgeSpaceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeSpacePayload>
           }
           deleteMany: {
-            args: Prisma.KnowledgeRepositoryConnectionDeleteManyArgs<ExtArgs>
+            args: Prisma.KnowledgeSpaceDeleteManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateMany: {
-            args: Prisma.KnowledgeRepositoryConnectionUpdateManyArgs<ExtArgs>
+            args: Prisma.KnowledgeSpaceUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
           updateManyAndReturn: {
-            args: Prisma.KnowledgeRepositoryConnectionUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeRepositoryConnectionPayload>[]
+            args: Prisma.KnowledgeSpaceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeSpacePayload>[]
           }
           upsert: {
-            args: Prisma.KnowledgeRepositoryConnectionUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$KnowledgeRepositoryConnectionPayload>
+            args: Prisma.KnowledgeSpaceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeSpacePayload>
           }
           aggregate: {
-            args: Prisma.KnowledgeRepositoryConnectionAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateKnowledgeRepositoryConnection>
+            args: Prisma.KnowledgeSpaceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateKnowledgeSpace>
           }
           groupBy: {
-            args: Prisma.KnowledgeRepositoryConnectionGroupByArgs<ExtArgs>
-            result: $Utils.Optional<KnowledgeRepositoryConnectionGroupByOutputType>[]
+            args: Prisma.KnowledgeSpaceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<KnowledgeSpaceGroupByOutputType>[]
           }
           count: {
-            args: Prisma.KnowledgeRepositoryConnectionCountArgs<ExtArgs>
-            result: $Utils.Optional<KnowledgeRepositoryConnectionCountAggregateOutputType> | number
+            args: Prisma.KnowledgeSpaceCountArgs<ExtArgs>
+            result: $Utils.Optional<KnowledgeSpaceCountAggregateOutputType> | number
+          }
+        }
+      }
+      KnowledgeRemoteBinding: {
+        payload: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>
+        fields: Prisma.KnowledgeRemoteBindingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.KnowledgeRemoteBindingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeRemoteBindingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.KnowledgeRemoteBindingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeRemoteBindingPayload>
+          }
+          findFirst: {
+            args: Prisma.KnowledgeRemoteBindingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeRemoteBindingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.KnowledgeRemoteBindingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeRemoteBindingPayload>
+          }
+          findMany: {
+            args: Prisma.KnowledgeRemoteBindingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeRemoteBindingPayload>[]
+          }
+          create: {
+            args: Prisma.KnowledgeRemoteBindingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeRemoteBindingPayload>
+          }
+          createMany: {
+            args: Prisma.KnowledgeRemoteBindingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.KnowledgeRemoteBindingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeRemoteBindingPayload>[]
+          }
+          delete: {
+            args: Prisma.KnowledgeRemoteBindingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeRemoteBindingPayload>
+          }
+          update: {
+            args: Prisma.KnowledgeRemoteBindingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeRemoteBindingPayload>
+          }
+          deleteMany: {
+            args: Prisma.KnowledgeRemoteBindingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.KnowledgeRemoteBindingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.KnowledgeRemoteBindingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeRemoteBindingPayload>[]
+          }
+          upsert: {
+            args: Prisma.KnowledgeRemoteBindingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeRemoteBindingPayload>
+          }
+          aggregate: {
+            args: Prisma.KnowledgeRemoteBindingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateKnowledgeRemoteBinding>
+          }
+          groupBy: {
+            args: Prisma.KnowledgeRemoteBindingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<KnowledgeRemoteBindingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.KnowledgeRemoteBindingCountArgs<ExtArgs>
+            result: $Utils.Optional<KnowledgeRemoteBindingCountAggregateOutputType> | number
+          }
+        }
+      }
+      RemoteRepositoryObservation: {
+        payload: Prisma.$RemoteRepositoryObservationPayload<ExtArgs>
+        fields: Prisma.RemoteRepositoryObservationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RemoteRepositoryObservationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteRepositoryObservationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RemoteRepositoryObservationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteRepositoryObservationPayload>
+          }
+          findFirst: {
+            args: Prisma.RemoteRepositoryObservationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteRepositoryObservationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RemoteRepositoryObservationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteRepositoryObservationPayload>
+          }
+          findMany: {
+            args: Prisma.RemoteRepositoryObservationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteRepositoryObservationPayload>[]
+          }
+          create: {
+            args: Prisma.RemoteRepositoryObservationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteRepositoryObservationPayload>
+          }
+          createMany: {
+            args: Prisma.RemoteRepositoryObservationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RemoteRepositoryObservationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteRepositoryObservationPayload>[]
+          }
+          delete: {
+            args: Prisma.RemoteRepositoryObservationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteRepositoryObservationPayload>
+          }
+          update: {
+            args: Prisma.RemoteRepositoryObservationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteRepositoryObservationPayload>
+          }
+          deleteMany: {
+            args: Prisma.RemoteRepositoryObservationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RemoteRepositoryObservationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RemoteRepositoryObservationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteRepositoryObservationPayload>[]
+          }
+          upsert: {
+            args: Prisma.RemoteRepositoryObservationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteRepositoryObservationPayload>
+          }
+          aggregate: {
+            args: Prisma.RemoteRepositoryObservationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRemoteRepositoryObservation>
+          }
+          groupBy: {
+            args: Prisma.RemoteRepositoryObservationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RemoteRepositoryObservationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RemoteRepositoryObservationCountArgs<ExtArgs>
+            result: $Utils.Optional<RemoteRepositoryObservationCountAggregateOutputType> | number
+          }
+        }
+      }
+      RemoteHistoryFence: {
+        payload: Prisma.$RemoteHistoryFencePayload<ExtArgs>
+        fields: Prisma.RemoteHistoryFenceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RemoteHistoryFenceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteHistoryFencePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RemoteHistoryFenceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteHistoryFencePayload>
+          }
+          findFirst: {
+            args: Prisma.RemoteHistoryFenceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteHistoryFencePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RemoteHistoryFenceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteHistoryFencePayload>
+          }
+          findMany: {
+            args: Prisma.RemoteHistoryFenceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteHistoryFencePayload>[]
+          }
+          create: {
+            args: Prisma.RemoteHistoryFenceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteHistoryFencePayload>
+          }
+          createMany: {
+            args: Prisma.RemoteHistoryFenceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RemoteHistoryFenceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteHistoryFencePayload>[]
+          }
+          delete: {
+            args: Prisma.RemoteHistoryFenceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteHistoryFencePayload>
+          }
+          update: {
+            args: Prisma.RemoteHistoryFenceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteHistoryFencePayload>
+          }
+          deleteMany: {
+            args: Prisma.RemoteHistoryFenceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RemoteHistoryFenceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RemoteHistoryFenceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteHistoryFencePayload>[]
+          }
+          upsert: {
+            args: Prisma.RemoteHistoryFenceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RemoteHistoryFencePayload>
+          }
+          aggregate: {
+            args: Prisma.RemoteHistoryFenceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRemoteHistoryFence>
+          }
+          groupBy: {
+            args: Prisma.RemoteHistoryFenceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RemoteHistoryFenceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RemoteHistoryFenceCountArgs<ExtArgs>
+            result: $Utils.Optional<RemoteHistoryFenceCountAggregateOutputType> | number
+          }
+        }
+      }
+      KnowledgeProjectionCheckpoint: {
+        payload: Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>
+        fields: Prisma.KnowledgeProjectionCheckpointFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.KnowledgeProjectionCheckpointFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeProjectionCheckpointPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.KnowledgeProjectionCheckpointFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeProjectionCheckpointPayload>
+          }
+          findFirst: {
+            args: Prisma.KnowledgeProjectionCheckpointFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeProjectionCheckpointPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.KnowledgeProjectionCheckpointFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeProjectionCheckpointPayload>
+          }
+          findMany: {
+            args: Prisma.KnowledgeProjectionCheckpointFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeProjectionCheckpointPayload>[]
+          }
+          create: {
+            args: Prisma.KnowledgeProjectionCheckpointCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeProjectionCheckpointPayload>
+          }
+          createMany: {
+            args: Prisma.KnowledgeProjectionCheckpointCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.KnowledgeProjectionCheckpointCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeProjectionCheckpointPayload>[]
+          }
+          delete: {
+            args: Prisma.KnowledgeProjectionCheckpointDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeProjectionCheckpointPayload>
+          }
+          update: {
+            args: Prisma.KnowledgeProjectionCheckpointUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeProjectionCheckpointPayload>
+          }
+          deleteMany: {
+            args: Prisma.KnowledgeProjectionCheckpointDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.KnowledgeProjectionCheckpointUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.KnowledgeProjectionCheckpointUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeProjectionCheckpointPayload>[]
+          }
+          upsert: {
+            args: Prisma.KnowledgeProjectionCheckpointUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KnowledgeProjectionCheckpointPayload>
+          }
+          aggregate: {
+            args: Prisma.KnowledgeProjectionCheckpointAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateKnowledgeProjectionCheckpoint>
+          }
+          groupBy: {
+            args: Prisma.KnowledgeProjectionCheckpointGroupByArgs<ExtArgs>
+            result: $Utils.Optional<KnowledgeProjectionCheckpointGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.KnowledgeProjectionCheckpointCountArgs<ExtArgs>
+            result: $Utils.Optional<KnowledgeProjectionCheckpointCountAggregateOutputType> | number
           }
         }
       }
@@ -9434,7 +9794,11 @@ export namespace Prisma {
     repositoryExplorer?: RepositoryExplorerOmit
     repositoryStatistic?: RepositoryStatisticOmit
     knowledgeRepositoryInstallationIntent?: KnowledgeRepositoryInstallationIntentOmit
-    knowledgeRepositoryConnection?: KnowledgeRepositoryConnectionOmit
+    knowledgeSpace?: KnowledgeSpaceOmit
+    knowledgeRemoteBinding?: KnowledgeRemoteBindingOmit
+    remoteRepositoryObservation?: RemoteRepositoryObservationOmit
+    remoteHistoryFence?: RemoteHistoryFenceOmit
+    knowledgeProjectionCheckpoint?: KnowledgeProjectionCheckpointOmit
     githubWebhookDelivery?: GithubWebhookDeliveryOmit
     knowledgeNoteProjection?: KnowledgeNoteProjectionOmit
     knowledgeAttachmentProjection?: KnowledgeAttachmentProjectionOmit
@@ -9588,7 +9952,7 @@ export namespace Prisma {
     folders: number
     resources: number
     repositoryResources: number
-    knowledgeRepositoryConnections: number
+    knowledgeRemoteBindings: number
     knowledgeRepositoryInstallationIntents: number
     knowledgeWriteRequests: number
   }
@@ -9643,7 +10007,7 @@ export namespace Prisma {
     folders?: boolean | AccountCountOutputTypeCountFoldersArgs
     resources?: boolean | AccountCountOutputTypeCountResourcesArgs
     repositoryResources?: boolean | AccountCountOutputTypeCountRepositoryResourcesArgs
-    knowledgeRepositoryConnections?: boolean | AccountCountOutputTypeCountKnowledgeRepositoryConnectionsArgs
+    knowledgeRemoteBindings?: boolean | AccountCountOutputTypeCountKnowledgeRemoteBindingsArgs
     knowledgeRepositoryInstallationIntents?: boolean | AccountCountOutputTypeCountKnowledgeRepositoryInstallationIntentsArgs
     knowledgeWriteRequests?: boolean | AccountCountOutputTypeCountKnowledgeWriteRequestsArgs
   }
@@ -10005,8 +10369,8 @@ export namespace Prisma {
   /**
    * AccountCountOutputType without action
    */
-  export type AccountCountOutputTypeCountKnowledgeRepositoryConnectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KnowledgeRepositoryConnectionWhereInput
+  export type AccountCountOutputTypeCountKnowledgeRemoteBindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KnowledgeRemoteBindingWhereInput
   }
 
   /**
@@ -10794,10 +11158,41 @@ export namespace Prisma {
 
 
   /**
-   * Count Type KnowledgeRepositoryConnectionCountOutputType
+   * Count Type KnowledgeSpaceCountOutputType
    */
 
-  export type KnowledgeRepositoryConnectionCountOutputType = {
+  export type KnowledgeSpaceCountOutputType = {
+    remoteBindings: number
+  }
+
+  export type KnowledgeSpaceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    remoteBindings?: boolean | KnowledgeSpaceCountOutputTypeCountRemoteBindingsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * KnowledgeSpaceCountOutputType without action
+   */
+  export type KnowledgeSpaceCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeSpaceCountOutputType
+     */
+    select?: KnowledgeSpaceCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * KnowledgeSpaceCountOutputType without action
+   */
+  export type KnowledgeSpaceCountOutputTypeCountRemoteBindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KnowledgeRemoteBindingWhereInput
+  }
+
+
+  /**
+   * Count Type KnowledgeRemoteBindingCountOutputType
+   */
+
+  export type KnowledgeRemoteBindingCountOutputType = {
     webhookDeliveries: number
     noteProjections: number
     attachmentProjections: number
@@ -10805,57 +11200,57 @@ export namespace Prisma {
     writeRequests: number
   }
 
-  export type KnowledgeRepositoryConnectionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    webhookDeliveries?: boolean | KnowledgeRepositoryConnectionCountOutputTypeCountWebhookDeliveriesArgs
-    noteProjections?: boolean | KnowledgeRepositoryConnectionCountOutputTypeCountNoteProjectionsArgs
-    attachmentProjections?: boolean | KnowledgeRepositoryConnectionCountOutputTypeCountAttachmentProjectionsArgs
-    attachmentContentCaches?: boolean | KnowledgeRepositoryConnectionCountOutputTypeCountAttachmentContentCachesArgs
-    writeRequests?: boolean | KnowledgeRepositoryConnectionCountOutputTypeCountWriteRequestsArgs
+  export type KnowledgeRemoteBindingCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    webhookDeliveries?: boolean | KnowledgeRemoteBindingCountOutputTypeCountWebhookDeliveriesArgs
+    noteProjections?: boolean | KnowledgeRemoteBindingCountOutputTypeCountNoteProjectionsArgs
+    attachmentProjections?: boolean | KnowledgeRemoteBindingCountOutputTypeCountAttachmentProjectionsArgs
+    attachmentContentCaches?: boolean | KnowledgeRemoteBindingCountOutputTypeCountAttachmentContentCachesArgs
+    writeRequests?: boolean | KnowledgeRemoteBindingCountOutputTypeCountWriteRequestsArgs
   }
 
   // Custom InputTypes
   /**
-   * KnowledgeRepositoryConnectionCountOutputType without action
+   * KnowledgeRemoteBindingCountOutputType without action
    */
-  export type KnowledgeRepositoryConnectionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnectionCountOutputType
+     * Select specific fields to fetch from the KnowledgeRemoteBindingCountOutputType
      */
-    select?: KnowledgeRepositoryConnectionCountOutputTypeSelect<ExtArgs> | null
+    select?: KnowledgeRemoteBindingCountOutputTypeSelect<ExtArgs> | null
   }
 
   /**
-   * KnowledgeRepositoryConnectionCountOutputType without action
+   * KnowledgeRemoteBindingCountOutputType without action
    */
-  export type KnowledgeRepositoryConnectionCountOutputTypeCountWebhookDeliveriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingCountOutputTypeCountWebhookDeliveriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: GithubWebhookDeliveryWhereInput
   }
 
   /**
-   * KnowledgeRepositoryConnectionCountOutputType without action
+   * KnowledgeRemoteBindingCountOutputType without action
    */
-  export type KnowledgeRepositoryConnectionCountOutputTypeCountNoteProjectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingCountOutputTypeCountNoteProjectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: KnowledgeNoteProjectionWhereInput
   }
 
   /**
-   * KnowledgeRepositoryConnectionCountOutputType without action
+   * KnowledgeRemoteBindingCountOutputType without action
    */
-  export type KnowledgeRepositoryConnectionCountOutputTypeCountAttachmentProjectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingCountOutputTypeCountAttachmentProjectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: KnowledgeAttachmentProjectionWhereInput
   }
 
   /**
-   * KnowledgeRepositoryConnectionCountOutputType without action
+   * KnowledgeRemoteBindingCountOutputType without action
    */
-  export type KnowledgeRepositoryConnectionCountOutputTypeCountAttachmentContentCachesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingCountOutputTypeCountAttachmentContentCachesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: KnowledgeAttachmentContentCacheWhereInput
   }
 
   /**
-   * KnowledgeRepositoryConnectionCountOutputType without action
+   * KnowledgeRemoteBindingCountOutputType without action
    */
-  export type KnowledgeRepositoryConnectionCountOutputTypeCountWriteRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingCountOutputTypeCountWriteRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: KnowledgeWriteRequestWhereInput
   }
 
@@ -11200,7 +11595,7 @@ export namespace Prisma {
     folders?: boolean | Account$foldersArgs<ExtArgs>
     resources?: boolean | Account$resourcesArgs<ExtArgs>
     repositoryResources?: boolean | Account$repositoryResourcesArgs<ExtArgs>
-    knowledgeRepositoryConnections?: boolean | Account$knowledgeRepositoryConnectionsArgs<ExtArgs>
+    knowledgeRemoteBindings?: boolean | Account$knowledgeRemoteBindingsArgs<ExtArgs>
     knowledgeRepositoryInstallationIntents?: boolean | Account$knowledgeRepositoryInstallationIntentsArgs<ExtArgs>
     knowledgeWriteRequests?: boolean | Account$knowledgeWriteRequestsArgs<ExtArgs>
     _count?: boolean | AccountCountOutputTypeDefaultArgs<ExtArgs>
@@ -11294,7 +11689,7 @@ export namespace Prisma {
     folders?: boolean | Account$foldersArgs<ExtArgs>
     resources?: boolean | Account$resourcesArgs<ExtArgs>
     repositoryResources?: boolean | Account$repositoryResourcesArgs<ExtArgs>
-    knowledgeRepositoryConnections?: boolean | Account$knowledgeRepositoryConnectionsArgs<ExtArgs>
+    knowledgeRemoteBindings?: boolean | Account$knowledgeRemoteBindingsArgs<ExtArgs>
     knowledgeRepositoryInstallationIntents?: boolean | Account$knowledgeRepositoryInstallationIntentsArgs<ExtArgs>
     knowledgeWriteRequests?: boolean | Account$knowledgeWriteRequestsArgs<ExtArgs>
     _count?: boolean | AccountCountOutputTypeDefaultArgs<ExtArgs>
@@ -11366,7 +11761,7 @@ export namespace Prisma {
       folders: Prisma.$FolderPayload<ExtArgs>[]
       resources: Prisma.$ResourcePayload<ExtArgs>[]
       repositoryResources: Prisma.$RepositoryResourcePayload<ExtArgs>[]
-      knowledgeRepositoryConnections: Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>[]
+      knowledgeRemoteBindings: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>[]
       knowledgeRepositoryInstallationIntents: Prisma.$KnowledgeRepositoryInstallationIntentPayload<ExtArgs>[]
       knowledgeWriteRequests: Prisma.$KnowledgeWriteRequestPayload<ExtArgs>[]
     }
@@ -11828,7 +12223,7 @@ export namespace Prisma {
     folders<T extends Account$foldersArgs<ExtArgs> = {}>(args?: Subset<T, Account$foldersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     resources<T extends Account$resourcesArgs<ExtArgs> = {}>(args?: Subset<T, Account$resourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     repositoryResources<T extends Account$repositoryResourcesArgs<ExtArgs> = {}>(args?: Subset<T, Account$repositoryResourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RepositoryResourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    knowledgeRepositoryConnections<T extends Account$knowledgeRepositoryConnectionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$knowledgeRepositoryConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    knowledgeRemoteBindings<T extends Account$knowledgeRemoteBindingsArgs<ExtArgs> = {}>(args?: Subset<T, Account$knowledgeRemoteBindingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     knowledgeRepositoryInstallationIntents<T extends Account$knowledgeRepositoryInstallationIntentsArgs<ExtArgs> = {}>(args?: Subset<T, Account$knowledgeRepositoryInstallationIntentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeRepositoryInstallationIntentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     knowledgeWriteRequests<T extends Account$knowledgeWriteRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Account$knowledgeWriteRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeWriteRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -13576,27 +13971,27 @@ export namespace Prisma {
   }
 
   /**
-   * Account.knowledgeRepositoryConnections
+   * Account.knowledgeRemoteBindings
    */
-  export type Account$knowledgeRepositoryConnectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Account$knowledgeRemoteBindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
      */
-    select?: KnowledgeRepositoryConnectionSelect<ExtArgs> | null
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeRemoteBinding
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionInclude<ExtArgs> | null
-    where?: KnowledgeRepositoryConnectionWhereInput
-    orderBy?: KnowledgeRepositoryConnectionOrderByWithRelationInput | KnowledgeRepositoryConnectionOrderByWithRelationInput[]
-    cursor?: KnowledgeRepositoryConnectionWhereUniqueInput
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
+    where?: KnowledgeRemoteBindingWhereInput
+    orderBy?: KnowledgeRemoteBindingOrderByWithRelationInput | KnowledgeRemoteBindingOrderByWithRelationInput[]
+    cursor?: KnowledgeRemoteBindingWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: KnowledgeRepositoryConnectionScalarFieldEnum | KnowledgeRepositoryConnectionScalarFieldEnum[]
+    distinct?: KnowledgeRemoteBindingScalarFieldEnum | KnowledgeRemoteBindingScalarFieldEnum[]
   }
 
   /**
@@ -96645,545 +97040,322 @@ export namespace Prisma {
 
 
   /**
-   * Model KnowledgeRepositoryConnection
+   * Model KnowledgeSpace
    */
 
-  export type AggregateKnowledgeRepositoryConnection = {
-    _count: KnowledgeRepositoryConnectionCountAggregateOutputType | null
-    _avg: KnowledgeRepositoryConnectionAvgAggregateOutputType | null
-    _sum: KnowledgeRepositoryConnectionSumAggregateOutputType | null
-    _min: KnowledgeRepositoryConnectionMinAggregateOutputType | null
-    _max: KnowledgeRepositoryConnectionMaxAggregateOutputType | null
+  export type AggregateKnowledgeSpace = {
+    _count: KnowledgeSpaceCountAggregateOutputType | null
+    _min: KnowledgeSpaceMinAggregateOutputType | null
+    _max: KnowledgeSpaceMaxAggregateOutputType | null
   }
 
-  export type KnowledgeRepositoryConnectionAvgAggregateOutputType = {
-    version: number | null
-  }
-
-  export type KnowledgeRepositoryConnectionSumAggregateOutputType = {
-    version: number | null
-  }
-
-  export type KnowledgeRepositoryConnectionMinAggregateOutputType = {
+  export type KnowledgeSpaceMinAggregateOutputType = {
     id: string | null
-    identityId: string | null
-    githubUserId: string | null
-    githubRepositoryId: string | null
-    githubRepositoryFullName: string | null
-    installationId: string | null
-    defaultBranch: string | null
-    isPrivate: boolean | null
-    status: string | null
-    lastSyncedCommitSha: string | null
-    lastProjectedCommitSha: string | null
-    lastErrorCode: string | null
-    lastErrorMessage: string | null
-    version: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    deletedAt: Date | null
   }
 
-  export type KnowledgeRepositoryConnectionMaxAggregateOutputType = {
+  export type KnowledgeSpaceMaxAggregateOutputType = {
     id: string | null
-    identityId: string | null
-    githubUserId: string | null
-    githubRepositoryId: string | null
-    githubRepositoryFullName: string | null
-    installationId: string | null
-    defaultBranch: string | null
-    isPrivate: boolean | null
-    status: string | null
-    lastSyncedCommitSha: string | null
-    lastProjectedCommitSha: string | null
-    lastErrorCode: string | null
-    lastErrorMessage: string | null
-    version: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    deletedAt: Date | null
   }
 
-  export type KnowledgeRepositoryConnectionCountAggregateOutputType = {
+  export type KnowledgeSpaceCountAggregateOutputType = {
     id: number
-    identityId: number
-    githubUserId: number
-    githubRepositoryId: number
-    githubRepositoryFullName: number
-    installationId: number
-    defaultBranch: number
-    isPrivate: number
-    status: number
-    lastSyncedCommitSha: number
-    lastProjectedCommitSha: number
-    lastErrorCode: number
-    lastErrorMessage: number
-    version: number
     createdAt: number
     updatedAt: number
-    deletedAt: number
     _all: number
   }
 
 
-  export type KnowledgeRepositoryConnectionAvgAggregateInputType = {
-    version?: true
-  }
-
-  export type KnowledgeRepositoryConnectionSumAggregateInputType = {
-    version?: true
-  }
-
-  export type KnowledgeRepositoryConnectionMinAggregateInputType = {
+  export type KnowledgeSpaceMinAggregateInputType = {
     id?: true
-    identityId?: true
-    githubUserId?: true
-    githubRepositoryId?: true
-    githubRepositoryFullName?: true
-    installationId?: true
-    defaultBranch?: true
-    isPrivate?: true
-    status?: true
-    lastSyncedCommitSha?: true
-    lastProjectedCommitSha?: true
-    lastErrorCode?: true
-    lastErrorMessage?: true
-    version?: true
     createdAt?: true
     updatedAt?: true
-    deletedAt?: true
   }
 
-  export type KnowledgeRepositoryConnectionMaxAggregateInputType = {
+  export type KnowledgeSpaceMaxAggregateInputType = {
     id?: true
-    identityId?: true
-    githubUserId?: true
-    githubRepositoryId?: true
-    githubRepositoryFullName?: true
-    installationId?: true
-    defaultBranch?: true
-    isPrivate?: true
-    status?: true
-    lastSyncedCommitSha?: true
-    lastProjectedCommitSha?: true
-    lastErrorCode?: true
-    lastErrorMessage?: true
-    version?: true
     createdAt?: true
     updatedAt?: true
-    deletedAt?: true
   }
 
-  export type KnowledgeRepositoryConnectionCountAggregateInputType = {
+  export type KnowledgeSpaceCountAggregateInputType = {
     id?: true
-    identityId?: true
-    githubUserId?: true
-    githubRepositoryId?: true
-    githubRepositoryFullName?: true
-    installationId?: true
-    defaultBranch?: true
-    isPrivate?: true
-    status?: true
-    lastSyncedCommitSha?: true
-    lastProjectedCommitSha?: true
-    lastErrorCode?: true
-    lastErrorMessage?: true
-    version?: true
     createdAt?: true
     updatedAt?: true
-    deletedAt?: true
     _all?: true
   }
 
-  export type KnowledgeRepositoryConnectionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeSpaceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which KnowledgeRepositoryConnection to aggregate.
+     * Filter which KnowledgeSpace to aggregate.
      */
-    where?: KnowledgeRepositoryConnectionWhereInput
+    where?: KnowledgeSpaceWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of KnowledgeRepositoryConnections to fetch.
+     * Determine the order of KnowledgeSpaces to fetch.
      */
-    orderBy?: KnowledgeRepositoryConnectionOrderByWithRelationInput | KnowledgeRepositoryConnectionOrderByWithRelationInput[]
+    orderBy?: KnowledgeSpaceOrderByWithRelationInput | KnowledgeSpaceOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
      * Sets the start position
      */
-    cursor?: KnowledgeRepositoryConnectionWhereUniqueInput
+    cursor?: KnowledgeSpaceWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` KnowledgeRepositoryConnections from the position of the cursor.
+     * Take `±n` KnowledgeSpaces from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` KnowledgeRepositoryConnections.
+     * Skip the first `n` KnowledgeSpaces.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
-     * Count returned KnowledgeRepositoryConnections
+     * Count returned KnowledgeSpaces
     **/
-    _count?: true | KnowledgeRepositoryConnectionCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: KnowledgeRepositoryConnectionAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: KnowledgeRepositoryConnectionSumAggregateInputType
+    _count?: true | KnowledgeSpaceCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
      * Select which fields to find the minimum value
     **/
-    _min?: KnowledgeRepositoryConnectionMinAggregateInputType
+    _min?: KnowledgeSpaceMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      *
      * Select which fields to find the maximum value
     **/
-    _max?: KnowledgeRepositoryConnectionMaxAggregateInputType
+    _max?: KnowledgeSpaceMaxAggregateInputType
   }
 
-  export type GetKnowledgeRepositoryConnectionAggregateType<T extends KnowledgeRepositoryConnectionAggregateArgs> = {
-        [P in keyof T & keyof AggregateKnowledgeRepositoryConnection]: P extends '_count' | 'count'
+  export type GetKnowledgeSpaceAggregateType<T extends KnowledgeSpaceAggregateArgs> = {
+        [P in keyof T & keyof AggregateKnowledgeSpace]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
-        : GetScalarType<T[P], AggregateKnowledgeRepositoryConnection[P]>
-      : GetScalarType<T[P], AggregateKnowledgeRepositoryConnection[P]>
+        : GetScalarType<T[P], AggregateKnowledgeSpace[P]>
+      : GetScalarType<T[P], AggregateKnowledgeSpace[P]>
   }
 
 
 
 
-  export type KnowledgeRepositoryConnectionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KnowledgeRepositoryConnectionWhereInput
-    orderBy?: KnowledgeRepositoryConnectionOrderByWithAggregationInput | KnowledgeRepositoryConnectionOrderByWithAggregationInput[]
-    by: KnowledgeRepositoryConnectionScalarFieldEnum[] | KnowledgeRepositoryConnectionScalarFieldEnum
-    having?: KnowledgeRepositoryConnectionScalarWhereWithAggregatesInput
+  export type KnowledgeSpaceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KnowledgeSpaceWhereInput
+    orderBy?: KnowledgeSpaceOrderByWithAggregationInput | KnowledgeSpaceOrderByWithAggregationInput[]
+    by: KnowledgeSpaceScalarFieldEnum[] | KnowledgeSpaceScalarFieldEnum
+    having?: KnowledgeSpaceScalarWhereWithAggregatesInput
     take?: number
     skip?: number
-    _count?: KnowledgeRepositoryConnectionCountAggregateInputType | true
-    _avg?: KnowledgeRepositoryConnectionAvgAggregateInputType
-    _sum?: KnowledgeRepositoryConnectionSumAggregateInputType
-    _min?: KnowledgeRepositoryConnectionMinAggregateInputType
-    _max?: KnowledgeRepositoryConnectionMaxAggregateInputType
+    _count?: KnowledgeSpaceCountAggregateInputType | true
+    _min?: KnowledgeSpaceMinAggregateInputType
+    _max?: KnowledgeSpaceMaxAggregateInputType
   }
 
-  export type KnowledgeRepositoryConnectionGroupByOutputType = {
+  export type KnowledgeSpaceGroupByOutputType = {
     id: string
-    identityId: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
-    installationId: string
-    defaultBranch: string
-    isPrivate: boolean
-    status: string
-    lastSyncedCommitSha: string | null
-    lastProjectedCommitSha: string | null
-    lastErrorCode: string | null
-    lastErrorMessage: string | null
-    version: number
     createdAt: Date
     updatedAt: Date
-    deletedAt: Date | null
-    _count: KnowledgeRepositoryConnectionCountAggregateOutputType | null
-    _avg: KnowledgeRepositoryConnectionAvgAggregateOutputType | null
-    _sum: KnowledgeRepositoryConnectionSumAggregateOutputType | null
-    _min: KnowledgeRepositoryConnectionMinAggregateOutputType | null
-    _max: KnowledgeRepositoryConnectionMaxAggregateOutputType | null
+    _count: KnowledgeSpaceCountAggregateOutputType | null
+    _min: KnowledgeSpaceMinAggregateOutputType | null
+    _max: KnowledgeSpaceMaxAggregateOutputType | null
   }
 
-  type GetKnowledgeRepositoryConnectionGroupByPayload<T extends KnowledgeRepositoryConnectionGroupByArgs> = Prisma.PrismaPromise<
+  type GetKnowledgeSpaceGroupByPayload<T extends KnowledgeSpaceGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<KnowledgeRepositoryConnectionGroupByOutputType, T['by']> &
+      PickEnumerable<KnowledgeSpaceGroupByOutputType, T['by']> &
         {
-          [P in ((keyof T) & (keyof KnowledgeRepositoryConnectionGroupByOutputType))]: P extends '_count'
+          [P in ((keyof T) & (keyof KnowledgeSpaceGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
-              : GetScalarType<T[P], KnowledgeRepositoryConnectionGroupByOutputType[P]>
-            : GetScalarType<T[P], KnowledgeRepositoryConnectionGroupByOutputType[P]>
+              : GetScalarType<T[P], KnowledgeSpaceGroupByOutputType[P]>
+            : GetScalarType<T[P], KnowledgeSpaceGroupByOutputType[P]>
         }
       >
     >
 
 
-  export type KnowledgeRepositoryConnectionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type KnowledgeSpaceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    identityId?: boolean
-    githubUserId?: boolean
-    githubRepositoryId?: boolean
-    githubRepositoryFullName?: boolean
-    installationId?: boolean
-    defaultBranch?: boolean
-    isPrivate?: boolean
-    status?: boolean
-    lastSyncedCommitSha?: boolean
-    lastProjectedCommitSha?: boolean
-    lastErrorCode?: boolean
-    lastErrorMessage?: boolean
-    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    webhookDeliveries?: boolean | KnowledgeRepositoryConnection$webhookDeliveriesArgs<ExtArgs>
-    noteProjections?: boolean | KnowledgeRepositoryConnection$noteProjectionsArgs<ExtArgs>
-    attachmentProjections?: boolean | KnowledgeRepositoryConnection$attachmentProjectionsArgs<ExtArgs>
-    attachmentContentCaches?: boolean | KnowledgeRepositoryConnection$attachmentContentCachesArgs<ExtArgs>
-    writeRequests?: boolean | KnowledgeRepositoryConnection$writeRequestsArgs<ExtArgs>
-    _count?: boolean | KnowledgeRepositoryConnectionCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["knowledgeRepositoryConnection"]>
+    remoteBindings?: boolean | KnowledgeSpace$remoteBindingsArgs<ExtArgs>
+    _count?: boolean | KnowledgeSpaceCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["knowledgeSpace"]>
 
-  export type KnowledgeRepositoryConnectionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type KnowledgeSpaceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    identityId?: boolean
-    githubUserId?: boolean
-    githubRepositoryId?: boolean
-    githubRepositoryFullName?: boolean
-    installationId?: boolean
-    defaultBranch?: boolean
-    isPrivate?: boolean
-    status?: boolean
-    lastSyncedCommitSha?: boolean
-    lastProjectedCommitSha?: boolean
-    lastErrorCode?: boolean
-    lastErrorMessage?: boolean
-    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["knowledgeRepositoryConnection"]>
+  }, ExtArgs["result"]["knowledgeSpace"]>
 
-  export type KnowledgeRepositoryConnectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+  export type KnowledgeSpaceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    identityId?: boolean
-    githubUserId?: boolean
-    githubRepositoryId?: boolean
-    githubRepositoryFullName?: boolean
-    installationId?: boolean
-    defaultBranch?: boolean
-    isPrivate?: boolean
-    status?: boolean
-    lastSyncedCommitSha?: boolean
-    lastProjectedCommitSha?: boolean
-    lastErrorCode?: boolean
-    lastErrorMessage?: boolean
-    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["knowledgeRepositoryConnection"]>
+  }, ExtArgs["result"]["knowledgeSpace"]>
 
-  export type KnowledgeRepositoryConnectionSelectScalar = {
+  export type KnowledgeSpaceSelectScalar = {
     id?: boolean
-    identityId?: boolean
-    githubUserId?: boolean
-    githubRepositoryId?: boolean
-    githubRepositoryFullName?: boolean
-    installationId?: boolean
-    defaultBranch?: boolean
-    isPrivate?: boolean
-    status?: boolean
-    lastSyncedCommitSha?: boolean
-    lastProjectedCommitSha?: boolean
-    lastErrorCode?: boolean
-    lastErrorMessage?: boolean
-    version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    deletedAt?: boolean
   }
 
-  export type KnowledgeRepositoryConnectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "githubUserId" | "githubRepositoryId" | "githubRepositoryFullName" | "installationId" | "defaultBranch" | "isPrivate" | "status" | "lastSyncedCommitSha" | "lastProjectedCommitSha" | "lastErrorCode" | "lastErrorMessage" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["knowledgeRepositoryConnection"]>
-  export type KnowledgeRepositoryConnectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    webhookDeliveries?: boolean | KnowledgeRepositoryConnection$webhookDeliveriesArgs<ExtArgs>
-    noteProjections?: boolean | KnowledgeRepositoryConnection$noteProjectionsArgs<ExtArgs>
-    attachmentProjections?: boolean | KnowledgeRepositoryConnection$attachmentProjectionsArgs<ExtArgs>
-    attachmentContentCaches?: boolean | KnowledgeRepositoryConnection$attachmentContentCachesArgs<ExtArgs>
-    writeRequests?: boolean | KnowledgeRepositoryConnection$writeRequestsArgs<ExtArgs>
-    _count?: boolean | KnowledgeRepositoryConnectionCountOutputTypeDefaultArgs<ExtArgs>
+  export type KnowledgeSpaceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt", ExtArgs["result"]["knowledgeSpace"]>
+  export type KnowledgeSpaceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    remoteBindings?: boolean | KnowledgeSpace$remoteBindingsArgs<ExtArgs>
+    _count?: boolean | KnowledgeSpaceCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type KnowledgeRepositoryConnectionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type KnowledgeRepositoryConnectionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
+  export type KnowledgeSpaceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type KnowledgeSpaceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
-  export type $KnowledgeRepositoryConnectionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "KnowledgeRepositoryConnection"
+  export type $KnowledgeSpacePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "KnowledgeSpace"
     objects: {
-      account: Prisma.$AccountPayload<ExtArgs>
-      webhookDeliveries: Prisma.$GithubWebhookDeliveryPayload<ExtArgs>[]
-      noteProjections: Prisma.$KnowledgeNoteProjectionPayload<ExtArgs>[]
-      attachmentProjections: Prisma.$KnowledgeAttachmentProjectionPayload<ExtArgs>[]
-      attachmentContentCaches: Prisma.$KnowledgeAttachmentContentCachePayload<ExtArgs>[]
-      writeRequests: Prisma.$KnowledgeWriteRequestPayload<ExtArgs>[]
+      remoteBindings: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      identityId: string
-      githubUserId: string
-      githubRepositoryId: string
-      githubRepositoryFullName: string
-      installationId: string
-      defaultBranch: string
-      isPrivate: boolean
-      status: string
-      lastSyncedCommitSha: string | null
-      lastProjectedCommitSha: string | null
-      lastErrorCode: string | null
-      lastErrorMessage: string | null
-      version: number
       createdAt: Date
       updatedAt: Date
-      deletedAt: Date | null
-    }, ExtArgs["result"]["knowledgeRepositoryConnection"]>
+    }, ExtArgs["result"]["knowledgeSpace"]>
     composites: {}
   }
 
-  type KnowledgeRepositoryConnectionGetPayload<S extends boolean | null | undefined | KnowledgeRepositoryConnectionDefaultArgs> = $Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload, S>
+  type KnowledgeSpaceGetPayload<S extends boolean | null | undefined | KnowledgeSpaceDefaultArgs> = $Result.GetResult<Prisma.$KnowledgeSpacePayload, S>
 
-  type KnowledgeRepositoryConnectionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<KnowledgeRepositoryConnectionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: KnowledgeRepositoryConnectionCountAggregateInputType | true
+  type KnowledgeSpaceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<KnowledgeSpaceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: KnowledgeSpaceCountAggregateInputType | true
     }
 
-  export interface KnowledgeRepositoryConnectionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KnowledgeRepositoryConnection'], meta: { name: 'KnowledgeRepositoryConnection' } }
+  export interface KnowledgeSpaceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KnowledgeSpace'], meta: { name: 'KnowledgeSpace' } }
     /**
-     * Find zero or one KnowledgeRepositoryConnection that matches the filter.
-     * @param {KnowledgeRepositoryConnectionFindUniqueArgs} args - Arguments to find a KnowledgeRepositoryConnection
+     * Find zero or one KnowledgeSpace that matches the filter.
+     * @param {KnowledgeSpaceFindUniqueArgs} args - Arguments to find a KnowledgeSpace
      * @example
-     * // Get one KnowledgeRepositoryConnection
-     * const knowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.findUnique({
+     * // Get one KnowledgeSpace
+     * const knowledgeSpace = await prisma.knowledgeSpace.findUnique({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUnique<T extends KnowledgeRepositoryConnectionFindUniqueArgs>(args: SelectSubset<T, KnowledgeRepositoryConnectionFindUniqueArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends KnowledgeSpaceFindUniqueArgs>(args: SelectSubset<T, KnowledgeSpaceFindUniqueArgs<ExtArgs>>): Prisma__KnowledgeSpaceClient<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find one KnowledgeRepositoryConnection that matches the filter or throw an error with `error.code='P2025'`
+     * Find one KnowledgeSpace that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {KnowledgeRepositoryConnectionFindUniqueOrThrowArgs} args - Arguments to find a KnowledgeRepositoryConnection
+     * @param {KnowledgeSpaceFindUniqueOrThrowArgs} args - Arguments to find a KnowledgeSpace
      * @example
-     * // Get one KnowledgeRepositoryConnection
-     * const knowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.findUniqueOrThrow({
+     * // Get one KnowledgeSpace
+     * const knowledgeSpace = await prisma.knowledgeSpace.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findUniqueOrThrow<T extends KnowledgeRepositoryConnectionFindUniqueOrThrowArgs>(args: SelectSubset<T, KnowledgeRepositoryConnectionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends KnowledgeSpaceFindUniqueOrThrowArgs>(args: SelectSubset<T, KnowledgeSpaceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KnowledgeSpaceClient<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first KnowledgeRepositoryConnection that matches the filter.
+     * Find the first KnowledgeSpace that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeRepositoryConnectionFindFirstArgs} args - Arguments to find a KnowledgeRepositoryConnection
+     * @param {KnowledgeSpaceFindFirstArgs} args - Arguments to find a KnowledgeSpace
      * @example
-     * // Get one KnowledgeRepositoryConnection
-     * const knowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.findFirst({
+     * // Get one KnowledgeSpace
+     * const knowledgeSpace = await prisma.knowledgeSpace.findFirst({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirst<T extends KnowledgeRepositoryConnectionFindFirstArgs>(args?: SelectSubset<T, KnowledgeRepositoryConnectionFindFirstArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends KnowledgeSpaceFindFirstArgs>(args?: SelectSubset<T, KnowledgeSpaceFindFirstArgs<ExtArgs>>): Prisma__KnowledgeSpaceClient<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find the first KnowledgeRepositoryConnection that matches the filter or
+     * Find the first KnowledgeSpace that matches the filter or
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeRepositoryConnectionFindFirstOrThrowArgs} args - Arguments to find a KnowledgeRepositoryConnection
+     * @param {KnowledgeSpaceFindFirstOrThrowArgs} args - Arguments to find a KnowledgeSpace
      * @example
-     * // Get one KnowledgeRepositoryConnection
-     * const knowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.findFirstOrThrow({
+     * // Get one KnowledgeSpace
+     * const knowledgeSpace = await prisma.knowledgeSpace.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      */
-    findFirstOrThrow<T extends KnowledgeRepositoryConnectionFindFirstOrThrowArgs>(args?: SelectSubset<T, KnowledgeRepositoryConnectionFindFirstOrThrowArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends KnowledgeSpaceFindFirstOrThrowArgs>(args?: SelectSubset<T, KnowledgeSpaceFindFirstOrThrowArgs<ExtArgs>>): Prisma__KnowledgeSpaceClient<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Find zero or more KnowledgeRepositoryConnections that matches the filter.
+     * Find zero or more KnowledgeSpaces that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeRepositoryConnectionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @param {KnowledgeSpaceFindManyArgs} args - Arguments to filter and select certain fields only.
      * @example
-     * // Get all KnowledgeRepositoryConnections
-     * const knowledgeRepositoryConnections = await prisma.knowledgeRepositoryConnection.findMany()
+     * // Get all KnowledgeSpaces
+     * const knowledgeSpaces = await prisma.knowledgeSpace.findMany()
      *
-     * // Get first 10 KnowledgeRepositoryConnections
-     * const knowledgeRepositoryConnections = await prisma.knowledgeRepositoryConnection.findMany({ take: 10 })
+     * // Get first 10 KnowledgeSpaces
+     * const knowledgeSpaces = await prisma.knowledgeSpace.findMany({ take: 10 })
      *
      * // Only select the `id`
-     * const knowledgeRepositoryConnectionWithIdOnly = await prisma.knowledgeRepositoryConnection.findMany({ select: { id: true } })
+     * const knowledgeSpaceWithIdOnly = await prisma.knowledgeSpace.findMany({ select: { id: true } })
      *
      */
-    findMany<T extends KnowledgeRepositoryConnectionFindManyArgs>(args?: SelectSubset<T, KnowledgeRepositoryConnectionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends KnowledgeSpaceFindManyArgs>(args?: SelectSubset<T, KnowledgeSpaceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
-     * Create a KnowledgeRepositoryConnection.
-     * @param {KnowledgeRepositoryConnectionCreateArgs} args - Arguments to create a KnowledgeRepositoryConnection.
+     * Create a KnowledgeSpace.
+     * @param {KnowledgeSpaceCreateArgs} args - Arguments to create a KnowledgeSpace.
      * @example
-     * // Create one KnowledgeRepositoryConnection
-     * const KnowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.create({
+     * // Create one KnowledgeSpace
+     * const KnowledgeSpace = await prisma.knowledgeSpace.create({
      *   data: {
-     *     // ... data to create a KnowledgeRepositoryConnection
+     *     // ... data to create a KnowledgeSpace
      *   }
      * })
      *
      */
-    create<T extends KnowledgeRepositoryConnectionCreateArgs>(args: SelectSubset<T, KnowledgeRepositoryConnectionCreateArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends KnowledgeSpaceCreateArgs>(args: SelectSubset<T, KnowledgeSpaceCreateArgs<ExtArgs>>): Prisma__KnowledgeSpaceClient<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Create many KnowledgeRepositoryConnections.
-     * @param {KnowledgeRepositoryConnectionCreateManyArgs} args - Arguments to create many KnowledgeRepositoryConnections.
+     * Create many KnowledgeSpaces.
+     * @param {KnowledgeSpaceCreateManyArgs} args - Arguments to create many KnowledgeSpaces.
      * @example
-     * // Create many KnowledgeRepositoryConnections
-     * const knowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.createMany({
+     * // Create many KnowledgeSpaces
+     * const knowledgeSpace = await prisma.knowledgeSpace.createMany({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *
      */
-    createMany<T extends KnowledgeRepositoryConnectionCreateManyArgs>(args?: SelectSubset<T, KnowledgeRepositoryConnectionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends KnowledgeSpaceCreateManyArgs>(args?: SelectSubset<T, KnowledgeSpaceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many KnowledgeRepositoryConnections and returns the data saved in the database.
-     * @param {KnowledgeRepositoryConnectionCreateManyAndReturnArgs} args - Arguments to create many KnowledgeRepositoryConnections.
+     * Create many KnowledgeSpaces and returns the data saved in the database.
+     * @param {KnowledgeSpaceCreateManyAndReturnArgs} args - Arguments to create many KnowledgeSpaces.
      * @example
-     * // Create many KnowledgeRepositoryConnections
-     * const knowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.createManyAndReturn({
+     * // Create many KnowledgeSpaces
+     * const knowledgeSpace = await prisma.knowledgeSpace.createManyAndReturn({
      *   data: [
      *     // ... provide data here
      *   ]
      * })
      *
-     * // Create many KnowledgeRepositoryConnections and only return the `id`
-     * const knowledgeRepositoryConnectionWithIdOnly = await prisma.knowledgeRepositoryConnection.createManyAndReturn({
+     * // Create many KnowledgeSpaces and only return the `id`
+     * const knowledgeSpaceWithIdOnly = await prisma.knowledgeSpace.createManyAndReturn({
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -97193,28 +97365,28 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      *
      */
-    createManyAndReturn<T extends KnowledgeRepositoryConnectionCreateManyAndReturnArgs>(args?: SelectSubset<T, KnowledgeRepositoryConnectionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends KnowledgeSpaceCreateManyAndReturnArgs>(args?: SelectSubset<T, KnowledgeSpaceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Delete a KnowledgeRepositoryConnection.
-     * @param {KnowledgeRepositoryConnectionDeleteArgs} args - Arguments to delete one KnowledgeRepositoryConnection.
+     * Delete a KnowledgeSpace.
+     * @param {KnowledgeSpaceDeleteArgs} args - Arguments to delete one KnowledgeSpace.
      * @example
-     * // Delete one KnowledgeRepositoryConnection
-     * const KnowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.delete({
+     * // Delete one KnowledgeSpace
+     * const KnowledgeSpace = await prisma.knowledgeSpace.delete({
      *   where: {
-     *     // ... filter to delete one KnowledgeRepositoryConnection
+     *     // ... filter to delete one KnowledgeSpace
      *   }
      * })
      *
      */
-    delete<T extends KnowledgeRepositoryConnectionDeleteArgs>(args: SelectSubset<T, KnowledgeRepositoryConnectionDeleteArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends KnowledgeSpaceDeleteArgs>(args: SelectSubset<T, KnowledgeSpaceDeleteArgs<ExtArgs>>): Prisma__KnowledgeSpaceClient<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Update one KnowledgeRepositoryConnection.
-     * @param {KnowledgeRepositoryConnectionUpdateArgs} args - Arguments to update one KnowledgeRepositoryConnection.
+     * Update one KnowledgeSpace.
+     * @param {KnowledgeSpaceUpdateArgs} args - Arguments to update one KnowledgeSpace.
      * @example
-     * // Update one KnowledgeRepositoryConnection
-     * const knowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.update({
+     * // Update one KnowledgeSpace
+     * const knowledgeSpace = await prisma.knowledgeSpace.update({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -97224,30 +97396,30 @@ export namespace Prisma {
      * })
      *
      */
-    update<T extends KnowledgeRepositoryConnectionUpdateArgs>(args: SelectSubset<T, KnowledgeRepositoryConnectionUpdateArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends KnowledgeSpaceUpdateArgs>(args: SelectSubset<T, KnowledgeSpaceUpdateArgs<ExtArgs>>): Prisma__KnowledgeSpaceClient<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
-     * Delete zero or more KnowledgeRepositoryConnections.
-     * @param {KnowledgeRepositoryConnectionDeleteManyArgs} args - Arguments to filter KnowledgeRepositoryConnections to delete.
+     * Delete zero or more KnowledgeSpaces.
+     * @param {KnowledgeSpaceDeleteManyArgs} args - Arguments to filter KnowledgeSpaces to delete.
      * @example
-     * // Delete a few KnowledgeRepositoryConnections
-     * const { count } = await prisma.knowledgeRepositoryConnection.deleteMany({
+     * // Delete a few KnowledgeSpaces
+     * const { count } = await prisma.knowledgeSpace.deleteMany({
      *   where: {
      *     // ... provide filter here
      *   }
      * })
      *
      */
-    deleteMany<T extends KnowledgeRepositoryConnectionDeleteManyArgs>(args?: SelectSubset<T, KnowledgeRepositoryConnectionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends KnowledgeSpaceDeleteManyArgs>(args?: SelectSubset<T, KnowledgeSpaceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more KnowledgeRepositoryConnections.
+     * Update zero or more KnowledgeSpaces.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeRepositoryConnectionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @param {KnowledgeSpaceUpdateManyArgs} args - Arguments to update one or more rows.
      * @example
-     * // Update many KnowledgeRepositoryConnections
-     * const knowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.updateMany({
+     * // Update many KnowledgeSpaces
+     * const knowledgeSpace = await prisma.knowledgeSpace.updateMany({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -97257,14 +97429,14 @@ export namespace Prisma {
      * })
      *
      */
-    updateMany<T extends KnowledgeRepositoryConnectionUpdateManyArgs>(args: SelectSubset<T, KnowledgeRepositoryConnectionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends KnowledgeSpaceUpdateManyArgs>(args: SelectSubset<T, KnowledgeSpaceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more KnowledgeRepositoryConnections and returns the data updated in the database.
-     * @param {KnowledgeRepositoryConnectionUpdateManyAndReturnArgs} args - Arguments to update many KnowledgeRepositoryConnections.
+     * Update zero or more KnowledgeSpaces and returns the data updated in the database.
+     * @param {KnowledgeSpaceUpdateManyAndReturnArgs} args - Arguments to update many KnowledgeSpaces.
      * @example
-     * // Update many KnowledgeRepositoryConnections
-     * const knowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.updateManyAndReturn({
+     * // Update many KnowledgeSpaces
+     * const knowledgeSpace = await prisma.knowledgeSpace.updateManyAndReturn({
      *   where: {
      *     // ... provide filter here
      *   },
@@ -97273,8 +97445,8 @@ export namespace Prisma {
      *   ]
      * })
      *
-     * // Update zero or more KnowledgeRepositoryConnections and only return the `id`
-     * const knowledgeRepositoryConnectionWithIdOnly = await prisma.knowledgeRepositoryConnection.updateManyAndReturn({
+     * // Update zero or more KnowledgeSpaces and only return the `id`
+     * const knowledgeSpaceWithIdOnly = await prisma.knowledgeSpace.updateManyAndReturn({
      *   select: { id: true },
      *   where: {
      *     // ... provide filter here
@@ -97287,56 +97459,56 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      *
      */
-    updateManyAndReturn<T extends KnowledgeRepositoryConnectionUpdateManyAndReturnArgs>(args: SelectSubset<T, KnowledgeRepositoryConnectionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends KnowledgeSpaceUpdateManyAndReturnArgs>(args: SelectSubset<T, KnowledgeSpaceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
-     * Create or update one KnowledgeRepositoryConnection.
-     * @param {KnowledgeRepositoryConnectionUpsertArgs} args - Arguments to update or create a KnowledgeRepositoryConnection.
+     * Create or update one KnowledgeSpace.
+     * @param {KnowledgeSpaceUpsertArgs} args - Arguments to update or create a KnowledgeSpace.
      * @example
-     * // Update or create a KnowledgeRepositoryConnection
-     * const knowledgeRepositoryConnection = await prisma.knowledgeRepositoryConnection.upsert({
+     * // Update or create a KnowledgeSpace
+     * const knowledgeSpace = await prisma.knowledgeSpace.upsert({
      *   create: {
-     *     // ... data to create a KnowledgeRepositoryConnection
+     *     // ... data to create a KnowledgeSpace
      *   },
      *   update: {
      *     // ... in case it already exists, update
      *   },
      *   where: {
-     *     // ... the filter for the KnowledgeRepositoryConnection we want to update
+     *     // ... the filter for the KnowledgeSpace we want to update
      *   }
      * })
      */
-    upsert<T extends KnowledgeRepositoryConnectionUpsertArgs>(args: SelectSubset<T, KnowledgeRepositoryConnectionUpsertArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends KnowledgeSpaceUpsertArgs>(args: SelectSubset<T, KnowledgeSpaceUpsertArgs<ExtArgs>>): Prisma__KnowledgeSpaceClient<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
 
     /**
-     * Count the number of KnowledgeRepositoryConnections.
+     * Count the number of KnowledgeSpaces.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeRepositoryConnectionCountArgs} args - Arguments to filter KnowledgeRepositoryConnections to count.
+     * @param {KnowledgeSpaceCountArgs} args - Arguments to filter KnowledgeSpaces to count.
      * @example
-     * // Count the number of KnowledgeRepositoryConnections
-     * const count = await prisma.knowledgeRepositoryConnection.count({
+     * // Count the number of KnowledgeSpaces
+     * const count = await prisma.knowledgeSpace.count({
      *   where: {
-     *     // ... the filter for the KnowledgeRepositoryConnections we want to count
+     *     // ... the filter for the KnowledgeSpaces we want to count
      *   }
      * })
     **/
-    count<T extends KnowledgeRepositoryConnectionCountArgs>(
-      args?: Subset<T, KnowledgeRepositoryConnectionCountArgs>,
+    count<T extends KnowledgeSpaceCountArgs>(
+      args?: Subset<T, KnowledgeSpaceCountArgs>,
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
           ? number
-          : GetScalarType<T['select'], KnowledgeRepositoryConnectionCountAggregateOutputType>
+          : GetScalarType<T['select'], KnowledgeSpaceCountAggregateOutputType>
         : number
     >
 
     /**
-     * Allows you to perform aggregations operations on a KnowledgeRepositoryConnection.
+     * Allows you to perform aggregations operations on a KnowledgeSpace.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeRepositoryConnectionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @param {KnowledgeSpaceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
      * @example
      * // Ordered by age ascending
      * // Where email contains prisma.io
@@ -97356,13 +97528,13 @@ export namespace Prisma {
      *   take: 10,
      * })
     **/
-    aggregate<T extends KnowledgeRepositoryConnectionAggregateArgs>(args: Subset<T, KnowledgeRepositoryConnectionAggregateArgs>): Prisma.PrismaPromise<GetKnowledgeRepositoryConnectionAggregateType<T>>
+    aggregate<T extends KnowledgeSpaceAggregateArgs>(args: Subset<T, KnowledgeSpaceAggregateArgs>): Prisma.PrismaPromise<GetKnowledgeSpaceAggregateType<T>>
 
     /**
-     * Group by KnowledgeRepositoryConnection.
+     * Group by KnowledgeSpace.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KnowledgeRepositoryConnectionGroupByArgs} args - Group by arguments.
+     * @param {KnowledgeSpaceGroupByArgs} args - Group by arguments.
      * @example
      * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
@@ -97377,14 +97549,14 @@ export namespace Prisma {
      *
     **/
     groupBy<
-      T extends KnowledgeRepositoryConnectionGroupByArgs,
+      T extends KnowledgeSpaceGroupByArgs,
       HasSelectOrTake extends Or<
         Extends<'skip', Keys<T>>,
         Extends<'take', Keys<T>>
       >,
       OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: KnowledgeRepositoryConnectionGroupByArgs['orderBy'] }
-        : { orderBy?: KnowledgeRepositoryConnectionGroupByArgs['orderBy'] },
+        ? { orderBy: KnowledgeSpaceGroupByArgs['orderBy'] }
+        : { orderBy?: KnowledgeSpaceGroupByArgs['orderBy'] },
       OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
@@ -97433,27 +97605,22 @@ export namespace Prisma {
             ? never
             : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
         }[OrderFields]
-    >(args: SubsetIntersection<T, KnowledgeRepositoryConnectionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKnowledgeRepositoryConnectionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+    >(args: SubsetIntersection<T, KnowledgeSpaceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKnowledgeSpaceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
-   * Fields of the KnowledgeRepositoryConnection model
+   * Fields of the KnowledgeSpace model
    */
-  readonly fields: KnowledgeRepositoryConnectionFieldRefs;
+  readonly fields: KnowledgeSpaceFieldRefs;
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for KnowledgeRepositoryConnection.
+   * The delegate class that acts as a "Promise-like" for KnowledgeSpace.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__KnowledgeRepositoryConnectionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__KnowledgeSpaceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    webhookDeliveries<T extends KnowledgeRepositoryConnection$webhookDeliveriesArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRepositoryConnection$webhookDeliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GithubWebhookDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    noteProjections<T extends KnowledgeRepositoryConnection$noteProjectionsArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRepositoryConnection$noteProjectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeNoteProjectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    attachmentProjections<T extends KnowledgeRepositoryConnection$attachmentProjectionsArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRepositoryConnection$attachmentProjectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeAttachmentProjectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    attachmentContentCaches<T extends KnowledgeRepositoryConnection$attachmentContentCachesArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRepositoryConnection$attachmentContentCachesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeAttachmentContentCachePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    writeRequests<T extends KnowledgeRepositoryConnection$writeRequestsArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRepositoryConnection$writeRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeWriteRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    remoteBindings<T extends KnowledgeSpace$remoteBindingsArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeSpace$remoteBindingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -97480,430 +97647,1693 @@ export namespace Prisma {
 
 
   /**
-   * Fields of the KnowledgeRepositoryConnection model
+   * Fields of the KnowledgeSpace model
    */
-  interface KnowledgeRepositoryConnectionFieldRefs {
-    readonly id: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly identityId: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly githubUserId: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly githubRepositoryId: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly githubRepositoryFullName: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly installationId: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly defaultBranch: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly isPrivate: FieldRef<"KnowledgeRepositoryConnection", 'Boolean'>
-    readonly status: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly lastSyncedCommitSha: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly lastProjectedCommitSha: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly lastErrorCode: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly lastErrorMessage: FieldRef<"KnowledgeRepositoryConnection", 'String'>
-    readonly version: FieldRef<"KnowledgeRepositoryConnection", 'Int'>
-    readonly createdAt: FieldRef<"KnowledgeRepositoryConnection", 'DateTime'>
-    readonly updatedAt: FieldRef<"KnowledgeRepositoryConnection", 'DateTime'>
-    readonly deletedAt: FieldRef<"KnowledgeRepositoryConnection", 'DateTime'>
+  interface KnowledgeSpaceFieldRefs {
+    readonly id: FieldRef<"KnowledgeSpace", 'String'>
+    readonly createdAt: FieldRef<"KnowledgeSpace", 'DateTime'>
+    readonly updatedAt: FieldRef<"KnowledgeSpace", 'DateTime'>
   }
 
 
   // Custom InputTypes
   /**
-   * KnowledgeRepositoryConnection findUnique
+   * KnowledgeSpace findUnique
    */
-  export type KnowledgeRepositoryConnectionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeSpaceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeSpace
      */
-    select?: KnowledgeRepositoryConnectionSelect<ExtArgs> | null
+    select?: KnowledgeSpaceSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeSpace
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionInclude<ExtArgs> | null
+    include?: KnowledgeSpaceInclude<ExtArgs> | null
     /**
-     * Filter, which KnowledgeRepositoryConnection to fetch.
+     * Filter, which KnowledgeSpace to fetch.
      */
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
+    where: KnowledgeSpaceWhereUniqueInput
   }
 
   /**
-   * KnowledgeRepositoryConnection findUniqueOrThrow
+   * KnowledgeSpace findUniqueOrThrow
    */
-  export type KnowledgeRepositoryConnectionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeSpaceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeSpace
      */
-    select?: KnowledgeRepositoryConnectionSelect<ExtArgs> | null
+    select?: KnowledgeSpaceSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeSpace
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionInclude<ExtArgs> | null
+    include?: KnowledgeSpaceInclude<ExtArgs> | null
     /**
-     * Filter, which KnowledgeRepositoryConnection to fetch.
+     * Filter, which KnowledgeSpace to fetch.
      */
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
+    where: KnowledgeSpaceWhereUniqueInput
   }
 
   /**
-   * KnowledgeRepositoryConnection findFirst
+   * KnowledgeSpace findFirst
    */
-  export type KnowledgeRepositoryConnectionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeSpaceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeSpace
      */
-    select?: KnowledgeRepositoryConnectionSelect<ExtArgs> | null
+    select?: KnowledgeSpaceSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeSpace
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionInclude<ExtArgs> | null
+    include?: KnowledgeSpaceInclude<ExtArgs> | null
     /**
-     * Filter, which KnowledgeRepositoryConnection to fetch.
+     * Filter, which KnowledgeSpace to fetch.
      */
-    where?: KnowledgeRepositoryConnectionWhereInput
+    where?: KnowledgeSpaceWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of KnowledgeRepositoryConnections to fetch.
+     * Determine the order of KnowledgeSpaces to fetch.
      */
-    orderBy?: KnowledgeRepositoryConnectionOrderByWithRelationInput | KnowledgeRepositoryConnectionOrderByWithRelationInput[]
+    orderBy?: KnowledgeSpaceOrderByWithRelationInput | KnowledgeSpaceOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
-     * Sets the position for searching for KnowledgeRepositoryConnections.
+     * Sets the position for searching for KnowledgeSpaces.
      */
-    cursor?: KnowledgeRepositoryConnectionWhereUniqueInput
+    cursor?: KnowledgeSpaceWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` KnowledgeRepositoryConnections from the position of the cursor.
+     * Take `±n` KnowledgeSpaces from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` KnowledgeRepositoryConnections.
+     * Skip the first `n` KnowledgeSpaces.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      *
-     * Filter by unique combinations of KnowledgeRepositoryConnections.
+     * Filter by unique combinations of KnowledgeSpaces.
      */
-    distinct?: KnowledgeRepositoryConnectionScalarFieldEnum | KnowledgeRepositoryConnectionScalarFieldEnum[]
+    distinct?: KnowledgeSpaceScalarFieldEnum | KnowledgeSpaceScalarFieldEnum[]
   }
 
   /**
-   * KnowledgeRepositoryConnection findFirstOrThrow
+   * KnowledgeSpace findFirstOrThrow
    */
-  export type KnowledgeRepositoryConnectionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeSpaceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeSpace
      */
-    select?: KnowledgeRepositoryConnectionSelect<ExtArgs> | null
+    select?: KnowledgeSpaceSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeSpace
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionInclude<ExtArgs> | null
+    include?: KnowledgeSpaceInclude<ExtArgs> | null
     /**
-     * Filter, which KnowledgeRepositoryConnection to fetch.
+     * Filter, which KnowledgeSpace to fetch.
      */
-    where?: KnowledgeRepositoryConnectionWhereInput
+    where?: KnowledgeSpaceWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of KnowledgeRepositoryConnections to fetch.
+     * Determine the order of KnowledgeSpaces to fetch.
      */
-    orderBy?: KnowledgeRepositoryConnectionOrderByWithRelationInput | KnowledgeRepositoryConnectionOrderByWithRelationInput[]
+    orderBy?: KnowledgeSpaceOrderByWithRelationInput | KnowledgeSpaceOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
-     * Sets the position for searching for KnowledgeRepositoryConnections.
+     * Sets the position for searching for KnowledgeSpaces.
      */
-    cursor?: KnowledgeRepositoryConnectionWhereUniqueInput
+    cursor?: KnowledgeSpaceWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` KnowledgeRepositoryConnections from the position of the cursor.
+     * Take `±n` KnowledgeSpaces from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` KnowledgeRepositoryConnections.
+     * Skip the first `n` KnowledgeSpaces.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      *
-     * Filter by unique combinations of KnowledgeRepositoryConnections.
+     * Filter by unique combinations of KnowledgeSpaces.
      */
-    distinct?: KnowledgeRepositoryConnectionScalarFieldEnum | KnowledgeRepositoryConnectionScalarFieldEnum[]
+    distinct?: KnowledgeSpaceScalarFieldEnum | KnowledgeSpaceScalarFieldEnum[]
   }
 
   /**
-   * KnowledgeRepositoryConnection findMany
+   * KnowledgeSpace findMany
    */
-  export type KnowledgeRepositoryConnectionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeSpaceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeSpace
      */
-    select?: KnowledgeRepositoryConnectionSelect<ExtArgs> | null
+    select?: KnowledgeSpaceSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeSpace
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionInclude<ExtArgs> | null
+    include?: KnowledgeSpaceInclude<ExtArgs> | null
     /**
-     * Filter, which KnowledgeRepositoryConnections to fetch.
+     * Filter, which KnowledgeSpaces to fetch.
      */
-    where?: KnowledgeRepositoryConnectionWhereInput
+    where?: KnowledgeSpaceWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
-     * Determine the order of KnowledgeRepositoryConnections to fetch.
+     * Determine the order of KnowledgeSpaces to fetch.
      */
-    orderBy?: KnowledgeRepositoryConnectionOrderByWithRelationInput | KnowledgeRepositoryConnectionOrderByWithRelationInput[]
+    orderBy?: KnowledgeSpaceOrderByWithRelationInput | KnowledgeSpaceOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
      *
-     * Sets the position for listing KnowledgeRepositoryConnections.
+     * Sets the position for listing KnowledgeSpaces.
      */
-    cursor?: KnowledgeRepositoryConnectionWhereUniqueInput
+    cursor?: KnowledgeSpaceWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Take `±n` KnowledgeRepositoryConnections from the position of the cursor.
+     * Take `±n` KnowledgeSpaces from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
-     * Skip the first `n` KnowledgeRepositoryConnections.
+     * Skip the first `n` KnowledgeSpaces.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
      *
-     * Filter by unique combinations of KnowledgeRepositoryConnections.
+     * Filter by unique combinations of KnowledgeSpaces.
      */
-    distinct?: KnowledgeRepositoryConnectionScalarFieldEnum | KnowledgeRepositoryConnectionScalarFieldEnum[]
+    distinct?: KnowledgeSpaceScalarFieldEnum | KnowledgeSpaceScalarFieldEnum[]
   }
 
   /**
-   * KnowledgeRepositoryConnection create
+   * KnowledgeSpace create
    */
-  export type KnowledgeRepositoryConnectionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeSpaceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeSpace
      */
-    select?: KnowledgeRepositoryConnectionSelect<ExtArgs> | null
+    select?: KnowledgeSpaceSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeSpace
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionInclude<ExtArgs> | null
+    include?: KnowledgeSpaceInclude<ExtArgs> | null
     /**
-     * The data needed to create a KnowledgeRepositoryConnection.
+     * The data needed to create a KnowledgeSpace.
      */
-    data: XOR<KnowledgeRepositoryConnectionCreateInput, KnowledgeRepositoryConnectionUncheckedCreateInput>
+    data: XOR<KnowledgeSpaceCreateInput, KnowledgeSpaceUncheckedCreateInput>
   }
 
   /**
-   * KnowledgeRepositoryConnection createMany
+   * KnowledgeSpace createMany
    */
-  export type KnowledgeRepositoryConnectionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeSpaceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to create many KnowledgeRepositoryConnections.
+     * The data used to create many KnowledgeSpaces.
      */
-    data: KnowledgeRepositoryConnectionCreateManyInput | KnowledgeRepositoryConnectionCreateManyInput[]
+    data: KnowledgeSpaceCreateManyInput | KnowledgeSpaceCreateManyInput[]
     skipDuplicates?: boolean
   }
 
   /**
-   * KnowledgeRepositoryConnection createManyAndReturn
+   * KnowledgeSpace createManyAndReturn
    */
-  export type KnowledgeRepositoryConnectionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeSpaceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeSpace
      */
-    select?: KnowledgeRepositoryConnectionSelectCreateManyAndReturn<ExtArgs> | null
+    select?: KnowledgeSpaceSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeSpace
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
     /**
-     * The data used to create many KnowledgeRepositoryConnections.
+     * The data used to create many KnowledgeSpaces.
      */
-    data: KnowledgeRepositoryConnectionCreateManyInput | KnowledgeRepositoryConnectionCreateManyInput[]
+    data: KnowledgeSpaceCreateManyInput | KnowledgeSpaceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KnowledgeSpace update
+   */
+  export type KnowledgeSpaceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeSpace
+     */
+    select?: KnowledgeSpaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeSpace
+     */
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeSpaceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a KnowledgeSpace.
+     */
+    data: XOR<KnowledgeSpaceUpdateInput, KnowledgeSpaceUncheckedUpdateInput>
+    /**
+     * Choose, which KnowledgeSpace to update.
+     */
+    where: KnowledgeSpaceWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeSpace updateMany
+   */
+  export type KnowledgeSpaceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update KnowledgeSpaces.
+     */
+    data: XOR<KnowledgeSpaceUpdateManyMutationInput, KnowledgeSpaceUncheckedUpdateManyInput>
+    /**
+     * Filter which KnowledgeSpaces to update
+     */
+    where?: KnowledgeSpaceWhereInput
+    /**
+     * Limit how many KnowledgeSpaces to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KnowledgeSpace updateManyAndReturn
+   */
+  export type KnowledgeSpaceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeSpace
+     */
+    select?: KnowledgeSpaceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeSpace
+     */
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
+    /**
+     * The data used to update KnowledgeSpaces.
+     */
+    data: XOR<KnowledgeSpaceUpdateManyMutationInput, KnowledgeSpaceUncheckedUpdateManyInput>
+    /**
+     * Filter which KnowledgeSpaces to update
+     */
+    where?: KnowledgeSpaceWhereInput
+    /**
+     * Limit how many KnowledgeSpaces to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KnowledgeSpace upsert
+   */
+  export type KnowledgeSpaceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeSpace
+     */
+    select?: KnowledgeSpaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeSpace
+     */
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeSpaceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the KnowledgeSpace to update in case it exists.
+     */
+    where: KnowledgeSpaceWhereUniqueInput
+    /**
+     * In case the KnowledgeSpace found by the `where` argument doesn't exist, create a new KnowledgeSpace with this data.
+     */
+    create: XOR<KnowledgeSpaceCreateInput, KnowledgeSpaceUncheckedCreateInput>
+    /**
+     * In case the KnowledgeSpace was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<KnowledgeSpaceUpdateInput, KnowledgeSpaceUncheckedUpdateInput>
+  }
+
+  /**
+   * KnowledgeSpace delete
+   */
+  export type KnowledgeSpaceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeSpace
+     */
+    select?: KnowledgeSpaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeSpace
+     */
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeSpaceInclude<ExtArgs> | null
+    /**
+     * Filter which KnowledgeSpace to delete.
+     */
+    where: KnowledgeSpaceWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeSpace deleteMany
+   */
+  export type KnowledgeSpaceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KnowledgeSpaces to delete
+     */
+    where?: KnowledgeSpaceWhereInput
+    /**
+     * Limit how many KnowledgeSpaces to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * KnowledgeSpace.remoteBindings
+   */
+  export type KnowledgeSpace$remoteBindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
+     */
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeRemoteBinding
+     */
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
+    where?: KnowledgeRemoteBindingWhereInput
+    orderBy?: KnowledgeRemoteBindingOrderByWithRelationInput | KnowledgeRemoteBindingOrderByWithRelationInput[]
+    cursor?: KnowledgeRemoteBindingWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: KnowledgeRemoteBindingScalarFieldEnum | KnowledgeRemoteBindingScalarFieldEnum[]
+  }
+
+  /**
+   * KnowledgeSpace without action
+   */
+  export type KnowledgeSpaceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeSpace
+     */
+    select?: KnowledgeSpaceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeSpace
+     */
+    omit?: KnowledgeSpaceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeSpaceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model KnowledgeRemoteBinding
+   */
+
+  export type AggregateKnowledgeRemoteBinding = {
+    _count: KnowledgeRemoteBindingCountAggregateOutputType | null
+    _avg: KnowledgeRemoteBindingAvgAggregateOutputType | null
+    _sum: KnowledgeRemoteBindingSumAggregateOutputType | null
+    _min: KnowledgeRemoteBindingMinAggregateOutputType | null
+    _max: KnowledgeRemoteBindingMaxAggregateOutputType | null
+  }
+
+  export type KnowledgeRemoteBindingAvgAggregateOutputType = {
+    version: number | null
+  }
+
+  export type KnowledgeRemoteBindingSumAggregateOutputType = {
+    version: number | null
+  }
+
+  export type KnowledgeRemoteBindingMinAggregateOutputType = {
+    id: string | null
+    knowledgeSpaceId: string | null
+    identityId: string | null
+    provider: string | null
+    installationId: string | null
+    repositoryId: string | null
+    repositoryFullNameSnapshot: string | null
+    connectedAt: Date | null
+    disconnectedAt: Date | null
+    version: number | null
+  }
+
+  export type KnowledgeRemoteBindingMaxAggregateOutputType = {
+    id: string | null
+    knowledgeSpaceId: string | null
+    identityId: string | null
+    provider: string | null
+    installationId: string | null
+    repositoryId: string | null
+    repositoryFullNameSnapshot: string | null
+    connectedAt: Date | null
+    disconnectedAt: Date | null
+    version: number | null
+  }
+
+  export type KnowledgeRemoteBindingCountAggregateOutputType = {
+    id: number
+    knowledgeSpaceId: number
+    identityId: number
+    provider: number
+    installationId: number
+    repositoryId: number
+    repositoryFullNameSnapshot: number
+    connectedAt: number
+    disconnectedAt: number
+    version: number
+    _all: number
+  }
+
+
+  export type KnowledgeRemoteBindingAvgAggregateInputType = {
+    version?: true
+  }
+
+  export type KnowledgeRemoteBindingSumAggregateInputType = {
+    version?: true
+  }
+
+  export type KnowledgeRemoteBindingMinAggregateInputType = {
+    id?: true
+    knowledgeSpaceId?: true
+    identityId?: true
+    provider?: true
+    installationId?: true
+    repositoryId?: true
+    repositoryFullNameSnapshot?: true
+    connectedAt?: true
+    disconnectedAt?: true
+    version?: true
+  }
+
+  export type KnowledgeRemoteBindingMaxAggregateInputType = {
+    id?: true
+    knowledgeSpaceId?: true
+    identityId?: true
+    provider?: true
+    installationId?: true
+    repositoryId?: true
+    repositoryFullNameSnapshot?: true
+    connectedAt?: true
+    disconnectedAt?: true
+    version?: true
+  }
+
+  export type KnowledgeRemoteBindingCountAggregateInputType = {
+    id?: true
+    knowledgeSpaceId?: true
+    identityId?: true
+    provider?: true
+    installationId?: true
+    repositoryId?: true
+    repositoryFullNameSnapshot?: true
+    connectedAt?: true
+    disconnectedAt?: true
+    version?: true
+    _all?: true
+  }
+
+  export type KnowledgeRemoteBindingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KnowledgeRemoteBinding to aggregate.
+     */
+    where?: KnowledgeRemoteBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeRemoteBindings to fetch.
+     */
+    orderBy?: KnowledgeRemoteBindingOrderByWithRelationInput | KnowledgeRemoteBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: KnowledgeRemoteBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeRemoteBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeRemoteBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned KnowledgeRemoteBindings
+    **/
+    _count?: true | KnowledgeRemoteBindingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: KnowledgeRemoteBindingAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: KnowledgeRemoteBindingSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: KnowledgeRemoteBindingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: KnowledgeRemoteBindingMaxAggregateInputType
+  }
+
+  export type GetKnowledgeRemoteBindingAggregateType<T extends KnowledgeRemoteBindingAggregateArgs> = {
+        [P in keyof T & keyof AggregateKnowledgeRemoteBinding]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateKnowledgeRemoteBinding[P]>
+      : GetScalarType<T[P], AggregateKnowledgeRemoteBinding[P]>
+  }
+
+
+
+
+  export type KnowledgeRemoteBindingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KnowledgeRemoteBindingWhereInput
+    orderBy?: KnowledgeRemoteBindingOrderByWithAggregationInput | KnowledgeRemoteBindingOrderByWithAggregationInput[]
+    by: KnowledgeRemoteBindingScalarFieldEnum[] | KnowledgeRemoteBindingScalarFieldEnum
+    having?: KnowledgeRemoteBindingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: KnowledgeRemoteBindingCountAggregateInputType | true
+    _avg?: KnowledgeRemoteBindingAvgAggregateInputType
+    _sum?: KnowledgeRemoteBindingSumAggregateInputType
+    _min?: KnowledgeRemoteBindingMinAggregateInputType
+    _max?: KnowledgeRemoteBindingMaxAggregateInputType
+  }
+
+  export type KnowledgeRemoteBindingGroupByOutputType = {
+    id: string
+    knowledgeSpaceId: string
+    identityId: string
+    provider: string
+    installationId: string
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date
+    disconnectedAt: Date | null
+    version: number
+    _count: KnowledgeRemoteBindingCountAggregateOutputType | null
+    _avg: KnowledgeRemoteBindingAvgAggregateOutputType | null
+    _sum: KnowledgeRemoteBindingSumAggregateOutputType | null
+    _min: KnowledgeRemoteBindingMinAggregateOutputType | null
+    _max: KnowledgeRemoteBindingMaxAggregateOutputType | null
+  }
+
+  type GetKnowledgeRemoteBindingGroupByPayload<T extends KnowledgeRemoteBindingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<KnowledgeRemoteBindingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof KnowledgeRemoteBindingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], KnowledgeRemoteBindingGroupByOutputType[P]>
+            : GetScalarType<T[P], KnowledgeRemoteBindingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type KnowledgeRemoteBindingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    knowledgeSpaceId?: boolean
+    identityId?: boolean
+    provider?: boolean
+    installationId?: boolean
+    repositoryId?: boolean
+    repositoryFullNameSnapshot?: boolean
+    connectedAt?: boolean
+    disconnectedAt?: boolean
+    version?: boolean
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    observation?: boolean | KnowledgeRemoteBinding$observationArgs<ExtArgs>
+    historyFence?: boolean | KnowledgeRemoteBinding$historyFenceArgs<ExtArgs>
+    projectionCheckpoint?: boolean | KnowledgeRemoteBinding$projectionCheckpointArgs<ExtArgs>
+    webhookDeliveries?: boolean | KnowledgeRemoteBinding$webhookDeliveriesArgs<ExtArgs>
+    noteProjections?: boolean | KnowledgeRemoteBinding$noteProjectionsArgs<ExtArgs>
+    attachmentProjections?: boolean | KnowledgeRemoteBinding$attachmentProjectionsArgs<ExtArgs>
+    attachmentContentCaches?: boolean | KnowledgeRemoteBinding$attachmentContentCachesArgs<ExtArgs>
+    writeRequests?: boolean | KnowledgeRemoteBinding$writeRequestsArgs<ExtArgs>
+    _count?: boolean | KnowledgeRemoteBindingCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["knowledgeRemoteBinding"]>
+
+  export type KnowledgeRemoteBindingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    knowledgeSpaceId?: boolean
+    identityId?: boolean
+    provider?: boolean
+    installationId?: boolean
+    repositoryId?: boolean
+    repositoryFullNameSnapshot?: boolean
+    connectedAt?: boolean
+    disconnectedAt?: boolean
+    version?: boolean
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["knowledgeRemoteBinding"]>
+
+  export type KnowledgeRemoteBindingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    knowledgeSpaceId?: boolean
+    identityId?: boolean
+    provider?: boolean
+    installationId?: boolean
+    repositoryId?: boolean
+    repositoryFullNameSnapshot?: boolean
+    connectedAt?: boolean
+    disconnectedAt?: boolean
+    version?: boolean
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["knowledgeRemoteBinding"]>
+
+  export type KnowledgeRemoteBindingSelectScalar = {
+    id?: boolean
+    knowledgeSpaceId?: boolean
+    identityId?: boolean
+    provider?: boolean
+    installationId?: boolean
+    repositoryId?: boolean
+    repositoryFullNameSnapshot?: boolean
+    connectedAt?: boolean
+    disconnectedAt?: boolean
+    version?: boolean
+  }
+
+  export type KnowledgeRemoteBindingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "knowledgeSpaceId" | "identityId" | "provider" | "installationId" | "repositoryId" | "repositoryFullNameSnapshot" | "connectedAt" | "disconnectedAt" | "version", ExtArgs["result"]["knowledgeRemoteBinding"]>
+  export type KnowledgeRemoteBindingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+    observation?: boolean | KnowledgeRemoteBinding$observationArgs<ExtArgs>
+    historyFence?: boolean | KnowledgeRemoteBinding$historyFenceArgs<ExtArgs>
+    projectionCheckpoint?: boolean | KnowledgeRemoteBinding$projectionCheckpointArgs<ExtArgs>
+    webhookDeliveries?: boolean | KnowledgeRemoteBinding$webhookDeliveriesArgs<ExtArgs>
+    noteProjections?: boolean | KnowledgeRemoteBinding$noteProjectionsArgs<ExtArgs>
+    attachmentProjections?: boolean | KnowledgeRemoteBinding$attachmentProjectionsArgs<ExtArgs>
+    attachmentContentCaches?: boolean | KnowledgeRemoteBinding$attachmentContentCachesArgs<ExtArgs>
+    writeRequests?: boolean | KnowledgeRemoteBinding$writeRequestsArgs<ExtArgs>
+    _count?: boolean | KnowledgeRemoteBindingCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type KnowledgeRemoteBindingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type KnowledgeRemoteBindingIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    knowledgeSpace?: boolean | KnowledgeSpaceDefaultArgs<ExtArgs>
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $KnowledgeRemoteBindingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "KnowledgeRemoteBinding"
+    objects: {
+      knowledgeSpace: Prisma.$KnowledgeSpacePayload<ExtArgs>
+      account: Prisma.$AccountPayload<ExtArgs>
+      observation: Prisma.$RemoteRepositoryObservationPayload<ExtArgs> | null
+      historyFence: Prisma.$RemoteHistoryFencePayload<ExtArgs> | null
+      projectionCheckpoint: Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs> | null
+      webhookDeliveries: Prisma.$GithubWebhookDeliveryPayload<ExtArgs>[]
+      noteProjections: Prisma.$KnowledgeNoteProjectionPayload<ExtArgs>[]
+      attachmentProjections: Prisma.$KnowledgeAttachmentProjectionPayload<ExtArgs>[]
+      attachmentContentCaches: Prisma.$KnowledgeAttachmentContentCachePayload<ExtArgs>[]
+      writeRequests: Prisma.$KnowledgeWriteRequestPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      knowledgeSpaceId: string
+      identityId: string
+      provider: string
+      installationId: string
+      repositoryId: string
+      repositoryFullNameSnapshot: string
+      connectedAt: Date
+      disconnectedAt: Date | null
+      version: number
+    }, ExtArgs["result"]["knowledgeRemoteBinding"]>
+    composites: {}
+  }
+
+  type KnowledgeRemoteBindingGetPayload<S extends boolean | null | undefined | KnowledgeRemoteBindingDefaultArgs> = $Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload, S>
+
+  type KnowledgeRemoteBindingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<KnowledgeRemoteBindingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: KnowledgeRemoteBindingCountAggregateInputType | true
+    }
+
+  export interface KnowledgeRemoteBindingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KnowledgeRemoteBinding'], meta: { name: 'KnowledgeRemoteBinding' } }
+    /**
+     * Find zero or one KnowledgeRemoteBinding that matches the filter.
+     * @param {KnowledgeRemoteBindingFindUniqueArgs} args - Arguments to find a KnowledgeRemoteBinding
+     * @example
+     * // Get one KnowledgeRemoteBinding
+     * const knowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends KnowledgeRemoteBindingFindUniqueArgs>(args: SelectSubset<T, KnowledgeRemoteBindingFindUniqueArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one KnowledgeRemoteBinding that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {KnowledgeRemoteBindingFindUniqueOrThrowArgs} args - Arguments to find a KnowledgeRemoteBinding
+     * @example
+     * // Get one KnowledgeRemoteBinding
+     * const knowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends KnowledgeRemoteBindingFindUniqueOrThrowArgs>(args: SelectSubset<T, KnowledgeRemoteBindingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KnowledgeRemoteBinding that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeRemoteBindingFindFirstArgs} args - Arguments to find a KnowledgeRemoteBinding
+     * @example
+     * // Get one KnowledgeRemoteBinding
+     * const knowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends KnowledgeRemoteBindingFindFirstArgs>(args?: SelectSubset<T, KnowledgeRemoteBindingFindFirstArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KnowledgeRemoteBinding that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeRemoteBindingFindFirstOrThrowArgs} args - Arguments to find a KnowledgeRemoteBinding
+     * @example
+     * // Get one KnowledgeRemoteBinding
+     * const knowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends KnowledgeRemoteBindingFindFirstOrThrowArgs>(args?: SelectSubset<T, KnowledgeRemoteBindingFindFirstOrThrowArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more KnowledgeRemoteBindings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeRemoteBindingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all KnowledgeRemoteBindings
+     * const knowledgeRemoteBindings = await prisma.knowledgeRemoteBinding.findMany()
+     *
+     * // Get first 10 KnowledgeRemoteBindings
+     * const knowledgeRemoteBindings = await prisma.knowledgeRemoteBinding.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const knowledgeRemoteBindingWithIdOnly = await prisma.knowledgeRemoteBinding.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends KnowledgeRemoteBindingFindManyArgs>(args?: SelectSubset<T, KnowledgeRemoteBindingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a KnowledgeRemoteBinding.
+     * @param {KnowledgeRemoteBindingCreateArgs} args - Arguments to create a KnowledgeRemoteBinding.
+     * @example
+     * // Create one KnowledgeRemoteBinding
+     * const KnowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.create({
+     *   data: {
+     *     // ... data to create a KnowledgeRemoteBinding
+     *   }
+     * })
+     *
+     */
+    create<T extends KnowledgeRemoteBindingCreateArgs>(args: SelectSubset<T, KnowledgeRemoteBindingCreateArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many KnowledgeRemoteBindings.
+     * @param {KnowledgeRemoteBindingCreateManyArgs} args - Arguments to create many KnowledgeRemoteBindings.
+     * @example
+     * // Create many KnowledgeRemoteBindings
+     * const knowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends KnowledgeRemoteBindingCreateManyArgs>(args?: SelectSubset<T, KnowledgeRemoteBindingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many KnowledgeRemoteBindings and returns the data saved in the database.
+     * @param {KnowledgeRemoteBindingCreateManyAndReturnArgs} args - Arguments to create many KnowledgeRemoteBindings.
+     * @example
+     * // Create many KnowledgeRemoteBindings
+     * const knowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many KnowledgeRemoteBindings and only return the `id`
+     * const knowledgeRemoteBindingWithIdOnly = await prisma.knowledgeRemoteBinding.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends KnowledgeRemoteBindingCreateManyAndReturnArgs>(args?: SelectSubset<T, KnowledgeRemoteBindingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a KnowledgeRemoteBinding.
+     * @param {KnowledgeRemoteBindingDeleteArgs} args - Arguments to delete one KnowledgeRemoteBinding.
+     * @example
+     * // Delete one KnowledgeRemoteBinding
+     * const KnowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.delete({
+     *   where: {
+     *     // ... filter to delete one KnowledgeRemoteBinding
+     *   }
+     * })
+     *
+     */
+    delete<T extends KnowledgeRemoteBindingDeleteArgs>(args: SelectSubset<T, KnowledgeRemoteBindingDeleteArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one KnowledgeRemoteBinding.
+     * @param {KnowledgeRemoteBindingUpdateArgs} args - Arguments to update one KnowledgeRemoteBinding.
+     * @example
+     * // Update one KnowledgeRemoteBinding
+     * const knowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends KnowledgeRemoteBindingUpdateArgs>(args: SelectSubset<T, KnowledgeRemoteBindingUpdateArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more KnowledgeRemoteBindings.
+     * @param {KnowledgeRemoteBindingDeleteManyArgs} args - Arguments to filter KnowledgeRemoteBindings to delete.
+     * @example
+     * // Delete a few KnowledgeRemoteBindings
+     * const { count } = await prisma.knowledgeRemoteBinding.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends KnowledgeRemoteBindingDeleteManyArgs>(args?: SelectSubset<T, KnowledgeRemoteBindingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KnowledgeRemoteBindings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeRemoteBindingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many KnowledgeRemoteBindings
+     * const knowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends KnowledgeRemoteBindingUpdateManyArgs>(args: SelectSubset<T, KnowledgeRemoteBindingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KnowledgeRemoteBindings and returns the data updated in the database.
+     * @param {KnowledgeRemoteBindingUpdateManyAndReturnArgs} args - Arguments to update many KnowledgeRemoteBindings.
+     * @example
+     * // Update many KnowledgeRemoteBindings
+     * const knowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more KnowledgeRemoteBindings and only return the `id`
+     * const knowledgeRemoteBindingWithIdOnly = await prisma.knowledgeRemoteBinding.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends KnowledgeRemoteBindingUpdateManyAndReturnArgs>(args: SelectSubset<T, KnowledgeRemoteBindingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one KnowledgeRemoteBinding.
+     * @param {KnowledgeRemoteBindingUpsertArgs} args - Arguments to update or create a KnowledgeRemoteBinding.
+     * @example
+     * // Update or create a KnowledgeRemoteBinding
+     * const knowledgeRemoteBinding = await prisma.knowledgeRemoteBinding.upsert({
+     *   create: {
+     *     // ... data to create a KnowledgeRemoteBinding
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the KnowledgeRemoteBinding we want to update
+     *   }
+     * })
+     */
+    upsert<T extends KnowledgeRemoteBindingUpsertArgs>(args: SelectSubset<T, KnowledgeRemoteBindingUpsertArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of KnowledgeRemoteBindings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeRemoteBindingCountArgs} args - Arguments to filter KnowledgeRemoteBindings to count.
+     * @example
+     * // Count the number of KnowledgeRemoteBindings
+     * const count = await prisma.knowledgeRemoteBinding.count({
+     *   where: {
+     *     // ... the filter for the KnowledgeRemoteBindings we want to count
+     *   }
+     * })
+    **/
+    count<T extends KnowledgeRemoteBindingCountArgs>(
+      args?: Subset<T, KnowledgeRemoteBindingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], KnowledgeRemoteBindingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a KnowledgeRemoteBinding.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeRemoteBindingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends KnowledgeRemoteBindingAggregateArgs>(args: Subset<T, KnowledgeRemoteBindingAggregateArgs>): Prisma.PrismaPromise<GetKnowledgeRemoteBindingAggregateType<T>>
+
+    /**
+     * Group by KnowledgeRemoteBinding.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeRemoteBindingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends KnowledgeRemoteBindingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: KnowledgeRemoteBindingGroupByArgs['orderBy'] }
+        : { orderBy?: KnowledgeRemoteBindingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, KnowledgeRemoteBindingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKnowledgeRemoteBindingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the KnowledgeRemoteBinding model
+   */
+  readonly fields: KnowledgeRemoteBindingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for KnowledgeRemoteBinding.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__KnowledgeRemoteBindingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    knowledgeSpace<T extends KnowledgeSpaceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeSpaceDefaultArgs<ExtArgs>>): Prisma__KnowledgeSpaceClient<$Result.GetResult<Prisma.$KnowledgeSpacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    observation<T extends KnowledgeRemoteBinding$observationArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBinding$observationArgs<ExtArgs>>): Prisma__RemoteRepositoryObservationClient<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    historyFence<T extends KnowledgeRemoteBinding$historyFenceArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBinding$historyFenceArgs<ExtArgs>>): Prisma__RemoteHistoryFenceClient<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    projectionCheckpoint<T extends KnowledgeRemoteBinding$projectionCheckpointArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBinding$projectionCheckpointArgs<ExtArgs>>): Prisma__KnowledgeProjectionCheckpointClient<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    webhookDeliveries<T extends KnowledgeRemoteBinding$webhookDeliveriesArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBinding$webhookDeliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GithubWebhookDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    noteProjections<T extends KnowledgeRemoteBinding$noteProjectionsArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBinding$noteProjectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeNoteProjectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    attachmentProjections<T extends KnowledgeRemoteBinding$attachmentProjectionsArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBinding$attachmentProjectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeAttachmentProjectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    attachmentContentCaches<T extends KnowledgeRemoteBinding$attachmentContentCachesArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBinding$attachmentContentCachesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeAttachmentContentCachePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    writeRequests<T extends KnowledgeRemoteBinding$writeRequestsArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBinding$writeRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeWriteRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the KnowledgeRemoteBinding model
+   */
+  interface KnowledgeRemoteBindingFieldRefs {
+    readonly id: FieldRef<"KnowledgeRemoteBinding", 'String'>
+    readonly knowledgeSpaceId: FieldRef<"KnowledgeRemoteBinding", 'String'>
+    readonly identityId: FieldRef<"KnowledgeRemoteBinding", 'String'>
+    readonly provider: FieldRef<"KnowledgeRemoteBinding", 'String'>
+    readonly installationId: FieldRef<"KnowledgeRemoteBinding", 'String'>
+    readonly repositoryId: FieldRef<"KnowledgeRemoteBinding", 'String'>
+    readonly repositoryFullNameSnapshot: FieldRef<"KnowledgeRemoteBinding", 'String'>
+    readonly connectedAt: FieldRef<"KnowledgeRemoteBinding", 'DateTime'>
+    readonly disconnectedAt: FieldRef<"KnowledgeRemoteBinding", 'DateTime'>
+    readonly version: FieldRef<"KnowledgeRemoteBinding", 'Int'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * KnowledgeRemoteBinding findUnique
+   */
+  export type KnowledgeRemoteBindingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
+     */
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeRemoteBinding
+     */
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeRemoteBinding to fetch.
+     */
+    where: KnowledgeRemoteBindingWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeRemoteBinding findUniqueOrThrow
+   */
+  export type KnowledgeRemoteBindingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
+     */
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeRemoteBinding
+     */
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeRemoteBinding to fetch.
+     */
+    where: KnowledgeRemoteBindingWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeRemoteBinding findFirst
+   */
+  export type KnowledgeRemoteBindingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
+     */
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeRemoteBinding
+     */
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeRemoteBinding to fetch.
+     */
+    where?: KnowledgeRemoteBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeRemoteBindings to fetch.
+     */
+    orderBy?: KnowledgeRemoteBindingOrderByWithRelationInput | KnowledgeRemoteBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for KnowledgeRemoteBindings.
+     */
+    cursor?: KnowledgeRemoteBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeRemoteBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeRemoteBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KnowledgeRemoteBindings.
+     */
+    distinct?: KnowledgeRemoteBindingScalarFieldEnum | KnowledgeRemoteBindingScalarFieldEnum[]
+  }
+
+  /**
+   * KnowledgeRemoteBinding findFirstOrThrow
+   */
+  export type KnowledgeRemoteBindingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
+     */
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeRemoteBinding
+     */
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeRemoteBinding to fetch.
+     */
+    where?: KnowledgeRemoteBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeRemoteBindings to fetch.
+     */
+    orderBy?: KnowledgeRemoteBindingOrderByWithRelationInput | KnowledgeRemoteBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for KnowledgeRemoteBindings.
+     */
+    cursor?: KnowledgeRemoteBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeRemoteBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeRemoteBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KnowledgeRemoteBindings.
+     */
+    distinct?: KnowledgeRemoteBindingScalarFieldEnum | KnowledgeRemoteBindingScalarFieldEnum[]
+  }
+
+  /**
+   * KnowledgeRemoteBinding findMany
+   */
+  export type KnowledgeRemoteBindingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
+     */
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeRemoteBinding
+     */
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeRemoteBindings to fetch.
+     */
+    where?: KnowledgeRemoteBindingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeRemoteBindings to fetch.
+     */
+    orderBy?: KnowledgeRemoteBindingOrderByWithRelationInput | KnowledgeRemoteBindingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing KnowledgeRemoteBindings.
+     */
+    cursor?: KnowledgeRemoteBindingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeRemoteBindings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeRemoteBindings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KnowledgeRemoteBindings.
+     */
+    distinct?: KnowledgeRemoteBindingScalarFieldEnum | KnowledgeRemoteBindingScalarFieldEnum[]
+  }
+
+  /**
+   * KnowledgeRemoteBinding create
+   */
+  export type KnowledgeRemoteBindingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
+     */
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeRemoteBinding
+     */
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
+    /**
+     * The data needed to create a KnowledgeRemoteBinding.
+     */
+    data: XOR<KnowledgeRemoteBindingCreateInput, KnowledgeRemoteBindingUncheckedCreateInput>
+  }
+
+  /**
+   * KnowledgeRemoteBinding createMany
+   */
+  export type KnowledgeRemoteBindingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many KnowledgeRemoteBindings.
+     */
+    data: KnowledgeRemoteBindingCreateManyInput | KnowledgeRemoteBindingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KnowledgeRemoteBinding createManyAndReturn
+   */
+  export type KnowledgeRemoteBindingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
+     */
+    select?: KnowledgeRemoteBindingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeRemoteBinding
+     */
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
+    /**
+     * The data used to create many KnowledgeRemoteBindings.
+     */
+    data: KnowledgeRemoteBindingCreateManyInput | KnowledgeRemoteBindingCreateManyInput[]
     skipDuplicates?: boolean
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionIncludeCreateManyAndReturn<ExtArgs> | null
+    include?: KnowledgeRemoteBindingIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * KnowledgeRepositoryConnection update
+   * KnowledgeRemoteBinding update
    */
-  export type KnowledgeRepositoryConnectionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
      */
-    select?: KnowledgeRepositoryConnectionSelect<ExtArgs> | null
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeRemoteBinding
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionInclude<ExtArgs> | null
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
     /**
-     * The data needed to update a KnowledgeRepositoryConnection.
+     * The data needed to update a KnowledgeRemoteBinding.
      */
-    data: XOR<KnowledgeRepositoryConnectionUpdateInput, KnowledgeRepositoryConnectionUncheckedUpdateInput>
+    data: XOR<KnowledgeRemoteBindingUpdateInput, KnowledgeRemoteBindingUncheckedUpdateInput>
     /**
-     * Choose, which KnowledgeRepositoryConnection to update.
+     * Choose, which KnowledgeRemoteBinding to update.
      */
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
+    where: KnowledgeRemoteBindingWhereUniqueInput
   }
 
   /**
-   * KnowledgeRepositoryConnection updateMany
+   * KnowledgeRemoteBinding updateMany
    */
-  export type KnowledgeRepositoryConnectionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * The data used to update KnowledgeRepositoryConnections.
+     * The data used to update KnowledgeRemoteBindings.
      */
-    data: XOR<KnowledgeRepositoryConnectionUpdateManyMutationInput, KnowledgeRepositoryConnectionUncheckedUpdateManyInput>
+    data: XOR<KnowledgeRemoteBindingUpdateManyMutationInput, KnowledgeRemoteBindingUncheckedUpdateManyInput>
     /**
-     * Filter which KnowledgeRepositoryConnections to update
+     * Filter which KnowledgeRemoteBindings to update
      */
-    where?: KnowledgeRepositoryConnectionWhereInput
+    where?: KnowledgeRemoteBindingWhereInput
     /**
-     * Limit how many KnowledgeRepositoryConnections to update.
+     * Limit how many KnowledgeRemoteBindings to update.
      */
     limit?: number
   }
 
   /**
-   * KnowledgeRepositoryConnection updateManyAndReturn
+   * KnowledgeRemoteBinding updateManyAndReturn
    */
-  export type KnowledgeRepositoryConnectionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
      */
-    select?: KnowledgeRepositoryConnectionSelectUpdateManyAndReturn<ExtArgs> | null
+    select?: KnowledgeRemoteBindingSelectUpdateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeRemoteBinding
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
     /**
-     * The data used to update KnowledgeRepositoryConnections.
+     * The data used to update KnowledgeRemoteBindings.
      */
-    data: XOR<KnowledgeRepositoryConnectionUpdateManyMutationInput, KnowledgeRepositoryConnectionUncheckedUpdateManyInput>
+    data: XOR<KnowledgeRemoteBindingUpdateManyMutationInput, KnowledgeRemoteBindingUncheckedUpdateManyInput>
     /**
-     * Filter which KnowledgeRepositoryConnections to update
+     * Filter which KnowledgeRemoteBindings to update
      */
-    where?: KnowledgeRepositoryConnectionWhereInput
+    where?: KnowledgeRemoteBindingWhereInput
     /**
-     * Limit how many KnowledgeRepositoryConnections to update.
+     * Limit how many KnowledgeRemoteBindings to update.
      */
     limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionIncludeUpdateManyAndReturn<ExtArgs> | null
+    include?: KnowledgeRemoteBindingIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
-   * KnowledgeRepositoryConnection upsert
+   * KnowledgeRemoteBinding upsert
    */
-  export type KnowledgeRepositoryConnectionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
      */
-    select?: KnowledgeRepositoryConnectionSelect<ExtArgs> | null
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeRemoteBinding
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionInclude<ExtArgs> | null
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
     /**
-     * The filter to search for the KnowledgeRepositoryConnection to update in case it exists.
+     * The filter to search for the KnowledgeRemoteBinding to update in case it exists.
      */
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
+    where: KnowledgeRemoteBindingWhereUniqueInput
     /**
-     * In case the KnowledgeRepositoryConnection found by the `where` argument doesn't exist, create a new KnowledgeRepositoryConnection with this data.
+     * In case the KnowledgeRemoteBinding found by the `where` argument doesn't exist, create a new KnowledgeRemoteBinding with this data.
      */
-    create: XOR<KnowledgeRepositoryConnectionCreateInput, KnowledgeRepositoryConnectionUncheckedCreateInput>
+    create: XOR<KnowledgeRemoteBindingCreateInput, KnowledgeRemoteBindingUncheckedCreateInput>
     /**
-     * In case the KnowledgeRepositoryConnection was found with the provided `where` argument, update it with this data.
+     * In case the KnowledgeRemoteBinding was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<KnowledgeRepositoryConnectionUpdateInput, KnowledgeRepositoryConnectionUncheckedUpdateInput>
+    update: XOR<KnowledgeRemoteBindingUpdateInput, KnowledgeRemoteBindingUncheckedUpdateInput>
   }
 
   /**
-   * KnowledgeRepositoryConnection delete
+   * KnowledgeRemoteBinding delete
    */
-  export type KnowledgeRepositoryConnectionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
      */
-    select?: KnowledgeRepositoryConnectionSelect<ExtArgs> | null
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeRemoteBinding
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionInclude<ExtArgs> | null
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
     /**
-     * Filter which KnowledgeRepositoryConnection to delete.
+     * Filter which KnowledgeRemoteBinding to delete.
      */
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
+    where: KnowledgeRemoteBindingWhereUniqueInput
   }
 
   /**
-   * KnowledgeRepositoryConnection deleteMany
+   * KnowledgeRemoteBinding deleteMany
    */
-  export type KnowledgeRepositoryConnectionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Filter which KnowledgeRepositoryConnections to delete
+     * Filter which KnowledgeRemoteBindings to delete
      */
-    where?: KnowledgeRepositoryConnectionWhereInput
+    where?: KnowledgeRemoteBindingWhereInput
     /**
-     * Limit how many KnowledgeRepositoryConnections to delete.
+     * Limit how many KnowledgeRemoteBindings to delete.
      */
     limit?: number
   }
 
   /**
-   * KnowledgeRepositoryConnection.webhookDeliveries
+   * KnowledgeRemoteBinding.observation
    */
-  export type KnowledgeRepositoryConnection$webhookDeliveriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBinding$observationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationInclude<ExtArgs> | null
+    where?: RemoteRepositoryObservationWhereInput
+  }
+
+  /**
+   * KnowledgeRemoteBinding.historyFence
+   */
+  export type KnowledgeRemoteBinding$historyFenceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceInclude<ExtArgs> | null
+    where?: RemoteHistoryFenceWhereInput
+  }
+
+  /**
+   * KnowledgeRemoteBinding.projectionCheckpoint
+   */
+  export type KnowledgeRemoteBinding$projectionCheckpointArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointInclude<ExtArgs> | null
+    where?: KnowledgeProjectionCheckpointWhereInput
+  }
+
+  /**
+   * KnowledgeRemoteBinding.webhookDeliveries
+   */
+  export type KnowledgeRemoteBinding$webhookDeliveriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the GithubWebhookDelivery
      */
@@ -97925,9 +99355,9 @@ export namespace Prisma {
   }
 
   /**
-   * KnowledgeRepositoryConnection.noteProjections
+   * KnowledgeRemoteBinding.noteProjections
    */
-  export type KnowledgeRepositoryConnection$noteProjectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBinding$noteProjectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the KnowledgeNoteProjection
      */
@@ -97949,9 +99379,9 @@ export namespace Prisma {
   }
 
   /**
-   * KnowledgeRepositoryConnection.attachmentProjections
+   * KnowledgeRemoteBinding.attachmentProjections
    */
-  export type KnowledgeRepositoryConnection$attachmentProjectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBinding$attachmentProjectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the KnowledgeAttachmentProjection
      */
@@ -97973,9 +99403,9 @@ export namespace Prisma {
   }
 
   /**
-   * KnowledgeRepositoryConnection.attachmentContentCaches
+   * KnowledgeRemoteBinding.attachmentContentCaches
    */
-  export type KnowledgeRepositoryConnection$attachmentContentCachesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBinding$attachmentContentCachesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the KnowledgeAttachmentContentCache
      */
@@ -97997,9 +99427,9 @@ export namespace Prisma {
   }
 
   /**
-   * KnowledgeRepositoryConnection.writeRequests
+   * KnowledgeRemoteBinding.writeRequests
    */
-  export type KnowledgeRepositoryConnection$writeRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBinding$writeRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the KnowledgeWriteRequest
      */
@@ -98021,21 +99451,3327 @@ export namespace Prisma {
   }
 
   /**
-   * KnowledgeRepositoryConnection without action
+   * KnowledgeRemoteBinding without action
    */
-  export type KnowledgeRepositoryConnectionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type KnowledgeRemoteBindingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KnowledgeRepositoryConnection
+     * Select specific fields to fetch from the KnowledgeRemoteBinding
      */
-    select?: KnowledgeRepositoryConnectionSelect<ExtArgs> | null
+    select?: KnowledgeRemoteBindingSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KnowledgeRepositoryConnection
+     * Omit specific fields from the KnowledgeRemoteBinding
      */
-    omit?: KnowledgeRepositoryConnectionOmit<ExtArgs> | null
+    omit?: KnowledgeRemoteBindingOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: KnowledgeRepositoryConnectionInclude<ExtArgs> | null
+    include?: KnowledgeRemoteBindingInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RemoteRepositoryObservation
+   */
+
+  export type AggregateRemoteRepositoryObservation = {
+    _count: RemoteRepositoryObservationCountAggregateOutputType | null
+    _min: RemoteRepositoryObservationMinAggregateOutputType | null
+    _max: RemoteRepositoryObservationMaxAggregateOutputType | null
+  }
+
+  export type RemoteRepositoryObservationMinAggregateOutputType = {
+    bindingId: string | null
+    observedAt: Date | null
+    accountId: string | null
+    repositoryFullName: string | null
+    defaultBranch: string | null
+    isPrivate: boolean | null
+    archived: boolean | null
+    disabled: boolean | null
+    contentsPermission: string | null
+    installationSuspended: boolean | null
+    eligibilityState: string | null
+    blockReason: string | null
+  }
+
+  export type RemoteRepositoryObservationMaxAggregateOutputType = {
+    bindingId: string | null
+    observedAt: Date | null
+    accountId: string | null
+    repositoryFullName: string | null
+    defaultBranch: string | null
+    isPrivate: boolean | null
+    archived: boolean | null
+    disabled: boolean | null
+    contentsPermission: string | null
+    installationSuspended: boolean | null
+    eligibilityState: string | null
+    blockReason: string | null
+  }
+
+  export type RemoteRepositoryObservationCountAggregateOutputType = {
+    bindingId: number
+    observedAt: number
+    accountId: number
+    repositoryFullName: number
+    defaultBranch: number
+    isPrivate: number
+    archived: number
+    disabled: number
+    contentsPermission: number
+    installationSuspended: number
+    eligibilityState: number
+    blockReason: number
+    _all: number
+  }
+
+
+  export type RemoteRepositoryObservationMinAggregateInputType = {
+    bindingId?: true
+    observedAt?: true
+    accountId?: true
+    repositoryFullName?: true
+    defaultBranch?: true
+    isPrivate?: true
+    archived?: true
+    disabled?: true
+    contentsPermission?: true
+    installationSuspended?: true
+    eligibilityState?: true
+    blockReason?: true
+  }
+
+  export type RemoteRepositoryObservationMaxAggregateInputType = {
+    bindingId?: true
+    observedAt?: true
+    accountId?: true
+    repositoryFullName?: true
+    defaultBranch?: true
+    isPrivate?: true
+    archived?: true
+    disabled?: true
+    contentsPermission?: true
+    installationSuspended?: true
+    eligibilityState?: true
+    blockReason?: true
+  }
+
+  export type RemoteRepositoryObservationCountAggregateInputType = {
+    bindingId?: true
+    observedAt?: true
+    accountId?: true
+    repositoryFullName?: true
+    defaultBranch?: true
+    isPrivate?: true
+    archived?: true
+    disabled?: true
+    contentsPermission?: true
+    installationSuspended?: true
+    eligibilityState?: true
+    blockReason?: true
+    _all?: true
+  }
+
+  export type RemoteRepositoryObservationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RemoteRepositoryObservation to aggregate.
+     */
+    where?: RemoteRepositoryObservationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RemoteRepositoryObservations to fetch.
+     */
+    orderBy?: RemoteRepositoryObservationOrderByWithRelationInput | RemoteRepositoryObservationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: RemoteRepositoryObservationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RemoteRepositoryObservations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RemoteRepositoryObservations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned RemoteRepositoryObservations
+    **/
+    _count?: true | RemoteRepositoryObservationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: RemoteRepositoryObservationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: RemoteRepositoryObservationMaxAggregateInputType
+  }
+
+  export type GetRemoteRepositoryObservationAggregateType<T extends RemoteRepositoryObservationAggregateArgs> = {
+        [P in keyof T & keyof AggregateRemoteRepositoryObservation]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRemoteRepositoryObservation[P]>
+      : GetScalarType<T[P], AggregateRemoteRepositoryObservation[P]>
+  }
+
+
+
+
+  export type RemoteRepositoryObservationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RemoteRepositoryObservationWhereInput
+    orderBy?: RemoteRepositoryObservationOrderByWithAggregationInput | RemoteRepositoryObservationOrderByWithAggregationInput[]
+    by: RemoteRepositoryObservationScalarFieldEnum[] | RemoteRepositoryObservationScalarFieldEnum
+    having?: RemoteRepositoryObservationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RemoteRepositoryObservationCountAggregateInputType | true
+    _min?: RemoteRepositoryObservationMinAggregateInputType
+    _max?: RemoteRepositoryObservationMaxAggregateInputType
+  }
+
+  export type RemoteRepositoryObservationGroupByOutputType = {
+    bindingId: string
+    observedAt: Date
+    accountId: string
+    repositoryFullName: string
+    defaultBranch: string
+    isPrivate: boolean
+    archived: boolean
+    disabled: boolean
+    contentsPermission: string
+    installationSuspended: boolean
+    eligibilityState: string
+    blockReason: string | null
+    _count: RemoteRepositoryObservationCountAggregateOutputType | null
+    _min: RemoteRepositoryObservationMinAggregateOutputType | null
+    _max: RemoteRepositoryObservationMaxAggregateOutputType | null
+  }
+
+  type GetRemoteRepositoryObservationGroupByPayload<T extends RemoteRepositoryObservationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RemoteRepositoryObservationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RemoteRepositoryObservationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RemoteRepositoryObservationGroupByOutputType[P]>
+            : GetScalarType<T[P], RemoteRepositoryObservationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RemoteRepositoryObservationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    bindingId?: boolean
+    observedAt?: boolean
+    accountId?: boolean
+    repositoryFullName?: boolean
+    defaultBranch?: boolean
+    isPrivate?: boolean
+    archived?: boolean
+    disabled?: boolean
+    contentsPermission?: boolean
+    installationSuspended?: boolean
+    eligibilityState?: boolean
+    blockReason?: boolean
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["remoteRepositoryObservation"]>
+
+  export type RemoteRepositoryObservationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    bindingId?: boolean
+    observedAt?: boolean
+    accountId?: boolean
+    repositoryFullName?: boolean
+    defaultBranch?: boolean
+    isPrivate?: boolean
+    archived?: boolean
+    disabled?: boolean
+    contentsPermission?: boolean
+    installationSuspended?: boolean
+    eligibilityState?: boolean
+    blockReason?: boolean
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["remoteRepositoryObservation"]>
+
+  export type RemoteRepositoryObservationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    bindingId?: boolean
+    observedAt?: boolean
+    accountId?: boolean
+    repositoryFullName?: boolean
+    defaultBranch?: boolean
+    isPrivate?: boolean
+    archived?: boolean
+    disabled?: boolean
+    contentsPermission?: boolean
+    installationSuspended?: boolean
+    eligibilityState?: boolean
+    blockReason?: boolean
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["remoteRepositoryObservation"]>
+
+  export type RemoteRepositoryObservationSelectScalar = {
+    bindingId?: boolean
+    observedAt?: boolean
+    accountId?: boolean
+    repositoryFullName?: boolean
+    defaultBranch?: boolean
+    isPrivate?: boolean
+    archived?: boolean
+    disabled?: boolean
+    contentsPermission?: boolean
+    installationSuspended?: boolean
+    eligibilityState?: boolean
+    blockReason?: boolean
+  }
+
+  export type RemoteRepositoryObservationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"bindingId" | "observedAt" | "accountId" | "repositoryFullName" | "defaultBranch" | "isPrivate" | "archived" | "disabled" | "contentsPermission" | "installationSuspended" | "eligibilityState" | "blockReason", ExtArgs["result"]["remoteRepositoryObservation"]>
+  export type RemoteRepositoryObservationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }
+  export type RemoteRepositoryObservationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }
+  export type RemoteRepositoryObservationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }
+
+  export type $RemoteRepositoryObservationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RemoteRepositoryObservation"
+    objects: {
+      binding: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      bindingId: string
+      observedAt: Date
+      accountId: string
+      repositoryFullName: string
+      defaultBranch: string
+      isPrivate: boolean
+      archived: boolean
+      disabled: boolean
+      contentsPermission: string
+      installationSuspended: boolean
+      eligibilityState: string
+      blockReason: string | null
+    }, ExtArgs["result"]["remoteRepositoryObservation"]>
+    composites: {}
+  }
+
+  type RemoteRepositoryObservationGetPayload<S extends boolean | null | undefined | RemoteRepositoryObservationDefaultArgs> = $Result.GetResult<Prisma.$RemoteRepositoryObservationPayload, S>
+
+  type RemoteRepositoryObservationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RemoteRepositoryObservationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RemoteRepositoryObservationCountAggregateInputType | true
+    }
+
+  export interface RemoteRepositoryObservationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RemoteRepositoryObservation'], meta: { name: 'RemoteRepositoryObservation' } }
+    /**
+     * Find zero or one RemoteRepositoryObservation that matches the filter.
+     * @param {RemoteRepositoryObservationFindUniqueArgs} args - Arguments to find a RemoteRepositoryObservation
+     * @example
+     * // Get one RemoteRepositoryObservation
+     * const remoteRepositoryObservation = await prisma.remoteRepositoryObservation.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RemoteRepositoryObservationFindUniqueArgs>(args: SelectSubset<T, RemoteRepositoryObservationFindUniqueArgs<ExtArgs>>): Prisma__RemoteRepositoryObservationClient<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RemoteRepositoryObservation that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RemoteRepositoryObservationFindUniqueOrThrowArgs} args - Arguments to find a RemoteRepositoryObservation
+     * @example
+     * // Get one RemoteRepositoryObservation
+     * const remoteRepositoryObservation = await prisma.remoteRepositoryObservation.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RemoteRepositoryObservationFindUniqueOrThrowArgs>(args: SelectSubset<T, RemoteRepositoryObservationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RemoteRepositoryObservationClient<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RemoteRepositoryObservation that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteRepositoryObservationFindFirstArgs} args - Arguments to find a RemoteRepositoryObservation
+     * @example
+     * // Get one RemoteRepositoryObservation
+     * const remoteRepositoryObservation = await prisma.remoteRepositoryObservation.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RemoteRepositoryObservationFindFirstArgs>(args?: SelectSubset<T, RemoteRepositoryObservationFindFirstArgs<ExtArgs>>): Prisma__RemoteRepositoryObservationClient<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RemoteRepositoryObservation that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteRepositoryObservationFindFirstOrThrowArgs} args - Arguments to find a RemoteRepositoryObservation
+     * @example
+     * // Get one RemoteRepositoryObservation
+     * const remoteRepositoryObservation = await prisma.remoteRepositoryObservation.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RemoteRepositoryObservationFindFirstOrThrowArgs>(args?: SelectSubset<T, RemoteRepositoryObservationFindFirstOrThrowArgs<ExtArgs>>): Prisma__RemoteRepositoryObservationClient<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RemoteRepositoryObservations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteRepositoryObservationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RemoteRepositoryObservations
+     * const remoteRepositoryObservations = await prisma.remoteRepositoryObservation.findMany()
+     *
+     * // Get first 10 RemoteRepositoryObservations
+     * const remoteRepositoryObservations = await prisma.remoteRepositoryObservation.findMany({ take: 10 })
+     *
+     * // Only select the `bindingId`
+     * const remoteRepositoryObservationWithBindingIdOnly = await prisma.remoteRepositoryObservation.findMany({ select: { bindingId: true } })
+     *
+     */
+    findMany<T extends RemoteRepositoryObservationFindManyArgs>(args?: SelectSubset<T, RemoteRepositoryObservationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RemoteRepositoryObservation.
+     * @param {RemoteRepositoryObservationCreateArgs} args - Arguments to create a RemoteRepositoryObservation.
+     * @example
+     * // Create one RemoteRepositoryObservation
+     * const RemoteRepositoryObservation = await prisma.remoteRepositoryObservation.create({
+     *   data: {
+     *     // ... data to create a RemoteRepositoryObservation
+     *   }
+     * })
+     *
+     */
+    create<T extends RemoteRepositoryObservationCreateArgs>(args: SelectSubset<T, RemoteRepositoryObservationCreateArgs<ExtArgs>>): Prisma__RemoteRepositoryObservationClient<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RemoteRepositoryObservations.
+     * @param {RemoteRepositoryObservationCreateManyArgs} args - Arguments to create many RemoteRepositoryObservations.
+     * @example
+     * // Create many RemoteRepositoryObservations
+     * const remoteRepositoryObservation = await prisma.remoteRepositoryObservation.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends RemoteRepositoryObservationCreateManyArgs>(args?: SelectSubset<T, RemoteRepositoryObservationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RemoteRepositoryObservations and returns the data saved in the database.
+     * @param {RemoteRepositoryObservationCreateManyAndReturnArgs} args - Arguments to create many RemoteRepositoryObservations.
+     * @example
+     * // Create many RemoteRepositoryObservations
+     * const remoteRepositoryObservation = await prisma.remoteRepositoryObservation.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many RemoteRepositoryObservations and only return the `bindingId`
+     * const remoteRepositoryObservationWithBindingIdOnly = await prisma.remoteRepositoryObservation.createManyAndReturn({
+     *   select: { bindingId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends RemoteRepositoryObservationCreateManyAndReturnArgs>(args?: SelectSubset<T, RemoteRepositoryObservationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RemoteRepositoryObservation.
+     * @param {RemoteRepositoryObservationDeleteArgs} args - Arguments to delete one RemoteRepositoryObservation.
+     * @example
+     * // Delete one RemoteRepositoryObservation
+     * const RemoteRepositoryObservation = await prisma.remoteRepositoryObservation.delete({
+     *   where: {
+     *     // ... filter to delete one RemoteRepositoryObservation
+     *   }
+     * })
+     *
+     */
+    delete<T extends RemoteRepositoryObservationDeleteArgs>(args: SelectSubset<T, RemoteRepositoryObservationDeleteArgs<ExtArgs>>): Prisma__RemoteRepositoryObservationClient<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RemoteRepositoryObservation.
+     * @param {RemoteRepositoryObservationUpdateArgs} args - Arguments to update one RemoteRepositoryObservation.
+     * @example
+     * // Update one RemoteRepositoryObservation
+     * const remoteRepositoryObservation = await prisma.remoteRepositoryObservation.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends RemoteRepositoryObservationUpdateArgs>(args: SelectSubset<T, RemoteRepositoryObservationUpdateArgs<ExtArgs>>): Prisma__RemoteRepositoryObservationClient<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RemoteRepositoryObservations.
+     * @param {RemoteRepositoryObservationDeleteManyArgs} args - Arguments to filter RemoteRepositoryObservations to delete.
+     * @example
+     * // Delete a few RemoteRepositoryObservations
+     * const { count } = await prisma.remoteRepositoryObservation.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends RemoteRepositoryObservationDeleteManyArgs>(args?: SelectSubset<T, RemoteRepositoryObservationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RemoteRepositoryObservations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteRepositoryObservationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RemoteRepositoryObservations
+     * const remoteRepositoryObservation = await prisma.remoteRepositoryObservation.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends RemoteRepositoryObservationUpdateManyArgs>(args: SelectSubset<T, RemoteRepositoryObservationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RemoteRepositoryObservations and returns the data updated in the database.
+     * @param {RemoteRepositoryObservationUpdateManyAndReturnArgs} args - Arguments to update many RemoteRepositoryObservations.
+     * @example
+     * // Update many RemoteRepositoryObservations
+     * const remoteRepositoryObservation = await prisma.remoteRepositoryObservation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more RemoteRepositoryObservations and only return the `bindingId`
+     * const remoteRepositoryObservationWithBindingIdOnly = await prisma.remoteRepositoryObservation.updateManyAndReturn({
+     *   select: { bindingId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends RemoteRepositoryObservationUpdateManyAndReturnArgs>(args: SelectSubset<T, RemoteRepositoryObservationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RemoteRepositoryObservation.
+     * @param {RemoteRepositoryObservationUpsertArgs} args - Arguments to update or create a RemoteRepositoryObservation.
+     * @example
+     * // Update or create a RemoteRepositoryObservation
+     * const remoteRepositoryObservation = await prisma.remoteRepositoryObservation.upsert({
+     *   create: {
+     *     // ... data to create a RemoteRepositoryObservation
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RemoteRepositoryObservation we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RemoteRepositoryObservationUpsertArgs>(args: SelectSubset<T, RemoteRepositoryObservationUpsertArgs<ExtArgs>>): Prisma__RemoteRepositoryObservationClient<$Result.GetResult<Prisma.$RemoteRepositoryObservationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RemoteRepositoryObservations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteRepositoryObservationCountArgs} args - Arguments to filter RemoteRepositoryObservations to count.
+     * @example
+     * // Count the number of RemoteRepositoryObservations
+     * const count = await prisma.remoteRepositoryObservation.count({
+     *   where: {
+     *     // ... the filter for the RemoteRepositoryObservations we want to count
+     *   }
+     * })
+    **/
+    count<T extends RemoteRepositoryObservationCountArgs>(
+      args?: Subset<T, RemoteRepositoryObservationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RemoteRepositoryObservationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RemoteRepositoryObservation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteRepositoryObservationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RemoteRepositoryObservationAggregateArgs>(args: Subset<T, RemoteRepositoryObservationAggregateArgs>): Prisma.PrismaPromise<GetRemoteRepositoryObservationAggregateType<T>>
+
+    /**
+     * Group by RemoteRepositoryObservation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteRepositoryObservationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends RemoteRepositoryObservationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RemoteRepositoryObservationGroupByArgs['orderBy'] }
+        : { orderBy?: RemoteRepositoryObservationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RemoteRepositoryObservationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRemoteRepositoryObservationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RemoteRepositoryObservation model
+   */
+  readonly fields: RemoteRepositoryObservationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RemoteRepositoryObservation.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RemoteRepositoryObservationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    binding<T extends KnowledgeRemoteBindingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBindingDefaultArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RemoteRepositoryObservation model
+   */
+  interface RemoteRepositoryObservationFieldRefs {
+    readonly bindingId: FieldRef<"RemoteRepositoryObservation", 'String'>
+    readonly observedAt: FieldRef<"RemoteRepositoryObservation", 'DateTime'>
+    readonly accountId: FieldRef<"RemoteRepositoryObservation", 'String'>
+    readonly repositoryFullName: FieldRef<"RemoteRepositoryObservation", 'String'>
+    readonly defaultBranch: FieldRef<"RemoteRepositoryObservation", 'String'>
+    readonly isPrivate: FieldRef<"RemoteRepositoryObservation", 'Boolean'>
+    readonly archived: FieldRef<"RemoteRepositoryObservation", 'Boolean'>
+    readonly disabled: FieldRef<"RemoteRepositoryObservation", 'Boolean'>
+    readonly contentsPermission: FieldRef<"RemoteRepositoryObservation", 'String'>
+    readonly installationSuspended: FieldRef<"RemoteRepositoryObservation", 'Boolean'>
+    readonly eligibilityState: FieldRef<"RemoteRepositoryObservation", 'String'>
+    readonly blockReason: FieldRef<"RemoteRepositoryObservation", 'String'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * RemoteRepositoryObservation findUnique
+   */
+  export type RemoteRepositoryObservationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationInclude<ExtArgs> | null
+    /**
+     * Filter, which RemoteRepositoryObservation to fetch.
+     */
+    where: RemoteRepositoryObservationWhereUniqueInput
+  }
+
+  /**
+   * RemoteRepositoryObservation findUniqueOrThrow
+   */
+  export type RemoteRepositoryObservationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationInclude<ExtArgs> | null
+    /**
+     * Filter, which RemoteRepositoryObservation to fetch.
+     */
+    where: RemoteRepositoryObservationWhereUniqueInput
+  }
+
+  /**
+   * RemoteRepositoryObservation findFirst
+   */
+  export type RemoteRepositoryObservationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationInclude<ExtArgs> | null
+    /**
+     * Filter, which RemoteRepositoryObservation to fetch.
+     */
+    where?: RemoteRepositoryObservationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RemoteRepositoryObservations to fetch.
+     */
+    orderBy?: RemoteRepositoryObservationOrderByWithRelationInput | RemoteRepositoryObservationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for RemoteRepositoryObservations.
+     */
+    cursor?: RemoteRepositoryObservationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RemoteRepositoryObservations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RemoteRepositoryObservations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of RemoteRepositoryObservations.
+     */
+    distinct?: RemoteRepositoryObservationScalarFieldEnum | RemoteRepositoryObservationScalarFieldEnum[]
+  }
+
+  /**
+   * RemoteRepositoryObservation findFirstOrThrow
+   */
+  export type RemoteRepositoryObservationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationInclude<ExtArgs> | null
+    /**
+     * Filter, which RemoteRepositoryObservation to fetch.
+     */
+    where?: RemoteRepositoryObservationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RemoteRepositoryObservations to fetch.
+     */
+    orderBy?: RemoteRepositoryObservationOrderByWithRelationInput | RemoteRepositoryObservationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for RemoteRepositoryObservations.
+     */
+    cursor?: RemoteRepositoryObservationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RemoteRepositoryObservations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RemoteRepositoryObservations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of RemoteRepositoryObservations.
+     */
+    distinct?: RemoteRepositoryObservationScalarFieldEnum | RemoteRepositoryObservationScalarFieldEnum[]
+  }
+
+  /**
+   * RemoteRepositoryObservation findMany
+   */
+  export type RemoteRepositoryObservationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationInclude<ExtArgs> | null
+    /**
+     * Filter, which RemoteRepositoryObservations to fetch.
+     */
+    where?: RemoteRepositoryObservationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RemoteRepositoryObservations to fetch.
+     */
+    orderBy?: RemoteRepositoryObservationOrderByWithRelationInput | RemoteRepositoryObservationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing RemoteRepositoryObservations.
+     */
+    cursor?: RemoteRepositoryObservationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RemoteRepositoryObservations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RemoteRepositoryObservations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of RemoteRepositoryObservations.
+     */
+    distinct?: RemoteRepositoryObservationScalarFieldEnum | RemoteRepositoryObservationScalarFieldEnum[]
+  }
+
+  /**
+   * RemoteRepositoryObservation create
+   */
+  export type RemoteRepositoryObservationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RemoteRepositoryObservation.
+     */
+    data: XOR<RemoteRepositoryObservationCreateInput, RemoteRepositoryObservationUncheckedCreateInput>
+  }
+
+  /**
+   * RemoteRepositoryObservation createMany
+   */
+  export type RemoteRepositoryObservationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RemoteRepositoryObservations.
+     */
+    data: RemoteRepositoryObservationCreateManyInput | RemoteRepositoryObservationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RemoteRepositoryObservation createManyAndReturn
+   */
+  export type RemoteRepositoryObservationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * The data used to create many RemoteRepositoryObservations.
+     */
+    data: RemoteRepositoryObservationCreateManyInput | RemoteRepositoryObservationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RemoteRepositoryObservation update
+   */
+  export type RemoteRepositoryObservationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RemoteRepositoryObservation.
+     */
+    data: XOR<RemoteRepositoryObservationUpdateInput, RemoteRepositoryObservationUncheckedUpdateInput>
+    /**
+     * Choose, which RemoteRepositoryObservation to update.
+     */
+    where: RemoteRepositoryObservationWhereUniqueInput
+  }
+
+  /**
+   * RemoteRepositoryObservation updateMany
+   */
+  export type RemoteRepositoryObservationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RemoteRepositoryObservations.
+     */
+    data: XOR<RemoteRepositoryObservationUpdateManyMutationInput, RemoteRepositoryObservationUncheckedUpdateManyInput>
+    /**
+     * Filter which RemoteRepositoryObservations to update
+     */
+    where?: RemoteRepositoryObservationWhereInput
+    /**
+     * Limit how many RemoteRepositoryObservations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RemoteRepositoryObservation updateManyAndReturn
+   */
+  export type RemoteRepositoryObservationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * The data used to update RemoteRepositoryObservations.
+     */
+    data: XOR<RemoteRepositoryObservationUpdateManyMutationInput, RemoteRepositoryObservationUncheckedUpdateManyInput>
+    /**
+     * Filter which RemoteRepositoryObservations to update
+     */
+    where?: RemoteRepositoryObservationWhereInput
+    /**
+     * Limit how many RemoteRepositoryObservations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RemoteRepositoryObservation upsert
+   */
+  export type RemoteRepositoryObservationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RemoteRepositoryObservation to update in case it exists.
+     */
+    where: RemoteRepositoryObservationWhereUniqueInput
+    /**
+     * In case the RemoteRepositoryObservation found by the `where` argument doesn't exist, create a new RemoteRepositoryObservation with this data.
+     */
+    create: XOR<RemoteRepositoryObservationCreateInput, RemoteRepositoryObservationUncheckedCreateInput>
+    /**
+     * In case the RemoteRepositoryObservation was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RemoteRepositoryObservationUpdateInput, RemoteRepositoryObservationUncheckedUpdateInput>
+  }
+
+  /**
+   * RemoteRepositoryObservation delete
+   */
+  export type RemoteRepositoryObservationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationInclude<ExtArgs> | null
+    /**
+     * Filter which RemoteRepositoryObservation to delete.
+     */
+    where: RemoteRepositoryObservationWhereUniqueInput
+  }
+
+  /**
+   * RemoteRepositoryObservation deleteMany
+   */
+  export type RemoteRepositoryObservationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RemoteRepositoryObservations to delete
+     */
+    where?: RemoteRepositoryObservationWhereInput
+    /**
+     * Limit how many RemoteRepositoryObservations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RemoteRepositoryObservation without action
+   */
+  export type RemoteRepositoryObservationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteRepositoryObservation
+     */
+    select?: RemoteRepositoryObservationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteRepositoryObservation
+     */
+    omit?: RemoteRepositoryObservationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteRepositoryObservationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RemoteHistoryFence
+   */
+
+  export type AggregateRemoteHistoryFence = {
+    _count: RemoteHistoryFenceCountAggregateOutputType | null
+    _min: RemoteHistoryFenceMinAggregateOutputType | null
+    _max: RemoteHistoryFenceMaxAggregateOutputType | null
+  }
+
+  export type RemoteHistoryFenceMinAggregateOutputType = {
+    bindingId: string | null
+    defaultBranch: string | null
+    lastConfirmedRemoteHeadSha: string | null
+    confirmedAt: Date | null
+  }
+
+  export type RemoteHistoryFenceMaxAggregateOutputType = {
+    bindingId: string | null
+    defaultBranch: string | null
+    lastConfirmedRemoteHeadSha: string | null
+    confirmedAt: Date | null
+  }
+
+  export type RemoteHistoryFenceCountAggregateOutputType = {
+    bindingId: number
+    defaultBranch: number
+    lastConfirmedRemoteHeadSha: number
+    confirmedAt: number
+    _all: number
+  }
+
+
+  export type RemoteHistoryFenceMinAggregateInputType = {
+    bindingId?: true
+    defaultBranch?: true
+    lastConfirmedRemoteHeadSha?: true
+    confirmedAt?: true
+  }
+
+  export type RemoteHistoryFenceMaxAggregateInputType = {
+    bindingId?: true
+    defaultBranch?: true
+    lastConfirmedRemoteHeadSha?: true
+    confirmedAt?: true
+  }
+
+  export type RemoteHistoryFenceCountAggregateInputType = {
+    bindingId?: true
+    defaultBranch?: true
+    lastConfirmedRemoteHeadSha?: true
+    confirmedAt?: true
+    _all?: true
+  }
+
+  export type RemoteHistoryFenceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RemoteHistoryFence to aggregate.
+     */
+    where?: RemoteHistoryFenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RemoteHistoryFences to fetch.
+     */
+    orderBy?: RemoteHistoryFenceOrderByWithRelationInput | RemoteHistoryFenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: RemoteHistoryFenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RemoteHistoryFences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RemoteHistoryFences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned RemoteHistoryFences
+    **/
+    _count?: true | RemoteHistoryFenceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: RemoteHistoryFenceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: RemoteHistoryFenceMaxAggregateInputType
+  }
+
+  export type GetRemoteHistoryFenceAggregateType<T extends RemoteHistoryFenceAggregateArgs> = {
+        [P in keyof T & keyof AggregateRemoteHistoryFence]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRemoteHistoryFence[P]>
+      : GetScalarType<T[P], AggregateRemoteHistoryFence[P]>
+  }
+
+
+
+
+  export type RemoteHistoryFenceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RemoteHistoryFenceWhereInput
+    orderBy?: RemoteHistoryFenceOrderByWithAggregationInput | RemoteHistoryFenceOrderByWithAggregationInput[]
+    by: RemoteHistoryFenceScalarFieldEnum[] | RemoteHistoryFenceScalarFieldEnum
+    having?: RemoteHistoryFenceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RemoteHistoryFenceCountAggregateInputType | true
+    _min?: RemoteHistoryFenceMinAggregateInputType
+    _max?: RemoteHistoryFenceMaxAggregateInputType
+  }
+
+  export type RemoteHistoryFenceGroupByOutputType = {
+    bindingId: string
+    defaultBranch: string
+    lastConfirmedRemoteHeadSha: string
+    confirmedAt: Date
+    _count: RemoteHistoryFenceCountAggregateOutputType | null
+    _min: RemoteHistoryFenceMinAggregateOutputType | null
+    _max: RemoteHistoryFenceMaxAggregateOutputType | null
+  }
+
+  type GetRemoteHistoryFenceGroupByPayload<T extends RemoteHistoryFenceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RemoteHistoryFenceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RemoteHistoryFenceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RemoteHistoryFenceGroupByOutputType[P]>
+            : GetScalarType<T[P], RemoteHistoryFenceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RemoteHistoryFenceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    bindingId?: boolean
+    defaultBranch?: boolean
+    lastConfirmedRemoteHeadSha?: boolean
+    confirmedAt?: boolean
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["remoteHistoryFence"]>
+
+  export type RemoteHistoryFenceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    bindingId?: boolean
+    defaultBranch?: boolean
+    lastConfirmedRemoteHeadSha?: boolean
+    confirmedAt?: boolean
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["remoteHistoryFence"]>
+
+  export type RemoteHistoryFenceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    bindingId?: boolean
+    defaultBranch?: boolean
+    lastConfirmedRemoteHeadSha?: boolean
+    confirmedAt?: boolean
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["remoteHistoryFence"]>
+
+  export type RemoteHistoryFenceSelectScalar = {
+    bindingId?: boolean
+    defaultBranch?: boolean
+    lastConfirmedRemoteHeadSha?: boolean
+    confirmedAt?: boolean
+  }
+
+  export type RemoteHistoryFenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"bindingId" | "defaultBranch" | "lastConfirmedRemoteHeadSha" | "confirmedAt", ExtArgs["result"]["remoteHistoryFence"]>
+  export type RemoteHistoryFenceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }
+  export type RemoteHistoryFenceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }
+  export type RemoteHistoryFenceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }
+
+  export type $RemoteHistoryFencePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RemoteHistoryFence"
+    objects: {
+      binding: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      bindingId: string
+      defaultBranch: string
+      lastConfirmedRemoteHeadSha: string
+      confirmedAt: Date
+    }, ExtArgs["result"]["remoteHistoryFence"]>
+    composites: {}
+  }
+
+  type RemoteHistoryFenceGetPayload<S extends boolean | null | undefined | RemoteHistoryFenceDefaultArgs> = $Result.GetResult<Prisma.$RemoteHistoryFencePayload, S>
+
+  type RemoteHistoryFenceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RemoteHistoryFenceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RemoteHistoryFenceCountAggregateInputType | true
+    }
+
+  export interface RemoteHistoryFenceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RemoteHistoryFence'], meta: { name: 'RemoteHistoryFence' } }
+    /**
+     * Find zero or one RemoteHistoryFence that matches the filter.
+     * @param {RemoteHistoryFenceFindUniqueArgs} args - Arguments to find a RemoteHistoryFence
+     * @example
+     * // Get one RemoteHistoryFence
+     * const remoteHistoryFence = await prisma.remoteHistoryFence.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RemoteHistoryFenceFindUniqueArgs>(args: SelectSubset<T, RemoteHistoryFenceFindUniqueArgs<ExtArgs>>): Prisma__RemoteHistoryFenceClient<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RemoteHistoryFence that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RemoteHistoryFenceFindUniqueOrThrowArgs} args - Arguments to find a RemoteHistoryFence
+     * @example
+     * // Get one RemoteHistoryFence
+     * const remoteHistoryFence = await prisma.remoteHistoryFence.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RemoteHistoryFenceFindUniqueOrThrowArgs>(args: SelectSubset<T, RemoteHistoryFenceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RemoteHistoryFenceClient<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RemoteHistoryFence that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteHistoryFenceFindFirstArgs} args - Arguments to find a RemoteHistoryFence
+     * @example
+     * // Get one RemoteHistoryFence
+     * const remoteHistoryFence = await prisma.remoteHistoryFence.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RemoteHistoryFenceFindFirstArgs>(args?: SelectSubset<T, RemoteHistoryFenceFindFirstArgs<ExtArgs>>): Prisma__RemoteHistoryFenceClient<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RemoteHistoryFence that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteHistoryFenceFindFirstOrThrowArgs} args - Arguments to find a RemoteHistoryFence
+     * @example
+     * // Get one RemoteHistoryFence
+     * const remoteHistoryFence = await prisma.remoteHistoryFence.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RemoteHistoryFenceFindFirstOrThrowArgs>(args?: SelectSubset<T, RemoteHistoryFenceFindFirstOrThrowArgs<ExtArgs>>): Prisma__RemoteHistoryFenceClient<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RemoteHistoryFences that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteHistoryFenceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RemoteHistoryFences
+     * const remoteHistoryFences = await prisma.remoteHistoryFence.findMany()
+     *
+     * // Get first 10 RemoteHistoryFences
+     * const remoteHistoryFences = await prisma.remoteHistoryFence.findMany({ take: 10 })
+     *
+     * // Only select the `bindingId`
+     * const remoteHistoryFenceWithBindingIdOnly = await prisma.remoteHistoryFence.findMany({ select: { bindingId: true } })
+     *
+     */
+    findMany<T extends RemoteHistoryFenceFindManyArgs>(args?: SelectSubset<T, RemoteHistoryFenceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RemoteHistoryFence.
+     * @param {RemoteHistoryFenceCreateArgs} args - Arguments to create a RemoteHistoryFence.
+     * @example
+     * // Create one RemoteHistoryFence
+     * const RemoteHistoryFence = await prisma.remoteHistoryFence.create({
+     *   data: {
+     *     // ... data to create a RemoteHistoryFence
+     *   }
+     * })
+     *
+     */
+    create<T extends RemoteHistoryFenceCreateArgs>(args: SelectSubset<T, RemoteHistoryFenceCreateArgs<ExtArgs>>): Prisma__RemoteHistoryFenceClient<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RemoteHistoryFences.
+     * @param {RemoteHistoryFenceCreateManyArgs} args - Arguments to create many RemoteHistoryFences.
+     * @example
+     * // Create many RemoteHistoryFences
+     * const remoteHistoryFence = await prisma.remoteHistoryFence.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends RemoteHistoryFenceCreateManyArgs>(args?: SelectSubset<T, RemoteHistoryFenceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RemoteHistoryFences and returns the data saved in the database.
+     * @param {RemoteHistoryFenceCreateManyAndReturnArgs} args - Arguments to create many RemoteHistoryFences.
+     * @example
+     * // Create many RemoteHistoryFences
+     * const remoteHistoryFence = await prisma.remoteHistoryFence.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many RemoteHistoryFences and only return the `bindingId`
+     * const remoteHistoryFenceWithBindingIdOnly = await prisma.remoteHistoryFence.createManyAndReturn({
+     *   select: { bindingId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends RemoteHistoryFenceCreateManyAndReturnArgs>(args?: SelectSubset<T, RemoteHistoryFenceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RemoteHistoryFence.
+     * @param {RemoteHistoryFenceDeleteArgs} args - Arguments to delete one RemoteHistoryFence.
+     * @example
+     * // Delete one RemoteHistoryFence
+     * const RemoteHistoryFence = await prisma.remoteHistoryFence.delete({
+     *   where: {
+     *     // ... filter to delete one RemoteHistoryFence
+     *   }
+     * })
+     *
+     */
+    delete<T extends RemoteHistoryFenceDeleteArgs>(args: SelectSubset<T, RemoteHistoryFenceDeleteArgs<ExtArgs>>): Prisma__RemoteHistoryFenceClient<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RemoteHistoryFence.
+     * @param {RemoteHistoryFenceUpdateArgs} args - Arguments to update one RemoteHistoryFence.
+     * @example
+     * // Update one RemoteHistoryFence
+     * const remoteHistoryFence = await prisma.remoteHistoryFence.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends RemoteHistoryFenceUpdateArgs>(args: SelectSubset<T, RemoteHistoryFenceUpdateArgs<ExtArgs>>): Prisma__RemoteHistoryFenceClient<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RemoteHistoryFences.
+     * @param {RemoteHistoryFenceDeleteManyArgs} args - Arguments to filter RemoteHistoryFences to delete.
+     * @example
+     * // Delete a few RemoteHistoryFences
+     * const { count } = await prisma.remoteHistoryFence.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends RemoteHistoryFenceDeleteManyArgs>(args?: SelectSubset<T, RemoteHistoryFenceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RemoteHistoryFences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteHistoryFenceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RemoteHistoryFences
+     * const remoteHistoryFence = await prisma.remoteHistoryFence.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends RemoteHistoryFenceUpdateManyArgs>(args: SelectSubset<T, RemoteHistoryFenceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RemoteHistoryFences and returns the data updated in the database.
+     * @param {RemoteHistoryFenceUpdateManyAndReturnArgs} args - Arguments to update many RemoteHistoryFences.
+     * @example
+     * // Update many RemoteHistoryFences
+     * const remoteHistoryFence = await prisma.remoteHistoryFence.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more RemoteHistoryFences and only return the `bindingId`
+     * const remoteHistoryFenceWithBindingIdOnly = await prisma.remoteHistoryFence.updateManyAndReturn({
+     *   select: { bindingId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends RemoteHistoryFenceUpdateManyAndReturnArgs>(args: SelectSubset<T, RemoteHistoryFenceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RemoteHistoryFence.
+     * @param {RemoteHistoryFenceUpsertArgs} args - Arguments to update or create a RemoteHistoryFence.
+     * @example
+     * // Update or create a RemoteHistoryFence
+     * const remoteHistoryFence = await prisma.remoteHistoryFence.upsert({
+     *   create: {
+     *     // ... data to create a RemoteHistoryFence
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RemoteHistoryFence we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RemoteHistoryFenceUpsertArgs>(args: SelectSubset<T, RemoteHistoryFenceUpsertArgs<ExtArgs>>): Prisma__RemoteHistoryFenceClient<$Result.GetResult<Prisma.$RemoteHistoryFencePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RemoteHistoryFences.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteHistoryFenceCountArgs} args - Arguments to filter RemoteHistoryFences to count.
+     * @example
+     * // Count the number of RemoteHistoryFences
+     * const count = await prisma.remoteHistoryFence.count({
+     *   where: {
+     *     // ... the filter for the RemoteHistoryFences we want to count
+     *   }
+     * })
+    **/
+    count<T extends RemoteHistoryFenceCountArgs>(
+      args?: Subset<T, RemoteHistoryFenceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RemoteHistoryFenceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RemoteHistoryFence.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteHistoryFenceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RemoteHistoryFenceAggregateArgs>(args: Subset<T, RemoteHistoryFenceAggregateArgs>): Prisma.PrismaPromise<GetRemoteHistoryFenceAggregateType<T>>
+
+    /**
+     * Group by RemoteHistoryFence.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RemoteHistoryFenceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends RemoteHistoryFenceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RemoteHistoryFenceGroupByArgs['orderBy'] }
+        : { orderBy?: RemoteHistoryFenceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RemoteHistoryFenceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRemoteHistoryFenceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RemoteHistoryFence model
+   */
+  readonly fields: RemoteHistoryFenceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RemoteHistoryFence.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RemoteHistoryFenceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    binding<T extends KnowledgeRemoteBindingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBindingDefaultArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RemoteHistoryFence model
+   */
+  interface RemoteHistoryFenceFieldRefs {
+    readonly bindingId: FieldRef<"RemoteHistoryFence", 'String'>
+    readonly defaultBranch: FieldRef<"RemoteHistoryFence", 'String'>
+    readonly lastConfirmedRemoteHeadSha: FieldRef<"RemoteHistoryFence", 'String'>
+    readonly confirmedAt: FieldRef<"RemoteHistoryFence", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * RemoteHistoryFence findUnique
+   */
+  export type RemoteHistoryFenceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceInclude<ExtArgs> | null
+    /**
+     * Filter, which RemoteHistoryFence to fetch.
+     */
+    where: RemoteHistoryFenceWhereUniqueInput
+  }
+
+  /**
+   * RemoteHistoryFence findUniqueOrThrow
+   */
+  export type RemoteHistoryFenceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceInclude<ExtArgs> | null
+    /**
+     * Filter, which RemoteHistoryFence to fetch.
+     */
+    where: RemoteHistoryFenceWhereUniqueInput
+  }
+
+  /**
+   * RemoteHistoryFence findFirst
+   */
+  export type RemoteHistoryFenceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceInclude<ExtArgs> | null
+    /**
+     * Filter, which RemoteHistoryFence to fetch.
+     */
+    where?: RemoteHistoryFenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RemoteHistoryFences to fetch.
+     */
+    orderBy?: RemoteHistoryFenceOrderByWithRelationInput | RemoteHistoryFenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for RemoteHistoryFences.
+     */
+    cursor?: RemoteHistoryFenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RemoteHistoryFences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RemoteHistoryFences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of RemoteHistoryFences.
+     */
+    distinct?: RemoteHistoryFenceScalarFieldEnum | RemoteHistoryFenceScalarFieldEnum[]
+  }
+
+  /**
+   * RemoteHistoryFence findFirstOrThrow
+   */
+  export type RemoteHistoryFenceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceInclude<ExtArgs> | null
+    /**
+     * Filter, which RemoteHistoryFence to fetch.
+     */
+    where?: RemoteHistoryFenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RemoteHistoryFences to fetch.
+     */
+    orderBy?: RemoteHistoryFenceOrderByWithRelationInput | RemoteHistoryFenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for RemoteHistoryFences.
+     */
+    cursor?: RemoteHistoryFenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RemoteHistoryFences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RemoteHistoryFences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of RemoteHistoryFences.
+     */
+    distinct?: RemoteHistoryFenceScalarFieldEnum | RemoteHistoryFenceScalarFieldEnum[]
+  }
+
+  /**
+   * RemoteHistoryFence findMany
+   */
+  export type RemoteHistoryFenceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceInclude<ExtArgs> | null
+    /**
+     * Filter, which RemoteHistoryFences to fetch.
+     */
+    where?: RemoteHistoryFenceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of RemoteHistoryFences to fetch.
+     */
+    orderBy?: RemoteHistoryFenceOrderByWithRelationInput | RemoteHistoryFenceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing RemoteHistoryFences.
+     */
+    cursor?: RemoteHistoryFenceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` RemoteHistoryFences from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` RemoteHistoryFences.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of RemoteHistoryFences.
+     */
+    distinct?: RemoteHistoryFenceScalarFieldEnum | RemoteHistoryFenceScalarFieldEnum[]
+  }
+
+  /**
+   * RemoteHistoryFence create
+   */
+  export type RemoteHistoryFenceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RemoteHistoryFence.
+     */
+    data: XOR<RemoteHistoryFenceCreateInput, RemoteHistoryFenceUncheckedCreateInput>
+  }
+
+  /**
+   * RemoteHistoryFence createMany
+   */
+  export type RemoteHistoryFenceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RemoteHistoryFences.
+     */
+    data: RemoteHistoryFenceCreateManyInput | RemoteHistoryFenceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RemoteHistoryFence createManyAndReturn
+   */
+  export type RemoteHistoryFenceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * The data used to create many RemoteHistoryFences.
+     */
+    data: RemoteHistoryFenceCreateManyInput | RemoteHistoryFenceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RemoteHistoryFence update
+   */
+  export type RemoteHistoryFenceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RemoteHistoryFence.
+     */
+    data: XOR<RemoteHistoryFenceUpdateInput, RemoteHistoryFenceUncheckedUpdateInput>
+    /**
+     * Choose, which RemoteHistoryFence to update.
+     */
+    where: RemoteHistoryFenceWhereUniqueInput
+  }
+
+  /**
+   * RemoteHistoryFence updateMany
+   */
+  export type RemoteHistoryFenceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RemoteHistoryFences.
+     */
+    data: XOR<RemoteHistoryFenceUpdateManyMutationInput, RemoteHistoryFenceUncheckedUpdateManyInput>
+    /**
+     * Filter which RemoteHistoryFences to update
+     */
+    where?: RemoteHistoryFenceWhereInput
+    /**
+     * Limit how many RemoteHistoryFences to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RemoteHistoryFence updateManyAndReturn
+   */
+  export type RemoteHistoryFenceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * The data used to update RemoteHistoryFences.
+     */
+    data: XOR<RemoteHistoryFenceUpdateManyMutationInput, RemoteHistoryFenceUncheckedUpdateManyInput>
+    /**
+     * Filter which RemoteHistoryFences to update
+     */
+    where?: RemoteHistoryFenceWhereInput
+    /**
+     * Limit how many RemoteHistoryFences to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RemoteHistoryFence upsert
+   */
+  export type RemoteHistoryFenceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RemoteHistoryFence to update in case it exists.
+     */
+    where: RemoteHistoryFenceWhereUniqueInput
+    /**
+     * In case the RemoteHistoryFence found by the `where` argument doesn't exist, create a new RemoteHistoryFence with this data.
+     */
+    create: XOR<RemoteHistoryFenceCreateInput, RemoteHistoryFenceUncheckedCreateInput>
+    /**
+     * In case the RemoteHistoryFence was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RemoteHistoryFenceUpdateInput, RemoteHistoryFenceUncheckedUpdateInput>
+  }
+
+  /**
+   * RemoteHistoryFence delete
+   */
+  export type RemoteHistoryFenceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceInclude<ExtArgs> | null
+    /**
+     * Filter which RemoteHistoryFence to delete.
+     */
+    where: RemoteHistoryFenceWhereUniqueInput
+  }
+
+  /**
+   * RemoteHistoryFence deleteMany
+   */
+  export type RemoteHistoryFenceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RemoteHistoryFences to delete
+     */
+    where?: RemoteHistoryFenceWhereInput
+    /**
+     * Limit how many RemoteHistoryFences to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RemoteHistoryFence without action
+   */
+  export type RemoteHistoryFenceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RemoteHistoryFence
+     */
+    select?: RemoteHistoryFenceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RemoteHistoryFence
+     */
+    omit?: RemoteHistoryFenceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RemoteHistoryFenceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model KnowledgeProjectionCheckpoint
+   */
+
+  export type AggregateKnowledgeProjectionCheckpoint = {
+    _count: KnowledgeProjectionCheckpointCountAggregateOutputType | null
+    _min: KnowledgeProjectionCheckpointMinAggregateOutputType | null
+    _max: KnowledgeProjectionCheckpointMaxAggregateOutputType | null
+  }
+
+  export type KnowledgeProjectionCheckpointMinAggregateOutputType = {
+    bindingId: string | null
+    branch: string | null
+    projectedCommitSha: string | null
+    state: string | null
+    failureCode: string | null
+    failureMessage: string | null
+    lastAttemptAt: Date | null
+    projectedAt: Date | null
+  }
+
+  export type KnowledgeProjectionCheckpointMaxAggregateOutputType = {
+    bindingId: string | null
+    branch: string | null
+    projectedCommitSha: string | null
+    state: string | null
+    failureCode: string | null
+    failureMessage: string | null
+    lastAttemptAt: Date | null
+    projectedAt: Date | null
+  }
+
+  export type KnowledgeProjectionCheckpointCountAggregateOutputType = {
+    bindingId: number
+    branch: number
+    projectedCommitSha: number
+    state: number
+    failureCode: number
+    failureMessage: number
+    lastAttemptAt: number
+    projectedAt: number
+    _all: number
+  }
+
+
+  export type KnowledgeProjectionCheckpointMinAggregateInputType = {
+    bindingId?: true
+    branch?: true
+    projectedCommitSha?: true
+    state?: true
+    failureCode?: true
+    failureMessage?: true
+    lastAttemptAt?: true
+    projectedAt?: true
+  }
+
+  export type KnowledgeProjectionCheckpointMaxAggregateInputType = {
+    bindingId?: true
+    branch?: true
+    projectedCommitSha?: true
+    state?: true
+    failureCode?: true
+    failureMessage?: true
+    lastAttemptAt?: true
+    projectedAt?: true
+  }
+
+  export type KnowledgeProjectionCheckpointCountAggregateInputType = {
+    bindingId?: true
+    branch?: true
+    projectedCommitSha?: true
+    state?: true
+    failureCode?: true
+    failureMessage?: true
+    lastAttemptAt?: true
+    projectedAt?: true
+    _all?: true
+  }
+
+  export type KnowledgeProjectionCheckpointAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KnowledgeProjectionCheckpoint to aggregate.
+     */
+    where?: KnowledgeProjectionCheckpointWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeProjectionCheckpoints to fetch.
+     */
+    orderBy?: KnowledgeProjectionCheckpointOrderByWithRelationInput | KnowledgeProjectionCheckpointOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: KnowledgeProjectionCheckpointWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeProjectionCheckpoints from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeProjectionCheckpoints.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned KnowledgeProjectionCheckpoints
+    **/
+    _count?: true | KnowledgeProjectionCheckpointCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: KnowledgeProjectionCheckpointMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: KnowledgeProjectionCheckpointMaxAggregateInputType
+  }
+
+  export type GetKnowledgeProjectionCheckpointAggregateType<T extends KnowledgeProjectionCheckpointAggregateArgs> = {
+        [P in keyof T & keyof AggregateKnowledgeProjectionCheckpoint]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateKnowledgeProjectionCheckpoint[P]>
+      : GetScalarType<T[P], AggregateKnowledgeProjectionCheckpoint[P]>
+  }
+
+
+
+
+  export type KnowledgeProjectionCheckpointGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KnowledgeProjectionCheckpointWhereInput
+    orderBy?: KnowledgeProjectionCheckpointOrderByWithAggregationInput | KnowledgeProjectionCheckpointOrderByWithAggregationInput[]
+    by: KnowledgeProjectionCheckpointScalarFieldEnum[] | KnowledgeProjectionCheckpointScalarFieldEnum
+    having?: KnowledgeProjectionCheckpointScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: KnowledgeProjectionCheckpointCountAggregateInputType | true
+    _min?: KnowledgeProjectionCheckpointMinAggregateInputType
+    _max?: KnowledgeProjectionCheckpointMaxAggregateInputType
+  }
+
+  export type KnowledgeProjectionCheckpointGroupByOutputType = {
+    bindingId: string
+    branch: string
+    projectedCommitSha: string | null
+    state: string
+    failureCode: string | null
+    failureMessage: string | null
+    lastAttemptAt: Date | null
+    projectedAt: Date | null
+    _count: KnowledgeProjectionCheckpointCountAggregateOutputType | null
+    _min: KnowledgeProjectionCheckpointMinAggregateOutputType | null
+    _max: KnowledgeProjectionCheckpointMaxAggregateOutputType | null
+  }
+
+  type GetKnowledgeProjectionCheckpointGroupByPayload<T extends KnowledgeProjectionCheckpointGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<KnowledgeProjectionCheckpointGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof KnowledgeProjectionCheckpointGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], KnowledgeProjectionCheckpointGroupByOutputType[P]>
+            : GetScalarType<T[P], KnowledgeProjectionCheckpointGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type KnowledgeProjectionCheckpointSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    bindingId?: boolean
+    branch?: boolean
+    projectedCommitSha?: boolean
+    state?: boolean
+    failureCode?: boolean
+    failureMessage?: boolean
+    lastAttemptAt?: boolean
+    projectedAt?: boolean
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["knowledgeProjectionCheckpoint"]>
+
+  export type KnowledgeProjectionCheckpointSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    bindingId?: boolean
+    branch?: boolean
+    projectedCommitSha?: boolean
+    state?: boolean
+    failureCode?: boolean
+    failureMessage?: boolean
+    lastAttemptAt?: boolean
+    projectedAt?: boolean
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["knowledgeProjectionCheckpoint"]>
+
+  export type KnowledgeProjectionCheckpointSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    bindingId?: boolean
+    branch?: boolean
+    projectedCommitSha?: boolean
+    state?: boolean
+    failureCode?: boolean
+    failureMessage?: boolean
+    lastAttemptAt?: boolean
+    projectedAt?: boolean
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["knowledgeProjectionCheckpoint"]>
+
+  export type KnowledgeProjectionCheckpointSelectScalar = {
+    bindingId?: boolean
+    branch?: boolean
+    projectedCommitSha?: boolean
+    state?: boolean
+    failureCode?: boolean
+    failureMessage?: boolean
+    lastAttemptAt?: boolean
+    projectedAt?: boolean
+  }
+
+  export type KnowledgeProjectionCheckpointOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"bindingId" | "branch" | "projectedCommitSha" | "state" | "failureCode" | "failureMessage" | "lastAttemptAt" | "projectedAt", ExtArgs["result"]["knowledgeProjectionCheckpoint"]>
+  export type KnowledgeProjectionCheckpointInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }
+  export type KnowledgeProjectionCheckpointIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }
+  export type KnowledgeProjectionCheckpointIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
+  }
+
+  export type $KnowledgeProjectionCheckpointPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "KnowledgeProjectionCheckpoint"
+    objects: {
+      binding: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      bindingId: string
+      branch: string
+      projectedCommitSha: string | null
+      state: string
+      failureCode: string | null
+      failureMessage: string | null
+      lastAttemptAt: Date | null
+      projectedAt: Date | null
+    }, ExtArgs["result"]["knowledgeProjectionCheckpoint"]>
+    composites: {}
+  }
+
+  type KnowledgeProjectionCheckpointGetPayload<S extends boolean | null | undefined | KnowledgeProjectionCheckpointDefaultArgs> = $Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload, S>
+
+  type KnowledgeProjectionCheckpointCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<KnowledgeProjectionCheckpointFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: KnowledgeProjectionCheckpointCountAggregateInputType | true
+    }
+
+  export interface KnowledgeProjectionCheckpointDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KnowledgeProjectionCheckpoint'], meta: { name: 'KnowledgeProjectionCheckpoint' } }
+    /**
+     * Find zero or one KnowledgeProjectionCheckpoint that matches the filter.
+     * @param {KnowledgeProjectionCheckpointFindUniqueArgs} args - Arguments to find a KnowledgeProjectionCheckpoint
+     * @example
+     * // Get one KnowledgeProjectionCheckpoint
+     * const knowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends KnowledgeProjectionCheckpointFindUniqueArgs>(args: SelectSubset<T, KnowledgeProjectionCheckpointFindUniqueArgs<ExtArgs>>): Prisma__KnowledgeProjectionCheckpointClient<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one KnowledgeProjectionCheckpoint that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {KnowledgeProjectionCheckpointFindUniqueOrThrowArgs} args - Arguments to find a KnowledgeProjectionCheckpoint
+     * @example
+     * // Get one KnowledgeProjectionCheckpoint
+     * const knowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends KnowledgeProjectionCheckpointFindUniqueOrThrowArgs>(args: SelectSubset<T, KnowledgeProjectionCheckpointFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KnowledgeProjectionCheckpointClient<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KnowledgeProjectionCheckpoint that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeProjectionCheckpointFindFirstArgs} args - Arguments to find a KnowledgeProjectionCheckpoint
+     * @example
+     * // Get one KnowledgeProjectionCheckpoint
+     * const knowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends KnowledgeProjectionCheckpointFindFirstArgs>(args?: SelectSubset<T, KnowledgeProjectionCheckpointFindFirstArgs<ExtArgs>>): Prisma__KnowledgeProjectionCheckpointClient<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KnowledgeProjectionCheckpoint that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeProjectionCheckpointFindFirstOrThrowArgs} args - Arguments to find a KnowledgeProjectionCheckpoint
+     * @example
+     * // Get one KnowledgeProjectionCheckpoint
+     * const knowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends KnowledgeProjectionCheckpointFindFirstOrThrowArgs>(args?: SelectSubset<T, KnowledgeProjectionCheckpointFindFirstOrThrowArgs<ExtArgs>>): Prisma__KnowledgeProjectionCheckpointClient<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more KnowledgeProjectionCheckpoints that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeProjectionCheckpointFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all KnowledgeProjectionCheckpoints
+     * const knowledgeProjectionCheckpoints = await prisma.knowledgeProjectionCheckpoint.findMany()
+     *
+     * // Get first 10 KnowledgeProjectionCheckpoints
+     * const knowledgeProjectionCheckpoints = await prisma.knowledgeProjectionCheckpoint.findMany({ take: 10 })
+     *
+     * // Only select the `bindingId`
+     * const knowledgeProjectionCheckpointWithBindingIdOnly = await prisma.knowledgeProjectionCheckpoint.findMany({ select: { bindingId: true } })
+     *
+     */
+    findMany<T extends KnowledgeProjectionCheckpointFindManyArgs>(args?: SelectSubset<T, KnowledgeProjectionCheckpointFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a KnowledgeProjectionCheckpoint.
+     * @param {KnowledgeProjectionCheckpointCreateArgs} args - Arguments to create a KnowledgeProjectionCheckpoint.
+     * @example
+     * // Create one KnowledgeProjectionCheckpoint
+     * const KnowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.create({
+     *   data: {
+     *     // ... data to create a KnowledgeProjectionCheckpoint
+     *   }
+     * })
+     *
+     */
+    create<T extends KnowledgeProjectionCheckpointCreateArgs>(args: SelectSubset<T, KnowledgeProjectionCheckpointCreateArgs<ExtArgs>>): Prisma__KnowledgeProjectionCheckpointClient<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many KnowledgeProjectionCheckpoints.
+     * @param {KnowledgeProjectionCheckpointCreateManyArgs} args - Arguments to create many KnowledgeProjectionCheckpoints.
+     * @example
+     * // Create many KnowledgeProjectionCheckpoints
+     * const knowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends KnowledgeProjectionCheckpointCreateManyArgs>(args?: SelectSubset<T, KnowledgeProjectionCheckpointCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many KnowledgeProjectionCheckpoints and returns the data saved in the database.
+     * @param {KnowledgeProjectionCheckpointCreateManyAndReturnArgs} args - Arguments to create many KnowledgeProjectionCheckpoints.
+     * @example
+     * // Create many KnowledgeProjectionCheckpoints
+     * const knowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many KnowledgeProjectionCheckpoints and only return the `bindingId`
+     * const knowledgeProjectionCheckpointWithBindingIdOnly = await prisma.knowledgeProjectionCheckpoint.createManyAndReturn({
+     *   select: { bindingId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends KnowledgeProjectionCheckpointCreateManyAndReturnArgs>(args?: SelectSubset<T, KnowledgeProjectionCheckpointCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a KnowledgeProjectionCheckpoint.
+     * @param {KnowledgeProjectionCheckpointDeleteArgs} args - Arguments to delete one KnowledgeProjectionCheckpoint.
+     * @example
+     * // Delete one KnowledgeProjectionCheckpoint
+     * const KnowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.delete({
+     *   where: {
+     *     // ... filter to delete one KnowledgeProjectionCheckpoint
+     *   }
+     * })
+     *
+     */
+    delete<T extends KnowledgeProjectionCheckpointDeleteArgs>(args: SelectSubset<T, KnowledgeProjectionCheckpointDeleteArgs<ExtArgs>>): Prisma__KnowledgeProjectionCheckpointClient<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one KnowledgeProjectionCheckpoint.
+     * @param {KnowledgeProjectionCheckpointUpdateArgs} args - Arguments to update one KnowledgeProjectionCheckpoint.
+     * @example
+     * // Update one KnowledgeProjectionCheckpoint
+     * const knowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends KnowledgeProjectionCheckpointUpdateArgs>(args: SelectSubset<T, KnowledgeProjectionCheckpointUpdateArgs<ExtArgs>>): Prisma__KnowledgeProjectionCheckpointClient<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more KnowledgeProjectionCheckpoints.
+     * @param {KnowledgeProjectionCheckpointDeleteManyArgs} args - Arguments to filter KnowledgeProjectionCheckpoints to delete.
+     * @example
+     * // Delete a few KnowledgeProjectionCheckpoints
+     * const { count } = await prisma.knowledgeProjectionCheckpoint.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends KnowledgeProjectionCheckpointDeleteManyArgs>(args?: SelectSubset<T, KnowledgeProjectionCheckpointDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KnowledgeProjectionCheckpoints.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeProjectionCheckpointUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many KnowledgeProjectionCheckpoints
+     * const knowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends KnowledgeProjectionCheckpointUpdateManyArgs>(args: SelectSubset<T, KnowledgeProjectionCheckpointUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KnowledgeProjectionCheckpoints and returns the data updated in the database.
+     * @param {KnowledgeProjectionCheckpointUpdateManyAndReturnArgs} args - Arguments to update many KnowledgeProjectionCheckpoints.
+     * @example
+     * // Update many KnowledgeProjectionCheckpoints
+     * const knowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more KnowledgeProjectionCheckpoints and only return the `bindingId`
+     * const knowledgeProjectionCheckpointWithBindingIdOnly = await prisma.knowledgeProjectionCheckpoint.updateManyAndReturn({
+     *   select: { bindingId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends KnowledgeProjectionCheckpointUpdateManyAndReturnArgs>(args: SelectSubset<T, KnowledgeProjectionCheckpointUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one KnowledgeProjectionCheckpoint.
+     * @param {KnowledgeProjectionCheckpointUpsertArgs} args - Arguments to update or create a KnowledgeProjectionCheckpoint.
+     * @example
+     * // Update or create a KnowledgeProjectionCheckpoint
+     * const knowledgeProjectionCheckpoint = await prisma.knowledgeProjectionCheckpoint.upsert({
+     *   create: {
+     *     // ... data to create a KnowledgeProjectionCheckpoint
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the KnowledgeProjectionCheckpoint we want to update
+     *   }
+     * })
+     */
+    upsert<T extends KnowledgeProjectionCheckpointUpsertArgs>(args: SelectSubset<T, KnowledgeProjectionCheckpointUpsertArgs<ExtArgs>>): Prisma__KnowledgeProjectionCheckpointClient<$Result.GetResult<Prisma.$KnowledgeProjectionCheckpointPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of KnowledgeProjectionCheckpoints.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeProjectionCheckpointCountArgs} args - Arguments to filter KnowledgeProjectionCheckpoints to count.
+     * @example
+     * // Count the number of KnowledgeProjectionCheckpoints
+     * const count = await prisma.knowledgeProjectionCheckpoint.count({
+     *   where: {
+     *     // ... the filter for the KnowledgeProjectionCheckpoints we want to count
+     *   }
+     * })
+    **/
+    count<T extends KnowledgeProjectionCheckpointCountArgs>(
+      args?: Subset<T, KnowledgeProjectionCheckpointCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], KnowledgeProjectionCheckpointCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a KnowledgeProjectionCheckpoint.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeProjectionCheckpointAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends KnowledgeProjectionCheckpointAggregateArgs>(args: Subset<T, KnowledgeProjectionCheckpointAggregateArgs>): Prisma.PrismaPromise<GetKnowledgeProjectionCheckpointAggregateType<T>>
+
+    /**
+     * Group by KnowledgeProjectionCheckpoint.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KnowledgeProjectionCheckpointGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends KnowledgeProjectionCheckpointGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: KnowledgeProjectionCheckpointGroupByArgs['orderBy'] }
+        : { orderBy?: KnowledgeProjectionCheckpointGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, KnowledgeProjectionCheckpointGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKnowledgeProjectionCheckpointGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the KnowledgeProjectionCheckpoint model
+   */
+  readonly fields: KnowledgeProjectionCheckpointFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for KnowledgeProjectionCheckpoint.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__KnowledgeProjectionCheckpointClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    binding<T extends KnowledgeRemoteBindingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBindingDefaultArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the KnowledgeProjectionCheckpoint model
+   */
+  interface KnowledgeProjectionCheckpointFieldRefs {
+    readonly bindingId: FieldRef<"KnowledgeProjectionCheckpoint", 'String'>
+    readonly branch: FieldRef<"KnowledgeProjectionCheckpoint", 'String'>
+    readonly projectedCommitSha: FieldRef<"KnowledgeProjectionCheckpoint", 'String'>
+    readonly state: FieldRef<"KnowledgeProjectionCheckpoint", 'String'>
+    readonly failureCode: FieldRef<"KnowledgeProjectionCheckpoint", 'String'>
+    readonly failureMessage: FieldRef<"KnowledgeProjectionCheckpoint", 'String'>
+    readonly lastAttemptAt: FieldRef<"KnowledgeProjectionCheckpoint", 'DateTime'>
+    readonly projectedAt: FieldRef<"KnowledgeProjectionCheckpoint", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * KnowledgeProjectionCheckpoint findUnique
+   */
+  export type KnowledgeProjectionCheckpointFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeProjectionCheckpoint to fetch.
+     */
+    where: KnowledgeProjectionCheckpointWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint findUniqueOrThrow
+   */
+  export type KnowledgeProjectionCheckpointFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeProjectionCheckpoint to fetch.
+     */
+    where: KnowledgeProjectionCheckpointWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint findFirst
+   */
+  export type KnowledgeProjectionCheckpointFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeProjectionCheckpoint to fetch.
+     */
+    where?: KnowledgeProjectionCheckpointWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeProjectionCheckpoints to fetch.
+     */
+    orderBy?: KnowledgeProjectionCheckpointOrderByWithRelationInput | KnowledgeProjectionCheckpointOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for KnowledgeProjectionCheckpoints.
+     */
+    cursor?: KnowledgeProjectionCheckpointWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeProjectionCheckpoints from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeProjectionCheckpoints.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KnowledgeProjectionCheckpoints.
+     */
+    distinct?: KnowledgeProjectionCheckpointScalarFieldEnum | KnowledgeProjectionCheckpointScalarFieldEnum[]
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint findFirstOrThrow
+   */
+  export type KnowledgeProjectionCheckpointFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeProjectionCheckpoint to fetch.
+     */
+    where?: KnowledgeProjectionCheckpointWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeProjectionCheckpoints to fetch.
+     */
+    orderBy?: KnowledgeProjectionCheckpointOrderByWithRelationInput | KnowledgeProjectionCheckpointOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for KnowledgeProjectionCheckpoints.
+     */
+    cursor?: KnowledgeProjectionCheckpointWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeProjectionCheckpoints from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeProjectionCheckpoints.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KnowledgeProjectionCheckpoints.
+     */
+    distinct?: KnowledgeProjectionCheckpointScalarFieldEnum | KnowledgeProjectionCheckpointScalarFieldEnum[]
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint findMany
+   */
+  export type KnowledgeProjectionCheckpointFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointInclude<ExtArgs> | null
+    /**
+     * Filter, which KnowledgeProjectionCheckpoints to fetch.
+     */
+    where?: KnowledgeProjectionCheckpointWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KnowledgeProjectionCheckpoints to fetch.
+     */
+    orderBy?: KnowledgeProjectionCheckpointOrderByWithRelationInput | KnowledgeProjectionCheckpointOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing KnowledgeProjectionCheckpoints.
+     */
+    cursor?: KnowledgeProjectionCheckpointWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KnowledgeProjectionCheckpoints from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KnowledgeProjectionCheckpoints.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KnowledgeProjectionCheckpoints.
+     */
+    distinct?: KnowledgeProjectionCheckpointScalarFieldEnum | KnowledgeProjectionCheckpointScalarFieldEnum[]
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint create
+   */
+  export type KnowledgeProjectionCheckpointCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointInclude<ExtArgs> | null
+    /**
+     * The data needed to create a KnowledgeProjectionCheckpoint.
+     */
+    data: XOR<KnowledgeProjectionCheckpointCreateInput, KnowledgeProjectionCheckpointUncheckedCreateInput>
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint createMany
+   */
+  export type KnowledgeProjectionCheckpointCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many KnowledgeProjectionCheckpoints.
+     */
+    data: KnowledgeProjectionCheckpointCreateManyInput | KnowledgeProjectionCheckpointCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint createManyAndReturn
+   */
+  export type KnowledgeProjectionCheckpointCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * The data used to create many KnowledgeProjectionCheckpoints.
+     */
+    data: KnowledgeProjectionCheckpointCreateManyInput | KnowledgeProjectionCheckpointCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint update
+   */
+  export type KnowledgeProjectionCheckpointUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointInclude<ExtArgs> | null
+    /**
+     * The data needed to update a KnowledgeProjectionCheckpoint.
+     */
+    data: XOR<KnowledgeProjectionCheckpointUpdateInput, KnowledgeProjectionCheckpointUncheckedUpdateInput>
+    /**
+     * Choose, which KnowledgeProjectionCheckpoint to update.
+     */
+    where: KnowledgeProjectionCheckpointWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint updateMany
+   */
+  export type KnowledgeProjectionCheckpointUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update KnowledgeProjectionCheckpoints.
+     */
+    data: XOR<KnowledgeProjectionCheckpointUpdateManyMutationInput, KnowledgeProjectionCheckpointUncheckedUpdateManyInput>
+    /**
+     * Filter which KnowledgeProjectionCheckpoints to update
+     */
+    where?: KnowledgeProjectionCheckpointWhereInput
+    /**
+     * Limit how many KnowledgeProjectionCheckpoints to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint updateManyAndReturn
+   */
+  export type KnowledgeProjectionCheckpointUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * The data used to update KnowledgeProjectionCheckpoints.
+     */
+    data: XOR<KnowledgeProjectionCheckpointUpdateManyMutationInput, KnowledgeProjectionCheckpointUncheckedUpdateManyInput>
+    /**
+     * Filter which KnowledgeProjectionCheckpoints to update
+     */
+    where?: KnowledgeProjectionCheckpointWhereInput
+    /**
+     * Limit how many KnowledgeProjectionCheckpoints to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint upsert
+   */
+  export type KnowledgeProjectionCheckpointUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointInclude<ExtArgs> | null
+    /**
+     * The filter to search for the KnowledgeProjectionCheckpoint to update in case it exists.
+     */
+    where: KnowledgeProjectionCheckpointWhereUniqueInput
+    /**
+     * In case the KnowledgeProjectionCheckpoint found by the `where` argument doesn't exist, create a new KnowledgeProjectionCheckpoint with this data.
+     */
+    create: XOR<KnowledgeProjectionCheckpointCreateInput, KnowledgeProjectionCheckpointUncheckedCreateInput>
+    /**
+     * In case the KnowledgeProjectionCheckpoint was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<KnowledgeProjectionCheckpointUpdateInput, KnowledgeProjectionCheckpointUncheckedUpdateInput>
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint delete
+   */
+  export type KnowledgeProjectionCheckpointDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointInclude<ExtArgs> | null
+    /**
+     * Filter which KnowledgeProjectionCheckpoint to delete.
+     */
+    where: KnowledgeProjectionCheckpointWhereUniqueInput
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint deleteMany
+   */
+  export type KnowledgeProjectionCheckpointDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KnowledgeProjectionCheckpoints to delete
+     */
+    where?: KnowledgeProjectionCheckpointWhereInput
+    /**
+     * Limit how many KnowledgeProjectionCheckpoints to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * KnowledgeProjectionCheckpoint without action
+   */
+  export type KnowledgeProjectionCheckpointDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KnowledgeProjectionCheckpoint
+     */
+    select?: KnowledgeProjectionCheckpointSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KnowledgeProjectionCheckpoint
+     */
+    omit?: KnowledgeProjectionCheckpointOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KnowledgeProjectionCheckpointInclude<ExtArgs> | null
   }
 
 
@@ -98051,7 +102787,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliveryMinAggregateOutputType = {
     id: string | null
-    connectionId: string | null
+    bindingId: string | null
     deliveryId: string | null
     eventName: string | null
     beforeSha: string | null
@@ -98065,7 +102801,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliveryMaxAggregateOutputType = {
     id: string | null
-    connectionId: string | null
+    bindingId: string | null
     deliveryId: string | null
     eventName: string | null
     beforeSha: string | null
@@ -98079,7 +102815,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliveryCountAggregateOutputType = {
     id: number
-    connectionId: number
+    bindingId: number
     deliveryId: number
     eventName: number
     beforeSha: number
@@ -98095,7 +102831,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliveryMinAggregateInputType = {
     id?: true
-    connectionId?: true
+    bindingId?: true
     deliveryId?: true
     eventName?: true
     beforeSha?: true
@@ -98109,7 +102845,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliveryMaxAggregateInputType = {
     id?: true
-    connectionId?: true
+    bindingId?: true
     deliveryId?: true
     eventName?: true
     beforeSha?: true
@@ -98123,7 +102859,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliveryCountAggregateInputType = {
     id?: true
-    connectionId?: true
+    bindingId?: true
     deliveryId?: true
     eventName?: true
     beforeSha?: true
@@ -98210,7 +102946,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliveryGroupByOutputType = {
     id: string
-    connectionId: string
+    bindingId: string
     deliveryId: string
     eventName: string
     beforeSha: string | null
@@ -98241,7 +102977,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliverySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     deliveryId?: boolean
     eventName?: boolean
     beforeSha?: boolean
@@ -98251,12 +102987,12 @@ export namespace Prisma {
     errorMessage?: boolean
     receivedAt?: boolean
     processedAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["githubWebhookDelivery"]>
 
   export type GithubWebhookDeliverySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     deliveryId?: boolean
     eventName?: boolean
     beforeSha?: boolean
@@ -98266,12 +103002,12 @@ export namespace Prisma {
     errorMessage?: boolean
     receivedAt?: boolean
     processedAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["githubWebhookDelivery"]>
 
   export type GithubWebhookDeliverySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     deliveryId?: boolean
     eventName?: boolean
     beforeSha?: boolean
@@ -98281,12 +103017,12 @@ export namespace Prisma {
     errorMessage?: boolean
     receivedAt?: boolean
     processedAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["githubWebhookDelivery"]>
 
   export type GithubWebhookDeliverySelectScalar = {
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     deliveryId?: boolean
     eventName?: boolean
     beforeSha?: boolean
@@ -98298,25 +103034,25 @@ export namespace Prisma {
     processedAt?: boolean
   }
 
-  export type GithubWebhookDeliveryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "connectionId" | "deliveryId" | "eventName" | "beforeSha" | "afterSha" | "forced" | "status" | "errorMessage" | "receivedAt" | "processedAt", ExtArgs["result"]["githubWebhookDelivery"]>
+  export type GithubWebhookDeliveryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "bindingId" | "deliveryId" | "eventName" | "beforeSha" | "afterSha" | "forced" | "status" | "errorMessage" | "receivedAt" | "processedAt", ExtArgs["result"]["githubWebhookDelivery"]>
   export type GithubWebhookDeliveryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
   export type GithubWebhookDeliveryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
   export type GithubWebhookDeliveryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
 
   export type $GithubWebhookDeliveryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "GithubWebhookDelivery"
     objects: {
-      connection: Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>
+      binding: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      connectionId: string
+      bindingId: string
       deliveryId: string
       eventName: string
       beforeSha: string | null
@@ -98720,7 +103456,7 @@ export namespace Prisma {
    */
   export interface Prisma__GithubWebhookDeliveryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    connection<T extends KnowledgeRepositoryConnectionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    binding<T extends KnowledgeRemoteBindingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBindingDefaultArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -98751,7 +103487,7 @@ export namespace Prisma {
    */
   interface GithubWebhookDeliveryFieldRefs {
     readonly id: FieldRef<"GithubWebhookDelivery", 'String'>
-    readonly connectionId: FieldRef<"GithubWebhookDelivery", 'String'>
+    readonly bindingId: FieldRef<"GithubWebhookDelivery", 'String'>
     readonly deliveryId: FieldRef<"GithubWebhookDelivery", 'String'>
     readonly eventName: FieldRef<"GithubWebhookDelivery", 'String'>
     readonly beforeSha: FieldRef<"GithubWebhookDelivery", 'String'>
@@ -99192,7 +103928,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionMinAggregateOutputType = {
     id: string | null
-    connectionId: string | null
+    bindingId: string | null
     relativePath: string | null
     commitSha: string | null
     blobSha: string | null
@@ -99206,7 +103942,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionMaxAggregateOutputType = {
     id: string | null
-    connectionId: string | null
+    bindingId: string | null
     relativePath: string | null
     commitSha: string | null
     blobSha: string | null
@@ -99220,7 +103956,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionCountAggregateOutputType = {
     id: number
-    connectionId: number
+    bindingId: number
     relativePath: number
     commitSha: number
     blobSha: number
@@ -99237,7 +103973,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionMinAggregateInputType = {
     id?: true
-    connectionId?: true
+    bindingId?: true
     relativePath?: true
     commitSha?: true
     blobSha?: true
@@ -99251,7 +103987,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionMaxAggregateInputType = {
     id?: true
-    connectionId?: true
+    bindingId?: true
     relativePath?: true
     commitSha?: true
     blobSha?: true
@@ -99265,7 +104001,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionCountAggregateInputType = {
     id?: true
-    connectionId?: true
+    bindingId?: true
     relativePath?: true
     commitSha?: true
     blobSha?: true
@@ -99353,7 +104089,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionGroupByOutputType = {
     id: string
-    connectionId: string
+    bindingId: string
     relativePath: string
     commitSha: string
     blobSha: string
@@ -99385,7 +104121,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -99396,12 +104132,12 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeNoteProjection"]>
 
   export type KnowledgeNoteProjectionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -99412,12 +104148,12 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeNoteProjection"]>
 
   export type KnowledgeNoteProjectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -99428,12 +104164,12 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeNoteProjection"]>
 
   export type KnowledgeNoteProjectionSelectScalar = {
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -99446,25 +104182,25 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type KnowledgeNoteProjectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "connectionId" | "relativePath" | "commitSha" | "blobSha" | "contentHash" | "frontmatter" | "markdownContent" | "indexStatus" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["knowledgeNoteProjection"]>
+  export type KnowledgeNoteProjectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "bindingId" | "relativePath" | "commitSha" | "blobSha" | "contentHash" | "frontmatter" | "markdownContent" | "indexStatus" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["knowledgeNoteProjection"]>
   export type KnowledgeNoteProjectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
   export type KnowledgeNoteProjectionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
   export type KnowledgeNoteProjectionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
 
   export type $KnowledgeNoteProjectionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "KnowledgeNoteProjection"
     objects: {
-      connection: Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>
+      binding: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      connectionId: string
+      bindingId: string
       relativePath: string
       commitSha: string
       blobSha: string
@@ -99869,7 +104605,7 @@ export namespace Prisma {
    */
   export interface Prisma__KnowledgeNoteProjectionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    connection<T extends KnowledgeRepositoryConnectionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    binding<T extends KnowledgeRemoteBindingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBindingDefaultArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -99900,7 +104636,7 @@ export namespace Prisma {
    */
   interface KnowledgeNoteProjectionFieldRefs {
     readonly id: FieldRef<"KnowledgeNoteProjection", 'String'>
-    readonly connectionId: FieldRef<"KnowledgeNoteProjection", 'String'>
+    readonly bindingId: FieldRef<"KnowledgeNoteProjection", 'String'>
     readonly relativePath: FieldRef<"KnowledgeNoteProjection", 'String'>
     readonly commitSha: FieldRef<"KnowledgeNoteProjection", 'String'>
     readonly blobSha: FieldRef<"KnowledgeNoteProjection", 'String'>
@@ -100352,7 +105088,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionMinAggregateOutputType = {
     id: string | null
-    connectionId: string | null
+    bindingId: string | null
     relativePath: string | null
     commitSha: string | null
     blobSha: string | null
@@ -100365,7 +105101,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionMaxAggregateOutputType = {
     id: string | null
-    connectionId: string | null
+    bindingId: string | null
     relativePath: string | null
     commitSha: string | null
     blobSha: string | null
@@ -100378,7 +105114,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionCountAggregateOutputType = {
     id: number
-    connectionId: number
+    bindingId: number
     relativePath: number
     commitSha: number
     blobSha: number
@@ -100401,7 +105137,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionMinAggregateInputType = {
     id?: true
-    connectionId?: true
+    bindingId?: true
     relativePath?: true
     commitSha?: true
     blobSha?: true
@@ -100414,7 +105150,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionMaxAggregateInputType = {
     id?: true
-    connectionId?: true
+    bindingId?: true
     relativePath?: true
     commitSha?: true
     blobSha?: true
@@ -100427,7 +105163,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionCountAggregateInputType = {
     id?: true
-    connectionId?: true
+    bindingId?: true
     relativePath?: true
     commitSha?: true
     blobSha?: true
@@ -100527,7 +105263,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionGroupByOutputType = {
     id: string
-    connectionId: string
+    bindingId: string
     relativePath: string
     commitSha: string
     blobSha: string
@@ -100559,7 +105295,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -100568,12 +105304,12 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeAttachmentProjection"]>
 
   export type KnowledgeAttachmentProjectionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -100582,12 +105318,12 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeAttachmentProjection"]>
 
   export type KnowledgeAttachmentProjectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -100596,12 +105332,12 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeAttachmentProjection"]>
 
   export type KnowledgeAttachmentProjectionSelectScalar = {
     id?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     relativePath?: boolean
     commitSha?: boolean
     blobSha?: boolean
@@ -100612,25 +105348,25 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type KnowledgeAttachmentProjectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "connectionId" | "relativePath" | "commitSha" | "blobSha" | "byteSize" | "mediaType" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["knowledgeAttachmentProjection"]>
+  export type KnowledgeAttachmentProjectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "bindingId" | "relativePath" | "commitSha" | "blobSha" | "byteSize" | "mediaType" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["knowledgeAttachmentProjection"]>
   export type KnowledgeAttachmentProjectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
   export type KnowledgeAttachmentProjectionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
   export type KnowledgeAttachmentProjectionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
 
   export type $KnowledgeAttachmentProjectionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "KnowledgeAttachmentProjection"
     objects: {
-      connection: Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>
+      binding: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      connectionId: string
+      bindingId: string
       relativePath: string
       commitSha: string
       blobSha: string
@@ -101033,7 +105769,7 @@ export namespace Prisma {
    */
   export interface Prisma__KnowledgeAttachmentProjectionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    connection<T extends KnowledgeRepositoryConnectionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    binding<T extends KnowledgeRemoteBindingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBindingDefaultArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -101064,7 +105800,7 @@ export namespace Prisma {
    */
   interface KnowledgeAttachmentProjectionFieldRefs {
     readonly id: FieldRef<"KnowledgeAttachmentProjection", 'String'>
-    readonly connectionId: FieldRef<"KnowledgeAttachmentProjection", 'String'>
+    readonly bindingId: FieldRef<"KnowledgeAttachmentProjection", 'String'>
     readonly relativePath: FieldRef<"KnowledgeAttachmentProjection", 'String'>
     readonly commitSha: FieldRef<"KnowledgeAttachmentProjection", 'String'>
     readonly blobSha: FieldRef<"KnowledgeAttachmentProjection", 'String'>
@@ -101513,7 +106249,7 @@ export namespace Prisma {
   }
 
   export type KnowledgeAttachmentContentCacheMinAggregateOutputType = {
-    connectionId: string | null
+    bindingId: string | null
     blobSha: string | null
     byteSize: number | null
     contentBytes: Bytes | null
@@ -101522,7 +106258,7 @@ export namespace Prisma {
   }
 
   export type KnowledgeAttachmentContentCacheMaxAggregateOutputType = {
-    connectionId: string | null
+    bindingId: string | null
     blobSha: string | null
     byteSize: number | null
     contentBytes: Bytes | null
@@ -101531,7 +106267,7 @@ export namespace Prisma {
   }
 
   export type KnowledgeAttachmentContentCacheCountAggregateOutputType = {
-    connectionId: number
+    bindingId: number
     blobSha: number
     byteSize: number
     contentBytes: number
@@ -101550,7 +106286,7 @@ export namespace Prisma {
   }
 
   export type KnowledgeAttachmentContentCacheMinAggregateInputType = {
-    connectionId?: true
+    bindingId?: true
     blobSha?: true
     byteSize?: true
     contentBytes?: true
@@ -101559,7 +106295,7 @@ export namespace Prisma {
   }
 
   export type KnowledgeAttachmentContentCacheMaxAggregateInputType = {
-    connectionId?: true
+    bindingId?: true
     blobSha?: true
     byteSize?: true
     contentBytes?: true
@@ -101568,7 +106304,7 @@ export namespace Prisma {
   }
 
   export type KnowledgeAttachmentContentCacheCountAggregateInputType = {
-    connectionId?: true
+    bindingId?: true
     blobSha?: true
     byteSize?: true
     contentBytes?: true
@@ -101664,7 +106400,7 @@ export namespace Prisma {
   }
 
   export type KnowledgeAttachmentContentCacheGroupByOutputType = {
-    connectionId: string
+    bindingId: string
     blobSha: string
     byteSize: number
     contentBytes: Bytes
@@ -101692,37 +106428,37 @@ export namespace Prisma {
 
 
   export type KnowledgeAttachmentContentCacheSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    connectionId?: boolean
+    bindingId?: boolean
     blobSha?: boolean
     byteSize?: boolean
     contentBytes?: boolean
     cachedAt?: boolean
     expiresAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeAttachmentContentCache"]>
 
   export type KnowledgeAttachmentContentCacheSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    connectionId?: boolean
+    bindingId?: boolean
     blobSha?: boolean
     byteSize?: boolean
     contentBytes?: boolean
     cachedAt?: boolean
     expiresAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeAttachmentContentCache"]>
 
   export type KnowledgeAttachmentContentCacheSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    connectionId?: boolean
+    bindingId?: boolean
     blobSha?: boolean
     byteSize?: boolean
     contentBytes?: boolean
     cachedAt?: boolean
     expiresAt?: boolean
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeAttachmentContentCache"]>
 
   export type KnowledgeAttachmentContentCacheSelectScalar = {
-    connectionId?: boolean
+    bindingId?: boolean
     blobSha?: boolean
     byteSize?: boolean
     contentBytes?: boolean
@@ -101730,24 +106466,24 @@ export namespace Prisma {
     expiresAt?: boolean
   }
 
-  export type KnowledgeAttachmentContentCacheOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"connectionId" | "blobSha" | "byteSize" | "contentBytes" | "cachedAt" | "expiresAt", ExtArgs["result"]["knowledgeAttachmentContentCache"]>
+  export type KnowledgeAttachmentContentCacheOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"bindingId" | "blobSha" | "byteSize" | "contentBytes" | "cachedAt" | "expiresAt", ExtArgs["result"]["knowledgeAttachmentContentCache"]>
   export type KnowledgeAttachmentContentCacheInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
   export type KnowledgeAttachmentContentCacheIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
   export type KnowledgeAttachmentContentCacheIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
 
   export type $KnowledgeAttachmentContentCachePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "KnowledgeAttachmentContentCache"
     objects: {
-      connection: Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>
+      binding: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
-      connectionId: string
+      bindingId: string
       blobSha: string
       byteSize: number
       contentBytes: Prisma.Bytes
@@ -101836,8 +106572,8 @@ export namespace Prisma {
      * // Get first 10 KnowledgeAttachmentContentCaches
      * const knowledgeAttachmentContentCaches = await prisma.knowledgeAttachmentContentCache.findMany({ take: 10 })
      *
-     * // Only select the `connectionId`
-     * const knowledgeAttachmentContentCacheWithConnectionIdOnly = await prisma.knowledgeAttachmentContentCache.findMany({ select: { connectionId: true } })
+     * // Only select the `bindingId`
+     * const knowledgeAttachmentContentCacheWithBindingIdOnly = await prisma.knowledgeAttachmentContentCache.findMany({ select: { bindingId: true } })
      *
      */
     findMany<T extends KnowledgeAttachmentContentCacheFindManyArgs>(args?: SelectSubset<T, KnowledgeAttachmentContentCacheFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KnowledgeAttachmentContentCachePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -101881,9 +106617,9 @@ export namespace Prisma {
      *   ]
      * })
      *
-     * // Create many KnowledgeAttachmentContentCaches and only return the `connectionId`
-     * const knowledgeAttachmentContentCacheWithConnectionIdOnly = await prisma.knowledgeAttachmentContentCache.createManyAndReturn({
-     *   select: { connectionId: true },
+     * // Create many KnowledgeAttachmentContentCaches and only return the `bindingId`
+     * const knowledgeAttachmentContentCacheWithBindingIdOnly = await prisma.knowledgeAttachmentContentCache.createManyAndReturn({
+     *   select: { bindingId: true },
      *   data: [
      *     // ... provide data here
      *   ]
@@ -101972,9 +106708,9 @@ export namespace Prisma {
      *   ]
      * })
      *
-     * // Update zero or more KnowledgeAttachmentContentCaches and only return the `connectionId`
-     * const knowledgeAttachmentContentCacheWithConnectionIdOnly = await prisma.knowledgeAttachmentContentCache.updateManyAndReturn({
-     *   select: { connectionId: true },
+     * // Update zero or more KnowledgeAttachmentContentCaches and only return the `bindingId`
+     * const knowledgeAttachmentContentCacheWithBindingIdOnly = await prisma.knowledgeAttachmentContentCache.updateManyAndReturn({
+     *   select: { bindingId: true },
      *   where: {
      *     // ... provide filter here
      *   },
@@ -102147,7 +106883,7 @@ export namespace Prisma {
    */
   export interface Prisma__KnowledgeAttachmentContentCacheClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    connection<T extends KnowledgeRepositoryConnectionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    binding<T extends KnowledgeRemoteBindingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBindingDefaultArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -102177,7 +106913,7 @@ export namespace Prisma {
    * Fields of the KnowledgeAttachmentContentCache model
    */
   interface KnowledgeAttachmentContentCacheFieldRefs {
-    readonly connectionId: FieldRef<"KnowledgeAttachmentContentCache", 'String'>
+    readonly bindingId: FieldRef<"KnowledgeAttachmentContentCache", 'String'>
     readonly blobSha: FieldRef<"KnowledgeAttachmentContentCache", 'String'>
     readonly byteSize: FieldRef<"KnowledgeAttachmentContentCache", 'Int'>
     readonly contentBytes: FieldRef<"KnowledgeAttachmentContentCache", 'Bytes'>
@@ -102625,7 +107361,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestMinAggregateOutputType = {
     id: string | null
     identityId: string | null
-    connectionId: string | null
+    bindingId: string | null
     requestId: string | null
     requestHash: string | null
     relativePath: string | null
@@ -102648,7 +107384,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestMaxAggregateOutputType = {
     id: string | null
     identityId: string | null
-    connectionId: string | null
+    bindingId: string | null
     requestId: string | null
     requestHash: string | null
     relativePath: string | null
@@ -102671,7 +107407,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestCountAggregateOutputType = {
     id: number
     identityId: number
-    connectionId: number
+    bindingId: number
     requestId: number
     requestHash: number
     relativePath: number
@@ -102704,7 +107440,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestMinAggregateInputType = {
     id?: true
     identityId?: true
-    connectionId?: true
+    bindingId?: true
     requestId?: true
     requestHash?: true
     relativePath?: true
@@ -102727,7 +107463,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestMaxAggregateInputType = {
     id?: true
     identityId?: true
-    connectionId?: true
+    bindingId?: true
     requestId?: true
     requestHash?: true
     relativePath?: true
@@ -102750,7 +107486,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestCountAggregateInputType = {
     id?: true
     identityId?: true
-    connectionId?: true
+    bindingId?: true
     requestId?: true
     requestHash?: true
     relativePath?: true
@@ -102860,7 +107596,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestGroupByOutputType = {
     id: string
     identityId: string
-    connectionId: string
+    bindingId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -102902,7 +107638,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     identityId?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     requestId?: boolean
     requestHash?: boolean
     relativePath?: boolean
@@ -102921,13 +107657,13 @@ export namespace Prisma {
     updatedAt?: boolean
     completedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeWriteRequest"]>
 
   export type KnowledgeWriteRequestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     identityId?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     requestId?: boolean
     requestHash?: boolean
     relativePath?: boolean
@@ -102946,13 +107682,13 @@ export namespace Prisma {
     updatedAt?: boolean
     completedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeWriteRequest"]>
 
   export type KnowledgeWriteRequestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     identityId?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     requestId?: boolean
     requestHash?: boolean
     relativePath?: boolean
@@ -102971,13 +107707,13 @@ export namespace Prisma {
     updatedAt?: boolean
     completedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["knowledgeWriteRequest"]>
 
   export type KnowledgeWriteRequestSelectScalar = {
     id?: boolean
     identityId?: boolean
-    connectionId?: boolean
+    bindingId?: boolean
     requestId?: boolean
     requestHash?: boolean
     relativePath?: boolean
@@ -102997,30 +107733,30 @@ export namespace Prisma {
     completedAt?: boolean
   }
 
-  export type KnowledgeWriteRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "connectionId" | "requestId" | "requestHash" | "relativePath" | "status" | "commitSha" | "errorCode" | "errorMessage" | "projectionStatus" | "projectionErrorCode" | "projectionErrorMessage" | "projectionAttempts" | "projectedAt" | "blobSha" | "markdownContent" | "createdAt" | "updatedAt" | "completedAt", ExtArgs["result"]["knowledgeWriteRequest"]>
+  export type KnowledgeWriteRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "bindingId" | "requestId" | "requestHash" | "relativePath" | "status" | "commitSha" | "errorCode" | "errorMessage" | "projectionStatus" | "projectionErrorCode" | "projectionErrorMessage" | "projectionAttempts" | "projectedAt" | "blobSha" | "markdownContent" | "createdAt" | "updatedAt" | "completedAt", ExtArgs["result"]["knowledgeWriteRequest"]>
   export type KnowledgeWriteRequestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
   export type KnowledgeWriteRequestIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
   export type KnowledgeWriteRequestIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    connection?: boolean | KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>
+    binding?: boolean | KnowledgeRemoteBindingDefaultArgs<ExtArgs>
   }
 
   export type $KnowledgeWriteRequestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "KnowledgeWriteRequest"
     objects: {
       account: Prisma.$AccountPayload<ExtArgs>
-      connection: Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>
+      binding: Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       identityId: string
-      connectionId: string
+      bindingId: string
       requestId: string
       requestHash: string
       relativePath: string
@@ -103433,7 +108169,7 @@ export namespace Prisma {
   export interface Prisma__KnowledgeWriteRequestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    connection<T extends KnowledgeRepositoryConnectionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRepositoryConnectionDefaultArgs<ExtArgs>>): Prisma__KnowledgeRepositoryConnectionClient<$Result.GetResult<Prisma.$KnowledgeRepositoryConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    binding<T extends KnowledgeRemoteBindingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KnowledgeRemoteBindingDefaultArgs<ExtArgs>>): Prisma__KnowledgeRemoteBindingClient<$Result.GetResult<Prisma.$KnowledgeRemoteBindingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -103465,7 +108201,7 @@ export namespace Prisma {
   interface KnowledgeWriteRequestFieldRefs {
     readonly id: FieldRef<"KnowledgeWriteRequest", 'String'>
     readonly identityId: FieldRef<"KnowledgeWriteRequest", 'String'>
-    readonly connectionId: FieldRef<"KnowledgeWriteRequest", 'String'>
+    readonly bindingId: FieldRef<"KnowledgeWriteRequest", 'String'>
     readonly requestId: FieldRef<"KnowledgeWriteRequest", 'String'>
     readonly requestHash: FieldRef<"KnowledgeWriteRequest", 'String'>
     readonly relativePath: FieldRef<"KnowledgeWriteRequest", 'String'>
@@ -128356,32 +133092,76 @@ export namespace Prisma {
   export type KnowledgeRepositoryInstallationIntentScalarFieldEnum = (typeof KnowledgeRepositoryInstallationIntentScalarFieldEnum)[keyof typeof KnowledgeRepositoryInstallationIntentScalarFieldEnum]
 
 
-  export const KnowledgeRepositoryConnectionScalarFieldEnum: {
+  export const KnowledgeSpaceScalarFieldEnum: {
     id: 'id',
-    identityId: 'identityId',
-    githubUserId: 'githubUserId',
-    githubRepositoryId: 'githubRepositoryId',
-    githubRepositoryFullName: 'githubRepositoryFullName',
-    installationId: 'installationId',
-    defaultBranch: 'defaultBranch',
-    isPrivate: 'isPrivate',
-    status: 'status',
-    lastSyncedCommitSha: 'lastSyncedCommitSha',
-    lastProjectedCommitSha: 'lastProjectedCommitSha',
-    lastErrorCode: 'lastErrorCode',
-    lastErrorMessage: 'lastErrorMessage',
-    version: 'version',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt'
+    updatedAt: 'updatedAt'
   };
 
-  export type KnowledgeRepositoryConnectionScalarFieldEnum = (typeof KnowledgeRepositoryConnectionScalarFieldEnum)[keyof typeof KnowledgeRepositoryConnectionScalarFieldEnum]
+  export type KnowledgeSpaceScalarFieldEnum = (typeof KnowledgeSpaceScalarFieldEnum)[keyof typeof KnowledgeSpaceScalarFieldEnum]
+
+
+  export const KnowledgeRemoteBindingScalarFieldEnum: {
+    id: 'id',
+    knowledgeSpaceId: 'knowledgeSpaceId',
+    identityId: 'identityId',
+    provider: 'provider',
+    installationId: 'installationId',
+    repositoryId: 'repositoryId',
+    repositoryFullNameSnapshot: 'repositoryFullNameSnapshot',
+    connectedAt: 'connectedAt',
+    disconnectedAt: 'disconnectedAt',
+    version: 'version'
+  };
+
+  export type KnowledgeRemoteBindingScalarFieldEnum = (typeof KnowledgeRemoteBindingScalarFieldEnum)[keyof typeof KnowledgeRemoteBindingScalarFieldEnum]
+
+
+  export const RemoteRepositoryObservationScalarFieldEnum: {
+    bindingId: 'bindingId',
+    observedAt: 'observedAt',
+    accountId: 'accountId',
+    repositoryFullName: 'repositoryFullName',
+    defaultBranch: 'defaultBranch',
+    isPrivate: 'isPrivate',
+    archived: 'archived',
+    disabled: 'disabled',
+    contentsPermission: 'contentsPermission',
+    installationSuspended: 'installationSuspended',
+    eligibilityState: 'eligibilityState',
+    blockReason: 'blockReason'
+  };
+
+  export type RemoteRepositoryObservationScalarFieldEnum = (typeof RemoteRepositoryObservationScalarFieldEnum)[keyof typeof RemoteRepositoryObservationScalarFieldEnum]
+
+
+  export const RemoteHistoryFenceScalarFieldEnum: {
+    bindingId: 'bindingId',
+    defaultBranch: 'defaultBranch',
+    lastConfirmedRemoteHeadSha: 'lastConfirmedRemoteHeadSha',
+    confirmedAt: 'confirmedAt'
+  };
+
+  export type RemoteHistoryFenceScalarFieldEnum = (typeof RemoteHistoryFenceScalarFieldEnum)[keyof typeof RemoteHistoryFenceScalarFieldEnum]
+
+
+  export const KnowledgeProjectionCheckpointScalarFieldEnum: {
+    bindingId: 'bindingId',
+    branch: 'branch',
+    projectedCommitSha: 'projectedCommitSha',
+    state: 'state',
+    failureCode: 'failureCode',
+    failureMessage: 'failureMessage',
+    lastAttemptAt: 'lastAttemptAt',
+    projectedAt: 'projectedAt'
+  };
+
+  export type KnowledgeProjectionCheckpointScalarFieldEnum = (typeof KnowledgeProjectionCheckpointScalarFieldEnum)[keyof typeof KnowledgeProjectionCheckpointScalarFieldEnum]
 
 
   export const GithubWebhookDeliveryScalarFieldEnum: {
     id: 'id',
-    connectionId: 'connectionId',
+    bindingId: 'bindingId',
     deliveryId: 'deliveryId',
     eventName: 'eventName',
     beforeSha: 'beforeSha',
@@ -128398,7 +133178,7 @@ export namespace Prisma {
 
   export const KnowledgeNoteProjectionScalarFieldEnum: {
     id: 'id',
-    connectionId: 'connectionId',
+    bindingId: 'bindingId',
     relativePath: 'relativePath',
     commitSha: 'commitSha',
     blobSha: 'blobSha',
@@ -128416,7 +133196,7 @@ export namespace Prisma {
 
   export const KnowledgeAttachmentProjectionScalarFieldEnum: {
     id: 'id',
-    connectionId: 'connectionId',
+    bindingId: 'bindingId',
     relativePath: 'relativePath',
     commitSha: 'commitSha',
     blobSha: 'blobSha',
@@ -128431,7 +133211,7 @@ export namespace Prisma {
 
 
   export const KnowledgeAttachmentContentCacheScalarFieldEnum: {
-    connectionId: 'connectionId',
+    bindingId: 'bindingId',
     blobSha: 'blobSha',
     byteSize: 'byteSize',
     contentBytes: 'contentBytes',
@@ -128445,7 +133225,7 @@ export namespace Prisma {
   export const KnowledgeWriteRequestScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
-    connectionId: 'connectionId',
+    bindingId: 'bindingId',
     requestId: 'requestId',
     requestHash: 'requestHash',
     relativePath: 'relativePath',
@@ -129104,7 +133884,7 @@ export namespace Prisma {
     folders?: FolderListRelationFilter
     resources?: ResourceListRelationFilter
     repositoryResources?: RepositoryResourceListRelationFilter
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionListRelationFilter
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingListRelationFilter
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentListRelationFilter
     knowledgeWriteRequests?: KnowledgeWriteRequestListRelationFilter
   }
@@ -129173,7 +133953,7 @@ export namespace Prisma {
     folders?: FolderOrderByRelationAggregateInput
     resources?: ResourceOrderByRelationAggregateInput
     repositoryResources?: RepositoryResourceOrderByRelationAggregateInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionOrderByRelationAggregateInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingOrderByRelationAggregateInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentOrderByRelationAggregateInput
     knowledgeWriteRequests?: KnowledgeWriteRequestOrderByRelationAggregateInput
   }
@@ -129245,7 +134025,7 @@ export namespace Prisma {
     folders?: FolderListRelationFilter
     resources?: ResourceListRelationFilter
     repositoryResources?: RepositoryResourceListRelationFilter
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionListRelationFilter
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingListRelationFilter
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentListRelationFilter
     knowledgeWriteRequests?: KnowledgeWriteRequestListRelationFilter
   }, "id">
@@ -135808,28 +140588,70 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"KnowledgeRepositoryInstallationIntent"> | Date | string
   }
 
-  export type KnowledgeRepositoryConnectionWhereInput = {
-    AND?: KnowledgeRepositoryConnectionWhereInput | KnowledgeRepositoryConnectionWhereInput[]
-    OR?: KnowledgeRepositoryConnectionWhereInput[]
-    NOT?: KnowledgeRepositoryConnectionWhereInput | KnowledgeRepositoryConnectionWhereInput[]
-    id?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    identityId?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    githubUserId?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    githubRepositoryId?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    githubRepositoryFullName?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    installationId?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    defaultBranch?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    isPrivate?: BoolFilter<"KnowledgeRepositoryConnection"> | boolean
-    status?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    lastSyncedCommitSha?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastProjectedCommitSha?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastErrorCode?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastErrorMessage?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    version?: IntFilter<"KnowledgeRepositoryConnection"> | number
-    createdAt?: DateTimeFilter<"KnowledgeRepositoryConnection"> | Date | string
-    updatedAt?: DateTimeFilter<"KnowledgeRepositoryConnection"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"KnowledgeRepositoryConnection"> | Date | string | null
+  export type KnowledgeSpaceWhereInput = {
+    AND?: KnowledgeSpaceWhereInput | KnowledgeSpaceWhereInput[]
+    OR?: KnowledgeSpaceWhereInput[]
+    NOT?: KnowledgeSpaceWhereInput | KnowledgeSpaceWhereInput[]
+    id?: StringFilter<"KnowledgeSpace"> | string
+    createdAt?: DateTimeFilter<"KnowledgeSpace"> | Date | string
+    updatedAt?: DateTimeFilter<"KnowledgeSpace"> | Date | string
+    remoteBindings?: KnowledgeRemoteBindingListRelationFilter
+  }
+
+  export type KnowledgeSpaceOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    remoteBindings?: KnowledgeRemoteBindingOrderByRelationAggregateInput
+  }
+
+  export type KnowledgeSpaceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: KnowledgeSpaceWhereInput | KnowledgeSpaceWhereInput[]
+    OR?: KnowledgeSpaceWhereInput[]
+    NOT?: KnowledgeSpaceWhereInput | KnowledgeSpaceWhereInput[]
+    createdAt?: DateTimeFilter<"KnowledgeSpace"> | Date | string
+    updatedAt?: DateTimeFilter<"KnowledgeSpace"> | Date | string
+    remoteBindings?: KnowledgeRemoteBindingListRelationFilter
+  }, "id">
+
+  export type KnowledgeSpaceOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: KnowledgeSpaceCountOrderByAggregateInput
+    _max?: KnowledgeSpaceMaxOrderByAggregateInput
+    _min?: KnowledgeSpaceMinOrderByAggregateInput
+  }
+
+  export type KnowledgeSpaceScalarWhereWithAggregatesInput = {
+    AND?: KnowledgeSpaceScalarWhereWithAggregatesInput | KnowledgeSpaceScalarWhereWithAggregatesInput[]
+    OR?: KnowledgeSpaceScalarWhereWithAggregatesInput[]
+    NOT?: KnowledgeSpaceScalarWhereWithAggregatesInput | KnowledgeSpaceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"KnowledgeSpace"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"KnowledgeSpace"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"KnowledgeSpace"> | Date | string
+  }
+
+  export type KnowledgeRemoteBindingWhereInput = {
+    AND?: KnowledgeRemoteBindingWhereInput | KnowledgeRemoteBindingWhereInput[]
+    OR?: KnowledgeRemoteBindingWhereInput[]
+    NOT?: KnowledgeRemoteBindingWhereInput | KnowledgeRemoteBindingWhereInput[]
+    id?: StringFilter<"KnowledgeRemoteBinding"> | string
+    knowledgeSpaceId?: StringFilter<"KnowledgeRemoteBinding"> | string
+    identityId?: StringFilter<"KnowledgeRemoteBinding"> | string
+    provider?: StringFilter<"KnowledgeRemoteBinding"> | string
+    installationId?: StringFilter<"KnowledgeRemoteBinding"> | string
+    repositoryId?: StringFilter<"KnowledgeRemoteBinding"> | string
+    repositoryFullNameSnapshot?: StringFilter<"KnowledgeRemoteBinding"> | string
+    connectedAt?: DateTimeFilter<"KnowledgeRemoteBinding"> | Date | string
+    disconnectedAt?: DateTimeNullableFilter<"KnowledgeRemoteBinding"> | Date | string | null
+    version?: IntFilter<"KnowledgeRemoteBinding"> | number
+    knowledgeSpace?: XOR<KnowledgeSpaceScalarRelationFilter, KnowledgeSpaceWhereInput>
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    observation?: XOR<RemoteRepositoryObservationNullableScalarRelationFilter, RemoteRepositoryObservationWhereInput> | null
+    historyFence?: XOR<RemoteHistoryFenceNullableScalarRelationFilter, RemoteHistoryFenceWhereInput> | null
+    projectionCheckpoint?: XOR<KnowledgeProjectionCheckpointNullableScalarRelationFilter, KnowledgeProjectionCheckpointWhereInput> | null
     webhookDeliveries?: GithubWebhookDeliveryListRelationFilter
     noteProjections?: KnowledgeNoteProjectionListRelationFilter
     attachmentProjections?: KnowledgeAttachmentProjectionListRelationFilter
@@ -135837,25 +140659,22 @@ export namespace Prisma {
     writeRequests?: KnowledgeWriteRequestListRelationFilter
   }
 
-  export type KnowledgeRepositoryConnectionOrderByWithRelationInput = {
+  export type KnowledgeRemoteBindingOrderByWithRelationInput = {
     id?: SortOrder
+    knowledgeSpaceId?: SortOrder
     identityId?: SortOrder
-    githubUserId?: SortOrder
-    githubRepositoryId?: SortOrder
-    githubRepositoryFullName?: SortOrder
+    provider?: SortOrder
     installationId?: SortOrder
-    defaultBranch?: SortOrder
-    isPrivate?: SortOrder
-    status?: SortOrder
-    lastSyncedCommitSha?: SortOrderInput | SortOrder
-    lastProjectedCommitSha?: SortOrderInput | SortOrder
-    lastErrorCode?: SortOrderInput | SortOrder
-    lastErrorMessage?: SortOrderInput | SortOrder
+    repositoryId?: SortOrder
+    repositoryFullNameSnapshot?: SortOrder
+    connectedAt?: SortOrder
+    disconnectedAt?: SortOrderInput | SortOrder
     version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
+    knowledgeSpace?: KnowledgeSpaceOrderByWithRelationInput
     account?: AccountOrderByWithRelationInput
+    observation?: RemoteRepositoryObservationOrderByWithRelationInput
+    historyFence?: RemoteHistoryFenceOrderByWithRelationInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointOrderByWithRelationInput
     webhookDeliveries?: GithubWebhookDeliveryOrderByRelationAggregateInput
     noteProjections?: KnowledgeNoteProjectionOrderByRelationAggregateInput
     attachmentProjections?: KnowledgeAttachmentProjectionOrderByRelationAggregateInput
@@ -135863,82 +140682,275 @@ export namespace Prisma {
     writeRequests?: KnowledgeWriteRequestOrderByRelationAggregateInput
   }
 
-  export type KnowledgeRepositoryConnectionWhereUniqueInput = Prisma.AtLeast<{
+  export type KnowledgeRemoteBindingWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    githubRepositoryId?: string
-    identityId_githubRepositoryId?: KnowledgeRepositoryConnectionIdentityIdGithubRepositoryIdCompoundUniqueInput
-    AND?: KnowledgeRepositoryConnectionWhereInput | KnowledgeRepositoryConnectionWhereInput[]
-    OR?: KnowledgeRepositoryConnectionWhereInput[]
-    NOT?: KnowledgeRepositoryConnectionWhereInput | KnowledgeRepositoryConnectionWhereInput[]
-    identityId?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    githubUserId?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    githubRepositoryFullName?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    installationId?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    defaultBranch?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    isPrivate?: BoolFilter<"KnowledgeRepositoryConnection"> | boolean
-    status?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    lastSyncedCommitSha?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastProjectedCommitSha?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastErrorCode?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastErrorMessage?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    version?: IntFilter<"KnowledgeRepositoryConnection"> | number
-    createdAt?: DateTimeFilter<"KnowledgeRepositoryConnection"> | Date | string
-    updatedAt?: DateTimeFilter<"KnowledgeRepositoryConnection"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"KnowledgeRepositoryConnection"> | Date | string | null
+    repositoryId?: string
+    identityId_repositoryId?: KnowledgeRemoteBindingIdentityIdRepositoryIdCompoundUniqueInput
+    AND?: KnowledgeRemoteBindingWhereInput | KnowledgeRemoteBindingWhereInput[]
+    OR?: KnowledgeRemoteBindingWhereInput[]
+    NOT?: KnowledgeRemoteBindingWhereInput | KnowledgeRemoteBindingWhereInput[]
+    knowledgeSpaceId?: StringFilter<"KnowledgeRemoteBinding"> | string
+    identityId?: StringFilter<"KnowledgeRemoteBinding"> | string
+    provider?: StringFilter<"KnowledgeRemoteBinding"> | string
+    installationId?: StringFilter<"KnowledgeRemoteBinding"> | string
+    repositoryFullNameSnapshot?: StringFilter<"KnowledgeRemoteBinding"> | string
+    connectedAt?: DateTimeFilter<"KnowledgeRemoteBinding"> | Date | string
+    disconnectedAt?: DateTimeNullableFilter<"KnowledgeRemoteBinding"> | Date | string | null
+    version?: IntFilter<"KnowledgeRemoteBinding"> | number
+    knowledgeSpace?: XOR<KnowledgeSpaceScalarRelationFilter, KnowledgeSpaceWhereInput>
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+    observation?: XOR<RemoteRepositoryObservationNullableScalarRelationFilter, RemoteRepositoryObservationWhereInput> | null
+    historyFence?: XOR<RemoteHistoryFenceNullableScalarRelationFilter, RemoteHistoryFenceWhereInput> | null
+    projectionCheckpoint?: XOR<KnowledgeProjectionCheckpointNullableScalarRelationFilter, KnowledgeProjectionCheckpointWhereInput> | null
     webhookDeliveries?: GithubWebhookDeliveryListRelationFilter
     noteProjections?: KnowledgeNoteProjectionListRelationFilter
     attachmentProjections?: KnowledgeAttachmentProjectionListRelationFilter
     attachmentContentCaches?: KnowledgeAttachmentContentCacheListRelationFilter
     writeRequests?: KnowledgeWriteRequestListRelationFilter
-  }, "id" | "identityId_githubRepositoryId" | "githubRepositoryId">
+  }, "id" | "identityId_repositoryId" | "repositoryId">
 
-  export type KnowledgeRepositoryConnectionOrderByWithAggregationInput = {
+  export type KnowledgeRemoteBindingOrderByWithAggregationInput = {
     id?: SortOrder
+    knowledgeSpaceId?: SortOrder
     identityId?: SortOrder
-    githubUserId?: SortOrder
-    githubRepositoryId?: SortOrder
-    githubRepositoryFullName?: SortOrder
+    provider?: SortOrder
     installationId?: SortOrder
-    defaultBranch?: SortOrder
-    isPrivate?: SortOrder
-    status?: SortOrder
-    lastSyncedCommitSha?: SortOrderInput | SortOrder
-    lastProjectedCommitSha?: SortOrderInput | SortOrder
-    lastErrorCode?: SortOrderInput | SortOrder
-    lastErrorMessage?: SortOrderInput | SortOrder
+    repositoryId?: SortOrder
+    repositoryFullNameSnapshot?: SortOrder
+    connectedAt?: SortOrder
+    disconnectedAt?: SortOrderInput | SortOrder
     version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    _count?: KnowledgeRepositoryConnectionCountOrderByAggregateInput
-    _avg?: KnowledgeRepositoryConnectionAvgOrderByAggregateInput
-    _max?: KnowledgeRepositoryConnectionMaxOrderByAggregateInput
-    _min?: KnowledgeRepositoryConnectionMinOrderByAggregateInput
-    _sum?: KnowledgeRepositoryConnectionSumOrderByAggregateInput
+    _count?: KnowledgeRemoteBindingCountOrderByAggregateInput
+    _avg?: KnowledgeRemoteBindingAvgOrderByAggregateInput
+    _max?: KnowledgeRemoteBindingMaxOrderByAggregateInput
+    _min?: KnowledgeRemoteBindingMinOrderByAggregateInput
+    _sum?: KnowledgeRemoteBindingSumOrderByAggregateInput
   }
 
-  export type KnowledgeRepositoryConnectionScalarWhereWithAggregatesInput = {
-    AND?: KnowledgeRepositoryConnectionScalarWhereWithAggregatesInput | KnowledgeRepositoryConnectionScalarWhereWithAggregatesInput[]
-    OR?: KnowledgeRepositoryConnectionScalarWhereWithAggregatesInput[]
-    NOT?: KnowledgeRepositoryConnectionScalarWhereWithAggregatesInput | KnowledgeRepositoryConnectionScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string
-    identityId?: StringWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string
-    githubUserId?: StringWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string
-    githubRepositoryId?: StringWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string
-    githubRepositoryFullName?: StringWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string
-    installationId?: StringWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string
-    defaultBranch?: StringWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string
-    isPrivate?: BoolWithAggregatesFilter<"KnowledgeRepositoryConnection"> | boolean
-    status?: StringWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string
-    lastSyncedCommitSha?: StringNullableWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastProjectedCommitSha?: StringNullableWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastErrorCode?: StringNullableWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastErrorMessage?: StringNullableWithAggregatesFilter<"KnowledgeRepositoryConnection"> | string | null
-    version?: IntWithAggregatesFilter<"KnowledgeRepositoryConnection"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"KnowledgeRepositoryConnection"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"KnowledgeRepositoryConnection"> | Date | string
-    deletedAt?: DateTimeNullableWithAggregatesFilter<"KnowledgeRepositoryConnection"> | Date | string | null
+  export type KnowledgeRemoteBindingScalarWhereWithAggregatesInput = {
+    AND?: KnowledgeRemoteBindingScalarWhereWithAggregatesInput | KnowledgeRemoteBindingScalarWhereWithAggregatesInput[]
+    OR?: KnowledgeRemoteBindingScalarWhereWithAggregatesInput[]
+    NOT?: KnowledgeRemoteBindingScalarWhereWithAggregatesInput | KnowledgeRemoteBindingScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"KnowledgeRemoteBinding"> | string
+    knowledgeSpaceId?: StringWithAggregatesFilter<"KnowledgeRemoteBinding"> | string
+    identityId?: StringWithAggregatesFilter<"KnowledgeRemoteBinding"> | string
+    provider?: StringWithAggregatesFilter<"KnowledgeRemoteBinding"> | string
+    installationId?: StringWithAggregatesFilter<"KnowledgeRemoteBinding"> | string
+    repositoryId?: StringWithAggregatesFilter<"KnowledgeRemoteBinding"> | string
+    repositoryFullNameSnapshot?: StringWithAggregatesFilter<"KnowledgeRemoteBinding"> | string
+    connectedAt?: DateTimeWithAggregatesFilter<"KnowledgeRemoteBinding"> | Date | string
+    disconnectedAt?: DateTimeNullableWithAggregatesFilter<"KnowledgeRemoteBinding"> | Date | string | null
+    version?: IntWithAggregatesFilter<"KnowledgeRemoteBinding"> | number
+  }
+
+  export type RemoteRepositoryObservationWhereInput = {
+    AND?: RemoteRepositoryObservationWhereInput | RemoteRepositoryObservationWhereInput[]
+    OR?: RemoteRepositoryObservationWhereInput[]
+    NOT?: RemoteRepositoryObservationWhereInput | RemoteRepositoryObservationWhereInput[]
+    bindingId?: StringFilter<"RemoteRepositoryObservation"> | string
+    observedAt?: DateTimeFilter<"RemoteRepositoryObservation"> | Date | string
+    accountId?: StringFilter<"RemoteRepositoryObservation"> | string
+    repositoryFullName?: StringFilter<"RemoteRepositoryObservation"> | string
+    defaultBranch?: StringFilter<"RemoteRepositoryObservation"> | string
+    isPrivate?: BoolFilter<"RemoteRepositoryObservation"> | boolean
+    archived?: BoolFilter<"RemoteRepositoryObservation"> | boolean
+    disabled?: BoolFilter<"RemoteRepositoryObservation"> | boolean
+    contentsPermission?: StringFilter<"RemoteRepositoryObservation"> | string
+    installationSuspended?: BoolFilter<"RemoteRepositoryObservation"> | boolean
+    eligibilityState?: StringFilter<"RemoteRepositoryObservation"> | string
+    blockReason?: StringNullableFilter<"RemoteRepositoryObservation"> | string | null
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
+  }
+
+  export type RemoteRepositoryObservationOrderByWithRelationInput = {
+    bindingId?: SortOrder
+    observedAt?: SortOrder
+    accountId?: SortOrder
+    repositoryFullName?: SortOrder
+    defaultBranch?: SortOrder
+    isPrivate?: SortOrder
+    archived?: SortOrder
+    disabled?: SortOrder
+    contentsPermission?: SortOrder
+    installationSuspended?: SortOrder
+    eligibilityState?: SortOrder
+    blockReason?: SortOrderInput | SortOrder
+    binding?: KnowledgeRemoteBindingOrderByWithRelationInput
+  }
+
+  export type RemoteRepositoryObservationWhereUniqueInput = Prisma.AtLeast<{
+    bindingId?: string
+    AND?: RemoteRepositoryObservationWhereInput | RemoteRepositoryObservationWhereInput[]
+    OR?: RemoteRepositoryObservationWhereInput[]
+    NOT?: RemoteRepositoryObservationWhereInput | RemoteRepositoryObservationWhereInput[]
+    observedAt?: DateTimeFilter<"RemoteRepositoryObservation"> | Date | string
+    accountId?: StringFilter<"RemoteRepositoryObservation"> | string
+    repositoryFullName?: StringFilter<"RemoteRepositoryObservation"> | string
+    defaultBranch?: StringFilter<"RemoteRepositoryObservation"> | string
+    isPrivate?: BoolFilter<"RemoteRepositoryObservation"> | boolean
+    archived?: BoolFilter<"RemoteRepositoryObservation"> | boolean
+    disabled?: BoolFilter<"RemoteRepositoryObservation"> | boolean
+    contentsPermission?: StringFilter<"RemoteRepositoryObservation"> | string
+    installationSuspended?: BoolFilter<"RemoteRepositoryObservation"> | boolean
+    eligibilityState?: StringFilter<"RemoteRepositoryObservation"> | string
+    blockReason?: StringNullableFilter<"RemoteRepositoryObservation"> | string | null
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
+  }, "bindingId">
+
+  export type RemoteRepositoryObservationOrderByWithAggregationInput = {
+    bindingId?: SortOrder
+    observedAt?: SortOrder
+    accountId?: SortOrder
+    repositoryFullName?: SortOrder
+    defaultBranch?: SortOrder
+    isPrivate?: SortOrder
+    archived?: SortOrder
+    disabled?: SortOrder
+    contentsPermission?: SortOrder
+    installationSuspended?: SortOrder
+    eligibilityState?: SortOrder
+    blockReason?: SortOrderInput | SortOrder
+    _count?: RemoteRepositoryObservationCountOrderByAggregateInput
+    _max?: RemoteRepositoryObservationMaxOrderByAggregateInput
+    _min?: RemoteRepositoryObservationMinOrderByAggregateInput
+  }
+
+  export type RemoteRepositoryObservationScalarWhereWithAggregatesInput = {
+    AND?: RemoteRepositoryObservationScalarWhereWithAggregatesInput | RemoteRepositoryObservationScalarWhereWithAggregatesInput[]
+    OR?: RemoteRepositoryObservationScalarWhereWithAggregatesInput[]
+    NOT?: RemoteRepositoryObservationScalarWhereWithAggregatesInput | RemoteRepositoryObservationScalarWhereWithAggregatesInput[]
+    bindingId?: StringWithAggregatesFilter<"RemoteRepositoryObservation"> | string
+    observedAt?: DateTimeWithAggregatesFilter<"RemoteRepositoryObservation"> | Date | string
+    accountId?: StringWithAggregatesFilter<"RemoteRepositoryObservation"> | string
+    repositoryFullName?: StringWithAggregatesFilter<"RemoteRepositoryObservation"> | string
+    defaultBranch?: StringWithAggregatesFilter<"RemoteRepositoryObservation"> | string
+    isPrivate?: BoolWithAggregatesFilter<"RemoteRepositoryObservation"> | boolean
+    archived?: BoolWithAggregatesFilter<"RemoteRepositoryObservation"> | boolean
+    disabled?: BoolWithAggregatesFilter<"RemoteRepositoryObservation"> | boolean
+    contentsPermission?: StringWithAggregatesFilter<"RemoteRepositoryObservation"> | string
+    installationSuspended?: BoolWithAggregatesFilter<"RemoteRepositoryObservation"> | boolean
+    eligibilityState?: StringWithAggregatesFilter<"RemoteRepositoryObservation"> | string
+    blockReason?: StringNullableWithAggregatesFilter<"RemoteRepositoryObservation"> | string | null
+  }
+
+  export type RemoteHistoryFenceWhereInput = {
+    AND?: RemoteHistoryFenceWhereInput | RemoteHistoryFenceWhereInput[]
+    OR?: RemoteHistoryFenceWhereInput[]
+    NOT?: RemoteHistoryFenceWhereInput | RemoteHistoryFenceWhereInput[]
+    bindingId?: StringFilter<"RemoteHistoryFence"> | string
+    defaultBranch?: StringFilter<"RemoteHistoryFence"> | string
+    lastConfirmedRemoteHeadSha?: StringFilter<"RemoteHistoryFence"> | string
+    confirmedAt?: DateTimeFilter<"RemoteHistoryFence"> | Date | string
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
+  }
+
+  export type RemoteHistoryFenceOrderByWithRelationInput = {
+    bindingId?: SortOrder
+    defaultBranch?: SortOrder
+    lastConfirmedRemoteHeadSha?: SortOrder
+    confirmedAt?: SortOrder
+    binding?: KnowledgeRemoteBindingOrderByWithRelationInput
+  }
+
+  export type RemoteHistoryFenceWhereUniqueInput = Prisma.AtLeast<{
+    bindingId?: string
+    AND?: RemoteHistoryFenceWhereInput | RemoteHistoryFenceWhereInput[]
+    OR?: RemoteHistoryFenceWhereInput[]
+    NOT?: RemoteHistoryFenceWhereInput | RemoteHistoryFenceWhereInput[]
+    defaultBranch?: StringFilter<"RemoteHistoryFence"> | string
+    lastConfirmedRemoteHeadSha?: StringFilter<"RemoteHistoryFence"> | string
+    confirmedAt?: DateTimeFilter<"RemoteHistoryFence"> | Date | string
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
+  }, "bindingId">
+
+  export type RemoteHistoryFenceOrderByWithAggregationInput = {
+    bindingId?: SortOrder
+    defaultBranch?: SortOrder
+    lastConfirmedRemoteHeadSha?: SortOrder
+    confirmedAt?: SortOrder
+    _count?: RemoteHistoryFenceCountOrderByAggregateInput
+    _max?: RemoteHistoryFenceMaxOrderByAggregateInput
+    _min?: RemoteHistoryFenceMinOrderByAggregateInput
+  }
+
+  export type RemoteHistoryFenceScalarWhereWithAggregatesInput = {
+    AND?: RemoteHistoryFenceScalarWhereWithAggregatesInput | RemoteHistoryFenceScalarWhereWithAggregatesInput[]
+    OR?: RemoteHistoryFenceScalarWhereWithAggregatesInput[]
+    NOT?: RemoteHistoryFenceScalarWhereWithAggregatesInput | RemoteHistoryFenceScalarWhereWithAggregatesInput[]
+    bindingId?: StringWithAggregatesFilter<"RemoteHistoryFence"> | string
+    defaultBranch?: StringWithAggregatesFilter<"RemoteHistoryFence"> | string
+    lastConfirmedRemoteHeadSha?: StringWithAggregatesFilter<"RemoteHistoryFence"> | string
+    confirmedAt?: DateTimeWithAggregatesFilter<"RemoteHistoryFence"> | Date | string
+  }
+
+  export type KnowledgeProjectionCheckpointWhereInput = {
+    AND?: KnowledgeProjectionCheckpointWhereInput | KnowledgeProjectionCheckpointWhereInput[]
+    OR?: KnowledgeProjectionCheckpointWhereInput[]
+    NOT?: KnowledgeProjectionCheckpointWhereInput | KnowledgeProjectionCheckpointWhereInput[]
+    bindingId?: StringFilter<"KnowledgeProjectionCheckpoint"> | string
+    branch?: StringFilter<"KnowledgeProjectionCheckpoint"> | string
+    projectedCommitSha?: StringNullableFilter<"KnowledgeProjectionCheckpoint"> | string | null
+    state?: StringFilter<"KnowledgeProjectionCheckpoint"> | string
+    failureCode?: StringNullableFilter<"KnowledgeProjectionCheckpoint"> | string | null
+    failureMessage?: StringNullableFilter<"KnowledgeProjectionCheckpoint"> | string | null
+    lastAttemptAt?: DateTimeNullableFilter<"KnowledgeProjectionCheckpoint"> | Date | string | null
+    projectedAt?: DateTimeNullableFilter<"KnowledgeProjectionCheckpoint"> | Date | string | null
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
+  }
+
+  export type KnowledgeProjectionCheckpointOrderByWithRelationInput = {
+    bindingId?: SortOrder
+    branch?: SortOrder
+    projectedCommitSha?: SortOrderInput | SortOrder
+    state?: SortOrder
+    failureCode?: SortOrderInput | SortOrder
+    failureMessage?: SortOrderInput | SortOrder
+    lastAttemptAt?: SortOrderInput | SortOrder
+    projectedAt?: SortOrderInput | SortOrder
+    binding?: KnowledgeRemoteBindingOrderByWithRelationInput
+  }
+
+  export type KnowledgeProjectionCheckpointWhereUniqueInput = Prisma.AtLeast<{
+    bindingId?: string
+    AND?: KnowledgeProjectionCheckpointWhereInput | KnowledgeProjectionCheckpointWhereInput[]
+    OR?: KnowledgeProjectionCheckpointWhereInput[]
+    NOT?: KnowledgeProjectionCheckpointWhereInput | KnowledgeProjectionCheckpointWhereInput[]
+    branch?: StringFilter<"KnowledgeProjectionCheckpoint"> | string
+    projectedCommitSha?: StringNullableFilter<"KnowledgeProjectionCheckpoint"> | string | null
+    state?: StringFilter<"KnowledgeProjectionCheckpoint"> | string
+    failureCode?: StringNullableFilter<"KnowledgeProjectionCheckpoint"> | string | null
+    failureMessage?: StringNullableFilter<"KnowledgeProjectionCheckpoint"> | string | null
+    lastAttemptAt?: DateTimeNullableFilter<"KnowledgeProjectionCheckpoint"> | Date | string | null
+    projectedAt?: DateTimeNullableFilter<"KnowledgeProjectionCheckpoint"> | Date | string | null
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
+  }, "bindingId">
+
+  export type KnowledgeProjectionCheckpointOrderByWithAggregationInput = {
+    bindingId?: SortOrder
+    branch?: SortOrder
+    projectedCommitSha?: SortOrderInput | SortOrder
+    state?: SortOrder
+    failureCode?: SortOrderInput | SortOrder
+    failureMessage?: SortOrderInput | SortOrder
+    lastAttemptAt?: SortOrderInput | SortOrder
+    projectedAt?: SortOrderInput | SortOrder
+    _count?: KnowledgeProjectionCheckpointCountOrderByAggregateInput
+    _max?: KnowledgeProjectionCheckpointMaxOrderByAggregateInput
+    _min?: KnowledgeProjectionCheckpointMinOrderByAggregateInput
+  }
+
+  export type KnowledgeProjectionCheckpointScalarWhereWithAggregatesInput = {
+    AND?: KnowledgeProjectionCheckpointScalarWhereWithAggregatesInput | KnowledgeProjectionCheckpointScalarWhereWithAggregatesInput[]
+    OR?: KnowledgeProjectionCheckpointScalarWhereWithAggregatesInput[]
+    NOT?: KnowledgeProjectionCheckpointScalarWhereWithAggregatesInput | KnowledgeProjectionCheckpointScalarWhereWithAggregatesInput[]
+    bindingId?: StringWithAggregatesFilter<"KnowledgeProjectionCheckpoint"> | string
+    branch?: StringWithAggregatesFilter<"KnowledgeProjectionCheckpoint"> | string
+    projectedCommitSha?: StringNullableWithAggregatesFilter<"KnowledgeProjectionCheckpoint"> | string | null
+    state?: StringWithAggregatesFilter<"KnowledgeProjectionCheckpoint"> | string
+    failureCode?: StringNullableWithAggregatesFilter<"KnowledgeProjectionCheckpoint"> | string | null
+    failureMessage?: StringNullableWithAggregatesFilter<"KnowledgeProjectionCheckpoint"> | string | null
+    lastAttemptAt?: DateTimeNullableWithAggregatesFilter<"KnowledgeProjectionCheckpoint"> | Date | string | null
+    projectedAt?: DateTimeNullableWithAggregatesFilter<"KnowledgeProjectionCheckpoint"> | Date | string | null
   }
 
   export type GithubWebhookDeliveryWhereInput = {
@@ -135946,7 +140958,7 @@ export namespace Prisma {
     OR?: GithubWebhookDeliveryWhereInput[]
     NOT?: GithubWebhookDeliveryWhereInput | GithubWebhookDeliveryWhereInput[]
     id?: StringFilter<"GithubWebhookDelivery"> | string
-    connectionId?: StringFilter<"GithubWebhookDelivery"> | string
+    bindingId?: StringFilter<"GithubWebhookDelivery"> | string
     deliveryId?: StringFilter<"GithubWebhookDelivery"> | string
     eventName?: StringFilter<"GithubWebhookDelivery"> | string
     beforeSha?: StringNullableFilter<"GithubWebhookDelivery"> | string | null
@@ -135956,12 +140968,12 @@ export namespace Prisma {
     errorMessage?: StringNullableFilter<"GithubWebhookDelivery"> | string | null
     receivedAt?: DateTimeFilter<"GithubWebhookDelivery"> | Date | string
     processedAt?: DateTimeNullableFilter<"GithubWebhookDelivery"> | Date | string | null
-    connection?: XOR<KnowledgeRepositoryConnectionScalarRelationFilter, KnowledgeRepositoryConnectionWhereInput>
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
   }
 
   export type GithubWebhookDeliveryOrderByWithRelationInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     deliveryId?: SortOrder
     eventName?: SortOrder
     beforeSha?: SortOrderInput | SortOrder
@@ -135971,7 +140983,7 @@ export namespace Prisma {
     errorMessage?: SortOrderInput | SortOrder
     receivedAt?: SortOrder
     processedAt?: SortOrderInput | SortOrder
-    connection?: KnowledgeRepositoryConnectionOrderByWithRelationInput
+    binding?: KnowledgeRemoteBindingOrderByWithRelationInput
   }
 
   export type GithubWebhookDeliveryWhereUniqueInput = Prisma.AtLeast<{
@@ -135980,7 +140992,7 @@ export namespace Prisma {
     AND?: GithubWebhookDeliveryWhereInput | GithubWebhookDeliveryWhereInput[]
     OR?: GithubWebhookDeliveryWhereInput[]
     NOT?: GithubWebhookDeliveryWhereInput | GithubWebhookDeliveryWhereInput[]
-    connectionId?: StringFilter<"GithubWebhookDelivery"> | string
+    bindingId?: StringFilter<"GithubWebhookDelivery"> | string
     eventName?: StringFilter<"GithubWebhookDelivery"> | string
     beforeSha?: StringNullableFilter<"GithubWebhookDelivery"> | string | null
     afterSha?: StringNullableFilter<"GithubWebhookDelivery"> | string | null
@@ -135989,12 +141001,12 @@ export namespace Prisma {
     errorMessage?: StringNullableFilter<"GithubWebhookDelivery"> | string | null
     receivedAt?: DateTimeFilter<"GithubWebhookDelivery"> | Date | string
     processedAt?: DateTimeNullableFilter<"GithubWebhookDelivery"> | Date | string | null
-    connection?: XOR<KnowledgeRepositoryConnectionScalarRelationFilter, KnowledgeRepositoryConnectionWhereInput>
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
   }, "id" | "deliveryId">
 
   export type GithubWebhookDeliveryOrderByWithAggregationInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     deliveryId?: SortOrder
     eventName?: SortOrder
     beforeSha?: SortOrderInput | SortOrder
@@ -136014,7 +141026,7 @@ export namespace Prisma {
     OR?: GithubWebhookDeliveryScalarWhereWithAggregatesInput[]
     NOT?: GithubWebhookDeliveryScalarWhereWithAggregatesInput | GithubWebhookDeliveryScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"GithubWebhookDelivery"> | string
-    connectionId?: StringWithAggregatesFilter<"GithubWebhookDelivery"> | string
+    bindingId?: StringWithAggregatesFilter<"GithubWebhookDelivery"> | string
     deliveryId?: StringWithAggregatesFilter<"GithubWebhookDelivery"> | string
     eventName?: StringWithAggregatesFilter<"GithubWebhookDelivery"> | string
     beforeSha?: StringNullableWithAggregatesFilter<"GithubWebhookDelivery"> | string | null
@@ -136031,7 +141043,7 @@ export namespace Prisma {
     OR?: KnowledgeNoteProjectionWhereInput[]
     NOT?: KnowledgeNoteProjectionWhereInput | KnowledgeNoteProjectionWhereInput[]
     id?: StringFilter<"KnowledgeNoteProjection"> | string
-    connectionId?: StringFilter<"KnowledgeNoteProjection"> | string
+    bindingId?: StringFilter<"KnowledgeNoteProjection"> | string
     relativePath?: StringFilter<"KnowledgeNoteProjection"> | string
     commitSha?: StringFilter<"KnowledgeNoteProjection"> | string
     blobSha?: StringFilter<"KnowledgeNoteProjection"> | string
@@ -136042,12 +141054,12 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"KnowledgeNoteProjection"> | Date | string
     updatedAt?: DateTimeFilter<"KnowledgeNoteProjection"> | Date | string
     deletedAt?: DateTimeNullableFilter<"KnowledgeNoteProjection"> | Date | string | null
-    connection?: XOR<KnowledgeRepositoryConnectionScalarRelationFilter, KnowledgeRepositoryConnectionWhereInput>
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
   }
 
   export type KnowledgeNoteProjectionOrderByWithRelationInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -136058,16 +141070,16 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
-    connection?: KnowledgeRepositoryConnectionOrderByWithRelationInput
+    binding?: KnowledgeRemoteBindingOrderByWithRelationInput
   }
 
   export type KnowledgeNoteProjectionWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    connectionId_relativePath?: KnowledgeNoteProjectionConnectionIdRelativePathCompoundUniqueInput
+    bindingId_relativePath?: KnowledgeNoteProjectionBindingIdRelativePathCompoundUniqueInput
     AND?: KnowledgeNoteProjectionWhereInput | KnowledgeNoteProjectionWhereInput[]
     OR?: KnowledgeNoteProjectionWhereInput[]
     NOT?: KnowledgeNoteProjectionWhereInput | KnowledgeNoteProjectionWhereInput[]
-    connectionId?: StringFilter<"KnowledgeNoteProjection"> | string
+    bindingId?: StringFilter<"KnowledgeNoteProjection"> | string
     relativePath?: StringFilter<"KnowledgeNoteProjection"> | string
     commitSha?: StringFilter<"KnowledgeNoteProjection"> | string
     blobSha?: StringFilter<"KnowledgeNoteProjection"> | string
@@ -136078,12 +141090,12 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"KnowledgeNoteProjection"> | Date | string
     updatedAt?: DateTimeFilter<"KnowledgeNoteProjection"> | Date | string
     deletedAt?: DateTimeNullableFilter<"KnowledgeNoteProjection"> | Date | string | null
-    connection?: XOR<KnowledgeRepositoryConnectionScalarRelationFilter, KnowledgeRepositoryConnectionWhereInput>
-  }, "id" | "connectionId_relativePath">
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
+  }, "id" | "bindingId_relativePath">
 
   export type KnowledgeNoteProjectionOrderByWithAggregationInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -136104,7 +141116,7 @@ export namespace Prisma {
     OR?: KnowledgeNoteProjectionScalarWhereWithAggregatesInput[]
     NOT?: KnowledgeNoteProjectionScalarWhereWithAggregatesInput | KnowledgeNoteProjectionScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
-    connectionId?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
+    bindingId?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
     relativePath?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
     commitSha?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
     blobSha?: StringWithAggregatesFilter<"KnowledgeNoteProjection"> | string
@@ -136122,7 +141134,7 @@ export namespace Prisma {
     OR?: KnowledgeAttachmentProjectionWhereInput[]
     NOT?: KnowledgeAttachmentProjectionWhereInput | KnowledgeAttachmentProjectionWhereInput[]
     id?: StringFilter<"KnowledgeAttachmentProjection"> | string
-    connectionId?: StringFilter<"KnowledgeAttachmentProjection"> | string
+    bindingId?: StringFilter<"KnowledgeAttachmentProjection"> | string
     relativePath?: StringFilter<"KnowledgeAttachmentProjection"> | string
     commitSha?: StringFilter<"KnowledgeAttachmentProjection"> | string
     blobSha?: StringFilter<"KnowledgeAttachmentProjection"> | string
@@ -136131,12 +141143,12 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"KnowledgeAttachmentProjection"> | Date | string
     updatedAt?: DateTimeFilter<"KnowledgeAttachmentProjection"> | Date | string
     deletedAt?: DateTimeNullableFilter<"KnowledgeAttachmentProjection"> | Date | string | null
-    connection?: XOR<KnowledgeRepositoryConnectionScalarRelationFilter, KnowledgeRepositoryConnectionWhereInput>
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
   }
 
   export type KnowledgeAttachmentProjectionOrderByWithRelationInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -136145,16 +141157,16 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
-    connection?: KnowledgeRepositoryConnectionOrderByWithRelationInput
+    binding?: KnowledgeRemoteBindingOrderByWithRelationInput
   }
 
   export type KnowledgeAttachmentProjectionWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    connectionId_relativePath?: KnowledgeAttachmentProjectionConnectionIdRelativePathCompoundUniqueInput
+    bindingId_relativePath?: KnowledgeAttachmentProjectionBindingIdRelativePathCompoundUniqueInput
     AND?: KnowledgeAttachmentProjectionWhereInput | KnowledgeAttachmentProjectionWhereInput[]
     OR?: KnowledgeAttachmentProjectionWhereInput[]
     NOT?: KnowledgeAttachmentProjectionWhereInput | KnowledgeAttachmentProjectionWhereInput[]
-    connectionId?: StringFilter<"KnowledgeAttachmentProjection"> | string
+    bindingId?: StringFilter<"KnowledgeAttachmentProjection"> | string
     relativePath?: StringFilter<"KnowledgeAttachmentProjection"> | string
     commitSha?: StringFilter<"KnowledgeAttachmentProjection"> | string
     blobSha?: StringFilter<"KnowledgeAttachmentProjection"> | string
@@ -136163,12 +141175,12 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"KnowledgeAttachmentProjection"> | Date | string
     updatedAt?: DateTimeFilter<"KnowledgeAttachmentProjection"> | Date | string
     deletedAt?: DateTimeNullableFilter<"KnowledgeAttachmentProjection"> | Date | string | null
-    connection?: XOR<KnowledgeRepositoryConnectionScalarRelationFilter, KnowledgeRepositoryConnectionWhereInput>
-  }, "id" | "connectionId_relativePath">
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
+  }, "id" | "bindingId_relativePath">
 
   export type KnowledgeAttachmentProjectionOrderByWithAggregationInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -136189,7 +141201,7 @@ export namespace Prisma {
     OR?: KnowledgeAttachmentProjectionScalarWhereWithAggregatesInput[]
     NOT?: KnowledgeAttachmentProjectionScalarWhereWithAggregatesInput | KnowledgeAttachmentProjectionScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"KnowledgeAttachmentProjection"> | string
-    connectionId?: StringWithAggregatesFilter<"KnowledgeAttachmentProjection"> | string
+    bindingId?: StringWithAggregatesFilter<"KnowledgeAttachmentProjection"> | string
     relativePath?: StringWithAggregatesFilter<"KnowledgeAttachmentProjection"> | string
     commitSha?: StringWithAggregatesFilter<"KnowledgeAttachmentProjection"> | string
     blobSha?: StringWithAggregatesFilter<"KnowledgeAttachmentProjection"> | string
@@ -136204,41 +141216,41 @@ export namespace Prisma {
     AND?: KnowledgeAttachmentContentCacheWhereInput | KnowledgeAttachmentContentCacheWhereInput[]
     OR?: KnowledgeAttachmentContentCacheWhereInput[]
     NOT?: KnowledgeAttachmentContentCacheWhereInput | KnowledgeAttachmentContentCacheWhereInput[]
-    connectionId?: StringFilter<"KnowledgeAttachmentContentCache"> | string
+    bindingId?: StringFilter<"KnowledgeAttachmentContentCache"> | string
     blobSha?: StringFilter<"KnowledgeAttachmentContentCache"> | string
     byteSize?: IntFilter<"KnowledgeAttachmentContentCache"> | number
     contentBytes?: BytesFilter<"KnowledgeAttachmentContentCache"> | Bytes
     cachedAt?: DateTimeFilter<"KnowledgeAttachmentContentCache"> | Date | string
     expiresAt?: DateTimeFilter<"KnowledgeAttachmentContentCache"> | Date | string
-    connection?: XOR<KnowledgeRepositoryConnectionScalarRelationFilter, KnowledgeRepositoryConnectionWhereInput>
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
   }
 
   export type KnowledgeAttachmentContentCacheOrderByWithRelationInput = {
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     blobSha?: SortOrder
     byteSize?: SortOrder
     contentBytes?: SortOrder
     cachedAt?: SortOrder
     expiresAt?: SortOrder
-    connection?: KnowledgeRepositoryConnectionOrderByWithRelationInput
+    binding?: KnowledgeRemoteBindingOrderByWithRelationInput
   }
 
   export type KnowledgeAttachmentContentCacheWhereUniqueInput = Prisma.AtLeast<{
-    connectionId_blobSha?: KnowledgeAttachmentContentCacheConnectionIdBlobShaCompoundUniqueInput
+    bindingId_blobSha?: KnowledgeAttachmentContentCacheBindingIdBlobShaCompoundUniqueInput
     AND?: KnowledgeAttachmentContentCacheWhereInput | KnowledgeAttachmentContentCacheWhereInput[]
     OR?: KnowledgeAttachmentContentCacheWhereInput[]
     NOT?: KnowledgeAttachmentContentCacheWhereInput | KnowledgeAttachmentContentCacheWhereInput[]
-    connectionId?: StringFilter<"KnowledgeAttachmentContentCache"> | string
+    bindingId?: StringFilter<"KnowledgeAttachmentContentCache"> | string
     blobSha?: StringFilter<"KnowledgeAttachmentContentCache"> | string
     byteSize?: IntFilter<"KnowledgeAttachmentContentCache"> | number
     contentBytes?: BytesFilter<"KnowledgeAttachmentContentCache"> | Bytes
     cachedAt?: DateTimeFilter<"KnowledgeAttachmentContentCache"> | Date | string
     expiresAt?: DateTimeFilter<"KnowledgeAttachmentContentCache"> | Date | string
-    connection?: XOR<KnowledgeRepositoryConnectionScalarRelationFilter, KnowledgeRepositoryConnectionWhereInput>
-  }, "connectionId_blobSha">
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
+  }, "bindingId_blobSha">
 
   export type KnowledgeAttachmentContentCacheOrderByWithAggregationInput = {
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     blobSha?: SortOrder
     byteSize?: SortOrder
     contentBytes?: SortOrder
@@ -136255,7 +141267,7 @@ export namespace Prisma {
     AND?: KnowledgeAttachmentContentCacheScalarWhereWithAggregatesInput | KnowledgeAttachmentContentCacheScalarWhereWithAggregatesInput[]
     OR?: KnowledgeAttachmentContentCacheScalarWhereWithAggregatesInput[]
     NOT?: KnowledgeAttachmentContentCacheScalarWhereWithAggregatesInput | KnowledgeAttachmentContentCacheScalarWhereWithAggregatesInput[]
-    connectionId?: StringWithAggregatesFilter<"KnowledgeAttachmentContentCache"> | string
+    bindingId?: StringWithAggregatesFilter<"KnowledgeAttachmentContentCache"> | string
     blobSha?: StringWithAggregatesFilter<"KnowledgeAttachmentContentCache"> | string
     byteSize?: IntWithAggregatesFilter<"KnowledgeAttachmentContentCache"> | number
     contentBytes?: BytesWithAggregatesFilter<"KnowledgeAttachmentContentCache"> | Bytes
@@ -136269,7 +141281,7 @@ export namespace Prisma {
     NOT?: KnowledgeWriteRequestWhereInput | KnowledgeWriteRequestWhereInput[]
     id?: StringFilter<"KnowledgeWriteRequest"> | string
     identityId?: StringFilter<"KnowledgeWriteRequest"> | string
-    connectionId?: StringFilter<"KnowledgeWriteRequest"> | string
+    bindingId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestHash?: StringFilter<"KnowledgeWriteRequest"> | string
     relativePath?: StringFilter<"KnowledgeWriteRequest"> | string
@@ -136288,13 +141300,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"KnowledgeWriteRequest"> | Date | string
     completedAt?: DateTimeNullableFilter<"KnowledgeWriteRequest"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    connection?: XOR<KnowledgeRepositoryConnectionScalarRelationFilter, KnowledgeRepositoryConnectionWhereInput>
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
   }
 
   export type KnowledgeWriteRequestOrderByWithRelationInput = {
     id?: SortOrder
     identityId?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     requestId?: SortOrder
     requestHash?: SortOrder
     relativePath?: SortOrder
@@ -136313,7 +141325,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     completedAt?: SortOrderInput | SortOrder
     account?: AccountOrderByWithRelationInput
-    connection?: KnowledgeRepositoryConnectionOrderByWithRelationInput
+    binding?: KnowledgeRemoteBindingOrderByWithRelationInput
   }
 
   export type KnowledgeWriteRequestWhereUniqueInput = Prisma.AtLeast<{
@@ -136323,7 +141335,7 @@ export namespace Prisma {
     OR?: KnowledgeWriteRequestWhereInput[]
     NOT?: KnowledgeWriteRequestWhereInput | KnowledgeWriteRequestWhereInput[]
     identityId?: StringFilter<"KnowledgeWriteRequest"> | string
-    connectionId?: StringFilter<"KnowledgeWriteRequest"> | string
+    bindingId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestHash?: StringFilter<"KnowledgeWriteRequest"> | string
     relativePath?: StringFilter<"KnowledgeWriteRequest"> | string
@@ -136342,13 +141354,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"KnowledgeWriteRequest"> | Date | string
     completedAt?: DateTimeNullableFilter<"KnowledgeWriteRequest"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    connection?: XOR<KnowledgeRepositoryConnectionScalarRelationFilter, KnowledgeRepositoryConnectionWhereInput>
+    binding?: XOR<KnowledgeRemoteBindingScalarRelationFilter, KnowledgeRemoteBindingWhereInput>
   }, "id" | "identityId_requestId">
 
   export type KnowledgeWriteRequestOrderByWithAggregationInput = {
     id?: SortOrder
     identityId?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     requestId?: SortOrder
     requestHash?: SortOrder
     relativePath?: SortOrder
@@ -136379,7 +141391,7 @@ export namespace Prisma {
     NOT?: KnowledgeWriteRequestScalarWhereWithAggregatesInput | KnowledgeWriteRequestScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
     identityId?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
-    connectionId?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
+    bindingId?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
     requestId?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
     requestHash?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
     relativePath?: StringWithAggregatesFilter<"KnowledgeWriteRequest"> | string
@@ -138475,7 +143487,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -138543,7 +143555,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -138611,7 +143623,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -138679,7 +143691,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -146056,163 +151068,399 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type KnowledgeRepositoryConnectionCreateInput = {
+  export type KnowledgeSpaceCreateInput = {
     id: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
-    installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
-    version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutKnowledgeRepositoryConnectionsInput
-    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutConnectionInput
-    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutConnectionInput
+    remoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutKnowledgeSpaceInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedCreateInput = {
+  export type KnowledgeSpaceUncheckedCreateInput = {
     id: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    remoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutKnowledgeSpaceInput
+  }
+
+  export type KnowledgeSpaceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    remoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutKnowledgeSpaceNestedInput
+  }
+
+  export type KnowledgeSpaceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    remoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutKnowledgeSpaceNestedInput
+  }
+
+  export type KnowledgeSpaceCreateManyInput = {
+    id: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KnowledgeSpaceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KnowledgeSpaceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KnowledgeRemoteBindingCreateInput = {
+    id: string
+    provider?: string
+    installationId: string
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
+    version?: number
+    knowledgeSpace: KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput
+    account: AccountCreateNestedOneWithoutKnowledgeRemoteBindingsInput
+    observation?: RemoteRepositoryObservationCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutBindingInput
+  }
+
+  export type KnowledgeRemoteBindingUncheckedCreateInput = {
+    id: string
+    knowledgeSpaceId: string
     identityId: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutConnectionInput
-    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutConnectionInput
+    observation?: RemoteRepositoryObservationUncheckedCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceUncheckedCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionUpdateInput = {
+  export type KnowledgeRemoteBindingUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutKnowledgeRepositoryConnectionsNestedInput
-    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutConnectionNestedInput
-    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutConnectionNestedInput
+    knowledgeSpace?: KnowledgeSpaceUpdateOneRequiredWithoutRemoteBindingsNestedInput
+    account?: AccountUpdateOneRequiredWithoutKnowledgeRemoteBindingsNestedInput
+    observation?: RemoteRepositoryObservationUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedUpdateInput = {
+  export type KnowledgeRemoteBindingUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutConnectionNestedInput
-    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutConnectionNestedInput
+    observation?: RemoteRepositoryObservationUncheckedUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUncheckedUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionCreateManyInput = {
+  export type KnowledgeRemoteBindingCreateManyInput = {
     id: string
+    knowledgeSpaceId: string
     identityId: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
   }
 
-  export type KnowledgeRepositoryConnectionUpdateManyMutationInput = {
+  export type KnowledgeRemoteBindingUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedUpdateManyInput = {
+  export type KnowledgeRemoteBindingUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    version?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type RemoteRepositoryObservationCreateInput = {
+    observedAt: Date | string
+    accountId: string
+    repositoryFullName: string
+    defaultBranch: string
+    isPrivate: boolean
+    archived: boolean
+    disabled: boolean
+    contentsPermission: string
+    installationSuspended: boolean
+    eligibilityState: string
+    blockReason?: string | null
+    binding: KnowledgeRemoteBindingCreateNestedOneWithoutObservationInput
+  }
+
+  export type RemoteRepositoryObservationUncheckedCreateInput = {
+    bindingId: string
+    observedAt: Date | string
+    accountId: string
+    repositoryFullName: string
+    defaultBranch: string
+    isPrivate: boolean
+    archived: boolean
+    disabled: boolean
+    contentsPermission: string
+    installationSuspended: boolean
+    eligibilityState: string
+    blockReason?: string | null
+  }
+
+  export type RemoteRepositoryObservationUpdateInput = {
+    observedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accountId?: StringFieldUpdateOperationsInput | string
+    repositoryFullName?: StringFieldUpdateOperationsInput | string
     defaultBranch?: StringFieldUpdateOperationsInput | string
     isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    archived?: BoolFieldUpdateOperationsInput | boolean
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    contentsPermission?: StringFieldUpdateOperationsInput | string
+    installationSuspended?: BoolFieldUpdateOperationsInput | boolean
+    eligibilityState?: StringFieldUpdateOperationsInput | string
+    blockReason?: NullableStringFieldUpdateOperationsInput | string | null
+    binding?: KnowledgeRemoteBindingUpdateOneRequiredWithoutObservationNestedInput
+  }
+
+  export type RemoteRepositoryObservationUncheckedUpdateInput = {
+    bindingId?: StringFieldUpdateOperationsInput | string
+    observedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accountId?: StringFieldUpdateOperationsInput | string
+    repositoryFullName?: StringFieldUpdateOperationsInput | string
+    defaultBranch?: StringFieldUpdateOperationsInput | string
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    archived?: BoolFieldUpdateOperationsInput | boolean
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    contentsPermission?: StringFieldUpdateOperationsInput | string
+    installationSuspended?: BoolFieldUpdateOperationsInput | boolean
+    eligibilityState?: StringFieldUpdateOperationsInput | string
+    blockReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type RemoteRepositoryObservationCreateManyInput = {
+    bindingId: string
+    observedAt: Date | string
+    accountId: string
+    repositoryFullName: string
+    defaultBranch: string
+    isPrivate: boolean
+    archived: boolean
+    disabled: boolean
+    contentsPermission: string
+    installationSuspended: boolean
+    eligibilityState: string
+    blockReason?: string | null
+  }
+
+  export type RemoteRepositoryObservationUpdateManyMutationInput = {
+    observedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accountId?: StringFieldUpdateOperationsInput | string
+    repositoryFullName?: StringFieldUpdateOperationsInput | string
+    defaultBranch?: StringFieldUpdateOperationsInput | string
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    archived?: BoolFieldUpdateOperationsInput | boolean
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    contentsPermission?: StringFieldUpdateOperationsInput | string
+    installationSuspended?: BoolFieldUpdateOperationsInput | boolean
+    eligibilityState?: StringFieldUpdateOperationsInput | string
+    blockReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type RemoteRepositoryObservationUncheckedUpdateManyInput = {
+    bindingId?: StringFieldUpdateOperationsInput | string
+    observedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accountId?: StringFieldUpdateOperationsInput | string
+    repositoryFullName?: StringFieldUpdateOperationsInput | string
+    defaultBranch?: StringFieldUpdateOperationsInput | string
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    archived?: BoolFieldUpdateOperationsInput | boolean
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    contentsPermission?: StringFieldUpdateOperationsInput | string
+    installationSuspended?: BoolFieldUpdateOperationsInput | boolean
+    eligibilityState?: StringFieldUpdateOperationsInput | string
+    blockReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type RemoteHistoryFenceCreateInput = {
+    defaultBranch: string
+    lastConfirmedRemoteHeadSha: string
+    confirmedAt: Date | string
+    binding: KnowledgeRemoteBindingCreateNestedOneWithoutHistoryFenceInput
+  }
+
+  export type RemoteHistoryFenceUncheckedCreateInput = {
+    bindingId: string
+    defaultBranch: string
+    lastConfirmedRemoteHeadSha: string
+    confirmedAt: Date | string
+  }
+
+  export type RemoteHistoryFenceUpdateInput = {
+    defaultBranch?: StringFieldUpdateOperationsInput | string
+    lastConfirmedRemoteHeadSha?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    binding?: KnowledgeRemoteBindingUpdateOneRequiredWithoutHistoryFenceNestedInput
+  }
+
+  export type RemoteHistoryFenceUncheckedUpdateInput = {
+    bindingId?: StringFieldUpdateOperationsInput | string
+    defaultBranch?: StringFieldUpdateOperationsInput | string
+    lastConfirmedRemoteHeadSha?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RemoteHistoryFenceCreateManyInput = {
+    bindingId: string
+    defaultBranch: string
+    lastConfirmedRemoteHeadSha: string
+    confirmedAt: Date | string
+  }
+
+  export type RemoteHistoryFenceUpdateManyMutationInput = {
+    defaultBranch?: StringFieldUpdateOperationsInput | string
+    lastConfirmedRemoteHeadSha?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RemoteHistoryFenceUncheckedUpdateManyInput = {
+    bindingId?: StringFieldUpdateOperationsInput | string
+    defaultBranch?: StringFieldUpdateOperationsInput | string
+    lastConfirmedRemoteHeadSha?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KnowledgeProjectionCheckpointCreateInput = {
+    branch: string
+    projectedCommitSha?: string | null
+    state: string
+    failureCode?: string | null
+    failureMessage?: string | null
+    lastAttemptAt?: Date | string | null
+    projectedAt?: Date | string | null
+    binding: KnowledgeRemoteBindingCreateNestedOneWithoutProjectionCheckpointInput
+  }
+
+  export type KnowledgeProjectionCheckpointUncheckedCreateInput = {
+    bindingId: string
+    branch: string
+    projectedCommitSha?: string | null
+    state: string
+    failureCode?: string | null
+    failureMessage?: string | null
+    lastAttemptAt?: Date | string | null
+    projectedAt?: Date | string | null
+  }
+
+  export type KnowledgeProjectionCheckpointUpdateInput = {
+    branch?: StringFieldUpdateOperationsInput | string
+    projectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: StringFieldUpdateOperationsInput | string
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    projectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    binding?: KnowledgeRemoteBindingUpdateOneRequiredWithoutProjectionCheckpointNestedInput
+  }
+
+  export type KnowledgeProjectionCheckpointUncheckedUpdateInput = {
+    bindingId?: StringFieldUpdateOperationsInput | string
+    branch?: StringFieldUpdateOperationsInput | string
+    projectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: StringFieldUpdateOperationsInput | string
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    projectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type KnowledgeProjectionCheckpointCreateManyInput = {
+    bindingId: string
+    branch: string
+    projectedCommitSha?: string | null
+    state: string
+    failureCode?: string | null
+    failureMessage?: string | null
+    lastAttemptAt?: Date | string | null
+    projectedAt?: Date | string | null
+  }
+
+  export type KnowledgeProjectionCheckpointUpdateManyMutationInput = {
+    branch?: StringFieldUpdateOperationsInput | string
+    projectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: StringFieldUpdateOperationsInput | string
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    projectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type KnowledgeProjectionCheckpointUncheckedUpdateManyInput = {
+    bindingId?: StringFieldUpdateOperationsInput | string
+    branch?: StringFieldUpdateOperationsInput | string
+    projectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: StringFieldUpdateOperationsInput | string
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    projectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type GithubWebhookDeliveryCreateInput = {
@@ -146226,12 +151474,12 @@ export namespace Prisma {
     errorMessage?: string | null
     receivedAt?: Date | string
     processedAt?: Date | string | null
-    connection: KnowledgeRepositoryConnectionCreateNestedOneWithoutWebhookDeliveriesInput
+    binding: KnowledgeRemoteBindingCreateNestedOneWithoutWebhookDeliveriesInput
   }
 
   export type GithubWebhookDeliveryUncheckedCreateInput = {
     id: string
-    connectionId: string
+    bindingId: string
     deliveryId: string
     eventName: string
     beforeSha?: string | null
@@ -146254,12 +151502,12 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    connection?: KnowledgeRepositoryConnectionUpdateOneRequiredWithoutWebhookDeliveriesNestedInput
+    binding?: KnowledgeRemoteBindingUpdateOneRequiredWithoutWebhookDeliveriesNestedInput
   }
 
   export type GithubWebhookDeliveryUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     deliveryId?: StringFieldUpdateOperationsInput | string
     eventName?: StringFieldUpdateOperationsInput | string
     beforeSha?: NullableStringFieldUpdateOperationsInput | string | null
@@ -146273,7 +151521,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliveryCreateManyInput = {
     id: string
-    connectionId: string
+    bindingId: string
     deliveryId: string
     eventName: string
     beforeSha?: string | null
@@ -146300,7 +151548,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliveryUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     deliveryId?: StringFieldUpdateOperationsInput | string
     eventName?: StringFieldUpdateOperationsInput | string
     beforeSha?: NullableStringFieldUpdateOperationsInput | string | null
@@ -146324,12 +151572,12 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    connection: KnowledgeRepositoryConnectionCreateNestedOneWithoutNoteProjectionsInput
+    binding: KnowledgeRemoteBindingCreateNestedOneWithoutNoteProjectionsInput
   }
 
   export type KnowledgeNoteProjectionUncheckedCreateInput = {
     id: string
-    connectionId: string
+    bindingId: string
     relativePath: string
     commitSha: string
     blobSha: string
@@ -146354,12 +151602,12 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    connection?: KnowledgeRepositoryConnectionUpdateOneRequiredWithoutNoteProjectionsNestedInput
+    binding?: KnowledgeRemoteBindingUpdateOneRequiredWithoutNoteProjectionsNestedInput
   }
 
   export type KnowledgeNoteProjectionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
@@ -146374,7 +151622,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionCreateManyInput = {
     id: string
-    connectionId: string
+    bindingId: string
     relativePath: string
     commitSha: string
     blobSha: string
@@ -146403,7 +151651,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
@@ -146426,12 +151674,12 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    connection: KnowledgeRepositoryConnectionCreateNestedOneWithoutAttachmentProjectionsInput
+    binding: KnowledgeRemoteBindingCreateNestedOneWithoutAttachmentProjectionsInput
   }
 
   export type KnowledgeAttachmentProjectionUncheckedCreateInput = {
     id: string
-    connectionId: string
+    bindingId: string
     relativePath: string
     commitSha: string
     blobSha: string
@@ -146452,12 +151700,12 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    connection?: KnowledgeRepositoryConnectionUpdateOneRequiredWithoutAttachmentProjectionsNestedInput
+    binding?: KnowledgeRemoteBindingUpdateOneRequiredWithoutAttachmentProjectionsNestedInput
   }
 
   export type KnowledgeAttachmentProjectionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
@@ -146470,7 +151718,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionCreateManyInput = {
     id: string
-    connectionId: string
+    bindingId: string
     relativePath: string
     commitSha: string
     blobSha: string
@@ -146495,7 +151743,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
@@ -146512,11 +151760,11 @@ export namespace Prisma {
     contentBytes: Bytes
     cachedAt?: Date | string
     expiresAt: Date | string
-    connection: KnowledgeRepositoryConnectionCreateNestedOneWithoutAttachmentContentCachesInput
+    binding: KnowledgeRemoteBindingCreateNestedOneWithoutAttachmentContentCachesInput
   }
 
   export type KnowledgeAttachmentContentCacheUncheckedCreateInput = {
-    connectionId: string
+    bindingId: string
     blobSha: string
     byteSize: number
     contentBytes: Bytes
@@ -146530,11 +151778,11 @@ export namespace Prisma {
     contentBytes?: BytesFieldUpdateOperationsInput | Bytes
     cachedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    connection?: KnowledgeRepositoryConnectionUpdateOneRequiredWithoutAttachmentContentCachesNestedInput
+    binding?: KnowledgeRemoteBindingUpdateOneRequiredWithoutAttachmentContentCachesNestedInput
   }
 
   export type KnowledgeAttachmentContentCacheUncheckedUpdateInput = {
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
     byteSize?: IntFieldUpdateOperationsInput | number
     contentBytes?: BytesFieldUpdateOperationsInput | Bytes
@@ -146543,7 +151791,7 @@ export namespace Prisma {
   }
 
   export type KnowledgeAttachmentContentCacheCreateManyInput = {
-    connectionId: string
+    bindingId: string
     blobSha: string
     byteSize: number
     contentBytes: Bytes
@@ -146560,7 +151808,7 @@ export namespace Prisma {
   }
 
   export type KnowledgeAttachmentContentCacheUncheckedUpdateManyInput = {
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     blobSha?: StringFieldUpdateOperationsInput | string
     byteSize?: IntFieldUpdateOperationsInput | number
     contentBytes?: BytesFieldUpdateOperationsInput | Bytes
@@ -146588,13 +151836,13 @@ export namespace Prisma {
     updatedAt?: Date | string
     completedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutKnowledgeWriteRequestsInput
-    connection: KnowledgeRepositoryConnectionCreateNestedOneWithoutWriteRequestsInput
+    binding: KnowledgeRemoteBindingCreateNestedOneWithoutWriteRequestsInput
   }
 
   export type KnowledgeWriteRequestUncheckedCreateInput = {
     id: string
     identityId: string
-    connectionId: string
+    bindingId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -146634,13 +151882,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutKnowledgeWriteRequestsNestedInput
-    connection?: KnowledgeRepositoryConnectionUpdateOneRequiredWithoutWriteRequestsNestedInput
+    binding?: KnowledgeRemoteBindingUpdateOneRequiredWithoutWriteRequestsNestedInput
   }
 
   export type KnowledgeWriteRequestUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -146663,7 +151911,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestCreateManyInput = {
     id: string
     identityId: string
-    connectionId: string
+    bindingId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -146707,7 +151955,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -149477,10 +154725,10 @@ export namespace Prisma {
     none?: RepositoryResourceWhereInput
   }
 
-  export type KnowledgeRepositoryConnectionListRelationFilter = {
-    every?: KnowledgeRepositoryConnectionWhereInput
-    some?: KnowledgeRepositoryConnectionWhereInput
-    none?: KnowledgeRepositoryConnectionWhereInput
+  export type KnowledgeRemoteBindingListRelationFilter = {
+    every?: KnowledgeRemoteBindingWhereInput
+    some?: KnowledgeRemoteBindingWhereInput
+    none?: KnowledgeRemoteBindingWhereInput
   }
 
   export type KnowledgeRepositoryInstallationIntentListRelationFilter = {
@@ -149696,7 +154944,7 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type KnowledgeRepositoryConnectionOrderByRelationAggregateInput = {
+  export type KnowledgeRemoteBindingOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -153955,6 +159203,44 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type KnowledgeSpaceCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KnowledgeSpaceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KnowledgeSpaceMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KnowledgeSpaceScalarRelationFilter = {
+    is?: KnowledgeSpaceWhereInput
+    isNot?: KnowledgeSpaceWhereInput
+  }
+
+  export type RemoteRepositoryObservationNullableScalarRelationFilter = {
+    is?: RemoteRepositoryObservationWhereInput | null
+    isNot?: RemoteRepositoryObservationWhereInput | null
+  }
+
+  export type RemoteHistoryFenceNullableScalarRelationFilter = {
+    is?: RemoteHistoryFenceWhereInput | null
+    isNot?: RemoteHistoryFenceWhereInput | null
+  }
+
+  export type KnowledgeProjectionCheckpointNullableScalarRelationFilter = {
+    is?: KnowledgeProjectionCheckpointWhereInput | null
+    isNot?: KnowledgeProjectionCheckpointWhereInput | null
+  }
+
   export type GithubWebhookDeliveryListRelationFilter = {
     every?: GithubWebhookDeliveryWhereInput
     some?: GithubWebhookDeliveryWhereInput
@@ -153995,87 +159281,165 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type KnowledgeRepositoryConnectionIdentityIdGithubRepositoryIdCompoundUniqueInput = {
+  export type KnowledgeRemoteBindingIdentityIdRepositoryIdCompoundUniqueInput = {
     identityId: string
-    githubRepositoryId: string
+    repositoryId: string
   }
 
-  export type KnowledgeRepositoryConnectionCountOrderByAggregateInput = {
+  export type KnowledgeRemoteBindingCountOrderByAggregateInput = {
     id?: SortOrder
+    knowledgeSpaceId?: SortOrder
     identityId?: SortOrder
-    githubUserId?: SortOrder
-    githubRepositoryId?: SortOrder
-    githubRepositoryFullName?: SortOrder
+    provider?: SortOrder
     installationId?: SortOrder
+    repositoryId?: SortOrder
+    repositoryFullNameSnapshot?: SortOrder
+    connectedAt?: SortOrder
+    disconnectedAt?: SortOrder
+    version?: SortOrder
+  }
+
+  export type KnowledgeRemoteBindingAvgOrderByAggregateInput = {
+    version?: SortOrder
+  }
+
+  export type KnowledgeRemoteBindingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    identityId?: SortOrder
+    provider?: SortOrder
+    installationId?: SortOrder
+    repositoryId?: SortOrder
+    repositoryFullNameSnapshot?: SortOrder
+    connectedAt?: SortOrder
+    disconnectedAt?: SortOrder
+    version?: SortOrder
+  }
+
+  export type KnowledgeRemoteBindingMinOrderByAggregateInput = {
+    id?: SortOrder
+    knowledgeSpaceId?: SortOrder
+    identityId?: SortOrder
+    provider?: SortOrder
+    installationId?: SortOrder
+    repositoryId?: SortOrder
+    repositoryFullNameSnapshot?: SortOrder
+    connectedAt?: SortOrder
+    disconnectedAt?: SortOrder
+    version?: SortOrder
+  }
+
+  export type KnowledgeRemoteBindingSumOrderByAggregateInput = {
+    version?: SortOrder
+  }
+
+  export type KnowledgeRemoteBindingScalarRelationFilter = {
+    is?: KnowledgeRemoteBindingWhereInput
+    isNot?: KnowledgeRemoteBindingWhereInput
+  }
+
+  export type RemoteRepositoryObservationCountOrderByAggregateInput = {
+    bindingId?: SortOrder
+    observedAt?: SortOrder
+    accountId?: SortOrder
+    repositoryFullName?: SortOrder
     defaultBranch?: SortOrder
     isPrivate?: SortOrder
-    status?: SortOrder
-    lastSyncedCommitSha?: SortOrder
-    lastProjectedCommitSha?: SortOrder
-    lastErrorCode?: SortOrder
-    lastErrorMessage?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
+    archived?: SortOrder
+    disabled?: SortOrder
+    contentsPermission?: SortOrder
+    installationSuspended?: SortOrder
+    eligibilityState?: SortOrder
+    blockReason?: SortOrder
   }
 
-  export type KnowledgeRepositoryConnectionAvgOrderByAggregateInput = {
-    version?: SortOrder
-  }
-
-  export type KnowledgeRepositoryConnectionMaxOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    githubUserId?: SortOrder
-    githubRepositoryId?: SortOrder
-    githubRepositoryFullName?: SortOrder
-    installationId?: SortOrder
+  export type RemoteRepositoryObservationMaxOrderByAggregateInput = {
+    bindingId?: SortOrder
+    observedAt?: SortOrder
+    accountId?: SortOrder
+    repositoryFullName?: SortOrder
     defaultBranch?: SortOrder
     isPrivate?: SortOrder
-    status?: SortOrder
-    lastSyncedCommitSha?: SortOrder
-    lastProjectedCommitSha?: SortOrder
-    lastErrorCode?: SortOrder
-    lastErrorMessage?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
+    archived?: SortOrder
+    disabled?: SortOrder
+    contentsPermission?: SortOrder
+    installationSuspended?: SortOrder
+    eligibilityState?: SortOrder
+    blockReason?: SortOrder
   }
 
-  export type KnowledgeRepositoryConnectionMinOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    githubUserId?: SortOrder
-    githubRepositoryId?: SortOrder
-    githubRepositoryFullName?: SortOrder
-    installationId?: SortOrder
+  export type RemoteRepositoryObservationMinOrderByAggregateInput = {
+    bindingId?: SortOrder
+    observedAt?: SortOrder
+    accountId?: SortOrder
+    repositoryFullName?: SortOrder
     defaultBranch?: SortOrder
     isPrivate?: SortOrder
-    status?: SortOrder
-    lastSyncedCommitSha?: SortOrder
-    lastProjectedCommitSha?: SortOrder
-    lastErrorCode?: SortOrder
-    lastErrorMessage?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
+    archived?: SortOrder
+    disabled?: SortOrder
+    contentsPermission?: SortOrder
+    installationSuspended?: SortOrder
+    eligibilityState?: SortOrder
+    blockReason?: SortOrder
   }
 
-  export type KnowledgeRepositoryConnectionSumOrderByAggregateInput = {
-    version?: SortOrder
+  export type RemoteHistoryFenceCountOrderByAggregateInput = {
+    bindingId?: SortOrder
+    defaultBranch?: SortOrder
+    lastConfirmedRemoteHeadSha?: SortOrder
+    confirmedAt?: SortOrder
   }
 
-  export type KnowledgeRepositoryConnectionScalarRelationFilter = {
-    is?: KnowledgeRepositoryConnectionWhereInput
-    isNot?: KnowledgeRepositoryConnectionWhereInput
+  export type RemoteHistoryFenceMaxOrderByAggregateInput = {
+    bindingId?: SortOrder
+    defaultBranch?: SortOrder
+    lastConfirmedRemoteHeadSha?: SortOrder
+    confirmedAt?: SortOrder
+  }
+
+  export type RemoteHistoryFenceMinOrderByAggregateInput = {
+    bindingId?: SortOrder
+    defaultBranch?: SortOrder
+    lastConfirmedRemoteHeadSha?: SortOrder
+    confirmedAt?: SortOrder
+  }
+
+  export type KnowledgeProjectionCheckpointCountOrderByAggregateInput = {
+    bindingId?: SortOrder
+    branch?: SortOrder
+    projectedCommitSha?: SortOrder
+    state?: SortOrder
+    failureCode?: SortOrder
+    failureMessage?: SortOrder
+    lastAttemptAt?: SortOrder
+    projectedAt?: SortOrder
+  }
+
+  export type KnowledgeProjectionCheckpointMaxOrderByAggregateInput = {
+    bindingId?: SortOrder
+    branch?: SortOrder
+    projectedCommitSha?: SortOrder
+    state?: SortOrder
+    failureCode?: SortOrder
+    failureMessage?: SortOrder
+    lastAttemptAt?: SortOrder
+    projectedAt?: SortOrder
+  }
+
+  export type KnowledgeProjectionCheckpointMinOrderByAggregateInput = {
+    bindingId?: SortOrder
+    branch?: SortOrder
+    projectedCommitSha?: SortOrder
+    state?: SortOrder
+    failureCode?: SortOrder
+    failureMessage?: SortOrder
+    lastAttemptAt?: SortOrder
+    projectedAt?: SortOrder
   }
 
   export type GithubWebhookDeliveryCountOrderByAggregateInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     deliveryId?: SortOrder
     eventName?: SortOrder
     beforeSha?: SortOrder
@@ -154089,7 +159453,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliveryMaxOrderByAggregateInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     deliveryId?: SortOrder
     eventName?: SortOrder
     beforeSha?: SortOrder
@@ -154103,7 +159467,7 @@ export namespace Prisma {
 
   export type GithubWebhookDeliveryMinOrderByAggregateInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     deliveryId?: SortOrder
     eventName?: SortOrder
     beforeSha?: SortOrder
@@ -154115,14 +159479,14 @@ export namespace Prisma {
     processedAt?: SortOrder
   }
 
-  export type KnowledgeNoteProjectionConnectionIdRelativePathCompoundUniqueInput = {
-    connectionId: string
+  export type KnowledgeNoteProjectionBindingIdRelativePathCompoundUniqueInput = {
+    bindingId: string
     relativePath: string
   }
 
   export type KnowledgeNoteProjectionCountOrderByAggregateInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -154137,7 +159501,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionMaxOrderByAggregateInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -154151,7 +159515,7 @@ export namespace Prisma {
 
   export type KnowledgeNoteProjectionMinOrderByAggregateInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -154163,14 +159527,14 @@ export namespace Prisma {
     deletedAt?: SortOrder
   }
 
-  export type KnowledgeAttachmentProjectionConnectionIdRelativePathCompoundUniqueInput = {
-    connectionId: string
+  export type KnowledgeAttachmentProjectionBindingIdRelativePathCompoundUniqueInput = {
+    bindingId: string
     relativePath: string
   }
 
   export type KnowledgeAttachmentProjectionCountOrderByAggregateInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -154187,7 +159551,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionMaxOrderByAggregateInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -154200,7 +159564,7 @@ export namespace Prisma {
 
   export type KnowledgeAttachmentProjectionMinOrderByAggregateInput = {
     id?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     relativePath?: SortOrder
     commitSha?: SortOrder
     blobSha?: SortOrder
@@ -154222,13 +159586,13 @@ export namespace Prisma {
     not?: NestedBytesFilter<$PrismaModel> | Bytes
   }
 
-  export type KnowledgeAttachmentContentCacheConnectionIdBlobShaCompoundUniqueInput = {
-    connectionId: string
+  export type KnowledgeAttachmentContentCacheBindingIdBlobShaCompoundUniqueInput = {
+    bindingId: string
     blobSha: string
   }
 
   export type KnowledgeAttachmentContentCacheCountOrderByAggregateInput = {
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     blobSha?: SortOrder
     byteSize?: SortOrder
     contentBytes?: SortOrder
@@ -154241,7 +159605,7 @@ export namespace Prisma {
   }
 
   export type KnowledgeAttachmentContentCacheMaxOrderByAggregateInput = {
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     blobSha?: SortOrder
     byteSize?: SortOrder
     contentBytes?: SortOrder
@@ -154250,7 +159614,7 @@ export namespace Prisma {
   }
 
   export type KnowledgeAttachmentContentCacheMinOrderByAggregateInput = {
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     blobSha?: SortOrder
     byteSize?: SortOrder
     contentBytes?: SortOrder
@@ -154280,7 +159644,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestCountOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     requestId?: SortOrder
     requestHash?: SortOrder
     relativePath?: SortOrder
@@ -154307,7 +159671,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestMaxOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     requestId?: SortOrder
     requestHash?: SortOrder
     relativePath?: SortOrder
@@ -154330,7 +159694,7 @@ export namespace Prisma {
   export type KnowledgeWriteRequestMinOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
-    connectionId?: SortOrder
+    bindingId?: SortOrder
     requestId?: SortOrder
     requestHash?: SortOrder
     relativePath?: SortOrder
@@ -156083,11 +161447,11 @@ export namespace Prisma {
     connect?: RepositoryResourceWhereUniqueInput | RepositoryResourceWhereUniqueInput[]
   }
 
-  export type KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutAccountInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAccountInput> | KnowledgeRepositoryConnectionCreateWithoutAccountInput[] | KnowledgeRepositoryConnectionUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutAccountInput | KnowledgeRepositoryConnectionCreateOrConnectWithoutAccountInput[]
-    createMany?: KnowledgeRepositoryConnectionCreateManyAccountInputEnvelope
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput | KnowledgeRepositoryConnectionWhereUniqueInput[]
+  export type KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutAccountInput, KnowledgeRemoteBindingUncheckedCreateWithoutAccountInput> | KnowledgeRemoteBindingCreateWithoutAccountInput[] | KnowledgeRemoteBindingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutAccountInput | KnowledgeRemoteBindingCreateOrConnectWithoutAccountInput[]
+    createMany?: KnowledgeRemoteBindingCreateManyAccountInputEnvelope
+    connect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
   }
 
   export type KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput = {
@@ -156489,11 +161853,11 @@ export namespace Prisma {
     connect?: RepositoryResourceWhereUniqueInput | RepositoryResourceWhereUniqueInput[]
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutAccountInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAccountInput> | KnowledgeRepositoryConnectionCreateWithoutAccountInput[] | KnowledgeRepositoryConnectionUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutAccountInput | KnowledgeRepositoryConnectionCreateOrConnectWithoutAccountInput[]
-    createMany?: KnowledgeRepositoryConnectionCreateManyAccountInputEnvelope
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput | KnowledgeRepositoryConnectionWhereUniqueInput[]
+  export type KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutAccountInput, KnowledgeRemoteBindingUncheckedCreateWithoutAccountInput> | KnowledgeRemoteBindingCreateWithoutAccountInput[] | KnowledgeRemoteBindingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutAccountInput | KnowledgeRemoteBindingCreateOrConnectWithoutAccountInput[]
+    createMany?: KnowledgeRemoteBindingCreateManyAccountInputEnvelope
+    connect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
   }
 
   export type KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput = {
@@ -157286,18 +162650,18 @@ export namespace Prisma {
     deleteMany?: RepositoryResourceScalarWhereInput | RepositoryResourceScalarWhereInput[]
   }
 
-  export type KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutAccountInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAccountInput> | KnowledgeRepositoryConnectionCreateWithoutAccountInput[] | KnowledgeRepositoryConnectionUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutAccountInput | KnowledgeRepositoryConnectionCreateOrConnectWithoutAccountInput[]
-    upsert?: KnowledgeRepositoryConnectionUpsertWithWhereUniqueWithoutAccountInput | KnowledgeRepositoryConnectionUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: KnowledgeRepositoryConnectionCreateManyAccountInputEnvelope
-    set?: KnowledgeRepositoryConnectionWhereUniqueInput | KnowledgeRepositoryConnectionWhereUniqueInput[]
-    disconnect?: KnowledgeRepositoryConnectionWhereUniqueInput | KnowledgeRepositoryConnectionWhereUniqueInput[]
-    delete?: KnowledgeRepositoryConnectionWhereUniqueInput | KnowledgeRepositoryConnectionWhereUniqueInput[]
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput | KnowledgeRepositoryConnectionWhereUniqueInput[]
-    update?: KnowledgeRepositoryConnectionUpdateWithWhereUniqueWithoutAccountInput | KnowledgeRepositoryConnectionUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: KnowledgeRepositoryConnectionUpdateManyWithWhereWithoutAccountInput | KnowledgeRepositoryConnectionUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: KnowledgeRepositoryConnectionScalarWhereInput | KnowledgeRepositoryConnectionScalarWhereInput[]
+  export type KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutAccountInput, KnowledgeRemoteBindingUncheckedCreateWithoutAccountInput> | KnowledgeRemoteBindingCreateWithoutAccountInput[] | KnowledgeRemoteBindingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutAccountInput | KnowledgeRemoteBindingCreateOrConnectWithoutAccountInput[]
+    upsert?: KnowledgeRemoteBindingUpsertWithWhereUniqueWithoutAccountInput | KnowledgeRemoteBindingUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: KnowledgeRemoteBindingCreateManyAccountInputEnvelope
+    set?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    disconnect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    delete?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    connect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    update?: KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutAccountInput | KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: KnowledgeRemoteBindingUpdateManyWithWhereWithoutAccountInput | KnowledgeRemoteBindingUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: KnowledgeRemoteBindingScalarWhereInput | KnowledgeRemoteBindingScalarWhereInput[]
   }
 
   export type KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput = {
@@ -158084,18 +163448,18 @@ export namespace Prisma {
     deleteMany?: RepositoryResourceScalarWhereInput | RepositoryResourceScalarWhereInput[]
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutAccountInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAccountInput> | KnowledgeRepositoryConnectionCreateWithoutAccountInput[] | KnowledgeRepositoryConnectionUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutAccountInput | KnowledgeRepositoryConnectionCreateOrConnectWithoutAccountInput[]
-    upsert?: KnowledgeRepositoryConnectionUpsertWithWhereUniqueWithoutAccountInput | KnowledgeRepositoryConnectionUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: KnowledgeRepositoryConnectionCreateManyAccountInputEnvelope
-    set?: KnowledgeRepositoryConnectionWhereUniqueInput | KnowledgeRepositoryConnectionWhereUniqueInput[]
-    disconnect?: KnowledgeRepositoryConnectionWhereUniqueInput | KnowledgeRepositoryConnectionWhereUniqueInput[]
-    delete?: KnowledgeRepositoryConnectionWhereUniqueInput | KnowledgeRepositoryConnectionWhereUniqueInput[]
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput | KnowledgeRepositoryConnectionWhereUniqueInput[]
-    update?: KnowledgeRepositoryConnectionUpdateWithWhereUniqueWithoutAccountInput | KnowledgeRepositoryConnectionUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: KnowledgeRepositoryConnectionUpdateManyWithWhereWithoutAccountInput | KnowledgeRepositoryConnectionUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: KnowledgeRepositoryConnectionScalarWhereInput | KnowledgeRepositoryConnectionScalarWhereInput[]
+  export type KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutAccountInput, KnowledgeRemoteBindingUncheckedCreateWithoutAccountInput> | KnowledgeRemoteBindingCreateWithoutAccountInput[] | KnowledgeRemoteBindingUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutAccountInput | KnowledgeRemoteBindingCreateOrConnectWithoutAccountInput[]
+    upsert?: KnowledgeRemoteBindingUpsertWithWhereUniqueWithoutAccountInput | KnowledgeRemoteBindingUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: KnowledgeRemoteBindingCreateManyAccountInputEnvelope
+    set?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    disconnect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    delete?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    connect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    update?: KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutAccountInput | KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: KnowledgeRemoteBindingUpdateManyWithWhereWithoutAccountInput | KnowledgeRemoteBindingUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: KnowledgeRemoteBindingScalarWhereInput | KnowledgeRemoteBindingScalarWhereInput[]
   }
 
   export type KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -161125,288 +166489,482 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutKnowledgeRepositoryInstallationIntentsInput, AccountUpdateWithoutKnowledgeRepositoryInstallationIntentsInput>, AccountUncheckedUpdateWithoutKnowledgeRepositoryInstallationIntentsInput>
   }
 
-  export type AccountCreateNestedOneWithoutKnowledgeRepositoryConnectionsInput = {
-    create?: XOR<AccountCreateWithoutKnowledgeRepositoryConnectionsInput, AccountUncheckedCreateWithoutKnowledgeRepositoryConnectionsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutKnowledgeRepositoryConnectionsInput
+  export type KnowledgeRemoteBindingCreateNestedManyWithoutKnowledgeSpaceInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput, KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput> | KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput[] | KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput[]
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput[]
+    createMany?: KnowledgeRemoteBindingCreateManyKnowledgeSpaceInputEnvelope
+    connect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+  }
+
+  export type KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutKnowledgeSpaceInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput, KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput> | KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput[] | KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput[]
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput[]
+    createMany?: KnowledgeRemoteBindingCreateManyKnowledgeSpaceInputEnvelope
+    connect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+  }
+
+  export type KnowledgeRemoteBindingUpdateManyWithoutKnowledgeSpaceNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput, KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput> | KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput[] | KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput[]
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput[]
+    upsert?: KnowledgeRemoteBindingUpsertWithWhereUniqueWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingUpsertWithWhereUniqueWithoutKnowledgeSpaceInput[]
+    createMany?: KnowledgeRemoteBindingCreateManyKnowledgeSpaceInputEnvelope
+    set?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    disconnect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    delete?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    connect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    update?: KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutKnowledgeSpaceInput[]
+    updateMany?: KnowledgeRemoteBindingUpdateManyWithWhereWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingUpdateManyWithWhereWithoutKnowledgeSpaceInput[]
+    deleteMany?: KnowledgeRemoteBindingScalarWhereInput | KnowledgeRemoteBindingScalarWhereInput[]
+  }
+
+  export type KnowledgeRemoteBindingUncheckedUpdateManyWithoutKnowledgeSpaceNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput, KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput> | KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput[] | KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput[]
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput[]
+    upsert?: KnowledgeRemoteBindingUpsertWithWhereUniqueWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingUpsertWithWhereUniqueWithoutKnowledgeSpaceInput[]
+    createMany?: KnowledgeRemoteBindingCreateManyKnowledgeSpaceInputEnvelope
+    set?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    disconnect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    delete?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    connect?: KnowledgeRemoteBindingWhereUniqueInput | KnowledgeRemoteBindingWhereUniqueInput[]
+    update?: KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutKnowledgeSpaceInput[]
+    updateMany?: KnowledgeRemoteBindingUpdateManyWithWhereWithoutKnowledgeSpaceInput | KnowledgeRemoteBindingUpdateManyWithWhereWithoutKnowledgeSpaceInput[]
+    deleteMany?: KnowledgeRemoteBindingScalarWhereInput | KnowledgeRemoteBindingScalarWhereInput[]
+  }
+
+  export type KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput = {
+    create?: XOR<KnowledgeSpaceCreateWithoutRemoteBindingsInput, KnowledgeSpaceUncheckedCreateWithoutRemoteBindingsInput>
+    connectOrCreate?: KnowledgeSpaceCreateOrConnectWithoutRemoteBindingsInput
+    connect?: KnowledgeSpaceWhereUniqueInput
+  }
+
+  export type AccountCreateNestedOneWithoutKnowledgeRemoteBindingsInput = {
+    create?: XOR<AccountCreateWithoutKnowledgeRemoteBindingsInput, AccountUncheckedCreateWithoutKnowledgeRemoteBindingsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutKnowledgeRemoteBindingsInput
     connect?: AccountWhereUniqueInput
   }
 
-  export type GithubWebhookDeliveryCreateNestedManyWithoutConnectionInput = {
-    create?: XOR<GithubWebhookDeliveryCreateWithoutConnectionInput, GithubWebhookDeliveryUncheckedCreateWithoutConnectionInput> | GithubWebhookDeliveryCreateWithoutConnectionInput[] | GithubWebhookDeliveryUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: GithubWebhookDeliveryCreateOrConnectWithoutConnectionInput | GithubWebhookDeliveryCreateOrConnectWithoutConnectionInput[]
-    createMany?: GithubWebhookDeliveryCreateManyConnectionInputEnvelope
+  export type RemoteRepositoryObservationCreateNestedOneWithoutBindingInput = {
+    create?: XOR<RemoteRepositoryObservationCreateWithoutBindingInput, RemoteRepositoryObservationUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: RemoteRepositoryObservationCreateOrConnectWithoutBindingInput
+    connect?: RemoteRepositoryObservationWhereUniqueInput
+  }
+
+  export type RemoteHistoryFenceCreateNestedOneWithoutBindingInput = {
+    create?: XOR<RemoteHistoryFenceCreateWithoutBindingInput, RemoteHistoryFenceUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: RemoteHistoryFenceCreateOrConnectWithoutBindingInput
+    connect?: RemoteHistoryFenceWhereUniqueInput
+  }
+
+  export type KnowledgeProjectionCheckpointCreateNestedOneWithoutBindingInput = {
+    create?: XOR<KnowledgeProjectionCheckpointCreateWithoutBindingInput, KnowledgeProjectionCheckpointUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: KnowledgeProjectionCheckpointCreateOrConnectWithoutBindingInput
+    connect?: KnowledgeProjectionCheckpointWhereUniqueInput
+  }
+
+  export type GithubWebhookDeliveryCreateNestedManyWithoutBindingInput = {
+    create?: XOR<GithubWebhookDeliveryCreateWithoutBindingInput, GithubWebhookDeliveryUncheckedCreateWithoutBindingInput> | GithubWebhookDeliveryCreateWithoutBindingInput[] | GithubWebhookDeliveryUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: GithubWebhookDeliveryCreateOrConnectWithoutBindingInput | GithubWebhookDeliveryCreateOrConnectWithoutBindingInput[]
+    createMany?: GithubWebhookDeliveryCreateManyBindingInputEnvelope
     connect?: GithubWebhookDeliveryWhereUniqueInput | GithubWebhookDeliveryWhereUniqueInput[]
   }
 
-  export type KnowledgeNoteProjectionCreateNestedManyWithoutConnectionInput = {
-    create?: XOR<KnowledgeNoteProjectionCreateWithoutConnectionInput, KnowledgeNoteProjectionUncheckedCreateWithoutConnectionInput> | KnowledgeNoteProjectionCreateWithoutConnectionInput[] | KnowledgeNoteProjectionUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeNoteProjectionCreateOrConnectWithoutConnectionInput | KnowledgeNoteProjectionCreateOrConnectWithoutConnectionInput[]
-    createMany?: KnowledgeNoteProjectionCreateManyConnectionInputEnvelope
+  export type KnowledgeNoteProjectionCreateNestedManyWithoutBindingInput = {
+    create?: XOR<KnowledgeNoteProjectionCreateWithoutBindingInput, KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput> | KnowledgeNoteProjectionCreateWithoutBindingInput[] | KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeNoteProjectionCreateOrConnectWithoutBindingInput | KnowledgeNoteProjectionCreateOrConnectWithoutBindingInput[]
+    createMany?: KnowledgeNoteProjectionCreateManyBindingInputEnvelope
     connect?: KnowledgeNoteProjectionWhereUniqueInput | KnowledgeNoteProjectionWhereUniqueInput[]
   }
 
-  export type KnowledgeAttachmentProjectionCreateNestedManyWithoutConnectionInput = {
-    create?: XOR<KnowledgeAttachmentProjectionCreateWithoutConnectionInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutConnectionInput> | KnowledgeAttachmentProjectionCreateWithoutConnectionInput[] | KnowledgeAttachmentProjectionUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeAttachmentProjectionCreateOrConnectWithoutConnectionInput | KnowledgeAttachmentProjectionCreateOrConnectWithoutConnectionInput[]
-    createMany?: KnowledgeAttachmentProjectionCreateManyConnectionInputEnvelope
+  export type KnowledgeAttachmentProjectionCreateNestedManyWithoutBindingInput = {
+    create?: XOR<KnowledgeAttachmentProjectionCreateWithoutBindingInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutBindingInput> | KnowledgeAttachmentProjectionCreateWithoutBindingInput[] | KnowledgeAttachmentProjectionUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeAttachmentProjectionCreateOrConnectWithoutBindingInput | KnowledgeAttachmentProjectionCreateOrConnectWithoutBindingInput[]
+    createMany?: KnowledgeAttachmentProjectionCreateManyBindingInputEnvelope
     connect?: KnowledgeAttachmentProjectionWhereUniqueInput | KnowledgeAttachmentProjectionWhereUniqueInput[]
   }
 
-  export type KnowledgeAttachmentContentCacheCreateNestedManyWithoutConnectionInput = {
-    create?: XOR<KnowledgeAttachmentContentCacheCreateWithoutConnectionInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutConnectionInput> | KnowledgeAttachmentContentCacheCreateWithoutConnectionInput[] | KnowledgeAttachmentContentCacheUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeAttachmentContentCacheCreateOrConnectWithoutConnectionInput | KnowledgeAttachmentContentCacheCreateOrConnectWithoutConnectionInput[]
-    createMany?: KnowledgeAttachmentContentCacheCreateManyConnectionInputEnvelope
+  export type KnowledgeAttachmentContentCacheCreateNestedManyWithoutBindingInput = {
+    create?: XOR<KnowledgeAttachmentContentCacheCreateWithoutBindingInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutBindingInput> | KnowledgeAttachmentContentCacheCreateWithoutBindingInput[] | KnowledgeAttachmentContentCacheUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeAttachmentContentCacheCreateOrConnectWithoutBindingInput | KnowledgeAttachmentContentCacheCreateOrConnectWithoutBindingInput[]
+    createMany?: KnowledgeAttachmentContentCacheCreateManyBindingInputEnvelope
     connect?: KnowledgeAttachmentContentCacheWhereUniqueInput | KnowledgeAttachmentContentCacheWhereUniqueInput[]
   }
 
-  export type KnowledgeWriteRequestCreateNestedManyWithoutConnectionInput = {
-    create?: XOR<KnowledgeWriteRequestCreateWithoutConnectionInput, KnowledgeWriteRequestUncheckedCreateWithoutConnectionInput> | KnowledgeWriteRequestCreateWithoutConnectionInput[] | KnowledgeWriteRequestUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeWriteRequestCreateOrConnectWithoutConnectionInput | KnowledgeWriteRequestCreateOrConnectWithoutConnectionInput[]
-    createMany?: KnowledgeWriteRequestCreateManyConnectionInputEnvelope
+  export type KnowledgeWriteRequestCreateNestedManyWithoutBindingInput = {
+    create?: XOR<KnowledgeWriteRequestCreateWithoutBindingInput, KnowledgeWriteRequestUncheckedCreateWithoutBindingInput> | KnowledgeWriteRequestCreateWithoutBindingInput[] | KnowledgeWriteRequestUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeWriteRequestCreateOrConnectWithoutBindingInput | KnowledgeWriteRequestCreateOrConnectWithoutBindingInput[]
+    createMany?: KnowledgeWriteRequestCreateManyBindingInputEnvelope
     connect?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
   }
 
-  export type GithubWebhookDeliveryUncheckedCreateNestedManyWithoutConnectionInput = {
-    create?: XOR<GithubWebhookDeliveryCreateWithoutConnectionInput, GithubWebhookDeliveryUncheckedCreateWithoutConnectionInput> | GithubWebhookDeliveryCreateWithoutConnectionInput[] | GithubWebhookDeliveryUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: GithubWebhookDeliveryCreateOrConnectWithoutConnectionInput | GithubWebhookDeliveryCreateOrConnectWithoutConnectionInput[]
-    createMany?: GithubWebhookDeliveryCreateManyConnectionInputEnvelope
+  export type RemoteRepositoryObservationUncheckedCreateNestedOneWithoutBindingInput = {
+    create?: XOR<RemoteRepositoryObservationCreateWithoutBindingInput, RemoteRepositoryObservationUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: RemoteRepositoryObservationCreateOrConnectWithoutBindingInput
+    connect?: RemoteRepositoryObservationWhereUniqueInput
+  }
+
+  export type RemoteHistoryFenceUncheckedCreateNestedOneWithoutBindingInput = {
+    create?: XOR<RemoteHistoryFenceCreateWithoutBindingInput, RemoteHistoryFenceUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: RemoteHistoryFenceCreateOrConnectWithoutBindingInput
+    connect?: RemoteHistoryFenceWhereUniqueInput
+  }
+
+  export type KnowledgeProjectionCheckpointUncheckedCreateNestedOneWithoutBindingInput = {
+    create?: XOR<KnowledgeProjectionCheckpointCreateWithoutBindingInput, KnowledgeProjectionCheckpointUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: KnowledgeProjectionCheckpointCreateOrConnectWithoutBindingInput
+    connect?: KnowledgeProjectionCheckpointWhereUniqueInput
+  }
+
+  export type GithubWebhookDeliveryUncheckedCreateNestedManyWithoutBindingInput = {
+    create?: XOR<GithubWebhookDeliveryCreateWithoutBindingInput, GithubWebhookDeliveryUncheckedCreateWithoutBindingInput> | GithubWebhookDeliveryCreateWithoutBindingInput[] | GithubWebhookDeliveryUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: GithubWebhookDeliveryCreateOrConnectWithoutBindingInput | GithubWebhookDeliveryCreateOrConnectWithoutBindingInput[]
+    createMany?: GithubWebhookDeliveryCreateManyBindingInputEnvelope
     connect?: GithubWebhookDeliveryWhereUniqueInput | GithubWebhookDeliveryWhereUniqueInput[]
   }
 
-  export type KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutConnectionInput = {
-    create?: XOR<KnowledgeNoteProjectionCreateWithoutConnectionInput, KnowledgeNoteProjectionUncheckedCreateWithoutConnectionInput> | KnowledgeNoteProjectionCreateWithoutConnectionInput[] | KnowledgeNoteProjectionUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeNoteProjectionCreateOrConnectWithoutConnectionInput | KnowledgeNoteProjectionCreateOrConnectWithoutConnectionInput[]
-    createMany?: KnowledgeNoteProjectionCreateManyConnectionInputEnvelope
+  export type KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutBindingInput = {
+    create?: XOR<KnowledgeNoteProjectionCreateWithoutBindingInput, KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput> | KnowledgeNoteProjectionCreateWithoutBindingInput[] | KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeNoteProjectionCreateOrConnectWithoutBindingInput | KnowledgeNoteProjectionCreateOrConnectWithoutBindingInput[]
+    createMany?: KnowledgeNoteProjectionCreateManyBindingInputEnvelope
     connect?: KnowledgeNoteProjectionWhereUniqueInput | KnowledgeNoteProjectionWhereUniqueInput[]
   }
 
-  export type KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutConnectionInput = {
-    create?: XOR<KnowledgeAttachmentProjectionCreateWithoutConnectionInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutConnectionInput> | KnowledgeAttachmentProjectionCreateWithoutConnectionInput[] | KnowledgeAttachmentProjectionUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeAttachmentProjectionCreateOrConnectWithoutConnectionInput | KnowledgeAttachmentProjectionCreateOrConnectWithoutConnectionInput[]
-    createMany?: KnowledgeAttachmentProjectionCreateManyConnectionInputEnvelope
+  export type KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutBindingInput = {
+    create?: XOR<KnowledgeAttachmentProjectionCreateWithoutBindingInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutBindingInput> | KnowledgeAttachmentProjectionCreateWithoutBindingInput[] | KnowledgeAttachmentProjectionUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeAttachmentProjectionCreateOrConnectWithoutBindingInput | KnowledgeAttachmentProjectionCreateOrConnectWithoutBindingInput[]
+    createMany?: KnowledgeAttachmentProjectionCreateManyBindingInputEnvelope
     connect?: KnowledgeAttachmentProjectionWhereUniqueInput | KnowledgeAttachmentProjectionWhereUniqueInput[]
   }
 
-  export type KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutConnectionInput = {
-    create?: XOR<KnowledgeAttachmentContentCacheCreateWithoutConnectionInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutConnectionInput> | KnowledgeAttachmentContentCacheCreateWithoutConnectionInput[] | KnowledgeAttachmentContentCacheUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeAttachmentContentCacheCreateOrConnectWithoutConnectionInput | KnowledgeAttachmentContentCacheCreateOrConnectWithoutConnectionInput[]
-    createMany?: KnowledgeAttachmentContentCacheCreateManyConnectionInputEnvelope
+  export type KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutBindingInput = {
+    create?: XOR<KnowledgeAttachmentContentCacheCreateWithoutBindingInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutBindingInput> | KnowledgeAttachmentContentCacheCreateWithoutBindingInput[] | KnowledgeAttachmentContentCacheUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeAttachmentContentCacheCreateOrConnectWithoutBindingInput | KnowledgeAttachmentContentCacheCreateOrConnectWithoutBindingInput[]
+    createMany?: KnowledgeAttachmentContentCacheCreateManyBindingInputEnvelope
     connect?: KnowledgeAttachmentContentCacheWhereUniqueInput | KnowledgeAttachmentContentCacheWhereUniqueInput[]
   }
 
-  export type KnowledgeWriteRequestUncheckedCreateNestedManyWithoutConnectionInput = {
-    create?: XOR<KnowledgeWriteRequestCreateWithoutConnectionInput, KnowledgeWriteRequestUncheckedCreateWithoutConnectionInput> | KnowledgeWriteRequestCreateWithoutConnectionInput[] | KnowledgeWriteRequestUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeWriteRequestCreateOrConnectWithoutConnectionInput | KnowledgeWriteRequestCreateOrConnectWithoutConnectionInput[]
-    createMany?: KnowledgeWriteRequestCreateManyConnectionInputEnvelope
+  export type KnowledgeWriteRequestUncheckedCreateNestedManyWithoutBindingInput = {
+    create?: XOR<KnowledgeWriteRequestCreateWithoutBindingInput, KnowledgeWriteRequestUncheckedCreateWithoutBindingInput> | KnowledgeWriteRequestCreateWithoutBindingInput[] | KnowledgeWriteRequestUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeWriteRequestCreateOrConnectWithoutBindingInput | KnowledgeWriteRequestCreateOrConnectWithoutBindingInput[]
+    createMany?: KnowledgeWriteRequestCreateManyBindingInputEnvelope
     connect?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
   }
 
-  export type AccountUpdateOneRequiredWithoutKnowledgeRepositoryConnectionsNestedInput = {
-    create?: XOR<AccountCreateWithoutKnowledgeRepositoryConnectionsInput, AccountUncheckedCreateWithoutKnowledgeRepositoryConnectionsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutKnowledgeRepositoryConnectionsInput
-    upsert?: AccountUpsertWithoutKnowledgeRepositoryConnectionsInput
+  export type KnowledgeSpaceUpdateOneRequiredWithoutRemoteBindingsNestedInput = {
+    create?: XOR<KnowledgeSpaceCreateWithoutRemoteBindingsInput, KnowledgeSpaceUncheckedCreateWithoutRemoteBindingsInput>
+    connectOrCreate?: KnowledgeSpaceCreateOrConnectWithoutRemoteBindingsInput
+    upsert?: KnowledgeSpaceUpsertWithoutRemoteBindingsInput
+    connect?: KnowledgeSpaceWhereUniqueInput
+    update?: XOR<XOR<KnowledgeSpaceUpdateToOneWithWhereWithoutRemoteBindingsInput, KnowledgeSpaceUpdateWithoutRemoteBindingsInput>, KnowledgeSpaceUncheckedUpdateWithoutRemoteBindingsInput>
+  }
+
+  export type AccountUpdateOneRequiredWithoutKnowledgeRemoteBindingsNestedInput = {
+    create?: XOR<AccountCreateWithoutKnowledgeRemoteBindingsInput, AccountUncheckedCreateWithoutKnowledgeRemoteBindingsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutKnowledgeRemoteBindingsInput
+    upsert?: AccountUpsertWithoutKnowledgeRemoteBindingsInput
     connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutKnowledgeRepositoryConnectionsInput, AccountUpdateWithoutKnowledgeRepositoryConnectionsInput>, AccountUncheckedUpdateWithoutKnowledgeRepositoryConnectionsInput>
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutKnowledgeRemoteBindingsInput, AccountUpdateWithoutKnowledgeRemoteBindingsInput>, AccountUncheckedUpdateWithoutKnowledgeRemoteBindingsInput>
   }
 
-  export type GithubWebhookDeliveryUpdateManyWithoutConnectionNestedInput = {
-    create?: XOR<GithubWebhookDeliveryCreateWithoutConnectionInput, GithubWebhookDeliveryUncheckedCreateWithoutConnectionInput> | GithubWebhookDeliveryCreateWithoutConnectionInput[] | GithubWebhookDeliveryUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: GithubWebhookDeliveryCreateOrConnectWithoutConnectionInput | GithubWebhookDeliveryCreateOrConnectWithoutConnectionInput[]
-    upsert?: GithubWebhookDeliveryUpsertWithWhereUniqueWithoutConnectionInput | GithubWebhookDeliveryUpsertWithWhereUniqueWithoutConnectionInput[]
-    createMany?: GithubWebhookDeliveryCreateManyConnectionInputEnvelope
+  export type RemoteRepositoryObservationUpdateOneWithoutBindingNestedInput = {
+    create?: XOR<RemoteRepositoryObservationCreateWithoutBindingInput, RemoteRepositoryObservationUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: RemoteRepositoryObservationCreateOrConnectWithoutBindingInput
+    upsert?: RemoteRepositoryObservationUpsertWithoutBindingInput
+    disconnect?: RemoteRepositoryObservationWhereInput | boolean
+    delete?: RemoteRepositoryObservationWhereInput | boolean
+    connect?: RemoteRepositoryObservationWhereUniqueInput
+    update?: XOR<XOR<RemoteRepositoryObservationUpdateToOneWithWhereWithoutBindingInput, RemoteRepositoryObservationUpdateWithoutBindingInput>, RemoteRepositoryObservationUncheckedUpdateWithoutBindingInput>
+  }
+
+  export type RemoteHistoryFenceUpdateOneWithoutBindingNestedInput = {
+    create?: XOR<RemoteHistoryFenceCreateWithoutBindingInput, RemoteHistoryFenceUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: RemoteHistoryFenceCreateOrConnectWithoutBindingInput
+    upsert?: RemoteHistoryFenceUpsertWithoutBindingInput
+    disconnect?: RemoteHistoryFenceWhereInput | boolean
+    delete?: RemoteHistoryFenceWhereInput | boolean
+    connect?: RemoteHistoryFenceWhereUniqueInput
+    update?: XOR<XOR<RemoteHistoryFenceUpdateToOneWithWhereWithoutBindingInput, RemoteHistoryFenceUpdateWithoutBindingInput>, RemoteHistoryFenceUncheckedUpdateWithoutBindingInput>
+  }
+
+  export type KnowledgeProjectionCheckpointUpdateOneWithoutBindingNestedInput = {
+    create?: XOR<KnowledgeProjectionCheckpointCreateWithoutBindingInput, KnowledgeProjectionCheckpointUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: KnowledgeProjectionCheckpointCreateOrConnectWithoutBindingInput
+    upsert?: KnowledgeProjectionCheckpointUpsertWithoutBindingInput
+    disconnect?: KnowledgeProjectionCheckpointWhereInput | boolean
+    delete?: KnowledgeProjectionCheckpointWhereInput | boolean
+    connect?: KnowledgeProjectionCheckpointWhereUniqueInput
+    update?: XOR<XOR<KnowledgeProjectionCheckpointUpdateToOneWithWhereWithoutBindingInput, KnowledgeProjectionCheckpointUpdateWithoutBindingInput>, KnowledgeProjectionCheckpointUncheckedUpdateWithoutBindingInput>
+  }
+
+  export type GithubWebhookDeliveryUpdateManyWithoutBindingNestedInput = {
+    create?: XOR<GithubWebhookDeliveryCreateWithoutBindingInput, GithubWebhookDeliveryUncheckedCreateWithoutBindingInput> | GithubWebhookDeliveryCreateWithoutBindingInput[] | GithubWebhookDeliveryUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: GithubWebhookDeliveryCreateOrConnectWithoutBindingInput | GithubWebhookDeliveryCreateOrConnectWithoutBindingInput[]
+    upsert?: GithubWebhookDeliveryUpsertWithWhereUniqueWithoutBindingInput | GithubWebhookDeliveryUpsertWithWhereUniqueWithoutBindingInput[]
+    createMany?: GithubWebhookDeliveryCreateManyBindingInputEnvelope
     set?: GithubWebhookDeliveryWhereUniqueInput | GithubWebhookDeliveryWhereUniqueInput[]
     disconnect?: GithubWebhookDeliveryWhereUniqueInput | GithubWebhookDeliveryWhereUniqueInput[]
     delete?: GithubWebhookDeliveryWhereUniqueInput | GithubWebhookDeliveryWhereUniqueInput[]
     connect?: GithubWebhookDeliveryWhereUniqueInput | GithubWebhookDeliveryWhereUniqueInput[]
-    update?: GithubWebhookDeliveryUpdateWithWhereUniqueWithoutConnectionInput | GithubWebhookDeliveryUpdateWithWhereUniqueWithoutConnectionInput[]
-    updateMany?: GithubWebhookDeliveryUpdateManyWithWhereWithoutConnectionInput | GithubWebhookDeliveryUpdateManyWithWhereWithoutConnectionInput[]
+    update?: GithubWebhookDeliveryUpdateWithWhereUniqueWithoutBindingInput | GithubWebhookDeliveryUpdateWithWhereUniqueWithoutBindingInput[]
+    updateMany?: GithubWebhookDeliveryUpdateManyWithWhereWithoutBindingInput | GithubWebhookDeliveryUpdateManyWithWhereWithoutBindingInput[]
     deleteMany?: GithubWebhookDeliveryScalarWhereInput | GithubWebhookDeliveryScalarWhereInput[]
   }
 
-  export type KnowledgeNoteProjectionUpdateManyWithoutConnectionNestedInput = {
-    create?: XOR<KnowledgeNoteProjectionCreateWithoutConnectionInput, KnowledgeNoteProjectionUncheckedCreateWithoutConnectionInput> | KnowledgeNoteProjectionCreateWithoutConnectionInput[] | KnowledgeNoteProjectionUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeNoteProjectionCreateOrConnectWithoutConnectionInput | KnowledgeNoteProjectionCreateOrConnectWithoutConnectionInput[]
-    upsert?: KnowledgeNoteProjectionUpsertWithWhereUniqueWithoutConnectionInput | KnowledgeNoteProjectionUpsertWithWhereUniqueWithoutConnectionInput[]
-    createMany?: KnowledgeNoteProjectionCreateManyConnectionInputEnvelope
+  export type KnowledgeNoteProjectionUpdateManyWithoutBindingNestedInput = {
+    create?: XOR<KnowledgeNoteProjectionCreateWithoutBindingInput, KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput> | KnowledgeNoteProjectionCreateWithoutBindingInput[] | KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeNoteProjectionCreateOrConnectWithoutBindingInput | KnowledgeNoteProjectionCreateOrConnectWithoutBindingInput[]
+    upsert?: KnowledgeNoteProjectionUpsertWithWhereUniqueWithoutBindingInput | KnowledgeNoteProjectionUpsertWithWhereUniqueWithoutBindingInput[]
+    createMany?: KnowledgeNoteProjectionCreateManyBindingInputEnvelope
     set?: KnowledgeNoteProjectionWhereUniqueInput | KnowledgeNoteProjectionWhereUniqueInput[]
     disconnect?: KnowledgeNoteProjectionWhereUniqueInput | KnowledgeNoteProjectionWhereUniqueInput[]
     delete?: KnowledgeNoteProjectionWhereUniqueInput | KnowledgeNoteProjectionWhereUniqueInput[]
     connect?: KnowledgeNoteProjectionWhereUniqueInput | KnowledgeNoteProjectionWhereUniqueInput[]
-    update?: KnowledgeNoteProjectionUpdateWithWhereUniqueWithoutConnectionInput | KnowledgeNoteProjectionUpdateWithWhereUniqueWithoutConnectionInput[]
-    updateMany?: KnowledgeNoteProjectionUpdateManyWithWhereWithoutConnectionInput | KnowledgeNoteProjectionUpdateManyWithWhereWithoutConnectionInput[]
+    update?: KnowledgeNoteProjectionUpdateWithWhereUniqueWithoutBindingInput | KnowledgeNoteProjectionUpdateWithWhereUniqueWithoutBindingInput[]
+    updateMany?: KnowledgeNoteProjectionUpdateManyWithWhereWithoutBindingInput | KnowledgeNoteProjectionUpdateManyWithWhereWithoutBindingInput[]
     deleteMany?: KnowledgeNoteProjectionScalarWhereInput | KnowledgeNoteProjectionScalarWhereInput[]
   }
 
-  export type KnowledgeAttachmentProjectionUpdateManyWithoutConnectionNestedInput = {
-    create?: XOR<KnowledgeAttachmentProjectionCreateWithoutConnectionInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutConnectionInput> | KnowledgeAttachmentProjectionCreateWithoutConnectionInput[] | KnowledgeAttachmentProjectionUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeAttachmentProjectionCreateOrConnectWithoutConnectionInput | KnowledgeAttachmentProjectionCreateOrConnectWithoutConnectionInput[]
-    upsert?: KnowledgeAttachmentProjectionUpsertWithWhereUniqueWithoutConnectionInput | KnowledgeAttachmentProjectionUpsertWithWhereUniqueWithoutConnectionInput[]
-    createMany?: KnowledgeAttachmentProjectionCreateManyConnectionInputEnvelope
+  export type KnowledgeAttachmentProjectionUpdateManyWithoutBindingNestedInput = {
+    create?: XOR<KnowledgeAttachmentProjectionCreateWithoutBindingInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutBindingInput> | KnowledgeAttachmentProjectionCreateWithoutBindingInput[] | KnowledgeAttachmentProjectionUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeAttachmentProjectionCreateOrConnectWithoutBindingInput | KnowledgeAttachmentProjectionCreateOrConnectWithoutBindingInput[]
+    upsert?: KnowledgeAttachmentProjectionUpsertWithWhereUniqueWithoutBindingInput | KnowledgeAttachmentProjectionUpsertWithWhereUniqueWithoutBindingInput[]
+    createMany?: KnowledgeAttachmentProjectionCreateManyBindingInputEnvelope
     set?: KnowledgeAttachmentProjectionWhereUniqueInput | KnowledgeAttachmentProjectionWhereUniqueInput[]
     disconnect?: KnowledgeAttachmentProjectionWhereUniqueInput | KnowledgeAttachmentProjectionWhereUniqueInput[]
     delete?: KnowledgeAttachmentProjectionWhereUniqueInput | KnowledgeAttachmentProjectionWhereUniqueInput[]
     connect?: KnowledgeAttachmentProjectionWhereUniqueInput | KnowledgeAttachmentProjectionWhereUniqueInput[]
-    update?: KnowledgeAttachmentProjectionUpdateWithWhereUniqueWithoutConnectionInput | KnowledgeAttachmentProjectionUpdateWithWhereUniqueWithoutConnectionInput[]
-    updateMany?: KnowledgeAttachmentProjectionUpdateManyWithWhereWithoutConnectionInput | KnowledgeAttachmentProjectionUpdateManyWithWhereWithoutConnectionInput[]
+    update?: KnowledgeAttachmentProjectionUpdateWithWhereUniqueWithoutBindingInput | KnowledgeAttachmentProjectionUpdateWithWhereUniqueWithoutBindingInput[]
+    updateMany?: KnowledgeAttachmentProjectionUpdateManyWithWhereWithoutBindingInput | KnowledgeAttachmentProjectionUpdateManyWithWhereWithoutBindingInput[]
     deleteMany?: KnowledgeAttachmentProjectionScalarWhereInput | KnowledgeAttachmentProjectionScalarWhereInput[]
   }
 
-  export type KnowledgeAttachmentContentCacheUpdateManyWithoutConnectionNestedInput = {
-    create?: XOR<KnowledgeAttachmentContentCacheCreateWithoutConnectionInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutConnectionInput> | KnowledgeAttachmentContentCacheCreateWithoutConnectionInput[] | KnowledgeAttachmentContentCacheUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeAttachmentContentCacheCreateOrConnectWithoutConnectionInput | KnowledgeAttachmentContentCacheCreateOrConnectWithoutConnectionInput[]
-    upsert?: KnowledgeAttachmentContentCacheUpsertWithWhereUniqueWithoutConnectionInput | KnowledgeAttachmentContentCacheUpsertWithWhereUniqueWithoutConnectionInput[]
-    createMany?: KnowledgeAttachmentContentCacheCreateManyConnectionInputEnvelope
+  export type KnowledgeAttachmentContentCacheUpdateManyWithoutBindingNestedInput = {
+    create?: XOR<KnowledgeAttachmentContentCacheCreateWithoutBindingInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutBindingInput> | KnowledgeAttachmentContentCacheCreateWithoutBindingInput[] | KnowledgeAttachmentContentCacheUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeAttachmentContentCacheCreateOrConnectWithoutBindingInput | KnowledgeAttachmentContentCacheCreateOrConnectWithoutBindingInput[]
+    upsert?: KnowledgeAttachmentContentCacheUpsertWithWhereUniqueWithoutBindingInput | KnowledgeAttachmentContentCacheUpsertWithWhereUniqueWithoutBindingInput[]
+    createMany?: KnowledgeAttachmentContentCacheCreateManyBindingInputEnvelope
     set?: KnowledgeAttachmentContentCacheWhereUniqueInput | KnowledgeAttachmentContentCacheWhereUniqueInput[]
     disconnect?: KnowledgeAttachmentContentCacheWhereUniqueInput | KnowledgeAttachmentContentCacheWhereUniqueInput[]
     delete?: KnowledgeAttachmentContentCacheWhereUniqueInput | KnowledgeAttachmentContentCacheWhereUniqueInput[]
     connect?: KnowledgeAttachmentContentCacheWhereUniqueInput | KnowledgeAttachmentContentCacheWhereUniqueInput[]
-    update?: KnowledgeAttachmentContentCacheUpdateWithWhereUniqueWithoutConnectionInput | KnowledgeAttachmentContentCacheUpdateWithWhereUniqueWithoutConnectionInput[]
-    updateMany?: KnowledgeAttachmentContentCacheUpdateManyWithWhereWithoutConnectionInput | KnowledgeAttachmentContentCacheUpdateManyWithWhereWithoutConnectionInput[]
+    update?: KnowledgeAttachmentContentCacheUpdateWithWhereUniqueWithoutBindingInput | KnowledgeAttachmentContentCacheUpdateWithWhereUniqueWithoutBindingInput[]
+    updateMany?: KnowledgeAttachmentContentCacheUpdateManyWithWhereWithoutBindingInput | KnowledgeAttachmentContentCacheUpdateManyWithWhereWithoutBindingInput[]
     deleteMany?: KnowledgeAttachmentContentCacheScalarWhereInput | KnowledgeAttachmentContentCacheScalarWhereInput[]
   }
 
-  export type KnowledgeWriteRequestUpdateManyWithoutConnectionNestedInput = {
-    create?: XOR<KnowledgeWriteRequestCreateWithoutConnectionInput, KnowledgeWriteRequestUncheckedCreateWithoutConnectionInput> | KnowledgeWriteRequestCreateWithoutConnectionInput[] | KnowledgeWriteRequestUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeWriteRequestCreateOrConnectWithoutConnectionInput | KnowledgeWriteRequestCreateOrConnectWithoutConnectionInput[]
-    upsert?: KnowledgeWriteRequestUpsertWithWhereUniqueWithoutConnectionInput | KnowledgeWriteRequestUpsertWithWhereUniqueWithoutConnectionInput[]
-    createMany?: KnowledgeWriteRequestCreateManyConnectionInputEnvelope
+  export type KnowledgeWriteRequestUpdateManyWithoutBindingNestedInput = {
+    create?: XOR<KnowledgeWriteRequestCreateWithoutBindingInput, KnowledgeWriteRequestUncheckedCreateWithoutBindingInput> | KnowledgeWriteRequestCreateWithoutBindingInput[] | KnowledgeWriteRequestUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeWriteRequestCreateOrConnectWithoutBindingInput | KnowledgeWriteRequestCreateOrConnectWithoutBindingInput[]
+    upsert?: KnowledgeWriteRequestUpsertWithWhereUniqueWithoutBindingInput | KnowledgeWriteRequestUpsertWithWhereUniqueWithoutBindingInput[]
+    createMany?: KnowledgeWriteRequestCreateManyBindingInputEnvelope
     set?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
     disconnect?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
     delete?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
     connect?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
-    update?: KnowledgeWriteRequestUpdateWithWhereUniqueWithoutConnectionInput | KnowledgeWriteRequestUpdateWithWhereUniqueWithoutConnectionInput[]
-    updateMany?: KnowledgeWriteRequestUpdateManyWithWhereWithoutConnectionInput | KnowledgeWriteRequestUpdateManyWithWhereWithoutConnectionInput[]
+    update?: KnowledgeWriteRequestUpdateWithWhereUniqueWithoutBindingInput | KnowledgeWriteRequestUpdateWithWhereUniqueWithoutBindingInput[]
+    updateMany?: KnowledgeWriteRequestUpdateManyWithWhereWithoutBindingInput | KnowledgeWriteRequestUpdateManyWithWhereWithoutBindingInput[]
     deleteMany?: KnowledgeWriteRequestScalarWhereInput | KnowledgeWriteRequestScalarWhereInput[]
   }
 
-  export type GithubWebhookDeliveryUncheckedUpdateManyWithoutConnectionNestedInput = {
-    create?: XOR<GithubWebhookDeliveryCreateWithoutConnectionInput, GithubWebhookDeliveryUncheckedCreateWithoutConnectionInput> | GithubWebhookDeliveryCreateWithoutConnectionInput[] | GithubWebhookDeliveryUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: GithubWebhookDeliveryCreateOrConnectWithoutConnectionInput | GithubWebhookDeliveryCreateOrConnectWithoutConnectionInput[]
-    upsert?: GithubWebhookDeliveryUpsertWithWhereUniqueWithoutConnectionInput | GithubWebhookDeliveryUpsertWithWhereUniqueWithoutConnectionInput[]
-    createMany?: GithubWebhookDeliveryCreateManyConnectionInputEnvelope
+  export type RemoteRepositoryObservationUncheckedUpdateOneWithoutBindingNestedInput = {
+    create?: XOR<RemoteRepositoryObservationCreateWithoutBindingInput, RemoteRepositoryObservationUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: RemoteRepositoryObservationCreateOrConnectWithoutBindingInput
+    upsert?: RemoteRepositoryObservationUpsertWithoutBindingInput
+    disconnect?: RemoteRepositoryObservationWhereInput | boolean
+    delete?: RemoteRepositoryObservationWhereInput | boolean
+    connect?: RemoteRepositoryObservationWhereUniqueInput
+    update?: XOR<XOR<RemoteRepositoryObservationUpdateToOneWithWhereWithoutBindingInput, RemoteRepositoryObservationUpdateWithoutBindingInput>, RemoteRepositoryObservationUncheckedUpdateWithoutBindingInput>
+  }
+
+  export type RemoteHistoryFenceUncheckedUpdateOneWithoutBindingNestedInput = {
+    create?: XOR<RemoteHistoryFenceCreateWithoutBindingInput, RemoteHistoryFenceUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: RemoteHistoryFenceCreateOrConnectWithoutBindingInput
+    upsert?: RemoteHistoryFenceUpsertWithoutBindingInput
+    disconnect?: RemoteHistoryFenceWhereInput | boolean
+    delete?: RemoteHistoryFenceWhereInput | boolean
+    connect?: RemoteHistoryFenceWhereUniqueInput
+    update?: XOR<XOR<RemoteHistoryFenceUpdateToOneWithWhereWithoutBindingInput, RemoteHistoryFenceUpdateWithoutBindingInput>, RemoteHistoryFenceUncheckedUpdateWithoutBindingInput>
+  }
+
+  export type KnowledgeProjectionCheckpointUncheckedUpdateOneWithoutBindingNestedInput = {
+    create?: XOR<KnowledgeProjectionCheckpointCreateWithoutBindingInput, KnowledgeProjectionCheckpointUncheckedCreateWithoutBindingInput>
+    connectOrCreate?: KnowledgeProjectionCheckpointCreateOrConnectWithoutBindingInput
+    upsert?: KnowledgeProjectionCheckpointUpsertWithoutBindingInput
+    disconnect?: KnowledgeProjectionCheckpointWhereInput | boolean
+    delete?: KnowledgeProjectionCheckpointWhereInput | boolean
+    connect?: KnowledgeProjectionCheckpointWhereUniqueInput
+    update?: XOR<XOR<KnowledgeProjectionCheckpointUpdateToOneWithWhereWithoutBindingInput, KnowledgeProjectionCheckpointUpdateWithoutBindingInput>, KnowledgeProjectionCheckpointUncheckedUpdateWithoutBindingInput>
+  }
+
+  export type GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingNestedInput = {
+    create?: XOR<GithubWebhookDeliveryCreateWithoutBindingInput, GithubWebhookDeliveryUncheckedCreateWithoutBindingInput> | GithubWebhookDeliveryCreateWithoutBindingInput[] | GithubWebhookDeliveryUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: GithubWebhookDeliveryCreateOrConnectWithoutBindingInput | GithubWebhookDeliveryCreateOrConnectWithoutBindingInput[]
+    upsert?: GithubWebhookDeliveryUpsertWithWhereUniqueWithoutBindingInput | GithubWebhookDeliveryUpsertWithWhereUniqueWithoutBindingInput[]
+    createMany?: GithubWebhookDeliveryCreateManyBindingInputEnvelope
     set?: GithubWebhookDeliveryWhereUniqueInput | GithubWebhookDeliveryWhereUniqueInput[]
     disconnect?: GithubWebhookDeliveryWhereUniqueInput | GithubWebhookDeliveryWhereUniqueInput[]
     delete?: GithubWebhookDeliveryWhereUniqueInput | GithubWebhookDeliveryWhereUniqueInput[]
     connect?: GithubWebhookDeliveryWhereUniqueInput | GithubWebhookDeliveryWhereUniqueInput[]
-    update?: GithubWebhookDeliveryUpdateWithWhereUniqueWithoutConnectionInput | GithubWebhookDeliveryUpdateWithWhereUniqueWithoutConnectionInput[]
-    updateMany?: GithubWebhookDeliveryUpdateManyWithWhereWithoutConnectionInput | GithubWebhookDeliveryUpdateManyWithWhereWithoutConnectionInput[]
+    update?: GithubWebhookDeliveryUpdateWithWhereUniqueWithoutBindingInput | GithubWebhookDeliveryUpdateWithWhereUniqueWithoutBindingInput[]
+    updateMany?: GithubWebhookDeliveryUpdateManyWithWhereWithoutBindingInput | GithubWebhookDeliveryUpdateManyWithWhereWithoutBindingInput[]
     deleteMany?: GithubWebhookDeliveryScalarWhereInput | GithubWebhookDeliveryScalarWhereInput[]
   }
 
-  export type KnowledgeNoteProjectionUncheckedUpdateManyWithoutConnectionNestedInput = {
-    create?: XOR<KnowledgeNoteProjectionCreateWithoutConnectionInput, KnowledgeNoteProjectionUncheckedCreateWithoutConnectionInput> | KnowledgeNoteProjectionCreateWithoutConnectionInput[] | KnowledgeNoteProjectionUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeNoteProjectionCreateOrConnectWithoutConnectionInput | KnowledgeNoteProjectionCreateOrConnectWithoutConnectionInput[]
-    upsert?: KnowledgeNoteProjectionUpsertWithWhereUniqueWithoutConnectionInput | KnowledgeNoteProjectionUpsertWithWhereUniqueWithoutConnectionInput[]
-    createMany?: KnowledgeNoteProjectionCreateManyConnectionInputEnvelope
+  export type KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingNestedInput = {
+    create?: XOR<KnowledgeNoteProjectionCreateWithoutBindingInput, KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput> | KnowledgeNoteProjectionCreateWithoutBindingInput[] | KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeNoteProjectionCreateOrConnectWithoutBindingInput | KnowledgeNoteProjectionCreateOrConnectWithoutBindingInput[]
+    upsert?: KnowledgeNoteProjectionUpsertWithWhereUniqueWithoutBindingInput | KnowledgeNoteProjectionUpsertWithWhereUniqueWithoutBindingInput[]
+    createMany?: KnowledgeNoteProjectionCreateManyBindingInputEnvelope
     set?: KnowledgeNoteProjectionWhereUniqueInput | KnowledgeNoteProjectionWhereUniqueInput[]
     disconnect?: KnowledgeNoteProjectionWhereUniqueInput | KnowledgeNoteProjectionWhereUniqueInput[]
     delete?: KnowledgeNoteProjectionWhereUniqueInput | KnowledgeNoteProjectionWhereUniqueInput[]
     connect?: KnowledgeNoteProjectionWhereUniqueInput | KnowledgeNoteProjectionWhereUniqueInput[]
-    update?: KnowledgeNoteProjectionUpdateWithWhereUniqueWithoutConnectionInput | KnowledgeNoteProjectionUpdateWithWhereUniqueWithoutConnectionInput[]
-    updateMany?: KnowledgeNoteProjectionUpdateManyWithWhereWithoutConnectionInput | KnowledgeNoteProjectionUpdateManyWithWhereWithoutConnectionInput[]
+    update?: KnowledgeNoteProjectionUpdateWithWhereUniqueWithoutBindingInput | KnowledgeNoteProjectionUpdateWithWhereUniqueWithoutBindingInput[]
+    updateMany?: KnowledgeNoteProjectionUpdateManyWithWhereWithoutBindingInput | KnowledgeNoteProjectionUpdateManyWithWhereWithoutBindingInput[]
     deleteMany?: KnowledgeNoteProjectionScalarWhereInput | KnowledgeNoteProjectionScalarWhereInput[]
   }
 
-  export type KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutConnectionNestedInput = {
-    create?: XOR<KnowledgeAttachmentProjectionCreateWithoutConnectionInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutConnectionInput> | KnowledgeAttachmentProjectionCreateWithoutConnectionInput[] | KnowledgeAttachmentProjectionUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeAttachmentProjectionCreateOrConnectWithoutConnectionInput | KnowledgeAttachmentProjectionCreateOrConnectWithoutConnectionInput[]
-    upsert?: KnowledgeAttachmentProjectionUpsertWithWhereUniqueWithoutConnectionInput | KnowledgeAttachmentProjectionUpsertWithWhereUniqueWithoutConnectionInput[]
-    createMany?: KnowledgeAttachmentProjectionCreateManyConnectionInputEnvelope
+  export type KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingNestedInput = {
+    create?: XOR<KnowledgeAttachmentProjectionCreateWithoutBindingInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutBindingInput> | KnowledgeAttachmentProjectionCreateWithoutBindingInput[] | KnowledgeAttachmentProjectionUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeAttachmentProjectionCreateOrConnectWithoutBindingInput | KnowledgeAttachmentProjectionCreateOrConnectWithoutBindingInput[]
+    upsert?: KnowledgeAttachmentProjectionUpsertWithWhereUniqueWithoutBindingInput | KnowledgeAttachmentProjectionUpsertWithWhereUniqueWithoutBindingInput[]
+    createMany?: KnowledgeAttachmentProjectionCreateManyBindingInputEnvelope
     set?: KnowledgeAttachmentProjectionWhereUniqueInput | KnowledgeAttachmentProjectionWhereUniqueInput[]
     disconnect?: KnowledgeAttachmentProjectionWhereUniqueInput | KnowledgeAttachmentProjectionWhereUniqueInput[]
     delete?: KnowledgeAttachmentProjectionWhereUniqueInput | KnowledgeAttachmentProjectionWhereUniqueInput[]
     connect?: KnowledgeAttachmentProjectionWhereUniqueInput | KnowledgeAttachmentProjectionWhereUniqueInput[]
-    update?: KnowledgeAttachmentProjectionUpdateWithWhereUniqueWithoutConnectionInput | KnowledgeAttachmentProjectionUpdateWithWhereUniqueWithoutConnectionInput[]
-    updateMany?: KnowledgeAttachmentProjectionUpdateManyWithWhereWithoutConnectionInput | KnowledgeAttachmentProjectionUpdateManyWithWhereWithoutConnectionInput[]
+    update?: KnowledgeAttachmentProjectionUpdateWithWhereUniqueWithoutBindingInput | KnowledgeAttachmentProjectionUpdateWithWhereUniqueWithoutBindingInput[]
+    updateMany?: KnowledgeAttachmentProjectionUpdateManyWithWhereWithoutBindingInput | KnowledgeAttachmentProjectionUpdateManyWithWhereWithoutBindingInput[]
     deleteMany?: KnowledgeAttachmentProjectionScalarWhereInput | KnowledgeAttachmentProjectionScalarWhereInput[]
   }
 
-  export type KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutConnectionNestedInput = {
-    create?: XOR<KnowledgeAttachmentContentCacheCreateWithoutConnectionInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutConnectionInput> | KnowledgeAttachmentContentCacheCreateWithoutConnectionInput[] | KnowledgeAttachmentContentCacheUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeAttachmentContentCacheCreateOrConnectWithoutConnectionInput | KnowledgeAttachmentContentCacheCreateOrConnectWithoutConnectionInput[]
-    upsert?: KnowledgeAttachmentContentCacheUpsertWithWhereUniqueWithoutConnectionInput | KnowledgeAttachmentContentCacheUpsertWithWhereUniqueWithoutConnectionInput[]
-    createMany?: KnowledgeAttachmentContentCacheCreateManyConnectionInputEnvelope
+  export type KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingNestedInput = {
+    create?: XOR<KnowledgeAttachmentContentCacheCreateWithoutBindingInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutBindingInput> | KnowledgeAttachmentContentCacheCreateWithoutBindingInput[] | KnowledgeAttachmentContentCacheUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeAttachmentContentCacheCreateOrConnectWithoutBindingInput | KnowledgeAttachmentContentCacheCreateOrConnectWithoutBindingInput[]
+    upsert?: KnowledgeAttachmentContentCacheUpsertWithWhereUniqueWithoutBindingInput | KnowledgeAttachmentContentCacheUpsertWithWhereUniqueWithoutBindingInput[]
+    createMany?: KnowledgeAttachmentContentCacheCreateManyBindingInputEnvelope
     set?: KnowledgeAttachmentContentCacheWhereUniqueInput | KnowledgeAttachmentContentCacheWhereUniqueInput[]
     disconnect?: KnowledgeAttachmentContentCacheWhereUniqueInput | KnowledgeAttachmentContentCacheWhereUniqueInput[]
     delete?: KnowledgeAttachmentContentCacheWhereUniqueInput | KnowledgeAttachmentContentCacheWhereUniqueInput[]
     connect?: KnowledgeAttachmentContentCacheWhereUniqueInput | KnowledgeAttachmentContentCacheWhereUniqueInput[]
-    update?: KnowledgeAttachmentContentCacheUpdateWithWhereUniqueWithoutConnectionInput | KnowledgeAttachmentContentCacheUpdateWithWhereUniqueWithoutConnectionInput[]
-    updateMany?: KnowledgeAttachmentContentCacheUpdateManyWithWhereWithoutConnectionInput | KnowledgeAttachmentContentCacheUpdateManyWithWhereWithoutConnectionInput[]
+    update?: KnowledgeAttachmentContentCacheUpdateWithWhereUniqueWithoutBindingInput | KnowledgeAttachmentContentCacheUpdateWithWhereUniqueWithoutBindingInput[]
+    updateMany?: KnowledgeAttachmentContentCacheUpdateManyWithWhereWithoutBindingInput | KnowledgeAttachmentContentCacheUpdateManyWithWhereWithoutBindingInput[]
     deleteMany?: KnowledgeAttachmentContentCacheScalarWhereInput | KnowledgeAttachmentContentCacheScalarWhereInput[]
   }
 
-  export type KnowledgeWriteRequestUncheckedUpdateManyWithoutConnectionNestedInput = {
-    create?: XOR<KnowledgeWriteRequestCreateWithoutConnectionInput, KnowledgeWriteRequestUncheckedCreateWithoutConnectionInput> | KnowledgeWriteRequestCreateWithoutConnectionInput[] | KnowledgeWriteRequestUncheckedCreateWithoutConnectionInput[]
-    connectOrCreate?: KnowledgeWriteRequestCreateOrConnectWithoutConnectionInput | KnowledgeWriteRequestCreateOrConnectWithoutConnectionInput[]
-    upsert?: KnowledgeWriteRequestUpsertWithWhereUniqueWithoutConnectionInput | KnowledgeWriteRequestUpsertWithWhereUniqueWithoutConnectionInput[]
-    createMany?: KnowledgeWriteRequestCreateManyConnectionInputEnvelope
+  export type KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingNestedInput = {
+    create?: XOR<KnowledgeWriteRequestCreateWithoutBindingInput, KnowledgeWriteRequestUncheckedCreateWithoutBindingInput> | KnowledgeWriteRequestCreateWithoutBindingInput[] | KnowledgeWriteRequestUncheckedCreateWithoutBindingInput[]
+    connectOrCreate?: KnowledgeWriteRequestCreateOrConnectWithoutBindingInput | KnowledgeWriteRequestCreateOrConnectWithoutBindingInput[]
+    upsert?: KnowledgeWriteRequestUpsertWithWhereUniqueWithoutBindingInput | KnowledgeWriteRequestUpsertWithWhereUniqueWithoutBindingInput[]
+    createMany?: KnowledgeWriteRequestCreateManyBindingInputEnvelope
     set?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
     disconnect?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
     delete?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
     connect?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
-    update?: KnowledgeWriteRequestUpdateWithWhereUniqueWithoutConnectionInput | KnowledgeWriteRequestUpdateWithWhereUniqueWithoutConnectionInput[]
-    updateMany?: KnowledgeWriteRequestUpdateManyWithWhereWithoutConnectionInput | KnowledgeWriteRequestUpdateManyWithWhereWithoutConnectionInput[]
+    update?: KnowledgeWriteRequestUpdateWithWhereUniqueWithoutBindingInput | KnowledgeWriteRequestUpdateWithWhereUniqueWithoutBindingInput[]
+    updateMany?: KnowledgeWriteRequestUpdateManyWithWhereWithoutBindingInput | KnowledgeWriteRequestUpdateManyWithWhereWithoutBindingInput[]
     deleteMany?: KnowledgeWriteRequestScalarWhereInput | KnowledgeWriteRequestScalarWhereInput[]
   }
 
-  export type KnowledgeRepositoryConnectionCreateNestedOneWithoutWebhookDeliveriesInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutWebhookDeliveriesInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutWebhookDeliveriesInput>
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutWebhookDeliveriesInput
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput
+  export type KnowledgeRemoteBindingCreateNestedOneWithoutObservationInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutObservationInput, KnowledgeRemoteBindingUncheckedCreateWithoutObservationInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutObservationInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
   }
 
-  export type KnowledgeRepositoryConnectionUpdateOneRequiredWithoutWebhookDeliveriesNestedInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutWebhookDeliveriesInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutWebhookDeliveriesInput>
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutWebhookDeliveriesInput
-    upsert?: KnowledgeRepositoryConnectionUpsertWithoutWebhookDeliveriesInput
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput
-    update?: XOR<XOR<KnowledgeRepositoryConnectionUpdateToOneWithWhereWithoutWebhookDeliveriesInput, KnowledgeRepositoryConnectionUpdateWithoutWebhookDeliveriesInput>, KnowledgeRepositoryConnectionUncheckedUpdateWithoutWebhookDeliveriesInput>
+  export type KnowledgeRemoteBindingUpdateOneRequiredWithoutObservationNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutObservationInput, KnowledgeRemoteBindingUncheckedCreateWithoutObservationInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutObservationInput
+    upsert?: KnowledgeRemoteBindingUpsertWithoutObservationInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
+    update?: XOR<XOR<KnowledgeRemoteBindingUpdateToOneWithWhereWithoutObservationInput, KnowledgeRemoteBindingUpdateWithoutObservationInput>, KnowledgeRemoteBindingUncheckedUpdateWithoutObservationInput>
   }
 
-  export type KnowledgeRepositoryConnectionCreateNestedOneWithoutNoteProjectionsInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutNoteProjectionsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutNoteProjectionsInput>
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutNoteProjectionsInput
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput
+  export type KnowledgeRemoteBindingCreateNestedOneWithoutHistoryFenceInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutHistoryFenceInput, KnowledgeRemoteBindingUncheckedCreateWithoutHistoryFenceInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutHistoryFenceInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
   }
 
-  export type KnowledgeRepositoryConnectionUpdateOneRequiredWithoutNoteProjectionsNestedInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutNoteProjectionsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutNoteProjectionsInput>
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutNoteProjectionsInput
-    upsert?: KnowledgeRepositoryConnectionUpsertWithoutNoteProjectionsInput
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput
-    update?: XOR<XOR<KnowledgeRepositoryConnectionUpdateToOneWithWhereWithoutNoteProjectionsInput, KnowledgeRepositoryConnectionUpdateWithoutNoteProjectionsInput>, KnowledgeRepositoryConnectionUncheckedUpdateWithoutNoteProjectionsInput>
+  export type KnowledgeRemoteBindingUpdateOneRequiredWithoutHistoryFenceNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutHistoryFenceInput, KnowledgeRemoteBindingUncheckedCreateWithoutHistoryFenceInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutHistoryFenceInput
+    upsert?: KnowledgeRemoteBindingUpsertWithoutHistoryFenceInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
+    update?: XOR<XOR<KnowledgeRemoteBindingUpdateToOneWithWhereWithoutHistoryFenceInput, KnowledgeRemoteBindingUpdateWithoutHistoryFenceInput>, KnowledgeRemoteBindingUncheckedUpdateWithoutHistoryFenceInput>
   }
 
-  export type KnowledgeRepositoryConnectionCreateNestedOneWithoutAttachmentProjectionsInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutAttachmentProjectionsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAttachmentProjectionsInput>
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutAttachmentProjectionsInput
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput
+  export type KnowledgeRemoteBindingCreateNestedOneWithoutProjectionCheckpointInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutProjectionCheckpointInput, KnowledgeRemoteBindingUncheckedCreateWithoutProjectionCheckpointInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutProjectionCheckpointInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
   }
 
-  export type KnowledgeRepositoryConnectionUpdateOneRequiredWithoutAttachmentProjectionsNestedInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutAttachmentProjectionsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAttachmentProjectionsInput>
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutAttachmentProjectionsInput
-    upsert?: KnowledgeRepositoryConnectionUpsertWithoutAttachmentProjectionsInput
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput
-    update?: XOR<XOR<KnowledgeRepositoryConnectionUpdateToOneWithWhereWithoutAttachmentProjectionsInput, KnowledgeRepositoryConnectionUpdateWithoutAttachmentProjectionsInput>, KnowledgeRepositoryConnectionUncheckedUpdateWithoutAttachmentProjectionsInput>
+  export type KnowledgeRemoteBindingUpdateOneRequiredWithoutProjectionCheckpointNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutProjectionCheckpointInput, KnowledgeRemoteBindingUncheckedCreateWithoutProjectionCheckpointInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutProjectionCheckpointInput
+    upsert?: KnowledgeRemoteBindingUpsertWithoutProjectionCheckpointInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
+    update?: XOR<XOR<KnowledgeRemoteBindingUpdateToOneWithWhereWithoutProjectionCheckpointInput, KnowledgeRemoteBindingUpdateWithoutProjectionCheckpointInput>, KnowledgeRemoteBindingUncheckedUpdateWithoutProjectionCheckpointInput>
   }
 
-  export type KnowledgeRepositoryConnectionCreateNestedOneWithoutAttachmentContentCachesInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutAttachmentContentCachesInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAttachmentContentCachesInput>
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutAttachmentContentCachesInput
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput
+  export type KnowledgeRemoteBindingCreateNestedOneWithoutWebhookDeliveriesInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutWebhookDeliveriesInput, KnowledgeRemoteBindingUncheckedCreateWithoutWebhookDeliveriesInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutWebhookDeliveriesInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
+  }
+
+  export type KnowledgeRemoteBindingUpdateOneRequiredWithoutWebhookDeliveriesNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutWebhookDeliveriesInput, KnowledgeRemoteBindingUncheckedCreateWithoutWebhookDeliveriesInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutWebhookDeliveriesInput
+    upsert?: KnowledgeRemoteBindingUpsertWithoutWebhookDeliveriesInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
+    update?: XOR<XOR<KnowledgeRemoteBindingUpdateToOneWithWhereWithoutWebhookDeliveriesInput, KnowledgeRemoteBindingUpdateWithoutWebhookDeliveriesInput>, KnowledgeRemoteBindingUncheckedUpdateWithoutWebhookDeliveriesInput>
+  }
+
+  export type KnowledgeRemoteBindingCreateNestedOneWithoutNoteProjectionsInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutNoteProjectionsInput, KnowledgeRemoteBindingUncheckedCreateWithoutNoteProjectionsInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutNoteProjectionsInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
+  }
+
+  export type KnowledgeRemoteBindingUpdateOneRequiredWithoutNoteProjectionsNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutNoteProjectionsInput, KnowledgeRemoteBindingUncheckedCreateWithoutNoteProjectionsInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutNoteProjectionsInput
+    upsert?: KnowledgeRemoteBindingUpsertWithoutNoteProjectionsInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
+    update?: XOR<XOR<KnowledgeRemoteBindingUpdateToOneWithWhereWithoutNoteProjectionsInput, KnowledgeRemoteBindingUpdateWithoutNoteProjectionsInput>, KnowledgeRemoteBindingUncheckedUpdateWithoutNoteProjectionsInput>
+  }
+
+  export type KnowledgeRemoteBindingCreateNestedOneWithoutAttachmentProjectionsInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutAttachmentProjectionsInput, KnowledgeRemoteBindingUncheckedCreateWithoutAttachmentProjectionsInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutAttachmentProjectionsInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
+  }
+
+  export type KnowledgeRemoteBindingUpdateOneRequiredWithoutAttachmentProjectionsNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutAttachmentProjectionsInput, KnowledgeRemoteBindingUncheckedCreateWithoutAttachmentProjectionsInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutAttachmentProjectionsInput
+    upsert?: KnowledgeRemoteBindingUpsertWithoutAttachmentProjectionsInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
+    update?: XOR<XOR<KnowledgeRemoteBindingUpdateToOneWithWhereWithoutAttachmentProjectionsInput, KnowledgeRemoteBindingUpdateWithoutAttachmentProjectionsInput>, KnowledgeRemoteBindingUncheckedUpdateWithoutAttachmentProjectionsInput>
+  }
+
+  export type KnowledgeRemoteBindingCreateNestedOneWithoutAttachmentContentCachesInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutAttachmentContentCachesInput, KnowledgeRemoteBindingUncheckedCreateWithoutAttachmentContentCachesInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutAttachmentContentCachesInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
   }
 
   export type BytesFieldUpdateOperationsInput = {
     set?: Bytes
   }
 
-  export type KnowledgeRepositoryConnectionUpdateOneRequiredWithoutAttachmentContentCachesNestedInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutAttachmentContentCachesInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAttachmentContentCachesInput>
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutAttachmentContentCachesInput
-    upsert?: KnowledgeRepositoryConnectionUpsertWithoutAttachmentContentCachesInput
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput
-    update?: XOR<XOR<KnowledgeRepositoryConnectionUpdateToOneWithWhereWithoutAttachmentContentCachesInput, KnowledgeRepositoryConnectionUpdateWithoutAttachmentContentCachesInput>, KnowledgeRepositoryConnectionUncheckedUpdateWithoutAttachmentContentCachesInput>
+  export type KnowledgeRemoteBindingUpdateOneRequiredWithoutAttachmentContentCachesNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutAttachmentContentCachesInput, KnowledgeRemoteBindingUncheckedCreateWithoutAttachmentContentCachesInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutAttachmentContentCachesInput
+    upsert?: KnowledgeRemoteBindingUpsertWithoutAttachmentContentCachesInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
+    update?: XOR<XOR<KnowledgeRemoteBindingUpdateToOneWithWhereWithoutAttachmentContentCachesInput, KnowledgeRemoteBindingUpdateWithoutAttachmentContentCachesInput>, KnowledgeRemoteBindingUncheckedUpdateWithoutAttachmentContentCachesInput>
   }
 
   export type AccountCreateNestedOneWithoutKnowledgeWriteRequestsInput = {
@@ -161415,10 +166973,10 @@ export namespace Prisma {
     connect?: AccountWhereUniqueInput
   }
 
-  export type KnowledgeRepositoryConnectionCreateNestedOneWithoutWriteRequestsInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutWriteRequestsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutWriteRequestsInput>
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutWriteRequestsInput
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput
+  export type KnowledgeRemoteBindingCreateNestedOneWithoutWriteRequestsInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutWriteRequestsInput, KnowledgeRemoteBindingUncheckedCreateWithoutWriteRequestsInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutWriteRequestsInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
   }
 
   export type AccountUpdateOneRequiredWithoutKnowledgeWriteRequestsNestedInput = {
@@ -161429,12 +166987,12 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutKnowledgeWriteRequestsInput, AccountUpdateWithoutKnowledgeWriteRequestsInput>, AccountUncheckedUpdateWithoutKnowledgeWriteRequestsInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpdateOneRequiredWithoutWriteRequestsNestedInput = {
-    create?: XOR<KnowledgeRepositoryConnectionCreateWithoutWriteRequestsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutWriteRequestsInput>
-    connectOrCreate?: KnowledgeRepositoryConnectionCreateOrConnectWithoutWriteRequestsInput
-    upsert?: KnowledgeRepositoryConnectionUpsertWithoutWriteRequestsInput
-    connect?: KnowledgeRepositoryConnectionWhereUniqueInput
-    update?: XOR<XOR<KnowledgeRepositoryConnectionUpdateToOneWithWhereWithoutWriteRequestsInput, KnowledgeRepositoryConnectionUpdateWithoutWriteRequestsInput>, KnowledgeRepositoryConnectionUncheckedUpdateWithoutWriteRequestsInput>
+  export type KnowledgeRemoteBindingUpdateOneRequiredWithoutWriteRequestsNestedInput = {
+    create?: XOR<KnowledgeRemoteBindingCreateWithoutWriteRequestsInput, KnowledgeRemoteBindingUncheckedCreateWithoutWriteRequestsInput>
+    connectOrCreate?: KnowledgeRemoteBindingCreateOrConnectWithoutWriteRequestsInput
+    upsert?: KnowledgeRemoteBindingUpsertWithoutWriteRequestsInput
+    connect?: KnowledgeRemoteBindingWhereUniqueInput
+    update?: XOR<XOR<KnowledgeRemoteBindingUpdateToOneWithWhereWithoutWriteRequestsInput, KnowledgeRemoteBindingUpdateWithoutWriteRequestsInput>, KnowledgeRemoteBindingUncheckedUpdateWithoutWriteRequestsInput>
   }
 
   export type AccountCreateNestedOneWithoutSchedulesInput = {
@@ -164648,61 +170206,53 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type KnowledgeRepositoryConnectionCreateWithoutAccountInput = {
+  export type KnowledgeRemoteBindingCreateWithoutAccountInput = {
     id: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutConnectionInput
-    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutConnectionInput
+    knowledgeSpace: KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput
+    observation?: RemoteRepositoryObservationCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedCreateWithoutAccountInput = {
+  export type KnowledgeRemoteBindingUncheckedCreateWithoutAccountInput = {
     id: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    knowledgeSpaceId: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutConnectionInput
-    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutConnectionInput
+    observation?: RemoteRepositoryObservationUncheckedCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceUncheckedCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionCreateOrConnectWithoutAccountInput = {
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutAccountInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAccountInput>
+  export type KnowledgeRemoteBindingCreateOrConnectWithoutAccountInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    create: XOR<KnowledgeRemoteBindingCreateWithoutAccountInput, KnowledgeRemoteBindingUncheckedCreateWithoutAccountInput>
   }
 
-  export type KnowledgeRepositoryConnectionCreateManyAccountInputEnvelope = {
-    data: KnowledgeRepositoryConnectionCreateManyAccountInput | KnowledgeRepositoryConnectionCreateManyAccountInput[]
+  export type KnowledgeRemoteBindingCreateManyAccountInputEnvelope = {
+    data: KnowledgeRemoteBindingCreateManyAccountInput | KnowledgeRemoteBindingCreateManyAccountInput[]
     skipDuplicates?: boolean
   }
 
@@ -164771,12 +170321,12 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     completedAt?: Date | string | null
-    connection: KnowledgeRepositoryConnectionCreateNestedOneWithoutWriteRequestsInput
+    binding: KnowledgeRemoteBindingCreateNestedOneWithoutWriteRequestsInput
   }
 
   export type KnowledgeWriteRequestUncheckedCreateWithoutAccountInput = {
     id: string
-    connectionId: string
+    bindingId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -166886,43 +172436,36 @@ export namespace Prisma {
     modifiedAt?: DateTimeNullableFilter<"RepositoryResource"> | Date | string | null
   }
 
-  export type KnowledgeRepositoryConnectionUpsertWithWhereUniqueWithoutAccountInput = {
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
-    update: XOR<KnowledgeRepositoryConnectionUpdateWithoutAccountInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutAccountInput>
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutAccountInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAccountInput>
+  export type KnowledgeRemoteBindingUpsertWithWhereUniqueWithoutAccountInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    update: XOR<KnowledgeRemoteBindingUpdateWithoutAccountInput, KnowledgeRemoteBindingUncheckedUpdateWithoutAccountInput>
+    create: XOR<KnowledgeRemoteBindingCreateWithoutAccountInput, KnowledgeRemoteBindingUncheckedCreateWithoutAccountInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpdateWithWhereUniqueWithoutAccountInput = {
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
-    data: XOR<KnowledgeRepositoryConnectionUpdateWithoutAccountInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutAccountInput>
+  export type KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutAccountInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    data: XOR<KnowledgeRemoteBindingUpdateWithoutAccountInput, KnowledgeRemoteBindingUncheckedUpdateWithoutAccountInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpdateManyWithWhereWithoutAccountInput = {
-    where: KnowledgeRepositoryConnectionScalarWhereInput
-    data: XOR<KnowledgeRepositoryConnectionUpdateManyMutationInput, KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountInput>
+  export type KnowledgeRemoteBindingUpdateManyWithWhereWithoutAccountInput = {
+    where: KnowledgeRemoteBindingScalarWhereInput
+    data: XOR<KnowledgeRemoteBindingUpdateManyMutationInput, KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountInput>
   }
 
-  export type KnowledgeRepositoryConnectionScalarWhereInput = {
-    AND?: KnowledgeRepositoryConnectionScalarWhereInput | KnowledgeRepositoryConnectionScalarWhereInput[]
-    OR?: KnowledgeRepositoryConnectionScalarWhereInput[]
-    NOT?: KnowledgeRepositoryConnectionScalarWhereInput | KnowledgeRepositoryConnectionScalarWhereInput[]
-    id?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    identityId?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    githubUserId?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    githubRepositoryId?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    githubRepositoryFullName?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    installationId?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    defaultBranch?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    isPrivate?: BoolFilter<"KnowledgeRepositoryConnection"> | boolean
-    status?: StringFilter<"KnowledgeRepositoryConnection"> | string
-    lastSyncedCommitSha?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastProjectedCommitSha?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastErrorCode?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    lastErrorMessage?: StringNullableFilter<"KnowledgeRepositoryConnection"> | string | null
-    version?: IntFilter<"KnowledgeRepositoryConnection"> | number
-    createdAt?: DateTimeFilter<"KnowledgeRepositoryConnection"> | Date | string
-    updatedAt?: DateTimeFilter<"KnowledgeRepositoryConnection"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"KnowledgeRepositoryConnection"> | Date | string | null
+  export type KnowledgeRemoteBindingScalarWhereInput = {
+    AND?: KnowledgeRemoteBindingScalarWhereInput | KnowledgeRemoteBindingScalarWhereInput[]
+    OR?: KnowledgeRemoteBindingScalarWhereInput[]
+    NOT?: KnowledgeRemoteBindingScalarWhereInput | KnowledgeRemoteBindingScalarWhereInput[]
+    id?: StringFilter<"KnowledgeRemoteBinding"> | string
+    knowledgeSpaceId?: StringFilter<"KnowledgeRemoteBinding"> | string
+    identityId?: StringFilter<"KnowledgeRemoteBinding"> | string
+    provider?: StringFilter<"KnowledgeRemoteBinding"> | string
+    installationId?: StringFilter<"KnowledgeRemoteBinding"> | string
+    repositoryId?: StringFilter<"KnowledgeRemoteBinding"> | string
+    repositoryFullNameSnapshot?: StringFilter<"KnowledgeRemoteBinding"> | string
+    connectedAt?: DateTimeFilter<"KnowledgeRemoteBinding"> | Date | string
+    disconnectedAt?: DateTimeNullableFilter<"KnowledgeRemoteBinding"> | Date | string | null
+    version?: IntFilter<"KnowledgeRemoteBinding"> | number
   }
 
   export type KnowledgeRepositoryInstallationIntentUpsertWithWhereUniqueWithoutAccountInput = {
@@ -166985,7 +172528,7 @@ export namespace Prisma {
     NOT?: KnowledgeWriteRequestScalarWhereInput | KnowledgeWriteRequestScalarWhereInput[]
     id?: StringFilter<"KnowledgeWriteRequest"> | string
     identityId?: StringFilter<"KnowledgeWriteRequest"> | string
-    connectionId?: StringFilter<"KnowledgeWriteRequest"> | string
+    bindingId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestId?: StringFilter<"KnowledgeWriteRequest"> | string
     requestHash?: StringFilter<"KnowledgeWriteRequest"> | string
     relativePath?: StringFilter<"KnowledgeWriteRequest"> | string
@@ -167067,7 +172610,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -167134,7 +172677,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -167217,7 +172760,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -167284,7 +172827,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -167351,7 +172894,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -167418,7 +172961,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -167529,7 +173072,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -167596,7 +173139,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -167679,7 +173222,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -167746,7 +173289,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -167860,7 +173403,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -167927,7 +173470,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -168031,7 +173574,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -168098,7 +173641,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -168181,7 +173724,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -168248,7 +173791,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -168315,7 +173858,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -168382,7 +173925,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -168465,7 +174008,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -168532,7 +174075,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -168599,7 +174142,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -168666,7 +174209,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -168749,7 +174292,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -168816,7 +174359,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -168883,7 +174426,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -168950,7 +174493,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -169033,7 +174576,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -169100,7 +174643,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -169167,7 +174710,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -169234,7 +174777,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -169317,7 +174860,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -169384,7 +174927,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -169451,7 +174994,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -169518,7 +175061,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -169601,7 +175144,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -169668,7 +175211,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -169839,7 +175382,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -169906,7 +175449,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -170086,7 +175629,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -170153,7 +175696,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -170472,7 +176015,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -170539,7 +176082,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -170638,7 +176181,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -170705,7 +176248,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -170810,7 +176353,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -170877,7 +176420,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -171015,7 +176558,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -171082,7 +176625,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -171240,7 +176783,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -171307,7 +176850,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -171437,7 +176980,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -171504,7 +177047,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -171608,7 +177151,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -171675,7 +177218,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -171791,7 +177334,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -171858,7 +177401,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -171964,7 +177507,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -172031,7 +177574,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -172249,7 +177792,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -172316,7 +177859,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -173389,7 +178932,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -173456,7 +178999,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -173588,7 +179131,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -173655,7 +179198,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -174024,7 +179567,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -174091,7 +179634,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -174212,7 +179755,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -174279,7 +179822,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -174378,7 +179921,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -174445,7 +179988,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -174606,7 +180149,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -174673,7 +180216,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -174830,7 +180373,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -174897,7 +180440,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -175097,7 +180640,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -175164,7 +180707,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -175526,7 +181069,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -175593,7 +181136,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -175756,7 +181299,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -175823,7 +181366,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -175890,7 +181433,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -175957,7 +181500,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -176107,7 +181650,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -176174,7 +181717,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -176314,7 +181857,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -176381,7 +181924,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -176531,7 +182074,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -176598,7 +182141,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -176945,7 +182488,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -177012,7 +182555,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -177168,7 +182711,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -177235,7 +182778,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -177302,7 +182845,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -177369,7 +182912,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -177452,7 +182995,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -177519,7 +183062,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -177744,7 +183287,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -177811,7 +183354,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -177958,7 +183501,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -178025,7 +183568,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -178092,7 +183635,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -178159,7 +183702,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -178242,7 +183785,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -178309,7 +183852,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -178376,7 +183919,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -178443,7 +183986,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -178587,7 +184130,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -178654,7 +184197,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -178788,7 +184331,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -178855,7 +184398,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -178999,7 +184542,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -179066,7 +184609,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -179200,7 +184743,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -179267,7 +184810,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -179350,7 +184893,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -179417,7 +184960,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -179484,7 +185027,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -179551,7 +185094,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -179695,7 +185238,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -179762,7 +185305,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -179896,7 +185439,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -179963,7 +185506,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -180046,7 +185589,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -180113,7 +185656,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -180241,7 +185784,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -180308,7 +185851,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -180458,7 +186001,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -180525,7 +186068,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -180592,7 +186135,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -180659,7 +186202,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -180848,7 +186391,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -180915,7 +186458,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -181038,7 +186581,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -181105,7 +186648,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -181215,7 +186758,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -181282,7 +186825,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -181365,7 +186908,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -181432,7 +186975,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -181577,7 +187120,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -181644,7 +187187,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -181785,7 +187328,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -181852,7 +187395,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -181970,7 +187513,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -182037,7 +187580,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -182120,7 +187663,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -182187,7 +187730,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -182295,7 +187838,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -182362,7 +187905,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -182493,7 +188036,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -182560,7 +188103,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -182682,7 +188225,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -182749,7 +188292,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -182849,7 +188392,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -182916,7 +188459,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -183038,7 +188581,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -183105,7 +188648,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -183172,7 +188715,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -183239,7 +188782,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -183510,7 +189053,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -183577,7 +189120,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -183708,7 +189251,7 @@ export namespace Prisma {
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -183775,7 +189318,7 @@ export namespace Prisma {
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -183980,7 +189523,7 @@ export namespace Prisma {
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -184047,7 +189590,7 @@ export namespace Prisma {
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -184226,7 +189769,7 @@ export namespace Prisma {
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -184293,7 +189836,7 @@ export namespace Prisma {
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -184427,7 +189970,7 @@ export namespace Prisma {
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -184494,7 +190037,7 @@ export namespace Prisma {
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -184660,7 +190203,7 @@ export namespace Prisma {
     aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -184727,7 +190270,7 @@ export namespace Prisma {
     aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -184957,7 +190500,7 @@ export namespace Prisma {
     aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -185024,7 +190567,7 @@ export namespace Prisma {
     aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -185506,7 +191049,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -185573,7 +191116,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -185707,7 +191250,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -185774,7 +191317,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -185898,7 +191441,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -185965,7 +191508,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -186048,7 +191591,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -186115,7 +191658,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -186183,7 +191726,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
 
@@ -186250,7 +191793,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
 
@@ -186333,7 +191876,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
 
@@ -186400,11 +191943,94 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
 
-  export type AccountCreateWithoutKnowledgeRepositoryConnectionsInput = {
+  export type KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput = {
+    id: string
+    provider?: string
+    installationId: string
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
+    version?: number
+    account: AccountCreateNestedOneWithoutKnowledgeRemoteBindingsInput
+    observation?: RemoteRepositoryObservationCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutBindingInput
+  }
+
+  export type KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput = {
+    id: string
+    identityId: string
+    provider?: string
+    installationId: string
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
+    version?: number
+    observation?: RemoteRepositoryObservationUncheckedCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceUncheckedCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutBindingInput
+  }
+
+  export type KnowledgeRemoteBindingCreateOrConnectWithoutKnowledgeSpaceInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    create: XOR<KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput, KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput>
+  }
+
+  export type KnowledgeRemoteBindingCreateManyKnowledgeSpaceInputEnvelope = {
+    data: KnowledgeRemoteBindingCreateManyKnowledgeSpaceInput | KnowledgeRemoteBindingCreateManyKnowledgeSpaceInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type KnowledgeRemoteBindingUpsertWithWhereUniqueWithoutKnowledgeSpaceInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    update: XOR<KnowledgeRemoteBindingUpdateWithoutKnowledgeSpaceInput, KnowledgeRemoteBindingUncheckedUpdateWithoutKnowledgeSpaceInput>
+    create: XOR<KnowledgeRemoteBindingCreateWithoutKnowledgeSpaceInput, KnowledgeRemoteBindingUncheckedCreateWithoutKnowledgeSpaceInput>
+  }
+
+  export type KnowledgeRemoteBindingUpdateWithWhereUniqueWithoutKnowledgeSpaceInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    data: XOR<KnowledgeRemoteBindingUpdateWithoutKnowledgeSpaceInput, KnowledgeRemoteBindingUncheckedUpdateWithoutKnowledgeSpaceInput>
+  }
+
+  export type KnowledgeRemoteBindingUpdateManyWithWhereWithoutKnowledgeSpaceInput = {
+    where: KnowledgeRemoteBindingScalarWhereInput
+    data: XOR<KnowledgeRemoteBindingUpdateManyMutationInput, KnowledgeRemoteBindingUncheckedUpdateManyWithoutKnowledgeSpaceInput>
+  }
+
+  export type KnowledgeSpaceCreateWithoutRemoteBindingsInput = {
+    id: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KnowledgeSpaceUncheckedCreateWithoutRemoteBindingsInput = {
+    id: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KnowledgeSpaceCreateOrConnectWithoutRemoteBindingsInput = {
+    where: KnowledgeSpaceWhereUniqueInput
+    create: XOR<KnowledgeSpaceCreateWithoutRemoteBindingsInput, KnowledgeSpaceUncheckedCreateWithoutRemoteBindingsInput>
+  }
+
+  export type AccountCreateWithoutKnowledgeRemoteBindingsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
@@ -186471,7 +192097,7 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
 
-  export type AccountUncheckedCreateWithoutKnowledgeRepositoryConnectionsInput = {
+  export type AccountUncheckedCreateWithoutKnowledgeRemoteBindingsInput = {
     id: string
     status?: string
     profile: JsonNullValueInput | InputJsonValue
@@ -186538,12 +192164,87 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
 
-  export type AccountCreateOrConnectWithoutKnowledgeRepositoryConnectionsInput = {
+  export type AccountCreateOrConnectWithoutKnowledgeRemoteBindingsInput = {
     where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutKnowledgeRepositoryConnectionsInput, AccountUncheckedCreateWithoutKnowledgeRepositoryConnectionsInput>
+    create: XOR<AccountCreateWithoutKnowledgeRemoteBindingsInput, AccountUncheckedCreateWithoutKnowledgeRemoteBindingsInput>
   }
 
-  export type GithubWebhookDeliveryCreateWithoutConnectionInput = {
+  export type RemoteRepositoryObservationCreateWithoutBindingInput = {
+    observedAt: Date | string
+    accountId: string
+    repositoryFullName: string
+    defaultBranch: string
+    isPrivate: boolean
+    archived: boolean
+    disabled: boolean
+    contentsPermission: string
+    installationSuspended: boolean
+    eligibilityState: string
+    blockReason?: string | null
+  }
+
+  export type RemoteRepositoryObservationUncheckedCreateWithoutBindingInput = {
+    observedAt: Date | string
+    accountId: string
+    repositoryFullName: string
+    defaultBranch: string
+    isPrivate: boolean
+    archived: boolean
+    disabled: boolean
+    contentsPermission: string
+    installationSuspended: boolean
+    eligibilityState: string
+    blockReason?: string | null
+  }
+
+  export type RemoteRepositoryObservationCreateOrConnectWithoutBindingInput = {
+    where: RemoteRepositoryObservationWhereUniqueInput
+    create: XOR<RemoteRepositoryObservationCreateWithoutBindingInput, RemoteRepositoryObservationUncheckedCreateWithoutBindingInput>
+  }
+
+  export type RemoteHistoryFenceCreateWithoutBindingInput = {
+    defaultBranch: string
+    lastConfirmedRemoteHeadSha: string
+    confirmedAt: Date | string
+  }
+
+  export type RemoteHistoryFenceUncheckedCreateWithoutBindingInput = {
+    defaultBranch: string
+    lastConfirmedRemoteHeadSha: string
+    confirmedAt: Date | string
+  }
+
+  export type RemoteHistoryFenceCreateOrConnectWithoutBindingInput = {
+    where: RemoteHistoryFenceWhereUniqueInput
+    create: XOR<RemoteHistoryFenceCreateWithoutBindingInput, RemoteHistoryFenceUncheckedCreateWithoutBindingInput>
+  }
+
+  export type KnowledgeProjectionCheckpointCreateWithoutBindingInput = {
+    branch: string
+    projectedCommitSha?: string | null
+    state: string
+    failureCode?: string | null
+    failureMessage?: string | null
+    lastAttemptAt?: Date | string | null
+    projectedAt?: Date | string | null
+  }
+
+  export type KnowledgeProjectionCheckpointUncheckedCreateWithoutBindingInput = {
+    branch: string
+    projectedCommitSha?: string | null
+    state: string
+    failureCode?: string | null
+    failureMessage?: string | null
+    lastAttemptAt?: Date | string | null
+    projectedAt?: Date | string | null
+  }
+
+  export type KnowledgeProjectionCheckpointCreateOrConnectWithoutBindingInput = {
+    where: KnowledgeProjectionCheckpointWhereUniqueInput
+    create: XOR<KnowledgeProjectionCheckpointCreateWithoutBindingInput, KnowledgeProjectionCheckpointUncheckedCreateWithoutBindingInput>
+  }
+
+  export type GithubWebhookDeliveryCreateWithoutBindingInput = {
     id: string
     deliveryId: string
     eventName: string
@@ -186556,7 +192257,7 @@ export namespace Prisma {
     processedAt?: Date | string | null
   }
 
-  export type GithubWebhookDeliveryUncheckedCreateWithoutConnectionInput = {
+  export type GithubWebhookDeliveryUncheckedCreateWithoutBindingInput = {
     id: string
     deliveryId: string
     eventName: string
@@ -186569,17 +192270,17 @@ export namespace Prisma {
     processedAt?: Date | string | null
   }
 
-  export type GithubWebhookDeliveryCreateOrConnectWithoutConnectionInput = {
+  export type GithubWebhookDeliveryCreateOrConnectWithoutBindingInput = {
     where: GithubWebhookDeliveryWhereUniqueInput
-    create: XOR<GithubWebhookDeliveryCreateWithoutConnectionInput, GithubWebhookDeliveryUncheckedCreateWithoutConnectionInput>
+    create: XOR<GithubWebhookDeliveryCreateWithoutBindingInput, GithubWebhookDeliveryUncheckedCreateWithoutBindingInput>
   }
 
-  export type GithubWebhookDeliveryCreateManyConnectionInputEnvelope = {
-    data: GithubWebhookDeliveryCreateManyConnectionInput | GithubWebhookDeliveryCreateManyConnectionInput[]
+  export type GithubWebhookDeliveryCreateManyBindingInputEnvelope = {
+    data: GithubWebhookDeliveryCreateManyBindingInput | GithubWebhookDeliveryCreateManyBindingInput[]
     skipDuplicates?: boolean
   }
 
-  export type KnowledgeNoteProjectionCreateWithoutConnectionInput = {
+  export type KnowledgeNoteProjectionCreateWithoutBindingInput = {
     id: string
     relativePath: string
     commitSha: string
@@ -186593,7 +192294,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
   }
 
-  export type KnowledgeNoteProjectionUncheckedCreateWithoutConnectionInput = {
+  export type KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput = {
     id: string
     relativePath: string
     commitSha: string
@@ -186607,17 +192308,17 @@ export namespace Prisma {
     deletedAt?: Date | string | null
   }
 
-  export type KnowledgeNoteProjectionCreateOrConnectWithoutConnectionInput = {
+  export type KnowledgeNoteProjectionCreateOrConnectWithoutBindingInput = {
     where: KnowledgeNoteProjectionWhereUniqueInput
-    create: XOR<KnowledgeNoteProjectionCreateWithoutConnectionInput, KnowledgeNoteProjectionUncheckedCreateWithoutConnectionInput>
+    create: XOR<KnowledgeNoteProjectionCreateWithoutBindingInput, KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput>
   }
 
-  export type KnowledgeNoteProjectionCreateManyConnectionInputEnvelope = {
-    data: KnowledgeNoteProjectionCreateManyConnectionInput | KnowledgeNoteProjectionCreateManyConnectionInput[]
+  export type KnowledgeNoteProjectionCreateManyBindingInputEnvelope = {
+    data: KnowledgeNoteProjectionCreateManyBindingInput | KnowledgeNoteProjectionCreateManyBindingInput[]
     skipDuplicates?: boolean
   }
 
-  export type KnowledgeAttachmentProjectionCreateWithoutConnectionInput = {
+  export type KnowledgeAttachmentProjectionCreateWithoutBindingInput = {
     id: string
     relativePath: string
     commitSha: string
@@ -186629,7 +192330,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
   }
 
-  export type KnowledgeAttachmentProjectionUncheckedCreateWithoutConnectionInput = {
+  export type KnowledgeAttachmentProjectionUncheckedCreateWithoutBindingInput = {
     id: string
     relativePath: string
     commitSha: string
@@ -186641,17 +192342,17 @@ export namespace Prisma {
     deletedAt?: Date | string | null
   }
 
-  export type KnowledgeAttachmentProjectionCreateOrConnectWithoutConnectionInput = {
+  export type KnowledgeAttachmentProjectionCreateOrConnectWithoutBindingInput = {
     where: KnowledgeAttachmentProjectionWhereUniqueInput
-    create: XOR<KnowledgeAttachmentProjectionCreateWithoutConnectionInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutConnectionInput>
+    create: XOR<KnowledgeAttachmentProjectionCreateWithoutBindingInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutBindingInput>
   }
 
-  export type KnowledgeAttachmentProjectionCreateManyConnectionInputEnvelope = {
-    data: KnowledgeAttachmentProjectionCreateManyConnectionInput | KnowledgeAttachmentProjectionCreateManyConnectionInput[]
+  export type KnowledgeAttachmentProjectionCreateManyBindingInputEnvelope = {
+    data: KnowledgeAttachmentProjectionCreateManyBindingInput | KnowledgeAttachmentProjectionCreateManyBindingInput[]
     skipDuplicates?: boolean
   }
 
-  export type KnowledgeAttachmentContentCacheCreateWithoutConnectionInput = {
+  export type KnowledgeAttachmentContentCacheCreateWithoutBindingInput = {
     blobSha: string
     byteSize: number
     contentBytes: Bytes
@@ -186659,7 +192360,7 @@ export namespace Prisma {
     expiresAt: Date | string
   }
 
-  export type KnowledgeAttachmentContentCacheUncheckedCreateWithoutConnectionInput = {
+  export type KnowledgeAttachmentContentCacheUncheckedCreateWithoutBindingInput = {
     blobSha: string
     byteSize: number
     contentBytes: Bytes
@@ -186667,17 +192368,17 @@ export namespace Prisma {
     expiresAt: Date | string
   }
 
-  export type KnowledgeAttachmentContentCacheCreateOrConnectWithoutConnectionInput = {
+  export type KnowledgeAttachmentContentCacheCreateOrConnectWithoutBindingInput = {
     where: KnowledgeAttachmentContentCacheWhereUniqueInput
-    create: XOR<KnowledgeAttachmentContentCacheCreateWithoutConnectionInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutConnectionInput>
+    create: XOR<KnowledgeAttachmentContentCacheCreateWithoutBindingInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutBindingInput>
   }
 
-  export type KnowledgeAttachmentContentCacheCreateManyConnectionInputEnvelope = {
-    data: KnowledgeAttachmentContentCacheCreateManyConnectionInput | KnowledgeAttachmentContentCacheCreateManyConnectionInput[]
+  export type KnowledgeAttachmentContentCacheCreateManyBindingInputEnvelope = {
+    data: KnowledgeAttachmentContentCacheCreateManyBindingInput | KnowledgeAttachmentContentCacheCreateManyBindingInput[]
     skipDuplicates?: boolean
   }
 
-  export type KnowledgeWriteRequestCreateWithoutConnectionInput = {
+  export type KnowledgeWriteRequestCreateWithoutBindingInput = {
     id: string
     requestId: string
     requestHash: string
@@ -186699,7 +192400,7 @@ export namespace Prisma {
     account: AccountCreateNestedOneWithoutKnowledgeWriteRequestsInput
   }
 
-  export type KnowledgeWriteRequestUncheckedCreateWithoutConnectionInput = {
+  export type KnowledgeWriteRequestUncheckedCreateWithoutBindingInput = {
     id: string
     identityId: string
     requestId: string
@@ -186721,28 +192422,51 @@ export namespace Prisma {
     completedAt?: Date | string | null
   }
 
-  export type KnowledgeWriteRequestCreateOrConnectWithoutConnectionInput = {
+  export type KnowledgeWriteRequestCreateOrConnectWithoutBindingInput = {
     where: KnowledgeWriteRequestWhereUniqueInput
-    create: XOR<KnowledgeWriteRequestCreateWithoutConnectionInput, KnowledgeWriteRequestUncheckedCreateWithoutConnectionInput>
+    create: XOR<KnowledgeWriteRequestCreateWithoutBindingInput, KnowledgeWriteRequestUncheckedCreateWithoutBindingInput>
   }
 
-  export type KnowledgeWriteRequestCreateManyConnectionInputEnvelope = {
-    data: KnowledgeWriteRequestCreateManyConnectionInput | KnowledgeWriteRequestCreateManyConnectionInput[]
+  export type KnowledgeWriteRequestCreateManyBindingInputEnvelope = {
+    data: KnowledgeWriteRequestCreateManyBindingInput | KnowledgeWriteRequestCreateManyBindingInput[]
     skipDuplicates?: boolean
   }
 
-  export type AccountUpsertWithoutKnowledgeRepositoryConnectionsInput = {
-    update: XOR<AccountUpdateWithoutKnowledgeRepositoryConnectionsInput, AccountUncheckedUpdateWithoutKnowledgeRepositoryConnectionsInput>
-    create: XOR<AccountCreateWithoutKnowledgeRepositoryConnectionsInput, AccountUncheckedCreateWithoutKnowledgeRepositoryConnectionsInput>
+  export type KnowledgeSpaceUpsertWithoutRemoteBindingsInput = {
+    update: XOR<KnowledgeSpaceUpdateWithoutRemoteBindingsInput, KnowledgeSpaceUncheckedUpdateWithoutRemoteBindingsInput>
+    create: XOR<KnowledgeSpaceCreateWithoutRemoteBindingsInput, KnowledgeSpaceUncheckedCreateWithoutRemoteBindingsInput>
+    where?: KnowledgeSpaceWhereInput
+  }
+
+  export type KnowledgeSpaceUpdateToOneWithWhereWithoutRemoteBindingsInput = {
+    where?: KnowledgeSpaceWhereInput
+    data: XOR<KnowledgeSpaceUpdateWithoutRemoteBindingsInput, KnowledgeSpaceUncheckedUpdateWithoutRemoteBindingsInput>
+  }
+
+  export type KnowledgeSpaceUpdateWithoutRemoteBindingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KnowledgeSpaceUncheckedUpdateWithoutRemoteBindingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AccountUpsertWithoutKnowledgeRemoteBindingsInput = {
+    update: XOR<AccountUpdateWithoutKnowledgeRemoteBindingsInput, AccountUncheckedUpdateWithoutKnowledgeRemoteBindingsInput>
+    create: XOR<AccountCreateWithoutKnowledgeRemoteBindingsInput, AccountUncheckedCreateWithoutKnowledgeRemoteBindingsInput>
     where?: AccountWhereInput
   }
 
-  export type AccountUpdateToOneWithWhereWithoutKnowledgeRepositoryConnectionsInput = {
+  export type AccountUpdateToOneWithWhereWithoutKnowledgeRemoteBindingsInput = {
     where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutKnowledgeRepositoryConnectionsInput, AccountUncheckedUpdateWithoutKnowledgeRepositoryConnectionsInput>
+    data: XOR<AccountUpdateWithoutKnowledgeRemoteBindingsInput, AccountUncheckedUpdateWithoutKnowledgeRemoteBindingsInput>
   }
 
-  export type AccountUpdateWithoutKnowledgeRepositoryConnectionsInput = {
+  export type AccountUpdateWithoutKnowledgeRemoteBindingsInput = {
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -186809,7 +192533,7 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
 
-  export type AccountUncheckedUpdateWithoutKnowledgeRepositoryConnectionsInput = {
+  export type AccountUncheckedUpdateWithoutKnowledgeRemoteBindingsInput = {
     id?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     profile?: JsonNullValueInput | InputJsonValue
@@ -186876,20 +192600,113 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
 
-  export type GithubWebhookDeliveryUpsertWithWhereUniqueWithoutConnectionInput = {
-    where: GithubWebhookDeliveryWhereUniqueInput
-    update: XOR<GithubWebhookDeliveryUpdateWithoutConnectionInput, GithubWebhookDeliveryUncheckedUpdateWithoutConnectionInput>
-    create: XOR<GithubWebhookDeliveryCreateWithoutConnectionInput, GithubWebhookDeliveryUncheckedCreateWithoutConnectionInput>
+  export type RemoteRepositoryObservationUpsertWithoutBindingInput = {
+    update: XOR<RemoteRepositoryObservationUpdateWithoutBindingInput, RemoteRepositoryObservationUncheckedUpdateWithoutBindingInput>
+    create: XOR<RemoteRepositoryObservationCreateWithoutBindingInput, RemoteRepositoryObservationUncheckedCreateWithoutBindingInput>
+    where?: RemoteRepositoryObservationWhereInput
   }
 
-  export type GithubWebhookDeliveryUpdateWithWhereUniqueWithoutConnectionInput = {
-    where: GithubWebhookDeliveryWhereUniqueInput
-    data: XOR<GithubWebhookDeliveryUpdateWithoutConnectionInput, GithubWebhookDeliveryUncheckedUpdateWithoutConnectionInput>
+  export type RemoteRepositoryObservationUpdateToOneWithWhereWithoutBindingInput = {
+    where?: RemoteRepositoryObservationWhereInput
+    data: XOR<RemoteRepositoryObservationUpdateWithoutBindingInput, RemoteRepositoryObservationUncheckedUpdateWithoutBindingInput>
   }
 
-  export type GithubWebhookDeliveryUpdateManyWithWhereWithoutConnectionInput = {
+  export type RemoteRepositoryObservationUpdateWithoutBindingInput = {
+    observedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accountId?: StringFieldUpdateOperationsInput | string
+    repositoryFullName?: StringFieldUpdateOperationsInput | string
+    defaultBranch?: StringFieldUpdateOperationsInput | string
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    archived?: BoolFieldUpdateOperationsInput | boolean
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    contentsPermission?: StringFieldUpdateOperationsInput | string
+    installationSuspended?: BoolFieldUpdateOperationsInput | boolean
+    eligibilityState?: StringFieldUpdateOperationsInput | string
+    blockReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type RemoteRepositoryObservationUncheckedUpdateWithoutBindingInput = {
+    observedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    accountId?: StringFieldUpdateOperationsInput | string
+    repositoryFullName?: StringFieldUpdateOperationsInput | string
+    defaultBranch?: StringFieldUpdateOperationsInput | string
+    isPrivate?: BoolFieldUpdateOperationsInput | boolean
+    archived?: BoolFieldUpdateOperationsInput | boolean
+    disabled?: BoolFieldUpdateOperationsInput | boolean
+    contentsPermission?: StringFieldUpdateOperationsInput | string
+    installationSuspended?: BoolFieldUpdateOperationsInput | boolean
+    eligibilityState?: StringFieldUpdateOperationsInput | string
+    blockReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type RemoteHistoryFenceUpsertWithoutBindingInput = {
+    update: XOR<RemoteHistoryFenceUpdateWithoutBindingInput, RemoteHistoryFenceUncheckedUpdateWithoutBindingInput>
+    create: XOR<RemoteHistoryFenceCreateWithoutBindingInput, RemoteHistoryFenceUncheckedCreateWithoutBindingInput>
+    where?: RemoteHistoryFenceWhereInput
+  }
+
+  export type RemoteHistoryFenceUpdateToOneWithWhereWithoutBindingInput = {
+    where?: RemoteHistoryFenceWhereInput
+    data: XOR<RemoteHistoryFenceUpdateWithoutBindingInput, RemoteHistoryFenceUncheckedUpdateWithoutBindingInput>
+  }
+
+  export type RemoteHistoryFenceUpdateWithoutBindingInput = {
+    defaultBranch?: StringFieldUpdateOperationsInput | string
+    lastConfirmedRemoteHeadSha?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RemoteHistoryFenceUncheckedUpdateWithoutBindingInput = {
+    defaultBranch?: StringFieldUpdateOperationsInput | string
+    lastConfirmedRemoteHeadSha?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KnowledgeProjectionCheckpointUpsertWithoutBindingInput = {
+    update: XOR<KnowledgeProjectionCheckpointUpdateWithoutBindingInput, KnowledgeProjectionCheckpointUncheckedUpdateWithoutBindingInput>
+    create: XOR<KnowledgeProjectionCheckpointCreateWithoutBindingInput, KnowledgeProjectionCheckpointUncheckedCreateWithoutBindingInput>
+    where?: KnowledgeProjectionCheckpointWhereInput
+  }
+
+  export type KnowledgeProjectionCheckpointUpdateToOneWithWhereWithoutBindingInput = {
+    where?: KnowledgeProjectionCheckpointWhereInput
+    data: XOR<KnowledgeProjectionCheckpointUpdateWithoutBindingInput, KnowledgeProjectionCheckpointUncheckedUpdateWithoutBindingInput>
+  }
+
+  export type KnowledgeProjectionCheckpointUpdateWithoutBindingInput = {
+    branch?: StringFieldUpdateOperationsInput | string
+    projectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: StringFieldUpdateOperationsInput | string
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    projectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type KnowledgeProjectionCheckpointUncheckedUpdateWithoutBindingInput = {
+    branch?: StringFieldUpdateOperationsInput | string
+    projectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: StringFieldUpdateOperationsInput | string
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    failureMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    lastAttemptAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    projectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type GithubWebhookDeliveryUpsertWithWhereUniqueWithoutBindingInput = {
+    where: GithubWebhookDeliveryWhereUniqueInput
+    update: XOR<GithubWebhookDeliveryUpdateWithoutBindingInput, GithubWebhookDeliveryUncheckedUpdateWithoutBindingInput>
+    create: XOR<GithubWebhookDeliveryCreateWithoutBindingInput, GithubWebhookDeliveryUncheckedCreateWithoutBindingInput>
+  }
+
+  export type GithubWebhookDeliveryUpdateWithWhereUniqueWithoutBindingInput = {
+    where: GithubWebhookDeliveryWhereUniqueInput
+    data: XOR<GithubWebhookDeliveryUpdateWithoutBindingInput, GithubWebhookDeliveryUncheckedUpdateWithoutBindingInput>
+  }
+
+  export type GithubWebhookDeliveryUpdateManyWithWhereWithoutBindingInput = {
     where: GithubWebhookDeliveryScalarWhereInput
-    data: XOR<GithubWebhookDeliveryUpdateManyMutationInput, GithubWebhookDeliveryUncheckedUpdateManyWithoutConnectionInput>
+    data: XOR<GithubWebhookDeliveryUpdateManyMutationInput, GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingInput>
   }
 
   export type GithubWebhookDeliveryScalarWhereInput = {
@@ -186897,7 +192714,7 @@ export namespace Prisma {
     OR?: GithubWebhookDeliveryScalarWhereInput[]
     NOT?: GithubWebhookDeliveryScalarWhereInput | GithubWebhookDeliveryScalarWhereInput[]
     id?: StringFilter<"GithubWebhookDelivery"> | string
-    connectionId?: StringFilter<"GithubWebhookDelivery"> | string
+    bindingId?: StringFilter<"GithubWebhookDelivery"> | string
     deliveryId?: StringFilter<"GithubWebhookDelivery"> | string
     eventName?: StringFilter<"GithubWebhookDelivery"> | string
     beforeSha?: StringNullableFilter<"GithubWebhookDelivery"> | string | null
@@ -186909,20 +192726,20 @@ export namespace Prisma {
     processedAt?: DateTimeNullableFilter<"GithubWebhookDelivery"> | Date | string | null
   }
 
-  export type KnowledgeNoteProjectionUpsertWithWhereUniqueWithoutConnectionInput = {
+  export type KnowledgeNoteProjectionUpsertWithWhereUniqueWithoutBindingInput = {
     where: KnowledgeNoteProjectionWhereUniqueInput
-    update: XOR<KnowledgeNoteProjectionUpdateWithoutConnectionInput, KnowledgeNoteProjectionUncheckedUpdateWithoutConnectionInput>
-    create: XOR<KnowledgeNoteProjectionCreateWithoutConnectionInput, KnowledgeNoteProjectionUncheckedCreateWithoutConnectionInput>
+    update: XOR<KnowledgeNoteProjectionUpdateWithoutBindingInput, KnowledgeNoteProjectionUncheckedUpdateWithoutBindingInput>
+    create: XOR<KnowledgeNoteProjectionCreateWithoutBindingInput, KnowledgeNoteProjectionUncheckedCreateWithoutBindingInput>
   }
 
-  export type KnowledgeNoteProjectionUpdateWithWhereUniqueWithoutConnectionInput = {
+  export type KnowledgeNoteProjectionUpdateWithWhereUniqueWithoutBindingInput = {
     where: KnowledgeNoteProjectionWhereUniqueInput
-    data: XOR<KnowledgeNoteProjectionUpdateWithoutConnectionInput, KnowledgeNoteProjectionUncheckedUpdateWithoutConnectionInput>
+    data: XOR<KnowledgeNoteProjectionUpdateWithoutBindingInput, KnowledgeNoteProjectionUncheckedUpdateWithoutBindingInput>
   }
 
-  export type KnowledgeNoteProjectionUpdateManyWithWhereWithoutConnectionInput = {
+  export type KnowledgeNoteProjectionUpdateManyWithWhereWithoutBindingInput = {
     where: KnowledgeNoteProjectionScalarWhereInput
-    data: XOR<KnowledgeNoteProjectionUpdateManyMutationInput, KnowledgeNoteProjectionUncheckedUpdateManyWithoutConnectionInput>
+    data: XOR<KnowledgeNoteProjectionUpdateManyMutationInput, KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingInput>
   }
 
   export type KnowledgeNoteProjectionScalarWhereInput = {
@@ -186930,7 +192747,7 @@ export namespace Prisma {
     OR?: KnowledgeNoteProjectionScalarWhereInput[]
     NOT?: KnowledgeNoteProjectionScalarWhereInput | KnowledgeNoteProjectionScalarWhereInput[]
     id?: StringFilter<"KnowledgeNoteProjection"> | string
-    connectionId?: StringFilter<"KnowledgeNoteProjection"> | string
+    bindingId?: StringFilter<"KnowledgeNoteProjection"> | string
     relativePath?: StringFilter<"KnowledgeNoteProjection"> | string
     commitSha?: StringFilter<"KnowledgeNoteProjection"> | string
     blobSha?: StringFilter<"KnowledgeNoteProjection"> | string
@@ -186943,20 +192760,20 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableFilter<"KnowledgeNoteProjection"> | Date | string | null
   }
 
-  export type KnowledgeAttachmentProjectionUpsertWithWhereUniqueWithoutConnectionInput = {
+  export type KnowledgeAttachmentProjectionUpsertWithWhereUniqueWithoutBindingInput = {
     where: KnowledgeAttachmentProjectionWhereUniqueInput
-    update: XOR<KnowledgeAttachmentProjectionUpdateWithoutConnectionInput, KnowledgeAttachmentProjectionUncheckedUpdateWithoutConnectionInput>
-    create: XOR<KnowledgeAttachmentProjectionCreateWithoutConnectionInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutConnectionInput>
+    update: XOR<KnowledgeAttachmentProjectionUpdateWithoutBindingInput, KnowledgeAttachmentProjectionUncheckedUpdateWithoutBindingInput>
+    create: XOR<KnowledgeAttachmentProjectionCreateWithoutBindingInput, KnowledgeAttachmentProjectionUncheckedCreateWithoutBindingInput>
   }
 
-  export type KnowledgeAttachmentProjectionUpdateWithWhereUniqueWithoutConnectionInput = {
+  export type KnowledgeAttachmentProjectionUpdateWithWhereUniqueWithoutBindingInput = {
     where: KnowledgeAttachmentProjectionWhereUniqueInput
-    data: XOR<KnowledgeAttachmentProjectionUpdateWithoutConnectionInput, KnowledgeAttachmentProjectionUncheckedUpdateWithoutConnectionInput>
+    data: XOR<KnowledgeAttachmentProjectionUpdateWithoutBindingInput, KnowledgeAttachmentProjectionUncheckedUpdateWithoutBindingInput>
   }
 
-  export type KnowledgeAttachmentProjectionUpdateManyWithWhereWithoutConnectionInput = {
+  export type KnowledgeAttachmentProjectionUpdateManyWithWhereWithoutBindingInput = {
     where: KnowledgeAttachmentProjectionScalarWhereInput
-    data: XOR<KnowledgeAttachmentProjectionUpdateManyMutationInput, KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutConnectionInput>
+    data: XOR<KnowledgeAttachmentProjectionUpdateManyMutationInput, KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingInput>
   }
 
   export type KnowledgeAttachmentProjectionScalarWhereInput = {
@@ -186964,7 +192781,7 @@ export namespace Prisma {
     OR?: KnowledgeAttachmentProjectionScalarWhereInput[]
     NOT?: KnowledgeAttachmentProjectionScalarWhereInput | KnowledgeAttachmentProjectionScalarWhereInput[]
     id?: StringFilter<"KnowledgeAttachmentProjection"> | string
-    connectionId?: StringFilter<"KnowledgeAttachmentProjection"> | string
+    bindingId?: StringFilter<"KnowledgeAttachmentProjection"> | string
     relativePath?: StringFilter<"KnowledgeAttachmentProjection"> | string
     commitSha?: StringFilter<"KnowledgeAttachmentProjection"> | string
     blobSha?: StringFilter<"KnowledgeAttachmentProjection"> | string
@@ -186975,27 +192792,27 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableFilter<"KnowledgeAttachmentProjection"> | Date | string | null
   }
 
-  export type KnowledgeAttachmentContentCacheUpsertWithWhereUniqueWithoutConnectionInput = {
+  export type KnowledgeAttachmentContentCacheUpsertWithWhereUniqueWithoutBindingInput = {
     where: KnowledgeAttachmentContentCacheWhereUniqueInput
-    update: XOR<KnowledgeAttachmentContentCacheUpdateWithoutConnectionInput, KnowledgeAttachmentContentCacheUncheckedUpdateWithoutConnectionInput>
-    create: XOR<KnowledgeAttachmentContentCacheCreateWithoutConnectionInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutConnectionInput>
+    update: XOR<KnowledgeAttachmentContentCacheUpdateWithoutBindingInput, KnowledgeAttachmentContentCacheUncheckedUpdateWithoutBindingInput>
+    create: XOR<KnowledgeAttachmentContentCacheCreateWithoutBindingInput, KnowledgeAttachmentContentCacheUncheckedCreateWithoutBindingInput>
   }
 
-  export type KnowledgeAttachmentContentCacheUpdateWithWhereUniqueWithoutConnectionInput = {
+  export type KnowledgeAttachmentContentCacheUpdateWithWhereUniqueWithoutBindingInput = {
     where: KnowledgeAttachmentContentCacheWhereUniqueInput
-    data: XOR<KnowledgeAttachmentContentCacheUpdateWithoutConnectionInput, KnowledgeAttachmentContentCacheUncheckedUpdateWithoutConnectionInput>
+    data: XOR<KnowledgeAttachmentContentCacheUpdateWithoutBindingInput, KnowledgeAttachmentContentCacheUncheckedUpdateWithoutBindingInput>
   }
 
-  export type KnowledgeAttachmentContentCacheUpdateManyWithWhereWithoutConnectionInput = {
+  export type KnowledgeAttachmentContentCacheUpdateManyWithWhereWithoutBindingInput = {
     where: KnowledgeAttachmentContentCacheScalarWhereInput
-    data: XOR<KnowledgeAttachmentContentCacheUpdateManyMutationInput, KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutConnectionInput>
+    data: XOR<KnowledgeAttachmentContentCacheUpdateManyMutationInput, KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingInput>
   }
 
   export type KnowledgeAttachmentContentCacheScalarWhereInput = {
     AND?: KnowledgeAttachmentContentCacheScalarWhereInput | KnowledgeAttachmentContentCacheScalarWhereInput[]
     OR?: KnowledgeAttachmentContentCacheScalarWhereInput[]
     NOT?: KnowledgeAttachmentContentCacheScalarWhereInput | KnowledgeAttachmentContentCacheScalarWhereInput[]
-    connectionId?: StringFilter<"KnowledgeAttachmentContentCache"> | string
+    bindingId?: StringFilter<"KnowledgeAttachmentContentCache"> | string
     blobSha?: StringFilter<"KnowledgeAttachmentContentCache"> | string
     byteSize?: IntFilter<"KnowledgeAttachmentContentCache"> | number
     contentBytes?: BytesFilter<"KnowledgeAttachmentContentCache"> | Bytes
@@ -187003,468 +192820,692 @@ export namespace Prisma {
     expiresAt?: DateTimeFilter<"KnowledgeAttachmentContentCache"> | Date | string
   }
 
-  export type KnowledgeWriteRequestUpsertWithWhereUniqueWithoutConnectionInput = {
+  export type KnowledgeWriteRequestUpsertWithWhereUniqueWithoutBindingInput = {
     where: KnowledgeWriteRequestWhereUniqueInput
-    update: XOR<KnowledgeWriteRequestUpdateWithoutConnectionInput, KnowledgeWriteRequestUncheckedUpdateWithoutConnectionInput>
-    create: XOR<KnowledgeWriteRequestCreateWithoutConnectionInput, KnowledgeWriteRequestUncheckedCreateWithoutConnectionInput>
+    update: XOR<KnowledgeWriteRequestUpdateWithoutBindingInput, KnowledgeWriteRequestUncheckedUpdateWithoutBindingInput>
+    create: XOR<KnowledgeWriteRequestCreateWithoutBindingInput, KnowledgeWriteRequestUncheckedCreateWithoutBindingInput>
   }
 
-  export type KnowledgeWriteRequestUpdateWithWhereUniqueWithoutConnectionInput = {
+  export type KnowledgeWriteRequestUpdateWithWhereUniqueWithoutBindingInput = {
     where: KnowledgeWriteRequestWhereUniqueInput
-    data: XOR<KnowledgeWriteRequestUpdateWithoutConnectionInput, KnowledgeWriteRequestUncheckedUpdateWithoutConnectionInput>
+    data: XOR<KnowledgeWriteRequestUpdateWithoutBindingInput, KnowledgeWriteRequestUncheckedUpdateWithoutBindingInput>
   }
 
-  export type KnowledgeWriteRequestUpdateManyWithWhereWithoutConnectionInput = {
+  export type KnowledgeWriteRequestUpdateManyWithWhereWithoutBindingInput = {
     where: KnowledgeWriteRequestScalarWhereInput
-    data: XOR<KnowledgeWriteRequestUpdateManyMutationInput, KnowledgeWriteRequestUncheckedUpdateManyWithoutConnectionInput>
+    data: XOR<KnowledgeWriteRequestUpdateManyMutationInput, KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingInput>
   }
 
-  export type KnowledgeRepositoryConnectionCreateWithoutWebhookDeliveriesInput = {
+  export type KnowledgeRemoteBindingCreateWithoutObservationInput = {
     id: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutKnowledgeRepositoryConnectionsInput
-    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutConnectionInput
+    knowledgeSpace: KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput
+    account: AccountCreateNestedOneWithoutKnowledgeRemoteBindingsInput
+    historyFence?: RemoteHistoryFenceCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedCreateWithoutWebhookDeliveriesInput = {
+  export type KnowledgeRemoteBindingUncheckedCreateWithoutObservationInput = {
     id: string
+    knowledgeSpaceId: string
     identityId: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutConnectionInput
+    historyFence?: RemoteHistoryFenceUncheckedCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionCreateOrConnectWithoutWebhookDeliveriesInput = {
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutWebhookDeliveriesInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutWebhookDeliveriesInput>
+  export type KnowledgeRemoteBindingCreateOrConnectWithoutObservationInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    create: XOR<KnowledgeRemoteBindingCreateWithoutObservationInput, KnowledgeRemoteBindingUncheckedCreateWithoutObservationInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpsertWithoutWebhookDeliveriesInput = {
-    update: XOR<KnowledgeRepositoryConnectionUpdateWithoutWebhookDeliveriesInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutWebhookDeliveriesInput>
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutWebhookDeliveriesInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutWebhookDeliveriesInput>
-    where?: KnowledgeRepositoryConnectionWhereInput
+  export type KnowledgeRemoteBindingUpsertWithoutObservationInput = {
+    update: XOR<KnowledgeRemoteBindingUpdateWithoutObservationInput, KnowledgeRemoteBindingUncheckedUpdateWithoutObservationInput>
+    create: XOR<KnowledgeRemoteBindingCreateWithoutObservationInput, KnowledgeRemoteBindingUncheckedCreateWithoutObservationInput>
+    where?: KnowledgeRemoteBindingWhereInput
   }
 
-  export type KnowledgeRepositoryConnectionUpdateToOneWithWhereWithoutWebhookDeliveriesInput = {
-    where?: KnowledgeRepositoryConnectionWhereInput
-    data: XOR<KnowledgeRepositoryConnectionUpdateWithoutWebhookDeliveriesInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutWebhookDeliveriesInput>
+  export type KnowledgeRemoteBindingUpdateToOneWithWhereWithoutObservationInput = {
+    where?: KnowledgeRemoteBindingWhereInput
+    data: XOR<KnowledgeRemoteBindingUpdateWithoutObservationInput, KnowledgeRemoteBindingUncheckedUpdateWithoutObservationInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpdateWithoutWebhookDeliveriesInput = {
+  export type KnowledgeRemoteBindingUpdateWithoutObservationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutKnowledgeRepositoryConnectionsNestedInput
-    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutConnectionNestedInput
+    knowledgeSpace?: KnowledgeSpaceUpdateOneRequiredWithoutRemoteBindingsNestedInput
+    account?: AccountUpdateOneRequiredWithoutKnowledgeRemoteBindingsNestedInput
+    historyFence?: RemoteHistoryFenceUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedUpdateWithoutWebhookDeliveriesInput = {
+  export type KnowledgeRemoteBindingUncheckedUpdateWithoutObservationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutConnectionNestedInput
+    historyFence?: RemoteHistoryFenceUncheckedUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionCreateWithoutNoteProjectionsInput = {
+  export type KnowledgeRemoteBindingCreateWithoutHistoryFenceInput = {
     id: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutKnowledgeRepositoryConnectionsInput
-    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutConnectionInput
+    knowledgeSpace: KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput
+    account: AccountCreateNestedOneWithoutKnowledgeRemoteBindingsInput
+    observation?: RemoteRepositoryObservationCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedCreateWithoutNoteProjectionsInput = {
+  export type KnowledgeRemoteBindingUncheckedCreateWithoutHistoryFenceInput = {
     id: string
+    knowledgeSpaceId: string
     identityId: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutConnectionInput
+    observation?: RemoteRepositoryObservationUncheckedCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionCreateOrConnectWithoutNoteProjectionsInput = {
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutNoteProjectionsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutNoteProjectionsInput>
+  export type KnowledgeRemoteBindingCreateOrConnectWithoutHistoryFenceInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    create: XOR<KnowledgeRemoteBindingCreateWithoutHistoryFenceInput, KnowledgeRemoteBindingUncheckedCreateWithoutHistoryFenceInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpsertWithoutNoteProjectionsInput = {
-    update: XOR<KnowledgeRepositoryConnectionUpdateWithoutNoteProjectionsInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutNoteProjectionsInput>
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutNoteProjectionsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutNoteProjectionsInput>
-    where?: KnowledgeRepositoryConnectionWhereInput
+  export type KnowledgeRemoteBindingUpsertWithoutHistoryFenceInput = {
+    update: XOR<KnowledgeRemoteBindingUpdateWithoutHistoryFenceInput, KnowledgeRemoteBindingUncheckedUpdateWithoutHistoryFenceInput>
+    create: XOR<KnowledgeRemoteBindingCreateWithoutHistoryFenceInput, KnowledgeRemoteBindingUncheckedCreateWithoutHistoryFenceInput>
+    where?: KnowledgeRemoteBindingWhereInput
   }
 
-  export type KnowledgeRepositoryConnectionUpdateToOneWithWhereWithoutNoteProjectionsInput = {
-    where?: KnowledgeRepositoryConnectionWhereInput
-    data: XOR<KnowledgeRepositoryConnectionUpdateWithoutNoteProjectionsInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutNoteProjectionsInput>
+  export type KnowledgeRemoteBindingUpdateToOneWithWhereWithoutHistoryFenceInput = {
+    where?: KnowledgeRemoteBindingWhereInput
+    data: XOR<KnowledgeRemoteBindingUpdateWithoutHistoryFenceInput, KnowledgeRemoteBindingUncheckedUpdateWithoutHistoryFenceInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpdateWithoutNoteProjectionsInput = {
+  export type KnowledgeRemoteBindingUpdateWithoutHistoryFenceInput = {
     id?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutKnowledgeRepositoryConnectionsNestedInput
-    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutConnectionNestedInput
+    knowledgeSpace?: KnowledgeSpaceUpdateOneRequiredWithoutRemoteBindingsNestedInput
+    account?: AccountUpdateOneRequiredWithoutKnowledgeRemoteBindingsNestedInput
+    observation?: RemoteRepositoryObservationUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedUpdateWithoutNoteProjectionsInput = {
+  export type KnowledgeRemoteBindingUncheckedUpdateWithoutHistoryFenceInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutConnectionNestedInput
+    observation?: RemoteRepositoryObservationUncheckedUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionCreateWithoutAttachmentProjectionsInput = {
+  export type KnowledgeRemoteBindingCreateWithoutProjectionCheckpointInput = {
     id: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutKnowledgeRepositoryConnectionsInput
-    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutConnectionInput
-    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutConnectionInput
+    knowledgeSpace: KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput
+    account: AccountCreateNestedOneWithoutKnowledgeRemoteBindingsInput
+    observation?: RemoteRepositoryObservationCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedCreateWithoutAttachmentProjectionsInput = {
+  export type KnowledgeRemoteBindingUncheckedCreateWithoutProjectionCheckpointInput = {
     id: string
+    knowledgeSpaceId: string
     identityId: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutConnectionInput
-    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutConnectionInput
+    observation?: RemoteRepositoryObservationUncheckedCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceUncheckedCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionCreateOrConnectWithoutAttachmentProjectionsInput = {
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutAttachmentProjectionsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAttachmentProjectionsInput>
+  export type KnowledgeRemoteBindingCreateOrConnectWithoutProjectionCheckpointInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    create: XOR<KnowledgeRemoteBindingCreateWithoutProjectionCheckpointInput, KnowledgeRemoteBindingUncheckedCreateWithoutProjectionCheckpointInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpsertWithoutAttachmentProjectionsInput = {
-    update: XOR<KnowledgeRepositoryConnectionUpdateWithoutAttachmentProjectionsInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutAttachmentProjectionsInput>
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutAttachmentProjectionsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAttachmentProjectionsInput>
-    where?: KnowledgeRepositoryConnectionWhereInput
+  export type KnowledgeRemoteBindingUpsertWithoutProjectionCheckpointInput = {
+    update: XOR<KnowledgeRemoteBindingUpdateWithoutProjectionCheckpointInput, KnowledgeRemoteBindingUncheckedUpdateWithoutProjectionCheckpointInput>
+    create: XOR<KnowledgeRemoteBindingCreateWithoutProjectionCheckpointInput, KnowledgeRemoteBindingUncheckedCreateWithoutProjectionCheckpointInput>
+    where?: KnowledgeRemoteBindingWhereInput
   }
 
-  export type KnowledgeRepositoryConnectionUpdateToOneWithWhereWithoutAttachmentProjectionsInput = {
-    where?: KnowledgeRepositoryConnectionWhereInput
-    data: XOR<KnowledgeRepositoryConnectionUpdateWithoutAttachmentProjectionsInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutAttachmentProjectionsInput>
+  export type KnowledgeRemoteBindingUpdateToOneWithWhereWithoutProjectionCheckpointInput = {
+    where?: KnowledgeRemoteBindingWhereInput
+    data: XOR<KnowledgeRemoteBindingUpdateWithoutProjectionCheckpointInput, KnowledgeRemoteBindingUncheckedUpdateWithoutProjectionCheckpointInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpdateWithoutAttachmentProjectionsInput = {
+  export type KnowledgeRemoteBindingUpdateWithoutProjectionCheckpointInput = {
     id?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutKnowledgeRepositoryConnectionsNestedInput
-    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutConnectionNestedInput
-    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutConnectionNestedInput
+    knowledgeSpace?: KnowledgeSpaceUpdateOneRequiredWithoutRemoteBindingsNestedInput
+    account?: AccountUpdateOneRequiredWithoutKnowledgeRemoteBindingsNestedInput
+    observation?: RemoteRepositoryObservationUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedUpdateWithoutAttachmentProjectionsInput = {
+  export type KnowledgeRemoteBindingUncheckedUpdateWithoutProjectionCheckpointInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutConnectionNestedInput
-    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutConnectionNestedInput
+    observation?: RemoteRepositoryObservationUncheckedUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUncheckedUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionCreateWithoutAttachmentContentCachesInput = {
+  export type KnowledgeRemoteBindingCreateWithoutWebhookDeliveriesInput = {
     id: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutKnowledgeRepositoryConnectionsInput
-    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutConnectionInput
-    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutConnectionInput
+    knowledgeSpace: KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput
+    account: AccountCreateNestedOneWithoutKnowledgeRemoteBindingsInput
+    observation?: RemoteRepositoryObservationCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointCreateNestedOneWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedCreateWithoutAttachmentContentCachesInput = {
+  export type KnowledgeRemoteBindingUncheckedCreateWithoutWebhookDeliveriesInput = {
     id: string
+    knowledgeSpaceId: string
     identityId: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutConnectionInput
-    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutConnectionInput
+    observation?: RemoteRepositoryObservationUncheckedCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceUncheckedCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedCreateNestedOneWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionCreateOrConnectWithoutAttachmentContentCachesInput = {
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutAttachmentContentCachesInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAttachmentContentCachesInput>
+  export type KnowledgeRemoteBindingCreateOrConnectWithoutWebhookDeliveriesInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    create: XOR<KnowledgeRemoteBindingCreateWithoutWebhookDeliveriesInput, KnowledgeRemoteBindingUncheckedCreateWithoutWebhookDeliveriesInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpsertWithoutAttachmentContentCachesInput = {
-    update: XOR<KnowledgeRepositoryConnectionUpdateWithoutAttachmentContentCachesInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutAttachmentContentCachesInput>
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutAttachmentContentCachesInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutAttachmentContentCachesInput>
-    where?: KnowledgeRepositoryConnectionWhereInput
+  export type KnowledgeRemoteBindingUpsertWithoutWebhookDeliveriesInput = {
+    update: XOR<KnowledgeRemoteBindingUpdateWithoutWebhookDeliveriesInput, KnowledgeRemoteBindingUncheckedUpdateWithoutWebhookDeliveriesInput>
+    create: XOR<KnowledgeRemoteBindingCreateWithoutWebhookDeliveriesInput, KnowledgeRemoteBindingUncheckedCreateWithoutWebhookDeliveriesInput>
+    where?: KnowledgeRemoteBindingWhereInput
   }
 
-  export type KnowledgeRepositoryConnectionUpdateToOneWithWhereWithoutAttachmentContentCachesInput = {
-    where?: KnowledgeRepositoryConnectionWhereInput
-    data: XOR<KnowledgeRepositoryConnectionUpdateWithoutAttachmentContentCachesInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutAttachmentContentCachesInput>
+  export type KnowledgeRemoteBindingUpdateToOneWithWhereWithoutWebhookDeliveriesInput = {
+    where?: KnowledgeRemoteBindingWhereInput
+    data: XOR<KnowledgeRemoteBindingUpdateWithoutWebhookDeliveriesInput, KnowledgeRemoteBindingUncheckedUpdateWithoutWebhookDeliveriesInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpdateWithoutAttachmentContentCachesInput = {
+  export type KnowledgeRemoteBindingUpdateWithoutWebhookDeliveriesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutKnowledgeRepositoryConnectionsNestedInput
-    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutConnectionNestedInput
-    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutConnectionNestedInput
+    knowledgeSpace?: KnowledgeSpaceUpdateOneRequiredWithoutRemoteBindingsNestedInput
+    account?: AccountUpdateOneRequiredWithoutKnowledgeRemoteBindingsNestedInput
+    observation?: RemoteRepositoryObservationUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUpdateOneWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedUpdateWithoutAttachmentContentCachesInput = {
+  export type KnowledgeRemoteBindingUncheckedUpdateWithoutWebhookDeliveriesInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutConnectionNestedInput
-    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutConnectionNestedInput
+    observation?: RemoteRepositoryObservationUncheckedUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUncheckedUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedUpdateOneWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingNestedInput
+  }
+
+  export type KnowledgeRemoteBindingCreateWithoutNoteProjectionsInput = {
+    id: string
+    provider?: string
+    installationId: string
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
+    version?: number
+    knowledgeSpace: KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput
+    account: AccountCreateNestedOneWithoutKnowledgeRemoteBindingsInput
+    observation?: RemoteRepositoryObservationCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutBindingInput
+  }
+
+  export type KnowledgeRemoteBindingUncheckedCreateWithoutNoteProjectionsInput = {
+    id: string
+    knowledgeSpaceId: string
+    identityId: string
+    provider?: string
+    installationId: string
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
+    version?: number
+    observation?: RemoteRepositoryObservationUncheckedCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceUncheckedCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutBindingInput
+  }
+
+  export type KnowledgeRemoteBindingCreateOrConnectWithoutNoteProjectionsInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    create: XOR<KnowledgeRemoteBindingCreateWithoutNoteProjectionsInput, KnowledgeRemoteBindingUncheckedCreateWithoutNoteProjectionsInput>
+  }
+
+  export type KnowledgeRemoteBindingUpsertWithoutNoteProjectionsInput = {
+    update: XOR<KnowledgeRemoteBindingUpdateWithoutNoteProjectionsInput, KnowledgeRemoteBindingUncheckedUpdateWithoutNoteProjectionsInput>
+    create: XOR<KnowledgeRemoteBindingCreateWithoutNoteProjectionsInput, KnowledgeRemoteBindingUncheckedCreateWithoutNoteProjectionsInput>
+    where?: KnowledgeRemoteBindingWhereInput
+  }
+
+  export type KnowledgeRemoteBindingUpdateToOneWithWhereWithoutNoteProjectionsInput = {
+    where?: KnowledgeRemoteBindingWhereInput
+    data: XOR<KnowledgeRemoteBindingUpdateWithoutNoteProjectionsInput, KnowledgeRemoteBindingUncheckedUpdateWithoutNoteProjectionsInput>
+  }
+
+  export type KnowledgeRemoteBindingUpdateWithoutNoteProjectionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    installationId?: StringFieldUpdateOperationsInput | string
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    version?: IntFieldUpdateOperationsInput | number
+    knowledgeSpace?: KnowledgeSpaceUpdateOneRequiredWithoutRemoteBindingsNestedInput
+    account?: AccountUpdateOneRequiredWithoutKnowledgeRemoteBindingsNestedInput
+    observation?: RemoteRepositoryObservationUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutBindingNestedInput
+  }
+
+  export type KnowledgeRemoteBindingUncheckedUpdateWithoutNoteProjectionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    installationId?: StringFieldUpdateOperationsInput | string
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    version?: IntFieldUpdateOperationsInput | number
+    observation?: RemoteRepositoryObservationUncheckedUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUncheckedUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingNestedInput
+  }
+
+  export type KnowledgeRemoteBindingCreateWithoutAttachmentProjectionsInput = {
+    id: string
+    provider?: string
+    installationId: string
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
+    version?: number
+    knowledgeSpace: KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput
+    account: AccountCreateNestedOneWithoutKnowledgeRemoteBindingsInput
+    observation?: RemoteRepositoryObservationCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutBindingInput
+  }
+
+  export type KnowledgeRemoteBindingUncheckedCreateWithoutAttachmentProjectionsInput = {
+    id: string
+    knowledgeSpaceId: string
+    identityId: string
+    provider?: string
+    installationId: string
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
+    version?: number
+    observation?: RemoteRepositoryObservationUncheckedCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceUncheckedCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutBindingInput
+  }
+
+  export type KnowledgeRemoteBindingCreateOrConnectWithoutAttachmentProjectionsInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    create: XOR<KnowledgeRemoteBindingCreateWithoutAttachmentProjectionsInput, KnowledgeRemoteBindingUncheckedCreateWithoutAttachmentProjectionsInput>
+  }
+
+  export type KnowledgeRemoteBindingUpsertWithoutAttachmentProjectionsInput = {
+    update: XOR<KnowledgeRemoteBindingUpdateWithoutAttachmentProjectionsInput, KnowledgeRemoteBindingUncheckedUpdateWithoutAttachmentProjectionsInput>
+    create: XOR<KnowledgeRemoteBindingCreateWithoutAttachmentProjectionsInput, KnowledgeRemoteBindingUncheckedCreateWithoutAttachmentProjectionsInput>
+    where?: KnowledgeRemoteBindingWhereInput
+  }
+
+  export type KnowledgeRemoteBindingUpdateToOneWithWhereWithoutAttachmentProjectionsInput = {
+    where?: KnowledgeRemoteBindingWhereInput
+    data: XOR<KnowledgeRemoteBindingUpdateWithoutAttachmentProjectionsInput, KnowledgeRemoteBindingUncheckedUpdateWithoutAttachmentProjectionsInput>
+  }
+
+  export type KnowledgeRemoteBindingUpdateWithoutAttachmentProjectionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    installationId?: StringFieldUpdateOperationsInput | string
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    version?: IntFieldUpdateOperationsInput | number
+    knowledgeSpace?: KnowledgeSpaceUpdateOneRequiredWithoutRemoteBindingsNestedInput
+    account?: AccountUpdateOneRequiredWithoutKnowledgeRemoteBindingsNestedInput
+    observation?: RemoteRepositoryObservationUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutBindingNestedInput
+  }
+
+  export type KnowledgeRemoteBindingUncheckedUpdateWithoutAttachmentProjectionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    installationId?: StringFieldUpdateOperationsInput | string
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    version?: IntFieldUpdateOperationsInput | number
+    observation?: RemoteRepositoryObservationUncheckedUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUncheckedUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingNestedInput
+  }
+
+  export type KnowledgeRemoteBindingCreateWithoutAttachmentContentCachesInput = {
+    id: string
+    provider?: string
+    installationId: string
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
+    version?: number
+    knowledgeSpace: KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput
+    account: AccountCreateNestedOneWithoutKnowledgeRemoteBindingsInput
+    observation?: RemoteRepositoryObservationCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestCreateNestedManyWithoutBindingInput
+  }
+
+  export type KnowledgeRemoteBindingUncheckedCreateWithoutAttachmentContentCachesInput = {
+    id: string
+    knowledgeSpaceId: string
+    identityId: string
+    provider?: string
+    installationId: string
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
+    version?: number
+    observation?: RemoteRepositoryObservationUncheckedCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceUncheckedCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutBindingInput
+    writeRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutBindingInput
+  }
+
+  export type KnowledgeRemoteBindingCreateOrConnectWithoutAttachmentContentCachesInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    create: XOR<KnowledgeRemoteBindingCreateWithoutAttachmentContentCachesInput, KnowledgeRemoteBindingUncheckedCreateWithoutAttachmentContentCachesInput>
+  }
+
+  export type KnowledgeRemoteBindingUpsertWithoutAttachmentContentCachesInput = {
+    update: XOR<KnowledgeRemoteBindingUpdateWithoutAttachmentContentCachesInput, KnowledgeRemoteBindingUncheckedUpdateWithoutAttachmentContentCachesInput>
+    create: XOR<KnowledgeRemoteBindingCreateWithoutAttachmentContentCachesInput, KnowledgeRemoteBindingUncheckedCreateWithoutAttachmentContentCachesInput>
+    where?: KnowledgeRemoteBindingWhereInput
+  }
+
+  export type KnowledgeRemoteBindingUpdateToOneWithWhereWithoutAttachmentContentCachesInput = {
+    where?: KnowledgeRemoteBindingWhereInput
+    data: XOR<KnowledgeRemoteBindingUpdateWithoutAttachmentContentCachesInput, KnowledgeRemoteBindingUncheckedUpdateWithoutAttachmentContentCachesInput>
+  }
+
+  export type KnowledgeRemoteBindingUpdateWithoutAttachmentContentCachesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    installationId?: StringFieldUpdateOperationsInput | string
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    version?: IntFieldUpdateOperationsInput | number
+    knowledgeSpace?: KnowledgeSpaceUpdateOneRequiredWithoutRemoteBindingsNestedInput
+    account?: AccountUpdateOneRequiredWithoutKnowledgeRemoteBindingsNestedInput
+    observation?: RemoteRepositoryObservationUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutBindingNestedInput
+  }
+
+  export type KnowledgeRemoteBindingUncheckedUpdateWithoutAttachmentContentCachesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    installationId?: StringFieldUpdateOperationsInput | string
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    version?: IntFieldUpdateOperationsInput | number
+    observation?: RemoteRepositoryObservationUncheckedUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUncheckedUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingNestedInput
   }
 
   export type AccountCreateWithoutKnowledgeWriteRequestsInput = {
@@ -187530,7 +193571,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
   }
 
@@ -187597,7 +193638,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
   }
 
@@ -187606,57 +193647,49 @@ export namespace Prisma {
     create: XOR<AccountCreateWithoutKnowledgeWriteRequestsInput, AccountUncheckedCreateWithoutKnowledgeWriteRequestsInput>
   }
 
-  export type KnowledgeRepositoryConnectionCreateWithoutWriteRequestsInput = {
+  export type KnowledgeRemoteBindingCreateWithoutWriteRequestsInput = {
     id: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutKnowledgeRepositoryConnectionsInput
-    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutConnectionInput
-    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutConnectionInput
+    knowledgeSpace: KnowledgeSpaceCreateNestedOneWithoutRemoteBindingsInput
+    account: AccountCreateNestedOneWithoutKnowledgeRemoteBindingsInput
+    observation?: RemoteRepositoryObservationCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedCreateWithoutWriteRequestsInput = {
+  export type KnowledgeRemoteBindingUncheckedCreateWithoutWriteRequestsInput = {
     id: string
+    knowledgeSpaceId: string
     identityId: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutConnectionInput
-    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutConnectionInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutConnectionInput
+    observation?: RemoteRepositoryObservationUncheckedCreateNestedOneWithoutBindingInput
+    historyFence?: RemoteHistoryFenceUncheckedCreateNestedOneWithoutBindingInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedCreateNestedOneWithoutBindingInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedCreateNestedManyWithoutBindingInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedCreateNestedManyWithoutBindingInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedCreateNestedManyWithoutBindingInput
   }
 
-  export type KnowledgeRepositoryConnectionCreateOrConnectWithoutWriteRequestsInput = {
-    where: KnowledgeRepositoryConnectionWhereUniqueInput
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutWriteRequestsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutWriteRequestsInput>
+  export type KnowledgeRemoteBindingCreateOrConnectWithoutWriteRequestsInput = {
+    where: KnowledgeRemoteBindingWhereUniqueInput
+    create: XOR<KnowledgeRemoteBindingCreateWithoutWriteRequestsInput, KnowledgeRemoteBindingUncheckedCreateWithoutWriteRequestsInput>
   }
 
   export type AccountUpsertWithoutKnowledgeWriteRequestsInput = {
@@ -187733,7 +193766,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
   }
 
@@ -187800,67 +193833,59 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionUpsertWithoutWriteRequestsInput = {
-    update: XOR<KnowledgeRepositoryConnectionUpdateWithoutWriteRequestsInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutWriteRequestsInput>
-    create: XOR<KnowledgeRepositoryConnectionCreateWithoutWriteRequestsInput, KnowledgeRepositoryConnectionUncheckedCreateWithoutWriteRequestsInput>
-    where?: KnowledgeRepositoryConnectionWhereInput
+  export type KnowledgeRemoteBindingUpsertWithoutWriteRequestsInput = {
+    update: XOR<KnowledgeRemoteBindingUpdateWithoutWriteRequestsInput, KnowledgeRemoteBindingUncheckedUpdateWithoutWriteRequestsInput>
+    create: XOR<KnowledgeRemoteBindingCreateWithoutWriteRequestsInput, KnowledgeRemoteBindingUncheckedCreateWithoutWriteRequestsInput>
+    where?: KnowledgeRemoteBindingWhereInput
   }
 
-  export type KnowledgeRepositoryConnectionUpdateToOneWithWhereWithoutWriteRequestsInput = {
-    where?: KnowledgeRepositoryConnectionWhereInput
-    data: XOR<KnowledgeRepositoryConnectionUpdateWithoutWriteRequestsInput, KnowledgeRepositoryConnectionUncheckedUpdateWithoutWriteRequestsInput>
+  export type KnowledgeRemoteBindingUpdateToOneWithWhereWithoutWriteRequestsInput = {
+    where?: KnowledgeRemoteBindingWhereInput
+    data: XOR<KnowledgeRemoteBindingUpdateWithoutWriteRequestsInput, KnowledgeRemoteBindingUncheckedUpdateWithoutWriteRequestsInput>
   }
 
-  export type KnowledgeRepositoryConnectionUpdateWithoutWriteRequestsInput = {
+  export type KnowledgeRemoteBindingUpdateWithoutWriteRequestsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutKnowledgeRepositoryConnectionsNestedInput
-    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutConnectionNestedInput
-    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutConnectionNestedInput
+    knowledgeSpace?: KnowledgeSpaceUpdateOneRequiredWithoutRemoteBindingsNestedInput
+    account?: AccountUpdateOneRequiredWithoutKnowledgeRemoteBindingsNestedInput
+    observation?: RemoteRepositoryObservationUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedUpdateWithoutWriteRequestsInput = {
+  export type KnowledgeRemoteBindingUncheckedUpdateWithoutWriteRequestsInput = {
     id?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutConnectionNestedInput
-    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutConnectionNestedInput
+    observation?: RemoteRepositoryObservationUncheckedUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUncheckedUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingNestedInput
   }
 
   export type AccountCreateWithoutSchedulesInput = {
@@ -187925,7 +193950,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -187992,7 +194017,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -188075,7 +194100,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -188142,7 +194167,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -188243,7 +194268,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -188310,7 +194335,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -188409,7 +194434,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -188476,7 +194501,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -188543,7 +194568,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -188610,7 +194635,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -188693,7 +194718,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -188760,7 +194785,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -188827,7 +194852,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -188894,7 +194919,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -189064,7 +195089,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -189131,7 +195156,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -189291,7 +195316,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -189358,7 +195383,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -189441,7 +195466,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -189508,7 +195533,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -189575,7 +195600,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -189642,7 +195667,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -189725,7 +195750,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -189792,7 +195817,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -189859,7 +195884,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -189926,7 +195951,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -190142,7 +196167,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -190209,7 +196234,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -190374,7 +196399,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -190441,7 +196466,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -190614,7 +196639,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -190681,7 +196706,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -190844,7 +196869,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -190911,7 +196936,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -191084,7 +197109,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -191151,7 +197176,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -191314,7 +197339,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -191381,7 +197406,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -191464,7 +197489,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -191531,7 +197556,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -191598,7 +197623,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -191665,7 +197690,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -191782,7 +197807,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -191849,7 +197874,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -191957,7 +197982,7 @@ export namespace Prisma {
     folders?: FolderCreateNestedManyWithoutIdentityInput
     resources?: ResourceCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
   }
@@ -192024,7 +198049,7 @@ export namespace Prisma {
     folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
     resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
     repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
   }
@@ -192138,7 +198163,7 @@ export namespace Prisma {
     folders?: FolderUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
   }
@@ -192205,7 +198230,7 @@ export namespace Prisma {
     folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
     resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
     repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRepositoryConnections?: KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
@@ -192979,23 +199004,16 @@ export namespace Prisma {
     modifiedAt?: Date | string | null
   }
 
-  export type KnowledgeRepositoryConnectionCreateManyAccountInput = {
+  export type KnowledgeRemoteBindingCreateManyAccountInput = {
     id: string
-    githubUserId: string
-    githubRepositoryId: string
-    githubRepositoryFullName: string
+    knowledgeSpaceId: string
+    provider?: string
     installationId: string
-    defaultBranch?: string
-    isPrivate?: boolean
-    status?: string
-    lastSyncedCommitSha?: string | null
-    lastProjectedCommitSha?: string | null
-    lastErrorCode?: string | null
-    lastErrorMessage?: string | null
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
     version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
   }
 
   export type KnowledgeRepositoryInstallationIntentCreateManyAccountInput = {
@@ -193018,7 +199036,7 @@ export namespace Prisma {
 
   export type KnowledgeWriteRequestCreateManyAccountInput = {
     id: string
-    connectionId: string
+    bindingId: string
     requestId: string
     requestHash: string
     relativePath: string
@@ -195420,71 +201438,56 @@ export namespace Prisma {
     modifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type KnowledgeRepositoryConnectionUpdateWithoutAccountInput = {
+  export type KnowledgeRemoteBindingUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutConnectionNestedInput
-    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutConnectionNestedInput
+    knowledgeSpace?: KnowledgeSpaceUpdateOneRequiredWithoutRemoteBindingsNestedInput
+    observation?: RemoteRepositoryObservationUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedUpdateWithoutAccountInput = {
+  export type KnowledgeRemoteBindingUncheckedUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutConnectionNestedInput
-    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutConnectionNestedInput
-    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutConnectionNestedInput
-    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutConnectionNestedInput
+    observation?: RemoteRepositoryObservationUncheckedUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUncheckedUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingNestedInput
   }
 
-  export type KnowledgeRepositoryConnectionUncheckedUpdateManyWithoutAccountInput = {
+  export type KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    githubUserId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryId?: StringFieldUpdateOperationsInput | string
-    githubRepositoryFullName?: StringFieldUpdateOperationsInput | string
+    knowledgeSpaceId?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
     installationId?: StringFieldUpdateOperationsInput | string
-    defaultBranch?: StringFieldUpdateOperationsInput | string
-    isPrivate?: BoolFieldUpdateOperationsInput | boolean
-    status?: StringFieldUpdateOperationsInput | string
-    lastSyncedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastProjectedCommitSha?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorCode?: NullableStringFieldUpdateOperationsInput | string | null
-    lastErrorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type KnowledgeRepositoryInstallationIntentUpdateWithoutAccountInput = {
@@ -195560,12 +201563,12 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    connection?: KnowledgeRepositoryConnectionUpdateOneRequiredWithoutWriteRequestsNestedInput
+    binding?: KnowledgeRemoteBindingUpdateOneRequiredWithoutWriteRequestsNestedInput
   }
 
   export type KnowledgeWriteRequestUncheckedUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -195587,7 +201590,7 @@ export namespace Prisma {
 
   export type KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    connectionId?: StringFieldUpdateOperationsInput | string
+    bindingId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
@@ -197732,7 +203735,71 @@ export namespace Prisma {
     lastVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type GithubWebhookDeliveryCreateManyConnectionInput = {
+  export type KnowledgeRemoteBindingCreateManyKnowledgeSpaceInput = {
+    id: string
+    identityId: string
+    provider?: string
+    installationId: string
+    repositoryId: string
+    repositoryFullNameSnapshot: string
+    connectedAt: Date | string
+    disconnectedAt?: Date | string | null
+    version?: number
+  }
+
+  export type KnowledgeRemoteBindingUpdateWithoutKnowledgeSpaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    installationId?: StringFieldUpdateOperationsInput | string
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    version?: IntFieldUpdateOperationsInput | number
+    account?: AccountUpdateOneRequiredWithoutKnowledgeRemoteBindingsNestedInput
+    observation?: RemoteRepositoryObservationUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUpdateManyWithoutBindingNestedInput
+  }
+
+  export type KnowledgeRemoteBindingUncheckedUpdateWithoutKnowledgeSpaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    installationId?: StringFieldUpdateOperationsInput | string
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    version?: IntFieldUpdateOperationsInput | number
+    observation?: RemoteRepositoryObservationUncheckedUpdateOneWithoutBindingNestedInput
+    historyFence?: RemoteHistoryFenceUncheckedUpdateOneWithoutBindingNestedInput
+    projectionCheckpoint?: KnowledgeProjectionCheckpointUncheckedUpdateOneWithoutBindingNestedInput
+    webhookDeliveries?: GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingNestedInput
+    noteProjections?: KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentProjections?: KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingNestedInput
+    attachmentContentCaches?: KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingNestedInput
+    writeRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingNestedInput
+  }
+
+  export type KnowledgeRemoteBindingUncheckedUpdateManyWithoutKnowledgeSpaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    installationId?: StringFieldUpdateOperationsInput | string
+    repositoryId?: StringFieldUpdateOperationsInput | string
+    repositoryFullNameSnapshot?: StringFieldUpdateOperationsInput | string
+    connectedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    disconnectedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    version?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type GithubWebhookDeliveryCreateManyBindingInput = {
     id: string
     deliveryId: string
     eventName: string
@@ -197745,7 +203812,7 @@ export namespace Prisma {
     processedAt?: Date | string | null
   }
 
-  export type KnowledgeNoteProjectionCreateManyConnectionInput = {
+  export type KnowledgeNoteProjectionCreateManyBindingInput = {
     id: string
     relativePath: string
     commitSha: string
@@ -197759,7 +203826,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
   }
 
-  export type KnowledgeAttachmentProjectionCreateManyConnectionInput = {
+  export type KnowledgeAttachmentProjectionCreateManyBindingInput = {
     id: string
     relativePath: string
     commitSha: string
@@ -197771,7 +203838,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
   }
 
-  export type KnowledgeAttachmentContentCacheCreateManyConnectionInput = {
+  export type KnowledgeAttachmentContentCacheCreateManyBindingInput = {
     blobSha: string
     byteSize: number
     contentBytes: Bytes
@@ -197779,7 +203846,7 @@ export namespace Prisma {
     expiresAt: Date | string
   }
 
-  export type KnowledgeWriteRequestCreateManyConnectionInput = {
+  export type KnowledgeWriteRequestCreateManyBindingInput = {
     id: string
     identityId: string
     requestId: string
@@ -197801,7 +203868,7 @@ export namespace Prisma {
     completedAt?: Date | string | null
   }
 
-  export type GithubWebhookDeliveryUpdateWithoutConnectionInput = {
+  export type GithubWebhookDeliveryUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     deliveryId?: StringFieldUpdateOperationsInput | string
     eventName?: StringFieldUpdateOperationsInput | string
@@ -197814,7 +203881,7 @@ export namespace Prisma {
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type GithubWebhookDeliveryUncheckedUpdateWithoutConnectionInput = {
+  export type GithubWebhookDeliveryUncheckedUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     deliveryId?: StringFieldUpdateOperationsInput | string
     eventName?: StringFieldUpdateOperationsInput | string
@@ -197827,7 +203894,7 @@ export namespace Prisma {
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type GithubWebhookDeliveryUncheckedUpdateManyWithoutConnectionInput = {
+  export type GithubWebhookDeliveryUncheckedUpdateManyWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     deliveryId?: StringFieldUpdateOperationsInput | string
     eventName?: StringFieldUpdateOperationsInput | string
@@ -197840,7 +203907,7 @@ export namespace Prisma {
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type KnowledgeNoteProjectionUpdateWithoutConnectionInput = {
+  export type KnowledgeNoteProjectionUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
@@ -197854,7 +203921,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type KnowledgeNoteProjectionUncheckedUpdateWithoutConnectionInput = {
+  export type KnowledgeNoteProjectionUncheckedUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
@@ -197868,7 +203935,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type KnowledgeNoteProjectionUncheckedUpdateManyWithoutConnectionInput = {
+  export type KnowledgeNoteProjectionUncheckedUpdateManyWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
@@ -197882,7 +203949,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type KnowledgeAttachmentProjectionUpdateWithoutConnectionInput = {
+  export type KnowledgeAttachmentProjectionUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
@@ -197894,7 +203961,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type KnowledgeAttachmentProjectionUncheckedUpdateWithoutConnectionInput = {
+  export type KnowledgeAttachmentProjectionUncheckedUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
@@ -197906,7 +203973,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutConnectionInput = {
+  export type KnowledgeAttachmentProjectionUncheckedUpdateManyWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     relativePath?: StringFieldUpdateOperationsInput | string
     commitSha?: StringFieldUpdateOperationsInput | string
@@ -197918,7 +203985,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type KnowledgeAttachmentContentCacheUpdateWithoutConnectionInput = {
+  export type KnowledgeAttachmentContentCacheUpdateWithoutBindingInput = {
     blobSha?: StringFieldUpdateOperationsInput | string
     byteSize?: IntFieldUpdateOperationsInput | number
     contentBytes?: BytesFieldUpdateOperationsInput | Bytes
@@ -197926,7 +203993,7 @@ export namespace Prisma {
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type KnowledgeAttachmentContentCacheUncheckedUpdateWithoutConnectionInput = {
+  export type KnowledgeAttachmentContentCacheUncheckedUpdateWithoutBindingInput = {
     blobSha?: StringFieldUpdateOperationsInput | string
     byteSize?: IntFieldUpdateOperationsInput | number
     contentBytes?: BytesFieldUpdateOperationsInput | Bytes
@@ -197934,7 +204001,7 @@ export namespace Prisma {
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutConnectionInput = {
+  export type KnowledgeAttachmentContentCacheUncheckedUpdateManyWithoutBindingInput = {
     blobSha?: StringFieldUpdateOperationsInput | string
     byteSize?: IntFieldUpdateOperationsInput | number
     contentBytes?: BytesFieldUpdateOperationsInput | Bytes
@@ -197942,7 +204009,7 @@ export namespace Prisma {
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type KnowledgeWriteRequestUpdateWithoutConnectionInput = {
+  export type KnowledgeWriteRequestUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
     requestHash?: StringFieldUpdateOperationsInput | string
@@ -197964,7 +204031,7 @@ export namespace Prisma {
     account?: AccountUpdateOneRequiredWithoutKnowledgeWriteRequestsNestedInput
   }
 
-  export type KnowledgeWriteRequestUncheckedUpdateWithoutConnectionInput = {
+  export type KnowledgeWriteRequestUncheckedUpdateWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string
@@ -197986,7 +204053,7 @@ export namespace Prisma {
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type KnowledgeWriteRequestUncheckedUpdateManyWithoutConnectionInput = {
+  export type KnowledgeWriteRequestUncheckedUpdateManyWithoutBindingInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     requestId?: StringFieldUpdateOperationsInput | string

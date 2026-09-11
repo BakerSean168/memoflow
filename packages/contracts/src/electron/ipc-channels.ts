@@ -203,6 +203,7 @@ export const RepositoryChannels = {
   KNOWLEDGE_CONNECTION_INSTALLATION_FINALIZE:
     'repository:knowledge-connection:installation:finalize',
   KNOWLEDGE_CONNECTION_LIST: 'repository:knowledge-connection:list',
+  KNOWLEDGE_CONNECTION_REFRESH_OBSERVATION: 'repository:knowledge-connection:refresh-observation',
   KNOWLEDGE_CONNECTION_CONNECT: 'repository:knowledge-connection:connect',
   KNOWLEDGE_CONNECTION_DISCONNECT: 'repository:knowledge-connection:disconnect',
   KNOWLEDGE_CONNECTION_RECONCILIATION_PREVIEW:

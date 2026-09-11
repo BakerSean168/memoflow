@@ -31,7 +31,7 @@ export class KnowledgeWriteRequestPrismaRepository implements IKnowledgeWriteReq
         data: {
           id: record.id,
           identityId: record.identityId,
-          connectionId: record.connectionId,
+          bindingId: record.connectionId,
           requestId: record.requestId,
           requestHash: record.requestHash,
           relativePath: record.relativePath,
@@ -102,11 +102,7 @@ export class KnowledgeWriteRequestPrismaRepository implements IKnowledgeWriteReq
     return updated.count === 1;
   }
 
-  async markProjectionSucceeded(
-    identityId: string,
-    id: string,
-    now: number,
-  ): Promise<boolean> {
+  async markProjectionSucceeded(identityId: string, id: string, now: number): Promise<boolean> {
     // Only advance Pending/Failed -> Succeeded. An already Succeeded projection
     // is a no-op (idempotent, never regresses).
     const updated = await this.db.knowledgeWriteRequest.updateMany({
@@ -149,7 +145,7 @@ export class KnowledgeWriteRequestPrismaRepository implements IKnowledgeWriteReq
     now: number,
   ): Promise<number> {
     const updated = await this.db.knowledgeWriteRequest.updateMany({
-      where: { connectionId, commitSha, projectionStatus: { not: 'Succeeded' } },
+      where: { bindingId: connectionId, commitSha, projectionStatus: { not: 'Succeeded' } },
       data: {
         projectionStatus: 'Succeeded',
         projectionErrorCode: null,
@@ -167,7 +163,7 @@ export class KnowledgeWriteRequestPrismaRepository implements IKnowledgeWriteReq
   ): Promise<KnowledgeWriteRequestRecord[]> {
     const rows = await this.db.knowledgeWriteRequest.findMany({
       where: {
-        connectionId,
+        bindingId: connectionId,
         status: 'Committed',
         projectionStatus: { in: ['Pending', 'Failed'] },
       },
@@ -186,7 +182,7 @@ export class KnowledgeWriteRequestPrismaRepository implements IKnowledgeWriteReq
     const rows = await this.db.knowledgeWriteRequest.findMany({
       where: {
         identityId,
-        ...(options.connectionId ? { connectionId: options.connectionId } : {}),
+        ...(options.connectionId ? { bindingId: options.connectionId } : {}),
       },
       orderBy: { createdAt: 'desc' },
       take: options.limit,
@@ -226,7 +222,7 @@ export class KnowledgeWriteRequestPrismaRepository implements IKnowledgeWriteReq
     return {
       id: row.id,
       identityId: row.identityId,
-      connectionId: row.connectionId,
+      connectionId: row.bindingId,
       requestId: row.requestId,
       requestHash: row.requestHash,
       relativePath: row.relativePath,

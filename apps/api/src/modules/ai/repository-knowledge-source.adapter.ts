@@ -65,35 +65,26 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
       .map(({ resource }) => resource);
   }
 
-  async listIndexableNotes(
-    identityId: string,
-    limit: number,
-  ): Promise<KnowledgeSourceNote[]> {
+  async listIndexableNotes(identityId: string, limit: number): Promise<KnowledgeSourceNote[]> {
     return this.loadNotes(identityId, limit);
   }
 
-  async getNoteById(
-    identityId: string,
-    resourceId: string,
-  ): Promise<KnowledgeSourceNote | null> {
+  async getNoteById(identityId: string, resourceId: string): Promise<KnowledgeSourceNote | null> {
     const row = await this.db.knowledgeNoteProjection.findFirst({
       where: {
         id: resourceId,
         deletedAt: null,
-        connection: { identityId, deletedAt: null, status: { in: ['Active', 'Suspended'] } },
+        binding: { identityId, disconnectedAt: null },
       },
     });
     return row ? this.toKnowledgeNote(identityId, row) : null;
   }
 
-  private async loadNotes(
-    identityId: string,
-    limit: number,
-  ): Promise<KnowledgeSourceNote[]> {
+  private async loadNotes(identityId: string, limit: number): Promise<KnowledgeSourceNote[]> {
     const rows = await this.db.knowledgeNoteProjection.findMany({
       where: {
         deletedAt: null,
-        connection: { identityId, deletedAt: null, status: { in: ['Active', 'Suspended'] } },
+        binding: { identityId, disconnectedAt: null },
       },
       orderBy: { updatedAt: 'desc' },
       take: limit,
@@ -105,7 +96,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     identityId: string,
     row: {
       id: string;
-      connectionId: string;
+      bindingId: string;
       relativePath: string;
       markdownContent: string;
       frontmatter: unknown;
@@ -126,7 +117,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
       row.contentHash || createHash('sha256').update(row.markdownContent).digest('hex');
     return {
       identityId,
-      repositoryId: row.connectionId,
+      repositoryId: row.bindingId,
       resourceId: row.id,
       resourcePath: row.relativePath,
       title,

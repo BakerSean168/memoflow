@@ -22,7 +22,7 @@ import type {
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,
   CreateKnowledgeRepositoryConnectionReq,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryInstallationIntentStatusResponse,
   KnowledgeRepositoryReconciliationPreview,
@@ -96,9 +96,17 @@ export class RepositoryIpcAdapter implements IRepositoryApiClient {
     return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_LIST);
   }
 
+  async refreshKnowledgeRepositoryObservation(
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
+    return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_REFRESH_OBSERVATION, {
+      connectionId,
+    });
+  }
+
   async connectKnowledgeRepository(
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>> {
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
     return this.ipcClient.invoke(RepositoryChannels.KNOWLEDGE_CONNECTION_CONNECT, request);
   }
 

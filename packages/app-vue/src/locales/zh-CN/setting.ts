@@ -42,7 +42,10 @@ export default {
     "desktopConnectHint": "点击下方按钮开始连接 GitHub 仓库。",
     "webConnectHint": "点击下方按钮跳转 GitHub 完成授权。",
     "defaultBranch": "默认分支：{branch}",
-    "lastSyncedCommit": "上次同步提交:{'：'}",
+    "lastConfirmedRemoteHead": "已确认远端 HEAD：{sha}",
+    "refreshProvider": "检查 GitHub 状态",
+    "refreshProviderFailed": "检查 GitHub Provider 状态失败",
+    "localRequiredBeforeConnect": "桌面端连接 GitHub 前请先选择本地知识库，以绑定同一个 KnowledgeSpace。",
     "errorTitle": "出错了",
     "loadFailed": "加载仓库连接失败",
     "startFailed": "发起连接失败",
@@ -91,25 +94,30 @@ export default {
         "RebasedAndPushed": "已合并并推送（{sha}）"
       }
     },
-    "lifecycle": {
-      "GITHUB_INSTALLATION_NOT_FOUND": "未找到 GitHub App 安装，请重新安装。",
-      "GITHUB_INSTALLATION_SUSPENDED": "GitHub App 安装已被暂停，请在 GitHub 上恢复。",
-      "GITHUB_CONTENTS_PERMISSION_REQUIRED": "缺少仓库内容权限，请在 GitHub 上更新授权。",
-      "GITHUB_REPOSITORY_ACCESS_LOST": "已失去该仓库的访问权限。",
-      "GITHUB_REPOSITORY_PUBLIC": "仓库已变为公开，仅支持私有仓库。",
-      "GITHUB_REPOSITORY_ARCHIVED": "仓库已归档，无法同步。",
-      "GITHUB_REPOSITORY_DISABLED": "仓库已被禁用。",
-      "GITHUB_REPOSITORY_ADMIN_REQUIRED": "需要仓库管理员权限。",
-      "GITHUB_DEFAULT_BRANCH_CHANGED": "仓库默认分支已变更，请重新连接。",
-      "GITHUB_LIFECYCLE_CHECK_UNAVAILABLE": "暂时无法检查仓库状态，请稍后重试。",
-      "unknown": "仓库状态异常，请重新检查连接。"
+    "providerStatus": {
+      "Ready": "Provider 可用",
+      "Blocked": "Provider 受阻",
+      "Unchecked": "尚未检查"
     },
-    "status": {
-      "PendingInstall": "待安装",
-      "Active": "已连接",
-      "Suspended": "已暂停",
-      "Revoked": "已撤销",
-      "Error": "异常"
+    "providerBlockReason": {
+      "InstallationMissing": "GitHub App 安装已不存在，请重新授权。",
+      "InstallationSuspended": "GitHub App 安装已暂停，请在 GitHub 恢复。",
+      "ContentsPermissionRequired": "缺少 Contents 写权限，请更新 GitHub App 授权。",
+      "RepositoryAccessLost": "GitHub App 已无法访问该仓库。",
+      "RepositoryPublic": "仓库已变为公开；为保护知识隐私，同步已暂停。",
+      "RepositoryArchived": "仓库已归档，无法同步。",
+      "RepositoryDisabled": "仓库已被 GitHub 禁用。",
+      "DefaultBranchChanged": "默认分支已变化，请执行重新协调以建立新的 history fence。",
+      "CheckUnavailable": "暂时无法检查 GitHub Provider；本地 Vault 仍可使用。",
+      "unknown": "GitHub Provider 状态需要检查。"
+    },
+    "projectionState": "投影：{state}",
+    "projectionStatus": {
+      "Ready": "就绪",
+      "Lagging": "待追平",
+      "Rebuilding": "重建中",
+      "Failed": "失败",
+      "Unknown": "尚无 checkpoint"
     }
   },
   "appearance": {

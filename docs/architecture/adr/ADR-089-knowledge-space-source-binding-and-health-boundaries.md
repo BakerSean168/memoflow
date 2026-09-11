@@ -13,7 +13,7 @@ updated: 2026-09-11T00:02:00+08:00
 
 # ADR-089: KnowledgeSpace、Source Binding 与 Health/Observation Boundary
 
-**状态：** 已采纳（实施中：Local Vault split 已完成，Remote split 待完成）
+**状态：** 已采纳（已实施 — 2026-09-11）
 **日期：** 2026-09-08
 **影响范围：** Repository/Knowledge、Desktop、GitHub App、Web Settings、Data Portability、Goal/Task Knowledge Context
 
@@ -48,7 +48,14 @@ Projection checkpoint = 服务端投影游标
 
 ### 1.1 Implementation checkpoint — 2026-09-11
 
-Desktop Local Vault 已完成本 ADR 的本地侧 cutover：binding 由稳定 `localProfileId` + `KnowledgeSpaceId` 拥有，filesystem 可用性改为独立 `LocalVaultHealth` observation，读取不再持久化 mutation；旧 schemaVersion 1 binding 不迁移。Remote Binding / provider observation / history fence / projection checkpoint 仍按本文后续章节实施中。
+本 ADR 已完成 canonical cutover：
+
+- Local Vault binding 由稳定 `localProfileId + KnowledgeSpaceId` 拥有，filesystem 可用性是独立 `LocalVaultHealth`；读取不再写 owner/status/timestamp，旧 schemaVersion 1 不迁移。
+- Remote 侧删除混合 `KnowledgeRepositoryConnection.status/error/cursor` 真值，改为 `KnowledgeRemoteBinding + RemoteRepositoryObservation + RemoteHistoryFence + KnowledgeProjectionCheckpoint`。
+- 普通 list Query 只读持久化 observation/checkpoint，不触发 GitHub I/O；Provider 检查通过显式 refresh / webhook / reconciliation / security preflight 更新。
+- Provider 失效只使 observation `Blocked`，不等于用户 disconnect；用户主动 disconnect 才写 `disconnectedAt`。
+- Desktop Local/Remote 必须共享同一个 `KnowledgeSpaceId`；continuous sync 必须同时满足 Provider Ready + history fence。
+- Prisma 与 server-held disclosure 均已切到四轴结构；Remote Knowledge 不在 PowerSync/Desktop 建第二份持久真值。
 
 ## 2. 当前事实
 

@@ -8,14 +8,16 @@ tags:
   - vnext
 description: Repository/Knowledge 当前事实源、绑定、同步、投影、AI 索引与遗留数据边界审计
 created: 2026-09-08T21:25:00+08:00
-updated: 2026-09-08T21:25:00+08:00
+updated: 2026-09-11T00:02:00+08:00
 ---
 
 # Knowledge Repository vNext — Current System Map
 
 ## 1. 文档地位
 
-本文记录 **2026-09-08 当前代码事实**，用于支撑 Repository/Knowledge vNext 建模。它不是目标态实现说明，也不把尚未实施的 ADR 当成当前行为。
+本文记录 **2026-09-08 当时代码事实**，用于支撑 Repository/Knowledge vNext 建模。它是历史 baseline，不应再被当作 2026-09-11 当前实现说明。
+
+> **2026-09-11 supersession note:** 本文第 4/6/7/8/9 节关于 Local `identityId/status`、`KnowledgeRepositoryConnection.status/error`、`lastSyncedCommitSha`、`lastProjectedCommitSha` 与 query-triggered lifecycle refresh 的描述已经被 ADR-089 实施替代。当前真值见 product module / ADR-089 / canonical system plan；本文保留用于说明为何需要该重构。ADR-090/091 相关 baseline 仍用于后续实施分析。
 
 相关目标态文档：
 

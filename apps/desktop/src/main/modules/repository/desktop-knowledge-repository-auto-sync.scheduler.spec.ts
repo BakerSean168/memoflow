@@ -4,7 +4,7 @@ import path from 'node:path';
 import type { ChokidarOptions, FSWatcher } from 'chokidar';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   SyncKnowledgeRepositoryRes,
 } from '@memoflow/contracts/repository';
 import { fail, ok } from '@memoflow/contracts/result';
@@ -17,30 +17,49 @@ import {
 const NOW = 1_750_000_000_000;
 const HEAD = 'a'.repeat(40);
 
+const SPACE_ID = 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440041' as never;
+const BINDING_ID = 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440042' as never;
+
 function connection(
-  overrides: Partial<KnowledgeRepositoryConnectionClientDTO> = {},
-): KnowledgeRepositoryConnectionClientDTO {
-  return {
-    id: 'connection-1',
+  overrides: Partial<KnowledgeRemoteBindingClientDTO> = {},
+): KnowledgeRemoteBindingClientDTO {
+  const base: KnowledgeRemoteBindingClientDTO = {
+    id: BINDING_ID,
+    knowledgeSpaceId: SPACE_ID,
     identityId:
-      'IdentityId_11111111-1111-4111-8111-111111111111' as KnowledgeRepositoryConnectionClientDTO['identityId'],
-    githubUserId: '42',
-    githubRepositoryId: '987654321',
-    githubRepositoryFullName: 'owner/knowledge',
+      'IdentityId_11111111-1111-4111-8111-111111111111' as KnowledgeRemoteBindingClientDTO['identityId'],
+    provider: 'GitHub',
     installationId: 'installation-1',
-    defaultBranch: 'main',
-    status: 'Active',
-    lastSyncedCommitSha: HEAD,
-    lastErrorCode: null,
-    canSync: true,
-    createdAt: NOW as KnowledgeRepositoryConnectionClientDTO['createdAt'],
-    updatedAt: NOW as KnowledgeRepositoryConnectionClientDTO['updatedAt'],
-    ...overrides,
+    repositoryId: '987654321',
+    repositoryFullNameSnapshot: 'owner/knowledge',
+    connectedAt: NOW,
+    disconnectedAt: null,
+    observation: {
+      bindingId: BINDING_ID,
+      observedAt: NOW,
+      accountId: '42',
+      repositoryFullName: 'owner/knowledge',
+      defaultBranch: 'main',
+      private: true,
+      archived: false,
+      disabled: false,
+      contentsPermission: 'write',
+      installationSuspended: false,
+      eligibility: { state: 'Ready' },
+    },
+    historyFence: {
+      bindingId: BINDING_ID,
+      defaultBranch: 'main',
+      lastConfirmedRemoteHeadSha: HEAD,
+      confirmedAt: NOW,
+    },
+    projectionCheckpoint: null,
   };
+  return { ...base, ...overrides };
 }
 
 function synchronizationResult(
-  currentConnection: KnowledgeRepositoryConnectionClientDTO = connection(),
+  currentConnection: KnowledgeRemoteBindingClientDTO = connection(),
 ): SyncKnowledgeRepositoryRes {
   return {
     connection: currentConnection,
@@ -73,7 +92,7 @@ async function flushMicrotasks(): Promise<void> {
 }
 
 function createFixture(options?: {
-  connections?: KnowledgeRepositoryConnectionClientDTO[];
+  connections?: KnowledgeRemoteBindingClientDTO[];
   stateFilePath?: string;
 }) {
   const watcher = new FakeWatcher();
@@ -97,7 +116,7 @@ function createFixture(options?: {
     getBinding: vi.fn(async () => ({
       binding: {
         id: localBindingId,
-        knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440041' as never,
+        knowledgeSpaceId: SPACE_ID,
         localProfileId: 'p_auto_sync',
         rootPath: '/vault',
         displayName: 'Vault',
@@ -119,7 +138,7 @@ function createFixture(options?: {
   };
   const synchronization = {
     executeAutomatic: vi.fn(
-      async (_identityId: string, currentConnection: KnowledgeRepositoryConnectionClientDTO) =>
+      async (_identityId: string, currentConnection: KnowledgeRemoteBindingClientDTO) =>
         ok(synchronizationResult(currentConnection)),
     ),
     commitLocalChanges: vi.fn(async () =>
@@ -171,7 +190,7 @@ describe('DesktopKnowledgeRepositoryAutoSyncScheduler', () => {
 
     expect(fixture.synchronization.executeAutomatic).toHaveBeenCalledWith(
       'identity-1',
-      expect.objectContaining({ id: 'connection-1' }),
+      expect.objectContaining({ id: BINDING_ID }),
     );
     expect(fixture.getWatchOptions()).toMatchObject({
       ignoreInitial: true,
@@ -263,9 +282,11 @@ describe('DesktopKnowledgeRepositoryAutoSyncScheduler', () => {
         ok({
           connections: [
             connection({
-              status: 'Suspended',
-              canSync: false,
-              lastErrorCode: 'GITHUB_REPOSITORY_ARCHIVED',
+              observation: {
+                ...connection().observation!,
+                archived: true,
+                eligibility: { state: 'Blocked', reason: 'RepositoryArchived' },
+              },
             }),
           ],
         }),
@@ -274,7 +295,7 @@ describe('DesktopKnowledgeRepositoryAutoSyncScheduler', () => {
       fail({
         code: 'FORBIDDEN',
         message: 'repository archived',
-        context: { lifecycleErrorCode: 'GITHUB_REPOSITORY_ARCHIVED' },
+        context: { remoteRepositoryBlockReason: 'RepositoryArchived' },
       }),
     );
 
@@ -302,7 +323,10 @@ describe('DesktopKnowledgeRepositoryAutoSyncScheduler', () => {
     expect(fixture.removeResumeListener).toHaveBeenCalledOnce();
     expect(fixture.synchronization.commitLocalChanges).toHaveBeenLastCalledWith(
       'identity-1',
-      expect.objectContaining({ id: 'connection-1', lastSyncedCommitSha: HEAD }),
+      expect.objectContaining({
+        id: BINDING_ID,
+        historyFence: expect.objectContaining({ lastConfirmedRemoteHeadSha: HEAD }),
+      }),
     );
     expect(fixture.synchronization.commitLocalChanges).toHaveBeenCalledOnce();
     expect(fixture.remote.listKnowledgeRepositoryConnections).toHaveBeenCalledOnce();
@@ -310,7 +334,21 @@ describe('DesktopKnowledgeRepositoryAutoSyncScheduler', () => {
 
   it('does not watch an ambiguous Vault with multiple reconciled connections', async () => {
     const fixture = createFixture({
-      connections: [connection(), connection({ id: 'connection-2', githubRepositoryId: '2' })],
+      connections: [
+        connection(),
+        connection({
+          id: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440043' as never,
+          repositoryId: '2',
+          observation: {
+            ...connection().observation!,
+            bindingId: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440043' as never,
+          },
+          historyFence: {
+            ...connection().historyFence!,
+            bindingId: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440043' as never,
+          },
+        }),
+      ],
     });
 
     await fixture.scheduler.start('identity-1');
@@ -327,7 +365,7 @@ describe('DesktopKnowledgeRepositoryAutoSyncScheduler', () => {
     const cached = connection();
     await fs.promises.writeFile(
       stateFilePath,
-      JSON.stringify({ schemaVersion: 1, connection: cached }),
+      JSON.stringify({ schemaVersion: 2, connection: cached }),
       'utf8',
     );
     const fixture = createFixture({ stateFilePath });
@@ -341,7 +379,10 @@ describe('DesktopKnowledgeRepositoryAutoSyncScheduler', () => {
     expect(fixture.getWatchOptions()).toBeDefined();
     expect(fixture.synchronization.executeAutomatic).toHaveBeenCalledWith(
       String(cached.identityId),
-      expect.objectContaining({ id: cached.id, lastSyncedCommitSha: HEAD }),
+      expect.objectContaining({
+        id: cached.id,
+        historyFence: expect.objectContaining({ lastConfirmedRemoteHeadSha: HEAD }),
+      }),
     );
 
     await fixture.scheduler.stop();

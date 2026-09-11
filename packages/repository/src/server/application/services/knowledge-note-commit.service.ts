@@ -13,7 +13,11 @@ import type { IdentityId, RepositoryId, ResourceId } from '@memoflow/contracts/p
 import { createLogger } from '@memoflow/utils/logger';
 import { GitHubAppClientFailureError } from '../ports/github-app-client.port';
 import type { GitHubFileCommitResult, IGitHubAppClient } from '../ports/github-app-client.port';
-import type { IKnowledgeRepositoryConnectionRepository } from '../ports/knowledge-repository-connection.repository';
+import type {
+  IKnowledgeRemoteBindingRepository,
+  IRemoteHistoryFenceRepository,
+  IRemoteRepositoryObservationRepository,
+} from '../ports/knowledge-remote-binding.repositories';
 import type { IKnowledgeRepositoryLeaseRepository } from '../ports/knowledge-repository-lease.repository';
 import type {
   IKnowledgeNoteProjectionRepository,
@@ -35,7 +39,9 @@ import {
 const logger = createLogger('KnowledgeNoteCommitService');
 
 export interface KnowledgeNoteCommitServiceOptions {
-  connectionRepository: IKnowledgeRepositoryConnectionRepository;
+  connectionRepository: IKnowledgeRemoteBindingRepository;
+  observationRepository: IRemoteRepositoryObservationRepository;
+  historyFenceRepository: IRemoteHistoryFenceRepository;
   projectionRepository: IKnowledgeNoteProjectionRepository;
   writeRequestRepository: IKnowledgeWriteRequestRepository;
   githubAppClient: IGitHubAppClient;
@@ -167,27 +173,38 @@ export class KnowledgeNoteCommitService {
       identityId,
       request.connectionId,
     );
-    if (!connection || connection.status !== 'Active' || connection.deletedAt !== null) {
+    if (!connection || connection.disconnectedAt !== null) {
       return fail({
         code: 'NOT_FOUND',
-        message: 'Active knowledge repository connection was not found',
+        message: 'Active knowledge remote binding was not found',
+      });
+    }
+    const [observation, historyFence] = await Promise.all([
+      this.options.observationRepository.findByBindingId(connection.id),
+      this.options.historyFenceRepository.findByBindingId(connection.id),
+    ]);
+    if (!observation || observation.eligibility.state !== 'Ready') {
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'Knowledge repository provider state requires attention',
       });
     }
     const inventory = await this.options.githubAppClient.getInstallationInventory(
       connection.installationId,
     );
     const repository = inventory.repositories.find(
-      (candidate) => candidate.id === connection.githubRepositoryId,
+      (candidate) => candidate.id === connection.repositoryId,
     );
     if (!repository || !this.canWrite(inventory.contentsPermission, repository)) {
       return fail({ code: 'FORBIDDEN', message: 'Knowledge repository is not writable' });
     }
-    if (repository.defaultBranch !== connection.defaultBranch) {
+    if (historyFence && repository.defaultBranch !== historyFence.defaultBranch) {
       return fail({
         code: 'CONFLICT',
-        message: 'Knowledge repository default branch changed; reconnect before creating notes',
+        message: 'Knowledge repository default branch changed; reconcile before creating notes',
       });
     }
+    const writeBranch = historyFence?.defaultBranch ?? repository.defaultBranch;
 
     const now = this.now();
     let record: KnowledgeWriteRequestRecord;
@@ -265,7 +282,7 @@ export class KnowledgeNoteCommitService {
       committed = await this.options.githubAppClient.createFileCommit(connection.installationId, {
         repository,
         path: request.proposedPath,
-        branch: connection.defaultBranch,
+        branch: writeBranch,
         content: markdownContent,
         message: `Create knowledge note: ${request.title}`,
         requestId: request.requestId,
@@ -325,7 +342,7 @@ export class KnowledgeNoteCommitService {
       );
       this.publishMutation({
         identityId: connection.identityId as IdentityId,
-        repositoryId: connection.id as RepositoryId,
+        repositoryId: String(connection.id) as RepositoryId,
         resourceId: projection.id as ResourceId,
         resourcePath: projection.relativePath,
         mutation: RepositoryNoteMutationType.Created,

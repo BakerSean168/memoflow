@@ -19,10 +19,12 @@ import type {
   ListKnowledgeWriteRequestsReq,
   ListKnowledgeWriteRequestsRes,
   GitHubInstallationRepositoryDTO,
+  KnowledgeProjectionCheckpoint,
+  RemoteRepositoryBlockReason,
 } from '@memoflow/contracts/repository';
 import type { IdentityId, RepositoryId, ResourceId } from '@memoflow/contracts/primitives';
 import { createLogger } from '@memoflow/utils/logger';
-import type { KnowledgeRepositoryConnectionServerDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/contracts/repository';
 import { GitHubAppClientFailureError } from '../ports/github-app-client.port';
 import type {
   GitHubBlobContent,
@@ -30,7 +32,12 @@ import type {
   IGitHubAppClient,
 } from '../ports/github-app-client.port';
 import type { GitHubMarkdownSnapshot } from '../ports/github-app-client.port';
-import type { IKnowledgeRepositoryConnectionRepository } from '../ports/knowledge-repository-connection.repository';
+import type {
+  IKnowledgeProjectionCheckpointRepository,
+  IKnowledgeRemoteBindingRepository,
+  IRemoteHistoryFenceRepository,
+  IRemoteRepositoryObservationRepository,
+} from '../ports/knowledge-remote-binding.repositories';
 import type {
   GithubWebhookDeliveryRecord,
   IGithubWebhookDeliveryRepository,
@@ -59,6 +66,7 @@ import {
   knowledgeRepositoryConnectionLeaseKey,
   knowledgeRepositoryDeliveryLeaseKey,
 } from './knowledge-repository-lease-coordinator';
+import { buildRemoteRepositoryObservation } from './remote-repository-observation.policy';
 
 const logger = createLogger('KnowledgeRepositoryProjectionService');
 const DEFAULT_RECONCILIATION_INTERVAL_MS = 15 * 60 * 1_000;
@@ -96,7 +104,10 @@ const FORCE_PUSH_ERROR = 'GITHUB_FORCE_PUSH_REQUIRES_RECONCILIATION';
 
 export interface KnowledgeRepositoryProjectionServiceOptions {
   webhookSecret: string;
-  connectionRepository: IKnowledgeRepositoryConnectionRepository;
+  connectionRepository: IKnowledgeRemoteBindingRepository;
+  observationRepository: IRemoteRepositoryObservationRepository;
+  historyFenceRepository: IRemoteHistoryFenceRepository;
+  projectionCheckpointRepository: IKnowledgeProjectionCheckpointRepository;
   deliveryRepository: IGithubWebhookDeliveryRepository;
   projectionRepository: IKnowledgeNoteProjectionRepository;
   attachmentRepository?: IKnowledgeAttachmentProjectionRepository;
@@ -140,7 +151,7 @@ export class KnowledgeRepositoryProjectionService {
   private reconciliationTimer: ReturnType<typeof setInterval> | null = null;
   private reconciliationRun: Promise<void> | null = null;
   private readonly leaseCoordinator: KnowledgeRepositoryLeaseCoordinator;
-  private reconciliationCursor: { updatedAt: number; id: string } | null = null;
+  private reconciliationCursor: { connectedAt: number; id: string } | null = null;
 
   constructor(private readonly options: KnowledgeRepositoryProjectionServiceOptions) {
     this.now = options.now ?? Date.now;
@@ -208,15 +219,19 @@ export class KnowledgeRepositoryProjectionService {
     if (!installationId || !repositoryId || !afterSha || !repositoryBranch || !ref) {
       return fail({ code: 'VALIDATION_ERROR', message: 'GitHub push payload is incomplete' });
     }
-    const connection =
-      await this.options.connectionRepository.findByInstallationAndGithubRepositoryId(
-        installationId,
-        repositoryId,
-      );
+    const connection = await this.options.connectionRepository.findByInstallationAndRepositoryId(
+      installationId,
+      repositoryId,
+    );
     if (!connection) {
       return ok({ accepted: false, duplicate: false, reason: 'connection_not_found' });
     }
-    if (ref !== `refs/heads/${connection.defaultBranch}`) {
+    const [historyFence, observation] = await Promise.all([
+      this.options.historyFenceRepository.findByBindingId(connection.id),
+      this.options.observationRepository.findByBindingId(connection.id),
+    ]);
+    const expectedBranch = historyFence?.defaultBranch ?? observation?.defaultBranch ?? null;
+    if (!expectedBranch || ref !== `refs/heads/${expectedBranch}`) {
       const ignored = await this.options.deliveryRepository.reserve({
         id: `github-delivery-${randomUUID()}`,
         connectionId: connection.id,
@@ -319,7 +334,7 @@ export class KnowledgeRepositoryProjectionService {
       identityId,
       attachment.connectionId,
     );
-    if (!connection || connection.deletedAt !== null) {
+    if (!connection || connection.disconnectedAt !== null) {
       return fail({ code: 'NOT_FOUND', message: 'Knowledge attachment was not found' });
     }
     try {
@@ -819,7 +834,7 @@ export class KnowledgeRepositoryProjectionService {
       }
       const last = candidates[candidates.length - 1];
       if (last) {
-        this.reconciliationCursor = { updatedAt: Number(last.updatedAt), id: last.id };
+        this.reconciliationCursor = { connectedAt: Number(last.connectedAt), id: last.id };
       }
       await Promise.all(
         candidates.map((connection) =>
@@ -842,9 +857,9 @@ export class KnowledgeRepositoryProjectionService {
    */
   private async loadOwnedConnectionById(
     connectionId: string,
-  ): Promise<KnowledgeRepositoryConnectionServerDTO | null> {
+  ): Promise<KnowledgeRemoteBindingServerDTO | null> {
     const connection = await this.options.connectionRepository.findById(connectionId);
-    if (!connection || connection.deletedAt !== null) {
+    if (!connection || connection.disconnectedAt !== null) {
       return null;
     }
 
@@ -867,28 +882,76 @@ export class KnowledgeRepositoryProjectionService {
   ): Promise<void> {
     const connection = await this.loadOwnedConnectionById(connectionId);
     if (!connection) return;
+    const attemptAt = this.now();
+    let inventory: Awaited<ReturnType<IGitHubAppClient['getInstallationInventory']>>;
     try {
-      const inventory = await this.options.githubAppClient.getInstallationInventory(
+      inventory = await this.options.githubAppClient.getInstallationInventory(
         connection.installationId,
       );
+    } catch (error) {
+      await this.persistObservationUnavailable(
+        connection,
+        error instanceof GitHubAppClientFailureError && error.failure.kind === 'not_found'
+          ? 'InstallationMissing'
+          : 'CheckUnavailable',
+      );
+      return;
+    }
+    try {
       const repository = this.findRepository(inventory.repositories, connection);
-      if (
-        inventory.suspended ||
-        inventory.contentsPermission === 'none' ||
-        !repository ||
-        !repository.private ||
-        repository.archived ||
-        repository.disabled ||
-        repository.defaultBranch !== connection.defaultBranch
-      ) {
+      if (!repository) {
+        await this.persistMissingRepositoryObservation(
+          connection,
+          inventory,
+          'RepositoryAccessLost',
+        );
         return;
       }
-      const remote = await this.options.githubAppClient.getRepositorySnapshot(
-        connection.installationId,
+      const historyFence = await this.options.historyFenceRepository.findByBindingId(connection.id);
+      const observation = buildRemoteRepositoryObservation({
+        binding: connection,
+        inventory,
         repository,
-      );
-      if (!remote.headSha || remote.headSha === connection.lastProjectedCommitSha) return;
+        historyFence,
+        observedAt: attemptAt,
+      });
+      await this.options.observationRepository.save(observation);
+      if (observation.eligibility.state !== 'Ready') return;
 
+      let remote: Awaited<ReturnType<IGitHubAppClient['getRepositorySnapshot']>>;
+      try {
+        remote = await this.options.githubAppClient.getRepositorySnapshot(
+          connection.installationId,
+          repository,
+        );
+      } catch {
+        await this.persistObservationUnavailable(connection, 'CheckUnavailable');
+        return;
+      }
+      const checkpoint = await this.options.projectionCheckpointRepository.findByBindingId(
+        connection.id,
+      );
+      if (!remote.headSha) {
+        await this.saveProjectionCheckpoint(connection, {
+          branch: remote.defaultBranch,
+          projectedCommitSha: null,
+          state: 'Ready',
+          failure: null,
+          lastAttemptAt: attemptAt,
+          projectedAt: attemptAt,
+        });
+        return;
+      }
+      if (checkpoint?.projectedCommitSha === remote.headSha && checkpoint.state === 'Ready') return;
+
+      await this.saveProjectionCheckpoint(connection, {
+        branch: remote.defaultBranch,
+        projectedCommitSha: checkpoint?.projectedCommitSha ?? null,
+        state: 'Rebuilding',
+        failure: null,
+        lastAttemptAt: attemptAt,
+        projectedAt: checkpoint?.projectedAt ?? null,
+      });
       const snapshot = await this.options.githubAppClient.getFullMarkdownSnapshot(
         connection.installationId,
         repository,
@@ -897,25 +960,30 @@ export class KnowledgeRepositoryProjectionService {
       await guard.ensureHeld();
       await this.applyFullSnapshot(connection, remote.headSha, snapshot);
       await guard.ensureHeld();
-      await this.options.connectionRepository.save({
-        ...connection,
-        status: 'Active',
-        lastProjectedCommitSha: remote.headSha,
-        lastErrorCode: null,
-        lastErrorMessage: null,
-        version: connection.status === 'Active' ? connection.version : connection.version + 1,
-        updatedAt: this.now() as KnowledgeRepositoryConnectionServerDTO['updatedAt'],
+      const projectedAt = this.now();
+      await this.saveProjectionCheckpoint(connection, {
+        branch: remote.defaultBranch,
+        projectedCommitSha: remote.headSha,
+        state: 'Ready',
+        failure: null,
+        lastAttemptAt: attemptAt,
+        projectedAt,
       });
       await guard.ensureHeld();
       if (this.options.writeRequestRepository) {
         await this.options.writeRequestRepository.markProjectionSucceededByCommit(
           connection.id,
           remote.headSha,
-          this.now(),
+          projectedAt,
         );
       }
     } catch (error) {
       if (error instanceof KnowledgeRepositoryLeaseLostError) return;
+      await this.saveProjectionFailure(
+        connection,
+        'KNOWLEDGE_PROJECTION_RECONCILIATION_FAILED',
+        error instanceof Error ? error.message : 'Knowledge projection reconciliation failed',
+      );
       logger.warn('Knowledge projection connection reconciliation failed', {
         error,
         connectionId,
@@ -965,7 +1033,7 @@ export class KnowledgeRepositoryProjectionService {
 
   private async processDeliveryOwned(
     delivery: GithubWebhookDeliveryRecord,
-    connection: KnowledgeRepositoryConnectionServerDTO,
+    connection: KnowledgeRemoteBindingServerDTO,
     guard: { ensureHeld(): Promise<void> },
   ): Promise<void> {
     await guard.ensureHeld();
@@ -974,68 +1042,96 @@ export class KnowledgeRepositoryProjectionService {
       delivery.connectionId,
       'Processing',
     );
+
+    if (delivery.forced) {
+      await guard.ensureHeld();
+      await this.saveProjectionFailure(
+        connection,
+        FORCE_PUSH_ERROR,
+        'Force push requires full reconciliation',
+      );
+      await this.options.deliveryRepository.updateStatus(
+        delivery.id,
+        delivery.connectionId,
+        'Failed',
+        'Force push requires full reconciliation',
+      );
+      return;
+    }
+
+    let inventory: Awaited<ReturnType<IGitHubAppClient['getInstallationInventory']>>;
     try {
-      if (delivery.forced) {
-        await guard.ensureHeld();
-        await this.persistConnectionError(
-          connection,
-          FORCE_PUSH_ERROR,
-          'Force push requires full reconciliation',
-        );
-        await guard.ensureHeld();
-        await this.options.deliveryRepository.updateStatus(
-          delivery.id,
-          delivery.connectionId,
-          'Failed',
-          'Force push requires full reconciliation',
-        );
-        return;
-      }
-      const inventory = await this.options.githubAppClient.getInstallationInventory(
+      inventory = await this.options.githubAppClient.getInstallationInventory(
         connection.installationId,
       );
-      const repository = this.findRepository(inventory.repositories, connection);
-      if (
-        inventory.suspended ||
-        inventory.contentsPermission !== 'write' ||
-        !repository ||
-        !repository.private ||
-        repository.archived ||
-        repository.disabled
-      ) {
-        await guard.ensureHeld();
-        await this.persistConnectionError(
-          connection,
-          'GITHUB_REPOSITORY_NOT_SYNCABLE',
-          'Repository authorization is no longer valid for projection ingestion',
-        );
-        await guard.ensureHeld();
-        await this.options.deliveryRepository.updateStatus(
-          delivery.id,
-          delivery.connectionId,
-          'Failed',
-          'Repository authorization is no longer valid',
-        );
-        return;
-      }
-      if (repository.defaultBranch !== connection.defaultBranch) {
-        await guard.ensureHeld();
-        await this.persistConnectionError(
-          connection,
-          'GITHUB_DEFAULT_BRANCH_CHANGED',
-          `Repository default branch changed from ${connection.defaultBranch} to ${repository.defaultBranch}`,
-        );
-        await guard.ensureHeld();
-        await this.options.deliveryRepository.updateStatus(
-          delivery.id,
-          delivery.connectionId,
-          'Failed',
-          'Repository default branch changed',
-        );
-        return;
-      }
-      const afterSha = delivery.afterSha;
-      if (!afterSha) throw new Error('Webhook delivery has no after SHA');
+    } catch (error) {
+      await this.persistObservationUnavailable(connection, 'CheckUnavailable');
+      await guard.ensureHeld();
+      await this.options.deliveryRepository.updateStatus(
+        delivery.id,
+        delivery.connectionId,
+        'Failed',
+        error instanceof Error ? error.message : 'Repository provider observation failed',
+      );
+      return;
+    }
+
+    const repository = this.findRepository(inventory.repositories, connection);
+    if (!repository) {
+      await this.persistMissingRepositoryObservation(connection, inventory, 'RepositoryAccessLost');
+      await guard.ensureHeld();
+      await this.options.deliveryRepository.updateStatus(
+        delivery.id,
+        delivery.connectionId,
+        'Failed',
+        'Repository is no longer available to the GitHub App installation',
+      );
+      return;
+    }
+    const historyFence = await this.options.historyFenceRepository.findByBindingId(connection.id);
+    const observation = buildRemoteRepositoryObservation({
+      binding: connection,
+      inventory,
+      repository,
+      historyFence,
+      observedAt: this.now(),
+    });
+    await this.options.observationRepository.save(observation);
+    if (observation.eligibility.state !== 'Ready') {
+      await guard.ensureHeld();
+      await this.options.deliveryRepository.updateStatus(
+        delivery.id,
+        delivery.connectionId,
+        'Failed',
+        `Repository provider state blocked projection: ${observation.eligibility.reason}`,
+      );
+      return;
+    }
+
+    const afterSha = delivery.afterSha;
+    if (!afterSha) {
+      await this.options.deliveryRepository.updateStatus(
+        delivery.id,
+        delivery.connectionId,
+        'Failed',
+        'Webhook delivery has no after SHA',
+      );
+      return;
+    }
+    const attemptAt = this.now();
+    const previousCheckpoint = await this.options.projectionCheckpointRepository.findByBindingId(
+      connection.id,
+    );
+    await this.saveProjectionCheckpoint(connection, {
+      branch: repository.defaultBranch,
+      projectedCommitSha: previousCheckpoint?.projectedCommitSha ?? null,
+      state: 'Rebuilding',
+      failure: null,
+      lastAttemptAt: attemptAt,
+      projectedAt: previousCheckpoint?.projectedAt ?? null,
+    });
+
+    try {
       const changes = await this.options.githubAppClient.getMarkdownChanges(
         connection.installationId,
         repository,
@@ -1123,19 +1219,21 @@ export class KnowledgeRepositoryProjectionService {
         deletedPaths.forEach((path) => this.publishDeletedProjectionMutation(connection, path));
       }
       await guard.ensureHeld();
-      await this.options.connectionRepository.save({
-        ...connection,
-        lastProjectedCommitSha: afterSha,
-        updatedAt: this.now() as KnowledgeRepositoryConnectionServerDTO['updatedAt'],
+      const projectedAt = this.now();
+      await this.saveProjectionCheckpoint(connection, {
+        branch: repository.defaultBranch,
+        projectedCommitSha: afterSha,
+        state: 'Ready',
+        failure: null,
+        lastAttemptAt: attemptAt,
+        projectedAt,
       });
-      // Bind write requests committed at this SHA to a Succeeded projection so
-      // external Git commits refresh the ledger (W6-A refresh).
       await guard.ensureHeld();
       if (this.options.writeRequestRepository) {
         await this.options.writeRequestRepository.markProjectionSucceededByCommit(
           connection.id,
           afterSha,
-          this.now(),
+          projectedAt,
         );
       }
       await guard.ensureHeld();
@@ -1147,6 +1245,11 @@ export class KnowledgeRepositoryProjectionService {
     } catch (error) {
       if (error instanceof KnowledgeRepositoryLeaseLostError) return;
       await guard.ensureHeld();
+      await this.saveProjectionFailure(
+        connection,
+        'KNOWLEDGE_PROJECTION_INGESTION_FAILED',
+        error instanceof Error ? error.message : 'Projection ingestion failed',
+      );
       await this.options.deliveryRepository.updateStatus(
         delivery.id,
         delivery.connectionId,
@@ -1212,7 +1315,7 @@ export class KnowledgeRepositoryProjectionService {
   }
 
   private async applyFullSnapshot(
-    connection: KnowledgeRepositoryConnectionServerDTO,
+    connection: KnowledgeRemoteBindingServerDTO,
     commitSha: string,
     snapshot: GitHubMarkdownSnapshot,
   ): Promise<void> {
@@ -1240,7 +1343,7 @@ export class KnowledgeRepositoryProjectionService {
     deleted.forEach((projection) =>
       this.publishMutation({
         identityId: connection.identityId as IdentityId,
-        repositoryId: connection.id as RepositoryId,
+        repositoryId: String(connection.id) as RepositoryId,
         resourceId: projection.id as ResourceId,
         resourcePath: projection.relativePath,
         mutation: RepositoryNoteMutationType.Deleted,
@@ -1250,21 +1353,19 @@ export class KnowledgeRepositoryProjectionService {
 
   private findRepository(
     repositories: GitHubInstallationRepositoryDTO[],
-    connection: KnowledgeRepositoryConnectionServerDTO,
+    connection: KnowledgeRemoteBindingServerDTO,
   ): GitHubInstallationRepositoryDTO | null {
-    return (
-      repositories.find((repository) => repository.id === connection.githubRepositoryId) ?? null
-    );
+    return repositories.find((repository) => repository.id === connection.repositoryId) ?? null;
   }
 
   private publishProjectionMutation(
-    connection: KnowledgeRepositoryConnectionServerDTO,
+    connection: KnowledgeRemoteBindingServerDTO,
     projection: KnowledgeNoteProjectionUpsert,
     mutation: RepositoryNoteMutationPayload['mutation'],
   ): void {
     this.publishMutation({
       identityId: connection.identityId as IdentityId,
-      repositoryId: connection.id as RepositoryId,
+      repositoryId: String(connection.id) as RepositoryId,
       resourceId: projection.id as ResourceId,
       resourcePath: projection.relativePath,
       mutation,
@@ -1272,31 +1373,79 @@ export class KnowledgeRepositoryProjectionService {
   }
 
   private publishDeletedProjectionMutation(
-    connection: KnowledgeRepositoryConnectionServerDTO,
+    connection: KnowledgeRemoteBindingServerDTO,
     relativePath: string,
   ): void {
     const projectionId = `knowledge-note-${createHash('sha256').update(`${connection.id}:${relativePath}`).digest('hex')}`;
     this.publishMutation({
       identityId: connection.identityId as IdentityId,
-      repositoryId: connection.id as RepositoryId,
+      repositoryId: String(connection.id) as RepositoryId,
       resourceId: projectionId as ResourceId,
       resourcePath: relativePath,
       mutation: RepositoryNoteMutationType.Deleted,
     });
   }
 
-  private async persistConnectionError(
-    connection: KnowledgeRepositoryConnectionServerDTO,
+  private async saveProjectionCheckpoint(
+    connection: KnowledgeRemoteBindingServerDTO,
+    checkpoint: Omit<KnowledgeProjectionCheckpoint, 'bindingId'>,
+  ): Promise<void> {
+    await this.options.projectionCheckpointRepository.save({
+      bindingId: connection.id,
+      ...checkpoint,
+    });
+  }
+
+  private async saveProjectionFailure(
+    connection: KnowledgeRemoteBindingServerDTO,
     code: string,
     message: string,
   ): Promise<void> {
-    await this.options.connectionRepository.save({
-      ...connection,
-      status: 'Error',
-      lastErrorCode: code,
-      lastErrorMessage: message,
-      version: connection.version + 1,
-      updatedAt: this.now() as KnowledgeRepositoryConnectionServerDTO['updatedAt'],
+    const current = await this.options.projectionCheckpointRepository.findByBindingId(
+      connection.id,
+    );
+    if (!current) {
+      throw new Error('Knowledge projection checkpoint is missing for the remote binding');
+    }
+    await this.options.projectionCheckpointRepository.save({
+      ...current,
+      state: 'Failed',
+      failure: { code, message },
+      lastAttemptAt: this.now(),
+    });
+  }
+
+  private async persistObservationUnavailable(
+    connection: KnowledgeRemoteBindingServerDTO,
+    reason: Extract<RemoteRepositoryBlockReason, 'InstallationMissing' | 'CheckUnavailable'>,
+  ): Promise<void> {
+    const previous = await this.options.observationRepository.findByBindingId(connection.id);
+    if (!previous) {
+      throw new Error('Remote repository observation is missing for the remote binding');
+    }
+    await this.options.observationRepository.save({
+      ...previous,
+      observedAt: this.now(),
+      eligibility: { state: 'Blocked', reason },
+    });
+  }
+
+  private async persistMissingRepositoryObservation(
+    connection: KnowledgeRemoteBindingServerDTO,
+    inventory: Awaited<ReturnType<IGitHubAppClient['getInstallationInventory']>>,
+    reason: Extract<RemoteRepositoryBlockReason, 'RepositoryAccessLost'>,
+  ): Promise<void> {
+    const previous = await this.options.observationRepository.findByBindingId(connection.id);
+    if (!previous) {
+      throw new Error('Remote repository observation is missing for the remote binding');
+    }
+    await this.options.observationRepository.save({
+      ...previous,
+      observedAt: this.now(),
+      accountId: inventory.accountId,
+      contentsPermission: inventory.contentsPermission,
+      installationSuspended: inventory.suspended,
+      eligibility: { state: 'Blocked', reason },
     });
   }
 

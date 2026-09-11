@@ -20,7 +20,7 @@ import type {
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,
   CreateKnowledgeRepositoryConnectionReq,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryInstallationIntentStatusResponse,
   KnowledgeRepositoryReconciliationPreview,
@@ -61,9 +61,12 @@ export interface IRepositoryApiClient {
     intentId: string,
   ): Promise<Result<CompleteKnowledgeRepositoryInstallationRes>>;
   listKnowledgeRepositoryConnections(): Promise<Result<ListKnowledgeRepositoryConnectionsRes>>;
+  refreshKnowledgeRepositoryObservation(
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   connectKnowledgeRepository(
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>>;
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   disconnectKnowledgeRepository(
     connectionId: string,
     purgeCloudData?: boolean,

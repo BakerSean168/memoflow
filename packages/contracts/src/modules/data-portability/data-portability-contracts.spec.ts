@@ -113,7 +113,13 @@ describe('parseUserDataExportEnvelope V2', () => {
       data: {
         repositories: {
           repositories: [
-            { _ref: 'repository:1', name: 'Knowledge', type: 'local', config: { auth: { token: 'x' } }, status: 'ACTIVE' },
+            {
+              _ref: 'repository:1',
+              name: 'Knowledge',
+              type: 'local',
+              config: { auth: { token: 'x' } },
+              status: 'ACTIVE',
+            },
           ],
           folders: [],
           resources: [],
@@ -204,14 +210,18 @@ describe('PortableUserDataV2Schema', () => {
 
   it('rejects persistent identity/database fields', () => {
     expect(
-      PortableUserDataV2Schema.safeParse({ settings: { preferences: {}, identityId: 'identity-1' } }).success,
+      PortableUserDataV2Schema.safeParse({
+        settings: { preferences: {}, identityId: 'identity-1' },
+      }).success,
     ).toBe(false);
   });
 });
 
 describe('Task Goal link / contribution portable contract', () => {
   it('supports both link-only and link+contribution Task plans', () => {
-    expect(PortableTaskDataSchema.safeParse({ templates: [validTask], instances: [] }).success).toBe(true);
+    expect(
+      PortableTaskDataSchema.safeParse({ templates: [validTask], instances: [] }).success,
+    ).toBe(true);
     expect(
       PortableTaskDataSchema.safeParse({
         templates: [{ ...validTask, contribution: null }],
@@ -247,7 +257,9 @@ describe('Task Goal link / contribution portable contract', () => {
 
 describe('module schemas', () => {
   it('accepts canonical Goal vNext data', () => {
-    expect(PortableGoalDataSchema.safeParse({ items: [validGoal], records: [] }).success).toBe(true);
+    expect(PortableGoalDataSchema.safeParse({ items: [validGoal], records: [] }).success).toBe(
+      true,
+    );
   });
 
   it('accepts canonical Reminder data', () => {
@@ -258,7 +270,8 @@ describe('module schemas', () => {
 
   it('accepts repository, schedule, editor, AI, and settings empty shapes', () => {
     expect(
-      PortableRepositoryDataSchema.safeParse({ repositories: [], folders: [], resources: [] }).success,
+      PortableRepositoryDataSchema.safeParse({ repositories: [], folders: [], resources: [] })
+        .success,
     ).toBe(true);
     expect(PortableScheduleDataSchema.safeParse({ entries: [], tasks: [] }).success).toBe(true);
     expect(PortableEditorDataSchema.safeParse({ workspaces: [] }).success).toBe(true);
@@ -305,7 +318,11 @@ describe('server-held disclosure schema', () => {
         includesDatabaseInternalRetrievalVector: false,
       },
       data: {
-        knowledgeRepositoryConnections: [],
+        knowledgeSpaces: [],
+        knowledgeRemoteBindings: [],
+        remoteRepositoryObservations: [],
+        remoteHistoryFences: [],
+        knowledgeProjectionCheckpoints: [],
         githubWebhookDeliveries: [],
         knowledgeNoteProjections: [],
         knowledgeAttachmentProjections: [],

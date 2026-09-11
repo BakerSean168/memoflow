@@ -74,7 +74,7 @@ model Account {
   folders                        Folder[]                        @relation("AccountFolders")
   resources                      Resource[]                      @relation("AccountResources")
   repositoryResources            RepositoryResource[]            @relation("AccountRepositoryResources")
-  knowledgeRepositoryConnections KnowledgeRepositoryConnection[]
+  knowledgeRemoteBindings        KnowledgeRemoteBinding[]
   knowledgeRepositoryInstallationIntents KnowledgeRepositoryInstallationIntent[]
   knowledgeWriteRequests         KnowledgeWriteRequest[]
 

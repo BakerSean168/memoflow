@@ -58,13 +58,10 @@ export default {
       "indexed": "可检索",
       "failed": "索引失败"
     },
-    "status": {
-      "Active": "已连接",
-      "Suspended": "已暂停",
-      "Revoked": "已撤销",
-      "Error": "需要处理",
-      "PendingInstall": "等待安装",
-      "Unknown": "未知状态"
+    "providerStatus": {
+      "Ready": "Provider 可用",
+      "Blocked": "Provider 受阻",
+      "Unchecked": "尚未检查"
     }
   },
   "writeRequestLedger": {

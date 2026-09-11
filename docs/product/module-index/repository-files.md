@@ -25,7 +25,7 @@ updated: 2026-09-11T00:02:00+08:00
 | [`ADR-090`](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)                                                                         | 稳定 `KnowledgeDocumentId` 与 path-independent durable reference              |
 | [`ADR-091`](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)                                                        | 单一 ProjectionEngine、AI Index ownership、可靠 Operation 与 capability ports |
 
-> 2026-09-11：ADR-089 的 Local Vault ownership/health split 已进入生产代码；Remote Binding/Observation/Fence/Checkpoint、ADR-090 与 ADR-091 仍待实施。
+> 2026-09-11：ADR-089 已完成 Local/Remote 全切换；Remote persistence 为 Binding/Observation/HistoryFence/ProjectionCheckpoint 四轴，普通 list 为纯读。ADR-090 与 ADR-091 仍待实施。
 
 ## 前端页面与路由
 

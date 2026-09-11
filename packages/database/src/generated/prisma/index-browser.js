@@ -1169,29 +1169,61 @@ exports.Prisma.KnowledgeRepositoryInstallationIntentScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.KnowledgeRepositoryConnectionScalarFieldEnum = {
+exports.Prisma.KnowledgeSpaceScalarFieldEnum = {
   id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.KnowledgeRemoteBindingScalarFieldEnum = {
+  id: 'id',
+  knowledgeSpaceId: 'knowledgeSpaceId',
   identityId: 'identityId',
-  githubUserId: 'githubUserId',
-  githubRepositoryId: 'githubRepositoryId',
-  githubRepositoryFullName: 'githubRepositoryFullName',
+  provider: 'provider',
   installationId: 'installationId',
+  repositoryId: 'repositoryId',
+  repositoryFullNameSnapshot: 'repositoryFullNameSnapshot',
+  connectedAt: 'connectedAt',
+  disconnectedAt: 'disconnectedAt',
+  version: 'version'
+};
+
+exports.Prisma.RemoteRepositoryObservationScalarFieldEnum = {
+  bindingId: 'bindingId',
+  observedAt: 'observedAt',
+  accountId: 'accountId',
+  repositoryFullName: 'repositoryFullName',
   defaultBranch: 'defaultBranch',
   isPrivate: 'isPrivate',
-  status: 'status',
-  lastSyncedCommitSha: 'lastSyncedCommitSha',
-  lastProjectedCommitSha: 'lastProjectedCommitSha',
-  lastErrorCode: 'lastErrorCode',
-  lastErrorMessage: 'lastErrorMessage',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  archived: 'archived',
+  disabled: 'disabled',
+  contentsPermission: 'contentsPermission',
+  installationSuspended: 'installationSuspended',
+  eligibilityState: 'eligibilityState',
+  blockReason: 'blockReason'
+};
+
+exports.Prisma.RemoteHistoryFenceScalarFieldEnum = {
+  bindingId: 'bindingId',
+  defaultBranch: 'defaultBranch',
+  lastConfirmedRemoteHeadSha: 'lastConfirmedRemoteHeadSha',
+  confirmedAt: 'confirmedAt'
+};
+
+exports.Prisma.KnowledgeProjectionCheckpointScalarFieldEnum = {
+  bindingId: 'bindingId',
+  branch: 'branch',
+  projectedCommitSha: 'projectedCommitSha',
+  state: 'state',
+  failureCode: 'failureCode',
+  failureMessage: 'failureMessage',
+  lastAttemptAt: 'lastAttemptAt',
+  projectedAt: 'projectedAt'
 };
 
 exports.Prisma.GithubWebhookDeliveryScalarFieldEnum = {
   id: 'id',
-  connectionId: 'connectionId',
+  bindingId: 'bindingId',
   deliveryId: 'deliveryId',
   eventName: 'eventName',
   beforeSha: 'beforeSha',
@@ -1205,7 +1237,7 @@ exports.Prisma.GithubWebhookDeliveryScalarFieldEnum = {
 
 exports.Prisma.KnowledgeNoteProjectionScalarFieldEnum = {
   id: 'id',
-  connectionId: 'connectionId',
+  bindingId: 'bindingId',
   relativePath: 'relativePath',
   commitSha: 'commitSha',
   blobSha: 'blobSha',
@@ -1220,7 +1252,7 @@ exports.Prisma.KnowledgeNoteProjectionScalarFieldEnum = {
 
 exports.Prisma.KnowledgeAttachmentProjectionScalarFieldEnum = {
   id: 'id',
-  connectionId: 'connectionId',
+  bindingId: 'bindingId',
   relativePath: 'relativePath',
   commitSha: 'commitSha',
   blobSha: 'blobSha',
@@ -1232,7 +1264,7 @@ exports.Prisma.KnowledgeAttachmentProjectionScalarFieldEnum = {
 };
 
 exports.Prisma.KnowledgeAttachmentContentCacheScalarFieldEnum = {
-  connectionId: 'connectionId',
+  bindingId: 'bindingId',
   blobSha: 'blobSha',
   byteSize: 'byteSize',
   contentBytes: 'contentBytes',
@@ -1243,7 +1275,7 @@ exports.Prisma.KnowledgeAttachmentContentCacheScalarFieldEnum = {
 exports.Prisma.KnowledgeWriteRequestScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
-  connectionId: 'connectionId',
+  bindingId: 'bindingId',
   requestId: 'requestId',
   requestHash: 'requestHash',
   relativePath: 'relativePath',
@@ -1703,7 +1735,11 @@ exports.Prisma.ModelName = {
   RepositoryExplorer: 'RepositoryExplorer',
   RepositoryStatistic: 'RepositoryStatistic',
   KnowledgeRepositoryInstallationIntent: 'KnowledgeRepositoryInstallationIntent',
-  KnowledgeRepositoryConnection: 'KnowledgeRepositoryConnection',
+  KnowledgeSpace: 'KnowledgeSpace',
+  KnowledgeRemoteBinding: 'KnowledgeRemoteBinding',
+  RemoteRepositoryObservation: 'RemoteRepositoryObservation',
+  RemoteHistoryFence: 'RemoteHistoryFence',
+  KnowledgeProjectionCheckpoint: 'KnowledgeProjectionCheckpoint',
   GithubWebhookDelivery: 'GithubWebhookDelivery',
   KnowledgeNoteProjection: 'KnowledgeNoteProjection',
   KnowledgeAttachmentProjection: 'KnowledgeAttachmentProjection',

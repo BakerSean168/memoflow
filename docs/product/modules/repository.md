@@ -47,7 +47,7 @@ KnowledgeSpace
 - [ADR-090](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
 - [ADR-091](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)
 
-**当前实施状态：** ADR-089 的 Desktop Local Vault 半边已经进入生产代码；Remote Binding/Observation/Fence/Checkpoint、ADR-090 stable document identity 与 ADR-091 single projection engine 仍未完成。
+**当前实施状态：** ADR-089 已完成 Local/Remote 全部四轴 cutover；ADR-090 stable document identity 与 ADR-091 single projection engine 仍未完成。
 
 ### 1.2 2026-09-11 Local Vault checkpoint
 
@@ -77,6 +77,23 @@ LocalVaultHealth
 - 本地 Vault port 不再接收 cloud `identityId`；renderer 也不能指定 local owner；
 - schemaVersion 1 binding 不迁移、不作为兼容真值；重新选择 Vault 后写入 V2 binding，但从不删除用户 Vault 内容；
 - sync/reconciliation/auto-sync、Desktop AI、Settings/Local Vault workspace 都消费明确的 `{ binding, health }` snapshot。
+
+### 1.3 2026-09-11 Remote Binding checkpoint
+
+Remote Knowledge 不再持久化单一 Connection lifecycle/status：
+
+```text
+KnowledgeRemoteBinding       = 用户长期选择 + connect/disconnect
+RemoteRepositoryObservation  = GitHub 当前事实/eligibility
+RemoteHistoryFence           = 最后确认的安全 remote HEAD
+KnowledgeProjectionCheckpoint = server projection cursor/state/failure
+```
+
+普通 list 仅组合这四轴数据库状态，不访问 GitHub；Settings 中的“检查 GitHub 状态”是显式 observation refresh。Token、confirmed write、reconciliation 等安全敏感操作仍 live preflight。Provider loss 只令 observation `Blocked`，不会自动 disconnect binding。
+
+Desktop GitHub connect 必须把当前 Local Vault 的 `knowledgeSpaceId` 交给 server；Web connect 不能指定 device-local space。continuous sync 还要求 Local/Remote `knowledgeSpaceId` 完全一致、observation `Ready` 且 history fence 已建立。
+
+Prisma 已删除 `knowledge_repository_connections` canonical model，改为五张四轴表；关联 webhook/projection/cache/write request 使用 `binding_id`。迁移是 ADR-111 destructive cutover，不 backfill 旧数据。
 
 ## 2. 当前实现
 
@@ -178,7 +195,7 @@ Web create
 
 ## 8. 当前差距
 
-Repository/Knowledge vNext 已开始迁移，但只完成 ADR-089 的 Local Vault 半边；不得把 Remote Binding、stable document identity 或 single projection engine 描述成已完成。
+Repository/Knowledge vNext 已完成 ADR-089 的 Local/Remote binding 四轴迁移；stable document identity（ADR-090）与 single projection engine（ADR-091）仍未完成。
 
 - 真实 GitHub App fixture E2E 仍依赖外部凭据与受控 private repository。
 - Mobile 尚未接入服务端 GitHub 投影的只读浏览、搜索与预览。

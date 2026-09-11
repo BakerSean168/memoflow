@@ -22,7 +22,7 @@ import type {
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,
   CreateKnowledgeRepositoryConnectionReq,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryInstallationIntentStatusResponse,
   KnowledgeRepositoryReconciliationPreview,
@@ -99,9 +99,18 @@ export class RepositoryHttpAdapter implements IRepositoryApiClient {
     return this.httpClient.get(`${this.baseUrl}/knowledge-connections`);
   }
 
+  async refreshKnowledgeRepositoryObservation(
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
+    return this.httpClient.post(
+      `${this.baseUrl}/knowledge-connections/${encodeURIComponent(connectionId)}/refresh-observation`,
+      {},
+    );
+  }
+
   async connectKnowledgeRepository(
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>> {
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
     return this.httpClient.post(`${this.baseUrl}/knowledge-connections`, request);
   }
 

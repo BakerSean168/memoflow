@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { KnowledgeRepositoryConnectionClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
 import { ok } from '@memoflow/contracts/result';
 import {
   DesktopKnowledgeRepositoryGitRuntime,
@@ -51,26 +51,40 @@ class LocalRemoteGitProcessPort implements GitProcessPort {
   }
 }
 
+const SPACE_ID = 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440051' as never;
+const BINDING_ID = 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440052' as never;
+
 function connection(
-  overrides: Partial<KnowledgeRepositoryConnectionClientDTO> = {},
-): KnowledgeRepositoryConnectionClientDTO {
-  return {
-    id: 'connection-1',
+  overrides: Partial<KnowledgeRemoteBindingClientDTO> = {},
+): KnowledgeRemoteBindingClientDTO {
+  const base: KnowledgeRemoteBindingClientDTO = {
+    id: BINDING_ID,
+    knowledgeSpaceId: SPACE_ID,
     identityId:
-      'IdentityId_11111111-1111-4111-8111-111111111111' as KnowledgeRepositoryConnectionClientDTO['identityId'],
-    githubUserId: '42',
-    githubRepositoryId: REPOSITORY_ID,
-    githubRepositoryFullName: REPOSITORY_FULL_NAME,
+      'IdentityId_11111111-1111-4111-8111-111111111111' as KnowledgeRemoteBindingClientDTO['identityId'],
+    provider: 'GitHub',
     installationId: 'installation-1',
-    defaultBranch: 'main',
-    status: 'Active',
-    lastSyncedCommitSha: null,
-    lastErrorCode: null,
-    canSync: true,
-    createdAt: NOW as KnowledgeRepositoryConnectionClientDTO['createdAt'],
-    updatedAt: NOW as KnowledgeRepositoryConnectionClientDTO['updatedAt'],
-    ...overrides,
+    repositoryId: REPOSITORY_ID,
+    repositoryFullNameSnapshot: REPOSITORY_FULL_NAME,
+    connectedAt: NOW,
+    disconnectedAt: null,
+    observation: {
+      bindingId: BINDING_ID,
+      observedAt: NOW,
+      accountId: '42',
+      repositoryFullName: REPOSITORY_FULL_NAME,
+      defaultBranch: 'main',
+      private: true,
+      archived: false,
+      disabled: false,
+      contentsPermission: 'write',
+      installationSuspended: false,
+      eligibility: { state: 'Ready' },
+    },
+    historyFence: null,
+    projectionCheckpoint: null,
   };
+  return { ...base, ...overrides };
 }
 
 async function temporaryDirectory(label: string): Promise<string> {
@@ -156,8 +170,15 @@ describe('DesktopKnowledgeRepositorySyncService acceptance', () => {
     });
     const remoteWorktree = await cloneRemoteWorktree(remotePath);
     const remoteHead = await commitAndPush(remoteWorktree, 'from-web.md', 'created on Web\n');
-    const current = connection({ lastSyncedCommitSha: initialized.headSha });
-    let confirmedConnection: KnowledgeRepositoryConnectionClientDTO | null = null;
+    const current = connection({
+      historyFence: {
+        bindingId: BINDING_ID,
+        defaultBranch: 'main',
+        lastConfirmedRemoteHeadSha: initialized.headSha,
+        confirmedAt: NOW,
+      },
+    });
+    let confirmedConnection: KnowledgeRemoteBindingClientDTO | null = null;
     const service = new DesktopKnowledgeRepositorySyncService({
       localVault: {
         getBinding: async () => {
@@ -165,7 +186,7 @@ describe('DesktopKnowledgeRepositorySyncService acceptance', () => {
           return {
             binding: {
               id: bindingId,
-              knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440051' as never,
+              knowledgeSpaceId: SPACE_ID,
               localProfileId: 'p_sync_acceptance',
               rootPath: vaultPath,
               displayName: 'Vault',
@@ -185,7 +206,14 @@ describe('DesktopKnowledgeRepositorySyncService acceptance', () => {
             expiresAt: NOW + 300_000,
           }),
         confirmKnowledgeRepositoryHead: async (_connectionId, request) => {
-          confirmedConnection = connection({ lastSyncedCommitSha: request.headSha });
+          confirmedConnection = connection({
+            historyFence: {
+              bindingId: BINDING_ID,
+              defaultBranch: 'main',
+              lastConfirmedRemoteHeadSha: request.headSha,
+              confirmedAt: NOW,
+            },
+          });
           return ok(confirmedConnection);
         },
       },
@@ -202,13 +230,15 @@ describe('DesktopKnowledgeRepositorySyncService acceptance', () => {
           localCommitCreated: false,
           remoteChangesApplied: true,
           pushed: false,
-          connection: { lastSyncedCommitSha: remoteHead },
+          connection: {
+            historyFence: { lastConfirmedRemoteHeadSha: remoteHead },
+          },
         },
       },
     );
     await expect(fs.promises.readFile(path.join(vaultPath, 'from-web.md'), 'utf8')).resolves.toBe(
       'created on Web\n',
     );
-    expect(confirmedConnection?.lastSyncedCommitSha).toBe(remoteHead);
+    expect(confirmedConnection?.historyFence?.lastConfirmedRemoteHeadSha).toBe(remoteHead);
   }, 30_000);
 });

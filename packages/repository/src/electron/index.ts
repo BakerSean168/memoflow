@@ -119,6 +119,7 @@ export type KnowledgeRepositoryConnectionElectronPort = Pick<
   | 'getKnowledgeRepositoryInstallationIntentStatus'
   | 'finalizeKnowledgeRepositoryInstallationIntent'
   | 'listKnowledgeRepositoryConnections'
+  | 'refreshKnowledgeRepositoryObservation'
   | 'connectKnowledgeRepository'
   | 'disconnectKnowledgeRepository'
   | 'issueDesktopKnowledgeRepositoryToken'
@@ -273,6 +274,14 @@ export function createRepositoryElectronModule(
           ),
         );
         installed.push(RepositoryChannels.KNOWLEDGE_CONNECTION_LIST);
+        ipcMain.handle(RepositoryChannels.KNOWLEDGE_CONNECTION_REFRESH_OBSERVATION, (_, request) =>
+          withAuthenticatedValue(ctx, () =>
+            withKnowledgeConnection((port) =>
+              port.refreshKnowledgeRepositoryObservation(request?.connectionId ?? ''),
+            ),
+          ),
+        );
+        installed.push(RepositoryChannels.KNOWLEDGE_CONNECTION_REFRESH_OBSERVATION);
         ipcMain.handle(RepositoryChannels.KNOWLEDGE_CONNECTION_CONNECT, (_, request) =>
           withAuthenticatedValue(ctx, async ({ identityId }) => {
             const result = await withKnowledgeConnection((port) =>

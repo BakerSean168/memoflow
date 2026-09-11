@@ -4,32 +4,14 @@
  */
 
 import { z } from 'zod';
-import type { IdentityId } from '../../../primitives';
-import { brandedId } from '../../../primitives';
-
-export const KnowledgeRepositoryConnectionStatusSchema = z.enum([
-  'PendingInstall',
-  'Active',
-  'Suspended',
-  'Revoked',
-  'Error',
-]);
-
-export const KnowledgeRepositoryLifecycleErrorCodes = {
-  InstallationNotFound: 'GITHUB_INSTALLATION_NOT_FOUND',
-  InstallationSuspended: 'GITHUB_INSTALLATION_SUSPENDED',
-  ContentsPermissionRequired: 'GITHUB_CONTENTS_PERMISSION_REQUIRED',
-  RepositoryAccessLost: 'GITHUB_REPOSITORY_ACCESS_LOST',
-  RepositoryPublic: 'GITHUB_REPOSITORY_PUBLIC',
-  RepositoryArchived: 'GITHUB_REPOSITORY_ARCHIVED',
-  RepositoryDisabled: 'GITHUB_REPOSITORY_DISABLED',
-  RepositoryAdminRequired: 'GITHUB_REPOSITORY_ADMIN_REQUIRED',
-  DefaultBranchChanged: 'GITHUB_DEFAULT_BRANCH_CHANGED',
-  CheckUnavailable: 'GITHUB_LIFECYCLE_CHECK_UNAVAILABLE',
-} as const;
-
-export type KnowledgeRepositoryLifecycleErrorCode =
-  (typeof KnowledgeRepositoryLifecycleErrorCodes)[keyof typeof KnowledgeRepositoryLifecycleErrorCodes];
+import type { KnowledgeSpaceId } from '../../../primitives';
+import { brandedId, ID_PREFIXES } from '../../../primitives';
+import {
+  KnowledgeProjectionCheckpointSchema,
+  KnowledgeRemoteBindingSchema,
+  RemoteHistoryFenceSchema,
+  RemoteRepositoryObservationSchema,
+} from '../aggregates/knowledge-remote-binding';
 
 export const KnowledgeRepositoryInstallationClientKindSchema = z.enum(['web', 'desktop']);
 export type KnowledgeRepositoryInstallationClientKind = z.infer<
@@ -121,41 +103,37 @@ export type CompleteKnowledgeRepositoryInstallationRes = z.infer<
   typeof CompleteKnowledgeRepositoryInstallationResponseSchema
 >;
 
-export const CreateKnowledgeRepositoryConnectionSchema = z.object({
-  installationId: z.string().min(1),
-  /** Numeric repository id selected from the server-verified installation inventory. */
-  githubRepositoryId: z.string().min(1),
-});
+export const CreateKnowledgeRepositoryConnectionSchema = z
+  .object({
+    installationId: z.string().min(1),
+    /** Numeric repository id selected from the server-verified installation inventory. */
+    githubRepositoryId: z.string().min(1),
+    /**
+     * Desktop installation intents MUST provide the current Local Vault space id.
+     * Web intents omit it and the server creates/reuses the account's cloud space.
+     */
+    knowledgeSpaceId: brandedId<KnowledgeSpaceId>(ID_PREFIXES.KnowledgeSpaceId).optional(),
+  })
+  .strict();
 
 export type CreateKnowledgeRepositoryConnectionReq = z.infer<
   typeof CreateKnowledgeRepositoryConnectionSchema
 >;
 
-// Residual 803: KnowledgeRepositoryConnectionClientDTO dual retired — sole ClientSchema + z.infer
-// (never includes installation tokens / private keys).
-export const KnowledgeRepositoryConnectionClientSchema = z.object({
-  id: z.string().min(1),
-  identityId: brandedId<IdentityId>(),
-  githubUserId: z.string().min(1),
-  githubRepositoryId: z.string().min(1),
-  githubRepositoryFullName: z.string().min(1),
-  installationId: z.string().min(1),
-  defaultBranch: z.string().min(1),
-  status: KnowledgeRepositoryConnectionStatusSchema,
-  lastSyncedCommitSha: z.string().nullable(),
-  lastProjectedCommitSha: z.string().nullable().optional(),
-  lastErrorCode: z.string().nullable(),
-  canSync: z.boolean(),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-});
+/**
+ * Read model composed from four independently owned ADR-089 axes.
+ * No provider check is performed merely to list this value.
+ */
+export const KnowledgeRemoteBindingClientSchema = KnowledgeRemoteBindingSchema.extend({
+  observation: RemoteRepositoryObservationSchema.nullable(),
+  historyFence: RemoteHistoryFenceSchema.nullable(),
+  projectionCheckpoint: KnowledgeProjectionCheckpointSchema.nullable(),
+}).strict();
 
-export type KnowledgeRepositoryConnectionClientDTO = z.infer<
-  typeof KnowledgeRepositoryConnectionClientSchema
->;
+export type KnowledgeRemoteBindingClientDTO = z.infer<typeof KnowledgeRemoteBindingClientSchema>;
 
 export const ListKnowledgeRepositoryConnectionsResSchema = z.object({
-  connections: z.array(KnowledgeRepositoryConnectionClientSchema),
+  connections: z.array(KnowledgeRemoteBindingClientSchema),
 });
 
 // Residual 773: list connections Res dual retired — OpenAPI + transport use ResSchema
@@ -269,7 +247,7 @@ export type ConfirmKnowledgeRepositoryHeadReq = z.infer<
 >;
 
 export const ExecuteKnowledgeRepositoryReconciliationResponseSchema = z.object({
-  connection: KnowledgeRepositoryConnectionClientSchema,
+  connection: KnowledgeRemoteBindingClientSchema,
   action: KnowledgeRepositoryExecutableReconciliationActionSchema,
   headSha: GitCommitShaSchema,
   reusedExistingSynchronization: z.boolean(),
@@ -309,7 +287,7 @@ export type KnowledgeRepositorySyncPendingContext = z.infer<
 >;
 
 export const SyncKnowledgeRepositoryResponseSchema = z.object({
-  connection: KnowledgeRepositoryConnectionClientSchema,
+  connection: KnowledgeRemoteBindingClientSchema,
   outcome: KnowledgeRepositorySyncOutcomeSchema,
   headSha: GitCommitShaSchema,
   localCommitCreated: z.boolean(),

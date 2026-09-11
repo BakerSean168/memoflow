@@ -92,6 +92,10 @@ function buildApplicationPort(deps: RepositoryModuleDependencies): RepositoryApp
         : unavailable(),
     listKnowledgeRepositoryConnections: async (ctx) =>
       connectionService ? connectionService.list(ctx.identityId) : unavailable(),
+    refreshKnowledgeRepositoryObservation: async (ctx, connectionId) =>
+      connectionService
+        ? connectionService.refreshObservation(ctx.identityId, connectionId)
+        : unavailable(),
     connectKnowledgeRepository: async (ctx, request) =>
       connectionService ? connectionService.connect(ctx.identityId, request) : unavailable(),
     disconnectKnowledgeRepository: async (ctx, connectionId, purgeCloudData) =>

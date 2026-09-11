@@ -52,13 +52,13 @@
             <Badge variant="secondary">{{ notes.length }}</Badge>
           </div>
           <p class="mt-1 truncate text-xs text-muted-foreground">
-            {{ selectedConnection?.githubRepositoryFullName }} ·
-            {{ selectedConnection?.defaultBranch }}
-            <span v-if="selectedConnection?.lastProjectedCommitSha">
+            {{ selectedConnection ? repositoryDisplayName(selectedConnection) : '' }} ·
+            {{ selectedConnection ? repositoryDefaultBranch(selectedConnection) : '—' }}
+            <span v-if="selectedConnection?.projectionCheckpoint?.projectedCommitSha">
               ·
               {{
                 t('repository.projection.commit', {
-                  sha: selectedConnection.lastProjectedCommitSha.slice(0, 8),
+                  sha: selectedConnection.projectionCheckpoint!.projectedCommitSha!.slice(0, 8),
                 })
               }}
             </span>
@@ -74,11 +74,19 @@
           @change="handleConnectionChange"
         >
           <option v-for="connection in connections" :key="connection.id" :value="connection.id">
-            {{ connection.githubRepositoryFullName }}
+            {{ repositoryDisplayName(connection) }}
           </option>
         </select>
-        <Badge :variant="selectedConnection?.status === 'Active' ? 'secondary' : 'outline'">
-          {{ connectionStatusLabel(selectedConnection?.status) }}
+        <Badge
+          :variant="
+            selectedConnection?.observation?.eligibility.state === 'Ready' ? 'secondary' : 'outline'
+          "
+        >
+          {{
+            selectedConnection
+              ? providerStateLabel(selectedConnection)
+              : t('repository.projection.providerStatus.Unchecked')
+          }}
         </Badge>
         <Button
           variant="ghost"
@@ -94,7 +102,7 @@
         </Button>
         <Button
           size="sm"
-          :disabled="selectedConnection?.status !== 'Active'"
+          :disabled="selectedConnection?.observation?.eligibility.state !== 'Ready'"
           data-testid="knowledge-projection-create"
           @click="openCreateDialog"
         >
@@ -235,7 +243,11 @@
               </div>
               <Badge variant="outline">{{ t('repository.projection.readOnly') }}</Badge>
             </div>
-            <div v-if="noteView === 'preview'" class="min-h-0 flex-1 overflow-y-auto" data-scroll-host="repository-preview">
+            <div
+              v-if="noteView === 'preview'"
+              class="min-h-0 flex-1 overflow-y-auto"
+              data-scroll-host="repository-preview"
+            >
               <article
                 class="preview-content mx-auto max-w-3xl px-5 py-5"
                 data-testid="knowledge-projection-preview"
@@ -425,7 +437,7 @@ import {
   CreateConfirmedKnowledgeNoteSchema,
   type CreateConfirmedKnowledgeNoteReq,
   type KnowledgeNoteProjectionClientDTO,
-  type KnowledgeRepositoryConnectionClientDTO,
+  type KnowledgeRemoteBindingClientDTO,
 } from '@memoflow/contracts/repository';
 import { renderSafeMarkdown } from '../../../shared/utils/safe-markdown';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
@@ -437,7 +449,7 @@ const router = useRouter();
 const route = useRoute();
 const service = useStrictInject(REPOSITORY_SERVICE_KEY, 'RepositoryService');
 
-const connections = ref<KnowledgeRepositoryConnectionClientDTO[]>([]);
+const connections = ref<KnowledgeRemoteBindingClientDTO[]>([]);
 const selectedConnectionId = ref('');
 const notes = ref<KnowledgeNoteProjectionClientDTO[]>([]);
 const selectedNoteId = ref('');
@@ -517,12 +529,18 @@ function createId(prefix: string): string {
   return `${prefix}-${uuid}`;
 }
 
-function connectionStatusLabel(
-  status: KnowledgeRepositoryConnectionClientDTO['status'] | undefined,
-): string {
-  return status
-    ? t(`repository.projection.status.${status}`)
-    : t('repository.projection.status.Unknown');
+function repositoryDisplayName(binding: KnowledgeRemoteBindingClientDTO): string {
+  return binding.observation?.repositoryFullName ?? binding.repositoryFullNameSnapshot;
+}
+
+function repositoryDefaultBranch(binding: KnowledgeRemoteBindingClientDTO): string {
+  return binding.observation?.defaultBranch ?? binding.historyFence?.defaultBranch ?? '—';
+}
+
+function providerStateLabel(binding: KnowledgeRemoteBindingClientDTO): string {
+  return t(
+    `repository.projection.providerStatus.${binding.observation?.eligibility.state ?? 'Unchecked'}`,
+  );
 }
 
 function indexStatusLabel(status: KnowledgeNoteProjectionClientDTO['indexStatus']): string {
@@ -543,7 +561,8 @@ async function loadConnections(): Promise<void> {
   connections.value = result.data.connections;
   if (!connections.value.some((connection) => connection.id === selectedConnectionId.value)) {
     selectedConnectionId.value =
-      connections.value.find((connection) => connection.status === 'Active')?.id ??
+      connections.value.find((connection) => connection.observation?.eligibility.state === 'Ready')
+        ?.id ??
       connections.value[0]?.id ??
       '';
   }

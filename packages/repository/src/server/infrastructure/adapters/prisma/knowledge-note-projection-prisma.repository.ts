@@ -22,7 +22,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
     const paths = notes.map((note) => note.relativePath);
     const deleted = await this.db.knowledgeNoteProjection.findMany({
       where: {
-        connectionId,
+        bindingId: connectionId,
         deletedAt: null,
         ...(paths.length ? { relativePath: { notIn: paths } } : {}),
       },
@@ -31,7 +31,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
     await this.upsertMany(notes);
     await this.db.knowledgeNoteProjection.updateMany({
       where: {
-        connectionId,
+        bindingId: connectionId,
         deletedAt: null,
         ...(paths.length ? { relativePath: { notIn: paths } } : {}),
       },
@@ -49,7 +49,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
     await this.upsertMany(notes);
     if (deletedPaths.length) {
       await this.db.knowledgeNoteProjection.updateMany({
-        where: { connectionId, relativePath: { in: [...new Set(deletedPaths)] } },
+        where: { bindingId: connectionId, relativePath: { in: [...new Set(deletedPaths)] } },
         data: { deletedAt: new Date(), commitSha, indexStatus: 'pending' },
       });
     }
@@ -62,12 +62,8 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
     const query = options.query?.trim();
     const rows = await this.db.knowledgeNoteProjection.findMany({
       where: {
-        connection: {
-          identityId,
-          deletedAt: null,
-          status: { in: ['Active', 'Suspended'] },
-        },
-        connectionId: options.connectionId,
+        binding: { identityId, disconnectedAt: null },
+        bindingId: options.connectionId,
         deletedAt: null,
         ...(query
           ? {
@@ -93,7 +89,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
         where: {
           id: projectionId,
           deletedAt: null,
-          connection: { identityId, deletedAt: null },
+          binding: { identityId, disconnectedAt: null },
         },
       }),
     );
@@ -105,7 +101,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
   ): Promise<KnowledgeNoteProjectionClientDTO | null> {
     return this.toClientOrNull(
       await this.db.knowledgeNoteProjection.findUnique({
-        where: { connectionId_relativePath: { connectionId, relativePath } },
+        where: { bindingId_relativePath: { bindingId: connectionId, relativePath } },
       }),
     );
   }
@@ -119,17 +115,13 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
       where: {
         id: centerProjectionId,
         deletedAt: null,
-        connection: {
-          identityId,
-          deletedAt: null,
-          status: { in: ['Active', 'Suspended'] },
-        },
+        binding: { identityId, disconnectedAt: null },
       },
     });
     if (!center) return null;
     const others = await this.db.knowledgeNoteProjection.findMany({
       where: {
-        connectionId: center.connectionId,
+        bindingId: center.bindingId,
         id: { not: center.id },
         deletedAt: null,
       },
@@ -154,7 +146,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
         id: projectionId,
         contentHash: expectedContentHash,
         deletedAt: null,
-        connection: { identityId, deletedAt: null },
+        binding: { identityId, disconnectedAt: null },
       },
       data: { indexStatus: status },
     });
@@ -165,13 +157,20 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
     for (const note of notes) {
       await this.db.knowledgeNoteProjection.upsert({
         where: {
-          connectionId_relativePath: {
-            connectionId: note.connectionId,
+          bindingId_relativePath: {
+            bindingId: note.connectionId,
             relativePath: note.relativePath,
           },
         },
         create: {
-          ...note,
+          id: note.id,
+          bindingId: note.connectionId,
+          relativePath: note.relativePath,
+          commitSha: note.commitSha,
+          blobSha: note.blobSha,
+          contentHash: note.contentHash,
+          markdownContent: note.markdownContent,
+          indexStatus: note.indexStatus,
           frontmatter: note.frontmatter as never,
         },
         update: {
@@ -202,7 +201,7 @@ export class KnowledgeNoteProjectionPrismaRepository implements IKnowledgeNotePr
         : row.relativePath.split('/').slice(-1)[0]?.replace(/\.md$/i, '') || row.relativePath;
     return {
       id: row.id,
-      connectionId: row.connectionId,
+      connectionId: row.bindingId,
       relativePath: row.relativePath,
       title,
       commitSha: row.commitSha,

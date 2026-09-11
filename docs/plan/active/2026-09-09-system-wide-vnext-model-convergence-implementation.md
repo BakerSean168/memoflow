@@ -321,13 +321,42 @@ Remove V2 reader/writer/migrator contracts and tests. Old backups are unsupporte
 
 ## KNOW-2001 — Implement KnowledgeSpace/binding split (ADR-089)
 
-**状态：IN PROGRESS — 2026-09-11 Local Vault ownership/health split complete; remote binding split pending**
+**状态：DONE — 2026-09-11 Local/Remote binding, observation, history fence and projection checkpoint converged**
 
-Separate binding, provider observation, sync fence and projection checkpoint. Preserve GitHub App safety and local Vault semantics.
+ADR-089 is now implemented as one destructive canonical cutover; no legacy connection/status/cursor compatibility model remains in production runtime code.
 
-Current checkpoint: the Desktop Local Vault half has completed the destructive ADR-089 cutover. `KnowledgeSpaceId` and `LocalVaultBindingId` are explicit branded ids; the persisted V2 binding is profile-owned (`localProfileId`) and contains only durable binding facts (`rootPath/displayName/boundAt/detachedAt`). `LocalVaultHealth` is a separate read-time observation (`Available | Missing | Unreadable`) and `getBinding()` is mutation-free. Local Vault ports no longer accept cloud `identityId`; the Desktop composition root injects the stable profile id while existing IPC channel names remain unchanged. Guest -> registered profile adoption therefore keeps the same local ownership without rewriting the Vault binding. Legacy local binding `schemaVersion: 1` is unsupported and is not migrated; user Vault files are never deleted. Sync/reconciliation/auto-sync, Desktop AI knowledge source/write, and Vue Settings/Local Vault consumers now use the explicit `{ binding, health }` snapshot. Evidence: contracts surface 7/7; Repository Local Vault/transport 29/29; Desktop AI/sync/reconciliation/auto-sync/acceptance 23/23; App-Vue Settings/recent-notes 21/21; Repository package typecheck, Desktop typecheck and App-Vue vue-tsc PASS.
+### Local source
 
-Remaining in KNOW-2001: replace `KnowledgeRepositoryConnection`'s mixed lifecycle/provider/cursor/error model with `KnowledgeRemoteBinding + RemoteRepositoryObservation + RemoteHistoryFence + KnowledgeProjectionCheckpoint`, and make ordinary connection queries read-only instead of provider-refresh mutations. No remote-half completion is claimed yet.
+- `KnowledgeSpaceId` and `LocalVaultBindingId` are explicit branded ids.
+- persisted Local Vault binding is profile-owned (`localProfileId`) and contains only durable facts: `rootPath/displayName/boundAt/detachedAt`;
+- filesystem state is an independent read-time `LocalVaultHealth` observation (`Available | Missing | Unreadable`);
+- Local Vault ports no longer accept cloud `identityId`; the Desktop composition root injects the stable profile id;
+- `getBinding()` is mutation-free; Guest -> registered profile adoption keeps the same local ownership without rewriting the Vault binding;
+- legacy local binding schemaVersion 1 is unsupported and not migrated; user Vault files are never deleted.
+
+### Remote source
+
+The former mixed `KnowledgeRepositoryConnection` persistence has been deleted and replaced by five canonical server-side records:
+
+```text
+KnowledgeSpace
+KnowledgeRemoteBinding
+RemoteRepositoryObservation
+RemoteHistoryFence
+KnowledgeProjectionCheckpoint
+```
+
+`KnowledgeRemoteBinding` contains only the durable user choice and lifecycle (`connectedAt/disconnectedAt`). Provider facts never disconnect it. GitHub installation/repository health is written only to `RemoteRepositoryObservation`; Desktop Git history safety advances only `RemoteHistoryFence`; projection success/failure/lag is written only to `KnowledgeProjectionCheckpoint`.
+
+Ordinary list queries are now pure database reads: opening Settings does not call GitHub and cannot mutate lifecycle. Provider refresh is an explicit command exposed through Repository service -> controller -> HTTP/IPC -> Desktop gateway -> Settings. Security-sensitive token/write/reconciliation commands still perform live provider preflight.
+
+Desktop and Remote binding pairing is explicit: a Desktop installation intent must connect with the current Local Vault `knowledgeSpaceId`; a Web intent must not smuggle a device-local space id. Continuous sync additionally requires exact Local/Remote `knowledgeSpaceId` equality, a `Ready` provider observation and a compatible history fence. Auto-sync cache is schemaVersion 2; the old cache is unsupported.
+
+The Prisma schema now owns `knowledge_spaces`, `knowledge_remote_bindings`, `remote_repository_observations`, `remote_history_fences` and `knowledge_projection_checkpoints`; child webhook/projection/cache/write-request foreign keys are `binding_id`. The flat SQL helper `knowledge-remote-binding-four-axis-cutover.sql` is an explicit/manual destructive reset aid, not a Prisma versioned migration. The production migrator remains on the repository-standard `prisma db push --accept-data-loss` path; no old connection data is renamed, backfilled or preserved, and environments containing obsolete business rows must reset/reseed.
+
+Server-held Data Portability disclosure mirrors these independent server facts instead of reconstructing the retired Connection status/cursor shape. No PowerSync/Desktop shadow persistence is introduced for remote Knowledge state.
+
+**Acceptance evidence before final commit:** Repository unit 35 files / 226 tests; Repository DB integration 2 files / 17 tests; Contracts 78 files / 530 tests; Data Portability 35 files / 152 tests; Desktop Git/sync/reconciliation/auto-sync/acceptance 45/45; App-Vue Settings/Projection 26/26; API Knowledge adapters 10/10; canonical API/Desktop/App-Vue typechecks PASS; Prisma validate/generate PASS; production semantic residue gate 0; changed-file ESLint 0 warnings/errors; pre-commit docs/governance PASS. Final exact-head gates are run again at commit closure.
 
 ## KNOW-2002 — Implement stable KnowledgeDocumentId (ADR-090)
 

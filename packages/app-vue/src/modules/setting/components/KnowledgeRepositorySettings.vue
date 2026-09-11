@@ -146,32 +146,39 @@
             <div class="min-w-0 flex-1">
               <div class="flex min-w-0 items-center gap-2">
                 <span class="truncate text-sm font-medium">
-                  {{ connection.githubRepositoryFullName }}
+                  {{ repositoryDisplayName(connection) }}
                 </span>
-                <Badge :variant="connection.status === 'Active' ? 'secondary' : 'outline'">
-                  {{ statusLabel(connection.status) }}
+                <Badge :variant="providerState(connection) === 'Ready' ? 'secondary' : 'outline'">
+                  {{ providerStateLabel(connection) }}
                 </Badge>
               </div>
               <p class="mt-1 text-xs text-muted-foreground">
                 {{
                   t('setting.knowledgeRepository.defaultBranch', {
-                    branch: connection.defaultBranch,
+                    branch: repositoryDefaultBranch(connection),
                   })
                 }}
               </p>
-              <p v-if="connection.lastSyncedCommitSha" class="mt-1 text-xs text-muted-foreground">
+              <p v-if="connection.historyFence" class="mt-1 text-xs text-muted-foreground">
                 {{
-                  t('setting.knowledgeRepository.lastSyncedCommit', {
-                    sha: connection.lastSyncedCommitSha.slice(0, 8),
+                  t('setting.knowledgeRepository.lastConfirmedRemoteHead', {
+                    sha: connection.historyFence!.lastConfirmedRemoteHeadSha.slice(0, 8),
+                  })
+                }}
+              </p>
+              <p v-if="connection.projectionCheckpoint" class="mt-1 text-xs text-muted-foreground">
+                {{
+                  t('setting.knowledgeRepository.projectionState', {
+                    state: projectionStateLabel(connection),
                   })
                 }}
               </p>
               <p
-                v-if="connection.lastErrorCode"
+                v-if="providerBlockReason(connection)"
                 class="mt-2 text-xs leading-5 text-amber-700 dark:text-amber-300"
-                data-testid="knowledge-repository-lifecycle-diagnostic"
+                data-testid="knowledge-repository-provider-diagnostic"
               >
-                {{ lifecycleDiagnostic(connection.lastErrorCode) }}
+                {{ providerDiagnostic(connection) }}
               </p>
               <p
                 v-if="syncCompleted[connection.id]"
@@ -303,7 +310,7 @@
                 {{ t('setting.knowledgeRepository.reconciliation.execute') }}
               </Button>
               <Button
-                v-if="desktopBridge && localVaultAvailable && !connection.lastSyncedCommitSha"
+                v-if="desktopBridge && localVaultAvailable && !connection.historyFence"
                 variant="outline"
                 size="sm"
                 :disabled="busy"
@@ -315,6 +322,19 @@
                 />
                 <GitBranch v-else class="mr-2 h-4 w-4" />
                 {{ t('setting.knowledgeRepository.reconciliation.preview') }}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                :disabled="busy"
+                @click="refreshProviderObservation(connection)"
+              >
+                <Loader2
+                  v-if="busyAction === `refresh-provider:${connection.id}`"
+                  class="mr-2 h-4 w-4 animate-spin"
+                />
+                <RefreshCw v-else class="mr-2 h-4 w-4" />
+                {{ t('setting.knowledgeRepository.refreshProvider') }}
               </Button>
               <Button
                 variant="outline"
@@ -387,7 +407,7 @@
           <DialogDescription>
             {{
               t('setting.knowledgeRepository.disconnectDescription', {
-                repository: disconnectTarget.githubRepositoryFullName,
+                repository: repositoryDisplayName(disconnectTarget),
               })
             }}
           </DialogDescription>
@@ -484,18 +504,17 @@ import {
 import { SystemChannels } from '@memoflow/contracts/electron';
 import type {
   GitHubInstallationRepositoryDTO,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryReconciliationPreview,
-  KnowledgeRepositoryConnectionStatus,
   LocalVaultBindingSnapshotDTO,
   KnowledgeRepositorySyncConflictContext,
   KnowledgeRepositorySyncOutcome,
   KnowledgeRepositorySyncPendingContext,
+  RemoteRepositoryBlockReason,
 } from '@memoflow/contracts/repository';
 import {
   KnowledgeRepositorySyncConflictContextSchema,
   KnowledgeRepositorySyncPendingContextSchema,
-  KnowledgeRepositoryLifecycleErrorCodes,
 } from '@memoflow/contracts/repository';
 import { DESKTOP_BRIDGE_KEY, REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
@@ -524,7 +543,7 @@ const canUseCloudKnowledgeRepo = computed(
 );
 const isGuest = computed(() => desktopAccess.value?.profile?.profileKind === 'guest');
 
-const connections = ref<KnowledgeRepositoryConnectionClientDTO[]>([]);
+const connections = ref<KnowledgeRemoteBindingClientDTO[]>([]);
 const installationRepositories = ref<GitHubInstallationRepositoryDTO[]>([]);
 const pendingInstallationId = ref<string | null>(null);
 const localVaultBindingSnapshot = ref<LocalVaultBindingSnapshotDTO | null>(null);
@@ -541,11 +560,10 @@ const syncConflicts = ref<Record<string, KnowledgeRepositorySyncConflictContext>
 const syncPending = ref<Record<string, KnowledgeRepositorySyncPendingContext>>({});
 const busyAction = ref<string | null>(null);
 const errorMessage = ref('');
-const disconnectTarget = ref<KnowledgeRepositoryConnectionClientDTO | null>(null);
+const disconnectTarget = ref<KnowledgeRemoteBindingClientDTO | null>(null);
 const disconnectDialogOpen = ref(false);
 const purgeCloudData = ref(false);
 const busy = computed(() => busyAction.value !== null);
-const lifecycleErrorCodes = new Set<string>(Object.values(KnowledgeRepositoryLifecycleErrorCodes));
 const GITHUB_NEW_PRIVATE_REPOSITORY_URL =
   'https://github.com/new?name=memory-flow-notes&visibility=private';
 const INSTALLATION_POLL_INTERVAL_MS = 1_500;
@@ -559,10 +577,42 @@ function resultError(result: { error?: { message?: string } }, fallback: string)
   return result.error?.message ?? fallback;
 }
 
-function lifecycleDiagnostic(errorCode: string): string {
-  return lifecycleErrorCodes.has(errorCode)
-    ? t(`setting.knowledgeRepository.lifecycle.${errorCode}`)
-    : t('setting.knowledgeRepository.lifecycle.unknown');
+function repositoryDisplayName(binding: KnowledgeRemoteBindingClientDTO): string {
+  return binding.observation?.repositoryFullName ?? binding.repositoryFullNameSnapshot;
+}
+
+function repositoryDefaultBranch(binding: KnowledgeRemoteBindingClientDTO): string {
+  return binding.observation?.defaultBranch ?? binding.historyFence?.defaultBranch ?? '—';
+}
+
+function providerState(
+  binding: KnowledgeRemoteBindingClientDTO,
+): 'Ready' | 'Blocked' | 'Unchecked' {
+  return binding.observation?.eligibility.state ?? 'Unchecked';
+}
+
+function providerStateLabel(binding: KnowledgeRemoteBindingClientDTO): string {
+  return t(`setting.knowledgeRepository.providerStatus.${providerState(binding)}`);
+}
+
+function projectionStateLabel(binding: KnowledgeRemoteBindingClientDTO): string {
+  const state = binding.projectionCheckpoint?.state ?? 'Unknown';
+  return t(`setting.knowledgeRepository.projectionStatus.${state}`);
+}
+
+function providerBlockReason(
+  binding: KnowledgeRemoteBindingClientDTO,
+): RemoteRepositoryBlockReason | null {
+  return binding.observation?.eligibility.state === 'Blocked'
+    ? binding.observation.eligibility.reason
+    : null;
+}
+
+function providerDiagnostic(binding: KnowledgeRemoteBindingClientDTO): string {
+  const reason = providerBlockReason(binding);
+  return reason
+    ? t(`setting.knowledgeRepository.providerBlockReason.${reason}`)
+    : t('setting.knowledgeRepository.providerBlockReason.unknown');
 }
 
 async function loadConnections(): Promise<void> {
@@ -813,10 +863,17 @@ async function connectRepository(repository: GitHubInstallationRepositoryDTO): P
       : t('setting.knowledgeRepository.offlineCloudBlocked');
     return;
   }
+  if (desktopBridge && !localVaultBinding.value) {
+    errorMessage.value = t('setting.knowledgeRepository.localRequiredBeforeConnect');
+    return;
+  }
   busyAction.value = `connect:${repository.id}`;
   const result = await service.connectKnowledgeRepository({
     installationId: pendingInstallationId.value,
     githubRepositoryId: repository.id,
+    ...(desktopBridge && localVaultBinding.value
+      ? { knowledgeSpaceId: localVaultBinding.value.knowledgeSpaceId }
+      : {}),
   });
   if (result.ok) {
     installationRepositories.value = [];
@@ -828,7 +885,7 @@ async function connectRepository(repository: GitHubInstallationRepositoryDTO): P
   }
 }
 
-function openDisconnectDialog(connection: KnowledgeRepositoryConnectionClientDTO): void {
+function openDisconnectDialog(connection: KnowledgeRemoteBindingClientDTO): void {
   disconnectTarget.value = connection;
   purgeCloudData.value = false;
   disconnectDialogOpen.value = true;
@@ -859,9 +916,7 @@ async function confirmDisconnect(): Promise<void> {
   }
 }
 
-async function previewReconciliation(
-  connection: KnowledgeRepositoryConnectionClientDTO,
-): Promise<void> {
+async function previewReconciliation(connection: KnowledgeRemoteBindingClientDTO): Promise<void> {
   busyAction.value = `preview:${connection.id}`;
   errorMessage.value = '';
   const result = await service.previewKnowledgeRepositoryReconciliation(connection.id);
@@ -884,17 +939,39 @@ function canExecuteReconciliation(connectionId: string): boolean {
   return Boolean(preview && preview.action !== 'ManualResolutionRequired');
 }
 
-function canSyncConnection(connection: KnowledgeRepositoryConnectionClientDTO): boolean {
+async function refreshProviderObservation(
+  connection: KnowledgeRemoteBindingClientDTO,
+): Promise<void> {
+  busyAction.value = `refresh-provider:${connection.id}`;
+  errorMessage.value = '';
+  const result = await service.refreshKnowledgeRepositoryObservation(connection.id);
+  if (result.ok) {
+    connections.value = connections.value.map((candidate) =>
+      candidate.id === connection.id ? result.data : candidate,
+    );
+  } else {
+    errorMessage.value = resultError(
+      result,
+      t('setting.knowledgeRepository.refreshProviderFailed'),
+    );
+  }
+  busyAction.value = null;
+}
+
+function canSyncConnection(connection: KnowledgeRemoteBindingClientDTO): boolean {
   return Boolean(
     desktopBridge &&
     localVaultAvailable.value &&
-    connection.status === 'Active' &&
-    connection.canSync &&
-    connection.lastSyncedCommitSha,
+    localVaultBinding.value &&
+    connection.disconnectedAt === null &&
+    connection.knowledgeSpaceId === localVaultBinding.value.knowledgeSpaceId &&
+    connection.observation?.eligibility.state === 'Ready' &&
+    connection.historyFence &&
+    connection.observation.defaultBranch === connection.historyFence.defaultBranch,
   );
 }
 
-async function syncConnection(connection: KnowledgeRepositoryConnectionClientDTO): Promise<void> {
+async function syncConnection(connection: KnowledgeRemoteBindingClientDTO): Promise<void> {
   if (!canSyncConnection(connection)) return;
   busyAction.value = `sync:${connection.id}`;
   errorMessage.value = '';
@@ -934,9 +1011,6 @@ async function syncConnection(connection: KnowledgeRepositoryConnectionClientDTO
       delete nextConflicts[connection.id];
       syncConflicts.value = nextConflicts;
     }
-    if (typeof result.error.context?.['lifecycleErrorCode'] === 'string') {
-      await loadConnections();
-    }
     errorMessage.value = resultError(result, t('setting.knowledgeRepository.sync.failed'));
   }
   busyAction.value = null;
@@ -960,9 +1034,7 @@ async function openConflictInObsidian(connectionId: string): Promise<void> {
   busyAction.value = null;
 }
 
-async function executeReconciliation(
-  connection: KnowledgeRepositoryConnectionClientDTO,
-): Promise<void> {
+async function executeReconciliation(connection: KnowledgeRemoteBindingClientDTO): Promise<void> {
   const preview = reconciliationPreviews.value[connection.id];
   if (!preview || preview.action === 'ManualResolutionRequired') return;
   const confirmed = await useConfirm({
@@ -1001,10 +1073,6 @@ async function executeReconciliation(
     );
   }
   busyAction.value = null;
-}
-
-function statusLabel(status: KnowledgeRepositoryConnectionStatus): string {
-  return t(`setting.knowledgeRepository.status.${status}`);
 }
 
 onBeforeUnmount(() => {

@@ -15,7 +15,7 @@ export class GithubWebhookDeliveryPrismaRepository implements IGithubWebhookDeli
       await this.db.githubWebhookDelivery.create({
         data: {
           id: record.id,
-          connectionId: record.connectionId,
+          bindingId: record.connectionId,
           deliveryId: record.deliveryId,
           eventName: record.eventName,
           beforeSha: record.beforeSha,
@@ -54,7 +54,7 @@ export class GithubWebhookDeliveryPrismaRepository implements IGithubWebhookDeli
     errorMessage: string | null = null,
   ): Promise<void> {
     const updated = await this.db.githubWebhookDelivery.updateMany({
-      where: { id, connectionId },
+      where: { id, bindingId: connectionId },
       data: {
         status,
         errorMessage,
@@ -70,7 +70,7 @@ export class GithubWebhookDeliveryPrismaRepository implements IGithubWebhookDeli
     if (!row) return null;
     return {
       id: row.id,
-      connectionId: row.connectionId,
+      connectionId: row.bindingId,
       deliveryId: row.deliveryId,
       eventName: row.eventName,
       beforeSha: row.beforeSha,

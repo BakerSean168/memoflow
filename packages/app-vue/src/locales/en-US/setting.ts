@@ -42,7 +42,10 @@ export default {
     "desktopConnectHint": "Authorization opens in your system browser. Return to Desktop and refresh after connecting.",
     "webConnectHint": "After installing the GitHub App, you will return here to choose a private repository.",
     "defaultBranch": "Default branch: {branch}",
-    "lastSyncedCommit": "Last synchronized commit: {sha}",
+    "lastConfirmedRemoteHead": "Confirmed remote HEAD: {sha}",
+    "refreshProvider": "Check GitHub status",
+    "refreshProviderFailed": "Failed to refresh GitHub provider state",
+    "localRequiredBeforeConnect": "Select a Local Vault before connecting GitHub so both sources bind to the same KnowledgeSpace.",
     "errorTitle": "Knowledge repository action failed",
     "loadFailed": "Failed to load knowledge repository connections",
     "startFailed": "Unable to start GitHub App installation",
@@ -91,25 +94,30 @@ export default {
         "RebasedAndPushed": "Local changes rebased and pushed at {sha}"
       }
     },
-    "lifecycle": {
-      "GITHUB_INSTALLATION_NOT_FOUND": "The GitHub App installation was removed. Reconnect the repository to resume synchronization.",
-      "GITHUB_INSTALLATION_SUSPENDED": "The GitHub App installation is suspended. Restore it on GitHub before synchronizing.",
-      "GITHUB_CONTENTS_PERMISSION_REQUIRED": "GitHub Contents write permission is missing. Update the GitHub App installation.",
-      "GITHUB_REPOSITORY_ACCESS_LOST": "The repository was deleted or removed from this GitHub App installation.",
-      "GITHUB_REPOSITORY_PUBLIC": "This repository is public. Synchronization is paused to protect knowledge privacy.",
-      "GITHUB_REPOSITORY_ARCHIVED": "This repository is archived. Unarchive it before synchronizing.",
-      "GITHUB_REPOSITORY_DISABLED": "This repository is disabled on GitHub. Synchronization is paused.",
-      "GITHUB_REPOSITORY_ADMIN_REQUIRED": "Repository administrator permission is required to continue synchronization.",
-      "GITHUB_DEFAULT_BRANCH_CHANGED": "The GitHub default branch changed. Reconcile the repository before synchronizing again.",
-      "GITHUB_LIFECYCLE_CHECK_UNAVAILABLE": "GitHub status could not be checked. Local Vault access remains available.",
-      "unknown": "The GitHub repository connection requires attention."
+    "providerStatus": {
+      "Ready": "Provider ready",
+      "Blocked": "Provider blocked",
+      "Unchecked": "Not checked"
     },
-    "status": {
-      "PendingInstall": "Waiting for installation",
-      "Active": "Connected",
-      "Suspended": "Suspended",
-      "Revoked": "Revoked",
-      "Error": "Error"
+    "providerBlockReason": {
+      "InstallationMissing": "The GitHub App installation no longer exists. Re-authorize it to continue.",
+      "InstallationSuspended": "The GitHub App installation is suspended. Restore it on GitHub.",
+      "ContentsPermissionRequired": "GitHub Contents write permission is missing. Update the App installation.",
+      "RepositoryAccessLost": "The GitHub App can no longer access this repository.",
+      "RepositoryPublic": "The repository is public. Sync is paused to protect knowledge privacy.",
+      "RepositoryArchived": "The repository is archived and cannot synchronize.",
+      "RepositoryDisabled": "The repository is disabled on GitHub.",
+      "DefaultBranchChanged": "The default branch changed. Reconcile again to establish a new history fence.",
+      "CheckUnavailable": "GitHub provider state could not be checked. The Local Vault remains available.",
+      "unknown": "The GitHub provider state needs to be checked."
+    },
+    "projectionState": "Projection: {state}",
+    "projectionStatus": {
+      "Ready": "Ready",
+      "Lagging": "Lagging",
+      "Rebuilding": "Rebuilding",
+      "Failed": "Failed",
+      "Unknown": "No checkpoint yet"
     }
   },
   "appearance": {

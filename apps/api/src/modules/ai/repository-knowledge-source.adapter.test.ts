@@ -5,7 +5,7 @@ import { RepositoryKnowledgeSourceAdapter } from './repository-knowledge-source.
 function projectionRow(overrides: Record<string, unknown> = {}) {
   return {
     id: 'projection-1',
-    connectionId: 'connection-1',
+    bindingId: 'binding-1',
     relativePath: 'notes/architecture.md',
     markdownContent: '# Architecture\n\nRepository-backed knowledge.',
     frontmatter: { title: 'Architecture' },
@@ -17,7 +17,7 @@ function projectionRow(overrides: Record<string, unknown> = {}) {
 }
 
 describe('RepositoryKnowledgeSourceAdapter', () => {
-  it('loads only identity-owned active projections and exposes the source digest for indexing', async () => {
+  it('loads only identity-owned connected projections and exposes the source digest for indexing', async () => {
     const findMany = vi.fn(async () => [
       projectionRow({
         id: 'projection-unrelated',
@@ -40,11 +40,7 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
     expect(findMany).toHaveBeenCalledWith({
       where: {
         deletedAt: null,
-        connection: {
-          identityId: 'identity-1',
-          deletedAt: null,
-          status: { in: ['Active', 'Suspended'] },
-        },
+        binding: { identityId: 'identity-1', disconnectedAt: null },
       },
       orderBy: { updatedAt: 'desc' },
       take: 3,
@@ -52,7 +48,7 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
     expect(resources).toEqual([
       expect.objectContaining({
         identityId: 'identity-1',
-        repositoryId: 'connection-1',
+        repositoryId: 'binding-1',
         resourceId: 'projection-1',
         resourcePath: 'notes/architecture.md',
         title: 'Architecture',
@@ -81,11 +77,7 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
       where: {
         id: 'projection-1',
         deletedAt: null,
-        connection: {
-          identityId: 'identity-1',
-          deletedAt: null,
-          status: { in: ['Active', 'Suspended'] },
-        },
+        binding: { identityId: 'identity-1', disconnectedAt: null },
       },
     });
     expect(resource?.metadata).toMatchObject({ projectionIndexStatus: 'indexed' });

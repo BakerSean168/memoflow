@@ -6,7 +6,7 @@ import {
   ConfirmKnowledgeRepositoryHeadSchema,
   CreateKnowledgeRepositoryConnectionSchema,
   DisconnectKnowledgeRepositoryConnectionResponseSchema,
-  KnowledgeRepositoryConnectionClientSchema,
+  KnowledgeRemoteBindingClientSchema,
   KnowledgeRepositoryInstallationTokenSchema,
   KnowledgeRepositoryInstallationIntentStatusResponseSchema,
   KnowledgeRepositoryReconciliationPreviewSchema,
@@ -419,6 +419,25 @@ export function registerKnowledgeRepositoryConnectionRoutes(
   r.route(
     {
       method: 'post',
+      path: '/knowledge-connections/:connectionId/refresh-observation',
+      summary: '显式刷新 GitHub Provider observation',
+      description:
+        '重新检查 GitHub installation/repository 当前事实并只更新 observation；不会修改 binding lifecycle。',
+      request: { params: connectionParams },
+      responses: {
+        200: successResponse(KnowledgeRemoteBindingClientSchema, 'Provider observation 已刷新'),
+        401: errorResponse('未授权，请登录'),
+        404: errorResponse('绑定不存在'),
+        503: errorResponse('GitHub Provider 暂不可用'),
+      },
+    },
+    auth,
+    (req, ctx) => controller.refreshObservation(ctx, req.params),
+  );
+
+  r.route(
+    {
+      method: 'post',
       path: '/knowledge-connections',
       summary: '连接已授权的知识仓库',
       request: {
@@ -427,7 +446,7 @@ export function registerKnowledgeRepositoryConnectionRoutes(
         },
       },
       responses: {
-        200: successResponse(KnowledgeRepositoryConnectionClientSchema, '连接成功'),
+        200: successResponse(KnowledgeRemoteBindingClientSchema, '连接成功'),
         401: errorResponse('未授权，请登录'),
         403: errorResponse('仓库权限不足'),
         404: errorResponse('仓库不存在'),
@@ -527,7 +546,7 @@ export function registerKnowledgeRepositoryConnectionRoutes(
         },
       },
       responses: {
-        200: successResponse(KnowledgeRepositoryConnectionClientSchema, '同步 HEAD 已确认'),
+        200: successResponse(KnowledgeRemoteBindingClientSchema, '同步 HEAD 已确认'),
         401: errorResponse('未授权，请登录'),
         403: errorResponse('仅 Desktop 客户端可确认或仓库权限不足'),
         404: errorResponse('连接或仓库不存在'),

@@ -19,7 +19,7 @@ import type {
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,
   CreateKnowledgeRepositoryConnectionReq,
-  KnowledgeRepositoryConnectionClientDTO,
+  KnowledgeRemoteBindingClientDTO,
   KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryInstallationIntentStatusResponse,
   KnowledgeRepositoryReconciliationPreview,
@@ -78,9 +78,15 @@ export class RepositoryClientService implements IRepositoryApiClient {
     return this.repositoryApi.listKnowledgeRepositoryConnections();
   }
 
+  refreshKnowledgeRepositoryObservation(
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
+    return this.repositoryApi.refreshKnowledgeRepositoryObservation(connectionId);
+  }
+
   connectKnowledgeRepository(
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>> {
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
     return this.repositoryApi.connectKnowledgeRepository(request);
   }
 

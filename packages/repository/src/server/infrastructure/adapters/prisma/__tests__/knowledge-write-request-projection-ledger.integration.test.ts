@@ -19,16 +19,19 @@ import type {
   KnowledgeNoteLinkGraphSourceSet,
   KnowledgeNoteProjectionUpsert,
 } from '../../../../application/ports/knowledge-note-projection.repository';
-import type { IKnowledgeRepositoryConnectionRepository } from '../../../../application/ports/knowledge-repository-connection.repository';
-import type {
-  KnowledgeRepositoryConnectionServerDTO,
-  KnowledgeRepositoryConnectionStatus,
-} from '@memoflow/contracts/repository';
+import type { IKnowledgeRemoteBindingRepository } from '../../../../application/ports/knowledge-remote-binding.repositories';
+import type { OperationAuditRecord, OperationTimelineEntry } from '@memoflow/contracts/operations';
+import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/contracts/repository';
 import { KnowledgeNoteCommitService } from '../../../../application/services/knowledge-note-commit.service';
 import { KnowledgeRepositoryProjectionService } from '../../../../application/services/knowledge-repository-projection.service';
 import { createRepositoryModule } from '../../../../infrastructure/repository.module';
 import { registerKnowledgeRepositoryConnectionRoutes } from '../../../../../api/routes/knowledge-repository-connection.routes';
-import { KnowledgeRepositoryConnectionPrismaRepository } from '../knowledge-repository-connection-prisma.repository';
+import {
+  KnowledgeProjectionCheckpointPrismaRepository,
+  KnowledgeRemoteBindingPrismaRepository,
+  RemoteHistoryFencePrismaRepository,
+  RemoteRepositoryObservationPrismaRepository,
+} from '../knowledge-remote-binding-prisma.repositories';
 import { KnowledgeNoteProjectionPrismaRepository } from '../knowledge-note-projection-prisma.repository';
 import { KnowledgeRepositoryLeasePrismaRepository } from '../knowledge-repository-lease-prisma.repository';
 import { KnowledgeWriteRequestPrismaRepository } from '../knowledge-write-request-prisma.repository';
@@ -72,18 +75,46 @@ async function seedContext(): Promise<Seed> {
     },
   });
   const connectionId = randomUUID();
+  const knowledgeSpaceId = randomUUID();
   const installationId = `install-${identityId}`;
   const githubRepositoryId = `gh-repo-${identityId}`;
-  await prisma.knowledgeRepositoryConnection.create({
+  const repositoryFullName = `user/knowledge-${identityId}`;
+  const now = new Date();
+  await prisma.knowledgeSpace.create({ data: { id: knowledgeSpaceId } });
+  await prisma.knowledgeRemoteBinding.create({
     data: {
       id: connectionId,
+      knowledgeSpaceId,
       identityId,
-      githubUserId: `github-user-${identityId}`,
-      githubRepositoryId,
-      githubRepositoryFullName: `user/knowledge-${identityId}`,
+      provider: 'GitHub',
       installationId,
+      repositoryId: githubRepositoryId,
+      repositoryFullNameSnapshot: repositoryFullName,
+      connectedAt: now,
+    },
+  });
+  await prisma.remoteRepositoryObservation.create({
+    data: {
+      bindingId: connectionId,
+      observedAt: now,
+      accountId: `github-user-${identityId}`,
+      repositoryFullName,
       defaultBranch: 'main',
-      status: 'Active',
+      isPrivate: true,
+      archived: false,
+      disabled: false,
+      contentsPermission: 'write',
+      installationSuspended: false,
+      eligibilityState: 'Ready',
+      blockReason: null,
+    },
+  });
+  await prisma.remoteHistoryFence.create({
+    data: {
+      bindingId: connectionId,
+      defaultBranch: 'main',
+      lastConfirmedRemoteHeadSha: 'a'.repeat(40),
+      confirmedAt: now,
     },
   });
   return { identityId, connectionId, installationId, githubRepositoryId };
@@ -202,13 +233,13 @@ class ThrowingProjectionRepository implements IKnowledgeNoteProjectionRepository
  * Succeeded, then the gated replay acquires the (now free) lease and writes its
  * own late Failed transition against the real DB.
  */
-class GatedConnectionRepository implements IKnowledgeRepositoryConnectionRepository {
+class GatedConnectionRepository implements IKnowledgeRemoteBindingRepository {
   private gate: Promise<void> | null = null;
   private releaseGate: (() => void) | null = null;
   private gated = false;
   private onGated: (() => void) | null = null;
 
-  constructor(private readonly real: KnowledgeRepositoryConnectionPrismaRepository) {}
+  constructor(private readonly real: KnowledgeRemoteBindingPrismaRepository) {}
 
   gateNextConnectionRead(): () => void {
     this.gate = new Promise<void>((resolve) => {
@@ -232,7 +263,7 @@ class GatedConnectionRepository implements IKnowledgeRepositoryConnectionReposit
   async findByIdForIdentity(
     identityId: string,
     id: string,
-  ): Promise<KnowledgeRepositoryConnectionServerDTO | null> {
+  ): Promise<KnowledgeRemoteBindingServerDTO | null> {
     const gate = this.gate;
     if (gate) {
       this.gate = null;
@@ -245,45 +276,38 @@ class GatedConnectionRepository implements IKnowledgeRepositoryConnectionReposit
     return this.real.findByIdForIdentity(identityId, id);
   }
 
-  findById(id: string): Promise<KnowledgeRepositoryConnectionServerDTO | null> {
+  findById(id: string): Promise<KnowledgeRemoteBindingServerDTO | null> {
     return this.real.findById(id);
   }
 
-  findByIdentityId(identityId: string): Promise<KnowledgeRepositoryConnectionServerDTO[]> {
+  findByIdentityId(identityId: string): Promise<KnowledgeRemoteBindingServerDTO[]> {
     return this.real.findByIdentityId(identityId);
   }
 
-  findByGithubRepositoryId(
-    githubRepositoryId: string,
-  ): Promise<KnowledgeRepositoryConnectionServerDTO | null> {
-    return this.real.findByGithubRepositoryId(githubRepositoryId);
+  findByRepositoryId(repositoryId: string): Promise<KnowledgeRemoteBindingServerDTO | null> {
+    return this.real.findByRepositoryId(repositoryId);
   }
 
-  findByInstallationAndGithubRepositoryId(
+  findByInstallationAndRepositoryId(
     installationId: string,
-    githubRepositoryId: string,
-  ): Promise<KnowledgeRepositoryConnectionServerDTO | null> {
-    return this.real.findByInstallationAndGithubRepositoryId(installationId, githubRepositoryId);
+    repositoryId: string,
+  ): Promise<KnowledgeRemoteBindingServerDTO | null> {
+    return this.real.findByInstallationAndRepositoryId(installationId, repositoryId);
   }
 
   listProjectionCandidates(
     limit: number,
-    cursor?: { updatedAt: number; id: string },
-  ): Promise<KnowledgeRepositoryConnectionServerDTO[]> {
+    cursor?: { connectedAt: number; id: string },
+  ): Promise<KnowledgeRemoteBindingServerDTO[]> {
     return this.real.listProjectionCandidates(limit, cursor);
   }
 
-  save(connection: KnowledgeRepositoryConnectionServerDTO): Promise<void> {
-    return this.real.save(connection);
+  save(binding: KnowledgeRemoteBindingServerDTO): Promise<void> {
+    return this.real.save(binding);
   }
 
-  updateStatus(
-    identityId: string,
-    id: string,
-    status: KnowledgeRepositoryConnectionStatus,
-    error?: { code: string; message: string } | null,
-  ): Promise<void> {
-    return this.real.updateStatus(identityId, id, status, error);
+  markDisconnected(identityId: string, id: string, disconnectedAt: number): Promise<boolean> {
+    return this.real.markDisconnected(identityId, id, disconnectedAt);
   }
 }
 
@@ -343,8 +367,11 @@ async function startRuntime(
   } = {},
 ): Promise<TestRuntime> {
   const connectionRepo = new GatedConnectionRepository(
-    new KnowledgeRepositoryConnectionPrismaRepository(prisma),
+    new KnowledgeRemoteBindingPrismaRepository(prisma),
   );
+  const observationRepo = new RemoteRepositoryObservationPrismaRepository(prisma);
+  const historyFenceRepo = new RemoteHistoryFencePrismaRepository(prisma);
+  const projectionCheckpointRepo = new KnowledgeProjectionCheckpointPrismaRepository(prisma);
   const realProjectionRepo = new KnowledgeNoteProjectionPrismaRepository(prisma);
   const projectionRepo = new ThrowingProjectionRepository(realProjectionRepo);
   const writeRequestRepo = new KnowledgeWriteRequestPrismaRepository(prisma);
@@ -374,6 +401,8 @@ async function startRuntime(
 
   const commitService = new KnowledgeNoteCommitService({
     connectionRepository: connectionRepo,
+    observationRepository: observationRepo,
+    historyFenceRepository: historyFenceRepo,
     projectionRepository: projectionRepo,
     writeRequestRepository: writeRequestRepo,
     githubAppClient,
@@ -384,6 +413,9 @@ async function startRuntime(
   const projectionService = new KnowledgeRepositoryProjectionService({
     webhookSecret: WEBHOOK_SECRET,
     connectionRepository: connectionRepo,
+    observationRepository: observationRepo,
+    historyFenceRepository: historyFenceRepo,
+    projectionCheckpointRepository: projectionCheckpointRepo,
     deliveryRepository: deliveryRepo,
     projectionRepository: projectionRepo,
     writeRequestRepository: writeRequestRepo,
@@ -608,7 +640,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(after?.projectedAt).not.toBeNull();
 
     const projected = await prisma.knowledgeNoteProjection.findFirst({
-      where: { connectionId: seed.connectionId, relativePath: 'notes/failed-then-replayed.md' },
+      where: { bindingId: seed.connectionId, relativePath: 'notes/failed-then-replayed.md' },
     });
     expect(projected).not.toBeNull();
     expect(projected?.commitSha).toBe('c'.repeat(40));
@@ -833,7 +865,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(after?.projectedAt).not.toBeNull();
 
     const projected = await prisma.knowledgeNoteProjection.findFirst({
-      where: { connectionId: seed.connectionId, relativePath: 'notes/pending-replay.md' },
+      where: { bindingId: seed.connectionId, relativePath: 'notes/pending-replay.md' },
     });
     expect(projected).not.toBeNull();
     expect(projected?.commitSha).toBe('c'.repeat(40));
@@ -889,7 +921,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
 
     // Projection row: reconcile applied the full remote snapshot.
     const projected = await prisma.knowledgeNoteProjection.findFirst({
-      where: { connectionId: seed.connectionId, relativePath: 'notes/webhook.md' },
+      where: { bindingId: seed.connectionId, relativePath: 'notes/webhook.md' },
     });
     expect(projected).not.toBeNull();
 
@@ -945,7 +977,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(after?.projectedAt).not.toBeNull();
 
     const projected = await prisma.knowledgeNoteProjection.findFirst({
-      where: { connectionId: seed.connectionId, relativePath: 'notes/race.md' },
+      where: { bindingId: seed.connectionId, relativePath: 'notes/race.md' },
     });
     expect(projected).not.toBeNull();
 
@@ -999,7 +1031,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(after?.projectedAt).not.toBeNull();
 
     const projected = await prisma.knowledgeNoteProjection.findFirst({
-      where: { connectionId: seed.connectionId, relativePath: 'notes/out-of-order.md' },
+      where: { bindingId: seed.connectionId, relativePath: 'notes/out-of-order.md' },
     });
     expect(projected).not.toBeNull();
 
@@ -1060,7 +1092,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
 
     // Projection row written by A is still intact.
     const projected = await prisma.knowledgeNoteProjection.findFirst({
-      where: { connectionId: seed.connectionId, relativePath: 'notes/late-failed.md' },
+      where: { bindingId: seed.connectionId, relativePath: 'notes/late-failed.md' },
     });
     expect(projected).not.toBeNull();
     expect(projected?.commitSha).toBe('c'.repeat(40));
@@ -1092,7 +1124,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     const ctx = { identityId: seed.identityId } as never;
     const timelineRes = await runtime.module.api.queryKnowledgeTimeline(ctx);
     expect(timelineRes.ok).toBe(true);
-    const entries = timelineRes.ok ? (timelineRes.data as any[]) : [];
+    const entries: OperationTimelineEntry[] = timelineRes.ok ? timelineRes.data : [];
     const entry = entries.find((e) => e.operationId === writeRequestId);
     expect(entry).toBeDefined();
     expect(entry.source).toBe('knowledge-projection');
@@ -1125,7 +1157,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
 
     const auditRes = await runtime.module.api.getOperationAudit(ctx);
     expect(auditRes.ok).toBe(true);
-    const audit = auditRes.ok ? (auditRes.data as any[]) : [];
+    const audit: OperationAuditRecord[] = auditRes.ok ? auditRes.data : [];
     const replayAudit = audit.find(
       (a) =>
         a.operationId === writeRequestId &&
@@ -1136,7 +1168,7 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(replayAudit.actorIdentityId).toBe(seed.identityId);
 
     const timelineAfter = await runtime.module.api.queryKnowledgeTimeline(ctx);
-    const entryAfter = (timelineAfter.ok ? (timelineAfter.data as any[]) : []).find(
+    const entryAfter = (timelineAfter.ok ? timelineAfter.data : []).find(
       (e) => e.operationId === writeRequestId,
     );
     expect(entryAfter.status).toBe('succeeded');

@@ -49,7 +49,10 @@ export class RepositoryKnowledgeNotePersistenceAdapter implements IKnowledgeNote
       );
     }
 
-    const active = listed.data.connections.filter((c) => c.status === 'Active');
+    const active = listed.data.connections.filter(
+      (binding) =>
+        binding.disconnectedAt === null && binding.observation?.eligibility.state === 'Ready',
+    );
     const connection = input.connectionId
       ? active.find((c) => c.id === input.connectionId)
       : active.length === 1
@@ -59,10 +62,10 @@ export class RepositoryKnowledgeNotePersistenceAdapter implements IKnowledgeNote
     if (!connection) {
       throw new Error(
         input.connectionId
-          ? 'The selected knowledge repository connection is not active'
+          ? 'The selected knowledge repository binding is not ready'
           : active.length > 1
-            ? 'An explicit knowledge repository connection is required'
-            : 'No active knowledge repository connection is available',
+            ? 'An explicit knowledge repository binding is required'
+            : 'No ready knowledge repository binding is available',
       );
     }
 

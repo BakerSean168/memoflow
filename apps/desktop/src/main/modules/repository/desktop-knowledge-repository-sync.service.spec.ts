@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { KnowledgeRepositoryConnectionClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
 import { fail, ok } from '@memoflow/contracts/result';
 import {
   KnowledgeRepositoryGitRuntimeError,
@@ -11,30 +11,49 @@ const NOW = 1_750_000_000_000;
 const PREVIOUS_HEAD = 'a'.repeat(40);
 const NEXT_HEAD = 'b'.repeat(40);
 
+const SPACE_ID = 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440021' as never;
+const BINDING_ID = 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440022' as never;
+
 function connection(
-  overrides: Partial<KnowledgeRepositoryConnectionClientDTO> = {},
-): KnowledgeRepositoryConnectionClientDTO {
-  return {
-    id: 'connection-1',
+  overrides: Partial<KnowledgeRemoteBindingClientDTO> = {},
+): KnowledgeRemoteBindingClientDTO {
+  const base: KnowledgeRemoteBindingClientDTO = {
+    id: BINDING_ID,
+    knowledgeSpaceId: SPACE_ID,
     identityId:
-      'IdentityId_11111111-1111-4111-8111-111111111111' as KnowledgeRepositoryConnectionClientDTO['identityId'],
-    githubUserId: '42',
-    githubRepositoryId: '987654321',
-    githubRepositoryFullName: 'owner/knowledge',
+      'IdentityId_11111111-1111-4111-8111-111111111111' as KnowledgeRemoteBindingClientDTO['identityId'],
+    provider: 'GitHub',
     installationId: 'installation-1',
-    defaultBranch: 'main',
-    status: 'Active',
-    lastSyncedCommitSha: PREVIOUS_HEAD,
-    lastErrorCode: null,
-    canSync: true,
-    createdAt: NOW as KnowledgeRepositoryConnectionClientDTO['createdAt'],
-    updatedAt: NOW as KnowledgeRepositoryConnectionClientDTO['updatedAt'],
-    ...overrides,
+    repositoryId: '987654321',
+    repositoryFullNameSnapshot: 'owner/knowledge',
+    connectedAt: NOW,
+    disconnectedAt: null,
+    observation: {
+      bindingId: BINDING_ID,
+      observedAt: NOW,
+      accountId: '42',
+      repositoryFullName: 'owner/knowledge',
+      defaultBranch: 'main',
+      private: true,
+      archived: false,
+      disabled: false,
+      contentsPermission: 'write',
+      installationSuspended: false,
+      eligibility: { state: 'Ready' },
+    },
+    historyFence: {
+      bindingId: BINDING_ID,
+      defaultBranch: 'main',
+      lastConfirmedRemoteHeadSha: PREVIOUS_HEAD,
+      confirmedAt: NOW,
+    },
+    projectionCheckpoint: null,
   };
+  return { ...base, ...overrides };
 }
 
 function createFixture(options?: {
-  current?: KnowledgeRepositoryConnectionClientDTO;
+  current?: KnowledgeRemoteBindingClientDTO;
   tokenFailure?: boolean;
   tokenExpiresAt?: number;
 }) {
@@ -44,7 +63,7 @@ function createFixture(options?: {
     getBinding: vi.fn(async () => ({
       binding: {
         id: localBindingId,
-        knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440021' as never,
+        knowledgeSpaceId: SPACE_ID,
         localProfileId: 'p_sync_service',
         rootPath: '/vault',
         displayName: 'Vault',
@@ -66,12 +85,21 @@ function createFixture(options?: {
         ? fail({ code: 'SERVICE_UNAVAILABLE', message: 'offline' })
         : ok({
             token: 'repository-token',
-            repositoryId: current.githubRepositoryId,
+            repositoryId: current.repositoryId,
             expiresAt: options?.tokenExpiresAt ?? NOW + 300_000,
           }),
     ),
     confirmKnowledgeRepositoryHead: vi.fn(async (_connectionId, request) =>
-      ok(connection({ lastSyncedCommitSha: request.headSha })),
+      ok(
+        connection({
+          historyFence: {
+            bindingId: current.id,
+            defaultBranch: current.historyFence?.defaultBranch ?? 'main',
+            lastConfirmedRemoteHeadSha: request.headSha,
+            confirmedAt: NOW,
+          },
+        }),
+      ),
     ),
   };
   const gitRuntime: KnowledgeRepositorySyncGitRuntimePort = {
@@ -110,7 +138,7 @@ describe('DesktopKnowledgeRepositorySyncService', () => {
         localCommitCreated: true,
         remoteChangesApplied: false,
         pushed: true,
-        connection: { lastSyncedCommitSha: NEXT_HEAD },
+        connection: { historyFence: { lastConfirmedRemoteHeadSha: NEXT_HEAD } },
       },
     });
 
@@ -119,10 +147,10 @@ describe('DesktopKnowledgeRepositorySyncService', () => {
     );
     expect(gitRuntime.synchronize).toHaveBeenCalledWith({
       rootPath: '/vault',
-      repositoryId: current.githubRepositoryId,
-      repositoryFullName: current.githubRepositoryFullName,
+      repositoryId: current.repositoryId,
+      repositoryFullName: current.observation!.repositoryFullName,
       defaultBranch: 'main',
-      lastSyncedCommitSha: PREVIOUS_HEAD,
+      lastConfirmedRemoteHeadSha: PREVIOUS_HEAD,
       token: 'repository-token',
     });
     expect(remote.confirmKnowledgeRepositoryHead).toHaveBeenCalledWith(current.id, {
@@ -155,7 +183,7 @@ describe('DesktopKnowledgeRepositorySyncService', () => {
 
   it('requires a confirmed first synchronization before continuous sync', async () => {
     const { service, remote, gitRuntime, current } = createFixture({
-      current: connection({ lastSyncedCommitSha: null }),
+      current: connection({ historyFence: null }),
     });
 
     await expect(
@@ -221,10 +249,10 @@ describe('DesktopKnowledgeRepositorySyncService', () => {
     expect(localVault.getBinding).toHaveBeenCalledWith();
     expect(gitRuntime.prepareSynchronization).toHaveBeenCalledWith({
       rootPath: '/vault',
-      repositoryId: current.githubRepositoryId,
-      repositoryFullName: current.githubRepositoryFullName,
-      defaultBranch: current.defaultBranch,
-      lastSyncedCommitSha: current.lastSyncedCommitSha,
+      repositoryId: current.repositoryId,
+      repositoryFullName: current.observation!.repositoryFullName,
+      defaultBranch: current.historyFence!.defaultBranch,
+      lastConfirmedRemoteHeadSha: current.historyFence!.lastConfirmedRemoteHeadSha,
     });
     expect(remote.listKnowledgeRepositoryConnections).not.toHaveBeenCalled();
     expect(remote.issueDesktopKnowledgeRepositoryToken).not.toHaveBeenCalled();

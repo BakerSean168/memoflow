@@ -3,9 +3,13 @@ import type {
   CreateConfirmedKnowledgeNoteReq,
   GitHubInstallationRepositoryDTO,
   KnowledgeNoteProjectionClientDTO,
-  KnowledgeRepositoryConnectionServerDTO,
+  KnowledgeRemoteBindingServerDTO,
 } from '@memoflow/contracts/repository';
-import type { IKnowledgeRepositoryConnectionRepository } from '../ports/knowledge-repository-connection.repository';
+import type {
+  IKnowledgeRemoteBindingRepository,
+  IRemoteHistoryFenceRepository,
+  IRemoteRepositoryObservationRepository,
+} from '../ports/knowledge-remote-binding.repositories';
 import type {
   IKnowledgeRepositoryLeaseRepository,
   KnowledgeRepositoryLeaseRequest,
@@ -21,24 +25,18 @@ import { GitHubAppClientFailureError } from '../ports/github-app-client.port';
 import { KnowledgeNoteCommitService } from './knowledge-note-commit.service';
 import { createUnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';
 
-function connection(): KnowledgeRepositoryConnectionServerDTO {
+function connection(): KnowledgeRemoteBindingServerDTO {
   return {
-    id: 'connection-1',
+    id: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440100' as never,
+    knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440101' as never,
     identityId: 'identity-1' as never,
-    githubUserId: '42',
-    githubRepositoryId: 'repository-1',
-    githubRepositoryFullName: 'owner/knowledge',
+    provider: 'GitHub',
     installationId: 'installation-1',
-    defaultBranch: 'main',
-    status: 'Active',
-    lastSyncedCommitSha: null,
-    lastProjectedCommitSha: null,
-    lastErrorCode: null,
-    lastErrorMessage: null,
+    repositoryId: 'repository-1',
+    repositoryFullNameSnapshot: 'owner/knowledge',
+    connectedAt: 1,
+    disconnectedAt: null,
     version: 1,
-    createdAt: 1 as never,
-    updatedAt: 1 as never,
-    deletedAt: null,
   };
 }
 
@@ -58,7 +56,7 @@ function githubRepository(): GitHubInstallationRepositoryDTO {
 
 function request(overrides: Partial<CreateConfirmedKnowledgeNoteReq> = {}) {
   return {
-    connectionId: 'connection-1',
+    connectionId: connection().id,
     proposalId: 'proposal-1',
     revision: 1,
     requestId: 'request-1',
@@ -71,7 +69,7 @@ function request(overrides: Partial<CreateConfirmedKnowledgeNoteReq> = {}) {
   } satisfies CreateConfirmedKnowledgeNoteReq;
 }
 
-class MemoryConnectionRepository implements IKnowledgeRepositoryConnectionRepository {
+class MemoryConnectionRepository implements IKnowledgeRemoteBindingRepository {
   readonly row = connection();
 
   async findById(id: string) {
@@ -86,13 +84,12 @@ class MemoryConnectionRepository implements IKnowledgeRepositoryConnectionReposi
     return identityId === this.row.identityId ? [this.row] : [];
   }
 
-  async findByGithubRepositoryId(repositoryId: string) {
-    return repositoryId === this.row.githubRepositoryId ? this.row : null;
+  async findByRepositoryId(repositoryId: string) {
+    return repositoryId === this.row.repositoryId ? this.row : null;
   }
 
-  async findByInstallationAndGithubRepositoryId(installationId: string, repositoryId: string) {
-    return installationId === this.row.installationId &&
-      repositoryId === this.row.githubRepositoryId
+  async findByInstallationAndRepositoryId(installationId: string, repositoryId: string) {
+    return installationId === this.row.installationId && repositoryId === this.row.repositoryId
       ? this.row
       : null;
   }
@@ -102,7 +99,52 @@ class MemoryConnectionRepository implements IKnowledgeRepositoryConnectionReposi
   }
 
   async save() {}
-  async updateStatus(_identityId: string, _id: string, _status: never) {}
+  async markDisconnected() {
+    return false;
+  }
+}
+
+class MemoryObservationRepository implements IRemoteRepositoryObservationRepository {
+  readonly row = {
+    bindingId: connection().id,
+    observedAt: 1,
+    accountId: '42',
+    repositoryFullName: 'owner/knowledge',
+    defaultBranch: 'main',
+    private: true,
+    archived: false,
+    disabled: false,
+    contentsPermission: 'write' as const,
+    installationSuspended: false,
+    eligibility: { state: 'Ready' as const },
+  };
+  async findByBindingId(bindingId: string) {
+    return bindingId === this.row.bindingId ? this.row : null;
+  }
+  async findByBindingIds(bindingIds: readonly string[]) {
+    return bindingIds.includes(this.row.bindingId)
+      ? new Map([[this.row.bindingId, this.row]])
+      : new Map();
+  }
+  async save() {}
+}
+
+class MemoryHistoryFenceRepository implements IRemoteHistoryFenceRepository {
+  readonly row = {
+    bindingId: connection().id,
+    defaultBranch: 'main',
+    lastConfirmedRemoteHeadSha: 'f'.repeat(40),
+    confirmedAt: 1,
+  };
+  async findByBindingId(bindingId: string) {
+    return bindingId === this.row.bindingId ? this.row : null;
+  }
+  async findByBindingIds(bindingIds: readonly string[]) {
+    return bindingIds.includes(this.row.bindingId)
+      ? new Map([[this.row.bindingId, this.row]])
+      : new Map();
+  }
+  async save() {}
 }
 
 class MemoryProjectionRepository implements IKnowledgeNoteProjectionRepository {
@@ -375,6 +417,8 @@ function createService(
   const writeRequestRepository =
     overrides.writeRequestRepository ?? new MemoryWriteRequestRepository();
   const connectionRepository = overrides.connectionRepository ?? new MemoryConnectionRepository();
+  const observationRepository = new MemoryObservationRepository();
+  const historyFenceRepository = new MemoryHistoryFenceRepository();
   const publishMutation = vi.fn();
   return {
     github,
@@ -383,6 +427,8 @@ function createService(
     publishMutation,
     service: new KnowledgeNoteCommitService({
       connectionRepository,
+      observationRepository,
+      historyFenceRepository,
       projectionRepository,
       writeRequestRepository,
       githubAppClient: github,
@@ -423,7 +469,7 @@ describe('KnowledgeNoteCommitService', () => {
       commitSha: 'a'.repeat(40),
     });
     expect(projectionRepository.applyChanges).toHaveBeenCalledWith(
-      'connection-1',
+      connection().id,
       'a'.repeat(40),
       [
         expect.objectContaining({

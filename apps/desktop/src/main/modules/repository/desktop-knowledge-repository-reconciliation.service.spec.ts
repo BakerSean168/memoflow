@@ -1,32 +1,46 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
-import type { KnowledgeRepositoryConnectionClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
 import { DesktopKnowledgeRepositoryReconciliationService } from './desktop-knowledge-repository-reconciliation.service';
 import type { KnowledgeRepositoryGitRuntimePort } from './desktop-knowledge-repository-git.runtime';
 
 const NOW = 1_750_000_000_000;
 const HEAD = 'a'.repeat(40);
 
+const SPACE_ID = 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440031' as never;
+const BINDING_ID = 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440032' as never;
+
 function connection(
-  overrides: Partial<KnowledgeRepositoryConnectionClientDTO> = {},
-): KnowledgeRepositoryConnectionClientDTO {
-  return {
-    id: 'connection-1',
+  overrides: Partial<KnowledgeRemoteBindingClientDTO> = {},
+): KnowledgeRemoteBindingClientDTO {
+  const base: KnowledgeRemoteBindingClientDTO = {
+    id: BINDING_ID,
+    knowledgeSpaceId: SPACE_ID,
     identityId:
-      'IdentityId_11111111-1111-4111-8111-111111111111' as KnowledgeRepositoryConnectionClientDTO['identityId'],
-    githubUserId: '42',
-    githubRepositoryId: '987654321',
-    githubRepositoryFullName: 'owner/knowledge',
+      'IdentityId_11111111-1111-4111-8111-111111111111' as KnowledgeRemoteBindingClientDTO['identityId'],
+    provider: 'GitHub',
     installationId: 'installation-1',
-    defaultBranch: 'main',
-    status: 'Active',
-    lastSyncedCommitSha: null,
-    lastErrorCode: null,
-    canSync: true,
-    createdAt: NOW as KnowledgeRepositoryConnectionClientDTO['createdAt'],
-    updatedAt: NOW as KnowledgeRepositoryConnectionClientDTO['updatedAt'],
-    ...overrides,
+    repositoryId: '987654321',
+    repositoryFullNameSnapshot: 'owner/knowledge',
+    connectedAt: NOW,
+    disconnectedAt: null,
+    observation: {
+      bindingId: BINDING_ID,
+      observedAt: NOW,
+      accountId: '42',
+      repositoryFullName: 'owner/knowledge',
+      defaultBranch: 'main',
+      private: true,
+      archived: false,
+      disabled: false,
+      contentsPermission: 'write',
+      installationSuspended: false,
+      eligibility: { state: 'Ready' },
+    },
+    historyFence: null,
+    projectionCheckpoint: null,
   };
+  return { ...base, ...overrides };
 }
 
 function createFixture(options?: {
@@ -42,7 +56,7 @@ function createFixture(options?: {
     getBinding: vi.fn(async () => ({
       binding: {
         id: localBindingId,
-        knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440031' as never,
+        knowledgeSpaceId: SPACE_ID,
         localProfileId: 'p_reconciliation',
         rootPath: '/vault',
         displayName: 'Vault',
@@ -73,12 +87,21 @@ function createFixture(options?: {
     issueDesktopKnowledgeRepositoryToken: vi.fn(async () =>
       ok({
         token: 'repository-token',
-        repositoryId: current.githubRepositoryId,
+        repositoryId: current.repositoryId,
         expiresAt: options?.tokenExpiresAt ?? NOW + 300_000,
       }),
     ),
     confirmKnowledgeRepositoryHead: vi.fn(async (_id, request) =>
-      ok(connection({ lastSyncedCommitSha: request.headSha })),
+      ok(
+        connection({
+          historyFence: {
+            bindingId: current.id,
+            defaultBranch: 'main',
+            lastConfirmedRemoteHeadSha: request.headSha,
+            confirmedAt: NOW,
+          },
+        }),
+      ),
     ),
   };
   const gitRuntime: KnowledgeRepositoryGitRuntimePort = {
@@ -120,14 +143,14 @@ describe('DesktopKnowledgeRepositoryReconciliationService', () => {
         action: 'InitializeRemoteFromLocal',
         headSha: HEAD,
         reusedExistingSynchronization: false,
-        connection: { lastSyncedCommitSha: HEAD },
+        connection: { historyFence: { lastConfirmedRemoteHeadSha: HEAD } },
       },
     });
 
     expect(gitRuntime.reconcile).toHaveBeenCalledWith({
       rootPath: '/vault',
-      repositoryId: current.githubRepositoryId,
-      repositoryFullName: current.githubRepositoryFullName,
+      repositoryId: current.repositoryId,
+      repositoryFullName: current.observation!.repositoryFullName,
       defaultBranch: 'main',
       expectedRemoteHeadSha: null,
       action: 'InitializeRemoteFromLocal',

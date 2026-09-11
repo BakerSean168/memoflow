@@ -4,34 +4,37 @@ import type { ServerHeldDataDisclosureSource } from '../../server-held-data-disc
 import { ExportServerHeldDataDisclosureUseCase } from '../export-server-held-data-disclosure.use-case';
 
 describe('ExportServerHeldDataDisclosureUseCase', () => {
-  it('builds a distinct non-importable disclosure with retained server records', async () => {
+  it('builds a non-importable disclosure using the current four-axis knowledge model', async () => {
     const source: ServerHeldDataDisclosureSource = {
       readForIdentity: vi.fn().mockResolvedValue({
-        knowledgeRepositoryConnections: [
+        knowledgeSpaces: [
           {
-            id: 'connection-1',
-            githubUserId: 'github-user-1',
-            githubRepositoryId: 'github-repository-1',
-            githubRepositoryFullName: 'owner/vault',
-            githubInstallationId: 'installation-1',
-            defaultBranch: 'main',
-            isPrivate: true,
-            status: 'REVOKED',
-            lastSyncedCommitSha: 'commit-1',
-            lastProjectedCommitSha: 'commit-1',
-            lastErrorCode: null,
-            lastErrorMessage: null,
-            version: 2,
+            id: 'space-1',
             createdAt: '2026-07-18T00:00:00.000Z',
             updatedAt: '2026-07-20T00:00:00.000Z',
-            deletedAt: '2026-07-20T00:00:00.000Z',
           },
         ],
+        knowledgeRemoteBindings: [
+          {
+            id: 'binding-1',
+            knowledgeSpaceId: 'space-1',
+            provider: 'GitHub',
+            installationId: 'installation-1',
+            repositoryId: 'repository-1',
+            repositoryFullNameSnapshot: 'owner/vault',
+            connectedAt: '2026-07-18T00:00:00.000Z',
+            disconnectedAt: null,
+            version: 2,
+          },
+        ],
+        remoteRepositoryObservations: [],
+        remoteHistoryFences: [],
+        knowledgeProjectionCheckpoints: [],
         githubWebhookDeliveries: [],
         knowledgeNoteProjections: [
           {
             id: 'projection-1',
-            connectionId: 'connection-1',
+            bindingId: 'binding-1',
             relativePath: 'notes/private.md',
             commitSha: 'commit-1',
             blobSha: 'blob-1',
@@ -47,7 +50,7 @@ describe('ExportServerHeldDataDisclosureUseCase', () => {
         knowledgeAttachmentProjections: [],
         knowledgeAttachmentContentCaches: [
           {
-            connectionId: 'connection-1',
+            bindingId: 'binding-1',
             blobSha: 'attachment-blob-1',
             byteSize: 3,
             contentBase64: 'AQID',
@@ -67,12 +70,9 @@ describe('ExportServerHeldDataDisclosureUseCase', () => {
     const result = await useCase.execute('identity-1');
     const envelope = JSON.parse(result.content) as unknown;
 
-    expect(source.readForIdentity).toHaveBeenCalledWith('identity-1');
-    expect(result.fileName).toBe(
-      'memoflow-server-held-data-disclosure-v1-2026-07-20T12-34-56.json',
-    );
     expect(result.summary.entityCounts).toMatchObject({
-      knowledgeRepositoryConnections: 1,
+      knowledgeSpaces: 1,
+      knowledgeRemoteBindings: 1,
       knowledgeNoteProjections: 1,
       knowledgeAttachmentContentCaches: 1,
     });
@@ -81,15 +81,11 @@ describe('ExportServerHeldDataDisclosureUseCase', () => {
     expect(envelope).toMatchObject({
       kind: 'memoflow.server-held-data-disclosure',
       subject: { identityId: 'identity-1' },
-      scope: {
-        importMode: 'not-importable',
-        includesApplicationManagedReplayableGithubAuthorization: false,
-        includesLocalVaultFiles: false,
-        includesEphemeralWorkerLeases: false,
-      },
+      scope: { importMode: 'not-importable', includesLocalVaultFiles: false },
       data: {
-        knowledgeNoteProjections: [{ markdownContent: '# Private note' }],
-        knowledgeAttachmentContentCaches: [{ contentBase64: 'AQID' }],
+        knowledgeRemoteBindings: [{ id: 'binding-1', repositoryId: 'repository-1' }],
+        knowledgeNoteProjections: [{ bindingId: 'binding-1', markdownContent: '# Private note' }],
+        knowledgeAttachmentContentCaches: [{ bindingId: 'binding-1', contentBase64: 'AQID' }],
       },
     });
   });

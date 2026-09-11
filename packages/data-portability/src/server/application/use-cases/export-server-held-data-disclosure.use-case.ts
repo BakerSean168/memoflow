@@ -47,7 +47,11 @@ export class ExportServerHeldDataDisclosureUseCase {
       });
 
     const entityCounts = {
-      knowledgeRepositoryConnections: data.knowledgeRepositoryConnections.length,
+      knowledgeSpaces: data.knowledgeSpaces.length,
+      knowledgeRemoteBindings: data.knowledgeRemoteBindings.length,
+      remoteRepositoryObservations: data.remoteRepositoryObservations.length,
+      remoteHistoryFences: data.remoteHistoryFences.length,
+      knowledgeProjectionCheckpoints: data.knowledgeProjectionCheckpoints.length,
       githubWebhookDeliveries: data.githubWebhookDeliveries.length,
       knowledgeNoteProjections: data.knowledgeNoteProjections.length,
       knowledgeAttachmentProjections: data.knowledgeAttachmentProjections.length,

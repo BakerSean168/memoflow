@@ -57,13 +57,10 @@ export default {
       "indexed": "Searchable",
       "failed": "Indexing failed"
     },
-    "status": {
-      "Active": "Connected",
-      "Suspended": "Suspended",
-      "Revoked": "Revoked",
-      "Error": "Needs attention",
-      "PendingInstall": "Pending installation",
-      "Unknown": "Unknown status"
+    "providerStatus": {
+      "Ready": "Provider ready",
+      "Blocked": "Provider blocked",
+      "Unchecked": "Not checked"
     }
   },
   "writeRequestLedger": {
