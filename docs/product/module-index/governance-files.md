@@ -80,6 +80,15 @@ updated: 2026-09-11T00:00:00+09:00
 | [`packages/contracts/src/mocks/governance.mock.ts`](../../../packages/contracts/src/mocks/governance.mock.ts)                                                       | 治理 mocks                        |
 | [`packages/database/prisma/schema/governance.prisma`](../../../packages/database/prisma/schema/governance.prisma)                                                   | 治理 Prisma schema                |
 
+## Development / diagnostic workbench
+
+| 文件                                                                                                                                                                                        | 说明                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [`packages/app-vue/src/modules/governance/governance-surface-policy.ts`](../../../packages/app-vue/src/modules/governance/governance-surface-policy.ts)                                     | route 永久注册；开发自动展示、生产诊断显式 opt-in 的导航策略 |
+| [`packages/app-vue/src/modules/governance/governance-surface-policy.spec.ts`](../../../packages/app-vue/src/modules/governance/governance-surface-policy.spec.ts)                           | development / production / diagnostic policy 行为            |
+| [`packages/app-vue/src/modules/governance/governance-development-surface.surface.spec.ts`](../../../packages/app-vue/src/modules/governance/governance-development-surface.surface.spec.ts) | router / Note shell / env wiring anti-drift                  |
+| [`packages/app-vue/src/modules/governance/governance-development-smoke.spec.ts`](../../../packages/app-vue/src/modules/governance/governance-development-smoke.spec.ts)                     | 真实 Vue list → create → update → RuleRevision history smoke |
+
 ## Reference feature 可执行锁
 
 | 文件                                                                                                                                                                                                                  | 说明                                                                                   |

@@ -3,7 +3,10 @@
     <div class="flex items-center justify-between gap-3 mb-3">
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium">v{{ revision.revisionNumber }}</span>
-        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium" :class="badgeClass">
+        <span
+          class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium"
+          :class="badgeClass"
+        >
           {{ changeLabel }}
         </span>
       </div>
@@ -11,7 +14,12 @@
     </div>
 
     <p class="text-xs text-muted-foreground mb-3">
-      作者：{{ revision.authorId }} · 变更字段：{{ revision.changedFields.join(', ') || '无' }}
+      {{
+        t('governance.revisionCard.author', {
+          authorId: revision.authorId,
+          fields: revision.changedFields.join(', ') || t('governance.revisionCard.noFields'),
+        })
+      }}
     </p>
 
     <div v-if="hasDiff" class="space-y-2">
@@ -24,11 +32,15 @@
         <div class="grid grid-cols-1 gap-2 text-xs @2xl/panel:grid-cols-2">
           <div class="rounded bg-destructive/5 p-2">
             <p class="text-muted-foreground mb-1">Before</p>
-            <pre class="whitespace-pre-wrap break-words">{{ stringifyValue(revision.previousValues[field]) }}</pre>
+            <pre class="whitespace-pre-wrap break-words">{{
+              stringifyValue(revision.previousValues[field])
+            }}</pre>
           </div>
           <div class="rounded bg-primary/5 p-2">
             <p class="text-muted-foreground mb-1">After</p>
-            <pre class="whitespace-pre-wrap break-words">{{ stringifyValue(revision.newValues[field]) }}</pre>
+            <pre class="whitespace-pre-wrap break-words">{{
+              stringifyValue(revision.newValues[field])
+            }}</pre>
           </div>
         </div>
       </div>
@@ -38,12 +50,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { RuleRevisionClientDTO } from '@memoflow/contracts/governance';
 import { formatProductDateTime } from '../../../shared/utils/product-time';
 
 const props = defineProps<{
   revision: RuleRevisionClientDTO;
 }>();
+
+const { t } = useI18n();
 
 const formattedDate = computed(() => formatProductDateTime(props.revision.createdAt));
 
@@ -52,13 +67,13 @@ const hasDiff = computed(() => props.revision.changedFields.length > 0);
 const changeLabel = computed(() => {
   switch (props.revision.changeType) {
     case 'Created':
-      return '创建';
+      return t('governance.revisionCard.changeCreated');
     case 'Updated':
-      return '更新';
+      return t('governance.revisionCard.changeUpdated');
     case 'Deprecated':
-      return '弃用';
+      return t('governance.revisionCard.changeDeprecated');
     case 'Reactivated':
-      return '重新激活';
+      return t('governance.revisionCard.changeReactivated');
     default:
       return props.revision.changeType;
   }

@@ -3687,6 +3687,30 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/governance/governance-development-smoke.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/governance/governance-development-surface.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/governance/governance-surface-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/governance/governance-types-export.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11542,7 +11566,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 204
+      "fileCount": 207
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12324,7 +12348,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1063,
+    "unit": 1066,
     "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,

@@ -39,13 +39,20 @@
  * 笔记 = /repository（Local Vault 或 knowledge projection）；规范 = /governance/**。
  * 路由 path 不变，仅在 Note 壳内切换分区导航。
  */
-import { computed } from 'vue';
+import { computed, type Component } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { BookOpen, ShieldCheck } from '@lucide/vue';
+import { shouldRenderGovernanceSegment } from '../../governance/governance-surface-policy';
 
 export type NoteSegment = 'notes' | 'governance';
 
-defineProps<{
+interface NoteSegmentOption {
+  value: NoteSegment;
+  label: string;
+  icon: Component;
+}
+
+const props = defineProps<{
   active: NoteSegment;
 }>();
 
@@ -55,16 +62,23 @@ defineEmits<{
 
 const { t } = useI18n();
 
-const segments = computed(() => [
-  {
-    value: 'notes' as const,
-    label: t('repository.segments.notes'),
-    icon: BookOpen,
-  },
-  {
-    value: 'governance' as const,
-    label: t('repository.segments.governance'),
-    icon: ShieldCheck,
-  },
-]);
+const segments = computed<NoteSegmentOption[]>(() => {
+  const items: NoteSegmentOption[] = [
+    {
+      value: 'notes',
+      label: t('repository.segments.notes'),
+      icon: BookOpen,
+    },
+  ];
+
+  if (shouldRenderGovernanceSegment(props.active)) {
+    items.push({
+      value: 'governance',
+      label: t('repository.segments.governance'),
+      icon: ShieldCheck,
+    });
+  }
+
+  return items;
+});
 </script>

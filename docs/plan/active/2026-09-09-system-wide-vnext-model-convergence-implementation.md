@@ -420,7 +420,13 @@ Governance is now protected as an executable reference feature rather than only 
 
 ## GOV-1902 — Define development-surface policy and smoke path
 
-Governance must remain actually runnable in development/diagnostic mode. Define the surface gate without allowing hidden navigation to become dead code. Add a smoke path that opens the rule list, creates/updates a rule and observes RuleRevision.
+**状态：DONE — 2026-09-11。**
+
+Governance remains a real routed feature in every build; only normal navigation visibility is policy-controlled. `governance-surface-policy.ts` keeps the route registered unconditionally, advertises the workbench automatically in Vite development mode, and permits an explicit production diagnostic opt-in through `VITE_ENABLE_GOVERNANCE_DEV_SURFACE=true`. Production/staging/test defaults are false. The Note shell hides the normal Governance segment when the surface is not advertised, while a direct/deep-linked `/governance/**` route still renders the active Governance segment so hidden navigation never turns the feature into an orphaned page. `governance-development-surface.surface.spec.ts` locks the router, Note shell and environment wiring together.
+
+A real Vue workbench smoke now mounts the production Governance list/editor/detail/history views with Router, Pinia, Vue Query, production i18n and the public `GovernanceClientPort`. The stateful validated smoke service runs the user-visible list → create → detail → edit/update → revision-history flow and proves the second ledger entry is `RuleRevision` v2 / `Updated`; it does not replace or mock away the actual views/composables. During smoke hardening, `RuleEditorView.spec.ts` was corrected to use production locale messages, and `RevisionCard`, `RuleStatusBadge` and `CodeSnippetView` were moved off hard-coded Chinese strings so the English diagnostic workbench no longer renders a mixed-language history/status surface.
+
+**Acceptance evidence:** App-Vue Governance + i18n focused suite 9 files / 36 tests PASS, including the complete create → update → revision smoke, surface-policy unit tests, wiring anti-drift lock and locale key completeness. App-Vue canonical `vue-tsc` PASS after rebuilding required workspace declarations; App-Vue production build PASS. Authored changed-file ESLint PASS with 0 warnings/errors; test inventory regenerated to 1235 files; docs-check PASS; governance-check PASS; `git diff --check` PASS at commit closure.
 
 **Protected:** package/API/IPC/persistence/UI remain real; production navigation visibility is policy, not ownership.
 

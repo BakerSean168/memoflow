@@ -89,6 +89,8 @@ focused characterization tests
 
 对全仓 feature architecture 的重大结构调整，优先用 Governance 证明一个完整可执行 vertical slice。`GOV-1901` 同时修复了一个实际 parity 漂移：Prisma search 现在与 PowerSync 一样覆盖 code/title/description/tags，并使用不区分大小写的关键词匹配。
 
+`GOV-1902` 进一步把“可运行”变成长期验收条件：`/governance/**` 不因生产导航隐藏而删除，开发环境直接展示工作台，生产可通过 `VITE_ENABLE_GOVERNANCE_DEV_SURFACE=true` 显式开启诊断入口；Vue smoke 必须跑通 list → create → update → RuleRevision history。
+
 ## 6. 与 Engineering Governance 的关系
 
 ```text
@@ -128,7 +130,7 @@ Knowledge 不再是 Governance 的替代目标。
 
 ## 8. 当前优化方向
 
-- 正式定义 development-mode surface policy；
+- development/diagnostic surface policy 已由 `GOV-1902` 固化：开发环境自动展示，生产仅显式诊断开关展示；route 与 feature ownership 始终保留；
 - 保持 reference module 与全仓 canonical feature shape 同步；
 - 建立 deterministic published rule bundle；
 - 增加 check/report/autofix adapter，而不是让 Rule DB 直接绑死 CI；

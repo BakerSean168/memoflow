@@ -10,6 +10,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { CheckCircle, Pencil, AlertTriangle } from '@lucide/vue';
 
 // Rule status enum
@@ -18,6 +19,8 @@ enum RuleStatus {
   Draft = 'Draft',
   Deprecated = 'Deprecated',
 }
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -55,11 +58,11 @@ const iconComponent = computed(() => {
 const label = computed(() => {
   switch (props.status) {
     case RuleStatus.Active:
-      return '已发布';
+      return t('governance.status.active');
     case RuleStatus.Draft:
-      return '草稿';
+      return t('governance.status.draft');
     case RuleStatus.Deprecated:
-      return '已弃用';
+      return t('governance.status.deprecated');
     default:
       return props.status;
   }

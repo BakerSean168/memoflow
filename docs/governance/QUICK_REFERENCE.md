@@ -38,6 +38,14 @@ Governance 不是静态目录样板。`GOV-1901` 长期要求以下四组 proof 
 
 对应 anti-drift gate：`packages/governance/src/reference-module-invariants.surface.spec.ts` 与 `server/infrastructure/__tests__/governance-persistence-parity.spec.ts`。任何系统级 feature architecture 改造，应先确保这两类 reference gate 仍成立。
 
+## Development / diagnostic surface
+
+- development：Governance 工作台导航自动可见；
+- production / staging / test：默认 `VITE_ENABLE_GOVERNANCE_DEV_SURFACE=false`，普通导航隐藏；
+- 生产诊断：显式设为 `true` 后展示入口；
+- route、API/IPC、Prisma/PowerSync、Vue list/detail/editor/history 从不因导航隐藏而删除；
+- 回归必须包含 `governance-development-smoke.spec.ts` 的 list → create → update → revision history 闭环。
+
 ## 前端数据流（推荐）
 
 ```text
