@@ -745,68 +745,6 @@ const notification_templates = new Table({
   updated_at: column.text,
 });
 
-// ──────────────────────────────────────────────
-// Editor
-// ──────────────────────────────────────────────
-
-const editor_workspaces = new Table({
-  identity_id: column.text,
-  name: column.text,
-  description: column.text,
-  project_path: column.text,
-  project_type: column.text,
-  layout: column.text, // JSON
-  setting: column.text, // JSON
-  is_active: column.integer, // boolean
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  accessed_at: column.text,
-  deleted_at: column.text,
-});
-
-const editor_workspace_sessions = new Table({
-  workspace_id: column.text, // FK
-  identity_id: column.text,
-  name: column.text,
-  layout: column.text, // JSON
-  is_active: column.integer, // boolean
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const editor_workspace_session_groups = new Table({
-  session_id: column.text, // FK
-  workspace_id: column.text, // FK
-  identity_id: column.text,
-  group_index: column.integer,
-  name: column.text,
-  split_direction: column.text,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const editor_workspace_session_group_tabs = new Table({
-  group_id: column.text, // FK
-  session_id: column.text, // FK
-  workspace_id: column.text, // FK
-  identity_id: column.text,
-  resource_id: column.text,
-  tab_index: column.integer,
-  tab_type: column.text,
-  title: column.text,
-  view_state: column.text, // JSON
-  is_pinned: column.integer, // boolean
-  is_active: column.integer, // boolean
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
 
 // ──────────────────────────────────────────────
 // AI
@@ -1160,10 +1098,6 @@ export const PowerSyncAppSchema = new Schema({
   notification_preferences,
   notification_templates,
   // Editor
-  editor_workspaces,
-  editor_workspace_sessions,
-  editor_workspace_session_groups,
-  editor_workspace_session_group_tabs,
   // AI
   ai_conversations,
   ai_messages,

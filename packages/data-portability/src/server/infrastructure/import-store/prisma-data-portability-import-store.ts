@@ -30,10 +30,6 @@ import type {
   CreateReminderGroupInput,
   CreateReminderTemplateInput,
   CreateReminderResponseInput,
-  CreateEditorWorkspaceInput,
-  CreateEditorSessionInput,
-  CreateEditorGroupInput,
-  CreateEditorTabInput,
   CreateAIConversationInput,
   CreateAIMessageInput,
 } from '../../application/import-store/data-portability-import-store';
@@ -209,31 +205,6 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
     });
   }
 
-  // --- Editor ---
-
-  async createEditorWorkspace(input: CreateEditorWorkspaceInput): Promise<void> {
-    await this.tx.editorWorkspace.create({
-      data: input as Prisma.EditorWorkspaceUncheckedCreateInput,
-    });
-  }
-
-  async createEditorSession(input: CreateEditorSessionInput): Promise<void> {
-    await this.tx.editorWorkspaceSession.create({
-      data: input as Prisma.EditorWorkspaceSessionUncheckedCreateInput,
-    });
-  }
-
-  async createEditorGroup(input: CreateEditorGroupInput): Promise<void> {
-    await this.tx.editorWorkspaceSessionGroup.create({
-      data: input as Prisma.EditorWorkspaceSessionGroupUncheckedCreateInput,
-    });
-  }
-
-  async createEditorTab(input: CreateEditorTabInput): Promise<void> {
-    await this.tx.editorWorkspaceSessionGroupTab.create({
-      data: input as Prisma.EditorWorkspaceSessionGroupTabUncheckedCreateInput,
-    });
-  }
 
   // --- AI ---
 

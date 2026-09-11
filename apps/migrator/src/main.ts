@@ -89,12 +89,6 @@ export function createMigrationCommands(workspaceRoot: string): Command[] {
       },
       {
         executable: process.execPath,
-        args: [resolve(runtimeScripts, 'prepare-editor-workspace-natural-key.js')],
-        cwd: databaseRoot,
-        label: 'prepare editor-workspace natural key',
-      },
-      {
-        executable: process.execPath,
         args: [resolve(runtimeScripts, 'prepare-notification-preference-hierarchy.js')],
         cwd: databaseRoot,
         label: 'prepare notification preference hierarchy',

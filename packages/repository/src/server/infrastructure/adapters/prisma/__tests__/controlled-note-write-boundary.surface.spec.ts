@@ -197,16 +197,14 @@ describe('controlled note-write boundary surface', () => {
     );
   });
 
-  it('legacy editor runtime package stays deleted; portable editor_* backup remains', () => {
+  it('legacy Editor runtime and persistence stay deleted', () => {
     expect(existsSync(resolve(repoRoot, 'packages/editor'))).toBe(false);
-    expect(existsSync(resolve(repoRoot, 'packages/database/prisma/schema/editor.prisma'))).toBe(
-      true,
-    );
+    expect(existsSync(resolve(repoRoot, 'packages/database/prisma/schema/editor.prisma'))).toBe(false);
     expect(
       existsSync(
         resolve(repoRoot, 'packages/database/scripts/prepare-editor-workspace-natural-key.ts'),
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(
       existsSync(
         resolve(
@@ -214,6 +212,6 @@ describe('controlled note-write boundary surface', () => {
           'packages/data-portability/src/server/application/use-cases/importers/editor.importer.ts',
         ),
       ),
-    ).toBe(true);
+    ).toBe(false);
   });
 });

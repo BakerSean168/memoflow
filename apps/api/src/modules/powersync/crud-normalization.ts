@@ -18,9 +18,6 @@ export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
   repositories: new Set(['config', 'stats']),
   folders: new Set(['metadata']),
   resources: new Set(['metadata', 'stats']),
-  editor_workspaces: new Set(['layout', 'setting']),
-  editor_workspace_sessions: new Set(['layout']),
-  editor_workspace_session_group_tabs: new Set(['view_state']),
   ai_knowledge_index_entries: new Set(['keywords', 'embedding', 'chunks', 'metadata']),
   dashboard_configs: new Set(['widget_config']),
 };
@@ -38,9 +35,6 @@ export const BOOLEAN_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
   notification_templates: new Set(['is_system', 'is_active']),
   ai_provider_configs: new Set(['is_active', 'is_default']),
   folders: new Set(['is_expanded']),
-  editor_workspaces: new Set(['is_active']),
-  editor_workspace_sessions: new Set(['is_active']),
-  editor_workspace_session_group_tabs: new Set(['is_pinned', 'is_active']),
 };
 
 function snakeToCamel(key: string): string {

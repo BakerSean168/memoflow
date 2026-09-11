@@ -65,20 +65,6 @@ export interface ScheduleTaskRepoPort {
   findByIdentityId(identityId: string): Promise<unknown[]>;
 }
 
-// ============ Editor ============
-
-export interface EditorWorkspaceRepoPort {
-  findByIdentityId(identityId: string): Promise<unknown[]>;
-}
-export interface EditorSessionRepoPort {
-  findByWorkspaceId(workspaceId: string): Promise<unknown[]>;
-}
-export interface EditorGroupRepoPort {
-  findBySessionId(sessionId: string): Promise<unknown[]>;
-}
-export interface EditorTabRepoPort {
-  findByGroupId(groupId: string): Promise<unknown[]>;
-}
 
 // ============ AI ============
 
@@ -121,10 +107,6 @@ export interface DataPortabilityDependencies {
   resourceRepository: ResourceRepoPort;
   scheduleRepository: ScheduleRepoPort;
   scheduleTaskRepository: ScheduleTaskRepoPort;
-  editorWorkspaceRepository: EditorWorkspaceRepoPort;
-  editorSessionRepository: EditorSessionRepoPort;
-  editorGroupRepository: EditorGroupRepoPort;
-  editorTabRepository: EditorTabRepoPort;
   aiConversationRepository: AIConversationRepoPort;
   notificationPreferenceRepository: NotificationPreferenceRepoPort;
   userPreferenceRepository: UserPreferenceRepoPort;

@@ -60,5 +60,9 @@ describe('PowerSyncAppSchema', () => {
     expect(PowerSyncAppSchema.props).not.toHaveProperty('document_links');
     expect(PowerSyncAppSchema.props).not.toHaveProperty('goal_statistics');
     expect(PowerSyncAppSchema.props).not.toHaveProperty('schedule_jobs');
+    expect(PowerSyncAppSchema.props).not.toHaveProperty('editor_workspaces');
+    expect(PowerSyncAppSchema.props).not.toHaveProperty('editor_workspace_sessions');
+    expect(PowerSyncAppSchema.props).not.toHaveProperty('editor_workspace_session_groups');
+    expect(PowerSyncAppSchema.props).not.toHaveProperty('editor_workspace_session_group_tabs');
   });
 });

@@ -348,69 +348,6 @@ exports.Prisma.CloudAuthDeviceCodeScalarFieldEnum = {
   scope: 'scope'
 };
 
-exports.Prisma.EditorWorkspaceScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  name: 'name',
-  description: 'description',
-  projectPath: 'projectPath',
-  projectType: 'projectType',
-  layout: 'layout',
-  setting: 'setting',
-  isActive: 'isActive',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  accessedAt: 'accessedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.EditorWorkspaceSessionScalarFieldEnum = {
-  id: 'id',
-  workspaceId: 'workspaceId',
-  identityId: 'identityId',
-  name: 'name',
-  layout: 'layout',
-  isActive: 'isActive',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.EditorWorkspaceSessionGroupScalarFieldEnum = {
-  id: 'id',
-  sessionId: 'sessionId',
-  workspaceId: 'workspaceId',
-  identityId: 'identityId',
-  groupIndex: 'groupIndex',
-  name: 'name',
-  splitDirection: 'splitDirection',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.EditorWorkspaceSessionGroupTabScalarFieldEnum = {
-  id: 'id',
-  groupId: 'groupId',
-  sessionId: 'sessionId',
-  workspaceId: 'workspaceId',
-  identityId: 'identityId',
-  resourceId: 'resourceId',
-  tabIndex: 'tabIndex',
-  tabType: 'tabType',
-  title: 'title',
-  viewState: 'viewState',
-  isPinned: 'isPinned',
-  isActive: 'isActive',
-  version: 'version',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
 exports.Prisma.GoalScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
@@ -1692,10 +1629,6 @@ exports.Prisma.ModelName = {
   CloudAuthProviderAccount: 'CloudAuthProviderAccount',
   CloudAuthVerification: 'CloudAuthVerification',
   CloudAuthDeviceCode: 'CloudAuthDeviceCode',
-  EditorWorkspace: 'EditorWorkspace',
-  EditorWorkspaceSession: 'EditorWorkspaceSession',
-  EditorWorkspaceSessionGroup: 'EditorWorkspaceSessionGroup',
-  EditorWorkspaceSessionGroupTab: 'EditorWorkspaceSessionGroupTab',
   Goal: 'Goal',
   KeyResult: 'KeyResult',
   GoalRecord: 'GoalRecord',

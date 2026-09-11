@@ -284,53 +284,6 @@ export interface CreateReminderResponseInput extends CreatedImportInput {
   timestamp: string;
 }
 
-// --- Editor ---
-
-export interface CreateEditorWorkspaceInput extends TimestampedImportInput {
-  id: string;
-  identityId: string;
-  name: string;
-  description: string | null;
-  projectPath: string;
-  projectType: string;
-  layout: unknown;
-  setting: unknown;
-  isActive: boolean;
-}
-
-export interface CreateEditorSessionInput extends TimestampedImportInput {
-  id: string;
-  workspaceId: string;
-  identityId: string;
-  name: string;
-  layout: unknown;
-  isActive: boolean;
-}
-
-export interface CreateEditorGroupInput extends TimestampedImportInput {
-  id: string;
-  sessionId: string;
-  workspaceId: string;
-  identityId: string;
-  groupIndex: number;
-  name: string | null;
-  splitDirection: string;
-}
-
-export interface CreateEditorTabInput extends TimestampedImportInput {
-  id: string;
-  groupId: string;
-  sessionId: string;
-  workspaceId: string;
-  identityId: string;
-  tabIndex: number;
-  tabType: string;
-  title: string;
-  viewState: unknown;
-  isPinned: boolean;
-  isActive: boolean;
-  resourceId: string | null;
-}
 
 // --- AI ---
 
@@ -382,11 +335,6 @@ export interface DataPortabilityImportTx {
   createReminderTemplate(input: CreateReminderTemplateInput): Promise<void>;
   createReminderResponse(input: CreateReminderResponseInput): Promise<void>;
 
-  // Editor
-  createEditorWorkspace(input: CreateEditorWorkspaceInput): Promise<void>;
-  createEditorSession(input: CreateEditorSessionInput): Promise<void>;
-  createEditorGroup(input: CreateEditorGroupInput): Promise<void>;
-  createEditorTab(input: CreateEditorTabInput): Promise<void>;
 
   // AI
   createAIConversation(input: CreateAIConversationInput): Promise<void>;

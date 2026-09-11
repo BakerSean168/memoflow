@@ -28,10 +28,6 @@ import type {
   CreateReminderGroupInput,
   CreateReminderTemplateInput,
   CreateReminderResponseInput,
-  CreateEditorWorkspaceInput,
-  CreateEditorSessionInput,
-  CreateEditorGroupInput,
-  CreateEditorTabInput,
   CreateAIConversationInput,
   CreateAIMessageInput,
 } from '../../application/import-store/data-portability-import-store';
@@ -526,77 +522,6 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
     );
   }
 
-  // --- Editor ---
-
-  async createEditorWorkspace(input: CreateEditorWorkspaceInput): Promise<void> {
-    await this.tx.execute(
-      `INSERT INTO editor_workspaces (id, identity_id, name, description, project_path, project_type, layout, setting, is_active, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [
-        input.id,
-        input.identityId,
-        input.name,
-        str(input.description),
-        input.projectPath,
-        input.projectType,
-        json(input.layout),
-        json(input.setting),
-        bool(input.isActive),
-        ...createdUpdated(input),
-      ],
-    );
-  }
-
-  async createEditorSession(input: CreateEditorSessionInput): Promise<void> {
-    await this.tx.execute(
-      `INSERT INTO editor_workspace_sessions (id, workspace_id, identity_id, name, layout, is_active, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [
-        input.id,
-        input.workspaceId,
-        input.identityId,
-        input.name,
-        json(input.layout),
-        bool(input.isActive),
-        ...createdUpdated(input),
-      ],
-    );
-  }
-
-  async createEditorGroup(input: CreateEditorGroupInput): Promise<void> {
-    await this.tx.execute(
-      `INSERT INTO editor_workspace_session_groups (id, session_id, workspace_id, identity_id, group_index, name, split_direction, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [
-        input.id,
-        input.sessionId,
-        input.workspaceId,
-        input.identityId,
-        input.groupIndex,
-        str(input.name),
-        input.splitDirection,
-        ...createdUpdated(input),
-      ],
-    );
-  }
-
-  async createEditorTab(input: CreateEditorTabInput): Promise<void> {
-    await this.tx.execute(
-      `INSERT INTO editor_workspace_session_group_tabs (id, group_id, session_id, workspace_id, identity_id, resource_id, tab_index, tab_type, title, view_state, is_pinned, is_active, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [
-        input.id,
-        input.groupId,
-        input.sessionId,
-        input.workspaceId,
-        input.identityId,
-        str(input.resourceId),
-        input.tabIndex,
-        input.tabType,
-        input.title,
-        json(input.viewState),
-        bool(input.isPinned),
-        bool(input.isActive),
-        ...createdUpdated(input),
-      ],
-    );
-  }
 
   // --- AI ---
 

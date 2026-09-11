@@ -926,7 +926,7 @@
     },
     {
       "id": "r1017",
-      "path": "packages/data-portability/src/server/application/use-cases/projections/goal-editor-resolve-ref-dual.surface.spec.ts",
+      "path": "packages/data-portability/src/server/application/use-cases/projections/goal-resolve-ref-dual.surface.spec.ts",
       "package": "packages/data-portability",
       "class": "retired",
       "sole": "projection-helpers.ts",

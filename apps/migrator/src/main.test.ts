@@ -33,7 +33,6 @@ describe('migrator interface', () => {
       'prepare pgvector',
       'retire legacy AI runtime state',
       'prepare goal-record source correlation',
-      'prepare editor-workspace natural key',
       'prepare notification preference hierarchy',
       'prepare vNext unique constraints',
       'prepare stable Knowledge document identity cutover',

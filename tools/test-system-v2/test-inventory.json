@@ -5553,6 +5553,26 @@
       ]
     },
     {
+      "path": "packages/data-portability/src/server/application/use-cases/__tests__/editor-persistence-retirement.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/data-portability/src/server/application/use-cases/__tests__/editor-portability-retirement.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/data-portability/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/data-portability/src/server/application/use-cases/__tests__/export-server-held-data-disclosure.use-case.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5613,16 +5633,6 @@
       ]
     },
     {
-      "path": "packages/data-portability/src/server/application/use-cases/__tests__/portable-editor-backup-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/data-portability/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/data-portability/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/data-portability/src/server/application/use-cases/__tests__/portable-runtime.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5673,7 +5683,7 @@
       ]
     },
     {
-      "path": "packages/data-portability/src/server/application/use-cases/projections/goal-editor-resolve-ref-dual.surface.spec.ts",
+      "path": "packages/data-portability/src/server/application/use-cases/projections/goal-resolve-ref-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/data-portability/vitest.config.ts"
@@ -5858,14 +5868,6 @@
     },
     {
       "path": "packages/database/src/schema/cloud-auth-user-access-projection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/database/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/database/src/schema/editor-workspace-natural-key.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/database/vitest.config.ts"
@@ -8690,6 +8692,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/repository/src/server/application/services/knowledge-projection-engine.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/repository/src/server/application/services/knowledge-repository-connection.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11127,7 +11137,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 35
+      "fileCount": 36
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11547,14 +11557,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 35
+      "fileCount": 36
     },
     {
       "id": "packages/database/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 11
+      "fileCount": 10
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -11631,7 +11641,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 36
+      "fileCount": 37
     },
     {
       "id": "packages/schedule-orchestration/vitest.config.ts",
@@ -11888,19 +11898,20 @@
       "packages/data-portability/src/electron/index-lifecycle.spec.ts",
       "packages/data-portability/src/infrastructure-client/adapters/http/data-portability-http.adapter.test.ts",
       "packages/data-portability/src/infrastructure-client/adapters/ipc/__tests__/data-portability-ipc-adapter.test.ts",
+      "packages/data-portability/src/server/application/use-cases/__tests__/editor-persistence-retirement.surface.spec.ts",
+      "packages/data-portability/src/server/application/use-cases/__tests__/editor-portability-retirement.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/export-server-held-data-disclosure.use-case.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/export-user-data.use-case.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/import-server-held-disclosure-rejected.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-boundary-re-lock.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-coordinator.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-capability-registry.test.ts",
-      "packages/data-portability/src/server/application/use-cases/__tests__/portable-editor-backup-boundary.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/portable-runtime.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/projection-powersync-rows.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/projection-ref-safety.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/sanitize.test.ts",
       "packages/data-portability/src/server/application/use-cases/__tests__/server-held-disclosure-not-importable.surface.spec.ts",
-      "packages/data-portability/src/server/application/use-cases/projections/goal-editor-resolve-ref-dual.surface.spec.ts",
+      "packages/data-portability/src/server/application/use-cases/projections/goal-resolve-ref-dual.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/projections/parse-json-field-keep-boundary.surface.spec.ts",
       "packages/data-portability/src/server/application/use-cases/projections/projection-helpers.spec.ts",
       "packages/data-portability/src/server/application/use-cases/projections/resolve-export-ref-dual.surface.spec.ts",
@@ -12291,7 +12302,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1060,
+    "unit": 1061,
     "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,

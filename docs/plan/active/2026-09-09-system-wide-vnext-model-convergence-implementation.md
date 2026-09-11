@@ -396,12 +396,13 @@ The PowerSync round-trip fixture deliberately keeps legacy `editor_*` source row
 
 ## EDITOR-1702 — Drop legacy editor persistence
 
-After 1701:
+**状态：DONE — 2026-09-11。**
 
-- Prisma editor models + Account relations;
-- PowerSync tables/mappings;
-- natural-key script/tests;
-- editor projection/importer/adapters/contracts.
+The retired Editor bounded context no longer has a persistence shadow. The four `editor_*` Prisma models and `Account` relations are deleted; generated Prisma client/schema expose no Editor delegate. PowerSync schema, API upload table/delegate maps, CRUD normalization, Desktop bootstrap tables and `docker/powersync/sync-config.yaml` all drop the same four tables in one cutover. The obsolete editor-workspace natural-key bootstrap source, Nx target, migrator step and tests are deleted, with `graph.json` updated only by the corresponding 10-line target removal.
+
+Data Portability now has no Editor DTO, projection, importer, repository port, Prisma/PowerSync adapter or import-store write method. The residual Goal `resolveExportRef` architecture lock was renamed to Goal-only ownership, and a dedicated `editor-persistence-retirement.surface.spec.ts` prevents Prisma/PowerSync/portable persistence from being resurrected. Current product/module-index docs no longer describe Editor as a recoverable backup boundary; legacy `data.editor` remains fail-closed from EDITOR-1701.
+
+**Acceptance evidence:** Prisma validate PASS and regenerated Prisma client contains zero `EditorWorkspace`/`editor_workspaces` references; production source scan contains zero Editor persistence/runtime references. Contracts 79 files / 535 tests PASS; Data Portability 36 / 148 PASS; PowerSync schema 1 / 6 PASS; Repository retirement locks 2 / 20 PASS; Utils dual-registry 1 / 40 PASS; API PowerSync 3 / 12 PASS; Desktop main PowerSync 3 / 6 PASS; Migrator 1 / 3 PASS. Data Portability, PowerSync Schema, Database and Migrator direct typechecks PASS; API canonical source+spec typechecks PASS; Desktop canonical typecheck PASS. Authored changed-file ESLint reports 0 warnings/errors. Data Portability, API, Migrator and Desktop production builds PASS. docs-check PASS; governance-check PASS after regenerating the test inventory; `git diff --check` PASS at commit closure.
 
 # Parallel Governance reference lane — permanent, non-retirement
 

@@ -16,10 +16,6 @@ model Account {
   cloudUser CloudAuthUser @relation(fields: [id], references: [id], onDelete: Cascade)
 
   // 关联的业务模块
-  editorWorkspaces                EditorWorkspace[]
-  editorWorkspaceSessions         EditorWorkspaceSession[]
-  editorWorkspaceSessionGroups    EditorWorkspaceSessionGroup[]
-  editorWorkspaceSessionGroupTabs EditorWorkspaceSessionGroupTab[]
   goals                           Goal[]
   labels                          Label[]
   goalLabels                      GoalLabel[]

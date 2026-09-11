@@ -25,10 +25,6 @@ import type {
   ResourceRepoPort,
   ScheduleRepoPort,
   ScheduleTaskRepoPort,
-  EditorWorkspaceRepoPort,
-  EditorSessionRepoPort,
-  EditorGroupRepoPort,
-  EditorTabRepoPort,
   AIConversationRepoPort,
   NotificationPreferenceRepoPort,
 } from '../../application/data-portability.dependencies';
@@ -240,49 +236,6 @@ class PowerSyncScheduleTaskAdapter implements ScheduleTaskRepoPort {
   }
 }
 
-class PowerSyncEditorWorkspaceAdapter implements EditorWorkspaceRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByIdentityId(identityId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM editor_workspaces WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
-      [identityId],
-    );
-    return mapRows(rows);
-  }
-}
-
-class PowerSyncEditorSessionAdapter implements EditorSessionRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByWorkspaceId(workspaceId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM editor_workspace_sessions WHERE workspace_id = ? AND deleted_at IS NULL ORDER BY created_at`,
-      [workspaceId],
-    );
-    return mapRows(rows);
-  }
-}
-
-class PowerSyncEditorGroupAdapter implements EditorGroupRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findBySessionId(sessionId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM editor_workspace_session_groups WHERE session_id = ? AND deleted_at IS NULL ORDER BY group_index`,
-      [sessionId],
-    );
-    return mapRows(rows);
-  }
-}
-
-class PowerSyncEditorTabAdapter implements EditorTabRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByGroupId(groupId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM editor_workspace_session_group_tabs WHERE group_id = ? AND deleted_at IS NULL ORDER BY tab_index`,
-      [groupId],
-    );
-    return mapRows(rows);
-  }
-}
 
 class PowerSyncAIConversationAdapter implements AIConversationRepoPort {
   constructor(private readonly db: IElectronDatabase) {}
@@ -338,10 +291,6 @@ export function createPowerSyncDataPortabilityDependencies(
     resourceRepository: new PowerSyncResourceAdapter(db),
     scheduleRepository: new PowerSyncScheduleAdapter(db),
     scheduleTaskRepository: new PowerSyncScheduleTaskAdapter(db),
-    editorWorkspaceRepository: new PowerSyncEditorWorkspaceAdapter(db),
-    editorSessionRepository: new PowerSyncEditorSessionAdapter(db),
-    editorGroupRepository: new PowerSyncEditorGroupAdapter(db),
-    editorTabRepository: new PowerSyncEditorTabAdapter(db),
     aiConversationRepository: new PowerSyncAIConversationAdapter(db),
     notificationPreferenceRepository: new PowerSyncNotificationPreferenceAdapter(db),
     userPreferenceRepository: settingRepos.userPreferenceRepository,

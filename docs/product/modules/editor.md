@@ -12,7 +12,7 @@ updated: 2026-09-11T00:00:00
 
 > **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
 
-> **2026-09-09 retirement closure:** ADR-107 决定不再存在 vNext Editor bounded context；当前 `editor_*` Prisma/PowerSync/Data Portability 只属于待直接删除的 residue；ADR-111 明确无需兼容导入。
+> **2026-09-11 retirement closure:** ADR-107 决定不再存在 vNext Editor bounded context；`EDITOR-1701/1702` 已删除 Portability 能力与全部 `editor_*` Prisma/PowerSync persistence residue；ADR-111 明确无需兼容导入。
 
 ## 1. 功能定位
 
@@ -25,7 +25,7 @@ updated: 2026-09-11T00:00:00
 - API host 不再注册 Editor API module，也不挂载旧 Repository/Folder/Resource CRUD；Desktop Repository IPC 只保留本地 Vault 与 GitHub knowledge connection/sync 能力。
 - Mobile 已移除数据库 Repository、文件夹和 note editor 路由，等待后续基于服务端投影实现只读能力。
 - `EDITOR-1701` 已将 Editor 从 `memoflow.user-data-export` V2 schema、导出选择器与导入分发中删除；旧备份中的 `data.editor` 会严格校验失败，不提供兼容 warning 或恢复通道。
-- V3 仅由仍存活的 owner capability 组成，API/Desktop 生产组合均不注册 Editor capability。`editor_*` Prisma/PowerSync 数据当前只是等待 `EDITOR-1702` 物理删除的 persistence residue，不再代表任何 portability 承诺。
+- `EDITOR-1702` 已物理删除 `editor_*` Prisma models/Account relations、PowerSync tables/sync mappings、natural-key bootstrap，以及 Data Portability 的 Editor DTO/projection/importer/adapters/import-store seam；重新生成的 Prisma client 也不再暴露 Editor delegate。
 - 服务端持有数据披露（`memoflow.server-held-data-disclosure`）仍与业务备份分离：Web 可下、Desktop 明确不支持、不可导入。
 - `@memoflow/editor` 包与 `packages/app-vue/src/modules/editor` 已删除；知识呈现入口在 repository 工作区与 `safe-markdown` 工具。
 - app-vue 顶层 `editor` locale 与设置页退役 Editor 分组文案已删除；用户 preferences 中残留的 `editor` schema 也直接删除，不再保留 portable 兼容。
@@ -75,7 +75,7 @@ Web 不直接修改 read model。用户确认新笔记后，Repository 服务通
 - Web 和 Desktop 同时创建或未来编辑时存在 Git HEAD 竞争。
 - 原始 HTML、危险 URL、SVG/iframe 和递归嵌入可能造成 XSS。
 - Obsidian 插件语法无法在独立 Web renderer 中完全复刻。
-- 删除旧编辑器前必须保留路径/内容确认、预览和引用跳转能力。
+- 任何重新引入 Editor persistence/runtime 的改动都可能制造第二真值源；路径/内容确认、预览和引用跳转必须继续由 Repository/Knowledge 边界承担。
 
 ## 7. 相关资料
 

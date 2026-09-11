@@ -18,10 +18,6 @@ export type {
   CreateReminderGroupInput,
   CreateReminderTemplateInput,
   CreateReminderResponseInput,
-  CreateEditorWorkspaceInput,
-  CreateEditorSessionInput,
-  CreateEditorGroupInput,
-  CreateEditorTabInput,
   CreateAIConversationInput,
   CreateAIMessageInput,
 } from './data-portability-import-store';

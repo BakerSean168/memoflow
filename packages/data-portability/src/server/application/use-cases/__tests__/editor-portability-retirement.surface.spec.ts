@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * EDITOR-1701 lock: the retired Editor bounded context is not a V2/V3
- * portability capability. Legacy persistence may exist only until EDITOR-1702
- * removes it; no business-backup export/import path may depend on that residue.
+ * portability capability. EDITOR-1702 also removes the legacy persistence;
+ * no business-backup export/import path may depend on any Editor residue.
  */
 describe('EDITOR-1701 editor portability retirement', () => {
   const repoRoot = resolve(__dirname, '../../../../../../../');
@@ -40,10 +40,8 @@ describe('EDITOR-1701 editor portability retirement', () => {
     expect(portabilityBlock(desktopMain)).not.toMatch(/editor/i);
   });
 
-  it('keeps legacy persistence visibly staged for EDITOR-1702, not as a portability promise', () => {
-    expect(existsSync(resolve(repoRoot, 'packages/database/prisma/schema/editor.prisma'))).toBe(
-      true,
-    );
+  it('keeps both Editor runtime and legacy persistence deleted after EDITOR-1702', () => {
+    expect(existsSync(resolve(repoRoot, 'packages/database/prisma/schema/editor.prisma'))).toBe(false);
     expect(existsSync(resolve(repoRoot, 'packages/editor'))).toBe(false);
   });
 });

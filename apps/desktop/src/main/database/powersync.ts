@@ -45,13 +45,6 @@ const NON_SYNCABLE_LOCAL_TABLES = ['accounts'] as const;
 const PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES = [
   'user_preference_records',
   'repositories',
-  // Residual 539: editor_* bootstrap tables are portable backup continuity only —
-  // Residual 885: portable boundary re-lock — no first-party @memoflow/editor remount.
-  // Desktop never remounts @memoflow/editor as a first-party editing surface.
-  'editor_workspaces',
-  'editor_workspace_sessions',
-  'editor_workspace_session_groups',
-  'editor_workspace_session_group_tabs',
 ] as const;
 
 // ──────────────────────────────────────────────

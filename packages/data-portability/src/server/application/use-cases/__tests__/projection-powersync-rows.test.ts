@@ -1,14 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { RefAllocator, type ExportContext } from '../../portable-runtime';
 import { projectGoalRecords, projectGoals } from '../projections/goal.projection';
-import { projectEditorWorkspaces } from '../projections/editor.projection';
 import {
   projectReminderResponses,
   projectReminderTemplates,
 } from '../projections/reminder.projection';
 import { projectScheduleTasks } from '../projections/schedule.projection';
 import { projectTaskPlans } from '../projections/task.projection';
-import type { DataPortabilityDependencies } from '../../data-portability.dependencies';
 
 function createExportContext(refs: Record<string, string> = {}): ExportContext {
   return {
@@ -251,80 +249,4 @@ describe('projection from PowerSync-shaped rows', () => {
     expect(Object.prototype.hasOwnProperty.call(tasks[0], 'execution')).toBe(true);
   });
 
-  it('exports editor rows using persistence field aliases and parsed JSON', async () => {
-    const ctx = createExportContext();
-    const deps = {
-      editorSessionRepository: {
-        findByWorkspaceId: async () => [
-          {
-            id: 'session-db-id',
-            name: 'Main',
-            layout: '{"activeGroupIndex":0}',
-            isActive: 1,
-          },
-        ],
-      },
-      editorGroupRepository: {
-        findBySessionId: async () => [
-          {
-            id: 'group-db-id',
-            groupIndex: 0,
-            name: 'Group',
-          },
-        ],
-      },
-      editorTabRepository: {
-        findByGroupId: async () => [
-          {
-            id: 'tab-db-id',
-            tabIndex: 0,
-            tabType: 'resource',
-            title: 'Note.md',
-            viewState: '{"cursor":4}',
-            isPinned: 0,
-            isActive: 1,
-          },
-        ],
-      },
-    } as unknown as DataPortabilityDependencies;
-
-    const workspaces = await projectEditorWorkspaces(
-      [
-        {
-          id: 'workspace-db-id',
-          name: 'Workspace',
-          projectPath: '/workspace',
-          projectType: 'local',
-          layout: '{}',
-          setting: '{"theme":"dark"}',
-          isActive: 1,
-        },
-      ],
-      ctx,
-      deps,
-    );
-
-    expect(workspaces[0]).toMatchObject({
-      settings: { theme: 'dark' },
-      isActive: true,
-      sessions: [
-        {
-          layout: { activeGroupIndex: 0 },
-          isActive: true,
-          groups: [
-            {
-              tabs: [
-                {
-                  name: 'Note.md',
-                  viewState: { cursor: 4 },
-                  isPinned: false,
-                  isActive: true,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-  });
 });

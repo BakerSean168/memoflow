@@ -9,7 +9,6 @@ export default defineConfig({
     'scripts/prepare-vnext-unique-constraints.ts',
     'scripts/prepare-ai-provider-onboarding-sessions.ts',
     'scripts/prepare-ai-provider-default-invariant.ts',
-    'scripts/prepare-editor-workspace-natural-key.ts',
     'scripts/prepare-knowledge-stable-document-identity-cutover.ts',
     'scripts/ensure-task-goal-binding-constraint.ts',
     'scripts/bootstrap-ai-knowledge-index.ts',

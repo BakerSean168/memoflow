@@ -6,7 +6,6 @@ export * from './portable-tasks.dto';
 export * from './portable-reminders.dto';
 export * from './portable-repositories.dto';
 export * from './portable-schedules.dto';
-export * from './portable-editor.dto';
 export * from './portable-ai.dto';
 export * from './portable-user-data.dto';
 export * from './portable-envelope.dto';

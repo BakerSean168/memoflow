@@ -13,7 +13,7 @@ updated: 2026-09-11T00:02:00+08:00
 本索引连接资源库模块业务说明与当前代码。优化前仍以代码、配置和测试为准。
 
 > 旧数据库 Repository/Folder/Resource CRUD 与 Editor 运行时入口已退役。索引只列 knowledge
-> connection、投影、Web confirmed create、Desktop Local Vault / Git 同步，以及可重新导入备份边界。
+> connection、投影、Web confirmed create、Desktop Local Vault / Git 同步，以及尚存 Repository 备份边界。Editor persistence 已由 EDITOR-1702 删除。
 
 ## vNext 建模文档（已采纳，实施中）
 
@@ -86,20 +86,18 @@ updated: 2026-09-11T00:02:00+08:00
 | [`packages/contracts/src/modules/repository/protocol/repository-event-map.ts`](../../../packages/contracts/src/modules/repository/protocol/repository-event-map.ts) | 仅 `repository:note:mutated`                                 |
 | [`packages/contracts/src/electron/ipc-channels.ts`](../../../packages/contracts/src/electron/ipc-channels.ts)                                                       | `RepositoryChannels`：knowledge connection + Local Vault     |
 
-## 可重新导入业务备份（非运行时编辑）
+## Repository 可重新导入业务备份（非运行时编辑）
 
-旧 Repository/Resource/Folder 与 Editor workspace 表只服务 portable 备份再导入，
-不构成运行时 Markdown 编辑通道。独立服务端持有数据披露见
+旧 Repository/Resource/Folder 当前仍服务 portable 备份再导入，不构成运行时 Markdown 编辑通道。
+Editor workspace persistence 已由 `EDITOR-1702` 删除，不再属于此备份边界。独立服务端持有数据披露见
 `memoflow.server-held-data-disclosure`。
 
-| 文件                                                                                                                                                                                                          | 说明                                            |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| [`packages/database/prisma/schema/editor.prisma`](../../../packages/database/prisma/schema/editor.prisma)                                                                                                     | `editor_*` Prisma 模型                          |
-| [`packages/powersync-schema/src/index.ts`](../../../packages/powersync-schema/src/index.ts)                                                                                                                   | PowerSync `editor_*` / resource 相关表          |
-| [`packages/data-portability/src/server/application/use-cases/projections/repository.projection.ts`](../../../packages/data-portability/src/server/application/use-cases/projections/repository.projection.ts) | portable repository/resource 导出               |
-| [`packages/data-portability/src/server/application/use-cases/projections/editor.projection.ts`](../../../packages/data-portability/src/server/application/use-cases/projections/editor.projection.ts)         | portable editor workspace 导出                  |
-| [`packages/data-portability/src/server/application/use-cases/importers/`](../../../packages/data-portability/src/server/application/use-cases/importers/)                                                     | portable 导入（含 repository/editor）           |
-| [`packages/contracts/src/modules/data-portability/`](../../../packages/contracts/src/modules/data-portability/)                                                                                               | portable 契约（含 server-held-data-disclosure） |
+| 文件                                                                                                                                                                                                          | 说明                                                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [`packages/powersync-schema/src/index.ts`](../../../packages/powersync-schema/src/index.ts)                                                                                                                   | PowerSync Repository/resource 相关表；无 `editor_*` |
+| [`packages/data-portability/src/server/application/use-cases/projections/repository.projection.ts`](../../../packages/data-portability/src/server/application/use-cases/projections/repository.projection.ts) | portable repository/resource 导出                   |
+| [`packages/data-portability/src/server/application/use-cases/importers/`](../../../packages/data-portability/src/server/application/use-cases/importers/)                                                     | portable 导入（Repository 等存活模块）              |
+| [`packages/contracts/src/modules/data-portability/`](../../../packages/contracts/src/modules/data-portability/)                                                                                               | portable 契约（含 server-held-data-disclosure）     |
 
 ## 测试入口
 
@@ -123,7 +121,7 @@ updated: 2026-09-11T00:02:00+08:00
 - AI indexing 状态最终由 AI owner；迁移期间不得新增 Repository `indexStatus` 的新消费者。
 - Web confirmed commit / webhook / reconciliation 不得继续扩散第三套 projection apply 逻辑；目标是 ADR-091 单一 ProjectionEngine。
 - 不要恢复 `/note/:id`、Editor API/Electron、或 Repository/Folder/Resource CRUD 运行时入口。
-- 不要把 portable `editor_*`/`resources` 备份与 `memoflow.server-held-data-disclosure` 混为同一导出通道。
+- 不要把 portable `resources` 备份与 `memoflow.server-held-data-disclosure` 混为同一导出通道；Editor 不得重新进入 portability。
 - Web Markdown 必须继续走 sanitizer；禁止重新启用原始 HTML。
 - Desktop Git 同步禁止 force push；双非空仓库首次对账必须人工确认。
 - AI 写入路径必须用户确认；确认创建返回 `KnowledgeNotePersistedRef`，不要恢复 Resource CRUD DTO。

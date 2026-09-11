@@ -94,26 +94,6 @@ export type CloudAuthVerification = $Result.DefaultSelection<Prisma.$CloudAuthVe
  */
 export type CloudAuthDeviceCode = $Result.DefaultSelection<Prisma.$CloudAuthDeviceCodePayload>
 /**
- * Model EditorWorkspace
- *
- */
-export type EditorWorkspace = $Result.DefaultSelection<Prisma.$EditorWorkspacePayload>
-/**
- * Model EditorWorkspaceSession
- *
- */
-export type EditorWorkspaceSession = $Result.DefaultSelection<Prisma.$EditorWorkspaceSessionPayload>
-/**
- * Model EditorWorkspaceSessionGroup
- *
- */
-export type EditorWorkspaceSessionGroup = $Result.DefaultSelection<Prisma.$EditorWorkspaceSessionGroupPayload>
-/**
- * Model EditorWorkspaceSessionGroupTab
- *
- */
-export type EditorWorkspaceSessionGroupTab = $Result.DefaultSelection<Prisma.$EditorWorkspaceSessionGroupTabPayload>
-/**
  * Model Goal
  *
  */
@@ -828,46 +808,6 @@ export class PrismaClient<
     * ```
     */
   get cloudAuthDeviceCode(): Prisma.CloudAuthDeviceCodeDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.editorWorkspace`: Exposes CRUD operations for the **EditorWorkspace** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more EditorWorkspaces
-    * const editorWorkspaces = await prisma.editorWorkspace.findMany()
-    * ```
-    */
-  get editorWorkspace(): Prisma.EditorWorkspaceDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.editorWorkspaceSession`: Exposes CRUD operations for the **EditorWorkspaceSession** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more EditorWorkspaceSessions
-    * const editorWorkspaceSessions = await prisma.editorWorkspaceSession.findMany()
-    * ```
-    */
-  get editorWorkspaceSession(): Prisma.EditorWorkspaceSessionDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.editorWorkspaceSessionGroup`: Exposes CRUD operations for the **EditorWorkspaceSessionGroup** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more EditorWorkspaceSessionGroups
-    * const editorWorkspaceSessionGroups = await prisma.editorWorkspaceSessionGroup.findMany()
-    * ```
-    */
-  get editorWorkspaceSessionGroup(): Prisma.EditorWorkspaceSessionGroupDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.editorWorkspaceSessionGroupTab`: Exposes CRUD operations for the **EditorWorkspaceSessionGroupTab** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more EditorWorkspaceSessionGroupTabs
-    * const editorWorkspaceSessionGroupTabs = await prisma.editorWorkspaceSessionGroupTab.findMany()
-    * ```
-    */
-  get editorWorkspaceSessionGroupTab(): Prisma.EditorWorkspaceSessionGroupTabDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.goal`: Exposes CRUD operations for the **Goal** model.
@@ -2128,10 +2068,6 @@ export namespace Prisma {
     CloudAuthProviderAccount: 'CloudAuthProviderAccount',
     CloudAuthVerification: 'CloudAuthVerification',
     CloudAuthDeviceCode: 'CloudAuthDeviceCode',
-    EditorWorkspace: 'EditorWorkspace',
-    EditorWorkspaceSession: 'EditorWorkspaceSession',
-    EditorWorkspaceSessionGroup: 'EditorWorkspaceSessionGroup',
-    EditorWorkspaceSessionGroupTab: 'EditorWorkspaceSessionGroupTab',
     Goal: 'Goal',
     KeyResult: 'KeyResult',
     GoalRecord: 'GoalRecord',
@@ -2228,7 +2164,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "editorWorkspace" | "editorWorkspaceSession" | "editorWorkspaceSessionGroup" | "editorWorkspaceSessionGroupTab" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "taskStatistic" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "taskStatistic" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3413,302 +3349,6 @@ export namespace Prisma {
           count: {
             args: Prisma.CloudAuthDeviceCodeCountArgs<ExtArgs>
             result: $Utils.Optional<CloudAuthDeviceCodeCountAggregateOutputType> | number
-          }
-        }
-      }
-      EditorWorkspace: {
-        payload: Prisma.$EditorWorkspacePayload<ExtArgs>
-        fields: Prisma.EditorWorkspaceFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.EditorWorkspaceFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspacePayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.EditorWorkspaceFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspacePayload>
-          }
-          findFirst: {
-            args: Prisma.EditorWorkspaceFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspacePayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.EditorWorkspaceFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspacePayload>
-          }
-          findMany: {
-            args: Prisma.EditorWorkspaceFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspacePayload>[]
-          }
-          create: {
-            args: Prisma.EditorWorkspaceCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspacePayload>
-          }
-          createMany: {
-            args: Prisma.EditorWorkspaceCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.EditorWorkspaceCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspacePayload>[]
-          }
-          delete: {
-            args: Prisma.EditorWorkspaceDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspacePayload>
-          }
-          update: {
-            args: Prisma.EditorWorkspaceUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspacePayload>
-          }
-          deleteMany: {
-            args: Prisma.EditorWorkspaceDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.EditorWorkspaceUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.EditorWorkspaceUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspacePayload>[]
-          }
-          upsert: {
-            args: Prisma.EditorWorkspaceUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspacePayload>
-          }
-          aggregate: {
-            args: Prisma.EditorWorkspaceAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateEditorWorkspace>
-          }
-          groupBy: {
-            args: Prisma.EditorWorkspaceGroupByArgs<ExtArgs>
-            result: $Utils.Optional<EditorWorkspaceGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.EditorWorkspaceCountArgs<ExtArgs>
-            result: $Utils.Optional<EditorWorkspaceCountAggregateOutputType> | number
-          }
-        }
-      }
-      EditorWorkspaceSession: {
-        payload: Prisma.$EditorWorkspaceSessionPayload<ExtArgs>
-        fields: Prisma.EditorWorkspaceSessionFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.EditorWorkspaceSessionFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.EditorWorkspaceSessionFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionPayload>
-          }
-          findFirst: {
-            args: Prisma.EditorWorkspaceSessionFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.EditorWorkspaceSessionFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionPayload>
-          }
-          findMany: {
-            args: Prisma.EditorWorkspaceSessionFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionPayload>[]
-          }
-          create: {
-            args: Prisma.EditorWorkspaceSessionCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionPayload>
-          }
-          createMany: {
-            args: Prisma.EditorWorkspaceSessionCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.EditorWorkspaceSessionCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionPayload>[]
-          }
-          delete: {
-            args: Prisma.EditorWorkspaceSessionDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionPayload>
-          }
-          update: {
-            args: Prisma.EditorWorkspaceSessionUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionPayload>
-          }
-          deleteMany: {
-            args: Prisma.EditorWorkspaceSessionDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.EditorWorkspaceSessionUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.EditorWorkspaceSessionUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionPayload>[]
-          }
-          upsert: {
-            args: Prisma.EditorWorkspaceSessionUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionPayload>
-          }
-          aggregate: {
-            args: Prisma.EditorWorkspaceSessionAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateEditorWorkspaceSession>
-          }
-          groupBy: {
-            args: Prisma.EditorWorkspaceSessionGroupByArgs<ExtArgs>
-            result: $Utils.Optional<EditorWorkspaceSessionGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.EditorWorkspaceSessionCountArgs<ExtArgs>
-            result: $Utils.Optional<EditorWorkspaceSessionCountAggregateOutputType> | number
-          }
-        }
-      }
-      EditorWorkspaceSessionGroup: {
-        payload: Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>
-        fields: Prisma.EditorWorkspaceSessionGroupFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.EditorWorkspaceSessionGroupFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.EditorWorkspaceSessionGroupFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupPayload>
-          }
-          findFirst: {
-            args: Prisma.EditorWorkspaceSessionGroupFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.EditorWorkspaceSessionGroupFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupPayload>
-          }
-          findMany: {
-            args: Prisma.EditorWorkspaceSessionGroupFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupPayload>[]
-          }
-          create: {
-            args: Prisma.EditorWorkspaceSessionGroupCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupPayload>
-          }
-          createMany: {
-            args: Prisma.EditorWorkspaceSessionGroupCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.EditorWorkspaceSessionGroupCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupPayload>[]
-          }
-          delete: {
-            args: Prisma.EditorWorkspaceSessionGroupDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupPayload>
-          }
-          update: {
-            args: Prisma.EditorWorkspaceSessionGroupUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupPayload>
-          }
-          deleteMany: {
-            args: Prisma.EditorWorkspaceSessionGroupDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.EditorWorkspaceSessionGroupUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.EditorWorkspaceSessionGroupUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupPayload>[]
-          }
-          upsert: {
-            args: Prisma.EditorWorkspaceSessionGroupUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupPayload>
-          }
-          aggregate: {
-            args: Prisma.EditorWorkspaceSessionGroupAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateEditorWorkspaceSessionGroup>
-          }
-          groupBy: {
-            args: Prisma.EditorWorkspaceSessionGroupGroupByArgs<ExtArgs>
-            result: $Utils.Optional<EditorWorkspaceSessionGroupGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.EditorWorkspaceSessionGroupCountArgs<ExtArgs>
-            result: $Utils.Optional<EditorWorkspaceSessionGroupCountAggregateOutputType> | number
-          }
-        }
-      }
-      EditorWorkspaceSessionGroupTab: {
-        payload: Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>
-        fields: Prisma.EditorWorkspaceSessionGroupTabFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.EditorWorkspaceSessionGroupTabFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupTabPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.EditorWorkspaceSessionGroupTabFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupTabPayload>
-          }
-          findFirst: {
-            args: Prisma.EditorWorkspaceSessionGroupTabFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupTabPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.EditorWorkspaceSessionGroupTabFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupTabPayload>
-          }
-          findMany: {
-            args: Prisma.EditorWorkspaceSessionGroupTabFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupTabPayload>[]
-          }
-          create: {
-            args: Prisma.EditorWorkspaceSessionGroupTabCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupTabPayload>
-          }
-          createMany: {
-            args: Prisma.EditorWorkspaceSessionGroupTabCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.EditorWorkspaceSessionGroupTabCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupTabPayload>[]
-          }
-          delete: {
-            args: Prisma.EditorWorkspaceSessionGroupTabDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupTabPayload>
-          }
-          update: {
-            args: Prisma.EditorWorkspaceSessionGroupTabUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupTabPayload>
-          }
-          deleteMany: {
-            args: Prisma.EditorWorkspaceSessionGroupTabDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.EditorWorkspaceSessionGroupTabUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.EditorWorkspaceSessionGroupTabUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupTabPayload>[]
-          }
-          upsert: {
-            args: Prisma.EditorWorkspaceSessionGroupTabUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EditorWorkspaceSessionGroupTabPayload>
-          }
-          aggregate: {
-            args: Prisma.EditorWorkspaceSessionGroupTabAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateEditorWorkspaceSessionGroupTab>
-          }
-          groupBy: {
-            args: Prisma.EditorWorkspaceSessionGroupTabGroupByArgs<ExtArgs>
-            result: $Utils.Optional<EditorWorkspaceSessionGroupTabGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.EditorWorkspaceSessionGroupTabCountArgs<ExtArgs>
-            result: $Utils.Optional<EditorWorkspaceSessionGroupTabCountAggregateOutputType> | number
           }
         }
       }
@@ -9830,10 +9470,6 @@ export namespace Prisma {
     cloudAuthProviderAccount?: CloudAuthProviderAccountOmit
     cloudAuthVerification?: CloudAuthVerificationOmit
     cloudAuthDeviceCode?: CloudAuthDeviceCodeOmit
-    editorWorkspace?: EditorWorkspaceOmit
-    editorWorkspaceSession?: EditorWorkspaceSessionOmit
-    editorWorkspaceSessionGroup?: EditorWorkspaceSessionGroupOmit
-    editorWorkspaceSessionGroupTab?: EditorWorkspaceSessionGroupTabOmit
     goal?: GoalOmit
     keyResult?: KeyResultOmit
     goalRecord?: GoalRecordOmit
@@ -9995,10 +9631,6 @@ export namespace Prisma {
    */
 
   export type AccountCountOutputType = {
-    editorWorkspaces: number
-    editorWorkspaceSessions: number
-    editorWorkspaceSessionGroups: number
-    editorWorkspaceSessionGroupTabs: number
     goals: number
     labels: number
     goalLabels: number
@@ -10050,10 +9682,6 @@ export namespace Prisma {
   }
 
   export type AccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    editorWorkspaces?: boolean | AccountCountOutputTypeCountEditorWorkspacesArgs
-    editorWorkspaceSessions?: boolean | AccountCountOutputTypeCountEditorWorkspaceSessionsArgs
-    editorWorkspaceSessionGroups?: boolean | AccountCountOutputTypeCountEditorWorkspaceSessionGroupsArgs
-    editorWorkspaceSessionGroupTabs?: boolean | AccountCountOutputTypeCountEditorWorkspaceSessionGroupTabsArgs
     goals?: boolean | AccountCountOutputTypeCountGoalsArgs
     labels?: boolean | AccountCountOutputTypeCountLabelsArgs
     goalLabels?: boolean | AccountCountOutputTypeCountGoalLabelsArgs
@@ -10113,34 +9741,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the AccountCountOutputType
      */
     select?: AccountCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * AccountCountOutputType without action
-   */
-  export type AccountCountOutputTypeCountEditorWorkspacesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EditorWorkspaceWhereInput
-  }
-
-  /**
-   * AccountCountOutputType without action
-   */
-  export type AccountCountOutputTypeCountEditorWorkspaceSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EditorWorkspaceSessionWhereInput
-  }
-
-  /**
-   * AccountCountOutputType without action
-   */
-  export type AccountCountOutputTypeCountEditorWorkspaceSessionGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EditorWorkspaceSessionGroupWhereInput
-  }
-
-  /**
-   * AccountCountOutputType without action
-   */
-  export type AccountCountOutputTypeCountEditorWorkspaceSessionGroupTabsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EditorWorkspaceSessionGroupTabWhereInput
   }
 
   /**
@@ -10557,99 +10157,6 @@ export namespace Prisma {
    */
   export type CloudAuthUserCountOutputTypeCountDeviceCodesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CloudAuthDeviceCodeWhereInput
-  }
-
-
-  /**
-   * Count Type EditorWorkspaceCountOutputType
-   */
-
-  export type EditorWorkspaceCountOutputType = {
-    sessions: number
-  }
-
-  export type EditorWorkspaceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    sessions?: boolean | EditorWorkspaceCountOutputTypeCountSessionsArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * EditorWorkspaceCountOutputType without action
-   */
-  export type EditorWorkspaceCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceCountOutputType
-     */
-    select?: EditorWorkspaceCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * EditorWorkspaceCountOutputType without action
-   */
-  export type EditorWorkspaceCountOutputTypeCountSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EditorWorkspaceSessionWhereInput
-  }
-
-
-  /**
-   * Count Type EditorWorkspaceSessionCountOutputType
-   */
-
-  export type EditorWorkspaceSessionCountOutputType = {
-    groups: number
-  }
-
-  export type EditorWorkspaceSessionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    groups?: boolean | EditorWorkspaceSessionCountOutputTypeCountGroupsArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * EditorWorkspaceSessionCountOutputType without action
-   */
-  export type EditorWorkspaceSessionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionCountOutputType
-     */
-    select?: EditorWorkspaceSessionCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * EditorWorkspaceSessionCountOutputType without action
-   */
-  export type EditorWorkspaceSessionCountOutputTypeCountGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EditorWorkspaceSessionGroupWhereInput
-  }
-
-
-  /**
-   * Count Type EditorWorkspaceSessionGroupCountOutputType
-   */
-
-  export type EditorWorkspaceSessionGroupCountOutputType = {
-    tabs: number
-  }
-
-  export type EditorWorkspaceSessionGroupCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    tabs?: boolean | EditorWorkspaceSessionGroupCountOutputTypeCountTabsArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * EditorWorkspaceSessionGroupCountOutputType without action
-   */
-  export type EditorWorkspaceSessionGroupCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupCountOutputType
-     */
-    select?: EditorWorkspaceSessionGroupCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupCountOutputType without action
-   */
-  export type EditorWorkspaceSessionGroupCountOutputTypeCountTabsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EditorWorkspaceSessionGroupTabWhereInput
   }
 
 
@@ -11640,10 +11147,6 @@ export namespace Prisma {
     updatedAt?: boolean
     closedAt?: boolean
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
-    editorWorkspaces?: boolean | Account$editorWorkspacesArgs<ExtArgs>
-    editorWorkspaceSessions?: boolean | Account$editorWorkspaceSessionsArgs<ExtArgs>
-    editorWorkspaceSessionGroups?: boolean | Account$editorWorkspaceSessionGroupsArgs<ExtArgs>
-    editorWorkspaceSessionGroupTabs?: boolean | Account$editorWorkspaceSessionGroupTabsArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
     labels?: boolean | Account$labelsArgs<ExtArgs>
     goalLabels?: boolean | Account$goalLabelsArgs<ExtArgs>
@@ -11734,10 +11237,6 @@ export namespace Prisma {
   export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "profile" | "createdAt" | "updatedAt" | "closedAt", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
-    editorWorkspaces?: boolean | Account$editorWorkspacesArgs<ExtArgs>
-    editorWorkspaceSessions?: boolean | Account$editorWorkspaceSessionsArgs<ExtArgs>
-    editorWorkspaceSessionGroups?: boolean | Account$editorWorkspaceSessionGroupsArgs<ExtArgs>
-    editorWorkspaceSessionGroupTabs?: boolean | Account$editorWorkspaceSessionGroupTabsArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
     labels?: boolean | Account$labelsArgs<ExtArgs>
     goalLabels?: boolean | Account$goalLabelsArgs<ExtArgs>
@@ -11806,10 +11305,6 @@ export namespace Prisma {
     name: "Account"
     objects: {
       cloudUser: Prisma.$CloudAuthUserPayload<ExtArgs>
-      editorWorkspaces: Prisma.$EditorWorkspacePayload<ExtArgs>[]
-      editorWorkspaceSessions: Prisma.$EditorWorkspaceSessionPayload<ExtArgs>[]
-      editorWorkspaceSessionGroups: Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>[]
-      editorWorkspaceSessionGroupTabs: Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>[]
       goals: Prisma.$GoalPayload<ExtArgs>[]
       labels: Prisma.$LabelPayload<ExtArgs>[]
       goalLabels: Prisma.$GoalLabelPayload<ExtArgs>[]
@@ -12268,10 +11763,6 @@ export namespace Prisma {
   export interface Prisma__AccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     cloudUser<T extends CloudAuthUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUserDefaultArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    editorWorkspaces<T extends Account$editorWorkspacesArgs<ExtArgs> = {}>(args?: Subset<T, Account$editorWorkspacesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    editorWorkspaceSessions<T extends Account$editorWorkspaceSessionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$editorWorkspaceSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    editorWorkspaceSessionGroups<T extends Account$editorWorkspaceSessionGroupsArgs<ExtArgs> = {}>(args?: Subset<T, Account$editorWorkspaceSessionGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    editorWorkspaceSessionGroupTabs<T extends Account$editorWorkspaceSessionGroupTabsArgs<ExtArgs> = {}>(args?: Subset<T, Account$editorWorkspaceSessionGroupTabsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     goals<T extends Account$goalsArgs<ExtArgs> = {}>(args?: Subset<T, Account$goalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     labels<T extends Account$labelsArgs<ExtArgs> = {}>(args?: Subset<T, Account$labelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     goalLabels<T extends Account$goalLabelsArgs<ExtArgs> = {}>(args?: Subset<T, Account$goalLabelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoalLabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12760,102 +12251,6 @@ export namespace Prisma {
      * Limit how many Accounts to delete.
      */
     limit?: number
-  }
-
-  /**
-   * Account.editorWorkspaces
-   */
-  export type Account$editorWorkspacesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceInclude<ExtArgs> | null
-    where?: EditorWorkspaceWhereInput
-    orderBy?: EditorWorkspaceOrderByWithRelationInput | EditorWorkspaceOrderByWithRelationInput[]
-    cursor?: EditorWorkspaceWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: EditorWorkspaceScalarFieldEnum | EditorWorkspaceScalarFieldEnum[]
-  }
-
-  /**
-   * Account.editorWorkspaceSessions
-   */
-  export type Account$editorWorkspaceSessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-    where?: EditorWorkspaceSessionWhereInput
-    orderBy?: EditorWorkspaceSessionOrderByWithRelationInput | EditorWorkspaceSessionOrderByWithRelationInput[]
-    cursor?: EditorWorkspaceSessionWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: EditorWorkspaceSessionScalarFieldEnum | EditorWorkspaceSessionScalarFieldEnum[]
-  }
-
-  /**
-   * Account.editorWorkspaceSessionGroups
-   */
-  export type Account$editorWorkspaceSessionGroupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-    where?: EditorWorkspaceSessionGroupWhereInput
-    orderBy?: EditorWorkspaceSessionGroupOrderByWithRelationInput | EditorWorkspaceSessionGroupOrderByWithRelationInput[]
-    cursor?: EditorWorkspaceSessionGroupWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: EditorWorkspaceSessionGroupScalarFieldEnum | EditorWorkspaceSessionGroupScalarFieldEnum[]
-  }
-
-  /**
-   * Account.editorWorkspaceSessionGroupTabs
-   */
-  export type Account$editorWorkspaceSessionGroupTabsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
-    where?: EditorWorkspaceSessionGroupTabWhereInput
-    orderBy?: EditorWorkspaceSessionGroupTabOrderByWithRelationInput | EditorWorkspaceSessionGroupTabOrderByWithRelationInput[]
-    cursor?: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: EditorWorkspaceSessionGroupTabScalarFieldEnum | EditorWorkspaceSessionGroupTabScalarFieldEnum[]
   }
 
   /**
@@ -31668,4903 +31063,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: CloudAuthDeviceCodeInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model EditorWorkspace
-   */
-
-  export type AggregateEditorWorkspace = {
-    _count: EditorWorkspaceCountAggregateOutputType | null
-    _avg: EditorWorkspaceAvgAggregateOutputType | null
-    _sum: EditorWorkspaceSumAggregateOutputType | null
-    _min: EditorWorkspaceMinAggregateOutputType | null
-    _max: EditorWorkspaceMaxAggregateOutputType | null
-  }
-
-  export type EditorWorkspaceAvgAggregateOutputType = {
-    version: number | null
-  }
-
-  export type EditorWorkspaceSumAggregateOutputType = {
-    version: number | null
-  }
-
-  export type EditorWorkspaceMinAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    name: string | null
-    description: string | null
-    projectPath: string | null
-    projectType: string | null
-    isActive: boolean | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    accessedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type EditorWorkspaceMaxAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    name: string | null
-    description: string | null
-    projectPath: string | null
-    projectType: string | null
-    isActive: boolean | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    accessedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type EditorWorkspaceCountAggregateOutputType = {
-    id: number
-    identityId: number
-    name: number
-    description: number
-    projectPath: number
-    projectType: number
-    layout: number
-    setting: number
-    isActive: number
-    version: number
-    createdAt: number
-    updatedAt: number
-    accessedAt: number
-    deletedAt: number
-    _all: number
-  }
-
-
-  export type EditorWorkspaceAvgAggregateInputType = {
-    version?: true
-  }
-
-  export type EditorWorkspaceSumAggregateInputType = {
-    version?: true
-  }
-
-  export type EditorWorkspaceMinAggregateInputType = {
-    id?: true
-    identityId?: true
-    name?: true
-    description?: true
-    projectPath?: true
-    projectType?: true
-    isActive?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    accessedAt?: true
-    deletedAt?: true
-  }
-
-  export type EditorWorkspaceMaxAggregateInputType = {
-    id?: true
-    identityId?: true
-    name?: true
-    description?: true
-    projectPath?: true
-    projectType?: true
-    isActive?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    accessedAt?: true
-    deletedAt?: true
-  }
-
-  export type EditorWorkspaceCountAggregateInputType = {
-    id?: true
-    identityId?: true
-    name?: true
-    description?: true
-    projectPath?: true
-    projectType?: true
-    layout?: true
-    setting?: true
-    isActive?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    accessedAt?: true
-    deletedAt?: true
-    _all?: true
-  }
-
-  export type EditorWorkspaceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which EditorWorkspace to aggregate.
-     */
-    where?: EditorWorkspaceWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaces to fetch.
-     */
-    orderBy?: EditorWorkspaceOrderByWithRelationInput | EditorWorkspaceOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: EditorWorkspaceWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaces from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaces.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned EditorWorkspaces
-    **/
-    _count?: true | EditorWorkspaceCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: EditorWorkspaceAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: EditorWorkspaceSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: EditorWorkspaceMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: EditorWorkspaceMaxAggregateInputType
-  }
-
-  export type GetEditorWorkspaceAggregateType<T extends EditorWorkspaceAggregateArgs> = {
-        [P in keyof T & keyof AggregateEditorWorkspace]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateEditorWorkspace[P]>
-      : GetScalarType<T[P], AggregateEditorWorkspace[P]>
-  }
-
-
-
-
-  export type EditorWorkspaceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EditorWorkspaceWhereInput
-    orderBy?: EditorWorkspaceOrderByWithAggregationInput | EditorWorkspaceOrderByWithAggregationInput[]
-    by: EditorWorkspaceScalarFieldEnum[] | EditorWorkspaceScalarFieldEnum
-    having?: EditorWorkspaceScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: EditorWorkspaceCountAggregateInputType | true
-    _avg?: EditorWorkspaceAvgAggregateInputType
-    _sum?: EditorWorkspaceSumAggregateInputType
-    _min?: EditorWorkspaceMinAggregateInputType
-    _max?: EditorWorkspaceMaxAggregateInputType
-  }
-
-  export type EditorWorkspaceGroupByOutputType = {
-    id: string
-    identityId: string
-    name: string
-    description: string | null
-    projectPath: string
-    projectType: string
-    layout: JsonValue
-    setting: JsonValue
-    isActive: boolean
-    version: number
-    createdAt: Date
-    updatedAt: Date
-    accessedAt: Date
-    deletedAt: Date | null
-    _count: EditorWorkspaceCountAggregateOutputType | null
-    _avg: EditorWorkspaceAvgAggregateOutputType | null
-    _sum: EditorWorkspaceSumAggregateOutputType | null
-    _min: EditorWorkspaceMinAggregateOutputType | null
-    _max: EditorWorkspaceMaxAggregateOutputType | null
-  }
-
-  type GetEditorWorkspaceGroupByPayload<T extends EditorWorkspaceGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<EditorWorkspaceGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof EditorWorkspaceGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], EditorWorkspaceGroupByOutputType[P]>
-            : GetScalarType<T[P], EditorWorkspaceGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type EditorWorkspaceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    name?: boolean
-    description?: boolean
-    projectPath?: boolean
-    projectType?: boolean
-    layout?: boolean
-    setting?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    accessedAt?: boolean
-    deletedAt?: boolean
-    sessions?: boolean | EditorWorkspace$sessionsArgs<ExtArgs>
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    _count?: boolean | EditorWorkspaceCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspace"]>
-
-  export type EditorWorkspaceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    name?: boolean
-    description?: boolean
-    projectPath?: boolean
-    projectType?: boolean
-    layout?: boolean
-    setting?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    accessedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspace"]>
-
-  export type EditorWorkspaceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    name?: boolean
-    description?: boolean
-    projectPath?: boolean
-    projectType?: boolean
-    layout?: boolean
-    setting?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    accessedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspace"]>
-
-  export type EditorWorkspaceSelectScalar = {
-    id?: boolean
-    identityId?: boolean
-    name?: boolean
-    description?: boolean
-    projectPath?: boolean
-    projectType?: boolean
-    layout?: boolean
-    setting?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    accessedAt?: boolean
-    deletedAt?: boolean
-  }
-
-  export type EditorWorkspaceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "projectPath" | "projectType" | "layout" | "setting" | "isActive" | "version" | "createdAt" | "updatedAt" | "accessedAt" | "deletedAt", ExtArgs["result"]["editorWorkspace"]>
-  export type EditorWorkspaceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    sessions?: boolean | EditorWorkspace$sessionsArgs<ExtArgs>
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    _count?: boolean | EditorWorkspaceCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type EditorWorkspaceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type EditorWorkspaceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-
-  export type $EditorWorkspacePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "EditorWorkspace"
-    objects: {
-      sessions: Prisma.$EditorWorkspaceSessionPayload<ExtArgs>[]
-      account: Prisma.$AccountPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      identityId: string
-      name: string
-      description: string | null
-      projectPath: string
-      projectType: string
-      layout: Prisma.JsonValue
-      setting: Prisma.JsonValue
-      isActive: boolean
-      version: number
-      createdAt: Date
-      updatedAt: Date
-      accessedAt: Date
-      deletedAt: Date | null
-    }, ExtArgs["result"]["editorWorkspace"]>
-    composites: {}
-  }
-
-  type EditorWorkspaceGetPayload<S extends boolean | null | undefined | EditorWorkspaceDefaultArgs> = $Result.GetResult<Prisma.$EditorWorkspacePayload, S>
-
-  type EditorWorkspaceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<EditorWorkspaceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: EditorWorkspaceCountAggregateInputType | true
-    }
-
-  export interface EditorWorkspaceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EditorWorkspace'], meta: { name: 'EditorWorkspace' } }
-    /**
-     * Find zero or one EditorWorkspace that matches the filter.
-     * @param {EditorWorkspaceFindUniqueArgs} args - Arguments to find a EditorWorkspace
-     * @example
-     * // Get one EditorWorkspace
-     * const editorWorkspace = await prisma.editorWorkspace.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends EditorWorkspaceFindUniqueArgs>(args: SelectSubset<T, EditorWorkspaceFindUniqueArgs<ExtArgs>>): Prisma__EditorWorkspaceClient<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one EditorWorkspace that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {EditorWorkspaceFindUniqueOrThrowArgs} args - Arguments to find a EditorWorkspace
-     * @example
-     * // Get one EditorWorkspace
-     * const editorWorkspace = await prisma.editorWorkspace.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends EditorWorkspaceFindUniqueOrThrowArgs>(args: SelectSubset<T, EditorWorkspaceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EditorWorkspaceClient<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first EditorWorkspace that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceFindFirstArgs} args - Arguments to find a EditorWorkspace
-     * @example
-     * // Get one EditorWorkspace
-     * const editorWorkspace = await prisma.editorWorkspace.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends EditorWorkspaceFindFirstArgs>(args?: SelectSubset<T, EditorWorkspaceFindFirstArgs<ExtArgs>>): Prisma__EditorWorkspaceClient<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first EditorWorkspace that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceFindFirstOrThrowArgs} args - Arguments to find a EditorWorkspace
-     * @example
-     * // Get one EditorWorkspace
-     * const editorWorkspace = await prisma.editorWorkspace.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends EditorWorkspaceFindFirstOrThrowArgs>(args?: SelectSubset<T, EditorWorkspaceFindFirstOrThrowArgs<ExtArgs>>): Prisma__EditorWorkspaceClient<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more EditorWorkspaces that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all EditorWorkspaces
-     * const editorWorkspaces = await prisma.editorWorkspace.findMany()
-     *
-     * // Get first 10 EditorWorkspaces
-     * const editorWorkspaces = await prisma.editorWorkspace.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const editorWorkspaceWithIdOnly = await prisma.editorWorkspace.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends EditorWorkspaceFindManyArgs>(args?: SelectSubset<T, EditorWorkspaceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a EditorWorkspace.
-     * @param {EditorWorkspaceCreateArgs} args - Arguments to create a EditorWorkspace.
-     * @example
-     * // Create one EditorWorkspace
-     * const EditorWorkspace = await prisma.editorWorkspace.create({
-     *   data: {
-     *     // ... data to create a EditorWorkspace
-     *   }
-     * })
-     *
-     */
-    create<T extends EditorWorkspaceCreateArgs>(args: SelectSubset<T, EditorWorkspaceCreateArgs<ExtArgs>>): Prisma__EditorWorkspaceClient<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many EditorWorkspaces.
-     * @param {EditorWorkspaceCreateManyArgs} args - Arguments to create many EditorWorkspaces.
-     * @example
-     * // Create many EditorWorkspaces
-     * const editorWorkspace = await prisma.editorWorkspace.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends EditorWorkspaceCreateManyArgs>(args?: SelectSubset<T, EditorWorkspaceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many EditorWorkspaces and returns the data saved in the database.
-     * @param {EditorWorkspaceCreateManyAndReturnArgs} args - Arguments to create many EditorWorkspaces.
-     * @example
-     * // Create many EditorWorkspaces
-     * const editorWorkspace = await prisma.editorWorkspace.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many EditorWorkspaces and only return the `id`
-     * const editorWorkspaceWithIdOnly = await prisma.editorWorkspace.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends EditorWorkspaceCreateManyAndReturnArgs>(args?: SelectSubset<T, EditorWorkspaceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a EditorWorkspace.
-     * @param {EditorWorkspaceDeleteArgs} args - Arguments to delete one EditorWorkspace.
-     * @example
-     * // Delete one EditorWorkspace
-     * const EditorWorkspace = await prisma.editorWorkspace.delete({
-     *   where: {
-     *     // ... filter to delete one EditorWorkspace
-     *   }
-     * })
-     *
-     */
-    delete<T extends EditorWorkspaceDeleteArgs>(args: SelectSubset<T, EditorWorkspaceDeleteArgs<ExtArgs>>): Prisma__EditorWorkspaceClient<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one EditorWorkspace.
-     * @param {EditorWorkspaceUpdateArgs} args - Arguments to update one EditorWorkspace.
-     * @example
-     * // Update one EditorWorkspace
-     * const editorWorkspace = await prisma.editorWorkspace.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends EditorWorkspaceUpdateArgs>(args: SelectSubset<T, EditorWorkspaceUpdateArgs<ExtArgs>>): Prisma__EditorWorkspaceClient<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more EditorWorkspaces.
-     * @param {EditorWorkspaceDeleteManyArgs} args - Arguments to filter EditorWorkspaces to delete.
-     * @example
-     * // Delete a few EditorWorkspaces
-     * const { count } = await prisma.editorWorkspace.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends EditorWorkspaceDeleteManyArgs>(args?: SelectSubset<T, EditorWorkspaceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more EditorWorkspaces.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many EditorWorkspaces
-     * const editorWorkspace = await prisma.editorWorkspace.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends EditorWorkspaceUpdateManyArgs>(args: SelectSubset<T, EditorWorkspaceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more EditorWorkspaces and returns the data updated in the database.
-     * @param {EditorWorkspaceUpdateManyAndReturnArgs} args - Arguments to update many EditorWorkspaces.
-     * @example
-     * // Update many EditorWorkspaces
-     * const editorWorkspace = await prisma.editorWorkspace.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more EditorWorkspaces and only return the `id`
-     * const editorWorkspaceWithIdOnly = await prisma.editorWorkspace.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends EditorWorkspaceUpdateManyAndReturnArgs>(args: SelectSubset<T, EditorWorkspaceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one EditorWorkspace.
-     * @param {EditorWorkspaceUpsertArgs} args - Arguments to update or create a EditorWorkspace.
-     * @example
-     * // Update or create a EditorWorkspace
-     * const editorWorkspace = await prisma.editorWorkspace.upsert({
-     *   create: {
-     *     // ... data to create a EditorWorkspace
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the EditorWorkspace we want to update
-     *   }
-     * })
-     */
-    upsert<T extends EditorWorkspaceUpsertArgs>(args: SelectSubset<T, EditorWorkspaceUpsertArgs<ExtArgs>>): Prisma__EditorWorkspaceClient<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of EditorWorkspaces.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceCountArgs} args - Arguments to filter EditorWorkspaces to count.
-     * @example
-     * // Count the number of EditorWorkspaces
-     * const count = await prisma.editorWorkspace.count({
-     *   where: {
-     *     // ... the filter for the EditorWorkspaces we want to count
-     *   }
-     * })
-    **/
-    count<T extends EditorWorkspaceCountArgs>(
-      args?: Subset<T, EditorWorkspaceCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], EditorWorkspaceCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a EditorWorkspace.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends EditorWorkspaceAggregateArgs>(args: Subset<T, EditorWorkspaceAggregateArgs>): Prisma.PrismaPromise<GetEditorWorkspaceAggregateType<T>>
-
-    /**
-     * Group by EditorWorkspace.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends EditorWorkspaceGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: EditorWorkspaceGroupByArgs['orderBy'] }
-        : { orderBy?: EditorWorkspaceGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, EditorWorkspaceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEditorWorkspaceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the EditorWorkspace model
-   */
-  readonly fields: EditorWorkspaceFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for EditorWorkspace.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__EditorWorkspaceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    sessions<T extends EditorWorkspace$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, EditorWorkspace$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the EditorWorkspace model
-   */
-  interface EditorWorkspaceFieldRefs {
-    readonly id: FieldRef<"EditorWorkspace", 'String'>
-    readonly identityId: FieldRef<"EditorWorkspace", 'String'>
-    readonly name: FieldRef<"EditorWorkspace", 'String'>
-    readonly description: FieldRef<"EditorWorkspace", 'String'>
-    readonly projectPath: FieldRef<"EditorWorkspace", 'String'>
-    readonly projectType: FieldRef<"EditorWorkspace", 'String'>
-    readonly layout: FieldRef<"EditorWorkspace", 'Json'>
-    readonly setting: FieldRef<"EditorWorkspace", 'Json'>
-    readonly isActive: FieldRef<"EditorWorkspace", 'Boolean'>
-    readonly version: FieldRef<"EditorWorkspace", 'Int'>
-    readonly createdAt: FieldRef<"EditorWorkspace", 'DateTime'>
-    readonly updatedAt: FieldRef<"EditorWorkspace", 'DateTime'>
-    readonly accessedAt: FieldRef<"EditorWorkspace", 'DateTime'>
-    readonly deletedAt: FieldRef<"EditorWorkspace", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * EditorWorkspace findUnique
-   */
-  export type EditorWorkspaceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspace to fetch.
-     */
-    where: EditorWorkspaceWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspace findUniqueOrThrow
-   */
-  export type EditorWorkspaceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspace to fetch.
-     */
-    where: EditorWorkspaceWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspace findFirst
-   */
-  export type EditorWorkspaceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspace to fetch.
-     */
-    where?: EditorWorkspaceWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaces to fetch.
-     */
-    orderBy?: EditorWorkspaceOrderByWithRelationInput | EditorWorkspaceOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for EditorWorkspaces.
-     */
-    cursor?: EditorWorkspaceWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaces from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaces.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaces.
-     */
-    distinct?: EditorWorkspaceScalarFieldEnum | EditorWorkspaceScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspace findFirstOrThrow
-   */
-  export type EditorWorkspaceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspace to fetch.
-     */
-    where?: EditorWorkspaceWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaces to fetch.
-     */
-    orderBy?: EditorWorkspaceOrderByWithRelationInput | EditorWorkspaceOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for EditorWorkspaces.
-     */
-    cursor?: EditorWorkspaceWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaces from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaces.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaces.
-     */
-    distinct?: EditorWorkspaceScalarFieldEnum | EditorWorkspaceScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspace findMany
-   */
-  export type EditorWorkspaceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaces to fetch.
-     */
-    where?: EditorWorkspaceWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaces to fetch.
-     */
-    orderBy?: EditorWorkspaceOrderByWithRelationInput | EditorWorkspaceOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing EditorWorkspaces.
-     */
-    cursor?: EditorWorkspaceWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaces from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaces.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaces.
-     */
-    distinct?: EditorWorkspaceScalarFieldEnum | EditorWorkspaceScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspace create
-   */
-  export type EditorWorkspaceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceInclude<ExtArgs> | null
-    /**
-     * The data needed to create a EditorWorkspace.
-     */
-    data: XOR<EditorWorkspaceCreateInput, EditorWorkspaceUncheckedCreateInput>
-  }
-
-  /**
-   * EditorWorkspace createMany
-   */
-  export type EditorWorkspaceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many EditorWorkspaces.
-     */
-    data: EditorWorkspaceCreateManyInput | EditorWorkspaceCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * EditorWorkspace createManyAndReturn
-   */
-  export type EditorWorkspaceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * The data used to create many EditorWorkspaces.
-     */
-    data: EditorWorkspaceCreateManyInput | EditorWorkspaceCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * EditorWorkspace update
-   */
-  export type EditorWorkspaceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceInclude<ExtArgs> | null
-    /**
-     * The data needed to update a EditorWorkspace.
-     */
-    data: XOR<EditorWorkspaceUpdateInput, EditorWorkspaceUncheckedUpdateInput>
-    /**
-     * Choose, which EditorWorkspace to update.
-     */
-    where: EditorWorkspaceWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspace updateMany
-   */
-  export type EditorWorkspaceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update EditorWorkspaces.
-     */
-    data: XOR<EditorWorkspaceUpdateManyMutationInput, EditorWorkspaceUncheckedUpdateManyInput>
-    /**
-     * Filter which EditorWorkspaces to update
-     */
-    where?: EditorWorkspaceWhereInput
-    /**
-     * Limit how many EditorWorkspaces to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * EditorWorkspace updateManyAndReturn
-   */
-  export type EditorWorkspaceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * The data used to update EditorWorkspaces.
-     */
-    data: XOR<EditorWorkspaceUpdateManyMutationInput, EditorWorkspaceUncheckedUpdateManyInput>
-    /**
-     * Filter which EditorWorkspaces to update
-     */
-    where?: EditorWorkspaceWhereInput
-    /**
-     * Limit how many EditorWorkspaces to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * EditorWorkspace upsert
-   */
-  export type EditorWorkspaceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceInclude<ExtArgs> | null
-    /**
-     * The filter to search for the EditorWorkspace to update in case it exists.
-     */
-    where: EditorWorkspaceWhereUniqueInput
-    /**
-     * In case the EditorWorkspace found by the `where` argument doesn't exist, create a new EditorWorkspace with this data.
-     */
-    create: XOR<EditorWorkspaceCreateInput, EditorWorkspaceUncheckedCreateInput>
-    /**
-     * In case the EditorWorkspace was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<EditorWorkspaceUpdateInput, EditorWorkspaceUncheckedUpdateInput>
-  }
-
-  /**
-   * EditorWorkspace delete
-   */
-  export type EditorWorkspaceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceInclude<ExtArgs> | null
-    /**
-     * Filter which EditorWorkspace to delete.
-     */
-    where: EditorWorkspaceWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspace deleteMany
-   */
-  export type EditorWorkspaceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which EditorWorkspaces to delete
-     */
-    where?: EditorWorkspaceWhereInput
-    /**
-     * Limit how many EditorWorkspaces to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * EditorWorkspace.sessions
-   */
-  export type EditorWorkspace$sessionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-    where?: EditorWorkspaceSessionWhereInput
-    orderBy?: EditorWorkspaceSessionOrderByWithRelationInput | EditorWorkspaceSessionOrderByWithRelationInput[]
-    cursor?: EditorWorkspaceSessionWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: EditorWorkspaceSessionScalarFieldEnum | EditorWorkspaceSessionScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspace without action
-   */
-  export type EditorWorkspaceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspace
-     */
-    select?: EditorWorkspaceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspace
-     */
-    omit?: EditorWorkspaceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model EditorWorkspaceSession
-   */
-
-  export type AggregateEditorWorkspaceSession = {
-    _count: EditorWorkspaceSessionCountAggregateOutputType | null
-    _avg: EditorWorkspaceSessionAvgAggregateOutputType | null
-    _sum: EditorWorkspaceSessionSumAggregateOutputType | null
-    _min: EditorWorkspaceSessionMinAggregateOutputType | null
-    _max: EditorWorkspaceSessionMaxAggregateOutputType | null
-  }
-
-  export type EditorWorkspaceSessionAvgAggregateOutputType = {
-    version: number | null
-  }
-
-  export type EditorWorkspaceSessionSumAggregateOutputType = {
-    version: number | null
-  }
-
-  export type EditorWorkspaceSessionMinAggregateOutputType = {
-    id: string | null
-    workspaceId: string | null
-    identityId: string | null
-    name: string | null
-    isActive: boolean | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type EditorWorkspaceSessionMaxAggregateOutputType = {
-    id: string | null
-    workspaceId: string | null
-    identityId: string | null
-    name: string | null
-    isActive: boolean | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type EditorWorkspaceSessionCountAggregateOutputType = {
-    id: number
-    workspaceId: number
-    identityId: number
-    name: number
-    layout: number
-    isActive: number
-    version: number
-    createdAt: number
-    updatedAt: number
-    deletedAt: number
-    _all: number
-  }
-
-
-  export type EditorWorkspaceSessionAvgAggregateInputType = {
-    version?: true
-  }
-
-  export type EditorWorkspaceSessionSumAggregateInputType = {
-    version?: true
-  }
-
-  export type EditorWorkspaceSessionMinAggregateInputType = {
-    id?: true
-    workspaceId?: true
-    identityId?: true
-    name?: true
-    isActive?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-  }
-
-  export type EditorWorkspaceSessionMaxAggregateInputType = {
-    id?: true
-    workspaceId?: true
-    identityId?: true
-    name?: true
-    isActive?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-  }
-
-  export type EditorWorkspaceSessionCountAggregateInputType = {
-    id?: true
-    workspaceId?: true
-    identityId?: true
-    name?: true
-    layout?: true
-    isActive?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-    _all?: true
-  }
-
-  export type EditorWorkspaceSessionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which EditorWorkspaceSession to aggregate.
-     */
-    where?: EditorWorkspaceSessionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessions to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionOrderByWithRelationInput | EditorWorkspaceSessionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: EditorWorkspaceSessionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned EditorWorkspaceSessions
-    **/
-    _count?: true | EditorWorkspaceSessionCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: EditorWorkspaceSessionAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: EditorWorkspaceSessionSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: EditorWorkspaceSessionMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: EditorWorkspaceSessionMaxAggregateInputType
-  }
-
-  export type GetEditorWorkspaceSessionAggregateType<T extends EditorWorkspaceSessionAggregateArgs> = {
-        [P in keyof T & keyof AggregateEditorWorkspaceSession]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateEditorWorkspaceSession[P]>
-      : GetScalarType<T[P], AggregateEditorWorkspaceSession[P]>
-  }
-
-
-
-
-  export type EditorWorkspaceSessionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EditorWorkspaceSessionWhereInput
-    orderBy?: EditorWorkspaceSessionOrderByWithAggregationInput | EditorWorkspaceSessionOrderByWithAggregationInput[]
-    by: EditorWorkspaceSessionScalarFieldEnum[] | EditorWorkspaceSessionScalarFieldEnum
-    having?: EditorWorkspaceSessionScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: EditorWorkspaceSessionCountAggregateInputType | true
-    _avg?: EditorWorkspaceSessionAvgAggregateInputType
-    _sum?: EditorWorkspaceSessionSumAggregateInputType
-    _min?: EditorWorkspaceSessionMinAggregateInputType
-    _max?: EditorWorkspaceSessionMaxAggregateInputType
-  }
-
-  export type EditorWorkspaceSessionGroupByOutputType = {
-    id: string
-    workspaceId: string
-    identityId: string
-    name: string
-    layout: JsonValue
-    isActive: boolean
-    version: number
-    createdAt: Date
-    updatedAt: Date
-    deletedAt: Date | null
-    _count: EditorWorkspaceSessionCountAggregateOutputType | null
-    _avg: EditorWorkspaceSessionAvgAggregateOutputType | null
-    _sum: EditorWorkspaceSessionSumAggregateOutputType | null
-    _min: EditorWorkspaceSessionMinAggregateOutputType | null
-    _max: EditorWorkspaceSessionMaxAggregateOutputType | null
-  }
-
-  type GetEditorWorkspaceSessionGroupByPayload<T extends EditorWorkspaceSessionGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<EditorWorkspaceSessionGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof EditorWorkspaceSessionGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], EditorWorkspaceSessionGroupByOutputType[P]>
-            : GetScalarType<T[P], EditorWorkspaceSessionGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type EditorWorkspaceSessionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    name?: boolean
-    layout?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    groups?: boolean | EditorWorkspaceSession$groupsArgs<ExtArgs>
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    workspace?: boolean | EditorWorkspaceDefaultArgs<ExtArgs>
-    _count?: boolean | EditorWorkspaceSessionCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspaceSession"]>
-
-  export type EditorWorkspaceSessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    name?: boolean
-    layout?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    workspace?: boolean | EditorWorkspaceDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspaceSession"]>
-
-  export type EditorWorkspaceSessionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    name?: boolean
-    layout?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    workspace?: boolean | EditorWorkspaceDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspaceSession"]>
-
-  export type EditorWorkspaceSessionSelectScalar = {
-    id?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    name?: boolean
-    layout?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-  }
-
-  export type EditorWorkspaceSessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "workspaceId" | "identityId" | "name" | "layout" | "isActive" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["editorWorkspaceSession"]>
-  export type EditorWorkspaceSessionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    groups?: boolean | EditorWorkspaceSession$groupsArgs<ExtArgs>
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    workspace?: boolean | EditorWorkspaceDefaultArgs<ExtArgs>
-    _count?: boolean | EditorWorkspaceSessionCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type EditorWorkspaceSessionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    workspace?: boolean | EditorWorkspaceDefaultArgs<ExtArgs>
-  }
-  export type EditorWorkspaceSessionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    workspace?: boolean | EditorWorkspaceDefaultArgs<ExtArgs>
-  }
-
-  export type $EditorWorkspaceSessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "EditorWorkspaceSession"
-    objects: {
-      groups: Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>[]
-      account: Prisma.$AccountPayload<ExtArgs>
-      workspace: Prisma.$EditorWorkspacePayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      workspaceId: string
-      identityId: string
-      name: string
-      layout: Prisma.JsonValue
-      isActive: boolean
-      version: number
-      createdAt: Date
-      updatedAt: Date
-      deletedAt: Date | null
-    }, ExtArgs["result"]["editorWorkspaceSession"]>
-    composites: {}
-  }
-
-  type EditorWorkspaceSessionGetPayload<S extends boolean | null | undefined | EditorWorkspaceSessionDefaultArgs> = $Result.GetResult<Prisma.$EditorWorkspaceSessionPayload, S>
-
-  type EditorWorkspaceSessionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<EditorWorkspaceSessionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: EditorWorkspaceSessionCountAggregateInputType | true
-    }
-
-  export interface EditorWorkspaceSessionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EditorWorkspaceSession'], meta: { name: 'EditorWorkspaceSession' } }
-    /**
-     * Find zero or one EditorWorkspaceSession that matches the filter.
-     * @param {EditorWorkspaceSessionFindUniqueArgs} args - Arguments to find a EditorWorkspaceSession
-     * @example
-     * // Get one EditorWorkspaceSession
-     * const editorWorkspaceSession = await prisma.editorWorkspaceSession.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends EditorWorkspaceSessionFindUniqueArgs>(args: SelectSubset<T, EditorWorkspaceSessionFindUniqueArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one EditorWorkspaceSession that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {EditorWorkspaceSessionFindUniqueOrThrowArgs} args - Arguments to find a EditorWorkspaceSession
-     * @example
-     * // Get one EditorWorkspaceSession
-     * const editorWorkspaceSession = await prisma.editorWorkspaceSession.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends EditorWorkspaceSessionFindUniqueOrThrowArgs>(args: SelectSubset<T, EditorWorkspaceSessionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first EditorWorkspaceSession that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionFindFirstArgs} args - Arguments to find a EditorWorkspaceSession
-     * @example
-     * // Get one EditorWorkspaceSession
-     * const editorWorkspaceSession = await prisma.editorWorkspaceSession.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends EditorWorkspaceSessionFindFirstArgs>(args?: SelectSubset<T, EditorWorkspaceSessionFindFirstArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first EditorWorkspaceSession that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionFindFirstOrThrowArgs} args - Arguments to find a EditorWorkspaceSession
-     * @example
-     * // Get one EditorWorkspaceSession
-     * const editorWorkspaceSession = await prisma.editorWorkspaceSession.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends EditorWorkspaceSessionFindFirstOrThrowArgs>(args?: SelectSubset<T, EditorWorkspaceSessionFindFirstOrThrowArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more EditorWorkspaceSessions that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all EditorWorkspaceSessions
-     * const editorWorkspaceSessions = await prisma.editorWorkspaceSession.findMany()
-     *
-     * // Get first 10 EditorWorkspaceSessions
-     * const editorWorkspaceSessions = await prisma.editorWorkspaceSession.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const editorWorkspaceSessionWithIdOnly = await prisma.editorWorkspaceSession.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends EditorWorkspaceSessionFindManyArgs>(args?: SelectSubset<T, EditorWorkspaceSessionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a EditorWorkspaceSession.
-     * @param {EditorWorkspaceSessionCreateArgs} args - Arguments to create a EditorWorkspaceSession.
-     * @example
-     * // Create one EditorWorkspaceSession
-     * const EditorWorkspaceSession = await prisma.editorWorkspaceSession.create({
-     *   data: {
-     *     // ... data to create a EditorWorkspaceSession
-     *   }
-     * })
-     *
-     */
-    create<T extends EditorWorkspaceSessionCreateArgs>(args: SelectSubset<T, EditorWorkspaceSessionCreateArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many EditorWorkspaceSessions.
-     * @param {EditorWorkspaceSessionCreateManyArgs} args - Arguments to create many EditorWorkspaceSessions.
-     * @example
-     * // Create many EditorWorkspaceSessions
-     * const editorWorkspaceSession = await prisma.editorWorkspaceSession.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends EditorWorkspaceSessionCreateManyArgs>(args?: SelectSubset<T, EditorWorkspaceSessionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many EditorWorkspaceSessions and returns the data saved in the database.
-     * @param {EditorWorkspaceSessionCreateManyAndReturnArgs} args - Arguments to create many EditorWorkspaceSessions.
-     * @example
-     * // Create many EditorWorkspaceSessions
-     * const editorWorkspaceSession = await prisma.editorWorkspaceSession.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many EditorWorkspaceSessions and only return the `id`
-     * const editorWorkspaceSessionWithIdOnly = await prisma.editorWorkspaceSession.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends EditorWorkspaceSessionCreateManyAndReturnArgs>(args?: SelectSubset<T, EditorWorkspaceSessionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a EditorWorkspaceSession.
-     * @param {EditorWorkspaceSessionDeleteArgs} args - Arguments to delete one EditorWorkspaceSession.
-     * @example
-     * // Delete one EditorWorkspaceSession
-     * const EditorWorkspaceSession = await prisma.editorWorkspaceSession.delete({
-     *   where: {
-     *     // ... filter to delete one EditorWorkspaceSession
-     *   }
-     * })
-     *
-     */
-    delete<T extends EditorWorkspaceSessionDeleteArgs>(args: SelectSubset<T, EditorWorkspaceSessionDeleteArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one EditorWorkspaceSession.
-     * @param {EditorWorkspaceSessionUpdateArgs} args - Arguments to update one EditorWorkspaceSession.
-     * @example
-     * // Update one EditorWorkspaceSession
-     * const editorWorkspaceSession = await prisma.editorWorkspaceSession.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends EditorWorkspaceSessionUpdateArgs>(args: SelectSubset<T, EditorWorkspaceSessionUpdateArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more EditorWorkspaceSessions.
-     * @param {EditorWorkspaceSessionDeleteManyArgs} args - Arguments to filter EditorWorkspaceSessions to delete.
-     * @example
-     * // Delete a few EditorWorkspaceSessions
-     * const { count } = await prisma.editorWorkspaceSession.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends EditorWorkspaceSessionDeleteManyArgs>(args?: SelectSubset<T, EditorWorkspaceSessionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more EditorWorkspaceSessions.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many EditorWorkspaceSessions
-     * const editorWorkspaceSession = await prisma.editorWorkspaceSession.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends EditorWorkspaceSessionUpdateManyArgs>(args: SelectSubset<T, EditorWorkspaceSessionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more EditorWorkspaceSessions and returns the data updated in the database.
-     * @param {EditorWorkspaceSessionUpdateManyAndReturnArgs} args - Arguments to update many EditorWorkspaceSessions.
-     * @example
-     * // Update many EditorWorkspaceSessions
-     * const editorWorkspaceSession = await prisma.editorWorkspaceSession.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more EditorWorkspaceSessions and only return the `id`
-     * const editorWorkspaceSessionWithIdOnly = await prisma.editorWorkspaceSession.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends EditorWorkspaceSessionUpdateManyAndReturnArgs>(args: SelectSubset<T, EditorWorkspaceSessionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one EditorWorkspaceSession.
-     * @param {EditorWorkspaceSessionUpsertArgs} args - Arguments to update or create a EditorWorkspaceSession.
-     * @example
-     * // Update or create a EditorWorkspaceSession
-     * const editorWorkspaceSession = await prisma.editorWorkspaceSession.upsert({
-     *   create: {
-     *     // ... data to create a EditorWorkspaceSession
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the EditorWorkspaceSession we want to update
-     *   }
-     * })
-     */
-    upsert<T extends EditorWorkspaceSessionUpsertArgs>(args: SelectSubset<T, EditorWorkspaceSessionUpsertArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of EditorWorkspaceSessions.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionCountArgs} args - Arguments to filter EditorWorkspaceSessions to count.
-     * @example
-     * // Count the number of EditorWorkspaceSessions
-     * const count = await prisma.editorWorkspaceSession.count({
-     *   where: {
-     *     // ... the filter for the EditorWorkspaceSessions we want to count
-     *   }
-     * })
-    **/
-    count<T extends EditorWorkspaceSessionCountArgs>(
-      args?: Subset<T, EditorWorkspaceSessionCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], EditorWorkspaceSessionCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a EditorWorkspaceSession.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends EditorWorkspaceSessionAggregateArgs>(args: Subset<T, EditorWorkspaceSessionAggregateArgs>): Prisma.PrismaPromise<GetEditorWorkspaceSessionAggregateType<T>>
-
-    /**
-     * Group by EditorWorkspaceSession.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends EditorWorkspaceSessionGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: EditorWorkspaceSessionGroupByArgs['orderBy'] }
-        : { orderBy?: EditorWorkspaceSessionGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, EditorWorkspaceSessionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEditorWorkspaceSessionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the EditorWorkspaceSession model
-   */
-  readonly fields: EditorWorkspaceSessionFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for EditorWorkspaceSession.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__EditorWorkspaceSessionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    groups<T extends EditorWorkspaceSession$groupsArgs<ExtArgs> = {}>(args?: Subset<T, EditorWorkspaceSession$groupsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    workspace<T extends EditorWorkspaceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, EditorWorkspaceDefaultArgs<ExtArgs>>): Prisma__EditorWorkspaceClient<$Result.GetResult<Prisma.$EditorWorkspacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the EditorWorkspaceSession model
-   */
-  interface EditorWorkspaceSessionFieldRefs {
-    readonly id: FieldRef<"EditorWorkspaceSession", 'String'>
-    readonly workspaceId: FieldRef<"EditorWorkspaceSession", 'String'>
-    readonly identityId: FieldRef<"EditorWorkspaceSession", 'String'>
-    readonly name: FieldRef<"EditorWorkspaceSession", 'String'>
-    readonly layout: FieldRef<"EditorWorkspaceSession", 'Json'>
-    readonly isActive: FieldRef<"EditorWorkspaceSession", 'Boolean'>
-    readonly version: FieldRef<"EditorWorkspaceSession", 'Int'>
-    readonly createdAt: FieldRef<"EditorWorkspaceSession", 'DateTime'>
-    readonly updatedAt: FieldRef<"EditorWorkspaceSession", 'DateTime'>
-    readonly deletedAt: FieldRef<"EditorWorkspaceSession", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * EditorWorkspaceSession findUnique
-   */
-  export type EditorWorkspaceSessionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSession to fetch.
-     */
-    where: EditorWorkspaceSessionWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSession findUniqueOrThrow
-   */
-  export type EditorWorkspaceSessionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSession to fetch.
-     */
-    where: EditorWorkspaceSessionWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSession findFirst
-   */
-  export type EditorWorkspaceSessionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSession to fetch.
-     */
-    where?: EditorWorkspaceSessionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessions to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionOrderByWithRelationInput | EditorWorkspaceSessionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for EditorWorkspaceSessions.
-     */
-    cursor?: EditorWorkspaceSessionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaceSessions.
-     */
-    distinct?: EditorWorkspaceSessionScalarFieldEnum | EditorWorkspaceSessionScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspaceSession findFirstOrThrow
-   */
-  export type EditorWorkspaceSessionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSession to fetch.
-     */
-    where?: EditorWorkspaceSessionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessions to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionOrderByWithRelationInput | EditorWorkspaceSessionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for EditorWorkspaceSessions.
-     */
-    cursor?: EditorWorkspaceSessionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaceSessions.
-     */
-    distinct?: EditorWorkspaceSessionScalarFieldEnum | EditorWorkspaceSessionScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspaceSession findMany
-   */
-  export type EditorWorkspaceSessionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSessions to fetch.
-     */
-    where?: EditorWorkspaceSessionWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessions to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionOrderByWithRelationInput | EditorWorkspaceSessionOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing EditorWorkspaceSessions.
-     */
-    cursor?: EditorWorkspaceSessionWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessions from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessions.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaceSessions.
-     */
-    distinct?: EditorWorkspaceSessionScalarFieldEnum | EditorWorkspaceSessionScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspaceSession create
-   */
-  export type EditorWorkspaceSessionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-    /**
-     * The data needed to create a EditorWorkspaceSession.
-     */
-    data: XOR<EditorWorkspaceSessionCreateInput, EditorWorkspaceSessionUncheckedCreateInput>
-  }
-
-  /**
-   * EditorWorkspaceSession createMany
-   */
-  export type EditorWorkspaceSessionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many EditorWorkspaceSessions.
-     */
-    data: EditorWorkspaceSessionCreateManyInput | EditorWorkspaceSessionCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * EditorWorkspaceSession createManyAndReturn
-   */
-  export type EditorWorkspaceSessionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * The data used to create many EditorWorkspaceSessions.
-     */
-    data: EditorWorkspaceSessionCreateManyInput | EditorWorkspaceSessionCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * EditorWorkspaceSession update
-   */
-  export type EditorWorkspaceSessionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-    /**
-     * The data needed to update a EditorWorkspaceSession.
-     */
-    data: XOR<EditorWorkspaceSessionUpdateInput, EditorWorkspaceSessionUncheckedUpdateInput>
-    /**
-     * Choose, which EditorWorkspaceSession to update.
-     */
-    where: EditorWorkspaceSessionWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSession updateMany
-   */
-  export type EditorWorkspaceSessionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update EditorWorkspaceSessions.
-     */
-    data: XOR<EditorWorkspaceSessionUpdateManyMutationInput, EditorWorkspaceSessionUncheckedUpdateManyInput>
-    /**
-     * Filter which EditorWorkspaceSessions to update
-     */
-    where?: EditorWorkspaceSessionWhereInput
-    /**
-     * Limit how many EditorWorkspaceSessions to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * EditorWorkspaceSession updateManyAndReturn
-   */
-  export type EditorWorkspaceSessionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * The data used to update EditorWorkspaceSessions.
-     */
-    data: XOR<EditorWorkspaceSessionUpdateManyMutationInput, EditorWorkspaceSessionUncheckedUpdateManyInput>
-    /**
-     * Filter which EditorWorkspaceSessions to update
-     */
-    where?: EditorWorkspaceSessionWhereInput
-    /**
-     * Limit how many EditorWorkspaceSessions to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * EditorWorkspaceSession upsert
-   */
-  export type EditorWorkspaceSessionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-    /**
-     * The filter to search for the EditorWorkspaceSession to update in case it exists.
-     */
-    where: EditorWorkspaceSessionWhereUniqueInput
-    /**
-     * In case the EditorWorkspaceSession found by the `where` argument doesn't exist, create a new EditorWorkspaceSession with this data.
-     */
-    create: XOR<EditorWorkspaceSessionCreateInput, EditorWorkspaceSessionUncheckedCreateInput>
-    /**
-     * In case the EditorWorkspaceSession was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<EditorWorkspaceSessionUpdateInput, EditorWorkspaceSessionUncheckedUpdateInput>
-  }
-
-  /**
-   * EditorWorkspaceSession delete
-   */
-  export type EditorWorkspaceSessionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-    /**
-     * Filter which EditorWorkspaceSession to delete.
-     */
-    where: EditorWorkspaceSessionWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSession deleteMany
-   */
-  export type EditorWorkspaceSessionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which EditorWorkspaceSessions to delete
-     */
-    where?: EditorWorkspaceSessionWhereInput
-    /**
-     * Limit how many EditorWorkspaceSessions to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * EditorWorkspaceSession.groups
-   */
-  export type EditorWorkspaceSession$groupsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-    where?: EditorWorkspaceSessionGroupWhereInput
-    orderBy?: EditorWorkspaceSessionGroupOrderByWithRelationInput | EditorWorkspaceSessionGroupOrderByWithRelationInput[]
-    cursor?: EditorWorkspaceSessionGroupWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: EditorWorkspaceSessionGroupScalarFieldEnum | EditorWorkspaceSessionGroupScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspaceSession without action
-   */
-  export type EditorWorkspaceSessionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSession
-     */
-    select?: EditorWorkspaceSessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSession
-     */
-    omit?: EditorWorkspaceSessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model EditorWorkspaceSessionGroup
-   */
-
-  export type AggregateEditorWorkspaceSessionGroup = {
-    _count: EditorWorkspaceSessionGroupCountAggregateOutputType | null
-    _avg: EditorWorkspaceSessionGroupAvgAggregateOutputType | null
-    _sum: EditorWorkspaceSessionGroupSumAggregateOutputType | null
-    _min: EditorWorkspaceSessionGroupMinAggregateOutputType | null
-    _max: EditorWorkspaceSessionGroupMaxAggregateOutputType | null
-  }
-
-  export type EditorWorkspaceSessionGroupAvgAggregateOutputType = {
-    groupIndex: number | null
-    version: number | null
-  }
-
-  export type EditorWorkspaceSessionGroupSumAggregateOutputType = {
-    groupIndex: number | null
-    version: number | null
-  }
-
-  export type EditorWorkspaceSessionGroupMinAggregateOutputType = {
-    id: string | null
-    sessionId: string | null
-    workspaceId: string | null
-    identityId: string | null
-    groupIndex: number | null
-    name: string | null
-    splitDirection: string | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type EditorWorkspaceSessionGroupMaxAggregateOutputType = {
-    id: string | null
-    sessionId: string | null
-    workspaceId: string | null
-    identityId: string | null
-    groupIndex: number | null
-    name: string | null
-    splitDirection: string | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type EditorWorkspaceSessionGroupCountAggregateOutputType = {
-    id: number
-    sessionId: number
-    workspaceId: number
-    identityId: number
-    groupIndex: number
-    name: number
-    splitDirection: number
-    version: number
-    createdAt: number
-    updatedAt: number
-    deletedAt: number
-    _all: number
-  }
-
-
-  export type EditorWorkspaceSessionGroupAvgAggregateInputType = {
-    groupIndex?: true
-    version?: true
-  }
-
-  export type EditorWorkspaceSessionGroupSumAggregateInputType = {
-    groupIndex?: true
-    version?: true
-  }
-
-  export type EditorWorkspaceSessionGroupMinAggregateInputType = {
-    id?: true
-    sessionId?: true
-    workspaceId?: true
-    identityId?: true
-    groupIndex?: true
-    name?: true
-    splitDirection?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-  }
-
-  export type EditorWorkspaceSessionGroupMaxAggregateInputType = {
-    id?: true
-    sessionId?: true
-    workspaceId?: true
-    identityId?: true
-    groupIndex?: true
-    name?: true
-    splitDirection?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-  }
-
-  export type EditorWorkspaceSessionGroupCountAggregateInputType = {
-    id?: true
-    sessionId?: true
-    workspaceId?: true
-    identityId?: true
-    groupIndex?: true
-    name?: true
-    splitDirection?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-    _all?: true
-  }
-
-  export type EditorWorkspaceSessionGroupAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which EditorWorkspaceSessionGroup to aggregate.
-     */
-    where?: EditorWorkspaceSessionGroupWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessionGroups to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionGroupOrderByWithRelationInput | EditorWorkspaceSessionGroupOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: EditorWorkspaceSessionGroupWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessionGroups from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessionGroups.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned EditorWorkspaceSessionGroups
-    **/
-    _count?: true | EditorWorkspaceSessionGroupCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: EditorWorkspaceSessionGroupAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: EditorWorkspaceSessionGroupSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: EditorWorkspaceSessionGroupMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: EditorWorkspaceSessionGroupMaxAggregateInputType
-  }
-
-  export type GetEditorWorkspaceSessionGroupAggregateType<T extends EditorWorkspaceSessionGroupAggregateArgs> = {
-        [P in keyof T & keyof AggregateEditorWorkspaceSessionGroup]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateEditorWorkspaceSessionGroup[P]>
-      : GetScalarType<T[P], AggregateEditorWorkspaceSessionGroup[P]>
-  }
-
-
-
-
-  export type EditorWorkspaceSessionGroupGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EditorWorkspaceSessionGroupWhereInput
-    orderBy?: EditorWorkspaceSessionGroupOrderByWithAggregationInput | EditorWorkspaceSessionGroupOrderByWithAggregationInput[]
-    by: EditorWorkspaceSessionGroupScalarFieldEnum[] | EditorWorkspaceSessionGroupScalarFieldEnum
-    having?: EditorWorkspaceSessionGroupScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: EditorWorkspaceSessionGroupCountAggregateInputType | true
-    _avg?: EditorWorkspaceSessionGroupAvgAggregateInputType
-    _sum?: EditorWorkspaceSessionGroupSumAggregateInputType
-    _min?: EditorWorkspaceSessionGroupMinAggregateInputType
-    _max?: EditorWorkspaceSessionGroupMaxAggregateInputType
-  }
-
-  export type EditorWorkspaceSessionGroupGroupByOutputType = {
-    id: string
-    sessionId: string
-    workspaceId: string
-    identityId: string
-    groupIndex: number
-    name: string | null
-    splitDirection: string
-    version: number
-    createdAt: Date
-    updatedAt: Date
-    deletedAt: Date | null
-    _count: EditorWorkspaceSessionGroupCountAggregateOutputType | null
-    _avg: EditorWorkspaceSessionGroupAvgAggregateOutputType | null
-    _sum: EditorWorkspaceSessionGroupSumAggregateOutputType | null
-    _min: EditorWorkspaceSessionGroupMinAggregateOutputType | null
-    _max: EditorWorkspaceSessionGroupMaxAggregateOutputType | null
-  }
-
-  type GetEditorWorkspaceSessionGroupGroupByPayload<T extends EditorWorkspaceSessionGroupGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<EditorWorkspaceSessionGroupGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof EditorWorkspaceSessionGroupGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], EditorWorkspaceSessionGroupGroupByOutputType[P]>
-            : GetScalarType<T[P], EditorWorkspaceSessionGroupGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type EditorWorkspaceSessionGroupSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    sessionId?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    groupIndex?: boolean
-    name?: boolean
-    splitDirection?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    tabs?: boolean | EditorWorkspaceSessionGroup$tabsArgs<ExtArgs>
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    session?: boolean | EditorWorkspaceSessionDefaultArgs<ExtArgs>
-    _count?: boolean | EditorWorkspaceSessionGroupCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspaceSessionGroup"]>
-
-  export type EditorWorkspaceSessionGroupSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    sessionId?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    groupIndex?: boolean
-    name?: boolean
-    splitDirection?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    session?: boolean | EditorWorkspaceSessionDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspaceSessionGroup"]>
-
-  export type EditorWorkspaceSessionGroupSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    sessionId?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    groupIndex?: boolean
-    name?: boolean
-    splitDirection?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    session?: boolean | EditorWorkspaceSessionDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspaceSessionGroup"]>
-
-  export type EditorWorkspaceSessionGroupSelectScalar = {
-    id?: boolean
-    sessionId?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    groupIndex?: boolean
-    name?: boolean
-    splitDirection?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-  }
-
-  export type EditorWorkspaceSessionGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "sessionId" | "workspaceId" | "identityId" | "groupIndex" | "name" | "splitDirection" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["editorWorkspaceSessionGroup"]>
-  export type EditorWorkspaceSessionGroupInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    tabs?: boolean | EditorWorkspaceSessionGroup$tabsArgs<ExtArgs>
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    session?: boolean | EditorWorkspaceSessionDefaultArgs<ExtArgs>
-    _count?: boolean | EditorWorkspaceSessionGroupCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type EditorWorkspaceSessionGroupIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    session?: boolean | EditorWorkspaceSessionDefaultArgs<ExtArgs>
-  }
-  export type EditorWorkspaceSessionGroupIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    session?: boolean | EditorWorkspaceSessionDefaultArgs<ExtArgs>
-  }
-
-  export type $EditorWorkspaceSessionGroupPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "EditorWorkspaceSessionGroup"
-    objects: {
-      tabs: Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>[]
-      account: Prisma.$AccountPayload<ExtArgs>
-      session: Prisma.$EditorWorkspaceSessionPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      sessionId: string
-      workspaceId: string
-      identityId: string
-      groupIndex: number
-      name: string | null
-      splitDirection: string
-      version: number
-      createdAt: Date
-      updatedAt: Date
-      deletedAt: Date | null
-    }, ExtArgs["result"]["editorWorkspaceSessionGroup"]>
-    composites: {}
-  }
-
-  type EditorWorkspaceSessionGroupGetPayload<S extends boolean | null | undefined | EditorWorkspaceSessionGroupDefaultArgs> = $Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload, S>
-
-  type EditorWorkspaceSessionGroupCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<EditorWorkspaceSessionGroupFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: EditorWorkspaceSessionGroupCountAggregateInputType | true
-    }
-
-  export interface EditorWorkspaceSessionGroupDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EditorWorkspaceSessionGroup'], meta: { name: 'EditorWorkspaceSessionGroup' } }
-    /**
-     * Find zero or one EditorWorkspaceSessionGroup that matches the filter.
-     * @param {EditorWorkspaceSessionGroupFindUniqueArgs} args - Arguments to find a EditorWorkspaceSessionGroup
-     * @example
-     * // Get one EditorWorkspaceSessionGroup
-     * const editorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends EditorWorkspaceSessionGroupFindUniqueArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupFindUniqueArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one EditorWorkspaceSessionGroup that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {EditorWorkspaceSessionGroupFindUniqueOrThrowArgs} args - Arguments to find a EditorWorkspaceSessionGroup
-     * @example
-     * // Get one EditorWorkspaceSessionGroup
-     * const editorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends EditorWorkspaceSessionGroupFindUniqueOrThrowArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first EditorWorkspaceSessionGroup that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupFindFirstArgs} args - Arguments to find a EditorWorkspaceSessionGroup
-     * @example
-     * // Get one EditorWorkspaceSessionGroup
-     * const editorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends EditorWorkspaceSessionGroupFindFirstArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupFindFirstArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first EditorWorkspaceSessionGroup that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupFindFirstOrThrowArgs} args - Arguments to find a EditorWorkspaceSessionGroup
-     * @example
-     * // Get one EditorWorkspaceSessionGroup
-     * const editorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends EditorWorkspaceSessionGroupFindFirstOrThrowArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupFindFirstOrThrowArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more EditorWorkspaceSessionGroups that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all EditorWorkspaceSessionGroups
-     * const editorWorkspaceSessionGroups = await prisma.editorWorkspaceSessionGroup.findMany()
-     *
-     * // Get first 10 EditorWorkspaceSessionGroups
-     * const editorWorkspaceSessionGroups = await prisma.editorWorkspaceSessionGroup.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const editorWorkspaceSessionGroupWithIdOnly = await prisma.editorWorkspaceSessionGroup.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends EditorWorkspaceSessionGroupFindManyArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a EditorWorkspaceSessionGroup.
-     * @param {EditorWorkspaceSessionGroupCreateArgs} args - Arguments to create a EditorWorkspaceSessionGroup.
-     * @example
-     * // Create one EditorWorkspaceSessionGroup
-     * const EditorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.create({
-     *   data: {
-     *     // ... data to create a EditorWorkspaceSessionGroup
-     *   }
-     * })
-     *
-     */
-    create<T extends EditorWorkspaceSessionGroupCreateArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupCreateArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many EditorWorkspaceSessionGroups.
-     * @param {EditorWorkspaceSessionGroupCreateManyArgs} args - Arguments to create many EditorWorkspaceSessionGroups.
-     * @example
-     * // Create many EditorWorkspaceSessionGroups
-     * const editorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends EditorWorkspaceSessionGroupCreateManyArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many EditorWorkspaceSessionGroups and returns the data saved in the database.
-     * @param {EditorWorkspaceSessionGroupCreateManyAndReturnArgs} args - Arguments to create many EditorWorkspaceSessionGroups.
-     * @example
-     * // Create many EditorWorkspaceSessionGroups
-     * const editorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many EditorWorkspaceSessionGroups and only return the `id`
-     * const editorWorkspaceSessionGroupWithIdOnly = await prisma.editorWorkspaceSessionGroup.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends EditorWorkspaceSessionGroupCreateManyAndReturnArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a EditorWorkspaceSessionGroup.
-     * @param {EditorWorkspaceSessionGroupDeleteArgs} args - Arguments to delete one EditorWorkspaceSessionGroup.
-     * @example
-     * // Delete one EditorWorkspaceSessionGroup
-     * const EditorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.delete({
-     *   where: {
-     *     // ... filter to delete one EditorWorkspaceSessionGroup
-     *   }
-     * })
-     *
-     */
-    delete<T extends EditorWorkspaceSessionGroupDeleteArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupDeleteArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one EditorWorkspaceSessionGroup.
-     * @param {EditorWorkspaceSessionGroupUpdateArgs} args - Arguments to update one EditorWorkspaceSessionGroup.
-     * @example
-     * // Update one EditorWorkspaceSessionGroup
-     * const editorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends EditorWorkspaceSessionGroupUpdateArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupUpdateArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more EditorWorkspaceSessionGroups.
-     * @param {EditorWorkspaceSessionGroupDeleteManyArgs} args - Arguments to filter EditorWorkspaceSessionGroups to delete.
-     * @example
-     * // Delete a few EditorWorkspaceSessionGroups
-     * const { count } = await prisma.editorWorkspaceSessionGroup.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends EditorWorkspaceSessionGroupDeleteManyArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more EditorWorkspaceSessionGroups.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many EditorWorkspaceSessionGroups
-     * const editorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends EditorWorkspaceSessionGroupUpdateManyArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more EditorWorkspaceSessionGroups and returns the data updated in the database.
-     * @param {EditorWorkspaceSessionGroupUpdateManyAndReturnArgs} args - Arguments to update many EditorWorkspaceSessionGroups.
-     * @example
-     * // Update many EditorWorkspaceSessionGroups
-     * const editorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more EditorWorkspaceSessionGroups and only return the `id`
-     * const editorWorkspaceSessionGroupWithIdOnly = await prisma.editorWorkspaceSessionGroup.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends EditorWorkspaceSessionGroupUpdateManyAndReturnArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one EditorWorkspaceSessionGroup.
-     * @param {EditorWorkspaceSessionGroupUpsertArgs} args - Arguments to update or create a EditorWorkspaceSessionGroup.
-     * @example
-     * // Update or create a EditorWorkspaceSessionGroup
-     * const editorWorkspaceSessionGroup = await prisma.editorWorkspaceSessionGroup.upsert({
-     *   create: {
-     *     // ... data to create a EditorWorkspaceSessionGroup
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the EditorWorkspaceSessionGroup we want to update
-     *   }
-     * })
-     */
-    upsert<T extends EditorWorkspaceSessionGroupUpsertArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupUpsertArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of EditorWorkspaceSessionGroups.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupCountArgs} args - Arguments to filter EditorWorkspaceSessionGroups to count.
-     * @example
-     * // Count the number of EditorWorkspaceSessionGroups
-     * const count = await prisma.editorWorkspaceSessionGroup.count({
-     *   where: {
-     *     // ... the filter for the EditorWorkspaceSessionGroups we want to count
-     *   }
-     * })
-    **/
-    count<T extends EditorWorkspaceSessionGroupCountArgs>(
-      args?: Subset<T, EditorWorkspaceSessionGroupCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], EditorWorkspaceSessionGroupCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a EditorWorkspaceSessionGroup.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends EditorWorkspaceSessionGroupAggregateArgs>(args: Subset<T, EditorWorkspaceSessionGroupAggregateArgs>): Prisma.PrismaPromise<GetEditorWorkspaceSessionGroupAggregateType<T>>
-
-    /**
-     * Group by EditorWorkspaceSessionGroup.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends EditorWorkspaceSessionGroupGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: EditorWorkspaceSessionGroupGroupByArgs['orderBy'] }
-        : { orderBy?: EditorWorkspaceSessionGroupGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, EditorWorkspaceSessionGroupGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEditorWorkspaceSessionGroupGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the EditorWorkspaceSessionGroup model
-   */
-  readonly fields: EditorWorkspaceSessionGroupFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for EditorWorkspaceSessionGroup.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__EditorWorkspaceSessionGroupClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    tabs<T extends EditorWorkspaceSessionGroup$tabsArgs<ExtArgs> = {}>(args?: Subset<T, EditorWorkspaceSessionGroup$tabsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    session<T extends EditorWorkspaceSessionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, EditorWorkspaceSessionDefaultArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the EditorWorkspaceSessionGroup model
-   */
-  interface EditorWorkspaceSessionGroupFieldRefs {
-    readonly id: FieldRef<"EditorWorkspaceSessionGroup", 'String'>
-    readonly sessionId: FieldRef<"EditorWorkspaceSessionGroup", 'String'>
-    readonly workspaceId: FieldRef<"EditorWorkspaceSessionGroup", 'String'>
-    readonly identityId: FieldRef<"EditorWorkspaceSessionGroup", 'String'>
-    readonly groupIndex: FieldRef<"EditorWorkspaceSessionGroup", 'Int'>
-    readonly name: FieldRef<"EditorWorkspaceSessionGroup", 'String'>
-    readonly splitDirection: FieldRef<"EditorWorkspaceSessionGroup", 'String'>
-    readonly version: FieldRef<"EditorWorkspaceSessionGroup", 'Int'>
-    readonly createdAt: FieldRef<"EditorWorkspaceSessionGroup", 'DateTime'>
-    readonly updatedAt: FieldRef<"EditorWorkspaceSessionGroup", 'DateTime'>
-    readonly deletedAt: FieldRef<"EditorWorkspaceSessionGroup", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * EditorWorkspaceSessionGroup findUnique
-   */
-  export type EditorWorkspaceSessionGroupFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSessionGroup to fetch.
-     */
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup findUniqueOrThrow
-   */
-  export type EditorWorkspaceSessionGroupFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSessionGroup to fetch.
-     */
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup findFirst
-   */
-  export type EditorWorkspaceSessionGroupFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSessionGroup to fetch.
-     */
-    where?: EditorWorkspaceSessionGroupWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessionGroups to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionGroupOrderByWithRelationInput | EditorWorkspaceSessionGroupOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for EditorWorkspaceSessionGroups.
-     */
-    cursor?: EditorWorkspaceSessionGroupWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessionGroups from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessionGroups.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaceSessionGroups.
-     */
-    distinct?: EditorWorkspaceSessionGroupScalarFieldEnum | EditorWorkspaceSessionGroupScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup findFirstOrThrow
-   */
-  export type EditorWorkspaceSessionGroupFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSessionGroup to fetch.
-     */
-    where?: EditorWorkspaceSessionGroupWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessionGroups to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionGroupOrderByWithRelationInput | EditorWorkspaceSessionGroupOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for EditorWorkspaceSessionGroups.
-     */
-    cursor?: EditorWorkspaceSessionGroupWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessionGroups from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessionGroups.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaceSessionGroups.
-     */
-    distinct?: EditorWorkspaceSessionGroupScalarFieldEnum | EditorWorkspaceSessionGroupScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup findMany
-   */
-  export type EditorWorkspaceSessionGroupFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSessionGroups to fetch.
-     */
-    where?: EditorWorkspaceSessionGroupWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessionGroups to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionGroupOrderByWithRelationInput | EditorWorkspaceSessionGroupOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing EditorWorkspaceSessionGroups.
-     */
-    cursor?: EditorWorkspaceSessionGroupWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessionGroups from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessionGroups.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaceSessionGroups.
-     */
-    distinct?: EditorWorkspaceSessionGroupScalarFieldEnum | EditorWorkspaceSessionGroupScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup create
-   */
-  export type EditorWorkspaceSessionGroupCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-    /**
-     * The data needed to create a EditorWorkspaceSessionGroup.
-     */
-    data: XOR<EditorWorkspaceSessionGroupCreateInput, EditorWorkspaceSessionGroupUncheckedCreateInput>
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup createMany
-   */
-  export type EditorWorkspaceSessionGroupCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many EditorWorkspaceSessionGroups.
-     */
-    data: EditorWorkspaceSessionGroupCreateManyInput | EditorWorkspaceSessionGroupCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup createManyAndReturn
-   */
-  export type EditorWorkspaceSessionGroupCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * The data used to create many EditorWorkspaceSessionGroups.
-     */
-    data: EditorWorkspaceSessionGroupCreateManyInput | EditorWorkspaceSessionGroupCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup update
-   */
-  export type EditorWorkspaceSessionGroupUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-    /**
-     * The data needed to update a EditorWorkspaceSessionGroup.
-     */
-    data: XOR<EditorWorkspaceSessionGroupUpdateInput, EditorWorkspaceSessionGroupUncheckedUpdateInput>
-    /**
-     * Choose, which EditorWorkspaceSessionGroup to update.
-     */
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup updateMany
-   */
-  export type EditorWorkspaceSessionGroupUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update EditorWorkspaceSessionGroups.
-     */
-    data: XOR<EditorWorkspaceSessionGroupUpdateManyMutationInput, EditorWorkspaceSessionGroupUncheckedUpdateManyInput>
-    /**
-     * Filter which EditorWorkspaceSessionGroups to update
-     */
-    where?: EditorWorkspaceSessionGroupWhereInput
-    /**
-     * Limit how many EditorWorkspaceSessionGroups to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup updateManyAndReturn
-   */
-  export type EditorWorkspaceSessionGroupUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * The data used to update EditorWorkspaceSessionGroups.
-     */
-    data: XOR<EditorWorkspaceSessionGroupUpdateManyMutationInput, EditorWorkspaceSessionGroupUncheckedUpdateManyInput>
-    /**
-     * Filter which EditorWorkspaceSessionGroups to update
-     */
-    where?: EditorWorkspaceSessionGroupWhereInput
-    /**
-     * Limit how many EditorWorkspaceSessionGroups to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup upsert
-   */
-  export type EditorWorkspaceSessionGroupUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-    /**
-     * The filter to search for the EditorWorkspaceSessionGroup to update in case it exists.
-     */
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-    /**
-     * In case the EditorWorkspaceSessionGroup found by the `where` argument doesn't exist, create a new EditorWorkspaceSessionGroup with this data.
-     */
-    create: XOR<EditorWorkspaceSessionGroupCreateInput, EditorWorkspaceSessionGroupUncheckedCreateInput>
-    /**
-     * In case the EditorWorkspaceSessionGroup was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<EditorWorkspaceSessionGroupUpdateInput, EditorWorkspaceSessionGroupUncheckedUpdateInput>
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup delete
-   */
-  export type EditorWorkspaceSessionGroupDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-    /**
-     * Filter which EditorWorkspaceSessionGroup to delete.
-     */
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup deleteMany
-   */
-  export type EditorWorkspaceSessionGroupDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which EditorWorkspaceSessionGroups to delete
-     */
-    where?: EditorWorkspaceSessionGroupWhereInput
-    /**
-     * Limit how many EditorWorkspaceSessionGroups to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup.tabs
-   */
-  export type EditorWorkspaceSessionGroup$tabsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
-    where?: EditorWorkspaceSessionGroupTabWhereInput
-    orderBy?: EditorWorkspaceSessionGroupTabOrderByWithRelationInput | EditorWorkspaceSessionGroupTabOrderByWithRelationInput[]
-    cursor?: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: EditorWorkspaceSessionGroupTabScalarFieldEnum | EditorWorkspaceSessionGroupTabScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspaceSessionGroup without action
-   */
-  export type EditorWorkspaceSessionGroupDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroup
-     */
-    select?: EditorWorkspaceSessionGroupSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroup
-     */
-    omit?: EditorWorkspaceSessionGroupOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model EditorWorkspaceSessionGroupTab
-   */
-
-  export type AggregateEditorWorkspaceSessionGroupTab = {
-    _count: EditorWorkspaceSessionGroupTabCountAggregateOutputType | null
-    _avg: EditorWorkspaceSessionGroupTabAvgAggregateOutputType | null
-    _sum: EditorWorkspaceSessionGroupTabSumAggregateOutputType | null
-    _min: EditorWorkspaceSessionGroupTabMinAggregateOutputType | null
-    _max: EditorWorkspaceSessionGroupTabMaxAggregateOutputType | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabAvgAggregateOutputType = {
-    tabIndex: number | null
-    version: number | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabSumAggregateOutputType = {
-    tabIndex: number | null
-    version: number | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabMinAggregateOutputType = {
-    id: string | null
-    groupId: string | null
-    sessionId: string | null
-    workspaceId: string | null
-    identityId: string | null
-    resourceId: string | null
-    tabIndex: number | null
-    tabType: string | null
-    title: string | null
-    isPinned: boolean | null
-    isActive: boolean | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabMaxAggregateOutputType = {
-    id: string | null
-    groupId: string | null
-    sessionId: string | null
-    workspaceId: string | null
-    identityId: string | null
-    resourceId: string | null
-    tabIndex: number | null
-    tabType: string | null
-    title: string | null
-    isPinned: boolean | null
-    isActive: boolean | null
-    version: number | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    deletedAt: Date | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabCountAggregateOutputType = {
-    id: number
-    groupId: number
-    sessionId: number
-    workspaceId: number
-    identityId: number
-    resourceId: number
-    tabIndex: number
-    tabType: number
-    title: number
-    viewState: number
-    isPinned: number
-    isActive: number
-    version: number
-    createdAt: number
-    updatedAt: number
-    deletedAt: number
-    _all: number
-  }
-
-
-  export type EditorWorkspaceSessionGroupTabAvgAggregateInputType = {
-    tabIndex?: true
-    version?: true
-  }
-
-  export type EditorWorkspaceSessionGroupTabSumAggregateInputType = {
-    tabIndex?: true
-    version?: true
-  }
-
-  export type EditorWorkspaceSessionGroupTabMinAggregateInputType = {
-    id?: true
-    groupId?: true
-    sessionId?: true
-    workspaceId?: true
-    identityId?: true
-    resourceId?: true
-    tabIndex?: true
-    tabType?: true
-    title?: true
-    isPinned?: true
-    isActive?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-  }
-
-  export type EditorWorkspaceSessionGroupTabMaxAggregateInputType = {
-    id?: true
-    groupId?: true
-    sessionId?: true
-    workspaceId?: true
-    identityId?: true
-    resourceId?: true
-    tabIndex?: true
-    tabType?: true
-    title?: true
-    isPinned?: true
-    isActive?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-  }
-
-  export type EditorWorkspaceSessionGroupTabCountAggregateInputType = {
-    id?: true
-    groupId?: true
-    sessionId?: true
-    workspaceId?: true
-    identityId?: true
-    resourceId?: true
-    tabIndex?: true
-    tabType?: true
-    title?: true
-    viewState?: true
-    isPinned?: true
-    isActive?: true
-    version?: true
-    createdAt?: true
-    updatedAt?: true
-    deletedAt?: true
-    _all?: true
-  }
-
-  export type EditorWorkspaceSessionGroupTabAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which EditorWorkspaceSessionGroupTab to aggregate.
-     */
-    where?: EditorWorkspaceSessionGroupTabWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessionGroupTabs to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionGroupTabOrderByWithRelationInput | EditorWorkspaceSessionGroupTabOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessionGroupTabs from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessionGroupTabs.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned EditorWorkspaceSessionGroupTabs
-    **/
-    _count?: true | EditorWorkspaceSessionGroupTabCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: EditorWorkspaceSessionGroupTabAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: EditorWorkspaceSessionGroupTabSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: EditorWorkspaceSessionGroupTabMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: EditorWorkspaceSessionGroupTabMaxAggregateInputType
-  }
-
-  export type GetEditorWorkspaceSessionGroupTabAggregateType<T extends EditorWorkspaceSessionGroupTabAggregateArgs> = {
-        [P in keyof T & keyof AggregateEditorWorkspaceSessionGroupTab]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateEditorWorkspaceSessionGroupTab[P]>
-      : GetScalarType<T[P], AggregateEditorWorkspaceSessionGroupTab[P]>
-  }
-
-
-
-
-  export type EditorWorkspaceSessionGroupTabGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EditorWorkspaceSessionGroupTabWhereInput
-    orderBy?: EditorWorkspaceSessionGroupTabOrderByWithAggregationInput | EditorWorkspaceSessionGroupTabOrderByWithAggregationInput[]
-    by: EditorWorkspaceSessionGroupTabScalarFieldEnum[] | EditorWorkspaceSessionGroupTabScalarFieldEnum
-    having?: EditorWorkspaceSessionGroupTabScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: EditorWorkspaceSessionGroupTabCountAggregateInputType | true
-    _avg?: EditorWorkspaceSessionGroupTabAvgAggregateInputType
-    _sum?: EditorWorkspaceSessionGroupTabSumAggregateInputType
-    _min?: EditorWorkspaceSessionGroupTabMinAggregateInputType
-    _max?: EditorWorkspaceSessionGroupTabMaxAggregateInputType
-  }
-
-  export type EditorWorkspaceSessionGroupTabGroupByOutputType = {
-    id: string
-    groupId: string
-    sessionId: string
-    workspaceId: string
-    identityId: string
-    resourceId: string | null
-    tabIndex: number
-    tabType: string
-    title: string
-    viewState: JsonValue
-    isPinned: boolean
-    isActive: boolean
-    version: number
-    createdAt: Date
-    updatedAt: Date
-    deletedAt: Date | null
-    _count: EditorWorkspaceSessionGroupTabCountAggregateOutputType | null
-    _avg: EditorWorkspaceSessionGroupTabAvgAggregateOutputType | null
-    _sum: EditorWorkspaceSessionGroupTabSumAggregateOutputType | null
-    _min: EditorWorkspaceSessionGroupTabMinAggregateOutputType | null
-    _max: EditorWorkspaceSessionGroupTabMaxAggregateOutputType | null
-  }
-
-  type GetEditorWorkspaceSessionGroupTabGroupByPayload<T extends EditorWorkspaceSessionGroupTabGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<EditorWorkspaceSessionGroupTabGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof EditorWorkspaceSessionGroupTabGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], EditorWorkspaceSessionGroupTabGroupByOutputType[P]>
-            : GetScalarType<T[P], EditorWorkspaceSessionGroupTabGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type EditorWorkspaceSessionGroupTabSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    groupId?: boolean
-    sessionId?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    resourceId?: boolean
-    tabIndex?: boolean
-    tabType?: boolean
-    title?: boolean
-    viewState?: boolean
-    isPinned?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | EditorWorkspaceSessionGroupDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspaceSessionGroupTab"]>
-
-  export type EditorWorkspaceSessionGroupTabSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    groupId?: boolean
-    sessionId?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    resourceId?: boolean
-    tabIndex?: boolean
-    tabType?: boolean
-    title?: boolean
-    viewState?: boolean
-    isPinned?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | EditorWorkspaceSessionGroupDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspaceSessionGroupTab"]>
-
-  export type EditorWorkspaceSessionGroupTabSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    groupId?: boolean
-    sessionId?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    resourceId?: boolean
-    tabIndex?: boolean
-    tabType?: boolean
-    title?: boolean
-    viewState?: boolean
-    isPinned?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | EditorWorkspaceSessionGroupDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["editorWorkspaceSessionGroupTab"]>
-
-  export type EditorWorkspaceSessionGroupTabSelectScalar = {
-    id?: boolean
-    groupId?: boolean
-    sessionId?: boolean
-    workspaceId?: boolean
-    identityId?: boolean
-    resourceId?: boolean
-    tabIndex?: boolean
-    tabType?: boolean
-    title?: boolean
-    viewState?: boolean
-    isPinned?: boolean
-    isActive?: boolean
-    version?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    deletedAt?: boolean
-  }
-
-  export type EditorWorkspaceSessionGroupTabOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "groupId" | "sessionId" | "workspaceId" | "identityId" | "resourceId" | "tabIndex" | "tabType" | "title" | "viewState" | "isPinned" | "isActive" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["editorWorkspaceSessionGroupTab"]>
-  export type EditorWorkspaceSessionGroupTabInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | EditorWorkspaceSessionGroupDefaultArgs<ExtArgs>
-  }
-  export type EditorWorkspaceSessionGroupTabIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | EditorWorkspaceSessionGroupDefaultArgs<ExtArgs>
-  }
-  export type EditorWorkspaceSessionGroupTabIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-    group?: boolean | EditorWorkspaceSessionGroupDefaultArgs<ExtArgs>
-  }
-
-  export type $EditorWorkspaceSessionGroupTabPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "EditorWorkspaceSessionGroupTab"
-    objects: {
-      account: Prisma.$AccountPayload<ExtArgs>
-      group: Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      groupId: string
-      sessionId: string
-      workspaceId: string
-      identityId: string
-      resourceId: string | null
-      tabIndex: number
-      tabType: string
-      title: string
-      viewState: Prisma.JsonValue
-      isPinned: boolean
-      isActive: boolean
-      version: number
-      createdAt: Date
-      updatedAt: Date
-      deletedAt: Date | null
-    }, ExtArgs["result"]["editorWorkspaceSessionGroupTab"]>
-    composites: {}
-  }
-
-  type EditorWorkspaceSessionGroupTabGetPayload<S extends boolean | null | undefined | EditorWorkspaceSessionGroupTabDefaultArgs> = $Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload, S>
-
-  type EditorWorkspaceSessionGroupTabCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<EditorWorkspaceSessionGroupTabFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: EditorWorkspaceSessionGroupTabCountAggregateInputType | true
-    }
-
-  export interface EditorWorkspaceSessionGroupTabDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EditorWorkspaceSessionGroupTab'], meta: { name: 'EditorWorkspaceSessionGroupTab' } }
-    /**
-     * Find zero or one EditorWorkspaceSessionGroupTab that matches the filter.
-     * @param {EditorWorkspaceSessionGroupTabFindUniqueArgs} args - Arguments to find a EditorWorkspaceSessionGroupTab
-     * @example
-     * // Get one EditorWorkspaceSessionGroupTab
-     * const editorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends EditorWorkspaceSessionGroupTabFindUniqueArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupTabFindUniqueArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupTabClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one EditorWorkspaceSessionGroupTab that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {EditorWorkspaceSessionGroupTabFindUniqueOrThrowArgs} args - Arguments to find a EditorWorkspaceSessionGroupTab
-     * @example
-     * // Get one EditorWorkspaceSessionGroupTab
-     * const editorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends EditorWorkspaceSessionGroupTabFindUniqueOrThrowArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupTabFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupTabClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first EditorWorkspaceSessionGroupTab that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupTabFindFirstArgs} args - Arguments to find a EditorWorkspaceSessionGroupTab
-     * @example
-     * // Get one EditorWorkspaceSessionGroupTab
-     * const editorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends EditorWorkspaceSessionGroupTabFindFirstArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupTabFindFirstArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupTabClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first EditorWorkspaceSessionGroupTab that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupTabFindFirstOrThrowArgs} args - Arguments to find a EditorWorkspaceSessionGroupTab
-     * @example
-     * // Get one EditorWorkspaceSessionGroupTab
-     * const editorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends EditorWorkspaceSessionGroupTabFindFirstOrThrowArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupTabFindFirstOrThrowArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupTabClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more EditorWorkspaceSessionGroupTabs that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupTabFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all EditorWorkspaceSessionGroupTabs
-     * const editorWorkspaceSessionGroupTabs = await prisma.editorWorkspaceSessionGroupTab.findMany()
-     *
-     * // Get first 10 EditorWorkspaceSessionGroupTabs
-     * const editorWorkspaceSessionGroupTabs = await prisma.editorWorkspaceSessionGroupTab.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const editorWorkspaceSessionGroupTabWithIdOnly = await prisma.editorWorkspaceSessionGroupTab.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends EditorWorkspaceSessionGroupTabFindManyArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupTabFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a EditorWorkspaceSessionGroupTab.
-     * @param {EditorWorkspaceSessionGroupTabCreateArgs} args - Arguments to create a EditorWorkspaceSessionGroupTab.
-     * @example
-     * // Create one EditorWorkspaceSessionGroupTab
-     * const EditorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.create({
-     *   data: {
-     *     // ... data to create a EditorWorkspaceSessionGroupTab
-     *   }
-     * })
-     *
-     */
-    create<T extends EditorWorkspaceSessionGroupTabCreateArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupTabCreateArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupTabClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many EditorWorkspaceSessionGroupTabs.
-     * @param {EditorWorkspaceSessionGroupTabCreateManyArgs} args - Arguments to create many EditorWorkspaceSessionGroupTabs.
-     * @example
-     * // Create many EditorWorkspaceSessionGroupTabs
-     * const editorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends EditorWorkspaceSessionGroupTabCreateManyArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupTabCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many EditorWorkspaceSessionGroupTabs and returns the data saved in the database.
-     * @param {EditorWorkspaceSessionGroupTabCreateManyAndReturnArgs} args - Arguments to create many EditorWorkspaceSessionGroupTabs.
-     * @example
-     * // Create many EditorWorkspaceSessionGroupTabs
-     * const editorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many EditorWorkspaceSessionGroupTabs and only return the `id`
-     * const editorWorkspaceSessionGroupTabWithIdOnly = await prisma.editorWorkspaceSessionGroupTab.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends EditorWorkspaceSessionGroupTabCreateManyAndReturnArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupTabCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a EditorWorkspaceSessionGroupTab.
-     * @param {EditorWorkspaceSessionGroupTabDeleteArgs} args - Arguments to delete one EditorWorkspaceSessionGroupTab.
-     * @example
-     * // Delete one EditorWorkspaceSessionGroupTab
-     * const EditorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.delete({
-     *   where: {
-     *     // ... filter to delete one EditorWorkspaceSessionGroupTab
-     *   }
-     * })
-     *
-     */
-    delete<T extends EditorWorkspaceSessionGroupTabDeleteArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupTabDeleteArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupTabClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one EditorWorkspaceSessionGroupTab.
-     * @param {EditorWorkspaceSessionGroupTabUpdateArgs} args - Arguments to update one EditorWorkspaceSessionGroupTab.
-     * @example
-     * // Update one EditorWorkspaceSessionGroupTab
-     * const editorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends EditorWorkspaceSessionGroupTabUpdateArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupTabUpdateArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupTabClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more EditorWorkspaceSessionGroupTabs.
-     * @param {EditorWorkspaceSessionGroupTabDeleteManyArgs} args - Arguments to filter EditorWorkspaceSessionGroupTabs to delete.
-     * @example
-     * // Delete a few EditorWorkspaceSessionGroupTabs
-     * const { count } = await prisma.editorWorkspaceSessionGroupTab.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends EditorWorkspaceSessionGroupTabDeleteManyArgs>(args?: SelectSubset<T, EditorWorkspaceSessionGroupTabDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more EditorWorkspaceSessionGroupTabs.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupTabUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many EditorWorkspaceSessionGroupTabs
-     * const editorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends EditorWorkspaceSessionGroupTabUpdateManyArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupTabUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more EditorWorkspaceSessionGroupTabs and returns the data updated in the database.
-     * @param {EditorWorkspaceSessionGroupTabUpdateManyAndReturnArgs} args - Arguments to update many EditorWorkspaceSessionGroupTabs.
-     * @example
-     * // Update many EditorWorkspaceSessionGroupTabs
-     * const editorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more EditorWorkspaceSessionGroupTabs and only return the `id`
-     * const editorWorkspaceSessionGroupTabWithIdOnly = await prisma.editorWorkspaceSessionGroupTab.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends EditorWorkspaceSessionGroupTabUpdateManyAndReturnArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupTabUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one EditorWorkspaceSessionGroupTab.
-     * @param {EditorWorkspaceSessionGroupTabUpsertArgs} args - Arguments to update or create a EditorWorkspaceSessionGroupTab.
-     * @example
-     * // Update or create a EditorWorkspaceSessionGroupTab
-     * const editorWorkspaceSessionGroupTab = await prisma.editorWorkspaceSessionGroupTab.upsert({
-     *   create: {
-     *     // ... data to create a EditorWorkspaceSessionGroupTab
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the EditorWorkspaceSessionGroupTab we want to update
-     *   }
-     * })
-     */
-    upsert<T extends EditorWorkspaceSessionGroupTabUpsertArgs>(args: SelectSubset<T, EditorWorkspaceSessionGroupTabUpsertArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupTabClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupTabPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of EditorWorkspaceSessionGroupTabs.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupTabCountArgs} args - Arguments to filter EditorWorkspaceSessionGroupTabs to count.
-     * @example
-     * // Count the number of EditorWorkspaceSessionGroupTabs
-     * const count = await prisma.editorWorkspaceSessionGroupTab.count({
-     *   where: {
-     *     // ... the filter for the EditorWorkspaceSessionGroupTabs we want to count
-     *   }
-     * })
-    **/
-    count<T extends EditorWorkspaceSessionGroupTabCountArgs>(
-      args?: Subset<T, EditorWorkspaceSessionGroupTabCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], EditorWorkspaceSessionGroupTabCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a EditorWorkspaceSessionGroupTab.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupTabAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends EditorWorkspaceSessionGroupTabAggregateArgs>(args: Subset<T, EditorWorkspaceSessionGroupTabAggregateArgs>): Prisma.PrismaPromise<GetEditorWorkspaceSessionGroupTabAggregateType<T>>
-
-    /**
-     * Group by EditorWorkspaceSessionGroupTab.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {EditorWorkspaceSessionGroupTabGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends EditorWorkspaceSessionGroupTabGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: EditorWorkspaceSessionGroupTabGroupByArgs['orderBy'] }
-        : { orderBy?: EditorWorkspaceSessionGroupTabGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, EditorWorkspaceSessionGroupTabGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEditorWorkspaceSessionGroupTabGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the EditorWorkspaceSessionGroupTab model
-   */
-  readonly fields: EditorWorkspaceSessionGroupTabFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for EditorWorkspaceSessionGroupTab.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__EditorWorkspaceSessionGroupTabClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    group<T extends EditorWorkspaceSessionGroupDefaultArgs<ExtArgs> = {}>(args?: Subset<T, EditorWorkspaceSessionGroupDefaultArgs<ExtArgs>>): Prisma__EditorWorkspaceSessionGroupClient<$Result.GetResult<Prisma.$EditorWorkspaceSessionGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the EditorWorkspaceSessionGroupTab model
-   */
-  interface EditorWorkspaceSessionGroupTabFieldRefs {
-    readonly id: FieldRef<"EditorWorkspaceSessionGroupTab", 'String'>
-    readonly groupId: FieldRef<"EditorWorkspaceSessionGroupTab", 'String'>
-    readonly sessionId: FieldRef<"EditorWorkspaceSessionGroupTab", 'String'>
-    readonly workspaceId: FieldRef<"EditorWorkspaceSessionGroupTab", 'String'>
-    readonly identityId: FieldRef<"EditorWorkspaceSessionGroupTab", 'String'>
-    readonly resourceId: FieldRef<"EditorWorkspaceSessionGroupTab", 'String'>
-    readonly tabIndex: FieldRef<"EditorWorkspaceSessionGroupTab", 'Int'>
-    readonly tabType: FieldRef<"EditorWorkspaceSessionGroupTab", 'String'>
-    readonly title: FieldRef<"EditorWorkspaceSessionGroupTab", 'String'>
-    readonly viewState: FieldRef<"EditorWorkspaceSessionGroupTab", 'Json'>
-    readonly isPinned: FieldRef<"EditorWorkspaceSessionGroupTab", 'Boolean'>
-    readonly isActive: FieldRef<"EditorWorkspaceSessionGroupTab", 'Boolean'>
-    readonly version: FieldRef<"EditorWorkspaceSessionGroupTab", 'Int'>
-    readonly createdAt: FieldRef<"EditorWorkspaceSessionGroupTab", 'DateTime'>
-    readonly updatedAt: FieldRef<"EditorWorkspaceSessionGroupTab", 'DateTime'>
-    readonly deletedAt: FieldRef<"EditorWorkspaceSessionGroupTab", 'DateTime'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * EditorWorkspaceSessionGroupTab findUnique
-   */
-  export type EditorWorkspaceSessionGroupTabFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSessionGroupTab to fetch.
-     */
-    where: EditorWorkspaceSessionGroupTabWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab findUniqueOrThrow
-   */
-  export type EditorWorkspaceSessionGroupTabFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSessionGroupTab to fetch.
-     */
-    where: EditorWorkspaceSessionGroupTabWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab findFirst
-   */
-  export type EditorWorkspaceSessionGroupTabFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSessionGroupTab to fetch.
-     */
-    where?: EditorWorkspaceSessionGroupTabWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessionGroupTabs to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionGroupTabOrderByWithRelationInput | EditorWorkspaceSessionGroupTabOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for EditorWorkspaceSessionGroupTabs.
-     */
-    cursor?: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessionGroupTabs from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessionGroupTabs.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaceSessionGroupTabs.
-     */
-    distinct?: EditorWorkspaceSessionGroupTabScalarFieldEnum | EditorWorkspaceSessionGroupTabScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab findFirstOrThrow
-   */
-  export type EditorWorkspaceSessionGroupTabFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSessionGroupTab to fetch.
-     */
-    where?: EditorWorkspaceSessionGroupTabWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessionGroupTabs to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionGroupTabOrderByWithRelationInput | EditorWorkspaceSessionGroupTabOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for EditorWorkspaceSessionGroupTabs.
-     */
-    cursor?: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessionGroupTabs from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessionGroupTabs.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaceSessionGroupTabs.
-     */
-    distinct?: EditorWorkspaceSessionGroupTabScalarFieldEnum | EditorWorkspaceSessionGroupTabScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab findMany
-   */
-  export type EditorWorkspaceSessionGroupTabFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
-    /**
-     * Filter, which EditorWorkspaceSessionGroupTabs to fetch.
-     */
-    where?: EditorWorkspaceSessionGroupTabWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of EditorWorkspaceSessionGroupTabs to fetch.
-     */
-    orderBy?: EditorWorkspaceSessionGroupTabOrderByWithRelationInput | EditorWorkspaceSessionGroupTabOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing EditorWorkspaceSessionGroupTabs.
-     */
-    cursor?: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` EditorWorkspaceSessionGroupTabs from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` EditorWorkspaceSessionGroupTabs.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of EditorWorkspaceSessionGroupTabs.
-     */
-    distinct?: EditorWorkspaceSessionGroupTabScalarFieldEnum | EditorWorkspaceSessionGroupTabScalarFieldEnum[]
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab create
-   */
-  export type EditorWorkspaceSessionGroupTabCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
-    /**
-     * The data needed to create a EditorWorkspaceSessionGroupTab.
-     */
-    data: XOR<EditorWorkspaceSessionGroupTabCreateInput, EditorWorkspaceSessionGroupTabUncheckedCreateInput>
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab createMany
-   */
-  export type EditorWorkspaceSessionGroupTabCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many EditorWorkspaceSessionGroupTabs.
-     */
-    data: EditorWorkspaceSessionGroupTabCreateManyInput | EditorWorkspaceSessionGroupTabCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab createManyAndReturn
-   */
-  export type EditorWorkspaceSessionGroupTabCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * The data used to create many EditorWorkspaceSessionGroupTabs.
-     */
-    data: EditorWorkspaceSessionGroupTabCreateManyInput | EditorWorkspaceSessionGroupTabCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab update
-   */
-  export type EditorWorkspaceSessionGroupTabUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
-    /**
-     * The data needed to update a EditorWorkspaceSessionGroupTab.
-     */
-    data: XOR<EditorWorkspaceSessionGroupTabUpdateInput, EditorWorkspaceSessionGroupTabUncheckedUpdateInput>
-    /**
-     * Choose, which EditorWorkspaceSessionGroupTab to update.
-     */
-    where: EditorWorkspaceSessionGroupTabWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab updateMany
-   */
-  export type EditorWorkspaceSessionGroupTabUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update EditorWorkspaceSessionGroupTabs.
-     */
-    data: XOR<EditorWorkspaceSessionGroupTabUpdateManyMutationInput, EditorWorkspaceSessionGroupTabUncheckedUpdateManyInput>
-    /**
-     * Filter which EditorWorkspaceSessionGroupTabs to update
-     */
-    where?: EditorWorkspaceSessionGroupTabWhereInput
-    /**
-     * Limit how many EditorWorkspaceSessionGroupTabs to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab updateManyAndReturn
-   */
-  export type EditorWorkspaceSessionGroupTabUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * The data used to update EditorWorkspaceSessionGroupTabs.
-     */
-    data: XOR<EditorWorkspaceSessionGroupTabUpdateManyMutationInput, EditorWorkspaceSessionGroupTabUncheckedUpdateManyInput>
-    /**
-     * Filter which EditorWorkspaceSessionGroupTabs to update
-     */
-    where?: EditorWorkspaceSessionGroupTabWhereInput
-    /**
-     * Limit how many EditorWorkspaceSessionGroupTabs to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab upsert
-   */
-  export type EditorWorkspaceSessionGroupTabUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
-    /**
-     * The filter to search for the EditorWorkspaceSessionGroupTab to update in case it exists.
-     */
-    where: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    /**
-     * In case the EditorWorkspaceSessionGroupTab found by the `where` argument doesn't exist, create a new EditorWorkspaceSessionGroupTab with this data.
-     */
-    create: XOR<EditorWorkspaceSessionGroupTabCreateInput, EditorWorkspaceSessionGroupTabUncheckedCreateInput>
-    /**
-     * In case the EditorWorkspaceSessionGroupTab was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<EditorWorkspaceSessionGroupTabUpdateInput, EditorWorkspaceSessionGroupTabUncheckedUpdateInput>
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab delete
-   */
-  export type EditorWorkspaceSessionGroupTabDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
-    /**
-     * Filter which EditorWorkspaceSessionGroupTab to delete.
-     */
-    where: EditorWorkspaceSessionGroupTabWhereUniqueInput
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab deleteMany
-   */
-  export type EditorWorkspaceSessionGroupTabDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which EditorWorkspaceSessionGroupTabs to delete
-     */
-    where?: EditorWorkspaceSessionGroupTabWhereInput
-    /**
-     * Limit how many EditorWorkspaceSessionGroupTabs to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * EditorWorkspaceSessionGroupTab without action
-   */
-  export type EditorWorkspaceSessionGroupTabDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EditorWorkspaceSessionGroupTab
-     */
-    select?: EditorWorkspaceSessionGroupTabSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the EditorWorkspaceSessionGroupTab
-     */
-    omit?: EditorWorkspaceSessionGroupTabOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EditorWorkspaceSessionGroupTabInclude<ExtArgs> | null
   }
 
 
@@ -133350,81 +127848,6 @@ export namespace Prisma {
   export type CloudAuthDeviceCodeScalarFieldEnum = (typeof CloudAuthDeviceCodeScalarFieldEnum)[keyof typeof CloudAuthDeviceCodeScalarFieldEnum]
 
 
-  export const EditorWorkspaceScalarFieldEnum: {
-    id: 'id',
-    identityId: 'identityId',
-    name: 'name',
-    description: 'description',
-    projectPath: 'projectPath',
-    projectType: 'projectType',
-    layout: 'layout',
-    setting: 'setting',
-    isActive: 'isActive',
-    version: 'version',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    accessedAt: 'accessedAt',
-    deletedAt: 'deletedAt'
-  };
-
-  export type EditorWorkspaceScalarFieldEnum = (typeof EditorWorkspaceScalarFieldEnum)[keyof typeof EditorWorkspaceScalarFieldEnum]
-
-
-  export const EditorWorkspaceSessionScalarFieldEnum: {
-    id: 'id',
-    workspaceId: 'workspaceId',
-    identityId: 'identityId',
-    name: 'name',
-    layout: 'layout',
-    isActive: 'isActive',
-    version: 'version',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt'
-  };
-
-  export type EditorWorkspaceSessionScalarFieldEnum = (typeof EditorWorkspaceSessionScalarFieldEnum)[keyof typeof EditorWorkspaceSessionScalarFieldEnum]
-
-
-  export const EditorWorkspaceSessionGroupScalarFieldEnum: {
-    id: 'id',
-    sessionId: 'sessionId',
-    workspaceId: 'workspaceId',
-    identityId: 'identityId',
-    groupIndex: 'groupIndex',
-    name: 'name',
-    splitDirection: 'splitDirection',
-    version: 'version',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt'
-  };
-
-  export type EditorWorkspaceSessionGroupScalarFieldEnum = (typeof EditorWorkspaceSessionGroupScalarFieldEnum)[keyof typeof EditorWorkspaceSessionGroupScalarFieldEnum]
-
-
-  export const EditorWorkspaceSessionGroupTabScalarFieldEnum: {
-    id: 'id',
-    groupId: 'groupId',
-    sessionId: 'sessionId',
-    workspaceId: 'workspaceId',
-    identityId: 'identityId',
-    resourceId: 'resourceId',
-    tabIndex: 'tabIndex',
-    tabType: 'tabType',
-    title: 'title',
-    viewState: 'viewState',
-    isPinned: 'isPinned',
-    isActive: 'isActive',
-    version: 'version',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt'
-  };
-
-  export type EditorWorkspaceSessionGroupTabScalarFieldEnum = (typeof EditorWorkspaceSessionGroupTabScalarFieldEnum)[keyof typeof EditorWorkspaceSessionGroupTabScalarFieldEnum]
-
-
   export const GoalScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -135087,10 +129510,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Account"> | Date | string
     closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
-    editorWorkspaces?: EditorWorkspaceListRelationFilter
-    editorWorkspaceSessions?: EditorWorkspaceSessionListRelationFilter
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupListRelationFilter
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabListRelationFilter
     goals?: GoalListRelationFilter
     labels?: LabelListRelationFilter
     goalLabels?: GoalLabelListRelationFilter
@@ -135156,10 +129575,6 @@ export namespace Prisma {
     updatedAt?: SortOrder
     closedAt?: SortOrderInput | SortOrder
     cloudUser?: CloudAuthUserOrderByWithRelationInput
-    editorWorkspaces?: EditorWorkspaceOrderByRelationAggregateInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionOrderByRelationAggregateInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupOrderByRelationAggregateInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabOrderByRelationAggregateInput
     goals?: GoalOrderByRelationAggregateInput
     labels?: LabelOrderByRelationAggregateInput
     goalLabels?: GoalLabelOrderByRelationAggregateInput
@@ -135228,10 +129643,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Account"> | Date | string
     closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
-    editorWorkspaces?: EditorWorkspaceListRelationFilter
-    editorWorkspaceSessions?: EditorWorkspaceSessionListRelationFilter
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupListRelationFilter
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabListRelationFilter
     goals?: GoalListRelationFilter
     labels?: LabelListRelationFilter
     goalLabels?: GoalLabelListRelationFilter
@@ -136656,408 +131067,6 @@ export namespace Prisma {
     pollingInterval?: IntNullableWithAggregatesFilter<"CloudAuthDeviceCode"> | number | null
     clientId?: StringNullableWithAggregatesFilter<"CloudAuthDeviceCode"> | string | null
     scope?: StringNullableWithAggregatesFilter<"CloudAuthDeviceCode"> | string | null
-  }
-
-  export type EditorWorkspaceWhereInput = {
-    AND?: EditorWorkspaceWhereInput | EditorWorkspaceWhereInput[]
-    OR?: EditorWorkspaceWhereInput[]
-    NOT?: EditorWorkspaceWhereInput | EditorWorkspaceWhereInput[]
-    id?: StringFilter<"EditorWorkspace"> | string
-    identityId?: StringFilter<"EditorWorkspace"> | string
-    name?: StringFilter<"EditorWorkspace"> | string
-    description?: StringNullableFilter<"EditorWorkspace"> | string | null
-    projectPath?: StringFilter<"EditorWorkspace"> | string
-    projectType?: StringFilter<"EditorWorkspace"> | string
-    layout?: JsonFilter<"EditorWorkspace">
-    setting?: JsonFilter<"EditorWorkspace">
-    isActive?: BoolFilter<"EditorWorkspace"> | boolean
-    version?: IntFilter<"EditorWorkspace"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspace"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspace"> | Date | string
-    accessedAt?: DateTimeFilter<"EditorWorkspace"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspace"> | Date | string | null
-    sessions?: EditorWorkspaceSessionListRelationFilter
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }
-
-  export type EditorWorkspaceOrderByWithRelationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    description?: SortOrderInput | SortOrder
-    projectPath?: SortOrder
-    projectType?: SortOrder
-    layout?: SortOrder
-    setting?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    accessedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    sessions?: EditorWorkspaceSessionOrderByRelationAggregateInput
-    account?: AccountOrderByWithRelationInput
-  }
-
-  export type EditorWorkspaceWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    identityId_projectPath?: EditorWorkspaceIdentityIdProjectPathCompoundUniqueInput
-    AND?: EditorWorkspaceWhereInput | EditorWorkspaceWhereInput[]
-    OR?: EditorWorkspaceWhereInput[]
-    NOT?: EditorWorkspaceWhereInput | EditorWorkspaceWhereInput[]
-    identityId?: StringFilter<"EditorWorkspace"> | string
-    name?: StringFilter<"EditorWorkspace"> | string
-    description?: StringNullableFilter<"EditorWorkspace"> | string | null
-    projectPath?: StringFilter<"EditorWorkspace"> | string
-    projectType?: StringFilter<"EditorWorkspace"> | string
-    layout?: JsonFilter<"EditorWorkspace">
-    setting?: JsonFilter<"EditorWorkspace">
-    isActive?: BoolFilter<"EditorWorkspace"> | boolean
-    version?: IntFilter<"EditorWorkspace"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspace"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspace"> | Date | string
-    accessedAt?: DateTimeFilter<"EditorWorkspace"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspace"> | Date | string | null
-    sessions?: EditorWorkspaceSessionListRelationFilter
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }, "id" | "identityId_projectPath">
-
-  export type EditorWorkspaceOrderByWithAggregationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    description?: SortOrderInput | SortOrder
-    projectPath?: SortOrder
-    projectType?: SortOrder
-    layout?: SortOrder
-    setting?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    accessedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    _count?: EditorWorkspaceCountOrderByAggregateInput
-    _avg?: EditorWorkspaceAvgOrderByAggregateInput
-    _max?: EditorWorkspaceMaxOrderByAggregateInput
-    _min?: EditorWorkspaceMinOrderByAggregateInput
-    _sum?: EditorWorkspaceSumOrderByAggregateInput
-  }
-
-  export type EditorWorkspaceScalarWhereWithAggregatesInput = {
-    AND?: EditorWorkspaceScalarWhereWithAggregatesInput | EditorWorkspaceScalarWhereWithAggregatesInput[]
-    OR?: EditorWorkspaceScalarWhereWithAggregatesInput[]
-    NOT?: EditorWorkspaceScalarWhereWithAggregatesInput | EditorWorkspaceScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"EditorWorkspace"> | string
-    identityId?: StringWithAggregatesFilter<"EditorWorkspace"> | string
-    name?: StringWithAggregatesFilter<"EditorWorkspace"> | string
-    description?: StringNullableWithAggregatesFilter<"EditorWorkspace"> | string | null
-    projectPath?: StringWithAggregatesFilter<"EditorWorkspace"> | string
-    projectType?: StringWithAggregatesFilter<"EditorWorkspace"> | string
-    layout?: JsonWithAggregatesFilter<"EditorWorkspace">
-    setting?: JsonWithAggregatesFilter<"EditorWorkspace">
-    isActive?: BoolWithAggregatesFilter<"EditorWorkspace"> | boolean
-    version?: IntWithAggregatesFilter<"EditorWorkspace"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"EditorWorkspace"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"EditorWorkspace"> | Date | string
-    accessedAt?: DateTimeWithAggregatesFilter<"EditorWorkspace"> | Date | string
-    deletedAt?: DateTimeNullableWithAggregatesFilter<"EditorWorkspace"> | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionWhereInput = {
-    AND?: EditorWorkspaceSessionWhereInput | EditorWorkspaceSessionWhereInput[]
-    OR?: EditorWorkspaceSessionWhereInput[]
-    NOT?: EditorWorkspaceSessionWhereInput | EditorWorkspaceSessionWhereInput[]
-    id?: StringFilter<"EditorWorkspaceSession"> | string
-    workspaceId?: StringFilter<"EditorWorkspaceSession"> | string
-    identityId?: StringFilter<"EditorWorkspaceSession"> | string
-    name?: StringFilter<"EditorWorkspaceSession"> | string
-    layout?: JsonFilter<"EditorWorkspaceSession">
-    isActive?: BoolFilter<"EditorWorkspaceSession"> | boolean
-    version?: IntFilter<"EditorWorkspaceSession"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspaceSession"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspaceSession"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspaceSession"> | Date | string | null
-    groups?: EditorWorkspaceSessionGroupListRelationFilter
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    workspace?: XOR<EditorWorkspaceScalarRelationFilter, EditorWorkspaceWhereInput>
-  }
-
-  export type EditorWorkspaceSessionOrderByWithRelationInput = {
-    id?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    layout?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    groups?: EditorWorkspaceSessionGroupOrderByRelationAggregateInput
-    account?: AccountOrderByWithRelationInput
-    workspace?: EditorWorkspaceOrderByWithRelationInput
-  }
-
-  export type EditorWorkspaceSessionWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: EditorWorkspaceSessionWhereInput | EditorWorkspaceSessionWhereInput[]
-    OR?: EditorWorkspaceSessionWhereInput[]
-    NOT?: EditorWorkspaceSessionWhereInput | EditorWorkspaceSessionWhereInput[]
-    workspaceId?: StringFilter<"EditorWorkspaceSession"> | string
-    identityId?: StringFilter<"EditorWorkspaceSession"> | string
-    name?: StringFilter<"EditorWorkspaceSession"> | string
-    layout?: JsonFilter<"EditorWorkspaceSession">
-    isActive?: BoolFilter<"EditorWorkspaceSession"> | boolean
-    version?: IntFilter<"EditorWorkspaceSession"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspaceSession"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspaceSession"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspaceSession"> | Date | string | null
-    groups?: EditorWorkspaceSessionGroupListRelationFilter
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    workspace?: XOR<EditorWorkspaceScalarRelationFilter, EditorWorkspaceWhereInput>
-  }, "id">
-
-  export type EditorWorkspaceSessionOrderByWithAggregationInput = {
-    id?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    layout?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    _count?: EditorWorkspaceSessionCountOrderByAggregateInput
-    _avg?: EditorWorkspaceSessionAvgOrderByAggregateInput
-    _max?: EditorWorkspaceSessionMaxOrderByAggregateInput
-    _min?: EditorWorkspaceSessionMinOrderByAggregateInput
-    _sum?: EditorWorkspaceSessionSumOrderByAggregateInput
-  }
-
-  export type EditorWorkspaceSessionScalarWhereWithAggregatesInput = {
-    AND?: EditorWorkspaceSessionScalarWhereWithAggregatesInput | EditorWorkspaceSessionScalarWhereWithAggregatesInput[]
-    OR?: EditorWorkspaceSessionScalarWhereWithAggregatesInput[]
-    NOT?: EditorWorkspaceSessionScalarWhereWithAggregatesInput | EditorWorkspaceSessionScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"EditorWorkspaceSession"> | string
-    workspaceId?: StringWithAggregatesFilter<"EditorWorkspaceSession"> | string
-    identityId?: StringWithAggregatesFilter<"EditorWorkspaceSession"> | string
-    name?: StringWithAggregatesFilter<"EditorWorkspaceSession"> | string
-    layout?: JsonWithAggregatesFilter<"EditorWorkspaceSession">
-    isActive?: BoolWithAggregatesFilter<"EditorWorkspaceSession"> | boolean
-    version?: IntWithAggregatesFilter<"EditorWorkspaceSession"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"EditorWorkspaceSession"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"EditorWorkspaceSession"> | Date | string
-    deletedAt?: DateTimeNullableWithAggregatesFilter<"EditorWorkspaceSession"> | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupWhereInput = {
-    AND?: EditorWorkspaceSessionGroupWhereInput | EditorWorkspaceSessionGroupWhereInput[]
-    OR?: EditorWorkspaceSessionGroupWhereInput[]
-    NOT?: EditorWorkspaceSessionGroupWhereInput | EditorWorkspaceSessionGroupWhereInput[]
-    id?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    sessionId?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    workspaceId?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    identityId?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    groupIndex?: IntFilter<"EditorWorkspaceSessionGroup"> | number
-    name?: StringNullableFilter<"EditorWorkspaceSessionGroup"> | string | null
-    splitDirection?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    version?: IntFilter<"EditorWorkspaceSessionGroup"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspaceSessionGroup"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspaceSessionGroup"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspaceSessionGroup"> | Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabListRelationFilter
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    session?: XOR<EditorWorkspaceSessionScalarRelationFilter, EditorWorkspaceSessionWhereInput>
-  }
-
-  export type EditorWorkspaceSessionGroupOrderByWithRelationInput = {
-    id?: SortOrder
-    sessionId?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    groupIndex?: SortOrder
-    name?: SortOrderInput | SortOrder
-    splitDirection?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    tabs?: EditorWorkspaceSessionGroupTabOrderByRelationAggregateInput
-    account?: AccountOrderByWithRelationInput
-    session?: EditorWorkspaceSessionOrderByWithRelationInput
-  }
-
-  export type EditorWorkspaceSessionGroupWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: EditorWorkspaceSessionGroupWhereInput | EditorWorkspaceSessionGroupWhereInput[]
-    OR?: EditorWorkspaceSessionGroupWhereInput[]
-    NOT?: EditorWorkspaceSessionGroupWhereInput | EditorWorkspaceSessionGroupWhereInput[]
-    sessionId?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    workspaceId?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    identityId?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    groupIndex?: IntFilter<"EditorWorkspaceSessionGroup"> | number
-    name?: StringNullableFilter<"EditorWorkspaceSessionGroup"> | string | null
-    splitDirection?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    version?: IntFilter<"EditorWorkspaceSessionGroup"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspaceSessionGroup"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspaceSessionGroup"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspaceSessionGroup"> | Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabListRelationFilter
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    session?: XOR<EditorWorkspaceSessionScalarRelationFilter, EditorWorkspaceSessionWhereInput>
-  }, "id">
-
-  export type EditorWorkspaceSessionGroupOrderByWithAggregationInput = {
-    id?: SortOrder
-    sessionId?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    groupIndex?: SortOrder
-    name?: SortOrderInput | SortOrder
-    splitDirection?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    _count?: EditorWorkspaceSessionGroupCountOrderByAggregateInput
-    _avg?: EditorWorkspaceSessionGroupAvgOrderByAggregateInput
-    _max?: EditorWorkspaceSessionGroupMaxOrderByAggregateInput
-    _min?: EditorWorkspaceSessionGroupMinOrderByAggregateInput
-    _sum?: EditorWorkspaceSessionGroupSumOrderByAggregateInput
-  }
-
-  export type EditorWorkspaceSessionGroupScalarWhereWithAggregatesInput = {
-    AND?: EditorWorkspaceSessionGroupScalarWhereWithAggregatesInput | EditorWorkspaceSessionGroupScalarWhereWithAggregatesInput[]
-    OR?: EditorWorkspaceSessionGroupScalarWhereWithAggregatesInput[]
-    NOT?: EditorWorkspaceSessionGroupScalarWhereWithAggregatesInput | EditorWorkspaceSessionGroupScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroup"> | string
-    sessionId?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroup"> | string
-    workspaceId?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroup"> | string
-    identityId?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroup"> | string
-    groupIndex?: IntWithAggregatesFilter<"EditorWorkspaceSessionGroup"> | number
-    name?: StringNullableWithAggregatesFilter<"EditorWorkspaceSessionGroup"> | string | null
-    splitDirection?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroup"> | string
-    version?: IntWithAggregatesFilter<"EditorWorkspaceSessionGroup"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"EditorWorkspaceSessionGroup"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"EditorWorkspaceSessionGroup"> | Date | string
-    deletedAt?: DateTimeNullableWithAggregatesFilter<"EditorWorkspaceSessionGroup"> | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabWhereInput = {
-    AND?: EditorWorkspaceSessionGroupTabWhereInput | EditorWorkspaceSessionGroupTabWhereInput[]
-    OR?: EditorWorkspaceSessionGroupTabWhereInput[]
-    NOT?: EditorWorkspaceSessionGroupTabWhereInput | EditorWorkspaceSessionGroupTabWhereInput[]
-    id?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    groupId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    sessionId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    workspaceId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    identityId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    resourceId?: StringNullableFilter<"EditorWorkspaceSessionGroupTab"> | string | null
-    tabIndex?: IntFilter<"EditorWorkspaceSessionGroupTab"> | number
-    tabType?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    title?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    viewState?: JsonFilter<"EditorWorkspaceSessionGroupTab">
-    isPinned?: BoolFilter<"EditorWorkspaceSessionGroupTab"> | boolean
-    isActive?: BoolFilter<"EditorWorkspaceSessionGroupTab"> | boolean
-    version?: IntFilter<"EditorWorkspaceSessionGroupTab"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspaceSessionGroupTab"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspaceSessionGroupTab"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspaceSessionGroupTab"> | Date | string | null
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    group?: XOR<EditorWorkspaceSessionGroupScalarRelationFilter, EditorWorkspaceSessionGroupWhereInput>
-  }
-
-  export type EditorWorkspaceSessionGroupTabOrderByWithRelationInput = {
-    id?: SortOrder
-    groupId?: SortOrder
-    sessionId?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    resourceId?: SortOrderInput | SortOrder
-    tabIndex?: SortOrder
-    tabType?: SortOrder
-    title?: SortOrder
-    viewState?: SortOrder
-    isPinned?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    account?: AccountOrderByWithRelationInput
-    group?: EditorWorkspaceSessionGroupOrderByWithRelationInput
-  }
-
-  export type EditorWorkspaceSessionGroupTabWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: EditorWorkspaceSessionGroupTabWhereInput | EditorWorkspaceSessionGroupTabWhereInput[]
-    OR?: EditorWorkspaceSessionGroupTabWhereInput[]
-    NOT?: EditorWorkspaceSessionGroupTabWhereInput | EditorWorkspaceSessionGroupTabWhereInput[]
-    groupId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    sessionId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    workspaceId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    identityId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    resourceId?: StringNullableFilter<"EditorWorkspaceSessionGroupTab"> | string | null
-    tabIndex?: IntFilter<"EditorWorkspaceSessionGroupTab"> | number
-    tabType?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    title?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    viewState?: JsonFilter<"EditorWorkspaceSessionGroupTab">
-    isPinned?: BoolFilter<"EditorWorkspaceSessionGroupTab"> | boolean
-    isActive?: BoolFilter<"EditorWorkspaceSessionGroupTab"> | boolean
-    version?: IntFilter<"EditorWorkspaceSessionGroupTab"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspaceSessionGroupTab"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspaceSessionGroupTab"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspaceSessionGroupTab"> | Date | string | null
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    group?: XOR<EditorWorkspaceSessionGroupScalarRelationFilter, EditorWorkspaceSessionGroupWhereInput>
-  }, "id">
-
-  export type EditorWorkspaceSessionGroupTabOrderByWithAggregationInput = {
-    id?: SortOrder
-    groupId?: SortOrder
-    sessionId?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    resourceId?: SortOrderInput | SortOrder
-    tabIndex?: SortOrder
-    tabType?: SortOrder
-    title?: SortOrder
-    viewState?: SortOrder
-    isPinned?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrderInput | SortOrder
-    _count?: EditorWorkspaceSessionGroupTabCountOrderByAggregateInput
-    _avg?: EditorWorkspaceSessionGroupTabAvgOrderByAggregateInput
-    _max?: EditorWorkspaceSessionGroupTabMaxOrderByAggregateInput
-    _min?: EditorWorkspaceSessionGroupTabMinOrderByAggregateInput
-    _sum?: EditorWorkspaceSessionGroupTabSumOrderByAggregateInput
-  }
-
-  export type EditorWorkspaceSessionGroupTabScalarWhereWithAggregatesInput = {
-    AND?: EditorWorkspaceSessionGroupTabScalarWhereWithAggregatesInput | EditorWorkspaceSessionGroupTabScalarWhereWithAggregatesInput[]
-    OR?: EditorWorkspaceSessionGroupTabScalarWhereWithAggregatesInput[]
-    NOT?: EditorWorkspaceSessionGroupTabScalarWhereWithAggregatesInput | EditorWorkspaceSessionGroupTabScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | string
-    groupId?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | string
-    sessionId?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | string
-    workspaceId?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | string
-    identityId?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | string
-    resourceId?: StringNullableWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | string | null
-    tabIndex?: IntWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | number
-    tabType?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | string
-    title?: StringWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | string
-    viewState?: JsonWithAggregatesFilter<"EditorWorkspaceSessionGroupTab">
-    isPinned?: BoolWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | boolean
-    isActive?: BoolWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | boolean
-    version?: IntWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | number
-    createdAt?: DateTimeWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | Date | string
-    deletedAt?: DateTimeNullableWithAggregatesFilter<"EditorWorkspaceSessionGroupTab"> | Date | string | null
   }
 
   export type GoalWhereInput = {
@@ -144769,10 +138778,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -144837,10 +138842,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -144905,10 +138906,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -144973,10 +138970,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -146595,452 +140588,6 @@ export namespace Prisma {
     pollingInterval?: NullableIntFieldUpdateOperationsInput | number | null
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type EditorWorkspaceCreateInput = {
-    id: string
-    name: string
-    description?: string | null
-    projectPath: string
-    projectType: string
-    layout: JsonNullValueInput | InputJsonValue
-    setting: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    accessedAt?: Date | string
-    deletedAt?: Date | string | null
-    sessions?: EditorWorkspaceSessionCreateNestedManyWithoutWorkspaceInput
-    account: AccountCreateNestedOneWithoutEditorWorkspacesInput
-  }
-
-  export type EditorWorkspaceUncheckedCreateInput = {
-    id: string
-    identityId: string
-    name: string
-    description?: string | null
-    projectPath: string
-    projectType: string
-    layout: JsonNullValueInput | InputJsonValue
-    setting: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    accessedAt?: Date | string
-    deletedAt?: Date | string | null
-    sessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutWorkspaceInput
-  }
-
-  export type EditorWorkspaceUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    projectPath?: StringFieldUpdateOperationsInput | string
-    projectType?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    setting?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    accessedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    sessions?: EditorWorkspaceSessionUpdateManyWithoutWorkspaceNestedInput
-    account?: AccountUpdateOneRequiredWithoutEditorWorkspacesNestedInput
-  }
-
-  export type EditorWorkspaceUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    projectPath?: StringFieldUpdateOperationsInput | string
-    projectType?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    setting?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    accessedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    sessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutWorkspaceNestedInput
-  }
-
-  export type EditorWorkspaceCreateManyInput = {
-    id: string
-    identityId: string
-    name: string
-    description?: string | null
-    projectPath: string
-    projectType: string
-    layout: JsonNullValueInput | InputJsonValue
-    setting: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    accessedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    projectPath?: StringFieldUpdateOperationsInput | string
-    projectType?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    setting?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    accessedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    projectPath?: StringFieldUpdateOperationsInput | string
-    projectType?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    setting?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    accessedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionCreateInput = {
-    id: string
-    name: string
-    layout: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    groups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutSessionInput
-    account: AccountCreateNestedOneWithoutEditorWorkspaceSessionsInput
-    workspace: EditorWorkspaceCreateNestedOneWithoutSessionsInput
-  }
-
-  export type EditorWorkspaceSessionUncheckedCreateInput = {
-    id: string
-    workspaceId: string
-    identityId: string
-    name: string
-    layout: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    groups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutSessionInput
-  }
-
-  export type EditorWorkspaceSessionUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    groups?: EditorWorkspaceSessionGroupUpdateManyWithoutSessionNestedInput
-    account?: AccountUpdateOneRequiredWithoutEditorWorkspaceSessionsNestedInput
-    workspace?: EditorWorkspaceUpdateOneRequiredWithoutSessionsNestedInput
-  }
-
-  export type EditorWorkspaceSessionUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    groups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutSessionNestedInput
-  }
-
-  export type EditorWorkspaceSessionCreateManyInput = {
-    id: string
-    workspaceId: string
-    identityId: string
-    name: string
-    layout: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupCreateInput = {
-    id: string
-    workspaceId: string
-    groupIndex: number
-    name?: string | null
-    splitDirection: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutGroupInput
-    account: AccountCreateNestedOneWithoutEditorWorkspaceSessionGroupsInput
-    session: EditorWorkspaceSessionCreateNestedOneWithoutGroupsInput
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedCreateInput = {
-    id: string
-    sessionId: string
-    workspaceId: string
-    identityId: string
-    groupIndex: number
-    name?: string | null
-    splitDirection: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutGroupInput
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutGroupNestedInput
-    account?: AccountUpdateOneRequiredWithoutEditorWorkspaceSessionGroupsNestedInput
-    session?: EditorWorkspaceSessionUpdateOneRequiredWithoutGroupsNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutGroupNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupCreateManyInput = {
-    id: string
-    sessionId: string
-    workspaceId: string
-    identityId: string
-    groupIndex: number
-    name?: string | null
-    splitDirection: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateInput = {
-    id: string
-    sessionId: string
-    workspaceId: string
-    resourceId?: string | null
-    tabIndex: number
-    tabType: string
-    title: string
-    viewState: JsonNullValueInput | InputJsonValue
-    isPinned?: boolean
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutEditorWorkspaceSessionGroupTabsInput
-    group: EditorWorkspaceSessionGroupCreateNestedOneWithoutTabsInput
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedCreateInput = {
-    id: string
-    groupId: string
-    sessionId: string
-    workspaceId: string
-    identityId: string
-    resourceId?: string | null
-    tabIndex: number
-    tabType: string
-    title: string
-    viewState: JsonNullValueInput | InputJsonValue
-    isPinned?: boolean
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    tabIndex?: IntFieldUpdateOperationsInput | number
-    tabType?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    viewState?: JsonNullValueInput | InputJsonValue
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutEditorWorkspaceSessionGroupTabsNestedInput
-    group?: EditorWorkspaceSessionGroupUpdateOneRequiredWithoutTabsNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    groupId?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    tabIndex?: IntFieldUpdateOperationsInput | number
-    tabType?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    viewState?: JsonNullValueInput | InputJsonValue
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateManyInput = {
-    id: string
-    groupId: string
-    sessionId: string
-    workspaceId: string
-    identityId: string
-    resourceId?: string | null
-    tabIndex: number
-    tabType: string
-    title: string
-    viewState: JsonNullValueInput | InputJsonValue
-    isPinned?: boolean
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    tabIndex?: IntFieldUpdateOperationsInput | number
-    tabType?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    viewState?: JsonNullValueInput | InputJsonValue
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    groupId?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    tabIndex?: IntFieldUpdateOperationsInput | number
-    tabType?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    viewState?: JsonNullValueInput | InputJsonValue
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type GoalCreateInput = {
@@ -155821,30 +149368,6 @@ export namespace Prisma {
     isNot?: CloudAuthUserWhereInput
   }
 
-  export type EditorWorkspaceListRelationFilter = {
-    every?: EditorWorkspaceWhereInput
-    some?: EditorWorkspaceWhereInput
-    none?: EditorWorkspaceWhereInput
-  }
-
-  export type EditorWorkspaceSessionListRelationFilter = {
-    every?: EditorWorkspaceSessionWhereInput
-    some?: EditorWorkspaceSessionWhereInput
-    none?: EditorWorkspaceSessionWhereInput
-  }
-
-  export type EditorWorkspaceSessionGroupListRelationFilter = {
-    every?: EditorWorkspaceSessionGroupWhereInput
-    some?: EditorWorkspaceSessionGroupWhereInput
-    none?: EditorWorkspaceSessionGroupWhereInput
-  }
-
-  export type EditorWorkspaceSessionGroupTabListRelationFilter = {
-    every?: EditorWorkspaceSessionGroupTabWhereInput
-    some?: EditorWorkspaceSessionGroupTabWhereInput
-    none?: EditorWorkspaceSessionGroupTabWhereInput
-  }
-
   export type GoalListRelationFilter = {
     every?: GoalWhereInput
     some?: GoalWhereInput
@@ -156171,22 +149694,6 @@ export namespace Prisma {
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
-  }
-
-  export type EditorWorkspaceOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionGroupOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionGroupTabOrderByRelationAggregateInput = {
-    _count?: SortOrder
   }
 
   export type GoalOrderByRelationAggregateInput = {
@@ -157437,243 +150944,6 @@ export namespace Prisma {
 
   export type CloudAuthDeviceCodeSumOrderByAggregateInput = {
     pollingInterval?: SortOrder
-  }
-
-  export type EditorWorkspaceIdentityIdProjectPathCompoundUniqueInput = {
-    identityId: string
-    projectPath: string
-  }
-
-  export type EditorWorkspaceCountOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    projectPath?: SortOrder
-    projectType?: SortOrder
-    layout?: SortOrder
-    setting?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    accessedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceAvgOrderByAggregateInput = {
-    version?: SortOrder
-  }
-
-  export type EditorWorkspaceMaxOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    projectPath?: SortOrder
-    projectType?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    accessedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceMinOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    projectPath?: SortOrder
-    projectType?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    accessedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceSumOrderByAggregateInput = {
-    version?: SortOrder
-  }
-
-  export type EditorWorkspaceScalarRelationFilter = {
-    is?: EditorWorkspaceWhereInput
-    isNot?: EditorWorkspaceWhereInput
-  }
-
-  export type EditorWorkspaceSessionCountOrderByAggregateInput = {
-    id?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    layout?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionAvgOrderByAggregateInput = {
-    version?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionMaxOrderByAggregateInput = {
-    id?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionMinOrderByAggregateInput = {
-    id?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    name?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionSumOrderByAggregateInput = {
-    version?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionScalarRelationFilter = {
-    is?: EditorWorkspaceSessionWhereInput
-    isNot?: EditorWorkspaceSessionWhereInput
-  }
-
-  export type EditorWorkspaceSessionGroupCountOrderByAggregateInput = {
-    id?: SortOrder
-    sessionId?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    groupIndex?: SortOrder
-    name?: SortOrder
-    splitDirection?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionGroupAvgOrderByAggregateInput = {
-    groupIndex?: SortOrder
-    version?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionGroupMaxOrderByAggregateInput = {
-    id?: SortOrder
-    sessionId?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    groupIndex?: SortOrder
-    name?: SortOrder
-    splitDirection?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionGroupMinOrderByAggregateInput = {
-    id?: SortOrder
-    sessionId?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    groupIndex?: SortOrder
-    name?: SortOrder
-    splitDirection?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionGroupSumOrderByAggregateInput = {
-    groupIndex?: SortOrder
-    version?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionGroupScalarRelationFilter = {
-    is?: EditorWorkspaceSessionGroupWhereInput
-    isNot?: EditorWorkspaceSessionGroupWhereInput
-  }
-
-  export type EditorWorkspaceSessionGroupTabCountOrderByAggregateInput = {
-    id?: SortOrder
-    groupId?: SortOrder
-    sessionId?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    resourceId?: SortOrder
-    tabIndex?: SortOrder
-    tabType?: SortOrder
-    title?: SortOrder
-    viewState?: SortOrder
-    isPinned?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionGroupTabAvgOrderByAggregateInput = {
-    tabIndex?: SortOrder
-    version?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionGroupTabMaxOrderByAggregateInput = {
-    id?: SortOrder
-    groupId?: SortOrder
-    sessionId?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    resourceId?: SortOrder
-    tabIndex?: SortOrder
-    tabType?: SortOrder
-    title?: SortOrder
-    isPinned?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionGroupTabMinOrderByAggregateInput = {
-    id?: SortOrder
-    groupId?: SortOrder
-    sessionId?: SortOrder
-    workspaceId?: SortOrder
-    identityId?: SortOrder
-    resourceId?: SortOrder
-    tabIndex?: SortOrder
-    tabType?: SortOrder
-    title?: SortOrder
-    isPinned?: SortOrder
-    isActive?: SortOrder
-    version?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    deletedAt?: SortOrder
-  }
-
-  export type EditorWorkspaceSessionGroupTabSumOrderByAggregateInput = {
-    tabIndex?: SortOrder
-    version?: SortOrder
   }
 
   export type KeyResultListRelationFilter = {
@@ -162538,34 +155808,6 @@ export namespace Prisma {
     connect?: CloudAuthUserWhereUniqueInput
   }
 
-  export type EditorWorkspaceCreateNestedManyWithoutAccountInput = {
-    create?: XOR<EditorWorkspaceCreateWithoutAccountInput, EditorWorkspaceUncheckedCreateWithoutAccountInput> | EditorWorkspaceCreateWithoutAccountInput[] | EditorWorkspaceUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceCreateOrConnectWithoutAccountInput | EditorWorkspaceCreateOrConnectWithoutAccountInput[]
-    createMany?: EditorWorkspaceCreateManyAccountInputEnvelope
-    connect?: EditorWorkspaceWhereUniqueInput | EditorWorkspaceWhereUniqueInput[]
-  }
-
-  export type EditorWorkspaceSessionCreateNestedManyWithoutAccountInput = {
-    create?: XOR<EditorWorkspaceSessionCreateWithoutAccountInput, EditorWorkspaceSessionUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionCreateWithoutAccountInput[] | EditorWorkspaceSessionUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionCreateOrConnectWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionCreateManyAccountInputEnvelope
-    connect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput = {
-    create?: XOR<EditorWorkspaceSessionGroupCreateWithoutAccountInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionGroupCreateWithoutAccountInput[] | EditorWorkspaceSessionGroupUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionGroupCreateOrConnectWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionGroupCreateManyAccountInputEnvelope
-    connect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput = {
-    create?: XOR<EditorWorkspaceSessionGroupTabCreateWithoutAccountInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionGroupTabCreateWithoutAccountInput[] | EditorWorkspaceSessionGroupTabUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupTabCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionGroupTabCreateOrConnectWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionGroupTabCreateManyAccountInputEnvelope
-    connect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-  }
-
   export type GoalCreateNestedManyWithoutAccountInput = {
     create?: XOR<GoalCreateWithoutAccountInput, GoalUncheckedCreateWithoutAccountInput> | GoalCreateWithoutAccountInput[] | GoalUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: GoalCreateOrConnectWithoutAccountInput | GoalCreateOrConnectWithoutAccountInput[]
@@ -162942,34 +156184,6 @@ export namespace Prisma {
     connectOrCreate?: KnowledgeWriteRequestCreateOrConnectWithoutAccountInput | KnowledgeWriteRequestCreateOrConnectWithoutAccountInput[]
     createMany?: KnowledgeWriteRequestCreateManyAccountInputEnvelope
     connect?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
-  }
-
-  export type EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput = {
-    create?: XOR<EditorWorkspaceCreateWithoutAccountInput, EditorWorkspaceUncheckedCreateWithoutAccountInput> | EditorWorkspaceCreateWithoutAccountInput[] | EditorWorkspaceUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceCreateOrConnectWithoutAccountInput | EditorWorkspaceCreateOrConnectWithoutAccountInput[]
-    createMany?: EditorWorkspaceCreateManyAccountInputEnvelope
-    connect?: EditorWorkspaceWhereUniqueInput | EditorWorkspaceWhereUniqueInput[]
-  }
-
-  export type EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput = {
-    create?: XOR<EditorWorkspaceSessionCreateWithoutAccountInput, EditorWorkspaceSessionUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionCreateWithoutAccountInput[] | EditorWorkspaceSessionUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionCreateOrConnectWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionCreateManyAccountInputEnvelope
-    connect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput = {
-    create?: XOR<EditorWorkspaceSessionGroupCreateWithoutAccountInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionGroupCreateWithoutAccountInput[] | EditorWorkspaceSessionGroupUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionGroupCreateOrConnectWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionGroupCreateManyAccountInputEnvelope
-    connect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput = {
-    create?: XOR<EditorWorkspaceSessionGroupTabCreateWithoutAccountInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionGroupTabCreateWithoutAccountInput[] | EditorWorkspaceSessionGroupTabUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupTabCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionGroupTabCreateOrConnectWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionGroupTabCreateManyAccountInputEnvelope
-    connect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
   }
 
   export type GoalUncheckedCreateNestedManyWithoutAccountInput = {
@@ -163368,62 +156582,6 @@ export namespace Prisma {
     upsert?: CloudAuthUserUpsertWithoutAccountInput
     connect?: CloudAuthUserWhereUniqueInput
     update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutAccountInput, CloudAuthUserUpdateWithoutAccountInput>, CloudAuthUserUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<EditorWorkspaceCreateWithoutAccountInput, EditorWorkspaceUncheckedCreateWithoutAccountInput> | EditorWorkspaceCreateWithoutAccountInput[] | EditorWorkspaceUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceCreateOrConnectWithoutAccountInput | EditorWorkspaceCreateOrConnectWithoutAccountInput[]
-    upsert?: EditorWorkspaceUpsertWithWhereUniqueWithoutAccountInput | EditorWorkspaceUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: EditorWorkspaceCreateManyAccountInputEnvelope
-    set?: EditorWorkspaceWhereUniqueInput | EditorWorkspaceWhereUniqueInput[]
-    disconnect?: EditorWorkspaceWhereUniqueInput | EditorWorkspaceWhereUniqueInput[]
-    delete?: EditorWorkspaceWhereUniqueInput | EditorWorkspaceWhereUniqueInput[]
-    connect?: EditorWorkspaceWhereUniqueInput | EditorWorkspaceWhereUniqueInput[]
-    update?: EditorWorkspaceUpdateWithWhereUniqueWithoutAccountInput | EditorWorkspaceUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: EditorWorkspaceUpdateManyWithWhereWithoutAccountInput | EditorWorkspaceUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: EditorWorkspaceScalarWhereInput | EditorWorkspaceScalarWhereInput[]
-  }
-
-  export type EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<EditorWorkspaceSessionCreateWithoutAccountInput, EditorWorkspaceSessionUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionCreateWithoutAccountInput[] | EditorWorkspaceSessionUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionCreateOrConnectWithoutAccountInput[]
-    upsert?: EditorWorkspaceSessionUpsertWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionCreateManyAccountInputEnvelope
-    set?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    update?: EditorWorkspaceSessionUpdateWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: EditorWorkspaceSessionUpdateManyWithWhereWithoutAccountInput | EditorWorkspaceSessionUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: EditorWorkspaceSessionScalarWhereInput | EditorWorkspaceSessionScalarWhereInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<EditorWorkspaceSessionGroupCreateWithoutAccountInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionGroupCreateWithoutAccountInput[] | EditorWorkspaceSessionGroupUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionGroupCreateOrConnectWithoutAccountInput[]
-    upsert?: EditorWorkspaceSessionGroupUpsertWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionGroupUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionGroupCreateManyAccountInputEnvelope
-    set?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    update?: EditorWorkspaceSessionGroupUpdateWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionGroupUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: EditorWorkspaceSessionGroupUpdateManyWithWhereWithoutAccountInput | EditorWorkspaceSessionGroupUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: EditorWorkspaceSessionGroupScalarWhereInput | EditorWorkspaceSessionGroupScalarWhereInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<EditorWorkspaceSessionGroupTabCreateWithoutAccountInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionGroupTabCreateWithoutAccountInput[] | EditorWorkspaceSessionGroupTabUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupTabCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionGroupTabCreateOrConnectWithoutAccountInput[]
-    upsert?: EditorWorkspaceSessionGroupTabUpsertWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionGroupTabUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionGroupTabCreateManyAccountInputEnvelope
-    set?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    update?: EditorWorkspaceSessionGroupTabUpdateWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionGroupTabUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: EditorWorkspaceSessionGroupTabUpdateManyWithWhereWithoutAccountInput | EditorWorkspaceSessionGroupTabUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: EditorWorkspaceSessionGroupTabScalarWhereInput | EditorWorkspaceSessionGroupTabScalarWhereInput[]
   }
 
   export type GoalUpdateManyWithoutAccountNestedInput = {
@@ -164166,62 +157324,6 @@ export namespace Prisma {
     update?: KnowledgeWriteRequestUpdateWithWhereUniqueWithoutAccountInput | KnowledgeWriteRequestUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: KnowledgeWriteRequestUpdateManyWithWhereWithoutAccountInput | KnowledgeWriteRequestUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: KnowledgeWriteRequestScalarWhereInput | KnowledgeWriteRequestScalarWhereInput[]
-  }
-
-  export type EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<EditorWorkspaceCreateWithoutAccountInput, EditorWorkspaceUncheckedCreateWithoutAccountInput> | EditorWorkspaceCreateWithoutAccountInput[] | EditorWorkspaceUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceCreateOrConnectWithoutAccountInput | EditorWorkspaceCreateOrConnectWithoutAccountInput[]
-    upsert?: EditorWorkspaceUpsertWithWhereUniqueWithoutAccountInput | EditorWorkspaceUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: EditorWorkspaceCreateManyAccountInputEnvelope
-    set?: EditorWorkspaceWhereUniqueInput | EditorWorkspaceWhereUniqueInput[]
-    disconnect?: EditorWorkspaceWhereUniqueInput | EditorWorkspaceWhereUniqueInput[]
-    delete?: EditorWorkspaceWhereUniqueInput | EditorWorkspaceWhereUniqueInput[]
-    connect?: EditorWorkspaceWhereUniqueInput | EditorWorkspaceWhereUniqueInput[]
-    update?: EditorWorkspaceUpdateWithWhereUniqueWithoutAccountInput | EditorWorkspaceUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: EditorWorkspaceUpdateManyWithWhereWithoutAccountInput | EditorWorkspaceUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: EditorWorkspaceScalarWhereInput | EditorWorkspaceScalarWhereInput[]
-  }
-
-  export type EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<EditorWorkspaceSessionCreateWithoutAccountInput, EditorWorkspaceSessionUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionCreateWithoutAccountInput[] | EditorWorkspaceSessionUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionCreateOrConnectWithoutAccountInput[]
-    upsert?: EditorWorkspaceSessionUpsertWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionCreateManyAccountInputEnvelope
-    set?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    update?: EditorWorkspaceSessionUpdateWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: EditorWorkspaceSessionUpdateManyWithWhereWithoutAccountInput | EditorWorkspaceSessionUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: EditorWorkspaceSessionScalarWhereInput | EditorWorkspaceSessionScalarWhereInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<EditorWorkspaceSessionGroupCreateWithoutAccountInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionGroupCreateWithoutAccountInput[] | EditorWorkspaceSessionGroupUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionGroupCreateOrConnectWithoutAccountInput[]
-    upsert?: EditorWorkspaceSessionGroupUpsertWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionGroupUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionGroupCreateManyAccountInputEnvelope
-    set?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    update?: EditorWorkspaceSessionGroupUpdateWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionGroupUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: EditorWorkspaceSessionGroupUpdateManyWithWhereWithoutAccountInput | EditorWorkspaceSessionGroupUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: EditorWorkspaceSessionGroupScalarWhereInput | EditorWorkspaceSessionGroupScalarWhereInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput = {
-    create?: XOR<EditorWorkspaceSessionGroupTabCreateWithoutAccountInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutAccountInput> | EditorWorkspaceSessionGroupTabCreateWithoutAccountInput[] | EditorWorkspaceSessionGroupTabUncheckedCreateWithoutAccountInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupTabCreateOrConnectWithoutAccountInput | EditorWorkspaceSessionGroupTabCreateOrConnectWithoutAccountInput[]
-    upsert?: EditorWorkspaceSessionGroupTabUpsertWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionGroupTabUpsertWithWhereUniqueWithoutAccountInput[]
-    createMany?: EditorWorkspaceSessionGroupTabCreateManyAccountInputEnvelope
-    set?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    update?: EditorWorkspaceSessionGroupTabUpdateWithWhereUniqueWithoutAccountInput | EditorWorkspaceSessionGroupTabUpdateWithWhereUniqueWithoutAccountInput[]
-    updateMany?: EditorWorkspaceSessionGroupTabUpdateManyWithWhereWithoutAccountInput | EditorWorkspaceSessionGroupTabUpdateManyWithWhereWithoutAccountInput[]
-    deleteMany?: EditorWorkspaceSessionGroupTabScalarWhereInput | EditorWorkspaceSessionGroupTabScalarWhereInput[]
   }
 
   export type GoalUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -165389,230 +158491,6 @@ export namespace Prisma {
     delete?: CloudAuthUserWhereInput | boolean
     connect?: CloudAuthUserWhereUniqueInput
     update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutDeviceCodesInput, CloudAuthUserUpdateWithoutDeviceCodesInput>, CloudAuthUserUncheckedUpdateWithoutDeviceCodesInput>
-  }
-
-  export type EditorWorkspaceSessionCreateNestedManyWithoutWorkspaceInput = {
-    create?: XOR<EditorWorkspaceSessionCreateWithoutWorkspaceInput, EditorWorkspaceSessionUncheckedCreateWithoutWorkspaceInput> | EditorWorkspaceSessionCreateWithoutWorkspaceInput[] | EditorWorkspaceSessionUncheckedCreateWithoutWorkspaceInput[]
-    connectOrCreate?: EditorWorkspaceSessionCreateOrConnectWithoutWorkspaceInput | EditorWorkspaceSessionCreateOrConnectWithoutWorkspaceInput[]
-    createMany?: EditorWorkspaceSessionCreateManyWorkspaceInputEnvelope
-    connect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-  }
-
-  export type AccountCreateNestedOneWithoutEditorWorkspacesInput = {
-    create?: XOR<AccountCreateWithoutEditorWorkspacesInput, AccountUncheckedCreateWithoutEditorWorkspacesInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutEditorWorkspacesInput
-    connect?: AccountWhereUniqueInput
-  }
-
-  export type EditorWorkspaceSessionUncheckedCreateNestedManyWithoutWorkspaceInput = {
-    create?: XOR<EditorWorkspaceSessionCreateWithoutWorkspaceInput, EditorWorkspaceSessionUncheckedCreateWithoutWorkspaceInput> | EditorWorkspaceSessionCreateWithoutWorkspaceInput[] | EditorWorkspaceSessionUncheckedCreateWithoutWorkspaceInput[]
-    connectOrCreate?: EditorWorkspaceSessionCreateOrConnectWithoutWorkspaceInput | EditorWorkspaceSessionCreateOrConnectWithoutWorkspaceInput[]
-    createMany?: EditorWorkspaceSessionCreateManyWorkspaceInputEnvelope
-    connect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-  }
-
-  export type EditorWorkspaceSessionUpdateManyWithoutWorkspaceNestedInput = {
-    create?: XOR<EditorWorkspaceSessionCreateWithoutWorkspaceInput, EditorWorkspaceSessionUncheckedCreateWithoutWorkspaceInput> | EditorWorkspaceSessionCreateWithoutWorkspaceInput[] | EditorWorkspaceSessionUncheckedCreateWithoutWorkspaceInput[]
-    connectOrCreate?: EditorWorkspaceSessionCreateOrConnectWithoutWorkspaceInput | EditorWorkspaceSessionCreateOrConnectWithoutWorkspaceInput[]
-    upsert?: EditorWorkspaceSessionUpsertWithWhereUniqueWithoutWorkspaceInput | EditorWorkspaceSessionUpsertWithWhereUniqueWithoutWorkspaceInput[]
-    createMany?: EditorWorkspaceSessionCreateManyWorkspaceInputEnvelope
-    set?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    update?: EditorWorkspaceSessionUpdateWithWhereUniqueWithoutWorkspaceInput | EditorWorkspaceSessionUpdateWithWhereUniqueWithoutWorkspaceInput[]
-    updateMany?: EditorWorkspaceSessionUpdateManyWithWhereWithoutWorkspaceInput | EditorWorkspaceSessionUpdateManyWithWhereWithoutWorkspaceInput[]
-    deleteMany?: EditorWorkspaceSessionScalarWhereInput | EditorWorkspaceSessionScalarWhereInput[]
-  }
-
-  export type AccountUpdateOneRequiredWithoutEditorWorkspacesNestedInput = {
-    create?: XOR<AccountCreateWithoutEditorWorkspacesInput, AccountUncheckedCreateWithoutEditorWorkspacesInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutEditorWorkspacesInput
-    upsert?: AccountUpsertWithoutEditorWorkspacesInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutEditorWorkspacesInput, AccountUpdateWithoutEditorWorkspacesInput>, AccountUncheckedUpdateWithoutEditorWorkspacesInput>
-  }
-
-  export type EditorWorkspaceSessionUncheckedUpdateManyWithoutWorkspaceNestedInput = {
-    create?: XOR<EditorWorkspaceSessionCreateWithoutWorkspaceInput, EditorWorkspaceSessionUncheckedCreateWithoutWorkspaceInput> | EditorWorkspaceSessionCreateWithoutWorkspaceInput[] | EditorWorkspaceSessionUncheckedCreateWithoutWorkspaceInput[]
-    connectOrCreate?: EditorWorkspaceSessionCreateOrConnectWithoutWorkspaceInput | EditorWorkspaceSessionCreateOrConnectWithoutWorkspaceInput[]
-    upsert?: EditorWorkspaceSessionUpsertWithWhereUniqueWithoutWorkspaceInput | EditorWorkspaceSessionUpsertWithWhereUniqueWithoutWorkspaceInput[]
-    createMany?: EditorWorkspaceSessionCreateManyWorkspaceInputEnvelope
-    set?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionWhereUniqueInput | EditorWorkspaceSessionWhereUniqueInput[]
-    update?: EditorWorkspaceSessionUpdateWithWhereUniqueWithoutWorkspaceInput | EditorWorkspaceSessionUpdateWithWhereUniqueWithoutWorkspaceInput[]
-    updateMany?: EditorWorkspaceSessionUpdateManyWithWhereWithoutWorkspaceInput | EditorWorkspaceSessionUpdateManyWithWhereWithoutWorkspaceInput[]
-    deleteMany?: EditorWorkspaceSessionScalarWhereInput | EditorWorkspaceSessionScalarWhereInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupCreateNestedManyWithoutSessionInput = {
-    create?: XOR<EditorWorkspaceSessionGroupCreateWithoutSessionInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutSessionInput> | EditorWorkspaceSessionGroupCreateWithoutSessionInput[] | EditorWorkspaceSessionGroupUncheckedCreateWithoutSessionInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupCreateOrConnectWithoutSessionInput | EditorWorkspaceSessionGroupCreateOrConnectWithoutSessionInput[]
-    createMany?: EditorWorkspaceSessionGroupCreateManySessionInputEnvelope
-    connect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-  }
-
-  export type AccountCreateNestedOneWithoutEditorWorkspaceSessionsInput = {
-    create?: XOR<AccountCreateWithoutEditorWorkspaceSessionsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutEditorWorkspaceSessionsInput
-    connect?: AccountWhereUniqueInput
-  }
-
-  export type EditorWorkspaceCreateNestedOneWithoutSessionsInput = {
-    create?: XOR<EditorWorkspaceCreateWithoutSessionsInput, EditorWorkspaceUncheckedCreateWithoutSessionsInput>
-    connectOrCreate?: EditorWorkspaceCreateOrConnectWithoutSessionsInput
-    connect?: EditorWorkspaceWhereUniqueInput
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutSessionInput = {
-    create?: XOR<EditorWorkspaceSessionGroupCreateWithoutSessionInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutSessionInput> | EditorWorkspaceSessionGroupCreateWithoutSessionInput[] | EditorWorkspaceSessionGroupUncheckedCreateWithoutSessionInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupCreateOrConnectWithoutSessionInput | EditorWorkspaceSessionGroupCreateOrConnectWithoutSessionInput[]
-    createMany?: EditorWorkspaceSessionGroupCreateManySessionInputEnvelope
-    connect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateManyWithoutSessionNestedInput = {
-    create?: XOR<EditorWorkspaceSessionGroupCreateWithoutSessionInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutSessionInput> | EditorWorkspaceSessionGroupCreateWithoutSessionInput[] | EditorWorkspaceSessionGroupUncheckedCreateWithoutSessionInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupCreateOrConnectWithoutSessionInput | EditorWorkspaceSessionGroupCreateOrConnectWithoutSessionInput[]
-    upsert?: EditorWorkspaceSessionGroupUpsertWithWhereUniqueWithoutSessionInput | EditorWorkspaceSessionGroupUpsertWithWhereUniqueWithoutSessionInput[]
-    createMany?: EditorWorkspaceSessionGroupCreateManySessionInputEnvelope
-    set?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    update?: EditorWorkspaceSessionGroupUpdateWithWhereUniqueWithoutSessionInput | EditorWorkspaceSessionGroupUpdateWithWhereUniqueWithoutSessionInput[]
-    updateMany?: EditorWorkspaceSessionGroupUpdateManyWithWhereWithoutSessionInput | EditorWorkspaceSessionGroupUpdateManyWithWhereWithoutSessionInput[]
-    deleteMany?: EditorWorkspaceSessionGroupScalarWhereInput | EditorWorkspaceSessionGroupScalarWhereInput[]
-  }
-
-  export type AccountUpdateOneRequiredWithoutEditorWorkspaceSessionsNestedInput = {
-    create?: XOR<AccountCreateWithoutEditorWorkspaceSessionsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutEditorWorkspaceSessionsInput
-    upsert?: AccountUpsertWithoutEditorWorkspaceSessionsInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutEditorWorkspaceSessionsInput, AccountUpdateWithoutEditorWorkspaceSessionsInput>, AccountUncheckedUpdateWithoutEditorWorkspaceSessionsInput>
-  }
-
-  export type EditorWorkspaceUpdateOneRequiredWithoutSessionsNestedInput = {
-    create?: XOR<EditorWorkspaceCreateWithoutSessionsInput, EditorWorkspaceUncheckedCreateWithoutSessionsInput>
-    connectOrCreate?: EditorWorkspaceCreateOrConnectWithoutSessionsInput
-    upsert?: EditorWorkspaceUpsertWithoutSessionsInput
-    connect?: EditorWorkspaceWhereUniqueInput
-    update?: XOR<XOR<EditorWorkspaceUpdateToOneWithWhereWithoutSessionsInput, EditorWorkspaceUpdateWithoutSessionsInput>, EditorWorkspaceUncheckedUpdateWithoutSessionsInput>
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutSessionNestedInput = {
-    create?: XOR<EditorWorkspaceSessionGroupCreateWithoutSessionInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutSessionInput> | EditorWorkspaceSessionGroupCreateWithoutSessionInput[] | EditorWorkspaceSessionGroupUncheckedCreateWithoutSessionInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupCreateOrConnectWithoutSessionInput | EditorWorkspaceSessionGroupCreateOrConnectWithoutSessionInput[]
-    upsert?: EditorWorkspaceSessionGroupUpsertWithWhereUniqueWithoutSessionInput | EditorWorkspaceSessionGroupUpsertWithWhereUniqueWithoutSessionInput[]
-    createMany?: EditorWorkspaceSessionGroupCreateManySessionInputEnvelope
-    set?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionGroupWhereUniqueInput | EditorWorkspaceSessionGroupWhereUniqueInput[]
-    update?: EditorWorkspaceSessionGroupUpdateWithWhereUniqueWithoutSessionInput | EditorWorkspaceSessionGroupUpdateWithWhereUniqueWithoutSessionInput[]
-    updateMany?: EditorWorkspaceSessionGroupUpdateManyWithWhereWithoutSessionInput | EditorWorkspaceSessionGroupUpdateManyWithWhereWithoutSessionInput[]
-    deleteMany?: EditorWorkspaceSessionGroupScalarWhereInput | EditorWorkspaceSessionGroupScalarWhereInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateNestedManyWithoutGroupInput = {
-    create?: XOR<EditorWorkspaceSessionGroupTabCreateWithoutGroupInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutGroupInput> | EditorWorkspaceSessionGroupTabCreateWithoutGroupInput[] | EditorWorkspaceSessionGroupTabUncheckedCreateWithoutGroupInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupTabCreateOrConnectWithoutGroupInput | EditorWorkspaceSessionGroupTabCreateOrConnectWithoutGroupInput[]
-    createMany?: EditorWorkspaceSessionGroupTabCreateManyGroupInputEnvelope
-    connect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-  }
-
-  export type AccountCreateNestedOneWithoutEditorWorkspaceSessionGroupsInput = {
-    create?: XOR<AccountCreateWithoutEditorWorkspaceSessionGroupsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionGroupsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutEditorWorkspaceSessionGroupsInput
-    connect?: AccountWhereUniqueInput
-  }
-
-  export type EditorWorkspaceSessionCreateNestedOneWithoutGroupsInput = {
-    create?: XOR<EditorWorkspaceSessionCreateWithoutGroupsInput, EditorWorkspaceSessionUncheckedCreateWithoutGroupsInput>
-    connectOrCreate?: EditorWorkspaceSessionCreateOrConnectWithoutGroupsInput
-    connect?: EditorWorkspaceSessionWhereUniqueInput
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutGroupInput = {
-    create?: XOR<EditorWorkspaceSessionGroupTabCreateWithoutGroupInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutGroupInput> | EditorWorkspaceSessionGroupTabCreateWithoutGroupInput[] | EditorWorkspaceSessionGroupTabUncheckedCreateWithoutGroupInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupTabCreateOrConnectWithoutGroupInput | EditorWorkspaceSessionGroupTabCreateOrConnectWithoutGroupInput[]
-    createMany?: EditorWorkspaceSessionGroupTabCreateManyGroupInputEnvelope
-    connect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpdateManyWithoutGroupNestedInput = {
-    create?: XOR<EditorWorkspaceSessionGroupTabCreateWithoutGroupInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutGroupInput> | EditorWorkspaceSessionGroupTabCreateWithoutGroupInput[] | EditorWorkspaceSessionGroupTabUncheckedCreateWithoutGroupInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupTabCreateOrConnectWithoutGroupInput | EditorWorkspaceSessionGroupTabCreateOrConnectWithoutGroupInput[]
-    upsert?: EditorWorkspaceSessionGroupTabUpsertWithWhereUniqueWithoutGroupInput | EditorWorkspaceSessionGroupTabUpsertWithWhereUniqueWithoutGroupInput[]
-    createMany?: EditorWorkspaceSessionGroupTabCreateManyGroupInputEnvelope
-    set?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    update?: EditorWorkspaceSessionGroupTabUpdateWithWhereUniqueWithoutGroupInput | EditorWorkspaceSessionGroupTabUpdateWithWhereUniqueWithoutGroupInput[]
-    updateMany?: EditorWorkspaceSessionGroupTabUpdateManyWithWhereWithoutGroupInput | EditorWorkspaceSessionGroupTabUpdateManyWithWhereWithoutGroupInput[]
-    deleteMany?: EditorWorkspaceSessionGroupTabScalarWhereInput | EditorWorkspaceSessionGroupTabScalarWhereInput[]
-  }
-
-  export type AccountUpdateOneRequiredWithoutEditorWorkspaceSessionGroupsNestedInput = {
-    create?: XOR<AccountCreateWithoutEditorWorkspaceSessionGroupsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionGroupsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutEditorWorkspaceSessionGroupsInput
-    upsert?: AccountUpsertWithoutEditorWorkspaceSessionGroupsInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutEditorWorkspaceSessionGroupsInput, AccountUpdateWithoutEditorWorkspaceSessionGroupsInput>, AccountUncheckedUpdateWithoutEditorWorkspaceSessionGroupsInput>
-  }
-
-  export type EditorWorkspaceSessionUpdateOneRequiredWithoutGroupsNestedInput = {
-    create?: XOR<EditorWorkspaceSessionCreateWithoutGroupsInput, EditorWorkspaceSessionUncheckedCreateWithoutGroupsInput>
-    connectOrCreate?: EditorWorkspaceSessionCreateOrConnectWithoutGroupsInput
-    upsert?: EditorWorkspaceSessionUpsertWithoutGroupsInput
-    connect?: EditorWorkspaceSessionWhereUniqueInput
-    update?: XOR<XOR<EditorWorkspaceSessionUpdateToOneWithWhereWithoutGroupsInput, EditorWorkspaceSessionUpdateWithoutGroupsInput>, EditorWorkspaceSessionUncheckedUpdateWithoutGroupsInput>
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutGroupNestedInput = {
-    create?: XOR<EditorWorkspaceSessionGroupTabCreateWithoutGroupInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutGroupInput> | EditorWorkspaceSessionGroupTabCreateWithoutGroupInput[] | EditorWorkspaceSessionGroupTabUncheckedCreateWithoutGroupInput[]
-    connectOrCreate?: EditorWorkspaceSessionGroupTabCreateOrConnectWithoutGroupInput | EditorWorkspaceSessionGroupTabCreateOrConnectWithoutGroupInput[]
-    upsert?: EditorWorkspaceSessionGroupTabUpsertWithWhereUniqueWithoutGroupInput | EditorWorkspaceSessionGroupTabUpsertWithWhereUniqueWithoutGroupInput[]
-    createMany?: EditorWorkspaceSessionGroupTabCreateManyGroupInputEnvelope
-    set?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    disconnect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    delete?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    connect?: EditorWorkspaceSessionGroupTabWhereUniqueInput | EditorWorkspaceSessionGroupTabWhereUniqueInput[]
-    update?: EditorWorkspaceSessionGroupTabUpdateWithWhereUniqueWithoutGroupInput | EditorWorkspaceSessionGroupTabUpdateWithWhereUniqueWithoutGroupInput[]
-    updateMany?: EditorWorkspaceSessionGroupTabUpdateManyWithWhereWithoutGroupInput | EditorWorkspaceSessionGroupTabUpdateManyWithWhereWithoutGroupInput[]
-    deleteMany?: EditorWorkspaceSessionGroupTabScalarWhereInput | EditorWorkspaceSessionGroupTabScalarWhereInput[]
-  }
-
-  export type AccountCreateNestedOneWithoutEditorWorkspaceSessionGroupTabsInput = {
-    create?: XOR<AccountCreateWithoutEditorWorkspaceSessionGroupTabsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionGroupTabsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutEditorWorkspaceSessionGroupTabsInput
-    connect?: AccountWhereUniqueInput
-  }
-
-  export type EditorWorkspaceSessionGroupCreateNestedOneWithoutTabsInput = {
-    create?: XOR<EditorWorkspaceSessionGroupCreateWithoutTabsInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutTabsInput>
-    connectOrCreate?: EditorWorkspaceSessionGroupCreateOrConnectWithoutTabsInput
-    connect?: EditorWorkspaceSessionGroupWhereUniqueInput
-  }
-
-  export type AccountUpdateOneRequiredWithoutEditorWorkspaceSessionGroupTabsNestedInput = {
-    create?: XOR<AccountCreateWithoutEditorWorkspaceSessionGroupTabsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionGroupTabsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutEditorWorkspaceSessionGroupTabsInput
-    upsert?: AccountUpsertWithoutEditorWorkspaceSessionGroupTabsInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutEditorWorkspaceSessionGroupTabsInput, AccountUpdateWithoutEditorWorkspaceSessionGroupTabsInput>, AccountUncheckedUpdateWithoutEditorWorkspaceSessionGroupTabsInput>
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateOneRequiredWithoutTabsNestedInput = {
-    create?: XOR<EditorWorkspaceSessionGroupCreateWithoutTabsInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutTabsInput>
-    connectOrCreate?: EditorWorkspaceSessionGroupCreateOrConnectWithoutTabsInput
-    upsert?: EditorWorkspaceSessionGroupUpsertWithoutTabsInput
-    connect?: EditorWorkspaceSessionGroupWhereUniqueInput
-    update?: XOR<XOR<EditorWorkspaceSessionGroupUpdateToOneWithWhereWithoutTabsInput, EditorWorkspaceSessionGroupUpdateWithoutTabsInput>, EditorWorkspaceSessionGroupUncheckedUpdateWithoutTabsInput>
   }
 
   export type AccountCreateNestedOneWithoutGoalsInput = {
@@ -169385,170 +162263,6 @@ export namespace Prisma {
     create: XOR<CloudAuthUserCreateWithoutAccountInput, CloudAuthUserUncheckedCreateWithoutAccountInput>
   }
 
-  export type EditorWorkspaceCreateWithoutAccountInput = {
-    id: string
-    name: string
-    description?: string | null
-    projectPath: string
-    projectType: string
-    layout: JsonNullValueInput | InputJsonValue
-    setting: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    accessedAt?: Date | string
-    deletedAt?: Date | string | null
-    sessions?: EditorWorkspaceSessionCreateNestedManyWithoutWorkspaceInput
-  }
-
-  export type EditorWorkspaceUncheckedCreateWithoutAccountInput = {
-    id: string
-    name: string
-    description?: string | null
-    projectPath: string
-    projectType: string
-    layout: JsonNullValueInput | InputJsonValue
-    setting: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    accessedAt?: Date | string
-    deletedAt?: Date | string | null
-    sessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutWorkspaceInput
-  }
-
-  export type EditorWorkspaceCreateOrConnectWithoutAccountInput = {
-    where: EditorWorkspaceWhereUniqueInput
-    create: XOR<EditorWorkspaceCreateWithoutAccountInput, EditorWorkspaceUncheckedCreateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceCreateManyAccountInputEnvelope = {
-    data: EditorWorkspaceCreateManyAccountInput | EditorWorkspaceCreateManyAccountInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type EditorWorkspaceSessionCreateWithoutAccountInput = {
-    id: string
-    name: string
-    layout: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    groups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutSessionInput
-    workspace: EditorWorkspaceCreateNestedOneWithoutSessionsInput
-  }
-
-  export type EditorWorkspaceSessionUncheckedCreateWithoutAccountInput = {
-    id: string
-    workspaceId: string
-    name: string
-    layout: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    groups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutSessionInput
-  }
-
-  export type EditorWorkspaceSessionCreateOrConnectWithoutAccountInput = {
-    where: EditorWorkspaceSessionWhereUniqueInput
-    create: XOR<EditorWorkspaceSessionCreateWithoutAccountInput, EditorWorkspaceSessionUncheckedCreateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionCreateManyAccountInputEnvelope = {
-    data: EditorWorkspaceSessionCreateManyAccountInput | EditorWorkspaceSessionCreateManyAccountInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type EditorWorkspaceSessionGroupCreateWithoutAccountInput = {
-    id: string
-    workspaceId: string
-    groupIndex: number
-    name?: string | null
-    splitDirection: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutGroupInput
-    session: EditorWorkspaceSessionCreateNestedOneWithoutGroupsInput
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedCreateWithoutAccountInput = {
-    id: string
-    sessionId: string
-    workspaceId: string
-    groupIndex: number
-    name?: string | null
-    splitDirection: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutGroupInput
-  }
-
-  export type EditorWorkspaceSessionGroupCreateOrConnectWithoutAccountInput = {
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-    create: XOR<EditorWorkspaceSessionGroupCreateWithoutAccountInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionGroupCreateManyAccountInputEnvelope = {
-    data: EditorWorkspaceSessionGroupCreateManyAccountInput | EditorWorkspaceSessionGroupCreateManyAccountInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateWithoutAccountInput = {
-    id: string
-    sessionId: string
-    workspaceId: string
-    resourceId?: string | null
-    tabIndex: number
-    tabType: string
-    title: string
-    viewState: JsonNullValueInput | InputJsonValue
-    isPinned?: boolean
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    group: EditorWorkspaceSessionGroupCreateNestedOneWithoutTabsInput
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedCreateWithoutAccountInput = {
-    id: string
-    groupId: string
-    sessionId: string
-    workspaceId: string
-    resourceId?: string | null
-    tabIndex: number
-    tabType: string
-    title: string
-    viewState: JsonNullValueInput | InputJsonValue
-    isPinned?: boolean
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateOrConnectWithoutAccountInput = {
-    where: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    create: XOR<EditorWorkspaceSessionGroupTabCreateWithoutAccountInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateManyAccountInputEnvelope = {
-    data: EditorWorkspaceSessionGroupTabCreateManyAccountInput | EditorWorkspaceSessionGroupTabCreateManyAccountInput[]
-    skipDuplicates?: boolean
-  }
-
   export type GoalCreateWithoutAccountInput = {
     id: string
     name: string
@@ -171929,145 +164643,6 @@ export namespace Prisma {
     deviceCodes?: CloudAuthDeviceCodeUncheckedUpdateManyWithoutUserNestedInput
   }
 
-  export type EditorWorkspaceUpsertWithWhereUniqueWithoutAccountInput = {
-    where: EditorWorkspaceWhereUniqueInput
-    update: XOR<EditorWorkspaceUpdateWithoutAccountInput, EditorWorkspaceUncheckedUpdateWithoutAccountInput>
-    create: XOR<EditorWorkspaceCreateWithoutAccountInput, EditorWorkspaceUncheckedCreateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceUpdateWithWhereUniqueWithoutAccountInput = {
-    where: EditorWorkspaceWhereUniqueInput
-    data: XOR<EditorWorkspaceUpdateWithoutAccountInput, EditorWorkspaceUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceUpdateManyWithWhereWithoutAccountInput = {
-    where: EditorWorkspaceScalarWhereInput
-    data: XOR<EditorWorkspaceUpdateManyMutationInput, EditorWorkspaceUncheckedUpdateManyWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceScalarWhereInput = {
-    AND?: EditorWorkspaceScalarWhereInput | EditorWorkspaceScalarWhereInput[]
-    OR?: EditorWorkspaceScalarWhereInput[]
-    NOT?: EditorWorkspaceScalarWhereInput | EditorWorkspaceScalarWhereInput[]
-    id?: StringFilter<"EditorWorkspace"> | string
-    identityId?: StringFilter<"EditorWorkspace"> | string
-    name?: StringFilter<"EditorWorkspace"> | string
-    description?: StringNullableFilter<"EditorWorkspace"> | string | null
-    projectPath?: StringFilter<"EditorWorkspace"> | string
-    projectType?: StringFilter<"EditorWorkspace"> | string
-    layout?: JsonFilter<"EditorWorkspace">
-    setting?: JsonFilter<"EditorWorkspace">
-    isActive?: BoolFilter<"EditorWorkspace"> | boolean
-    version?: IntFilter<"EditorWorkspace"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspace"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspace"> | Date | string
-    accessedAt?: DateTimeFilter<"EditorWorkspace"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspace"> | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionUpsertWithWhereUniqueWithoutAccountInput = {
-    where: EditorWorkspaceSessionWhereUniqueInput
-    update: XOR<EditorWorkspaceSessionUpdateWithoutAccountInput, EditorWorkspaceSessionUncheckedUpdateWithoutAccountInput>
-    create: XOR<EditorWorkspaceSessionCreateWithoutAccountInput, EditorWorkspaceSessionUncheckedCreateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionUpdateWithWhereUniqueWithoutAccountInput = {
-    where: EditorWorkspaceSessionWhereUniqueInput
-    data: XOR<EditorWorkspaceSessionUpdateWithoutAccountInput, EditorWorkspaceSessionUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionUpdateManyWithWhereWithoutAccountInput = {
-    where: EditorWorkspaceSessionScalarWhereInput
-    data: XOR<EditorWorkspaceSessionUpdateManyMutationInput, EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionScalarWhereInput = {
-    AND?: EditorWorkspaceSessionScalarWhereInput | EditorWorkspaceSessionScalarWhereInput[]
-    OR?: EditorWorkspaceSessionScalarWhereInput[]
-    NOT?: EditorWorkspaceSessionScalarWhereInput | EditorWorkspaceSessionScalarWhereInput[]
-    id?: StringFilter<"EditorWorkspaceSession"> | string
-    workspaceId?: StringFilter<"EditorWorkspaceSession"> | string
-    identityId?: StringFilter<"EditorWorkspaceSession"> | string
-    name?: StringFilter<"EditorWorkspaceSession"> | string
-    layout?: JsonFilter<"EditorWorkspaceSession">
-    isActive?: BoolFilter<"EditorWorkspaceSession"> | boolean
-    version?: IntFilter<"EditorWorkspaceSession"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspaceSession"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspaceSession"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspaceSession"> | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupUpsertWithWhereUniqueWithoutAccountInput = {
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-    update: XOR<EditorWorkspaceSessionGroupUpdateWithoutAccountInput, EditorWorkspaceSessionGroupUncheckedUpdateWithoutAccountInput>
-    create: XOR<EditorWorkspaceSessionGroupCreateWithoutAccountInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateWithWhereUniqueWithoutAccountInput = {
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-    data: XOR<EditorWorkspaceSessionGroupUpdateWithoutAccountInput, EditorWorkspaceSessionGroupUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateManyWithWhereWithoutAccountInput = {
-    where: EditorWorkspaceSessionGroupScalarWhereInput
-    data: XOR<EditorWorkspaceSessionGroupUpdateManyMutationInput, EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionGroupScalarWhereInput = {
-    AND?: EditorWorkspaceSessionGroupScalarWhereInput | EditorWorkspaceSessionGroupScalarWhereInput[]
-    OR?: EditorWorkspaceSessionGroupScalarWhereInput[]
-    NOT?: EditorWorkspaceSessionGroupScalarWhereInput | EditorWorkspaceSessionGroupScalarWhereInput[]
-    id?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    sessionId?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    workspaceId?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    identityId?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    groupIndex?: IntFilter<"EditorWorkspaceSessionGroup"> | number
-    name?: StringNullableFilter<"EditorWorkspaceSessionGroup"> | string | null
-    splitDirection?: StringFilter<"EditorWorkspaceSessionGroup"> | string
-    version?: IntFilter<"EditorWorkspaceSessionGroup"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspaceSessionGroup"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspaceSessionGroup"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspaceSessionGroup"> | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpsertWithWhereUniqueWithoutAccountInput = {
-    where: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    update: XOR<EditorWorkspaceSessionGroupTabUpdateWithoutAccountInput, EditorWorkspaceSessionGroupTabUncheckedUpdateWithoutAccountInput>
-    create: XOR<EditorWorkspaceSessionGroupTabCreateWithoutAccountInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpdateWithWhereUniqueWithoutAccountInput = {
-    where: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    data: XOR<EditorWorkspaceSessionGroupTabUpdateWithoutAccountInput, EditorWorkspaceSessionGroupTabUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpdateManyWithWhereWithoutAccountInput = {
-    where: EditorWorkspaceSessionGroupTabScalarWhereInput
-    data: XOR<EditorWorkspaceSessionGroupTabUpdateManyMutationInput, EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountInput>
-  }
-
-  export type EditorWorkspaceSessionGroupTabScalarWhereInput = {
-    AND?: EditorWorkspaceSessionGroupTabScalarWhereInput | EditorWorkspaceSessionGroupTabScalarWhereInput[]
-    OR?: EditorWorkspaceSessionGroupTabScalarWhereInput[]
-    NOT?: EditorWorkspaceSessionGroupTabScalarWhereInput | EditorWorkspaceSessionGroupTabScalarWhereInput[]
-    id?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    groupId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    sessionId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    workspaceId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    identityId?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    resourceId?: StringNullableFilter<"EditorWorkspaceSessionGroupTab"> | string | null
-    tabIndex?: IntFilter<"EditorWorkspaceSessionGroupTab"> | number
-    tabType?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    title?: StringFilter<"EditorWorkspaceSessionGroupTab"> | string
-    viewState?: JsonFilter<"EditorWorkspaceSessionGroupTab">
-    isPinned?: BoolFilter<"EditorWorkspaceSessionGroupTab"> | boolean
-    isActive?: BoolFilter<"EditorWorkspaceSessionGroupTab"> | boolean
-    version?: IntFilter<"EditorWorkspaceSessionGroupTab"> | number
-    createdAt?: DateTimeFilter<"EditorWorkspaceSessionGroupTab"> | Date | string
-    updatedAt?: DateTimeFilter<"EditorWorkspaceSessionGroupTab"> | Date | string
-    deletedAt?: DateTimeNullableFilter<"EditorWorkspaceSessionGroupTab"> | Date | string | null
-  }
-
   export type GoalUpsertWithWhereUniqueWithoutAccountInput = {
     where: GoalWhereUniqueInput
     update: XOR<GoalUpdateWithoutAccountInput, GoalUncheckedUpdateWithoutAccountInput>
@@ -174090,10 +166665,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -174157,10 +166728,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -174240,10 +166807,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -174307,10 +166870,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -174374,10 +166933,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -174441,10 +166996,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -174552,10 +167103,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -174619,10 +167166,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -174702,10 +167245,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -174769,10 +167308,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -174883,10 +167418,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -174950,10 +167481,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -175054,10 +167581,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -175121,10 +167644,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -175204,10 +167723,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -175271,10 +167786,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -175338,10 +167849,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -175405,10 +167912,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -175488,10 +167991,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -175555,10 +168054,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -175622,10 +168117,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -175689,10 +168180,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -175772,10 +168259,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -175839,10 +168322,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -175906,10 +168385,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -175973,10 +168448,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -176056,10 +168527,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -176123,10 +168590,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -176190,10 +168653,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -176257,10 +168716,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -176340,10 +168795,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -176407,10 +168858,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -176474,10 +168921,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -176541,10 +168984,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -176624,10 +169063,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -176691,10 +169126,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -176861,10 +169292,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -176928,10 +169355,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -177108,10 +169531,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -177175,10 +169594,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -177452,1534 +169867,6 @@ export namespace Prisma {
     account?: AccountUncheckedUpdateOneWithoutCloudUserNestedInput
   }
 
-  export type EditorWorkspaceSessionCreateWithoutWorkspaceInput = {
-    id: string
-    name: string
-    layout: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    groups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutSessionInput
-    account: AccountCreateNestedOneWithoutEditorWorkspaceSessionsInput
-  }
-
-  export type EditorWorkspaceSessionUncheckedCreateWithoutWorkspaceInput = {
-    id: string
-    identityId: string
-    name: string
-    layout: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    groups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutSessionInput
-  }
-
-  export type EditorWorkspaceSessionCreateOrConnectWithoutWorkspaceInput = {
-    where: EditorWorkspaceSessionWhereUniqueInput
-    create: XOR<EditorWorkspaceSessionCreateWithoutWorkspaceInput, EditorWorkspaceSessionUncheckedCreateWithoutWorkspaceInput>
-  }
-
-  export type EditorWorkspaceSessionCreateManyWorkspaceInputEnvelope = {
-    data: EditorWorkspaceSessionCreateManyWorkspaceInput | EditorWorkspaceSessionCreateManyWorkspaceInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type AccountCreateWithoutEditorWorkspacesInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutEditorWorkspacesInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupUncheckedCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateUncheckedCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceUncheckedCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticUncheckedCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelUncheckedCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutEditorWorkspacesInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutEditorWorkspacesInput, AccountUncheckedCreateWithoutEditorWorkspacesInput>
-  }
-
-  export type EditorWorkspaceSessionUpsertWithWhereUniqueWithoutWorkspaceInput = {
-    where: EditorWorkspaceSessionWhereUniqueInput
-    update: XOR<EditorWorkspaceSessionUpdateWithoutWorkspaceInput, EditorWorkspaceSessionUncheckedUpdateWithoutWorkspaceInput>
-    create: XOR<EditorWorkspaceSessionCreateWithoutWorkspaceInput, EditorWorkspaceSessionUncheckedCreateWithoutWorkspaceInput>
-  }
-
-  export type EditorWorkspaceSessionUpdateWithWhereUniqueWithoutWorkspaceInput = {
-    where: EditorWorkspaceSessionWhereUniqueInput
-    data: XOR<EditorWorkspaceSessionUpdateWithoutWorkspaceInput, EditorWorkspaceSessionUncheckedUpdateWithoutWorkspaceInput>
-  }
-
-  export type EditorWorkspaceSessionUpdateManyWithWhereWithoutWorkspaceInput = {
-    where: EditorWorkspaceSessionScalarWhereInput
-    data: XOR<EditorWorkspaceSessionUpdateManyMutationInput, EditorWorkspaceSessionUncheckedUpdateManyWithoutWorkspaceInput>
-  }
-
-  export type AccountUpsertWithoutEditorWorkspacesInput = {
-    update: XOR<AccountUpdateWithoutEditorWorkspacesInput, AccountUncheckedUpdateWithoutEditorWorkspacesInput>
-    create: XOR<AccountCreateWithoutEditorWorkspacesInput, AccountUncheckedCreateWithoutEditorWorkspacesInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutEditorWorkspacesInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutEditorWorkspacesInput, AccountUncheckedUpdateWithoutEditorWorkspacesInput>
-  }
-
-  export type AccountUpdateWithoutEditorWorkspacesInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutEditorWorkspacesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUncheckedUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUncheckedUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUncheckedUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupCreateWithoutSessionInput = {
-    id: string
-    workspaceId: string
-    groupIndex: number
-    name?: string | null
-    splitDirection: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutGroupInput
-    account: AccountCreateNestedOneWithoutEditorWorkspaceSessionGroupsInput
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedCreateWithoutSessionInput = {
-    id: string
-    workspaceId: string
-    identityId: string
-    groupIndex: number
-    name?: string | null
-    splitDirection: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutGroupInput
-  }
-
-  export type EditorWorkspaceSessionGroupCreateOrConnectWithoutSessionInput = {
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-    create: XOR<EditorWorkspaceSessionGroupCreateWithoutSessionInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutSessionInput>
-  }
-
-  export type EditorWorkspaceSessionGroupCreateManySessionInputEnvelope = {
-    data: EditorWorkspaceSessionGroupCreateManySessionInput | EditorWorkspaceSessionGroupCreateManySessionInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type AccountCreateWithoutEditorWorkspaceSessionsInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutEditorWorkspaceSessionsInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupUncheckedCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateUncheckedCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceUncheckedCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticUncheckedCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelUncheckedCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutEditorWorkspaceSessionsInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutEditorWorkspaceSessionsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionsInput>
-  }
-
-  export type EditorWorkspaceCreateWithoutSessionsInput = {
-    id: string
-    name: string
-    description?: string | null
-    projectPath: string
-    projectType: string
-    layout: JsonNullValueInput | InputJsonValue
-    setting: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    accessedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutEditorWorkspacesInput
-  }
-
-  export type EditorWorkspaceUncheckedCreateWithoutSessionsInput = {
-    id: string
-    identityId: string
-    name: string
-    description?: string | null
-    projectPath: string
-    projectType: string
-    layout: JsonNullValueInput | InputJsonValue
-    setting: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    accessedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceCreateOrConnectWithoutSessionsInput = {
-    where: EditorWorkspaceWhereUniqueInput
-    create: XOR<EditorWorkspaceCreateWithoutSessionsInput, EditorWorkspaceUncheckedCreateWithoutSessionsInput>
-  }
-
-  export type EditorWorkspaceSessionGroupUpsertWithWhereUniqueWithoutSessionInput = {
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-    update: XOR<EditorWorkspaceSessionGroupUpdateWithoutSessionInput, EditorWorkspaceSessionGroupUncheckedUpdateWithoutSessionInput>
-    create: XOR<EditorWorkspaceSessionGroupCreateWithoutSessionInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutSessionInput>
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateWithWhereUniqueWithoutSessionInput = {
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-    data: XOR<EditorWorkspaceSessionGroupUpdateWithoutSessionInput, EditorWorkspaceSessionGroupUncheckedUpdateWithoutSessionInput>
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateManyWithWhereWithoutSessionInput = {
-    where: EditorWorkspaceSessionGroupScalarWhereInput
-    data: XOR<EditorWorkspaceSessionGroupUpdateManyMutationInput, EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutSessionInput>
-  }
-
-  export type AccountUpsertWithoutEditorWorkspaceSessionsInput = {
-    update: XOR<AccountUpdateWithoutEditorWorkspaceSessionsInput, AccountUncheckedUpdateWithoutEditorWorkspaceSessionsInput>
-    create: XOR<AccountCreateWithoutEditorWorkspaceSessionsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionsInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutEditorWorkspaceSessionsInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutEditorWorkspaceSessionsInput, AccountUncheckedUpdateWithoutEditorWorkspaceSessionsInput>
-  }
-
-  export type AccountUpdateWithoutEditorWorkspaceSessionsInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutEditorWorkspaceSessionsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUncheckedUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUncheckedUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUncheckedUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type EditorWorkspaceUpsertWithoutSessionsInput = {
-    update: XOR<EditorWorkspaceUpdateWithoutSessionsInput, EditorWorkspaceUncheckedUpdateWithoutSessionsInput>
-    create: XOR<EditorWorkspaceCreateWithoutSessionsInput, EditorWorkspaceUncheckedCreateWithoutSessionsInput>
-    where?: EditorWorkspaceWhereInput
-  }
-
-  export type EditorWorkspaceUpdateToOneWithWhereWithoutSessionsInput = {
-    where?: EditorWorkspaceWhereInput
-    data: XOR<EditorWorkspaceUpdateWithoutSessionsInput, EditorWorkspaceUncheckedUpdateWithoutSessionsInput>
-  }
-
-  export type EditorWorkspaceUpdateWithoutSessionsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    projectPath?: StringFieldUpdateOperationsInput | string
-    projectType?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    setting?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    accessedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutEditorWorkspacesNestedInput
-  }
-
-  export type EditorWorkspaceUncheckedUpdateWithoutSessionsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    projectPath?: StringFieldUpdateOperationsInput | string
-    projectType?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    setting?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    accessedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateWithoutGroupInput = {
-    id: string
-    sessionId: string
-    workspaceId: string
-    resourceId?: string | null
-    tabIndex: number
-    tabType: string
-    title: string
-    viewState: JsonNullValueInput | InputJsonValue
-    isPinned?: boolean
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutEditorWorkspaceSessionGroupTabsInput
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedCreateWithoutGroupInput = {
-    id: string
-    sessionId: string
-    workspaceId: string
-    identityId: string
-    resourceId?: string | null
-    tabIndex: number
-    tabType: string
-    title: string
-    viewState: JsonNullValueInput | InputJsonValue
-    isPinned?: boolean
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateOrConnectWithoutGroupInput = {
-    where: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    create: XOR<EditorWorkspaceSessionGroupTabCreateWithoutGroupInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutGroupInput>
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateManyGroupInputEnvelope = {
-    data: EditorWorkspaceSessionGroupTabCreateManyGroupInput | EditorWorkspaceSessionGroupTabCreateManyGroupInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type AccountCreateWithoutEditorWorkspaceSessionGroupsInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutEditorWorkspaceSessionGroupsInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupUncheckedCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateUncheckedCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceUncheckedCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticUncheckedCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelUncheckedCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutEditorWorkspaceSessionGroupsInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutEditorWorkspaceSessionGroupsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionGroupsInput>
-  }
-
-  export type EditorWorkspaceSessionCreateWithoutGroupsInput = {
-    id: string
-    name: string
-    layout: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutEditorWorkspaceSessionsInput
-    workspace: EditorWorkspaceCreateNestedOneWithoutSessionsInput
-  }
-
-  export type EditorWorkspaceSessionUncheckedCreateWithoutGroupsInput = {
-    id: string
-    workspaceId: string
-    identityId: string
-    name: string
-    layout: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionCreateOrConnectWithoutGroupsInput = {
-    where: EditorWorkspaceSessionWhereUniqueInput
-    create: XOR<EditorWorkspaceSessionCreateWithoutGroupsInput, EditorWorkspaceSessionUncheckedCreateWithoutGroupsInput>
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpsertWithWhereUniqueWithoutGroupInput = {
-    where: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    update: XOR<EditorWorkspaceSessionGroupTabUpdateWithoutGroupInput, EditorWorkspaceSessionGroupTabUncheckedUpdateWithoutGroupInput>
-    create: XOR<EditorWorkspaceSessionGroupTabCreateWithoutGroupInput, EditorWorkspaceSessionGroupTabUncheckedCreateWithoutGroupInput>
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpdateWithWhereUniqueWithoutGroupInput = {
-    where: EditorWorkspaceSessionGroupTabWhereUniqueInput
-    data: XOR<EditorWorkspaceSessionGroupTabUpdateWithoutGroupInput, EditorWorkspaceSessionGroupTabUncheckedUpdateWithoutGroupInput>
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpdateManyWithWhereWithoutGroupInput = {
-    where: EditorWorkspaceSessionGroupTabScalarWhereInput
-    data: XOR<EditorWorkspaceSessionGroupTabUpdateManyMutationInput, EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutGroupInput>
-  }
-
-  export type AccountUpsertWithoutEditorWorkspaceSessionGroupsInput = {
-    update: XOR<AccountUpdateWithoutEditorWorkspaceSessionGroupsInput, AccountUncheckedUpdateWithoutEditorWorkspaceSessionGroupsInput>
-    create: XOR<AccountCreateWithoutEditorWorkspaceSessionGroupsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionGroupsInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutEditorWorkspaceSessionGroupsInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutEditorWorkspaceSessionGroupsInput, AccountUncheckedUpdateWithoutEditorWorkspaceSessionGroupsInput>
-  }
-
-  export type AccountUpdateWithoutEditorWorkspaceSessionGroupsInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutEditorWorkspaceSessionGroupsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUncheckedUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUncheckedUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUncheckedUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type EditorWorkspaceSessionUpsertWithoutGroupsInput = {
-    update: XOR<EditorWorkspaceSessionUpdateWithoutGroupsInput, EditorWorkspaceSessionUncheckedUpdateWithoutGroupsInput>
-    create: XOR<EditorWorkspaceSessionCreateWithoutGroupsInput, EditorWorkspaceSessionUncheckedCreateWithoutGroupsInput>
-    where?: EditorWorkspaceSessionWhereInput
-  }
-
-  export type EditorWorkspaceSessionUpdateToOneWithWhereWithoutGroupsInput = {
-    where?: EditorWorkspaceSessionWhereInput
-    data: XOR<EditorWorkspaceSessionUpdateWithoutGroupsInput, EditorWorkspaceSessionUncheckedUpdateWithoutGroupsInput>
-  }
-
-  export type EditorWorkspaceSessionUpdateWithoutGroupsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutEditorWorkspaceSessionsNestedInput
-    workspace?: EditorWorkspaceUpdateOneRequiredWithoutSessionsNestedInput
-  }
-
-  export type EditorWorkspaceSessionUncheckedUpdateWithoutGroupsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type AccountCreateWithoutEditorWorkspaceSessionGroupTabsInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutEditorWorkspaceSessionGroupTabsInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupUncheckedCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateUncheckedCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceUncheckedCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticUncheckedCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelUncheckedCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutEditorWorkspaceSessionGroupTabsInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutEditorWorkspaceSessionGroupTabsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionGroupTabsInput>
-  }
-
-  export type EditorWorkspaceSessionGroupCreateWithoutTabsInput = {
-    id: string
-    workspaceId: string
-    groupIndex: number
-    name?: string | null
-    splitDirection: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-    account: AccountCreateNestedOneWithoutEditorWorkspaceSessionGroupsInput
-    session: EditorWorkspaceSessionCreateNestedOneWithoutGroupsInput
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedCreateWithoutTabsInput = {
-    id: string
-    sessionId: string
-    workspaceId: string
-    identityId: string
-    groupIndex: number
-    name?: string | null
-    splitDirection: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupCreateOrConnectWithoutTabsInput = {
-    where: EditorWorkspaceSessionGroupWhereUniqueInput
-    create: XOR<EditorWorkspaceSessionGroupCreateWithoutTabsInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutTabsInput>
-  }
-
-  export type AccountUpsertWithoutEditorWorkspaceSessionGroupTabsInput = {
-    update: XOR<AccountUpdateWithoutEditorWorkspaceSessionGroupTabsInput, AccountUncheckedUpdateWithoutEditorWorkspaceSessionGroupTabsInput>
-    create: XOR<AccountCreateWithoutEditorWorkspaceSessionGroupTabsInput, AccountUncheckedCreateWithoutEditorWorkspaceSessionGroupTabsInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutEditorWorkspaceSessionGroupTabsInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutEditorWorkspaceSessionGroupTabsInput, AccountUncheckedUpdateWithoutEditorWorkspaceSessionGroupTabsInput>
-  }
-
-  export type AccountUpdateWithoutEditorWorkspaceSessionGroupTabsInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutEditorWorkspaceSessionGroupTabsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUncheckedUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUncheckedUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUncheckedUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupUpsertWithoutTabsInput = {
-    update: XOR<EditorWorkspaceSessionGroupUpdateWithoutTabsInput, EditorWorkspaceSessionGroupUncheckedUpdateWithoutTabsInput>
-    create: XOR<EditorWorkspaceSessionGroupCreateWithoutTabsInput, EditorWorkspaceSessionGroupUncheckedCreateWithoutTabsInput>
-    where?: EditorWorkspaceSessionGroupWhereInput
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateToOneWithWhereWithoutTabsInput = {
-    where?: EditorWorkspaceSessionGroupWhereInput
-    data: XOR<EditorWorkspaceSessionGroupUpdateWithoutTabsInput, EditorWorkspaceSessionGroupUncheckedUpdateWithoutTabsInput>
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateWithoutTabsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutEditorWorkspaceSessionGroupsNestedInput
-    session?: EditorWorkspaceSessionUpdateOneRequiredWithoutGroupsNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedUpdateWithoutTabsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
   export type AccountCreateWithoutGoalsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
@@ -178987,10 +169874,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -179054,10 +169937,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -179272,10 +170151,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -179339,10 +170214,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -180412,10 +171283,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -180479,10 +171346,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -180611,10 +171474,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -180678,10 +171537,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -181047,10 +171902,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -181114,10 +171965,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -181235,10 +172082,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -181302,10 +172145,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -181401,10 +172240,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
@@ -181468,10 +172303,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -181629,10 +172460,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
@@ -181696,10 +172523,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -181853,10 +172676,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -181920,10 +172739,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -182120,10 +172935,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -182187,10 +172998,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -182549,10 +173356,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -182616,10 +173419,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -182779,10 +173578,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -182846,10 +173641,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -182913,10 +173704,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -182980,10 +173767,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -183130,10 +173913,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -183197,10 +173976,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -183337,10 +174112,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -183404,10 +174175,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -183554,10 +174321,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -183621,10 +174384,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -183968,10 +174727,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -184035,10 +174790,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -184191,10 +174942,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -184258,10 +175005,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -184325,10 +175068,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -184392,10 +175131,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -184475,10 +175210,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -184542,10 +175273,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -184767,10 +175494,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -184834,10 +175557,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -184981,10 +175700,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -185048,10 +175763,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -185115,10 +175826,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -185182,10 +175889,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -185265,10 +175968,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -185332,10 +176031,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -185399,10 +176094,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -185466,10 +176157,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -185610,10 +176297,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -185677,10 +176360,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -185811,10 +176490,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -185878,10 +176553,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -186022,10 +176693,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -186089,10 +176756,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -186223,10 +176886,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -186290,10 +176949,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -186373,10 +177028,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -186440,10 +177091,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -186507,10 +177154,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -186574,10 +177217,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -186718,10 +177357,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -186785,10 +177420,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -186919,10 +177550,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -186986,10 +177613,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -187069,10 +177692,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -187136,10 +177755,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -187264,10 +177879,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -187331,10 +177942,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -187481,10 +178088,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -187548,10 +178151,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -187615,10 +178214,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -187682,10 +178277,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -187871,10 +178462,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -187938,10 +178525,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -188061,10 +178644,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -188128,10 +178707,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -188238,10 +178813,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -188305,10 +178876,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -188388,10 +178955,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -188455,10 +179018,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -188600,10 +179159,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -188667,10 +179222,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -188808,10 +179359,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -188875,10 +179422,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -188993,10 +179536,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -189060,10 +179599,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -189143,10 +179678,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -189210,10 +179741,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -189318,10 +179845,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -189385,10 +179908,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -189516,10 +180035,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -189583,10 +180098,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -189705,10 +180216,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -189772,10 +180279,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -189872,10 +180375,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -189939,10 +180438,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -190061,10 +180556,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -190128,10 +180619,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -190195,10 +180682,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -190262,10 +180745,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -190533,10 +181012,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -190600,10 +181075,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -190731,10 +181202,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -190798,10 +181265,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -191003,10 +181466,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -191070,10 +181529,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -191249,10 +181704,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -191316,10 +181767,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -191450,10 +181897,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -191517,10 +181960,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -191683,10 +182122,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -191750,10 +182185,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -191980,10 +182411,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -192047,10 +182474,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -192529,10 +182952,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -192596,10 +183015,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -192730,10 +183145,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -192797,10 +183208,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -192921,10 +183328,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -192988,10 +183391,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -193071,10 +183470,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -193138,10 +183533,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -193205,10 +183596,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -193272,10 +183659,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -193355,10 +183738,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -193422,10 +183801,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -193675,10 +184050,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -193742,10 +184113,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -194117,10 +184484,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -194184,10 +184547,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -195160,10 +185519,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -195227,10 +185582,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -195355,10 +185706,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -195422,10 +185769,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -195540,10 +185883,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -195607,10 +185946,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -195690,10 +186025,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -195757,10 +186088,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -195858,10 +186185,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -195925,10 +186248,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -196024,10 +186343,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -196091,10 +186406,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -196158,10 +186469,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -196225,10 +186532,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -196308,10 +186611,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -196375,10 +186674,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -196442,10 +186737,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -196509,10 +186800,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -196679,10 +186966,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -196746,10 +187029,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -196906,10 +187185,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -196973,10 +187248,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -197056,10 +187327,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -197123,10 +187390,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -197190,10 +187453,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -197257,10 +187516,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -197340,10 +187595,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -197407,10 +187658,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -197474,10 +187721,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -197541,10 +187784,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -197757,10 +187996,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -197824,10 +188059,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -197989,10 +188220,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -198056,10 +188283,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -198229,10 +188452,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -198296,10 +188515,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -198459,10 +188674,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -198526,10 +188737,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -198699,10 +188906,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -198766,10 +188969,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -198929,10 +189128,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -198996,10 +189191,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -199079,10 +189270,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -199146,10 +189333,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -199213,10 +189396,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -199280,10 +189459,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -199397,10 +189572,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -199464,10 +189635,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -199572,10 +189739,6 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    editorWorkspaces?: EditorWorkspaceCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -199639,10 +189802,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedCreateNestedManyWithoutAccountInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -199753,10 +189912,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    editorWorkspaces?: EditorWorkspaceUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -199820,10 +189975,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    editorWorkspaces?: EditorWorkspaceUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountNestedInput
-    editorWorkspaceSessionGroupTabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -199878,65 +190029,6 @@ export namespace Prisma {
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
-  }
-
-  export type EditorWorkspaceCreateManyAccountInput = {
-    id: string
-    name: string
-    description?: string | null
-    projectPath: string
-    projectType: string
-    layout: JsonNullValueInput | InputJsonValue
-    setting: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    accessedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionCreateManyAccountInput = {
-    id: string
-    workspaceId: string
-    name: string
-    layout: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupCreateManyAccountInput = {
-    id: string
-    sessionId: string
-    workspaceId: string
-    groupIndex: number
-    name?: string | null
-    splitDirection: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateManyAccountInput = {
-    id: string
-    groupId: string
-    sessionId: string
-    workspaceId: string
-    resourceId?: string | null
-    tabIndex: number
-    tabType: string
-    title: string
-    viewState: JsonNullValueInput | InputJsonValue
-    isPinned?: boolean
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
   }
 
   export type GoalCreateManyAccountInput = {
@@ -200700,189 +190792,6 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     completedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    projectPath?: StringFieldUpdateOperationsInput | string
-    projectType?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    setting?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    accessedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    sessions?: EditorWorkspaceSessionUpdateManyWithoutWorkspaceNestedInput
-  }
-
-  export type EditorWorkspaceUncheckedUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    projectPath?: StringFieldUpdateOperationsInput | string
-    projectType?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    setting?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    accessedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    sessions?: EditorWorkspaceSessionUncheckedUpdateManyWithoutWorkspaceNestedInput
-  }
-
-  export type EditorWorkspaceUncheckedUpdateManyWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    projectPath?: StringFieldUpdateOperationsInput | string
-    projectType?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    setting?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    accessedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    groups?: EditorWorkspaceSessionGroupUpdateManyWithoutSessionNestedInput
-    workspace?: EditorWorkspaceUpdateOneRequiredWithoutSessionsNestedInput
-  }
-
-  export type EditorWorkspaceSessionUncheckedUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    groups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutSessionNestedInput
-  }
-
-  export type EditorWorkspaceSessionUncheckedUpdateManyWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutGroupNestedInput
-    session?: EditorWorkspaceSessionUpdateOneRequiredWithoutGroupsNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutGroupNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    tabIndex?: IntFieldUpdateOperationsInput | number
-    tabType?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    viewState?: JsonNullValueInput | InputJsonValue
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    group?: EditorWorkspaceSessionGroupUpdateOneRequiredWithoutTabsNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    groupId?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    tabIndex?: IntFieldUpdateOperationsInput | number
-    tabType?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    viewState?: JsonNullValueInput | InputJsonValue
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    groupId?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    tabIndex?: IntFieldUpdateOperationsInput | number
-    tabType?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    viewState?: JsonNullValueInput | InputJsonValue
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type GoalUpdateWithoutAccountInput = {
@@ -203441,182 +193350,6 @@ export namespace Prisma {
     pollingInterval?: NullableIntFieldUpdateOperationsInput | number | null
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     scope?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type EditorWorkspaceSessionCreateManyWorkspaceInput = {
-    id: string
-    identityId: string
-    name: string
-    layout: JsonNullValueInput | InputJsonValue
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionUpdateWithoutWorkspaceInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    groups?: EditorWorkspaceSessionGroupUpdateManyWithoutSessionNestedInput
-    account?: AccountUpdateOneRequiredWithoutEditorWorkspaceSessionsNestedInput
-  }
-
-  export type EditorWorkspaceSessionUncheckedUpdateWithoutWorkspaceInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    groups?: EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutSessionNestedInput
-  }
-
-  export type EditorWorkspaceSessionUncheckedUpdateManyWithoutWorkspaceInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    layout?: JsonNullValueInput | InputJsonValue
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupCreateManySessionInput = {
-    id: string
-    workspaceId: string
-    identityId: string
-    groupIndex: number
-    name?: string | null
-    splitDirection: string
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupUpdateWithoutSessionInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabUpdateManyWithoutGroupNestedInput
-    account?: AccountUpdateOneRequiredWithoutEditorWorkspaceSessionGroupsNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedUpdateWithoutSessionInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    tabs?: EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutGroupNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupUncheckedUpdateManyWithoutSessionInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    groupIndex?: IntFieldUpdateOperationsInput | number
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    splitDirection?: StringFieldUpdateOperationsInput | string
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabCreateManyGroupInput = {
-    id: string
-    sessionId: string
-    workspaceId: string
-    identityId: string
-    resourceId?: string | null
-    tabIndex: number
-    tabType: string
-    title: string
-    viewState: JsonNullValueInput | InputJsonValue
-    isPinned?: boolean
-    isActive?: boolean
-    version?: number
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deletedAt?: Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabUpdateWithoutGroupInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    tabIndex?: IntFieldUpdateOperationsInput | number
-    tabType?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    viewState?: JsonNullValueInput | InputJsonValue
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    account?: AccountUpdateOneRequiredWithoutEditorWorkspaceSessionGroupTabsNestedInput
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedUpdateWithoutGroupInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    tabIndex?: IntFieldUpdateOperationsInput | number
-    tabType?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    viewState?: JsonNullValueInput | InputJsonValue
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type EditorWorkspaceSessionGroupTabUncheckedUpdateManyWithoutGroupInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    sessionId?: StringFieldUpdateOperationsInput | string
-    workspaceId?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    tabIndex?: IntFieldUpdateOperationsInput | number
-    tabType?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    viewState?: JsonNullValueInput | InputJsonValue
-    isPinned?: BoolFieldUpdateOperationsInput | boolean
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    version?: IntFieldUpdateOperationsInput | number
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type KeyResultCreateManyGoalInput = {

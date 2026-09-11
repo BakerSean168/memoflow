@@ -40,13 +40,6 @@ export const IDENTITY_ID_TABLES = new Set([
   'notification_preferences',
   'notification_channels',
   'notification_history',
-  // Residual 539: editor_* tables stay for portable backup re-import / PowerSync
-  // Residual 885: portable boundary re-lock — editor_* is backup continuity only, not product editor runtime.
-  // continuity only — not a first-party @memoflow/editor product runtime surface.
-  'editor_workspaces',
-  'editor_workspace_sessions',
-  'editor_workspace_session_groups',
-  'editor_workspace_session_group_tabs',
   'ai_conversations',
   'ai_messages',
   'ai_generation_tasks',
@@ -91,10 +84,6 @@ const TABLE_TO_MODEL: Record<string, string> = {
   notification_channels: 'notificationChannel',
   notification_history: 'notificationHistory',
   notification_templates: 'notificationTemplate',
-  editor_workspaces: 'editorWorkspace',
-  editor_workspace_sessions: 'editorWorkspaceSession',
-  editor_workspace_session_groups: 'editorWorkspaceSessionGroup',
-  editor_workspace_session_group_tabs: 'editorWorkspaceSessionGroupTab',
   ai_conversations: 'aiConversation',
   ai_messages: 'aiMessage',
   ai_generation_tasks: 'aiGenerationTask',
