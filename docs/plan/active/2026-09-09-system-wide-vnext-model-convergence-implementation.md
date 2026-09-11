@@ -376,7 +376,13 @@ Review-repair evidence (2026-09-11, final workspace): focused identity/schema su
 
 ## KNOW-2003 — Single KnowledgeProjectionEngine (ADR-091)
 
-Unify webhook, confirmed web commit and reconciliation projection application. AI indexing becomes an independent consumer.
+**状态：DONE — 2026-09-11。**
+
+`KnowledgeProjectionEngine` is now the single application-owned write path for rebuildable Knowledge note/attachment projections. Confirmed create/adopt commits, write-request replay, GitHub webhook incremental/full-snapshot ingestion, and periodic reconciliation all provide normalized source/change sets to that engine instead of writing projection repositories directly. The engine owns projection materialization, `KnowledgeDocumentId` marker validation/registration, stable-id rename/delete mutation semantics, attachment projection application, and publication of `repository:note:mutated`; AI indexing remains an independent consumer of that mutation boundary rather than being embedded in projection persistence. Adoption explicitly preserves the existing projection row id while durable `KnowledgeDocumentId` remains the product identity.
+
+Production Prisma composition constructs one shared engine instance and injects it into both `KnowledgeNoteCommitService` and `KnowledgeRepositoryProjectionService`. A dedicated anti-resurrection surface test fails if either caller regains direct `projectionRepository`/`attachmentRepository` writes, if confirmed commits/webhook/reconciliation stop routing through the engine, or if production starts composing duplicate engine instances. The real-DB projection-ledger fixture was also updated to mirror the same shared-engine composition; this caught and closed the failure -> replay path that a unit-only seam would have missed.
+
+**Acceptance evidence:** Repository typecheck PASS; Repository unit 37 files / 246 tests PASS; `knowledge-write-request-projection-ledger.integration.test.ts` real PostgreSQL 15/15 PASS including commit projection failure -> HTTP replay, valid/duplicate webhook, reconciliation and concurrent lease cases; Repository lint PASS with one pre-existing `index-lifecycle.spec.ts` unused-variable warning and no errors; Repository build PASS; direct production-service projection write scan reports only `knowledge-projection.engine.ts`; docs-check PASS; governance-check PASS; `git diff --check` PASS at documentation closure.
 
 ## EDITOR-1701 — Remove Editor capability from Portability V3
 

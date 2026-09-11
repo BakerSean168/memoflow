@@ -43,6 +43,7 @@ import { KnowledgeAttachmentContentCachePrismaRepository } from './adapters/pris
 import { KnowledgeWriteRequestPrismaRepository } from './adapters/prisma/knowledge-write-request-prisma.repository';
 import { KnowledgeRepositoryLeasePrismaRepository } from './adapters/prisma/knowledge-repository-lease-prisma.repository';
 import { KnowledgeRepositoryProjectionService } from '../application/services/knowledge-repository-projection.service';
+import { KnowledgeProjectionEngine } from '../application/services/knowledge-projection.engine';
 import { KnowledgeNoteCommitService } from '../application/services/knowledge-note-commit.service';
 import {
   PrismaOperationAuditRepository,
@@ -219,6 +220,14 @@ export function createRepositoryPrismaRuntimeContributions(
   const attachmentContentCache = githubApp ? repositories.attachmentContentCache : null;
   const leaseRepository = githubApp ? repositories.leaseRepository : null;
   const writeRequestRepository = githubApp ? repositories.writeRequestRepository : null;
+  const knowledgeProjectionEngine =
+    githubApp && projectionRepository
+      ? new KnowledgeProjectionEngine({
+          projectionRepository,
+          attachmentRepository: attachmentRepository ?? undefined,
+          documentIdentityRepository: repositories.documentIdentityRepository,
+        })
+      : null;
 
   const knowledgeRepositoryConnectionService =
     githubApp && bindingRepository && githubAppClient
@@ -258,6 +267,7 @@ export function createRepositoryPrismaRuntimeContributions(
           leaseRepository: leaseRepository ?? undefined,
           githubAppClient,
           metrics: globalUnifiedOperationMetrics,
+          projectionEngine: knowledgeProjectionEngine ?? undefined,
         })
       : null;
   const knowledgeNoteCommitService =
@@ -273,6 +283,7 @@ export function createRepositoryPrismaRuntimeContributions(
           githubAppClient,
           closureChecker: deps.closureChecker,
           metrics: globalUnifiedOperationMetrics,
+          projectionEngine: knowledgeProjectionEngine ?? undefined,
         })
       : null;
 

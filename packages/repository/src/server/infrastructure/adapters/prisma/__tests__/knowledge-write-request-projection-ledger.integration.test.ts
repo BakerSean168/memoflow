@@ -26,6 +26,7 @@ import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/contracts/reposi
 import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
 import { KnowledgeNoteCommitService } from '../../../../application/services/knowledge-note-commit.service';
 import { KnowledgeRepositoryProjectionService } from '../../../../application/services/knowledge-repository-projection.service';
+import { KnowledgeProjectionEngine } from '../../../../application/services/knowledge-projection.engine';
 import { createRepositoryModule } from '../../../../infrastructure/repository.module';
 import { registerKnowledgeRepositoryConnectionRoutes } from '../../../../../api/routes/knowledge-repository-connection.routes';
 import {
@@ -413,6 +414,10 @@ async function startRuntime(
     ],
   };
   const githubAppClient = createGithubAppClient(inventory, commitSha);
+  const projectionEngine = new KnowledgeProjectionEngine({
+    projectionRepository: projectionRepo,
+    documentIdentityRepository: documentIdentityRepo,
+  });
 
   const commitService = new KnowledgeNoteCommitService({
     connectionRepository: connectionRepo,
@@ -424,6 +429,7 @@ async function startRuntime(
     githubAppClient,
     leaseRepository: leaseRepo,
     closureChecker: async () => false,
+    projectionEngine,
   });
 
   const projectionService = new KnowledgeRepositoryProjectionService({
@@ -439,6 +445,7 @@ async function startRuntime(
     leaseRepository: leaseRepo,
     reconciliationIntervalMs: 0,
     metrics: options.metrics,
+    projectionEngine,
   });
 
   const module = createRepositoryModule({

@@ -14,3 +14,11 @@ export {
   publishRepositoryNoteMutation,
   type RepositoryNoteMutationPayload,
 } from './repository-note-mutation.publisher';
+
+export {
+  KnowledgeProjectionEngine,
+  type IKnowledgeProjectionEngine,
+  type KnowledgeProjectionEngineOptions,
+  type KnowledgeProjectionChangeSet,
+  type KnowledgeProjectionSnapshot,
+} from './knowledge-projection.engine';

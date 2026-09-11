@@ -10,9 +10,7 @@ import {
   type AdoptKnowledgeDocumentReq,
   type AdoptKnowledgeDocumentResponse,
   type GitHubInstallationRepositoryDTO,
-  RepositoryNoteMutationType,
 } from '@memoflow/contracts/repository';
-import type { IdentityId, RepositoryId, ResourceId } from '@memoflow/contracts/primitives';
 import { createLogger } from '@memoflow/utils/logger';
 import { GitHubAppClientFailureError } from '../ports/github-app-client.port';
 import type { GitHubFileCommitResult, IGitHubAppClient } from '../ports/github-app-client.port';
@@ -26,19 +24,19 @@ import type { IKnowledgeRepositoryLeaseRepository } from '../ports/knowledge-rep
 import type {
   IKnowledgeNoteProjectionRepository,
   IKnowledgeWriteRequestRepository,
-  KnowledgeNoteProjectionUpsert,
   KnowledgeWriteRequestRecord,
 } from '../ports/knowledge-note-projection.repository';
-import {
-  publishRepositoryNoteMutation,
-  type RepositoryNoteMutationPayload,
-} from './repository-note-mutation.publisher';
+import type { RepositoryNoteMutationPayload } from './repository-note-mutation.publisher';
 import {
   KnowledgeRepositoryLeaseCoordinator,
   KnowledgeRepositoryLeaseLostError,
   knowledgeRepositoryConnectionLeaseKey,
   type KnowledgeRepositoryLeaseGuard,
 } from './knowledge-repository-lease-coordinator';
+import {
+  KnowledgeProjectionEngine,
+  type IKnowledgeProjectionEngine,
+} from './knowledge-projection.engine';
 
 const logger = createLogger('KnowledgeNoteCommitService');
 
@@ -57,6 +55,7 @@ export interface KnowledgeNoteCommitServiceOptions {
   leaseRenewalIntervalMs?: number;
   closureChecker?: (identityId: string) => Promise<boolean>;
   metrics?: import('@memoflow/patterns/operations').UnifiedOperationMetricsRecorder;
+  projectionEngine?: IKnowledgeProjectionEngine;
 }
 
 /**
@@ -67,7 +66,7 @@ export interface KnowledgeNoteCommitServiceOptions {
  */
 export class KnowledgeNoteCommitService {
   private readonly now: () => number;
-  private readonly publishMutation: (event: RepositoryNoteMutationPayload) => void;
+  private readonly projectionEngine: IKnowledgeProjectionEngine;
   private readonly inFlight = new Map<
     string,
     {
@@ -90,7 +89,14 @@ export class KnowledgeNoteCommitService {
       throw new Error('[FAIL-CLOSED] KnowledgeNoteCommitService requires options.closureChecker');
     }
     this.now = options.now ?? Date.now;
-    this.publishMutation = options.publishMutation ?? publishRepositoryNoteMutation;
+    this.projectionEngine =
+      options.projectionEngine ??
+      new KnowledgeProjectionEngine({
+        projectionRepository: options.projectionRepository,
+        documentIdentityRepository: options.documentIdentityRepository,
+        now: this.now,
+        publishMutation: options.publishMutation,
+      });
     this.leaseCoordinator = new KnowledgeRepositoryLeaseCoordinator(options.leaseRepository, {
       now: this.now,
       ttlMs: options.leaseTtlMs,
@@ -436,39 +442,25 @@ export class KnowledgeNoteCommitService {
       markdownContent,
     });
 
-    const adoptedProjection: KnowledgeNoteProjectionUpsert = {
-      id: projection.id,
-      connectionId: projection.connectionId,
-      knowledgeDocumentId: request.knowledgeDocumentId,
-      relativePath: projection.relativePath,
-      commitSha: committed.commitSha,
-      blobSha: committed.blobSha,
-      contentHash: createHash('sha256').update(markdownContent).digest('hex'),
-      frontmatter,
-      markdownContent,
-      indexStatus: 'pending',
-    };
     try {
       await guard.ensureHeld();
-      await this.options.projectionRepository.applyChanges(
-        connection.id,
-        committed.commitSha,
-        [adoptedProjection],
-        [],
-      );
+      await this.projectionEngine.applyChanges(connection, committed.commitSha, {
+        notes: [
+          {
+            projectionId: projection.id,
+            relativePath: projection.relativePath,
+            blobSha: committed.blobSha,
+            markdownContent,
+            mutation: 'content_updated',
+          },
+        ],
+      });
       await guard.ensureHeld();
       await this.options.writeRequestRepository.markProjectionSucceeded(
         identityId,
         record.id,
         this.now(),
       );
-      this.publishMutation({
-        identityId: connection.identityId as IdentityId,
-        repositoryId: String(connection.id) as RepositoryId,
-        resourceId: String(request.knowledgeDocumentId) as ResourceId,
-        resourcePath: projection.relativePath,
-        mutation: RepositoryNoteMutationType.ContentUpdated,
-      });
     } catch (error) {
       if (error instanceof KnowledgeRepositoryLeaseLostError) throw error;
       logger.warn('Knowledge adoption committed but immediate projection update failed', {
@@ -716,39 +708,24 @@ export class KnowledgeNoteCommitService {
       blobSha: committed.blobSha,
       markdownContent,
     });
-    const projection: KnowledgeNoteProjectionUpsert = {
-      id: `knowledge-note-${createHash('sha256').update(`${connection.id}:${request.proposedPath}`).digest('hex')}`,
-      connectionId: connection.id,
-      knowledgeDocumentId: request.knowledgeDocumentId,
-      relativePath: request.proposedPath,
-      commitSha: committed.commitSha,
-      blobSha: committed.blobSha,
-      contentHash: createHash('sha256').update(markdownContent).digest('hex'),
-      frontmatter,
-      markdownContent,
-      indexStatus: 'pending',
-    };
     try {
       await guard.ensureHeld();
-      await this.options.projectionRepository.applyChanges(
-        connection.id,
-        committed.commitSha,
-        [projection],
-        [],
-      );
+      await this.projectionEngine.applyChanges(connection, committed.commitSha, {
+        notes: [
+          {
+            relativePath: request.proposedPath,
+            blobSha: committed.blobSha,
+            markdownContent,
+            mutation: 'created',
+          },
+        ],
+      });
       await guard.ensureHeld();
       await this.options.writeRequestRepository.markProjectionSucceeded(
         identityId,
         record.id,
         this.now(),
       );
-      this.publishMutation({
-        identityId: connection.identityId as IdentityId,
-        repositoryId: String(connection.id) as RepositoryId,
-        resourceId: String(request.knowledgeDocumentId) as ResourceId,
-        resourcePath: projection.relativePath,
-        mutation: RepositoryNoteMutationType.Created,
-      });
     } catch (error) {
       if (error instanceof KnowledgeRepositoryLeaseLostError) throw error;
       logger.warn('Knowledge note committed but immediate projection update failed', {

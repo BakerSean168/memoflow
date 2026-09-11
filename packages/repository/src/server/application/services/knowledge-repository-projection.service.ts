@@ -1,6 +1,4 @@
-import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
-import matter from 'gray-matter';
-import { randomUUID } from 'node:crypto';
+import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
 import {
@@ -22,21 +20,11 @@ import type {
   KnowledgeProjectionCheckpoint,
   RemoteRepositoryBlockReason,
 } from '@memoflow/contracts/repository';
-import type {
-  IdentityId,
-  KnowledgeDocumentId,
-  RepositoryId,
-  ResourceId,
-} from '@memoflow/contracts/primitives';
+import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import { createLogger } from '@memoflow/utils/logger';
 import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/contracts/repository';
 import { GitHubAppClientFailureError } from '../ports/github-app-client.port';
-import type {
-  GitHubBlobContent,
-  GitHubMarkdownChange,
-  IGitHubAppClient,
-} from '../ports/github-app-client.port';
-import type { GitHubMarkdownSnapshot } from '../ports/github-app-client.port';
+import type { GitHubBlobContent, IGitHubAppClient } from '../ports/github-app-client.port';
 import type {
   IKnowledgeProjectionCheckpointRepository,
   IKnowledgeRemoteBindingRepository,
@@ -48,23 +36,16 @@ import type {
   IGithubWebhookDeliveryRepository,
   IKnowledgeNoteProjectionRepository,
   IKnowledgeWriteRequestRepository,
-  KnowledgeNoteProjectionUpsert,
   KnowledgeWriteRequestRecord,
 } from '../ports/knowledge-note-projection.repository';
-import type {
-  IKnowledgeAttachmentProjectionRepository,
-  KnowledgeAttachmentProjectionUpsert,
-} from '../ports/knowledge-attachment-projection.repository';
+import type { IKnowledgeAttachmentProjectionRepository } from '../ports/knowledge-attachment-projection.repository';
 import type {
   IKnowledgeAttachmentContentCache,
   KnowledgeAttachmentContentCacheEntry,
 } from '../ports/knowledge-attachment-content-cache.port';
 import type { IKnowledgeDocumentIdentityRepository } from '../ports/knowledge-document-identity.repository';
 import type { IKnowledgeRepositoryLeaseRepository } from '../ports/knowledge-repository-lease.repository';
-import {
-  publishRepositoryNoteMutation,
-  type RepositoryNoteMutationPayload,
-} from './repository-note-mutation.publisher';
+import type { RepositoryNoteMutationPayload } from './repository-note-mutation.publisher';
 import { buildKnowledgeNoteLinkGraph } from './knowledge-note-link-graph';
 import {
   KnowledgeRepositoryLeaseCoordinator,
@@ -73,10 +54,11 @@ import {
   knowledgeRepositoryDeliveryLeaseKey,
 } from './knowledge-repository-lease-coordinator';
 import { buildRemoteRepositoryObservation } from './remote-repository-observation.policy';
+import { KnowledgeDocumentIdentityConflictError } from './knowledge-document-identity.policy';
 import {
-  KnowledgeDocumentIdentityConflictError,
-  readKnowledgeDocumentId,
-} from './knowledge-document-identity.policy';
+  KnowledgeProjectionEngine,
+  type IKnowledgeProjectionEngine,
+} from './knowledge-projection.engine';
 
 const logger = createLogger('KnowledgeRepositoryProjectionService');
 const DEFAULT_RECONCILIATION_INTERVAL_MS = 15 * 60 * 1_000;
@@ -134,6 +116,7 @@ export interface KnowledgeRepositoryProjectionServiceOptions {
   leaseTtlMs?: number;
   leaseRenewalIntervalMs?: number;
   metrics?: import('@memoflow/patterns/operations').UnifiedOperationMetricsRecorder;
+  projectionEngine?: IKnowledgeProjectionEngine;
 }
 
 export interface KnowledgeWriteRequestReplayResponse {
@@ -150,7 +133,7 @@ export interface KnowledgeWriteRequestReplayResponse {
  */
 export class KnowledgeRepositoryProjectionService {
   private readonly now: () => number;
-  private readonly publishMutation: (event: RepositoryNoteMutationPayload) => void;
+  private readonly projectionEngine: IKnowledgeProjectionEngine;
   private readonly reconciliationIntervalMs: number;
   private readonly reconciliationBatchSize: number;
   private readonly attachmentCacheTtlMs: number;
@@ -166,7 +149,15 @@ export class KnowledgeRepositoryProjectionService {
 
   constructor(private readonly options: KnowledgeRepositoryProjectionServiceOptions) {
     this.now = options.now ?? Date.now;
-    this.publishMutation = options.publishMutation ?? publishRepositoryNoteMutation;
+    this.projectionEngine =
+      options.projectionEngine ??
+      new KnowledgeProjectionEngine({
+        projectionRepository: options.projectionRepository,
+        attachmentRepository: options.attachmentRepository,
+        documentIdentityRepository: options.documentIdentityRepository,
+        now: this.now,
+        publishMutation: options.publishMutation,
+      });
     this.reconciliationIntervalMs =
       options.reconciliationIntervalMs ?? DEFAULT_RECONCILIATION_INTERVAL_MS;
     this.reconciliationBatchSize = options.reconciliationBatchSize ?? 50;
@@ -634,7 +625,7 @@ export class KnowledgeRepositoryProjectionService {
     const outcome = await this.leaseCoordinator.execute(
       knowledgeRepositoryConnectionLeaseKey(connection.id),
       async (guard) =>
-        this.replayWriteRequestCore(connection.id, writeRequest, {
+        this.replayWriteRequestCore(connection, writeRequest, {
           ensureHeld: guard.ensureHeld,
         }),
     );
@@ -714,7 +705,7 @@ export class KnowledgeRepositoryProjectionService {
   }
 
   private async replayWriteRequestCore(
-    connectionId: string,
+    connection: KnowledgeRemoteBindingServerDTO,
     writeRequest: KnowledgeWriteRequestRecord,
     guard: { ensureHeld(): Promise<void> },
   ): Promise<Result<KnowledgeWriteRequestReplayResponse>> {
@@ -733,33 +724,17 @@ export class KnowledgeRepositoryProjectionService {
         message: 'Knowledge write request has no rebuildable projection source',
       });
     }
-    let frontmatter: Record<string, unknown> = {};
-    try {
-      const parsed = matter(markdownContent);
-      frontmatter = parsed.data as Record<string, unknown>;
-    } catch {
-      frontmatter = {};
-    }
-    const projection: KnowledgeNoteProjectionUpsert = {
-      id: `knowledge-note-${createHash('sha256').update(`${connectionId}:${writeRequest.relativePath}`).digest('hex')}`,
-      connectionId,
-      knowledgeDocumentId: writeRequest.knowledgeDocumentId,
-      relativePath: writeRequest.relativePath,
-      commitSha,
-      blobSha,
-      contentHash: createHash('sha256').update(markdownContent).digest('hex'),
-      frontmatter,
-      markdownContent,
-      indexStatus: 'pending',
-    };
     try {
       await guard.ensureHeld();
-      await this.options.projectionRepository.applyChanges(
-        connectionId,
-        commitSha,
-        [projection],
-        [],
-      );
+      await this.projectionEngine.applyChanges(connection, commitSha, {
+        notes: [
+          {
+            relativePath: writeRequest.relativePath,
+            blobSha,
+            markdownContent,
+          },
+        ],
+      });
       await guard.ensureHeld();
       await this.options.writeRequestRepository.markProjectionSucceeded(
         writeRequest.identityId,
@@ -987,7 +962,7 @@ export class KnowledgeRepositoryProjectionService {
         remote.headSha,
       );
       await guard.ensureHeld();
-      await this.applyFullSnapshot(connection, remote.headSha, snapshot);
+      await this.projectionEngine.applySnapshot(connection, remote.headSha, snapshot);
       await guard.ensureHeld();
       const projectedAt = this.now();
       await this.saveProjectionCheckpoint(connection, {
@@ -1177,39 +1152,27 @@ export class KnowledgeRepositoryProjectionService {
           afterSha,
         );
         await guard.ensureHeld();
-        await this.applyFullSnapshot(connection, afterSha, snapshot);
+        await this.projectionEngine.applySnapshot(connection, afterSha, snapshot);
       } else {
         const deletedPaths = changes.changes
           .filter((change) => change.status === 'removed')
           .map((change) => change.relativePath);
-        const upsertedChanges = changes.changes.filter(
-          (change): change is GitHubMarkdownChange & { markdownContent: string; blobSha: string } =>
-            change.status !== 'removed' && Boolean(change.markdownContent && change.blobSha),
+        const notes = changes.changes.flatMap((change) =>
+          change.status !== 'removed' && change.markdownContent && change.blobSha
+            ? [
+                {
+                  relativePath: change.relativePath,
+                  blobSha: change.blobSha,
+                  markdownContent: change.markdownContent,
+                  previousPath: change.previousPath ?? null,
+                  mutation:
+                    change.status === 'added'
+                      ? RepositoryNoteMutationType.Created
+                      : RepositoryNoteMutationType.ContentUpdated,
+                },
+              ]
+            : [],
         );
-        const projections = upsertedChanges.map((change) =>
-          this.toProjection(connection.id, afterSha, {
-            relativePath: change.relativePath,
-            blobSha: change.blobSha,
-            markdownContent: change.markdownContent,
-          }),
-        );
-        const renamedFromPaths = changes.changes
-          .filter((change) => change.previousPath)
-          .map((change) => change.previousPath!);
-        const allDeletedPaths = deletedPaths.concat(renamedFromPaths);
-        const deletedProjections = await Promise.all(
-          allDeletedPaths.map((relativePath) =>
-            this.options.projectionRepository.findByPath(connection.id, relativePath),
-          ),
-        );
-        await this.validateAndRegisterDocumentIdentities(connection, projections, allDeletedPaths);
-        await this.options.projectionRepository.applyChanges(
-          connection.id,
-          afterSha,
-          projections,
-          allDeletedPaths,
-        );
-        await guard.ensureHeld();
         const attachmentChanges = changes.attachmentChanges ?? [];
         const deletedAttachmentPaths = attachmentChanges
           .filter((change) => change.status === 'removed')
@@ -1217,57 +1180,21 @@ export class KnowledgeRepositoryProjectionService {
         const attachments = attachmentChanges.flatMap((change) =>
           change.status !== 'removed' && change.blobSha && change.mediaType
             ? [
-                this.toAttachmentProjection(connection.id, afterSha, {
+                {
                   relativePath: change.relativePath,
                   blobSha: change.blobSha,
                   byteSize: change.byteSize,
                   mediaType: change.mediaType,
-                }),
+                  previousPath: change.previousPath ?? null,
+                },
               ]
             : [],
         );
-        if (this.options.attachmentRepository) {
-          await this.options.attachmentRepository.applyChanges(
-            connection.id,
-            afterSha,
-            attachments,
-            deletedAttachmentPaths.concat(
-              attachmentChanges
-                .filter((change) => change.previousPath)
-                .map((change) => change.previousPath!),
-            ),
-          );
-          await guard.ensureHeld();
-        }
-        upsertedChanges.forEach((change, index) => {
-          const projection = projections[index];
-          if (!projection) return;
-          this.publishProjectionMutation(
-            connection,
-            projection,
-            change.status === 'added'
-              ? RepositoryNoteMutationType.Created
-              : RepositoryNoteMutationType.ContentUpdated,
-          );
-          if (change.previousPath) {
-            const previous = deletedProjections.find(
-              (candidate) => candidate?.relativePath === change.previousPath,
-            );
-            if (
-              !previous?.knowledgeDocumentId ||
-              previous.knowledgeDocumentId !== projection.knowledgeDocumentId
-            ) {
-              this.publishDeletedProjectionMutation(
-                connection,
-                change.previousPath,
-                previous ?? null,
-              );
-            }
-          }
-        });
-        deletedPaths.forEach((path) => {
-          const previous = deletedProjections.find((candidate) => candidate?.relativePath === path);
-          this.publishDeletedProjectionMutation(connection, path, previous ?? null);
+        await this.projectionEngine.applyChanges(connection, afterSha, {
+          notes,
+          deletedPaths,
+          attachments,
+          deletedAttachmentPaths,
         });
       }
       await guard.ensureHeld();
@@ -1322,209 +1249,11 @@ export class KnowledgeRepositoryProjectionService {
     timer.unref?.();
   }
 
-  private toProjection(
-    connectionId: string,
-    commitSha: string,
-    file: { relativePath: string; blobSha: string; markdownContent: string },
-  ): KnowledgeNoteProjectionUpsert {
-    let frontmatter: Record<string, unknown> = {};
-    try {
-      const parsed = matter(file.markdownContent);
-      frontmatter = parsed.data as Record<string, unknown>;
-    } catch {
-      frontmatter = {};
-    }
-    const knowledgeDocumentId = readKnowledgeDocumentId(frontmatter);
-    return {
-      id: `knowledge-note-${createHash('sha256').update(`${connectionId}:${file.relativePath}`).digest('hex')}`,
-      connectionId,
-      knowledgeDocumentId,
-      relativePath: file.relativePath,
-      commitSha,
-      blobSha: file.blobSha,
-      contentHash: createHash('sha256').update(file.markdownContent).digest('hex'),
-      frontmatter,
-      markdownContent: file.markdownContent,
-      indexStatus: 'pending',
-    };
-  }
-
-  private toAttachmentProjection(
-    connectionId: string,
-    commitSha: string,
-    file: {
-      relativePath: string;
-      blobSha: string;
-      byteSize: number | null;
-      mediaType: string;
-    },
-  ): KnowledgeAttachmentProjectionUpsert {
-    return {
-      id: `knowledge-attachment-${createHash('sha256').update(`${connectionId}:${file.relativePath}`).digest('hex')}`,
-      connectionId,
-      relativePath: file.relativePath,
-      commitSha,
-      blobSha: file.blobSha,
-      byteSize: file.byteSize,
-      mediaType: file.mediaType,
-    };
-  }
-
-  private async applyFullSnapshot(
-    connection: KnowledgeRemoteBindingServerDTO,
-    commitSha: string,
-    snapshot: GitHubMarkdownSnapshot,
-  ): Promise<void> {
-    const projections = snapshot.files.map((file) =>
-      this.toProjection(connection.id, commitSha, file),
-    );
-    const attachments = (snapshot.attachments ?? []).map((file) =>
-      this.toAttachmentProjection(connection.id, commitSha, file),
-    );
-    const previous = await this.options.projectionRepository.listLiveByConnection(connection.id);
-    const nextPaths = new Set(projections.map((projection) => projection.relativePath));
-    const deletedPaths = previous
-      .filter((projection) => !nextPaths.has(projection.relativePath))
-      .map((projection) => projection.relativePath);
-    await this.validateAndRegisterDocumentIdentities(connection, projections, deletedPaths);
-    const deleted = await this.options.projectionRepository.applySnapshot(
-      connection.id,
-      commitSha,
-      projections,
-    );
-    if (this.options.attachmentRepository) {
-      await this.options.attachmentRepository.applySnapshot(connection.id, commitSha, attachments);
-    }
-    projections.forEach((projection) =>
-      this.publishProjectionMutation(
-        connection,
-        projection,
-        RepositoryNoteMutationType.ContentUpdated,
-      ),
-    );
-    const survivingManagedIds = new Set(
-      projections.flatMap((projection) =>
-        projection.knowledgeDocumentId ? [projection.knowledgeDocumentId] : [],
-      ),
-    );
-    deleted
-      .filter(
-        (projection) =>
-          !projection.knowledgeDocumentId ||
-          !survivingManagedIds.has(projection.knowledgeDocumentId),
-      )
-      .forEach((projection) =>
-        this.publishDeletedProjectionMutation(connection, projection.relativePath, projection),
-      );
-  }
-
   private findRepository(
     repositories: GitHubInstallationRepositoryDTO[],
     connection: KnowledgeRemoteBindingServerDTO,
   ): GitHubInstallationRepositoryDTO | null {
     return repositories.find((repository) => repository.id === connection.repositoryId) ?? null;
-  }
-
-  private publishProjectionMutation(
-    connection: KnowledgeRemoteBindingServerDTO,
-    projection: KnowledgeNoteProjectionUpsert,
-    mutation: RepositoryNoteMutationPayload['mutation'],
-  ): void {
-    this.publishMutation({
-      identityId: connection.identityId as IdentityId,
-      repositoryId: String(connection.id) as RepositoryId,
-      resourceId: (projection.knowledgeDocumentId ?? projection.id) as ResourceId,
-      resourcePath: projection.relativePath,
-      mutation,
-    });
-  }
-
-  private publishDeletedProjectionMutation(
-    connection: KnowledgeRemoteBindingServerDTO,
-    relativePath: string,
-    projection: { id: string; knowledgeDocumentId: KnowledgeDocumentId | null } | null = null,
-  ): void {
-    const fallbackProjectionId = `knowledge-note-${createHash('sha256').update(`${connection.id}:${relativePath}`).digest('hex')}`;
-    this.publishMutation({
-      identityId: connection.identityId as IdentityId,
-      repositoryId: String(connection.id) as RepositoryId,
-      resourceId: (projection?.knowledgeDocumentId ??
-        projection?.id ??
-        fallbackProjectionId) as ResourceId,
-      resourcePath: relativePath,
-      mutation: RepositoryNoteMutationType.Deleted,
-    });
-  }
-
-  private async validateAndRegisterDocumentIdentities(
-    connection: KnowledgeRemoteBindingServerDTO,
-    projections: KnowledgeNoteProjectionUpsert[],
-    deletedPaths: string[],
-  ): Promise<void> {
-    const deleted = new Set(deletedPaths);
-    const incomingManaged = projections.filter(
-      (
-        projection,
-      ): projection is KnowledgeNoteProjectionUpsert & {
-        knowledgeDocumentId: KnowledgeDocumentId;
-      } => projection.knowledgeDocumentId !== null,
-    );
-    const incomingByDocumentId = new Map<KnowledgeDocumentId, string[]>();
-    for (const projection of incomingManaged) {
-      const paths = incomingByDocumentId.get(projection.knowledgeDocumentId) ?? [];
-      paths.push(projection.relativePath);
-      incomingByDocumentId.set(projection.knowledgeDocumentId, paths);
-    }
-    for (const [documentId, paths] of incomingByDocumentId) {
-      if (new Set(paths).size > 1) {
-        throw new KnowledgeDocumentIdentityConflictError(
-          'KNOWLEDGE_DOCUMENT_ID_COLLISION',
-          `Knowledge document identity ${documentId} appears at multiple live paths`,
-        );
-      }
-    }
-
-    for (const projection of projections) {
-      const existingAtPath = await this.options.projectionRepository.findByPath(
-        connection.id,
-        projection.relativePath,
-      );
-      if (existingAtPath?.deletedAt === null && existingAtPath.knowledgeDocumentId) {
-        if (!projection.knowledgeDocumentId) {
-          throw new KnowledgeDocumentIdentityConflictError(
-            'KNOWLEDGE_DOCUMENT_ID_REMOVED',
-            `Managed knowledge document at ${projection.relativePath} lost its memoflow_id marker`,
-          );
-        }
-        if (existingAtPath.knowledgeDocumentId !== projection.knowledgeDocumentId) {
-          throw new KnowledgeDocumentIdentityConflictError(
-            'KNOWLEDGE_DOCUMENT_ID_REPLACED',
-            `Managed knowledge document at ${projection.relativePath} changed its memoflow_id marker`,
-          );
-        }
-      }
-      if (!projection.knowledgeDocumentId) continue;
-      const liveMatches = await this.options.projectionRepository.findLiveByDocumentId(
-        connection.id,
-        projection.knowledgeDocumentId,
-      );
-      const collision = liveMatches.find(
-        (candidate) =>
-          candidate.relativePath !== projection.relativePath &&
-          !deleted.has(candidate.relativePath),
-      );
-      if (collision) {
-        throw new KnowledgeDocumentIdentityConflictError(
-          'KNOWLEDGE_DOCUMENT_ID_COLLISION',
-          `Knowledge document identity ${projection.knowledgeDocumentId} is already live at ${collision.relativePath}`,
-        );
-      }
-      await this.options.documentIdentityRepository.observeMarker(
-        connection.knowledgeSpaceId,
-        projection.knowledgeDocumentId,
-        this.now(),
-      );
-    }
   }
 
   private async saveProjectionCheckpoint(
