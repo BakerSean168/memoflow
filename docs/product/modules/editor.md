@@ -5,7 +5,7 @@ tags:
   - editor
 description: 编辑器模块退役后的安全预览、Obsidian 外部编辑与 Web 快捷创建边界
 created: 2026-06-02T00:00:00
-updated: 2026-07-22T00:00:00
+updated: 2026-09-11T00:00:00
 ---
 
 # 编辑器模块说明
@@ -24,8 +24,9 @@ updated: 2026-07-22T00:00:00
 - Desktop `/repository` 只挂载本地 Vault 浏览、安全预览和 Obsidian 打开入口；主进程不再注册 Editor Electron runtime。
 - API host 不再注册 Editor API module，也不挂载旧 Repository/Folder/Resource CRUD；Desktop Repository IPC 只保留本地 Vault 与 GitHub knowledge connection/sync 能力。
 - Mobile 已移除数据库 Repository、文件夹和 note editor 路由，等待后续基于服务端投影实现只读能力。
-- 旧 Repository/Folder/Resource 与 Editor workspace 数据仅为可重新导入业务数据备份保留，不再构成运行时编辑通道。
-- 服务端持有数据披露（`memoflow.server-held-data-disclosure`）与业务备份分离：Web 可下、Desktop 明确不支持、不可导入；`editor_*` portable 备份只走 `memoflow.user-data-export` 导入通道。
+- `EDITOR-1701` 已将 Editor 从 `memoflow.user-data-export` V2 schema、导出选择器与导入分发中删除；旧备份中的 `data.editor` 会严格校验失败，不提供兼容 warning 或恢复通道。
+- V3 仅由仍存活的 owner capability 组成，API/Desktop 生产组合均不注册 Editor capability。`editor_*` Prisma/PowerSync 数据当前只是等待 `EDITOR-1702` 物理删除的 persistence residue，不再代表任何 portability 承诺。
+- 服务端持有数据披露（`memoflow.server-held-data-disclosure`）仍与业务备份分离：Web 可下、Desktop 明确不支持、不可导入。
 - `@memoflow/editor` 包与 `packages/app-vue/src/modules/editor` 已删除；知识呈现入口在 repository 工作区与 `safe-markdown` 工具。
 - app-vue 顶层 `editor` locale 与设置页退役 Editor 分组文案已删除；用户 preferences 中残留的 `editor` schema 也直接删除，不再保留 portable 兼容。
 - Web 与 Desktop 预览统一使用关闭原始 HTML 并经过 sanitizer 的安全 Markdown 渲染边界。

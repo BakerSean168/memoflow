@@ -5,7 +5,6 @@ import {
   ImportUserDataReqSchema,
   parseUserDataExportEnvelope,
   PortableAIDataSchema,
-  PortableEditorDataSchema,
   PortableGoalDataSchema,
   PortableRefSchema,
   PortableReminderDataSchema,
@@ -92,6 +91,15 @@ describe('parseUserDataExportEnvelope V2', () => {
 
   it('rejects missing data', () => {
     expect(parseUserDataExportEnvelope(baseEnvelope).ok).toBe(false);
+  });
+
+  it('rejects retired Editor payloads instead of silently dropping them', () => {
+    const result = parseUserDataExportEnvelope({
+      ...baseEnvelope,
+      data: { editor: { workspaces: [] } },
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain('editor');
   });
 
   it('rejects identity fields inside the strict canonical preference profile', () => {
@@ -187,6 +195,7 @@ describe('request contracts', () => {
     expect(ExportUserDataReqSchema.safeParse({}).success).toBe(true);
     expect(ExportUserDataReqSchema.safeParse({ include: ['goals', 'tasks'] }).success).toBe(true);
     expect(ExportUserDataReqSchema.safeParse({ include: ['invalid'] }).success).toBe(false);
+    expect(ExportUserDataReqSchema.safeParse({ include: ['editor'] }).success).toBe(false);
     expect(ImportUserDataReqSchema.safeParse({ content: '{}', dryRun: true }).success).toBe(true);
     expect(ImportUserDataReqSchema.safeParse({}).success).toBe(false);
   });
@@ -197,9 +206,10 @@ describe('request contracts', () => {
 });
 
 describe('PortableUserDataV2Schema', () => {
-  it('accepts an empty backup and rejects unknown top-level modules', () => {
+  it('accepts an empty backup and rejects unknown or retired top-level modules', () => {
     expect(PortableUserDataV2Schema.safeParse({}).success).toBe(true);
     expect(PortableUserDataV2Schema.safeParse({ unknownModule: {} }).success).toBe(false);
+    expect(PortableUserDataV2Schema.safeParse({ editor: { workspaces: [] } }).success).toBe(false);
   });
 
   it('composes canonical Goal and Task vNext shapes', () => {
@@ -271,13 +281,12 @@ describe('module schemas', () => {
     ).toBe(true);
   });
 
-  it('accepts repository, schedule, editor, AI, and settings empty shapes', () => {
+  it('accepts repository, schedule, AI, and settings empty shapes', () => {
     expect(
       PortableRepositoryDataSchema.safeParse({ repositories: [], folders: [], resources: [] })
         .success,
     ).toBe(true);
     expect(PortableScheduleDataSchema.safeParse({ entries: [], tasks: [] }).success).toBe(true);
-    expect(PortableEditorDataSchema.safeParse({ workspaces: [] }).success).toBe(true);
     expect(PortableAIDataSchema.safeParse({ conversations: [] }).success).toBe(true);
     expect(
       PortableSettingsSchema.safeParse({

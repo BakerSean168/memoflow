@@ -6,7 +6,6 @@ import { PortableTaskDataSchema } from './portable-tasks.dto';
 import { PortableReminderDataSchema } from './portable-reminders.dto';
 import { PortableRepositoryDataSchema } from './portable-repositories.dto';
 import { PortableScheduleDataSchema } from './portable-schedules.dto';
-import { PortableEditorDataSchema } from './portable-editor.dto';
 import { PortableAIDataSchema } from './portable-ai.dto';
 
 export const PortableUserDataV2Schema = z.object({
@@ -18,7 +17,6 @@ export const PortableUserDataV2Schema = z.object({
   reminders: PortableReminderDataSchema.optional(),
   repositories: PortableRepositoryDataSchema.optional(),
   schedules: PortableScheduleDataSchema.optional(),
-  editor: PortableEditorDataSchema.optional(),
   ai: PortableAIDataSchema.optional(),
 }).strict();
 export type PortableUserDataV2 = z.infer<typeof PortableUserDataV2Schema>;

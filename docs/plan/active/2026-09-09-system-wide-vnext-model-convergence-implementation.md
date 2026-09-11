@@ -386,7 +386,13 @@ Production Prisma composition constructs one shared engine instance and injects 
 
 ## EDITOR-1701 — Remove Editor capability from Portability V3
 
-V3 exports no Editor section. Delete V2 Editor payload handling entirely; no compatibility warning/import path is required.
+**状态：DONE — 2026-09-11。**
+
+Editor is retired from both portability generations. The V2 public payload no longer accepts `data.editor`, the export selector no longer accepts `editor`, and the V2 export/import dispatch paths no longer project or recreate Editor workspaces. Because the V2 payload is strict, legacy backups containing `data.editor` fail validation explicitly instead of being silently dropped or routed through a compatibility warning/import path. V3 remains owner-capability driven; neither API nor Desktop production composition registers an Editor capability.
+
+The PowerSync round-trip fixture deliberately keeps legacy `editor_*` source rows while proving that the exported envelope omits `workspaces` and the target import emits no writes to any Editor table. A dedicated anti-resurrection surface locks the V2 schema/selector/dispatch and both V3 production hosts. Legacy Prisma/PowerSync persistence plus dead Editor projection/importer/adapters/contracts remain intentionally staged only for `EDITOR-1702`; they are not a portability promise. Product/module-index documentation now states that retirement boundary.
+
+**Acceptance evidence:** Contracts typecheck PASS; Contracts 79 files / 535 tests PASS; Data Portability typecheck PASS; Data Portability 35 files / 147 tests PASS; Contracts lint PASS with two pre-existing `no-explicit-any` warnings and zero errors; Data Portability lint PASS with one pre-existing `no-explicit-any` warning and zero errors; Contracts build PASS; Data Portability build PASS; active V2/V3 portability surface scan returns zero Editor references; docs-check PASS; governance-check PASS; `git diff --check` PASS at documentation closure.
 
 ## EDITOR-1702 — Drop legacy editor persistence
 

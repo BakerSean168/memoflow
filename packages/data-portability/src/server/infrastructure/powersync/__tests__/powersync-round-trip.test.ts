@@ -57,7 +57,7 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(exported.content).toContain('"templates"');
     expect(exported.content).toContain('"groups"');
     expect(exported.content).toContain('"tasks"');
-    expect(exported.content).toContain('"workspaces"');
+    expect(exported.content).not.toContain('"workspaces"');
     expect(exported.content).toContain('"conversations"');
 
     const targetDb = new FakePowerSyncDb({}, { existingSingletonsIdentityId: identityB });
@@ -79,6 +79,10 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(JSON.stringify(firstStatements)).not.toContain('task-plan-a');
     expect(JSON.stringify(firstStatements)).not.toContain('reminder-template-a');
     expect(JSON.stringify(firstStatements)).not.toContain('workspace-a');
+    expect(JSON.stringify(firstStatements)).not.toContain('editor_workspaces');
+    expect(JSON.stringify(firstStatements)).not.toContain('editor_workspace_sessions');
+    expect(JSON.stringify(firstStatements)).not.toContain('editor_workspace_session_groups');
+    expect(JSON.stringify(firstStatements)).not.toContain('editor_workspace_session_group_tabs');
     expect(JSON.stringify(firstStatements)).not.toContain('conversation-a');
 
     const repository = insertedRow(firstStatements, 'repositories');
@@ -96,10 +100,6 @@ describe('PowerSync desktop data portability round trip', () => {
     const routineDefinition = insertedRow(firstStatements, 'routine_definitions');
     const routineMembership = insertedRow(firstStatements, 'routine_profile_memberships');
     const reminderResponse = insertedRow(firstStatements, 'reminder_responses');
-    const workspace = insertedRow(firstStatements, 'editor_workspaces');
-    const session = insertedRow(firstStatements, 'editor_workspace_sessions');
-    const group = insertedRow(firstStatements, 'editor_workspace_session_groups');
-    const tab = insertedRow(firstStatements, 'editor_workspace_session_group_tabs');
     const conversation = insertedRow(firstStatements, 'ai_conversations');
     const message = insertedRow(firstStatements, 'ai_messages');
 
@@ -122,13 +122,6 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(reminderResponse.action).toBe("SNOOZED");
     expect(reminderResponse.response_time).toBe(7);
     expect(reminderResponse.snooze_duration_seconds).toBe(900);
-    expect(session.workspace_id).toBe(workspace.id);
-    expect(group.session_id).toBe(session.id);
-    expect(group.workspace_id).toBe(workspace.id);
-    expect(tab.group_id).toBe(group.id);
-    expect(tab.session_id).toBe(session.id);
-    expect(tab.workspace_id).toBe(workspace.id);
-    expect(tab.resource_id).toBe(resource.id);
     expect(message.conversation_id).toBe(conversation.id);
 
     await importUseCase.execute(identityB, exported.content);

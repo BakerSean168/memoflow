@@ -24,7 +24,6 @@ import { projectTaskPlans, projectTaskOccurrences } from './projections/task.pro
 import { projectReminderGroups, projectReminderTemplates, projectReminderResponses, projectUserReminderPreference } from './projections/reminder.projection';
 import { projectRepositories, projectResourceFolders, projectResources } from './projections/repository.projection';
 import { projectCalendarEntries, projectScheduleTasks } from './projections/schedule.projection';
-import { projectEditorWorkspaces } from './projections/editor.projection';
 import { projectAIConversations } from './projections/ai.projection';
 import { projectNotificationPreference } from './projections/notification.projection';
 import { projectSettings } from './projections/setting.projection';
@@ -182,15 +181,6 @@ export class ExportUserDataUseCase {
       };
       entityCounts.calendarEntries = data.schedules.entries.length;
       entityCounts.scheduleTasks = data.schedules.tasks.length;
-    }
-
-    // ─── Editor ───
-    if (modules.includes('editor')) {
-      const workspaces = await this.deps.editorWorkspaceRepository.findByIdentityId(identityId);
-      data.editor = {
-        workspaces: await projectEditorWorkspaces(workspaces, ctx, this.deps),
-      };
-      entityCounts.editorWorkspaces = data.editor.workspaces.length;
     }
 
     // ─── AI ───

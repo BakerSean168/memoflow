@@ -11,7 +11,6 @@ export const ExportableModuleSchema = z.enum([
   'schedule',
   'reminders',
   'repository',
-  'editor',
   'ai',
   'notifications',
 ]);
@@ -25,7 +24,6 @@ export const ALL_EXPORTABLE_MODULES: ExportableModule[] = [
   'schedule',
   'reminders',
   'repository',
-  'editor',
   'ai',
   'notifications',
 ];
