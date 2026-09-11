@@ -5107,6 +5107,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/governance/api/governance-rule-bundle.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/label/label-contract.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6916,6 +6924,16 @@
       ]
     },
     {
+      "path": "packages/governance/src/client/governance-rule-bundle-client.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/governance/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/governance/src/dual-registry-path.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6967,6 +6985,16 @@
     },
     {
       "path": "packages/governance/src/server/application/use-cases/commands/__tests__/update-rule.use-case.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/governance/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/governance/src/server/application/use-cases/queries/__tests__/export-governance-rule-bundle.use-case.test.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/governance/vitest.config.ts"
@@ -11216,7 +11244,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 28
+      "fileCount": 30
     },
     {
       "id": "packages/notification/vitest.config.ts",
@@ -11587,7 +11615,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 79
+      "fileCount": 80
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11629,7 +11657,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 28
+      "fileCount": 30
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -12061,12 +12089,14 @@
       "packages/governance/src/api/routes/governance-void-success-envelope.surface.spec.ts",
       "packages/governance/src/api/routes/governance.routes.spec.ts",
       "packages/governance/src/client/governance-ipc-transport-dual.surface.spec.ts",
+      "packages/governance/src/client/governance-rule-bundle-client.spec.ts",
       "packages/governance/src/dual-registry-path.surface.spec.ts",
       "packages/governance/src/electron/index.spec.ts",
       "packages/governance/src/reference-module-invariants.surface.spec.ts",
       "packages/governance/src/server/application/use-cases/commands/__tests__/create-rule.use-case.test.ts",
       "packages/governance/src/server/application/use-cases/commands/__tests__/delete-rule.use-case.test.ts",
       "packages/governance/src/server/application/use-cases/commands/__tests__/update-rule.use-case.test.ts",
+      "packages/governance/src/server/application/use-cases/queries/__tests__/export-governance-rule-bundle.use-case.test.ts",
       "packages/governance/src/server/application/use-cases/queries/__tests__/get-rule-revisions.use-case.test.ts",
       "packages/governance/src/server/application/use-cases/queries/__tests__/get-rule.use-case.test.ts",
       "packages/governance/src/server/application/use-cases/queries/__tests__/list-rules.use-case.test.ts",
@@ -12348,7 +12378,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1066,
+    "unit": 1069,
     "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,

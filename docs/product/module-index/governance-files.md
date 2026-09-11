@@ -59,6 +59,8 @@ updated: 2026-09-11T00:00:00+09:00
 | [`packages/governance/src/server/application/use-cases/commands/delete-rule.use-case.ts`](../../../packages/governance/src/server/application/use-cases/commands/delete-rule.use-case.ts)             | 删除规则用例                |
 | [`packages/governance/src/server/application/use-cases/queries/search-rules.use-case.ts`](../../../packages/governance/src/server/application/use-cases/queries/search-rules.use-case.ts)             | 搜索规则查询                |
 | [`packages/governance/src/server/application/use-cases/queries/get-rule-revisions.use-case.ts`](../../../packages/governance/src/server/application/use-cases/queries/get-rule-revisions.use-case.ts) | 修订历史查询                |
+| [`packages/governance/src/server/application/use-cases/queries/export-governance-rule-bundle.use-case.ts`](../../../packages/governance/src/server/application/use-cases/queries/export-governance-rule-bundle.use-case.ts) | deterministic Active Rule bundle 发布查询 |
+| [`packages/governance/src/server/application/governance-rule-bundle.ts`](../../../packages/governance/src/server/application/governance-rule-bundle.ts) | canonical projection / ordering / SHA-256 |
 | [`packages/governance/src/server/infrastructure/runtime/governance-event-log.runtime.ts`](../../../packages/governance/src/server/infrastructure/runtime/governance-event-log.runtime.ts)             | 模块事件日志 runtime 适配器 |
 | [`packages/governance/src/server/infrastructure/governance.module.ts`](../../../packages/governance/src/server/infrastructure/governance.module.ts)                                                   | 服务端治理模块组合根        |
 | [`packages/governance/src/server/infrastructure/prisma.ts`](../../../packages/governance/src/server/infrastructure/prisma.ts)                                                                         | Prisma 便捷组合根           |
@@ -73,6 +75,7 @@ updated: 2026-09-11T00:00:00+09:00
 | [`packages/contracts/src/modules/governance/entities/rule-revision-server.ts`](../../../packages/contracts/src/modules/governance/entities/rule-revision-server.ts) | RuleRevision 服务端 DTO           |
 | [`packages/contracts/src/modules/governance/api/rules.ts`](../../../packages/contracts/src/modules/governance/api/rules.ts)                                         | 规则 API 请求 / 查询 schema       |
 | [`packages/contracts/src/modules/governance/api/rule-revisions.ts`](../../../packages/contracts/src/modules/governance/api/rule-revisions.ts)                       | 修订历史 API schema               |
+| [`packages/contracts/src/modules/governance/api/governance-rule-bundle.ts`](../../../packages/contracts/src/modules/governance/api/governance-rule-bundle.ts) | versioned/hashable published bundle contract |
 | [`packages/contracts/src/modules/governance/api/response-schemas.ts`](../../../packages/contracts/src/modules/governance/api/response-schemas.ts)                   | 路由响应 schema                   |
 | [`packages/contracts/src/modules/governance/protocol/governance-channels.ts`](../../../packages/contracts/src/modules/governance/protocol/governance-channels.ts)   | 治理 RPC channel 常量             |
 | [`packages/contracts/src/modules/governance/protocol/governance-event-map.ts`](../../../packages/contracts/src/modules/governance/protocol/governance-event-map.ts) | 治理事件 map                      |

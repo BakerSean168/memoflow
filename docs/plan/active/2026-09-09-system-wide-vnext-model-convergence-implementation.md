@@ -432,7 +432,13 @@ A real Vue workbench smoke now mounts the production Governance list/editor/deta
 
 ## GOV-1903 — Add deterministic published rule-bundle boundary
 
-Define a versioned/hashable `GovernanceRuleBundle` projection/export containing Active rules, revision/provenance and executable metadata needed by engineering adapters. Bundle generation must be deterministic and must not mutate repository source.
+**状态：DONE — 2026-09-11。**
+
+Governance now exposes an explicit read-only publish boundary instead of requiring engineering tooling to inspect the live Rule database. `GovernanceRuleBundle` schema version 1 contains only Active rules, stable provenance (`ruleId`, `authorId`, created/updated timestamps, revision count and nullable latest revision), real engineering metadata (`ruleKey`, Rule severity/tags/reference path), and normalized good/bad examples. The semantic payload intentionally has no export wall-clock timestamp or machine identity. Rules, tags, examples, revision fields and JSON object keys use locale-independent deterministic ordering; SHA-256 is calculated over the canonical `{ kind, schemaVersion, rules }` payload and returned as `sha256:<64hex>`.
+
+`ExportGovernanceRuleBundleUseCase` reads Rule/RuleRevision repositories only and performs zero persistence writes. The same application port is exposed through authenticated `GET /governance/rules/bundle`, `governance:rule-bundle:export` IPC and `GovernanceClientPort.exportRuleBundle()`. Transport-specific code never computes the hash or reads Prisma/PowerSync directly. Existing seeded Active rules are allowed to have `revisionCount: 0` / `latestRevision: null`; provenance is never fabricated. During implementation the bundle contract exposed an existing invalid seed default (`authorId = governance-seed`); the system seed now uses deterministic UUID `00000000-0000-4000-8000-000000000001`, preserving the existing IdentityId contract instead of weakening the bundle schema.
+
+**Acceptance evidence:** Contracts typecheck PASS and full suite 80 files / 537 tests PASS; Governance direct typecheck PASS, full suite 30 / 199 PASS and production build PASS. Determinism tests prove identical bundle/hash under different Rule/Revision repository ordering, hash changes on published semantic changes, Active-only reads, nullable zero-revision provenance and zero writes. HTTP route, HTTP client, IPC client and Electron handler are locked to the same bundle contract/channel; GOV-1902 Vue create/update/revision smoke remains 1/1 PASS after the client seam expansion. Authored changed-file ESLint PASS with 0 warnings/errors; test inventory regenerated to 1238 files; docs-check PASS; governance-check PASS after satisfying Governance bilingual/public JSDoc requirements; `git diff --check` PASS at commit closure.
 
 **Acceptance:** same Governance state + same bundle schema version produces the same semantic bundle/hash.
 

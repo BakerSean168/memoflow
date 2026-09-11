@@ -3,7 +3,7 @@
  * 治理 Electron IPC 生命周期测试
  *
  * Verifies that createGovernanceElectronModule is a pure transport/lifecycle
- * adapter: it registers the 7 governance channels, starts the already-assembled
+ * adapter: it registers all governance channels, starts the already-assembled
  * instance once, routes IPC calls through GovernanceController to the same
  * instance api, removes all channels on destroy, disposes exactly once, and
  * cleans up on start failure. It also locks the per-handle state machine:
@@ -11,7 +11,7 @@
  * registration reverses exactly the channels installed by that call.
  *
  * 验证 createGovernanceElectronModule 是纯传输/生命周期适配器：
- * 注册 7 个治理通道、启动已装配实例一次、通过 GovernanceController 把 IPC
+ * 注册全部治理通道、启动已装配实例一次、通过 GovernanceController 把 IPC
  * 调用路由到同一实例 api、destroy 时移除全部通道、恰好 dispose 一次，
  * 且 start 失败时执行清理。同时固定每个 handle 的状态机：重复 register()
  * 抛错、destroy 后 register() 抛错、失败注册会逆向移除本次已安装的通道。
@@ -60,6 +60,15 @@ function createApiStub(): GovernanceApplicationPort {
     listRules: vi.fn(() => ok([] as never)),
     searchRules: vi.fn(() => ok([] as never)),
     getRevisions: vi.fn(() => ok(null as never)),
+    exportRuleBundle: vi.fn(() =>
+      ok({
+        kind: 'memoflow.governance-rule-bundle' as const,
+        schemaVersion: 1 as const,
+        hashAlgorithm: 'sha256' as const,
+        semanticHash: `sha256:${'0'.repeat(64)}`,
+        rules: [],
+      }),
+    ),
   } as GovernanceApplicationPort;
 }
 
@@ -114,7 +123,7 @@ describe('createGovernanceElectronModule IPC lifecycle', () => {
     mocks.handlers.clear();
   });
 
-  it('registers all 7 governance channels and starts the instance once', () => {
+  it('registers all 8 governance channels and starts the instance once', () => {
     moduleDef.register(context);
 
     for (const channel of Object.values(GovernanceChannels)) {
@@ -154,6 +163,17 @@ describe('createGovernanceElectronModule IPC lifecycle', () => {
       expect.anything(),
       expect.objectContaining({ identityId: 'identity-1', source: 'ipc' }),
     );
+
+    const bundleResult = await registered(GovernanceChannels.RULE_BUNDLE_EXPORT)(undefined, {});
+    expect(bundleResult).toMatchObject({
+      ok: true,
+      data: {
+        kind: 'memoflow.governance-rule-bundle',
+        schemaVersion: 1,
+        semanticHash: `sha256:${'0'.repeat(64)}`,
+      },
+    });
+    expect(fake.api.exportRuleBundle).toHaveBeenCalledTimes(1);
   });
 
   it('destroy removes all channels and disposes exactly once (second call no-ops)', () => {

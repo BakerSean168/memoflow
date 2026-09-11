@@ -90,3 +90,18 @@ packages/governance/src/
 ## Development / diagnostic workbench
 
 Governance route 与 package ownership 在所有构建中都保持真实存在。App-Vue 仅通过 surface policy 控制普通导航是否展示：Vite development 自动展示；production/staging/test 默认隐藏；需要生产诊断时显式设置 `VITE_ENABLE_GOVERNANCE_DEV_SURFACE=true`。隐藏导航不会禁用 `/governance/**` 深链或 API/IPC/persistence。`governance-development-smoke.spec.ts` 必须持续跑通 list → create → update → RuleRevision history。
+
+## Deterministic published rule bundle
+
+`GOV-1903` 提供显式、只读的 Governance → Engineering 发布边界：
+
+```text
+Active Rule + RuleRevision ledger
+→ canonical GovernanceRuleBundle schema v1
+→ SHA-256 semantic hash
+→ GET /governance/rules/bundle
+   or governance:rule-bundle:export IPC
+→ GovernanceClientPort.exportRuleBundle()
+```
+
+bundle 不包含导出时间或机器身份；Rule、tags、examples、revision 字段和 JSON key 都稳定排序，因此同一 Governance 状态与同一 schema version 会得到相同 bundle/hash。发布用例只读 Rule/RuleRevision repositories，不写数据库。CI 不允许直接连接 live Governance DB；后续 engineering adapter 必须消费 repository-pinned/versioned bundle。

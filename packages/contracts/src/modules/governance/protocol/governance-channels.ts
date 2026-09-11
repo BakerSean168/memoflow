@@ -17,4 +17,5 @@ export const GovernanceChannels = {
   RULE_UPDATE: 'governance:rule:update',
   RULE_DELETE: 'governance:rule:delete',
   RULE_REVISIONS: 'governance:rule-revision:list',
+  RULE_BUNDLE_EXPORT: 'governance:rule-bundle:export',
 } as const;

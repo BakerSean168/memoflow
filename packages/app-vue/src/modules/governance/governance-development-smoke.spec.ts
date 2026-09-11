@@ -140,6 +140,16 @@ class StatefulGovernanceSmokeClient implements GovernanceClientPort {
     });
   }
 
+  async exportRuleBundle() {
+    return ok({
+      kind: 'memoflow.governance-rule-bundle' as const,
+      schemaVersion: 1 as const,
+      hashAlgorithm: 'sha256' as const,
+      semanticHash: `sha256:${'0'.repeat(64)}`,
+      rules: [],
+    });
+  }
+
   async getRevisions(query: GetRuleRevisionsQueryInput) {
     const items = query.ruleId === RULE_ID ? [...this.revisionLedger].reverse() : [];
     return ok({

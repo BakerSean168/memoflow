@@ -101,7 +101,7 @@ tools/governance + docs/governance + docs/standards + CI
 = repository engineering governance
 ```
 
-未来可以增加显式：
+`GOV-1903` 已增加显式：
 
 ```text
 Rule
@@ -110,7 +110,7 @@ Rule
 → check/report/autofix proposal
 ```
 
-但 CI 消费的是固定版本/hash 的 bundle，而不是实时开发数据库。
+当前 bundle 通过 authenticated HTTP/IPC/client export seam 显式发布；CI 仍不得读取实时开发数据库。`GOV-1904` 只会把固定版本/hash 的 repository-pinned bundle 接到 engineering check/report/autofix proposal。
 
 ## 7. 与 Knowledge 的关系
 
@@ -132,7 +132,7 @@ Knowledge 不再是 Governance 的替代目标。
 
 - development/diagnostic surface policy 已由 `GOV-1902` 固化：开发环境自动展示，生产仅显式诊断开关展示；route 与 feature ownership 始终保留；
 - 保持 reference module 与全仓 canonical feature shape 同步；
-- 建立 deterministic published rule bundle；
+- deterministic published rule bundle 已由 `GOV-1903` 完成：schema v1 + canonical payload + SHA-256 + Active-only + provenance；
 - 增加 check/report/autofix adapter，而不是让 Rule DB 直接绑死 CI；
 - 更新 authorization policy，使其明确服务开发/reference 场景；
 - 保持 Web/Desktop/Prisma/PowerSync parity 的教材价值。

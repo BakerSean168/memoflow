@@ -38,6 +38,17 @@ Governance 不是静态目录样板。`GOV-1901` 长期要求以下四组 proof 
 
 对应 anti-drift gate：`packages/governance/src/reference-module-invariants.surface.spec.ts` 与 `server/infrastructure/__tests__/governance-persistence-parity.spec.ts`。任何系统级 feature architecture 改造，应先确保这两类 reference gate 仍成立。
 
+## Published GovernanceRuleBundle
+
+- schema：`GovernanceRuleBundle` v1；
+- 内容：仅 Active Rule + revision/provenance + code/severity/tags/reference path + examples；
+- hash：locale-independent canonical JSON → SHA-256；不包含 export time / machine identity；
+- HTTP：`GET /api/v1/governance/rules/bundle`；
+- IPC：`governance:rule-bundle:export`；
+- client：`GovernanceClientPort.exportRuleBundle()`；
+- 生成过程严格只读；seed rule 没有历史 revision 时显式返回 `revisionCount: 0` / `latestRevision: null`；
+- CI/engineering governance 不读取 live Rule DB，后续只能消费 repository-pinned/versioned bundle。
+
 ## Development / diagnostic surface
 
 - development：Governance 工作台导航自动可见；
