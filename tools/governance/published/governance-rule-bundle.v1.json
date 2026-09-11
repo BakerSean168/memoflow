@@ -1,0 +1,198 @@
+{
+  "kind": "memoflow.governance-rule-bundle",
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "code": "DDD-001",
+      "title": "Entity Props Pattern",
+      "description": "Entities MUST encapsulate constructor arguments inside a dedicated Props object to keep signatures stable and explicit.",
+      "severity": "Mandatory",
+      "tags": ["architecture", "consistency", "ddd", "entity"],
+      "liveReferenceLocation": "packages/governance/src/server/domain/aggregates/rule.ts",
+      "goodExamples": [
+        {
+          "language": "TypeScript",
+          "type": "GoodExample",
+          "content": "interface RuleProps {\n  code: string;\n  title: string;\n}\n\nclass Rule {\n  private constructor(private readonly props: RuleProps) {}\n}\n",
+          "caption": "Entity constructor receives a single props object."
+        }
+      ],
+      "badExamples": [
+        {
+          "language": "TypeScript",
+          "type": "BadExample",
+          "content": "class Rule {\n  constructor(\n    private readonly code: string,\n    private readonly title: string,\n    private readonly description: string,\n    private readonly severity: string,\n  ) {}\n}\n",
+          "caption": "Long positional constructor arguments are fragile and error-prone."
+        }
+      ],
+      "provenance": {
+        "ruleId": "5127328a-6e32-43ca-a4ce-090c3c790a4b",
+        "authorId": "00000000-0000-4000-8000-000000000001",
+        "createdAt": 1789144579287,
+        "updatedAt": 1789144579287,
+        "revisionCount": 0,
+        "latestRevision": null
+      },
+      "engineering": {
+        "ruleKey": "DDD-001",
+        "severity": "Mandatory",
+        "tags": ["architecture", "consistency", "ddd", "entity"],
+        "referencePath": "packages/governance/src/server/domain/aggregates/rule.ts"
+      }
+    },
+    {
+      "code": "DDD-002",
+      "title": "No Logic in DTOs",
+      "description": "DTOs MUST remain pure data contracts. Validation and business rules belong to Value Objects, Entities, and Use Cases.",
+      "severity": "Mandatory",
+      "tags": ["contracts", "ddd", "dto", "separation-of-concerns"],
+      "liveReferenceLocation": "packages/contracts/src/modules/governance/aggregates/rule-client.ts",
+      "goodExamples": [
+        {
+          "language": "TypeScript",
+          "type": "GoodExample",
+          "content": "export interface CreateRuleReq {\n  code: string;\n  title: string;\n  description: string;\n}\n",
+          "caption": "DTO remains a pure shape declaration."
+        }
+      ],
+      "badExamples": [
+        {
+          "language": "TypeScript",
+          "type": "BadExample",
+          "content": "export class CreateRuleReq {\n  constructor(public code: string) {}\n\n  normalizeCode(): string {\n    return this.code.trim().toUpperCase();\n  }\n}\n",
+          "caption": "Behavior in DTOs creates hidden domain logic in the wrong layer."
+        }
+      ],
+      "provenance": {
+        "ruleId": "5b407800-ab15-41ab-858a-4fa8cdcdb82b",
+        "authorId": "00000000-0000-4000-8000-000000000001",
+        "createdAt": 1789144579380,
+        "updatedAt": 1789144579380,
+        "revisionCount": 0,
+        "latestRevision": null
+      },
+      "engineering": {
+        "ruleKey": "DDD-002",
+        "severity": "Mandatory",
+        "tags": ["contracts", "ddd", "dto", "separation-of-concerns"],
+        "referencePath": "packages/contracts/src/modules/governance/aggregates/rule-client.ts"
+      }
+    },
+    {
+      "code": "DDD-003",
+      "title": "Layer Isolation",
+      "description": "Domain and application layers MUST not directly depend on infrastructure details such as Prisma clients or HTTP adapters.",
+      "severity": "Mandatory",
+      "tags": ["ddd", "dependency-inversion", "infrastructure", "layering"],
+      "liveReferenceLocation": "packages/governance/src/server/domain/repositories/i-rule-repository.ts",
+      "goodExamples": [
+        {
+          "language": "TypeScript",
+          "type": "GoodExample",
+          "content": "export interface IRuleRepository {\n  findByCode(code: string): Promise<Rule | null>;\n}\n\nclass SearchRulesUseCase {\n  constructor(private readonly repo: IRuleRepository) {}\n}\n",
+          "caption": "Use case depends on abstraction, not infrastructure."
+        }
+      ],
+      "badExamples": [
+        {
+          "language": "TypeScript",
+          "type": "BadExample",
+          "content": "import { prisma } from '@memoflow/database';\n\nclass SearchRulesUseCase {\n  async execute(code: string) {\n    return prisma.rule.findUnique({ where: { code } });\n  }\n}\n",
+          "caption": "Application layer is tightly coupled to persistence implementation."
+        }
+      ],
+      "provenance": {
+        "ruleId": "14b24f97-3db7-4b8b-8064-406d9ae0322d",
+        "authorId": "00000000-0000-4000-8000-000000000001",
+        "createdAt": 1789144579385,
+        "updatedAt": 1789144579385,
+        "revisionCount": 0,
+        "latestRevision": null
+      },
+      "engineering": {
+        "ruleKey": "DDD-003",
+        "severity": "Mandatory",
+        "tags": ["ddd", "dependency-inversion", "infrastructure", "layering"],
+        "referencePath": "packages/governance/src/server/domain/repositories/i-rule-repository.ts"
+      }
+    },
+    {
+      "code": "DDD-004",
+      "title": "Value Object Collections",
+      "description": "Collections in aggregates MUST use Value Objects for normalization and invariants instead of passing primitive strings directly.",
+      "severity": "Recommended",
+      "tags": ["collection", "ddd", "invariants", "value-object"],
+      "liveReferenceLocation": "packages/governance/src/server/domain/value-objects/rule-tag.ts",
+      "goodExamples": [
+        {
+          "language": "TypeScript",
+          "type": "GoodExample",
+          "content": "class Rule {\n  private tags = new Set<RuleTag>();\n\n  addTag(raw: string) {\n    this.tags.add(RuleTag.create(raw));\n  }\n}\n",
+          "caption": "RuleTag enforces normalization for every collection entry."
+        }
+      ],
+      "badExamples": [
+        {
+          "language": "TypeScript",
+          "type": "BadExample",
+          "content": "class Rule {\n  private tags: string[] = [];\n\n  addTag(raw: string) {\n    this.tags.push(raw);\n  }\n}\n",
+          "caption": "Primitive collection bypasses normalization and duplicate checks."
+        }
+      ],
+      "provenance": {
+        "ruleId": "9eb5a76f-ea7c-484d-835e-355d1f205ff7",
+        "authorId": "00000000-0000-4000-8000-000000000001",
+        "createdAt": 1789144579391,
+        "updatedAt": 1789144579391,
+        "revisionCount": 0,
+        "latestRevision": null
+      },
+      "engineering": {
+        "ruleKey": "DDD-004",
+        "severity": "Recommended",
+        "tags": ["collection", "ddd", "invariants", "value-object"],
+        "referencePath": "packages/governance/src/server/domain/value-objects/rule-tag.ts"
+      }
+    },
+    {
+      "code": "DDD-005",
+      "title": "Factory Method Pattern",
+      "description": "Aggregates MUST expose static factory methods and hide constructors to guarantee invariant validation at creation time.",
+      "severity": "Recommended",
+      "tags": ["aggregate", "ddd", "factory-method", "invariants"],
+      "liveReferenceLocation": "packages/governance/src/server/domain/entities/rule-revision.ts",
+      "goodExamples": [
+        {
+          "language": "TypeScript",
+          "type": "GoodExample",
+          "content": "class RuleRevision {\n  private constructor(private readonly props: RuleRevisionProps) {}\n\n  static create(props: RuleRevisionProps): RuleRevision {\n    return new RuleRevision(props);\n  }\n}\n",
+          "caption": "Factory method centralizes creation and validation flow."
+        }
+      ],
+      "badExamples": [
+        {
+          "language": "TypeScript",
+          "type": "BadExample",
+          "content": "class RuleRevision {\n  constructor(public readonly props: RuleRevisionProps) {}\n}\n",
+          "caption": "Public constructor allows bypassing validation and lifecycle controls."
+        }
+      ],
+      "provenance": {
+        "ruleId": "8c337123-1172-4b76-84cc-585eb1dd5951",
+        "authorId": "00000000-0000-4000-8000-000000000001",
+        "createdAt": 1789144579395,
+        "updatedAt": 1789144579395,
+        "revisionCount": 0,
+        "latestRevision": null
+      },
+      "engineering": {
+        "ruleKey": "DDD-005",
+        "severity": "Recommended",
+        "tags": ["aggregate", "ddd", "factory-method", "invariants"],
+        "referencePath": "packages/governance/src/server/domain/entities/rule-revision.ts"
+      }
+    }
+  ],
+  "hashAlgorithm": "sha256",
+  "semanticHash": "sha256:644c795c8f69b8b87f0ed58604084da802b3cf3d0ab3949a0093c5d24500e246"
+}

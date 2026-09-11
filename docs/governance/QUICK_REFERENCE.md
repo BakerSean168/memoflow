@@ -47,7 +47,10 @@ Governance 不是静态目录样板。`GOV-1901` 长期要求以下四组 proof 
 - IPC：`governance:rule-bundle:export`；
 - client：`GovernanceClientPort.exportRuleBundle()`；
 - 生成过程严格只读；seed rule 没有历史 revision 时显式返回 `revisionCount: 0` / `latestRevision: null`；
-- CI/engineering governance 不读取 live Rule DB，后续只能消费 repository-pinned/versioned bundle。
+- CI/engineering governance 不读取 live Rule DB；当前固定消费 `tools/governance/published/governance-rule-bundle.v1.json`，semantic hash 由 `tools/governance/pinned-rule-bundles.json` 固定；
+- Rule → engineering check 必须在 `engineering-rule-adapters.json` 显式映射；severity 不自动等于 enforcement，未映射 Rule 只报告为 `unmapped (non-enforcing)`；
+- `DDD-003` 当前只覆盖 `package-internal-boundary` 的 `partial` 子集；原始 `package-internal-boundary-audit.mjs` 仍可独立运行；
+- `--mode check` 用于 CI、`--mode report` 输出机器可读报告、`--mode autofix-proposal` 仅输出 review-required proposal，禁止直接修改产品源码。
 
 ## Development / diagnostic surface
 

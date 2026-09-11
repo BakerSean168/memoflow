@@ -11023,6 +11023,30 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/governance-rule-bundle-cli.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/governance/__tests__/governance-rule-bundle-hard-guards.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/governance/__tests__/governance-rule-engineering-adapter.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/governance/__tests__/local-docker-product-validation.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -11048,6 +11072,14 @@
     },
     {
       "path": "tools/governance/__tests__/public-surface-jsdoc.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/governance/__tests__/published-rule-bundle.test.mjs",
       "primarySuite": "governance",
       "collectors": [
         "tools/governance/vitest.config.ts"
@@ -11454,7 +11486,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 15
+      "fileCount": 19
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -12385,6 +12417,6 @@
     "boundary-main": 6,
     "e2e": 60,
     "perf": 1,
-    "governance": 53
+    "governance": 57
   }
 }

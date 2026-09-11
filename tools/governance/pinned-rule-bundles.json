@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "bundles": [
+    {
+      "path": "tools/governance/published/governance-rule-bundle.v1.json",
+      "semanticHash": "sha256:644c795c8f69b8b87f0ed58604084da802b3cf3d0ab3949a0093c5d24500e246",
+      "purpose": "repository-engineering-baseline"
+    },
+    {
+      "path": "tools/governance/__fixtures__/governance-rule-bundle.v1.json",
+      "semanticHash": "sha256:0b2e56543c54e13af453b3259fd28a229c6bcf41028fd58270fb007b10adc1cf",
+      "purpose": "adapter-test-fixture"
+    }
+  ]
+}

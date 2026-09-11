@@ -104,4 +104,4 @@ Active Rule + RuleRevision ledger
 → GovernanceClientPort.exportRuleBundle()
 ```
 
-bundle 不包含导出时间或机器身份；Rule、tags、examples、revision 字段和 JSON key 都稳定排序，因此同一 Governance 状态与同一 schema version 会得到相同 bundle/hash。发布用例只读 Rule/RuleRevision repositories，不写数据库。CI 不允许直接连接 live Governance DB；后续 engineering adapter 必须消费 repository-pinned/versioned bundle。
+bundle 不包含导出时间或机器身份；Rule、tags、examples、revision 字段和 JSON key 都稳定排序，因此同一 Governance 状态与同一 schema version 会得到相同 bundle/hash。发布用例只读 Rule/RuleRevision repositories，不写数据库。`GOV-1904` 已把显式发布结果接到 repository-pinned engineering boundary：CI 固定消费 `tools/governance/published/governance-rule-bundle.v1.json` 与 `pinned-rule-bundles.json` 中的 semantic hash，不连接 live Governance DB；只有 `engineering-rule-adapters.json` 中显式映射的 Rule 才能执行工程检查，Rule severity 本身不会隐式升级成 CI enforcement。
