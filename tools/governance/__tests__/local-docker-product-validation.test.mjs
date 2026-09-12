@@ -71,6 +71,21 @@ describe('API Docker workspace closure', () => {
   });
 });
 
+describe('local Docker image provenance', () => {
+  it('stamps the locally built PowerSync image with the exact workspace revision and build date', () => {
+    const compose = readFileSync(new URL('../../../docker-compose.local.yml', import.meta.url), 'utf8');
+    const powersyncStart = compose.indexOf('\n  powersync:\n');
+    const webStart = compose.indexOf('\n  web:\n', powersyncStart + 1);
+
+    expect(powersyncStart).toBeGreaterThanOrEqual(0);
+    expect(webStart).toBeGreaterThan(powersyncStart);
+
+    const powersyncBlock = compose.slice(powersyncStart, webStart);
+    expect(powersyncBlock).toContain('org.opencontainers.image.created: ${BUILD_DATE:-unknown}');
+    expect(powersyncBlock).toContain('org.opencontainers.image.revision: ${VCS_REF:-unknown}');
+  });
+});
+
 describe('local Docker product validation evidence', () => {
   it('requires healthy listeners, exact compose port mappings, and current revisions', () => {
     const result = evaluateLocalDockerRuntimeEvidence(healthyRuntime());
