@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-09T00:31:00+08:00
+updated: 2026-09-12T23:05:00+08:00
 ---
 
 # Active Plans
@@ -17,7 +17,7 @@ updated: 2026-09-09T00:31:00+08:00
 
 | 计划                                                                                                      | 当前状态                                                                                                                                                                                                                                                                                  |
 | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Goal vNext Model Convergence](./2026-09-08-goal-vnext-model-convergence.md)                              | **ACTIVE / implementation complete** — `GOAL-7202～7210` 已完成：canonical Goal/KR、Task/Knowledge Context、Workspace、GoalPlanDraft V2、property-chip UI 与 destructive legacy cleanup 均已落地；仅剩 `GOAL-7211` 五层审查、exact-head CI/build 与归档交付。                             |
+| [Goal vNext Model Convergence](./2026-09-08-goal-vnext-model-convergence.md)                              | **ACTIVE / local review complete, delivery pending** — `GOAL-7202～7210` 实施完成，`GOAL-7211` 五层本地审查 P0/P1 = 0；真实 PostgreSQL/HTTP/IPC/PowerSync/AI/UI 矩阵均绿。仅剩 exact-head PR required CI，首轮全绿后再归档并让归档 HEAD 重跑同一 delivery gate。                          |
 | [Task vNext Model Convergence](./2026-09-08-task-vnext-model-convergence.md)                              | **ACTIVE / implementation started** — TaskPlan/TaskOccurrence 独立聚合、Schedule union、Result/Checklist、Reminder persistence parity、Goal-level link 与 Workspace read model；基线 71 files / 717 tests PASS。                                                                          |
 | [Setting vNext Model Convergence](./2026-09-08-setting-vnext-model-convergence.md)                        | **ACTIVE / implementation complete, closure pending** — `SETTING-9202～9209` 已完成 canonical preferences、Notification/device ownership、Settings Hub、V3 preference portability 与 legacy persistence/protocol/client 删除；仅剩 `SETTING-9210` 五层 review / exact-head CI / archive。 |
 | [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)                                  | **ACTIVE / design frozen** — 保留 Mastra 单一 runtime，收敛 Conversation shell、Provider Secret/Model Capability、AI Context、Knowledge stable identity、Workflow Draft/Apply、ExecutionRecord；`AI-9601` 文档完成，其余 production implementation 未开始。                               |

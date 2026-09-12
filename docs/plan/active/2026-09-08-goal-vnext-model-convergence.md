@@ -11,7 +11,7 @@ tags:
   - migration
 description: Goal vNext 产品模型、KR Measurement V3、Task/Knowledge Context、AI Plan 与 Linear-style UI 的一次性收敛实施计划
 created: 2026-09-08T17:55:00+08:00
-updated: 2026-09-12T12:13:00+08:00
+updated: 2026-09-12T23:05:00+08:00
 status: active
 ---
 
@@ -706,6 +706,18 @@ Recurrence UNTIL
 - current product docs updated from old implementation truth to new truth;
 - plan archived only after merge/delivery evidence exists.
 
+**Local five-layer review result (2026-09-12): PASS, P0 = 0, P1 = 0.**
+
+1. **Contract correctness — PASS.** Goal lifecycle is exactly `Planned / InProgress / Completed / Abandoned`; planning time is `startDate + GoalTimeframe(day/month/quarter/halfYear/year)`; KR Measurement V3 exposes Initial/Current/Target while `trackingBaseValue` remains server/portable-state-only; Task Goal context keeps the three accepted Goal-only / Goal+KR / Goal+KR+Contribution states; Goal Knowledge relations use stable `KnowledgeDocumentRef` rather than paths.
+2. **Vertical completeness — PASS.** Vue/React adapters reach the same HTTP/IPC application contracts; Goal Workspace composes owner read ports instead of foreign repositories; focused HTTP/IPC/PowerSync Workspace + Relation verification is 6 files / 14 tests PASS. PostgreSQL Relation integration is 3/3 PASS, Goal integration is 4 files / 18 tests PASS, and Task integration is 6 files / 31 tests PASS on the canonical Prisma schema.
+3. **Behavioral completeness — PASS.** Existing suites cover explicit lifecycle/CAS transitions, broad Target precision and target passage without automatic status changes, reminder Target-boundary + DST behavior, increasing/decreasing/midstream KR measurement, Goal-only/KR-link/contribution Task behavior, Knowledge unlink/delete preservation, durable AI restart/partial retry/idempotency, Vue create/edit/detail and React/Mobile semantic parity.
+4. **Engineering quality — PASS.** Multi-owner AI apply uses deterministic entity/request identities plus durable per-step receipts; Shared Relation, Task and Knowledge ownership remain injected through narrow ports; no cross-owner repository reach-through was introduced. `core-vnext-architecture-lock` is 6/6 PASS and audits 2082 production files across Goal/KR owner code, AI GoalPlan, Prisma source/generated schema, PowerSync and Data Portability. Owner-scoped scans have zero retired Goal/KR production hits while Task `dueDate/isOverdue` remains intentionally present.
+5. **Plan integrity — PASS locally.** Product/ADR/current-plan wording is on GoalPlanDraft V2, GoalTimeframe, KR V3 and Goal Workspace truth. Test inventory is current at 1266 files; `docs:check` and full `governance:check` PASS.
+
+**Local verification ledger at implementation head `72934633222`:** Goal 84 files / 474 tests; Contracts 85 / 578; AI 79 / 425; Data Portability 36 / 148; App-Vue Goal+i18n 15 / 51; PowerSync schema 7 / 7; Governance tools 19 / 139; Relation unit 12 / 12; Relation PostgreSQL 3 / 3; Goal PostgreSQL 18 / 18; Task PostgreSQL 31 / 31; focused Workspace/Relation transport 14 / 14. Cross-surface typechecks and Web/Desktop production builds PASS.
+
+**Delivery gate:** local review is complete, but GOAL-7211 is **not archived yet**. The exact-head GitHub PR required checks are the authoritative delivery evidence. After that head is green, archive this plan in a new commit and require the archive head itself to pass the same PR gate before declaring GOAL-7211 DONE.
+
 ## 17. Implementation order and parallelism
 
 Safe parallelism after GOAL-7201:
@@ -769,7 +781,7 @@ GOAL-7207  DONE — GoalWorkspaceReadModel + bounded owner composition
 GOAL-7208  DONE — GoalPlanDraft V2 + deterministic multi-owner apply/retry
 GOAL-7209  DONE — property-chip create/edit + Workspace UI + React/Mobile parity
 GOAL-7210  DONE — destructive legacy-track retirement + expanded anti-resurrection locks
-GOAL-7211  PLANNED — next dependency-ready Goal ticket
+GOAL-7211  REVIEW COMPLETE / DELIVERY PENDING — P0/P1 = 0; exact-head PR CI pending
 ```
 
-GOAL-7201 froze the design package; GOAL-7202～7210 are now implemented production truth. GOAL-7211 is the final Goal review/delivery ticket.
+GOAL-7201 froze the design package; GOAL-7202～7210 are implemented production truth. GOAL-7211 local five-layer review is complete with P0/P1 = 0; exact-head PR CI and post-CI archive are the remaining delivery gates.
