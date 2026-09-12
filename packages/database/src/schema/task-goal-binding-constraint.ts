@@ -1,5 +1,5 @@
 export const TASK_GOAL_BINDING_CONSTRAINT = 'task_templates_goal_binding_complete';
-export const TASK_GOAL_BINDING_CONSTRAINT_VERSION = 'memoflow.task-goal-binding/v2';
+export const TASK_GOAL_BINDING_CONSTRAINT_VERSION = 'memoflow.task-goal-binding/v3';
 
 export interface TaskGoalBindingSchemaQueryClient {
   query(sql: string): Promise<{
@@ -22,9 +22,12 @@ const canonicalConstraintSql = `
       goal_id IS NULL AND key_result_id IS NULL AND
       goal_record_value IS NULL AND goal_progress_trigger IS NULL
     ) OR (
+      goal_id IS NOT NULL AND key_result_id IS NULL AND
+      goal_record_value IS NULL AND goal_progress_trigger IS NULL
+    ) OR (
       goal_id IS NOT NULL AND key_result_id IS NOT NULL AND (
         (goal_record_value IS NULL AND goal_progress_trigger IS NULL) OR (
-          goal_record_value IS NOT NULL AND goal_record_value >= 0 AND
+          goal_record_value IS NOT NULL AND goal_record_value > 0 AND
           goal_progress_trigger IS NOT NULL AND
           goal_progress_trigger IN ('EachCompletion', 'PlanCompletion')
         )
@@ -84,10 +87,11 @@ async function installCanonicalConstraint(
  *
  * Valid persisted states are:
  * - no binding at all;
- * - a link-only Goal/KR relation with no automatic contribution;
- * - a Goal/KR relation with a non-negative EachCompletion/PlanCompletion contribution.
+ * - a Goal-level link with no Key Result and no automatic contribution;
+ * - a Goal/KR link with no automatic contribution;
+ * - a Goal/KR link with a positive EachCompletion/PlanCompletion contribution.
  *
- * Older trigger names are data-migrated before the v2 constraint is installed.
+ * Older trigger names are data-migrated before the v3 constraint is installed.
  */
 export async function ensureTaskGoalBindingConstraint(
   client: TaskGoalBindingSchemaQueryClient,

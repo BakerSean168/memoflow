@@ -82,6 +82,7 @@ import {
   CompleteTaskOccurrenceInvocationSchema,
   CreateTaskPlanSchema,
   GenerateInstancesInvocationSchema,
+  ListTaskPlanFiltersSchema,
   MarkTaskOccurrenceMissedInvocationSchema,
   RescheduleTaskOccurrenceInvocationSchema,
   SkipTaskOccurrenceInvocationSchema,
@@ -137,7 +138,6 @@ const logger = createLogger('TaskElectron');
 const allChannels = Object.values(TaskChannels);
 
 function normalizeTemplateListParams(
-  requestContext: { identityId: string },
   params: Record<string, unknown> | undefined,
 ): ListTaskPlanFilters {
   const status = params?.status;
@@ -226,18 +226,17 @@ export function createTaskElectronModule(
         const instanceController = new TaskOccurrenceController(handlers.instance);
 
         // --- Template channels ---
-        ipcMain.handle(TaskChannels.TEMPLATE_LIST, (_, params) =>
-          withAuthenticatedValue(ctx, async (requestContext) =>
-            templateController.listTemplates(
-              normalizeTemplateListParams(
-                requestContext,
-                params && typeof params === 'object'
-                  ? (params as Record<string, unknown>)
-                  : undefined,
-              ),
-              requestContext,
+        registerValidatedChannel(
+          ctx,
+          TaskChannels.TEMPLATE_LIST,
+          ListTaskPlanFiltersSchema,
+          (data, requestContext) => templateController.listTemplates(data, requestContext),
+          (params) =>
+            normalizeTemplateListParams(
+              params && typeof params === 'object'
+                ? (params as Record<string, unknown>)
+                : undefined,
             ),
-          ),
         );
         installed.push(TaskChannels.TEMPLATE_LIST);
         ipcMain.handle(TaskChannels.TEMPLATE_GET, (_, payload) =>

@@ -80,6 +80,7 @@ export class TaskPlanController {
       identityId: IdentityId.of(ctx.identityId),
       status: filters?.status,
       goalId: filters?.goalId as GoalId | undefined,
+      keyResultId: filters?.keyResultId,
       labelIdsAll: filters?.labelIdsAll,
     };
   }

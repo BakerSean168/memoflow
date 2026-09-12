@@ -322,11 +322,15 @@ export class PowerSyncTaskPlanRepository
     return this.queryByType(identityId, false, filters);
   }
 
-  async findByKeyResultId(identityId: string, keyResultId: string): Promise<TaskPlan[]> {
+  async findByGoalAndKeyResultId(
+    identityId: string,
+    goalId: string,
+    keyResultId: string,
+  ): Promise<TaskPlan[]> {
     return this.queryTemplates(
       identityId,
-      'SELECT * FROM task_templates WHERE identity_id = ? AND key_result_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
-      [identityId, keyResultId],
+      'SELECT * FROM task_templates WHERE identity_id = ? AND goal_id = ? AND key_result_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
+      [identityId, goalId, keyResultId],
     );
   }
 

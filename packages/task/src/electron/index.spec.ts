@@ -168,6 +168,24 @@ describe('createTaskElectronModule IPC lifecycle', () => {
     expect(fake.api.listTaskOccurrencesByAccount).toHaveBeenCalledTimes(1);
   });
 
+  it('validates Goal+KR list filters before invoking the Task application port', async () => {
+    await moduleDef.register(context);
+    const handler = registered(TaskChannels.TEMPLATE_LIST);
+    const goalId = 'IGoalId_550e8400-e29b-41d4-a716-446655440000';
+    const keyResultId = 'IKeyResultId_550e8400-e29b-41d4-a716-446655440001';
+
+    const valid = await handler(undefined, { goalId, keyResultId });
+    expect(valid).toMatchObject({ ok: true });
+    expect(fake.api.listTaskPlans).toHaveBeenLastCalledWith(
+      expect.objectContaining({ goalId, keyResultId }),
+    );
+
+    vi.mocked(fake.api.listTaskPlans).mockClear();
+    const invalid = await handler(undefined, { keyResultId });
+    expect(invalid).toMatchObject({ ok: false });
+    expect(fake.api.listTaskPlans).not.toHaveBeenCalled();
+  });
+
   it('destroy removes all channels and disposes exactly once (second call no-ops)', async () => {
     await moduleDef.register(context);
 

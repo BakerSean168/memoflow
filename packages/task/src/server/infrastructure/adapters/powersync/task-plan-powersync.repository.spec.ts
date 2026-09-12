@@ -104,10 +104,12 @@ describe('PowerSync task template goal binding', () => {
       [identityId, goalId],
     );
 
-    await expect(repository.findByKeyResultId(identityId, keyResultId)).resolves.toHaveLength(1);
+    await expect(
+      repository.findByGoalAndKeyResultId(identityId, goalId, keyResultId),
+    ).resolves.toHaveLength(1);
     expect(db.getAll).toHaveBeenCalledWith(
-      expect.stringContaining('identity_id = ? AND key_result_id = ?'),
-      [identityId, keyResultId],
+      expect.stringContaining('identity_id = ? AND goal_id = ? AND key_result_id = ?'),
+      [identityId, goalId, keyResultId],
     );
   });
 

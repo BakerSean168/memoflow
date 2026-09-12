@@ -10,3 +10,5 @@ export * from './task-occurrence.dto';
 export * from './task-schedule.dto';
 export * from './task-invocation.schemas';
 export * from './response-schemas';
+
+export * from './task-goal-context.dto';

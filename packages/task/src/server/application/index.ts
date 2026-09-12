@@ -16,3 +16,6 @@ export * from './services';
 export * from './outbox';
 
 export type { TaskApplicationPort } from './task.application.port';
+
+// ===== Cross-module owner read ports =====
+export type * from './ports';

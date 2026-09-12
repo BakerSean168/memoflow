@@ -15,7 +15,8 @@ const canonicalNotificationFiles = [
     `,
   },
   {
-    relPath: 'packages/notification/src/server/application/use-cases/commands/create-notification.use-case.ts',
+    relPath:
+      'packages/notification/src/server/application/use-cases/commands/create-notification.use-case.ts',
     content: `
       class NotificationPolicy { evaluate() {} }
       const NotificationDeliveryPlanOutcome = {};
@@ -24,8 +25,33 @@ const canonicalNotificationFiles = [
   },
 ];
 
+const canonicalTaskGoalFiles = [
+  {
+    relPath: 'packages/database/src/schema/task-goal-binding-constraint.ts',
+    content: `
+      const VERSION = 'memoflow.task-goal-binding/v3';
+      const sql = 'goal_id IS NOT NULL AND key_result_id IS NULL';
+      const contribution = 'goal_record_value IS NULL AND goal_progress_trigger IS NULL';
+    `,
+  },
+  {
+    relPath: 'packages/task/src/server/application/ports/task-goal-context-read.port.ts',
+    content: `
+      interface TaskGoalContextReadPort {
+        listTasksByGoal(): unknown;
+        listTasksByKeyResult(): unknown;
+        getTaskGoalContextSummary(): unknown;
+      }
+    `,
+  },
+];
+
 function scan(...files) {
-  return findCoreVnextArchitectureLockViolations([...canonicalNotificationFiles, ...files]);
+  return findCoreVnextArchitectureLockViolations([
+    ...canonicalNotificationFiles,
+    ...canonicalTaskGoalFiles,
+    ...files,
+  ]);
 }
 
 describe('HARD-7102 core vNext architecture lock', () => {
@@ -107,6 +133,14 @@ describe('HARD-7102 core vNext architecture lock', () => {
         relPath: 'packages/app-vue/src/modules/goal/LegacyKr.vue',
         content: `const hidden = keyResult.trackingBaseValue;`,
       },
+      {
+        relPath: 'packages/task/src/server/domain/repositories/legacy-task-plan-repository.ts',
+        content: `findByKeyResultId(identityId, keyResultId);`,
+      },
+      {
+        relPath: 'packages/task/src/domain-client/aggregates/task-plan.ts',
+        content: `return { keyResultId: String(binding.keyResultId) };`,
+      },
     );
     const kinds = new Set(violations.map((v) => v.kind));
     expect(kinds).toEqual(expect.objectContaining({}));
@@ -130,6 +164,8 @@ describe('HARD-7102 core vNext architecture lock', () => {
       'goal-legacy-due-time',
       'kr-legacy-measurement',
       'kr-tracking-base-ui-leak',
+      'task-goal-ownerless-kr-query',
+      'task-goal-null-kr-stringify',
     ]) {
       expect(kinds.has(kind), `missing violation kind ${kind}`).toBe(true);
     }
@@ -142,7 +178,8 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `export { createTaskScheduledHandlerRegistration } from '../server/infrastructure/scheduled-handler';`,
       },
       {
-        relPath: 'packages/reminder/src/server/domain/repositories/i-reminder-template-repository.ts',
+        relPath:
+          'packages/reminder/src/server/domain/repositories/i-reminder-template-repository.ts',
         content: `findByNextTriggerBefore(beforeTime: number, identityId?: string): Promise<ReminderTemplate[]>;`,
       },
       {
@@ -211,6 +248,22 @@ describe('HARD-7102 core vNext architecture lock', () => {
       },
     );
     expect(violations).toHaveLength(0);
+  });
+
+  it('requires the canonical Task Goal binding v3 constraint and owner read port', () => {
+    const files = [
+      ...canonicalNotificationFiles.map((file) => ({ ...file })),
+      ...canonicalTaskGoalFiles.map((file) => ({ ...file })),
+    ];
+    files.find((file) => file.relPath.endsWith('task-goal-binding-constraint.ts')).content =
+      `const VERSION = 'memoflow.task-goal-binding/v2';`;
+    files.find((file) => file.relPath.endsWith('task-goal-context-read.port.ts')).content =
+      `interface TaskGoalContextReadPort { listTasksByGoal(): unknown; }`;
+
+    const { violations } = findCoreVnextArchitectureLockViolations(files);
+    const kinds = violations.map((violation) => violation.kind);
+    expect(kinds).toContain('task-goal-binding-v3-missing');
+    expect(kinds).toContain('task-goal-context-read-port-missing');
   });
 
   it('requires the canonical NotificationRequested -> policy/DeliveryPlan path', () => {

@@ -16,6 +16,7 @@ const scanRoots = [
   'packages/scheduler/src',
   'packages/notification/src',
   'packages/contracts/src',
+  'packages/database/src/schema',
   'packages/app-react/src',
   'packages/app-vue/src',
   'apps/desktop/src/renderer',

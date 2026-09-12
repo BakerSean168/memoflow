@@ -50,6 +50,7 @@ describe('ListTaskPlansUseCase', () => {
       findByIdentityId: vi.fn().mockResolvedValue([]),
       findByStatus: vi.fn().mockResolvedValue([]),
       findByGoalId: vi.fn().mockResolvedValue([]),
+      findByGoalAndKeyResultId: vi.fn().mockResolvedValue([]),
       save: vi.fn().mockResolvedValue(undefined),
     });
     instanceRepo = createMockRepo<ITaskOccurrenceRepository>({
@@ -74,10 +75,7 @@ describe('ListTaskPlansUseCase', () => {
       });
 
       expect(result).toBeOk();
-      expect(templateRepo.findByStatus).toHaveBeenCalledWith(
-        testIdentityId,
-        TaskPlanStatus.Active,
-      );
+      expect(templateRepo.findByStatus).toHaveBeenCalledWith(testIdentityId, TaskPlanStatus.Active);
       if (result.ok) {
         expect(result.data.templates).toHaveLength(1);
         expect(result.data.total).toBe(1);
@@ -91,6 +89,21 @@ describe('ListTaskPlansUseCase', () => {
       });
 
       expect(templateRepo.findByGoalId).toHaveBeenCalledWith(testIdentityId, 'goal-1');
+    });
+
+    it('uses the Goal+KR owner query when both filters are provided', async () => {
+      await useCase.execute({
+        identityId: testIdentityId,
+        goalId: 'goal-1' as any,
+        keyResultId: 'kr-1' as any,
+      });
+
+      expect(templateRepo.findByGoalAndKeyResultId).toHaveBeenCalledWith(
+        testIdentityId,
+        'goal-1',
+        'kr-1',
+      );
+      expect(templateRepo.findByGoalId).not.toHaveBeenCalled();
     });
 
     it('should fallback to findByIdentityId when no filters provided', async () => {

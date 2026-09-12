@@ -69,6 +69,8 @@ export const GOAL_LEGACY_TIME_PATTERN = /\b(?:dueDate|isOverdue|GoalDueDateNotSe
 export const KR_LEGACY_MEASUREMENT_PATTERN =
   /\b(?:startingValue|progressBaselineValue)\b|\b(?:starting_value|progress_baseline_value)\b/;
 export const KR_CLIENT_TRACKING_STATE_PATTERN = /\btrackingBaseValue\b/;
+export const TASK_GOAL_OWNERLESS_KR_QUERY_PATTERN = /\bfindByKeyResultId\s*\(/;
+export const TASK_GOAL_NULL_STRINGIFY_PATTERN = /\bkeyResultId\s*:\s*String\s*\(\s*binding\.keyResultId\s*\)/;
 
 const GOAL_TIME_OWNER_ROOTS = [
   'packages/goal/src/',
@@ -339,6 +341,27 @@ export function findCoreVnextArchitectureLockViolations(files) {
       );
     }
 
+    // ADR-069 / GOAL-7205: Key Result task reads are always scoped by their owning Goal,
+    // and a nullable KR link must remain null on ordinary client projections.
+    if (relPath.startsWith('packages/task/src/')) {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        TASK_GOAL_OWNERLESS_KR_QUERY_PATTERN,
+        'task-goal-ownerless-kr-query',
+      );
+    }
+    if (relPath === 'packages/task/src/domain-client/aggregates/task-plan.ts') {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        TASK_GOAL_NULL_STRINGIFY_PATTERN,
+        'task-goal-null-kr-stringify',
+      );
+    }
+
 
     // ADR-067 / GOAL-7203: Goal owns Target Timeframe, never Task-style due/overdue truth.
     // Scope this lock to Goal-owned canonical surfaces so Task dueDate/isOverdue and the
@@ -378,6 +401,27 @@ export function findCoreVnextArchitectureLockViolations(files) {
       );
     }
   }
+
+  // ADR-069 / GOAL-7205 positive locks: persistence must continue accepting Goal-only links,
+  // and Task must own the bounded read seam consumed later by Goal Workspace.
+  requireTokens(
+    violations,
+    fileMap,
+    'packages/database/src/schema/task-goal-binding-constraint.ts',
+    [
+      'memoflow.task-goal-binding/v3',
+      'goal_id IS NOT NULL AND key_result_id IS NULL',
+      'goal_record_value IS NULL AND goal_progress_trigger IS NULL',
+    ],
+    'task-goal-binding-v3-missing',
+  );
+  requireTokens(
+    violations,
+    fileMap,
+    'packages/task/src/server/application/ports/task-goal-context-read.port.ts',
+    ['listTasksByGoal', 'listTasksByKeyResult', 'getTaskGoalContextSummary'],
+    'task-goal-context-read-port-missing',
+  );
 
   // Canonical Notification path is a positive lock, not merely absence of the
   // legacy bypass: shared requests must enter CreateNotificationUseCase and its
@@ -431,6 +475,10 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
     'goal-legacy-due-time': 'Goal planning time must use startDate + GoalTimeframe target; Task-style dueDate/isOverdue truth is forbidden in Goal-owned surfaces',
     'kr-legacy-measurement': 'KR Measurement V3 must use initialValue/currentValue/targetValue plus internal trackingBaseValue; V2 starting/baseline names are forbidden on canonical KR surfaces',
     'kr-tracking-base-ui-leak': 'trackingBaseValue is internal aggregation state and must never appear in ordinary Goal/KR product UI',
+    'task-goal-ownerless-kr-query': 'Task Key Result reads must include the owning Goal; ownerless findByKeyResultId queries are forbidden',
+    'task-goal-null-kr-stringify': 'Goal-only Task links must preserve keyResultId=null; stringifying a nullable KR id is forbidden',
+    'task-goal-binding-v3-missing': 'Task persistence must retain the v3 Goal-only / Goal+KR binding constraint',
+    'task-goal-context-read-port-missing': 'Task must expose the ADR-069 owner-controlled Goal/KR context read port',
   };
   return `${file}:${line}: ${messages[kind] ?? kind} [${text}]`;
 }

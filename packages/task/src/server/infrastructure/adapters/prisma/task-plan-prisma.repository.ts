@@ -356,13 +356,19 @@ export class TaskPlanPrismaRepository
     );
   }
 
-  async findByKeyResultId(identityId: string, keyResultId: string): Promise<TaskPlan[]> {
+  async findByGoalAndKeyResultId(
+    identityId: string,
+    goalId: string,
+    keyResultId: string,
+  ): Promise<TaskPlan[]> {
     const data = await this.db.taskPlan.findMany({
       where: {
         identityId,
+        goalId,
         keyResultId,
         deletedAt: null,
       },
+      orderBy: { createdAt: 'desc' },
     });
     return this.hydrateTemplates(
       identityId,

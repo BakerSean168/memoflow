@@ -5340,6 +5340,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/task/api/task-goal-context.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/task/api/task-plan.dto.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9825,6 +9833,16 @@
       ]
     },
     {
+      "path": "packages/task/src/domain-client/aggregates/task-plan.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/electron/authenticated-ipc.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11402,7 +11420,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -11696,7 +11714,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 82
+      "fileCount": 83
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11829,7 +11847,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 72
+      "fileCount": 73
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -12389,6 +12407,7 @@
       "packages/task/src/api/routes/task-plan.routes.spec.ts",
       "packages/task/src/api/routes/task-void-success-envelope.surface.spec.ts",
       "packages/task/src/client/task-client-browser-boundary.surface.spec.ts",
+      "packages/task/src/domain-client/aggregates/task-plan.spec.ts",
       "packages/task/src/electron/authenticated-ipc.spec.ts",
       "packages/task/src/electron/index.spec.ts",
       "packages/task/src/electron/task-electron.surface.spec.ts",
@@ -12462,7 +12481,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1074,
+    "unit": 1076,
     "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,

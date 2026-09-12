@@ -23,10 +23,7 @@ describe('task template ownership surface', () => {
     'utf8',
   );
   const deleteUseCase = readFileSync(
-    resolve(
-      __dirname,
-      '../../../../application/use-cases/commands/delete-task-plan.use-case.ts',
-    ),
+    resolve(__dirname, '../../../../application/use-cases/commands/delete-task-plan.use-case.ts'),
     'utf8',
   );
   const routes = readFileSync(
@@ -97,17 +94,21 @@ describe('task template ownership surface', () => {
   });
 
   it('findByGoalId remains identity scoped while folder lookup is retired', () => {
-    expect(port).toContain('findByGoalId(identityId: string, goalId: string): Promise<TaskPlan[]>;');
+    expect(port).toContain(
+      'findByGoalId(identityId: string, goalId: string): Promise<TaskPlan[]>;',
+    );
     expect(prisma).toContain('async findByGoalId(identityId: string, goalId: string)');
     expect(listUseCase).toContain('findByGoalId(request.identityId, request.goalId)');
     expect(port).not.toContain('findByFolderId');
     expect(prisma).not.toContain('findByFolderId');
   });
 
-  it('findByKeyResultId remains identity scoped while hierarchy lookup is retired', () => {
-    expect(port).toContain('findByKeyResultId(identityId: string, keyResultId: string): Promise<TaskPlan[]>;');
-    expect(prisma).toContain('async findByKeyResultId(identityId: string, keyResultId: string)');
-    expect(prisma).toMatch(/identityId,\s*keyResultId,\s*deletedAt: null/);
+  it('findByGoalAndKeyResultId remains identity + Goal scoped while hierarchy lookup is retired', () => {
+    expect(port).toContain('findByGoalAndKeyResultId(');
+    expect(port).toContain('goalId: string');
+    expect(port).toContain('keyResultId: string');
+    expect(prisma).toContain('async findByGoalAndKeyResultId(');
+    expect(prisma).toMatch(/identityId,\s*goalId,\s*keyResultId,\s*deletedAt: null/);
     expect(port).not.toContain('findSubtasks');
     expect(prisma).not.toContain('findSubtasks');
   });

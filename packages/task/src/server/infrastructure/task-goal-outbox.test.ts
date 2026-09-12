@@ -9,7 +9,9 @@ import {
 import { toTaskGoalOutboxRecord } from './task-goal-outbox';
 
 function completionEvent(
-  contribution: NonNullable<NonNullable<TaskOccurrenceCompletedEvent['goalBinding']>['contribution']> | null = {
+  contribution: NonNullable<
+    NonNullable<TaskOccurrenceCompletedEvent['goalBinding']>['contribution']
+  > | null = {
     value: 2,
     trigger: TaskGoalBindingTrigger.EachCompletion,
   },
@@ -26,7 +28,9 @@ function completionEvent(
       taskTitle: 'Ship reliable progress',
       goalBinding: {
         goalId: 'goal-1' as NonNullable<TaskOccurrenceCompletedEvent['goalBinding']>['goalId'],
-        keyResultId: 'kr-1' as NonNullable<TaskOccurrenceCompletedEvent['goalBinding']>['keyResultId'],
+        keyResultId: 'kr-1' as NonNullable<
+          TaskOccurrenceCompletedEvent['goalBinding']
+        >['keyResultId'],
         contribution,
       },
     },
@@ -37,7 +41,9 @@ function planOutcomeEvent(
   previousOutcome: TaskPlanOutcomeChangedEvent['previousOutcome'],
   nextOutcome: TaskPlanOutcomeChangedEvent['nextOutcome'],
   planVersion = 8,
-  contribution: NonNullable<NonNullable<TaskPlanOutcomeChangedEvent['goalBinding']>['contribution']> | null = {
+  contribution: NonNullable<
+    NonNullable<TaskPlanOutcomeChangedEvent['goalBinding']>['contribution']
+  > | null = {
     value: 3,
     trigger: TaskGoalBindingTrigger.PlanCompletion,
   },
@@ -54,7 +60,9 @@ function planOutcomeEvent(
       taskTitle: 'Graduate reliably',
       goalBinding: {
         goalId: 'goal-1' as NonNullable<TaskPlanOutcomeChangedEvent['goalBinding']>['goalId'],
-        keyResultId: 'kr-1' as NonNullable<TaskPlanOutcomeChangedEvent['goalBinding']>['keyResultId'],
+        keyResultId: 'kr-1' as NonNullable<
+          TaskPlanOutcomeChangedEvent['goalBinding']
+        >['keyResultId'],
         contribution,
       },
       previousOutcome,
@@ -83,6 +91,17 @@ describe('toTaskGoalOutboxRecord V2', () => {
 
   it('never enqueues progress for a link-only Task', () => {
     expect(toTaskGoalOutboxRecord(completionEvent(null))).toBeNull();
+  });
+
+  it('never enqueues progress for a Goal-only Task link', () => {
+    const event = completionEvent(null);
+    const payload = event.payload as TaskOccurrenceCompletedEvent;
+    payload.goalBinding = {
+      goalId: payload.goalBinding!.goalId,
+      keyResultId: null,
+      contribution: null,
+    };
+    expect(toTaskGoalOutboxRecord(event)).toBeNull();
   });
 
   it('does not let an occurrence completion directly settle PlanCompletion', () => {

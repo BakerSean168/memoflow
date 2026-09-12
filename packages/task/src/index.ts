@@ -24,6 +24,7 @@ export {
   PrismaTaskBindingReadPort,
   PowerSyncTaskBindingReadPort,
   type TaskApplicationPort,
+  type TaskGoalContextReadPort,
   type TaskModuleDependencies,
   type TaskModuleInstance,
   type TaskModuleRuntimeContribution,

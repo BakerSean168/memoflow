@@ -5,7 +5,7 @@ tags:
   - task
 description: Task 模块当前事实与 Task vNext Plan/Occurrence/Workspace 目标模型
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T19:40:00+08:00
+updated: 2026-09-12T14:00:00+08:00
 ---
 
 # Task 模块说明
@@ -25,7 +25,7 @@ Task 负责 **Action + Execution**。
 - finite plan completion policy；
 - Daily/Weekly/Monthly/Yearly recurrence；
 - Shared Label；
-- Goal/KR link + optional EachCompletion/PlanCompletion contribution；
+- Goal-only / Goal+KR link + optional KR-scoped EachCompletion/PlanCompletion contribution；
 - Planner projection 与 Scheduler single authority；
 - Today / Upcoming / Plans；
 - Prisma / PowerSync 双端 persistence。
@@ -86,7 +86,7 @@ Prisma/PowerSync load path 会把它们置 null；本轮 vNext 会删除，而�
 
 ## 5. Goal / Note Context
 
-Task Goal link 最终允许：
+Task Goal link 当前 canonical 语义已经允许：
 
 ```text
 Task -> Goal
@@ -94,7 +94,9 @@ Task -> Goal + KR
 Task -> Goal + KR + Contribution
 ```
 
-Contribution 仍必须绑定 KR。
+`keyResultId` 对普通 Goal context 是可空的；Contribution 仍必须绑定 KR，goal-only / link-only completion 不会生成 Goal progress outbox。公开 Task list 可按 Goal 或 Goal+KR 查询，其中 KR filter 必须同时携带 owning Goal。
+
+Task 同时拥有 `TaskGoalContextReadPort`，通过 `listTasksByGoal`、`listTasksByKeyResult`、`getTaskGoalContextSummary` 提供 identity-scoped、soft-delete-aware 的 bounded read projection；Goal/Goal Workspace 不直接读取 Task 表或 Task repository。
 
 Related Notes 通过 shared Relation 查询，不存 `noteIds[]`。
 

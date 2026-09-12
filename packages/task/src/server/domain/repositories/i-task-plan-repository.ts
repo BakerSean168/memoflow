@@ -27,6 +27,7 @@ export class TaskLabelOwnershipError extends Error {
 export interface TaskFilters {
   status?: string;
   goalId?: string;
+  keyResultId?: string;
   dueDateFrom?: number;
   dueDateTo?: number;
   limit?: number;
@@ -121,10 +122,12 @@ export interface ITaskPlanRepository {
    */
   findRecurringTasks(identityId: string, filters?: TaskFilters): Promise<TaskPlan[]>;
 
-  /**
-   * 根据关键结果查找任务（identity-scoped）
-   */
-  findByKeyResultId(identityId: string, keyResultId: string): Promise<TaskPlan[]>;
+  /** Find Task plans linked to one Key Result of one Goal (identity-scoped). */
+  findByGoalAndKeyResultId(
+    identityId: string,
+    goalId: string,
+    keyResultId: string,
+  ): Promise<TaskPlan[]>;
 
   /**
    * 统计任务数量（按条件）

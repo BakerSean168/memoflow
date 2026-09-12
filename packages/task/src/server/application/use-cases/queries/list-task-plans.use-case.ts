@@ -49,11 +49,39 @@ export class ListTaskPlansUseCase {
           (template) => String(template.goalBinding?.goalId ?? '') === String(request.goalId),
         );
       }
+      if (request.keyResultId) {
+        templates = templates.filter(
+          (template) =>
+            String(template.goalBinding?.keyResultId ?? '') === String(request.keyResultId),
+        );
+      }
+    } else if (request.goalId && request.keyResultId) {
+      templates = await this.templateRepository.findByGoalAndKeyResultId(
+        request.identityId,
+        request.goalId,
+        request.keyResultId,
+      );
+      if (request.status && request.status.length > 0) {
+        templates = templates.filter((template) =>
+          request.status!.includes(String(template.status)),
+        );
+      }
     } else if (request.status && request.status.length > 0) {
       templates = await this.templateRepository.findByStatus(
         request.identityId,
         request.status[0] as TaskPlanStatusType,
       );
+      if (request.goalId) {
+        templates = templates.filter(
+          (template) => String(template.goalBinding?.goalId ?? '') === String(request.goalId),
+        );
+      }
+      if (request.keyResultId) {
+        templates = templates.filter(
+          (template) =>
+            String(template.goalBinding?.keyResultId ?? '') === String(request.keyResultId),
+        );
+      }
     } else if (request.goalId) {
       templates = await this.templateRepository.findByGoalId(request.identityId, request.goalId);
     } else {

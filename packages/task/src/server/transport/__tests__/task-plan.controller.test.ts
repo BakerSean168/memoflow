@@ -224,7 +224,7 @@ describe('TaskPlanController', () => {
       expect(args.status).toEqual(['Active']);
     });
 
-    it('should pass through goalId and Shared Label filters', async () => {
+    it('should pass through Goal+KR and Shared Label filters', async () => {
       (useCases.listTemplates as ReturnType<typeof vi.fn>).mockResolvedValue(
         ok({ templates: [], total: 0 }),
       );
@@ -232,6 +232,7 @@ describe('TaskPlanController', () => {
       await controller.listTemplates(
         {
           goalId: 'GoalId_550e8400-e29b-41d4-a716-446655440002' as any,
+          keyResultId: 'KeyResultId_550e8400-e29b-41d4-a716-446655440003' as any,
           labelIdsAll: ['label-1', 'label-2'],
         },
         ctx,
@@ -239,6 +240,7 @@ describe('TaskPlanController', () => {
 
       const args = (useCases.listTemplates as ReturnType<typeof vi.fn>).mock.calls[0][0];
       expect(args.goalId).toBe('GoalId_550e8400-e29b-41d4-a716-446655440002');
+      expect(args.keyResultId).toBe('KeyResultId_550e8400-e29b-41d4-a716-446655440003');
       expect(args.labelIdsAll).toEqual(['label-1', 'label-2']);
     });
 

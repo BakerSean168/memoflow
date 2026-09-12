@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
-import type { IdentityId, GoalId, TaskPlanId } from '../../../primitives';
+import type { IdentityId, GoalId, KeyResultId, TaskPlanId } from '../../../primitives';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import type { TaskPlanClientDTO } from '../aggregates/task-plan-client';
 import type { TaskOccurrenceClientDTO } from '../aggregates/task-occurrence-client';
@@ -69,11 +69,22 @@ export const AbandonTaskPlanSchema = z
 export type AbandonTaskPlanReq = z.infer<typeof AbandonTaskPlanSchema>;
 
 // Public transport schema - NO identityId (injected from Context)
-export const ListTaskPlanFiltersSchema = z.object({
-  status: z.array(z.string()).optional(),
-  goalId: brandedId<GoalId>().optional(),
-  labelIdsAll: z.array(z.string().min(1)).max(50).optional(),
-});
+export const ListTaskPlanFiltersSchema = z
+  .object({
+    status: z.array(z.string()).optional(),
+    goalId: brandedId<GoalId>().optional(),
+    keyResultId: brandedId<KeyResultId>().optional(),
+    labelIdsAll: z.array(z.string().min(1)).max(50).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.keyResultId && !value.goalId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['goalId'],
+        message: 'Key Result task filtering requires its owning Goal',
+      });
+    }
+  });
 
 export type ListTaskPlanFilters = z.infer<typeof ListTaskPlanFiltersSchema>;
 
@@ -89,6 +100,7 @@ export interface QueryTaskPlansInternal {
   identityId: IdentityId;
   status?: string[];
   goalId?: GoalId;
+  keyResultId?: KeyResultId;
   labelIdsAll?: string[];
 }
 export interface QueryTaskPlansRes {

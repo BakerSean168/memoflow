@@ -256,6 +256,29 @@ describe('task.create durable Mastra Workflow (AI-VNEXT-06)', () => {
     });
   });
 
+  it('maps a Goal-only context link without synthesizing a Key Result or contribution', async () => {
+    const mutations = mutationPort();
+    const service = new ApplyTaskPlanService(mutations);
+    const draft = TaskPlanDraftContentSchema.parse({
+      task: {
+        title: 'Goal context only',
+        cadence: 'once',
+        startDate: Date.UTC(2026, 8, 8),
+        goalId: 'goal-1',
+      },
+    });
+
+    await service.apply({
+      workflowRunId: 'task-workflow-goal-only',
+      draft: { ...draft, revision: 1 },
+      context: executionContext('request-goal-only'),
+    });
+
+    expect(mutations.createTaskPlan.mock.calls[0]?.[0]).toMatchObject({
+      goalBinding: { goalId: 'goal-1', keyResultId: null, contribution: null },
+    });
+  });
+
   it('is idempotent: re-applying a successful receipt does not duplicate the template', async () => {
     const mutations = mutationPort();
     const service = new ApplyTaskPlanService(mutations);

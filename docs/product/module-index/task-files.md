@@ -5,7 +5,7 @@ tags:
   - task
 description: Task vNext（Plan / Occurrence）模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-09-10T17:45:00+09:00
+updated: 2026-09-12T15:00:00+09:00
 ---
 
 # Task vNext 文件索引
@@ -56,6 +56,9 @@ updated: 2026-09-10T17:45:00+09:00
 | [`packages/task/src/server/application/use-cases/commands/create-task-plan.use-case.ts`](../../../packages/task/src/server/application/use-cases/commands/create-task-plan.use-case.ts) | 创建 TaskPlan |
 | [`packages/task/src/server/application/use-cases/commands/complete-task-occurrence.use-case.ts`](../../../packages/task/src/server/application/use-cases/commands/complete-task-occurrence.use-case.ts) | 完成 TaskOccurrence |
 | [`packages/task/src/server/application/use-cases/commands/generate-task-occurrences.use-case.ts`](../../../packages/task/src/server/application/use-cases/commands/generate-task-occurrences.use-case.ts) | 生成 Occurrence |
+| [`packages/task/src/server/application/ports/task-goal-context-read.port.ts`](../../../packages/task/src/server/application/ports/task-goal-context-read.port.ts) | Task-owned Goal/KR context read port；供跨模块读取，不泄漏 repository |
+| [`packages/task/src/server/infrastructure/adapters/prisma/prisma-task-binding-read-port.ts`](../../../packages/task/src/server/infrastructure/adapters/prisma/prisma-task-binding-read-port.ts) | Prisma Goal 删除检查 + Goal/KR context read adapter |
+| [`packages/task/src/server/infrastructure/adapters/powersync/powersync-task-binding-read-port.ts`](../../../packages/task/src/server/infrastructure/adapters/powersync/powersync-task-binding-read-port.ts) | PowerSync Goal 删除检查 + Goal/KR context read adapter |
 | [`packages/task/src/server/infrastructure/adapters/prisma/task-plan-prisma.repository.ts`](../../../packages/task/src/server/infrastructure/adapters/prisma/task-plan-prisma.repository.ts) | Prisma TaskPlan repository |
 | [`packages/task/src/server/infrastructure/adapters/prisma/task-occurrence-prisma.repository.ts`](../../../packages/task/src/server/infrastructure/adapters/prisma/task-occurrence-prisma.repository.ts) | Prisma TaskOccurrence repository |
 | [`packages/task/src/server/infrastructure/adapters/powersync/task-plan-powersync.repository.ts`](../../../packages/task/src/server/infrastructure/adapters/powersync/task-plan-powersync.repository.ts) | PowerSync TaskPlan repository |
@@ -71,6 +74,7 @@ updated: 2026-09-10T17:45:00+09:00
 | [`packages/contracts/src/modules/task/aggregates/task-occurrence-server.ts`](../../../packages/contracts/src/modules/task/aggregates/task-occurrence-server.ts) | TaskOccurrence server DTO |
 | [`packages/contracts/src/modules/task/aggregates/task-occurrence-client.ts`](../../../packages/contracts/src/modules/task/aggregates/task-occurrence-client.ts) | TaskOccurrence client DTO |
 | [`packages/contracts/src/modules/task/api/task-plan.dto.ts`](../../../packages/contracts/src/modules/task/api/task-plan.dto.ts) | TaskPlan API schema |
+| [`packages/contracts/src/modules/task/api/task-goal-context.dto.ts`](../../../packages/contracts/src/modules/task/api/task-goal-context.dto.ts) | ADR-069 Goal/KR Task context page + summary contract |
 | [`packages/contracts/src/modules/task/api/task-occurrence.dto.ts`](../../../packages/contracts/src/modules/task/api/task-occurrence.dto.ts) | TaskOccurrence API schema |
 | [`packages/contracts/src/modules/task/value-objects/task-plan-schedule.ts`](../../../packages/contracts/src/modules/task/value-objects/task-plan-schedule.ts) | OneTime / Recurring schedule algebra |
 | [`packages/contracts/src/modules/task/value-objects/task-goal-binding.ts`](../../../packages/contracts/src/modules/task/value-objects/task-goal-binding.ts) | Goal-only link + optional KR + KR-scoped contribution |

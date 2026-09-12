@@ -157,8 +157,13 @@ describe('task-plan route contracts', () => {
     const route = getRegisteredRoute(registry, 'get', BASE);
     const querySchema = getQuerySchema(route);
     expect(querySchema).toBeDefined();
-    // Query with status array should pass
+    // Query with status array should pass.
     expect(querySchema.safeParse({ status: ['active'] }).success).toBe(true);
+    const goalId = 'IGoalId_550e8400-e29b-41d4-a716-446655440000';
+    const keyResultId = 'IKeyResultId_550e8400-e29b-41d4-a716-446655440001';
+    expect(querySchema.safeParse({ goalId }).success).toBe(true);
+    expect(querySchema.safeParse({ goalId, keyResultId }).success).toBe(true);
+    expect(querySchema.safeParse({ keyResultId }).success).toBe(false);
   });
 
   it('GET /{id} detail uses TaskPlanResponseSchema', () => {

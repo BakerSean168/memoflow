@@ -249,7 +249,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   private serializeGoalBinding(binding: TaskGoalBinding): TaskGoalBindingDTO {
     return {
       goalId: String(binding.goalId) as GoalId,
-      keyResultId: String(binding.keyResultId) as KeyResultId,
+      keyResultId: binding.keyResultId == null ? null : (String(binding.keyResultId) as KeyResultId),
       contribution: binding.contribution ? { ...binding.contribution } : null,
     };
   }

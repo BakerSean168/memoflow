@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CreateTaskPlanSchema,
+  ListTaskPlanFiltersSchema,
   TaskPlanScheduleSchema,
   UpdateTaskPlanSchema,
 } from './task-plan.dto';
@@ -70,9 +71,51 @@ describe('task template contracts', () => {
     expect(CreateTaskPlanSchema.safeParse(validCreatePayload()).success).toBe(true);
   });
 
+  it('accepts exactly the vNext Goal link states and rejects contribution without a Key Result', () => {
+    const goalId = `IGoalId_${uuid}`;
+    const keyResultId = `IKeyResultId_${uuid}`;
+    expect(
+      CreateTaskPlanSchema.safeParse({ ...validCreatePayload(), goalBinding: { goalId } }).success,
+    ).toBe(true);
+    expect(
+      CreateTaskPlanSchema.safeParse({
+        ...validCreatePayload(),
+        goalBinding: { goalId, keyResultId },
+      }).success,
+    ).toBe(true);
+    expect(
+      CreateTaskPlanSchema.safeParse({
+        ...validCreatePayload(),
+        goalBinding: {
+          goalId,
+          keyResultId,
+          contribution: { value: 1, trigger: 'EachCompletion' },
+        },
+      }).success,
+    ).toBe(true);
+    expect(
+      CreateTaskPlanSchema.safeParse({
+        ...validCreatePayload(),
+        goalBinding: { goalId, contribution: { value: 1, trigger: 'EachCompletion' } },
+      }).success,
+    ).toBe(false);
+  });
+
+  it('requires Goal ownership when filtering Task plans by Key Result', () => {
+    const goalId = `IGoalId_${uuid}`;
+    const keyResultId = `IKeyResultId_${uuid}`;
+    expect(ListTaskPlanFiltersSchema.safeParse({ goalId }).success).toBe(true);
+    expect(ListTaskPlanFiltersSchema.safeParse({ goalId, keyResultId }).success).toBe(true);
+    expect(ListTaskPlanFiltersSchema.safeParse({ keyResultId }).success).toBe(false);
+  });
+
   it('rejects retired Task string tags and custom color in favor of Shared Label IDs', () => {
-    expect(CreateTaskPlanSchema.safeParse({ ...validCreatePayload(), tags: ['legacy'] }).success).toBe(false);
-    expect(CreateTaskPlanSchema.safeParse({ ...validCreatePayload(), color: '#ff0000' }).success).toBe(false);
+    expect(
+      CreateTaskPlanSchema.safeParse({ ...validCreatePayload(), tags: ['legacy'] }).success,
+    ).toBe(false);
+    expect(
+      CreateTaskPlanSchema.safeParse({ ...validCreatePayload(), color: '#ff0000' }).success,
+    ).toBe(false);
     expect(UpdateTaskPlanSchema.safeParse({ tags: ['legacy'] }).success).toBe(false);
     expect(UpdateTaskPlanSchema.safeParse({ color: '#ff0000' }).success).toBe(false);
   });
