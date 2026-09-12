@@ -14,6 +14,21 @@ export interface TaskGoalBindingConstraintReport {
   constraintReplaced: boolean;
 }
 
+/** Builds the operator-facing reconciliation message from the same version constant as the DB comment. */
+export function describeTaskGoalBindingConstraintReport(
+  report: TaskGoalBindingConstraintReport,
+): string {
+  if (!report.tablePresent) {
+    return 'Task templates table is not present; constraint setup skipped.';
+  }
+  const action = report.constraintReplaced
+    ? 'replaced with'
+    : report.constraintCreated
+      ? 'created'
+      : 'already';
+  return `Task goal-binding constraint: ${action} canonical ${TASK_GOAL_BINDING_CONSTRAINT_VERSION}`;
+}
+
 const canonicalConstraintSql = `
   ALTER TABLE task_templates
   ADD CONSTRAINT "${TASK_GOAL_BINDING_CONSTRAINT}"

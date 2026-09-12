@@ -2,10 +2,30 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   TASK_GOAL_BINDING_CONSTRAINT,
   TASK_GOAL_BINDING_CONSTRAINT_VERSION,
+  describeTaskGoalBindingConstraintReport,
   ensureTaskGoalBindingConstraint,
 } from './task-goal-binding-constraint';
 
 describe('ensureTaskGoalBindingConstraint', () => {
+  it('derives operator messages from the canonical version constant', () => {
+    expect(
+      describeTaskGoalBindingConstraintReport({
+        tablePresent: true,
+        constraintCreated: false,
+        constraintReplaced: true,
+      }),
+    ).toBe(
+      `Task goal-binding constraint: replaced with canonical ${TASK_GOAL_BINDING_CONSTRAINT_VERSION}`,
+    );
+    expect(
+      describeTaskGoalBindingConstraintReport({
+        tablePresent: false,
+        constraintCreated: false,
+        constraintReplaced: false,
+      }),
+    ).toBe('Task templates table is not present; constraint setup skipped.');
+  });
+
   it('adds the v3 binding check when task_templates exists without the constraint', async () => {
     const query = vi
       .fn()
