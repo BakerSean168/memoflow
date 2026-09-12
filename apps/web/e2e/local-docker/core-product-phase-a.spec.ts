@@ -173,7 +173,7 @@ async function createGoalWithKeyResult(
   await page.getByTestId('create-goal-entry').click();
   await page.getByTestId('goal-name-input').fill(input.name);
   await page
-    .getByTestId('goal-description-input')
+    .getByTestId('goal-summary-input')
     .fill('Created through the real local Docker product surface.');
   await page.getByTestId('add-key-result-entry').click();
   await expect(page.getByTestId('key-result-draft-form')).toBeVisible();

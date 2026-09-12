@@ -44,7 +44,7 @@ test.describe('Local Docker core product Phase D', () => {
     await expect(goalDialog).toBeVisible();
     await expect(page.getByTestId('goal-name-input')).toBeFocused();
     await expect(page.getByLabel('开始日期', { exact: true })).toBeVisible();
-    await expect(page.getByLabel('截止日期', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('目标日期', { exact: true })).toBeVisible();
     await expectDialogGeometry(goalDialog);
     await expectNoSeriousAxeViolations(page, '[data-testid="goal-dialog"]');
 
@@ -52,14 +52,22 @@ test.describe('Local Docker core product Phase D', () => {
     await tabTo(page, page.getByTestId('add-key-result-entry'));
     await page.keyboard.press('Enter');
     await expect(page.getByTestId('key-result-draft-form')).toBeVisible();
+    await expect(page.getByLabel('初始值', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('当前值', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('目标值', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('目标时间（可选）', { exact: true })).toBeVisible();
     await tabTo(page, page.getByTestId('draft-kr-title-input'));
     await page.keyboard.type(keyResultName);
-    await page.getByTestId('draft-kr-target-input').fill('1');
+    await page.getByTestId('draft-kr-initial-input').fill('75');
+    await page.getByTestId('draft-kr-current-input').fill('73');
+    await page.getByTestId('draft-kr-target-input').fill('70');
+    await page.getByTestId('draft-kr-unit-input').fill('kg');
+    await page.getByLabel('目标时间（可选）', { exact: true }).fill('2027-12-31');
     await tabTo(page, page.getByTestId('save-key-result-draft'));
     await page.keyboard.press('Enter');
     await expect(page.getByTestId('key-result-draft-form')).toBeHidden();
     await expect(goalDialog).toContainText(keyResultName);
-    await expect(goalDialog).toContainText('0 → 1');
+    await expect(goalDialog).toContainText('73 → 70 kg');
     await expect(goalDialog).not.toContainText(/Incremental|Absolute|Binary|Moderate|Vital|Minor/);
 
     await tabTo(page, page.getByTestId('save-goal-button'));
