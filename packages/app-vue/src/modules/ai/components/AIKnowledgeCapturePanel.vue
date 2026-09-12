@@ -60,7 +60,7 @@
       </p>
       <p
         v-for="(failure, index) in knowledgeCaptureRun.suspension.failures"
-        :key="`${failure.operation}-${failure.index ?? 'root'}-${failure.code}-${index}`"
+        :key="`${failure.operation}-${failure.code}-${index}`"
         class="text-sm text-destructive"
       >
         {{ failure.operation }} · {{ publicFailureMessage(failure) }}

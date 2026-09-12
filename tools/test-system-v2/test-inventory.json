@@ -2980,6 +2980,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/mastra/agents/goal-planner.worker.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/mastra/agents/planner-observability.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11426,7 +11436,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 79
+      "fileCount": 80
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11825,7 +11835,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 79
+      "fileCount": 80
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -12184,6 +12194,7 @@
       "packages/ai/src/server/infrastructure/security/ai-secret-cipher.spec.ts",
       "packages/ai/src/server/infrastructure/security/provider-endpoint-policy.spec.ts",
       "packages/ai/src/server/infrastructure/security/provider-safe-fetch.spec.ts",
+      "packages/ai/src/server/mastra/agents/goal-planner.worker.spec.ts",
       "packages/ai/src/server/mastra/agents/planner-observability.spec.ts",
       "packages/ai/src/server/mastra/agents/user-time-context.spec.ts",
       "packages/ai/src/server/mastra/ai-vnext-no-legacy.surface.spec.ts",
@@ -12630,7 +12641,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1091,
+    "unit": 1092,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

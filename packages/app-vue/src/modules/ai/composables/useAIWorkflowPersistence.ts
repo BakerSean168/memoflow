@@ -1,12 +1,11 @@
 import { ref, watch, type Ref } from 'vue';
-import { normalizeReminderTimeOfDay } from '@memoflow/utils/shared';
 import type { AIWorkflowRunView } from '@memoflow/contracts/ai';
 import {
   createEmptyGoalDraft,
   type EditableGoal,
   type EditableKeyResult,
-  type EditableGoalReminder,
-  type EditableGoalTaskPlan,
+  type EditableGoalKnowledge,
+  type EditableGoalTask,
   type GoalWorkflowStage,
   type KnowledgeAnswer,
   type PersistedWorkflowEntry,
@@ -14,7 +13,11 @@ import {
   normalizeWorkflowMode,
 } from './types';
 
-const WORKFLOW_STORAGE_KEY = 'ai:conversation-workflow-map';
+const WORKFLOW_STORAGE_KEY = 'ai:conversation-workflow-map:v2';
+
+function cloneSerializable<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
 
 export interface UseAIWorkflowPersistenceOptions {
   toolMode: Ref<WorkflowMode>;
@@ -26,8 +29,8 @@ export interface UseAIWorkflowPersistenceOptions {
   clarificationAnswers: Ref<string[]>;
   editableGoal: Ref<EditableGoal>;
   editableKeyResults: Ref<EditableKeyResult[]>;
-  editableTaskPlans: Ref<EditableGoalTaskPlan[]>;
-  editableReminders: Ref<EditableGoalReminder[]>;
+  editableTasks: Ref<EditableGoalTask[]>;
+  editableKnowledge: Ref<EditableGoalKnowledge[]>;
   showGoalDraftEditor: Ref<boolean>;
   resetWorkflowArtifacts: () => void;
 }
@@ -52,17 +55,19 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
     localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify(next));
   }
 
-  function normalizeReminderDraft(item: EditableGoalReminder): EditableGoalReminder {
-    return { ...item, timeOfDay: normalizeReminderTimeOfDay(item.timeOfDay) };
-  }
-
-  function inferGoalWorkflowStage(entry: PersistedWorkflowEntry | undefined | null): GoalWorkflowStage {
+  function inferGoalWorkflowStage(
+    entry: PersistedWorkflowEntry | undefined | null,
+  ): GoalWorkflowStage {
     const run = entry?.goalWorkflowRun;
     if (run?.kind === 'goal.create') {
-      if (run.status === 'suspended' && run.suspension?.type === 'clarification_required') return 'clarification';
-      if (run.status === 'suspended' && run.suspension?.type === 'goal_draft_review') return 'confirm';
-      if (run.status === 'suspended' && run.suspension?.type === 'recovery_required') return 'execute';
-      if (run.status === 'completed' || run.status === 'cancelled' || run.status === 'failed') return 'result';
+      if (run.status === 'suspended' && run.suspension?.type === 'clarification_required')
+        return 'clarification';
+      if (run.status === 'suspended' && run.suspension?.type === 'goal_draft_review')
+        return 'confirm';
+      if (run.status === 'suspended' && run.suspension?.type === 'recovery_required')
+        return 'execute';
+      if (run.status === 'completed' || run.status === 'cancelled' || run.status === 'failed')
+        return 'result';
       return 'plan';
     }
     if (entry?.goalWorkflowStage) return entry.goalWorkflowStage;
@@ -82,8 +87,8 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
       clarificationAnswers: [...options.clarificationAnswers.value],
       editableGoal: { ...options.editableGoal.value },
       editableKeyResults: options.editableKeyResults.value.map((item) => ({ ...item })),
-      editableTaskPlans: options.editableTaskPlans.value.map((item) => ({ ...item })),
-      editableReminders: options.editableReminders.value.map((item) => ({ ...item })),
+      editableTasks: cloneSerializable(options.editableTasks.value),
+      editableKnowledge: cloneSerializable(options.editableKnowledge.value),
       showGoalDraftEditor: options.showGoalDraftEditor.value,
     };
   }
@@ -115,7 +120,8 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
 
     const mode = normalizeWorkflowMode(entry.mode);
     options.toolMode.value = mode;
-    options.goalWorkflowStage.value = mode === 'goal-create' ? inferGoalWorkflowStage(entry) : 'collect';
+    options.goalWorkflowStage.value =
+      mode === 'goal-create' ? inferGoalWorkflowStage(entry) : 'collect';
     options.goalWorkflowRun.value = entry.goalWorkflowRun ?? null;
     options.taskWorkflowRun.value = entry.taskWorkflowRun ?? null;
     options.knowledgeCaptureRun.value = entry.knowledgeCaptureRun ?? null;
@@ -125,29 +131,32 @@ export function useAIWorkflowPersistence(options: UseAIWorkflowPersistenceOption
       ...createEmptyGoalDraft(),
       ...entry.editableGoal,
     };
-    options.editableKeyResults.value = (entry.editableKeyResults ?? []).map((item) => ({ ...item }));
-    options.editableTaskPlans.value = (entry.editableTaskPlans ?? []).map((item) => ({ ...item }));
-    options.editableReminders.value = (entry.editableReminders ?? []).map(normalizeReminderDraft);
+    options.editableKeyResults.value = (entry.editableKeyResults ?? []).map((item) => ({
+      ...item,
+    }));
+    options.editableTasks.value = cloneSerializable(entry.editableTasks ?? []);
+    options.editableKnowledge.value = cloneSerializable(entry.editableKnowledge ?? []);
     options.showGoalDraftEditor.value = Boolean(entry.showGoalDraftEditor);
   }
 
   function bindPersistenceWatcher(chatConversationId: Ref<string>) {
     watch(
-      () => [
-        chatConversationId.value,
-        options.toolMode.value,
-        options.goalWorkflowStage.value,
-        options.showGoalDraftEditor.value ? '1' : '0',
-        JSON.stringify(options.goalWorkflowRun.value),
-        JSON.stringify(options.taskWorkflowRun.value),
-        JSON.stringify(options.knowledgeCaptureRun.value),
-        JSON.stringify(options.knowledgeAnswer.value),
-        JSON.stringify(options.clarificationAnswers.value),
-        JSON.stringify(options.editableGoal.value),
-        JSON.stringify(options.editableKeyResults.value),
-        JSON.stringify(options.editableTaskPlans.value),
-        JSON.stringify(options.editableReminders.value),
-      ].join('|'),
+      () =>
+        [
+          chatConversationId.value,
+          options.toolMode.value,
+          options.goalWorkflowStage.value,
+          options.showGoalDraftEditor.value ? '1' : '0',
+          JSON.stringify(options.goalWorkflowRun.value),
+          JSON.stringify(options.taskWorkflowRun.value),
+          JSON.stringify(options.knowledgeCaptureRun.value),
+          JSON.stringify(options.knowledgeAnswer.value),
+          JSON.stringify(options.clarificationAnswers.value),
+          JSON.stringify(options.editableGoal.value),
+          JSON.stringify(options.editableKeyResults.value),
+          JSON.stringify(options.editableTasks.value),
+          JSON.stringify(options.editableKnowledge.value),
+        ].join('|'),
       () => {
         if (!chatConversationId.value || suspendWorkflowPersistence.value) return;
         persistWorkflowState(chatConversationId.value);

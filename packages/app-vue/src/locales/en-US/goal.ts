@@ -92,6 +92,7 @@ export default {
     "notFound": "Goal not found",
     "backToList": "Back to Goals",
     "noDescription": "No description",
+    "status": "Status",
     "startDate": "Start Date",
     "category": "Category",
     "notSet": "Not set",

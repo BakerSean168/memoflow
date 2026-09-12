@@ -8,6 +8,7 @@ import {
 import {
   TaskCreateClientInputSchema,
   TaskPlanDraftSchema,
+  TaskPlanExecutionFailureSchema,
   TaskPlanExecutionReceiptSchema,
 } from './ai-task-create-workflow.dto';
 import {
@@ -173,6 +174,7 @@ export type AIWorkflowStatus = z.infer<typeof AIWorkflowStatusSchema>;
 
 export const AIWorkflowExecutionFailureSchema = z.discriminatedUnion('operation', [
   GoalPlanExecutionFailureSchema,
+  TaskPlanExecutionFailureSchema,
   KnowledgeCaptureExecutionFailureSchema,
 ]);
 export type AIWorkflowExecutionFailure = z.infer<typeof AIWorkflowExecutionFailureSchema>;

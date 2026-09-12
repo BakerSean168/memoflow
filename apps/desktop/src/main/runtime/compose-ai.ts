@@ -23,6 +23,7 @@ import type { IScheduleRepository } from '@memoflow/schedule';
 import type { INotificationRepository } from '@memoflow/notification';
 import type { TaskApplicationPort } from '@memoflow/task';
 import type { LabelService } from '@memoflow/label';
+import type { GoalKnowledgeService, KnowledgeDocumentRefResolver } from '@memoflow/relation';
 import type { UserTimeContextPort } from '@memoflow/time';
 import {
   AIEvaluationReportFileAdapter,
@@ -53,6 +54,8 @@ export interface ComposeAIElectronDependencies {
   readonly goalApplicationPort: GoalApplicationPort;
   readonly taskApplicationPort: TaskApplicationPort;
   readonly reminderApplicationPort: ReminderApplicationPort;
+  readonly goalKnowledgeService: Pick<GoalKnowledgeService, 'link'>;
+  readonly knowledgeDocumentRefResolver: KnowledgeDocumentRefResolver;
   readonly labelService: LabelService;
   readonly routineCommandPort: RoutineCoachCommandPort;
   readonly scheduleRepository: IScheduleRepository;
@@ -76,8 +79,10 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
   const goalPlanMutationPort = new DesktopGoalPlanMutationAdapter(
     dependencies.goalApplicationPort,
     dependencies.taskApplicationPort,
-    dependencies.reminderApplicationPort,
     dependencies.labelService,
+    dependencies.knowledgeNotePersistence,
+    dependencies.knowledgeDocumentRefResolver,
+    dependencies.goalKnowledgeService,
   );
   const taskPlanMutationAdapter = new DesktopTaskPlanMutationAdapter(
     dependencies.taskApplicationPort,
@@ -92,6 +97,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): AIElectr
     knowledgeCaptureMutationPort: new KnowledgeCapturePersistenceAdapter(
       dependencies.knowledgeNotePersistence,
     ),
+    knowledgeSourcePort: dependencies.knowledgeSourcePort,
     executionLogPort,
     usageReadPort: executionLogPort,
     routineCommandPort: new DesktopRoutineAICommandAdapter(

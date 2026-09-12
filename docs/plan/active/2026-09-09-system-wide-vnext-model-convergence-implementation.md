@@ -486,6 +486,8 @@ Core outputs:
 
 **GOAL-7207 DONE:** `GoalWorkspaceReadModel` is now a separate read-side composition, not an expansion of the Goal write aggregate. `goal` remains the sole Goal/KR authority; Task and Knowledge are injected through owner-controlled structural read ports and host composition reuses the existing Task binding port, Shared Relation GoalKnowledge service and Goal repository instances. First paint is bounded summary+preview, owner failure degrades only that external context to `Unavailable`, unresolved stable Knowledge edges surface as `Missing`, and full Task/Knowledge lists use explicit pagination. Relation pagination now reaches persistence (`count + take/skip` on Prisma; `COUNT + LIMIT/OFFSET` on PowerSync) rather than scanning all edges in memory. HTTP/IPC share canonical Workspace contracts and Goal clients; Vue and React expose read-only `useGoalWorkspace` adapters while GOAL-7209 retains UI ownership. Current closure evidence: Contracts 85/578, Relation 12 unit + 3 PostgreSQL integration, Repository 39/252, Goal 84/474, Governance tools 19/139 PASS; API/Desktop typecheck+production build and App-Vue production build PASS; React/Vue typechecks PASS; test inventory 1265 current; docs-check and full governance-check PASS; changed-code ESLint is zero-warning. `goal-workspace-read-model-audit` executes inside the canonical governance gate. GOAL-7208 is now dependency-ready.
 
+**GOAL-7208 DONE:** `goal.create` now uses GoalPlanDraft V2 with stable workflow-local `draftRef`s across Goal/KR/Task/Knowledge, owner-domain Task schedule/Goal-KR links, and explicit Knowledge `create | linkExisting` intents. Deterministic entity/request IDs plus durable `referenceMap + relationIds` receipts make multi-owner application resumable without pretending to be a cross-domain DB transaction: a restarted partial apply reuses only verified deterministic successes and retries only missing work, while owner identity drift fails closed. API and Desktop compose the same mutation port over Goal, Task, Knowledge and Shared Relation owners; Vue review can edit/remove proposed children before approval and routes successful completion through the V2 Goal reference. Closure evidence: Contracts 85/580 and AI 79/425 full suites PASS; focused API 7/7, Desktop 6/6, Vue Goal/i18n/chat 26/26 and shared recovery panels 9/9 PASS; Contracts/AI/App-Vue/API/Desktop typechecks and App-Vue/API/Desktop production builds PASS; changed-code ESLint and diff gates PASS; Prettier-managed changed files PASS while legacy-format Goal locale files retain their existing style; test inventory is current at 1266 files; `docs:check` and full `governance:check` PASS; Web typecheck/build PASS. GOAL-7209 is now dependency-ready.
+
 ## TASK lane — continue Task plan from clean checkpoint
 
 Resume only after Time/Label owner seams are ready. Continue from the existing TaskPlan/TaskOccurrence/schedule checkpoint, not from legacy templates.
@@ -678,10 +680,11 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 ## 7. Immediate next tickets
 
-TIME-1204..1206, LABEL-1301..1305 and `SETTING-9207..9209` are complete. Current dependency-ready work is:
+TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, and Goal `GOAL-7202..7208` are complete. Current dependency-ready work is:
 
-1. `SETTING-9210` — five-layer review, exact-head CI/build, docs integrity and Setting plan archive;
-2. continue `PORT-1601/1602` surviving owner capability registration, then execute `PORT-1603` only when V3 can replace the production full-backup path without reducing current business-data coverage;
-3. in parallel where file ownership is disjoint, continue Knowledge foundation before Goal/Task durable note relations.
+1. `GOAL-7209` — Linear-style Goal property-chip create/edit plus Workspace detail UI convergence;
+2. `TASK-7302` + `TASK-7303` — converge TaskPlan and TaskOccurrence aggregates, then continue the Task vNext dependency chain;
+3. `SETTING-9210` — five-layer review, exact-head CI/build, docs integrity and Setting plan archive;
+4. continue `PORT-1601/1602` owner capability registration as surviving owner models stabilize; execute final V2 deletion only when V3 preserves all required product coverage.
 
 `SETTING-9209` deliberately kept the current V2 full-backup envelope's `settings` singleton as a strict canonical UserPreferenceProfile adapter while deleting all legacy Setting persistence/protocol/client code. Therefore PORT-1603 remains independent cross-module work rather than a reason to retain `user_settings`.

@@ -31,24 +31,28 @@ afterEach(async () => {
 
 const draft = GoalPlanDraftContentSchema.parse({
   goal: {
+    draftRef: 'goal',
     name: 'Ship the Mastra reference workflow',
-    description: 'Make durable workflow semantics the production path.',
-    startDate: Date.UTC(2026, 7, 20),
-    dueDate: Date.UTC(2026, 8, 20),
+    summary: 'Make durable workflow semantics the production path.',
+    status: 'Planned',
+    startDate: '2026-08-20',
+    target: { kind: 'month', year: 2026, month: 9 },
+    labels: [],
   },
   keyResults: [
     {
+      draftRef: 'kr:reference-journey',
       title: 'Pass the reference acceptance journey',
-      calculationMethod: 'Sum',
-      startingValue: 0,
+      aggregationMethod: 'Sum',
+      initialValue: 0,
       currentValue: 0,
       targetValue: 1,
       unit: 'journey',
       weight: 5,
     },
   ],
-  taskPlans: [],
-  reminders: [],
+  tasks: [],
+  knowledge: [],
   rationale: 'The workflow must be restart-safe before later workflow batches build on it.',
   warnings: [],
 });
@@ -84,24 +88,29 @@ function context(identityId: string, requestId: string): ExecutionContext {
   };
 }
 
-function mutationPort(): GoalPlanMutationPort & {
-  resolveLabels: ReturnType<typeof vi.fn>;
-  createGoal: ReturnType<typeof vi.fn>;
-  createTaskPlan: ReturnType<typeof vi.fn>;
-  createReminder: ReturnType<typeof vi.fn>;
-} {
+function mutationPort(): GoalPlanMutationPort & Record<string, ReturnType<typeof vi.fn>> {
   return {
     resolveLabels: vi.fn(async (names: readonly string[]) =>
-      ok(names.map((name) => `label:${name.trim().toLowerCase()}`)),
+      ok(names.map((name) => 'label:' + name.trim().toLowerCase())),
     ),
     createGoal: vi.fn(async (request) =>
       ok({
         goalId: String(request.id),
+        goalVersion: 1,
         keyResultIds: (request.initialKeyResults ?? []).map((item) => String(item.id)),
       }),
     ),
+    activateGoal: vi.fn(async () => ok({ goalVersion: 2 })),
     createTaskPlan: vi.fn(async (request) => ok({ taskId: String(request.id) })),
-    createReminder: vi.fn(async (request) => ok({ reminderId: String(request.id) })),
+    createKnowledgeDocument: vi.fn(async () =>
+      ok({
+        knowledgeDocument: {
+          knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440010',
+          documentId: 'kdoc_550e8400-e29b-41d4-a716-446655440011',
+        },
+      }),
+    ),
+    linkGoalKnowledge: vi.fn(async () => ok({ relationId: 'relation-1' })),
   };
 }
 

@@ -85,6 +85,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
         deletedAt: null,
         binding: { identityId, disconnectedAt: null },
       },
+      include: { binding: { select: { knowledgeSpaceId: true } } },
     });
     return row ? this.toKnowledgeNote(identityId, row) : null;
   }
@@ -95,6 +96,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
         deletedAt: null,
         binding: { identityId, disconnectedAt: null },
       },
+      include: { binding: { select: { knowledgeSpaceId: true } } },
       orderBy: { updatedAt: 'desc' },
       take: limit,
     });
@@ -113,6 +115,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
       blobSha: string;
       contentHash: string;
       indexStatus: string;
+      binding: { knowledgeSpaceId: string };
     },
   ): KnowledgeSourceNote {
     const frontmatter =
@@ -140,6 +143,7 @@ export class RepositoryKnowledgeSourceAdapter implements IKnowledgeSourcePort {
         contentDigest: contentHash,
         projectionIndexStatus: row.indexStatus,
         knowledgeDocumentId: row.knowledgeDocumentId,
+        knowledgeSpaceId: row.binding.knowledgeSpaceId,
         sourceType: 'github-default-branch-projection',
       },
     };

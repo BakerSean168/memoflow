@@ -540,6 +540,8 @@ Core identity    Target/time        KR Measurement V3
 
 ### GOAL-7208 — Upgrade GoalPlanDraft and ApplyGoalPlanService
 
+**Status:** DONE — 2026-09-12.
+
 **Goal:** AI can propose and safely apply Goal + KR + Task + Knowledge context in one reviewed durable workflow.
 
 **Scope:**
@@ -568,6 +570,8 @@ Core identity    Target/time        KR Measurement V3
 11. route success to Goal Workspace.
 
 **Acceptance:** user can delete/edit any proposed item before approve; successful apply surfaces all created/linked entities in Workspace; partial apply is resumable and never duplicates Goal/KR/Task/Note.
+
+**Closure evidence:** GoalPlanDraft V2 is now the single `goal.create` workflow contract: Goal/KR use the canonical vNext fields, Task uses the owner `TaskPlanSchedule`/Goal-KR link contract, and Knowledge is an explicit `create | linkExisting` intent keyed by stable `draftRef`. `ApplyGoalPlanService` derives deterministic Goal/KR/Task/Knowledge IDs and mutation request IDs from workflow run/revision/ref, persists `referenceMap + relationIds` receipts, rehydrates only deterministic prior successes, retries only missing operations after partial failure/restart, and fails closed on owner identity drift. Cloud and Desktop adapters both use owner application ports for Task creation, stable Knowledge document creation and GoalKnowledge linking; existing Knowledge references skip creation. The Vue review editor can edit/remove proposed KR/Task/Knowledge entries before approval, normalizes nullable draft fields before structured-edit comparison, and deep-links completion only through the V2 `referenceMap.goal`. Verification: Contracts full suite `85 files / 580 tests` PASS; AI full suite `79 / 425` PASS; focused API AI composition/adapters `7/7`, Desktop `6/6`, Vue Goal workflow/panel/i18n/chat `26/26`, and the three shared recovery panels `9/9` PASS. Contracts/AI/App-Vue/API/Desktop typechecks PASS; App-Vue, API and Desktop production builds PASS. Changed TypeScript/Vue ESLint is zero-warning/error; all Prettier-managed changed files PASS while the two legacy-format Goal locale files preserve their existing generated style with only one key added each; `git diff --check` PASS; test inventory is current at `1266` files; `docs:check` and full `governance:check` PASS. Web typecheck and production build also PASS. Full App-Vue suite was not used as closure evidence because the 90-second execution channel terminated the run; the only observed failure before termination was the missing `goal.detail.status` locale key, which was fixed and its dedicated completeness gate then passed.
 
 **Dependencies:** GOAL-7202~7207.
 
@@ -749,13 +753,13 @@ GOAL-7201  DONE — design package written and active plan expanded
 GOAL-7202  DONE — identity/lifecycle direct cutover
 GOAL-7203  DONE — Product Time + GoalTimeframe direct cutover
 GOAL-7204  DONE — KR Measurement V3 + optional KR timeframe direct cutover
-GOAL-7205  PLANNED
-GOAL-7206  PLANNED
-GOAL-7207  PLANNED
-GOAL-7208  PLANNED
-GOAL-7209  PLANNED
+GOAL-7205  DONE — Goal-level Task/KR context ownership + runtime proof
+GOAL-7206  DONE — Shared Relation + stable KnowledgeDocumentId Goal links
+GOAL-7207  DONE — GoalWorkspaceReadModel + bounded owner composition
+GOAL-7208  DONE — GoalPlanDraft V2 + deterministic multi-owner apply/retry
+GOAL-7209  PLANNED — next dependency-ready Goal ticket
 GOAL-7210  PLANNED
 GOAL-7211  PLANNED
 ```
 
-GOAL-7201 itself only froze the design package; GOAL-7202/7203/7204 are now implemented production truth.
+GOAL-7201 froze the design package; GOAL-7202～7208 are now implemented production truth. GOAL-7209 is the next Goal implementation ticket.

@@ -2,10 +2,11 @@ import { defineComponent, h } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type {
-  AIWorkflowRunView,
-  GoalPlanDraft,
-  GoalPlanExecutionReceipt,
+import {
+  GoalPlanDraftSchema,
+  type AIWorkflowRunView,
+  type GoalPlanDraft,
+  type GoalPlanExecutionReceipt,
 } from '@memoflow/contracts/ai';
 import type { WorkflowRuntimeClient } from '@memoflow/ai/client';
 import { useAIGoalWorkflow, type UseAIGoalWorkflowOptions } from './useAIGoalWorkflow';
@@ -43,23 +44,36 @@ const MODEL: ChatModelOption = {
 };
 
 function makeDraft(revision: number): GoalPlanDraft {
-  return {
+  return GoalPlanDraftSchema.parse({
     revision,
     goal: {
+      draftRef: 'goal',
       name: 'Deep work',
-      description: '',
-      category: '',
-      importance: 'moderate',
-      tags: [],
-      startDate: null,
-      targetDate: null,
+      summary: 'Protect focused work time.',
+      status: 'Planned',
+      startDate: '2026-09-12',
+      target: { kind: 'month', year: 2026, month: 12 },
+      labels: [],
     },
-    keyResults: [],
-    taskPlans: [],
-    reminders: [],
+    keyResults: [
+      {
+        draftRef: 'kr:focus-blocks',
+        title: 'Complete focus blocks',
+        description: null,
+        aggregationMethod: 'Sum',
+        initialValue: 0,
+        currentValue: 0,
+        targetValue: 20,
+        target: null,
+        unit: 'blocks',
+        weight: 3,
+      },
+    ],
+    tasks: [],
+    knowledge: [],
     rationale: '',
     warnings: [],
-  };
+  });
 }
 
 function makeReceipt(overrides: Partial<GoalPlanExecutionReceipt> = {}): GoalPlanExecutionReceipt {
@@ -67,10 +81,10 @@ function makeReceipt(overrides: Partial<GoalPlanExecutionReceipt> = {}): GoalPla
     workflowRunId: 'run-1',
     revision: 1,
     status: 'success',
-    goalId: 'goal-123',
-    keyResultIds: [],
-    taskIds: [],
-    reminderIds: [],
+    referenceMap: { goal: 'goal-123' },
+    relationIds: {},
+    goalVersion: 1,
+    appliedGoalStatus: 'Planned',
     failures: [],
     retryable: false,
     ...overrides,
@@ -261,7 +275,7 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     expect(runtime.resume).toHaveBeenCalledWith({ runId: 'run-1', command: { type: 'cancel' } });
   });
 
-  it('deep-links to the created goal ONLY when the run is completed with a goalId (AI-VNEXT-05 deep link)', async () => {
+  it('deep-links to the created goal only from the V2 draftRef referenceMap', async () => {
     const runtime = createRuntimeStub();
     runtime.start.mockResolvedValue(
       makeGoalRun({
@@ -279,14 +293,17 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     expect(routerMocks.push).not.toHaveBeenCalled();
 
     runtime.resume.mockResolvedValue(
-      makeGoalRun({ status: 'completed', result: makeReceipt({ goalId: 'goal-123' }) }),
+      makeGoalRun({
+        status: 'completed',
+        result: makeReceipt({ referenceMap: { goal: 'goal-123' } }),
+      }),
     );
     await vm.confirmGoalAgentRun();
     await vm.openAutomatedGoal();
     expect(routerMocks.push).toHaveBeenCalledWith('/goals/goal-123');
   });
 
-  it('does not deep-link on a cancelled or partial run without a goalId', async () => {
+  it('does not deep-link on a cancelled or partial run without a goal draftRef mapping', async () => {
     const runtime = createRuntimeStub();
     runtime.start.mockResolvedValue(
       makeGoalRun({

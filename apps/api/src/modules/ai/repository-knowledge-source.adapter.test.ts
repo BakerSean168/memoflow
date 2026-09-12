@@ -6,6 +6,8 @@ function projectionRow(overrides: Record<string, unknown> = {}) {
   return {
     id: 'projection-1',
     bindingId: 'binding-1',
+    knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
+    binding: { knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011' },
     relativePath: 'notes/architecture.md',
     markdownContent: '# Architecture\n\nRepository-backed knowledge.',
     frontmatter: { title: 'Architecture' },
@@ -42,6 +44,7 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
         deletedAt: null,
         binding: { identityId: 'identity-1', disconnectedAt: null },
       },
+      include: { binding: { select: { knowledgeSpaceId: true } } },
       orderBy: { updatedAt: 'desc' },
       take: 3,
     });
@@ -49,11 +52,13 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
       expect.objectContaining({
         identityId: 'identity-1',
         repositoryId: 'binding-1',
-        resourceId: 'projection-1',
+        resourceId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
         resourcePath: 'notes/architecture.md',
         title: 'Architecture',
         metadata: expect.objectContaining({
           contentDigest: 'b'.repeat(64),
+          knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
+          knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
           projectionIndexStatus: 'pending',
           sourceType: 'github-default-branch-projection',
         }),
@@ -79,7 +84,28 @@ describe('RepositoryKnowledgeSourceAdapter', () => {
         deletedAt: null,
         binding: { identityId: 'identity-1', disconnectedAt: null },
       },
+      include: { binding: { select: { knowledgeSpaceId: true } } },
     });
-    expect(resource?.metadata).toMatchObject({ projectionIndexStatus: 'indexed' });
+    expect(resource?.metadata).toMatchObject({
+      projectionIndexStatus: 'indexed',
+      knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440012',
+      knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
+    });
+  });
+
+  it('keeps unmanaged path projections readable but without a stable document identity', async () => {
+    const findMany = vi.fn(async () => [projectionRow({ knowledgeDocumentId: null })]);
+    const db = {
+      knowledgeNoteProjection: { findMany, findFirst: vi.fn() },
+    } as unknown as PrismaClient;
+    const adapter = new RepositoryKnowledgeSourceAdapter(db);
+
+    const [resource] = await adapter.listIndexableNotes('identity-1', 1);
+
+    expect(resource?.resourceId).toBe('projection-1');
+    expect(resource?.metadata).toMatchObject({
+      knowledgeDocumentId: null,
+      knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011',
+    });
   });
 });

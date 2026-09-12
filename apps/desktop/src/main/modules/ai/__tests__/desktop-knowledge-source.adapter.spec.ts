@@ -86,6 +86,8 @@ describe('DesktopKnowledgeSourceAdapter', () => {
     expect(resources[0]?.metadata).toMatchObject({
       owner: 'platform',
       tags: ['architecture'],
+      knowledgeDocumentId: DOCUMENT_ID,
+      knowledgeSpaceId: SPACE_ID,
     });
   });
 

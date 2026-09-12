@@ -325,6 +325,8 @@ async function bootstrap(): Promise<void> {
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
     reminderApplicationPort: reminderComposed.executorReminderPort,
+    goalKnowledgeService,
+    knowledgeDocumentRefResolver: repositoryApiModule.knowledgeDocumentRefResolver,
     routineCommandPort: reminderComposed.routineCommandPort,
     scheduleRepository: scheduleApiModule.repositories.scheduleRepository,
     notificationRepository: notificationApiModule.repositories.notificationRepository,

@@ -8,44 +8,66 @@ import {
 
 const draft = {
   goal: {
+    draftRef: 'goal',
     name: 'Pass JLPT N1',
-    description: 'Build a sustainable preparation plan.',
-    motivation: 'Study in Japan',
-    feasibilityAnalysis: 'One focused hour per day is available.',
-    startDate: 1_773_000_000_000,
-    dueDate: 1_783_000_000_000,
+    summary: 'Build a sustainable preparation plan.',
+    status: 'InProgress',
+    startDate: '2026-09-15',
+    target: { kind: 'year', year: 2027 },
     labels: ['Learning'],
   },
   keyResults: [
     {
+      draftRef: 'kr:mock-exams',
       title: 'Complete N1 mock exams',
-      calculationMethod: 'Sum',
-      startingValue: 0,
-      progressBaselineValue: null,
+      aggregationMethod: 'Sum',
+      initialValue: 0,
       currentValue: 0,
       targetValue: 8,
       unit: 'exams',
       weight: 5,
+      target: { kind: 'month', year: 2027, month: 6 },
     },
   ],
-  taskPlans: [
+  tasks: [
     {
-      name: 'Daily N1 study',
+      draftRef: 'task:daily-n1-study',
+      title: 'Daily N1 study',
       importance: 'Important',
-      cadence: 'daily',
-      occurrences: 120,
-      keyResultIndex: 0,
+      schedule: {
+        kind: 'Recurring',
+        startDate: '2026-09-15',
+        timing: { kind: 'At', time: '20:00' },
+        recurrence: {
+          frequency: 'Daily',
+          interval: 1,
+          byWeekday: [],
+          end: { kind: 'Never' },
+        },
+      },
       labels: ['Japanese'],
+      goalRef: 'goal',
+      keyResultRef: 'kr:mock-exams',
+      contribution: { value: 1, trigger: 'EachCompletion' },
     },
   ],
-  reminders: [
+  knowledge: [
     {
-      title: 'Start N1 study block',
-      importance: 'Moderate',
-      cadence: 'daily',
-      timeOfDay: '20:00',
-      timezone: 'Asia/Shanghai',
-      channels: ['InApp'],
+      draftRef: 'note:goal-brief',
+      mode: 'create',
+      title: 'JLPT N1 Goal Brief',
+      markdown: '# Why\nPass N1 for study and work in Japan.',
+      targetSubpath: 'goals/jlpt-n1-goal-brief.md',
+      sourceRefs: ['conversation:user-intent'],
+    },
+    {
+      draftRef: 'note:grammar-index',
+      mode: 'linkExisting',
+      title: 'Existing N1 grammar index',
+      knowledgeDocument: {
+        knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440010',
+        documentId: 'kdoc_550e8400-e29b-41d4-a716-446655440011',
+      },
     },
   ],
   rationale: 'Daily study plus regular mock exams makes progress measurable.',
@@ -55,7 +77,7 @@ const draft = {
 
 const { revision: _revision, ...draftContent } = draft;
 
-describe('ADR-052 goal.create workflow contracts', () => {
+describe('GOAL-7208 goal.create Workflow V2 contracts', () => {
   it('accepts only typed client input and rejects identity/credential injection', () => {
     expect(GoalCreateClientInputSchema.parse({ idea: 'Pass JLPT N1' })).toEqual({
       idea: 'Pass JLPT N1',
@@ -71,31 +93,77 @@ describe('ADR-052 goal.create workflow contracts', () => {
     ).toBe(false);
   });
 
-  it('validates a complete product draft and domain-previewable references', () => {
+  it('uses owner-domain Goal/KR/Task/Knowledge vocabulary with stable draftRefs', () => {
     const parsed = GoalPlanDraftSchema.parse(draft);
     expect(parsed.revision).toBe(1);
-    expect(parsed.taskPlans[0].keyResultIndex).toBe(0);
-    expect(parsed.goal.labels).toEqual(['Learning']);
-    expect(parsed.taskPlans[0].labels).toEqual(['Japanese']);
-    expect(
-      GoalPlanDraftSchema.safeParse({
-        ...draft,
-        taskPlans: [{ ...draft.taskPlans[0], tags: ['legacy'] }],
-      }).success,
-    ).toBe(false);
+    expect(parsed.goal.draftRef).toBe('goal');
+    expect(parsed.keyResults[0]?.draftRef).toBe('kr:mock-exams');
+    expect(parsed.tasks[0]?.schedule.kind).toBe('Recurring');
+    expect(parsed.tasks[0]?.keyResultRef).toBe('kr:mock-exams');
+    expect(parsed.knowledge.map((item) => item.mode)).toEqual(['create', 'linkExisting']);
 
+    for (const retired of [
+      { goal: { ...draft.goal, dueDate: Date.now() } },
+      { goal: { ...draft.goal, motivation: 'legacy' } },
+      { keyResults: [{ ...draft.keyResults[0], startingValue: 0 }] },
+      { taskPlans: draft.tasks },
+      { reminders: [] },
+    ]) {
+      expect(
+        GoalPlanDraftSchema.safeParse({
+          ...draft,
+          ...retired,
+        }).success,
+      ).toBe(false);
+    }
+  });
+
+  it('rejects duplicate/missing draftRef relationships and invalid Knowledge paths', () => {
     expect(
       GoalPlanDraftSchema.safeParse({
         ...draft,
-        taskPlans: [{ ...draft.taskPlans[0], keyResultIndex: 9 }],
+        keyResults: [draft.keyResults[0], { ...draft.keyResults[0] }],
       }).success,
     ).toBe(false);
     expect(
       GoalPlanDraftSchema.safeParse({
         ...draft,
-        taskPlans: [{ ...draft.taskPlans[0], cadence: 'weekly', daysOfWeek: [] }],
+        tasks: [{ ...draft.tasks[0], keyResultRef: 'kr:missing' }],
       }).success,
     ).toBe(false);
+    expect(
+      GoalPlanDraftSchema.safeParse({
+        ...draft,
+        tasks: [
+          {
+            ...draft.tasks[0],
+            keyResultRef: null,
+            contribution: { value: 1, trigger: 'EachCompletion' },
+          },
+        ],
+      }).success,
+    ).toBe(false);
+    expect(
+      GoalPlanDraftSchema.safeParse({
+        ...draft,
+        knowledge: [
+          {
+            ...draft.knowledge[0],
+            targetSubpath: '/absolute/goal-brief.md',
+          },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('defaults KR currentValue from Initial without inventing trackingBase in the draft', () => {
+    const withoutCurrent = {
+      ...draft,
+      keyResults: [{ ...draft.keyResults[0], initialValue: 3, currentValue: undefined }],
+    };
+    const parsed = GoalPlanDraftSchema.parse(withoutCurrent);
+    expect(parsed.keyResults[0]?.currentValue).toBe(3);
+    expect(parsed.keyResults[0]).not.toHaveProperty('trackingBaseValue');
   });
 
   it('makes clarification versus draft-ready a typed planner decision', () => {
@@ -114,28 +182,25 @@ describe('ADR-052 goal.create workflow contracts', () => {
         questions: ['How much time can you spend daily?'],
       }).success,
     ).toBe(true);
-    expect(
-      GoalPlanningDecisionSchema.safeParse({
-        status: 'needs_clarification',
-        reason: 'Too many questions.',
-        questions: ['1?', '2?', '3?', '4?'],
-      }).success,
-    ).toBe(false);
   });
 
-  it('locks the deterministic apply receipt shape used for retry/recovery', () => {
+  it('locks a draftRef keyed durable receipt instead of index/array identity', () => {
     const receipt = GoalPlanExecutionReceiptSchema.parse({
       workflowRunId: 'run-1',
       revision: 2,
       status: 'partial',
-      goalId: 'IGoalId_550e8400-e29b-41d4-a716-446655440000',
-      keyResultIds: ['IKeyResultId_550e8400-e29b-41d4-a716-446655440001'],
-      taskIds: [],
-      reminderIds: [],
+      referenceMap: {
+        goal: 'IGoalId_550e8400-e29b-41d4-a716-446655440000',
+        'kr:mock-exams': 'IKeyResultId_550e8400-e29b-41d4-a716-446655440001',
+        'note:goal-brief': 'kdoc_550e8400-e29b-41d4-a716-446655440002',
+      },
+      relationIds: { 'note:goal-brief': 'relation-1' },
+      goalVersion: 2,
+      appliedGoalStatus: 'InProgress',
       failures: [
         {
-          operation: 'task_template',
-          index: 0,
+          operation: 'task_create',
+          draftRef: 'task:daily-n1-study',
           code: 'SERVICE_UNAVAILABLE',
           message: 'Task store unavailable',
           retryable: true,
@@ -144,7 +209,9 @@ describe('ADR-052 goal.create workflow contracts', () => {
       retryable: true,
     });
 
-    expect(receipt.status).toBe('partial');
-    expect(receipt.failures[0].retryable).toBe(true);
+    expect(receipt.referenceMap['kr:mock-exams']).toContain('IKeyResultId_');
+    expect(receipt.failures[0]?.draftRef).toBe('task:daily-n1-study');
+    expect(receipt).not.toHaveProperty('taskIds');
+    expect(receipt).not.toHaveProperty('reminderIds');
   });
 });

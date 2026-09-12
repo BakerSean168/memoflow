@@ -1,15 +1,21 @@
 import { z } from 'zod';
+import { YmdSchema } from '../../../primitives';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
-import { KeyResultCalculationMethod } from '../../goal/value-objects/key-result-calculation-method';
-import { NotificationChannel } from '../../reminder/value-objects/notification-channel';
+import { GoalTimeframeSchema, KeyResultCalculationMethod } from '../../goal';
+import { KnowledgeDocumentRefSchema } from '../../repository';
+import {
+  GoalContributionRuleSchema,
+  TaskPlanScheduleSchema,
+  TaskReminderConfigSchema,
+} from '../../task';
 
 /**
- * Canonical product contract for ADR-052 `goal.create`.
+ * Canonical product contract for the durable `goal.create` Workflow.
  *
- * These shapes are deliberately independent from the retired Goal AgentAction /
- * Proposal protocol. They are safe to persist in Mastra workflow snapshots and
- * to project to HTTP/IPC clients: no credentials, provider configuration or
- * framework-private workflow state is allowed here.
+ * GOAL-7208 / ADR-070 / ADR-099: drafts are reviewed multi-entity plans over
+ * owner-domain vocabulary. Array positions are presentation only; every child
+ * owns a stable workflow-local `draftRef`, and no legacy Goal/Task/Reminder DSL
+ * is accepted here.
  */
 
 export const GoalCreateClientInputSchema = z
@@ -35,119 +41,163 @@ export const GoalCreateWorkflowInputSchema = GoalCreateClientInputSchema.extend(
 }).strict();
 export type GoalCreateWorkflowInput = z.infer<typeof GoalCreateWorkflowInputSchema>;
 
+const draftRefSlug = '[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?';
+export const GoalDraftRefSchema = z.literal('goal');
+export const GoalPlanKeyResultDraftRefSchema = z.string().regex(new RegExp(`^kr:${draftRefSlug}$`));
+export const GoalPlanTaskDraftRefSchema = z.string().regex(new RegExp(`^task:${draftRefSlug}$`));
+export const GoalPlanKnowledgeDraftRefSchema = z
+  .string()
+  .regex(new RegExp(`^note:${draftRefSlug}$`));
+export const GoalPlanDraftRefSchema = z.union([
+  GoalDraftRefSchema,
+  GoalPlanKeyResultDraftRefSchema,
+  GoalPlanTaskDraftRefSchema,
+  GoalPlanKnowledgeDraftRefSchema,
+]);
+export type GoalPlanDraftRef = z.infer<typeof GoalPlanDraftRefSchema>;
+
+const LabelNameSchema = z.string().trim().min(1).max(50);
+
 export const GoalPlanGoalSchema = z
   .object({
+    draftRef: GoalDraftRefSchema,
     name: z.string().trim().min(1).max(256),
-    description: z.string().trim().max(2000).default(''),
-    motivation: z.string().trim().max(2000).optional(),
-    feasibilityAnalysis: z.string().trim().max(2000).optional(),
-    startDate: z.number().int().nonnegative().nullable().default(null),
-    dueDate: z.number().int().nonnegative().nullable().default(null),
-    labels: z.array(z.string().trim().min(1).max(50)).max(50).default([]),
+    summary: z.string().trim().max(500).nullable().optional(),
+    status: z.enum(['Planned', 'InProgress']).default('Planned'),
+    startDate: YmdSchema.nullable().optional(),
+    target: GoalTimeframeSchema.nullable().optional(),
+    labels: z.array(LabelNameSchema).max(50).default([]),
   })
-  .strict()
-  .superRefine((value, ctx) => {
-    if (value.startDate != null && value.dueDate != null && value.startDate > value.dueDate) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['dueDate'],
-        message: 'Goal dueDate must not be earlier than startDate',
-      });
-    }
-  });
+  .strict();
 export type GoalPlanGoal = z.infer<typeof GoalPlanGoalSchema>;
 
 export const GoalPlanKeyResultSchema = z
   .object({
-    title: z.string().trim().min(1).max(256),
-    description: z.string().trim().max(2000).optional(),
-    calculationMethod: z.enum(KeyResultCalculationMethod),
-    startingValue: z.number().default(0),
-    progressBaselineValue: z.number().nullable().default(null),
-    currentValue: z.number().default(0),
+    draftRef: GoalPlanKeyResultDraftRefSchema,
+    title: z.string().trim().min(1).max(200),
+    description: z.string().trim().max(2000).nullable().optional(),
+    aggregationMethod: z.enum(KeyResultCalculationMethod).default(KeyResultCalculationMethod.Sum),
+    initialValue: z.number().default(0),
+    currentValue: z.number().optional(),
     targetValue: z.number(),
-    unit: z.string().trim().max(50).default(''),
-    weight: z.number().int().min(1).max(5),
+    target: GoalTimeframeSchema.nullable().optional(),
+    unit: z.string().trim().max(20).nullable().optional(),
+    weight: z.number().int().min(1).max(5).default(3),
   })
-  .strict();
+  .strict()
+  .transform((value) => ({
+    ...value,
+    currentValue: value.currentValue ?? value.initialValue,
+  }));
 export type GoalPlanKeyResult = z.infer<typeof GoalPlanKeyResultSchema>;
 
-export const GoalPlanCadenceSchema = z.enum(['daily', 'weekly', 'once']);
-export type GoalPlanCadence = z.infer<typeof GoalPlanCadenceSchema>;
-
-const TimeOfDaySchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
-
-export const GoalPlanTaskPlanSchema = z
+export const GoalPlanTaskSchema = z
   .object({
-    name: z.string().trim().min(1).max(256),
-    description: z.string().trim().max(2000).optional(),
+    draftRef: GoalPlanTaskDraftRefSchema,
+    title: z.string().trim().min(1).max(256),
+    description: z.string().trim().max(2000).nullable().optional(),
     importance: z.enum(ImportanceLevel).default(ImportanceLevel.Moderate),
-    cadence: GoalPlanCadenceSchema,
-    startDate: z.number().int().nonnegative().nullable().optional(),
-    timeOfDay: TimeOfDaySchema.optional(),
-    timezone: z.string().trim().min(1).max(100).default('UTC'),
-    daysOfWeek: z.array(z.number().int().min(0).max(6)).max(7).default([]),
-    occurrences: z.number().int().positive().nullable().default(null),
-    keyResultIndex: z.number().int().nonnegative().optional(),
-    contributionValue: z.number().nonnegative().default(1),
-    labels: z.array(z.string().trim().min(1).max(50)).max(50).default([]),
+    schedule: TaskPlanScheduleSchema,
+    reminderConfig: TaskReminderConfigSchema.nullable().optional(),
+    labels: z.array(LabelNameSchema).max(50).default([]),
+    goalRef: GoalDraftRefSchema,
+    keyResultRef: GoalPlanKeyResultDraftRefSchema.nullable().optional(),
+    contribution: GoalContributionRuleSchema.nullable().optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
-    if (value.cadence === 'weekly' && value.daysOfWeek.length === 0) {
+    if (value.contribution && !value.keyResultRef) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ['daysOfWeek'],
-        message: 'Weekly task templates require at least one dayOfWeek',
+        path: ['keyResultRef'],
+        message: 'Task contribution requires a Key Result draftRef',
       });
     }
   });
-export type GoalPlanTaskPlan = z.infer<typeof GoalPlanTaskPlanSchema>;
+export type GoalPlanTask = z.infer<typeof GoalPlanTaskSchema>;
 
-export const GoalPlanReminderSchema = z
+const GoalPlanKnowledgeTargetPathSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(1024)
+  .refine(
+    (value) =>
+      !value.startsWith('/') &&
+      !value.startsWith('\\\\') &&
+      !/^[a-zA-Z]:/.test(value) &&
+      !value.split('/').some((part) => part === '..') &&
+      value.toLowerCase().endsWith('.md'),
+    { message: 'Knowledge target path must be a vault-relative Markdown path' },
+  );
+
+export const GoalPlanKnowledgeCreateSchema = z
   .object({
-    title: z.string().trim().min(1).max(200),
-    description: z.string().trim().max(1000).optional(),
-    importance: z.enum(ImportanceLevel).default(ImportanceLevel.Moderate),
-    cadence: GoalPlanCadenceSchema,
-    scheduledAt: z.number().int().nonnegative().nullable().optional(),
-    timeOfDay: TimeOfDaySchema.optional(),
-    timezone: z.string().trim().min(1).max(100).nullable().default(null),
-    channels: z.array(z.enum(NotificationChannel)).min(1).default([NotificationChannel.InApp]),
-    tags: z.array(z.string().trim().min(1).max(50)).max(50).default([]),
+    draftRef: GoalPlanKnowledgeDraftRefSchema,
+    mode: z.literal('create'),
+    title: z.string().trim().min(1).max(256),
+    markdown: z.string().trim().min(1).max(40000),
+    targetSubpath: GoalPlanKnowledgeTargetPathSchema,
+    sourceRefs: z.array(z.string().trim().min(1).max(2000)).max(50).default([]),
   })
-  .strict()
-  .superRefine((value, ctx) => {
-    if (value.cadence === 'once' && value.scheduledAt == null && !value.timeOfDay) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['scheduledAt'],
-        message: 'One-time reminders require scheduledAt or timeOfDay',
-      });
-    }
-  });
-export type GoalPlanReminder = z.infer<typeof GoalPlanReminderSchema>;
+  .strict();
+
+export const GoalPlanKnowledgeLinkExistingSchema = z
+  .object({
+    draftRef: GoalPlanKnowledgeDraftRefSchema,
+    mode: z.literal('linkExisting'),
+    knowledgeDocument: KnowledgeDocumentRefSchema,
+    title: z.string().trim().min(1).max(256),
+  })
+  .strict();
+
+export const GoalPlanKnowledgeSchema = z.discriminatedUnion('mode', [
+  GoalPlanKnowledgeCreateSchema,
+  GoalPlanKnowledgeLinkExistingSchema,
+]);
+export type GoalPlanKnowledge = z.infer<typeof GoalPlanKnowledgeSchema>;
 
 export const GoalPlanDraftContentSchema = z
   .object({
     goal: GoalPlanGoalSchema,
     keyResults: z.array(GoalPlanKeyResultSchema).max(50).default([]),
-    taskPlans: z.array(GoalPlanTaskPlanSchema).max(50).default([]),
-    reminders: z.array(GoalPlanReminderSchema).max(50).default([]),
+    tasks: z.array(GoalPlanTaskSchema).max(50).default([]),
+    knowledge: z.array(GoalPlanKnowledgeSchema).max(50).default([]),
     rationale: z.string().trim().max(4000).default(''),
     warnings: z.array(z.string().trim().min(1).max(1000)).max(20).default([]),
   })
   .strict()
   .superRefine((value, ctx) => {
-    for (const [index, task] of value.taskPlans.entries()) {
-      if (task.keyResultIndex != null && task.keyResultIndex >= value.keyResults.length) {
+    const refs = new Set<string>();
+    const addRef = (ref: string, path: (string | number)[]) => {
+      if (refs.has(ref)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ['taskPlans', index, 'keyResultIndex'],
-          message: 'Task keyResultIndex must reference an existing key result',
+          path,
+          message: `Duplicate draftRef: ${ref}`,
         });
       }
-    }
+      refs.add(ref);
+    };
+    addRef(value.goal.draftRef, ['goal', 'draftRef']);
+    value.keyResults.forEach((item, index) =>
+      addRef(item.draftRef, ['keyResults', index, 'draftRef']),
+    );
+    value.tasks.forEach((item, index) => addRef(item.draftRef, ['tasks', index, 'draftRef']));
+    value.knowledge.forEach((item, index) =>
+      addRef(item.draftRef, ['knowledge', index, 'draftRef']),
+    );
+
+    const keyResultRefs = new Set(value.keyResults.map((item) => item.draftRef));
+    value.tasks.forEach((task, index) => {
+      if (task.keyResultRef && !keyResultRefs.has(task.keyResultRef)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['tasks', index, 'keyResultRef'],
+          message: `Task keyResultRef does not exist in this draft: ${task.keyResultRef}`,
+        });
+      }
+    });
   });
 export type GoalPlanDraftContent = z.infer<typeof GoalPlanDraftContentSchema>;
 
@@ -193,8 +243,15 @@ export type GoalClarificationState = z.infer<typeof GoalClarificationStateSchema
 
 export const GoalPlanExecutionFailureSchema = z
   .object({
-    operation: z.enum(['goal', 'task_template', 'reminder']),
-    index: z.number().int().nonnegative().optional(),
+    operation: z.enum([
+      'label_resolve',
+      'goal_create',
+      'goal_activate',
+      'knowledge_create',
+      'knowledge_link',
+      'task_create',
+    ]),
+    draftRef: GoalPlanDraftRefSchema,
     code: z.string().min(1),
     message: z.string(),
     retryable: z.boolean(),
@@ -202,15 +259,21 @@ export const GoalPlanExecutionFailureSchema = z
   .strict();
 export type GoalPlanExecutionFailure = z.infer<typeof GoalPlanExecutionFailureSchema>;
 
+/**
+ * Durable V2 apply receipt. `referenceMap` is the only draftRef -> persistent
+ * entity map; arrays/indexes are deliberately absent so reorder cannot change
+ * retry identity. Knowledge Relation ids are mutation receipts rather than
+ * entity identities and therefore live in a separate map.
+ */
 export const GoalPlanExecutionReceiptSchema = z
   .object({
     workflowRunId: z.string().min(1),
     revision: z.number().int().positive(),
     status: z.enum(['success', 'partial', 'failed']),
-    goalId: z.string().min(1).optional(),
-    keyResultIds: z.array(z.string().min(1)).default([]),
-    taskIds: z.array(z.string().min(1)).default([]),
-    reminderIds: z.array(z.string().min(1)).default([]),
+    referenceMap: z.record(GoalPlanDraftRefSchema, z.string().min(1)).default({}),
+    relationIds: z.record(GoalPlanKnowledgeDraftRefSchema, z.string().min(1)).default({}),
+    goalVersion: z.number().int().positive().optional(),
+    appliedGoalStatus: z.enum(['Planned', 'InProgress']).optional(),
     failures: z.array(GoalPlanExecutionFailureSchema).default([]),
     retryable: z.boolean(),
   })

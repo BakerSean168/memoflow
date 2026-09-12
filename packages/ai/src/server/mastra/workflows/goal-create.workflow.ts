@@ -61,8 +61,8 @@ const dangerousPatchKeys = new Set(['__proto__', 'prototype', 'constructor']);
 const allowedDraftPatchKeys = new Set([
   'goal',
   'keyResults',
-  'taskPlans',
-  'reminders',
+  'tasks',
+  'knowledge',
   'rationale',
   'warnings',
 ]);
@@ -225,7 +225,6 @@ export function createGoalCreateWorkflow(input: {
           workflowRunId: runId,
           draft: current.draft,
           context: currentExecutionContext(requestContext, current.input.identityId),
-          timeZone: current.input.surfaceContext?.timezone ?? 'UTC',
           priorReceipt,
         });
         if (receipt.status === 'success') {
@@ -337,7 +336,7 @@ export function createGoalCreateWorkflow(input: {
           return applyAndResolve(priorReceipt);
         }
         if (resumeData.type === 'accept_partial') {
-          if (priorReceipt.status !== 'partial' || !priorReceipt.goalId) {
+          if (priorReceipt.status !== 'partial' || !priorReceipt.referenceMap.goal) {
             throw new Error('goal.create has no partial business result to accept');
           }
           await persist({ ...current, phase: 'completed' });
@@ -347,7 +346,7 @@ export function createGoalCreateWorkflow(input: {
           });
         }
         if (resumeData.type === 'cancel_remaining') {
-          if (priorReceipt.status === 'partial' && priorReceipt.goalId) {
+          if (priorReceipt.status === 'partial' && Boolean(priorReceipt.referenceMap.goal)) {
             await persist({ ...current, phase: 'completed' });
             return GoalCreateWorkflowOutputSchema.parse({
               outcome: 'completed',

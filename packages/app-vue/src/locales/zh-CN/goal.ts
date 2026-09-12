@@ -92,6 +92,7 @@ export default {
     "notFound": "目标不存在",
     "backToList": "回到目标列表",
     "noDescription": "暂无描述",
+    "status": "状态",
     "startDate": "开始日期",
     "category": "分类",
     "notSet": "未设置",

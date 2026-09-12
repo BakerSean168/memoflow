@@ -26,14 +26,24 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     const summaries = query.trim()
       ? (await this.localVault.searchVault({ query, limit })).results.map((result) => result.note)
       : (await this.localVault.scanVault()).notes.slice(0, limit);
-    return this.hydrate(identityId, snapshot.binding.id, summaries.slice(0, limit));
+    return this.hydrate(
+      identityId,
+      snapshot.binding.id,
+      snapshot.binding.knowledgeSpaceId,
+      summaries.slice(0, limit),
+    );
   }
 
   async listIndexableNotes(identityId: string, limit: number): Promise<KnowledgeSourceNote[]> {
     const snapshot = await this.localVault.getBinding();
     if (!snapshot || snapshot.health.state !== 'Available') return [];
     const scanned = await this.localVault.scanVault();
-    return this.hydrate(identityId, snapshot.binding.id, scanned.notes.slice(0, limit));
+    return this.hydrate(
+      identityId,
+      snapshot.binding.id,
+      snapshot.binding.knowledgeSpaceId,
+      scanned.notes.slice(0, limit),
+    );
   }
 
   async getNoteById(identityId: string, resourceId: string): Promise<KnowledgeSourceNote | null> {
@@ -49,12 +59,18 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
     const note = await this.localVault.readNote({
       relativePath: summary.relativePath,
     });
-    return this.toKnowledgeNote(identityId, snapshot.binding.id, note);
+    return this.toKnowledgeNote(
+      identityId,
+      snapshot.binding.id,
+      snapshot.binding.knowledgeSpaceId,
+      note,
+    );
   }
 
   private async hydrate(
     identityId: string,
     repositoryId: string,
+    knowledgeSpaceId: string,
     summaries: LocalVaultNoteSummaryDTO[],
   ): Promise<KnowledgeSourceNote[]> {
     return Promise.all(
@@ -62,6 +78,7 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
         this.toKnowledgeNote(
           identityId,
           repositoryId,
+          knowledgeSpaceId,
           await this.localVault.readNote({
             relativePath: summary.relativePath,
           }),
@@ -73,6 +90,7 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
   private toKnowledgeNote(
     identityId: string,
     repositoryId: string,
+    knowledgeSpaceId: string,
     note: LocalVaultNoteDTO,
   ): KnowledgeSourceNote {
     return {
@@ -90,6 +108,7 @@ export class DesktopKnowledgeSourceAdapter implements IKnowledgeSourcePort {
         outgoingLinks: note.outgoingLinks,
         contentDigest: createHash('sha256').update(note.contentMarkdown).digest('hex'),
         knowledgeDocumentId: note.knowledgeDocumentId,
+        knowledgeSpaceId,
       },
     };
   }

@@ -488,6 +488,8 @@ async function registerBusinessModules(
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
     reminderApplicationPort: reminderComposed.applicationPort,
+    goalKnowledgeService,
+    knowledgeDocumentRefResolver: localVaultKnowledgeRefResolver,
     routineCommandPort: reminderComposed.routineCommandPort,
     scheduleRepository: scheduleComposed.repositories.scheduleRepository,
     notificationRepository: notificationComposed.repositories.notificationRepository,
