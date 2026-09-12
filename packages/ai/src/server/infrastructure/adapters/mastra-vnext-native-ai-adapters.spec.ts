@@ -89,7 +89,13 @@ describe('Mastra vNext native AI adapters', () => {
       identityId: 'identity-1',
       providerConfig: provider,
       question: 'What should I focus on?',
-      context: { goals: [], goalSearchResults: [], extra: {}, taskDashboard: { open: 3 } },
+      context: {
+        timeContext: { timeZone: 'Asia/Tokyo' as never, weekStartsOn: 1 },
+        goals: [],
+        goalSearchResults: [],
+        extra: {},
+        taskDashboard: { open: 3 },
+      },
     });
     expect(result.answer).toBe('Three tasks remain.');
     expect(result.highlights).toEqual(['3 open tasks']);

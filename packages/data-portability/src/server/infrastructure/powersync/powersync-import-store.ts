@@ -11,7 +11,7 @@ import { newId } from '@memoflow/utils';
 import type {
   DataPortabilityImportStore,
   DataPortabilityImportTx,
-  UpsertUserSettingInput,
+  UpsertUserPreferencesInput,
   UpsertNotificationPreferenceInput,
   UpsertUserReminderPreferenceInput,
   CreateRepositoryInput,
@@ -21,17 +21,13 @@ import type {
   CreateKeyResultInput,
   CreateGoalReviewInput,
   CreateGoalRecordInput,
-  CreateTaskTemplateInput,
-  CreateTaskInstanceInput,
+  CreateTaskPlanInput,
+  CreateTaskOccurrenceInput,
   CreateScheduleInput,
   CreateScheduleTaskInput,
   CreateReminderGroupInput,
   CreateReminderTemplateInput,
   CreateReminderResponseInput,
-  CreateEditorWorkspaceInput,
-  CreateEditorSessionInput,
-  CreateEditorGroupInput,
-  CreateEditorTabInput,
   CreateAIConversationInput,
   CreateAIMessageInput,
 } from '../../application/import-store/data-portability-import-store';
@@ -71,21 +67,27 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   // --- Singletons ---
 
-  async upsertUserSetting(input: UpsertUserSettingInput): Promise<void> {
-    const existing = await this.tx.getOptional<{ id: string }>(
-      `SELECT id FROM user_settings WHERE identity_id = ?`,
-      [input.identityId],
-    );
-    if (existing) {
-      await this.tx.execute(
-        `UPDATE user_settings SET preferences = ?, updated_at = ? WHERE identity_id = ?`,
-        [json(input.preferences), new Date().toISOString(), input.identityId],
+  async upsertUserPreferences(input: UpsertUserPreferencesInput): Promise<void> {
+    for (const [namespace, payload] of [
+      ['presentation', input.presentation],
+      ['regional', input.regional],
+    ] as const) {
+      const existing = await this.tx.getOptional<{ id: string }>(
+        `SELECT id FROM user_preference_records WHERE identity_id = ? AND namespace = ?`,
+        [input.identityId, namespace],
       );
-    } else {
-      await this.tx.execute(
-        `INSERT INTO user_settings (id, identity_id, preferences, version, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?)`,
-        [input.id ?? newId(), input.identityId, json(input.preferences), ...createdUpdated({})],
-      );
+      if (existing) {
+        await this.tx.execute(
+          `UPDATE user_preference_records SET payload = ?, revision = revision + 1, updated_at = ? WHERE identity_id = ? AND namespace = ?`,
+          [json(payload), new Date().toISOString(), input.identityId, namespace],
+        );
+      } else {
+        const now = new Date().toISOString();
+        await this.tx.execute(
+          `INSERT INTO user_preference_records (id, identity_id, namespace, payload, revision, created_at, updated_at) VALUES (?, ?, ?, ?, 1, ?, ?)`,
+          [newId(), input.identityId, namespace, json(payload), now, now],
+        );
+      }
     }
   }
 
@@ -214,17 +216,16 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createGoal(input: CreateGoalInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO goals (id, identity_id, name, description, feasibility_analysis, motivation, status, start_date, due_date, completed_at, archived_at, sort_order, reminder_config, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
+      `INSERT INTO goals (id, identity_id, name, summary, status, start_date, target_kind, target_end_date, completed_at, archived_at, sort_order, reminder_config, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [
         input.id,
         input.identityId,
         input.name,
-        str(input.description),
-        str(input.feasibilityAnalysis),
-        str(input.motivation),
+        str(input.summary),
         input.status,
         str(input.startDate),
-        str(input.dueDate),
+        str(input.targetKind),
+        str(input.targetEndDate),
         str(input.completedAt),
         str(input.archivedAt),
         input.sortOrder,
@@ -236,7 +237,7 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createKeyResult(input: CreateKeyResultInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO key_results (id, identity_id, goal_id, title, description, aggregation_method, starting_value, progress_baseline_value, target_value, current_value, unit, weight, "order", created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO key_results (id, identity_id, goal_id, title, description, aggregation_method, initial_value, tracking_base_value, target_value, current_value, target_kind, target_end_date, unit, weight, "order", created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.id,
         input.identityId,
@@ -244,10 +245,12 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
         input.title,
         str(input.description),
         input.aggregationMethod,
-        input.startingValue,
-        input.progressBaselineValue,
+        input.initialValue,
+        input.trackingBaseValue,
         input.targetValue,
         input.currentValue,
+        str(input.targetKind),
+        str(input.targetEndDate),
         str(input.unit),
         input.weight,
         input.order,
@@ -292,7 +295,7 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   // --- Task ---
 
-  async createTaskTemplate(input: CreateTaskTemplateInput): Promise<void> {
+  async createTaskPlan(input: CreateTaskPlanInput): Promise<void> {
     await this.tx.execute(
       `INSERT INTO task_templates (id, identity_id, name, description, status, outcome, completion_policy, closed_at, archived_at, abandoned_reason, importance, color, tags, time_config_type, time_config_start_time, time_config_end_time, time_config_duration_minutes, time_config_time_point, time_config_time_range_start, time_config_time_range_end, recurrence_rule_type, recurrence_rule_interval, recurrence_rule_days_of_week, recurrence_rule_end_date, recurrence_rule_count, reminder_config_enabled, reminder_config_time_offset_minutes, reminder_config_unit, reminder_config_channel, last_generated_date, generate_ahead_days, goal_id, key_result_id, goal_record_value, goal_progress_trigger, checklist, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [
@@ -337,7 +340,7 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
     );
   }
 
-  async createTaskInstance(input: CreateTaskInstanceInput): Promise<void> {
+  async createTaskOccurrence(input: CreateTaskOccurrenceInput): Promise<void> {
     await this.tx.execute(
       `INSERT INTO task_instances (id, template_id, identity_id, instance_date, occurrence_key, status, importance, time_config, actual_start_time, actual_end_time, comment, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [
@@ -516,78 +519,6 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
         input.snoozeDurationSeconds,
         input.timestamp,
         createdAt(input),
-      ],
-    );
-  }
-
-  // --- Editor ---
-
-  async createEditorWorkspace(input: CreateEditorWorkspaceInput): Promise<void> {
-    await this.tx.execute(
-      `INSERT INTO editor_workspaces (id, identity_id, name, description, project_path, project_type, layout, setting, is_active, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [
-        input.id,
-        input.identityId,
-        input.name,
-        str(input.description),
-        input.projectPath,
-        input.projectType,
-        json(input.layout),
-        json(input.setting),
-        bool(input.isActive),
-        ...createdUpdated(input),
-      ],
-    );
-  }
-
-  async createEditorSession(input: CreateEditorSessionInput): Promise<void> {
-    await this.tx.execute(
-      `INSERT INTO editor_workspace_sessions (id, workspace_id, identity_id, name, layout, is_active, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [
-        input.id,
-        input.workspaceId,
-        input.identityId,
-        input.name,
-        json(input.layout),
-        bool(input.isActive),
-        ...createdUpdated(input),
-      ],
-    );
-  }
-
-  async createEditorGroup(input: CreateEditorGroupInput): Promise<void> {
-    await this.tx.execute(
-      `INSERT INTO editor_workspace_session_groups (id, session_id, workspace_id, identity_id, group_index, name, split_direction, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [
-        input.id,
-        input.sessionId,
-        input.workspaceId,
-        input.identityId,
-        input.groupIndex,
-        str(input.name),
-        input.splitDirection,
-        ...createdUpdated(input),
-      ],
-    );
-  }
-
-  async createEditorTab(input: CreateEditorTabInput): Promise<void> {
-    await this.tx.execute(
-      `INSERT INTO editor_workspace_session_group_tabs (id, group_id, session_id, workspace_id, identity_id, resource_id, tab_index, tab_type, title, view_state, is_pinned, is_active, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
-      [
-        input.id,
-        input.groupId,
-        input.sessionId,
-        input.workspaceId,
-        input.identityId,
-        str(input.resourceId),
-        input.tabIndex,
-        input.tabType,
-        input.title,
-        json(input.viewState),
-        bool(input.isPinned),
-        bool(input.isActive),
-        ...createdUpdated(input),
       ],
     );
   }

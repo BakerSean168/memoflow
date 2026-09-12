@@ -12,8 +12,8 @@ import { getFirstQueryValue } from './get-first-query-value';
 describe('getFirstQueryValue dual retired (residual 983)', () => {
   const dir = __dirname;
   const sole = readFileSync(resolve(dir, 'get-first-query-value.ts'), 'utf8');
-  const instance = readFileSync(resolve(dir, 'task-instance.routes.ts'), 'utf8');
-  const template = readFileSync(resolve(dir, 'task-template.routes.ts'), 'utf8');
+  const instance = readFileSync(resolve(dir, 'task-occurrence.routes.ts'), 'utf8');
+  const template = readFileSync(resolve(dir, 'task-plan.routes.ts'), 'utf8');
 
   it('owns sole getFirstQueryValue helper body', () => {
     expect(sole).toContain('Residual 983');

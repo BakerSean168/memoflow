@@ -2,7 +2,7 @@
  * Duration arithmetic sole (ADR-037 P4).
  * Modules may supply i18n label dictionaries; h/m/s split lives here only.
  */
-import type { TimeStyle } from '../types';
+import type { TimePresentationStyle } from '../types';
 
 export interface DurationParts {
   hours: number;
@@ -42,7 +42,7 @@ export function splitDurationMinutes(totalMinutes: number): DurationParts {
 
 export function formatDurationParts(
   parts: DurationParts,
-  style: TimeStyle,
+  style: TimePresentationStyle,
   labels?: {
     hours?: (n: number) => string;
     minutes?: (n: number) => string;
@@ -53,9 +53,12 @@ export function formatDurationParts(
   if (parts.totalMs === 0 && parts.totalMinutes === 0) {
     return style.duration.zero;
   }
-  const hLabel = labels?.hours ?? ((n) => (style.duration.style === 'long' ? `${n} hours` : `${n}h`));
-  const mLabel = labels?.minutes ?? ((n) => (style.duration.style === 'long' ? `${n} minutes` : `${n}m`));
-  const sLabel = labels?.seconds ?? ((n) => (style.duration.style === 'long' ? `${n} seconds` : `${n}s`));
+  const hLabel =
+    labels?.hours ?? ((n) => (style.duration.style === 'long' ? `${n} hours` : `${n}h`));
+  const mLabel =
+    labels?.minutes ?? ((n) => (style.duration.style === 'long' ? `${n} minutes` : `${n}m`));
+  const sLabel =
+    labels?.seconds ?? ((n) => (style.duration.style === 'long' ? `${n} seconds` : `${n}s`));
   const join = labels?.join ?? (style.locale.toLowerCase().startsWith('zh') ? '' : ' ');
   const chunks: string[] = [];
   if (parts.hours > 0) chunks.push(hLabel(parts.hours));

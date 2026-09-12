@@ -84,8 +84,8 @@ describe('UpdateGoalKeyResultUseCase', () => {
       title: 'Updated KR',
       description: undefined,
       weight: 5,
-      startingValue: undefined,
-      progressBaselineValue: undefined,
+      initialValue: undefined,
+      target: undefined,
       aggregationMethod: undefined,
       currentValue: undefined,
       targetValue: undefined,
@@ -178,8 +178,8 @@ describe('UpdateGoalKeyResultUseCase', () => {
       title: undefined,
       description: 'New desc',
       weight: undefined,
-      startingValue: undefined,
-      progressBaselineValue: undefined,
+      initialValue: undefined,
+      target: undefined,
       aggregationMethod: undefined,
       currentValue: undefined,
       targetValue: undefined,
@@ -187,7 +187,7 @@ describe('UpdateGoalKeyResultUseCase', () => {
     });
   });
 
-  it('should pass currentValue updates correctly', async () => {
+  it('passes Initial and Current updates without exposing tracking-base control', async () => {
     const goal = createGoalFixture();
     const goalPolicy = { ensureGoalCanBeModified: vi.fn() } as any;
     const goalRepo = createMockRepo<IGoalRepository>({
@@ -198,7 +198,7 @@ describe('UpdateGoalKeyResultUseCase', () => {
 
     await useCase.execute('goal-id-1', 'identity-1', 'kr-1', {
       currentValue: 11,
-      startingValue: 5,
+      initialValue: 5,
       expectedVersion: 1,
     });
 
@@ -206,7 +206,8 @@ describe('UpdateGoalKeyResultUseCase', () => {
       title: undefined,
       description: undefined,
       weight: undefined,
-      startingValue: 5,
+      initialValue: 5,
+      target: undefined,
       currentValue: 11,
       targetValue: undefined,
       unit: undefined,

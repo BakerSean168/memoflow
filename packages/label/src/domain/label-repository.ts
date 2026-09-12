@@ -1,29 +1,29 @@
-import type { LabelRecord, NewLabelRecord } from './label'
+import type { LabelColor } from '@memoflow/contracts/label';
+import type { Instant } from '@memoflow/contracts/primitives';
+import type { LabelRecord, NewLabelRecord } from './label';
 
 export interface LabelListOptions {
-  readonly identityId: string
-  readonly normalizedSearch?: string | null
-  readonly limit?: number
+  readonly identityId: string;
+  readonly normalizedSearch?: string | null;
+  readonly limit?: number;
 }
 
+/** Identity-owned Shared Label registry persistence (ADR-102 / LABEL-1302). */
 export interface LabelRepository {
-  create(record: NewLabelRecord): Promise<LabelRecord>
+  create(record: NewLabelRecord): Promise<LabelRecord>;
   update(input: {
-    identityId: string
-    labelId: string
-    name?: string
-    normalizedName?: string
-    color?: string | null
-  }): Promise<LabelRecord | null>
-  delete(identityId: string, labelId: string): Promise<boolean>
-  findById(identityId: string, labelId: string): Promise<LabelRecord | null>
-  list(options: LabelListOptions): Promise<LabelRecord[]>
-  replaceGoalLabels(identityId: string, goalId: string, labelIds: readonly string[]): Promise<void>
-  replaceTaskLabels(identityId: string, taskTemplateId: string, labelIds: readonly string[]): Promise<void>
-  listGoalLabels(identityId: string, goalId: string): Promise<LabelRecord[]>
-  listTaskLabels(identityId: string, taskTemplateId: string): Promise<LabelRecord[]>
-  listGoalLabelsByGoalIds(identityId: string, goalIds: readonly string[]): Promise<Map<string, LabelRecord[]>>
-  listTaskLabelsByTaskTemplateIds(identityId: string, taskTemplateIds: readonly string[]): Promise<Map<string, LabelRecord[]>>
-  findGoalIdsMatchingAllLabels(identityId: string, labelIds: readonly string[]): Promise<string[]>
-  findTaskTemplateIdsMatchingAllLabels(identityId: string, labelIds: readonly string[]): Promise<string[]>
+    identityId: string;
+    labelId: string;
+    name?: string;
+    normalizedName?: string;
+    color?: LabelColor | null;
+    updatedAt: Instant;
+  }): Promise<LabelRecord | null>;
+  delete(identityId: string, labelId: string): Promise<boolean>;
+  findById(identityId: string, labelId: string): Promise<LabelRecord | null>;
+  findByNormalizedNames(
+    identityId: string,
+    normalizedNames: readonly string[],
+  ): Promise<LabelRecord[]>;
+  list(options: LabelListOptions): Promise<LabelRecord[]>;
 }

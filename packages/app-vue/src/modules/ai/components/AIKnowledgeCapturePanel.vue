@@ -27,6 +27,13 @@
       <p v-if="reviewDraft" class="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
         {{ reviewDraft.topic }}
       </p>
+      <p
+        v-if="reviewDraft"
+        class="font-mono text-xs text-muted-foreground"
+        data-testid="knowledge-capture-workflow-document-id"
+      >
+        memoflow_id: {{ reviewDraft.knowledgeDocumentId }}
+      </p>
     </div>
 
     <div v-if="reviewDraft?.tags.length" class="flex flex-wrap gap-2">
@@ -53,7 +60,7 @@
       </p>
       <p
         v-for="(failure, index) in knowledgeCaptureRun.suspension.failures"
-        :key="`${failure.operation}-${failure.index ?? 'root'}-${failure.code}-${index}`"
+        :key="`${failure.operation}-${failure.code}-${index}`"
         class="text-sm text-destructive"
       >
         {{ failure.operation }} · {{ publicFailureMessage(failure) }}

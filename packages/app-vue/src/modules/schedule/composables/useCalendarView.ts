@@ -1,22 +1,25 @@
 /**
  * useCalendarView - 日历视图聚合 composable
  *
- * 将 CalendarEntry（schedule 模块）、Goal 和 TaskInstance 三个来源
+ * 将 CalendarEntry（schedule 模块）、Goal 和 TaskOccurrence 三个来源
  * 统一转换为内部 CalendarEventItem 类型后提供给日历组件渲染。
  */
 
 import { computed, ref } from 'vue';
-import { formatLocalHHmm } from '../../../shared/utils/format-local-hhmm';
-import { padTwoDigits } from '../../../shared/utils/pad-two-digits';
 import { useSchedule } from './useSchedule';
 import { useTask } from '../../task/composables/useTask';
 import type {
-  TaskInstanceClientDTO,
-  TaskInstanceStatus,
-  TaskTemplateClientDTO,
+  TaskOccurrenceClientDTO,
+  TaskOccurrenceStatus,
+  TaskPlanClientDTO,
 } from '@memoflow/contracts/task';
 import type { CalendarEventProjection } from '@memoflow/contracts/schedule';
-import { endOfDayMs, getProductTime, startOfDayMs } from '../../../shared/utils/product-time';
+import {
+  endOfDayMs,
+  getProductTime,
+  productTimeRevision,
+  startOfDayMs,
+} from '../../../shared/utils/product-time';
 import {
   projectPlannerReadModel,
   projectTaskOccurrence,
@@ -34,28 +37,26 @@ export interface CalendarEventItem {
   source: 'schedule' | 'task' | 'goal';
   hasConflict?: boolean;
   originalId: string;
-  /** 仅当 source === 'task' 时存在，对应 TaskInstanceStatus 值 */
-  instanceStatus?: TaskInstanceStatus;
+  /** 仅当 source === 'task' 时存在，对应 TaskOccurrenceStatus 值 */
+  instanceStatus?: TaskOccurrenceStatus;
 }
 
 /**
  * Residual 1282: sole toLocalDateKey — Date | number → YYYY-MM-DD local calendar key.
  * Dual-retired from Day/Week/Month calendar local toDateStr copies.
  * Residual 1321: padStart dual retired onto padTwoDigits sole (Date|number key contract stays local).
- * Soft residual 1252: formatDateToYMD Date-only form sole remains separate (storage encoding).
+ * TIME-1206: date keys are canonical session-calendar Ymd values, not Date-derived storage encodings.
  */
 export function toLocalDateKey(value: Date | number): string {
-  const date = typeof value === 'number' ? new Date(value) : value;
-  const year = date.getFullYear();
-  const month = padTwoDigits(date.getMonth() + 1);
-  const day = padTwoDigits(date.getDate());
-  return `${year}-${month}-${day}`;
+  void productTimeRevision.value;
+  const instant = typeof value === 'number' ? value : value.getTime();
+  return String(getProductTime().calendar.toYmd(instant));
 }
 
 /**
  * Residual 1291: sole calendarEventSourceLabel — schedule/goal/task source → i18n label.
  * Dual-retired from DayDetailSheet + EventDetailSheet local sourceLabel copies.
- * Soft residual 1294: formatLocalHHmm dual-retired sole (formatCapsuleTime alias) remains separate.
+ * TIME-1206: capsule HH:mm formatting resolves through the session Product Time facade.
  * Soft residual 1288: Month eventClass translucent + getEventStyle Day/Week layout keep-boundaries remain separate.
  */
 export function calendarEventSourceLabel(
@@ -71,11 +72,12 @@ export function calendarEventSourceLabel(
 }
 
 /**
- * Residual 1294: formatCapsuleTime dual body retired onto formatLocalHHmm sole.
+ * TIME-1206: formatCapsuleTime is a thin session Product Time presentation helper.
  * Thin schedule alias for shell capsule consumers (same HH:mm local padStart contract).
  */
 export function formatCapsuleTime(ms: number): string {
-  return formatLocalHHmm(ms);
+  void productTimeRevision.value;
+  return getProductTime().format.hm(ms);
 }
 
 export type ScheduleCapsuleSnapshot = {
@@ -184,15 +186,15 @@ function projectionToLegacyCalendarEvent(
     originalId: projection.ownerCommandTarget.ownerId,
     instanceStatus:
       projection.sourceType === 'task'
-        ? (projection.displayMetadata.status as TaskInstanceStatus | undefined)
+        ? (projection.displayMetadata.status as TaskOccurrenceStatus | undefined)
         : undefined,
   };
 }
 
-/** TaskInstance → legacy CalendarEventItem through the canonical PLAN-4302 projection. */
-export function taskInstancesToEvents(
-  instances: TaskInstanceClientDTO[],
-  templates: TaskTemplateClientDTO[],
+/** TaskOccurrence → legacy CalendarEventItem through the canonical PLAN-4302 projection. */
+export function taskOccurrencesToEvents(
+  instances: TaskOccurrenceClientDTO[],
+  templates: TaskPlanClientDTO[],
 ): CalendarEventItem[] {
   const templateMap = new Map(templates.map((template) => [String(template.id), template]));
   const time = plannerProductTimePort();
@@ -229,7 +231,7 @@ export function useCalendarView() {
     return projectPlannerReadModel({
       calendarEntries: Array.isArray(entriesRaw) ? entriesRaw : [],
       taskOccurrences: Array.isArray(instancesRaw) ? instancesRaw : [],
-      taskTemplates: Array.isArray(templatesRaw) ? templatesRaw : [],
+      taskPlans: Array.isArray(templatesRaw) ? templatesRaw : [],
       goals: [],
       routineOccurrences: [],
       time: plannerProductTimePort(),

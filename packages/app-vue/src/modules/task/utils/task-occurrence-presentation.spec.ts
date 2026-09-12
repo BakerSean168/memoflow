@@ -1,6 +1,6 @@
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import enTask from '../../../locales/en-US/task';
 import { startOfDayMs } from '../../../shared/utils/product-time';
 import {
@@ -23,8 +23,8 @@ const now = day + 12 * 60 * 60_000;
 
 function occurrence(
   id: string,
-  overrides: Partial<TaskInstanceClientDTO> = {},
-): TaskInstanceClientDTO {
+  overrides: Partial<TaskOccurrenceClientDTO> = {},
+): TaskOccurrenceClientDTO {
   return {
     id,
     templateId: 'plan-a',
@@ -47,7 +47,7 @@ function occurrence(
     updatedAt: day,
     deletedAt: null,
     ...overrides,
-  } as TaskInstanceClientDTO;
+  } as TaskOccurrenceClientDTO;
 }
 
 describe('task occurrence presentation', () => {
@@ -88,19 +88,19 @@ describe('task occurrence presentation', () => {
     const first = occurrence('a', { instanceDate: day });
     const second = occurrence('b', { instanceDate: day + 86_400_000 });
     const other = occurrence('c', {
-      templateId: 'plan-b' as TaskInstanceClientDTO['templateId'],
+      templateId: 'plan-b' as TaskOccurrenceClientDTO['templateId'],
     });
 
     expect(
       getTaskOccurrencePosition(second, [other, second, first], {
         instanceCount: 8,
-      } as Pick<TaskTemplateClientDTO, 'instanceCount'>),
+      } as Pick<TaskPlanClientDTO, 'instanceCount'>),
     ).toEqual({ position: 2, total: 8 });
   });
 
   it('sorts by time, status, or plan title without mutating source input', () => {
     const later = occurrence('later', {
-      templateId: 'plan-z' as TaskInstanceClientDTO['templateId'],
+      templateId: 'plan-z' as TaskOccurrenceClientDTO['templateId'],
       timeConfig: {
         timeType: 'TimePoint',
         startDate: day,
@@ -109,7 +109,7 @@ describe('task occurrence presentation', () => {
       },
     });
     const completed = occurrence('completed', {
-      templateId: 'plan-a' as TaskInstanceClientDTO['templateId'],
+      templateId: 'plan-a' as TaskOccurrenceClientDTO['templateId'],
       status: 'Completed',
     });
     const source = [later, completed];

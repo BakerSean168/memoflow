@@ -7,6 +7,7 @@
 
 // ===== Composables =====
 export { useGoal } from './composables';
+export { useGoalWorkspace } from './composables';
 export { useGoalTimeline } from './composables';
 export type { TimelineData, TimelineSnapshot } from './composables';
 export { formatTimelineTimestamp } from './composables';

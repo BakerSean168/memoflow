@@ -3,5 +3,5 @@
  * Task 模块聚合根导出
  */
 
-export { TaskTemplate, type TaskTemplateState } from './task-template.js';
-export { TaskInstance, type TaskInstanceState } from './task-instance.js';
+export { TaskPlan, type TaskPlanState } from './task-plan.js';
+export { TaskOccurrence, type TaskOccurrenceState } from './task-occurrence.js';

@@ -187,7 +187,7 @@ export interface KnowledgeRepositorySyncGitRuntimeInput {
   repositoryId: string;
   repositoryFullName: string;
   defaultBranch: string;
-  lastSyncedCommitSha: string;
+  lastConfirmedRemoteHeadSha: string;
 }
 
 export interface KnowledgeRepositorySyncGitRuntimePreparation {
@@ -216,7 +216,6 @@ export interface KnowledgeRepositorySyncGitRuntimePort {
   ): Promise<KnowledgeRepositorySyncGitRuntimeResult>;
 }
 
-
 function portablePath(value: string): string {
   return value.split(path.sep).join('/');
 }
@@ -228,7 +227,6 @@ function parseNullSeparated(output: string): string[] {
 function replaceLiteral(value: string, search: string, replacement: string): string {
   return search.length === 0 ? value : value.split(search).join(replacement);
 }
-
 
 function isSyncablePath(relativePath: string): boolean {
   const normalized = relativePath.replace(/\\/g, '/').replace(/^\.\//, '');
@@ -375,7 +373,7 @@ export class DesktopKnowledgeRepositoryGitRuntime
       const remoteHeadSha = await this.fetchRemoteHead(root, input.defaultBranch, env);
       await this.assertRemoteHistoryNotRewritten(
         root,
-        input.lastSyncedCommitSha,
+        input.lastConfirmedRemoteHeadSha,
         localHeadSha,
         remoteHeadSha,
       );
@@ -622,17 +620,20 @@ export class DesktopKnowledgeRepositoryGitRuntime
 
   private async assertRemoteHistoryNotRewritten(
     root: string,
-    lastSyncedCommitSha: string,
+    lastConfirmedRemoteHeadSha: string,
     localHeadSha: string,
     remoteHeadSha: string,
   ): Promise<void> {
-    const knownCommit = await this.git.run(['cat-file', '-e', `${lastSyncedCommitSha}^{commit}`], {
-      cwd: root,
-      allowedExitCodes: [0, 1, 128],
-    });
+    const knownCommit = await this.git.run(
+      ['cat-file', '-e', `${lastConfirmedRemoteHeadSha}^{commit}`],
+      {
+        cwd: root,
+        allowedExitCodes: [0, 1, 128],
+      },
+    );
     const historyPreserved =
       knownCommit.exitCode === 0 &&
-      (await this.isAncestor(root, lastSyncedCommitSha, remoteHeadSha));
+      (await this.isAncestor(root, lastConfirmedRemoteHeadSha, remoteHeadSha));
     if (historyPreserved) return;
 
     const context: KnowledgeRepositorySyncConflictContext = {

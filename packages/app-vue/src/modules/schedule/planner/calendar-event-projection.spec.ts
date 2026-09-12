@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import type { GoalClientDTO } from '@memoflow/contracts/goal';
 import type { CalendarEntryClientDTO, CalendarEventProjection } from '@memoflow/contracts/schedule';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import { asInstant, asYmd, type Instant, type Ymd } from '@memoflow/time';
 import {
   projectCalendarEntry,
@@ -15,15 +15,13 @@ import {
 
 const dayStart = asInstant(Date.parse('2026-08-27T00:00:00.000Z'));
 const taskDay = asInstant(Date.parse('2026-08-28T00:00:00.000Z'));
-const goalStart = asInstant(Date.parse('2026-09-01T00:00:00.000Z'));
-const goalDue = asInstant(Date.parse('2026-09-30T00:00:00.000Z'));
+const goalStart = asYmd('2026-09-01');
+const goalTarget = asYmd('2026-09-30');
 
 const time: PlannerProductTimePort = {
   startOfDay: (instant) => instant,
   toYmd: (instant) => {
     if (instant === taskDay) return asYmd('2026-08-28');
-    if (instant === goalStart) return asYmd('2026-09-01');
-    if (instant === goalDue) return asYmd('2026-09-30');
     throw new Error(`Unexpected Instant ${instant}`);
   },
 };
@@ -45,10 +43,10 @@ function calendarEntry(): CalendarEntryClientDTO {
   } as CalendarEntryClientDTO;
 }
 
-function taskOccurrence(overrides: Partial<TaskInstanceClientDTO> = {}): TaskInstanceClientDTO {
+function taskOccurrence(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
   return {
     id: 'task-occurrence-1',
-    templateId: 'task-template-1',
+    templateId: 'task-plan-1',
     identityId: 'identity-1',
     instanceDate: Number(taskDay),
     timeConfig: {
@@ -67,32 +65,30 @@ function taskOccurrence(overrides: Partial<TaskInstanceClientDTO> = {}): TaskIns
     updatedAt: Number(taskDay),
     deletedAt: null,
     ...overrides,
-  } as TaskInstanceClientDTO;
+  } as TaskOccurrenceClientDTO;
 }
 
-const taskTemplate = {
-  id: 'task-template-1',
+const taskPlan = {
+  id: 'task-plan-1',
   name: 'Review Core vNext PR',
-} as TaskTemplateClientDTO;
+} as TaskPlanClientDTO;
 
-function goal(): GoalClientDTO {
+function goal(overrides: Partial<GoalClientDTO> = {}): GoalClientDTO {
   return {
     id: 'goal-1',
     identityId: 'identity-1',
     name: 'Ship Core vNext',
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
-    status: 'Active',
-    startDate: Number(goalStart),
-    dueDate: Number(goalDue),
+    summary: null,
+    status: 'InProgress',
+    startDate: goalStart,
+    target: { kind: 'day', date: goalTarget },
     completedAt: null,
     archivedAt: null,
     sortOrder: 0,
     reminderConfig: null,
     labels: [],
-    createdAt: Number(goalStart),
-    updatedAt: Number(goalStart),
+    createdAt: Number(dayStart),
+    updatedAt: Number(dayStart),
     deletedAt: null,
     version: 12,
     keyResults: null,
@@ -100,6 +96,7 @@ function goal(): GoalClientDTO {
     totalKeyResults: 0,
     completedKeyResults: 0,
     overallProgress: 0,
+    ...overrides,
   } as GoalClientDTO;
 }
 
@@ -133,7 +130,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
   });
 
   it('projects TaskOccurrence time semantics without leaking Date or Scheduler types', () => {
-    const allDay = projectTaskOccurrence(taskOccurrence(), taskTemplate, time)!;
+    const allDay = projectTaskOccurrence(taskOccurrence(), taskPlan, time)!;
     expect(allDay).toMatchObject({
       sourceType: 'task',
       sourceId: 'task-occurrence-1',
@@ -155,7 +152,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
           timeRange: { start: 14 * 60, end: 15 * 60 + 30 },
         },
       }),
-      taskTemplate,
+      taskPlan,
       time,
     )!;
     if (timed.allDay) throw new Error('Expected timed task');
@@ -163,21 +160,53 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
     expect(timed.end).toBe(Number(taskDay) + (15 * 60 + 30) * 60_000);
   });
 
-  it('projects Goal start/deadline as distinct all-day facts targeting the Goal owner', () => {
+  it('projects Goal start/target as distinct all-day facts targeting the Goal owner', () => {
     const events = projectGoalDates(goal(), time);
     expect(events).toHaveLength(2);
-    expect(events.map((event) => event.sourceId)).toEqual(['goal-1:start-date', 'goal-1:due-date']);
+    expect(events.map((event) => event.sourceId)).toEqual(['goal-1:start-date', 'goal-1:target']);
     expect(events[1]).toMatchObject({
       allDay: true,
       start: '2026-09-30',
-      displayMetadata: { semantic: 'goal-deadline' },
+      displayMetadata: { semantic: 'goal-target' },
       ownerCommandTarget: { ownerType: 'goal.goal', ownerId: 'goal-1' },
       editableCapabilities: { move: true, resize: false },
       revision: 12,
     });
-    const deadline = events[1]!;
-    if (!deadline.allDay) throw new Error('Goal date must be all-day');
-    expectTypeOf(deadline.start).toEqualTypeOf<Ymd>();
+    const target = events[1]!;
+    if (!target.allDay) throw new Error('Goal target must be all-day');
+    expectTypeOf(target.start).toEqualTypeOf<Ymd>();
+  });
+
+  it('projects a coarse Target Timeframe at its end boundary but keeps it read-only', () => {
+    const events = projectGoalDates(
+      goal({ target: { kind: 'quarter', year: 2026, quarter: 4 } }),
+      time,
+    );
+    expect(events[1]).toMatchObject({
+      sourceId: 'goal-1:target',
+      start: '2026-12-31',
+      editableCapabilities: { move: false, resize: false },
+      displayMetadata: { semantic: 'goal-target', tone: 'muted' },
+    });
+  });
+
+  it('keeps non-terminal Goal dates editable without turning lifecycle into calendar state', () => {
+    expect(projectGoalDates(goal({ status: 'Planned' }), time)[0]?.editableCapabilities.move).toBe(
+      true,
+    );
+    expect(
+      projectGoalDates(goal({ status: 'InProgress' }), time)[0]?.editableCapabilities.move,
+    ).toBe(true);
+    expect(
+      projectGoalDates(goal({ status: 'Completed' }), time)[0]?.editableCapabilities.move,
+    ).toBe(false);
+    expect(
+      projectGoalDates(goal({ status: 'Abandoned' }), time)[0]?.editableCapabilities.move,
+    ).toBe(false);
+    expect(
+      projectGoalDates(goal({ status: 'InProgress', archivedAt: Number(dayStart) }), time)[0]
+        ?.editableCapabilities.move,
+    ).toBe(false);
   });
 
   it('projects Routine wall-clock occurrence identity, not its Scheduler invocation identity', () => {
@@ -198,7 +227,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
     const input = {
       calendarEntries: [calendarEntry()],
       taskOccurrences: [taskOccurrence()],
-      taskTemplates: [taskTemplate],
+      taskPlans: [taskPlan],
       goals: [goal()],
       routineOccurrences: [routineOccurrence],
       time,

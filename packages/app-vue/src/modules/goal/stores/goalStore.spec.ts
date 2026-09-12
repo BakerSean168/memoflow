@@ -29,7 +29,7 @@ describe('Goal store vNext', () => {
 
   it('normalizes goals and materializes reviews/key results from canonical stores', () => {
     const store = useGoalStore();
-    const active = createMockGoal({ status: 'Active', version: 2 });
+    const active = createMockGoal({ status: 'InProgress', version: 2 });
     const completed = createMockGoal({ status: 'Completed', version: 3 });
     const activeId = String(active.id);
     const kr = createMockKeyResult();
@@ -155,14 +155,19 @@ describe('Goal store vNext', () => {
 
   it('derives active/completed counts from status plus archive/delete facts', () => {
     const store = useGoalStore();
-    const active = createMockGoal({ status: 'Active', archivedAt: null, deletedAt: null });
-    const archivedActive = createMockGoal({ status: 'Active', archivedAt: Date.now(), deletedAt: null });
+    const planned = createMockGoal({ status: 'Planned', archivedAt: null, deletedAt: null });
+    const inProgress = createMockGoal({ status: 'InProgress', archivedAt: null, deletedAt: null });
+    const archivedActive = createMockGoal({
+      status: 'InProgress',
+      archivedAt: Date.now(),
+      deletedAt: null,
+    });
     const completed = createMockGoal({ status: 'Completed', deletedAt: null });
     const deletedCompleted = createMockGoal({ status: 'Completed', deletedAt: Date.now() });
 
-    store.setGoals([active, archivedActive, completed, deletedCompleted]);
+    store.setGoals([planned, inProgress, archivedActive, completed, deletedCompleted]);
 
-    expect(store.activeGoalCount).toBe(1);
+    expect(store.activeGoalCount).toBe(2);
     expect(store.completedGoalCount).toBe(1);
   });
 

@@ -1,7 +1,8 @@
 import type { Hm, Instant, Ymd } from '@memoflow/contracts/primitives';
 import type { TimeCodec } from '../codec/codec';
-import type { TimeEngine, TimeStyle } from '../types';
+import type { TimeContext, TimePresentationStyle } from '../types';
 import { asInstant } from '../codec/brand';
+import { instantToHmInTimeZone } from '../timezone/wall-clock';
 
 export interface InputApi {
   dateValue(instantOrYmd: Instant | number | Ymd | string | null | undefined): string;
@@ -12,29 +13,29 @@ export interface InputApi {
 }
 
 export function createInput(
-  style: TimeStyle,
+  presentation: TimePresentationStyle,
+  context: TimeContext,
   codec: TimeCodec,
-  engine: TimeEngine,
 ): InputApi {
   return {
     dateValue(instantOrYmd) {
-      if (instantOrYmd == null || instantOrYmd === '') return style.empty.input;
+      if (instantOrYmd == null || instantOrYmd === '') return presentation.empty.input;
       if (typeof instantOrYmd === 'string') {
-        return codec.parseYmd(instantOrYmd) ?? style.empty.input;
+        return codec.parseYmd(instantOrYmd) ?? presentation.empty.input;
       }
       if (typeof instantOrYmd === 'number') {
-        const i = codec.fromTransfer(instantOrYmd);
-        if (i == null) return style.empty.input;
-        return engine.toYmd(i);
+        const instant = codec.fromTransfer(instantOrYmd);
+        if (instant == null) return presentation.empty.input;
+        return codec.toYmd(instant);
       }
-      return style.empty.input;
+      return presentation.empty.input;
     },
 
     timeValue(instant) {
-      if (instant == null) return style.empty.input;
-      const i = codec.fromTransfer(instant as number);
-      if (i == null) return style.empty.input;
-      return engine.formatHm(i, 'HH:mm');
+      if (instant == null) return presentation.empty.input;
+      const parsed = codec.fromTransfer(instant as number);
+      if (parsed == null) return presentation.empty.input;
+      return instantToHmInTimeZone(parsed, context.timeZone);
     },
 
     parseDateValue(raw) {

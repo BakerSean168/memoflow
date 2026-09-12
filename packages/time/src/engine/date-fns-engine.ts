@@ -13,15 +13,27 @@ import {
   startOfDay as dfStartOfDay,
   startOfWeek as dfStartOfWeek,
 } from 'date-fns';
+import { TZDateMini } from '@date-fns/tz';
 import type { Hm, Instant, Ymd } from '@memoflow/contracts/primitives';
-import type { TimeEngine, TimeStyleCalendar, TimeStyleDisplay } from '../types';
+import type { TimeDateStyle, TimeEngine, TimeZoneId, Weekday } from '../types';
 import { asHm, asInstant, asYmd, isHmShape, isYmdShape } from '../codec/brand';
 
 function toDate(instant: Instant): Date {
   return new Date(instant);
 }
 
-function densityToDateFnsPattern(density: TimeStyleDisplay['date'] | TimeStyleDisplay['dateTime']): string {
+/**
+ * Date-fns fixed-pattern/chart/export escape hatch. TZDateMini is deliberately
+ * kept inside the engine so date-fns receives the explicit context zone
+ * without leaking @date-fns/tz into product contracts. The MemoFlow callers
+ * currently use numeric date/time fields, `MMM d`, and `X`/`x` offsets; named
+ * human presentation belongs to the Intl formatters instead.
+ */
+function toPatternDate(instant: Instant, timeZone: TimeZoneId): InstanceType<typeof TZDateMini> {
+  return new TZDateMini(instant, timeZone);
+}
+
+function densityToDateFnsPattern(density: TimeDateStyle): string {
   switch (density) {
     case 'short':
       return 'yyyy/M/d';
@@ -33,7 +45,7 @@ function densityToDateFnsPattern(density: TimeStyleDisplay['date'] | TimeStyleDi
   }
 }
 
-function densityToDateOnlyPattern(density: TimeStyleDisplay['date']): string {
+function densityToDateOnlyPattern(density: TimeDateStyle): string {
   switch (density) {
     case 'short':
       return 'M/d';
@@ -44,90 +56,6 @@ function densityToDateOnlyPattern(density: TimeStyleDisplay['date']): string {
       return 'yyyy-MM-dd';
   }
 }
-
-
-/**
- * Wall-clock Ymd+Hm → Instant under TimeZonePolicy (P11).
- * `local` uses host local calendar; IANA ids use Intl offset fixup (no date-fns-tz).
- */
-export function combineYmdHmWithTimeZone(
-  ymd: Ymd,
-  hm: Hm,
-  timeZone: string,
-): Instant | null {
-  if (!isYmdShape(ymd) || !isHmShape(hm)) return null;
-  const [ys, ms, ds] = ymd.split('-');
-  const [hs, mins] = hm.split(':');
-  const y = Number(ys);
-  const m = Number(ms);
-  const d = Number(ds);
-  const hour = Number(hs);
-  const minute = Number(mins);
-  if (![y, m, d, hour, minute].every((n) => Number.isFinite(n))) return null;
-
-  if (timeZone === 'local') {
-    const instant = new Date(y, m - 1, d, hour, minute, 0, 0);
-    if (!isValid(instant)) return null;
-    return asInstant(instant.getTime());
-  }
-
-  // Initial guess: treat wall as UTC, then correct by observed TZ offset.
-  let utcGuess = Date.UTC(y, m - 1, d, hour, minute, 0, 0);
-  for (let i = 0; i < 3; i++) {
-    const parts = getZonedParts(utcGuess, timeZone);
-    if (parts == null) return null;
-    const asUtc = Date.UTC(parts.y, parts.m - 1, parts.d, parts.h, parts.min, 0, 0);
-    const desired = Date.UTC(y, m - 1, d, hour, minute, 0, 0);
-    const delta = desired - asUtc;
-    if (delta === 0) break;
-    utcGuess += delta;
-  }
-  // Verify
-  const check = getZonedParts(utcGuess, timeZone);
-  if (
-    check == null ||
-    check.y !== y ||
-    check.m !== m ||
-    check.d !== d ||
-    check.h !== hour ||
-    check.min !== minute
-  ) {
-    // Still return best effort when DST gaps; null only if Intl failed
-    if (check == null) return null;
-  }
-  return asInstant(utcGuess);
-}
-
-function getZonedParts(
-  utcMs: number,
-  timeZone: string,
-): { y: number; m: number; d: number; h: number; min: number } | null {
-  try {
-    const dtf = new Intl.DateTimeFormat('en-US', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hourCycle: 'h23',
-    });
-    const bag: Record<string, string> = {};
-    for (const p of dtf.formatToParts(new Date(utcMs))) {
-      if (p.type !== 'literal') bag[p.type] = p.value;
-    }
-    return {
-      y: Number(bag.year),
-      m: Number(bag.month),
-      d: Number(bag.day),
-      h: Number(bag.hour),
-      min: Number(bag.minute),
-    };
-  } catch {
-    return null;
-  }
-}
-
 
 export function createDateFnsEngine(): TimeEngine {
   return {
@@ -142,24 +70,20 @@ export function createDateFnsEngine(): TimeEngine {
       return dfFormat(d, pattern || 'HH:mm');
     },
 
-    formatDate(instant: Instant, _locale: string, density: TimeStyleDisplay['date']): string {
+    formatDate(instant: Instant, _locale: string, density: TimeDateStyle): string {
       const d = toDate(instant);
       if (!isValid(d)) return '';
       return dfFormat(d, densityToDateOnlyPattern(density));
     },
 
-    formatDateTime(
-      instant: Instant,
-      _locale: string,
-      density: TimeStyleDisplay['dateTime'],
-    ): string {
+    formatDateTime(instant: Instant, _locale: string, density: TimeDateStyle): string {
       const d = toDate(instant);
       if (!isValid(d)) return '';
       return dfFormat(d, densityToDateFnsPattern(density));
     },
 
-    formatPattern(instant: Instant, pattern: string): string {
-      const d = toDate(instant);
+    formatPattern(instant: Instant, pattern: string, timeZone: TimeZoneId): string {
+      const d = toPatternDate(instant, timeZone);
       if (!isValid(d)) return '';
       return dfFormat(d, pattern);
     },
@@ -223,18 +147,12 @@ export function createDateFnsEngine(): TimeEngine {
       return differenceInCalendarDays(toDate(a), toDate(b));
     },
 
-    diffCalendarWeeks(
-      a: Instant,
-      b: Instant,
-      weekStartsOn: TimeStyleCalendar['weekStartsOn'] = 1,
-    ): number {
+    diffCalendarWeeks(a: Instant, b: Instant, weekStartsOn: Weekday = 1): number {
       return differenceInCalendarWeeks(toDate(a), toDate(b), { weekStartsOn });
     },
 
-    startOfWeek(instant: Instant, weekStartsOn: TimeStyleCalendar['weekStartsOn']): Instant {
-      return asInstant(
-        dfStartOfWeek(toDate(instant), { weekStartsOn }).getTime(),
-      );
+    startOfWeek(instant: Instant, weekStartsOn: Weekday): Instant {
+      return asInstant(dfStartOfWeek(toDate(instant), { weekStartsOn }).getTime());
     },
 
     isSameDay(a: Instant, b: Instant): boolean {
@@ -242,7 +160,11 @@ export function createDateFnsEngine(): TimeEngine {
     },
 
     isValidInstant(instant: Instant | number): boolean {
-      return typeof instant === 'number' && Number.isFinite(instant) && isValid(toDate(instant as Instant));
+      return (
+        typeof instant === 'number' &&
+        Number.isFinite(instant) &&
+        isValid(toDate(instant as Instant))
+      );
     },
   };
 }

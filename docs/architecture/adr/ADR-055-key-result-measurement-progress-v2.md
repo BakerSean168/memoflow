@@ -7,19 +7,21 @@ tags:
   - measurement
 description: Key Result Measurement V2，删除 valueType、拆分记录起点与进度基线并统一进度/完成语义
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-12T21:49:00+08:00
 ---
 
 # ADR-055: Key Result Measurement & Progress V2
 
-**状态：** 已采纳并实施
+**状态：** 已实施，后由 ADR-068 修订（V2 仅保留历史决策）
 **日期：** 2026-08-25  
 **影响范围：** Goal domain、contracts、database、Task contribution、Goal UI、Review snapshots、AI Goal workflow  
 **关联：** ADR-038、ADR-052、ADR-053、ADR-056
 
-## 2026-09-08 实现状态
+> **2026-09-12 后续状态：** [ADR-068](./ADR-068-key-result-measurement-v3.md) 已完成实施，`initialValue/currentValue/targetValue + trackingBaseValue` 现为 canonical KR 模型。V2 的 `startingValue/progressBaselineValue` 已从 Goal owner contract/domain/persistence/UI 删除；本 ADR 仅保留历史设计与迁移语义。
 
-KR Measurement V2 已是当前 contract/domain/UI 真值；旧 `valueType` 产品语义已退休。统一 progress calculator 负责 baseline/current/target/direction 解释，Goal 完成与 weighted progress 展示保持分离；AI Goal draft 与 React/Mobile 也消费当前 Measurement contract。
+## 2026-09-12 实现状态
+
+KR Measurement V2 已被 ADR-068 的 Measurement V3 取代。旧 `valueType`、`startingValue`、`progressBaselineValue` 均不再是 Goal owner 产品真值；统一 calculator、Goal Record aggregation、Review snapshot、Prisma/PowerSync、Vue/React 与 Data Portability 已切到 V3。GOAL-7208 已将 AI workflow 切到 GoalPlanDraft V2，GOAL-7210 进一步删除旧兼容产品轨道并让治理门禁拒绝这些字段重新进入当前 Goal/AI/persistence surface。
 
 ## 1. 背景
 

@@ -58,8 +58,6 @@ function createFakeInstance() {
     listAccounts: vi.fn(() => ok([] as never)),
     getProfile: vi.fn(() => ok(null as never)),
     updateProfile: vi.fn(() => ok(null as never)),
-    updateSettings: vi.fn(() => ok(null as never)),
-    checkAvailability: vi.fn(() => ok(null as never)),
     closeAccount: vi.fn(() => ok(null as never)),
     queryClosureTimeline: vi.fn(() => ok([] as never)),
     replayClosure: vi.fn(() => ok(null as never)),

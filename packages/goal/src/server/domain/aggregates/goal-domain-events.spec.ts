@@ -6,11 +6,9 @@ function createGoalAggregate(): Goal {
   return Goal.create({
     identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440001' as any,
     name: 'Launch Goal',
-    description: 'Ship the launch plan',
-    feasibilityAnalysis: null,
-    motivation: null,
+    summary: 'Ship the launch plan',
     startDate: null,
-    dueDate: null,
+    target: null,
     reminderConfig: null,
   });
 }
@@ -20,17 +18,17 @@ describe('Goal vNext domain events', () => {
     const goal = createGoalAggregate();
     goal.pullDomainEvents();
 
-    goal.updateBasicInfo({ name: 'Launch Goal v2', motivation: 'Ship it' });
+    goal.updateBasicInfo({ name: 'Launch Goal v2', summary: 'Ship it' });
 
     const [event] = goal.pullDomainEvents();
     expect(event.eventType).toBe('goal:updated');
     expect(event.payload).toMatchObject({
       identityId: goal.identityId,
-      changes: ['name', 'motivation'],
+      changes: ['name', 'summary'],
       goal: {
         id: goal.id,
         name: 'Launch Goal v2',
-        motivation: 'Ship it',
+        summary: 'Ship it',
       },
     });
     expect('color' in (event.payload as any).goal).toBe(false);
@@ -62,6 +60,8 @@ describe('Goal vNext domain events', () => {
   it('keeps completion, abandonment and archive as distinct facts', () => {
     const completed = createGoalAggregate();
     completed.pullDomainEvents();
+    completed.activate();
+    completed.pullDomainEvents();
     completed.markAsCompleted();
     const completionEvents = completed.pullDomainEvents();
     expect(completed.status).toBe(GoalStatus.Completed);
@@ -83,7 +83,7 @@ describe('Goal vNext domain events', () => {
     archived.pullDomainEvents();
     archived.archive();
     const [archiveEvent] = archived.pullDomainEvents();
-    expect(archived.status).toBe(GoalStatus.Active);
+    expect(archived.status).toBe(GoalStatus.Planned);
     expect(archiveEvent.eventType).toBe('goal:archived');
   });
 });

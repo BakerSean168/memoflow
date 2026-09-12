@@ -7,8 +7,8 @@ import { presentErrorMessage } from '@memoflow/http-client';
 
 import { getProductTime, formatProductDateTime, emptyKind } from '../utils/product-time';
 
-import { useTaskInstances } from '../hooks/useTaskInstances';
-import { useTaskTemplateDetail } from '../hooks/useTaskTemplateDetail';
+import { useTaskOccurrences } from '../hooks/useTaskOccurrences';
+import { useTaskPlanDetail } from '../hooks/useTaskPlanDetail';
 import { useAppSession } from '../hooks/useAppSession';
 import { useTaskService } from '../hooks/useTaskService';
 
@@ -44,6 +44,16 @@ function formatTimeConfig(input: {
   return input.timeType;
 }
 
+function formatPlanSchedule(schedule: import('@memoflow/contracts/task').TaskPlanSchedule): string {
+  if (schedule.timing.kind === 'AllDay') return 'All day';
+  if (schedule.timing.kind === 'At') return `At ${schedule.timing.time}`;
+  return `${schedule.timing.start} - ${schedule.timing.end}`;
+}
+
+function planScheduleDate(schedule: import('@memoflow/contracts/task').TaskPlanSchedule): string {
+  return schedule.kind === 'OneTime' ? schedule.date : schedule.startDate;
+}
+
 export function TaskDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string | string[] }>();
@@ -51,7 +61,7 @@ export function TaskDetailScreen() {
     typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
   const { signOut } = useAppSession();
   const service = useTaskService();
-  const { error, isLoading, refresh, template } = useTaskTemplateDetail(taskId);
+  const { error, isLoading, refresh, template } = useTaskPlanDetail(taskId);
   const {
     completeInstance,
     error: instancesError,
@@ -60,7 +70,7 @@ export function TaskDetailScreen() {
     refresh: refreshInstances,
     skipInstance,
     startInstance,
-  } = useTaskInstances(taskId);
+  } = useTaskOccurrences(taskId);
   const [isMutating, setIsMutating] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [activeInstanceId, setActiveInstanceId] = useState<string | null>(null);
@@ -226,7 +236,9 @@ export function TaskDetailScreen() {
               />
               <StatusPill label={template.importance} tone="tint" />
               <StatusPill label={template.outcome} tone="textSecondary" />
-              {template.archivedAt !== null ? <StatusPill label="Archived" tone="textSecondary" /> : null}
+              {template.archivedAt !== null ? (
+                <StatusPill label="Archived" tone="textSecondary" />
+              ) : null}
             </View>
             <View style={styles.actionRow}>
               {template.status === 'Active' ? (
@@ -260,14 +272,16 @@ export function TaskDetailScreen() {
           </SectionCard>
 
           <SectionCard title="Schedule" description="桌面端细分区域先收敛成移动端可读的摘要。">
-            <MetricRow label="Time mode" value={formatTimeConfig(template.timeConfig)} />
+            <MetricRow label="Time mode" value={formatPlanSchedule(template.schedule)} />
+            <MetricRow label="Start date" value={planScheduleDate(template.schedule)} />
             <MetricRow
-              label="Start date"
-              value={formatProductDateTime(template.startDate ?? template.timeConfig.startDate, emptyKind('notSet'))}
+              label="Created"
+              value={formatProductDateTime(template.createdAt, emptyKind('notSet'))}
             />
-            <MetricRow label="Due date" value={formatProductDateTime(template.dueDate, emptyKind('notSet'))} />
-            <MetricRow label="Created" value={formatProductDateTime(template.createdAt, emptyKind('notSet'))} />
-            <MetricRow label="Updated" value={formatProductDateTime(template.updatedAt, emptyKind('notSet'))} />
+            <MetricRow
+              label="Updated"
+              value={formatProductDateTime(template.updatedAt, emptyKind('notSet'))}
+            />
           </SectionCard>
 
           <SectionCard
@@ -300,7 +314,9 @@ export function TaskDetailScreen() {
                     style={styles.instanceCard}
                   >
                     <View style={styles.instanceHeader}>
-                      <ThemedText type="smallBold">{formatProductDateTime(instance.instanceDate, emptyKind('notSet'))}</ThemedText>
+                      <ThemedText type="smallBold">
+                        {formatProductDateTime(instance.instanceDate, emptyKind('notSet'))}
+                      </ThemedText>
                       <StatusPill
                         label={instance.status}
                         tone={
@@ -357,15 +373,6 @@ export function TaskDetailScreen() {
             title="Notes"
             description={template.description ?? 'No description provided yet.'}
           >
-            <MetricRow
-              label="Estimated minutes"
-              value={template.estimatedMinutes ? String(template.estimatedMinutes) : 'Not set'}
-            />
-            <MetricRow
-              label="Actual minutes"
-              value={template.actualMinutes ? String(template.actualMinutes) : 'Not set'}
-            />
-            <MetricRow label="Comment" value={template.comment ?? 'No comment'} />
             <View style={styles.tagRow}>
               {template.labels.length > 0 ? (
                 template.labels.map((label) => (

@@ -1,5 +1,7 @@
 # @memoflow/governance
 
+> **ADR-110 protected reference feature:** 本包永久保留为 MemoFlow 的可执行架构参考模块，并在 development / diagnostic 场景中真实提供编码规范管理能力。不得把它当成临时示例或 Knowledge migration residue 删除。
+
 治理模块（活文档）— 当前仓库的参考模块。它展示的是目标架构，而不是历史兼容结构：公共 contracts 集中、public seam 收敛、服务端内部统一为 `server/*` 切片。
 
 ## 公开 seam
@@ -72,3 +74,34 @@ packages/governance/src/
 > `governance` 的代码结构本身就是仓库治理标准。
 >
 > 新模块开发时，应优先对齐这套 `api/client/electron/server/*` 结构，而不是继续复制旧的 layer-named seam、模块内公共 contracts 或 UI domain-client 特例。
+
+## Reference feature executable invariants
+
+`GOV-1901` 把 ADR-110 的 reference responsibility 固化为可执行契约，而不是只依赖本文档：
+
+- Rule CRUD/search、Draft → Active → Deprecated → Active lifecycle 与 `RuleRevision` append-only audit 必须保持行为测试；
+- Prisma 与 PowerSync 必须把同一 Rule/RuleRevision 恢复为等价领域状态，并保持 search/filter 语义一致；
+- HTTP 与 IPC 必须经过同一 contracts validation 与 `GovernanceApplicationPort`，返回等价 Result/failure contract；
+- API/Desktop host composer 负责选择 Prisma/PowerSync adapter，`api` / `electron` transport module 不允许重新内嵌 composition；
+- `src/reference-module-invariants.surface.spec.ts` 会直接核对 package exports、host composer、Vue list/detail/editor/history surface 与 README/QUICK_REFERENCE，防止 gold-standard 文档和真实包形状漂移。
+
+因此，当全仓库引入新的 feature architecture pattern 时，Governance 的这组 gate 应先变绿，再把相同模式推广到复杂业务模块。
+
+## Development / diagnostic workbench
+
+Governance route 与 package ownership 在所有构建中都保持真实存在。App-Vue 仅通过 surface policy 控制普通导航是否展示：Vite development 自动展示；production/staging/test 默认隐藏；需要生产诊断时显式设置 `VITE_ENABLE_GOVERNANCE_DEV_SURFACE=true`。隐藏导航不会禁用 `/governance/**` 深链或 API/IPC/persistence。`governance-development-smoke.spec.ts` 必须持续跑通 list → create → update → RuleRevision history。
+
+## Deterministic published rule bundle
+
+`GOV-1903` 提供显式、只读的 Governance → Engineering 发布边界：
+
+```text
+Active Rule + RuleRevision ledger
+→ canonical GovernanceRuleBundle schema v1
+→ SHA-256 semantic hash
+→ GET /governance/rules/bundle
+   or governance:rule-bundle:export IPC
+→ GovernanceClientPort.exportRuleBundle()
+```
+
+bundle 不包含导出时间或机器身份；Rule、tags、examples、revision 字段和 JSON key 都稳定排序，因此同一 Governance 状态与同一 schema version 会得到相同 bundle/hash。发布用例只读 Rule/RuleRevision repositories，不写数据库。`GOV-1904` 已把显式发布结果接到 repository-pinned engineering boundary：CI 固定消费 `tools/governance/published/governance-rule-bundle.v1.json` 与 `pinned-rule-bundles.json` 中的 semantic hash，不连接 live Governance DB；只有 `engineering-rule-adapters.json` 中显式映射的 Rule 才能执行工程检查，Rule severity 本身不会隐式升级成 CI enforcement。

@@ -9,7 +9,7 @@ export const PortableTaskContributionSchema = z.object({
 }).strict();
 export type PortableTaskContribution = z.infer<typeof PortableTaskContributionSchema>;
 
-export const PortableTaskTemplateSchema = z.object({
+export const PortableTaskPlanSchema = z.object({
   _ref: PortableRefSchema,
   title: z.string(),
   description: z.string().nullable().optional(),
@@ -44,9 +44,9 @@ export const PortableTaskTemplateSchema = z.object({
     ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Task contribution requires a Goal/KR link' });
   }
 });
-export type PortableTaskTemplate = z.infer<typeof PortableTaskTemplateSchema>;
+export type PortableTaskPlan = z.infer<typeof PortableTaskPlanSchema>;
 
-export const PortableTaskInstanceSchema = z.object({
+export const PortableTaskOccurrenceSchema = z.object({
   _ref: PortableRefSchema,
   templateRef: PortableRefSchema,
   instanceDate: IsoDateString,
@@ -60,10 +60,10 @@ export const PortableTaskInstanceSchema = z.object({
   createdAt: IsoDateString.optional(),
   updatedAt: IsoDateString.optional(),
 }).strict();
-export type PortableTaskInstance = z.infer<typeof PortableTaskInstanceSchema>;
+export type PortableTaskOccurrence = z.infer<typeof PortableTaskOccurrenceSchema>;
 
 export const PortableTaskDataSchema = z.object({
-  templates: z.array(PortableTaskTemplateSchema),
-  instances: z.array(PortableTaskInstanceSchema),
+  templates: z.array(PortableTaskPlanSchema),
+  instances: z.array(PortableTaskOccurrenceSchema),
 }).strict();
 export type PortableTaskData = z.infer<typeof PortableTaskDataSchema>;

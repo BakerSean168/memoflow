@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-08T12:14:00+08:00
+updated: 2026-09-12T23:05:00+08:00
 ---
 
 # Active Plans
@@ -13,12 +13,21 @@ updated: 2026-09-08T12:14:00+08:00
 
 ## 当前计划
 
-当前没有仍在推进中的 active plan。
+当前有 6 个仍在推进中的 active plan。
+
+| 计划                                                                                                      | 当前状态                                                                                                                                                                                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Goal vNext Model Convergence](./2026-09-08-goal-vnext-model-convergence.md)                              | **ACTIVE / local review complete, delivery pending** — `GOAL-7202～7210` 实施完成，`GOAL-7211` 五层本地审查 P0/P1 = 0；真实 PostgreSQL/HTTP/IPC/PowerSync/AI/UI 矩阵均绿。仅剩 exact-head PR required CI，首轮全绿后再归档并让归档 HEAD 重跑同一 delivery gate。                          |
+| [Task vNext Model Convergence](./2026-09-08-task-vnext-model-convergence.md)                              | **ACTIVE / implementation started** — TaskPlan/TaskOccurrence 独立聚合、Schedule union、Result/Checklist、Reminder persistence parity、Goal-level link 与 Workspace read model；基线 71 files / 717 tests PASS。                                                                          |
+| [Setting vNext Model Convergence](./2026-09-08-setting-vnext-model-convergence.md)                        | **ACTIVE / implementation complete, closure pending** — `SETTING-9202～9209` 已完成 canonical preferences、Notification/device ownership、Settings Hub、V3 preference portability 与 legacy persistence/protocol/client 删除；仅剩 `SETTING-9210` 五层 review / exact-head CI / archive。 |
+| [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)                                  | **ACTIVE / design frozen** — 保留 Mastra 单一 runtime，收敛 Conversation shell、Provider Secret/Model Capability、AI Context、Knowledge stable identity、Workflow Draft/Apply、ExecutionRecord；`AI-9601` 文档完成，其余 production implementation 未开始。                               |
+| [Time + Label vNext Model Convergence](./2026-09-09-time-label-vnext-model-convergence.md)                | **ACTIVE / local closure complete** — `TIME-1201～1206` 与 `LABEL-1301～1305` 已全部完成，anti-resurrection governance 已接入；`FOUNDATION-1401` 本地五层终审完成，仅剩提交后的 exact-head required CI delivery gate。                                                                    |
+| [System-wide vNext Model Convergence](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) | **ACTIVE / canonical execution order** — ADR-067～111 统一 ownership review 已通过；ADR-111 明确零旧数据 destructive cutover，协调所有 module subplan 的依赖、共享 schema 单写者、直接删除与最终 exact-head closure。                                                                     |
 
 ## 本轮已归档（2026-09-08）
 
-| 计划 | 结果 |
-| --- | --- |
+| 计划                                                                                                      | 结果                                                                                                                                                                                                 |
+| --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [MemoFlow Core vNext — Unified Refactor Orchestration](../archive/2026-08-25-core-vnext-orchestration.md) | Goal/Task/Routine/Planner/Scheduler/Notification/EventBus 全面收口；产品 parity、Schedule/Scheduler 物理拆分、HARD-7101~7105 全部完成；PR #338 第四轮 exact-head CI 19/19 全绿并合入 `088a9f16499`。 |
 
 ## 本轮已归档（2026-09-06）

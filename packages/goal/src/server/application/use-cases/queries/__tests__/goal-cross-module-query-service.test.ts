@@ -21,21 +21,14 @@ vi.mock('@memoflow/utils', async () => {
 // ============================================================
 
 function createGoalFixture(overrides?: Record<string, any>) {
-  const { dueDate: rawTargetDate, ...rest } = overrides ?? {};
-  // ADR-037: Instant epoch ms (not Date)
-  const dueDate =
-    rawTargetDate != null
-      ? rawTargetDate instanceof Date
-        ? rawTargetDate.getTime()
-        : Number(rawTargetDate)
-      : null;
+  const rest = overrides ?? {};
   return {
     id: rest.id ?? 'goal-id-1',
     name: rest.name ?? rest.title ?? 'Test Goal',
     description: rest.description ?? 'Test description',
     status: rest.status ?? 'IN_PROGRESS',
     title: rest.title ?? 'Test Goal',
-    dueDate,
+    target: rest.target ?? null,
     keyResults: rest.keyResults ?? [],
     progress: rest.progress ?? 50,
     getOverallProgress: vi.fn().mockReturnValue(rest.progress ?? 50),
@@ -56,10 +49,10 @@ function createKeyResultFixture(overrides?: Record<string, any>) {
     description: overrides?.description ?? 'KR description',
     progress: overrides?.progress ?? {
       aggregationMethod: 'Last',
-      startingValue: 0,
+      trackingBaseValue: 0,
       currentValue: 30,
       targetValue: 100,
-      progressBaselineValue: null,
+      initialValue: 0,
       unit: null,
     },
     weight: overrides?.weight ?? 1,
@@ -74,9 +67,9 @@ function createKeyResultFixture(overrides?: Record<string, any>) {
 describe('GoalCrossModuleQueryServiceUseCase', () => {
   describe('getGoalsForTaskBinding', () => {
     it('should return ok with goals filtered by default statuses', async () => {
-      const goal1 = createGoalFixture({ id: 'g1', status: 'IN_PROGRESS', title: 'Active Goal' });
+      const goal1 = createGoalFixture({ id: 'g1', status: 'InProgress', title: 'Active Goal' });
       const goal2 = createGoalFixture({ id: 'g2', status: 'COMPLETED', title: 'Done Goal' });
-      const goal3 = createGoalFixture({ id: 'g3', status: 'NOT_STARTED', title: 'New Goal' });
+      const goal3 = createGoalFixture({ id: 'g3', status: 'Planned', title: 'New Goal' });
       const goalRepo = createMockRepo<IGoalRepository>({
         findByIdentityId: vi.fn().mockResolvedValue([goal1, goal2, goal3]),
       });
@@ -93,7 +86,7 @@ describe('GoalCrossModuleQueryServiceUseCase', () => {
 
     it('should filter by custom status list', async () => {
       const goal1 = createGoalFixture({ id: 'g1', status: 'COMPLETED' });
-      const goal2 = createGoalFixture({ id: 'g2', status: 'IN_PROGRESS' });
+      const goal2 = createGoalFixture({ id: 'g2', status: 'InProgress' });
       const goalRepo = createMockRepo<IGoalRepository>({
         findByIdentityId: vi.fn().mockResolvedValue([goal1, goal2]),
       });
@@ -131,9 +124,9 @@ describe('GoalCrossModuleQueryServiceUseCase', () => {
         id: 'g1',
         name: 'My Goal',
         title: 'My Goal',
-        description: 'Desc',
-        status: 'IN_PROGRESS',
-        dueDate: 1700000000,
+        summary: 'Desc',
+        status: 'InProgress',
+        target: { kind: 'quarter', year: 2026, quarter: 4 },
         progress: 75,
       });
       const goalRepo = createMockRepo<IGoalRepository>({
@@ -148,9 +141,9 @@ describe('GoalCrossModuleQueryServiceUseCase', () => {
         expect(result.data[0]).toEqual({
           id: 'g1',
           title: 'My Goal',
-          description: 'Desc',
-          status: 'IN_PROGRESS',
-          dueDate: 1700000000,
+          summary: 'Desc',
+          status: 'InProgress',
+          target: { kind: 'quarter', year: 2026, quarter: 4 },
           progress: 75,
         });
       }
@@ -204,10 +197,10 @@ describe('GoalCrossModuleQueryServiceUseCase', () => {
         description: 'KR Desc',
         progress: {
           aggregationMethod: 'Last',
-          startingValue: 0,
+          trackingBaseValue: 0,
           currentValue: 50,
           targetValue: 200,
-          progressBaselineValue: null,
+          initialValue: 0,
           unit: null,
         },
         weight: 2,

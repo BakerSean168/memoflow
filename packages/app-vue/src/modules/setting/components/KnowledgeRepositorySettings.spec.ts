@@ -8,6 +8,7 @@ import {
   SystemChannels,
   type DesktopAccessSnapshot,
 } from '@memoflow/contracts/electron';
+import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
 import { fail, ok } from '@memoflow/contracts/result';
 import { DESKTOP_BRIDGE_KEY, REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
@@ -58,7 +59,27 @@ const messages = {
       webConnectHint: 'Web connect hint',
       desktopConnectHint: 'Desktop connect hint',
       defaultBranch: 'Default branch: {branch}',
-      lastSyncedCommit: 'Last synchronized commit: {sha}',
+      lastConfirmedRemoteHead: 'Confirmed remote HEAD: {sha}',
+      refreshProvider: 'Check GitHub status',
+      refreshProviderFailed: 'Provider refresh failed',
+      localRequiredBeforeConnect: 'Choose a Local Vault before connecting GitHub.',
+      providerStatus: {
+        Ready: 'Provider ready',
+        Blocked: 'Provider blocked',
+        Unchecked: 'Not checked',
+      },
+      providerBlockReason: {
+        RepositoryPublic: 'Repository became public; sync paused.',
+        unknown: 'Provider needs attention.',
+      },
+      projectionState: 'Projection: {state}',
+      projectionStatus: {
+        Ready: 'Ready',
+        Lagging: 'Lagging',
+        Rebuilding: 'Rebuilding',
+        Failed: 'Failed',
+        Unknown: 'No checkpoint yet',
+      },
       loadFailed: 'Load failed',
       completeFailed: 'Complete failed',
       connectFailed: 'Connect failed',
@@ -104,11 +125,6 @@ const messages = {
           RebasedAndPushed: 'Rebased and pushed at {sha}',
         },
       },
-      lifecycle: {
-        GITHUB_REPOSITORY_PUBLIC: 'Repository became public; sync paused.',
-        unknown: 'Connection needs attention.',
-      },
-      status: { Active: 'Connected', Suspended: 'Suspended', Revoked: 'Revoked', Error: 'Error' },
     },
   },
 };
@@ -152,9 +168,74 @@ const CheckboxStub = defineComponent({
   },
 });
 
+function availableLocalVaultSnapshot() {
+  const bindingId = 'LocalVaultBindingId_550e8400-e29b-41d4-a716-446655440000' as never;
+  return {
+    binding: {
+      id: bindingId,
+      knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440001' as never,
+      localProfileId: 'registered-profile',
+      rootPath: '/vault',
+      displayName: 'Vault',
+      boundAt: 1,
+      detachedAt: null,
+    },
+    health: {
+      bindingId,
+      state: 'Available' as const,
+      observedAt: 1,
+      detail: null,
+    },
+  };
+}
+
+const REMOTE_BINDING_ID = 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440410' as never;
+const KNOWLEDGE_SPACE_ID = 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440001' as never;
+
+function readyRemoteBinding(
+  overrides: Partial<KnowledgeRemoteBindingClientDTO> = {},
+): KnowledgeRemoteBindingClientDTO {
+  const base: KnowledgeRemoteBindingClientDTO = {
+    id: REMOTE_BINDING_ID,
+    knowledgeSpaceId: KNOWLEDGE_SPACE_ID,
+    identityId: 'IdentityId_11111111-1111-4111-8111-111111111111' as never,
+    provider: 'GitHub',
+    installationId: 'installation-1',
+    repositoryId: 'repository-1',
+    repositoryFullNameSnapshot: 'owner/knowledge',
+    connectedAt: 1,
+    disconnectedAt: null,
+    observation: {
+      bindingId: REMOTE_BINDING_ID,
+      observedAt: 1,
+      accountId: '42',
+      repositoryFullName: 'owner/knowledge',
+      defaultBranch: 'main',
+      private: true,
+      archived: false,
+      disabled: false,
+      contentsPermission: 'write',
+      installationSuspended: false,
+      eligibility: { state: 'Ready' },
+    },
+    historyFence: null,
+    projectionCheckpoint: {
+      bindingId: REMOTE_BINDING_ID,
+      branch: 'main',
+      projectedCommitSha: null,
+      state: 'Lagging',
+      failure: null,
+      lastAttemptAt: null,
+      projectedAt: null,
+    },
+  };
+  return { ...base, ...overrides };
+}
+
 function createService(overrides: Partial<IRepositoryService> = {}): IRepositoryService {
   return {
     listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [] })),
+    refreshKnowledgeRepositoryObservation: vi.fn(),
     completeKnowledgeRepositoryInstallation: vi.fn(),
     getKnowledgeRepositoryInstallationIntentStatus: vi.fn(),
     finalizeKnowledgeRepositoryInstallationIntent: vi.fn(),
@@ -299,23 +380,7 @@ describe('KnowledgeRepositorySettings', () => {
   it('loads existing identity-scoped repository connections', async () => {
     const listKnowledgeRepositoryConnections = vi.fn(async () =>
       ok({
-        connections: [
-          {
-            id: 'connection-1',
-            identityId: 'IdentityId_11111111-1111-4111-8111-111111111111' as never,
-            githubUserId: '42',
-            githubRepositoryId: 'repository-1',
-            githubRepositoryFullName: 'owner/knowledge',
-            installationId: 'installation-1',
-            defaultBranch: 'main',
-            status: 'Active' as const,
-            lastSyncedCommitSha: null,
-            lastErrorCode: null,
-            canSync: true,
-            createdAt: 1 as never,
-            updatedAt: 1 as never,
-          },
-        ],
+        connections: [readyRemoteBinding()],
       }),
     );
     const wrapper = mountSettings(createService({ listKnowledgeRepositoryConnections }));
@@ -323,28 +388,42 @@ describe('KnowledgeRepositorySettings', () => {
 
     expect(listKnowledgeRepositoryConnections).toHaveBeenCalledOnce();
     expect(wrapper.text()).toContain('owner/knowledge');
-    expect(wrapper.text()).toContain('Connected');
+    expect(wrapper.text()).toContain('Provider ready');
+  });
+
+  it('refreshes provider observation only after an explicit user action', async () => {
+    const current = readyRemoteBinding();
+    const refreshKnowledgeRepositoryObservation = vi.fn(async () =>
+      ok(
+        readyRemoteBinding({
+          observation: { ...current.observation!, observedAt: 2 },
+        }),
+      ),
+    );
+    const wrapper = mountSettings(
+      createService({
+        listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [current] })),
+        refreshKnowledgeRepositoryObservation,
+      }),
+    );
+    await flushPromises();
+
+    expect(refreshKnowledgeRepositoryObservation).not.toHaveBeenCalled();
+    const refreshButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Check GitHub status'));
+    expect(refreshButton).toBeDefined();
+    await refreshButton!.trigger('click');
+    await flushPromises();
+
+    expect(refreshKnowledgeRepositoryObservation).toHaveBeenCalledWith(REMOTE_BINDING_ID);
   });
 
   it.each([
     ['retains rebuildable cloud data by default', false],
     ['purges cloud projections only after the user selects the option', true],
   ])('%s when disconnecting', async (_label, purgeCloudData) => {
-    const connection = {
-      id: 'connection-1',
-      identityId: 'IdentityId_11111111-1111-4111-8111-111111111111' as never,
-      githubUserId: '42',
-      githubRepositoryId: 'repository-1',
-      githubRepositoryFullName: 'owner/knowledge',
-      installationId: 'installation-1',
-      defaultBranch: 'main',
-      status: 'Active' as const,
-      lastSyncedCommitSha: null,
-      lastErrorCode: null,
-      canSync: true,
-      createdAt: 1 as never,
-      updatedAt: 1 as never,
-    };
+    const connection = readyRemoteBinding();
     const listKnowledgeRepositoryConnections = vi
       .fn()
       .mockResolvedValueOnce(ok({ connections: [connection] }))
@@ -376,7 +455,7 @@ describe('KnowledgeRepositorySettings', () => {
     await wrapper.get('[data-testid="knowledge-repository-confirm-disconnect"]').trigger('click');
     await flushPromises();
 
-    expect(disconnectKnowledgeRepository).toHaveBeenCalledWith('connection-1', purgeCloudData);
+    expect(disconnectKnowledgeRepository).toHaveBeenCalledWith(REMOTE_BINDING_ID, purgeCloudData);
     expect(confirmMock).not.toHaveBeenCalled();
   });
 
@@ -468,12 +547,14 @@ describe('KnowledgeRepositorySettings', () => {
         ],
       }),
     );
+    const connectKnowledgeRepository = vi.fn(async () => ok(readyRemoteBinding()));
     const wrapper = mountSettings(
       createService({
         startKnowledgeRepositoryInstallation,
         getKnowledgeRepositoryInstallationIntentStatus,
         finalizeKnowledgeRepositoryInstallationIntent,
-        getLocalVaultBinding: vi.fn(async () => ok(null)),
+        connectKnowledgeRepository,
+        getLocalVaultBinding: vi.fn(async () => ok(availableLocalVaultSnapshot())),
       }),
       { invoke },
     );
@@ -492,6 +573,19 @@ describe('KnowledgeRepositorySettings', () => {
     expect(getKnowledgeRepositoryInstallationIntentStatus).toHaveBeenCalledWith('intent-desktop-1');
     expect(finalizeKnowledgeRepositoryInstallationIntent).toHaveBeenCalledWith('intent-desktop-1');
     expect(wrapper.text()).toContain('owner/knowledge');
+
+    const repositoryConnectButton = wrapper
+      .findAll('button')
+      .find((button) => button.text() === 'Connect');
+    expect(repositoryConnectButton).toBeDefined();
+    await repositoryConnectButton!.trigger('click');
+    await flushPromises();
+
+    expect(connectKnowledgeRepository).toHaveBeenCalledWith({
+      installationId: 'installation-1',
+      githubRepositoryId: 'repository-1',
+      knowledgeSpaceId: KNOWLEDGE_SPACE_ID,
+    });
   });
 
   it('resumes a verified Desktop installation without reopening GitHub', async () => {
@@ -618,23 +712,7 @@ describe('KnowledgeRepositorySettings', () => {
         ],
       }),
     );
-    const connectKnowledgeRepository = vi.fn(async () =>
-      ok({
-        id: 'connection-1',
-        identityId: 'IdentityId_11111111-1111-4111-8111-111111111111' as never,
-        githubUserId: '42',
-        githubRepositoryId: 'repository-1',
-        githubRepositoryFullName: 'owner/knowledge',
-        installationId: 'installation-1',
-        defaultBranch: 'main',
-        status: 'Active' as const,
-        lastSyncedCommitSha: null,
-        lastErrorCode: null,
-        canSync: true,
-        createdAt: 1 as never,
-        updatedAt: 1 as never,
-      }),
-    );
+    const connectKnowledgeRepository = vi.fn(async () => ok(readyRemoteBinding()));
     const wrapper = mountSettings(
       createService({
         completeKnowledgeRepositoryInstallation,
@@ -665,24 +743,10 @@ describe('KnowledgeRepositorySettings', () => {
   });
 
   it('previews the four-way first reconciliation only when Desktop has an active Vault', async () => {
-    const connection = {
-      id: 'connection-1',
-      identityId: 'IdentityId_11111111-1111-4111-8111-111111111111' as never,
-      githubUserId: '42',
-      githubRepositoryId: 'repository-1',
-      githubRepositoryFullName: 'owner/knowledge',
-      installationId: 'installation-1',
-      defaultBranch: 'main',
-      status: 'Active' as const,
-      lastSyncedCommitSha: null,
-      lastErrorCode: null,
-      canSync: true,
-      createdAt: 1 as never,
-      updatedAt: 1 as never,
-    };
+    const connection = readyRemoteBinding();
     const previewKnowledgeRepositoryReconciliation = vi.fn(async () =>
       ok({
-        connectionId: 'connection-1',
+        connectionId: REMOTE_BINDING_ID,
         localState: 'NonEmpty' as const,
         remoteState: 'NonEmpty' as const,
         action: 'ManualResolutionRequired' as const,
@@ -693,19 +757,7 @@ describe('KnowledgeRepositorySettings', () => {
     const wrapper = mountSettings(
       createService({
         listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [connection] })),
-        getLocalVaultBinding: vi.fn(async () =>
-          ok({
-            id: 'vault-1',
-            identityId: connection.identityId,
-            rootPath: '/vault',
-            displayName: 'Vault',
-            status: 'Active' as const,
-            obsidianVaultId: null,
-            lastScannedAt: null,
-            createdAt: 1 as never,
-            updatedAt: 1 as never,
-          }),
-        ),
+        getLocalVaultBinding: vi.fn(async () => ok(availableLocalVaultSnapshot())),
         previewKnowledgeRepositoryReconciliation,
       }),
       { invoke: vi.fn() },
@@ -719,31 +771,17 @@ describe('KnowledgeRepositorySettings', () => {
     await previewButton!.trigger('click');
     await flushPromises();
 
-    expect(previewKnowledgeRepositoryReconciliation).toHaveBeenCalledWith('connection-1');
+    expect(previewKnowledgeRepositoryReconciliation).toHaveBeenCalledWith(REMOTE_BINDING_ID);
     expect(wrapper.get('[data-testid="reconciliation-preview"]').text()).toContain(
       'Manual resolution required',
     );
   });
 
   it('executes only the immutable safe preview after explicit confirmation', async () => {
-    const connection = {
-      id: 'connection-1',
-      identityId: 'IdentityId_11111111-1111-4111-8111-111111111111' as never,
-      githubUserId: '42',
-      githubRepositoryId: 'repository-1',
-      githubRepositoryFullName: 'owner/knowledge',
-      installationId: 'installation-1',
-      defaultBranch: 'main',
-      status: 'Active' as const,
-      lastSyncedCommitSha: null,
-      lastErrorCode: null,
-      canSync: true,
-      createdAt: 1 as never,
-      updatedAt: 1 as never,
-    };
+    const connection = readyRemoteBinding();
     const previewKnowledgeRepositoryReconciliation = vi.fn(async () =>
       ok({
-        connectionId: 'connection-1',
+        connectionId: REMOTE_BINDING_ID,
         localState: 'NonEmpty' as const,
         remoteState: 'Empty' as const,
         action: 'InitializeRemoteFromLocal' as const,
@@ -754,7 +792,15 @@ describe('KnowledgeRepositorySettings', () => {
     const headSha = 'c'.repeat(40);
     const executeKnowledgeRepositoryReconciliation = vi.fn(async () =>
       ok({
-        connection: { ...connection, lastSyncedCommitSha: headSha, updatedAt: 2 as never },
+        connection: {
+          ...connection,
+          historyFence: {
+            bindingId: REMOTE_BINDING_ID,
+            defaultBranch: 'main',
+            lastConfirmedRemoteHeadSha: headSha,
+            confirmedAt: 2,
+          },
+        },
         action: 'InitializeRemoteFromLocal' as const,
         headSha,
         reusedExistingSynchronization: false,
@@ -763,19 +809,7 @@ describe('KnowledgeRepositorySettings', () => {
     const wrapper = mountSettings(
       createService({
         listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [connection] })),
-        getLocalVaultBinding: vi.fn(async () =>
-          ok({
-            id: 'vault-1',
-            identityId: connection.identityId,
-            rootPath: '/vault',
-            displayName: 'Vault',
-            status: 'Active' as const,
-            obsidianVaultId: null,
-            lastScannedAt: null,
-            createdAt: 1 as never,
-            updatedAt: 1 as never,
-          }),
-        ),
+        getLocalVaultBinding: vi.fn(async () => ok(availableLocalVaultSnapshot())),
         previewKnowledgeRepositoryReconciliation,
         executeKnowledgeRepositoryReconciliation,
       }),
@@ -796,7 +830,7 @@ describe('KnowledgeRepositorySettings', () => {
 
     expect(confirmMock).toHaveBeenCalledOnce();
     expect(executeKnowledgeRepositoryReconciliation).toHaveBeenCalledWith({
-      connectionId: 'connection-1',
+      connectionId: REMOTE_BINDING_ID,
       expectedAction: 'InitializeRemoteFromLocal',
       expectedDefaultBranch: 'main',
       expectedRemoteHeadSha: null,
@@ -809,24 +843,24 @@ describe('KnowledgeRepositorySettings', () => {
   it('runs continuous sync only for a reconciled Desktop connection', async () => {
     const previousHead = 'a'.repeat(40);
     const nextHead = 'b'.repeat(40);
-    const connection = {
-      id: 'connection-1',
-      identityId: 'IdentityId_11111111-1111-4111-8111-111111111111' as never,
-      githubUserId: '42',
-      githubRepositoryId: 'repository-1',
-      githubRepositoryFullName: 'owner/knowledge',
-      installationId: 'installation-1',
-      defaultBranch: 'main',
-      status: 'Active' as const,
-      lastSyncedCommitSha: previousHead,
-      lastErrorCode: null,
-      canSync: true,
-      createdAt: 1 as never,
-      updatedAt: 1 as never,
-    };
+    const connection = readyRemoteBinding({
+      historyFence: {
+        bindingId: REMOTE_BINDING_ID,
+        defaultBranch: 'main',
+        lastConfirmedRemoteHeadSha: previousHead,
+        confirmedAt: 1,
+      },
+    });
     const syncKnowledgeRepository = vi.fn(async () =>
       ok({
-        connection: { ...connection, lastSyncedCommitSha: nextHead, updatedAt: 2 as never },
+        connection: {
+          ...connection,
+          historyFence: {
+            ...connection.historyFence!,
+            lastConfirmedRemoteHeadSha: nextHead,
+            confirmedAt: 2,
+          },
+        },
         outcome: 'Pushed' as const,
         headSha: nextHead,
         localCommitCreated: true,
@@ -837,19 +871,7 @@ describe('KnowledgeRepositorySettings', () => {
     const wrapper = mountSettings(
       createService({
         listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [connection] })),
-        getLocalVaultBinding: vi.fn(async () =>
-          ok({
-            id: 'vault-1',
-            identityId: connection.identityId,
-            rootPath: '/vault',
-            displayName: 'Vault',
-            status: 'Active' as const,
-            obsidianVaultId: null,
-            lastScannedAt: null,
-            createdAt: 1 as never,
-            updatedAt: 1 as never,
-          }),
-        ),
+        getLocalVaultBinding: vi.fn(async () => ok(availableLocalVaultSnapshot())),
         syncKnowledgeRepository,
       }),
       { invoke: vi.fn() },
@@ -889,38 +911,19 @@ describe('KnowledgeRepositorySettings', () => {
 
   it('shows preserved rebase conflicts and offers a recheck action', async () => {
     const head = 'a'.repeat(40);
-    const connection = {
-      id: 'connection-1',
-      identityId: 'IdentityId_11111111-1111-4111-8111-111111111111' as never,
-      githubUserId: '42',
-      githubRepositoryId: 'repository-1',
-      githubRepositoryFullName: 'owner/knowledge',
-      installationId: 'installation-1',
-      defaultBranch: 'main',
-      status: 'Active' as const,
-      lastSyncedCommitSha: head,
-      lastErrorCode: null,
-      canSync: true,
-      createdAt: 1 as never,
-      updatedAt: 1 as never,
-    };
+    const connection = readyRemoteBinding({
+      historyFence: {
+        bindingId: REMOTE_BINDING_ID,
+        defaultBranch: 'main',
+        lastConfirmedRemoteHeadSha: head,
+        confirmedAt: 1,
+      },
+    });
     const openLocalVaultInObsidian = vi.fn(async () => ok(undefined));
     const wrapper = mountSettings(
       createService({
         listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [connection] })),
-        getLocalVaultBinding: vi.fn(async () =>
-          ok({
-            id: 'vault-1',
-            identityId: connection.identityId,
-            rootPath: '/vault',
-            displayName: 'Vault',
-            status: 'Active' as const,
-            obsidianVaultId: null,
-            lastScannedAt: null,
-            createdAt: 1 as never,
-            updatedAt: 1 as never,
-          }),
-        ),
+        getLocalVaultBinding: vi.fn(async () => ok(availableLocalVaultSnapshot())),
         syncKnowledgeRepository: vi.fn(async () =>
           fail({
             code: 'CONFLICT',
@@ -962,44 +965,30 @@ describe('KnowledgeRepositorySettings', () => {
     });
   });
 
-  it('shows lifecycle diagnostics and disables sync for a suspended repository', async () => {
-    const connection = {
-      id: 'connection-1',
-      identityId: 'IdentityId_11111111-1111-4111-8111-111111111111' as never,
-      githubUserId: '42',
-      githubRepositoryId: 'repository-1',
-      githubRepositoryFullName: 'owner/knowledge',
-      installationId: 'installation-1',
-      defaultBranch: 'main',
-      status: 'Suspended' as const,
-      lastSyncedCommitSha: 'a'.repeat(40),
-      lastErrorCode: 'GITHUB_REPOSITORY_PUBLIC',
-      canSync: false,
-      createdAt: 1 as never,
-      updatedAt: 2 as never,
-    };
+  it('shows provider diagnostics and disables sync for a blocked repository', async () => {
+    const connection = readyRemoteBinding({
+      observation: {
+        ...readyRemoteBinding().observation!,
+        private: false,
+        eligibility: { state: 'Blocked', reason: 'RepositoryPublic' },
+      },
+      historyFence: {
+        bindingId: REMOTE_BINDING_ID,
+        defaultBranch: 'main',
+        lastConfirmedRemoteHeadSha: 'a'.repeat(40),
+        confirmedAt: 1,
+      },
+    });
     const wrapper = mountSettings(
       createService({
         listKnowledgeRepositoryConnections: vi.fn(async () => ok({ connections: [connection] })),
-        getLocalVaultBinding: vi.fn(async () =>
-          ok({
-            id: 'vault-1',
-            identityId: connection.identityId,
-            rootPath: '/vault',
-            displayName: 'Vault',
-            status: 'Active' as const,
-            obsidianVaultId: null,
-            lastScannedAt: null,
-            createdAt: 1 as never,
-            updatedAt: 1 as never,
-          }),
-        ),
+        getLocalVaultBinding: vi.fn(async () => ok(availableLocalVaultSnapshot())),
       }),
       { invoke: vi.fn() },
     );
     await flushPromises();
 
-    expect(wrapper.get('[data-testid="knowledge-repository-lifecycle-diagnostic"]').text()).toBe(
+    expect(wrapper.get('[data-testid="knowledge-repository-provider-diagnostic"]').text()).toBe(
       'Repository became public; sync paused.',
     );
     expect(wrapper.text()).not.toContain('Sync now');

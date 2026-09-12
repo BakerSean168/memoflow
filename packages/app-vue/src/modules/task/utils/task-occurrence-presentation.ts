@@ -1,5 +1,5 @@
 import type { ComposerTranslation } from 'vue-i18n';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import {
   endOfDayMs,
   formatProductDate,
@@ -11,8 +11,8 @@ import {
 export type TaskOccurrenceSurface = 'today' | 'upcoming';
 export type TaskOccurrenceSort = 'time' | 'status' | 'title';
 
-const OPEN_STATUSES = new Set<TaskInstanceClientDTO['status']>(['Pending', 'InProgress']);
-const STATUS_ORDER: Readonly<Record<TaskInstanceClientDTO['status'], number>> = {
+const OPEN_STATUSES = new Set<TaskOccurrenceClientDTO['status']>(['Pending', 'InProgress']);
+const STATUS_ORDER: Readonly<Record<TaskOccurrenceClientDTO['status'], number>> = {
   InProgress: 0,
   Pending: 1,
   Missed: 2,
@@ -20,7 +20,7 @@ const STATUS_ORDER: Readonly<Record<TaskInstanceClientDTO['status'], number>> = 
   Completed: 4,
 };
 
-export function getTaskOccurrenceDueAt(instance: TaskInstanceClientDTO): number {
+export function getTaskOccurrenceDueAt(instance: TaskOccurrenceClientDTO): number {
   const dayStart = startOfDayMs(instance.instanceDate);
   const time = instance.timeConfig;
   if (time.timeType === 'TimePoint' && typeof time.timePoint === 'number') {
@@ -33,7 +33,7 @@ export function getTaskOccurrenceDueAt(instance: TaskInstanceClientDTO): number 
 }
 
 export function isTaskOccurrenceOverdue(
-  instance: TaskInstanceClientDTO,
+  instance: TaskOccurrenceClientDTO,
   now = Date.now(),
 ): boolean {
   return (
@@ -43,7 +43,7 @@ export function isTaskOccurrenceOverdue(
 }
 
 export function isTaskOccurrenceOnSurface(
-  instance: TaskInstanceClientDTO,
+  instance: TaskOccurrenceClientDTO,
   surface: TaskOccurrenceSurface,
   now = Date.now(),
 ): boolean {
@@ -55,7 +55,7 @@ export function isTaskOccurrenceOnSurface(
 
 export function getTaskOccurrenceStatusLabel(
   t: ComposerTranslation,
-  instance: TaskInstanceClientDTO,
+  instance: TaskOccurrenceClientDTO,
   now = Date.now(),
 ): string {
   if (isTaskOccurrenceOverdue(instance, now)) {
@@ -66,7 +66,7 @@ export function getTaskOccurrenceStatusLabel(
 
 export function getTaskOccurrenceScheduleLabel(
   t: ComposerTranslation,
-  instance: TaskInstanceClientDTO,
+  instance: TaskOccurrenceClientDTO,
 ): string {
   const date = formatProductDate(instance.instanceDate);
   const time = instance.timeConfig;
@@ -87,9 +87,9 @@ export function getTaskOccurrenceScheduleLabel(
 }
 
 export function getTaskOccurrencePosition(
-  instance: TaskInstanceClientDTO,
-  allInstances: readonly TaskInstanceClientDTO[],
-  template?: Pick<TaskTemplateClientDTO, 'instanceCount'> | null,
+  instance: TaskOccurrenceClientDTO,
+  allInstances: readonly TaskOccurrenceClientDTO[],
+  template?: Pick<TaskPlanClientDTO, 'instanceCount'> | null,
 ): { position: number; total: number } | null {
   const siblings = allInstances
     .filter((candidate) => candidate.templateId === instance.templateId)
@@ -108,10 +108,10 @@ export function getTaskOccurrencePosition(
 }
 
 export function sortTaskOccurrences(
-  occurrences: readonly TaskInstanceClientDTO[],
+  occurrences: readonly TaskOccurrenceClientDTO[],
   sort: TaskOccurrenceSort,
   titleFor: (templateId: string) => string,
-): TaskInstanceClientDTO[] {
+): TaskOccurrenceClientDTO[] {
   return occurrences.slice().sort((left, right) => {
     if (sort === 'status') {
       const byStatus = STATUS_ORDER[left.status] - STATUS_ORDER[right.status];

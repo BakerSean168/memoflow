@@ -1,7 +1,6 @@
 export default {
   "newChat": "New Chat",
   "search": "Search",
-  "help": "Help",
   "guest": "Guest",
   "back": "Back",
   "forward": "Forward",
@@ -82,13 +81,6 @@ export default {
     "logout": "Sign out",
     "loginOrRegister": "Sign in / Register",
     "connectCloud": "Connect MemoFlow account"
-  },
-  "helpMenu": {
-    "shortcuts": "Keyboard shortcuts",
-    "guide": "User guide",
-    "feedback": "Send feedback",
-    "about": "About",
-    "soon": "Soon"
   },
   "auth": {
     "unverifiedBanner": "Verify your email to unlock all features",

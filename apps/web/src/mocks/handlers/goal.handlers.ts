@@ -16,6 +16,7 @@ import {
   createMockGoalReview,
   createMockGoalReviewList,
 } from '@memoflow/contracts/mocks';
+import { GoalStatus } from '@memoflow/contracts/goal';
 import type {
   GoalClientDTO,
   GoalRecordClientDTO,
@@ -117,6 +118,7 @@ export const goalHandlers = [
         message: 'Created',
         data: createMockGoalMutationReceipt({
           name: typeof body['name'] === 'string' ? body['name'] : undefined,
+          status: GoalStatus.Planned,
         }),
         timestamp: Date.now(),
       },
@@ -124,12 +126,28 @@ export const goalHandlers = [
     );
   }),
 
+  http.post(`${GOALS}/:id/plan`, ({ params }) => {
+    return HttpResponse.json({
+      ok: true,
+      code: 200,
+      message: 'Planned',
+      data: createMockGoalMutationReceipt({
+        id: toGoalId(params['id']),
+        status: GoalStatus.Planned,
+      }),
+      timestamp: Date.now(),
+    });
+  }),
+
   http.post(`${GOALS}/:id/activate`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
       message: 'Activated',
-      data: createMockGoalMutationReceipt({ id: toGoalId(params['id']), status: 'Active' }),
+      data: createMockGoalMutationReceipt({
+        id: toGoalId(params['id']),
+        status: GoalStatus.InProgress,
+      }),
       timestamp: Date.now(),
     });
   }),
@@ -141,8 +159,21 @@ export const goalHandlers = [
       message: 'Completed',
       data: createMockGoalMutationReceipt({
         id: toGoalId(params['id']),
-        status: 'Completed',
+        status: GoalStatus.Completed,
         completedAt: Date.now(),
+      }),
+      timestamp: Date.now(),
+    });
+  }),
+
+  http.post(`${GOALS}/:id/abandon`, ({ params }) => {
+    return HttpResponse.json({
+      ok: true,
+      code: 200,
+      message: 'Abandoned',
+      data: createMockGoalMutationReceipt({
+        id: toGoalId(params['id']),
+        status: GoalStatus.Abandoned,
       }),
       timestamp: Date.now(),
     });
@@ -155,7 +186,7 @@ export const goalHandlers = [
       message: 'Archived',
       data: createMockGoalMutationReceipt({
         id: toGoalId(params['id']),
-        status: 'Active',
+        status: GoalStatus.InProgress,
         archivedAt: Date.now(),
       }),
       timestamp: Date.now(),
@@ -442,8 +473,7 @@ export const goalHandlers = [
           name:
             (typeof body['name'] === 'string' ? body['name'] : undefined) ??
             `${original.name} (copy)`,
-          description:
-            typeof body['description'] === 'string' ? body['description'] : original.description,
+          summary: typeof body['summary'] === 'string' ? body['summary'] : original.summary,
         }),
         timestamp: Date.now(),
       },

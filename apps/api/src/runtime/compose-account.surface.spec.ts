@@ -20,9 +20,10 @@ describe('account API runtime composer surface', () => {
   const server = readFileSync(resolve(dir, 'server.ts'), 'utf8');
   const composer = readFileSync(resolve(dir, 'runtime/compose-account.ts'), 'utf8');
 
-  it('server.ts composes account via composeAccount({ db: prisma, cloudAuth })', () => {
+  it('server.ts composes account with an explicit Product Time clock', () => {
     expect(server).toContain("from './runtime/compose-account'");
     expect(server).toMatch(/composeAccount\(\{\s*db: prisma,\s*cloudAuth,/);
+    expect(server).toMatch(/clock:\s*createSystemClock\(\)/);
     expect(server).toContain('.register(accountApiModule)');
   });
 
@@ -33,6 +34,7 @@ describe('account API runtime composer surface', () => {
 
   it('composer only touches the narrow seams (no deep server import)', () => {
     expect(composer).toContain('interface ComposeAccountDependencies');
+    expect(composer).toContain('readonly clock: Clock');
     expect(composer).toContain("from '@memoflow/account'");
     expect(composer).toContain("from '@memoflow/account/api'");
     expect(composer).not.toMatch(/@memoflow\/account\/server/);

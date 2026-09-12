@@ -72,7 +72,7 @@ describe('PowerSyncDataPortabilityImportStore', () => {
     const store = new PowerSyncDataPortabilityImportStore(db);
 
     await store.transaction((tx) =>
-      tx.createTaskTemplate({
+      tx.createTaskPlan({
         id: 'task-1',
         identityId: 'identity-1',
         name: 'Write tests',
@@ -135,15 +135,17 @@ describe('PowerSyncDataPortabilityImportStore', () => {
     const store = new PowerSyncDataPortabilityImportStore(db);
 
     await store.transaction((tx) =>
-      tx.upsertUserSetting({
+      tx.upsertUserPreferences({
         identityId: 'identity-1',
-        preferences: { locale: 'zh-CN' },
+        presentation: { theme: 'dark', language: 'en-US' },
+        regional: { timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 },
       }),
     );
 
-    expect(statements).toHaveLength(1);
-    expect(statements[0]?.sql).toContain('UPDATE user_settings');
-    expect(statements[0]?.parameters).toContain(JSON.stringify({ locale: 'zh-CN' }));
+    expect(statements).toHaveLength(2);
+    expect(statements.every((statement) => statement.sql.includes('UPDATE user_preference_records'))).toBe(true);
+    expect(statements[0]?.parameters).toContain(JSON.stringify({ theme: 'dark', language: 'en-US' }));
+    expect(statements[1]?.parameters).toContain(JSON.stringify({ timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 }));
   });
 
   it('writes schedule task scheduler fields and imported timestamps', async () => {

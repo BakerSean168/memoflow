@@ -49,7 +49,16 @@ const localPin = ref('');
 const localPinConfirmation = ref('');
 const pinBusy = ref(false);
 
-const { currentAccount, isLoading, error, isGuest, loadMyProfile, updateMyProfile } = useAccount();
+const {
+  currentAccount,
+  isLoading,
+  error,
+  email,
+  isEmailVerified,
+  isGuest,
+  loadMyProfile,
+  updateMyProfile,
+} = useAccount();
 
 const form = reactive({
   nickname: '',
@@ -140,7 +149,7 @@ async function enableLocalPin(): Promise<void> {
     return;
   }
   pinBusy.value = true;
-  const result = await desktopBridge.invoke(ProfileAccessChannels.PIN_SET, localPin.value) as {
+  const result = (await desktopBridge.invoke(ProfileAccessChannels.PIN_SET, localPin.value)) as {
     ok?: boolean;
     error?: { message?: string };
   };
@@ -167,7 +176,7 @@ async function removeLocalPin(): Promise<void> {
   });
   if (!confirmed) return;
   pinBusy.value = true;
-  const result = await desktopBridge.invoke(ProfileAccessChannels.PIN_REMOVE) as {
+  const result = (await desktopBridge.invoke(ProfileAccessChannels.PIN_REMOVE)) as {
     ok?: boolean;
     error?: { message?: string };
   };
@@ -211,7 +220,10 @@ onMounted(() => {
           <div class="space-y-1">
             <div class="text-xl font-semibold">{{ form.nickname }}</div>
             <div class="text-sm text-muted-foreground">
-              {{ isGuest ? t('account.guestLabel') : currentAccount?.email?.address }}
+              {{ isGuest ? t('account.guestLabel') : email }}
+            </div>
+            <div v-if="!isGuest && email" class="text-xs text-muted-foreground">
+              {{ isEmailVerified ? t('account.emailVerified') : t('account.emailUnverified') }}
             </div>
           </div>
         </div>
@@ -298,7 +310,11 @@ onMounted(() => {
         <CardDescription>{{ t('account.lockProfileHint') }}</CardDescription>
       </CardHeader>
       <CardContent class="flex justify-end">
-        <Button data-testid="account-lock-profile-button" variant="outline" @click="handleLockProfile">
+        <Button
+          data-testid="account-lock-profile-button"
+          variant="outline"
+          @click="handleLockProfile"
+        >
           <LockKeyhole class="mr-2 h-4 w-4" />
           {{ t('account.actions.lockProfile') }}
         </Button>
@@ -346,7 +362,9 @@ onMounted(() => {
             />
           </div>
           <div class="space-y-2">
-            <Label for="local-profile-pin-confirmation">{{ t('account.localProtection.confirmPin') }}</Label>
+            <Label for="local-profile-pin-confirmation">{{
+              t('account.localProtection.confirmPin')
+            }}</Label>
             <Input
               id="local-profile-pin-confirmation"
               v-model="localPinConfirmation"

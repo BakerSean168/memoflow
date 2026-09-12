@@ -17,6 +17,8 @@ updated: 2026-08-20T00:00:00+08:00
 **日期：** 2026-08-20  
 **依赖：** ADR-050、ADR-051
 
+> **2026-09-08 Goal vNext 后续决策：** ADR-052 的 durable Mastra workflow、HITL、deterministic apply 与 owner application port 原则继续有效；`GoalPlanDraft` 的目标 schema 与多实体 apply 范围由 [ADR-070](./ADR-070-ai-goal-plan-orchestration.md) 取代，并使用 [ADR-067](./ADR-067-goal-vnext-product-model-and-lifecycle.md)、[ADR-068](./ADR-068-key-result-measurement-v3.md)、[ADR-069](./ADR-069-goal-workspace-cross-module-context.md) 的 Goal/KR/Context 真值。实施完成前，本 ADR 记录的旧 draft 字段仅是历史背景。
+
 > **2026-08-25 产品模型修订：** 本 ADR 的 Mastra workflow / HITL / idempotent apply 架构继续有效；`GoalPlanDraft` 中的 `category`、`importance`、旧 KR `valueType`、旧 Task binding 等字段不再是目标模型真值。实施时按 [ADR-053](./ADR-053-goal-task-personal-product-boundary.md)、[ADR-054](./ADR-054-shared-labels-and-system-views.md)、[ADR-055](./ADR-055-key-result-measurement-progress-v2.md)、[ADR-056](./ADR-056-task-plan-goal-link-contribution-settlement.md) 更新 draft schema。
 
 ## 1. 决策

@@ -1,18 +1,21 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { setProductTimePreferences } from './product-time';
 import { formatCalendarEventTimeRange } from './format-calendar-event-time-range';
 
 /**
- * Residual 1213: formatTimeRange keep-boundary (app-react Intl pair vs app-vue event/all-day).
- * - app-react useScheduleAgenda: (startTime, endTime) → Intl zh-CN hour:minute + " - "
+ * TIME-1205: formatTimeRange keep-boundary (app-react Product Time pair vs app-vue event/all-day).
+ * - app-react useScheduleAgenda: (startTime, endTime) → session Product Time HH:mm pair + " - "
  * - app-vue event/all-day shape lives in formatCalendarEventTimeRange sole (Residual 1273 dual-retired)
  * Soft residual 1213 / Residual 1273: DayDetailSheet + TaskEventActionPanel dual-retired onto sole.
  * Soft residual 1210: formatDateToInput keep-boundary remains separate.
- * Residual 1303: vue sole inner HH:mm dual retired onto formatLocalHHmm (en-dash keeps separate from react " - ").
+ * TIME-1205: vue sole inner HH:mm uses the session Product Time facade (en-dash stays separate).
  * Does not flip §13.2 checkboxes.
  */
 describe('formatTimeRange keep-boundary (residual 1213)', () => {
+  afterEach(() => setProductTimePreferences(createDefaultUserPreferenceProfile()));
   const dir = __dirname;
   const react = readFileSync(
     resolve(dir, '../../../../app-react/src/hooks/useScheduleAgenda.ts'),
@@ -28,17 +31,18 @@ describe('formatTimeRange keep-boundary (residual 1213)', () => {
   );
   const sole = readFileSync(resolve(dir, 'format-calendar-event-time-range.ts'), 'utf8');
 
-  it('owns Residual 1213 keep-boundary markers on app-react Intl zh-CN formatTimeRange', () => {
-    expect(react).toContain('Residual 1213 keep-boundary');
+  it('locks app-react formatTimeRange onto canonical session Product Time', () => {
+    expect(react).toContain('Canonical Product Time projection');
     expect(react).toMatch(/function formatTimeRange\b/);
     expect(react).toContain('startTime: number, endTime: number');
-    expect(react).toContain("Intl.DateTimeFormat('zh-CN'");
+    expect(react).toContain('getProductTime');
     const body = react.match(/function formatTimeRange\([\s\S]*?\n\}/)?.[0] ?? '';
-    expect(body).toContain('hour');
-    expect(body).toContain('minute');
+    expect(body).toContain('time.format.hm');
     expect(body).toContain(' - ');
     expect(body).not.toContain('all-day');
     expect(body).not.toContain('CalendarEventItem');
+    expect(body).not.toContain('Intl.DateTimeFormat');
+    expect(body).not.toContain('zh-CN');
     expect(body).not.toContain('padStart');
   });
 
@@ -49,12 +53,13 @@ describe('formatTimeRange keep-boundary (residual 1213)', () => {
     expect(sole).toContain('Residual 1273');
     expect(sole).toContain('Residual 1303');
     expect(sole).toContain("displayMode === 'all-day'");
-    expect(sole).toContain('formatLocalHHmm');
+    expect(sole).toContain('getProductTime');
     expect(sole).not.toContain('padStart');
     expect(sole).toContain('–');
-    const body = sole.match(/export function formatCalendarEventTimeRange\([\s\S]*?\n\}/)?.[0] ?? '';
+    const body =
+      sole.match(/export function formatCalendarEventTimeRange\([\s\S]*?\n\}/)?.[0] ?? '';
     expect(body).toContain('all-day');
-    expect(body).toContain('formatLocalHHmm');
+    expect(body).toContain('time.format.hm');
     expect(body).not.toContain('padStart');
     expect(body).toContain('–');
     expect(body).not.toContain('Intl.DateTimeFormat');
@@ -80,28 +85,40 @@ describe('formatTimeRange keep-boundary (residual 1213)', () => {
     expect(panel).not.toContain('Intl.DateTimeFormat');
   });
 
-  it('runtime: documents Intl pair vs event/all-day contracts via body shape', () => {
-    function reactFormatTimeRange(startTime: number, endTime: number): string {
-      const formatter = new Intl.DateTimeFormat('zh-CN', {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      return `${formatter.format(new Date(startTime))} - ${formatter.format(new Date(endTime))}`;
-    }
+  it('formats the vue event range in the session timezone across DST', () => {
+    const profile = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({
+      ...profile,
+      regional: { ...profile.regional, timeZone: 'America/New_York' },
+    });
+
+    expect(
+      formatCalendarEventTimeRange(
+        {
+          displayMode: 'timed',
+          startTime: Date.parse('2026-03-08T13:05:00.000Z'),
+          endTime: Date.parse('2026-03-08T14:30:00.000Z'),
+        },
+        'All day',
+      ),
+    ).toBe('09:05 – 10:30');
+  });
+
+  it('documents Product Time pair vs event/all-day contracts via body shape', () => {
+    const body = react.match(/function formatTimeRange\([\s\S]*?\n\}/)?.[0] ?? '';
+    expect(body).toContain('getProductTime');
+    expect(body).toContain('time.format.hm');
+    expect(body).toContain(' - ');
+    expect(body).not.toContain('Intl.DateTimeFormat');
+
     const start = Date.UTC(2024, 0, 2, 9, 0, 0);
     const end = Date.UTC(2024, 0, 2, 10, 30, 0);
-    const reactOut = reactFormatTimeRange(start, end);
-    expect(typeof reactOut).toBe('string');
-    expect(reactOut).toContain(' - ');
     expect(
       formatCalendarEventTimeRange(
         { displayMode: 'all-day', startTime: start, endTime: end },
         'All day',
       ),
     ).toBe('All day');
-    const vueOut = formatCalendarEventTimeRange({ startTime: start, endTime: end }, 'All day');
-    expect(vueOut).toContain('–');
-    expect(vueOut).not.toContain(' - ');
   });
 
   it('documents residual 1213 lock intent without claiming §13.2 complete', () => {

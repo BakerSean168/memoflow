@@ -1,19 +1,29 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { TaskTimeConfig } from '../task-time-config';
 
-describe('TaskTimeConfig ADR-037 Instant + startDay Ymd', () => {
-  it('exposes Instant startDate and Ymd startDay for all-day', () => {
-    const localMidnight = new Date(2026, 6, 26, 0, 0, 0, 0).getTime();
-    const config = TaskTimeConfig.createAllDay(localMidnight);
-    expect(config.startDate).toBe(localMidnight);
-    expect(config.startDay).toBe('2026-07-26');
+describe('TaskTimeConfig Instant-only compatibility state (TIME-1206)', () => {
+  it('keeps startDate as an Instant without exposing an ambient calendar-day projection', () => {
+    const start = Date.parse('2026-07-26T00:00:00.000Z');
+    const config = TaskTimeConfig.createAllDay(start);
+
+    expect(config.startDate).toBe(start);
     expect(config.isAllDay).toBe(true);
+    expect('startDay' in config).toBe(false);
   });
 
-  it('setStartDate accepts Instant without Date wrapper', () => {
-    const ms = new Date(2026, 0, 15, 0, 0, 0, 0).getTime();
-    const config = TaskTimeConfig.createAllDay(ms).setStartDate(ms);
-    expect(config.startDate).toBe(ms);
-    expect(config.startDay).toBe('2026-01-15');
+  it('setStartDate stays Instant-only and cannot resurrect host-local startDay', () => {
+    const start = Date.parse('2026-01-15T00:00:00.000Z');
+    const config = TaskTimeConfig.createAllDay(start).setStartDate(start);
+
+    expect(config.startDate).toBe(start);
+    expect('startDay' in config).toBe(false);
+  });
+
+  it('source has no no-arg Product Time facade or startDay compatibility getter', () => {
+    const source = readFileSync(resolve(__dirname, '../task-time-config.ts'), 'utf8');
+    expect(source).not.toContain('createTimeFacade()');
+    expect(source).not.toContain('get startDay');
   });
 });

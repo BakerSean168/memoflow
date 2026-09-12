@@ -9,6 +9,6 @@
  * - 聚合内的实体不直接拥有仓储：需要通过聚合根访问
  */
 
-export type { ITaskInstanceRepository } from './i-task-instance-repository';
-export { TaskLabelOwnershipError } from './i-task-template-repository';
-export type { ITaskTemplateRepository, TaskFilters } from './i-task-template-repository';
+export type { ITaskOccurrenceRepository } from './i-task-occurrence-repository';
+export { TaskLabelOwnershipError } from './i-task-plan-repository';
+export type { ITaskPlanRepository, TaskFilters } from './i-task-plan-repository';

@@ -114,7 +114,7 @@ export class ListGoalRecordsUseCase {
 
       const progressTemplate = KeyResultProgress.fromDTO({
         ...keyResult.progress,
-        currentValue: keyResult.progress.startingValue,
+        currentValue: keyResult.progress.trackingBaseValue,
       });
       const history: number[] = [];
       const sorted = [...group].sort(

@@ -7,10 +7,12 @@ tags:
   - style
 description: 产品时间体系详设——类型谱、门面 API、Style、Codec 与 DomainDate/TransferDate、治理与迁移波次
 created: 2026-07-26T00:00:00
-updated: 2026-07-26T00:00:00
+updated: 2026-09-09T00:30:00+08:00
 ---
 
 # 产品时间体系（Product Time System）
+
+> **2026-09-09 vNext closure：** ADR-100/101 与 TIME-1201～1206 已实施；本文的 current API 段落按 context-required Product Time 更新。后文迁移波次保留为历史实施记录，不再定义兼容 surface。
 
 > **宪法：** [ADR-037](./adr/ADR-037-product-time-system.md)（已采纳）  
 > 本文是可实施的详设；与 ADR 冲突时以 ADR 决策为准，并回头修正本文。
@@ -56,29 +58,30 @@ updated: 2026-07-26T00:00:00
 
 ### 3.1 规范类型
 
-| 类型 | 底层 | 语义 |
-|------|------|------|
-| `Instant` | brand `number`（ms） | UTC 时间轴上的瞬时 |
-| `TransferDate` | **≡ `Instant`** | API/DTO/VO 内部传输名（保留名降低迁移噪音） |
-| `Ymd` | brand `` `${number}-${number}-${number}` `` 或 opaque string | **本地**日历日键 `YYYY-MM-DD` |
-| `Hm` | brand string | 本地 `HH:mm` |
-| `IsoUtc` | brand string | 互操作/日志 |
-| `DurationMs` | brand number | 时长毫秒 |
-| `DurationMin` | brand number | 时长分钟（表单） |
-| `LocaleId` | BCP 47 string | 来自 preference |
-| `TimeZoneId` | IANA string | 预留；第一版默认 local |
+| 类型           | 底层                                                         | 语义                                        |
+| -------------- | ------------------------------------------------------------ | ------------------------------------------- |
+| `Instant`      | brand `number`（ms）                                         | UTC 时间轴上的瞬时                          |
+| `TransferDate` | **≡ `Instant`**                                              | API/DTO/VO 内部传输名（保留名降低迁移噪音） |
+| `Ymd`          | brand `` `${number}-${number}-${number}` `` 或 opaque string | **本地**日历日键 `YYYY-MM-DD`               |
+| `Hm`           | brand string                                                 | 本地 `HH:mm`                                |
+| `IsoUtc`       | brand string                                                 | 互操作/日志                                 |
+| `DurationMs`   | brand number                                                 | 时长毫秒                                    |
+| `DurationMin`  | brand number                                                 | 时长分钟（表单）                            |
+| `LocaleId`     | BCP 47 string                                                | 来自 preference                             |
+| `TimeZoneId`   | IANA string                                                  | 预留；第一版默认 local                      |
 
 ### 3.2 过渡类型
 
-| 类型 | 状态 |
-|------|------|
+| 类型             | 状态                                                        |
+| ---------------- | ----------------------------------------------------------- |
 | ~~`DomainDate`~~ | **已删除（T10）**；曾 `= Date`；产品字段与 Codec 桥均已退役 |
+
 ### 3.3 已删除 / 禁止回潮
 
-| 类型 | 状态 |
-|------|------|
-| `DomainDate` | 不进 contracts；禁止 reintroduce || `PersistenceDate` | 不进 contracts；infra 本地 |
-| `TransportDate` | 非官方名；文档一律 TransferDate |
+| 类型            | 状态                             |
+| --------------- | -------------------------------- |
+| `DomainDate`    | 不进 contracts；禁止 reintroduce |     | `PersistenceDate` | 不进 contracts；infra 本地 |
+| `TransportDate` | 非官方名；文档一律 TransferDate  |
 
 ### 3.4 类型放置与依赖
 
@@ -111,6 +114,7 @@ contracts      : GoalTimeRange vs GoalTimeRangeDTO 双 interface 名（859 keep-
 ```
 
 ### 4.2 字段选型
+
 **瞬时字段：**
 
 ```text
@@ -131,14 +135,15 @@ UI             : format.ymdDisplay / input.dateValue 基于 Ymd
 
 ### 4.3 双 shape 保留规则
 
-| 情况 | 做法 |
-|------|------|
-| 两侧同语义同类型 | 允许 type alias，消灭假 dual |
+| 情况                     | 做法                                                        |
+| ------------------------ | ----------------------------------------------------------- |
+| 两侧同语义同类型         | 允许 type alias，消灭假 dual                                |
 | 领域要日历日、传输要瞬时 | **保持双 shape**，字段名也应反映（`startDay` vs `startAt`） |
-| 仅 Date vs number 换皮 | **禁止**（DomainDate 已删） |
+| 仅 Date vs number 换皮   | **禁止**（DomainDate 已删）                                 |
+
 ### 4.4 Codec 接缝（必须）
 
-```text
+````text
 fromTransfer(t: TransferDate): Instant        // 恒等 + 校验有限
 toTransfer(i: Instant): TransferDate
 
@@ -186,7 +191,7 @@ TimeStyle {
     zero: string
   }
 }
-```
+````
 
 ### 5.2 解析优先级
 
@@ -199,12 +204,12 @@ call-site override
 
 ### 5.3 受管范围
 
-| 受管 | 例子 |
-|------|------|
-| ✅ | 列表时间、相对时间、表单 date/time、Ymd 键、时长文案、range 展示 |
-| ✅ 策略 | 日界、周起始、clock.now |
-| ❌ | CSS transition ms、与产品无关的 performance 标记（可保留原始 number） |
-| ⚠️ | cron 表达式：领域 + Calendar，不进 UI Format |
+| 受管    | 例子                                                                  |
+| ------- | --------------------------------------------------------------------- |
+| ✅      | 列表时间、相对时间、表单 date/time、Ymd 键、时长文案、range 展示      |
+| ✅ 策略 | 日界、周起始、clock.now                                               |
+| ❌      | CSS transition ms、与产品无关的 performance 标记（可保留原始 number） |
+| ⚠️      | cron 表达式：领域 + Calendar，不进 UI Format                          |
 
 ---
 
@@ -271,40 +276,40 @@ calendar.isToday(instant): boolean
 ### 6.6 装配
 
 ```text
-createTimeFacade({ style, clock, engine }): TimeFacade
-time.withStyle(partial): TimeFacade
+createTimeFacade({ context, presentation?, clock?, engine? }): TimeFacade
+time.withContext(context): TimeFacade
+time.withPresentation(partial): TimeFacade
 ```
 
-App bootstrap `provide` / React Context；Server 请求级 `withStyle({ locale })`。
+`context` 必填；不存在 `defaultTime` / mixed `TimeStyle` / `withStyle`。App bootstrap 可以显式用 device `TimeZoneSource` 初始化 guest context；登录态由 canonical Preference `UserTimeContextPort` 覆盖。
 
 ---
 
 ## 7. 物理包结构
 
-```text
+````text
 packages/time/                          @memoflow/time
   src/
     types.ts                            re-export primitives + 本地辅助
-    style/
     clock/
     codec/
     format/
     input/
     calendar/
+    recurrence/
+    timezone/                           IANA context + wall-clock adapter
     engine/
-      date-fns-engine.ts
-      intl-display-engine.ts
+      date-fns-engine.ts                production 唯一 date-fns importer
       types.ts
-    facade.ts
+    facade.ts                           context-required facade
     index.ts
-    free/format-helpers.ts              公开 free helpers（非 legacy）
+    free/format-helpers.ts              仅纯字符串/Ymd presentation helper
   README.md
 packages/contracts/src/primitives/
   instant.ts / transfer-date.ts         brand ≡
   ymd.ts / hm.ts
 
-packages/app-vue/src/shared/utils/format-*  → re-export @memoflow/time（dual 路径稳定）
-packages/app-vue/src/shared/utils/product-time.ts  session facade + empty-label override```
+packages/app-vue/src/shared/utils/product-time.ts  explicit session context + presentation facade```
 
 Nx：`time` project；依赖 `contracts`、`date-fns`；被 app-*、domain packages 依赖。
 
@@ -315,60 +320,61 @@ Nx：`time` project；依赖 `contracts`、`date-fns`；被 app-*、domain packa
 ### 8.1 Time Registry（`tools/governance/time-registry.json` + 人读 md）
 
 ```text
-kind: canonical | boundary | legacy | exemption
+kind: canonical | boundary
 path / symbol
 reason
 owner
-retire_by?   // legacy/exemption 必填
-```
+
+TIME-1206 后 registry 不再作为 legacy date-fns allowlist。
+````
 
 ### 8.2 ESLint（目标）
 
-1. `no-restricted-imports`: `date-fns`、`date-fns/*` → 仅 `packages/time/engine/**`  
-2. apps 内限制 `toLocaleDateString` / `toLocaleString`（测试/story exemption）  
-3. 限制组件内新建 `function formatDate|formatTime|formatTimestamp`  
-4. 限制业务 `new Date()` 作为「现在」（鼓励 clock.now）；infra/codec 白名单  
+1. `no-restricted-imports`: `date-fns`、`date-fns/*` → 仅 `packages/time/engine/**`
+2. apps 内限制 `toLocaleDateString` / `toLocaleString`（测试/story exemption）
+3. 限制组件内新建 `function formatDate|formatTime|formatTimestamp`
+4. 限制业务 `new Date()` 作为「现在」（鼓励 clock.now）；infra/codec 白名单
 
-分阶段：warn → error + legacy 名单。
+当前状态：error；production `date-fns` 仅允许 `packages/time/src/engine/**`，无 legacy importer exemption。
 
 ### 8.3 Surface / 测试
 
-- Codec round-trip Transfer ↔ Instant  
-- Ymd 本地日不因 UTC 偏移错日（固定 TZ 测试）  
-- empty style  
-- combine Ymd+Hm  
-- 断供：抽查高流量模块 import 图  
+- Codec round-trip Transfer ↔ Instant
+- Ymd 本地日不因 UTC 偏移错日（固定 TZ 测试）
+- empty style
+- combine Ymd+Hm
+- 断供：抽查高流量模块 import 图
 - 固定 Clock 的展示快照（关键列表）
 
 ### 8.4 与 Dual Registry
 
-| Dual Registry | Time Registry / ADR-037 |
-|---------------|-------------------------|
-| dual-retired 文件锁税 | 时间宪法与调用合法性 |
+| Dual Registry            | Time Registry / ADR-037               |
+| ------------------------ | ------------------------------------- |
+| dual-retired 文件锁税    | 时间宪法与调用合法性                  |
 | keep_boundary 语义双实现 | 时间 boundary 与 Domain/Transfer 语义 |
 
-format 类 keep-boundary 迁移期双写，长期以 Time Registry + canonical API 为准。
+历史 keep-boundary 记录仍由 Dual Registry 保存；Product Time current source 只以 Time Registry canonical/boundary + canonical API 为准。
 
 ---
 
 ## 9. 迁移波次（实施顺序）
 
-| 波次 | 内容 | 完成定义 |
-|------|------|----------|
-| **W0** | ADR 已采纳；本文；package 骨架；默认 Style；Clock/Codec/Format.hm 最小集；引擎 date-fns | 可编译；样例测试绿 |
-| **W1** | brand Instant≡TransferDate；Codec；文档 primitives | 类型可被新代码使用 |
-| **W2** | 上提 app-vue sole（hm、ymd、pad、display…） | app-vue 主路径改 import |
-| **W3** | ESLint 断供 date-fns（error + legacy 表） | CI 强制 |
-| **W4** | 屠龙组件/Screen 私有 format（含 app-react） | rg 归零（白名单 0） |
-| **W5** | Ymd 引入高优先级字段（生日、全天） | 字段级合约测试 |
-| **W6** | Domain getter 迁 Instant | 核心 VO 完成 |
-| **W7** | 删除 legacy re-export、utils/date 旧 API | 主路径单一 |
-| **W8** | Style 接 presentation preference | 一处改全局可演示 |
-| **T9–T10** | DomainDate 类型与 Codec 桥删除；registry 仅 canonical；empty 经 Style | 类型谱无 DomainDate |
-| **T11** | 收尾体检 + 冗余度量 | plan §9 |
-| **P1–P10** | **第二阶段**（调用层/领域扫尾）：见实施 plan §10 | 组件无私有 format*；session 对称；相对/时长/input；Domain Date 清；lint 终态 |
-**每一波：** 最近 nx test + 相关 surface +（触及治理时）governance-check。  
-**禁止：** 为减 dual 文件数删除仍保护真旁路的断言。
+| 波次                                                                       | 内容                                                                                    | 完成定义                                                                     |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **W0**                                                                     | ADR 已采纳；本文；package 骨架；默认 Style；Clock/Codec/Format.hm 最小集；引擎 date-fns | 可编译；样例测试绿                                                           |
+| **W1**                                                                     | brand Instant≡TransferDate；Codec；文档 primitives                                      | 类型可被新代码使用                                                           |
+| **W2**                                                                     | 上提 app-vue sole（hm、ymd、pad、display…）                                             | app-vue 主路径改 import                                                      |
+| **W3**                                                                     | ESLint 断供 date-fns（error + legacy 表）                                               | CI 强制                                                                      |
+| **W4**                                                                     | 屠龙组件/Screen 私有 format（含 app-react）                                             | rg 归零（白名单 0）                                                          |
+| **W5**                                                                     | Ymd 引入高优先级字段（生日、全天）                                                      | 字段级合约测试                                                               |
+| **W6**                                                                     | Domain getter 迁 Instant                                                                | 核心 VO 完成                                                                 |
+| **W7**                                                                     | 删除 legacy re-export、utils/date 旧 API                                                | 主路径单一                                                                   |
+| **W8**                                                                     | Style 接 presentation preference                                                        | 一处改全局可演示                                                             |
+| **T9–T10**                                                                 | DomainDate 类型与 Codec 桥删除；registry 仅 canonical；empty 经 Style                   | 类型谱无 DomainDate                                                          |
+| **T11**                                                                    | 收尾体检 + 冗余度量                                                                     | plan §9                                                                      |
+| **P1–P10**                                                                 | **第二阶段**（调用层/领域扫尾）：见实施 plan §10                                        | 组件无私有 format*；session 对称；相对/时长/input；Domain Date 清；lint 终态 |
+| **每一波：** 最近 nx test + 相关 surface +（触及治理时）governance-check。 |
+| **禁止：** 为减 dual 文件数删除仍保护真旁路的断言。                        |
 
 第二阶段刀序与 DoD 的**可执行详设**以  
 [`../plan/archive/2026-07-26-product-time-system.md`](../plan/archive/2026-07-26-product-time-system.md) **§10** 为准（P1 Empty Catalog → … → P10 dual 降维；P11 TZ 远期）。
@@ -402,36 +408,36 @@ Prisma DateTime → codec.fromJsDate → Instant → 领域
 
 ## 11. 反模式（杀死清单）
 
-| 反模式 | 替代 |
-|--------|------|
+| 反模式                                | 替代                     |
+| ------------------------------------- | ------------------------ |
 | `formatDate(value: any, fmt: string)` | 具名 format.* + 显式类型 |
-| 仅 re-export date-fns | 真 Facade + Style |
-| `ensureDate` → 非法变 now | ParsePolicy null/throw |
-| 新字段 `DomainDate` | Instant 或 Ymd |
-| 组件 `function formatDate` | 门面 |
-| 业务 `from 'date-fns'` | engine only |
-| PersistenceDate 回 contracts | infra + codec |
-| fileSize 进 time 包 | 仍 utils/frontend |
-| 静默 merge keep-boundary | Registry + 改名 |
+| 仅 re-export date-fns                 | 真 Facade + Style        |
+| `ensureDate` → 非法变 now             | ParsePolicy null/throw   |
+| 新字段 `DomainDate`                   | Instant 或 Ymd           |
+| 组件 `function formatDate`            | 门面                     |
+| 业务 `from 'date-fns'`                | engine only              |
+| PersistenceDate 回 contracts          | infra + codec            |
+| fileSize 进 time 包                   | 仍 utils/frontend        |
+| 静默 merge keep-boundary              | Registry + 改名          |
 
 ---
 
 ## 12. 成功图像
 
-1. `date-fns` importers ⊆ `packages/time/engine`（+ 空 legacy 表）。  
-2. apps 无产品私有 `formatDate`/`formatTime`（测试除外）。  
-3. 改 `TimeStyle.empty.display` 一处，列表空时间全局变。  
-4. FixedClock 下关键文案稳定可测。  
-5. 新 contracts 字段无 `DomainDate`；TransferDate 为 brand Instant。  
-6. 全天/生日为 Ymd，不再用午夜 Date 冒充。  
-7. Time Registry legacy → 0 有截止日期趋势。  
+1. production `date-fns` importers = `packages/time/src/engine/**` only。
+2. apps 无产品私有 `formatDate`/`formatTime`（测试除外）。
+3. 改 `TimePresentationStyle.empty.display` 一处，统一影响 Product Time 空值展示。
+4. FixedClock 下关键文案稳定可测。
+5. 新 contracts 字段无 `DomainDate`；TransferDate 为 brand Instant。
+6. 全天/生日为 Ymd，不再用午夜 Date 冒充。
+7. Time Registry legacy/exemption importer = 0；anti-resurrection audit 已接入 governance。
 8. 设计/产品能读 `packages/time/TIME_STYLE.md` 提相对时间阈值而不改业务代码。
 
 ---
 
 ## 13. 相关
 
-- [ADR-037](./adr/ADR-037-product-time-system.md)  
-- [Dual Registry](../governance/dual-registry.md)  
-- [AI runtime path map](./ai-runtime-path-map.md)（编排边界，非时间）  
-- 优雅化 plan：`docs/plan/archive/2026-07-26-codebase-elegance-foundation.md`  
+- [ADR-037](./adr/ADR-037-product-time-system.md)
+- [Dual Registry](../governance/dual-registry.md)
+- [AI runtime path map](./ai-runtime-path-map.md)（编排边界，非时间）
+- 优雅化 plan：`docs/plan/archive/2026-07-26-codebase-elegance-foundation.md`

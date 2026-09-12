@@ -32,7 +32,7 @@ describe('AI API runtime composer surface', () => {
   it('server.ts composes AI with owner-domain mutation ports plus read-only Planner/Notification capabilities', () => {
     expect(server).toContain("from './runtime/compose-ai'");
     expect(server).toMatch(
-      /composeAI\(\{\s*db: prisma,\s*repositoryApiPort: repositoryApiModule\.getApplicationPort\(\),\s*repositoryStorageBaseDir,\s*goalApplicationPort: goalComposed\.applicationPort,\s*taskApplicationPort: taskComposed\.applicationPort,\s*reminderApplicationPort: reminderComposed\.executorReminderPort,\s*routineCommandPort: reminderComposed\.routineCommandPort,\s*scheduleRepository: scheduleApiModule\.repositories\.scheduleRepository,\s*notificationRepository: notificationApiModule\.repositories\.notificationRepository,\s*labelService,\s*mastraStorage: \{ kind: 'postgres', connectionString: env\.DATABASE_URL \},\s*\}/,
+      /composeAI\(\{\s*db: prisma,\s*repositoryApiPort: repositoryApiModule\.getApplicationPort\(\),\s*repositoryStorageBaseDir,\s*goalApplicationPort: goalComposed\.applicationPort,\s*taskApplicationPort: taskComposed\.applicationPort,\s*reminderApplicationPort: reminderComposed\.executorReminderPort,\s*routineCommandPort: reminderComposed\.routineCommandPort,\s*scheduleRepository: scheduleApiModule\.repositories\.scheduleRepository,\s*notificationRepository: notificationApiModule\.repositories\.notificationRepository,\s*userTimeContextPort: settingApiModule\.userTimeContextPort,\s*labelService,\s*mastraStorage: \{ kind: 'postgres', connectionString: env\.DATABASE_URL \},\s*\}/,
     );
     expect(server).toContain('.register(aiApiModule)');
     expect(server).toContain('routineCommandPort: reminderComposed.routineCommandPort');

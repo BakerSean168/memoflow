@@ -4,7 +4,7 @@ import type { TaskGoalProgressOutboxEventV2 } from '@memoflow/contracts/task';
 import { GoalTaskProgressHandler } from './task-goal-progress.handler';
 
 function applyEvent(
-  source: 'TaskInstance' | 'TaskPlan' = 'TaskInstance',
+  source: 'TaskOccurrence' | 'TaskPlan' = 'TaskOccurrence',
   overrides: Partial<Extract<TaskGoalProgressOutboxEventV2, { action: 'apply' }>> = {},
 ): Extract<TaskGoalProgressOutboxEventV2, { action: 'apply' }> {
   return {
@@ -13,8 +13,8 @@ function applyEvent(
     eventType: 'task.goal-progress-requested',
     action: 'apply',
     identityId: 'identity-1' as never,
-    taskInstanceId: 'instance-1' as never,
-    taskTemplateId: 'template-1' as never,
+    taskOccurrenceId: 'instance-1' as never,
+    taskPlanId: 'template-1' as never,
     goalId: 'goal-1' as never,
     keyResultId: 'kr-1' as never,
     value: 3,
@@ -32,10 +32,10 @@ function revertEvent(): Extract<TaskGoalProgressOutboxEventV2, { action: 'revert
     eventType: 'task.goal-progress-requested',
     action: 'revert',
     identityId: 'identity-1' as never,
-    taskInstanceId: 'instance-1' as never,
-    taskTemplateId: 'template-1' as never,
+    taskOccurrenceId: 'instance-1' as never,
+    taskPlanId: 'template-1' as never,
     sources: [
-      { type: 'TaskInstance', id: 'instance-1' },
+      { type: 'TaskOccurrence', id: 'instance-1' },
       { type: 'TaskPlan', id: 'template-1' },
     ],
     occurredAt: 2000,

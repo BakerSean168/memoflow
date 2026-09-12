@@ -8,12 +8,12 @@ tags:
   - focus
 description: Reminder 向 Routine Coach 演进时的领域边界、Profile Gate、确定性 Runtime、Ambient/Protocol 双运行语义与 Electron Surface 决策
 created: 2026-08-25T17:13:00+08:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-08T20:20:00+08:00
 ---
 
 # ADR-059: Routine Coach 领域、Runtime 与交互 Surface
 
-**状态：** 已采纳并实施（Core vNext 目标态）
+**状态：** 已采纳并实施（Core vNext 基础目标态；ADR-076~079 进一步收敛待实施）
 **日期：** 2026-08-25  
 **影响范围：** reminder、contracts、database、schedule-orchestration、notification、app-vue、desktop、AI tools/workflows  
 **关联：** ADR-004、ADR-006、ADR-033、ADR-037、ADR-042、ADR-045、ADR-048、ADR-050、ADR-051、ADR-058
@@ -21,6 +21,17 @@ updated: 2026-09-08T09:00:00+08:00
 ## 2026-09-08 实现状态
 
 Routine Coach 核心目标态已经落地：RoutineDefinition、M:N ProfileMembership、WallClock / ActiveUsage / Protocol runtimes、Temporary Override、Intervention/Focus surfaces 与确定性 ProtocolSession。ControlMode、single-group ownership 与独立 Reminder scanner 已退休；初始六方法 Method Library 与 AI Routine command tools 也已接入 owner-domain command seam。
+
+### 2026-09-08 领域模型二次收敛
+
+本 ADR 的 Runtime/Profile/Protocol 大方向保持有效，但重新审查代码后确认 Legacy `ReminderTemplate` 仍然是完整写模型，并与 Routine vNext 并存。后续最终模型由以下 ADR 细化：
+
+- ADR-076：RoutineDefinition / Trigger Algebra / legacy retirement；
+- ADR-077：RoutineOccurrence / RoutineInteraction 与可靠性边界；
+- ADR-078：Profile / Eligibility / RuntimeContext / TemporaryOverride；
+- ADR-079：Intervention Policy / Notification / Device Surface。
+
+这些新增决策**尚未实施**；不得把“Core vNext 基础目标态已落地”解释为 legacy Reminder 已经完全删除。
 
 ## 1. 背景
 

@@ -13,8 +13,8 @@ describe('TaskPlanTaskSchema AI-6101 contract', () => {
     expect(result.success).toBe(false);
   });
 
-  it('requires Goal and Key Result identifiers as one semantic link', () => {
-    expect(TaskPlanTaskSchema.safeParse({ ...baseTask, goalId: 'goal-1' }).success).toBe(false);
+  it('allows a Goal-only context link and rejects a Key Result without its owning Goal', () => {
+    expect(TaskPlanTaskSchema.safeParse({ ...baseTask, goalId: 'goal-1' }).success).toBe(true);
     expect(TaskPlanTaskSchema.safeParse({ ...baseTask, keyResultId: 'kr-1' }).success).toBe(false);
     expect(
       TaskPlanTaskSchema.safeParse({ ...baseTask, goalId: 'goal-1', keyResultId: 'kr-1' }).success,

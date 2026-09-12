@@ -4,11 +4,10 @@ import LocaleSettings from './LocaleSettings.vue';
 
 const defaultSettings = {
   language: 'zh-CN',
-  timezone: 'Asia/Shanghai',
-  dateFormat: 'YYYY-MM-DD',
-  timeFormat: 'HH:mm',
+  timeZone: 'Asia/Shanghai',
+  dateStyle: 'medium',
+  timeStyle: '24h',
   weekStartsOn: 1,
-  currency: 'CNY',
 };
 
 const meta = {
@@ -50,11 +49,10 @@ export const EnglishUS: Story = {
   args: {
     modelValue: {
       language: 'en-US',
-      timezone: 'America/New_York',
-      dateFormat: 'MM/DD/YYYY',
-      timeFormat: 'hh:mm A',
+      timeZone: 'America/New_York',
+      dateStyle: 'short',
+      timeStyle: '12h',
       weekStartsOn: 0,
-      currency: 'USD',
     },
   },
 };
@@ -70,12 +68,11 @@ export const Japanese: Story = {
   }),
   args: {
     modelValue: {
-      language: 'ja-JP',
-      timezone: 'Asia/Tokyo',
-      dateFormat: 'YYYY/MM/DD',
-      timeFormat: 'HH:mm',
+      language: 'en-US',
+      timeZone: 'Asia/Tokyo',
+      dateStyle: 'long',
+      timeStyle: '24h',
       weekStartsOn: 1,
-      currency: 'JPY',
     },
   },
 };

@@ -191,6 +191,13 @@
       ],
       "@memoflow/scheduler/*": [
         "packages/scheduler/src/*/index.ts"
+      ],
+      "@memoflow/relation": [
+        "packages/relation/src/index.ts"
+      ],
+      "@memoflow/relation/*": [
+        "packages/relation/src/*/index.ts",
+        "packages/relation/src/*.ts"
       ]
     }
   }

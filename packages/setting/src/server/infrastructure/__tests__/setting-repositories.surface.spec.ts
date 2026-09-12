@@ -11,95 +11,72 @@ import {
   type SettingPrismaRepositorySet,
   type SettingPowerSyncRepositorySet,
   type SettingModuleInstance,
-  type IUserSettingRepository,
+  type IUserPreferenceRepository,
 } from '../../../../src';
 
-/**
- * Setting repository seam surface.
- * 设置仓储 seam 的表面契约。
- *
- * Both lane factories return the single `userSettingRepository` port;
- * convenience module factories keep the api/start/dispose surface; the runtime
- * contribution factory returns a reversible contribution; and no concrete
- * adapter class leaks through the root barrel.
- *
- * 两个 lane 工厂都返回单一的 `userSettingRepository` Port；便捷模块工厂保留
- * api/start/dispose 表面；运行时贡献工厂返回可逆贡献；具体适配器类绝不通过
- * 根 barrel 泄漏。
- */
-describe('setting repository factories surface', () => {
+describe('canonical setting repository factories', () => {
   const fakePrisma = {} as unknown as PrismaClient;
   const fakeElectronDb = {
     getOptional: async () => null,
-    execute: async () => undefined,
+    getAll: async () => [],
+    get: async () => { throw new Error('not found'); },
+    execute: async () => ({ rowsAffected: 0 }),
   };
 
-  it('createSettingPrismaRepositories returns the one-field Prisma set', () => {
-    const set = createSettingPrismaRepositories(fakePrisma);
-    expect(set).toHaveProperty('userSettingRepository');
-    const typed: SettingPrismaRepositorySet = set;
-    expect(typeof typed.userSettingRepository.findByIdentityId).toBe('function');
+  it('Prisma and PowerSync expose only userPreferenceRepository', () => {
+    const prisma = createSettingPrismaRepositories(fakePrisma);
+    const powersync = createSettingPowerSyncRepositories(fakeElectronDb);
+    const typedPrisma: SettingPrismaRepositorySet = prisma;
+    const typedPowerSync: SettingPowerSyncRepositorySet = powersync;
+
+    expect(Object.keys(prisma)).toEqual(['userPreferenceRepository']);
+    expect(Object.keys(powersync)).toEqual(['userPreferenceRepository']);
+    expect(typeof typedPrisma.userPreferenceRepository.compareAndSwap).toBe('function');
+    expect(typeof typedPowerSync.userPreferenceRepository.compareAndSwap).toBe('function');
   });
 
-  it('createSettingPowerSyncRepositories returns the one-field PowerSync set', () => {
-    const set = createSettingPowerSyncRepositories(fakeElectronDb);
-    expect(set).toHaveProperty('userSettingRepository');
-    const typed: SettingPowerSyncRepositorySet = set;
-    expect(typeof typed.userSettingRepository.findByIdentityId).toBe('function');
+  it('module factories expose canonical API, time and portability seams only', () => {
+    for (const instance of [
+      createSettingPrismaModule(fakePrisma),
+      createSettingPowerSyncModule(fakeElectronDb),
+    ]) {
+      const typed: SettingModuleInstance = instance;
+      expect(typeof typed.api.getPreferenceProfile).toBe('function');
+      expect(typeof typed.api.getPreferenceNamespace).toBe('function');
+      expect(typeof typed.api.exportSettings).toBe('function');
+      expect(typeof typed.api.importSettings).toBe('function');
+      expect(typed.api).not.toHaveProperty('getUserSetting');
+      expect(typed).not.toHaveProperty('userSettingRepository');
+      expect(typed.portableCapability).toMatchObject({ key: 'preferences', schemaVersion: 3 });
+      expect(typed.userTimeContextPort).toBeDefined();
+    }
   });
 
-  it('Prisma and PowerSync sets agree on all field names', () => {
-    expect(Object.keys(createSettingPrismaRepositories(fakePrisma))).toEqual(
-      Object.keys(createSettingPowerSyncRepositories(fakeElectronDb)),
-    );
-  });
-
-  it('convenience module factories preserve api/start/dispose', () => {
-    const prismaInstance = createSettingPrismaModule(fakePrisma);
-    expect(prismaInstance).toHaveProperty('api');
-    expect(typeof prismaInstance.start).toBe('function');
-    expect(typeof prismaInstance.dispose).toBe('function');
-    const typedPrisma: SettingModuleInstance = prismaInstance;
-    expect(typeof typedPrisma.api.getUserSetting).toBe('function');
-
-    const powerSyncInstance = createSettingPowerSyncModule(fakeElectronDb);
-    expect(powerSyncInstance).toHaveProperty('api');
-    expect(typeof powerSyncInstance.start).toBe('function');
-    expect(typeof powerSyncInstance.dispose).toBe('function');
-    const typedPowerSync: SettingModuleInstance = powerSyncInstance;
-    expect(typeof typedPowerSync.api.getUserSetting).toBe('function');
-  });
-
-  it('createSettingRuntimeContribution returns a reversible contribution', () => {
+  it('runtime contribution stays reversible', () => {
     const runtime = createSettingRuntimeContribution();
-    expect(typeof runtime.start).toBe('function');
-    expect(typeof runtime.stop).toBe('function');
     expect(() => runtime.start()).not.toThrow();
     expect(() => runtime.stop()).not.toThrow();
   });
 
-  it('does not leak concrete adapter classes through the root barrel', async () => {
-    const forbidden = ['UserSettingPrismaRepository', 'UserSettingPowerSyncRepository'];
-
-    const root = readFileSync(resolve(__dirname, '../../../index.ts'), 'utf8');
-    for (const name of forbidden) {
-      expect(root).not.toMatch(new RegExp(`\\b${name}\\b`));
+  it('root barrels do not leak concrete adapters or the deleted legacy repository port', async () => {
+    const forbidden = [
+      'UserSettingPrismaRepository',
+      'UserSettingPowerSyncRepository',
+      'UserPreferencePrismaRepository',
+      'UserPreferencePowerSyncRepository',
+      'IUserSettingRepository',
+      'createSettingPrismaRepository',
+    ];
+    for (const file of ['../../../index.ts', '../index.ts']) {
+      const source = readFileSync(resolve(__dirname, file), 'utf8');
+      for (const name of forbidden) expect(source).not.toMatch(new RegExp(`\\b${name}\\b`));
     }
-
-    const infra = readFileSync(resolve(__dirname, '../index.ts'), 'utf8');
-    for (const name of forbidden) {
-      expect(infra).not.toMatch(new RegExp(`\\b${name}\\b`));
-    }
-
-    const rootModule = await import('../../../../src');
-    const exportedNames = Object.keys(rootModule).sort();
-    for (const name of forbidden) {
-      expect(exportedNames).not.toContain(name);
-    }
+    const root = await import('../../../../src');
+    for (const name of forbidden) expect(Object.keys(root)).not.toContain(name);
   });
 
-  it('root barrel type-exports the set field type (compile-time lock)', () => {
-    const repo = (_t: IUserSettingRepository) => undefined;
-    expect(typeof repo).toBe('function');
+  it('type-exports the surviving preference repository port', () => {
+    const compileLock = (_repo: IUserPreferenceRepository) => undefined;
+    expect(typeof compileLock).toBe('function');
   });
 });

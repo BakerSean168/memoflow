@@ -46,10 +46,8 @@ import {
   type AccountRuntimeContributionsInput,
   type CloudAuthLike,
 } from '@memoflow/account';
-import {
-  createAccountApiModule,
-  type AccountApiModuleDef,
-} from '@memoflow/account/api';
+import type { Clock } from '@memoflow/time';
+import { createAccountApiModule, type AccountApiModuleDef } from '@memoflow/account/api';
 
 /**
  * Dependencies the account composer needs from the API host runtime.
@@ -60,6 +58,8 @@ export interface ComposeAccountDependencies {
   readonly db: PrismaClient;
   /** Host-owned CloudAuth capability typed as a port; used for closure revocation. 宿主持有的、以 Port 形式类型化的 CloudAuth 能力，用于 closure revocation。 */
   readonly cloudAuth: CloudAuthLike;
+  /** Host-owned Product Time clock for Account mutations. */
+  readonly clock: Clock;
   /** Extra runtime contributions from the host. 宿主提供的额外运行时贡献。 */
   readonly runtimeContributions?: AccountRuntimeContributionsInput;
 }
@@ -100,16 +100,16 @@ export interface ComposeAccountDependencies {
  * @param dependencies - ComposeAccountDependencies with the runtime Prisma client and CloudAuth port.
  * @returns AccountApiModuleDef — an already-bound IApiModule-compatible handle.
  */
-export function composeAccount(
-  dependencies: ComposeAccountDependencies,
-): AccountApiModuleDef {
+export function composeAccount(dependencies: ComposeAccountDependencies): AccountApiModuleDef {
   const repositories = createAccountPrismaRepositories({
     db: dependencies.db,
+    clock: dependencies.clock,
     cloudAuth: dependencies.cloudAuth,
   });
 
   const instance = createAccountModule({
     accountRepository: repositories.accountRepository,
+    clock: dependencies.clock,
     closureOperationRepository: repositories.closureOperationRepository,
     revocationPort: repositories.revocationPort,
     eventPublisher: repositories.eventPublisher,

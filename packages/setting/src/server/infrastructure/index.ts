@@ -19,12 +19,10 @@ export {
   type SettingModuleUseCases,
 } from './setting.module';
 export type { SettingApplicationPort } from '../application';
-export type { IUserSettingRepository } from '../domain';
 
 export {
   createSettingPrismaModule,
   createSettingPrismaRepositories,
-  createSettingPrismaRepository,
   type CreateSettingPrismaModuleOptions,
   type SettingPrismaRepositorySet,
 } from './prisma';

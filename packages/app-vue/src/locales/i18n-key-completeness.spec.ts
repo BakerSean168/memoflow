@@ -111,7 +111,7 @@ describe('i18n key completeness (production locales)', () => {
     const probe = 'goal.list.noGoalsFound';
     expect(isPresent(resolveMessage(zhCN as Record<string, unknown>, probe))).toBe(true);
     // Simulate deletion without mutating production objects permanently
-    const broken = structuredClone(zhCN) as Record<string, any>;
+    const broken = structuredClone(zhCN) as { goal: { list: Record<string, unknown> } };
     delete broken.goal.list.noGoalsFound;
     expect(isPresent(resolveMessage(broken, probe))).toBe(false);
   });
@@ -122,13 +122,14 @@ describe('i18n key completeness (production locales)', () => {
       'goal.list.createToStart',
       'goal.list.askAi',
       'goal.list.newGoal',
-      'goal.dialog.importance',
-      'goal.dialog.cancel',
+      'goal.dialog.targetPrecisionHint',
+      'goal.dialog.reminder',
       'goal.dialog.createGoal',
-      'goal.cards.goalStatus.active',
+      'goal.dialog.krInitialValue',
+      'goal.dialog.krCurrentValue',
+      'goal.dialog.krTargetValue',
       'goal.cards.keyResultsCount',
-      'goal.cards.daysLeft',
-      'goal.detail.recordProgress',
+      'goal.list.pastTarget',
       'task.templateMgmt.countLabel',
       'task.templateMgmt.emptyTitle',
       'task.templateMgmt.emptyDescription',

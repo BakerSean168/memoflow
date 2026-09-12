@@ -12,10 +12,10 @@ export async function importSettings(
   tx: TxClient, ctx: ImportContext, settings: PortableSettings | undefined,
 ): Promise<void> {
   if (!settings) return;
-  const prefs = settings.preferences ?? {};
-  await tx.upsertUserSetting({
+  await tx.upsertUserPreferences({
     identityId: ctx.identityId,
-    preferences: prefs as Record<string, unknown>,
+    presentation: settings.preferences.presentation,
+    regional: settings.preferences.regional,
   });
   incSingleton(ctx, 'settings');
 }

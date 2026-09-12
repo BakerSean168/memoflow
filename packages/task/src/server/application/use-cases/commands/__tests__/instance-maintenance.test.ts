@@ -1,67 +1,77 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import type { ITaskTemplateRepository } from '../../../../domain/repositories/i-task-template-repository';
-import type { ITaskInstanceRepository } from '../../../../domain/repositories/i-task-instance-repository';
-import { aLoadedTaskTemplate } from '../../../../../testing';
-import { TaskTemplateStatus } from '@memoflow/contracts/task';
-import { InvalidTaskTemplateStateError } from '../../../../domain/value-objects/task-errors';
-import { GenerateTaskInstancesUseCase } from '../generate-task-instances.use-case';
-import { MarkTaskInstanceMissedUseCase } from '../mark-task-instance-missed.use-case';
+import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
+import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
+import {
+  aLoadedTaskPlan,
+  TASK_TEST_OCCURRENCE_PROJECTION,
+  TASK_TEST_TIME_CONTEXT,
+} from '../../../../../testing';
+import { TaskPlanStatus } from '@memoflow/contracts/task';
+import { InvalidTaskPlanStateError } from '../../../../domain/value-objects/task-errors';
+import { GenerateTaskOccurrencesUseCase } from '../generate-task-occurrences.use-case';
+import { MarkTaskOccurrenceMissedUseCase } from '../mark-task-occurrence-missed.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
+
+const userTimeContextPort = {
+  getUserTimeContext: vi.fn().mockResolvedValue(TASK_TEST_TIME_CONTEXT),
+};
 
 const mockGenerateInstances = vi.fn();
 vi.mock('../../../../domain/services', () => {
   return {
-    TaskInstanceGenerationService: class {
+    TaskOccurrenceGenerationService: class {
       generateInstances = mockGenerateInstances;
     },
   };
 });
 
 describe('Instance maintenance use-cases', () => {
-  let templateRepo: ReturnType<typeof createMockRepo<ITaskTemplateRepository>>;
-  let instanceRepo: ReturnType<typeof createMockRepo<ITaskInstanceRepository>>;
+  let templateRepo: ReturnType<typeof createMockRepo<ITaskPlanRepository>>;
+  let instanceRepo: ReturnType<typeof createMockRepo<ITaskOccurrenceRepository>>;
 
   const createGenerateUseCase = () =>
-    new GenerateTaskInstancesUseCase(
+    new GenerateTaskOccurrencesUseCase(
       templateRepo,
       instanceRepo,
       createInlineTaskWriteTransactionRunner({
         templateRepository: templateRepo,
         instanceRepository: instanceRepo,
       }),
+      userTimeContextPort,
     );
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-    templateRepo = createMockRepo<ITaskTemplateRepository>({
+    templateRepo = createMockRepo<ITaskPlanRepository>({
       findByIdForIdentity: vi.fn(),
       save: vi.fn().mockResolvedValue(undefined),
     });
 
-    instanceRepo = createMockRepo<ITaskInstanceRepository>({
+    instanceRepo = createMockRepo<ITaskOccurrenceRepository>({
       findByIdentityId: vi.fn().mockResolvedValue([]),
       findByTemplateId: vi.fn().mockResolvedValue([]),
       saveMany: vi.fn().mockResolvedValue(undefined),
     });
   });
 
-  describe('MarkTaskInstanceMissedUseCase', () => {
+  describe('MarkTaskOccurrenceMissedUseCase', () => {
     it('persists Missed only after an explicit command', async () => {
       const instance = {
         canMarkMissed: vi.fn().mockReturnValue(true),
         markMissed: vi.fn(),
-        toClientDTO: vi.fn().mockReturnValue({ id: 'i-1', status: 'Missed' }),
+        toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-1', status: 'Missed' }),
       } as any;
       vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
       vi.mocked(instanceRepo.save).mockResolvedValue(undefined);
 
-      const result = await new MarkTaskInstanceMissedUseCase(
+      const result = await new MarkTaskOccurrenceMissedUseCase(
         instanceRepo,
         createInlineTaskWriteTransactionRunner({ instanceRepository: instanceRepo }),
+        TASK_TEST_OCCURRENCE_PROJECTION,
       ).execute(
         'i-1',
         'identity-1',
@@ -74,11 +84,11 @@ describe('Instance maintenance use-cases', () => {
     });
   });
 
-  describe('GenerateTaskInstancesUseCase', () => {
+  describe('GenerateTaskOccurrencesUseCase', () => {
     it('throws an error if transactionRunner is missing', () => {
       expect(
-        () => new GenerateTaskInstancesUseCase(templateRepo, instanceRepo, undefined as any),
-      ).toThrow('TaskWriteTransactionRunner must be explicitly provided to GenerateTaskInstancesUseCase');
+        () => new GenerateTaskOccurrencesUseCase(templateRepo, instanceRepo, undefined as any),
+      ).toThrow('TaskWriteTransactionRunner must be explicitly provided to GenerateTaskOccurrencesUseCase');
     });
 
     it('returns NOT_FOUND when template does not exist', async () => {
@@ -108,11 +118,15 @@ describe('Instance maintenance use-cases', () => {
       });
 
       expect(result).toBeOkWith([] as any);
-      expect(mockGenerateInstances).toHaveBeenCalledWith(template, {
-        forceGenerate: true,
+      expect(mockGenerateInstances).toHaveBeenCalledWith(
+        template,
+        TASK_TEST_TIME_CONTEXT,
+        {
+          forceGenerate: true,
         targetDate: 2,
-        fromDate: 1,
-      });
+          fromDate: 1,
+        },
+      );
       expect(instanceRepo.saveMany).not.toHaveBeenCalled();
       expect(templateRepo.save).not.toHaveBeenCalled();
     });
@@ -120,8 +134,8 @@ describe('Instance maintenance use-cases', () => {
     it('persists generated instances and returns DTO list', async () => {
       const template = { id: 'tpl-1' } as any;
       const generated = [
-        { toClientDTO: vi.fn().mockReturnValue({ id: 'i-1' }) },
-        { toClientDTO: vi.fn().mockReturnValue({ id: 'i-2' }) },
+        { toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-1' }) },
+        { toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-2' }) },
       ];
       vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
       mockGenerateInstances.mockReturnValue(generated as any);
@@ -138,10 +152,10 @@ describe('Instance maintenance use-cases', () => {
     });
 
     it('returns BAD_REQUEST when the template cannot generate instances in its current state', async () => {
-      const template = aLoadedTaskTemplate({ status: TaskTemplateStatus.Paused });
+      const template = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
       vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
       mockGenerateInstances.mockImplementation(() => {
-        throw new InvalidTaskTemplateStateError('Can only generate instances for active templates');
+        throw new InvalidTaskPlanStateError('Can only generate instances for active templates');
       });
       const useCase = createGenerateUseCase();
 
@@ -155,8 +169,8 @@ describe('Instance maintenance use-cases', () => {
     });
 
     it('returns INTERNAL_ERROR when template persistence fails after generating instances', async () => {
-      const template = aLoadedTaskTemplate();
-      const generated = [{ toClientDTO: vi.fn().mockReturnValue({ id: 'i-1' }) }];
+      const template = aLoadedTaskPlan();
+      const generated = [{ toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-1' }) }];
       vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
       mockGenerateInstances.mockReturnValue(generated as any);
       vi.mocked(templateRepo.save).mockRejectedValue(new Error('save failed'));

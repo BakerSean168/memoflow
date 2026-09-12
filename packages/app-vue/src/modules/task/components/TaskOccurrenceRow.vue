@@ -36,8 +36,12 @@
               })
             }}
           </span>
-          <span v-else-if="template.recurrenceRule">{{ t('task.occurrence.recurring') }}</span>
-          <span v-if="template.labels.length">{{ template.labels.map((label) => label.name).join(' · ') }}</span>
+          <span v-else-if="template.schedule.kind === 'Recurring'">{{
+            t('task.occurrence.recurring')
+          }}</span>
+          <span v-if="template.labels.length">{{
+            template.labels.map((label) => label.name).join(' · ')
+          }}</span>
         </div>
       </button>
 
@@ -97,7 +101,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Badge, Button } from '@memoflow/ui-vue-shadcn';
 import { Check, ClockAlert, SkipForward, Undo2 } from '@lucide/vue';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import {
   getTaskOccurrenceScheduleLabel,
   getTaskOccurrenceStatusLabel,
@@ -106,8 +110,8 @@ import {
 
 const props = withDefaults(
   defineProps<{
-    occurrence: TaskInstanceClientDTO;
-    template: TaskTemplateClientDTO;
+    occurrence: TaskOccurrenceClientDTO;
+    template: TaskPlanClientDTO;
     position?: { position: number; total: number } | null;
     busy?: boolean;
     now?: number;

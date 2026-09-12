@@ -6,7 +6,14 @@
  * writes against table schemas, not these domain repositories.
  */
 
-export { KnowledgeRepositoryConnectionPrismaRepository } from './knowledge-repository-connection-prisma.repository';
+export {
+  KnowledgeSpacePrismaRepository,
+  KnowledgeRemoteBindingPrismaRepository,
+  RemoteRepositoryObservationPrismaRepository,
+  RemoteHistoryFencePrismaRepository,
+  KnowledgeProjectionCheckpointPrismaRepository,
+} from './knowledge-remote-binding-prisma.repositories';
+export { KnowledgeDocumentIdentityPrismaRepository } from './knowledge-document-identity-prisma.repository';
 export { GithubWebhookDeliveryPrismaRepository } from './github-webhook-delivery-prisma.repository';
 export { KnowledgeNoteProjectionPrismaRepository } from './knowledge-note-projection-prisma.repository';
 export { KnowledgeAttachmentProjectionPrismaRepository } from './knowledge-attachment-projection-prisma.repository';

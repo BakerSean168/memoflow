@@ -6,7 +6,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTask } from '../../../modules/task/composables/useTask';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import { formatHHmmParts } from '../../../shared/utils/format-hhmm-parts';
 import { startOfDayMs, endOfDayMs, isTodayMs } from '../../../shared/utils/product-time';
 
@@ -34,7 +34,7 @@ function getTodayRange() {
   };
 }
 
-const todayInstances = computed<TaskInstanceClientDTO[]>(() => {
+const todayInstances = computed<TaskOccurrenceClientDTO[]>(() => {
   return (task.instances.value ?? []).filter((inst) =>
     isTodayMs(inst.instanceDate),
   );
@@ -51,7 +51,7 @@ const completedCount = computed(
 );
 
 const templateMap = computed(() => {
-  const map = new Map<string, TaskTemplateClientDTO>();
+  const map = new Map<string, TaskPlanClientDTO>();
   for (const tpl of task.templates.value ?? []) {
     map.set(String(tpl.id), tpl);
   }
@@ -59,7 +59,7 @@ const templateMap = computed(() => {
 });
 
 /** Residual 1297: minutes-of-day HH:mm dual retired onto formatHHmmParts sole. */
-function timeLabel(inst: TaskInstanceClientDTO): string {
+function timeLabel(inst: TaskOccurrenceClientDTO): string {
   const fmt = (minutes: number) => {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
@@ -72,7 +72,7 @@ function timeLabel(inst: TaskInstanceClientDTO): string {
   return t('shell.preview.allDay');
 }
 
-function titleOf(inst: TaskInstanceClientDTO): string {
+function titleOf(inst: TaskOccurrenceClientDTO): string {
   const tpl = templateMap.value.get(String(inst.templateId));
   return tpl?.name || String(inst.templateId);
 }

@@ -101,8 +101,8 @@ describe('composeTask assembly order with goalProgressHandler', () => {
     const repoSet = createTaskPrismaRepositories.mock.results[0].value;
     const moduleCall = createTaskModule.mock.calls[0][0];
     expect(moduleCall).toMatchObject({
-      taskTemplateRepository: repoSet.taskTemplateRepository,
-      taskInstanceRepository: repoSet.taskInstanceRepository,
+      taskPlanRepository: repoSet.taskPlanRepository,
+      taskOccurrenceRepository: repoSet.taskOccurrenceRepository,
       taskWriteTransactionRunner: repoSet.taskWriteTransactionRunner,
     });
     expect(moduleCall.runtimeContributions).toContain(

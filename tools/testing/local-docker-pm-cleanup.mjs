@@ -13,9 +13,9 @@ export function normalizeCleanupPrefix(value = DEFAULT_PM_CLEANUP_PREFIX) {
 export function buildCleanupPreviewSql(prefix) {
   const normalized = normalizeCleanupPrefix(prefix);
   return [
-    'SELECT id, email_address, created_at',
-    'FROM accounts',
-    `WHERE email_address LIKE '${normalized}%@test.com'`,
+    'SELECT id, email, created_at',
+    'FROM cloud_auth_users',
+    `WHERE email LIKE '${normalized}%@test.com'`,
     'ORDER BY created_at;',
   ].join('\n');
 }
@@ -25,8 +25,8 @@ export function buildCleanupSql(prefix) {
   return [
     'BEGIN;',
     'CREATE TEMP TABLE pm_cleanup_ids ON COMMIT DROP AS',
-    'SELECT id FROM accounts',
-    `WHERE email_address LIKE '${normalized}%@test.com';`,
+    'SELECT id FROM cloud_auth_users',
+    `WHERE email LIKE '${normalized}%@test.com';`,
     '',
     'CREATE TEMP TABLE pm_cleanup_identity_tables ON COMMIT DROP AS',
     'SELECT DISTINCT table_name',
@@ -66,7 +66,7 @@ export function buildCleanupSql(prefix) {
     'END',
     '$pm_cleanup$;',
     '',
-    'DELETE FROM auth_identities',
+    'DELETE FROM cloud_auth_users',
     'WHERE id IN (SELECT id FROM pm_cleanup_ids);',
     '',
     'COMMIT;',

@@ -10,7 +10,7 @@
  * ```typescript
  * // ✅ 推荐：从子路径导入（极致 Tree-Shaking）
  * import { GoalServerDTO, GoalStatus } from '@memoflow/contracts/goal';
- * import { TaskTemplateServer, TaskType } from '@memoflow/contracts/task';
+ * import { TaskPlanServer, TaskType } from '@memoflow/contracts/task';
  * import { HttpResponse, ResultCode } from '@memoflow/contracts/result';
  *
  * // ✅ 命名空间导入（避免命名冲突）
@@ -38,7 +38,7 @@
 // Primitives
 // ============================================================
 export { brandedId } from './primitives';
-export type { IdentityId } from './primitives';
+export type { IdentityId, TimeZoneId } from './primitives';
 
 // ============================================================
 // Operations (W7 统一 operation timeline / replay / audit)

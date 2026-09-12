@@ -24,6 +24,8 @@
         @dirty-change="goalDialogDirty = $event"
         @created="handleSaved"
         @updated="handleSaved"
+        @create-with-ai="openCreateWithAI"
+        @open-knowledge="openKnowledge"
       />
     </main>
   </div>
@@ -74,6 +76,16 @@ const views = computed(() => [
 
 function openCreate() {
   void router.push({ name: 'goal-list', query: { dialog: 'goal' } });
+}
+function openCreateWithAI() {
+  dialogOpen.value = false;
+  goalDialogDirty.value = false;
+  void router.push({ path: '/', query: { workflow: 'goal-create' } });
+}
+function openKnowledge(goalId: string) {
+  dialogOpen.value = false;
+  goalDialogDirty.value = false;
+  void router.push({ path: '/repository', query: { goalId } });
 }
 
 async function syncDialogFromRoute() {

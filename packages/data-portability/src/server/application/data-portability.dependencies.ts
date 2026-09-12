@@ -16,10 +16,10 @@ export interface GoalRecordRepoPort {
 
 // ============ Task ============
 
-export interface TaskTemplateRepoPort {
+export interface TaskPlanRepoPort {
   findByIdentityId(identityId: string): Promise<unknown[]>;
 }
-export interface TaskInstanceRepoPort {
+export interface TaskOccurrenceRepoPort {
   findByIdentityId(identityId: string): Promise<unknown[]>;
 }
 
@@ -65,20 +65,6 @@ export interface ScheduleTaskRepoPort {
   findByIdentityId(identityId: string): Promise<unknown[]>;
 }
 
-// ============ Editor ============
-
-export interface EditorWorkspaceRepoPort {
-  findByIdentityId(identityId: string): Promise<unknown[]>;
-}
-export interface EditorSessionRepoPort {
-  findByWorkspaceId(workspaceId: string): Promise<unknown[]>;
-}
-export interface EditorGroupRepoPort {
-  findBySessionId(sessionId: string): Promise<unknown[]>;
-}
-export interface EditorTabRepoPort {
-  findByGroupId(groupId: string): Promise<unknown[]>;
-}
 
 // ============ AI ============
 
@@ -92,10 +78,15 @@ export interface NotificationPreferenceRepoPort {
   findByIdentityId(identityId: string): Promise<unknown | null>;
 }
 
-// ============ Setting ============
+// ============ User Preferences ============
 
-export interface SettingRepoPort {
-  findByIdentityId(identityId: string): Promise<unknown | null>;
+export interface UserPreferenceDocumentPort {
+  readonly namespace: 'presentation' | 'regional';
+  readonly payload: unknown;
+}
+
+export interface UserPreferenceRepoPort {
+  list(identityId: string): Promise<readonly UserPreferenceDocumentPort[]>;
 }
 
 // ============ Aggregate Dependencies ============
@@ -103,8 +94,8 @@ export interface SettingRepoPort {
 export interface DataPortabilityDependencies {
   goalRepository: GoalRepoPort;
   goalRecordRepository: GoalRecordRepoPort;
-  taskTemplateRepository: TaskTemplateRepoPort;
-  taskInstanceRepository: TaskInstanceRepoPort;
+  taskPlanRepository: TaskPlanRepoPort;
+  taskOccurrenceRepository: TaskOccurrenceRepoPort;
   reminderTemplateRepository: ReminderTemplateRepoPort;
   reminderGroupRepository: ReminderGroupRepoPort;
   reminderResponseRepository: ReminderResponseRepoPort;
@@ -116,11 +107,7 @@ export interface DataPortabilityDependencies {
   resourceRepository: ResourceRepoPort;
   scheduleRepository: ScheduleRepoPort;
   scheduleTaskRepository: ScheduleTaskRepoPort;
-  editorWorkspaceRepository: EditorWorkspaceRepoPort;
-  editorSessionRepository: EditorSessionRepoPort;
-  editorGroupRepository: EditorGroupRepoPort;
-  editorTabRepository: EditorTabRepoPort;
   aiConversationRepository: AIConversationRepoPort;
   notificationPreferenceRepository: NotificationPreferenceRepoPort;
-  settingRepository: SettingRepoPort;
+  userPreferenceRepository: UserPreferenceRepoPort;
 }

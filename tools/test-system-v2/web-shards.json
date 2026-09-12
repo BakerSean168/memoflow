@@ -29,7 +29,7 @@
       "estimatedDurationMs": 310305,
       "specs": [
         "user-settings/data-portability.spec.ts",
-        "task/task-template-crud.spec.ts",
+        "task/task-plan-crud.spec.ts",
         "user-settings/persistence.spec.ts",
         "authentication/auth-flow.spec.ts",
         "authentication/auth-password.spec.ts",

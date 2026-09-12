@@ -24,8 +24,8 @@
  * `main.ts` (e.g. `composeAccount`). Do not document retired account module aliases.
  */
 
-import express, { type Express, Router } from 'express';
-import type { CloudAuth } from '@memoflow/cloud-auth/server';
+import express, { type Express, type RequestHandler, Router } from 'express';
+import type { CloudSessionCapability } from '@memoflow/cloud-auth/server';
 import type { CloudAuthEmailKind, CloudAuthEmailLinkCapture } from '@memoflow/cloud-auth/server';
 import type {
   IApiModule,
@@ -53,6 +53,10 @@ export interface PublicAuthCapabilities {
   github: boolean;
 }
 
+interface ApiCloudAuthRuntime extends CloudSessionCapability {
+  readonly expressHandler: RequestHandler;
+}
+
 const NO_PUBLIC_AUTH_CAPABILITIES: PublicAuthCapabilities = Object.freeze({ github: false });
 
 export class ApiBootstrapper {
@@ -65,7 +69,7 @@ export class ApiBootstrapper {
 
   constructor(
     db: DatabaseClient,
-    private readonly cloudAuth: CloudAuth,
+    private readonly cloudAuth: ApiCloudAuthRuntime,
     private readonly testEmailLinks?: Pick<CloudAuthEmailLinkCapture, 'findLatest'>,
     trace: HttpRequestTrace = NOOP_HTTP_REQUEST_TRACE,
     private readonly authCapabilities: PublicAuthCapabilities = NO_PUBLIC_AUTH_CAPABILITIES,

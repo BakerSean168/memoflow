@@ -14,6 +14,7 @@ import type {
   CreateRuleRes,
   DeleteRuleReq,
   DeleteRuleRes,
+  ExportGovernanceRuleBundleRes,
   GetRuleReq,
   GetRuleRes,
   GetRuleRevisionsQuery,
@@ -41,4 +42,5 @@ export interface GovernanceApplicationPort {
   listRules(query: ListRulesQuery): Promise<Result<ListRulesRes>>;
   searchRules(query: SearchRulesQueryInput, cx?: ExecutionContext): Promise<Result<SearchRulesRes>>;
   getRevisions(query: GetRuleRevisionsQuery): Promise<Result<GetRuleRevisionsRes>>;
+  exportRuleBundle(): Promise<Result<ExportGovernanceRuleBundleRes>>;
 }

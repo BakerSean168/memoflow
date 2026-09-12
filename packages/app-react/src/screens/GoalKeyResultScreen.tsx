@@ -5,10 +5,19 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { presentErrorMessage } from '@memoflow/http-client';
 
-import type { GoalRecordClientDTO, KeyResultClientDTO } from '@memoflow/contracts/goal';
+import {
+  goalTimeframeLabel,
+  type GoalRecordClientDTO,
+  type KeyResultClientDTO,
+} from '@memoflow/contracts/goal';
 import { useGoalService } from '../hooks/useGoalService';
 
-import { formatProductDateTime, emptyKind } from '../utils/product-time';
+import {
+  emptyKind,
+  formatProductDateTime,
+  goalTimeframeInputValue,
+  parseGoalTimeframeInput,
+} from '../utils/product-time';
 
 import {
   PageShell,
@@ -41,8 +50,10 @@ export function GoalKeyResultScreen() {
   const [records, setRecords] = useState<GoalRecordClientDTO[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [initialValue, setInitialValue] = useState('0');
   const [currentValue, setCurrentValue] = useState('');
   const [targetValue, setTargetValue] = useState('');
+  const [targetInput, setTargetInput] = useState('');
   const [unit, setUnit] = useState('');
   const [weight, setWeight] = useState('1');
   const [recordValue, setRecordValue] = useState('');
@@ -86,8 +97,10 @@ export function GoalKeyResultScreen() {
     setGoalVersion(result.data.goal.version);
     setTitle(found.title);
     setDescription(found.description ?? '');
+    setInitialValue(String(found.progress.initialValue));
     setCurrentValue(String(found.progress.currentValue));
     setTargetValue(String(found.progress.targetValue));
+    setTargetInput(goalTimeframeInputValue(found.target));
     setUnit(found.progress.unit ?? '');
     setWeight(String(found.weight));
     setRecordValue(String(found.progress.currentValue));
@@ -104,14 +117,37 @@ export function GoalKeyResultScreen() {
       return;
     }
 
+    const nextInitialValue = Number.parseFloat(initialValue);
+    const nextCurrentValue = Number.parseFloat(currentValue);
+    const nextTargetValue = Number.parseFloat(targetValue);
+    if (
+      !Number.isFinite(nextInitialValue) ||
+      !Number.isFinite(nextCurrentValue) ||
+      !Number.isFinite(nextTargetValue)
+    ) {
+      setError('Initial, current, and target values must be valid numbers.');
+      return;
+    }
+    if (nextInitialValue === nextTargetValue) {
+      setError('Initial value must differ from target value.');
+      return;
+    }
+    const target = targetInput.trim().length === 0 ? null : parseGoalTimeframeInput(targetInput);
+    if (targetInput.trim().length > 0 && target === null) {
+      setError('Target supports YYYY-MM-DD, YYYY-MM, Q4 2026, H1 2027, or YYYY.');
+      return;
+    }
+
     setIsMutating(true);
     setError(null);
     const result = await service.updateKeyResult(goalId, keyResultId, {
       expectedVersion: goalVersion,
       title: title.trim(),
       description: description.trim() || null,
-      currentValue: Number.parseFloat(currentValue) || 0,
-      targetValue: Number.parseFloat(targetValue) || 0,
+      initialValue: nextInitialValue,
+      currentValue: nextCurrentValue,
+      targetValue: nextTargetValue,
+      target,
       unit: unit.trim() || null,
       weight: Math.max(1, Math.min(5, Number.parseInt(weight, 10) || 1)),
     });
@@ -211,6 +247,12 @@ export function GoalKeyResultScreen() {
               onChangeText={setDescription}
             />
             <PrimaryTextField
+              label="Initial value"
+              value={initialValue}
+              onChangeText={setInitialValue}
+              keyboardType="numeric"
+            />
+            <PrimaryTextField
               label="Current value"
               value={currentValue}
               onChangeText={setCurrentValue}
@@ -222,6 +264,18 @@ export function GoalKeyResultScreen() {
               onChangeText={setTargetValue}
               keyboardType="numeric"
             />
+            <PrimaryTextField
+              label="Target timeframe"
+              value={targetInput}
+              onChangeText={setTargetInput}
+              placeholder="Q4 2026"
+              hint="Use YYYY-MM-DD, YYYY-MM, Q4 2026, H1 2027, or YYYY. Precision is preserved."
+            />
+            {keyResult.target ? (
+              <ThemedText type="small" themeColor="textSecondary">
+                Current target: {goalTimeframeLabel(keyResult.target)}
+              </ThemedText>
+            ) : null}
             <PrimaryTextField label="Unit" value={unit} onChangeText={setUnit} />
             <PrimaryTextField
               label="Weight"

@@ -29,7 +29,7 @@ export const SERVER_STATE_GC_TIME_MS = 10 * 60_000;
 export interface ServerStateRuntimePolicy {
   lane: RuntimeLane;
   /** Per-module stale times (ms). 各模块 staleTime（毫秒）。 */
-  staleTime: { notification: number; taskTemplate: number; governance: number };
+  staleTime: { notification: number; taskPlan: number; governance: number };
   /** Query cache GC time (ms). 查询缓存 gcTime（毫秒）。 */
   gcTime: number;
   /**
@@ -56,7 +56,7 @@ export function createServerStateRuntimePolicy(lane: RuntimeLane): ServerStateRu
     lane,
     staleTime: {
       notification: NOTIFICATION_STALE_TIME_MS,
-      taskTemplate: TASK_TEMPLATE_STALE_TIME_MS,
+      taskPlan: TASK_TEMPLATE_STALE_TIME_MS,
       governance: GOVERNANCE_STALE_TIME_MS,
     },
     gcTime: SERVER_STATE_GC_TIME_MS,

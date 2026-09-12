@@ -1,38 +1,39 @@
 import { describe, it, expect } from 'vitest';
 import { GoalStatus } from '@memoflow/contracts/goal';
-import { TaskInstanceStatus, TaskTemplateStatus } from '@memoflow/contracts/task';
+import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/contracts/task';
 import { ReminderStatus } from '@memoflow/contracts/reminder';
+import { createTimeContext, createTimeFacade } from '@memoflow/time';
 import type {
   DashboardReadSource,
   DashboardGoalRecord,
-  DashboardTaskTemplateRecord,
-  DashboardTaskInstanceRecord,
+  DashboardTaskPlanRecord,
+  DashboardTaskOccurrenceRecord,
   DashboardScheduleRecord,
   DashboardReminderRecord,
 } from '../domain/types';
 import { getDashboardData } from '../domain/projection';
 
+const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+
 function makeGoal(overrides: Partial<DashboardGoalRecord> = {}): DashboardGoalRecord {
   return {
     id: 'g1',
     name: 'Goal',
-    status: GoalStatus.Active,
+    status: GoalStatus.InProgress,
     deletedAt: null,
     updatedAt: Date.now(),
     overallProgress: 50,
-    dueDate: null,
+    target: null,
     totalKeyResults: 0,
     ...overrides,
   };
 }
 
-function makeTemplate(
-  overrides: Partial<DashboardTaskTemplateRecord> = {},
-): DashboardTaskTemplateRecord {
+function makeTemplate(overrides: Partial<DashboardTaskPlanRecord> = {}): DashboardTaskPlanRecord {
   return {
     id: 't1',
     title: 'Task',
-    status: TaskTemplateStatus.Active,
+    status: TaskPlanStatus.Active,
     deletedAt: null,
     createdAt: Date.now(),
     ...overrides,
@@ -40,12 +41,12 @@ function makeTemplate(
 }
 
 function makeInstance(
-  overrides: Partial<DashboardTaskInstanceRecord> = {},
-): DashboardTaskInstanceRecord {
+  overrides: Partial<DashboardTaskOccurrenceRecord> = {},
+): DashboardTaskOccurrenceRecord {
   return {
     id: 'i1',
     templateId: 't1',
-    status: TaskInstanceStatus.Pending,
+    status: TaskOccurrenceStatus.Pending,
     instanceDate: Date.now(),
     actualEndTime: null,
     updatedAt: Date.now(),
@@ -81,8 +82,8 @@ function makeReminder(overrides: Partial<DashboardReminderRecord> = {}): Dashboa
 function makeSource(overrides: Partial<DashboardReadSource> = {}): DashboardReadSource {
   return {
     listGoals: async () => [],
-    listTaskTemplates: async () => [],
-    listTaskInstances: async () => [],
+    listTaskPlans: async () => [],
+    listTaskOccurrences: async () => [],
     listSchedules: async () => [],
     listUpcomingReminders: async () => [],
     countUnreadNotifications: async () => 0,
@@ -92,7 +93,7 @@ function makeSource(overrides: Partial<DashboardReadSource> = {}): DashboardRead
 
 describe('getDashboardData', () => {
   it('returns empty dashboard with default source', async () => {
-    const data = await getDashboardData('user1', makeSource());
+    const data = await getDashboardData('user1', makeSource(), TEST_TIME_CONTEXT);
 
     expect(data.stats.activeTasks).toBe(0);
     expect(data.stats.completedToday).toBe(0);
@@ -104,17 +105,18 @@ describe('getDashboardData', () => {
     expect(data.upcomingSchedule).toEqual([]);
   });
 
-  it('counts active goals correctly', async () => {
+  it('counts Planned and InProgress goals as the non-terminal active summary', async () => {
     const source = makeSource({
       listGoals: async () => [
-        makeGoal({ id: 'g1', status: GoalStatus.Active }),
+        makeGoal({ id: 'g1', status: GoalStatus.Planned }),
         makeGoal({ id: 'g2', status: GoalStatus.Completed }),
-        makeGoal({ id: 'g3', status: GoalStatus.Active, deletedAt: Date.now() }),
-        makeGoal({ id: 'g4', status: GoalStatus.Active }),
+        makeGoal({ id: 'g3', status: GoalStatus.InProgress, deletedAt: Date.now() }),
+        makeGoal({ id: 'g4', status: GoalStatus.InProgress }),
+        makeGoal({ id: 'g5', status: GoalStatus.Abandoned }),
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.stats.activeGoals).toBe(2);
     expect(data.goalProgress).toHaveLength(2);
   });
@@ -124,7 +126,7 @@ describe('getDashboardData', () => {
       countUnreadNotifications: async () => 5,
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.stats.unreadNotifications).toBe(5);
   });
 
@@ -138,7 +140,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.goalProgress.map((item) => item.id)).toEqual(['g3', 'g1', 'g2']);
   });
 
@@ -148,7 +150,7 @@ describe('getDashboardData', () => {
       listGoals: async () => goals,
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.goalProgress).toHaveLength(5);
   });
 
@@ -161,7 +163,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     const progressById = Object.fromEntries(
       data.goalProgress.map((goal) => [goal.id, goal.progress]),
     );
@@ -173,50 +175,48 @@ describe('getDashboardData', () => {
 
   it('filters out closed and deleted task plans', async () => {
     const source = makeSource({
-      listTaskTemplates: async () => [
-        makeTemplate({ id: 't1', status: TaskTemplateStatus.Active }),
-        makeTemplate({ id: 't2', status: TaskTemplateStatus.Paused }),
+      listTaskPlans: async () => [
+        makeTemplate({ id: 't1', status: TaskPlanStatus.Active }),
+        makeTemplate({ id: 't2', status: TaskPlanStatus.Paused }),
         makeTemplate({ id: 't3', deletedAt: Date.now() }),
-        makeTemplate({ id: 't4', status: TaskTemplateStatus.Closed }),
+        makeTemplate({ id: 't4', status: TaskPlanStatus.Closed }),
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.taskBoard.todo).toBe(0);
   });
 
   it('builds taskBoard from today instances', async () => {
-    const now = Date.now();
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const todayMs = todayStart.getTime();
+    const time = createTimeFacade({ context: TEST_TIME_CONTEXT });
+    const todayMs = Number(time.calendar.startOfDay(time.now()));
 
     const source = makeSource({
-      listTaskInstances: async () => [
+      listTaskOccurrences: async () => [
         makeInstance({
           id: 'i1',
-          status: TaskInstanceStatus.Pending,
+          status: TaskOccurrenceStatus.Pending,
           instanceDate: todayMs + 1000,
         }),
         makeInstance({
           id: 'i2',
-          status: TaskInstanceStatus.InProgress,
+          status: TaskOccurrenceStatus.InProgress,
           instanceDate: todayMs + 2000,
         }),
         makeInstance({
           id: 'i3',
-          status: TaskInstanceStatus.Completed,
+          status: TaskOccurrenceStatus.Completed,
           instanceDate: todayMs + 3000,
         }),
         makeInstance({
           id: 'i4',
-          status: TaskInstanceStatus.Pending,
+          status: TaskOccurrenceStatus.Pending,
           instanceDate: todayMs + 4000,
         }),
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.taskBoard.todo).toBe(2);
     expect(data.taskBoard.inProgress).toBe(1);
     expect(data.taskBoard.done).toBe(1);
@@ -224,14 +224,14 @@ describe('getDashboardData', () => {
 
   it('counts overdue tasks', async () => {
     const source = makeSource({
-      listTaskInstances: async () => [
-        makeInstance({ id: 'i1', status: TaskInstanceStatus.Missed, isOverdue: () => false }),
-        makeInstance({ id: 'i2', status: TaskInstanceStatus.Pending, isOverdue: () => true }),
-        makeInstance({ id: 'i3', status: TaskInstanceStatus.Pending, isOverdue: () => false }),
+      listTaskOccurrences: async () => [
+        makeInstance({ id: 'i1', status: TaskOccurrenceStatus.Missed, isOverdue: () => false }),
+        makeInstance({ id: 'i2', status: TaskOccurrenceStatus.Pending, isOverdue: () => true }),
+        makeInstance({ id: 'i3', status: TaskOccurrenceStatus.Pending, isOverdue: () => false }),
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.taskBoard.overdue).toBe(1);
   });
 
@@ -244,7 +244,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.upcomingSchedule).toHaveLength(1);
     expect(data.upcomingSchedule[0].id).toBe('s1');
   });
@@ -259,7 +259,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.stats.scheduleConflicts).toBe(2);
   });
 
@@ -275,7 +275,7 @@ describe('getDashboardData', () => {
       ],
     });
 
-    const data = await getDashboardData('user1', source);
+    const data = await getDashboardData('user1', source, TEST_TIME_CONTEXT);
     expect(data.stats.upcomingReminders).toBe(1);
   });
 });

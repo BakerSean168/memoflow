@@ -1,42 +1,35 @@
 import { ValueObject } from '@memoflow/utils/domain';
-import type {
-  KeyResultProgress as IKeyResultProgress,
-  KeyResultProgressDTO,
-  KeyResultCalculationMethod,
-} from '@memoflow/contracts/goal';
+import type { KeyResultCalculationMethod, KeyResultMeasurement } from '@memoflow/contracts/goal';
 import { calculateKeyResultProgress } from '../services/key-result-progress-calculator';
 
-/** Immutable KR Measurement V2 value object. Arithmetic delegates to the canonical calculator. */
-export class KeyResultProgress
-  extends ValueObject<KeyResultProgressDTO>
-  implements IKeyResultProgress
-{
-  private constructor(props: KeyResultProgressDTO) {
+/** Immutable KR Measurement V3 server value object. Arithmetic delegates to the canonical calculator. */
+export class KeyResultProgress extends ValueObject<KeyResultMeasurement> {
+  private constructor(props: KeyResultMeasurement) {
     super(props);
   }
 
-  public static create(props: KeyResultProgressDTO): KeyResultProgress {
+  public static create(props: KeyResultMeasurement): KeyResultProgress {
     this.validate(props);
     return new KeyResultProgress(props);
   }
 
   public static createDefault(targetValue: number): KeyResultProgress {
     return this.create({
-      startingValue: 0,
+      initialValue: 0,
       currentValue: 0,
       targetValue,
-      progressBaselineValue: null,
+      trackingBaseValue: 0,
       aggregationMethod: 'Sum',
       unit: null,
     });
   }
 
-  public static fromDTO(dto: KeyResultProgressDTO): KeyResultProgress {
+  public static fromDTO(dto: KeyResultMeasurement): KeyResultProgress {
     this.validate(dto);
     return new KeyResultProgress(dto);
   }
 
-  private static validate(props: KeyResultProgressDTO): void {
+  private static validate(props: KeyResultMeasurement): void {
     if (props.unit && props.unit.length > 20) throw new Error('Unit too long (max 20 characters)');
     calculateKeyResultProgress(props);
   }
@@ -45,8 +38,8 @@ export class KeyResultProgress
     return this.props.aggregationMethod;
   }
 
-  public get startingValue(): number {
-    return this.props.startingValue;
+  public get initialValue(): number {
+    return this.props.initialValue;
   }
 
   public get targetValue(): number {
@@ -57,8 +50,8 @@ export class KeyResultProgress
     return this.props.currentValue;
   }
 
-  public get progressBaselineValue(): number | null {
-    return this.props.progressBaselineValue;
+  public get trackingBaseValue(): number {
+    return this.props.trackingBaseValue;
   }
 
   public get unit(): string | null {
@@ -69,16 +62,12 @@ export class KeyResultProgress
     return KeyResultProgress.create({ ...this.props, currentValue });
   }
 
-  public updateStartingValue(startingValue: number): KeyResultProgress {
-    return KeyResultProgress.create({ ...this.props, startingValue });
+  public updateInitialValue(initialValue: number): KeyResultProgress {
+    return KeyResultProgress.create({ ...this.props, initialValue });
   }
 
   public updateTargetValue(targetValue: number): KeyResultProgress {
     return KeyResultProgress.create({ ...this.props, targetValue });
-  }
-
-  public updateProgressBaselineValue(progressBaselineValue: number | null): KeyResultProgress {
-    return KeyResultProgress.create({ ...this.props, progressBaselineValue });
   }
 
   public updateAggregationMethod(aggregationMethod: KeyResultCalculationMethod): KeyResultProgress {
@@ -94,7 +83,7 @@ export class KeyResultProgress
   }
 
   public reset(): KeyResultProgress {
-    return this.updateCurrentValue(this.props.startingValue);
+    return this.updateCurrentValue(this.props.trackingBaseValue);
   }
 
   public setToTarget(): KeyResultProgress {
@@ -134,15 +123,14 @@ export class KeyResultProgress
   }
 
   public getCompletedValue(): number {
-    const baseline = this.props.progressBaselineValue ?? 0;
-    return Math.abs(this.props.currentValue - baseline);
+    return Math.abs(this.props.currentValue - this.props.initialValue);
   }
 
   public getDirection(): 'up' | 'down' {
     return calculateKeyResultProgress(this.props).direction === 'increasing' ? 'up' : 'down';
   }
 
-  public toDTO(): KeyResultProgressDTO {
+  public toDTO(): KeyResultMeasurement {
     return { ...this.props };
   }
 }

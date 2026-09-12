@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { GoalId, ScheduleTaskId } from '../../../primitives';
 import { brandedId } from '../../../primitives';
 import { GoalStatus } from '../../goal/value-objects/goal-status';
+import { GoalTimeframeSchema } from '../../goal/value-objects/goal-timeframe';
 
 export const DashboardStatsSchema = z.object({
   activeTasks: z.number().int().nonnegative(),
@@ -37,7 +38,7 @@ export const DashboardGoalProgressItemSchema = z.object({
   name: z.string(),
   progress: z.number().int().min(0).max(100),
   status: z.enum(GoalStatus),
-  dueDate: z.number().int().nonnegative(),
+  target: GoalTimeframeSchema.nullable(),
   keyResultCount: z.number().int().nonnegative(),
 });
 

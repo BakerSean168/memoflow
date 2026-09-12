@@ -108,17 +108,17 @@ import {
   Checkbox,
 } from '@memoflow/ui-vue-shadcn';
 import { CheckCircle, Clock, Plus } from '@lucide/vue';
-import type { TaskInstanceViewModel } from '../types';
+import type { TaskOccurrenceViewModel } from '../types';
 import { useI18n } from 'vue-i18n';
-import { getTaskTimeValueDisplay } from '../../utils/task-template-presentation';
+import { getTaskTimeValueDisplay } from '../../utils/task-plan-presentation';
 
 const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
-    tasks?: TaskInstanceViewModel[];
+    tasks?: TaskOccurrenceViewModel[];
     onNavigateToManagement?: () => void | Promise<void>;
-    onToggleComplete?: (task: TaskInstanceViewModel) => void | Promise<void>;
+    onToggleComplete?: (task: TaskOccurrenceViewModel) => void | Promise<void>;
   }>(),
   {
     tasks: () => [],
@@ -127,7 +127,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: 'navigate-management'): void;
-  (e: 'toggle-complete', task: TaskInstanceViewModel): void;
+  (e: 'toggle-complete', task: TaskOccurrenceViewModel): void;
 }>();
 
 const navigateToTaskManagement = () => {
@@ -156,12 +156,12 @@ const completionPercentage = computed(() => {
 });
 
 // ✅ 切换任务完成状态
-const toggleTaskComplete = async (task: TaskInstanceViewModel) => {
+const toggleTaskComplete = async (task: TaskOccurrenceViewModel) => {
   emit('toggle-complete', task);
   await props.onToggleComplete?.(task);
 };
 
-const getTaskTimeLabel = (task: TaskInstanceViewModel) =>
+const getTaskTimeLabel = (task: TaskOccurrenceViewModel) =>
   getTaskTimeValueDisplay(t, task.timeConfig);
 </script>
 

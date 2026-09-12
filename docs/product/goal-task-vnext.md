@@ -8,10 +8,12 @@ tags:
   - domain
 description: Goal / Task vNext 的产品模型、页面信息架构、交互文案与跨模块闭环
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-08-25T15:03:00+08:00
+updated: 2026-09-12T21:49:00+08:00
 ---
 
 # Goal / Task vNext 产品设计
+
+> **2026-09-12 canonical state：** Goal 已完成 vNext direct cutover：identity 为 `name + summary`，lifecycle 为 `Planned / InProgress / Completed / Abandoned`，planning time 为 `startDate + GoalTimeframe target`，KR 使用 Measurement V3，Goal Workspace 组合 Task/Knowledge context，AI 使用 durable GoalPlanDraft V2。Task 的 vNext lifecycle/due/overdue 语义保持 Task owner 真值。详见 [Goal vNext active plan](../plan/active/2026-09-08-goal-vnext-model-convergence.md) 与 ADR-067～070。
 
 ## 1. North Star
 
@@ -42,12 +44,13 @@ Goal 与 Task 独立可用，联合使用时自动闭环。
 用户可见字段：
 
 ```text
-title
-description?
-status
-startDate?
-dueDate?
+name
+summary?
+status = Planned | InProgress | Completed | Abandoned
+startDate?     # Ymd
+target?        # GoalTimeframe: Day / Month / Quarter / Half-year / Year
 labels[]
+reminderConfig?
 keyResults[]
 ```
 
@@ -80,20 +83,21 @@ comparison
 
 ```text
 title
+initialValue = 0
 currentValue
 targetValue
 unit?
+target?        # optional GoalTimeframe
 ```
 
 高级：
 
 ```text
-progressBaselineValue?
 aggregationMethod = Sum
 weight = 3
 ```
 
-不再有 Value Type。
+系统内部另有 `trackingBaseValue` 作为 Record 聚合 seed；它不进入普通产品 UI，也不作为 0% baseline。Increasing / decreasing KR 统一使用 `Initial -> Current -> Target` 公式，不再有 Value Type 或 `progressBaselineValue`。
 
 ### 2.3 Task
 

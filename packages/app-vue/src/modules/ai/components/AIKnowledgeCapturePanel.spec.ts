@@ -22,6 +22,43 @@ const i18n = createI18n({
 });
 
 describe('AIKnowledgeCapturePanel', () => {
+  it('shows the stable memoflow_id before knowledge draft approval', () => {
+    const documentId = 'kdoc_550e8400-e29b-41d4-a716-446655440530';
+    const wrapper = mount(AIKnowledgeCapturePanel, {
+      global: { plugins: [i18n] },
+      props: {
+        toolMode: 'knowledge-capture',
+        knowledgeCaptureRun: {
+          runId: 'run-review',
+          conversationId: 'conv-review',
+          kind: 'knowledge.capture',
+          status: 'suspended',
+          createdAt: 1,
+          updatedAt: 2,
+          suspension: {
+            type: 'knowledge_draft_review',
+            revision: 1,
+            warnings: [],
+            draft: {
+              revision: 1,
+              knowledgeDocumentId: documentId,
+              title: 'Stable identity',
+              topic: 'Review stable identity',
+              markdown: '# Stable identity',
+              targetSubpath: 'Notes/Stable.md',
+              tags: [],
+              duplicateRisk: '',
+            },
+          },
+        },
+      },
+    });
+
+    expect(wrapper.get('[data-testid="knowledge-capture-workflow-document-id"]').text()).toBe(
+      `memoflow_id: ${documentId}`,
+    );
+  });
+
   it('redacts raw knowledge persistence failure messages', () => {
     const wrapper = mount(AIKnowledgeCapturePanel, {
       global: { plugins: [i18n] },

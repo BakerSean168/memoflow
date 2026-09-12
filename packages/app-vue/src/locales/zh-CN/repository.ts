@@ -18,6 +18,13 @@ export default {
     "createAction": "新建笔记",
     "commit": "commit {sha}",
     "readOnly": "只读投影",
+    "documentId": "稳定文档身份",
+    "adoptAction": "纳入 MemoFlow 管理",
+    "adoptTitle": "纳入这篇知识笔记",
+    "adoptDescription": "MemoFlow 只会创建一次受控的 metadata Git commit，为现有 Markdown 添加稳定文档身份，不编辑正文。",
+    "adoptPatch": "即将写入的元数据",
+    "adoptImmutable": "本次确认绑定当前投影的 Git blob；如果文件在提交前发生变化，系统会停止而不是覆盖新内容。",
+    "adoptConfirmAction": "确认元数据提交",
     "noteViews": "知识笔记视图",
     "previewTab": "预览",
     "relationsTab": "关系",
@@ -58,13 +65,10 @@ export default {
       "indexed": "可检索",
       "failed": "索引失败"
     },
-    "status": {
-      "Active": "已连接",
-      "Suspended": "已暂停",
-      "Revoked": "已撤销",
-      "Error": "需要处理",
-      "PendingInstall": "等待安装",
-      "Unknown": "未知状态"
+    "providerStatus": {
+      "Ready": "Provider 可用",
+      "Blocked": "Provider 受阻",
+      "Unchecked": "尚未检查"
     }
   },
   "writeRequestLedger": {

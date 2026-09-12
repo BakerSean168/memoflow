@@ -1,6 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'crypto';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { createTimeContext } from '@memoflow/time';
 import {
   NotificationCategory,
   NotificationRequestedSchema,
@@ -10,9 +11,9 @@ import {
 } from '@memoflow/contracts/notification';
 import {
   ReminderTimeUnit,
-  TaskInstanceStatus,
+  TaskOccurrenceStatus,
   TaskReminderType,
-  TaskTemplateStatus,
+  TaskPlanStatus,
 } from '@memoflow/contracts/task';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
 // eslint-disable-next-line @nx/enforce-module-boundaries
@@ -41,6 +42,11 @@ import {
   getPrisma,
   seedAccount,
 } from '@memoflow/test-utils/setup/integration-helpers';
+
+const TEST_NOTIFICATION_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => TEST_NOTIFICATION_TIME_CONTEXT,
+};
 
 describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
   let prisma: ReturnType<typeof getPrisma>;
@@ -87,6 +93,7 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
 
   function buildRuntime() {
     return createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       ownerToken: `worker-${randomUUID()}`,
       repository: notificationRepo,
@@ -112,7 +119,9 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
     expect(shared.status).toBe('pending');
     // No Fact materialized at write time.
     expect(
-      await prisma.notification.count({ where: { identityId, idempotencyKey: envelope.idempotencyKey } }),
+      await prisma.notification.count({
+        where: { identityId, idempotencyKey: envelope.idempotencyKey },
+      }),
     ).toBe(0);
   });
 
@@ -238,9 +247,7 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
     expect(second.operationId).toBe(first.operationId);
     expect(second.idempotencyKey).toBe(first.idempotencyKey);
     expect(second.status).toBe('pending');
-    expect(
-      await prisma.outboxMessage.count({ where: { id: opId } }),
-    ).toBe(1);
+    expect(await prisma.outboxMessage.count({ where: { id: opId } })).toBe(1);
   });
 
   it('6. Envelope-level idempotency: a retry with a NEW operationId reconciles to the durable row pinned by idempotencyKey', async () => {
@@ -248,7 +255,10 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
     const retryOpId = randomUUID();
     const envelope = buildEnvelope();
 
-    const first = await writer.enqueueNotificationRequested({ operationId: originalOpId, envelope });
+    const first = await writer.enqueueNotificationRequested({
+      operationId: originalOpId,
+      envelope,
+    });
     // Crash/replay retry that generated a fresh operationId for the SAME envelope.
     const retried = await writer.enqueueNotificationRequested({ operationId: retryOpId, envelope });
 
@@ -257,7 +267,9 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
     expect(retried.status).toBe('pending');
     // Exactly one durable row: the retry must not create a second row nor throw
     // the unique-idempotencyKey violation.
-    expect(await prisma.outboxMessage.count({ where: { idempotencyKey: envelope.idempotencyKey } })).toBe(1);
+    expect(
+      await prisma.outboxMessage.count({ where: { idempotencyKey: envelope.idempotencyKey } }),
+    ).toBe(1);
     expect(await prisma.outboxMessage.count({ where: { id: retryOpId } })).toBe(0);
 
     // The re-claimed envelope still consumes into exactly one Fact + dispatch.
@@ -267,7 +279,9 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
       where: { identityId, idempotencyKey: envelope.idempotencyKey },
     });
     expect(facts).toBe(1);
-    const shared = await prisma.outboxMessage.findUniqueOrThrow({ where: { id: first.operationId } });
+    const shared = await prisma.outboxMessage.findUniqueOrThrow({
+      where: { id: first.operationId },
+    });
     expect(shared.status).toBe('succeeded');
   });
 
@@ -316,27 +330,27 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
   });
 
   it('8. NOTIF-3302: task.reminder.fire handler emits NotificationRequested and the runtime materializes ONE Task Fact', async () => {
-    const instanceId = `TaskInstanceId_${randomUUID()}`;
-    const templateId = `TaskTemplateId_${randomUUID()}`;
+    const instanceId = `TaskOccurrenceId_${randomUUID()}`;
+    const templateId = `TaskPlanId_${randomUUID()}`;
     const schedulingKey = `${instanceId}|2026-08-10T08:45:00.000Z`;
     const registration = createTaskReminderScheduledHandlerRegistration({
-      taskInstanceRepository: {
+      taskOccurrenceRepository: {
         findByIdForIdentity: async () => ({
           id: instanceId,
           identityId,
           templateId,
           occurrenceKey: null,
-          status: TaskInstanceStatus.Pending,
+          status: TaskOccurrenceStatus.Pending,
           deletedAt: null,
         }),
       },
-      taskTemplateRepository: {
+      taskPlanRepository: {
         findByIdForIdentity: async () => ({
           toServerDTO: () => ({
             id: templateId,
             identityId,
             name: 'Ship R07',
-            status: TaskTemplateStatus.Active,
+            status: TaskPlanStatus.Active,
             deletedAt: null,
             reminderConfig: {
               enabled: true,
@@ -451,8 +465,8 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
             id: goalId,
             identityId,
             name: 'Ship R06',
-            description: null,
-            status: GoalStatus.Active,
+            summary: null,
+            status: GoalStatus.InProgress,
             deletedAt: null,
             archivedAt: null,
             completedAt: null,

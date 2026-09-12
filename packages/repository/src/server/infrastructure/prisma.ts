@@ -26,9 +26,16 @@ import type { IKnowledgeRepositoryConnectionService } from '../application/ports
 import type { IKnowledgeRepositoryProjectionService } from '../application/ports/knowledge-repository-projection.service.port';
 import type { IKnowledgeNoteCommitService } from '../application/ports/knowledge-note-commit.service.port';
 import { GitHubAppClient } from './services/github-app-client';
-import { KnowledgeRepositoryConnectionPrismaRepository } from './adapters/prisma/knowledge-repository-connection-prisma.repository';
+import {
+  KnowledgeProjectionCheckpointPrismaRepository,
+  KnowledgeRemoteBindingPrismaRepository,
+  KnowledgeSpacePrismaRepository,
+  RemoteHistoryFencePrismaRepository,
+  RemoteRepositoryObservationPrismaRepository,
+} from './adapters/prisma/knowledge-remote-binding-prisma.repositories';
 import { KnowledgeRepositoryInstallationIntentPrismaRepository } from './adapters/prisma/knowledge-repository-installation-intent-prisma.repository';
-import { KnowledgeRepositoryConnectionWritePrismaTransactionRunner } from './adapters/prisma/knowledge-repository-connection-write-prisma-transaction.runner';
+import { KnowledgeRemoteBindingWritePrismaTransactionRunner } from './adapters/prisma/knowledge-remote-binding-write-prisma-transaction.runner';
+import { KnowledgeDocumentIdentityPrismaRepository } from './adapters/prisma/knowledge-document-identity-prisma.repository';
 import { GithubWebhookDeliveryPrismaRepository } from './adapters/prisma/github-webhook-delivery-prisma.repository';
 import { KnowledgeNoteProjectionPrismaRepository } from './adapters/prisma/knowledge-note-projection-prisma.repository';
 import { KnowledgeAttachmentProjectionPrismaRepository } from './adapters/prisma/knowledge-attachment-projection-prisma.repository';
@@ -36,15 +43,23 @@ import { KnowledgeAttachmentContentCachePrismaRepository } from './adapters/pris
 import { KnowledgeWriteRequestPrismaRepository } from './adapters/prisma/knowledge-write-request-prisma.repository';
 import { KnowledgeRepositoryLeasePrismaRepository } from './adapters/prisma/knowledge-repository-lease-prisma.repository';
 import { KnowledgeRepositoryProjectionService } from '../application/services/knowledge-repository-projection.service';
+import { KnowledgeProjectionEngine } from '../application/services/knowledge-projection.engine';
 import { KnowledgeNoteCommitService } from '../application/services/knowledge-note-commit.service';
 import {
   PrismaOperationAuditRepository,
   globalUnifiedOperationMetrics,
 } from '@memoflow/patterns/operations';
 import type { OperationAuditRepository } from '@memoflow/patterns/operations';
-import type { IKnowledgeRepositoryConnectionRepository } from '../application/ports/knowledge-repository-connection.repository';
+import type {
+  IKnowledgeProjectionCheckpointRepository,
+  IKnowledgeRemoteBindingRepository,
+  IKnowledgeSpaceRepository,
+  IRemoteHistoryFenceRepository,
+  IRemoteRepositoryObservationRepository,
+} from '../application/ports/knowledge-remote-binding.repositories';
 import type { IKnowledgeRepositoryInstallationIntentRepository } from '../application/ports/knowledge-repository-installation-intent.repository';
 import type { KnowledgeRepositoryInstallationRoutingConfig } from '../application/services/knowledge-repository-connection.service';
+import type { IKnowledgeDocumentIdentityRepository } from '../application/ports/knowledge-document-identity.repository';
 import type {
   IGithubWebhookDeliveryRepository,
   IKnowledgeNoteProjectionRepository,
@@ -86,10 +101,15 @@ export interface GithubAppConfig {
  * attachment 内容缓存、write requests、lease）以及操作审计仓储。
  */
 export interface RepositoryPrismaRepositorySet {
-  readonly connectionRepository: IKnowledgeRepositoryConnectionRepository;
+  readonly knowledgeSpaceRepository: IKnowledgeSpaceRepository;
+  readonly bindingRepository: IKnowledgeRemoteBindingRepository;
+  readonly observationRepository: IRemoteRepositoryObservationRepository;
+  readonly historyFenceRepository: IRemoteHistoryFenceRepository;
+  readonly projectionCheckpointRepository: IKnowledgeProjectionCheckpointRepository;
   readonly installationIntentRepository: IKnowledgeRepositoryInstallationIntentRepository;
-  readonly connectionWriteTransactionRunner: KnowledgeRepositoryConnectionWritePrismaTransactionRunner;
+  readonly bindingWriteTransactionRunner: KnowledgeRemoteBindingWritePrismaTransactionRunner;
   readonly deliveryRepository: IGithubWebhookDeliveryRepository;
+  readonly documentIdentityRepository: IKnowledgeDocumentIdentityRepository;
   readonly noteProjectionRepository: IKnowledgeNoteProjectionRepository;
   readonly attachmentProjectionRepository: IKnowledgeAttachmentProjectionRepository;
   readonly attachmentContentCache: IKnowledgeAttachmentContentCache;
@@ -124,12 +144,15 @@ export function createRepositoryPrismaRepositories(
   db: PrismaClient,
 ): RepositoryPrismaRepositorySet {
   return {
-    connectionRepository: new KnowledgeRepositoryConnectionPrismaRepository(db),
+    knowledgeSpaceRepository: new KnowledgeSpacePrismaRepository(db),
+    bindingRepository: new KnowledgeRemoteBindingPrismaRepository(db),
+    observationRepository: new RemoteRepositoryObservationPrismaRepository(db),
+    historyFenceRepository: new RemoteHistoryFencePrismaRepository(db),
+    projectionCheckpointRepository: new KnowledgeProjectionCheckpointPrismaRepository(db),
     installationIntentRepository: new KnowledgeRepositoryInstallationIntentPrismaRepository(db),
-    connectionWriteTransactionRunner: new KnowledgeRepositoryConnectionWritePrismaTransactionRunner(
-      db,
-    ),
+    bindingWriteTransactionRunner: new KnowledgeRemoteBindingWritePrismaTransactionRunner(db),
     deliveryRepository: new GithubWebhookDeliveryPrismaRepository(db),
+    documentIdentityRepository: new KnowledgeDocumentIdentityPrismaRepository(db),
     noteProjectionRepository: new KnowledgeNoteProjectionPrismaRepository(db),
     attachmentProjectionRepository: new KnowledgeAttachmentProjectionPrismaRepository(db),
     attachmentContentCache: new KnowledgeAttachmentContentCachePrismaRepository(db),
@@ -183,7 +206,7 @@ export function createRepositoryPrismaRuntimeContributions(
   }
 
   const { repositories, githubApp } = deps;
-  const connectionRepository = githubApp ? repositories.connectionRepository : null;
+  const bindingRepository = githubApp ? repositories.bindingRepository : null;
   const githubAppClient = githubApp
     ? (githubApp.client ??
       new GitHubAppClient({
@@ -197,13 +220,25 @@ export function createRepositoryPrismaRuntimeContributions(
   const attachmentContentCache = githubApp ? repositories.attachmentContentCache : null;
   const leaseRepository = githubApp ? repositories.leaseRepository : null;
   const writeRequestRepository = githubApp ? repositories.writeRequestRepository : null;
+  const knowledgeProjectionEngine =
+    githubApp && projectionRepository
+      ? new KnowledgeProjectionEngine({
+          projectionRepository,
+          attachmentRepository: attachmentRepository ?? undefined,
+          documentIdentityRepository: repositories.documentIdentityRepository,
+        })
+      : null;
 
   const knowledgeRepositoryConnectionService =
-    githubApp && connectionRepository && githubAppClient
+    githubApp && bindingRepository && githubAppClient
       ? new KnowledgeRepositoryConnectionService({
           appSlug: githubApp.appSlug,
-          connectionRepository,
-          connectionWriteTransactionRunner: repositories.connectionWriteTransactionRunner,
+          knowledgeSpaceRepository: repositories.knowledgeSpaceRepository,
+          bindingRepository,
+          observationRepository: repositories.observationRepository,
+          historyFenceRepository: repositories.historyFenceRepository,
+          projectionCheckpointRepository: repositories.projectionCheckpointRepository,
+          bindingWriteTransactionRunner: repositories.bindingWriteTransactionRunner,
           githubAppClient,
           installationIntentRepository:
             githubApp.installationIntentRepository ?? repositories.installationIntentRepository,
@@ -213,14 +248,18 @@ export function createRepositoryPrismaRuntimeContributions(
       : null;
   const knowledgeRepositoryProjectionService =
     githubApp &&
-    connectionRepository &&
+    bindingRepository &&
     githubAppClient &&
     projectionRepository &&
     attachmentRepository
       ? new KnowledgeRepositoryProjectionService({
           webhookSecret: githubApp.webhookSecret,
-          connectionRepository,
+          connectionRepository: bindingRepository,
+          projectionCheckpointRepository: repositories.projectionCheckpointRepository,
+          observationRepository: repositories.observationRepository,
+          historyFenceRepository: repositories.historyFenceRepository,
           deliveryRepository: repositories.deliveryRepository,
+          documentIdentityRepository: repositories.documentIdentityRepository,
           projectionRepository,
           attachmentRepository,
           attachmentContentCache: attachmentContentCache ?? undefined,
@@ -228,22 +267,23 @@ export function createRepositoryPrismaRuntimeContributions(
           leaseRepository: leaseRepository ?? undefined,
           githubAppClient,
           metrics: globalUnifiedOperationMetrics,
+          projectionEngine: knowledgeProjectionEngine ?? undefined,
         })
       : null;
   const knowledgeNoteCommitService =
-    githubApp &&
-    connectionRepository &&
-    githubAppClient &&
-    projectionRepository &&
-    deps.closureChecker
+    githubApp && bindingRepository && githubAppClient && projectionRepository && deps.closureChecker
       ? new KnowledgeNoteCommitService({
-          connectionRepository,
+          connectionRepository: bindingRepository,
+          observationRepository: repositories.observationRepository,
+          historyFenceRepository: repositories.historyFenceRepository,
+          documentIdentityRepository: repositories.documentIdentityRepository,
           projectionRepository,
           writeRequestRepository: writeRequestRepository ?? repositories.writeRequestRepository,
           leaseRepository: leaseRepository ?? undefined,
           githubAppClient,
           closureChecker: deps.closureChecker,
           metrics: globalUnifiedOperationMetrics,
+          projectionEngine: knowledgeProjectionEngine ?? undefined,
         })
       : null;
 

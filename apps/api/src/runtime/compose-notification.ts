@@ -35,6 +35,7 @@
  */
 
 import type { PrismaClient } from '@memoflow/database';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createNotificationDurableRuntime,
   createNotificationModule,
@@ -57,6 +58,7 @@ export interface ComposeNotificationDependencies {
   readonly db: PrismaClient;
   /** Host-owned account-active checker (fail-closed for closed accounts). 宿主持有的账户激活检查器（对已关闭账户 fail-closed）。 */
   readonly closureChecker: (identityId: string) => Promise<boolean>;
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Explicit channel capabilities selected by the host. 宿主显式选择的 channel capabilities。 */
   readonly channelCapabilities: readonly ChannelCapabilitySpec[];
 }
@@ -121,6 +123,7 @@ export function composeNotification(
     notificationRepository: repositories.notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
     closureChecker: dependencies.closureChecker,
+    userTimeContextPort: dependencies.userTimeContextPort,
     reliableAdapter: repositories.reliableAdapter,
     channelCapabilities: Array.from(dependencies.channelCapabilities),
   });
@@ -130,6 +133,7 @@ export function composeNotification(
     preferenceRepository: repositories.notificationPreferenceRepository,
     templateRepository: repositories.notificationTemplateRepository,
     closureChecker: dependencies.closureChecker,
+    userTimeContextPort: dependencies.userTimeContextPort,
     durableRuntime,
     runtimeContributions: [durableRuntime],
     auditRepository: repositories.auditRepository,

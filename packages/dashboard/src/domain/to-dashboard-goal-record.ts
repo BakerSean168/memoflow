@@ -9,7 +9,7 @@ export type DashboardGoalSource = Pick<
   | 'deletedAt'
   | 'updatedAt'
   | 'overallProgress'
-  | 'dueDate'
+  | 'target'
   | 'totalKeyResults'
 >;
 
@@ -22,7 +22,7 @@ export function toDashboardGoalRecord(goal: DashboardGoalSource): DashboardGoalR
     deletedAt: goal.deletedAt,
     updatedAt: goal.updatedAt,
     overallProgress: goal.overallProgress,
-    dueDate: goal.dueDate,
+    target: goal.target,
     totalKeyResults: goal.totalKeyResults,
   };
 }

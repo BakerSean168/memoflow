@@ -260,7 +260,13 @@ async function handleCreateSchedule(data: CreateScheduleRequest): Promise<boolea
   const result = await schedule.createCalendarEntry(data);
   if (result) {
     if (windowStart.value && windowEnd.value) {
-      await fetchForRange(windowStart.value, windowEnd.value);
+      try {
+        await fetchForRange(windowStart.value, windowEnd.value);
+      } catch {
+        // The command already committed and the local Schedule store contains the returned DTO.
+        // A read-model refresh failure must never be reported as a failed create.
+        toast.warning(t('schedule.toast.scheduleCreatedRefreshFailed'));
+      }
     }
     toast.success(t('schedule.toast.scheduleCreated'));
     return true;

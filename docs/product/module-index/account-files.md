@@ -50,10 +50,8 @@ updated: 2026-08-03T00:00:00+08:00
 | 文件 | 说明 |
 | --- | --- |
 | [`packages/account/src/server/domain/aggregates/account.ts`](../../../packages/account/src/server/domain/aggregates/account.ts) | Account 聚合根 |
-| [`packages/account/src/server/domain/services/account-uniqueness-checker.ts`](../../../packages/account/src/server/domain/services/account-uniqueness-checker.ts) | 邮箱唯一性检查服务 |
 | [`packages/account/src/server/application/use-cases/commands/update-account-profile.use-case.ts`](../../../packages/account/src/server/application/use-cases/commands/update-account-profile.use-case.ts) | 更新资料用例 |
 | [`packages/account/src/server/application/use-cases/commands/close-account.use-case.ts`](../../../packages/account/src/server/application/use-cases/commands/close-account.use-case.ts) | 关闭当前云端 Account；按 context identity 主键加载 |
-| [`packages/account/src/server/application/use-cases/commands/update-account-settings.use-case.ts`](../../../packages/account/src/server/application/use-cases/commands/update-account-settings.use-case.ts) | 更新设置用例 |
 | [`packages/account/src/server/application/use-cases/queries/get-account-profile.use-case.ts`](../../../packages/account/src/server/application/use-cases/queries/get-account-profile.use-case.ts) | 获取资料查询 |
 | [`packages/account/src/server/infrastructure/account.module.ts`](../../../packages/account/src/server/infrastructure/account.module.ts) | 服务端账户模块组合根 |
 | [`packages/account/src/server/infrastructure/cloud-account-provisioner.ts`](../../../packages/account/src/server/infrastructure/cloud-account-provisioner.ts) | Better Auth user 到同 ID Account 的幂等投影 |
@@ -69,7 +67,6 @@ updated: 2026-08-03T00:00:00+08:00
 | [`packages/contracts/src/modules/account/protocol/account-event-map.ts`](../../../packages/contracts/src/modules/account/protocol/account-event-map.ts) | 账户事件 map |
 | [`packages/contracts/src/modules/account/protocol/account-rpc-map.ts`](../../../packages/contracts/src/modules/account/protocol/account-rpc-map.ts) | 账户 RPC map |
 | [`packages/contracts/src/modules/account/value-objects/account-profile.ts`](../../../packages/contracts/src/modules/account/value-objects/account-profile.ts) | AccountProfile 值对象 |
-| [`packages/contracts/src/modules/account/value-objects/account-settings.ts`](../../../packages/contracts/src/modules/account/value-objects/account-settings.ts) | AccountSettings 值对象 |
 
 ## 测试入口
 

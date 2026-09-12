@@ -70,6 +70,9 @@ const notificationRequestedWriter = {
   enqueueNotificationRequested: vi.fn(),
 } as never;
 const closureChecker = async (_identityId: string): Promise<boolean> => false;
+const userTimeContextPort = {
+  getUserTimeContext: async () => ({ timeZone: 'UTC', weekStartsOn: 1 as const }),
+} as const;
 
 describe('composeReminder assembly order', () => {
   beforeEach(() => {
@@ -77,7 +80,12 @@ describe('composeReminder assembly order', () => {
   });
 
   it('assembles after ROUTINE-3402 cutover: repositories → module → schedule sources → api module', () => {
-    composeReminder({ db: fakeDb, notificationRequestedWriter, closureChecker });
+    composeReminder({
+      db: fakeDb,
+      notificationRequestedWriter,
+      userTimeContextPort,
+      closureChecker,
+    });
 
     const reposOrder = createReminderPrismaRepositories.mock.invocationCallOrder[0];
     const moduleOrder = createReminderModule.mock.invocationCallOrder[0];
@@ -92,7 +100,12 @@ describe('composeReminder assembly order', () => {
   });
 
   it('passes the fake db and host closureChecker through unchanged', () => {
-    composeReminder({ db: fakeDb, notificationRequestedWriter, closureChecker });
+    composeReminder({
+      db: fakeDb,
+      notificationRequestedWriter,
+      userTimeContextPort,
+      closureChecker,
+    });
 
     expect(createReminderPrismaRepositories).toHaveBeenCalledWith(fakeDb);
 
@@ -119,6 +132,7 @@ describe('composeReminder assembly order', () => {
     composeReminder({
       db: fakeDb,
       notificationRequestedWriter,
+      userTimeContextPort,
       closureChecker,
       runtimeContributions: hostContribution,
     });
@@ -128,7 +142,12 @@ describe('composeReminder assembly order', () => {
   });
 
   it('builds both schedule sources from the SAME repository set as the module', () => {
-    composeReminder({ db: fakeDb, notificationRequestedWriter, closureChecker });
+    composeReminder({
+      db: fakeDb,
+      notificationRequestedWriter,
+      userTimeContextPort,
+      closureChecker,
+    });
 
     const instance = createReminderModule.mock.results[0].value;
     const templateRepository = instance.reminderTemplateRepository;
@@ -151,7 +170,12 @@ describe('composeReminder assembly order', () => {
   });
 
   it('returns the module handle, application port, repository view and both schedule sources', () => {
-    const composed = composeReminder({ db: fakeDb, notificationRequestedWriter, closureChecker });
+    const composed = composeReminder({
+      db: fakeDb,
+      notificationRequestedWriter,
+      userTimeContextPort,
+      closureChecker,
+    });
 
     expect(composed.module).toMatchObject({ name: 'Reminder' });
     expect(typeof composed.module.register).toBe('function');
@@ -176,6 +200,7 @@ describe('composeReminder assembly order', () => {
     composeReminder({
       db: fakeDb,
       notificationRequestedWriter,
+      userTimeContextPort,
       closureChecker: hostClosureChecker,
     });
 
@@ -188,6 +213,7 @@ describe('composeReminder assembly order', () => {
     const composed = composeReminder({
       db: fakeDb,
       notificationRequestedWriter,
+      userTimeContextPort,
       closureChecker,
       executorClosureChecker,
     });
@@ -211,8 +237,8 @@ describe('createExecutorClosureChecker — merge-base frozen closure predicate',
   }> = [
     { name: 'missing account blocks', account: null, opPhase: null, expectedBlocked: true },
     {
-      name: 'Deactivated account blocks (no closure op)',
-      account: { status: 'Deactivated' },
+      name: 'Closed account blocks (canonical lifecycle)',
+      account: { status: 'Closed' },
       opPhase: null,
       expectedBlocked: true,
     },
@@ -313,7 +339,12 @@ describe('composeReminder structural registration', () => {
   });
 
   it('mounts /reminders on the router and starts the owned instance', async () => {
-    const composed = composeReminder({ db: fakeDb, notificationRequestedWriter, closureChecker });
+    const composed = composeReminder({
+      db: fakeDb,
+      notificationRequestedWriter,
+      userTimeContextPort,
+      closureChecker,
+    });
 
     const instance = createReminderModule.mock.results[0].value;
     const startSpy = vi.spyOn(instance, 'start');

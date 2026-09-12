@@ -1,16 +1,16 @@
 /** Task Module — Core vNext export projections. */
 import type { ExportContext } from '../../portable-runtime';
-import type { PortableTaskTemplate, PortableTaskInstance } from '@memoflow/contracts/data-portability';
+import type { PortableTaskPlan, PortableTaskOccurrence } from '@memoflow/contracts/data-portability';
 import type { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
 import { parseJsonField, toDateString, resolveExportRef, resolveExportRefOrThrow } from './projection-helpers';
 
-export function projectTaskTemplates(
+export function projectTaskPlans(
   templates: unknown[],
   ctx: ExportContext,
-): PortableTaskTemplate[] {
+): PortableTaskPlan[] {
   return templates.map((t) => {
     const entity = t as Record<string, unknown>;
-    const ref = ctx.refAllocator.allocate('taskTemplate');
+    const ref = ctx.refAllocator.allocate('taskPlan');
     ctx.refToIdMap.set(String(entity.id), ref);
     const goalBinding = (entity.goalBinding as Record<string, unknown> | null | undefined) ?? null;
     const goalId = String(goalBinding?.goalId ?? entity.goalId ?? '');
@@ -102,13 +102,13 @@ export function projectTaskTemplates(
   });
 }
 
-export function projectTaskInstances(
+export function projectTaskOccurrences(
   instances: unknown[],
   ctx: ExportContext,
-): PortableTaskInstance[] {
+): PortableTaskOccurrence[] {
   return instances.map((i) => {
     const entity = i as Record<string, unknown>;
-    const ref = ctx.refAllocator.allocate('taskInstance');
+    const ref = ctx.refAllocator.allocate('taskOccurrence');
     ctx.refToIdMap.set(String(entity.id), ref);
     return {
       _ref: ref,

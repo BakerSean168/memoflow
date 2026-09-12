@@ -9,22 +9,10 @@
 
 import type { IResultHttpClient } from '@memoflow/http-client';
 import {
-  BUILT_IN_RULES,
-  BUILT_IN_TEMPLATES,
   GoalClientService,
-  RULE_TEMPLATES,
   createGoalClientService,
   createGoalServiceFromHttpClient,
-  findRuleById,
-  getEnabledRules,
-  getTemplateById,
-  getTemplatesByCategory,
-  getTemplatesByIndustry,
-  getTemplatesByRole,
-  sortRulesByPriority,
   type GoalClientPort,
-  type GoalTemplate,
-  type KeyResultTemplate,
 } from '../application-client';
 import { Goal, GoalRecord, GoalReview, KeyResult } from '../domain-client';
 import {
@@ -43,11 +31,9 @@ export type {
   GoalClientPort,
   GoalHttpAdapters,
   GoalIpcAdapters,
-  GoalTemplate,
   IGoalApiClient,
   IResultHttpClient,
   IResultIpcClient,
-  KeyResultTemplate,
 };
 
 export function createGoalHttpClient(httpClient: IResultHttpClient): GoalClientPort {
@@ -60,8 +46,6 @@ export function createGoalIpcClient(ipcClient: IResultIpcClient): GoalClientPort
 }
 
 export {
-  BUILT_IN_RULES,
-  BUILT_IN_TEMPLATES,
   Goal,
   GoalClientService,
   GoalHttpAdapter,
@@ -69,15 +53,7 @@ export {
   GoalRecord,
   GoalReview,
   KeyResult,
-  RULE_TEMPLATES,
   createGoalClientService,
   createGoalHttpAdapters,
   createGoalIpcAdapters,
-  findRuleById,
-  getEnabledRules,
-  getTemplateById,
-  getTemplatesByCategory,
-  getTemplatesByIndustry,
-  getTemplatesByRole,
-  sortRulesByPriority,
 };

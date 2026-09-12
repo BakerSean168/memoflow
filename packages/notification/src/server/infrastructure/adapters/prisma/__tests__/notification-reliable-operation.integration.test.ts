@@ -1,6 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'crypto';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { createTimeContext } from '@memoflow/time';
 import {
   NotificationType,
   NotificationCategory,
@@ -22,6 +23,11 @@ import {
 } from '@memoflow/test-utils/setup/integration-helpers';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { ReminderTemplate, createReminderPrismaRepositories } from '@memoflow/reminder/server';
+
+const TEST_NOTIFICATION_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => TEST_NOTIFICATION_TIME_CONTEXT,
+};
 
 describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', () => {
   let prisma: ReturnType<typeof getPrisma>;
@@ -300,6 +306,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       notificationRepo,
       preferenceRepo,
       async () => false,
+      TEST_USER_TIME_CONTEXT_PORT,
     );
 
     let deliveredCount = 0;
@@ -310,6 +317,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     };
 
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository: notificationRepo,
       reliableAdapter,
@@ -438,6 +446,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
   it('8. Authorized Application/API entrances for dead-letter query & replay', async () => {
     const { createNotificationPrismaModule } = await import('../../../prisma');
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
 
@@ -492,6 +501,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
   it('9. Delivery receipts timeline query for disconnect recovery', async () => {
     const { createNotificationPrismaModule } = await import('../../../prisma');
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
 
@@ -530,6 +540,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
   it('9b. W7 unified operation timeline exposes failure reason and next retry', async () => {
     const { createNotificationPrismaModule } = await import('../../../prisma');
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
 
@@ -595,6 +606,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
   it('9c. W7 replay records audit trail and moves state forward; unauthorized identity is rejected', async () => {
     const { createNotificationPrismaModule } = await import('../../../prisma');
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
 
@@ -667,6 +679,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
   it('9d. P1-3 timeline query writes a timeline_query audit with result count', async () => {
     const { createNotificationPrismaModule } = await import('../../../prisma');
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
 
@@ -770,6 +783,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       templateRepository: templateRepo,
       closureChecker: async () => false,
       durableRuntime: createNotificationRuntimeContribution({
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
         repository: notificationRepo,
         reliableAdapter,
       }),
@@ -804,6 +818,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       templateRepository: templateRepo,
       closureChecker: async () => false,
       durableRuntime: createNotificationRuntimeContribution({
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
         repository: notificationRepo,
         reliableAdapter,
       }),
@@ -827,6 +842,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     };
 
     const worker1 = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       ownerToken: 'worker-1',
       repository: notificationRepo,
@@ -835,6 +851,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     });
 
     const worker2 = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       ownerToken: 'worker-2',
       repository: notificationRepo,
@@ -891,12 +908,14 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       async deliver() {},
     };
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository: notificationRepo,
       reliableAdapter,
       deliverer: mockDeliverer,
     });
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       runtimeContributions: [runtime],
       closureChecker: async () => false,
     });
@@ -1150,6 +1169,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     };
 
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository: notificationRepo,
       preferenceRepository: preferenceRepo,
@@ -1200,6 +1220,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     };
 
     const worker2 = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       ownerToken: 'worker-sideeffect-2',
       repository: notificationRepo,
@@ -1353,12 +1374,14 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
 
     const mockDeliverer = { async deliver() {} };
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository: notificationRepo,
       reliableAdapter,
       deliverer: mockDeliverer,
     });
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       runtimeContributions: [runtime],
       closureChecker: async () => false,
     });
@@ -1480,6 +1503,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     app.use(express.json());
 
     const moduleInstance = createNotificationPrismaModule(prisma, {
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       closureChecker: async () => false,
     });
     const mockAuth = (_req: any, _res: any, next: any) => {
@@ -1622,6 +1646,7 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     const failingDeliverer = new RealInAppChannelDeliverer(failingRepo);
 
     const runtime = createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       repository: notificationRepo,
       reliableAdapter,
@@ -1744,5 +1769,4 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
     expect(updated?.status).toBe('succeeded');
     expect(updated?.lastError).toBeNull();
   });
-
 });

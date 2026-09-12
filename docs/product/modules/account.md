@@ -11,16 +11,20 @@ updated: 2026-08-03T00:00:00+08:00
 
 # Account 模块
 
+> **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
+
+> **2026-09-09 vNext notice:** ADR-104 决定 Account 收敛为 Product Profile + Lifecycle；当前 `Account.settings` 与登录邮箱投影仍是实现事实，待 Setting/Auth cutover 后退休。
+
 ## 1. 功能定位
 
 Account 是用户资料和偏好的业务聚合，不负责密码、OAuth、Session 或本地 Profile 解锁。
 
-| 事实 | 真源 |
-| --- | --- |
+| 事实                             | 真源                                 |
+| -------------------------------- | ------------------------------------ |
 | 登录邮箱、验证状态、云端 Session | Better Auth / `@memoflow/cloud-auth` |
-| 昵称、头像、简介和 Account 设置 | Account |
-| Desktop 当前打开哪个本地容器 | Desktop Profile Access |
-| Profile 是否连接云端 Account | `CloudBinding` |
+| 昵称、头像、简介和 Account 设置  | Account                              |
+| Desktop 当前打开哪个本地容器     | Desktop Profile Access               |
+| Profile 是否连接云端 Account     | `CloudBinding`                       |
 
 Better Auth user ID 直接作为云端 `Account.id` 和业务 `identityId`，不再保留平行 `AuthIdentity` 映射。
 

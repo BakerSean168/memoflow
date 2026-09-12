@@ -24,6 +24,13 @@ export const TaskChannels = {
   INSTANCE_RESCHEDULE: 'task:reschedule-instance',
 } as const;
 
+export const RelationChannels = {
+  GOAL_KNOWLEDGE_LINK: 'relation:goal-knowledge:link',
+  GOAL_KNOWLEDGE_UNLINK: 'relation:goal-knowledge:unlink',
+  GOAL_KNOWLEDGE_LIST: 'relation:goal-knowledge:list',
+  GOAL_KNOWLEDGE_REVERSE_LIST: 'relation:goal-knowledge:reverse-list',
+} as const;
+
 export const LabelChannels = {
   LIST: 'label:list',
   CREATE: 'label:create',
@@ -37,6 +44,7 @@ export const GoalChannels = {
   DELETE: 'goal:delete',
   ARCHIVE: 'goal:archive',
   ABANDON: 'goal:abandon',
+  PLAN: 'goal:plan',
   ACTIVATE: 'goal:activate',
   COMPLETE: 'goal:complete',
   SEARCH: 'goal:search',
@@ -57,6 +65,12 @@ export const GoalChannels = {
   RECORD_LIST_BY_KEY_RESULT: 'goal:record:listByKeyResult',
   RECORD_LIST_BY_GOAL: 'goal:record:listByGoal',
   RECORD_DELETE: 'goal:record:delete',
+} as const;
+
+export const GoalWorkspaceChannels = {
+  GET: 'goal:workspace:get',
+  TASKS: 'goal:workspace:tasks',
+  KNOWLEDGE: 'goal:workspace:knowledge',
 } as const;
 
 export const ScheduleChannels = {
@@ -105,8 +119,6 @@ export const DashboardChannels = {
 export const AccountChannels = {
   GET_ME: 'account:get-me',
   UPDATE_PROFILE: 'account:update-profile',
-  UPDATE_SETTINGS: 'account:update-settings',
-  CHECK_AVAILABILITY: 'account:check-availability',
   CLOSE: 'account:close',
 } as const;
 
@@ -205,6 +217,7 @@ export const RepositoryChannels = {
   KNOWLEDGE_CONNECTION_INSTALLATION_FINALIZE:
     'repository:knowledge-connection:installation:finalize',
   KNOWLEDGE_CONNECTION_LIST: 'repository:knowledge-connection:list',
+  KNOWLEDGE_CONNECTION_REFRESH_OBSERVATION: 'repository:knowledge-connection:refresh-observation',
   KNOWLEDGE_CONNECTION_CONNECT: 'repository:knowledge-connection:connect',
   KNOWLEDGE_CONNECTION_DISCONNECT: 'repository:knowledge-connection:disconnect',
   KNOWLEDGE_CONNECTION_RECONCILIATION_PREVIEW:
@@ -226,12 +239,13 @@ export const RepositoryChannels = {
 } as const;
 
 export const SettingChannels = {
-  GET_ALL: 'setting:all',
-  GET_DEFAULTS: 'setting:defaults',
-  PATCH: 'setting:patch',
-  RESET: 'setting:reset',
   IMPORT: 'setting:import',
   EXPORT: 'setting:export',
+  PREFERENCES_PROFILE_GET: 'setting:preferences:profile',
+  PREFERENCES_RESET: 'setting:preferences:reset',
+  PREFERENCE_GET: 'setting:preference:get',
+  PREFERENCE_PATCH: 'setting:preference:patch',
+  PREFERENCE_RESET: 'setting:preference:reset',
 } as const;
 
 export const SystemChannels = {
@@ -255,6 +269,9 @@ export const DesktopFeatureChannels = {
   SHORTCUTS_UPDATE: 'desktop:shortcuts:update',
   TRAY_FLASH: 'desktop:tray:flash',
   TRAY_STOP_FLASH: 'desktop:tray:stopFlash',
+  NOTIFICATION_DEVICE_PREFERENCE_GET: 'desktop:notification:device-preference:get',
+  NOTIFICATION_DEVICE_PREFERENCE_UPDATE: 'desktop:notification:device-preference:update',
+  NOTIFICATION_DEVICE_PREFERENCE_RESET: 'desktop:notification:device-preference:reset',
 } as const;
 
 export const RendererEventChannels = {

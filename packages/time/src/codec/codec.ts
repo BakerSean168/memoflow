@@ -1,5 +1,5 @@
 import type { Hm, Instant, TransferDate, Ymd } from '@memoflow/contracts/primitives';
-import type { OnInvalid, TimeEngine, TimeStyle, TimeZonePolicy } from '../types';
+import type { OnInvalid, TimeZoneId } from '../types';
 import {
   asHm,
   asInstant,
@@ -9,12 +9,16 @@ import {
   isHmShape,
   isYmdShape,
 } from './brand';
-import { combineYmdHmWithTimeZone } from '../engine/date-fns-engine';
+import {
+  combineYmdHmWithTimeZone,
+  instantToYmdInTimeZone,
+  startOfYmdInTimeZone,
+} from '../timezone/wall-clock';
 
 export interface CodecOptions {
   onInvalid?: OnInvalid;
   /** Override style timeZone for this call */
-  timeZone?: TimeZonePolicy;
+  timeZone?: TimeZoneId;
 }
 
 export interface TimeCodec {
@@ -33,10 +37,7 @@ export interface TimeCodec {
   startOfYmd(ymd: Ymd, options?: CodecOptions): Instant;
 }
 
-function resolveInvalid<T>(
-  options: CodecOptions | undefined,
-  message: string,
-): T | null {
+function resolveInvalid<T>(options: CodecOptions | undefined, message: string): T | null {
   const policy = options?.onInvalid ?? 'null';
   if (policy === 'throw') {
     throw new TypeError(message);
@@ -44,9 +45,7 @@ function resolveInvalid<T>(
   return null;
 }
 
-export function createCodec(engine: TimeEngine, style?: Pick<TimeStyle, 'timeZone'>): TimeCodec {
-  const defaultZone: TimeZonePolicy = style?.timeZone ?? 'local';
-
+export function createCodec(defaultZone: TimeZoneId): TimeCodec {
   return {
     isInstant(value: unknown): value is Instant {
       return isFiniteInstantMs(value);
@@ -91,7 +90,7 @@ export function createCodec(engine: TimeEngine, style?: Pick<TimeStyle, 'timeZon
     },
 
     toYmd(instant: Instant): Ymd {
-      return engine.toYmd(instant);
+      return instantToYmdInTimeZone(instant, defaultZone);
     },
 
     parseHm(raw: string | null | undefined, options?: CodecOptions): Hm | null {
@@ -115,9 +114,7 @@ export function createCodec(engine: TimeEngine, style?: Pick<TimeStyle, 'timeZon
 
     startOfYmd(ymd: Ymd, options?: CodecOptions): Instant {
       const zone = options?.timeZone ?? defaultZone;
-      const combined = combineYmdHmWithTimeZone(ymd, asHm('00:00'), zone);
-      if (combined != null) return combined;
-      return engine.fromYmdStart(ymd);
+      return startOfYmdInTimeZone(ymd, zone);
     },
   };
 }

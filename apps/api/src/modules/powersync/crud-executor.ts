@@ -7,6 +7,8 @@
 
 import { createLogger } from '@memoflow/utils/logger';
 import { normalizeCrudData } from './crud-normalization.js';
+import { executeUserPreferenceCrudOperation } from './user-preference-crud-executor.js';
+import { executeRelationCrudOperation } from './relation-crud-executor.js';
 import {
   IDENTITY_ID_TABLES,
   getPrismaDelegate,
@@ -62,6 +64,14 @@ export async function executeCrudBatch(
 
       for (const op of ops) {
         const { op: opType, type: tableName, id, data } = op;
+        if (tableName === 'user_preference_records') {
+          await executeUserPreferenceCrudOperation(tx, identityId, op);
+          continue;
+        }
+        if (tableName === 'relations') {
+          await executeRelationCrudOperation(tx as never, identityId, op);
+          continue;
+        }
         const delegate = getPrismaDelegate(tx, tableName);
 
         if (!delegate) {

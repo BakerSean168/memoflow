@@ -1,0 +1,83 @@
+{
+  "kind": "memoflow.governance-rule-bundle",
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "code": "DDD-001",
+      "title": "Entity Props Pattern",
+      "description": "Fixture rule used to prove that published Governance rules without an engineering adapter stay explicit and non-enforcing.",
+      "severity": "Mandatory",
+      "tags": [
+        "architecture",
+        "ddd"
+      ],
+      "liveReferenceLocation": "packages/governance/src/server/domain/aggregates/rule.ts",
+      "goodExamples": [],
+      "badExamples": [],
+      "provenance": {
+        "ruleId": "00000000-0000-4000-8000-000000000101",
+        "authorId": "00000000-0000-4000-8000-000000000001",
+        "createdAt": 1789128000000,
+        "updatedAt": 1789128000000,
+        "revisionCount": 0,
+        "latestRevision": null
+      },
+      "engineering": {
+        "ruleKey": "DDD-001",
+        "severity": "Mandatory",
+        "tags": [
+          "architecture",
+          "ddd"
+        ],
+        "referencePath": "packages/governance/src/server/domain/aggregates/rule.ts"
+      }
+    },
+    {
+      "code": "DDD-003",
+      "title": "Layer Isolation",
+      "description": "Fixture rule used to prove the explicit partial mapping from DDD-003 into the existing package-internal boundary audit.",
+      "severity": "Mandatory",
+      "tags": [
+        "ddd",
+        "layering"
+      ],
+      "liveReferenceLocation": "packages/governance/src/server/domain/repositories/i-rule-repository.ts",
+      "goodExamples": [],
+      "badExamples": [],
+      "provenance": {
+        "ruleId": "00000000-0000-4000-8000-000000000103",
+        "authorId": "00000000-0000-4000-8000-000000000001",
+        "createdAt": 1789128000000,
+        "updatedAt": 1789128060000,
+        "revisionCount": 1,
+        "latestRevision": {
+          "revisionId": "00000000-0000-4000-8000-000000000203",
+          "revisionNumber": 1,
+          "authorId": "00000000-0000-4000-8000-000000000001",
+          "changeType": "Created",
+          "changedFields": [
+            "code",
+            "title"
+          ],
+          "previousValues": {},
+          "newValues": {
+            "code": "DDD-003",
+            "title": "Layer Isolation"
+          },
+          "createdAt": 1789128060000
+        }
+      },
+      "engineering": {
+        "ruleKey": "DDD-003",
+        "severity": "Mandatory",
+        "tags": [
+          "ddd",
+          "layering"
+        ],
+        "referencePath": "packages/governance/src/server/domain/repositories/i-rule-repository.ts"
+      }
+    }
+  ],
+  "hashAlgorithm": "sha256",
+  "semanticHash": "sha256:0b2e56543c54e13af453b3259fd28a229c6bcf41028fd58270fb007b10adc1cf"
+}

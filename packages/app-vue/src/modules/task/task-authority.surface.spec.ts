@@ -29,7 +29,7 @@ const detailView = code(readFileSync(resolve(taskRoot, 'views/TaskDetailView.vue
 
 describe('Task pilot authority surface (fail closed)', () => {
   it('keeps the Task store instances/UI-only (no template / graph / dependency DTOs)', () => {
-    expect(storeSource).not.toContain('TaskTemplateClientDTO');
+    expect(storeSource).not.toContain('TaskPlanClientDTO');
     expect(storeSource).not.toMatch(/templates:\s*\[/);
     expect(storeSource).not.toMatch(/currentTemplate:/);
     expect(storeSource).not.toMatch(/dependencies:\s*\[/);

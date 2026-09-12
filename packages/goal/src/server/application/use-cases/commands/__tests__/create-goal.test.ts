@@ -166,11 +166,9 @@ describe('CreateGoalUseCase', () => {
       id: goalId,
       identityId: testIdentityId,
       name: 'Learn TypeScript',
-      description: null,
-      feasibilityAnalysis: null,
-      motivation: null,
+      summary: null,
       startDate: null,
-      dueDate: null,
+      target: null,
       reminderConfig: null,
     });
     committed.createAndAddKeyResult({

@@ -1,91 +1,99 @@
-/**
- * MSW Handlers - Setting Module
- *
- * Intercepts HTTP requests to the Setting API and returns mock data.
- * Active only in development when MSW is enabled.
- */
-
+/** MSW handlers for the canonical Setting API. */
 import { http, HttpResponse } from 'msw';
-import { createMockUserSetting } from '@memoflow/contracts/mocks';
-import type {
-  PreferenceCategory,
-  UserSettingPreferences,
+import {
+  PreferencePortableDocumentV3Schema,
+  createDefaultUserPreferenceProfile,
+  parsePreferenceNamespacePatch,
+  parsePreferenceNamespacePayload,
+  type PreferenceNamespace,
+  type UserPreferenceProfile,
 } from '@memoflow/contracts/setting';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 const BASE = `${API_BASE}/settings`;
 
-let mockUserSetting = createMockUserSetting();
+let preferences: UserPreferenceProfile = createDefaultUserPreferenceProfile();
+let revisions: Record<PreferenceNamespace, number> = { presentation: 1, regional: 1 };
 
-const isPreferenceCategory = (category: string): category is PreferenceCategory =>
-  category in mockUserSetting.preferences;
+function envelope(data: unknown, message = 'Success') {
+  return HttpResponse.json({ ok: true, code: 200, message, data, timestamp: Date.now() });
+}
 
-function applyPreferencePatch<K extends PreferenceCategory>(
-  preferences: UserSettingPreferences,
-  category: K,
-  patch: Partial<UserSettingPreferences[K]>,
-) {
-  preferences[category] = {
-    ...preferences[category],
-    ...patch,
-  };
+function namespaceResponse(namespace: PreferenceNamespace) {
+  return { namespace, preferences: preferences[namespace], revision: revisions[namespace] };
 }
 
 export const settingHandlers = [
-  // GET /api/v1/settings — get user settings
-  http.get(BASE, () => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Success',
-      data: mockUserSetting,
-      timestamp: Date.now(),
-    });
-  }),
+  http.get(`${BASE}/preferences`, () => envelope(preferences)),
 
-  // PATCH /api/v1/settings/:category — patch a category
-  http.patch(`${BASE}/:category`, async ({ params, request }) => {
-    const category = params.category as string;
-    const patch = (await request.json()) as Record<string, unknown>;
-
-    if (mockUserSetting.preferences && isPreferenceCategory(category)) {
-      applyPreferencePatch(
-        mockUserSetting.preferences,
-        category,
-        patch as Partial<UserSettingPreferences[typeof category]>,
-      );
+  http.get(`${BASE}/preferences/:namespace`, ({ params }) => {
+    const namespace = params.namespace as PreferenceNamespace;
+    if (namespace !== 'presentation' && namespace !== 'regional') {
+      return HttpResponse.json({ ok: false, code: 400, message: 'Invalid preference namespace' }, { status: 400 });
     }
-    mockUserSetting = { ...mockUserSetting, updatedAt: Date.now() };
+    return envelope(namespaceResponse(namespace));
+  }),
 
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Updated',
-      data: mockUserSetting,
-      timestamp: Date.now(),
+  http.patch(`${BASE}/preferences/:namespace`, async ({ params, request }) => {
+    const namespace = params.namespace as PreferenceNamespace;
+    if (namespace !== 'presentation' && namespace !== 'regional') {
+      return HttpResponse.json({ ok: false, code: 400, message: 'Invalid preference namespace' }, { status: 400 });
+    }
+    const body = (await request.json()) as { patch?: unknown; expectedRevision?: number };
+    if (body.expectedRevision !== undefined && body.expectedRevision !== revisions[namespace]) {
+      return HttpResponse.json({ ok: false, code: 409, message: 'Preference revision conflict' }, { status: 409 });
+    }
+    const patch = parsePreferenceNamespacePatch(namespace, body.patch ?? {});
+    preferences = {
+      ...preferences,
+      [namespace]: parsePreferenceNamespacePayload(namespace, {
+        ...preferences[namespace],
+        ...patch,
+      }),
+    } as UserPreferenceProfile;
+    revisions[namespace] += 1;
+    return envelope({ namespace, revision: revisions[namespace], changedKeys: Object.keys(patch) }, 'Updated');
+  }),
+
+  http.post(`${BASE}/preferences/:namespace/reset`, ({ params }) => {
+    const namespace = params.namespace as PreferenceNamespace;
+    if (namespace !== 'presentation' && namespace !== 'regional') {
+      return HttpResponse.json({ ok: false, code: 400, message: 'Invalid preference namespace' }, { status: 400 });
+    }
+    preferences = { ...preferences, [namespace]: createDefaultUserPreferenceProfile()[namespace] } as UserPreferenceProfile;
+    revisions[namespace] += 1;
+    return envelope({ namespace, revision: revisions[namespace], changedKeys: [] }, 'Reset');
+  }),
+
+  http.post(`${BASE}/preferences/reset-all`, () => {
+    preferences = createDefaultUserPreferenceProfile();
+    revisions = { presentation: revisions.presentation + 1, regional: revisions.regional + 1 };
+    return envelope({
+      presentation: { namespace: 'presentation', revision: revisions.presentation, changedKeys: [] },
+      regional: { namespace: 'regional', revision: revisions.regional, changedKeys: [] },
+    }, 'Reset');
+  }),
+
+  http.post(`${BASE}/export`, () => {
+    const exportedAt = new Date().toISOString();
+    const document = PreferencePortableDocumentV3Schema.parse({ schemaVersion: 3, exportedAt, preferences });
+    return envelope({
+      data: JSON.stringify(document, null, 2),
+      fileName: `memoflow-settings-${exportedAt.replace(/[:.]/g, '-')}.json`,
     });
   }),
 
-  // POST /api/v1/settings/reset — reset user settings
-  http.post(`${BASE}/reset`, () => {
-    mockUserSetting = createMockUserSetting();
+  http.post(`${BASE}/import`, async ({ request }) => {
+    const body = (await request.json()) as { data?: string };
+    const document = PreferencePortableDocumentV3Schema.parse(JSON.parse(body.data ?? 'null'));
+    preferences = document.preferences;
+    revisions = { presentation: revisions.presentation + 1, regional: revisions.regional + 1 };
     return HttpResponse.json({
       ok: true,
-      code: 200,
-      message: 'Reset',
-      data: mockUserSetting,
+      code: 201,
+      message: 'Imported',
+      data: { schemaVersion: 3, imported: 2, skipped: 0, warnings: [] },
       timestamp: Date.now(),
-    });
-  }),
-
-  // GET /api/v1/settings/defaults — get default settings
-  http.get(`${BASE}/defaults`, () => {
-    return HttpResponse.json({
-      ok: true,
-      code: 200,
-      message: 'Success',
-      data: createMockUserSetting(),
-      timestamp: Date.now(),
-    });
+    }, { status: 201 });
   }),
 ];

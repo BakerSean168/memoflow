@@ -24,7 +24,7 @@ import { registerDashboardIpcHandler } from './ipc/dashboard-handler';
 
 // ── Module Electron Entry Points ─────────────────────────────────────
 import { PowerSyncTaskBindingReadPort } from '@memoflow/task';
-import { createGoalTaskProgressPowerSyncHandler } from '@memoflow/goal';
+import { createGoalTaskProgressPowerSyncHandler, GoalWorkspaceQueryService } from '@memoflow/goal';
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 import { createTaskPowerSyncScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import { createScheduleOrchestrationModule } from '@memoflow/schedule-orchestration';
@@ -38,6 +38,16 @@ import {
 import { createSchedulePowerSyncRepositories } from '@memoflow/schedule';
 import { createSchedulerPowerSyncRepositories } from '@memoflow/scheduler';
 import { LabelService, PowerSyncLabelRepository } from '@memoflow/label';
+import {
+  GoalKnowledgeService,
+  PowerSyncRelationRepository,
+  PowerSyncGoalRelationCleanupCapability,
+} from '@memoflow/relation';
+import { createGoalKnowledgeElectronModule } from './modules/relation/relation.electron-module';
+import { LocalVaultKnowledgeDocumentRefResolver } from './modules/relation/local-vault-knowledge-document-ref.resolver';
+import { LocalVaultKnowledgeWorkspaceResolver } from './modules/relation/local-vault-knowledge-workspace.resolver';
+import { createGoalWorkspaceElectronModule } from './modules/goal/goal-workspace.electron-module';
+import { createSystemClock } from '@memoflow/time';
 import { createLabelElectronModule } from './modules/label/label.electron-module';
 import { composeGovernance } from './runtime/compose-governance';
 import { composeGoal } from './runtime/compose-goal';
@@ -68,7 +78,7 @@ import { DesktopKnowledgeNotePersistenceAdapter } from './modules/ai/desktop-kno
 import { DesktopKnowledgeSourceAdapter } from './modules/ai/desktop-knowledge-source.adapter';
 import {
   getDesktopDashboardData,
-  type DashboardRepositoryDependencies,
+  type DashboardReadDependencies,
 } from './services/dashboard-read-service';
 import { configureDesktopShellIdentity } from './utils/app-icon';
 import { getApiBaseUrl } from './utils/api-config';
@@ -111,7 +121,7 @@ let activeReminderUsageRuntime: { stop: () => void } | null = null;
 // 当前激活 profile 的组合 Goal/Task repository view。dashboard IPC handler 在
 // shell 初始化时只注册一次，而仓储要等 profile 激活（registerBusinessModules）
 // 之后才存在，因此在这里做桥接。
-let activeProfileDashboardRepositories: DashboardRepositoryDependencies | null = null;
+let activeProfileDashboardRepositories: DashboardReadDependencies | null = null;
 
 /**
  * Register all business modules on a bootstrapper for the active profile.
@@ -159,6 +169,7 @@ async function registerBusinessModules(
   const localVaultRuntime = createLocalVaultRuntime({
     bindingFilePath: profilePaths.localVaultBindingPath,
     writeLedgerFilePath: profilePaths.localVaultWriteLedgerPath,
+    localProfileId: profilePaths.profileId,
     platform: localVaultPlatform,
   });
 
@@ -176,8 +187,25 @@ async function registerBusinessModules(
   //    先组装通知/提醒 composer —— schedule 编排消费它们返回的 source/notification
   //    ports。桌面 channel capabilities 显式声明（InApp + Desktop），杜绝包默认值
   //    替宿主决定策略。
+  const settingElectronModule = composeSetting({ db });
   const notificationComposed = composeNotification({
     db,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
+    desktopRenderer: (dto) => {
+      const renderer = mainRuntime?.notification;
+      if (!renderer) return false;
+      const payload = dto as Record<string, unknown>;
+      return renderer.show({
+        title: String(payload.title ?? 'Notification'),
+        body: String(payload.content ?? ''),
+        data: {
+          notificationId: payload.id,
+          identityId: payload.identityId,
+          notificationType: payload.type,
+          notificationCategory: payload.category,
+        },
+      });
+    },
     channelCapabilities: [
       { channelType: 'InApp', status: 'available' },
       { channelType: 'Desktop', status: 'available' },
@@ -193,6 +221,7 @@ async function registerBusinessModules(
     db,
     identityId: profileIdentityId,
     notificationRequestedWriter: notificationComposed.requestedWriter,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
   });
   // Project the durable vNext Routine snapshot before sensors start so the first
   // activity transition cannot race ahead of registration. ROUTINE-5301 can
@@ -245,11 +274,17 @@ async function registerBusinessModules(
   //    schedule runtime 包级全局）。
   const scheduleOrchestrationModule = createScheduleOrchestrationModule({
     taskProjection: {
-      source: createTaskPowerSyncScheduleProjectionSource(db),
+      source: createTaskPowerSyncScheduleProjectionSource(
+        db,
+        settingElectronModule.userTimeContextPort,
+      ),
       scheduleTaskRepository: schedulerRepositorySet.scheduleTaskRepository,
     },
     goalProjection: {
-      source: createGoalPowerSyncScheduleProjectionSource(db),
+      source: createGoalPowerSyncScheduleProjectionSource(
+        db,
+        settingElectronModule.userTimeContextPort,
+      ),
     },
     reminderProjection: {
       source: reminderComposed.scheduleProjectionSource,
@@ -279,6 +314,7 @@ async function registerBusinessModules(
     db,
     runtimeContributions: scheduleOrchestrationModule.projectionRuntime,
     goalProgressHandler: createGoalTaskProgressPowerSyncHandler(db),
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
   });
   // Register the Task reminder fire handler so scheduled `task.reminder` work
   // (e.g. a one-time task + relative reminder) is executed by the registry-based
@@ -286,29 +322,56 @@ async function registerBusinessModules(
   // into the shared outbox consumed by the notification durable runtime.
   scheduleOrchestrationModule.handlerRegistry.register(
     createTaskReminderScheduledHandlerRegistration({
-      taskInstanceRepository: taskComposed.repositories.taskInstanceRepository,
-      taskTemplateRepository: taskComposed.repositories.taskTemplateRepository,
+      taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
+      taskPlanRepository: taskComposed.repositories.taskPlanRepository,
       notificationRequestedWriter: notificationComposed.repositories.requestedWriter,
     }),
   );
   const taskElectronModule = taskComposed.module;
 
+  const taskGoalContextReadPort = new PowerSyncTaskBindingReadPort(db);
+  const relationRepository = new PowerSyncRelationRepository(db);
+  const localVaultKnowledgeRefResolver = new LocalVaultKnowledgeDocumentRefResolver(
+    localVaultRuntime,
+  );
+  const goalKnowledgeService = new GoalKnowledgeService(
+    relationRepository,
+    localVaultKnowledgeRefResolver,
+  );
   const goalComposed = composeGoal({
     db,
-    taskBindingReadPort: new PowerSyncTaskBindingReadPort(db),
+    taskBindingReadPort: taskGoalContextReadPort,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
+    relationCleanupFactory: (tx) => new PowerSyncGoalRelationCleanupCapability(tx),
+  });
+  const goalWorkspaceService = new GoalWorkspaceQueryService({
+    goalRepository: goalComposed.repositories.goalRepository,
+    goalRecordRepository: goalComposed.repositories.goalRecordRepository,
+    taskContextReadPort: taskGoalContextReadPort,
+    knowledgeRelationReadPort: goalKnowledgeService,
+    knowledgeContextReadPort: new LocalVaultKnowledgeWorkspaceResolver(localVaultRuntime),
   });
 
-  const labelService = new LabelService(new PowerSyncLabelRepository(db));
+  const labelService = new LabelService(new PowerSyncLabelRepository(db), {
+    clock: createSystemClock(),
+  });
   const labelElectronModule = createLabelElectronModule({ service: labelService });
+  const goalKnowledgeElectronModule = createGoalKnowledgeElectronModule({
+    service: goalKnowledgeService,
+  });
+  const goalWorkspaceElectronModule = createGoalWorkspaceElectronModule({
+    port: goalWorkspaceService,
+  });
 
-  const dashboardRepositories: DashboardRepositoryDependencies = {
+  const dashboardRepositories: DashboardReadDependencies = {
     goalRepository: goalComposed.repositories.goalRepository,
-    taskTemplateRepository: taskComposed.repositories.taskTemplateRepository,
-    taskInstanceRepository: taskComposed.repositories.taskInstanceRepository,
+    taskPlanRepository: taskComposed.repositories.taskPlanRepository,
+    taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
     scheduleRepository: scheduleComposed.repositories.scheduleRepository,
     scheduleTaskRepository: scheduleComposed.repositories.scheduleTaskRepository,
     reminderTemplateRepository: reminderComposed.repositories.reminderTemplateRepository,
     notificationRepository: notificationComposed.repositories.notificationRepository,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
   };
   activeProfileDashboardRepositories = dashboardRepositories;
 
@@ -316,6 +379,7 @@ async function registerBusinessModules(
   //    account/data-portability/setting/AI/repository 均以显式实例组装。
   const accountComposed = composeAccount({
     db,
+    clock: createSystemClock(),
     syncOptions: {
       getCloudAccountId: () =>
         mainRuntime?.profileRuntimeManager.getActiveProfileDescriptorSync()?.cloudBinding
@@ -410,7 +474,9 @@ async function registerBusinessModules(
 
   const analyticsReadAdapter = new DesktopAnalyticsReadAdapter({
     goalRepository: goalComposed.repositories.goalRepository,
-    taskTemplateRepository: taskComposed.repositories.taskTemplateRepository,
+    taskPlanRepository: taskComposed.repositories.taskPlanRepository,
+    taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
     dashboardDataLoader: (identityId) => getDesktopDashboardData(identityId, dashboardRepositories),
   });
 
@@ -422,9 +488,12 @@ async function registerBusinessModules(
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
     reminderApplicationPort: reminderComposed.applicationPort,
+    goalKnowledgeService,
+    knowledgeDocumentRefResolver: localVaultKnowledgeRefResolver,
     routineCommandPort: reminderComposed.routineCommandPort,
     scheduleRepository: scheduleComposed.repositories.scheduleRepository,
     notificationRepository: notificationComposed.repositories.notificationRepository,
+    userTimeContextPort: settingElectronModule.userTimeContextPort,
     labelService,
     mastraStorage: {
       kind: 'libsql',
@@ -432,8 +501,13 @@ async function registerBusinessModules(
     },
   });
 
-  const dataPortabilityElectronModule = composeDataPortability({ db });
-  const settingElectronModule = composeSetting({ db });
+  const dataPortabilityElectronModule = composeDataPortability({
+    db,
+    portableCapabilities: [
+      settingElectronModule.portableCapability,
+      notificationComposed.module.portableCapability,
+    ],
+  });
 
   const knowledgeRepositoryRemoteGateway = new KnowledgeRepositoryRemoteGateway({
     getAccessToken: getCloudAccessToken,
@@ -504,7 +578,9 @@ async function registerBusinessModules(
     .register(dataPortabilityElectronModule)
     // Feature modules
     .register(goalComposed.module)
+    .register(goalWorkspaceElectronModule)
     .register(labelElectronModule)
+    .register(goalKnowledgeElectronModule)
     .register(taskElectronModule)
     .register(scheduleComposed.calendarModule)
     .register(scheduleComposed.schedulerModule)
@@ -539,7 +615,11 @@ async function initializeShellRuntime(): Promise<void> {
   await profileRegistry.load();
   console.log('[Shell] ProfileRegistry initialized');
 
-  const profileRuntimeManager = new DesktopProfileRuntimeManager(sharedResolver, profileRegistry);
+  const profileRuntimeManager = new DesktopProfileRuntimeManager(
+    sharedResolver,
+    profileRegistry,
+    createSystemClock(),
+  );
   const cloudSessionStore = new CloudSessionStore(sharedResolver.rootDir);
   const cloudConnectionManager = new DesktopCloudConnectionManager(
     cloudSessionStore,

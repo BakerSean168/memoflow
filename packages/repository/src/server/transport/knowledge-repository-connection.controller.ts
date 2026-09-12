@@ -13,7 +13,7 @@ import {
   type CompleteKnowledgeRepositoryInstallationRes,
   type ConfirmKnowledgeRepositoryHeadReq,
   type CreateKnowledgeRepositoryConnectionReq,
-  type KnowledgeRepositoryConnectionClientDTO,
+  type KnowledgeRemoteBindingClientDTO,
   type KnowledgeRepositoryInstallationTokenRes,
   type KnowledgeRepositoryInstallationIntentStatusResponse,
   type KnowledgeRepositoryReconciliationPreview,
@@ -24,10 +24,13 @@ import {
   type PreviewKnowledgeRepositoryReconciliationReq,
   ListKnowledgeProjectionsSchema,
   CreateConfirmedKnowledgeNoteSchema,
+  AdoptKnowledgeDocumentSchema,
   GetKnowledgeNoteLinkGraphSchema,
   ListKnowledgeWriteRequestsSchema,
   type CreateConfirmedKnowledgeNoteReq,
   type CreateConfirmedKnowledgeNoteResponse,
+  type AdoptKnowledgeDocumentReq,
+  type AdoptKnowledgeDocumentResponse,
   type KnowledgeNoteProjectionClientDTO,
   type KnowledgeNoteProjectionListResponse,
   type ListKnowledgeNoteProjectionsReq,
@@ -63,10 +66,14 @@ export interface KnowledgeRepositoryConnectionUseCases {
   listKnowledgeRepositoryConnections(
     ctx: Context,
   ): Promise<Result<ListKnowledgeRepositoryConnectionsRes>>;
+  refreshKnowledgeRepositoryObservation(
+    ctx: Context,
+    connectionId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   connectKnowledgeRepository(
     ctx: Context,
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>>;
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   disconnectKnowledgeRepository(
     ctx: Context,
     connectionId: string,
@@ -85,7 +92,7 @@ export interface KnowledgeRepositoryConnectionUseCases {
     ctx: Context,
     connectionId: string,
     request: ConfirmKnowledgeRepositoryHeadReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>>;
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>>;
   listKnowledgeNoteProjections(
     ctx: Context,
     request: ListKnowledgeNoteProjectionsReq,
@@ -111,6 +118,10 @@ export interface KnowledgeRepositoryConnectionUseCases {
     ctx: Context,
     request: CreateConfirmedKnowledgeNoteReq,
   ): Promise<Result<CreateConfirmedKnowledgeNoteResponse>>;
+  adoptKnowledgeDocument(
+    ctx: Context,
+    request: AdoptKnowledgeDocumentReq,
+  ): Promise<Result<AdoptKnowledgeDocumentResponse>>;
   listKnowledgeWriteRequests(
     ctx: Context,
     request: ListKnowledgeWriteRequestsReq,
@@ -169,6 +180,18 @@ export class KnowledgeRepositoryConnectionController {
 
   async listConnections(ctx: Context) {
     return this.useCases.listKnowledgeRepositoryConnections(ctx);
+  }
+
+  async refreshObservation(ctx: Context, input: unknown) {
+    const parsed = KnowledgeRepositoryConnectionParamsSchema.safeParse(input);
+    if (!parsed.success) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid knowledge remote binding id',
+        details: formatZodErrors(parsed.error.issues),
+      });
+    }
+    return this.useCases.refreshKnowledgeRepositoryObservation(ctx, parsed.data.connectionId);
   }
 
   async connect(ctx: Context, input: unknown) {
@@ -310,6 +333,18 @@ export class KnowledgeRepositoryConnectionController {
       });
     }
     return this.useCases.createConfirmedKnowledgeNote(ctx, parsed.data);
+  }
+
+  async adoptNote(ctx: Context, input: unknown) {
+    const parsed = AdoptKnowledgeDocumentSchema.safeParse(input);
+    if (!parsed.success) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid knowledge document adoption request',
+        details: formatZodErrors(parsed.error.issues),
+      });
+    }
+    return this.useCases.adoptKnowledgeDocument(ctx, parsed.data);
   }
 
   async listWriteRequests(ctx: Context, input: unknown) {

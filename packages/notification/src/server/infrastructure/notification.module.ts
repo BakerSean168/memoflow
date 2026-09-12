@@ -28,24 +28,21 @@ import {
   GetUserNotificationsUseCase,
   GetUnreadNotificationsUseCase,
   GetNotificationPreferenceUseCase,
+  createNotificationDeliveryPreferencePortableCapability,
+  type NotificationDeliveryPreferencePortableCapability,
 } from '../application';
 import { fail, ok } from '@memoflow/contracts/result';
 import {
   NotificationMaintenanceApplicationService,
   NotificationQueryApplicationService,
 } from '../application';
-import type {
-  NotificationApplicationPort,
-  NotificationSseDeliveryEvent,
-} from '../application';
+import type { NotificationApplicationPort, NotificationSseDeliveryEvent } from '../application';
 import type { NotificationDurableRuntimePort } from './runtime/notification.runtime';
 import { mapReceiptToTimelineEntry } from '@memoflow/patterns/operations';
-import type {
-  OperationAuditRepository,
-  OperationAuditRecord,
-} from '@memoflow/patterns/operations';
+import type { OperationAuditRepository, OperationAuditRecord } from '@memoflow/patterns/operations';
 import { runTimelineQueryWithAudit } from '@memoflow/patterns/operations';
 import { createLogger } from '@memoflow/utils/logger';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 const logger = createLogger('NotificationModule');
 
@@ -55,14 +52,14 @@ export interface NotificationModuleRuntimeContribution {
 }
 
 export type NotificationRuntimeContributionsInput =
-  | NotificationModuleRuntimeContribution
-  | readonly NotificationModuleRuntimeContribution[];
+  NotificationModuleRuntimeContribution | readonly NotificationModuleRuntimeContribution[];
 
 export interface NotificationModuleDependencies {
   readonly notificationRepository: INotificationRepository;
   readonly preferenceRepository: INotificationPreferenceRepository;
   readonly templateRepository: INotificationTemplateRepository;
   readonly closureChecker: (identityId: string) => Promise<boolean>;
+  readonly userTimeContextPort: UserTimeContextPort;
   readonly runtimeContributions?: NotificationRuntimeContributionsInput;
   readonly durableRuntime: NotificationDurableRuntimePort;
   readonly auditRepository?: OperationAuditRepository;
@@ -81,6 +78,7 @@ export interface NotificationModuleUseCases {
 export interface NotificationModuleInstance {
   readonly notificationRepository: INotificationRepository;
   readonly preferenceRepository: INotificationPreferenceRepository;
+  readonly portableCapability: NotificationDeliveryPreferencePortableCapability;
   readonly templateRepository: INotificationTemplateRepository;
   readonly useCases: NotificationModuleUseCases;
   readonly api: NotificationApplicationPort;
@@ -103,6 +101,7 @@ export function createNotificationUseCases(
       notificationRepository,
       preferenceRepository,
       deps.closureChecker,
+      deps.userTimeContextPort,
     ),
     updateNotification: new UpdateNotificationUseCase(notificationRepository),
     markAsRead: new MarkNotificationAsReadUseCase(notificationRepository),
@@ -115,8 +114,7 @@ export function createNotificationUseCases(
 
 function normalizeRuntimeContributions(
   runtimeContributions?:
-    | NotificationModuleRuntimeContribution
-    | ReadonlyArray<NotificationModuleRuntimeContribution>,
+    NotificationModuleRuntimeContribution | ReadonlyArray<NotificationModuleRuntimeContribution>,
 ): readonly NotificationModuleRuntimeContribution[] {
   if (!runtimeContributions) {
     return [];
@@ -132,7 +130,8 @@ function normalizeRuntimeContributions(
 export function createNotificationModule(
   dependencies: NotificationModuleDependencies,
 ): NotificationModuleInstance {
-  const { notificationRepository, preferenceRepository, templateRepository, durableRuntime } = dependencies;
+  const { notificationRepository, preferenceRepository, templateRepository, durableRuntime } =
+    dependencies;
   const auditRepository = dependencies.auditRepository;
   const runtimeContributions = normalizeRuntimeContributions(dependencies.runtimeContributions);
 
@@ -149,6 +148,8 @@ export function createNotificationModule(
   }
 
   const useCases = createNotificationUseCases(dependencies);
+  const portableCapability =
+    createNotificationDeliveryPreferencePortableCapability(preferenceRepository);
   const notificationQueryApplicationService = new NotificationQueryApplicationService(
     notificationRepository,
   );
@@ -249,12 +250,16 @@ export function createNotificationModule(
             '[FAIL-CLOSED] notification replay requires an explicit auditRepository dependency.',
           );
         }
-        const res = await durableRuntime.replayDeadLetter({ identityId, operationId }, {
-          actorIdentityId: identityId,
-          source: 'notification',
-          operationId,
-          action: 'replay',
-        }, auditRepository);
+        const res = await durableRuntime.replayDeadLetter(
+          { identityId, operationId },
+          {
+            actorIdentityId: identityId,
+            source: 'notification',
+            operationId,
+            action: 'replay',
+          },
+          auditRepository,
+        );
         return ok(res);
       } catch (err) {
         return fail({
@@ -315,6 +320,7 @@ export function createNotificationModule(
   return {
     notificationRepository,
     preferenceRepository,
+    portableCapability,
     templateRepository,
     useCases,
     api,

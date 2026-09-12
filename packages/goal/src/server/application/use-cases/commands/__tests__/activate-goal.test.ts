@@ -13,11 +13,9 @@ function createTestGoal(name = 'Test Goal'): Goal {
   return Goal.create({
     identityId: 'test-identity-id' as any,
     name,
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
+    summary: null,
     startDate: null,
-    dueDate: null,
+    target: null,
     reminderConfig: null,
   });
 }
@@ -47,34 +45,38 @@ describe('ActivateGoalUseCase', () => {
 
   it('should reactivate a completed goal and clear completedAt', async () => {
     const goal = createTestGoal();
+    goal.activate();
     goal.markAsCompleted();
     vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);
 
     const result = await useCase.execute(goal.id, 'identity-1', goal.version);
 
     expect(result).toBeOk();
-    expect(goal.status).toBe('Active');
+    expect(goal.status).toBe('InProgress');
     expect(goal.completedAt).toBeNull();
     expect(goal.archivedAt).toBeNull();
     expect(goalRepo.saveRootWithExpectedVersion).toHaveBeenCalledWith(goal, 1);
   });
 
-  it('should activate an already active goal (idempotent)', async () => {
+  it('should keep an already in-progress goal idempotent', async () => {
     const goal = createTestGoal();
+    goal.activate();
     vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);
 
     const result = await useCase.execute(goal.id, 'identity-1', goal.version);
 
     expect(result).toBeOk();
-    expect(goal.status).toBe('Active');
+    expect(goal.status).toBe('InProgress');
     expect(goalRepo.findByIdForIdentity).toHaveBeenCalledWith('identity-1', goal.id, {
       includeChildren: true,
     });
-    expect(goalRepo.saveRootWithExpectedVersion).toHaveBeenCalledWith(goal, 1);
+    expect(goal.version).toBe(1);
+    expect(goalRepo.saveRootWithExpectedVersion).not.toHaveBeenCalled();
   });
 
   it('should throw when goal is archived', async () => {
     const goal = createTestGoal();
+    goal.activate();
     goal.markAsCompleted();
     goal.archive();
     vi.mocked(goalRepo.findByIdForIdentity).mockResolvedValue(goal);

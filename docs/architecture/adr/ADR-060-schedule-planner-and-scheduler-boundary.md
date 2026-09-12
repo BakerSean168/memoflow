@@ -9,7 +9,7 @@ tags:
   - architecture
 description: 将用户可见的 Schedule/Planner 与内部 Scheduler/Temporal Engine 明确分层，避免 CalendarEntry 与后台执行队列继续共享同一产品语义
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-08T20:45:00+08:00
 ---
 
 # ADR-060: Schedule / Planner 与 Scheduler / Temporal Engine 分离
@@ -22,6 +22,17 @@ updated: 2026-09-08T09:00:00+08:00
 ## 2026-09-08 实现状态
 
 CLEAN-6304 已完成语义与物理拆分：`@memoflow/schedule` 只拥有 Planner/Calendar 产品能力，`@memoflow/scheduler` 拥有 Temporal Engine/worker persistence/lease/queue/retry 与只读 diagnostics。产品 UI 与 AI 均不得直接 mutation raw ScheduleTask。
+
+### 2026-09-08 vNext Model Convergence Follow-up
+
+上述 bounded-context / package 分离已经真实实施，但**不代表 CalendarEntry 与 Scheduler 内部 persistence model 已经完成最终收敛**。后续采用 ADR-080~083：
+
+- ADR-080：CalendarEntry 使用 Timed/AllDay Range Algebra；`duration` 改为派生；conflict 从 aggregate truth 移到 Planner read model；Planner 增加 occupancy。
+- ADR-081：Scheduler canonical persistence 从 legacy `ScheduleTask` 收敛为 `ScheduledInvocation`。
+- ADR-082：当前 invocation state 与 `InvocationAttempt` 历史事实分离，严格区分 `runAt` 与 retry `nextAttemptAt`。
+- ADR-083：Schedule/Scheduler contracts、diagnostics 与 persistence language 最终分区。
+
+因此本 ADR 的“已实施”只表示 **Schedule/Planner 与 Scheduler/Temporal Engine 的 ownership/package boundary 已完成**；ADR-080~083 的模型收敛仍是已采纳、待实施。
 
 ## 1. 背景
 

@@ -8,12 +8,14 @@ interface PackageManifest {
 }
 
 describe('@memoflow/time runtime dependency boundary', () => {
-  it('ships @internationalized/date because the public facade imports it at runtime', () => {
+  it('ships runtime-only third-party adapters from dependencies', () => {
     const manifest = JSON.parse(
       readFileSync(resolve(process.cwd(), 'package.json'), 'utf8'),
     ) as PackageManifest;
 
     expect(manifest.dependencies?.['@internationalized/date']).toBe('3.11.0');
     expect(manifest.devDependencies?.['@internationalized/date']).toBeUndefined();
+    expect(manifest.dependencies?.['@date-fns/tz']).toBe('1.5.0');
+    expect(manifest.devDependencies?.['@date-fns/tz']).toBeUndefined();
   });
 });

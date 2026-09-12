@@ -19,22 +19,27 @@ test.describe('Planner owner-command acceptance', () => {
       landingPath: '/tasks',
     });
 
+    const taskDate = await page.evaluate(() => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    });
+
     const creation = await expectApiData<{
       template: { id: string };
       todayInstanceCreated: boolean;
     }>(
-      await page.request.post(`${API_CONFIG.API_PREFIX}/task-templates`, {
+      await page.request.post(`${API_CONFIG.API_PREFIX}/task-plans`, {
         data: {
           name: taskName,
           description: 'HARD-7103 Fixture J owner-command rollback',
-          taskType: 'OneTime',
-          timeConfig: {
-            timeType: 'TimePoint',
-            startDate: Date.now(),
-            timePoint: 14 * 60,
-            timeRange: null,
+          schedule: {
+            kind: 'OneTime',
+            date: taskDate,
+            timing: { kind: 'At', time: '14:00' },
           },
-          recurrenceRule: null,
           reminderConfig: null,
           importance: 'Moderate',
           labelIds: [],
@@ -65,7 +70,7 @@ test.describe('Planner owner-command acceptance', () => {
     expect(before).not.toBeNull();
 
     let reschedulePayload: unknown = null;
-    await page.route('**/api/v1/task-instances/*/reschedule', async (route) => {
+    await page.route('**/api/v1/task-occurrences/*/reschedule', async (route) => {
       reschedulePayload = route.request().postDataJSON();
       await route.fulfill({
         status: 409,
@@ -83,7 +88,7 @@ test.describe('Planner owner-command acceptance', () => {
     const requestPromise = page.waitForRequest(
       (request) =>
         request.method() === 'POST' &&
-        /\/api\/v1\/task-instances\/[^/]+\/reschedule$/.test(new URL(request.url()).pathname),
+        /\/api\/v1\/task-occurrences\/[^/]+\/reschedule$/.test(new URL(request.url()).pathname),
     );
 
     await page.mouse.move(before!.x + before!.width / 2, before!.y + before!.height / 2);

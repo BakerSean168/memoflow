@@ -2,6 +2,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { GoalChannels } from '@memoflow/contracts/electron';
+import { createTimeContext } from '@memoflow/time';
+
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+};
 
 vi.mock('electron', () => ({
   ipcMain: {
@@ -30,6 +35,7 @@ describe('createGoalElectronModule channel surface', () => {
   });
 
   it('keeps canonical Goal vNext status channels on contracts surface', () => {
+    expect(GoalChannels.PLAN).toBe('goal:plan');
     expect(GoalChannels.ABANDON).toBe('goal:abandon');
     expect(GoalChannels.COMPLETE).toBe('goal:complete');
     expect('ARCHIVE_EXPIRED' in GoalChannels).toBe(false);
@@ -76,6 +82,8 @@ describe('GoalElectronModule.register() startup (W4 P2-1)', () => {
         taskBindingReadPort: {
           checkActiveTaskBindings: async () => ({ hasActiveBindings: false, activeCount: 0 }),
         },
+        userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+        relationCleanupFactory: () => ({ unlinkAllForGoal: async () => 0 }),
       }),
     ).not.toThrow();
   });

@@ -5,58 +5,80 @@ tags:
   - goal
 description: Goal vNext 当前功能、产品语义与模块边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-12T21:49:00+08:00
 ---
 
 # Goal 模块说明
 
+> **当前收敛状态（2026-09-12）：** GOAL-7202~7209 已落地：Goal identity/lifecycle、planning time、KR Measurement V3、Task context 三态、Shared Relation + stable Knowledge identity、Goal Workspace、durable GoalPlanDraft V2、property-chip create/edit、五精度 Target picker 与 React/Mobile parity 均已实现。GOAL-7210 已完成 destructive truth cleanup：旧 GoalTemplate/standalone AI-KR 轨道已删除，anti-resurrection governance 已扩展到 AI/persistence/portability surfaces，同时 Task deadline 语义保持不变。剩余 `GOAL-7211` 只负责最终五层审查、exact-head CI/build 与归档交付。
+
 ## 1. 功能定位
 
-Goal 负责个人目标的 **Direction + Measurement**：用户定义想达到什么结果，用 Key Result Measurement V2 表达可验证的衡量方式，并通过 Record / Review 跟踪事实与复盘。Goal 不再承担任务编排、专注计时、目录层级或动态优先级等其他产品职责。
+Goal 负责个人目标的 **Direction + Measurement**：用户定义想达到什么结果，用 Key Result Measurement V3 的 `Initial / Current / Target` 表达可验证的衡量方式，并通过 Record / Review 跟踪事实与复盘。Goal 不再承担任务编排、专注计时、目录层级或动态优先级等其他产品职责。
 
 ## 2. 当前产品能力
 
-- Goal 创建、编辑、激活、完成、放弃、归档与删除；
-- Key Result Measurement V2：`baseline / current / target / unit / direction` 等测量语义由统一 calculator 解释；
+- Goal 创建、编辑、回到规划、开始、完成、放弃、归档与删除；
+- Goal identity：`name + summary`；新 Goal 默认 `Planned`；
+- Planning time：`startDate?: Ymd` + `target?: GoalTimeframe`，Target 支持 Day / Month / Quarter / Half-year / Year 精度；目标周期过去只产生 `Past Target` 展示信号，不产生 Task-style overdue，也不自动改变状态；
+- Key Result Measurement V3：普通产品面只暴露 `initialValue / currentValue / targetValue / unit / optional target timeframe`；统一 calculator 使用 `(current - initial) / (target - initial)`，系统聚合 seed `trackingBaseValue` 仅存在于服务端/可移植备份协议，不进入普通 UI；
 - Goal Record：记录 KR 的真实测量事实；
 - Goal Review：记录阶段性复盘；
 - Shared Label：Goal 与 Task 共用 identity-scoped Label registry，创建/更新提交 `labelIds`，多标签筛选使用 `labelIdsAll` AND 语义；
 - Task Link：Task 可以链接 Goal/KR，但 Goal 不反向拥有 Task；
-- AI Goal draft：Mastra durable workflow 生成当前 Goal/KR/Label 语义的可审阅草稿，确认后由 Goal application port 写入。
+- Knowledge Link：通过 Shared Relation 的 typed GoalKnowledge facade 链接 reusable KnowledgeDocument；持久化端点只使用 stable `KnowledgeDocumentId`，rename/move 不改变关系身份；
+- Goal Workspace：一次 bounded read 返回 Goal authority + Task/Knowledge summary/preview + recent Record/Review；Task/Knowledge owner 暂时不可用时只降级对应 context，unresolved Knowledge edge 显式显示为 `Missing`；完整 Task/Knowledge 列表使用分页 query，不把 external entity ids 写回 Goal；
+- AI Goal plan：Mastra durable `goal.create` workflow 使用 GoalPlanDraft V2，可同时审阅/编辑 Goal、KR、Task 与 Knowledge intents；Apply 通过各 owner application ports + deterministic receipts 幂等执行，不直接写数据库。
 
-已退休且不得恢复为产品真值：`GoalFolder`、Goal category/string tags、Parent Goal、Importance/Priority、Goal Focus Session、MultiGoalComparison、Standalone ProgressBreakdown。
+已退休且不得恢复为产品真值：`GoalFolder`、Goal category/string tags、Parent Goal、Importance/Priority、Goal Focus Session、MultiGoalComparison、Standalone ProgressBreakdown、旧 `GoalTemplate` OKR catalog、旧 standalone “AI Generate KR” flow。
 
 ## 3. 状态与完成语义
 
 Goal 业务状态只有：
 
 ```text
-Active
+Planned
+InProgress
 Completed
 Abandoned
 ```
 
-`archivedAt` 是独立的历史/显示属性，不是第四种业务状态。完成判定由 Goal/KR 领域语义决定；weighted progress 是展示用进度，不是自动完成开关。
+状态只能通过显式 `plan / activate / complete / abandon` 业务动作改变。`archivedAt` 是独立的历史/显示属性，不是业务状态；start/target/KR/Task/Reminder 都不会自动切换 Goal status。进入 Completed 设置 `completedAt`，重新进入 InProgress 会清除它。
 
-## 4. 写入与一致性边界
+## 4. Planning time 边界
+
+- `startDate` 是 Product Time 的 date-only `Ymd`，不是 epoch instant；
+- `target` 是 `GoalTimeframe`：Day / Month / Quarter / Half-year / Year，展示必须保留用户选择的精度；
+- 持久化使用 `target_kind + target_end_date` 的规范化可逆 pair，应用层仍只暴露 `GoalTimeframe`；
+- Reminder/Schedule 可以从 target 派生 period end boundary，但这个 boundary 不是新的 Goal deadline truth；
+- Task `dueDate/isOverdue` 属于 Task owner，不能因为 Goal 去除 due 语义而删除或复用。
+
+Web/Desktop 使用 property-chip create/edit 与统一 `GoalTimeframePicker`；Goal 与 KR 都可直接编辑 Day / Month / Quarter / Half-year / Year，并保持用户选择的原始精度。React/Mobile 使用同一 GoalTimeframe contract 与 precision-preserving parser，以适合小屏的输入/摘要方式呈现。
+
+## 5. 写入与一致性边界
 
 - Goal aggregate 是 Goal/KR/Record/Review 的一致性边界；
 - 修改既有 aggregate 使用 `expectedVersion`，冲突显式返回而不是静默覆盖；
 - mutation 返回权威 `GoalMutationReceipt`，客户端按 ID 原子合并；
 - Task contribution 通过自包含、幂等的跨模块事件/settlement 进入 Goal，不共享 repository 或数据库事务；
+- generic Relation 不属于 Goal；Goal 删除只依赖窄 `GoalRelationCleanupPort`，由 host 注入 transaction-scoped Shared Relation adapter，使 Goal 删除与 edge unlink 在同一 Prisma/PowerSync 数据库事务中原子提交/回滚，且永不删除 KnowledgeDocument；
 - AI 只生成草稿并调用 Goal/Task owner application port，不直接写数据库。
+- Goal Workspace 是独立 read composition：Goal application/read layer 只依赖 structural consumer ports；API/Desktop host 复用 Task/Relation/Goal owner 实例，Goal package 不直接 import Task/Relation/Repository persistence。
 
-## 5. 用户视图
+## 6. 用户视图
 
-主要视图是 `Active / Completed / All`，归档与放弃属于历史入口；它们都是状态/日期派生的 **System View**，不是 Label。用户可叠加 Shared Label 过滤，例如 `Active AND #工作 AND #AI`。
+当前列表仍使用 `Active / Completed / All` 这组 **System View** 展示标签，其中 `Active` 视图是 UI/read-model 聚合，包含 `Planned + InProgress`，不是第五种 Goal status。归档与放弃属于历史入口；System View 都是状态/时间派生视图，不是 Label。用户可叠加 Shared Label 过滤。
 
-Web/Desktop 与 React/Mobile 均使用同一公开 contracts；移动端不存在 Folder/Comparison/Focus 等已退休 UI。
+Web/Desktop 与 React/Mobile 均使用同一公开 contracts 与 `GoalWorkspaceReadModel`。Vue/React 详情页都展示 bounded Task/Knowledge context、KR measurement、recent progress/reviews 与轻量 `Past Target` signal；移动端仅压缩布局，不引入第二套 Goal contract，也不存在 Folder/Comparison/Focus 等已退休 UI。
 
-## 6. 相关资产
+## 7. 相关资产
 
+- 当前 Goal model/lifecycle/timeframe：[ADR-067](../../architecture/adr/ADR-067-goal-vnext-product-model-and-lifecycle.md)
 - 设计总览：[Goal / Task vNext](../goal-task-vnext.md)
 - 产品边界：[ADR-053](../../architecture/adr/ADR-053-goal-task-personal-product-boundary.md)
 - Shared Label：[ADR-054](../../architecture/adr/ADR-054-shared-labels-and-system-views.md)
-- KR Measurement V2：[ADR-055](../../architecture/adr/ADR-055-key-result-measurement-progress-v2.md)
+- Goal Workspace / Shared Relation：[ADR-069](../../architecture/adr/ADR-069-goal-workspace-cross-module-context.md)
+- Stable Knowledge identity：[ADR-090](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
+- KR Measurement V3：[ADR-068](../../architecture/adr/ADR-068-key-result-measurement-v3.md)（ADR-055 保留为已被修订的 V2 历史决策）
 - Task settlement：[ADR-056](../../architecture/adr/ADR-056-task-plan-goal-link-contribution-settlement.md)
 - 文件索引：[Goal 模块文件索引](../module-index/goal-files.md)

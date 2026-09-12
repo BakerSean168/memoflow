@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   TaskGoalBindingTrigger,
-  type CreateTaskTemplateReq,
+  type CreateTaskPlanReq,
 } from '@memoflow/contracts/task';
 
 describe('TASK-2205 Goal link / contribution V2 contract', () => {
@@ -13,7 +13,7 @@ describe('TASK-2205 Goal link / contribution V2 contract', () => {
   });
 
   it('allows a Goal link without configuring automatic contribution', () => {
-    type Binding = NonNullable<CreateTaskTemplateReq['goalBinding']>;
+    type Binding = NonNullable<CreateTaskPlanReq['goalBinding']>;
     const linkOnly = {
       goalId: 'IGoalId_goal-1',
       keyResultId: 'IKeyResultId_kr-1',

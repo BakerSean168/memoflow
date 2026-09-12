@@ -18,6 +18,14 @@ test.describe('Task completion closed loop', () => {
       landingPath: '/',
     });
 
+    const taskDate = await page.evaluate(() => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    });
+
     const headers = {};
 
     const goalReceipt = await expectApiData<{
@@ -28,9 +36,8 @@ test.describe('Task completion closed loop', () => {
         headers,
         data: {
           name: goalName,
-          description: 'Verifies task-to-goal progress projection.',
-          startDate: Date.now(),
-          dueDate: Date.now() + 7 * 24 * 60 * 60 * 1000,
+          summary: 'Verifies task-to-goal progress projection.',
+          startDate: taskDate,
         },
       }),
     );
@@ -44,7 +51,7 @@ test.describe('Task completion closed loop', () => {
           expectedVersion: goalReceipt.goalVersion,
           title: 'Complete linked work',
           calculationMethod: 'Sum',
-          startingValue: 0,
+          initialValue: 0,
           currentValue: 0,
           targetValue: 10,
           unit: 'tasks',
@@ -58,19 +65,16 @@ test.describe('Task completion closed loop', () => {
       template: { id: string };
       todayInstanceCreated: boolean;
     }>(
-      await page.request.post(`${API_CONFIG.API_PREFIX}/task-templates`, {
+      await page.request.post(`${API_CONFIG.API_PREFIX}/task-plans`, {
         headers,
         data: {
           name: taskName,
           description: 'Created for the P0 completion closed loop.',
-          taskType: 'OneTime',
-          timeConfig: {
-            timeType: 'AllDay',
-            startDate: Date.now(),
-            timePoint: null,
-            timeRange: null,
+          schedule: {
+            kind: 'OneTime',
+            date: taskDate,
+            timing: { kind: 'AllDay' },
           },
-          recurrenceRule: null,
           reminderConfig: null,
           importance: 'Moderate',
           labelIds: [],

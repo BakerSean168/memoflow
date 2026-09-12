@@ -8,8 +8,8 @@ import {
   BufferedTaskWriteEventBus,
   committedTaskWriteEventBus,
 } from '../task-write-buffered-event-bus';
-import { TaskInstancePrismaRepository } from './task-instance-prisma.repository';
-import { TaskTemplatePrismaRepository } from './task-template-prisma.repository';
+import { TaskOccurrencePrismaRepository } from './task-occurrence-prisma.repository';
+import { TaskPlanPrismaRepository } from './task-plan-prisma.repository';
 import { toTaskGoalOutboxRecord, type TaskGoalOutboxWriter } from '../../task-goal-outbox';
 
 export class PrismaTaskWriteTransactionRunner implements TaskWriteTransactionRunner {
@@ -24,8 +24,8 @@ export class PrismaTaskWriteTransactionRunner implements TaskWriteTransactionRun
     let postCommitEvents: import('@memoflow/contracts/shared').IDomainEvent[] = [];
     const result = await this.prisma.$transaction(async (tx) => {
       const result = await work({
-        templateRepository: new TaskTemplatePrismaRepository(tx, bufferedEventBus),
-        instanceRepository: new TaskInstancePrismaRepository(tx, bufferedEventBus),
+        templateRepository: new TaskPlanPrismaRepository(tx, bufferedEventBus),
+        instanceRepository: new TaskOccurrencePrismaRepository(tx, bufferedEventBus),
       });
       const events = bufferedEventBus.drain();
       const goalOutbox: TaskGoalOutboxWriter = {
@@ -34,8 +34,8 @@ export class PrismaTaskWriteTransactionRunner implements TaskWriteTransactionRun
             data: [{
               eventId: record.eventId,
               identityId: record.identityId,
-              taskInstanceId: record.taskInstanceId,
-              taskTemplateId: record.taskTemplateId,
+              taskOccurrenceId: record.taskOccurrenceId,
+              taskPlanId: record.taskPlanId,
               goalId: record.goalId,
               keyResultId: record.keyResultId,
               payload: record.payload,

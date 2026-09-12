@@ -1,0 +1,38 @@
+import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { Instant } from '@memoflow/contracts/primitives';
+import type { IdentityId } from '@memoflow/domain-shared';
+import type { TaskPlanCompletionPolicyValue, TaskPlanOutcomeValue } from '@memoflow/contracts/task';
+import type { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
+import type { TaskPlanId } from '../../domain/value-objects/task-plan-id';
+import type {
+  ChecklistItemDefinition,
+  TaskPlanSchedule,
+  TaskGoalBinding,
+  TaskReminderConfig,
+} from '../value-objects';
+
+export interface TaskPlanState {
+  id: TaskPlanId;
+  identityId: IdentityId;
+  title: string;
+  description: string | null;
+  schedule: TaskPlanSchedule;
+  importance: ImportanceLevel;
+  status: TaskPlanStatus;
+  outcome: TaskPlanOutcomeValue;
+  completionPolicy: TaskPlanCompletionPolicyValue;
+  closedAt: Instant | null;
+  archivedAt: Instant | null;
+  abandonedReason: string | null;
+  goalBinding: TaskGoalBinding | null;
+  checklist: ChecklistItemDefinition[];
+  reminderConfig: TaskReminderConfig | null;
+  lastGeneratedDate: Instant | null;
+  generateAheadDays: number | null;
+  createdAt: Instant;
+  updatedAt: Instant;
+  deletedAt: Instant | null;
+  version: number;
+}
+
+export type TaskPlanProps = Omit<TaskPlanState, 'id'>;

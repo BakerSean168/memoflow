@@ -6,7 +6,7 @@
   "files": [
     "dist"
   ],
-  "description": "Product time facade: Clock, Style, Codec, Format, Input, Calendar (ADR-037)",
+  "description": "Product Time: explicit TimeContext, Clock, Codec, Format, Input, Calendar and recurrence adapters",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -16,6 +16,7 @@
     }
   },
   "dependencies": {
+    "@date-fns/tz": "1.5.0",
     "@internationalized/date": "3.11.0",
     "@memoflow/contracts": "workspace:*",
     "date-fns": "^4.1.0",

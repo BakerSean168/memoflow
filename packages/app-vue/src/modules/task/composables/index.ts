@@ -1,11 +1,11 @@
 export { useTask } from './useTask';
-export { useTaskInstances } from './useTaskInstances';
-export { useTaskTemplateForm } from './useTaskTemplateForm';
+export { useTaskOccurrences } from './useTaskOccurrences';
+export { useTaskPlanForm } from './useTaskPlanForm';
 export { useBasicInfoValidation } from './useBasicInfoValidation';
 export type { BasicInfoValidationErrors } from './useBasicInfoValidation';
-export { useTaskTemplateListQuery } from './useTaskTemplateListQuery';
-export { useTaskTemplateDetailQuery } from './useTaskTemplateDetailQuery';
+export { useTaskPlanListQuery } from './useTaskPlanListQuery';
+export { useTaskPlanDetailQuery } from './useTaskPlanDetailQuery';
 export {
-  useTaskTemplateMutations,
+  useTaskPlanMutations,
   type CreateTemplateFeedbackIntent,
-} from './useTaskTemplateMutations';
+} from './useTaskPlanMutations';

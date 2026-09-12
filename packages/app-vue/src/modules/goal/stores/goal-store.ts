@@ -79,8 +79,13 @@ export const useGoalStore = defineStore('goal', {
     activeGoalCount: (state): number =>
       state.goalIds
         .map((id) => state.goalById[id])
-        .filter((goal) => goal && goal.status === 'Active' && !goal.archivedAt && !goal.deletedAt)
-        .length,
+        .filter(
+          (goal) =>
+            goal &&
+            (goal.status === 'Planned' || goal.status === 'InProgress') &&
+            !goal.archivedAt &&
+            !goal.deletedAt,
+        ).length,
     completedGoalCount: (state): number =>
       state.goalIds
         .map((id) => state.goalById[id])

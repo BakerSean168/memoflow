@@ -63,7 +63,7 @@ const mocks = vi.hoisted(() => {
     })),
     getMyProfile: vi.fn(async () => ({
       ok: true,
-      data: { toDTO: () => ({ id: 'cloud-1' }) },
+      data: { account: { toDTO: () => ({ id: 'cloud-1' }) } },
     })),
     createNotificationStartupHook: vi.fn(() => notificationHook),
     installDesktopServerStateRuntime: vi.fn(() => serverStateRuntime),

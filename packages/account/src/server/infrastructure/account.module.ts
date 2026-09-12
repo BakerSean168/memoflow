@@ -3,21 +3,19 @@ import {
   ListAccountsUseCase,
   GetAccountProfileUseCase,
   UpdateAccountProfileUseCase,
-  UpdateAccountSettingsUseCase,
   CloseAccountUseCase,
-  CheckAvailabilityUseCase,
   AccountClosureCoordinator,
   type CloudAuthRevocationPort,
   type AccountClosureEventPublisher,
-  type Clock,
 } from '../application';
+import type { Clock } from '@memoflow/time';
 import type { AccountApplicationPort } from '../application';
 import type { OperationAuditRepository } from '@memoflow/patterns/operations';
-import { runTimelineQueryWithAudit, globalUnifiedOperationMetrics } from '@memoflow/patterns/operations';
-import type {
-  OperationTimelineEntry,
-  OperationAuditRecord,
-} from '@memoflow/contracts/operations';
+import {
+  runTimelineQueryWithAudit,
+  globalUnifiedOperationMetrics,
+} from '@memoflow/patterns/operations';
+import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/contracts/operations';
 import { OperationTimelineEntrySchema } from '@memoflow/contracts/operations';
 import { ok, fail } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
@@ -32,11 +30,10 @@ export interface AccountModuleDependencies {
   readonly revocationPort?: CloudAuthRevocationPort;
   readonly eventPublisher?: AccountClosureEventPublisher;
   readonly coordinator?: AccountClosureCoordinator;
-  readonly clock?: Clock;
+  readonly clock: Clock;
   readonly laneCapability?: 'api' | 'desktop';
   readonly runtimeContributions?:
-    | AccountModuleRuntimeContribution
-    | readonly AccountModuleRuntimeContribution[];
+    AccountModuleRuntimeContribution | readonly AccountModuleRuntimeContribution[];
   /** W7：审计仓库（最小权限 + 审计） */
   readonly auditRepository?: OperationAuditRepository;
 }
@@ -52,9 +49,7 @@ export interface AccountModuleUseCases {
   readonly listAccounts: ListAccountsUseCase;
   readonly getProfile: GetAccountProfileUseCase;
   readonly updateProfile: UpdateAccountProfileUseCase;
-  readonly updateSettings: UpdateAccountSettingsUseCase;
   readonly closeAccount: CloseAccountUseCase;
-  readonly checkAvailability: CheckAvailabilityUseCase;
 }
 
 export interface AccountModuleInstance {
@@ -71,7 +66,7 @@ export interface AccountModuleInstance {
 export function createAccountUseCases(
   dependencies: AccountModuleDependencies,
 ): AccountModuleUseCases {
-  const { accountRepository, laneCapability = 'api' } = dependencies;
+  const { accountRepository, clock, laneCapability = 'api' } = dependencies;
 
   let coordinator: AccountClosureCoordinator | null = dependencies.coordinator ?? null;
 
@@ -86,7 +81,7 @@ export function createAccountUseCases(
         closureOperationRepository: dependencies.closureOperationRepository,
         revocationPort: dependencies.revocationPort,
         eventPublisher: dependencies.eventPublisher,
-        clock: dependencies.clock,
+        clock,
         metrics: globalUnifiedOperationMetrics,
       });
     }
@@ -111,17 +106,14 @@ export function createAccountUseCases(
   return {
     listAccounts: new ListAccountsUseCase(accountRepository),
     getProfile: new GetAccountProfileUseCase(accountRepository),
-    updateProfile: new UpdateAccountProfileUseCase(accountRepository),
-    updateSettings: new UpdateAccountSettingsUseCase(accountRepository),
+    updateProfile: new UpdateAccountProfileUseCase(accountRepository, clock),
     closeAccount: new CloseAccountUseCase(coordinator),
-    checkAvailability: new CheckAvailabilityUseCase(accountRepository),
   };
 }
 
 function normalizeRuntimeContributions(
   runtimeContributions?:
-    | AccountModuleRuntimeContribution
-    | readonly AccountModuleRuntimeContribution[],
+    AccountModuleRuntimeContribution | readonly AccountModuleRuntimeContribution[],
 ): readonly AccountModuleRuntimeContribution[] {
   if (!runtimeContributions) {
     return [];
@@ -154,8 +146,6 @@ export function createAccountModule(
       listAccounts: (options) => useCases.listAccounts.execute(options),
       getProfile: (cx) => useCases.getProfile.execute(cx),
       updateProfile: (data, cx) => useCases.updateProfile.execute(data, cx),
-      updateSettings: (data, cx) => useCases.updateSettings.execute(data, cx),
-      checkAvailability: (data) => useCases.checkAvailability.execute(data),
       closeAccount: (data, cx) => useCases.closeAccount.execute(data, cx),
       queryClosureTimeline: async (cx) => {
         const operationRepo = dependencies.closureOperationRepository;

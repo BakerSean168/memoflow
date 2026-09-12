@@ -7,12 +7,13 @@
  */
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import { createSettingPowerSyncRepositories } from '@memoflow/setting';
 import type {
   DataPortabilityDependencies,
   GoalRepoPort,
   GoalRecordRepoPort,
-  TaskTemplateRepoPort,
-  TaskInstanceRepoPort,
+  TaskPlanRepoPort,
+  TaskOccurrenceRepoPort,
   ReminderTemplateRepoPort,
   ReminderGroupRepoPort,
   ReminderResponseRepoPort,
@@ -24,13 +25,8 @@ import type {
   ResourceRepoPort,
   ScheduleRepoPort,
   ScheduleTaskRepoPort,
-  EditorWorkspaceRepoPort,
-  EditorSessionRepoPort,
-  EditorGroupRepoPort,
-  EditorTabRepoPort,
   AIConversationRepoPort,
   NotificationPreferenceRepoPort,
-  SettingRepoPort,
 } from '../../application/data-portability.dependencies';
 
 // ============ Helpers ============
@@ -95,7 +91,7 @@ class PowerSyncGoalRecordAdapter implements GoalRecordRepoPort {
   }
 }
 
-class PowerSyncTaskTemplateAdapter implements TaskTemplateRepoPort {
+class PowerSyncTaskPlanAdapter implements TaskPlanRepoPort {
   constructor(private readonly db: IElectronDatabase) {}
   async findByIdentityId(identityId: string): Promise<unknown[]> {
     const rows = await this.db.getAll<Record<string, unknown>>(
@@ -106,7 +102,7 @@ class PowerSyncTaskTemplateAdapter implements TaskTemplateRepoPort {
   }
 }
 
-class PowerSyncTaskInstanceAdapter implements TaskInstanceRepoPort {
+class PowerSyncTaskOccurrenceAdapter implements TaskOccurrenceRepoPort {
   constructor(private readonly db: IElectronDatabase) {}
   async findByIdentityId(identityId: string): Promise<unknown[]> {
     const rows = await this.db.getAll<Record<string, unknown>>(
@@ -240,49 +236,6 @@ class PowerSyncScheduleTaskAdapter implements ScheduleTaskRepoPort {
   }
 }
 
-class PowerSyncEditorWorkspaceAdapter implements EditorWorkspaceRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByIdentityId(identityId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM editor_workspaces WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
-      [identityId],
-    );
-    return mapRows(rows);
-  }
-}
-
-class PowerSyncEditorSessionAdapter implements EditorSessionRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByWorkspaceId(workspaceId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM editor_workspace_sessions WHERE workspace_id = ? AND deleted_at IS NULL ORDER BY created_at`,
-      [workspaceId],
-    );
-    return mapRows(rows);
-  }
-}
-
-class PowerSyncEditorGroupAdapter implements EditorGroupRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findBySessionId(sessionId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM editor_workspace_session_groups WHERE session_id = ? AND deleted_at IS NULL ORDER BY group_index`,
-      [sessionId],
-    );
-    return mapRows(rows);
-  }
-}
-
-class PowerSyncEditorTabAdapter implements EditorTabRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByGroupId(groupId: string): Promise<unknown[]> {
-    const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM editor_workspace_session_group_tabs WHERE group_id = ? AND deleted_at IS NULL ORDER BY tab_index`,
-      [groupId],
-    );
-    return mapRows(rows);
-  }
-}
 
 class PowerSyncAIConversationAdapter implements AIConversationRepoPort {
   constructor(private readonly db: IElectronDatabase) {}
@@ -316,27 +269,17 @@ class PowerSyncNotificationPreferenceAdapter implements NotificationPreferenceRe
   }
 }
 
-class PowerSyncSettingAdapter implements SettingRepoPort {
-  constructor(private readonly db: IElectronDatabase) {}
-  async findByIdentityId(identityId: string): Promise<unknown | null> {
-    const row = await this.db.getOptional<Record<string, unknown>>(
-      `SELECT * FROM user_settings WHERE identity_id = ?`,
-      [identityId],
-    );
-    return row ? mapRow(row) : null;
-  }
-}
-
 // ============ Factory ============
 
 export function createPowerSyncDataPortabilityDependencies(
   db: IElectronDatabase,
 ): DataPortabilityDependencies {
+  const settingRepos = createSettingPowerSyncRepositories(db);
   return {
     goalRepository: new PowerSyncGoalAdapter(db),
     goalRecordRepository: new PowerSyncGoalRecordAdapter(db),
-    taskTemplateRepository: new PowerSyncTaskTemplateAdapter(db),
-    taskInstanceRepository: new PowerSyncTaskInstanceAdapter(db),
+    taskPlanRepository: new PowerSyncTaskPlanAdapter(db),
+    taskOccurrenceRepository: new PowerSyncTaskOccurrenceAdapter(db),
     reminderTemplateRepository: new PowerSyncReminderTemplateAdapter(db),
     reminderGroupRepository: new PowerSyncReminderGroupAdapter(db),
     reminderResponseRepository: new PowerSyncReminderResponseAdapter(db),
@@ -348,12 +291,8 @@ export function createPowerSyncDataPortabilityDependencies(
     resourceRepository: new PowerSyncResourceAdapter(db),
     scheduleRepository: new PowerSyncScheduleAdapter(db),
     scheduleTaskRepository: new PowerSyncScheduleTaskAdapter(db),
-    editorWorkspaceRepository: new PowerSyncEditorWorkspaceAdapter(db),
-    editorSessionRepository: new PowerSyncEditorSessionAdapter(db),
-    editorGroupRepository: new PowerSyncEditorGroupAdapter(db),
-    editorTabRepository: new PowerSyncEditorTabAdapter(db),
     aiConversationRepository: new PowerSyncAIConversationAdapter(db),
     notificationPreferenceRepository: new PowerSyncNotificationPreferenceAdapter(db),
-    settingRepository: new PowerSyncSettingAdapter(db),
+    userPreferenceRepository: settingRepos.userPreferenceRepository,
   };
 }

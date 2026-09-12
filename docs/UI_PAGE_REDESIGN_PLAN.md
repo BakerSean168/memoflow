@@ -484,7 +484,7 @@ FilterBar：[全部|进行中|已暂停|已归档](计数Tabs) [关系过滤▾]
 
 > **⚠️ 运行时 supersede（2026-07-21；残留 301）**：`RepositoryWorkspaceView.vue` 已从运行时删除。
 > 当前 `/repository` 入口为 `RepositoryEntryView` → `KnowledgeProjectionWorkspaceView`（GitHub 投影）/
-> `LocalVaultWorkspaceView`（Desktop 本地 Vault）；confirmed-create-only；AI 着陆 `/repository?note=`。
+> `LocalVaultWorkspaceView`（Desktop 本地 Vault）；controlled confirmed-create / explicit metadata adoption；AI 着陆 `/repository?note=`。
 > 以下布局/动作描述保留为 UI redesign 历史方案，**不得**当作当前实现清单。真值见 product 模块文档与 ADR-034。
 >
 > 本页原执行 Brief §13.3 **阶段 0（UI 收缩）**。说明：Brief §4.7 的"不可删除交互状态"以自建编辑器为长期方向为前提；§13 已拍板 Obsidian vault 方向（2026-07-11），两处冲突**以 §13 / ADR-034 为准**。

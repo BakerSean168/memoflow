@@ -13,6 +13,7 @@ import type {
 } from '@memoflow/contracts/goal';
 import { GoalStatus } from '@memoflow/contracts/goal';
 import { IdentityId } from '@memoflow/domain-shared';
+import { decodeGoalStartDate, decodeGoalTimeframe } from '../../goal-timeframe-persistence';
 import { GoalId, GoalReviewId, KeyResultId } from '../../../../domain';
 import {
   KeyResult,
@@ -31,12 +32,11 @@ export interface RawGoalData {
   id: string;
   identityId: string;
   name: string;
-  description: string | null;
-  feasibilityAnalysis: string | null;
-  motivation: string | null;
+  summary: string | null;
   status: string;
-  startDate: number | null;
-  dueDate: number | null;
+  startDate: string | null;
+  targetKind: string | null;
+  targetEndDate: string | null;
   completedAt: number | null;
   archivedAt: number | null;
   sortOrder: number;
@@ -56,13 +56,15 @@ export interface RawKeyResultData {
   title: string;
   description: string | null;
   progress: {
-    startingValue: number;
-    progressBaselineValue: number | null;
+    initialValue: number;
+    trackingBaseValue: number;
     currentValue: number;
     targetValue: number;
     aggregationMethod: string;
     unit: string | null;
   };
+  targetKind: string | null;
+  targetEndDate: string | null;
   weight: number;
   sortOrder: number;
   createdAt: number;
@@ -95,13 +97,14 @@ export function rawDataToGoalState(raw: RawGoalData): GoalState {
       title: kr.title,
       description: kr.description ?? null,
       progress: {
-        startingValue: kr.progress.startingValue ?? 0,
-        progressBaselineValue: kr.progress.progressBaselineValue ?? null,
+        initialValue: kr.progress.initialValue ?? 0,
+        trackingBaseValue: kr.progress.trackingBaseValue ?? kr.progress.currentValue ?? 0,
         currentValue: kr.progress.currentValue ?? 0,
         targetValue: kr.progress.targetValue ?? 100,
         aggregationMethod: (kr.progress.aggregationMethod ?? 'Last') as KeyResultCalculationMethod,
         unit: kr.progress.unit ?? null,
       },
+      target: decodeGoalTimeframe(kr.targetKind, kr.targetEndDate),
       weight: kr.weight,
       sortOrder: kr.sortOrder,
       createdAt: Number(kr.createdAt),
@@ -131,12 +134,10 @@ export function rawDataToGoalState(raw: RawGoalData): GoalState {
     id: GoalId.of(raw.id),
     identityId: IdentityId.of(raw.identityId),
     name: raw.name,
-    description: raw.description ?? null,
-    feasibilityAnalysis: raw.feasibilityAnalysis ?? null,
-    motivation: raw.motivation ?? null,
+    summary: raw.summary ?? null,
     status: raw.status as GoalStatus,
-    startDate: raw.startDate ? Number(raw.startDate) : null,
-    dueDate: raw.dueDate ? Number(raw.dueDate) : null,
+    startDate: decodeGoalStartDate(raw.startDate),
+    target: decodeGoalTimeframe(raw.targetKind, raw.targetEndDate),
     completedAt: raw.completedAt ? Number(raw.completedAt) : null,
     archivedAt: raw.archivedAt ? Number(raw.archivedAt) : null,
     sortOrder: raw.sortOrder,

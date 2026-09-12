@@ -64,7 +64,7 @@ import {
 } from '@memoflow/cloud-auth/server';
 import { composeGoal } from './runtime/compose-goal';
 import { PrismaTaskBindingReadPort } from '@memoflow/task';
-import { createGoalTaskProgressPrismaHandler } from '@memoflow/goal';
+import { createGoalTaskProgressPrismaHandler, GoalWorkspaceQueryService } from '@memoflow/goal';
 import { createGoalPrismaReminderFireHandler } from '@memoflow/goal/schedule-execution';
 import { createGoalPrismaScheduleProjectionSource } from '@memoflow/goal/schedule-projection';
 import { resolveRepositoryStorageBaseDir } from '@memoflow/repository';
@@ -81,6 +81,14 @@ import { composePowerSyncApiModule } from './modules/powersync/module.js';
 import { composeDashboardApiModule } from './modules/dashboard/module.js';
 import { composeLabelApiModule } from './modules/label/module.js';
 import { LabelService, PrismaLabelRepository } from '@memoflow/label';
+import {
+  GoalKnowledgeService,
+  PrismaRelationRepository,
+  PrismaGoalRelationCleanupCapability,
+} from '@memoflow/relation';
+import { composeGoalKnowledgeApiModule } from './modules/relation/module.js';
+import { composeGoalWorkspaceApiModule } from './modules/goal/goal-workspace.module.js';
+import { createSystemClock } from '@memoflow/time';
 import { PrismaDashboardReadPort } from './modules/dashboard/dashboard-read-port.js';
 import {
   PrismaActivityLedgerWriter,
@@ -140,10 +148,10 @@ async function bootstrap(): Promise<void> {
   const accountActiveChecker = async (identityId: string) =>
     (await closureRepo.findActiveByIdentityId(identityId)) !== null;
   // Executor-visible closure predicate frozen from merge-base: block when the
-  // account is missing / Deactivated / Closed, or an active closure operation
+  // account is missing / Closed, or an active closure operation
   // exists in requested|revoking|closing. The AI executor MUST see this
   // predicate, not the shared account-active checker.
-  // 从 merge-base 冻结的 executor 可见闭户谓词：账户缺失 / Deactivated / Closed
+  // 从 merge-base 冻结的 executor 可见闭户谓词：账户缺失 / Closed
   // 或存在 requested|revoking|closing 阶段的有效闭户操作时阻断。AI executor
   // 必须看到该谓词，而不是共享的账户激活检查器。
   const executorClosureChecker = createExecutorClosureChecker(prisma);
@@ -164,7 +172,7 @@ async function bootstrap(): Promise<void> {
       env.MEMOFLOW_WEB_URL,
     ),
     github: githubOAuthConfig ?? undefined,
-    userProvisioner: createCloudAccountProvisioner(prisma),
+    userProvisioner: createCloudAccountProvisioner(prisma, createSystemClock()),
     emailDelivery: testEmailLinks?.delivery ?? baseEmailDelivery,
     closureChecker: accountActiveChecker,
     rateLimit: env.LOCAL_VALIDATION
@@ -190,10 +198,13 @@ async function bootstrap(): Promise<void> {
   const accountApiModule = composeAccount({
     db: prisma,
     cloudAuth,
+    clock: createSystemClock(),
   });
+  const settingApiModule = composeSetting({ db: prisma });
   const notificationApiModule = composeNotification({
     db: prisma,
     closureChecker: accountActiveChecker,
+    userTimeContextPort: settingApiModule.userTimeContextPort,
     channelCapabilities: [
       {
         channelType: 'InApp',
@@ -205,6 +216,7 @@ async function bootstrap(): Promise<void> {
   const reminderComposed = composeReminder({
     db: prisma,
     notificationRequestedWriter: notificationApiModule.requestedWriter,
+    userTimeContextPort: settingApiModule.userTimeContextPort,
     closureChecker: accountActiveChecker,
     executorClosureChecker,
   });
@@ -215,8 +227,13 @@ async function bootstrap(): Promise<void> {
     githubApp: getGithubAppConfig() ?? undefined,
     knowledgeRepositoryCloudDataPurger: new RepositoryKnowledgeCloudDataPurgerAdapter(prisma),
   });
-  const settingApiModule = composeSetting({ db: prisma });
-  const dataPortabilityApiModule = composeDataPortability({ db: prisma });
+  const dataPortabilityApiModule = composeDataPortability({
+    db: prisma,
+    portableCapabilities: [
+      settingApiModule.portableCapability,
+      notificationApiModule.module.portableCapability,
+    ],
+  });
 
   // CLEAN-6304: Calendar and Temporal Engine own separate repository sets.
   // Orchestration shares the ONE Scheduler task repository; Calendar receives
@@ -228,11 +245,17 @@ async function bootstrap(): Promise<void> {
   const routineExecutionDeps = createRoutinePrismaScheduleExecutionDeps(prisma);
   const scheduleOrchestrationModule = createScheduleOrchestrationModule({
     taskProjection: {
-      source: createTaskPrismaScheduleProjectionSource(prisma),
+      source: createTaskPrismaScheduleProjectionSource(
+        prisma,
+        settingApiModule.userTimeContextPort,
+      ),
       scheduleTaskRepository: schedulerRepositorySet.scheduleTaskRepository,
     },
     goalProjection: {
-      source: createGoalPrismaScheduleProjectionSource(prisma),
+      source: createGoalPrismaScheduleProjectionSource(
+        prisma,
+        settingApiModule.userTimeContextPort,
+      ),
     },
     reminderProjection: {
       source: reminderComposed.scheduleProjectionSource,
@@ -258,25 +281,43 @@ async function bootstrap(): Promise<void> {
     db: prisma,
     runtimeContributions: scheduleOrchestrationModule.projectionRuntime,
     goalProgressHandler: createGoalTaskProgressPrismaHandler(prisma),
+    userTimeContextPort: settingApiModule.userTimeContextPort,
   });
   // Register the Task reminder fire handler so scheduled `task.reminder` work
   // (e.g. a one-time task + relative reminder) is executed by the registry-based
   // source executor instead of the legacy router fallback.
   scheduleOrchestrationModule.handlerRegistry.register(
     createTaskReminderScheduledHandlerRegistration({
-      taskInstanceRepository: taskComposed.taskInstanceRepository,
-      taskTemplateRepository: taskComposed.taskTemplateRepository,
+      taskOccurrenceRepository: taskComposed.taskOccurrenceRepository,
+      taskPlanRepository: taskComposed.taskPlanRepository,
       notificationRequestedWriter: notificationApiModule.repositories.requestedWriter,
     }),
   );
+  const taskGoalContextReadPort = new PrismaTaskBindingReadPort(prisma);
+  const relationRepository = new PrismaRelationRepository(prisma);
+  const goalKnowledgeService = new GoalKnowledgeService(
+    relationRepository,
+    repositoryApiModule.knowledgeDocumentRefResolver,
+  );
   const goalComposed = composeGoal({
     db: prisma,
-    taskBindingReadPort: new PrismaTaskBindingReadPort(prisma),
+    taskBindingReadPort: taskGoalContextReadPort,
+    userTimeContextPort: settingApiModule.userTimeContextPort,
+    relationCleanupFactory: (tx) => new PrismaGoalRelationCleanupCapability(tx),
+  });
+  const goalWorkspaceService = new GoalWorkspaceQueryService({
+    goalRepository: goalComposed.repositories.goalRepository,
+    goalRecordRepository: goalComposed.repositories.goalRecordRepository,
+    taskContextReadPort: taskGoalContextReadPort,
+    knowledgeRelationReadPort: goalKnowledgeService,
+    knowledgeContextReadPort: repositoryApiModule.knowledgeDocumentWorkspaceResolver,
   });
   if (!env.DATABASE_URL) {
     throw new Error('AI Mastra runtime requires DATABASE_URL after environment normalization');
   }
-  const labelService = new LabelService(new PrismaLabelRepository(prisma));
+  const labelService = new LabelService(new PrismaLabelRepository(prisma), {
+    clock: createSystemClock(),
+  });
   const aiApiModule = composeAI({
     db: prisma,
     repositoryApiPort: repositoryApiModule.getApplicationPort(),
@@ -284,9 +325,12 @@ async function bootstrap(): Promise<void> {
     goalApplicationPort: goalComposed.applicationPort,
     taskApplicationPort: taskComposed.applicationPort,
     reminderApplicationPort: reminderComposed.executorReminderPort,
+    goalKnowledgeService,
+    knowledgeDocumentRefResolver: repositoryApiModule.knowledgeDocumentRefResolver,
     routineCommandPort: reminderComposed.routineCommandPort,
     scheduleRepository: scheduleApiModule.repositories.scheduleRepository,
     notificationRepository: notificationApiModule.repositories.notificationRepository,
+    userTimeContextPort: settingApiModule.userTimeContextPort,
     labelService,
     mastraStorage: { kind: 'postgres', connectionString: env.DATABASE_URL },
   });
@@ -296,8 +340,10 @@ async function bootstrap(): Promise<void> {
   // mounts routes against the transport-only context.
   const powerSyncApiModule = composePowerSyncApiModule({ db: prisma });
   const labelApiModule = composeLabelApiModule({ service: labelService });
+  const goalKnowledgeApiModule = composeGoalKnowledgeApiModule({ service: goalKnowledgeService });
+  const goalWorkspaceApiModule = composeGoalWorkspaceApiModule({ port: goalWorkspaceService });
   const dashboardApiModule = composeDashboardApiModule({
-    dashboardReadPort: new PrismaDashboardReadPort(prisma),
+    dashboardReadPort: new PrismaDashboardReadPort(prisma, settingApiModule.userTimeContextPort),
     activityLedgerRuntime: createActivityLedgerRecorder(new PrismaActivityLedgerWriter(prisma)),
   });
   const app = await bootstrapper
@@ -313,7 +359,9 @@ async function bootstrap(): Promise<void> {
     .register(taskComposed.module) // ✅ 任务模块
     .register(aiApiModule) // ✅ AI 模块 (runtime composer)
     .register(goalComposed.module) // ✅ 目标模块
+    .register(goalWorkspaceApiModule) // ✅ Goal Workspace read composition
     .register(labelApiModule) // ✅ 共享标签目录
+    .register(goalKnowledgeApiModule) // ✅ Shared Relation / Goal Knowledge
     .register(dataPortabilityApiModule.module) // ✅ 数据导入导出模块 (runtime composer)
     .register(powerSyncApiModule) // ✅ PowerSync 同步模块
     .register(dashboardApiModule) // ✅ 仪表盘聚合模块

@@ -13,8 +13,8 @@ export class DesktopPlannerAIReadAdapter implements IAIPlannerReadPort {
 
   private async taskItems(identityId: string, startTime: number, endTime: number): Promise<AIPlannerTaskItem[]> {
     const [instances, templates] = await Promise.all([
-      this.taskApplicationPort.getTaskInstancesByDateRange(identityId, startTime, endTime),
-      this.taskApplicationPort.listTaskTemplates({ identityId: IdentityId.of(identityId) }),
+      this.taskApplicationPort.getTaskOccurrencesByDateRange(identityId, startTime, endTime),
+      this.taskApplicationPort.listTaskPlans({ identityId: IdentityId.of(identityId) }),
     ]);
     const instanceData = unwrap(instances).data;
     const templateData = unwrap(templates).templates;

@@ -3,7 +3,7 @@ import type { Instant, Ymd } from '../../primitives';
 export type PlannerSourceType = 'schedule' | 'task' | 'goal' | 'routine';
 
 export type PlannerDisplaySemantic =
-  'calendar-entry' | 'task-occurrence' | 'goal-start' | 'goal-deadline' | 'routine-wall-clock';
+  'calendar-entry' | 'task-occurrence' | 'goal-start' | 'goal-target' | 'routine-wall-clock';
 
 export type PlannerDisplayTone = 'default' | 'muted' | 'accent' | 'warning' | 'success';
 

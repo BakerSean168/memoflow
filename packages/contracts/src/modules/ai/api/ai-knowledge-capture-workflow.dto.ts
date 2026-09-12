@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { KnowledgeDocumentIdSchema } from '../../repository/aggregates/knowledge-document-identity';
 
 /**
  * Canonical product contract for the ADR-052-style `knowledge.capture` Mastra
@@ -53,9 +54,12 @@ export const KnowledgeNoteDraftSchema = z
       .trim()
       .min(1)
       .max(1024)
-      .refine((value) => !value.startsWith('/') && !value.startsWith('\\\\') && !/^[a-zA-Z]:/.test(value), {
-        message: 'Knowledge note target path must be vault-relative',
-      }),
+      .refine(
+        (value) => !value.startsWith('/') && !value.startsWith('\\\\') && !/^[a-zA-Z]:/.test(value),
+        {
+          message: 'Knowledge note target path must be vault-relative',
+        },
+      ),
     tags: z.array(z.string().trim().min(1).max(50)).max(20).default([]),
     duplicateRisk: z.string().trim().max(500).default(''),
   })
@@ -70,6 +74,7 @@ export const KnowledgeNoteDraftContentSchema = KnowledgeNoteDraftSchema.omit({ t
 export type KnowledgeNoteDraftContent = z.infer<typeof KnowledgeNoteDraftContentSchema>;
 
 export const KnowledgeDraftSchema = KnowledgeNoteDraftContentSchema.extend({
+  knowledgeDocumentId: KnowledgeDocumentIdSchema,
   revision: z.number().int().positive(),
 }).strict();
 export type KnowledgeDraft = z.infer<typeof KnowledgeDraftSchema>;

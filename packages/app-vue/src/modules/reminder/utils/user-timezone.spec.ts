@@ -1,14 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { getProductTime } from '../../../shared/utils/product-time';
 import { getUserTimezone } from './user-timezone';
 
 describe('getUserTimezone', () => {
-  it('returns a valid string timezone or null without throwing exception', () => {
-    const tz = getUserTimezone();
-    if (tz !== null) {
-      expect(typeof tz).toBe('string');
-      expect(tz.length).toBeGreaterThan(0);
-    } else {
-      expect(tz).toBeNull();
-    }
+  it('reads the current Product Time context without Account/UserSetting fallback', () => {
+    expect(getUserTimezone()).toBe(getProductTime().context.timeZone);
   });
 });

@@ -16,11 +16,12 @@ import type {
 import { GoalStatus } from '@memoflow/contracts/goal';
 import type { GoalId, ScheduleTaskId } from '@memoflow/contracts/primitives';
 import { ReminderStatus } from '@memoflow/contracts/reminder';
-import { TaskInstanceStatus, TaskTemplateStatus } from '@memoflow/contracts/task';
+import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/contracts/task';
+import { createTimeFacade, type CalendarApi, type TimeContext } from '@memoflow/time';
 import type {
   DashboardReadSource,
-  DashboardTaskInstanceRecord,
-  DashboardTaskTemplateRecord,
+  DashboardTaskOccurrenceRecord,
+  DashboardTaskPlanRecord,
 } from './types';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -37,40 +38,44 @@ const ACTIVITY_WINDOW_MS = 14 * DAY_MS;
 export async function getDashboardData(
   identityId: string,
   source: DashboardReadSource,
+  timeContext: TimeContext,
 ): Promise<DashboardData> {
-  const now = Date.now();
-  const todayStart = startOfDay(now);
-  const todayEnd = todayStart + DAY_MS - 1;
+  const time = createTimeFacade({ context: timeContext });
+  const now = Number(time.now());
+  const todayStart = Number(time.calendar.startOfDay(now));
+  const todayEnd = Number(time.calendar.endOfDay(now));
 
-  const [goals, taskTemplates, taskInstances, schedules, reminders, unreadNotifications] =
+  const [goals, taskPlans, taskOccurrences, schedules, reminders, unreadNotifications] =
     await Promise.all([
       source.listGoals(identityId),
-      source.listTaskTemplates(identityId),
-      source.listTaskInstances(identityId),
+      source.listTaskPlans(identityId),
+      source.listTaskOccurrences(identityId),
       source.listSchedules(identityId),
       source.listUpcomingReminders(identityId, now + UPCOMING_REMINDER_WINDOW_MS),
       source.countUnreadNotifications(identityId),
     ]);
 
   const activeGoals = goals.filter(
-    (goal) => goal.status === GoalStatus.Active && goal.deletedAt === null,
+    (goal) =>
+      (goal.status === GoalStatus.Planned || goal.status === GoalStatus.InProgress) &&
+      goal.deletedAt === null,
   );
-  const activeTemplates = taskTemplates.filter(
-    (template) => template.deletedAt === null && template.status !== TaskTemplateStatus.Closed,
+  const activeTemplates = taskPlans.filter(
+    (template) => template.deletedAt === null && template.status !== TaskPlanStatus.Closed,
   );
-  const liveTaskInstances = taskInstances.filter((instance) => instance.deletedAt === null);
-  const todayTaskInstances = liveTaskInstances.filter((instance) =>
+  const liveTaskOccurrences = taskOccurrences.filter((instance) => instance.deletedAt === null);
+  const todayTaskOccurrences = liveTaskOccurrences.filter((instance) =>
     isWithinRange(instance.instanceDate, todayStart, todayEnd),
   );
-  const completedToday = liveTaskInstances.filter((instance) => {
-    if (instance.status !== TaskInstanceStatus.Completed) {
+  const completedToday = liveTaskOccurrences.filter((instance) => {
+    if (instance.status !== TaskOccurrenceStatus.Completed) {
       return false;
     }
 
     const completedAt = getTaskCompletionTimestamp(instance);
     return completedAt !== null && isWithinRange(completedAt, todayStart, todayEnd);
   }).length;
-  const overdueTaskCount = liveTaskInstances.filter((instance) => instance.isOverdue()).length;
+  const overdueTaskCount = liveTaskOccurrences.filter((instance) => instance.isOverdue()).length;
 
   const upcomingReminders = reminders.filter(
     (reminder) =>
@@ -103,18 +108,20 @@ export async function getDashboardData(
       name: goal.name,
       progress: normalizePercentage(goal.overallProgress),
       status: goal.status as GoalStatus,
-      dueDate: goal.dueDate ?? 0,
+      target: goal.target,
       keyResultCount: goal.totalKeyResults,
     }));
 
   const taskBoard: TaskBoardSummary = {
-    todo: todayTaskInstances.filter((instance) => instance.status === TaskInstanceStatus.Pending)
-      .length,
-    inProgress: todayTaskInstances.filter(
-      (instance) => instance.status === TaskInstanceStatus.InProgress,
+    todo: todayTaskOccurrences.filter(
+      (instance) => instance.status === TaskOccurrenceStatus.Pending,
     ).length,
-    done: todayTaskInstances.filter((instance) => instance.status === TaskInstanceStatus.Completed)
-      .length,
+    inProgress: todayTaskOccurrences.filter(
+      (instance) => instance.status === TaskOccurrenceStatus.InProgress,
+    ).length,
+    done: todayTaskOccurrences.filter(
+      (instance) => instance.status === TaskOccurrenceStatus.Completed,
+    ).length,
     overdue: overdueTaskCount,
   };
 
@@ -134,12 +141,12 @@ export async function getDashboardData(
         })
       : buildActivityTimeline({
           goals: activeGoals,
-          taskTemplates: activeTemplates,
-          taskInstances: liveTaskInstances,
+          taskPlans: activeTemplates,
+          taskOccurrences: liveTaskOccurrences,
           schedules,
           now,
         }),
-    trendDays: buildTrendDays(now, activeTemplates, liveTaskInstances),
+    trendDays: buildTrendDays(now, activeTemplates, liveTaskOccurrences, time.calendar),
     goalProgress,
     taskBoard,
     upcomingSchedule,
@@ -148,12 +155,14 @@ export async function getDashboardData(
 
 function buildTrendDays(
   now: number,
-  taskTemplates: DashboardTaskTemplateRecord[],
-  taskInstances: DashboardTaskInstanceRecord[],
+  taskPlans: DashboardTaskPlanRecord[],
+  taskOccurrences: DashboardTaskOccurrenceRecord[],
+  calendar: CalendarApi,
 ): TrendDay[] {
   const days = Array.from({ length: TREND_DAY_COUNT }, (_, index) => {
-    const dayStart = startOfDay(now - (TREND_DAY_COUNT - 1 - index) * DAY_MS);
-    const date = new Date(dayStart).toISOString().slice(0, 10);
+    const offset = -(TREND_DAY_COUNT - 1 - index);
+    const dayStart = Number(calendar.startOfDay(calendar.addDays(now, offset)));
+    const date = String(calendar.toYmd(dayStart));
 
     return {
       date,
@@ -165,20 +174,20 @@ function buildTrendDays(
 
   const dayMap = new Map(days.map((day) => [day.date, day]));
 
-  for (const template of taskTemplates) {
-    const day = dayMap.get(toDateKey(template.createdAt));
+  for (const template of taskPlans) {
+    const day = dayMap.get(toDateKey(template.createdAt, calendar));
     if (day) {
       day.tasksCreated += 1;
     }
   }
 
-  for (const instance of taskInstances) {
-    if (instance.status !== TaskInstanceStatus.Completed) {
+  for (const instance of taskOccurrences) {
+    if (instance.status !== TaskOccurrenceStatus.Completed) {
       continue;
     }
 
     const completedAt = instance.actualEndTime ?? instance.updatedAt;
-    const day = dayMap.get(toDateKey(completedAt));
+    const day = dayMap.get(toDateKey(completedAt, calendar));
     if (day) {
       day.tasksCompleted += 1;
     }
@@ -189,20 +198,20 @@ function buildTrendDays(
 
 function buildActivityTimeline(input: {
   goals: Array<{ id: string; name: string; updatedAt: number }>;
-  taskTemplates: DashboardTaskTemplateRecord[];
-  taskInstances: DashboardTaskInstanceRecord[];
+  taskPlans: DashboardTaskPlanRecord[];
+  taskOccurrences: DashboardTaskOccurrenceRecord[];
   schedules: Array<{ id: string; title: string; createdAt: number }>;
   now: number;
 }): ActivityItem[] {
   const recentCutoff = input.now - ACTIVITY_WINDOW_MS;
   const templateMap = new Map(
-    input.taskTemplates.map((template) => [String(template.id), template.title]),
+    input.taskPlans.map((template) => [String(template.id), template.title]),
   );
 
   const items: ActivityItem[] = [];
 
-  for (const instance of input.taskInstances) {
-    if (instance.status !== TaskInstanceStatus.Completed) {
+  for (const instance of input.taskOccurrences) {
+    if (instance.status !== TaskOccurrenceStatus.Completed) {
       continue;
     }
 
@@ -219,7 +228,7 @@ function buildActivityTimeline(input: {
     });
   }
 
-  for (const template of input.taskTemplates) {
+  for (const template of input.taskPlans) {
     const timestamp = template.createdAt;
     if (timestamp < recentCutoff) {
       continue;
@@ -264,7 +273,7 @@ function buildActivityTimeline(input: {
   return items.sort((left, right) => right.timestamp - left.timestamp).slice(0, ACTIVITY_LIMIT);
 }
 
-function getTaskCompletionTimestamp(instance: DashboardTaskInstanceRecord): number | null {
+function getTaskCompletionTimestamp(instance: DashboardTaskOccurrenceRecord): number | null {
   return instance.actualEndTime ?? instance.updatedAt ?? null;
 }
 
@@ -276,16 +285,8 @@ function normalizePercentage(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-// Residual 1165 keep-boundary: dashboard projection startOfDay — timestamp ms → timestamp ms.
-// Soft residual 1165: app-react agenda startOfDay takes/returns Date (no force-merge).
-function startOfDay(timestamp: number): number {
-  const date = new Date(timestamp);
-  date.setHours(0, 0, 0, 0);
-  return date.getTime();
-}
-
-function toDateKey(timestamp: number): string {
-  return new Date(startOfDay(timestamp)).toISOString().slice(0, 10);
+function toDateKey(timestamp: number, calendar: CalendarApi): string {
+  return String(calendar.toYmd(timestamp));
 }
 
 function isWithinRange(value: number, start: number, end: number): boolean {

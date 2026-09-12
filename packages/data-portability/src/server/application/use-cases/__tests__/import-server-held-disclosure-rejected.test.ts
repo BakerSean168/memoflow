@@ -27,7 +27,12 @@ describe('ImportUserDataUseCase rejects server-held disclosure (residual 106)', 
         includesDatabaseInternalRetrievalVector: false,
       },
       data: {
-        knowledgeRepositoryConnections: [],
+        knowledgeSpaces: [],
+        knowledgeDocumentIdentities: [],
+        knowledgeRemoteBindings: [],
+        remoteRepositoryObservations: [],
+        remoteHistoryFences: [],
+        knowledgeProjectionCheckpoints: [],
         githubWebhookDeliveries: [],
         knowledgeNoteProjections: [],
         knowledgeAttachmentProjections: [],
@@ -37,13 +42,11 @@ describe('ImportUserDataUseCase rejects server-held disclosure (residual 106)', 
       },
     };
 
-    await expect(
-      useCase.execute('identity-1', JSON.stringify(disclosure)),
-    ).rejects.toBeInstanceOf(ResultErrorException);
+    await expect(useCase.execute('identity-1', JSON.stringify(disclosure))).rejects.toBeInstanceOf(
+      ResultErrorException,
+    );
 
-    await expect(
-      useCase.execute('identity-1', JSON.stringify(disclosure)),
-    ).rejects.toMatchObject({
+    await expect(useCase.execute('identity-1', JSON.stringify(disclosure))).rejects.toMatchObject({
       code: 'VALIDATION_ERROR',
       message: expect.stringMatching(/not importable/i),
     });

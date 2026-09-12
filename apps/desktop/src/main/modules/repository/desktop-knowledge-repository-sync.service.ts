@@ -1,6 +1,6 @@
 import {
   KnowledgeRepositoryConnectionParamsSchema,
-  type KnowledgeRepositoryConnectionClientDTO,
+  type KnowledgeRemoteBindingClientDTO,
   type SyncKnowledgeRepositoryReq,
   type SyncKnowledgeRepositoryRes,
 } from '@memoflow/contracts/repository';
@@ -12,6 +12,7 @@ import {
   type KnowledgeRepositorySyncGitRuntimePreparation,
 } from './desktop-knowledge-repository-git.runtime';
 import type { KnowledgeRepositoryDesktopRemotePort } from './knowledge-repository-desktop-remote.port';
+import { resolveReadyKnowledgeRemoteSyncState } from './knowledge-remote-binding-sync.policy';
 
 export interface DesktopKnowledgeRepositorySyncServiceOptions {
   localVault: Pick<LocalVaultElectronPort, 'getBinding'>;
@@ -32,13 +33,13 @@ export interface KnowledgeRepositoryLocalCommitResult {
 }
 
 interface ResolvedSynchronization {
-  connection: KnowledgeRepositoryConnectionClientDTO;
+  connection: KnowledgeRemoteBindingClientDTO;
   runtimeInput: {
     rootPath: string;
     repositoryId: string;
     repositoryFullName: string;
     defaultBranch: string;
-    lastSyncedCommitSha: string;
+    lastConfirmedRemoteHeadSha: string;
   };
 }
 
@@ -79,28 +80,31 @@ export class DesktopKnowledgeRepositorySyncService {
    */
   async executeAutomatic(
     identityId: string,
-    connection: KnowledgeRepositoryConnectionClientDTO,
+    connection: KnowledgeRemoteBindingClientDTO,
   ): Promise<Result<SyncKnowledgeRepositoryRes>> {
-    if (connection.status !== 'Active' || !connection.canSync || !connection.lastSyncedCommitSha) {
-      return fail({
-        code: 'CONFLICT',
-        message: 'Complete first synchronization before using continuous sync',
-      });
-    }
-
     try {
-      const binding = await this.options.localVault.getBinding(identityId);
-      if (!binding || binding.status !== 'Active') {
+      const snapshot = await this.options.localVault.getBinding();
+      if (!snapshot || snapshot.health.state !== 'Available') {
         return fail({ code: 'NOT_FOUND', message: 'No active local Vault is selected' });
+      }
+      const syncState = resolveReadyKnowledgeRemoteSyncState(
+        connection,
+        snapshot.binding.knowledgeSpaceId,
+      );
+      if (!syncState) {
+        return fail({
+          code: 'CONFLICT',
+          message: 'Complete first synchronization before using continuous sync',
+        });
       }
       return await this.synchronizeResolved({
         connection,
         runtimeInput: {
-          rootPath: binding.rootPath,
-          repositoryId: connection.githubRepositoryId,
-          repositoryFullName: connection.githubRepositoryFullName,
-          defaultBranch: connection.defaultBranch,
-          lastSyncedCommitSha: connection.lastSyncedCommitSha,
+          rootPath: snapshot.binding.rootPath,
+          repositoryId: syncState.repositoryId,
+          repositoryFullName: syncState.repositoryFullName,
+          defaultBranch: syncState.defaultBranch,
+          lastConfirmedRemoteHeadSha: syncState.lastConfirmedRemoteHeadSha,
         },
       });
     } catch (error) {
@@ -129,7 +133,7 @@ export class DesktopKnowledgeRepositorySyncService {
         });
       }
       if (
-        token.data.repositoryId !== connection.githubRepositoryId ||
+        token.data.repositoryId !== connection.repositoryId ||
         token.data.expiresAt <= this.now() + 30_000
       ) {
         return fail({
@@ -171,26 +175,29 @@ export class DesktopKnowledgeRepositorySyncService {
    */
   async commitLocalChanges(
     identityId: string,
-    connection: KnowledgeRepositoryConnectionClientDTO,
+    connection: KnowledgeRemoteBindingClientDTO,
   ): Promise<Result<KnowledgeRepositoryLocalCommitResult>> {
-    if (connection.status !== 'Active' || !connection.canSync || !connection.lastSyncedCommitSha) {
-      return fail({
-        code: 'CONFLICT',
-        message: 'Complete first synchronization before creating local commits',
-      });
-    }
-
     try {
-      const binding = await this.options.localVault.getBinding(identityId);
-      if (!binding || binding.status !== 'Active') {
+      const snapshot = await this.options.localVault.getBinding();
+      if (!snapshot || snapshot.health.state !== 'Available') {
         return fail({ code: 'NOT_FOUND', message: 'No active local Vault is selected' });
       }
+      const syncState = resolveReadyKnowledgeRemoteSyncState(
+        connection,
+        snapshot.binding.knowledgeSpaceId,
+      );
+      if (!syncState) {
+        return fail({
+          code: 'CONFLICT',
+          message: 'Complete first synchronization before creating local commits',
+        });
+      }
       const prepared = await this.options.gitRuntime.prepareSynchronization({
-        rootPath: binding.rootPath,
-        repositoryId: connection.githubRepositoryId,
-        repositoryFullName: connection.githubRepositoryFullName,
-        defaultBranch: connection.defaultBranch,
-        lastSyncedCommitSha: connection.lastSyncedCommitSha,
+        rootPath: snapshot.binding.rootPath,
+        repositoryId: syncState.repositoryId,
+        repositoryFullName: syncState.repositoryFullName,
+        defaultBranch: syncState.defaultBranch,
+        lastConfirmedRemoteHeadSha: syncState.lastConfirmedRemoteHeadSha,
       });
       return ok({
         connectionId: connection.id,
@@ -216,24 +223,27 @@ export class DesktopKnowledgeRepositorySyncService {
     input: SyncKnowledgeRepositoryReq,
   ): Promise<Result<ResolvedSynchronization>> {
     const [binding, connections] = await Promise.all([
-      this.options.localVault.getBinding(identityId),
+      this.options.localVault.getBinding(),
       this.options.remote.listKnowledgeRepositoryConnections(),
     ]);
-    if (!binding || binding.status !== 'Active') {
+    if (!binding || binding.health.state !== 'Available') {
       return fail({ code: 'NOT_FOUND', message: 'No active local Vault is selected' });
     }
     if (!connections.ok) return fail(connections.error);
     const connection = connections.data.connections.find(
-      (candidate) =>
-        candidate.id === input.connectionId && candidate.status === 'Active' && candidate.canSync,
+      (candidate) => candidate.id === input.connectionId && candidate.disconnectedAt === null,
     );
     if (!connection) {
       return fail({
         code: 'NOT_FOUND',
-        message: 'Active knowledge repository connection was not found',
+        message: 'Active knowledge remote binding was not found',
       });
     }
-    if (!connection.lastSyncedCommitSha) {
+    const syncState = resolveReadyKnowledgeRemoteSyncState(
+      connection,
+      binding.binding.knowledgeSpaceId,
+    );
+    if (!syncState) {
       return fail({
         code: 'CONFLICT',
         message: 'Complete first synchronization before using continuous sync',
@@ -243,11 +253,11 @@ export class DesktopKnowledgeRepositorySyncService {
     return ok({
       connection,
       runtimeInput: {
-        rootPath: binding.rootPath,
-        repositoryId: connection.githubRepositoryId,
-        repositoryFullName: connection.githubRepositoryFullName,
-        defaultBranch: connection.defaultBranch,
-        lastSyncedCommitSha: connection.lastSyncedCommitSha,
+        rootPath: binding.binding.rootPath,
+        repositoryId: syncState.repositoryId,
+        repositoryFullName: syncState.repositoryFullName,
+        defaultBranch: syncState.defaultBranch,
+        lastConfirmedRemoteHeadSha: syncState.lastConfirmedRemoteHeadSha,
       },
     });
   }

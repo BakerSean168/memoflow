@@ -4,9 +4,9 @@ import {
   RecurrenceRule,
   TaskGoalBinding,
   TaskGoalBindingTrigger,
-  TaskInstanceStatus,
+  TaskOccurrenceStatus,
   TaskReminderConfig,
-  TaskTemplateStatus,
+  TaskPlanStatus,
   TaskTimeConfig,
   TaskTimeType,
 } from '..';
@@ -14,8 +14,10 @@ import { DayOfWeek, DependencyType, ReminderTimeUnit } from '@memoflow/contracts
 
 describe('task domain value objects', () => {
   it('covers recurrence rules and reminder configuration', () => {
-    const rule = RecurrenceRule.createWeekly([DayOfWeek.Monday, DayOfWeek.Friday], 2)
-      .setOccurrences(3);
+    const rule = RecurrenceRule.createWeekly(
+      [DayOfWeek.Monday, DayOfWeek.Friday],
+      2,
+    ).setOccurrences(3);
     expect(rule.isWeekly).toBe(true);
     expect(rule.hasEndCondition).toBe(true);
     expect(rule.getDescription()).toContain('周一');
@@ -61,50 +63,51 @@ describe('task domain value objects', () => {
 
     const items = ChecklistItemDefinition.fromTitles(['A', 'B']);
     expect(items[1].order).toBe(1);
+    const originalId = items[0].id;
     expect(items[0].updateTitle('Updated').updateOrder(3).toDTO()).toEqual({
+      id: originalId,
       title: 'Updated',
       order: 3,
     });
   });
 
   it('covers goal binding and status helper objects', () => {
-    const binding = TaskGoalBinding.bindToGoal(
-      'GoalId_1',
-      'KeyResultId_1',
-      { value: 5, trigger: TaskGoalBindingTrigger.PlanCompletion },
-    );
+    const binding = TaskGoalBinding.bindToGoal('GoalId_1', 'KeyResultId_1', {
+      value: 5,
+      trigger: TaskGoalBindingTrigger.PlanCompletion,
+    });
 
     expect(binding.hasContribution).toBe(true);
     expect(binding.getDisplayText()).toContain('PlanCompletion');
 
-    expect(TaskInstanceStatus.getAll()).toEqual([
-      TaskInstanceStatus.Pending,
-      TaskInstanceStatus.InProgress,
-      TaskInstanceStatus.Completed,
-      TaskInstanceStatus.Missed,
-      TaskInstanceStatus.Skipped,
+    expect(TaskOccurrenceStatus.getAll()).toEqual([
+      TaskOccurrenceStatus.Pending,
+      TaskOccurrenceStatus.InProgress,
+      TaskOccurrenceStatus.Completed,
+      TaskOccurrenceStatus.Missed,
+      TaskOccurrenceStatus.Skipped,
     ]);
-    expect(TaskInstanceStatus.isValid('Pending')).toBe(true);
-    expect(TaskInstanceStatus.isPending(TaskInstanceStatus.Pending)).toBe(true);
-    expect(TaskInstanceStatus.isInProgress(TaskInstanceStatus.InProgress)).toBe(true);
-    expect(TaskInstanceStatus.isCompleted(TaskInstanceStatus.Completed)).toBe(true);
-    expect(TaskInstanceStatus.isSkipped(TaskInstanceStatus.Skipped)).toBe(true);
-    expect(TaskInstanceStatus.isMissed(TaskInstanceStatus.Missed)).toBe(true);
-    expect(TaskInstanceStatus.isTerminated(TaskInstanceStatus.Completed)).toBe(true);
-    expect(TaskInstanceStatus.needsAction(TaskInstanceStatus.Pending)).toBe(true);
-    expect(TaskTemplateStatus.getAll()).toEqual([
-      TaskTemplateStatus.Active,
-      TaskTemplateStatus.Paused,
-      TaskTemplateStatus.Closed,
+    expect(TaskOccurrenceStatus.isValid('Pending')).toBe(true);
+    expect(TaskOccurrenceStatus.isPending(TaskOccurrenceStatus.Pending)).toBe(true);
+    expect(TaskOccurrenceStatus.isInProgress(TaskOccurrenceStatus.InProgress)).toBe(true);
+    expect(TaskOccurrenceStatus.isCompleted(TaskOccurrenceStatus.Completed)).toBe(true);
+    expect(TaskOccurrenceStatus.isSkipped(TaskOccurrenceStatus.Skipped)).toBe(true);
+    expect(TaskOccurrenceStatus.isMissed(TaskOccurrenceStatus.Missed)).toBe(true);
+    expect(TaskOccurrenceStatus.isTerminated(TaskOccurrenceStatus.Completed)).toBe(true);
+    expect(TaskOccurrenceStatus.needsAction(TaskOccurrenceStatus.Pending)).toBe(true);
+    expect(TaskPlanStatus.getAll()).toEqual([
+      TaskPlanStatus.Active,
+      TaskPlanStatus.Paused,
+      TaskPlanStatus.Closed,
     ]);
-    expect(TaskTemplateStatus.of('Active')).toBe(TaskTemplateStatus.Active);
-    expect(TaskTemplateStatus.isValid('Paused')).toBe(true);
-    expect(TaskTemplateStatus.isActive(TaskTemplateStatus.Active)).toBe(true);
-    expect(TaskTemplateStatus.isPaused(TaskTemplateStatus.Paused)).toBe(true);
-    expect(TaskTemplateStatus.isClosed(TaskTemplateStatus.Closed)).toBe(true);
-    expect(TaskTemplateStatus.isAvailable(TaskTemplateStatus.Paused)).toBe(true);
-    expect(TaskTemplateStatus.isAvailable(TaskTemplateStatus.Closed)).toBe(false);
-    expect(TaskTemplateStatus.isExecutable(TaskTemplateStatus.Active)).toBe(true);
+    expect(TaskPlanStatus.of('Active')).toBe(TaskPlanStatus.Active);
+    expect(TaskPlanStatus.isValid('Paused')).toBe(true);
+    expect(TaskPlanStatus.isActive(TaskPlanStatus.Active)).toBe(true);
+    expect(TaskPlanStatus.isPaused(TaskPlanStatus.Paused)).toBe(true);
+    expect(TaskPlanStatus.isClosed(TaskPlanStatus.Closed)).toBe(true);
+    expect(TaskPlanStatus.isAvailable(TaskPlanStatus.Paused)).toBe(true);
+    expect(TaskPlanStatus.isAvailable(TaskPlanStatus.Closed)).toBe(false);
+    expect(TaskPlanStatus.isExecutable(TaskPlanStatus.Active)).toBe(true);
     expect(TaskTimeType.getAll()).toEqual([
       TaskTimeType.AllDay,
       TaskTimeType.TimePoint,
@@ -117,8 +120,8 @@ describe('task domain value objects', () => {
     expect(TaskTimeType.isTimeRange(TaskTimeType.TimeRange)).toBe(true);
     expect(TaskTimeType.hasSpecificTime(TaskTimeType.TimePoint)).toBe(true);
     expect(TaskTimeType.hasTimeRange(TaskTimeType.TimeRange)).toBe(true);
-    expect(() => TaskInstanceStatus.of('Bad')).toThrow('Invalid TaskInstanceStatus');
-    expect(() => TaskTemplateStatus.of('Bad')).toThrow('Invalid TaskTemplateStatus');
+    expect(() => TaskOccurrenceStatus.of('Bad')).toThrow('Invalid TaskOccurrenceStatus');
+    expect(() => TaskPlanStatus.of('Bad')).toThrow('Invalid TaskPlanStatus');
     expect(() => TaskTimeType.of('Bad')).toThrow('Invalid TaskTimeType');
   });
 });

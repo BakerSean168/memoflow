@@ -16,7 +16,7 @@ updated: 2026-07-22T00:00:00
 
 | 文件 | 说明 |
 | --- | --- |
-| [`packages/app-vue/src/modules/dashboard/components/DashboardStatsStrip.vue`](../../../packages/app-vue/src/modules/dashboard/components/DashboardStatsStrip.vue) | Dashboard 主页面（统计卡片、趋势图、活动时间线、小组件） |
+| [`packages/app-vue/src/modules/dashboard/composables/useDashboard.ts`](../../../packages/app-vue/src/modules/dashboard/composables/useDashboard.ts) | Dashboard read-model composable |
 
 ## 前端状态、组合函数与组件
 

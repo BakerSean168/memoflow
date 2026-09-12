@@ -4,9 +4,18 @@ import type {
   GitHubInstallationRepositoryDTO,
   KnowledgeAttachmentProjectionClientDTO,
   KnowledgeNoteProjectionClientDTO,
-  KnowledgeRepositoryConnectionServerDTO,
+  KnowledgeRemoteBindingServerDTO,
+  KnowledgeProjectionCheckpoint,
+  RemoteHistoryFence,
+  RemoteRepositoryObservation,
 } from '@memoflow/contracts/repository';
-import type { IKnowledgeRepositoryConnectionRepository } from '../ports/knowledge-repository-connection.repository';
+import type {
+  IKnowledgeProjectionCheckpointRepository,
+  IKnowledgeRemoteBindingRepository,
+  IRemoteHistoryFenceRepository,
+  IRemoteRepositoryObservationRepository,
+} from '../ports/knowledge-remote-binding.repositories';
+import type { IKnowledgeDocumentIdentityRepository } from '../ports/knowledge-document-identity.repository';
 import type {
   IKnowledgeRepositoryLeaseRepository,
   KnowledgeRepositoryLeaseRequest,
@@ -34,24 +43,18 @@ import { KnowledgeRepositoryProjectionService } from './knowledge-repository-pro
 
 const webhookSecret = 'test-webhook-secret';
 
-function connection(): KnowledgeRepositoryConnectionServerDTO {
+function connection(): KnowledgeRemoteBindingServerDTO {
   return {
-    id: 'connection-1',
+    id: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440200' as never,
+    knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440201' as never,
     identityId: 'IdentityId_11111111-1111-4111-8111-111111111111' as never,
-    githubUserId: '42',
-    githubRepositoryId: 'repository-1',
-    githubRepositoryFullName: 'owner/knowledge',
+    provider: 'GitHub',
     installationId: 'installation-1',
-    defaultBranch: 'main',
-    status: 'Active',
-    lastSyncedCommitSha: null,
-    lastProjectedCommitSha: null,
-    lastErrorCode: null,
-    lastErrorMessage: null,
+    repositoryId: 'repository-1',
+    repositoryFullNameSnapshot: 'owner/knowledge',
+    connectedAt: 1,
+    disconnectedAt: null,
     version: 1,
-    createdAt: 1 as never,
-    updatedAt: 1 as never,
-    deletedAt: null,
   };
 }
 
@@ -79,9 +82,9 @@ function inventory(): GitHubAppInstallationInventory {
   };
 }
 
-class MemoryConnectionRepository implements IKnowledgeRepositoryConnectionRepository {
+class MemoryConnectionRepository implements IKnowledgeRemoteBindingRepository {
   readonly row = connection();
-  readonly save = vi.fn(async (next: KnowledgeRepositoryConnectionServerDTO) => {
+  readonly save = vi.fn(async (next: KnowledgeRemoteBindingServerDTO) => {
     Object.assign(this.row, next);
   });
   readonly listProjectionCandidates = vi.fn(async (_limit: number) => [this.row]);
@@ -98,18 +101,190 @@ class MemoryConnectionRepository implements IKnowledgeRepositoryConnectionReposi
     return identityId === this.row.identityId ? [this.row] : [];
   }
 
-  async findByGithubRepositoryId(repositoryId: string) {
-    return repositoryId === this.row.githubRepositoryId ? this.row : null;
+  async findByRepositoryId(repositoryId: string) {
+    return repositoryId === this.row.repositoryId ? this.row : null;
   }
 
-  async findByInstallationAndGithubRepositoryId(installationId: string, repositoryId: string) {
-    return installationId === this.row.installationId &&
-      repositoryId === this.row.githubRepositoryId
+  async findByInstallationAndRepositoryId(installationId: string, repositoryId: string) {
+    return installationId === this.row.installationId && repositoryId === this.row.repositoryId
       ? this.row
       : null;
   }
 
-  async updateStatus(_identityId: string, _id: string, _status: never) {}
+  async markDisconnected() {
+    return false;
+  }
+}
+
+class MemoryObservationRepository implements IRemoteRepositoryObservationRepository {
+  readonly rows = new Map<string, RemoteRepositoryObservation>();
+  readonly save = vi.fn(async (row: RemoteRepositoryObservation) => {
+    this.rows.set(row.bindingId, structuredClone(row));
+  });
+  constructor(
+    initial: RemoteRepositoryObservation = {
+      bindingId: connection().id,
+      observedAt: 1,
+      accountId: '42',
+      repositoryFullName: 'owner/knowledge',
+      defaultBranch: 'main',
+      private: true,
+      archived: false,
+      disabled: false,
+      contentsPermission: 'write',
+      installationSuspended: false,
+      eligibility: { state: 'Ready' },
+    },
+  ) {
+    this.rows.set(initial.bindingId, structuredClone(initial));
+  }
+  async findByBindingId(bindingId: string) {
+    return this.rows.get(bindingId) ?? null;
+  }
+  async findByBindingIds(bindingIds: readonly string[]) {
+    return new Map(
+      bindingIds.flatMap((id) => (this.rows.has(id) ? [[id, this.rows.get(id)!] as const] : [])),
+    );
+  }
+}
+
+class MemoryHistoryFenceRepository implements IRemoteHistoryFenceRepository {
+  readonly rows = new Map<string, RemoteHistoryFence>();
+  readonly save = vi.fn(async (row: RemoteHistoryFence) => {
+    this.rows.set(row.bindingId, structuredClone(row));
+  });
+  constructor(
+    initial: RemoteHistoryFence = {
+      bindingId: connection().id,
+      defaultBranch: 'main',
+      lastConfirmedRemoteHeadSha: 'before-sha',
+      confirmedAt: 1,
+    },
+  ) {
+    this.rows.set(initial.bindingId, structuredClone(initial));
+  }
+  async findByBindingId(bindingId: string) {
+    return this.rows.get(bindingId) ?? null;
+  }
+  async findByBindingIds(bindingIds: readonly string[]) {
+    return new Map(
+      bindingIds.flatMap((id) => (this.rows.has(id) ? [[id, this.rows.get(id)!] as const] : [])),
+    );
+  }
+}
+
+class MemoryProjectionCheckpointRepository implements IKnowledgeProjectionCheckpointRepository {
+  readonly rows = new Map<string, KnowledgeProjectionCheckpoint>();
+  readonly save = vi.fn(async (row: KnowledgeProjectionCheckpoint) => {
+    this.rows.set(row.bindingId, structuredClone(row));
+  });
+  constructor(
+    initial: KnowledgeProjectionCheckpoint = {
+      bindingId: connection().id,
+      branch: 'main',
+      projectedCommitSha: 'before-sha',
+      state: 'Ready',
+      failure: null,
+      lastAttemptAt: 1,
+      projectedAt: 1,
+    },
+  ) {
+    this.rows.set(initial.bindingId, structuredClone(initial));
+  }
+  async findByBindingId(bindingId: string) {
+    return this.rows.get(bindingId) ?? null;
+  }
+  async findByBindingIds(bindingIds: readonly string[]) {
+    return new Map(
+      bindingIds.flatMap((id) => (this.rows.has(id) ? [[id, this.rows.get(id)!] as const] : [])),
+    );
+  }
+}
+
+class MemoryDocumentIdentityRepository implements IKnowledgeDocumentIdentityRepository {
+  readonly rows = new Map<
+    string,
+    {
+      knowledgeSpaceId: never;
+      knowledgeDocumentId: never;
+      origin: 'ObservedMarker';
+      originRequestId: null;
+      createdAt: number;
+      updatedAt: number;
+    }
+  >();
+  private key(spaceId: string, documentId: string): string {
+    return `${spaceId}:${documentId}`;
+  }
+  async find(spaceId: never, documentId: never) {
+    return this.rows.get(this.key(spaceId, documentId)) ?? null;
+  }
+  async claimForCreate() {
+    return true;
+  }
+  async claimForAdoption(
+    knowledgeSpaceId: never,
+    knowledgeDocumentId: never,
+    requestId: string,
+    now: number,
+  ) {
+    const key = this.key(knowledgeSpaceId, knowledgeDocumentId);
+    const existing = this.rows.get(key);
+    if (existing) return existing.origin === 'Adopted' && existing.originRequestId === requestId;
+    this.rows.set(key, {
+      knowledgeSpaceId,
+      knowledgeDocumentId,
+      origin: 'Adopted',
+      originRequestId: requestId,
+      createdAt: now,
+      updatedAt: now,
+    } as never);
+    return true;
+  }
+
+  async observeMarker(spaceId: never, documentId: never, now: number) {
+    const key = this.key(spaceId, documentId);
+    if (!this.rows.has(key))
+      this.rows.set(key, {
+        knowledgeSpaceId: spaceId,
+        knowledgeDocumentId: documentId,
+        origin: 'ObservedMarker',
+        originRequestId: null,
+        createdAt: now,
+        updatedAt: now,
+      });
+  }
+}
+
+let latestFourAxisRepositories: ReturnType<typeof buildFourAxisRepositories> | null = null;
+
+function buildFourAxisRepositories() {
+  return {
+    observationRepository: new MemoryObservationRepository(),
+    historyFenceRepository: new MemoryHistoryFenceRepository(),
+    projectionCheckpointRepository: new MemoryProjectionCheckpointRepository(),
+    documentIdentityRepository: new MemoryDocumentIdentityRepository(),
+  };
+}
+
+function createFourAxisRepositories() {
+  latestFourAxisRepositories = buildFourAxisRepositories();
+  return latestFourAxisRepositories;
+}
+
+function latestCheckpointRepository(): MemoryProjectionCheckpointRepository {
+  if (!latestFourAxisRepositories) throw new Error('four-axis repositories were not created');
+  return latestFourAxisRepositories.projectionCheckpointRepository;
+}
+
+function latestObservationRepository(): MemoryObservationRepository {
+  if (!latestFourAxisRepositories) throw new Error('four-axis repositories were not created');
+  return latestFourAxisRepositories.observationRepository;
+}
+
+function latestDocumentIdentityRepository(): MemoryDocumentIdentityRepository {
+  if (!latestFourAxisRepositories) throw new Error('four-axis repositories were not created');
+  return latestFourAxisRepositories.documentIdentityRepository;
 }
 
 class MemoryDeliveryRepository implements IGithubWebhookDeliveryRepository {
@@ -194,7 +369,11 @@ class MemoryProjectionRepository implements IKnowledgeNoteProjectionRepository {
     async (_connectionId: string, _commitSha: string, notes: KnowledgeNoteProjectionUpsert[]) => {
       const deleted = [...this.rows.values()]
         .filter((row) => !notes.some((note) => note.relativePath === row.relativePath))
-        .map((row) => ({ id: row.id, relativePath: row.relativePath }));
+        .map((row) => ({
+          id: row.id,
+          knowledgeDocumentId: row.knowledgeDocumentId,
+          relativePath: row.relativePath,
+        }));
       this.rows.clear();
       notes.forEach((note) => this.rows.set(note.id, note));
       return deleted;
@@ -215,6 +394,16 @@ class MemoryProjectionRepository implements IKnowledgeNoteProjectionRepository {
       (candidate) => candidate.relativePath === relativePath,
     );
     return row ? this.toClient(row) : null;
+  }
+
+  async findLiveByDocumentId(_connectionId: string, knowledgeDocumentId: string) {
+    return [...this.rows.values()]
+      .filter((row) => row.knowledgeDocumentId === knowledgeDocumentId)
+      .map((row) => this.toClient(row));
+  }
+
+  async listLiveByConnection(_connectionId: string) {
+    return [...this.rows.values()].map((row) => this.toClient(row));
   }
 
   async loadLinkGraphSourcesForIdentity(
@@ -366,6 +555,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const projectionRepository = new MemoryProjectionRepository();
     const publishMutation = vi.fn();
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository,
       deliveryRepository,
@@ -388,7 +578,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       expect([...deliveryRepository.rows.values()][0]?.status).toBe('Processed');
     });
     expect(projectionRepository.applyChanges).toHaveBeenCalledWith(
-      'connection-1',
+      connection().id,
       'after-sha',
       [
         expect.objectContaining({
@@ -398,11 +588,13 @@ describe('KnowledgeRepositoryProjectionService', () => {
       ],
       [],
     );
-    expect(connectionRepository.row.lastProjectedCommitSha).toBe('after-sha');
+    expect(latestCheckpointRepository().rows.get(connection().id)?.projectedCommitSha).toBe(
+      'after-sha',
+    );
     expect(publishMutation).toHaveBeenCalledWith(
       expect.objectContaining({
         identityId: connectionRepository.row.identityId,
-        repositoryId: 'connection-1',
+        repositoryId: connection().id,
         resourcePath: 'notes/architecture.md',
         mutation: 'created',
       }),
@@ -420,6 +612,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
   it('rejects invalid signatures before reserving work', async () => {
     const deliveryRepository = new MemoryDeliveryRepository();
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository,
@@ -438,9 +631,232 @@ describe('KnowledgeRepositoryProjectionService', () => {
     expect(deliveryRepository.rows.size).toBe(0);
   });
 
+  it('keeps unmanaged Markdown readable without inventing or persisting document identity', async () => {
+    const projectionRepository = new MemoryProjectionRepository();
+    const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
+      webhookSecret,
+      connectionRepository: new MemoryConnectionRepository(),
+      deliveryRepository: new MemoryDeliveryRepository(),
+      projectionRepository,
+      githubAppClient: githubClient(),
+      now: () => 1_750_000_000_000,
+    });
+
+    await service.ingest({
+      deliveryId: 'delivery-unmanaged',
+      eventName: 'push',
+      ...signedPushPayload(),
+    });
+    await vi.waitFor(() => expect(projectionRepository.applyChanges).toHaveBeenCalledOnce());
+
+    const projected = [...projectionRepository.rows.values()][0]!;
+    expect(projected.knowledgeDocumentId).toBeNull();
+    expect(latestDocumentIdentityRepository().rows.size).toBe(0);
+  });
+
+  it('preserves KnowledgeDocumentId across a Git rename while technical projection identity changes', async () => {
+    const documentId = 'kdoc_550e8400-e29b-41d4-a716-446655440290';
+    const projectionRepository = new MemoryProjectionRepository();
+    const publishMutation = vi.fn();
+    const getMarkdownChanges = vi
+      .fn()
+      .mockResolvedValueOnce({
+        commitSha: 'after-sha',
+        requiresFullSnapshot: false,
+        changes: [
+          {
+            relativePath: 'notes/old-name.md',
+            blobSha: 'blob-old',
+            markdownContent: `---\ntitle: Old\nmemoflow_id: ${documentId}\n---\n\n# Old`,
+            status: 'added' as const,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        commitSha: 'after-sha-2',
+        requiresFullSnapshot: false,
+        changes: [
+          {
+            relativePath: 'notes/new-name.md',
+            previousPath: 'notes/old-name.md',
+            blobSha: 'blob-new',
+            markdownContent: `---\ntitle: New\nmemoflow_id: ${documentId}\n---\n\n# New`,
+            status: 'renamed' as const,
+          },
+        ],
+      });
+    const deliveryRepository = new MemoryDeliveryRepository();
+    const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
+      webhookSecret,
+      connectionRepository: new MemoryConnectionRepository(),
+      deliveryRepository,
+      projectionRepository,
+      githubAppClient: githubClient({ getMarkdownChanges }),
+      publishMutation,
+      now: () => 1_750_000_000_000,
+    });
+
+    await service.ingest({
+      deliveryId: 'delivery-managed-create',
+      eventName: 'push',
+      ...signedPushPayload(),
+    });
+    await vi.waitFor(() =>
+      expect(
+        [...deliveryRepository.rows.values()].find(
+          (row) => row.deliveryId === 'delivery-managed-create',
+        )?.status,
+      ).toBe('Processed'),
+    );
+    const oldProjection = [...projectionRepository.rows.values()][0]!;
+
+    await service.ingest({
+      deliveryId: 'delivery-managed-rename',
+      eventName: 'push',
+      ...signedPushPayload({ before: 'after-sha', after: 'after-sha-2' }),
+    });
+    await vi.waitFor(() =>
+      expect(
+        [...deliveryRepository.rows.values()].find(
+          (row) => row.deliveryId === 'delivery-managed-rename',
+        )?.status,
+      ).toBe('Processed'),
+    );
+    const nextProjection = [...projectionRepository.rows.values()][0]!;
+
+    expect(oldProjection.id).not.toBe(nextProjection.id);
+    expect(oldProjection.knowledgeDocumentId).toBe(documentId);
+    expect(nextProjection.knowledgeDocumentId).toBe(documentId);
+    expect(nextProjection.relativePath).toBe('notes/new-name.md');
+    expect(latestDocumentIdentityRepository().rows.size).toBe(1);
+    expect(publishMutation.mock.calls.map(([event]) => event.resourceId)).toEqual([
+      documentId,
+      documentId,
+    ]);
+    expect(publishMutation.mock.calls.some(([event]) => event.mutation === 'deleted')).toBe(false);
+  });
+
+  it('fails closed when the same memoflow_id appears at multiple live paths', async () => {
+    const documentId = 'kdoc_550e8400-e29b-41d4-a716-446655440291';
+    const deliveryRepository = new MemoryDeliveryRepository();
+    const projectionRepository = new MemoryProjectionRepository();
+    const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
+      webhookSecret,
+      connectionRepository: new MemoryConnectionRepository(),
+      deliveryRepository,
+      projectionRepository,
+      githubAppClient: githubClient({
+        getMarkdownChanges: vi.fn(async () => ({
+          commitSha: 'after-sha',
+          requiresFullSnapshot: false,
+          changes: ['one', 'two'].map((name) => ({
+            relativePath: `notes/${name}.md`,
+            blobSha: `blob-${name}`,
+            markdownContent: `---\nmemoflow_id: ${documentId}\n---\n\n# ${name}`,
+            status: 'added' as const,
+          })),
+        })),
+      }),
+    });
+
+    await service.ingest({
+      deliveryId: 'delivery-duplicate-id',
+      eventName: 'push',
+      ...signedPushPayload(),
+    });
+    await vi.waitFor(() =>
+      expect(
+        [...deliveryRepository.rows.values()].find(
+          (row) => row.deliveryId === 'delivery-duplicate-id',
+        )?.status,
+      ).toBe('Failed'),
+    );
+
+    expect(projectionRepository.applyChanges).not.toHaveBeenCalled();
+    expect(latestCheckpointRepository().rows.get(connection().id)?.failure?.code).toBe(
+      'KNOWLEDGE_DOCUMENT_ID_COLLISION',
+    );
+  });
+
+  it('fails closed when a managed document loses its memoflow_id marker', async () => {
+    const documentId = 'kdoc_550e8400-e29b-41d4-a716-446655440292';
+    const deliveryRepository = new MemoryDeliveryRepository();
+    const projectionRepository = new MemoryProjectionRepository();
+    const getMarkdownChanges = vi
+      .fn()
+      .mockResolvedValueOnce({
+        commitSha: 'after-sha',
+        requiresFullSnapshot: false,
+        changes: [
+          {
+            relativePath: 'notes/managed.md',
+            blobSha: 'blob-managed-1',
+            markdownContent: `---\nmemoflow_id: ${documentId}\n---\n\n# Managed`,
+            status: 'added' as const,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        commitSha: 'after-sha-2',
+        requiresFullSnapshot: false,
+        changes: [
+          {
+            relativePath: 'notes/managed.md',
+            blobSha: 'blob-managed-2',
+            markdownContent: '# Marker removed',
+            status: 'modified' as const,
+          },
+        ],
+      });
+    const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
+      webhookSecret,
+      connectionRepository: new MemoryConnectionRepository(),
+      deliveryRepository,
+      projectionRepository,
+      githubAppClient: githubClient({ getMarkdownChanges }),
+    });
+
+    await service.ingest({
+      deliveryId: 'delivery-marker-first',
+      eventName: 'push',
+      ...signedPushPayload(),
+    });
+    await vi.waitFor(() =>
+      expect(
+        [...deliveryRepository.rows.values()].find(
+          (row) => row.deliveryId === 'delivery-marker-first',
+        )?.status,
+      ).toBe('Processed'),
+    );
+    projectionRepository.applyChanges.mockClear();
+
+    await service.ingest({
+      deliveryId: 'delivery-marker-removed',
+      eventName: 'push',
+      ...signedPushPayload({ before: 'after-sha', after: 'after-sha-2' }),
+    });
+    await vi.waitFor(() =>
+      expect(
+        [...deliveryRepository.rows.values()].find(
+          (row) => row.deliveryId === 'delivery-marker-removed',
+        )?.status,
+      ).toBe('Failed'),
+    );
+
+    expect(projectionRepository.applyChanges).not.toHaveBeenCalled();
+    expect(latestCheckpointRepository().rows.get(connection().id)?.failure?.code).toBe(
+      'KNOWLEDGE_DOCUMENT_ID_REMOVED',
+    );
+  });
+
   it('updates index status only through the identity/content-hash guarded repository method', async () => {
     const projectionRepository = new MemoryProjectionRepository();
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -449,14 +865,15 @@ describe('KnowledgeRepositoryProjectionService', () => {
     });
 
     await expect(
-      service.updateIndexStatus('identity-1', {
-        projectionId: 'projection-1',
+      service.updateIndexStatus(String(connection().identityId), {
+        connectionId: connection().id,
+        resourceId: 'projection-1',
         contentHash: 'content-hash-1',
         status: 'indexed',
       }),
     ).resolves.toEqual({ ok: true, data: { updated: true } });
     expect(projectionRepository.updateIndexStatusForIdentity).toHaveBeenCalledWith(
-      'identity-1',
+      String(connection().identityId),
       'projection-1',
       'content-hash-1',
       'indexed',
@@ -467,7 +884,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const projectionRepository = new MemoryProjectionRepository();
     projectionRepository.rows.set('center-note', {
       id: 'center-note',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       relativePath: 'Center.md',
       commitSha: 'commit-1',
       blobSha: 'blob-center',
@@ -478,7 +895,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     });
     projectionRepository.rows.set('target-note', {
       id: 'target-note',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       relativePath: 'Target.md',
       commitSha: 'commit-1',
       blobSha: 'blob-target',
@@ -488,6 +905,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       indexStatus: 'indexed',
     });
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -545,6 +963,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const connectionRepository = new MemoryConnectionRepository();
     const deliveryRepository = new MemoryDeliveryRepository();
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository,
       deliveryRepository,
@@ -573,7 +992,9 @@ describe('KnowledgeRepositoryProjectionService', () => {
     });
 
     expect(getMarkdownChanges.mock.calls.map((call) => call[3])).toEqual(['commit-1', 'commit-2']);
-    expect(connectionRepository.row.lastProjectedCommitSha).toBe('commit-2');
+    expect(latestCheckpointRepository().rows.get(connection().id)?.projectedCommitSha).toBe(
+      'commit-2',
+    );
   });
 
   it('claims a persisted webhook delivery once across two service instances', async () => {
@@ -582,7 +1003,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const projectionRepository = new MemoryProjectionRepository();
     await deliveryRepository.reserve({
       id: 'delivery-shared',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       deliveryId: 'delivery-shared-id',
       eventName: 'push',
       beforeSha: 'before-sha',
@@ -606,8 +1027,10 @@ describe('KnowledgeRepositoryProjectionService', () => {
         },
       ],
     }));
+    const fourAxis = buildFourAxisRepositories();
     const createService = () =>
       new KnowledgeRepositoryProjectionService({
+        ...fourAxis,
         webhookSecret,
         connectionRepository,
         deliveryRepository,
@@ -633,7 +1056,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const deliveryRepository = new MemoryDeliveryRepository();
     await deliveryRepository.reserve({
       id: 'delivery-owned',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       deliveryId: 'delivery-owned-id',
       eventName: 'push',
       beforeSha: 'before-sha',
@@ -651,13 +1074,12 @@ describe('KnowledgeRepositoryProjectionService', () => {
       processedAt: null,
     });
 
-    await deliveryRepository.updateStatus('delivery-owned', 'connection-1', 'Processing');
+    await deliveryRepository.updateStatus('delivery-owned', connection().id, 'Processing');
     expect(deliveryRepository.rows.get('delivery-owned')?.status).toBe('Processing');
   });
 
   it('claims reconciliation for one instance while another observes the persisted lease', async () => {
     const connectionRepository = new MemoryConnectionRepository();
-    connectionRepository.row.lastProjectedCommitSha = 'old-sha';
     const deliveryRepository = new MemoryDeliveryRepository();
     const projectionRepository = new MemoryProjectionRepository();
     const getRepositorySnapshot = vi.fn(async () => ({
@@ -677,8 +1099,19 @@ describe('KnowledgeRepositoryProjectionService', () => {
       ],
     }));
     const leaseRepository = new MemoryLeaseRepository();
+    const fourAxis = buildFourAxisRepositories();
+    fourAxis.projectionCheckpointRepository.rows.set(connection().id, {
+      bindingId: connection().id,
+      branch: 'main',
+      projectedCommitSha: 'old-sha',
+      state: 'Ready',
+      failure: null,
+      lastAttemptAt: 1,
+      projectedAt: 1,
+    });
     const createService = () =>
       new KnowledgeRepositoryProjectionService({
+        ...fourAxis,
         webhookSecret,
         connectionRepository,
         deliveryRepository,
@@ -692,14 +1125,16 @@ describe('KnowledgeRepositoryProjectionService', () => {
 
     expect(getRepositorySnapshot).toHaveBeenCalledOnce();
     expect(getFullMarkdownSnapshot).toHaveBeenCalledOnce();
-    expect(connectionRepository.row.lastProjectedCommitSha).toBe('new-sha');
+    expect(
+      fourAxis.projectionCheckpointRepository.rows.get(connection().id)?.projectedCommitSha,
+    ).toBe('new-sha');
   });
 
   it('publishes deletion events for notes removed by a full snapshot rebuild', async () => {
     const projectionRepository = new MemoryProjectionRepository();
     projectionRepository.rows.set('old-projection', {
       id: 'old-projection',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       relativePath: 'notes/removed.md',
       commitSha: 'before-sha',
       blobSha: 'old-blob',
@@ -711,6 +1146,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const publishMutation = vi.fn();
     const deliveryRepository = new MemoryDeliveryRepository();
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository,
@@ -758,6 +1194,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const deliveryRepository = new MemoryDeliveryRepository();
     const projectionRepository = new MemoryProjectionRepository();
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository,
       deliveryRepository,
@@ -780,19 +1217,30 @@ describe('KnowledgeRepositoryProjectionService', () => {
       expect([...deliveryRepository.rows.values()][0]?.status).toBe('Failed');
     });
 
-    expect(connectionRepository.row).toMatchObject({
-      status: 'Error',
-      lastErrorCode: 'GITHUB_DEFAULT_BRANCH_CHANGED',
+    expect(connectionRepository.row.disconnectedAt).toBeNull();
+    expect(latestObservationRepository().rows.get(connection().id)).toMatchObject({
+      eligibility: { state: 'Blocked', reason: 'DefaultBranchChanged' },
+      defaultBranch: 'trunk',
     });
     expect(projectionRepository.applyChanges).not.toHaveBeenCalled();
   });
 
   it('does not fetch a full snapshot when reconciliation finds the projected HEAD unchanged', async () => {
     const connectionRepository = new MemoryConnectionRepository();
-    connectionRepository.row.lastProjectedCommitSha = 'current-sha';
     const projectionRepository = new MemoryProjectionRepository();
     const getFullMarkdownSnapshot = vi.fn();
+    const fourAxis = buildFourAxisRepositories();
+    fourAxis.projectionCheckpointRepository.rows.set(connection().id, {
+      bindingId: connection().id,
+      branch: 'main',
+      projectedCommitSha: 'current-sha',
+      state: 'Ready',
+      failure: null,
+      lastAttemptAt: 1,
+      projectedAt: 1,
+    });
     const service = new KnowledgeRepositoryProjectionService({
+      ...fourAxis,
       webhookSecret,
       connectionRepository,
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -818,14 +1266,13 @@ describe('KnowledgeRepositoryProjectionService', () => {
 
   it('advances and wraps the reconciliation cursor so unchanged rows cannot starve later pages', async () => {
     const connectionRepository = new MemoryConnectionRepository();
-    connectionRepository.row.lastProjectedCommitSha = 'current-sha';
-    connectionRepository.row.updatedAt = 1 as never;
     const secondConnection = {
       ...connectionRepository.row,
       id: 'connection-2',
-      githubRepositoryId: 'repository-2',
-      githubRepositoryFullName: 'owner/second',
-      updatedAt: 2 as never,
+      id: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440202' as never,
+      repositoryId: 'repository-2',
+      repositoryFullNameSnapshot: 'owner/second',
+      connectedAt: 2,
     };
     connectionRepository.listProjectionCandidates
       .mockResolvedValueOnce([connectionRepository.row])
@@ -833,6 +1280,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([connectionRepository.row]);
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository,
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -853,17 +1301,26 @@ describe('KnowledgeRepositoryProjectionService', () => {
 
     expect(connectionRepository.listProjectionCandidates.mock.calls).toEqual([
       [50],
-      [50, { updatedAt: 1, id: 'connection-1' }],
-      [50, { updatedAt: 2, id: 'connection-2' }],
+      [50, { connectedAt: 1, id: connection().id }],
+      [50, { connectedAt: 2, id: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440202' }],
       [50],
     ]);
   });
 
   it('rebuilds projections and advances the cursor when reconciliation finds a new HEAD', async () => {
     const connectionRepository = new MemoryConnectionRepository();
-    connectionRepository.row.lastProjectedCommitSha = 'old-sha';
     const projectionRepository = new MemoryProjectionRepository();
     const publishMutation = vi.fn();
+    const fourAxis = buildFourAxisRepositories();
+    fourAxis.projectionCheckpointRepository.rows.set(connection().id, {
+      bindingId: connection().id,
+      branch: 'main',
+      projectedCommitSha: 'old-sha',
+      state: 'Ready',
+      failure: null,
+      lastAttemptAt: 1,
+      projectedAt: 1,
+    });
     const getFullMarkdownSnapshot = vi.fn(async () => ({
       commitSha: 'new-sha',
       files: [
@@ -875,6 +1332,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       ],
     }));
     const service = new KnowledgeRepositoryProjectionService({
+      ...fourAxis,
       webhookSecret,
       connectionRepository,
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -899,13 +1357,15 @@ describe('KnowledgeRepositoryProjectionService', () => {
       expect.objectContaining({ id: 'repository-1' }),
       'new-sha',
     );
-    expect(projectionRepository.applySnapshot).toHaveBeenCalledWith('connection-1', 'new-sha', [
+    expect(projectionRepository.applySnapshot).toHaveBeenCalledWith(connection().id, 'new-sha', [
       expect.objectContaining({ relativePath: 'notes/reconciled.md', indexStatus: 'pending' }),
     ]);
-    expect(connectionRepository.row.lastProjectedCommitSha).toBe('new-sha');
+    expect(
+      fourAxis.projectionCheckpointRepository.rows.get(connection().id)?.projectedCommitSha,
+    ).toBe('new-sha');
     expect(publishMutation).toHaveBeenCalledWith(
       expect.objectContaining({
-        repositoryId: 'connection-1',
+        repositoryId: connection().id,
         resourcePath: 'notes/reconciled.md',
         mutation: 'content_updated',
       }),
@@ -914,14 +1374,21 @@ describe('KnowledgeRepositoryProjectionService', () => {
 
   it('restores a force-push-paused connection after a successful full reconciliation', async () => {
     const connectionRepository = new MemoryConnectionRepository();
-    Object.assign(connectionRepository.row, {
-      status: 'Error',
-      lastProjectedCommitSha: 'old-sha',
-      lastErrorCode: 'GITHUB_FORCE_PUSH_REQUIRES_RECONCILIATION',
-      lastErrorMessage: 'Force push requires full reconciliation',
-      version: 4,
+    const fourAxis = buildFourAxisRepositories();
+    fourAxis.projectionCheckpointRepository.rows.set(connection().id, {
+      bindingId: connection().id,
+      branch: 'main',
+      projectedCommitSha: 'old-sha',
+      state: 'Failed',
+      failure: {
+        code: 'GITHUB_FORCE_PUSH_REQUIRES_RECONCILIATION',
+        message: 'Force push requires full reconciliation',
+      },
+      lastAttemptAt: 1,
+      projectedAt: 1,
     });
     const service = new KnowledgeRepositoryProjectionService({
+      ...fourAxis,
       webhookSecret,
       connectionRepository,
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -942,12 +1409,11 @@ describe('KnowledgeRepositoryProjectionService', () => {
 
     await service.reconcileNow();
 
-    expect(connectionRepository.row).toMatchObject({
-      status: 'Active',
-      lastProjectedCommitSha: 'rewritten-sha',
-      lastErrorCode: null,
-      lastErrorMessage: null,
-      version: 5,
+    expect(connectionRepository.row.disconnectedAt).toBeNull();
+    expect(fourAxis.projectionCheckpointRepository.rows.get(connection().id)).toMatchObject({
+      state: 'Ready',
+      projectedCommitSha: 'rewritten-sha',
+      failure: null,
     });
   });
 
@@ -956,6 +1422,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const deliveryRepository = new MemoryDeliveryRepository();
     const attachmentRepository = new MemoryAttachmentRepository();
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository,
       deliveryRepository,
@@ -990,7 +1457,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     });
 
     expect(attachmentRepository.applyChanges).toHaveBeenCalledWith(
-      'connection-1',
+      connection().id,
       'after-sha',
       [
         expect.objectContaining({
@@ -1008,7 +1475,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const attachmentRepository = new MemoryAttachmentRepository();
     attachmentRepository.rows.set('attachment-1', {
       id: 'attachment-1',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       relativePath: 'assets/diagram.png',
       commitSha: 'commit-1',
       blobSha: 'attachment-blob-sha',
@@ -1021,6 +1488,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       bytes: Uint8Array.from([1, 2, 3, 4]),
     }));
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -1058,7 +1526,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const attachmentRepository = new MemoryAttachmentRepository();
     attachmentRepository.rows.set('attachment-large', {
       id: 'attachment-large',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       relativePath: 'assets/large.pdf',
       commitSha: 'commit-1',
       blobSha: 'large-blob-sha',
@@ -1067,6 +1535,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     });
     const github = githubClient();
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -1087,7 +1556,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const attachmentRepository = new MemoryAttachmentRepository();
     attachmentRepository.rows.set('attachment-cache', {
       id: 'attachment-cache',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       relativePath: 'assets/diagram.png',
       commitSha: 'commit-1',
       blobSha: 'cached-blob-sha',
@@ -1100,6 +1569,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       bytes: Uint8Array.from([1, 2, 3, 4]),
     }));
     const firstService = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -1121,6 +1591,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     }));
     const secondInventory = vi.fn(async () => inventory());
     const secondService = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -1146,7 +1617,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const attachmentRepository = new MemoryAttachmentRepository();
     attachmentRepository.rows.set('attachment-expiring', {
       id: 'attachment-expiring',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       relativePath: 'assets/diagram.png',
       commitSha: 'commit-1',
       blobSha: 'expiring-blob-sha',
@@ -1167,6 +1638,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       });
     const createService = () =>
       new KnowledgeRepositoryProjectionService({
+        ...createFourAxisRepositories(),
         webhookSecret,
         connectionRepository: new MemoryConnectionRepository(),
         deliveryRepository: new MemoryDeliveryRepository(),
@@ -1193,7 +1665,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const attachmentRepository = new MemoryAttachmentRepository();
     attachmentRepository.rows.set('attachment-concurrent', {
       id: 'attachment-concurrent',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       relativePath: 'assets/diagram.png',
       commitSha: 'commit-1',
       blobSha: 'concurrent-blob-sha',
@@ -1209,6 +1681,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
         }),
     );
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -1252,7 +1725,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const attachmentRepository = new MemoryAttachmentRepository();
     attachmentRepository.rows.set('attachment-cache-offline', {
       id: 'attachment-cache-offline',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       relativePath: 'assets/diagram.png',
       commitSha: 'commit-1',
       blobSha: 'cache-offline-blob-sha',
@@ -1265,6 +1738,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       bytes: Uint8Array.from([8]),
     }));
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -1285,7 +1759,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const attachmentRepository = new MemoryAttachmentRepository();
     attachmentRepository.rows.set('attachment-integrity', {
       id: 'attachment-integrity',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       relativePath: 'assets/diagram.png',
       commitSha: 'commit-1',
       blobSha: 'expected-blob-sha',
@@ -1293,6 +1767,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       mediaType: 'image/png',
     });
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -1319,7 +1794,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     const attachmentRepository = new MemoryAttachmentRepository();
     attachmentRepository.rows.set('attachment-corrupt', {
       id: 'attachment-corrupt',
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       relativePath: 'assets/diagram.png',
       commitSha: 'commit-1',
       blobSha: 'corrupt-blob-sha',
@@ -1327,7 +1802,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       mediaType: 'image/png',
     });
     await cache.save({
-      connectionId: 'connection-1',
+      connectionId: connection().id,
       blobSha: 'corrupt-blob-sha',
       byteSize: 99,
       bytes: Uint8Array.from([7]),
@@ -1340,6 +1815,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       bytes: Uint8Array.from([3, 4]),
     }));
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository: new MemoryConnectionRepository(),
       deliveryRepository: new MemoryDeliveryRepository(),
@@ -1353,15 +1829,15 @@ describe('KnowledgeRepositoryProjectionService', () => {
       service.getAttachmentContent(connection().identityId, 'attachment-corrupt'),
     ).resolves.toMatchObject({ ok: true, data: { contentBase64: 'AwQ=' } });
     expect(getBlob).toHaveBeenCalledOnce();
-    expect(await cache.find('connection-1', 'corrupt-blob-sha', Date.now())).toBeTruthy();
+    expect(await cache.find(connection().id, 'corrupt-blob-sha', Date.now())).toBeTruthy();
   });
 
   it('starts one managed reconciliation loop and stops scheduling further runs', async () => {
     vi.useFakeTimers();
     try {
       const connectionRepository = new MemoryConnectionRepository();
-      connectionRepository.row.lastProjectedCommitSha = 'current-sha';
       const service = new KnowledgeRepositoryProjectionService({
+        ...createFourAxisRepositories(),
         webhookSecret,
         connectionRepository,
         deliveryRepository: new MemoryDeliveryRepository(),
@@ -1405,6 +1881,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
     });
     const connectionRepository = new MemoryConnectionRepository();
     const service = new KnowledgeRepositoryProjectionService({
+      ...createFourAxisRepositories(),
       webhookSecret,
       connectionRepository,
       deliveryRepository,

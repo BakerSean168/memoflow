@@ -5,18 +5,24 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, describe, expect, it } from 'vitest';
 import type {
   GitHubInstallationRepositoryDTO,
-  KnowledgeRepositoryConnectionClientDTO,
-  KnowledgeRepositoryConnectionServerDTO,
+  KnowledgeRemoteBindingClientDTO,
+  KnowledgeRemoteBindingServerDTO,
 } from '@memoflow/contracts/repository';
+import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
 import type { IdentityId } from '@memoflow/contracts/primitives';
 import { ok, ResultErrorException } from '@memoflow/contracts/result';
 // This opt-in acceptance file intentionally crosses the Desktop -> Repository
 // boundary so the production service and Git runtime are exercised together.
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import type { IKnowledgeRepositoryConnectionRepository } from '../../../../../../packages/repository/src/server/application/ports/knowledge-repository-connection.repository';
+import type {
+  IKnowledgeRemoteBindingRepository,
+  IRemoteHistoryFenceRepository,
+  IRemoteRepositoryObservationRepository,
+} from '../../../../../../packages/repository/src/server/application/ports/knowledge-remote-binding.repositories';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import type {
   IKnowledgeNoteProjectionRepository,
+  KnowledgeNoteProjectionDeletion,
   IKnowledgeWriteRequestRepository,
   KnowledgeNoteProjectionUpsert,
   KnowledgeWriteRequestProjectionSource,
@@ -63,61 +69,107 @@ function asIdentityId(value: string): IdentityId {
   return value as IdentityId;
 }
 
-class LiveConnectionRepository implements IKnowledgeRepositoryConnectionRepository {
-  constructor(private row: KnowledgeRepositoryConnectionServerDTO) {}
+class LiveConnectionRepository implements IKnowledgeRemoteBindingRepository {
+  constructor(private row: KnowledgeRemoteBindingServerDTO) {}
 
-  async findById(id: string): Promise<KnowledgeRepositoryConnectionServerDTO | null> {
+  async findById(id: string): Promise<KnowledgeRemoteBindingServerDTO | null> {
     return id === this.row.id ? this.row : null;
   }
 
   async findByIdForIdentity(
     identityId: string,
     id: string,
-  ): Promise<KnowledgeRepositoryConnectionServerDTO | null> {
+  ): Promise<KnowledgeRemoteBindingServerDTO | null> {
     return identityId === this.row.identityId && id === this.row.id ? this.row : null;
   }
 
-  async findByIdentityId(identityId: string): Promise<KnowledgeRepositoryConnectionServerDTO[]> {
+  async findByIdentityId(identityId: string): Promise<KnowledgeRemoteBindingServerDTO[]> {
     return identityId === this.row.identityId ? [this.row] : [];
   }
 
-  async findByGithubRepositoryId(
-    githubRepositoryId: string,
-  ): Promise<KnowledgeRepositoryConnectionServerDTO | null> {
-    return githubRepositoryId === this.row.githubRepositoryId ? this.row : null;
+  async findByRepositoryId(repositoryId: string): Promise<KnowledgeRemoteBindingServerDTO | null> {
+    return repositoryId === this.row.repositoryId ? this.row : null;
   }
 
-  async findByInstallationAndGithubRepositoryId(
+  async findByInstallationAndRepositoryId(
     installationId: string,
-    githubRepositoryId: string,
-  ): Promise<KnowledgeRepositoryConnectionServerDTO | null> {
-    return installationId === this.row.installationId &&
-      githubRepositoryId === this.row.githubRepositoryId
+    repositoryId: string,
+  ): Promise<KnowledgeRemoteBindingServerDTO | null> {
+    return installationId === this.row.installationId && repositoryId === this.row.repositoryId
       ? this.row
       : null;
   }
 
   async listProjectionCandidates(
     _limit: number,
-    _cursor?: { updatedAt: number; id: string },
-  ): Promise<KnowledgeRepositoryConnectionServerDTO[]> {
+    _cursor?: { connectedAt: number; id: string },
+  ): Promise<KnowledgeRemoteBindingServerDTO[]> {
     return [this.row];
   }
 
-  async save(connection: KnowledgeRepositoryConnectionServerDTO): Promise<void> {
+  async save(connection: KnowledgeRemoteBindingServerDTO): Promise<void> {
     this.row = connection;
   }
 
-  async updateStatus(
-    identityId: string,
-    id: string,
-    status: KnowledgeRepositoryConnectionServerDTO['status'],
-    _error?: { code: string; message: string } | null,
-  ): Promise<void> {
-    if (identityId === this.row.identityId && id === this.row.id) {
-      this.row = { ...this.row, status };
+  async markDisconnected(identityId: string, id: string, disconnectedAt: number): Promise<boolean> {
+    if (
+      identityId !== this.row.identityId ||
+      id !== this.row.id ||
+      this.row.disconnectedAt !== null
+    ) {
+      return false;
     }
+    this.row = { ...this.row, disconnectedAt, version: this.row.version + 1 };
+    return true;
   }
+}
+
+class LiveObservationRepository implements IRemoteRepositoryObservationRepository {
+  constructor(
+    private observation: import('@memoflow/contracts/repository').RemoteRepositoryObservation,
+  ) {}
+  async findByBindingId(bindingId: string) {
+    return bindingId === this.observation.bindingId ? this.observation : null;
+  }
+  async findByBindingIds(bindingIds: readonly string[]) {
+    return bindingIds.includes(this.observation.bindingId)
+      ? new Map([[this.observation.bindingId, this.observation]])
+      : new Map();
+  }
+  async save(observation: import('@memoflow/contracts/repository').RemoteRepositoryObservation) {
+    this.observation = observation;
+  }
+}
+
+class LiveHistoryFenceRepository implements IRemoteHistoryFenceRepository {
+  constructor(private fence: import('@memoflow/contracts/repository').RemoteHistoryFence) {}
+  async findByBindingId(bindingId: string) {
+    return bindingId === this.fence.bindingId ? this.fence : null;
+  }
+  async findByBindingIds(bindingIds: readonly string[]) {
+    return bindingIds.includes(this.fence.bindingId)
+      ? new Map([[this.fence.bindingId, this.fence]])
+      : new Map();
+  }
+  async save(fence: import('@memoflow/contracts/repository').RemoteHistoryFence) {
+    this.fence = fence;
+  }
+}
+
+class LiveDocumentIdentityRepository {
+  async find(): Promise<null> {
+    return null;
+  }
+
+  async claimForCreate(): Promise<boolean> {
+    return true;
+  }
+
+  async claimForAdoption(): Promise<boolean> {
+    return true;
+  }
+
+  async observeMarker(): Promise<void> {}
 }
 
 class LiveProjectionRepository implements IKnowledgeNoteProjectionRepository {
@@ -127,7 +179,7 @@ class LiveProjectionRepository implements IKnowledgeNoteProjectionRepository {
     _connectionId: string,
     _commitSha: string,
     notes: KnowledgeNoteProjectionUpsert[],
-  ): Promise<{ id: string; relativePath: string }[]> {
+  ): Promise<KnowledgeNoteProjectionDeletion[]> {
     this.notes.clear();
     for (const note of notes) this.notes.set(note.relativePath, note);
     return [];
@@ -154,6 +206,14 @@ class LiveProjectionRepository implements IKnowledgeNoteProjectionRepository {
   async findByPath(_connectionId: string, relativePath: string): Promise<null> {
     void relativePath;
     return null;
+  }
+
+  async findLiveByDocumentId(): Promise<never[]> {
+    return [];
+  }
+
+  async listLiveByConnection(): Promise<never[]> {
+    return [];
   }
 
   async loadLinkGraphSourcesForIdentity(): Promise<null> {
@@ -215,12 +275,7 @@ class LiveWriteRequestRepository implements IKnowledgeWriteRequestRepository {
     }
   }
 
-  async markFailed(
-    identityId: string,
-    id: string,
-    code: string,
-    message: string,
-  ): Promise<void> {
+  async markFailed(identityId: string, id: string, code: string, message: string): Promise<void> {
     for (const [key, record] of this.records) {
       if (record.identityId !== identityId || record.id !== id) continue;
       this.records.set(key, {
@@ -489,31 +544,53 @@ describe('live GitHub knowledge repository acceptance', () => {
     if (!synchronizedPreview.headSha) throw new Error('Fixture HEAD disappeared after clone');
 
     const identityId = asIdentityId('live-github-acceptance');
-    const connectionId = `live-github-connection-${randomUUID()}`;
+    const connectionId =
+      `KnowledgeRemoteBindingId_${randomUUID()}` as KnowledgeRemoteBindingServerDTO['id'];
+    const knowledgeSpaceId =
+      `KnowledgeSpaceId_${randomUUID()}` as KnowledgeRemoteBindingServerDTO['knowledgeSpaceId'];
     const now = Date.now();
-    const serverConnection: KnowledgeRepositoryConnectionServerDTO = {
+    const serverConnection: KnowledgeRemoteBindingServerDTO = {
       id: connectionId,
+      knowledgeSpaceId,
       identityId,
-      githubUserId: inventory.accountId,
-      githubRepositoryId: repository.id,
-      githubRepositoryFullName: repository.fullName,
+      provider: 'GitHub',
       installationId: environment.GITHUB_TEST_INSTALLATION_ID,
-      defaultBranch: repository.defaultBranch,
-      status: 'Active',
-      lastSyncedCommitSha: synchronizedPreview.headSha,
-      lastProjectedCommitSha: synchronizedPreview.headSha,
-      lastErrorCode: null,
-      lastErrorMessage: null,
+      repositoryId: repository.id,
+      repositoryFullNameSnapshot: repository.fullName,
+      connectedAt: now,
+      disconnectedAt: null,
       version: 1,
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: null,
+    };
+    const observation = {
+      bindingId: connectionId,
+      observedAt: now,
+      accountId: inventory.accountId,
+      repositoryFullName: repository.fullName,
+      defaultBranch: repository.defaultBranch,
+      private: true,
+      archived: false,
+      disabled: false,
+      contentsPermission: 'write' as const,
+      installationSuspended: false,
+      eligibility: { state: 'Ready' as const },
+    };
+    const historyFence = {
+      bindingId: connectionId,
+      defaultBranch: repository.defaultBranch,
+      lastConfirmedRemoteHeadSha: synchronizedPreview.headSha,
+      confirmedAt: now,
     };
     const connectionRepository = new LiveConnectionRepository(serverConnection);
+    const observationRepository = new LiveObservationRepository(observation);
+    const historyFenceRepository = new LiveHistoryFenceRepository(historyFence);
+    const documentIdentityRepository = new LiveDocumentIdentityRepository();
     const projectionRepository = new LiveProjectionRepository();
     const writeRequestRepository = new LiveWriteRequestRepository();
     const commitService = new KnowledgeNoteCommitService({
       connectionRepository,
+      observationRepository,
+      historyFenceRepository,
+      documentIdentityRepository,
       projectionRepository,
       writeRequestRepository,
       githubAppClient: appClient,
@@ -526,6 +603,7 @@ describe('live GitHub knowledge repository acceptance', () => {
     const requestId = `live-github-request-${randomUUID()}`;
     const committed = await commitService.create(identityId, {
       connectionId,
+      knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(`kdoc_${randomUUID()}`),
       proposalId: `live-github-proposal-${randomUUID()}`,
       revision: 1,
       requestId,
@@ -567,35 +645,42 @@ describe('live GitHub knowledge repository acceptance', () => {
       snapshot.files.find((file) => file.relativePath === proposedPath)?.markdownContent,
     ).toContain('production GitHub App and Desktop pull boundary');
 
-    let connection: KnowledgeRepositoryConnectionClientDTO = {
-      id: serverConnection.id,
-      identityId: serverConnection.identityId,
-      githubUserId: serverConnection.githubUserId,
-      githubRepositoryId: serverConnection.githubRepositoryId,
-      githubRepositoryFullName: serverConnection.githubRepositoryFullName,
-      installationId: serverConnection.installationId,
-      defaultBranch: serverConnection.defaultBranch,
-      status: serverConnection.status,
-      lastSyncedCommitSha: synchronizedPreview.headSha,
-      lastProjectedCommitSha: synchronizedPreview.headSha,
-      lastErrorCode: null,
-      canSync: true,
-      createdAt: serverConnection.createdAt,
-      updatedAt: serverConnection.updatedAt,
+    let connection: KnowledgeRemoteBindingClientDTO = {
+      ...serverConnection,
+      observation,
+      historyFence,
+      projectionCheckpoint: {
+        bindingId: connectionId,
+        branch: repository.defaultBranch,
+        projectedCommitSha: synchronizedPreview.headSha,
+        state: 'Ready',
+        failure: null,
+        lastAttemptAt: now,
+        projectedAt: now,
+      },
     };
     const syncService = new DesktopKnowledgeRepositorySyncService({
       localVault: {
-        getBinding: async () => ({
-          id: `live-vault-${randomUUID()}`,
-          identityId,
-          rootPath: vaultPath,
-          displayName: 'Live GitHub acceptance vault',
-          status: 'Active' as const,
-          obsidianVaultId: null,
-          lastScannedAt: null,
-          createdAt: now,
-          updatedAt: now,
-        }),
+        getBinding: async () => {
+          const bindingId = `LocalVaultBindingId_${randomUUID()}` as never;
+          return {
+            binding: {
+              id: bindingId,
+              knowledgeSpaceId,
+              localProfileId: 'p_live_github_acceptance',
+              rootPath: vaultPath,
+              displayName: 'Live GitHub acceptance vault',
+              boundAt: now,
+              detachedAt: null,
+            },
+            health: {
+              bindingId,
+              state: 'Available' as const,
+              observedAt: now,
+              detail: null,
+            },
+          };
+        },
       },
       remote: {
         listKnowledgeRepositoryConnections: async () => ok({ connections: [connection] }),
@@ -616,7 +701,15 @@ describe('live GitHub knowledge repository acceptance', () => {
             repository,
           );
           expect(current.headSha).toBe(input.headSha);
-          connection = { ...connection, lastSyncedCommitSha: input.headSha };
+          connection = {
+            ...connection,
+            historyFence: {
+              bindingId: connection.id,
+              defaultBranch: repository.defaultBranch,
+              lastConfirmedRemoteHeadSha: input.headSha,
+              confirmedAt: Date.now(),
+            },
+          };
           return ok(connection);
         },
       },

@@ -10,6 +10,7 @@
  */
 
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createTaskModule,
   type TaskModuleInstance,
@@ -17,8 +18,8 @@ import {
   type TaskRuntimeContributionsInput,
 } from './task.module';
 import {
-  PowerSyncTaskTemplateRepository,
-  PowerSyncTaskInstanceRepository,
+  PowerSyncTaskPlanRepository,
+  PowerSyncTaskOccurrenceRepository,
   PowerSyncTaskWriteTransactionRunner,
   PowerSyncTaskGoalOutboxDispatchStore,
 } from './adapters/powersync';
@@ -53,19 +54,23 @@ type TaskPowerSyncQueryable = IElectronDatabaseTransaction;
  */
 export function createTaskPowerSyncModule(
   db: IElectronDatabase,
-  runtimeContributions?: TaskRuntimeContributionsInput,
+  options: {
+    readonly userTimeContextPort: UserTimeContextPort;
+    readonly runtimeContributions?: TaskRuntimeContributionsInput;
+  },
 ): TaskModuleInstance {
   const {
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
   } = createTaskPowerSyncRepositories(db);
 
   return createTaskModule({
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
-    runtimeContributions,
+    userTimeContextPort: options.userTimeContextPort,
+    runtimeContributions: options.runtimeContributions,
   });
 }
 
@@ -85,8 +90,8 @@ export function createTaskPowerSyncModule(
  */
 export function createTaskPowerSyncRepositories(db: IElectronDatabase): TaskRepositorySet {
   return {
-    taskTemplateRepository: new PowerSyncTaskTemplateRepository(db),
-    taskInstanceRepository: new PowerSyncTaskInstanceRepository(db),
+    taskPlanRepository: new PowerSyncTaskPlanRepository(db),
+    taskOccurrenceRepository: new PowerSyncTaskOccurrenceRepository(db),
     taskWriteTransactionRunner: new PowerSyncTaskWriteTransactionRunner(db),
   };
 }
@@ -123,14 +128,16 @@ export function createTaskPowerSyncGoalOutboxRuntime(
 
 export function createTaskPowerSyncScheduleProjectionSource(
   db: TaskPowerSyncQueryable,
+  userTimeContextPort: UserTimeContextPort,
 ): TaskScheduleProjectionSource {
   return createTaskScheduleProjectionSource({
-    taskTemplateRepository: new PowerSyncTaskTemplateRepository(db),
-    taskInstanceRepository: new PowerSyncTaskInstanceRepository(db),
+    taskPlanRepository: new PowerSyncTaskPlanRepository(db),
+    taskOccurrenceRepository: new PowerSyncTaskOccurrenceRepository(db),
+    userTimeContextPort,
   });
 }
 
 export {
-  PowerSyncTaskTemplateRepository,
-  PowerSyncTaskInstanceRepository,
+  PowerSyncTaskPlanRepository,
+  PowerSyncTaskOccurrenceRepository,
 };

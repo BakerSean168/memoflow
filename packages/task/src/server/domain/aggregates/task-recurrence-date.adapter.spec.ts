@@ -1,11 +1,16 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { RecurrenceFrequency } from '@memoflow/contracts/task';
 import type { RecurrenceEnginePort, RecurrenceSchedule } from '@memoflow/time';
-import { createTimeFacade } from '@memoflow/time';
+import { createTimeContext, createTimeFacade } from '@memoflow/time';
 import { RecurrenceRule, TaskTimeConfig } from '../value-objects';
 import { createTaskRecurrenceDateAdapter } from './task-recurrence-date.adapter';
 
 const originalTimeZone = process.env.TZ;
+
+const UTC_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TOKYO_CONTEXT = createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 });
+const NEW_YORK_CONTEXT = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 1 });
+
 
 afterEach(() => {
   if (originalTimeZone === undefined) delete process.env.TZ;
@@ -58,6 +63,7 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       config,
       new Date(2026, 0, 1).getTime(),
       new Date(2026, 2, 1).getTime(),
+      TOKYO_CONTEXT,
     );
 
     expect(schedules).toHaveLength(1);
@@ -70,7 +76,9 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       byWeekday: [1, 5],
       count: null,
     });
-    expect(schedules[0].until).toBe(createTimeFacade().calendar.endOfDay(endDate));
+    expect(schedules[0].until).toBe(
+      createTimeFacade({ context: TOKYO_CONTEXT }).calendar.endOfDay(endDate),
+    );
   });
 
   it.each([
@@ -98,6 +106,7 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       TaskTimeConfig.createAllDay(start),
       start,
       Date.UTC(2026, 11, 31),
+      UTC_CONTEXT,
     );
     expect(captured?.frequency).toBe(engineFrequency);
     expect(captured?.count).toBe(7);
@@ -118,6 +127,7 @@ describe('Task recurrence adapter (TASK-2204)', () => {
         unanchored,
         Date.UTC(2026, 0, 1),
         Date.UTC(2026, 0, 31),
+        UTC_CONTEXT,
       ),
     ).toThrow('Recurring Task requires an anchored local date');
   });
@@ -131,6 +141,7 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       TaskTimeConfig.createAllDay(start),
       start,
       Date.UTC(2026, 0, 31, 23, 59, 59, 999),
+      UTC_CONTEXT,
     );
     expect(dates.map((instant) => new Date(instant).toISOString())).toEqual([
       '2026-01-01T00:00:00.000Z',
@@ -149,6 +160,7 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       TaskTimeConfig.createAllDay(start),
       start,
       new Date(2026, 0, 5, 23, 59, 59, 999).getTime(),
+      TOKYO_CONTEXT,
     );
     expect(dates.map((instant) => new Date(instant).getDate())).toEqual([1, 2, 3]);
   });
@@ -162,6 +174,7 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       TaskTimeConfig.createAllDay(start),
       new Date(2026, 9, 31, 0, 0, 0).getTime(),
       new Date(2026, 10, 2, 23, 59, 59, 999).getTime(),
+      NEW_YORK_CONTEXT,
     );
 
     expect(dates.map((instant) => new Date(instant).toISOString())).toEqual([
@@ -180,6 +193,7 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       TaskTimeConfig.createAllDay(start),
       new Date(2026, 2, 7, 0, 0, 0).getTime(),
       new Date(2026, 2, 10, 23, 59, 59, 999).getTime(),
+      NEW_YORK_CONTEXT,
     );
 
     expect(dates.map((instant) => new Date(instant).toISOString())).toEqual([
@@ -189,4 +203,24 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       '2026-03-10T04:00:00.000Z',
     ]);
   });
+  it('is host-timezone independent for the same explicit TimeContext', () => {
+    const adapter = createTaskRecurrenceDateAdapter();
+    const start = Date.UTC(2026, 8, 8, 15, 0, 0); // 2026-09-09 00:00 in Tokyo
+    const config = TaskTimeConfig.createAllDay(start);
+    const recurrence = rule(RecurrenceFrequency.Daily, { occurrences: 2 });
+    const from = Date.UTC(2026, 8, 8, 0, 0, 0);
+    const to = Date.UTC(2026, 8, 10, 23, 59, 59, 999);
+
+    process.env.TZ = 'UTC';
+    const fromUtcHost = adapter.between(recurrence, config, from, to, TOKYO_CONTEXT);
+    process.env.TZ = 'America/Los_Angeles';
+    const fromLosAngelesHost = adapter.between(recurrence, config, from, to, TOKYO_CONTEXT);
+
+    expect(fromLosAngelesHost).toEqual(fromUtcHost);
+    expect(fromUtcHost.map((instant) => new Date(instant).toISOString())).toEqual([
+      '2026-09-08T15:00:00.000Z',
+      '2026-09-09T15:00:00.000Z',
+    ]);
+  });
+
 });

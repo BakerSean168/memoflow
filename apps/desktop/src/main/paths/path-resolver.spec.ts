@@ -57,6 +57,10 @@ describe('profile-path-resolver', () => {
     expect(resolver.mainWindowStatePath).toBe(
       path.join('/root', 'profiles', 'p_test123', 'ui', 'main-window-state.json'),
     );
+    expect(resolver.desktopNotificationPreferencePath).toBe(
+      path.join('/root', 'profiles', 'p_test123', 'ui', 'notification-preference.json'),
+    );
+    expect(resolver.desktopNotificationPreferencePath).not.toBe(resolver.mainWindowStatePath);
   });
 });
 

@@ -4,6 +4,9 @@ import { RefreshControl, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { useScheduleAgenda } from '../hooks/useScheduleAgenda';
+import { useAppPreferences } from '../providers/app-preference-provider';
+import { getProductTime } from '../utils/product-time';
+import { asYmd } from '@memoflow/time';
 
 import {
   PageShell,
@@ -15,40 +18,49 @@ import {
   ThemedView,
 } from '@memoflow/ui-react-native';
 
-function getMonthBounds(anchor: Date) {
-  const start = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
-  const end = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0, 23, 59, 59, 999);
-  return { start, end };
+function monthStart(anchor: number): number {
+  const time = getProductTime();
+  const ymd = String(time.calendar.toYmd(anchor));
+  return Number(time.codec.startOfYmd(asYmd(`${ymd.slice(0, 7)}-01`)));
 }
 
-function startOfCalendarGrid(monthStart: Date) {
-  const next = new Date(monthStart);
-  const day = next.getDay();
-  const offset = day === 0 ? 6 : day - 1;
-  next.setDate(next.getDate() - offset);
-  next.setHours(0, 0, 0, 0);
-  return next;
+function shiftMonth(anchor: number, delta: number): number {
+  const time = getProductTime();
+  const ymd = String(time.calendar.toYmd(anchor));
+  const year = Number(ymd.slice(0, 4));
+  const month = Number(ymd.slice(5, 7));
+  const shifted = new Date(Date.UTC(year, month - 1 + delta, 1));
+  const target = asYmd(
+    `${String(shifted.getUTCFullYear()).padStart(4, '0')}-${String(shifted.getUTCMonth() + 1).padStart(2, '0')}-01`,
+  );
+  return Number(time.codec.startOfYmd(target));
 }
 
-function formatDayKey(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+function getMonthBounds(anchor: number) {
+  const time = getProductTime();
+  const start = monthStart(anchor);
+  const nextMonth = shiftMonth(start, 1);
+  const lastDay = time.calendar.addDays(nextMonth, -1);
+  return {
+    start,
+    end: Number(time.calendar.endOfDay(lastDay)),
+    monthKey: String(time.calendar.toYmd(start)).slice(0, 7),
+  };
 }
 
-function formatMonthLabel(date: Date) {
-  return new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long' }).format(date);
+function formatMonthLabel(anchor: number) {
+  return getProductTime().format.pattern(monthStart(anchor), 'yyyy MMMM');
 }
 
 export function ScheduleCalendarScreen() {
   const router = useRouter();
-  const [monthAnchor, setMonthAnchor] = useState(() => new Date());
+  const { profile } = useAppPreferences();
+  const [monthAnchor, setMonthAnchor] = useState(() => Date.now());
 
-  const monthBounds = useMemo(() => getMonthBounds(monthAnchor), [monthAnchor]);
+  const monthBounds = useMemo(() => getMonthBounds(monthAnchor), [monthAnchor, profile]);
   const { entries, groupedEntries, isLoading, error, refresh } = useScheduleAgenda({
-    startTime: monthBounds.start.getTime(),
-    endTime: monthBounds.end.getTime(),
+    startTime: monthBounds.start,
+    endTime: monthBounds.end,
   });
 
   const dayMap = useMemo(() => {
@@ -65,21 +77,30 @@ export function ScheduleCalendarScreen() {
   }, [entries]);
 
   const gridDays = useMemo(() => {
-    const start = startOfCalendarGrid(monthBounds.start);
+    const time = getProductTime();
+    const start = time.calendar.startOfWeek(monthBounds.start);
     return Array.from({ length: 42 }, (_, index) => {
-      const current = new Date(start);
-      current.setDate(start.getDate() + index);
-      const key = formatDayKey(current);
+      const current = time.calendar.addDays(start, index);
+      const key = String(time.calendar.toYmd(current));
       const summary = dayMap.get(key);
       return {
         key,
-        day: current.getDate(),
-        isCurrentMonth: current.getMonth() === monthBounds.start.getMonth(),
+        day: Number(key.slice(8, 10)),
+        isCurrentMonth: key.startsWith(monthBounds.monthKey),
         count: summary?.count ?? 0,
         conflicts: summary?.conflicts ?? 0,
       };
     });
-  }, [dayMap, monthBounds.start]);
+  }, [dayMap, monthBounds.monthKey, monthBounds.start, profile]);
+
+  const weekdayLabels = useMemo(() => {
+    const time = getProductTime();
+    const start = time.calendar.startOfWeek(monthBounds.start);
+    return Array.from({ length: 7 }, (_, index) =>
+      time.format.pattern(time.calendar.addDays(start, index), 'EEE'),
+    );
+  }, [monthBounds.start, profile]);
+
 
   const busiestDays = useMemo(
     () => groupedEntries.slice().sort((left, right) => right.items.length - left.items.length).slice(0, 3),
@@ -119,12 +140,12 @@ export function ScheduleCalendarScreen() {
       refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}>
       <SectionCard title={formatMonthLabel(monthAnchor)} description="按天展示事件密度和冲突数量。">
         <View style={styles.actionRow}>
-          <PrimaryButton label="Prev month" onPress={() => setMonthAnchor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))} variant="ghost" />
-          <PrimaryButton label="This month" onPress={() => setMonthAnchor(new Date())} variant="secondary" />
-          <PrimaryButton label="Next month" onPress={() => setMonthAnchor((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))} variant="ghost" />
+          <PrimaryButton label="Prev month" onPress={() => setMonthAnchor((current) => shiftMonth(current, -1))} variant="ghost" />
+          <PrimaryButton label="This month" onPress={() => setMonthAnchor(Date.now())} variant="secondary" />
+          <PrimaryButton label="Next month" onPress={() => setMonthAnchor((current) => shiftMonth(current, 1))} variant="ghost" />
         </View>
         <View style={styles.weekdayRow}>
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((item) => (
+          {weekdayLabels.map((item) => (
             <ThemedText key={item} type="small" themeColor="textSecondary" style={styles.weekdayCell}>{item}</ThemedText>
           ))}
         </View>

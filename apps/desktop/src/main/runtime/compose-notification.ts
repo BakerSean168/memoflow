@@ -36,6 +36,7 @@
  */
 
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createDefaultElectronDesktopTransport,
   createNotificationDurableRuntime,
@@ -58,10 +59,13 @@ import {
 export interface ComposeNotificationDesktopDependencies {
   /** PowerSync-backed desktop business database owned by the desktop main runtime. 桌面主进程持有的 PowerSync 桌面业务数据库。 */
   readonly db: IElectronDatabase;
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Explicit channel capabilities selected by the host (InApp + Desktop). 宿主显式选择的 channel capabilities（InApp + Desktop）。 */
   readonly channelCapabilities: readonly ChannelCapabilitySpec[];
   /** Native Electron desktop transport (acks + native Notification side effect). 原生 Electron desktop transport（ack + 原生 Notification 副作用）。 */
   readonly desktopTransport?: unknown;
+  /** Late-bound device renderer used by the durable Desktop transport. */
+  readonly desktopRenderer?: (dto: unknown, context?: unknown) => boolean | Promise<boolean>;
 }
 
 /**
@@ -122,21 +126,30 @@ export function composeNotification(
 ): ComposedNotificationDesktop {
   const repositories = createNotificationPowerSyncRepositories(dependencies.db);
 
+  const closureChecker = createPowerSyncClosureChecker(dependencies.db);
+
   const durableRuntime = createNotificationDurableRuntime({
     notificationRepository: repositories.notificationRepository,
+    preferenceRepository: repositories.notificationPreferenceRepository,
+    closureChecker,
+    userTimeContextPort: dependencies.userTimeContextPort,
     reliableAdapter: repositories.reliableAdapter,
     channelCapabilities: Array.from(dependencies.channelCapabilities),
     transport:
-      dependencies.desktopTransport ?? createDefaultElectronDesktopTransport(dependencies.db),
+      dependencies.desktopTransport ??
+      createDefaultElectronDesktopTransport({
+        db: dependencies.db,
+        renderer: dependencies.desktopRenderer,
+      }),
   });
 
-  const closureChecker = createPowerSyncClosureChecker(dependencies.db);
 
   const instance = createNotificationModule({
     notificationRepository: repositories.notificationRepository,
     preferenceRepository: repositories.notificationPreferenceRepository,
     templateRepository: repositories.notificationTemplateRepository,
     closureChecker,
+    userTimeContextPort: dependencies.userTimeContextPort,
     durableRuntime,
     runtimeContributions: [durableRuntime],
   });

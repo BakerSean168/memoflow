@@ -5,7 +5,7 @@ import {
 } from '../../../domain';
 import { Goal } from '../../../domain';
 import type { GoalSystemView, KeyResultWeightSnapshotDTO } from '@memoflow/contracts/goal';
-import type { LabelDto } from '@memoflow/contracts/label';
+import { LabelColorSchema, type LabelDto } from '@memoflow/contracts/label';
 import {
   AggregateRepositoryBase,
   createEventBusAdapter,
@@ -17,6 +17,7 @@ import type { GoalPowerSyncDatabase, PowerSyncLockContext } from './shared';
 import { toDbDateTime } from './shared';
 import { PowerSyncGoalMapper } from './mappers/powersync-goal.mapper';
 import type { RawKeyResultData, RawGoalReviewData } from './mappers/powersync-goal.mapper';
+import { encodeGoalTimeframe } from '../goal-timeframe-persistence';
 
 const eventBusAdapter = createEventBusAdapter(eventBus);
 
@@ -38,7 +39,7 @@ export class GoalPowerSyncRepository
       identityId: String(row.identity_id),
       name: String(row.name),
       normalizedName: String(row.normalized_name),
-      color: row.color == null ? null : String(row.color),
+      color: row.color == null ? null : LabelColorSchema.parse(String(row.color)),
       createdAt: Date.parse(String(row.created_at)),
       updatedAt: Date.parse(String(row.updated_at)),
     };
@@ -134,7 +135,7 @@ export class GoalPowerSyncRepository
 
     switch (options?.systemView) {
       case 'active':
-        filters.push("g.status = 'Active'");
+        filters.push("g.status IN ('Planned', 'InProgress')");
         break;
       case 'completed':
         filters.push("g.status = 'Completed'");
@@ -206,6 +207,7 @@ export class GoalPowerSyncRepository
 
   protected async persist(goal: Goal): Promise<void> {
     const dto = goal.toServerDTO(true);
+    const target = encodeGoalTimeframe(dto.target);
 
     const persistInTransaction = async (tx: PowerSyncLockContext) => {
       const existingGoal = await tx.getOptional<{ id: string }>(
@@ -218,12 +220,11 @@ export class GoalPowerSyncRepository
           `UPDATE goals
            SET identity_id = ?,
                name = ?,
-               description = ?,
-               feasibility_analysis = ?,
-               motivation = ?,
+               summary = ?,
                status = ?,
                start_date = ?,
-               due_date = ?,
+               target_kind = ?,
+               target_end_date = ?,
                completed_at = ?,
                archived_at = ?,
                sort_order = ?,
@@ -235,12 +236,11 @@ export class GoalPowerSyncRepository
           [
             dto.identityId,
             dto.name,
-            dto.description,
-            dto.feasibilityAnalysis,
-            dto.motivation,
+            dto.summary,
             dto.status,
-            toDbDateTime(dto.startDate),
-            toDbDateTime(dto.dueDate),
+            dto.startDate,
+            target.targetKind,
+            target.targetEndDate,
             toDbDateTime(dto.completedAt),
             toDbDateTime(dto.archivedAt),
             dto.sortOrder,
@@ -254,20 +254,19 @@ export class GoalPowerSyncRepository
       } else {
         await tx.execute(
           `INSERT INTO goals (
-             id, identity_id, name, description, feasibility_analysis, motivation, status,
-             start_date, due_date, completed_at, archived_at, sort_order, reminder_config,
+             id, identity_id, name, summary, status,
+             start_date, target_kind, target_end_date, completed_at, archived_at, sort_order, reminder_config,
              version, created_at, updated_at, deleted_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             dto.id,
             dto.identityId,
             dto.name,
-            dto.description,
-            dto.feasibilityAnalysis,
-            dto.motivation,
+            dto.summary,
             dto.status,
-            toDbDateTime(dto.startDate),
-            toDbDateTime(dto.dueDate),
+            dto.startDate,
+            target.targetKind,
+            target.targetEndDate,
             toDbDateTime(dto.completedAt),
             toDbDateTime(dto.archivedAt),
             dto.sortOrder,
@@ -324,19 +323,18 @@ export class GoalPowerSyncRepository
 
   private async persistWithExpectedVersion(goal: Goal, expectedVersion: number): Promise<void> {
     const dto = goal.toServerDTO(false);
+    const target = encodeGoalTimeframe(dto.target);
     const result = await this.db.execute(
-      `UPDATE goals SET name = ?, description = ?, feasibility_analysis = ?, motivation = ?,
-       status = ?, start_date = ?, due_date = ?, completed_at = ?, archived_at = ?,
+      `UPDATE goals SET name = ?, summary = ?, status = ?, start_date = ?, target_kind = ?, target_end_date = ?, completed_at = ?, archived_at = ?,
        reminder_config = ?, version = ?, updated_at = ?, deleted_at = ?
        WHERE id = ? AND identity_id = ? AND version = ?`,
       [
         dto.name,
-        dto.description,
-        dto.feasibilityAnalysis,
-        dto.motivation,
+        dto.summary,
         dto.status,
-        toDbDateTime(dto.startDate),
-        toDbDateTime(dto.dueDate),
+        dto.startDate,
+        target.targetKind,
+        target.targetEndDate,
         toDbDateTime(dto.completedAt),
         toDbDateTime(dto.archivedAt),
         dto.reminderConfig ? JSON.stringify(dto.reminderConfig) : null,
@@ -507,6 +505,7 @@ export class GoalPowerSyncRepository
         typeof keyResult.progress === 'string'
           ? JSON.parse(keyResult.progress)
           : keyResult.progress;
+      const target = encodeGoalTimeframe(keyResult.target);
 
       const existingKeyResult = await tx.getOptional<{ id: string }>(
         `SELECT id FROM key_results WHERE id = ? LIMIT 1`,
@@ -521,10 +520,12 @@ export class GoalPowerSyncRepository
                title = ?,
                description = ?,
                aggregation_method = ?,
-               starting_value = ?,
-               progress_baseline_value = ?,
+               initial_value = ?,
+               tracking_base_value = ?,
                target_value = ?,
                current_value = ?,
+               target_kind = ?,
+               target_end_date = ?,
                unit = ?,
                weight = ?,
                "order" = ?,
@@ -536,10 +537,12 @@ export class GoalPowerSyncRepository
             keyResult.title,
             keyResult.description,
             progress.aggregationMethod ?? 'Last',
-            progress.startingValue ?? 0,
-            progress.progressBaselineValue ?? null,
+            progress.initialValue ?? 0,
+            progress.trackingBaseValue ?? progress.currentValue ?? 0,
             progress.targetValue ?? 100,
             progress.currentValue ?? 0,
+            target.targetKind,
+            target.targetEndDate,
             progress.unit ?? null,
             keyResult.weight,
             keyResult.sortOrder,
@@ -551,9 +554,9 @@ export class GoalPowerSyncRepository
         await tx.execute(
           `INSERT INTO key_results (
              id, identity_id, goal_id, title, description, aggregation_method,
-             starting_value, progress_baseline_value, target_value, current_value,
-             unit, weight, "order", created_at, updated_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             initial_value, tracking_base_value, target_value, current_value,
+             target_kind, target_end_date, unit, weight, "order", created_at, updated_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             keyResult.id,
             identityId,
@@ -561,10 +564,12 @@ export class GoalPowerSyncRepository
             keyResult.title,
             keyResult.description,
             progress.aggregationMethod ?? 'Last',
-            progress.startingValue ?? 0,
-            progress.progressBaselineValue ?? null,
+            progress.initialValue ?? 0,
+            progress.trackingBaseValue ?? progress.currentValue ?? 0,
             progress.targetValue ?? 100,
             progress.currentValue ?? 0,
+            target.targetKind,
+            target.targetEndDate,
             progress.unit ?? null,
             keyResult.weight,
             keyResult.sortOrder,

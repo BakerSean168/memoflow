@@ -36,9 +36,8 @@ import type {
  *
  * ❌ 错误示例：
  *   account:create                  — 缺少过去式后缀，应为 account:created
- *   editor:EditorWorkspaceUpdatedEvent — 使用了类名，应为 editor:workspace-updated
+ *   task:TaskPlanUpdatedEvent        — 使用了类名，应为 task:plan-updated
  *   ai.conversation.created         — 使用了点分隔符，应为 ai:conversation-created
- *   setting:UserSettingCreated      — PascalCase，应为 setting:user-setting-created
  *
  * 参见：docs/standards/contract-module-development-spec.md
  * 参见：docs/standards/domain-event-spec.md

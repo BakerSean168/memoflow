@@ -11,7 +11,7 @@ describe('TaskDetailView occurrence correction and plan settings', () => {
     expect(source).toContain('scheduleText');
     expect(source).toContain('reminderText');
     expect(source).toContain('goalBindingText');
-    expect(source).toContain('<TaskTemplateDialog');
+    expect(source).toContain('<TaskPlanDialog');
     expect(source).toContain('@save="saveEdit"');
   });
 

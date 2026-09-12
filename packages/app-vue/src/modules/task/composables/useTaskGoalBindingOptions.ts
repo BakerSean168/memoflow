@@ -16,7 +16,7 @@ type GoalOptionDTO = {
   id: string;
   name?: string;
   title?: string;
-  description?: string | null;
+  summary?: string | null;
   status?: string;
 };
 
@@ -36,20 +36,20 @@ function mapGoalOption(goal: GoalLike): GoalBindingOption {
   return {
     id: String(dto.id),
     title: String(dto.name ?? dto.title ?? ''),
-    description: dto.description ?? undefined,
+    description: dto.summary ?? undefined,
     status: dto.status ?? undefined,
   };
 }
 
 function mapKeyResultOption(dto: KeyResultClientDTO): KeyResultBindingOption {
-  const { startingValue, currentValue: current, targetValue: target } = dto.progress;
-  const range = target - startingValue;
+  const { initialValue, currentValue: current, targetValue: target } = dto.progress;
+  const range = target - initialValue;
   const percentage =
     range === 0
       ? current >= target
         ? 100
         : 0
-      : Math.min(100, Math.max(0, Math.round(((current - startingValue) / range) * 100)));
+      : Math.min(100, Math.max(0, Math.round(((current - initialValue) / range) * 100)));
 
   return {
     id: String(dto.id),

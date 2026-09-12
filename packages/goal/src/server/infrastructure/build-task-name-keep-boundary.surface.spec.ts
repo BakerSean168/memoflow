@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
  * Residual 1177: buildIntentName keep-boundary (goal vs task schedule projections).
  * - goal: GoalServerDTO + ReminderTrigger → RemainingDays / progress % Chinese name
  * - task: TASK-3101 neutral ScheduledIntent observability name keeps the same
- *   TaskTemplate + Relative/Absolute business wording without ScheduleTask coupling.
+ *   TaskPlan + Relative/Absolute business wording without ScheduleTask coupling.
  * Soft residual 1168: mapImportanceToTaskPriority dual-retired sole remains separate.
  * Soft residual 1174: normalizePath keep-boundary remains separate.
  * Does not flip §13.2 checkboxes.
@@ -37,7 +37,7 @@ describe('buildIntentName keep-boundary (residual 1177)', () => {
 
   it('keeps Goal legacy naming distinct from Task neutral intent observability naming', () => {
     expect(task).toMatch(/function buildIntentName\b/);
-    expect(task).toContain('TaskTemplateServerDTO');
+    expect(task).toContain('TaskPlanServerDTO');
     expect(task).toContain("trigger.type === 'Relative'");
     expect(task).toContain('formatUnit');
     expect(task).toContain('定时提醒');

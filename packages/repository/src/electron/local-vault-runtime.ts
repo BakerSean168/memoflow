@@ -2,11 +2,17 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
+import {
+  KnowledgeDocumentIdSchema,
+  LocalVaultBindingClientDTOSchema,
+} from '@memoflow/contracts/repository';
 import type {
   ConfirmedLocalVaultWriteReq,
   ConfirmedLocalVaultWriteRes,
   KnowledgeRepositoryContentState,
   LocalVaultBindingClientDTO,
+  LocalVaultBindingSnapshotDTO,
+  LocalVaultHealthDTO,
   LocalVaultNoteDTO,
   LocalVaultNoteSummaryDTO,
   OpenLocalVaultInObsidianReq,
@@ -26,20 +32,22 @@ const MAX_SEARCH_RESULTS = 200;
 const IGNORED_DIRECTORIES = new Set(['.git', '.obsidian', '.trash', '.Trash', 'node_modules']);
 const SYNC_IGNORED_DIRECTORIES = new Set([...IGNORED_DIRECTORIES, '.memory-flow']);
 
-interface StoredBinding extends LocalVaultBindingClientDTO {
-  schemaVersion: 1;
+interface StoredBindingFile {
+  schemaVersion: 2;
+  binding: LocalVaultBindingClientDTO;
 }
 
 interface WriteLedgerEntry {
   requestId: string;
   proposalId: string;
   proposalRevision: number;
+  knowledgeDocumentId: string;
   relativePath: string;
   createdAt: number;
 }
 
 interface WriteLedger {
-  schemaVersion: 1;
+  schemaVersion: 2;
   entries: WriteLedgerEntry[];
 }
 
@@ -51,6 +59,8 @@ export interface LocalVaultPlatform {
 export interface LocalVaultRuntimeOptions {
   bindingFilePath: string;
   writeLedgerFilePath: string;
+  /** Stable host-owned Desktop profile identity; never a cloud account id. */
+  localProfileId: string;
   platform?: LocalVaultPlatform;
   now?: () => number;
 }
@@ -66,21 +76,15 @@ export class LocalVaultRuntimeError extends Error {
 }
 
 export interface LocalVaultElectronPort {
-  getBinding(identityId: string): Promise<LocalVaultBindingClientDTO | null>;
-  selectVault(
-    identityId: string,
-    request?: SelectLocalVaultReq,
-  ): Promise<LocalVaultBindingClientDTO | null>;
-  detachVault(identityId: string): Promise<void>;
-  scanVault(identityId: string): Promise<ScanLocalVaultRes>;
-  readNote(identityId: string, request: ReadLocalVaultNoteReq): Promise<LocalVaultNoteDTO>;
-  searchVault(identityId: string, request: SearchLocalVaultReq): Promise<SearchLocalVaultRes>;
-  openInObsidian(identityId: string, request: OpenLocalVaultInObsidianReq): Promise<void>;
-  writeConfirmedNote(
-    identityId: string,
-    request: ConfirmedLocalVaultWriteReq,
-  ): Promise<ConfirmedLocalVaultWriteRes>;
-  inspectSyncContent(identityId: string): Promise<KnowledgeRepositoryContentState>;
+  getBinding(): Promise<LocalVaultBindingSnapshotDTO | null>;
+  selectVault(request?: SelectLocalVaultReq): Promise<LocalVaultBindingSnapshotDTO | null>;
+  detachVault(): Promise<void>;
+  scanVault(): Promise<ScanLocalVaultRes>;
+  readNote(request: ReadLocalVaultNoteReq): Promise<LocalVaultNoteDTO>;
+  searchVault(request: SearchLocalVaultReq): Promise<SearchLocalVaultRes>;
+  openInObsidian(request: OpenLocalVaultInObsidianReq): Promise<void>;
+  writeConfirmedNote(request: ConfirmedLocalVaultWriteReq): Promise<ConfirmedLocalVaultWriteRes>;
+  inspectSyncContent(): Promise<KnowledgeRepositoryContentState>;
 }
 
 /**
@@ -126,7 +130,6 @@ export function createElectronLocalVaultPlatform(
 function toPortablePath(value: string): string {
   return value.split(path.sep).join('/');
 }
-
 
 function normalizeRelativeMarkdownPath(relativePath: string): string {
   const normalized = relativePath.replace(/\\/g, '/').trim().replace(/^\.\//, '');
@@ -178,6 +181,22 @@ function extractTitle(
   return heading || path.basename(relativePath, path.extname(relativePath));
 }
 
+function readStableKnowledgeDocumentId(
+  frontmatter: Record<string, unknown>,
+): LocalVaultNoteDTO['knowledgeDocumentId'] {
+  const marker = frontmatter['memoflow_id'];
+  if (marker === undefined || marker === null) return null;
+
+  const parsed = KnowledgeDocumentIdSchema.safeParse(marker);
+  if (!parsed.success) {
+    throw new LocalVaultRuntimeError(
+      'CONFLICT',
+      'Vault note contains an invalid memoflow_id marker',
+    );
+  }
+  return parsed.data;
+}
+
 function extractTags(frontmatter: Record<string, unknown>): string[] {
   const value = frontmatter['tags'];
   const tags = Array.isArray(value) ? value : typeof value === 'string' ? value.split(',') : [];
@@ -200,7 +219,6 @@ function buildExcerpt(markdownBody: string): string {
     .slice(0, 240);
 }
 
-
 async function writeJsonAtomically(filePath: string, value: unknown): Promise<void> {
   await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
   const temporaryPath = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
@@ -220,41 +238,22 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     this.now = options.now ?? Date.now;
   }
 
-  async getBinding(identityId: string): Promise<LocalVaultBindingClientDTO | null> {
-    const binding = await this.loadBinding();
-    if (!binding) return null;
-
-    let status = binding.status;
-    if (status !== 'Detached') {
-      try {
-        const stat = await fs.promises.stat(binding.rootPath);
-        status = stat.isDirectory() ? 'Active' : 'Unreadable';
-        await fs.promises.access(binding.rootPath, fs.constants.R_OK);
-      } catch (error) {
-        status = isMissing(error) ? 'Missing' : 'Unreadable';
-      }
-    }
-
-    const next: StoredBinding = {
-      ...binding,
-      identityId: identityId as LocalVaultBindingClientDTO['identityId'],
-      status,
-      updatedAt: this.now() as LocalVaultBindingClientDTO['updatedAt'],
+  async getBinding(): Promise<LocalVaultBindingSnapshotDTO | null> {
+    const stored = await this.loadBinding();
+    if (!stored || stored.binding.detachedAt !== null) return null;
+    return {
+      binding: stored.binding,
+      health: await this.observeHealth(stored.binding),
     };
-    if (next.identityId !== binding.identityId || next.status !== binding.status) {
-      await this.saveBinding(next);
-    }
-    return next;
   }
 
   async selectVault(
-    identityId: string,
     request: SelectLocalVaultReq = {},
-  ): Promise<LocalVaultBindingClientDTO | null> {
+  ): Promise<LocalVaultBindingSnapshotDTO | null> {
     const selectedPath = await this.platform.selectDirectory({
       suggestedPath: request.suggestedPath,
     });
-    if (!selectedPath) return this.getBinding(identityId);
+    if (!selectedPath) return this.getBinding();
 
     const canonicalRoot = await fs.promises.realpath(selectedPath);
     const stat = await fs.promises.stat(canonicalRoot);
@@ -263,36 +262,52 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     }
 
     const existing = await this.loadBinding();
+    if (
+      existing?.binding.detachedAt === null &&
+      existing.binding.rootPath === canonicalRoot &&
+      existing.binding.localProfileId === this.options.localProfileId
+    ) {
+      return {
+        binding: existing.binding,
+        health: await this.observeHealth(existing.binding),
+      };
+    }
+
     const timestamp = this.now();
-    const binding: StoredBinding = {
-      schemaVersion: 1,
-      id: existing?.id ?? `local-vault-${randomUUID()}`,
-      identityId: identityId as LocalVaultBindingClientDTO['identityId'],
+    const binding: LocalVaultBindingClientDTO = {
+      id: `LocalVaultBindingId_${randomUUID()}` as LocalVaultBindingClientDTO['id'],
+      knowledgeSpaceId:
+        existing?.binding.knowledgeSpaceId ??
+        (`KnowledgeSpaceId_${randomUUID()}` as LocalVaultBindingClientDTO['knowledgeSpaceId']),
+      localProfileId: this.options.localProfileId,
       rootPath: canonicalRoot,
       displayName: path.basename(canonicalRoot),
-      status: 'Active',
-      obsidianVaultId: null,
-      lastScannedAt: null,
-      createdAt: existing?.createdAt ?? (timestamp as LocalVaultBindingClientDTO['createdAt']),
-      updatedAt: timestamp as LocalVaultBindingClientDTO['updatedAt'],
+      boundAt: timestamp,
+      detachedAt: null,
     };
     await this.saveBinding(binding);
-    return binding;
+    return {
+      binding,
+      health: {
+        bindingId: binding.id,
+        state: 'Available',
+        observedAt: timestamp,
+        detail: null,
+      },
+    };
   }
 
-  async detachVault(identityId: string): Promise<void> {
-    const binding = await this.getBinding(identityId);
-    if (!binding) return;
+  async detachVault(): Promise<void> {
+    const stored = await this.loadBinding();
+    if (!stored || stored.binding.detachedAt !== null) return;
     await this.saveBinding({
-      ...binding,
-      schemaVersion: 1,
-      status: 'Detached',
-      updatedAt: this.now() as LocalVaultBindingClientDTO['updatedAt'],
+      ...stored.binding,
+      detachedAt: this.now(),
     });
   }
 
-  async scanVault(identityId: string): Promise<ScanLocalVaultRes> {
-    const binding = await this.requireActiveBinding(identityId);
+  async scanVault(): Promise<ScanLocalVaultRes> {
+    const binding = await this.requireAvailableBinding();
     const root = await fs.promises.realpath(binding.rootPath);
     const notes: LocalVaultNoteSummaryDTO[] = [];
 
@@ -315,45 +330,41 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
           const note = await this.readNoteFromBinding(binding, { relativePath });
           notes.push(this.toSummary(note));
         } catch (error) {
-          if (!(error instanceof LocalVaultRuntimeError)) throw error;
+          if (!(error instanceof LocalVaultRuntimeError) || error.code === 'CONFLICT') throw error;
         }
       }
     };
 
     await walk(root);
     const scannedAt = this.now();
-    const updatedBinding: StoredBinding = {
-      ...binding,
-      schemaVersion: 1,
-      lastScannedAt: scannedAt as LocalVaultBindingClientDTO['lastScannedAt'],
-      updatedAt: scannedAt as LocalVaultBindingClientDTO['updatedAt'],
-    };
-    await this.saveBinding(updatedBinding);
     return {
-      binding: updatedBinding,
+      binding,
+      health: {
+        bindingId: binding.id,
+        state: 'Available',
+        observedAt: scannedAt,
+        detail: null,
+      },
       notes,
-      scannedAt: scannedAt as ScanLocalVaultRes['scannedAt'],
+      scannedAt,
     };
   }
 
-  async readNote(identityId: string, request: ReadLocalVaultNoteReq): Promise<LocalVaultNoteDTO> {
-    return this.readNoteFromBinding(await this.requireActiveBinding(identityId), request);
+  async readNote(request: ReadLocalVaultNoteReq): Promise<LocalVaultNoteDTO> {
+    return this.readNoteFromBinding(await this.requireAvailableBinding(), request);
   }
 
-  async searchVault(
-    identityId: string,
-    request: SearchLocalVaultReq,
-  ): Promise<SearchLocalVaultRes> {
+  async searchVault(request: SearchLocalVaultReq): Promise<SearchLocalVaultRes> {
     const query = request.query.trim();
     if (!query) return { query, results: [] };
     const limit = Math.min(Math.max(request.limit ?? 50, 1), MAX_SEARCH_RESULTS);
-    const scanned = await this.scanVault(identityId);
+    const scanned = await this.scanVault();
     const normalizedQuery = query.toLocaleLowerCase();
     const results: SearchLocalVaultRes['results'] = [];
 
     for (const summary of scanned.notes) {
       if (results.length >= limit) break;
-      const note = await this.readNote(identityId, { relativePath: summary.relativePath });
+      const note = await this.readNote({ relativePath: summary.relativePath });
       const matches: SearchLocalVaultRes['results'][number]['matches'] = [];
       for (const [index, line] of note.contentMarkdown.split(/\r?\n/).entries()) {
         const startIndex = line.toLocaleLowerCase().indexOf(normalizedQuery);
@@ -365,7 +376,6 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
             endIndex: startIndex + query.length,
           });
         }
-        if (matches.length >= 5) break;
       }
       if (
         matches.length ||
@@ -378,8 +388,8 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     return { query, results };
   }
 
-  async openInObsidian(identityId: string, request: OpenLocalVaultInObsidianReq): Promise<void> {
-    const binding = await this.requireActiveBinding(identityId);
+  async openInObsidian(request: OpenLocalVaultInObsidianReq): Promise<void> {
+    const binding = await this.requireAvailableBinding();
     const targetPath = request.relativePath
       ? await this.resolveExistingNotePath(binding, request.relativePath)
       : await fs.promises.realpath(binding.rootPath);
@@ -388,7 +398,6 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
   }
 
   async writeConfirmedNote(
-    identityId: string,
     request: ConfirmedLocalVaultWriteReq,
   ): Promise<ConfirmedLocalVaultWriteRes> {
     if (!request.proposalId.trim() || !request.requestId.trim() || request.proposalRevision < 1) {
@@ -397,19 +406,41 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
         'Confirmed proposal metadata is required',
       );
     }
-    const contentBytes = Buffer.byteLength(request.contentMarkdown, 'utf8');
+    const parsedDocumentId = KnowledgeDocumentIdSchema.safeParse(request.knowledgeDocumentId);
+    if (!parsedDocumentId.success) {
+      throw new LocalVaultRuntimeError(
+        'VALIDATION_ERROR',
+        'Confirmed knowledge document identity is invalid',
+      );
+    }
+    const knowledgeDocumentId = parsedDocumentId.data;
+    const parsedRequestedMarkdown = matter(request.contentMarkdown);
+    const requestedFrontmatter = parsedRequestedMarkdown.data as Record<string, unknown>;
+    const embeddedDocumentId = requestedFrontmatter['memoflow_id'];
+    if (embeddedDocumentId !== undefined && embeddedDocumentId !== knowledgeDocumentId) {
+      throw new LocalVaultRuntimeError(
+        'CONFLICT',
+        'Confirmed note contains a different memoflow_id marker',
+      );
+    }
+    const contentMarkdown = matter.stringify(parsedRequestedMarkdown.content, {
+      ...requestedFrontmatter,
+      memoflow_id: knowledgeDocumentId,
+    });
+    const contentBytes = Buffer.byteLength(contentMarkdown, 'utf8');
     if (contentBytes === 0 || contentBytes > MAX_WRITE_BYTES) {
       throw new LocalVaultRuntimeError('VALIDATION_ERROR', 'Vault note content size is invalid');
     }
 
     const relativePath = normalizeRelativeMarkdownPath(request.relativePath);
-    const binding = await this.requireActiveBinding(identityId);
+    const binding = await this.requireAvailableBinding();
     const ledger = await this.loadLedger();
     const replay = ledger.entries.find((entry) => entry.requestId === request.requestId);
     if (replay) {
       if (
         replay.proposalId !== request.proposalId ||
         replay.proposalRevision !== request.proposalRevision ||
+        replay.knowledgeDocumentId !== knowledgeDocumentId ||
         replay.relativePath !== relativePath
       ) {
         throw new LocalVaultRuntimeError(
@@ -423,6 +454,16 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       };
     }
 
+    const duplicateIdentity = (await this.scanVault()).notes.find(
+      (note) => note.knowledgeDocumentId === knowledgeDocumentId,
+    );
+    if (duplicateIdentity) {
+      throw new LocalVaultRuntimeError(
+        'CONFLICT',
+        'Knowledge document identity already exists in this Vault',
+      );
+    }
+
     const root = await fs.promises.realpath(binding.rootPath);
     const candidate = path.resolve(root, relativePath);
     assertContained(root, candidate);
@@ -431,7 +472,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     let handle: fs.promises.FileHandle | null = null;
     try {
       handle = await fs.promises.open(candidate, 'wx', 0o600);
-      await handle.writeFile(request.contentMarkdown, 'utf8');
+      await handle.writeFile(contentMarkdown, 'utf8');
       await handle.sync();
     } catch (error) {
       if (
@@ -451,6 +492,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       requestId: request.requestId,
       proposalId: request.proposalId,
       proposalRevision: request.proposalRevision,
+      knowledgeDocumentId: knowledgeDocumentId,
       relativePath,
       createdAt: this.now(),
     });
@@ -462,8 +504,8 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     };
   }
 
-  async inspectSyncContent(identityId: string): Promise<KnowledgeRepositoryContentState> {
-    const binding = await this.requireActiveBinding(identityId);
+  async inspectSyncContent(): Promise<KnowledgeRepositoryContentState> {
+    const binding = await this.requireAvailableBinding();
     const root = await fs.promises.realpath(binding.rootPath);
 
     const containsUserContent = async (directory: string): Promise<boolean> => {
@@ -485,18 +527,44 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     return (await containsUserContent(root)) ? 'NonEmpty' : 'Empty';
   }
 
-  private async requireActiveBinding(identityId: string): Promise<LocalVaultBindingClientDTO> {
-    const binding = await this.getBinding(identityId);
-    if (!binding || binding.status === 'Detached') {
+  private async observeHealth(binding: LocalVaultBindingClientDTO): Promise<LocalVaultHealthDTO> {
+    let state: LocalVaultHealthDTO['state'] = 'Available';
+    let detail: string | null = null;
+    try {
+      const stat = await fs.promises.stat(binding.rootPath);
+      if (!stat.isDirectory()) {
+        state = 'Unreadable';
+        detail = 'Selected Vault root is not a directory';
+      } else {
+        await fs.promises.access(binding.rootPath, fs.constants.R_OK);
+      }
+    } catch (error) {
+      state = isMissing(error) ? 'Missing' : 'Unreadable';
+      detail =
+        state === 'Missing'
+          ? 'Selected Vault root is missing'
+          : 'Selected Vault root is unreadable';
+    }
+    return {
+      bindingId: binding.id,
+      state,
+      observedAt: this.now(),
+      detail,
+    };
+  }
+
+  private async requireAvailableBinding(): Promise<LocalVaultBindingClientDTO> {
+    const snapshot = await this.getBinding();
+    if (!snapshot) {
       throw new LocalVaultRuntimeError('NOT_FOUND', 'No local Vault is selected');
     }
-    if (binding.status !== 'Active') {
+    if (snapshot.health.state !== 'Available') {
       throw new LocalVaultRuntimeError(
         'NOT_FOUND',
-        `Local Vault is ${binding.status.toLowerCase()}`,
+        `Local Vault is ${snapshot.health.state.toLowerCase()}`,
       );
     }
-    return binding;
+    return snapshot.binding;
   }
 
   private async resolveExistingNotePath(
@@ -538,6 +606,7 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     const frontmatter = parsed.data as Record<string, unknown>;
     return {
       relativePath,
+      knowledgeDocumentId: readStableKnowledgeDocumentId(frontmatter),
       title: extractTitle(relativePath, parsed.content, frontmatter),
       excerpt: buildExcerpt(parsed.content),
       tags: extractTags(frontmatter),
@@ -572,26 +641,36 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     }
   }
 
-  private async loadBinding(): Promise<StoredBinding | null> {
+  private async loadBinding(): Promise<StoredBindingFile | null> {
     try {
-      const parsed = JSON.parse(
+      const raw = JSON.parse(
         await fs.promises.readFile(this.options.bindingFilePath, 'utf8'),
-      ) as StoredBinding;
-      if (parsed.schemaVersion !== 1 || typeof parsed.rootPath !== 'string') {
+      ) as unknown;
+      if (
+        !raw ||
+        typeof raw !== 'object' ||
+        (raw as { schemaVersion?: unknown }).schemaVersion !== 2
+      ) {
+        // ADR-111 destructive cutover: schemaVersion 1 is unsupported and never migrated.
+        return null;
+      }
+      const candidate = raw as { schemaVersion: 2; binding?: unknown };
+      const parsed = LocalVaultBindingClientDTOSchema.safeParse(candidate.binding);
+      if (!parsed.success || parsed.data.localProfileId !== this.options.localProfileId) {
         throw new LocalVaultRuntimeError(
           'INTERNAL_ERROR',
-          'Local Vault binding metadata is invalid',
+          'Local Vault binding metadata is invalid for this profile',
         );
       }
-      return parsed;
+      return { schemaVersion: 2, binding: parsed.data };
     } catch (error) {
       if (isMissing(error)) return null;
       throw error;
     }
   }
 
-  private async saveBinding(binding: StoredBinding): Promise<void> {
-    await writeJsonAtomically(this.options.bindingFilePath, binding);
+  private async saveBinding(binding: LocalVaultBindingClientDTO): Promise<void> {
+    await writeJsonAtomically(this.options.bindingFilePath, { schemaVersion: 2, binding });
   }
 
   private async loadLedger(): Promise<WriteLedger> {
@@ -599,11 +678,11 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
       const parsed = JSON.parse(
         await fs.promises.readFile(this.options.writeLedgerFilePath, 'utf8'),
       ) as WriteLedger;
-      return parsed.schemaVersion === 1 && Array.isArray(parsed.entries)
+      return parsed.schemaVersion === 2 && Array.isArray(parsed.entries)
         ? parsed
-        : { schemaVersion: 1, entries: [] };
+        : { schemaVersion: 2, entries: [] };
     } catch (error) {
-      if (isMissing(error)) return { schemaVersion: 1, entries: [] };
+      if (isMissing(error)) return { schemaVersion: 2, entries: [] };
       throw error;
     }
   }

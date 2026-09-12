@@ -6,3 +6,4 @@
 export * from './rules';
 export * from './rule-revisions';
 export * from './response-schemas';
+export * from './governance-rule-bundle';

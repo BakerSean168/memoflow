@@ -47,10 +47,10 @@ describe('task desktop runtime composer surface', () => {
     expect(main).toContain('createTaskReminderScheduledHandlerRegistration');
     expect(main).toContain('scheduleOrchestrationModule.handlerRegistry.register(');
     expect(main).toMatch(
-      /taskInstanceRepository: taskComposed\.repositories\.taskInstanceRepository/,
+      /taskOccurrenceRepository: taskComposed\.repositories\.taskOccurrenceRepository/,
     );
     expect(main).toMatch(
-      /taskTemplateRepository: taskComposed\.repositories\.taskTemplateRepository/,
+      /taskPlanRepository: taskComposed\.repositories\.taskPlanRepository/,
     );
     expect(main).toMatch(
       /notificationRequestedWriter: notificationComposed\.repositories\.requestedWriter/,

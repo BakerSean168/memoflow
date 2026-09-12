@@ -172,8 +172,10 @@ describe('KnowledgeRepositoryRemoteGateway', () => {
       response({
         ok: true,
         data: {
-          id: 'connection-1',
-          lastSyncedCommitSha: 'a'.repeat(40),
+          id: 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440060',
+          historyFence: {
+            lastConfirmedRemoteHeadSha: 'a'.repeat(40),
+          },
         },
       }),
     );

@@ -125,7 +125,7 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
     expect(outcome.status).toBe('applied');
   });
 
-  it('routes Goal deadline move to Goal owner and never turns it into a Scheduler mutation', async () => {
+  it('routes an exact-day Goal target move to Goal owner and never turns it into a Scheduler mutation', async () => {
     const updateGoal = vi.fn().mockResolvedValue(ok({}));
     const nextDayStart = asInstant(Number(dayStart) + 24 * 60 * 60_000);
     const router = createPlannerOwnerCommandRouter({
@@ -138,12 +138,12 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
     const projection: Extract<CalendarEventProjection, { sourceType: 'goal' }> = {
       identityId: 'identity-1',
       sourceType: 'goal',
-      sourceId: 'goal-1:due-date',
+      sourceId: 'goal-1:target',
       title: 'Goal',
       start: asYmd('2026-08-27'),
       end: null,
       allDay: true,
-      displayMetadata: { semantic: 'goal-deadline' },
+      displayMetadata: { semantic: 'goal-target' },
       editableCapabilities: { move: true, resize: false },
       ownerCommandTarget: { ownerType: 'goal.goal', ownerId: 'goal-1' },
       revision: 5,
@@ -156,12 +156,11 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
     });
 
     expect(updateGoal).toHaveBeenCalledWith('goal-1', {
-      dueDate: Number(nextDayStart),
+      target: { kind: 'day', date: asYmd('2026-08-28') },
       expectedVersion: 5,
     });
     expect(outcome.status).toBe('applied');
   });
-
 
   it('routes an explicitly editable Routine wall-clock occurrence to the Routine owner port', async () => {
     const rescheduleOccurrence = vi.fn().mockResolvedValue(ok({}));

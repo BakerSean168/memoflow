@@ -9,11 +9,11 @@
  * - 无决类状态：整个业务逻辑执行后才保存
  * - 注入仓储：很有提供仓储侟可培议可涓
  * 
- * 【TaskInstanceGenerationService】
+ * 【TaskOccurrenceGenerationService】
  * - 任务实例执行：根据任务模板生成具体任务实例
  * - 是弹是粘贴上一个骨架
  */
 
-export { TaskInstanceGenerationService } from './task-instance-generation-service';
+export { TaskOccurrenceGenerationService } from './task-occurrence-generation-service';
 
 export { TaskPlanOutcomeEvaluator } from './task-plan-outcome-evaluator';

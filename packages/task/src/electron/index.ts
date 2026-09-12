@@ -75,25 +75,26 @@
 import { ipcMain } from 'electron';
 import { ok } from '@memoflow/contracts/result';
 import { TaskChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import type { ListTaskTemplateFilters } from '@memoflow/contracts/task';
+import type { ListTaskPlanFilters } from '@memoflow/contracts/task';
 import {
   AbandonTaskPlanInvocationSchema,
   BindTaskToGoalInvocationSchema,
-  CompleteTaskInstanceInvocationSchema,
-  CreateTaskTemplateSchema,
+  CompleteTaskOccurrenceInvocationSchema,
+  CreateTaskPlanSchema,
   GenerateInstancesInvocationSchema,
-  MarkTaskInstanceMissedInvocationSchema,
-  RescheduleTaskInstanceInvocationSchema,
-  SkipTaskInstanceInvocationSchema,
-  TaskInstanceIdCommandInvocationSchema,
-  TaskTemplateIdCommandInvocationSchema,
-  UpdateTaskTemplateInvocationSchema,
+  ListTaskPlanFiltersSchema,
+  MarkTaskOccurrenceMissedInvocationSchema,
+  RescheduleTaskOccurrenceInvocationSchema,
+  SkipTaskOccurrenceInvocationSchema,
+  TaskOccurrenceIdCommandInvocationSchema,
+  TaskPlanIdCommandInvocationSchema,
+  UpdateTaskPlanInvocationSchema,
 } from '@memoflow/contracts/task';
 import { createLogger } from '@memoflow/utils/logger';
 import type { TaskModuleInstance } from '../server/infrastructure';
 import { createTaskTransportHandlers } from '../server/transport';
-import { TaskInstanceController } from '../server/transport/task-instance.controller';
-import { TaskTemplateController } from '../server/transport/task-template.controller';
+import { TaskOccurrenceController } from '../server/transport/task-occurrence.controller';
+import { TaskPlanController } from '../server/transport/task-plan.controller';
 import { withAuthenticatedValidation, withAuthenticatedValue } from './authenticated-ipc';
 
 /**
@@ -137,9 +138,8 @@ const logger = createLogger('TaskElectron');
 const allChannels = Object.values(TaskChannels);
 
 function normalizeTemplateListParams(
-  requestContext: { identityId: string },
   params: Record<string, unknown> | undefined,
-): ListTaskTemplateFilters {
+): ListTaskPlanFilters {
   const status = params?.status;
 
   return {
@@ -222,22 +222,21 @@ export function createTaskElectronModule(
 
       try {
         const handlers = createTaskTransportHandlers(options.instance.api);
-        const templateController = new TaskTemplateController(handlers.template);
-        const instanceController = new TaskInstanceController(handlers.instance);
+        const templateController = new TaskPlanController(handlers.template);
+        const instanceController = new TaskOccurrenceController(handlers.instance);
 
         // --- Template channels ---
-        ipcMain.handle(TaskChannels.TEMPLATE_LIST, (_, params) =>
-          withAuthenticatedValue(ctx, async (requestContext) =>
-            templateController.listTemplates(
-              normalizeTemplateListParams(
-                requestContext,
-                params && typeof params === 'object'
-                  ? (params as Record<string, unknown>)
-                  : undefined,
-              ),
-              requestContext,
+        registerValidatedChannel(
+          ctx,
+          TaskChannels.TEMPLATE_LIST,
+          ListTaskPlanFiltersSchema,
+          (data, requestContext) => templateController.listTemplates(data, requestContext),
+          (params) =>
+            normalizeTemplateListParams(
+              params && typeof params === 'object'
+                ? (params as Record<string, unknown>)
+                : undefined,
             ),
-          ),
         );
         installed.push(TaskChannels.TEMPLATE_LIST);
         ipcMain.handle(TaskChannels.TEMPLATE_GET, (_, payload) =>
@@ -253,7 +252,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.TEMPLATE_CREATE,
-          CreateTaskTemplateSchema,
+          CreateTaskPlanSchema,
           (data, requestContext) => templateController.createTemplate(data, requestContext),
           (args) => args,
         );
@@ -261,7 +260,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.TEMPLATE_UPDATE,
-          UpdateTaskTemplateInvocationSchema,
+          UpdateTaskPlanInvocationSchema,
           (data, requestContext) =>
             templateController.updateTemplate(data.params.id, data.body, requestContext),
           (args) => ({
@@ -273,7 +272,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.TEMPLATE_DELETE,
-          TaskTemplateIdCommandInvocationSchema,
+          TaskPlanIdCommandInvocationSchema,
           async (data, requestContext) => {
             const result = await templateController.deleteTemplate(data.params.id, requestContext);
             if (!result.ok) return result;
@@ -285,7 +284,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.TEMPLATE_ARCHIVE,
-          TaskTemplateIdCommandInvocationSchema,
+          TaskPlanIdCommandInvocationSchema,
           (data, requestContext) =>
             templateController.archiveTemplate(data.params.id, requestContext),
           (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
@@ -294,7 +293,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.TEMPLATE_ACTIVATE,
-          TaskTemplateIdCommandInvocationSchema,
+          TaskPlanIdCommandInvocationSchema,
           (data, requestContext) =>
             templateController.activateTemplate(data.params.id, requestContext),
           (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
@@ -315,7 +314,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.TEMPLATE_PAUSE,
-          TaskTemplateIdCommandInvocationSchema,
+          TaskPlanIdCommandInvocationSchema,
           (data, requestContext) =>
             templateController.pauseTemplate(data.params.id, requestContext),
           (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
@@ -357,7 +356,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.TEMPLATE_UNBIND_GOAL,
-          TaskTemplateIdCommandInvocationSchema,
+          TaskPlanIdCommandInvocationSchema,
           (data, requestContext) =>
             templateController.unbindFromGoal(data.params.id, requestContext),
           (args) => ({ params: { id: (args as { templateId?: string }).templateId } }),
@@ -397,7 +396,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.INSTANCE_CREATE,
-          TaskInstanceIdCommandInvocationSchema,
+          TaskOccurrenceIdCommandInvocationSchema,
           (data, requestContext) =>
             instanceController.startInstance(data.params.id, requestContext),
           (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
@@ -406,7 +405,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.INSTANCE_DELETE,
-          TaskInstanceIdCommandInvocationSchema,
+          TaskOccurrenceIdCommandInvocationSchema,
           async (data, requestContext) => {
             const result = await instanceController.deleteInstance(data.params.id, requestContext);
             if (!result.ok) return result;
@@ -418,7 +417,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.INSTANCE_COMPLETE,
-          CompleteTaskInstanceInvocationSchema,
+          CompleteTaskOccurrenceInvocationSchema,
           (data, requestContext) =>
             instanceController.completeInstance(data.params.id, data.body, requestContext),
           (args) => ({
@@ -430,7 +429,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.INSTANCE_UNCOMPLETE,
-          TaskInstanceIdCommandInvocationSchema,
+          TaskOccurrenceIdCommandInvocationSchema,
           (data, requestContext) =>
             instanceController.uncompleteInstance(data.params.id, requestContext),
           (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
@@ -439,7 +438,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.INSTANCE_SKIP,
-          SkipTaskInstanceInvocationSchema,
+          SkipTaskOccurrenceInvocationSchema,
           (data, requestContext) =>
             instanceController.skipInstance(data.params.id, data.body, requestContext),
           (args) => ({
@@ -451,7 +450,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.INSTANCE_MARK_MISSED,
-          MarkTaskInstanceMissedInvocationSchema,
+          MarkTaskOccurrenceMissedInvocationSchema,
           (data, requestContext) =>
             instanceController.markMissedInstance(data.params.id, data.body, requestContext),
           (args) => ({
@@ -463,7 +462,7 @@ export function createTaskElectronModule(
         registerValidatedChannel(
           ctx,
           TaskChannels.INSTANCE_RESCHEDULE,
-          RescheduleTaskInstanceInvocationSchema,
+          RescheduleTaskOccurrenceInvocationSchema,
           (data, requestContext) =>
             instanceController.rescheduleInstance(data.params.id, data.body, requestContext),
           (args) => {

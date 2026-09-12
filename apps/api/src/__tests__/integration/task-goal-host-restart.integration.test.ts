@@ -3,11 +3,12 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import express from 'express';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { TaskGoalBindingTrigger, TaskType } from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createGoalPrismaModule, createGoalTaskProgressPrismaHandler } from '@memoflow/goal';
+import { PrismaGoalRelationCleanupCapability } from '@memoflow/relation';
 import {
   PrismaTaskBindingReadPort,
   createTaskModule,
@@ -16,12 +17,14 @@ import {
   createTaskPrismaRepositories,
   createTaskRuntimeContribution,
 } from '@memoflow/task';
+import { TASK_TEST_TIME_CONTEXT, TASK_TEST_USER_TIME_CONTEXT_PORT } from '@memoflow/task/testing';
 import { createTaskApiModule, type TaskApiModuleDef } from '@memoflow/task/api';
 import {
   cleanAll,
   disconnectPrisma,
   seedAccount,
 } from '@memoflow/test-utils/setup/integration-helpers';
+import { createTimeFacade } from '@memoflow/time';
 
 const execFileAsync = promisify(execFile);
 
@@ -29,13 +32,11 @@ function composeRestartedTaskHost(): TaskApiModuleDef {
   const taskRepositories = createTaskPrismaRepositories(prisma);
   const runtimeContributions = [
     createTaskRuntimeContribution(),
-    createTaskPrismaGoalOutboxRuntime(
-      prisma,
-      createGoalTaskProgressPrismaHandler(prisma),
-    ),
+    createTaskPrismaGoalOutboxRuntime(prisma, createGoalTaskProgressPrismaHandler(prisma)),
   ];
   const instance = createTaskModule({
     ...taskRepositories,
+    userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
     runtimeContributions,
   });
 
@@ -58,6 +59,8 @@ describe('API host Task -> Goal restart recovery', () => {
 
     const goalModule = createGoalPrismaModule(prisma, {
       taskBindingReadPort: new PrismaTaskBindingReadPort(prisma),
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+      relationCleanupFactory: (tx) => new PrismaGoalRelationCleanupCapability(tx),
     });
     const createdGoal = await goalModule.api.createGoal(
       {
@@ -87,19 +90,18 @@ describe('API host Task -> Goal restart recovery', () => {
     expect(keyResultId).toBeDefined();
     if (!keyResultId) return;
 
-    const taskModule = createTaskPrismaModule(prisma);
-    const createdTask = await taskModule.api.createTaskTemplate({
+    const taskModule = createTaskPrismaModule(prisma, {
+      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+    });
+    const taskDate = createTimeFacade({ context: TASK_TEST_TIME_CONTEXT }).calendar.toYmd(
+      Date.now(),
+    );
+    const createdTask = await taskModule.api.createTaskPlan({
       identityId,
       name: 'Persist contribution before host exit',
-      taskType: TaskType.OneTime,
-      timeConfig: {
-        timeType: 'AllDay',
-        startDate: Date.now(),
-        timePoint: null,
-        timeRange: null,
-      },
+      schedule: { kind: 'OneTime', date: taskDate, timing: { kind: 'AllDay' } },
       importance: ImportanceLevel.Moderate,
-      tags: [],
+      labelIds: [],
       goalBinding: {
         goalId,
         keyResultId,
@@ -109,7 +111,7 @@ describe('API host Task -> Goal restart recovery', () => {
     expect(createdTask.ok).toBe(true);
     if (!createdTask.ok) return;
 
-    const taskInstance = await prisma.taskInstance.findFirstOrThrow({
+    const taskOccurrence = await prisma.taskOccurrence.findFirstOrThrow({
       where: { templateId: createdTask.data.template.id },
     });
     const fixturePath = path.resolve(__dirname, 'fixtures/complete-task-and-exit.ts');
@@ -126,7 +128,7 @@ describe('API host Task -> Goal restart recovery', () => {
         '--tsconfig',
         workspaceTsconfigPath,
         fixturePath,
-        taskInstance.id,
+        taskOccurrence.id,
         String(identityId),
       ],
       { env: process.env },
@@ -135,7 +137,7 @@ describe('API host Task -> Goal restart recovery', () => {
 
     await expect(
       prisma.taskGoalOutbox.findFirstOrThrow({
-        where: { taskInstanceId: taskInstance.id },
+        where: { taskOccurrenceId: taskOccurrence.id },
       }),
     ).resolves.toMatchObject({ status: 'PENDING' });
     await expect(prisma.goalRecord.count({ where: { keyResultId } })).resolves.toBe(0);
@@ -156,7 +158,7 @@ describe('API host Task -> Goal restart recovery', () => {
         async () =>
           (
             await prisma.taskGoalOutbox.findFirstOrThrow({
-              where: { taskInstanceId: taskInstance.id },
+              where: { taskOccurrenceId: taskOccurrence.id },
               select: { status: true },
             })
           ).status,

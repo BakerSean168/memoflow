@@ -7,6 +7,7 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 import { nextTick } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import RuleEditorView from './RuleEditorView.vue';
+import enUS from '../../../locales/en-US';
 import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
 
 // hoisted 非响应式桩对象：测试内直接改 value，配合表单输入触发 computed 重算。
@@ -33,7 +34,7 @@ vi.mock('../composables/useGovernance', () => ({
 const i18n = createI18n({
   legacy: false,
   locale: 'en-US',
-  messages: { 'en-US': {} },
+  messages: { 'en-US': enUS },
 });
 
 const TagInputStub = {

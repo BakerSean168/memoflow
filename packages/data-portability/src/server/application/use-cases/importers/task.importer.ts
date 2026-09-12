@@ -17,7 +17,7 @@ export async function importTasks(tx: TxClient, ctx: ImportContext, data: Portab
       t.contribution && typeof t.contribution === 'object'
         ? (t.contribution as Record<string, unknown>)
         : null;
-    await tx.createTaskTemplate({
+    await tx.createTaskPlan({
       id: allocateId(ctx, t._ref as string),
       identityId: ctx.identityId,
       name: String(t.title),
@@ -56,7 +56,7 @@ export async function importTasks(tx: TxClient, ctx: ImportContext, data: Portab
       checklist: t.checklist ? jsonStringify(t.checklist) : null,
       ...timestamps(t),
     });
-    inc(ctx, 'taskTemplates');
+    inc(ctx, 'taskPlans');
   }
 
   for (const instance of data.instances) {
@@ -66,7 +66,7 @@ export async function importTasks(tx: TxClient, ctx: ImportContext, data: Portab
     const occurrenceKey = portableOccurrenceKey
       ? `${templateId}:${portableOccurrenceKey.split(':').slice(1).join(':')}`
       : null;
-    await tx.createTaskInstance({
+    await tx.createTaskOccurrence({
       id: allocateId(ctx, i._ref as string),
       templateId,
       identityId: ctx.identityId,
@@ -80,6 +80,6 @@ export async function importTasks(tx: TxClient, ctx: ImportContext, data: Portab
       comment: (i.note as string | null | undefined) ?? null,
       ...timestamps(i),
     });
-    inc(ctx, 'taskInstances');
+    inc(ctx, 'taskOccurrences');
   }
 }

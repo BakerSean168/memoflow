@@ -71,6 +71,21 @@ describe('API Docker workspace closure', () => {
   });
 });
 
+describe('local Docker image provenance', () => {
+  it('stamps the locally built PowerSync image with the exact workspace revision and build date', () => {
+    const compose = readFileSync(new URL('../../../docker-compose.local.yml', import.meta.url), 'utf8');
+    const powersyncStart = compose.indexOf('\n  powersync:\n');
+    const webStart = compose.indexOf('\n  web:\n', powersyncStart + 1);
+
+    expect(powersyncStart).toBeGreaterThanOrEqual(0);
+    expect(webStart).toBeGreaterThan(powersyncStart);
+
+    const powersyncBlock = compose.slice(powersyncStart, webStart);
+    expect(powersyncBlock).toContain('org.opencontainers.image.created: ${BUILD_DATE:-unknown}');
+    expect(powersyncBlock).toContain('org.opencontainers.image.revision: ${VCS_REF:-unknown}');
+  });
+});
+
 describe('local Docker product validation evidence', () => {
   it('requires healthy listeners, exact compose port mappings, and current revisions', () => {
     const result = evaluateLocalDockerRuntimeEvidence(healthyRuntime());
@@ -125,8 +140,9 @@ describe('local Docker PM data cleanup', () => {
     const sql = buildCleanupSql(prefix);
 
     expect(prefix).toBe('pm-phase-');
-    expect(sql).toContain('email_address LIKE');
-    expect(sql).toContain('DELETE FROM auth_identities');
+    expect(sql).toContain('FROM cloud_auth_users');
+    expect(sql).toContain('email LIKE');
+    expect(sql).toContain('DELETE FROM cloud_auth_users');
     expect(sql).toContain('information_schema.columns');
     expect(sql).toContain('WHEN foreign_key_violation OR restrict_violation');
     expect(sql).toContain('PM cleanup could not resolve dependent identity tables');

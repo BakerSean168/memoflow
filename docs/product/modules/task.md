@@ -3,78 +3,110 @@ tags:
   - product
   - module
   - task
-description: Task vNext 当前功能、Occurrence/Plan 语义与 Goal/Planner 边界
+description: Task 模块当前事实与 Task vNext Plan/Occurrence/Workspace 目标模型
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-12T14:00:00+08:00
 ---
 
 # Task 模块说明
 
 ## 1. 功能定位
 
-Task 负责 **Action + Execution**。长期配置是 Task Plan（当前代码仍使用 `TaskTemplate` 名称），每次实际执行是 Task Occurrence（当前代码使用 `TaskInstance`）。产品默认从 Today / Upcoming 的 occurrence 出发，而不是从文件夹、依赖图或项目管理 DAG 出发。
+Task 负责 **Action + Execution**。
 
-## 2. 当前产品能力
+当前已实现版本仍以 `TaskTemplate` / `TaskInstance` 作为代码名，但产品语义已经是 Task Plan / Task Occurrence。2026-09-08 起，ADR-071～075 已冻结下一轮 canonical model：正式把 domain/public language 收敛为 `TaskPlan` / `TaskOccurrence`，并删除历史 OneTime 双轨字段。
 
-- Task Plan 创建、编辑、暂停、恢复、关闭与放弃；
-- 一次性与周期性 recurrence，支持 Daily / Weekly / Monthly / Yearly 等当前 recurrence contract；
-- Today / Upcoming / Plans 三类主视图；
-- Occurrence 启动、完成、撤销完成、标记 Missed、Skip；
-- `isOverdue` 派生展示，过期后仍允许补录真实结果；
-- Shared Label：Task 分类只使用 first-class Label，创建/更新提交 `labelIds`，列表 AND 过滤使用 `labelIdsAll`；
-- Goal Link：Plan 可链接 Goal/KR；自动 contribution 是独立、可选的规则；
-- Planner projection：Task 时间事实进入 Planner，但拖拽/修改最终回到 Task owner command；
-- Scheduler integration：Task 通过 `SchedulingPort` / handler registry 接入 Temporal Engine，不向产品 UI 或 AI 暴露 raw ScheduleTask mutation；
-- AI Task draft：Mastra workflow 使用当前 recurrence / labels / Goal link / optional contribution contract。
+## 2. 当前已实现能力
 
-已退休且不得恢复：`TaskFolder`、parent/subtask hierarchy、TaskDependency、DAG、CriticalPath、dynamic priority score、Task string tags、自定义 Task color。
+- Plan/Occurrence 分层；
+- Pending/InProgress/Completed/Missed/Skipped occurrence facts；
+- Overdue 派生，不自动将未操作判 Missed；
+- Plan lifecycle `Active/Paused/Closed` 与 outcome `Open/Succeeded/Failed/Abandoned` 分离；
+- finite plan completion policy；
+- Daily/Weekly/Monthly/Yearly recurrence；
+- Shared Label；
+- Goal-only / Goal+KR link + optional KR-scoped EachCompletion/PlanCompletion contribution；
+- Planner projection 与 Scheduler single authority；
+- Today / Upcoming / Plans；
+- Prisma / PowerSync 双端 persistence。
 
-## 3. Occurrence 与 Plan 生命周期
+已退休且不得恢复：TaskFolder、parent/subtask hierarchy、TaskDependency、DAG、CriticalPath、dynamic priority、Task string tags、自定义 Task color、Expired 持久状态。
 
-Occurrence 持久状态：
+## 3. 下一版 accepted target design
 
-```text
-Pending -> InProgress -> Completed
-                       -> Missed
-                       -> Skipped
-```
+详见：
 
-`Overdue` 只是 `未完成 + 时间已过去` 的派生事实，不再使用 `Expired` 持久终态。
+- [Task vNext Plan / Occurrence / Workspace](../task-vnext-plan-occurrence-workspace.md)
+- [Task vNext active plan](../../plan/active/2026-09-08-task-vnext-model-convergence.md)
+- ADR-071～075
 
-Task Plan outcome：
-
-```text
-Open
-Succeeded
-Failed
-Abandoned
-```
-
-有限计划是否成功由 completion policy 与 occurrence facts 判定；历史修正可以撤回此前的 PlanCompletion settlement。
-
-## 4. Goal Link / Contribution
-
-Task 与 Goal 的关系分两层：
+核心目标：
 
 ```text
-Link        = goalId + keyResultId
-Contribution = optional { value, trigger }
+TaskPlan       = Action Definition + Scheduling Intent + Plan Lifecycle
+TaskOccurrence = Execution + Reality Fact
+TaskWorkspace  = Plan + Occurrences + Context
 ```
 
-没有 contribution 的 Task 只是“这个行动服务于该 Goal”，不会猜测 KR 进度。自动 contribution 支持当前明确建模的 `EachCompletion` 与 `PlanCompletion`；settlement 使用持久 source correlation 保证重放幂等，并支持撤销。
+### 3.1 Plan
 
-## 5. 跨端与数据一致性
+- `title + description + importance`；
+- OneTime/Recurring schedule discriminated union；
+- reminder policy；
+- checklist definition；
+- optional Goal-level/KR link；
+- lifecycle/outcome/completion policy；
+- Shared Labels / Notes 保持外部 relation/projection。
 
-- Prisma / PowerSync 使用同一 Task contract；
-- Task 分类关系由 `TaskLabel` 持有；旧 `task_templates.tags/color` 已通过有边界、可重放的迁移收敛到 Shared Label；
-- Web/Desktop 与 React/Mobile 都消费同一 `labels[]` projection；
-- Mobile parity 已确认没有 Folder/Dependency/ValueType 等退役产品字段。
+### 3.2 Occurrence
+
+- schedule snapshot；
+- Pending/InProgress/Completed/Missed/Skipped；
+- explicit Result union；
+- per-occurrence checklist state；
+- actual execution timing；
+- dueAt/isOverdue derived。
+
+## 4. 当前待删除残差
+
+当前代码仍有一批不是可靠 persistence truth 的 `TaskTemplate` OneTime 字段：
+
+```text
+startDate
+dueDate
+completedAt
+estimatedMinutes
+actualMinutes
+note
+```
+
+Prisma/PowerSync load path 会把它们置 null；本轮 vNext 会删除，而不是继续修补第二条时间/完成轨道。
+
+当前 reminder domain 支持多个 trigger，但 persistence 只保存第一条 relative trigger；本轮改为完整 policy round-trip。
+
+## 5. Goal / Note Context
+
+Task Goal link 当前 canonical 语义已经允许：
+
+```text
+Task -> Goal
+Task -> Goal + KR
+Task -> Goal + KR + Contribution
+```
+
+`keyResultId` 对普通 Goal context 是可空的；Contribution 仍必须绑定 KR，goal-only / link-only completion 不会生成 Goal progress outbox。公开 Task list 可按 Goal 或 Goal+KR 查询，其中 KR filter 必须同时携带 owning Goal。
+
+Task 同时拥有 `TaskGoalContextReadPort`，通过 `listTasksByGoal`、`listTasksByKeyResult`、`getTaskGoalContextSummary` 提供 identity-scoped、soft-delete-aware 的 bounded read projection；Goal/Goal Workspace 不直接读取 Task 表或 Task repository。
+
+Related Notes 通过 shared Relation 查询，不存 `noteIds[]`。
 
 ## 6. 相关资产
 
-- [Goal / Task vNext](../goal-task-vnext.md)
 - [ADR-053](../../architecture/adr/ADR-053-goal-task-personal-product-boundary.md)
-- [ADR-054 Shared Labels](../../architecture/adr/ADR-054-shared-labels-and-system-views.md)
-- [ADR-056 Goal Link / Contribution](../../architecture/adr/ADR-056-task-plan-goal-link-contribution-settlement.md)
-- [ADR-057 Occurrence / Plan lifecycle](../../architecture/adr/ADR-057-task-occurrence-outcome-and-plan-lifecycle.md)
-- [Task 模块文件索引](../module-index/task-files.md)
+- [ADR-056](../../architecture/adr/ADR-056-task-plan-goal-link-contribution-settlement.md)
+- [ADR-057](../../architecture/adr/ADR-057-task-occurrence-outcome-and-plan-lifecycle.md)
+- [ADR-071](../../architecture/adr/ADR-071-task-plan-occurrence-aggregate-boundary.md)
+- [ADR-072](../../architecture/adr/ADR-072-task-plan-schedule-algebra.md)
+- [ADR-073](../../architecture/adr/ADR-073-task-occurrence-result-and-checklist.md)
+- [ADR-074](../../architecture/adr/ADR-074-task-reminder-policy-persistence.md)
+- [ADR-075](../../architecture/adr/ADR-075-task-workspace-context-and-goal-link.md)

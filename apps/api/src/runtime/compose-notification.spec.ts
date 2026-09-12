@@ -30,6 +30,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
 import type { NotificationApiModuleContext } from '@memoflow/notification/api';
 import type { ChannelCapabilitySpec } from '@memoflow/notification';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 vi.mock('@memoflow/notification', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@memoflow/notification')>();
@@ -62,6 +63,9 @@ const closureChecker = async (_identityId: string): Promise<boolean> => false;
 const channelCapabilities: readonly ChannelCapabilitySpec[] = [
   { channelType: 'InApp', status: 'available', requiredInProduction: true },
 ];
+const userTimeContextPort: UserTimeContextPort = {
+  getUserTimeContext: async () => ({ timeZone: 'UTC', weekStartsOn: 1 }),
+};
 
 describe('composeNotification assembly order', () => {
   beforeEach(() => {
@@ -72,6 +76,7 @@ describe('composeNotification assembly order', () => {
     composeNotification({
       db: fakeDb,
       closureChecker,
+      userTimeContextPort,
       channelCapabilities,
     });
 
@@ -89,6 +94,7 @@ describe('composeNotification assembly order', () => {
     composeNotification({
       db: fakeDb,
       closureChecker,
+      userTimeContextPort,
       channelCapabilities,
     });
 
@@ -99,6 +105,7 @@ describe('composeNotification assembly order', () => {
       notificationRepository: repoSet.notificationRepository,
       preferenceRepository: repoSet.notificationPreferenceRepository,
       closureChecker,
+      userTimeContextPort,
       reliableAdapter: repoSet.reliableAdapter,
       channelCapabilities: Array.from(channelCapabilities),
     });
@@ -109,6 +116,7 @@ describe('composeNotification assembly order', () => {
       preferenceRepository: repoSet.notificationPreferenceRepository,
       templateRepository: repoSet.notificationTemplateRepository,
       closureChecker,
+      userTimeContextPort,
       durableRuntime: createNotificationDurableRuntime.mock.results[0].value,
       auditRepository: repoSet.auditRepository,
     });
@@ -121,7 +129,7 @@ describe('composeNotification assembly order', () => {
   });
 
   it('exposes the SAME durable NotificationRequested writer from the repository set', () => {
-    const composed = composeNotification({ db: fakeDb, closureChecker, channelCapabilities });
+    const composed = composeNotification({ db: fakeDb, closureChecker, userTimeContextPort, channelCapabilities });
     const repoSet = createNotificationPrismaRepositories.mock.results[0].value;
     expect(composed.requestedWriter).toBe(repoSet.requestedWriter);
     expect(composed.repositories.requestedWriter).toBe(repoSet.requestedWriter);
@@ -131,6 +139,7 @@ describe('composeNotification assembly order', () => {
     const composed = composeNotification({
       db: fakeDb,
       closureChecker,
+      userTimeContextPort,
       channelCapabilities,
     });
 
@@ -142,6 +151,7 @@ describe('composeNotification assembly order', () => {
     const composed = composeNotification({
       db: fakeDb,
       closureChecker,
+      userTimeContextPort,
       channelCapabilities,
     });
 
@@ -176,6 +186,7 @@ describe('composeNotification structural registration', () => {
     const composed = composeNotification({
       db: fakeDb,
       closureChecker,
+      userTimeContextPort,
       channelCapabilities,
     });
 

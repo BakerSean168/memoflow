@@ -101,7 +101,7 @@ describe('initElectronFeatures DB_CHANGED pilot routing (Step 3)', () => {
       source: 'powersync',
     });
     expect(dispatchedIntents()[1]).toEqual({
-      target: 'task-template',
+      target: 'task-plan',
       identityScope: 'profile-1',
       source: 'powersync',
       projection: 'all',

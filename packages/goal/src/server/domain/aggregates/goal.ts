@@ -1,4 +1,4 @@
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { Instant, Ymd } from '@memoflow/contracts/primitives';
 import type { LabelDto } from '@memoflow/contracts/label';
 /**
  * Goal 聚合根实现
@@ -33,8 +33,17 @@ import { AggregateRoot } from '@memoflow/utils/domain';
 import { IdentityId } from '@memoflow/domain-shared';
 import { GoalId, KeyResultWeightSnapshotId, KeyResultId } from '../value-objects';
 import type { GoalEventMap } from '@memoflow/contracts/goal';
-import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
-import type { SnapshotTrigger, GoalReminderConfigDTO, GoalReviewSystemContext } from '@memoflow/contracts/goal';
+import {
+  GoalStatus,
+  ReminderTriggerType,
+  goalTimeframeEndBoundary,
+} from '@memoflow/contracts/goal';
+import type {
+  SnapshotTrigger,
+  GoalReminderConfigDTO,
+  GoalReviewSystemContext,
+  GoalTimeframe,
+} from '@memoflow/contracts/goal';
 import type {
   GoalServerDTO,
   GoalReviewServerDTO,
@@ -48,19 +57,17 @@ import {
   KeyResultWeightSnapshot,
   KeyResultNotFoundInGoalError,
   GoalNameRequiredError,
-  GoalInvalidDateRangeError,
-  GoalInvalidDateModificationError,
-  GoalDueDateNotSetError,
+  GoalInvalidPlanningWindowError,
   GoalKeyResultNotFoundError,
   GoalReviewNotFoundError,
   GoalDeletedError,
   GoalArchivedError,
+  GoalInvalidLifecycleTransitionError,
   GoalNameTooLongError,
   KeyResultWeightInvalidError,
 } from '../value-objects';
 
 // ================ 常量定义 ================
-const DAY_MS = 1000 * 60 * 60 * 24;
 
 /**
  * Goal 内部状态接口
@@ -70,12 +77,10 @@ export interface GoalState {
   id: GoalId;
   identityId: IdentityId;
   name: string;
-  description: string | null;
-  feasibilityAnalysis: string | null;
-  motivation: string | null;
+  summary: string | null;
   status: GoalStatus;
-  startDate: Instant | null;
-  dueDate: Instant | null;
+  startDate: Ymd | null;
+  target: GoalTimeframe | null;
   completedAt: Instant | null;
   archivedAt: Instant | null;
   sortOrder: number;
@@ -115,12 +120,10 @@ export class Goal extends AggregateRoot<GoalId> {
       id: params.id,
       identityId: params.identityId,
       name: params.name,
-      description: params.description ?? null,
-      feasibilityAnalysis: params.feasibilityAnalysis ?? null,
-      motivation: params.motivation ?? null,
+      summary: params.summary ?? null,
       status: params.status,
       startDate: params.startDate ?? null,
-      dueDate: params.dueDate ?? null,
+      target: params.target ?? null,
       completedAt: params.completedAt ?? null,
       archivedAt: params.archivedAt ?? null,
       sortOrder: params.sortOrder,
@@ -151,28 +154,20 @@ export class Goal extends AggregateRoot<GoalId> {
     return this._props.name;
   }
 
-  get description(): string | null {
-    return this._props.description;
-  }
-
-  get feasibilityAnalysis(): string | null {
-    return this._props.feasibilityAnalysis;
-  }
-
-  get motivation(): string | null {
-    return this._props.motivation;
+  get summary(): string | null {
+    return this._props.summary;
   }
 
   get status(): GoalStatus {
     return this._props.status;
   }
 
-  get startDate(): Instant | null {
+  get startDate(): Ymd | null {
     return this._props.startDate;
   }
 
-  get dueDate(): Instant | null {
-    return this._props.dueDate;
+  get target(): GoalTimeframe | null {
+    return this._props.target;
   }
 
   get completedAt(): Instant | null {
@@ -253,36 +248,31 @@ export class Goal extends AggregateRoot<GoalId> {
    * @param params 创建参数
    * @throws {GoalNameRequiredError} 当名称为空时
    * @throws {GoalNameTooLongError} 当名称超过200字符时
-   * @throws {GoalInvalidDateRangeError} 当开始日期晚于截止日期时
    */
   public static create(params: {
     id?: GoalId;
     identityId: IdentityId;
     name: string;
-    description: string | null;
-    feasibilityAnalysis: string | null;
-    motivation: string | null;
-    startDate: Instant | null;
-    dueDate: Instant | null;
+    summary: string | null;
+    startDate: Ymd | null;
+    target: GoalTimeframe | null;
     reminderConfig: GoalReminderConfig | null;
   }): Goal {
     if (!params.identityId) {
       throw new GoalNameRequiredError();
     }
     Goal.validateTitle(params.name);
-    Goal.validateDateRange(params.startDate, params.dueDate);
+    Goal.validatePlanningWindow(params.startDate, params.target);
 
     const now = Date.now();
     const goal = new Goal({
       id: params.id ?? GoalId.generate(),
       identityId: params.identityId,
       name: params.name.trim(),
-      description: params.description?.trim() || null,
-      feasibilityAnalysis: params.feasibilityAnalysis?.trim() || null,
-      motivation: params.motivation?.trim() || null,
-      status: GoalStatus.Active,
+      summary: params.summary?.trim() || null,
+      status: GoalStatus.Planned,
       startDate: params.startDate ?? null,
-      dueDate: params.dueDate ?? null,
+      target: params.target ?? null,
       completedAt: null,
       archivedAt: null,
       sortOrder: 0,
@@ -327,12 +317,7 @@ export class Goal extends AggregateRoot<GoalId> {
    * @throws {GoalNameRequiredError} 当名称为空时
    * @throws {GoalNameTooLongError} 当名称超过200字符时
    */
-  public updateBasicInfo(params: {
-    name?: string;
-    description?: string | null;
-    feasibilityAnalysis?: string | null;
-    motivation?: string | null;
-  }): void {
+  public updateBasicInfo(params: { name?: string; summary?: string | null }): void {
     this.ensureModifiable();
     let hasChanges = false;
     if (params.name !== undefined && params.name !== this._props.name) {
@@ -340,20 +325,13 @@ export class Goal extends AggregateRoot<GoalId> {
       this._props.name = params.name.trim();
       hasChanges = true;
     }
-    if (params.description !== undefined && params.description !== this._props.description) {
-      this._props.description = params.description?.trim() || null;
-      hasChanges = true;
-    }
-    if (
-      params.feasibilityAnalysis !== undefined &&
-      params.feasibilityAnalysis !== this._props.feasibilityAnalysis
-    ) {
-      this._props.feasibilityAnalysis = params.feasibilityAnalysis?.trim() || null;
-      hasChanges = true;
-    }
-    if (params.motivation !== undefined && params.motivation !== this._props.motivation) {
-      this._props.motivation = params.motivation?.trim() || null;
-      hasChanges = true;
+    if (params.summary !== undefined) {
+      const summary = params.summary?.trim() || null;
+      Goal.validateSummary(summary);
+      if (summary !== this._props.summary) {
+        this._props.summary = summary;
+        hasChanges = true;
+      }
     }
     if (hasChanges) {
       this._props.updatedAt = Date.now();
@@ -361,15 +339,29 @@ export class Goal extends AggregateRoot<GoalId> {
     }
   }
 
-  public updateTimeRange(params: { startDate?: Instant | null; dueDate?: Instant | null }): void {
+  public updatePlanningTime(params: {
+    startDate?: Ymd | null;
+    target?: GoalTimeframe | null;
+  }): void {
+    this.ensureModifiable();
     const nextStartDate = params.startDate !== undefined ? params.startDate : this._props.startDate;
-    const nextDueDate = params.dueDate !== undefined ? params.dueDate : this._props.dueDate;
-    if (nextStartDate === this._props.startDate && nextDueDate === this._props.dueDate) return;
-    Goal.validateDateRange(nextStartDate, nextDueDate);
-    if (params.startDate !== undefined) this._props.startDate = params.startDate;
-    if (params.dueDate !== undefined) this._props.dueDate = params.dueDate;
+    const nextTarget = params.target !== undefined ? params.target : this._props.target;
+    Goal.validatePlanningWindow(nextStartDate, nextTarget);
+    const targetUnchanged = Goal.sameTimeframe(nextTarget, this._props.target);
+    if (nextStartDate === this._props.startDate && targetUnchanged) return;
+
+    const changes: string[] = [];
+    if (params.startDate !== undefined && params.startDate !== this._props.startDate) {
+      this._props.startDate = params.startDate;
+      changes.push('startDate');
+    }
+    if (params.target !== undefined && !targetUnchanged) {
+      this._props.target = params.target;
+      changes.push('target');
+    }
+    if (changes.length === 0) return;
+
     this._props.updatedAt = Date.now();
-    const changes = Object.keys(params);
     this.emitGoalUpdated(changes);
     this.addDomainEvent<GoalEventMap['goal:schedule-time-changed']>('goal:schedule-time-changed', {
       identityId: this._props.identityId,
@@ -378,36 +370,25 @@ export class Goal extends AggregateRoot<GoalId> {
     });
   }
 
-  public extendDueDate(extensionDays: number): void {
-    if (extensionDays <= 0) throw new GoalInvalidDateModificationError('Extend', extensionDays);
-    if (!this._props.dueDate) throw new GoalDueDateNotSetError();
-    this.updateTimeRange({ dueDate: this._props.dueDate + extensionDays * DAY_MS });
-  }
-
-  public shortenDueDate(shortenDays: number): void {
-    if (shortenDays <= 0) throw new GoalInvalidDateModificationError('Shorten', shortenDays);
-    if (!this._props.dueDate) throw new GoalDueDateNotSetError();
-    const newDueDate = this._props.dueDate - shortenDays * DAY_MS;
-    if (this._props.startDate && newDueDate <= this._props.startDate) {
-      throw new GoalInvalidDateRangeError(this._props.startDate, newDueDate);
-    }
-    this.updateTimeRange({ dueDate: newDueDate });
-  }
-
-  /**
-   * ✅ 更新状态
-   */
-  public updateStatus(newStatus: GoalStatus): void {
-    if (newStatus === this._props.status) return;
+  /** Apply one explicit lifecycle transition from ADR-067. */
+  private transitionTo(newStatus: GoalStatus): boolean {
     this.ensureModifiable();
+    if (newStatus === this._props.status) return false;
     const previousStatus = this._props.status;
+    const allowed: Record<GoalStatus, readonly GoalStatus[]> = {
+      [GoalStatus.Planned]: [GoalStatus.InProgress, GoalStatus.Abandoned],
+      [GoalStatus.InProgress]: [GoalStatus.Planned, GoalStatus.Completed, GoalStatus.Abandoned],
+      [GoalStatus.Completed]: [GoalStatus.InProgress],
+      [GoalStatus.Abandoned]: [GoalStatus.Planned, GoalStatus.InProgress],
+    };
+    if (!allowed[previousStatus].includes(newStatus)) {
+      throw new GoalInvalidLifecycleTransitionError(previousStatus, newStatus);
+    }
+
     const now = Date.now();
     this._props.status = newStatus;
-    if (newStatus === GoalStatus.Completed) {
-      this._props.completedAt = this._props.completedAt ?? now;
-    } else if (previousStatus === GoalStatus.Completed) {
-      this._props.completedAt = null;
-    }
+    if (newStatus === GoalStatus.Completed) this._props.completedAt = now;
+    else if (previousStatus === GoalStatus.Completed) this._props.completedAt = null;
     this._props.updatedAt = now;
     this.addDomainEvent<GoalEventMap['goal:status-changed']>('goal:status-changed', {
       identityId: this._props.identityId,
@@ -415,20 +396,25 @@ export class Goal extends AggregateRoot<GoalId> {
       previousStatus,
       newStatus,
     });
+    return true;
   }
 
+  /** Move a Planned/Abandoned Goal back to the planning state. */
+  public plan(): void {
+    this.transitionTo(GoalStatus.Planned);
+  }
+
+  /** Begin or reopen active pursuit of a Goal. */
   public activate(): void {
-    this.updateStatus(GoalStatus.Active);
+    this.transitionTo(GoalStatus.InProgress);
   }
 
   public abandon(): void {
-    this.updateStatus(GoalStatus.Abandoned);
+    this.transitionTo(GoalStatus.Abandoned);
   }
 
   public markAsCompleted(): void {
-    if (this._props.status === GoalStatus.Completed && this._props.completedAt) return;
-    this.ensureModifiable();
-    this.updateStatus(GoalStatus.Completed);
+    if (!this.transitionTo(GoalStatus.Completed)) return;
     this.addDomainEvent<GoalEventMap['goal:completed']>('goal:completed', {
       identityId: this._props.identityId,
       goal: this.toServerDTO(true),
@@ -585,30 +571,31 @@ export class Goal extends AggregateRoot<GoalId> {
     title: string;
     description?: string | null;
     aggregationMethod?: KeyResultServerDTO['progress']['aggregationMethod'];
-    startingValue?: number;
+    initialValue?: number;
     currentValue?: number;
     targetValue: number;
-    progressBaselineValue?: number | null;
+    target?: GoalTimeframe | null;
     unit?: string | null;
     weight?: number;
   }): KeyResult {
     this.ensureModifiable();
     const weight = params.weight ?? 3;
     Goal.validateKeyResultWeight(weight);
-    const currentValue = params.currentValue ?? params.startingValue ?? 0;
-    const startingValue = params.startingValue ?? currentValue;
+    const initialValue = params.initialValue ?? 0;
+    const currentValue = params.currentValue ?? initialValue;
     const keyResult = KeyResult.create({
       id: params.id,
       title: params.title,
       description: params.description ?? undefined,
       progress: {
-        startingValue,
+        initialValue,
         currentValue,
         targetValue: params.targetValue,
-        progressBaselineValue: params.progressBaselineValue ?? null,
+        trackingBaseValue: currentValue,
         aggregationMethod: params.aggregationMethod ?? 'Sum',
         unit: params.unit?.trim() || null,
       },
+      target: params.target ?? null,
       weight,
       sortOrder: this._props.keyResults.length,
     });
@@ -634,10 +621,10 @@ export class Goal extends AggregateRoot<GoalId> {
       title?: string;
       description?: string | null;
       weight?: number;
-      startingValue?: number;
+      initialValue?: number;
       currentValue?: number;
       targetValue?: number;
-      progressBaselineValue?: number | null;
+      target?: GoalTimeframe | null;
       unit?: string | null;
       aggregationMethod?: KeyResultServerDTO['progress']['aggregationMethod'];
     },
@@ -656,17 +643,15 @@ export class Goal extends AggregateRoot<GoalId> {
       keyResult.updateWeight(updates.weight);
     }
     const measurementPatch = {
-      ...(updates.startingValue !== undefined ? { startingValue: updates.startingValue } : {}),
+      ...(updates.initialValue !== undefined ? { initialValue: updates.initialValue } : {}),
       ...(updates.currentValue !== undefined ? { currentValue: updates.currentValue } : {}),
       ...(updates.targetValue !== undefined ? { targetValue: updates.targetValue } : {}),
-      ...(updates.progressBaselineValue !== undefined
-        ? { progressBaselineValue: updates.progressBaselineValue }
-        : {}),
       ...(updates.aggregationMethod !== undefined
         ? { aggregationMethod: updates.aggregationMethod }
         : {}),
     };
     if (Object.keys(measurementPatch).length > 0) keyResult.updateMeasurement(measurementPatch);
+    if (updates.target !== undefined) keyResult.updateTarget(updates.target);
     if (updates.unit !== undefined) keyResult.updateUnit(updates.unit);
 
     this._props.updatedAt = Date.now();
@@ -810,7 +795,6 @@ export class Goal extends AggregateRoot<GoalId> {
     return Math.round(progress * 100) / 100;
   }
 
-
   /**
    * 📊 检查是否所有关键结果都已完成
    */
@@ -953,24 +937,6 @@ export class Goal extends AggregateRoot<GoalId> {
     }
   }
 
-  /**
-   * 📊 是否已过期
-   */
-  public isOverdue(): boolean {
-    if (!this._props.dueDate || this._props.status !== GoalStatus.Active || this._props.archivedAt)
-      return false;
-    return Date.now() > this._props.dueDate;
-  }
-
-  /**
-   * 📊 获取剩余天数
-   */
-  public getRemainingDays(): number | null {
-    if (!this._props.dueDate) return null;
-    const diff = this._props.dueDate - Date.now();
-    return Math.ceil(diff / DAY_MS);
-  }
-
   // ================= 8. 序列化 (Serialization) =================
 
   /**
@@ -981,12 +947,10 @@ export class Goal extends AggregateRoot<GoalId> {
       id: this.id,
       identityId: this._props.identityId,
       name: this._props.name,
-      description: this._props.description,
-      feasibilityAnalysis: this._props.feasibilityAnalysis,
-      motivation: this._props.motivation,
+      summary: this._props.summary,
       status: this._props.status,
       startDate: this._props.startDate,
-      dueDate: this._props.dueDate,
+      target: this._props.target,
       completedAt: this._props.completedAt,
       archivedAt: this._props.archivedAt,
       sortOrder: this._props.sortOrder,
@@ -1028,12 +992,10 @@ export class Goal extends AggregateRoot<GoalId> {
       id: this.id,
       identityId: this._props.identityId,
       name: this._props.name,
-      description: this._props.description,
-      feasibilityAnalysis: this._props.feasibilityAnalysis,
-      motivation: this._props.motivation,
+      summary: this._props.summary,
       status: this._props.status,
       startDate: this._props.startDate ?? null,
-      dueDate: this._props.dueDate ?? null,
+      target: this._props.target ?? null,
       completedAt: this._props.completedAt ?? null,
       archivedAt: this._props.archivedAt ?? null,
       sortOrder: this._props.sortOrder,
@@ -1089,14 +1051,30 @@ export class Goal extends AggregateRoot<GoalId> {
     }
   }
 
-  /**
-   * 验证日期范围
-   * @throws {GoalInvalidDateRangeError} 当开始日期晚于截止日期时
-   */
-  public static validateDateRange(startDate?: Instant | null, dueDate?: Instant | null): void {
-    if (startDate && dueDate && Number(startDate) > Number(dueDate)) {
-      throw new GoalInvalidDateRangeError(startDate, dueDate);
+  /** Validate the short Goal identity summary. */
+  public static validateSummary(summary: string | null): void {
+    if (summary !== null && summary.length > 500) {
+      throw new Error('Goal summary must not exceed 500 characters');
     }
+  }
+
+  /** Goal start may sit inside a coarse target period, but never after that period ends. */
+  public static validatePlanningWindow(
+    startDate: Ymd | null | undefined,
+    target: GoalTimeframe | null | undefined,
+  ): void {
+    if (startDate == null || target == null) return;
+    const targetEndDate = goalTimeframeEndBoundary(target);
+    if (startDate > targetEndDate) {
+      throw new GoalInvalidPlanningWindowError(startDate, targetEndDate);
+    }
+  }
+
+  private static sameTimeframe(left: GoalTimeframe | null, right: GoalTimeframe | null): boolean {
+    if (left === null || right === null) return left === right;
+    return (
+      left.kind === right.kind && goalTimeframeEndBoundary(left) === goalTimeframeEndBoundary(right)
+    );
   }
 
   /**

@@ -51,6 +51,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './task',
     './goal',
     './label',
+    './relation',
     './governance',
     './reminder',
     './repository',

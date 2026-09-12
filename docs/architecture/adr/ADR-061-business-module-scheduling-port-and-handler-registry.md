@@ -9,7 +9,7 @@ tags:
   - reliable-messaging
 description: 业务模块通过 ScheduledIntent + SchedulingPort.reconcile 接入 Scheduler，并以稳定 schedulingKey 与 handlerKey registry 替代 SourceModule 中央路由
 created: 2026-08-25T17:49:00+08:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-08T20:45:00+08:00
 ---
 
 # ADR-061: 业务模块通过 Scheduling Port 与 Handler Registry 接入 Scheduler
@@ -22,6 +22,18 @@ updated: 2026-09-08T09:00:00+08:00
 ## 2026-09-08 实现状态
 
 Goal/Task/Reminder 通过 neutral ScheduledIntent + `SchedulingPort.reconcile` 接入 Scheduler；稳定 `schedulingKey` 与 handler key registry 已替代 `SourceModule` 中央执行 switch。`SourceModule` 只允许作为 metadata/diagnostics，HARD-7102 governance lock 防止行为路由复活。
+
+### 2026-09-08 vNext Model Convergence Follow-up
+
+本 ADR 的 neutral seam 已成为正确 canonical ingress，但当前 `LegacyScheduleTaskSchedulingAdapter` 仍需要把新 owner/handler identity 桥接进旧 `ScheduleTask` aggregate。ADR-081~083 继续完成内部收敛：
+
+```text
+ScheduledIntent / SchedulingPort        已是新真值
+ScheduleTask aggregate                  迁移壳
+ScheduledInvocation persistence/runtime 目标模型
+```
+
+后续不得为了删除 legacy aggregate 而改变 `SchedulingPort.reconcile`、稳定 `schedulingKey`、handler registry 或 owner-level atomic reconcile 语义。
 
 ## 1. 背景
 

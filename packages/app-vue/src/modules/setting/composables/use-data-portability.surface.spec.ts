@@ -16,8 +16,8 @@ describe('useDataPortability server-held disclosure surface', () => {
     ),
     'utf8',
   );
-  const settingsView = readFileSync(
-    resolve(__dirname, '../views/UserSettingsView.vue'),
+  const dataSettingsSection = readFileSync(
+    resolve(__dirname, '../components/DataSettingsSection.vue'),
     'utf8',
   );
 
@@ -47,10 +47,10 @@ describe('useDataPortability server-held disclosure surface', () => {
     expect(method).not.toContain('this.ipcClient.invoke');
   });
 
-  it('settings view wires disclosure only through the composable flag', () => {
-    expect(settingsView).toContain('isServerDisclosureAvailable');
-    expect(settingsView).toContain('exportServerHeldDataDisclosure');
-    expect(settingsView).toContain(':server-data-disclosure-available="isServerDisclosureAvailable"');
-    expect(settingsView).toContain('@export-server-data-disclosure="exportServerHeldDataDisclosure"');
+  it('Data owner section wires disclosure only through the composable flag', () => {
+    expect(dataSettingsSection).toContain('isServerDisclosureAvailable');
+    expect(dataSettingsSection).toContain('exportServerHeldDataDisclosure');
+    expect(dataSettingsSection).toContain(':server-data-disclosure-available="isServerDisclosureAvailable"');
+    expect(dataSettingsSection).toContain('@export-server-data-disclosure="exportServerHeldDataDisclosure"');
   });
 });

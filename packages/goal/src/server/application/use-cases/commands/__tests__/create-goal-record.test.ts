@@ -13,9 +13,7 @@ function createTestGoal() {
   return Goal.create({
     identityId: 'identity-1' as any,
     name: 'Graduation Goal',
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
+    summary: null,
     startDate: null,
     reminderConfig: null,
   });
@@ -58,7 +56,7 @@ describe('CreateGoalRecordUseCase', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Concurrent progress',
       aggregationMethod: 'Sum',
-      startingValue: 4,
+      initialValue: 0,
       currentValue: 4,
       targetValue: 10,
       weight: 1,
@@ -78,12 +76,12 @@ describe('CreateGoalRecordUseCase', () => {
     expect(goalRepository.saveRootWithExpectedVersion).not.toHaveBeenCalled();
   });
 
-  it('uses startingValue as the authoritative Sum seed when creating a record', async () => {
+  it('uses the create-time current value as the hidden tracking seed when creating a record', async () => {
     const goal = createTestGoal();
     const keyResult = goal.createAndAddKeyResult({
       title: 'Second-class points',
       aggregationMethod: 'Sum',
-      startingValue: 41,
+      initialValue: 0,
       currentValue: 41,
       targetValue: 50,
       weight: 1,
@@ -120,7 +118,7 @@ describe('CreateGoalRecordUseCase', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Latest score',
       aggregationMethod: 'Last',
-      startingValue: 41,
+      initialValue: 0,
       currentValue: 41,
       targetValue: 50,
       weight: 1,
@@ -150,13 +148,12 @@ describe('CreateGoalRecordUseCase', () => {
     }
   });
 
-
   it('rejects automatic Task contributions to non-Sum key results', async () => {
     const goal = createTestGoal();
     const keyResult = goal.createAndAddKeyResult({
       title: 'Latest score',
       aggregationMethod: 'Last',
-      startingValue: 41,
+      initialValue: 0,
       currentValue: 41,
       targetValue: 50,
       weight: 1,
@@ -169,7 +166,7 @@ describe('CreateGoalRecordUseCase', () => {
       keyResult.id,
       {
         value: 1,
-        source: { type: 'TASK_INSTANCE' as const, id: 'task-instance-1' },
+        source: { type: 'TASK_INSTANCE' as const, id: 'task-occurrence-1' },
       },
       'identity-1',
     );
@@ -179,12 +176,12 @@ describe('CreateGoalRecordUseCase', () => {
     expect(goalRepository.saveRootWithExpectedVersion).not.toHaveBeenCalled();
   });
 
-  it('applies the same task-instance contribution only once', async () => {
+  it('applies the same task-occurrence contribution only once', async () => {
     const goal = createTestGoal();
     const keyResult = goal.createAndAddKeyResult({
       title: 'Completed tasks',
       aggregationMethod: 'Sum',
-      startingValue: 0,
+      initialValue: 0,
       currentValue: 0,
       targetValue: 10,
       weight: 1,
@@ -200,7 +197,7 @@ describe('CreateGoalRecordUseCase', () => {
     const params = {
       value: 2,
       note: 'Task completed',
-      source: { type: 'TASK_INSTANCE' as const, id: 'task-instance-1' },
+      source: { type: 'TASK_INSTANCE' as const, id: 'task-occurrence-1' },
     };
     const first = await useCase.execute(goal.id, keyResult.id, params, 'identity-1');
     const duplicate = await useCase.execute(goal.id, keyResult.id, params, 'identity-1');
@@ -217,7 +214,7 @@ describe('CreateGoalRecordUseCase', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Atomic progress',
       aggregationMethod: 'Sum',
-      startingValue: 4,
+      initialValue: 0,
       currentValue: 4,
       targetValue: 10,
       weight: 1,

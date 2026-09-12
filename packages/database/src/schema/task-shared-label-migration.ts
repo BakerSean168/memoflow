@@ -92,7 +92,7 @@ async function hasColumn(db: SqlQueryable, table: string, column: string): Promi
  * The operation is deliberately narrow:
  * 1. migrate legacy Task string tags into the existing Shared Label registry;
  * 2. create identity-scoped TaskLabel assignments idempotently;
- * 3. only then retire TaskTemplate.tags and TaskTemplate.color.
+ * 3. only then retire TaskPlan.tags and TaskPlan.color.
  *
  * It does not enable Prisma --accept-data-loss, so unrelated destructive schema
  * changes remain fail-closed.

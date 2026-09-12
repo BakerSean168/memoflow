@@ -13,8 +13,8 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { ITaskInstanceRepository } from '../../domain/repositories/i-task-instance-repository';
-import type { ITaskTemplateRepository } from '../../domain/repositories/i-task-template-repository';
+import type { ITaskOccurrenceRepository } from '../../domain/repositories/i-task-occurrence-repository';
+import type { ITaskPlanRepository } from '../../domain/repositories/i-task-plan-repository';
 import type { TaskWriteTransactionRunner } from '../../application/use-cases/commands/task-write-support';
 import {
   createTaskModule,
@@ -41,10 +41,10 @@ function makeContribution(name: string, failOnStart = false): FakeContribution {
 
 function makeDeps(runtimeContributions: TaskModuleRuntimeContribution[]): TaskModuleDependencies {
   return {
-    taskTemplateRepository: {
+    taskPlanRepository: {
       findNeedGenerateInstances: vi.fn(async () => []),
-    } as unknown as ITaskTemplateRepository,
-    taskInstanceRepository: {} as unknown as ITaskInstanceRepository,
+    } as unknown as ITaskPlanRepository,
+    taskOccurrenceRepository: {} as unknown as ITaskOccurrenceRepository,
     taskWriteTransactionRunner: {} as unknown as TaskWriteTransactionRunner,
     runtimeContributions,
   };

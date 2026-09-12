@@ -41,7 +41,7 @@ export {
 export { createRepositoryRuntimeContribution } from './runtime';
 
 // Repository / service ports referenced by the set and module dependencies
-export type { IKnowledgeRepositoryConnectionRepository } from '../application/ports/knowledge-repository-connection.repository';
+export type { IKnowledgeRemoteBindingRepository } from '../application/ports/knowledge-remote-binding.repositories';
 export type {
   IGithubWebhookDeliveryRepository,
   IKnowledgeNoteProjectionRepository,

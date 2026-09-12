@@ -1,5 +1,6 @@
 import type { Instant } from '@memoflow/contracts/primitives';
 import type {
+  GoalTimeframe,
   KeyResultCalculationMethod,
   KeyResultClientDTO,
   KeyResultServerDTO,
@@ -13,6 +14,7 @@ export interface KeyResultState {
   title: string;
   description: string | null;
   progress: KeyResultServerDTO['progress'];
+  target: GoalTimeframe | null;
   weight: number;
   sortOrder: number;
   createdAt: Instant;
@@ -36,6 +38,9 @@ export class KeyResult extends Entity<KeyResultId> {
   get progress(): KeyResultServerDTO['progress'] {
     return { ...this._props.progress };
   }
+  get target(): GoalTimeframe | null {
+    return this._props.target;
+  }
   get weight(): number {
     return this._props.weight;
   }
@@ -58,6 +63,7 @@ export class KeyResult extends Entity<KeyResultId> {
     title: string;
     description?: string;
     progress: KeyResultServerDTO['progress'];
+    target?: GoalTimeframe | null;
     weight?: number;
     sortOrder?: number;
   }): KeyResult {
@@ -73,6 +79,7 @@ export class KeyResult extends Entity<KeyResultId> {
       title: params.title.trim(),
       description: params.description?.trim() || null,
       progress: { ...params.progress },
+      target: params.target ?? null,
       weight,
       sortOrder: params.sortOrder ?? 0,
       createdAt: now,
@@ -100,16 +107,17 @@ export class KeyResult extends Entity<KeyResultId> {
     this.touch();
   }
 
-  public updateStartingValue(startingValue: number): void {
-    this.replaceProgress({ startingValue });
+  public updateInitialValue(initialValue: number): void {
+    this.replaceProgress({ initialValue });
   }
 
   public updateTargetValue(targetValue: number): void {
     this.replaceProgress({ targetValue });
   }
 
-  public updateProgressBaselineValue(progressBaselineValue: number | null): void {
-    this.replaceProgress({ progressBaselineValue });
+  public updateTarget(target: GoalTimeframe | null): void {
+    this._props.target = target;
+    this.touch();
   }
 
   public updateUnit(unit?: string | null): void {
@@ -123,16 +131,12 @@ export class KeyResult extends Entity<KeyResultId> {
     this.replaceProgress({ aggregationMethod });
   }
 
-  /** Atomically updates KR Measurement V2 semantics so intermediate states cannot invalidate a valid patch. */
+  /** Atomically updates KR Measurement V3 semantics without rebasing record aggregation. */
   public updateMeasurement(
     patch: Partial<
       Pick<
         KeyResultServerDTO['progress'],
-        | 'startingValue'
-        | 'currentValue'
-        | 'targetValue'
-        | 'progressBaselineValue'
-        | 'aggregationMethod'
+        'initialValue' | 'currentValue' | 'targetValue' | 'aggregationMethod'
       >
     >,
   ): void {
@@ -166,6 +170,7 @@ export class KeyResult extends Entity<KeyResultId> {
       title: this._props.title,
       description: this._props.description,
       progress: { ...this._props.progress },
+      target: this._props.target,
       weight: this._props.weight,
       sortOrder: this._props.sortOrder,
       createdAt: this._props.createdAt,
@@ -179,7 +184,14 @@ export class KeyResult extends Entity<KeyResultId> {
       id: this.id,
       title: this._props.title,
       description: this._props.description,
-      progress: { ...this._props.progress },
+      progress: {
+        initialValue: this._props.progress.initialValue,
+        currentValue: this._props.progress.currentValue,
+        targetValue: this._props.progress.targetValue,
+        aggregationMethod: this._props.progress.aggregationMethod,
+        unit: this._props.progress.unit,
+      },
+      target: this._props.target,
       progressPercentage: calculation.percentage,
       isCompleted: calculation.isCompleted,
       weight: this._props.weight,

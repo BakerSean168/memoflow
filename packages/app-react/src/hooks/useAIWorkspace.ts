@@ -14,17 +14,14 @@ import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
 import { useAppClientRegistry } from '../providers/app-client-registry-provider';
+import { getProductTime } from '../utils/product-time';
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? presentErrorMessage(error) : 'AI request failed';
 }
 
-// Residual 1207 keep-boundary: mobile keeps fixed zh-CN Intl formatting.
 function formatMessageTime(timestamp: number) {
-  return new Intl.DateTimeFormat('zh-CN', {
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(timestamp));
+  return getProductTime().format.hm(timestamp);
 }
 
 function toMessageClientDTO(message: AssistantRuntimeMessageView): MessageClientDTO {

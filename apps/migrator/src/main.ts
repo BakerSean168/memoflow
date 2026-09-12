@@ -89,12 +89,6 @@ export function createMigrationCommands(workspaceRoot: string): Command[] {
       },
       {
         executable: process.execPath,
-        args: [resolve(runtimeScripts, 'prepare-editor-workspace-natural-key.js')],
-        cwd: databaseRoot,
-        label: 'prepare editor-workspace natural key',
-      },
-      {
-        executable: process.execPath,
         args: [resolve(runtimeScripts, 'prepare-notification-preference-hierarchy.js')],
         cwd: databaseRoot,
         label: 'prepare notification preference hierarchy',
@@ -107,9 +101,9 @@ export function createMigrationCommands(workspaceRoot: string): Command[] {
       },
       {
         executable: process.execPath,
-        args: [resolve(runtimeScripts, 'prepare-legacy-cloud-auth-migration.js')],
+        args: [resolve(runtimeScripts, 'prepare-knowledge-stable-document-identity-cutover.js')],
         cwd: databaseRoot,
-        label: 'migrate legacy authentication to Better Auth',
+        label: 'prepare stable Knowledge document identity cutover',
       },
       {
         executable: prismaBin,

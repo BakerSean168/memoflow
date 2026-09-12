@@ -47,6 +47,7 @@ export const TaskPlanTaskSchema = z
     cadence: TaskPlanCadenceSchema,
     startDate: z.number().int().nonnegative().nullable().default(null),
     timeOfDay: TimeOfDaySchema.optional(),
+    timezone: z.string().trim().min(1).max(100).default('UTC'),
     daysOfWeek: z.array(z.number().int().min(0).max(6)).max(7).default([]),
     occurrences: z.number().int().positive().nullable().default(null),
     goalId: z.string().trim().min(1).nullable().default(null),
@@ -63,11 +64,11 @@ export const TaskPlanTaskSchema = z
         message: 'Weekly task plans require at least one dayOfWeek',
       });
     }
-    if ((value.goalId === null) !== (value.keyResultId === null)) {
+    if (value.keyResultId !== null && value.goalId === null) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: value.goalId === null ? ['goalId'] : ['keyResultId'],
-        message: 'Task goal links require both goalId and keyResultId',
+        path: ['goalId'],
+        message: 'A Key Result link requires its owning Goal',
       });
     }
     if (value.contributionValue !== null && (value.goalId === null || value.keyResultId === null)) {
@@ -145,7 +146,7 @@ export const TaskPlanExecutionReceiptSchema = z
     workflowRunId: z.string().min(1),
     revision: z.number().int().positive(),
     status: z.enum(['success', 'partial', 'failed']),
-    taskTemplateId: z.string().min(1).optional(),
+    taskPlanId: z.string().min(1).optional(),
     taskIds: z.array(z.string().min(1)).default([]),
     failures: z.array(TaskPlanExecutionFailureSchema).default([]),
     retryable: z.boolean(),

@@ -1,6 +1,6 @@
 import { computed, onMounted, ref } from 'vue';
 import type {
-  LocalVaultBindingClientDTO,
+  LocalVaultBindingSnapshotDTO,
   LocalVaultNoteDTO,
   LocalVaultNoteSummaryDTO,
   SearchLocalVaultRes,
@@ -20,7 +20,9 @@ import { errorMessage } from '@memoflow/utils/shared';
 export function useLocalVault() {
   const service = useStrictInject(REPOSITORY_SERVICE_KEY, 'RepositoryService');
   const t = getGlobalResultErrorT();
-  const binding = ref<LocalVaultBindingClientDTO | null>(null);
+  const bindingSnapshot = ref<LocalVaultBindingSnapshotDTO | null>(null);
+  const binding = computed(() => bindingSnapshot.value?.binding ?? null);
+  const health = computed(() => bindingSnapshot.value?.health ?? null);
   const notes = ref<LocalVaultNoteSummaryDTO[]>([]);
   const activeNote = ref<LocalVaultNoteDTO | null>(null);
   const searchQuery = ref('');
@@ -29,7 +31,7 @@ export function useLocalVault() {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  const isBound = computed(() => binding.value?.status === 'Active');
+  const isBound = computed(() => health.value?.state === 'Available');
   const displayedNotes = computed(() =>
     searchActive.value ? searchResults.value.map((result) => result.note) : notes.value,
   );
@@ -61,8 +63,8 @@ export function useLocalVault() {
 
   async function loadBinding(): Promise<void> {
     const loaded = await run(() => unwrap(service.getLocalVaultBinding()));
-    binding.value = loaded;
-    if (loaded?.status === 'Active') await scan();
+    bindingSnapshot.value = loaded;
+    if (loaded?.health.state === 'Available') await scan();
   }
 
   async function selectVault(): Promise<void> {
@@ -74,7 +76,7 @@ export function useLocalVault() {
       ),
     );
     if (!selected) return;
-    binding.value = selected;
+    bindingSnapshot.value = selected;
     activeNote.value = null;
     searchQuery.value = '';
     searchActive.value = false;
@@ -84,7 +86,7 @@ export function useLocalVault() {
   async function detachVault(): Promise<void> {
     const detached = await run(() => unwrap(service.detachLocalVault()));
     if (detached !== null) {
-      binding.value = binding.value ? { ...binding.value, status: 'Detached' } : null;
+      bindingSnapshot.value = null;
       notes.value = [];
       activeNote.value = null;
     }
@@ -93,7 +95,7 @@ export function useLocalVault() {
   async function scan(): Promise<void> {
     const scanned = await run(() => unwrap(service.scanLocalVault()));
     if (!scanned) return;
-    binding.value = scanned.binding;
+    bindingSnapshot.value = { binding: scanned.binding, health: scanned.health };
     notes.value = scanned.notes;
     if (activeNote.value) {
       const stillExists = scanned.notes.some(
@@ -158,6 +160,7 @@ export function useLocalVault() {
 
   return {
     binding,
+    health,
     notes,
     activeNote,
     searchQuery,

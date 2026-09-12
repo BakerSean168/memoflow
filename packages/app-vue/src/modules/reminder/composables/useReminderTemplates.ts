@@ -7,7 +7,6 @@ import type {
   UpdateReminderTemplateReq,
 } from '@memoflow/contracts/reminder';
 import type { ReminderContext } from './useReminderContext';
-import { getUserTimezone } from '../utils/user-timezone';
 
 export function useReminderTemplates(ctx: ReminderContext) {
   const { store, service, savingId, executeReminderOperation } = ctx;
@@ -38,10 +37,10 @@ export function useReminderTemplates(ctx: ReminderContext) {
     timezone?: string;
   }): Promise<GetReminderTodayScheduleRes | null> {
     store.setError(null);
-    const userTz = params?.timezone ?? getUserTimezone() ?? undefined;
-    const requestParams = userTz ? { ...params, timezone: userTz } : params;
+    // Omit timezone by default: the server resolves the identity-scoped canonical
+    // UserTimeContext. A caller-supplied timezone remains an explicit snapshot override.
     const result = await executeReminderOperation<GetReminderTodayScheduleRes>(
-      () => service.getTodaySchedule(requestParams),
+      () => service.getTodaySchedule(params),
       'reminder.error.loadTemplatesFailed',
     );
     if (result.ok) {

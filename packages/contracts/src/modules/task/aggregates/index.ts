@@ -2,18 +2,18 @@
  * Task Aggregates Barrel Export
  */
 
-// TaskInstance
+// TaskOccurrence
 export type {
-  TaskInstanceServerDTO,
-} from './task-instance-server';
+  TaskOccurrenceServerDTO,
+} from './task-occurrence-server';
 
-export type { TaskInstanceClientDTO } from './task-instance-client';
+export type { TaskOccurrenceClientDTO } from './task-occurrence-client';
 
-// TaskTemplate
+// TaskPlan
 export type {
-  TaskTemplateServerDTO,
-} from './task-template-server';
+  TaskPlanServerDTO,
+} from './task-plan-server';
 
 export type {
-  TaskTemplateClientDTO,
-} from './task-template-client';
+  TaskPlanClientDTO,
+} from './task-plan-client';

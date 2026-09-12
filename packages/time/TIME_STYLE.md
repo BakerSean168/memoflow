@@ -1,45 +1,77 @@
-# TimeStyle
+# TimeContext and TimePresentationStyle
 
-Product/design knobs for human-visible time. Change **one** default (or session override) — list empty cells, relative cutoffs, and HM density follow.
-
-## Key fields
-
-| Path | Effect |
-|------|--------|
-| `empty.display` | `format.hm/date/dateTime/relative(null)` and list empty-time cells |
-| `empty.input` | Form date/time empty string |
-| `empty.unknown` | Unparseable display |
-| `display.hm` | `format.hm` pattern (default `HH:mm`) |
-| `display.date` / `dateTime` | Density: short / medium / long |
-| `locale` | Intl + relative |
-| `relative.maxAgeMs` | Beyond → absolute `dateTime` |
-| `calendar.weekStartsOn` | Week grid / `startOfWeek` |
-
-## Priority
+Product Time has two separate owners. They must not be merged back into one style bag.
 
 ```text
-call-site override
-  > facade.withStyle(partial)
-    > session preference (W8)
-      > DEFAULT_TIME_STYLE
+TimeContext                         TimePresentationStyle
+├── timeZone: branded TimeZoneId    ├── locale
+└── weekStartsOn                    ├── dateStyle: short | medium | long
+                                    ├── timeStyle: 12h | 24h
+                                    ├── empty
+                                    ├── relative
+                                    └── duration
 ```
 
-## Demo: empty display
+`TimeContext` changes calendar/wall-clock meaning. `TimePresentationStyle` changes only human-visible rendering.
+
+## Canonical construction
 
 ```ts
-const time = createTimeFacade({ style: { empty: { display: '暂无' } } });
-time.format.hm(null); // '暂无'
+const context = createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 });
+const time = createTimeFacade({
+  context,
+  presentation: {
+    locale: 'en-US',
+    dateStyle: 'medium',
+    timeStyle: '24h',
+    empty: { display: 'N/A' },
+  },
+});
 ```
 
-Domain code must **not** read UI locale for business rules; use Calendar/Clock policy only.
+`context` is required. There is no `defaultTime`, no mixed `TimeStyle`, no `withStyle`, and no host-local fallback.
 
-## Third-party conversion boundaries (TIME-1101)
+## Presentation fields
 
-`Instant / Ymd / Hm` remain the only product time vocabulary. Third-party date types are adapter-only:
+| Path                | Effect                                                   |
+| ------------------- | -------------------------------------------------------- |
+| `locale`            | `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` locale |
+| `dateStyle`         | semantic date density: `short` / `medium` / `long`       |
+| `timeStyle`         | explicit `12h` / `24h`                                   |
+| `empty.display`     | empty list/read presentation                             |
+| `empty.input`       | empty form date/time value                               |
+| `empty.unknown`     | unknown/unparseable display                              |
+| `relative.maxAgeMs` | elapsed-duration threshold before absolute display       |
+| `duration`          | duration-only presentation preferences                   |
 
-- the internal UI adapter converts `Ymd/Hm` to and from `@internationalized/date` `CalendarDate/Time` values; TIME-1101 intentionally does not add a new public package subpath.
-- recurrence consumers use MemoFlow-owned `RecurrenceSchedule` / `RecurrenceEnginePort`; `rrule` types stop inside the recurrence adapter.
-- feature contracts under `@memoflow/contracts` must not import `rrule`, `ical.js`, or `@internationalized/date`.
-- recurrence receives a resolved IANA zone through the time boundary; code that means “current local zone” resolves it through `TimeZoneSource` rather than reading host timezone ad hoc inside recurrence math.
+Use `withContext(...)` for an explicitly resolved timezone/week-start change and `withPresentation(...)` for display changes. Domain code does not use locale as a business rule.
 
-The conformance suite includes Tokyo plus New York spring/fall DST transitions. Temporal is not a second product time model; if adopted later, it belongs at a dedicated adapter edge only.
+## Where context comes from
+
+- **Signed-in server/application:** `UserTimeContextPort`, implemented by canonical Setting preferences.
+- **Signed-in UI:** session Product Time bootstrapped from canonical `UserPreferenceProfile`.
+- **Guest/device bootstrap:** an explicit validated IANA device timezone source.
+- **Persisted schedule trigger:** the timezone snapshot owned by that trigger/schedule when the contract calls for one.
+
+No layer may silently fall back to the server or browser timezone for business semantics.
+
+## Third-party boundaries
+
+- Product vocabulary is `Instant / Ymd / Hm / TimeContext`.
+- UI calendar libraries are adapter-only (`CalendarDate ↔ Ymd`, `Time ↔ Hm`).
+- Recurrence uses MemoFlow-owned `RecurrenceSchedule / RecurrenceEnginePort`; `rrule` types stay behind the adapter.
+- `date-fns` production imports are confined to `packages/time/src/engine/**`.
+- Fixed chart/export patterns may use the engine escape hatch; ordinary product UI uses semantic formatters.
+
+## Anti-resurrection gates
+
+TIME-1206 permanently retired ambient/mixed compatibility surfaces. CI enforces this with:
+
+```text
+tools/governance/product-time-surface-audit.mjs
+tools/governance/date-fns-import-audit.mjs
+eslint.config.ts date-fns engine-only restriction
+tools/governance/time-registry.json canonical-only registry
+```
+
+The conformance suite includes Tokyo plus New York spring/fall DST transitions.

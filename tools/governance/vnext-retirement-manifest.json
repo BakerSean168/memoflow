@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "dashboard-page-only-surfaces",
+      "status": "active",
+      "decision": "ADR-108 / SYS-0002",
+      "forbiddenPaths": [
+        "packages/app-vue/src/modules/dashboard/components/DashboardActivityTimeline.vue",
+        "packages/app-vue/src/modules/dashboard/components/DashboardStatsStrip.vue",
+        "packages/app-vue/src/modules/dashboard/components/DashboardTrendPanel.vue",
+        "packages/app-vue/src/shared/utils/format-time-keep-boundary.surface.spec.ts"
+      ]
+    },
+    {
+      "id": "editor-runtime-package",
+      "status": "active",
+      "decision": "ADR-107",
+      "forbiddenPaths": ["packages/editor"]
+    },
+    {
+      "id": "standalone-dashboard-bounded-context",
+      "status": "staged",
+      "decision": "ADR-108 / HOME-1805",
+      "forbiddenPaths": [
+        "packages/dashboard",
+        "packages/contracts/src/modules/dashboard",
+        "packages/app-vue/src/modules/dashboard"
+      ]
+    },
+    {
+      "id": "legacy-editor-persistence",
+      "status": "staged",
+      "decision": "ADR-107 / EDITOR-1702",
+      "forbiddenPaths": ["packages/database/prisma/schema/editor.prisma"]
+    },
+    {
+      "id": "account-settings-legacy",
+      "status": "staged",
+      "decision": "ADR-104 / ACC-1403",
+      "forbiddenPaths": [
+        "packages/contracts/src/modules/account/value-objects/account-settings.ts",
+        "packages/account/src/server/application/use-cases/commands/update-account-settings.use-case.ts"
+      ]
+    },
+    {
+      "id": "legacy-reminder-model",
+      "status": "staged",
+      "decision": "ADR-076..079 / ROUTINE-2201",
+      "forbiddenPaths": ["packages/reminder/src/server/domain/aggregates/reminder-template.ts"]
+    },
+    {
+      "id": "legacy-schedule-task-model",
+      "status": "staged",
+      "decision": "ADR-081..083 / SCHED-2302",
+      "forbiddenPaths": ["packages/scheduler/src/server/domain/aggregates/schedule-task.ts"]
+    },
+    {
+      "id": "legacy-notification-template",
+      "status": "staged",
+      "decision": "ADR-085 / NOTIF-2401",
+      "forbiddenPaths": [
+        "packages/notification/src/server/domain/aggregates/notification-template.ts"
+      ]
+    }
+  ]
+}

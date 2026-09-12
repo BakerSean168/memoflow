@@ -1,8 +1,8 @@
 import type { TaskPlanExecutionReceipt } from '@memoflow/contracts/ai';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { CreateTaskTemplateReq } from '@memoflow/contracts/task';
-import type { TaskTemplateMutationResult } from './goal-plan-mutation.port';
+import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
+import type { TaskPlanMutationResult } from './goal-plan-mutation.port';
 
 /**
  * Narrow host binding consumed by the Mastra task.create workflow.
@@ -17,10 +17,10 @@ export interface TaskPlanMutationPort {
     names: readonly string[],
     context: ExecutionContext,
   ): Promise<Result<string[]>>;
-  createTaskTemplate(
-    request: CreateTaskTemplateReq,
+  createTaskPlan(
+    request: CreateTaskPlanReq,
     context: ExecutionContext,
-  ): Promise<Result<TaskTemplateMutationResult>>;
+  ): Promise<Result<TaskPlanMutationResult>>;
 }
 
 export interface ApplyTaskPlanInput {

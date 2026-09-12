@@ -1,4 +1,4 @@
-import type { GoalClientDTO } from '@memoflow/contracts/goal';
+import { goalTimeframeEndBoundary, type GoalClientDTO } from '@memoflow/contracts/goal';
 import type {
   CalendarEntryClientDTO,
   CalendarEventProjection,
@@ -7,8 +7,9 @@ import type {
   ScheduleCalendarEventProjection,
   TaskCalendarEventProjection,
 } from '@memoflow/contracts/schedule';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
-import { asInstant, defaultTime, type Instant, type Ymd } from '@memoflow/time';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import { asInstant, type Instant, type Ymd } from '@memoflow/time';
+import { getProductTime } from '../../../shared/utils/product-time';
 
 const MINUTE_MS = 60_000;
 
@@ -18,8 +19,8 @@ export interface PlannerProductTimePort {
 }
 
 export const defaultPlannerProductTimePort: PlannerProductTimePort = {
-  toYmd: (instant) => defaultTime.calendar.toYmd(instant),
-  startOfDay: (instant) => defaultTime.calendar.startOfDay(instant),
+  toYmd: (instant) => getProductTime().calendar.toYmd(instant),
+  startOfDay: (instant) => getProductTime().calendar.startOfDay(instant),
 };
 
 export interface RoutineWallClockPlannerOccurrence {
@@ -37,8 +38,8 @@ export interface RoutineWallClockPlannerOccurrence {
 
 export interface PlannerReadProjectionInput {
   readonly calendarEntries: readonly CalendarEntryClientDTO[];
-  readonly taskOccurrences: readonly TaskInstanceClientDTO[];
-  readonly taskTemplates: readonly TaskTemplateClientDTO[];
+  readonly taskOccurrences: readonly TaskOccurrenceClientDTO[];
+  readonly taskPlans: readonly TaskPlanClientDTO[];
   readonly goals: readonly GoalClientDTO[];
   readonly routineOccurrences: readonly RoutineWallClockPlannerOccurrence[];
   readonly time?: PlannerProductTimePort;
@@ -75,8 +76,8 @@ export function projectCalendarEntry(
 }
 
 export function projectTaskOccurrence(
-  occurrence: TaskInstanceClientDTO,
-  template: TaskTemplateClientDTO | undefined,
+  occurrence: TaskOccurrenceClientDTO,
+  template: TaskPlanClientDTO | undefined,
   time: PlannerProductTimePort = defaultPlannerProductTimePort,
 ): TaskCalendarEventProjection | null {
   if (occurrence.deletedAt != null) return null;
@@ -138,11 +139,12 @@ export function projectTaskOccurrence(
 
 export function projectGoalDates(
   goal: GoalClientDTO,
-  time: PlannerProductTimePort = defaultPlannerProductTimePort,
+  _time: PlannerProductTimePort = defaultPlannerProductTimePort,
 ): GoalCalendarEventProjection[] {
   if (goal.deletedAt != null) return [];
 
-  const editable = goal.status === 'Active' && goal.archivedAt == null;
+  const editable =
+    (goal.status === 'Planned' || goal.status === 'InProgress') && goal.archivedAt == null;
   const base = {
     identityId: String(goal.identityId),
     sourceType: 'goal' as const,
@@ -158,7 +160,7 @@ export function projectGoalDates(
       ...base,
       sourceId: `${String(goal.id)}:start-date`,
       allDay: true,
-      start: time.toYmd(asInstant(Number(goal.startDate))),
+      start: goal.startDate,
       end: null,
       displayMetadata: {
         semantic: 'goal-start',
@@ -169,17 +171,19 @@ export function projectGoalDates(
     });
   }
 
-  if (goal.dueDate != null) {
+  if (goal.target != null) {
+    const targetEditable = editable && goal.target.kind === 'day';
     events.push({
       ...base,
-      sourceId: `${String(goal.id)}:due-date`,
+      sourceId: `${String(goal.id)}:target`,
       allDay: true,
-      start: time.toYmd(asInstant(Number(goal.dueDate))),
+      start: goalTimeframeEndBoundary(goal.target),
       end: null,
+      editableCapabilities: { move: targetEditable, resize: false },
       displayMetadata: {
-        semantic: 'goal-deadline',
+        semantic: 'goal-target',
         subtitle: null,
-        tone: editable ? 'default' : 'muted',
+        tone: targetEditable ? 'default' : 'muted',
         status: goal.status,
       },
     });
@@ -221,9 +225,7 @@ export function projectPlannerReadModel(
   input: PlannerReadProjectionInput,
 ): CalendarEventProjection[] {
   const time = input.time ?? defaultPlannerProductTimePort;
-  const templateById = new Map(
-    input.taskTemplates.map((template) => [String(template.id), template]),
-  );
+  const templateById = new Map(input.taskPlans.map((template) => [String(template.id), template]));
   const projected: CalendarEventProjection[] = [
     ...input.calendarEntries.map(projectCalendarEntry),
     ...input.taskOccurrences.flatMap((occurrence) => {

@@ -5,3 +5,4 @@
  */
 
 export { TaskQueryValidator } from './task-query.validator';
+export { TaskOccurrenceProjectionService } from './task-occurrence-projection.service';

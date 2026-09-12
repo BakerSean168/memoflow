@@ -2,16 +2,20 @@
 import { z } from 'zod';
 import { PortableRefSchema, IsoDateString } from './portable-common.dto';
 import { KeyResultCalculationMethod } from '../../goal/value-objects/key-result-calculation-method';
+import { GoalStatus } from '../../goal/value-objects/goal-status';
+import { GoalTimeframeSchema } from '../../goal/value-objects/goal-timeframe';
+import { YmdSchema } from '../../../primitives';
 
 export const PortableKeyResultSchema = z.object({
   _ref: PortableRefSchema,
   title: z.string(),
   description: z.string().nullable().optional(),
   calculationMethod: z.enum(KeyResultCalculationMethod),
-  startingValue: z.number(),
-  progressBaselineValue: z.number().nullable().optional(),
+  initialValue: z.number(),
+  trackingBaseValue: z.number(),
   targetValue: z.number(),
   currentValue: z.number(),
+  target: GoalTimeframeSchema.nullable().optional(),
   unit: z.string().nullable().optional(),
   weight: z.number(),
   sortOrder: z.number(),
@@ -67,12 +71,10 @@ export type PortableGoalReview = z.infer<typeof PortableGoalReviewSchema>;
 export const PortableGoalSchema = z.object({
   _ref: PortableRefSchema,
   name: z.string(),
-  description: z.string().nullable().optional(),
-  feasibilityAnalysis: z.string().nullable().optional(),
-  motivation: z.string().nullable().optional(),
-  status: z.string(),
-  startDate: IsoDateString.nullable().optional(),
-  dueDate: IsoDateString.nullable().optional(),
+  summary: z.string().max(500).nullable().optional(),
+  status: z.enum(GoalStatus),
+  startDate: YmdSchema.nullable().optional(),
+  target: GoalTimeframeSchema.nullable().optional(),
   completedAt: IsoDateString.nullable().optional(),
   archivedAt: IsoDateString.nullable().optional(),
   sortOrder: z.number(),

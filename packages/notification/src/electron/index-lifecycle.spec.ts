@@ -23,10 +23,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  NotificationChannels,
-  type IElectronModuleContext,
-} from '@memoflow/contracts/electron';
+import { NotificationChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
 import { ok } from '@memoflow/contracts/result';
 import type { NotificationModuleInstance } from '../server/infrastructure';
 
@@ -83,11 +80,16 @@ function createFakeInstance() {
     getPreferences: vi.fn(() => ok(null as never)),
     updatePreferences: vi.fn(() => ok(null as never)),
   };
+  const portableCapability = {
+    key: 'notification-delivery-preferences',
+    schemaVersion: 3,
+  } as never;
   const start = vi.fn();
   const dispose = vi.fn();
   const instance: NotificationModuleInstance = {
     notificationRepository: {} as never,
     preferenceRepository: {} as never,
+    portableCapability,
     templateRepository: {} as never,
     useCases: {} as never,
     api,
@@ -95,7 +97,7 @@ function createFakeInstance() {
     start,
     dispose,
   } as NotificationModuleInstance;
-  return { instance, api, start, dispose };
+  return { instance, api, portableCapability, start, dispose };
 }
 
 function createFakeContext(): IElectronModuleContext {

@@ -44,6 +44,7 @@ import type {
   DeleteGoalUseCase,
   ArchiveGoalUseCase,
   ActivateGoalUseCase,
+  PlanGoalUseCase,
   AbandonGoalUseCase,
   SearchGoalsUseCase,
   AddGoalKeyResultUseCase,
@@ -75,6 +76,7 @@ export interface GoalUseCases {
   deleteGoal: DeleteGoalUseCase['execute'];
   archiveGoal: ArchiveGoalUseCase['execute'];
   abandonGoal: AbandonGoalUseCase['execute'];
+  planGoal: PlanGoalUseCase['execute'];
   activateGoal: ActivateGoalUseCase['execute'];
   completeGoal: CompleteGoalUseCase['execute'];
   searchGoals: SearchGoalsUseCase['execute'];
@@ -172,6 +174,10 @@ export class GoalController {
     return this.useCases.abandonGoal(id, cx.identityId, expectedVersion);
   }
 
+  async plan(id: string, expectedVersion: number, cx: ExecutionContext): Promise<Result<unknown>> {
+    return this.useCases.planGoal(id, cx.identityId, expectedVersion);
+  }
+
   async activate(
     id: string,
     expectedVersion: number,
@@ -191,7 +197,6 @@ export class GoalController {
   async getAggregate(goalId: string, cx: ExecutionContext): Promise<Result<GetGoalAggregateRes>> {
     return this.useCases.getGoalAggregate(goalId, cx.identityId);
   }
-
 
   async cloneGoal(
     goalId: string,
@@ -230,10 +235,10 @@ export class GoalController {
     return this.useCases.addKeyResult(goalId, cx.identityId, {
       title: input.title,
       aggregationMethod: input.calculationMethod,
-      startingValue: input.startingValue,
+      initialValue: input.initialValue,
       targetValue: input.targetValue,
       currentValue: input.currentValue,
-      progressBaselineValue: input.progressBaselineValue,
+      target: input.target,
       unit: input.unit,
       weight: input.weight,
       expectedVersion: input.expectedVersion,
@@ -250,10 +255,10 @@ export class GoalController {
       title: input.title,
       description: input.description ?? undefined,
       weight: input.weight,
-      startingValue: input.startingValue,
+      initialValue: input.initialValue,
       currentValue: input.currentValue,
       targetValue: input.targetValue,
-      progressBaselineValue: input.progressBaselineValue,
+      target: input.target,
       aggregationMethod: input.calculationMethod,
       unit: input.unit ?? undefined,
       expectedVersion: input.expectedVersion,

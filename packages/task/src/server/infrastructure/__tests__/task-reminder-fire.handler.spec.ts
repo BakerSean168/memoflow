@@ -12,9 +12,9 @@ import {
 import { TASK_REMINDER_HANDLER_KEY, TASK_REMINDER_PAYLOAD_VERSION } from '../schedule-projection-source';
 
 const IDENTITY = 'IdentityId_task-owner';
-const INSTANCE_ID = 'TaskInstanceId_instance-1';
-const TEMPLATE_ID = 'TaskTemplateId_template-1';
-const SCHEDULING_KEY = 'sk:v1:3:task.reminder:6:TaskInstanceId_instance-1:16:relative:15:Minutes';
+const INSTANCE_ID = 'TaskOccurrenceId_instance-1';
+const TEMPLATE_ID = 'TaskPlanId_template-1';
+const SCHEDULING_KEY = 'sk:v1:3:task.reminder:6:TaskOccurrenceId_instance-1:16:relative:15:Minutes';
 
 function createPayload(overrides: Record<string, unknown> = {}) {
   return {
@@ -85,10 +85,10 @@ function createWriter() {
 
 function createDeps(writerRet: ReturnType<typeof createWriter>, instanceRet: unknown, templateRet: unknown) {
   return {
-    taskInstanceRepository: {
+    taskOccurrenceRepository: {
       findByIdForIdentity: vi.fn().mockResolvedValue(instanceRet),
     },
-    taskTemplateRepository: {
+    taskPlanRepository: {
       findByIdForIdentity: vi.fn().mockResolvedValue(templateRet),
     },
     notificationRequestedWriter: writerRet as unknown as NotificationRequestedWriterPort,
@@ -431,7 +431,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
   it('propagates repository technical failures as retryable', async () => {
     const writer = createWriter();
     const deps = createDeps(writer, createInstance(), createTemplate());
-    deps.taskInstanceRepository.findByIdForIdentity.mockRejectedValueOnce(new Error('db down'));
+    deps.taskOccurrenceRepository.findByIdForIdentity.mockRejectedValueOnce(new Error('db down'));
     const registration = createTaskReminderScheduledHandlerRegistration(deps);
     await expect(registration.handler.execute(createContext())).rejects.toThrow('db down');
   });

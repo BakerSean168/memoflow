@@ -19,7 +19,7 @@ import {
 } from '../../../domain';
 import { Goal } from '../../../domain';
 import type { GoalSystemView, KeyResultServerDTO } from '@memoflow/contracts/goal';
-import type { LabelDto } from '@memoflow/contracts/label';
+import { LabelColorSchema, type LabelDto } from '@memoflow/contracts/label';
 import {
   AggregateRepositoryBase,
   createEventBusAdapter,
@@ -29,6 +29,7 @@ import {
 import { eventBus } from '@memoflow/utils/domain';
 import { PrismaGoalMapper, type PrismaGoalWithRelations } from './mappers/prisma-goal-mapper';
 import { rawDataToGoalState, type RawKeyResultData } from './mappers/goal-state-mapper';
+import { encodeGoalTimeframe } from '../goal-timeframe-persistence';
 
 const eventBusAdapter = createEventBusAdapter(eventBus);
 
@@ -76,7 +77,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
       identityId: row.identityId,
       name: row.name,
       normalizedName: row.normalizedName,
-      color: row.color,
+      color: row.color == null ? null : LabelColorSchema.parse(row.color),
       createdAt: row.createdAt.getTime(),
       updatedAt: row.updatedAt.getTime(),
     };
@@ -164,7 +165,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
 
     switch (options?.systemView) {
       case 'active':
-        where.status = 'Active';
+        where.status = { in: ['Planned', 'InProgress'] };
         break;
       case 'completed':
         where.status = 'Completed';
@@ -240,6 +241,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
    */
   protected async persist(goal: Goal): Promise<void> {
     const dto = goal.toServerDTO(true);
+    const target = encodeGoalTimeframe(dto.target);
 
     // Run in a transaction for consistency
     const persistInTransaction = async (tx: Prisma.TransactionClient) => {
@@ -250,12 +252,11 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
           id: dto.id as string,
           identityId: dto.identityId as string,
           name: dto.name,
-          description: dto.description,
-          feasibilityAnalysis: dto.feasibilityAnalysis,
-          motivation: dto.motivation,
+          summary: dto.summary,
           status: dto.status,
-          startDate: dto.startDate ? new Date(dto.startDate) : null,
-          dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+          startDate: dto.startDate,
+          targetKind: target.targetKind,
+          targetEndDate: target.targetEndDate,
           completedAt: dto.completedAt ? new Date(dto.completedAt) : null,
           archivedAt: dto.archivedAt ? new Date(dto.archivedAt) : null,
           sortOrder: dto.sortOrder,
@@ -265,12 +266,11 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
         },
         update: {
           name: dto.name,
-          description: dto.description,
-          feasibilityAnalysis: dto.feasibilityAnalysis,
-          motivation: dto.motivation,
+          summary: dto.summary,
           status: dto.status,
-          startDate: dto.startDate ? new Date(dto.startDate) : null,
-          dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+          startDate: dto.startDate,
+          targetKind: target.targetKind,
+          targetEndDate: target.targetEndDate,
           completedAt: dto.completedAt ? new Date(dto.completedAt) : null,
           archivedAt: dto.archivedAt ? new Date(dto.archivedAt) : null,
           sortOrder: dto.sortOrder,
@@ -296,6 +296,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
         // Upsert each KeyResult
         for (const kr of dto.keyResults) {
           const progress = parseKeyResultProgressForPrisma(kr);
+          const keyResultTarget = encodeGoalTimeframe(kr.target);
           await tx.keyResult.upsert({
             where: { id: kr.id as string },
             create: {
@@ -305,10 +306,12 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
               title: kr.title,
               description: kr.description,
               aggregationMethod: progress.aggregationMethod,
-              startingValue: progress.startingValue,
-              progressBaselineValue: progress.progressBaselineValue,
+              initialValue: progress.initialValue,
+              trackingBaseValue: progress.trackingBaseValue,
               targetValue: progress.targetValue,
               currentValue: progress.currentValue,
+              targetKind: keyResultTarget.targetKind,
+              targetEndDate: keyResultTarget.targetEndDate,
               unit: progress.unit,
               weight: kr.weight,
               order: kr.sortOrder,
@@ -317,10 +320,12 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
               title: kr.title,
               description: kr.description,
               aggregationMethod: progress.aggregationMethod,
-              startingValue: progress.startingValue,
-              progressBaselineValue: progress.progressBaselineValue,
+              initialValue: progress.initialValue,
+              trackingBaseValue: progress.trackingBaseValue,
               targetValue: progress.targetValue,
               currentValue: progress.currentValue,
+              targetKind: keyResultTarget.targetKind,
+              targetEndDate: keyResultTarget.targetEndDate,
               unit: progress.unit,
               weight: kr.weight,
               order: kr.sortOrder,
@@ -418,16 +423,16 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
 
   private async persistWithExpectedVersion(goal: Goal, expectedVersion: number): Promise<void> {
     const dto = goal.toServerDTO(false);
+    const target = encodeGoalTimeframe(dto.target);
     const result = await this.prisma.goal.updateMany({
       where: { id: String(dto.id), identityId: String(dto.identityId), version: expectedVersion },
       data: {
         name: dto.name,
-        description: dto.description,
-        feasibilityAnalysis: dto.feasibilityAnalysis,
-        motivation: dto.motivation,
+        summary: dto.summary,
         status: dto.status,
-        startDate: dto.startDate ? new Date(dto.startDate) : null,
-        dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+        startDate: dto.startDate,
+        targetKind: target.targetKind,
+        targetEndDate: target.targetEndDate,
         completedAt: dto.completedAt ? new Date(dto.completedAt) : null,
         archivedAt: dto.archivedAt ? new Date(dto.archivedAt) : null,
         reminderConfig: dto.reminderConfig ? JSON.stringify(dto.reminderConfig) : null,

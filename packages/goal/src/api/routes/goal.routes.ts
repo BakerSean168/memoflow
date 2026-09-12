@@ -27,7 +27,7 @@ import {
   BatchKeyResultWeightsInvocationSchema,
 } from '@memoflow/contracts/goal';
 import type { ListGoalFilters } from '@memoflow/contracts/goal';
-import { brandedId } from '@memoflow/contracts/primitives';
+import { brandedId, parseYmd } from '@memoflow/contracts/primitives';
 import type { GoalId } from '@memoflow/contracts/primitives';
 import type { GoalController } from '../../server/transport/goal.controller';
 // Residual 985: sole parseBoolean (local dual retired).
@@ -69,8 +69,12 @@ function normalizeGoalListQuery(query: Record<string, unknown>): ListGoalFilters
     systemView: query.systemView as ListGoalFilters['systemView'],
     query: (query.query as string | undefined) ?? undefined,
     labelIdsAll: parseStringArray(query.labelIdsAll),
-    startDate: parseNumber(query.startDate),
-    endDate: parseNumber(query.endDate),
+    targetStart:
+      typeof query.targetStart === 'string'
+        ? (parseYmd(query.targetStart) ?? undefined)
+        : undefined,
+    targetEnd:
+      typeof query.targetEnd === 'string' ? (parseYmd(query.targetEnd) ?? undefined) : undefined,
     sortBy: query.sortBy as ListGoalFilters['sortBy'],
     sortOrder: query.sortOrder as ListGoalFilters['sortOrder'],
     page: parseNumber(query.page),
@@ -303,6 +307,33 @@ export function registerGoalCrudRoutes(
     (data, ctx) => controller.abandon(data.params.id, data.body.expectedVersion, ctx),
   );
 
+  // POST /:id/plan — 回到规划态
+  r.routeWithValidation(
+    {
+      method: 'post',
+      path: '/:id/plan',
+      summary: '将目标设为规划中',
+      request: {
+        params: GoalStatusCommandInvocationSchema.shape.params,
+        body: {
+          content: {
+            'application/json': { schema: GoalStatusCommandInvocationSchema.shape.body },
+          },
+        },
+      },
+      responses: {
+        200: successResponse(GoalMutationReceiptSchema, '已设为规划中'),
+        404: errorResponse('目标不存在'),
+      },
+      validation: {
+        schema: GoalStatusCommandInvocationSchema,
+        projectInput: (req) => ({ params: req.params, body: req.body }),
+      },
+    },
+    [auth],
+    (data, ctx) => controller.plan(data.params.id, data.body.expectedVersion, ctx),
+  );
+
   // POST /:id/activate — 激活目标
   r.routeWithValidation(
     {
@@ -372,7 +403,6 @@ export function registerGoalCrudRoutes(
     [auth],
     (req, ctx) => controller.getAggregate(req.params!.id, ctx),
   );
-
 
   // POST /:id/clone — 克隆目标
   r.routeWithValidation(

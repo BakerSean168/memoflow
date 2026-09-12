@@ -2,7 +2,13 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "parallel": 2,
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals", "!{projectRoot}/.tmp-*", "!{projectRoot}/**/.tmp-*", "!{projectRoot}/**/*.tmp"],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals",
+      "!{projectRoot}/.tmp-*",
+      "!{projectRoot}/**/.tmp-*",
+      "!{projectRoot}/**/*.tmp"
+    ],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
@@ -30,7 +36,11 @@
       "cache": false
     },
     "test": {
-      "inputs": ["default", "^production"],
+      "inputs": [
+        "default",
+        "^production",
+        "{workspaceRoot}/tools/test/fixtures/label-normalization.json"
+      ],
       "cache": true,
       "syncGenerators": ["@memoflow/nx-test-system:sync-test-targets"]
     },
@@ -39,7 +49,11 @@
       "syncGenerators": ["@memoflow/nx-test-system:sync-test-targets"]
     },
     "test:coverage": {
-      "inputs": ["default", "^production"],
+      "inputs": [
+        "default",
+        "^production",
+        "{workspaceRoot}/tools/test/fixtures/label-normalization.json"
+      ],
       "cache": true,
       "syncGenerators": ["@memoflow/nx-test-system:sync-test-targets"]
     },

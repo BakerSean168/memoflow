@@ -6,6 +6,7 @@
  */
 
 import type { RouteRecordRaw } from 'vue-router';
+import { governanceSurfacePolicy } from '../governance-surface-policy';
 
 const NoteModuleLayout = () => import('../../repository/views/NoteModuleLayout.vue');
 
@@ -15,7 +16,7 @@ export const governanceRoutes: RouteRecordRaw[] = [
     component: NoteModuleLayout,
     meta: {
       title: 'governance.route.ruleList',
-      showInNav: true,
+      showInNav: governanceSurfacePolicy.navigationVisible,
       icon: 'mdi-shield-check',
       order: 8,
       requiresAuth: true,

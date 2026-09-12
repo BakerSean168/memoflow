@@ -13,6 +13,7 @@
  */
 
 import { faker } from '@faker-js/faker';
+import { requireYmd } from '../primitives';
 import type { GoalClientDTO } from '../modules/goal/aggregates/goal-client';
 import type { KeyResultClientDTO } from '../modules/goal/entities/key-result-client';
 import type { GoalRecordClientDTO } from '../modules/goal/aggregates/goal-record-client';
@@ -41,12 +42,15 @@ export function createMockGoal(overrides: Partial<GoalClientDTO> = {}): GoalClie
     id,
     identityId,
     name: faker.lorem.words({ min: 2, max: 5 }),
-    description: faker.datatype.boolean() ? faker.lorem.sentence() : null,
-    feasibilityAnalysis: null,
-    motivation: faker.datatype.boolean() ? faker.lorem.sentence() : null,
-    status: faker.helpers.arrayElement(['Active', 'Completed', 'Abandoned'] as const),
-    startDate: faker.datatype.boolean() ? faker.date.past({ years: 1 }).getTime() : null,
-    dueDate: faker.datatype.boolean() ? faker.date.future({ years: 1 }).getTime() : null,
+    summary: faker.datatype.boolean() ? faker.lorem.sentence().slice(0, 500) : null,
+    status: faker.helpers.arrayElement([
+      'Planned',
+      'InProgress',
+      'Completed',
+      'Abandoned',
+    ] as const),
+    startDate: faker.datatype.boolean() ? requireYmd('2026-01-15') : null,
+    target: faker.datatype.boolean() ? { kind: 'quarter', year: 2026, quarter: 4 } : null,
     completedAt: null,
     archivedAt: null,
     sortOrder: faker.number.int({ min: 0, max: 1000 }),
@@ -140,12 +144,12 @@ export function createMockKeyResult(
     description: faker.datatype.boolean() ? faker.lorem.sentence() : null,
     progress: {
       aggregationMethod: 'Sum',
-      startingValue: 0,
+      initialValue: 0,
       targetValue: 100,
       currentValue: 25,
-      progressBaselineValue: null,
       unit: null,
     },
+    target: null,
     progressPercentage: 25,
     isCompleted: false,
     weight: faker.number.int({ min: 1, max: 5 }),

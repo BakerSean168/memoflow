@@ -205,7 +205,7 @@
       </div>
     </main>
 
-    <TaskTemplateDialog
+    <TaskPlanDialog
       v-model="showEditDialog"
       mode="edit"
       :template="viewModel"
@@ -235,21 +235,22 @@ import {
 import { Badge, Button, useConfirm } from '@memoflow/ui-vue-shadcn';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import type { RecurrenceRuleDTO, TaskReminderConfigDTO } from '@memoflow/contracts/task';
+import type { TaskReminderConfigDTO } from '@memoflow/contracts/task';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import { formatProductDate } from '../../../shared/utils/product-time';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
-import TaskTemplateDialog from '../components/dialogs/TaskTemplateDialog.vue';
-import type { TaskTemplateViewModel } from '../components/types';
+import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
+import type { TaskPlanViewModel } from '../components/types';
 import { useTaskStore } from '../stores/task-store';
-import { useTaskInstances } from '../composables/useTaskInstances';
-import { useTaskTemplateDetailQuery } from '../composables/useTaskTemplateDetailQuery';
-import { useTaskTemplateMutations } from '../composables/useTaskTemplateMutations';
+import { useTaskOccurrences } from '../composables/useTaskOccurrences';
+import { useTaskPlanDetailQuery } from '../composables/useTaskPlanDetailQuery';
+import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import {
-  getTaskTimeValueDisplay,
-  mapTaskTemplateDtoToViewModel,
-  toTaskTimeConfigPayload,
-} from '../utils/task-template-presentation';
+  getTaskPlanScheduleDate,
+  getTaskPlanScheduleTimeDisplay,
+  mapTaskPlanDtoToViewModel,
+  toTaskPlanSchedulePayload,
+} from '../utils/task-plan-presentation';
 import {
   getTaskOccurrencePosition,
   sortTaskOccurrences,
@@ -264,7 +265,7 @@ const {
   isLoading: templateLoading,
   isError: templateError,
   refetch,
-} = useTaskTemplateDetailQuery(id);
+} = useTaskPlanDetailQuery(id);
 const {
   updateTemplateSafe,
   activateTemplateSafe,
@@ -272,13 +273,13 @@ const {
   archiveTemplateSafe,
   deleteTemplateSafe,
   isSaving,
-} = useTaskTemplateMutations();
+} = useTaskPlanMutations();
 const { fetchInstances, completeInstance, uncompleteInstance, markInstanceMissed, skipInstance } =
-  useTaskInstances();
+  useTaskOccurrences();
 const taskStore = useTaskStore();
 const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
 const viewModel = computed(() =>
-  currentTemplate.value ? mapTaskTemplateDtoToViewModel(currentTemplate.value, t) : null,
+  currentTemplate.value ? mapTaskPlanDtoToViewModel(currentTemplate.value, t) : null,
 );
 const showEditDialog = ref(false);
 const busyOccurrenceId = ref<string | null>(null);
@@ -308,22 +309,20 @@ const openCount = computed(
       (occurrence) => occurrence.status === 'Pending' || occurrence.status === 'InProgress',
     ).length,
 );
-const scheduleText = computed(() => getTaskTimeValueDisplay(t, currentTemplate.value?.timeConfig));
+const scheduleText = computed(() =>
+  getTaskPlanScheduleTimeDisplay(t, currentTemplate.value?.schedule),
+);
 const planStartText = computed(() => {
-  const startDate = currentTemplate.value?.timeConfig.startDate;
-  return startDate == null
-    ? t('task.detail.noStartDate')
-    : t('task.detail.startsOn', { date: formatProductDate(startDate) });
+  const schedule = currentTemplate.value?.schedule;
+  if (!schedule) return t('task.detail.noStartDate');
+  return t('task.detail.startsOn', { date: getTaskPlanScheduleDate(schedule) });
 });
 const recurrenceBoundaryText = computed(() => {
-  const recurrence = currentTemplate.value?.recurrenceRule;
-  if (!recurrence) return t('task.detail.oneTimePlan');
-  if (recurrence.occurrences) {
-    return t('task.detail.occurrenceLimit', { count: recurrence.occurrences });
-  }
-  if (recurrence.endDate) {
-    return t('task.detail.endsOn', { date: formatProductDate(recurrence.endDate) });
-  }
+  const schedule = currentTemplate.value?.schedule;
+  if (!schedule || schedule.kind === 'OneTime') return t('task.detail.oneTimePlan');
+  const end = schedule.recurrence.end;
+  if (end.kind === 'Count') return t('task.detail.occurrenceLimit', { count: end.count });
+  if (end.kind === 'Until') return t('task.detail.endsOn', { date: end.date });
   return t('task.detail.noRecurrenceEnd');
 });
 const reminderText = computed(() => {
@@ -341,20 +340,19 @@ const goalBindingText = computed(() =>
 function openEdit() {
   showEditDialog.value = true;
 }
-function goalBinding(vm: TaskTemplateViewModel) {
-  if (!vm.goalBinding?.goalId || !vm.goalBinding.keyResultId) return null;
+function goalBinding(vm: TaskPlanViewModel) {
+  if (!vm.goalBinding?.goalId) return null;
   return {
     goalId: vm.goalBinding.goalId as GoalId,
-    keyResultId: vm.goalBinding.keyResultId as KeyResultId,
-    contribution: vm.goalBinding.contribution ?? null,
+    keyResultId: vm.goalBinding.keyResultId ? (vm.goalBinding.keyResultId as KeyResultId) : null,
+    contribution: vm.goalBinding.keyResultId ? (vm.goalBinding.contribution ?? null) : null,
   };
 }
-async function saveEdit(vm: TaskTemplateViewModel) {
+async function saveEdit(vm: TaskPlanViewModel) {
   const result = await updateTemplateSafe(id.value, {
     name: vm.title,
     description: vm.description ?? null,
-    timeConfig: toTaskTimeConfigPayload(vm.timeConfig),
-    recurrenceRule: (vm.recurrenceRule as unknown as RecurrenceRuleDTO) ?? null,
+    schedule: toTaskPlanSchedulePayload(vm),
     reminderConfig: (vm.reminderConfig as never) ?? null,
     importance: (vm.importance as ImportanceLevel) ?? ImportanceLevel.Moderate,
     labelIds: vm.labelIds ?? vm.labels?.map((label) => label.id) ?? [],

@@ -5,6 +5,8 @@ import {
   createGoalReminderFireHandler,
   GOAL_REMINDER_NOTIFICATION_SOURCE,
 } from '@memoflow/goal/schedule-execution';
+import { GOAL_REMINDER_PAYLOAD_VERSION } from '@memoflow/goal/schedule-projection';
+import { requireYmd } from '@memoflow/contracts/primitives';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
 import type { BusinessOperationReceipt } from '@memoflow/contracts/reliable-messaging';
@@ -19,9 +21,9 @@ function buildPayload() {
     goalTitle: 'Ship R06',
     triggerType: ReminderTriggerType.RemainingDays,
     triggerValue: 3,
-    startDate: Date.UTC(2026, 1, 1),
-    dueDate: Date.UTC(2026, 8, 1),
-    reminderTime: 8 * 60,
+    startDate: requireYmd('2026-02-01'),
+    target: { kind: 'day' as const, date: requireYmd('2026-09-01') },
+    reminderTime: Date.UTC(2026, 7, 10, 8, 45),
   };
 }
 
@@ -32,7 +34,7 @@ function buildInvocation(): ScheduledInvocationContext {
     schedulingKey: SCHEDULING_KEY,
     handlerKey: 'goal.reminder.fire',
     runAt: Date.UTC(2026, 7, 10, 8, 45),
-    payloadVersion: 1,
+    payloadVersion: GOAL_REMINDER_PAYLOAD_VERSION,
     payload: buildPayload(),
   };
 }
@@ -43,8 +45,8 @@ function makeGoal() {
       id: GOAL_ID,
       identityId: IDENTITY_ID,
       name: 'Ship R06',
-      description: null,
-      status: GoalStatus.Active,
+      summary: null,
+      status: GoalStatus.InProgress,
       deletedAt: null,
       archivedAt: null,
       completedAt: null,

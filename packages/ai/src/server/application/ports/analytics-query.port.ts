@@ -1,9 +1,12 @@
+import type { UserTimeContext } from '@memoflow/time';
 import type {
   ChatExecutionProviderConfig,
   ChatExecutionUsage,
 } from './chat-execution.port';
 
 export interface AnalyticsQueryContext {
+  /** Canonical identity-scoped Product Time context exposed to model synthesis. */
+  timeContext: UserTimeContext;
   dashboard?: Record<string, unknown>;
   taskDashboard?: Record<string, unknown>;
   goals: Array<Record<string, unknown>>;

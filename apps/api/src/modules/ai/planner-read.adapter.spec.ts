@@ -24,11 +24,11 @@ function fixture() {
     ]),
   };
   const taskApplicationPort = {
-    getTaskInstancesByDateRange: vi.fn(async () => ok({ data: [
+    getTaskOccurrencesByDateRange: vi.fn(async () => ok({ data: [
       { id: 'occ-2', templateId: 'plan-2', instanceDate: 1_800, status: 'Completed' },
       { id: 'occ-1', templateId: 'plan-1', instanceDate: 1_500, status: 'Pending' },
     ] } as never)),
-    listTaskTemplates: vi.fn(async () => ok({ templates: [
+    listTaskPlans: vi.fn(async () => ok({ templates: [
       { id: 'plan-1', name: 'Write draft' },
       { id: 'plan-2', name: 'Review notes' },
     ] } as never)),

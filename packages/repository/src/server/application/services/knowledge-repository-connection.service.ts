@@ -6,8 +6,13 @@ import type {
   CompleteKnowledgeRepositoryInstallationRes,
   ConfirmKnowledgeRepositoryHeadReq,
   CreateKnowledgeRepositoryConnectionReq,
-  KnowledgeRepositoryConnectionClientDTO,
-  KnowledgeRepositoryConnectionServerDTO,
+  KnowledgeRemoteBindingClientDTO,
+  KnowledgeRemoteBindingServerDTO,
+  KnowledgeProjectionCheckpoint,
+  RemoteHistoryFence,
+  RemoteRepositoryBlockReason,
+  RemoteRepositoryObservation,
+  GitHubInstallationRepositoryDTO,
   KnowledgeRepositoryContentState,
   KnowledgeRepositoryInstallationClientKind,
   KnowledgeRepositoryInstallationIntentStatusResponse,
@@ -18,14 +23,19 @@ import type {
   StartKnowledgeRepositoryInstallationReq,
   StartKnowledgeRepositoryInstallationRes,
 } from '@memoflow/contracts/repository';
-import { KnowledgeRepositoryLifecycleErrorCodes } from '@memoflow/contracts/repository';
 import type {
   GitHubAppInstallationInventory,
   IGitHubAppClient,
 } from '../ports/github-app-client.port';
 import { GitHubAppClientFailureError } from '../ports/github-app-client.port';
-import type { IKnowledgeRepositoryConnectionRepository } from '../ports/knowledge-repository-connection.repository';
-import type { IKnowledgeRepositoryConnectionWriteTransactionRunner } from '../ports/knowledge-repository-connection-write-transaction.runner';
+import type {
+  IKnowledgeProjectionCheckpointRepository,
+  IKnowledgeRemoteBindingRepository,
+  IKnowledgeSpaceRepository,
+  IRemoteHistoryFenceRepository,
+  IRemoteRepositoryObservationRepository,
+} from '../ports/knowledge-remote-binding.repositories';
+import type { IKnowledgeRemoteBindingWriteTransactionRunner } from '../ports/knowledge-remote-binding-write-transaction.runner';
 import type { IKnowledgeRepositoryCloudDataPurger } from '../ports/knowledge-repository-cloud-data-purger.port';
 import type {
   IKnowledgeRepositoryInstallationIntentRepository,
@@ -40,6 +50,7 @@ import {
   hashKnowledgeRepositoryInstallationState,
   parseKnowledgeRepositoryInstallationStateRouteKey,
 } from './knowledge-repository-installation-state';
+import { buildRemoteRepositoryObservation } from './remote-repository-observation.policy';
 
 function firstReconciliationAction(
   localState: KnowledgeRepositoryContentState,
@@ -112,8 +123,12 @@ function buildSetupRouteUrl(
 
 export interface KnowledgeRepositoryConnectionServiceOptions {
   appSlug: string;
-  connectionRepository: IKnowledgeRepositoryConnectionRepository;
-  connectionWriteTransactionRunner: IKnowledgeRepositoryConnectionWriteTransactionRunner;
+  knowledgeSpaceRepository: IKnowledgeSpaceRepository;
+  bindingRepository: IKnowledgeRemoteBindingRepository;
+  observationRepository: IRemoteRepositoryObservationRepository;
+  historyFenceRepository: IRemoteHistoryFenceRepository;
+  projectionCheckpointRepository: IKnowledgeProjectionCheckpointRepository;
+  bindingWriteTransactionRunner: IKnowledgeRemoteBindingWriteTransactionRunner;
   cloudDataPurger?: IKnowledgeRepositoryCloudDataPurger;
   githubAppClient: IGitHubAppClient;
   installationIntentRepository: IKnowledgeRepositoryInstallationIntentRepository;
@@ -371,7 +386,7 @@ export class KnowledgeRepositoryConnectionService {
   async connect(
     identityId: string,
     request: CreateKnowledgeRepositoryConnectionReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>> {
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
     const finalizedIntent = await this.options.installationIntentRepository.findUsableFinalized(
       identityId,
       request.installationId,
@@ -381,6 +396,18 @@ export class KnowledgeRepositoryConnectionService {
       return fail({
         code: 'FORBIDDEN',
         message: 'Finalize the GitHub App installation before connecting a repository',
+      });
+    }
+    if (finalizedIntent.clientKind === 'desktop' && !request.knowledgeSpaceId) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: 'Desktop knowledge repository binding requires the Local Vault knowledgeSpaceId',
+      });
+    }
+    if (finalizedIntent.clientKind === 'web' && request.knowledgeSpaceId) {
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: 'Web knowledge repository binding cannot choose a device-local KnowledgeSpace id',
       });
     }
 
@@ -406,19 +433,20 @@ export class KnowledgeRepositoryConnectionService {
           message: 'Archived or disabled repositories cannot connect',
         });
       }
-      if (!repository.permissions.push) {
-        return fail({
-          code: 'FORBIDDEN',
-          message: 'Repository push (contents write) permission is required',
-        });
-      }
-      if (inventory.contentsPermission !== 'write') {
+      if (!repository.permissions.push || inventory.contentsPermission !== 'write') {
         return fail({ code: 'FORBIDDEN', message: 'Contents write permission is required' });
       }
 
       const timestamp = this.now();
-      const connection = await this.options.connectionWriteTransactionRunner.run(
-        async ({ connectionRepository, installationIntentRepository }) => {
+      const result = await this.options.bindingWriteTransactionRunner.run(
+        async ({
+          knowledgeSpaceRepository,
+          bindingRepository,
+          observationRepository,
+          historyFenceRepository,
+          projectionCheckpointRepository,
+          installationIntentRepository,
+        }) => {
           const transactionalIntent = await installationIntentRepository.findUsableFinalized(
             identityId,
             request.installationId,
@@ -431,35 +459,74 @@ export class KnowledgeRepositoryConnectionService {
             );
           }
 
-          const existing = await connectionRepository.findByGithubRepositoryId(repository.id);
+          const existing = await bindingRepository.findByRepositoryId(repository.id);
           if (existing && existing.identityId !== identityId) {
             throw new KnowledgeRepositoryConnectionCommitError(
               'CONFLICT',
               'Repository is already associated with another account',
             );
           }
+          const ownedBindings = await bindingRepository.findByIdentityId(identityId);
+          const otherActive = ownedBindings.find(
+            (binding) => binding.disconnectedAt === null && binding.id !== existing?.id,
+          );
+          if (otherActive) {
+            throw new KnowledgeRepositoryConnectionCommitError(
+              'CONFLICT',
+              'Disconnect the current remote knowledge binding before selecting another repository',
+            );
+          }
 
-          const next: KnowledgeRepositoryConnectionServerDTO = {
-            id: existing?.id ?? `knowledge-connection-${randomUUID()}`,
-            identityId: identityId as KnowledgeRepositoryConnectionServerDTO['identityId'],
-            githubUserId: inventory.accountId,
-            githubRepositoryId: repository.id,
-            githubRepositoryFullName: repository.fullName,
+          const knowledgeSpaceId =
+            transactionalIntent.clientKind === 'desktop'
+              ? request.knowledgeSpaceId!
+              : (existing?.knowledgeSpaceId ??
+                ownedBindings[0]?.knowledgeSpaceId ??
+                (`KnowledgeSpaceId_${randomUUID()}` as KnowledgeRemoteBindingServerDTO['knowledgeSpaceId']));
+          await knowledgeSpaceRepository.ensure(knowledgeSpaceId);
+
+          const binding: KnowledgeRemoteBindingServerDTO = {
+            id:
+              existing?.id ??
+              (`KnowledgeRemoteBindingId_${randomUUID()}` as KnowledgeRemoteBindingServerDTO['id']),
+            knowledgeSpaceId,
+            identityId: identityId as KnowledgeRemoteBindingServerDTO['identityId'],
+            provider: 'GitHub',
             installationId: request.installationId,
-            defaultBranch: repository.defaultBranch,
-            status: 'Active',
-            lastSyncedCommitSha: existing?.lastSyncedCommitSha ?? null,
-            lastProjectedCommitSha: existing?.lastProjectedCommitSha ?? null,
-            lastErrorCode: null,
-            lastErrorMessage: null,
+            repositoryId: repository.id,
+            repositoryFullNameSnapshot: repository.fullName,
+            connectedAt: timestamp,
+            disconnectedAt: null,
             version: (existing?.version ?? 0) + 1,
-            createdAt:
-              existing?.createdAt ??
-              (timestamp as KnowledgeRepositoryConnectionServerDTO['createdAt']),
-            updatedAt: timestamp as KnowledgeRepositoryConnectionServerDTO['updatedAt'],
-            deletedAt: null,
           };
-          await connectionRepository.save(next);
+          await bindingRepository.save(binding);
+
+          const existingFence = existing
+            ? await historyFenceRepository.findByBindingId(binding.id)
+            : null;
+          const observation = this.buildObservation(
+            binding,
+            inventory,
+            repository,
+            existingFence,
+            timestamp,
+          );
+          await observationRepository.save(observation);
+
+          const checkpoint = existing
+            ? await projectionCheckpointRepository.findByBindingId(binding.id)
+            : null;
+          const nextCheckpoint: KnowledgeProjectionCheckpoint = checkpoint ?? {
+            bindingId: binding.id,
+            branch: repository.defaultBranch,
+            projectedCommitSha: null,
+            state: 'Lagging',
+            failure: null,
+            lastAttemptAt: null,
+            projectedAt: null,
+          };
+          if (!checkpoint) await projectionCheckpointRepository.save(nextCheckpoint);
+
           const consumed = await installationIntentRepository.markConsumed({
             identityId,
             intentId: transactionalIntent.id,
@@ -471,10 +538,12 @@ export class KnowledgeRepositoryConnectionService {
               'GitHub installation intent was consumed concurrently',
             );
           }
-          return next;
+          return { binding, observation, historyFence: existingFence, checkpoint: nextCheckpoint };
         },
       );
-      return ok(this.toClient(connection));
+      return ok(
+        this.toClient(result.binding, result.observation, result.historyFence, result.checkpoint),
+      );
     } catch (error) {
       if (error instanceof KnowledgeRepositoryConnectionCommitError) {
         return fail({ code: error.code, message: error.message });
@@ -487,44 +556,55 @@ export class KnowledgeRepositoryConnectionService {
   }
 
   async list(identityId: string): Promise<Result<ListKnowledgeRepositoryConnectionsRes>> {
-    const connections = await this.options.connectionRepository.findByIdentityId(identityId);
-    const visibleConnections = connections.filter((connection) => connection.deletedAt === null);
-    const inventoryLookups = new Map<
-      string,
-      Promise<{ ok: true; data: GitHubAppInstallationInventory } | { ok: false; error: unknown }>
-    >();
-    for (const connection of visibleConnections) {
-      if (!inventoryLookups.has(connection.installationId)) {
-        inventoryLookups.set(
-          connection.installationId,
-          this.options.githubAppClient
-            .getInstallationInventory(connection.installationId)
-            .then((data) => ({ ok: true as const, data }))
-            .catch((error: unknown) => ({ ok: false as const, error })),
-        );
-      }
-    }
-    const refreshed = await Promise.all(
-      visibleConnections.map((connection) =>
-        this.refreshLifecycle(connection, inventoryLookups.get(connection.installationId)!),
-      ),
+    const bindings = (await this.options.bindingRepository.findByIdentityId(identityId)).filter(
+      (binding) => binding.disconnectedAt === null,
     );
+    const bindingIds = bindings.map((binding) => binding.id);
+    const [observations, fences, checkpoints] = await Promise.all([
+      this.options.observationRepository.findByBindingIds(bindingIds),
+      this.options.historyFenceRepository.findByBindingIds(bindingIds),
+      this.options.projectionCheckpointRepository.findByBindingIds(bindingIds),
+    ]);
     return ok({
-      connections: refreshed.map((connection) => this.toClient(connection)),
+      connections: bindings.map((binding) =>
+        this.toClient(
+          binding,
+          observations.get(binding.id) ?? null,
+          fences.get(binding.id) ?? null,
+          checkpoints.get(binding.id) ?? null,
+        ),
+      ),
     });
+  }
+
+  async refreshObservation(
+    identityId: string,
+    bindingId: string,
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
+    const binding = await this.options.bindingRepository.findByIdForIdentity(identityId, bindingId);
+    if (!binding || binding.disconnectedAt !== null) {
+      return fail({ code: 'NOT_FOUND', message: 'Knowledge remote binding was not found' });
+    }
+    try {
+      await this.refreshObservationState(binding);
+      return ok(await this.composeClient(binding));
+    } catch (error) {
+      return fail({
+        code: 'SERVICE_UNAVAILABLE',
+        message:
+          error instanceof Error ? error.message : 'GitHub repository observation refresh failed',
+      });
+    }
   }
 
   async disconnect(
     identityId: string,
-    connectionId: string,
+    bindingId: string,
     purgeCloudData = false,
   ): Promise<Result<null>> {
-    const connection = await this.options.connectionRepository.findByIdForIdentity(
-      identityId,
-      connectionId,
-    );
-    if (!connection || connection.deletedAt !== null) {
-      return fail({ code: 'NOT_FOUND', message: 'Knowledge repository connection was not found' });
+    const binding = await this.options.bindingRepository.findByIdForIdentity(identityId, bindingId);
+    if (!binding || binding.disconnectedAt !== null) {
+      return fail({ code: 'NOT_FOUND', message: 'Knowledge remote binding was not found' });
     }
     if (purgeCloudData) {
       if (!this.options.cloudDataPurger) {
@@ -533,61 +613,41 @@ export class KnowledgeRepositoryConnectionService {
           message: 'Cloud data purge is not configured for this runtime',
         });
       }
-      const purged = await this.options.cloudDataPurger.purge(identityId, connectionId);
-      if (!purged) {
-        return fail({
-          code: 'NOT_FOUND',
-          message: 'Knowledge repository connection was not found',
-        });
-      }
+      const purged = await this.options.cloudDataPurger.purge(identityId, bindingId);
+      if (!purged)
+        return fail({ code: 'NOT_FOUND', message: 'Knowledge remote binding was not found' });
     } else {
-      await this.options.connectionRepository.updateStatus(
+      const disconnected = await this.options.bindingRepository.markDisconnected(
         identityId,
-        connectionId,
-        'Revoked',
-        null,
+        bindingId,
+        this.now(),
       );
+      if (!disconnected) {
+        return fail({ code: 'NOT_FOUND', message: 'Knowledge remote binding was not found' });
+      }
     }
     return ok(null);
   }
 
   async issueInstallationToken(
     identityId: string,
-    connectionId: string,
+    bindingId: string,
   ): Promise<Result<{ token: string; expiresAt: number; repositoryId: string }>> {
-    const connection = await this.options.connectionRepository.findByIdForIdentity(
-      identityId,
-      connectionId,
-    );
-    if (!connection || connection.status !== 'Active' || connection.deletedAt !== null) {
-      return fail({
-        code: 'NOT_FOUND',
-        message: 'Active knowledge repository connection was not found',
-      });
+    const binding = await this.options.bindingRepository.findByIdForIdentity(identityId, bindingId);
+    if (!binding || binding.disconnectedAt !== null) {
+      return fail({ code: 'NOT_FOUND', message: 'Active knowledge remote binding was not found' });
     }
+    const preflight = await this.requireLiveProviderState(binding);
+    if (!preflight.ok) return preflight;
     try {
-      const refreshed = await this.refreshLifecycle(
-        connection,
-        this.options.githubAppClient
-          .getInstallationInventory(connection.installationId)
-          .then((data) => ({ ok: true as const, data }))
-          .catch((error: unknown) => ({ ok: false as const, error })),
-      );
-      if (refreshed.status !== 'Active') {
-        return fail({
-          code: 'FORBIDDEN',
-          message: 'Knowledge repository authorization requires attention before synchronization',
-          context: { lifecycleErrorCode: refreshed.lastErrorCode },
-        });
-      }
       const token = await this.options.githubAppClient.createInstallationAccessToken(
-        refreshed.installationId,
-        refreshed.githubRepositoryId,
+        binding.installationId,
+        binding.repositoryId,
       );
       return ok({
         token: token.token,
         expiresAt: token.expiresAt,
-        repositoryId: refreshed.githubRepositoryId,
+        repositoryId: binding.repositoryId,
       });
     } catch (error) {
       return fail({
@@ -600,55 +660,24 @@ export class KnowledgeRepositoryConnectionService {
 
   async previewFirstReconciliation(
     identityId: string,
-    connectionId: string,
+    bindingId: string,
     request: PreviewKnowledgeRepositoryReconciliationReq,
   ): Promise<Result<KnowledgeRepositoryReconciliationPreview>> {
-    const connection = await this.options.connectionRepository.findByIdForIdentity(
-      identityId,
-      connectionId,
-    );
-    if (!connection || connection.status !== 'Active' || connection.deletedAt !== null) {
-      return fail({
-        code: 'NOT_FOUND',
-        message: 'Active knowledge repository connection was not found',
-      });
+    const binding = await this.options.bindingRepository.findByIdForIdentity(identityId, bindingId);
+    if (!binding || binding.disconnectedAt !== null) {
+      return fail({ code: 'NOT_FOUND', message: 'Active knowledge remote binding was not found' });
     }
 
+    const preflight = await this.requireLiveProviderState(binding, ['DefaultBranchChanged']);
+    if (!preflight.ok) return preflight;
     try {
-      const inventory = await this.options.githubAppClient.getInstallationInventory(
-        connection.installationId,
-      );
-      if (inventory.suspended) {
-        return fail({ code: 'FORBIDDEN', message: 'GitHub App installation is suspended' });
-      }
-      if (inventory.contentsPermission !== 'write') {
-        return fail({ code: 'FORBIDDEN', message: 'Contents write permission is required' });
-      }
-      const repository = inventory.repositories.find(
-        (candidate) => candidate.id === connection.githubRepositoryId,
-      );
-      if (!repository) {
-        return fail({ code: 'NOT_FOUND', message: 'Repository is not part of this installation' });
-      }
-      if (
-        !repository.private ||
-        repository.archived ||
-        repository.disabled ||
-        !repository.permissions.push
-      ) {
-        return fail({
-          code: 'FORBIDDEN',
-          message: 'Repository no longer satisfies knowledge repository requirements',
-        });
-      }
-
       const snapshot = await this.options.githubAppClient.getRepositorySnapshot(
-        connection.installationId,
-        repository,
+        binding.installationId,
+        preflight.data.repository,
       );
       const remoteState: KnowledgeRepositoryContentState = snapshot.empty ? 'Empty' : 'NonEmpty';
       return ok({
-        connectionId,
+        connectionId: bindingId,
         localState: request.localState,
         remoteState,
         action: firstReconciliationAction(request.localState, remoteState),
@@ -666,49 +695,20 @@ export class KnowledgeRepositoryConnectionService {
 
   async confirmHead(
     identityId: string,
-    connectionId: string,
+    bindingId: string,
     request: ConfirmKnowledgeRepositoryHeadReq,
-  ): Promise<Result<KnowledgeRepositoryConnectionClientDTO>> {
-    const connection = await this.options.connectionRepository.findByIdForIdentity(
-      identityId,
-      connectionId,
-    );
-    if (!connection || connection.status !== 'Active' || connection.deletedAt !== null) {
-      return fail({
-        code: 'NOT_FOUND',
-        message: 'Active knowledge repository connection was not found',
-      });
+  ): Promise<Result<KnowledgeRemoteBindingClientDTO>> {
+    const binding = await this.options.bindingRepository.findByIdForIdentity(identityId, bindingId);
+    if (!binding || binding.disconnectedAt !== null) {
+      return fail({ code: 'NOT_FOUND', message: 'Active knowledge remote binding was not found' });
     }
 
+    const preflight = await this.requireLiveProviderState(binding, ['DefaultBranchChanged']);
+    if (!preflight.ok) return preflight;
     try {
-      const inventory = await this.options.githubAppClient.getInstallationInventory(
-        connection.installationId,
-      );
-      if (inventory.suspended || inventory.contentsPermission !== 'write') {
-        return fail({
-          code: 'FORBIDDEN',
-          message: 'GitHub App installation is unavailable or lacks Contents write permission',
-        });
-      }
-      const repository = inventory.repositories.find(
-        (candidate) => candidate.id === connection.githubRepositoryId,
-      );
-      if (
-        !repository ||
-        !repository.private ||
-        repository.archived ||
-        repository.disabled ||
-        !repository.permissions.push
-      ) {
-        return fail({
-          code: 'FORBIDDEN',
-          message: 'Repository no longer satisfies knowledge repository requirements',
-        });
-      }
-
       const snapshot = await this.options.githubAppClient.getRepositorySnapshot(
-        connection.installationId,
-        repository,
+        binding.installationId,
+        preflight.data.repository,
       );
       if (snapshot.headSha !== request.headSha) {
         return fail({
@@ -716,20 +716,39 @@ export class KnowledgeRepositoryConnectionService {
           message: 'GitHub default branch changed before reconciliation was confirmed',
         });
       }
-
       const timestamp = this.now();
-      const updated: KnowledgeRepositoryConnectionServerDTO = {
-        ...connection,
+      const fence: RemoteHistoryFence = {
+        bindingId: binding.id,
         defaultBranch: snapshot.defaultBranch,
-        status: 'Active',
-        lastSyncedCommitSha: request.headSha,
-        lastErrorCode: null,
-        lastErrorMessage: null,
-        version: connection.version + 1,
-        updatedAt: timestamp as KnowledgeRepositoryConnectionServerDTO['updatedAt'],
+        lastConfirmedRemoteHeadSha: request.headSha,
+        confirmedAt: timestamp,
       };
-      await this.options.connectionRepository.save(updated);
-      return ok(this.toClient(updated));
+      await this.options.historyFenceRepository.save(fence);
+      await this.options.observationRepository.save(
+        this.buildObservation(
+          binding,
+          preflight.data.inventory,
+          preflight.data.repository,
+          fence,
+          timestamp,
+        ),
+      );
+
+      const checkpoint = await this.options.projectionCheckpointRepository.findByBindingId(
+        binding.id,
+      );
+      if (checkpoint && checkpoint.branch !== snapshot.defaultBranch) {
+        await this.options.projectionCheckpointRepository.save({
+          ...checkpoint,
+          branch: snapshot.defaultBranch,
+          projectedCommitSha: null,
+          state: 'Lagging',
+          failure: null,
+          lastAttemptAt: null,
+          projectedAt: null,
+        });
+      }
+      return ok(await this.composeClient(binding));
     } catch (error) {
       return fail({
         code: 'SERVICE_UNAVAILABLE',
@@ -810,149 +829,155 @@ export class KnowledgeRepositoryConnectionService {
     }
   }
 
+  private async composeClient(
+    binding: KnowledgeRemoteBindingServerDTO,
+  ): Promise<KnowledgeRemoteBindingClientDTO> {
+    const [observation, historyFence, projectionCheckpoint] = await Promise.all([
+      this.options.observationRepository.findByBindingId(binding.id),
+      this.options.historyFenceRepository.findByBindingId(binding.id),
+      this.options.projectionCheckpointRepository.findByBindingId(binding.id),
+    ]);
+    return this.toClient(binding, observation, historyFence, projectionCheckpoint);
+  }
+
   private toClient(
-    connection: KnowledgeRepositoryConnectionServerDTO,
-  ): KnowledgeRepositoryConnectionClientDTO {
+    binding: KnowledgeRemoteBindingServerDTO,
+    observation: RemoteRepositoryObservation | null,
+    historyFence: RemoteHistoryFence | null,
+    projectionCheckpoint: KnowledgeProjectionCheckpoint | null,
+  ): KnowledgeRemoteBindingClientDTO {
     return {
-      id: connection.id,
-      identityId: connection.identityId,
-      githubUserId: connection.githubUserId,
-      githubRepositoryId: connection.githubRepositoryId,
-      githubRepositoryFullName: connection.githubRepositoryFullName,
-      installationId: connection.installationId,
-      defaultBranch: connection.defaultBranch,
-      status: connection.status,
-      lastSyncedCommitSha: connection.lastSyncedCommitSha,
-      lastErrorCode: connection.lastErrorCode,
-      canSync: connection.status === 'Active',
-      createdAt: connection.createdAt,
-      updatedAt: connection.updatedAt,
+      id: binding.id,
+      knowledgeSpaceId: binding.knowledgeSpaceId,
+      identityId: binding.identityId,
+      provider: binding.provider,
+      installationId: binding.installationId,
+      repositoryId: binding.repositoryId,
+      repositoryFullNameSnapshot: binding.repositoryFullNameSnapshot,
+      connectedAt: binding.connectedAt,
+      disconnectedAt: binding.disconnectedAt,
+      observation,
+      historyFence,
+      projectionCheckpoint,
     };
   }
 
-  private async refreshLifecycle(
-    connection: KnowledgeRepositoryConnectionServerDTO,
-    inventoryLookup: Promise<
-      { ok: true; data: GitHubAppInstallationInventory } | { ok: false; error: unknown }
-    >,
-  ): Promise<KnowledgeRepositoryConnectionServerDTO> {
-    const inventory = await inventoryLookup;
-    if (!inventory.ok) {
-      if (
-        inventory.error instanceof GitHubAppClientFailureError &&
-        inventory.error.failure.kind === 'not_found'
-      ) {
-        return this.persistLifecycle(connection, {
-          status: 'Revoked',
-          lastErrorCode: KnowledgeRepositoryLifecycleErrorCodes.InstallationNotFound,
-          lastErrorMessage: 'GitHub App installation no longer exists',
-        });
-      }
-      if (connection.status !== 'Active') return connection;
-      return this.persistLifecycle(connection, {
-        lastErrorCode: KnowledgeRepositoryLifecycleErrorCodes.CheckUnavailable,
-        lastErrorMessage: 'GitHub repository lifecycle check is temporarily unavailable',
-      });
-    }
-
-    if (inventory.data.suspended) {
-      return this.persistLifecycle(connection, {
-        status: 'Suspended',
-        lastErrorCode: KnowledgeRepositoryLifecycleErrorCodes.InstallationSuspended,
-        lastErrorMessage: 'GitHub App installation is suspended',
-      });
-    }
-    if (inventory.data.contentsPermission !== 'write') {
-      return this.persistLifecycle(connection, {
-        status: 'Suspended',
-        lastErrorCode: KnowledgeRepositoryLifecycleErrorCodes.ContentsPermissionRequired,
-        lastErrorMessage: 'GitHub App Contents write permission is required',
-      });
-    }
-
-    const repository = inventory.data.repositories.find(
-      (candidate) => candidate.id === connection.githubRepositoryId,
-    );
-    if (!repository) {
-      return this.persistLifecycle(connection, {
-        status: 'Revoked',
-        lastErrorCode: KnowledgeRepositoryLifecycleErrorCodes.RepositoryAccessLost,
-        lastErrorMessage: 'Repository was deleted or removed from the GitHub App installation',
-      });
-    }
-    if (!repository.private) {
-      return this.persistLifecycle(connection, {
-        status: 'Suspended',
-        lastErrorCode: KnowledgeRepositoryLifecycleErrorCodes.RepositoryPublic,
-        lastErrorMessage: 'Knowledge repository is public; synchronization is paused',
-      });
-    }
-    if (repository.archived) {
-      return this.persistLifecycle(connection, {
-        status: 'Suspended',
-        lastErrorCode: KnowledgeRepositoryLifecycleErrorCodes.RepositoryArchived,
-        lastErrorMessage: 'Knowledge repository is archived',
-      });
-    }
-    if (repository.disabled) {
-      return this.persistLifecycle(connection, {
-        status: 'Suspended',
-        lastErrorCode: KnowledgeRepositoryLifecycleErrorCodes.RepositoryDisabled,
-        lastErrorMessage: 'Knowledge repository is disabled',
-      });
-    }
-    if (!repository.permissions.push) {
-      return this.persistLifecycle(connection, {
-        status: 'Suspended',
-        lastErrorCode: KnowledgeRepositoryLifecycleErrorCodes.RepositoryAdminRequired,
-        lastErrorMessage: 'Repository push (contents write) permission is required',
-      });
-    }
-    if (connection.lastSyncedCommitSha && repository.defaultBranch !== connection.defaultBranch) {
-      return this.persistLifecycle(connection, {
-        status: 'Suspended',
-        githubRepositoryFullName: repository.fullName,
-        githubUserId: inventory.data.accountId,
-        lastErrorCode: KnowledgeRepositoryLifecycleErrorCodes.DefaultBranchChanged,
-        lastErrorMessage: 'GitHub default branch changed; repository reconciliation is required',
-      });
-    }
-
-    return this.persistLifecycle(connection, {
-      status: 'Active',
-      githubRepositoryFullName: repository.fullName,
-      githubUserId: inventory.data.accountId,
-      defaultBranch: repository.defaultBranch,
-      lastErrorCode: null,
-      lastErrorMessage: null,
+  private buildObservation(
+    binding: KnowledgeRemoteBindingServerDTO,
+    inventory: GitHubAppInstallationInventory,
+    repository: GitHubInstallationRepositoryDTO,
+    historyFence: RemoteHistoryFence | null,
+    observedAt: number,
+  ): RemoteRepositoryObservation {
+    return buildRemoteRepositoryObservation({
+      binding,
+      inventory,
+      repository,
+      historyFence,
+      observedAt,
     });
   }
 
-  private async persistLifecycle(
-    connection: KnowledgeRepositoryConnectionServerDTO,
-    patch: Partial<
-      Pick<
-        KnowledgeRepositoryConnectionServerDTO,
-        | 'githubUserId'
-        | 'githubRepositoryFullName'
-        | 'defaultBranch'
-        | 'status'
-        | 'lastErrorCode'
-        | 'lastErrorMessage'
-      >
-    >,
-  ): Promise<KnowledgeRepositoryConnectionServerDTO> {
-    const changed = Object.entries(patch).some(
-      ([key, value]) => connection[key as keyof typeof connection] !== value,
+  private async refreshObservationState(binding: KnowledgeRemoteBindingServerDTO): Promise<{
+    observation: RemoteRepositoryObservation;
+    inventory: GitHubAppInstallationInventory | null;
+    repository: GitHubInstallationRepositoryDTO | null;
+  }> {
+    const observedAt = this.now();
+    const previous = await this.options.observationRepository.findByBindingId(binding.id);
+    let inventory: GitHubAppInstallationInventory;
+    try {
+      inventory = await this.options.githubAppClient.getInstallationInventory(
+        binding.installationId,
+      );
+    } catch (error) {
+      if (!previous) throw error;
+      const reason: RemoteRepositoryBlockReason =
+        error instanceof GitHubAppClientFailureError && error.failure.kind === 'not_found'
+          ? 'InstallationMissing'
+          : 'CheckUnavailable';
+      const observation: RemoteRepositoryObservation = {
+        ...previous,
+        observedAt,
+        eligibility: { state: 'Blocked', reason },
+      };
+      await this.options.observationRepository.save(observation);
+      return { observation, inventory: null, repository: null };
+    }
+
+    const repository = inventory.repositories.find(
+      (candidate) => candidate.id === binding.repositoryId,
     );
-    if (!changed) return connection;
-    const updated: KnowledgeRepositoryConnectionServerDTO = {
-      ...connection,
-      ...patch,
-      version: connection.version + 1,
-      updatedAt: this.now() as KnowledgeRepositoryConnectionServerDTO['updatedAt'],
-    };
-    await this.options.connectionRepository.save(updated);
-    return updated;
+    if (!repository) {
+      if (!previous) {
+        throw new Error('GitHub repository observation is unavailable before initial projection');
+      }
+      const observation: RemoteRepositoryObservation = {
+        ...previous,
+        observedAt,
+        accountId: inventory.accountId,
+        contentsPermission: inventory.contentsPermission,
+        installationSuspended: inventory.suspended,
+        eligibility: { state: 'Blocked', reason: 'RepositoryAccessLost' },
+      };
+      await this.options.observationRepository.save(observation);
+      return { observation, inventory, repository: null };
+    }
+
+    const historyFence = await this.options.historyFenceRepository.findByBindingId(binding.id);
+    const observation = this.buildObservation(
+      binding,
+      inventory,
+      repository,
+      historyFence,
+      observedAt,
+    );
+    await this.options.observationRepository.save(observation);
+    return { observation, inventory, repository };
+  }
+
+  private async requireLiveProviderState(
+    binding: KnowledgeRemoteBindingServerDTO,
+    allowedBlockedReasons: readonly RemoteRepositoryBlockReason[] = [],
+  ): Promise<
+    Result<{
+      inventory: GitHubAppInstallationInventory;
+      repository: GitHubInstallationRepositoryDTO;
+      observation: RemoteRepositoryObservation;
+    }>
+  > {
+    let state: Awaited<ReturnType<KnowledgeRepositoryConnectionService['refreshObservationState']>>;
+    try {
+      state = await this.refreshObservationState(binding);
+    } catch (error) {
+      return fail({
+        code: 'SERVICE_UNAVAILABLE',
+        message: error instanceof Error ? error.message : 'GitHub repository check failed',
+      });
+    }
+
+    const blockedReason =
+      state.observation.eligibility.state === 'Blocked'
+        ? state.observation.eligibility.reason
+        : null;
+    if (blockedReason && !allowedBlockedReasons.includes(blockedReason)) {
+      return fail({
+        code: 'FORBIDDEN',
+        message: 'Knowledge repository authorization or provider state requires attention',
+        context: { remoteRepositoryBlockReason: blockedReason },
+      });
+    }
+    if (!state.inventory || !state.repository) {
+      return fail({
+        code: blockedReason === 'CheckUnavailable' ? 'SERVICE_UNAVAILABLE' : 'FORBIDDEN',
+        message: 'Knowledge repository provider state is unavailable',
+        context: blockedReason ? { remoteRepositoryBlockReason: blockedReason } : undefined,
+      });
+    }
+    return ok({
+      inventory: state.inventory,
+      repository: state.repository,
+      observation: state.observation,
+    });
   }
 }

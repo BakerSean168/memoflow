@@ -140,8 +140,8 @@ describe('ListGoalRecordsUseCase', () => {
           id: 'kr-1',
           progress: {
             aggregationMethod: 'Sum',
-            startingValue: 0,
-            progressBaselineValue: null,
+            trackingBaseValue: 0,
+            initialValue: 0,
             targetValue: 100,
             currentValue: 0,
             unit: null,
@@ -166,7 +166,7 @@ describe('ListGoalRecordsUseCase', () => {
     expect(record.toClientDTO).toHaveBeenCalledWith('goal-1', 15);
   });
 
-  it('should calculate valueAfter using startingValue plus authoritative Sum history', async () => {
+  it('should calculate valueAfter using trackingBaseValue plus authoritative Sum history', async () => {
     const recordA = createRecordFixture({
       id: 'record-a',
       value: 5,
@@ -186,8 +186,8 @@ describe('ListGoalRecordsUseCase', () => {
           id: 'kr-1',
           progress: {
             aggregationMethod: 'Sum',
-            startingValue: 10,
-            progressBaselineValue: null,
+            trackingBaseValue: 10,
+            initialValue: 0,
             targetValue: 200,
             currentValue: 22,
             unit: null,
@@ -233,8 +233,8 @@ describe('ListGoalRecordsUseCase', () => {
           id: 'kr-1',
           progress: {
             aggregationMethod: 'Average',
-            startingValue: 0,
-            progressBaselineValue: null,
+            trackingBaseValue: 0,
+            initialValue: 0,
             targetValue: 100,
             currentValue: 999,
             unit: null,

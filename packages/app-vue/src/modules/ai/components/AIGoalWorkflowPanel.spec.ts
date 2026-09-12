@@ -77,12 +77,12 @@ const i18n = createI18n({
           keyResults: 'Key Results',
           importance: 'Importance',
           selectImportance: 'Select importance',
-          taskTemplates: 'Task Templates',
-          taskTemplateName: 'Task template name',
-          taskTemplateDescription: 'Describe the task template...',
-          addTaskTemplate: 'Add Task Template',
-          removeTaskTemplate: 'Remove',
-          noTaskTemplates: 'No task templates will be created.',
+          taskPlans: 'Task Templates',
+          taskPlanName: 'Task template name',
+          taskPlanDescription: 'Describe the task template...',
+          addTaskPlan: 'Add Task Template',
+          removeTaskPlan: 'Remove',
+          noTaskPlans: 'No task templates will be created.',
           reminders: 'Reminders',
           reminderTitle: 'Reminder title',
           reminderDescription: 'Describe the reminder...',
@@ -111,46 +111,69 @@ const i18n = createI18n({
 const draft = {
   revision: 2,
   goal: {
+    draftRef: 'goal' as const,
     name: 'Ship durable goal workflow',
-    description: 'Make Mastra Workflow the only goal.create owner.',
-    importance: 'Important' as const,
-    tags: ['ai-vnext'],
-    startDate: 1_777_000_000_000,
-    targetDate: 1_780_000_000_000,
+    summary: 'Make Mastra Workflow the only goal.create owner.',
+    status: 'InProgress' as const,
+    startDate: '2026-09-01' as const,
+    target: { kind: 'quarter' as const, year: 2026, quarter: 4 },
+    labels: ['ai-vnext'],
   },
   keyResults: [
     {
+      draftRef: 'kr:reference-journey',
       title: 'Pass the reference journey',
-      valueType: 'Incremental' as const,
-      calculationMethod: 'Sum' as const,
-      startValue: 0,
+      description: null,
+      aggregationMethod: 'Sum' as const,
+      initialValue: 0,
       currentValue: 0,
       targetValue: 1,
+      target: null,
       unit: 'journey',
       weight: 5,
     },
   ],
-  taskTemplates: [
+  tasks: [
     {
-      name: 'Run the regression gate',
+      draftRef: 'task:regression-gate',
+      title: 'Run the regression gate',
+      description: 'Run canonical regression checks.',
       importance: 'Important' as const,
-      cadence: 'daily' as const,
-      timeOfDay: '09:00',
-      daysOfWeek: [],
-      occurrences: null,
-      contributionValue: 1,
-      tags: [],
+      schedule: {
+        kind: 'Recurring' as const,
+        startDate: '2026-09-01' as const,
+        timing: { kind: 'At' as const, time: '09:00' as const },
+        recurrence: {
+          frequency: 'Daily' as const,
+          interval: 1,
+          byWeekday: [],
+          end: { kind: 'Never' as const },
+        },
+      },
+      reminderConfig: null,
+      labels: [],
+      goalRef: 'goal' as const,
+      keyResultRef: 'kr:reference-journey',
+      contribution: { value: 1, trigger: 'EachCompletion' as const },
     },
   ],
-  reminders: [
+  knowledge: [
     {
-      title: 'Check the gate',
-      importance: 'Moderate' as const,
-      cadence: 'daily' as const,
-      timeOfDay: '08:55',
-      timezone: 'Asia/Shanghai',
-      channels: ['InApp' as const],
-      tags: [],
+      draftRef: 'note:goal-brief',
+      mode: 'create' as const,
+      title: 'Goal Brief',
+      markdown: '# Goal Brief\n\nWhy this goal matters.',
+      targetSubpath: 'goals/ship-durable.md',
+      sourceRefs: ['notes/adr-099.md'],
+    },
+    {
+      draftRef: 'note:existing-architecture',
+      mode: 'linkExisting' as const,
+      title: 'Existing Architecture',
+      knowledgeDocument: {
+        knowledgeSpaceId: 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440010',
+        documentId: 'kdoc_550e8400-e29b-41d4-a716-446655440011',
+      },
     },
   ],
   rationale: 'A single durable owner prevents duplicate domain mutation.',
@@ -182,30 +205,25 @@ function createPanelProps(overrides: Partial<PanelProps> = {}): PanelProps {
     clarificationAnswers: [],
     editableGoal: {
       name: draft.goal.name,
-      description: draft.goal.description,
-      category: '',
-      importance: draft.goal.importance,
-      motivation: '',
-      feasibilityAnalysis: '',
-      tags: [...draft.goal.tags],
+      summary: draft.goal.summary,
+      status: draft.goal.status,
       startDate: draft.goal.startDate,
-      targetDate: draft.goal.targetDate,
+      target: draft.goal.target,
     },
-    editableKeyResults: draft.keyResults.map((item) => ({ ...item, description: '' })),
-    editableTaskTemplates: draft.taskTemplates.map((item) => ({
-      name: item.name,
-      description: '',
-      importance: item.importance,
-      cadence: item.cadence,
-      timeOfDay: item.timeOfDay,
-    })),
-    editableReminders: draft.reminders.map((item) => ({
+    editableKeyResults: draft.keyResults.map((item) => ({
+      draftRef: item.draftRef,
       title: item.title,
-      description: '',
-      importance: item.importance,
-      cadence: item.cadence,
-      timeOfDay: item.timeOfDay,
+      description: item.description ?? '',
+      aggregationMethod: item.aggregationMethod,
+      initialValue: item.initialValue,
+      currentValue: item.currentValue,
+      targetValue: item.targetValue,
+      target: item.target,
+      unit: item.unit ?? '',
+      weight: item.weight,
     })),
+    editableTasks: structuredClone(draft.tasks),
+    editableKnowledge: structuredClone(draft.knowledge),
     showGoalDraftEditor: false,
     knowledgeAnswer: null,
     formatExecutionOutcome: (status: string) => status,
@@ -233,7 +251,7 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
     expect(wrapper.find('[data-testid="goal-agent-panel"]').exists()).toBe(false);
   });
 
-  it('reuses the existing draft editor while Workflow suspension remains authoritative', async () => {
+  it('renders canonical Task schedule and both Knowledge create/linkExisting review entries', () => {
     const wrapper = mountPanel({ showGoalDraftEditor: true });
     const editor = wrapper.findComponent(AIGoalDraftEditor);
 
@@ -243,20 +261,14 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
     expect(wrapper.find('[data-testid="goal-workflow-supporting-drafts-editor"]').exists()).toBe(
       true,
     );
-    expect(wrapper.find('[data-testid="goal-workflow-task-template-editor"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="goal-workflow-reminder-editor"]').exists()).toBe(true);
-
-    wrapper
-      .findComponent('[data-testid="goal-workflow-reminder-time"]')
-      .vm.$emit('update:model-value', '10:30');
-    await wrapper.vm.$nextTick();
-    const reminderUpdates = wrapper.emitted('update-reminder') ?? [];
-    expect(reminderUpdates.at(-1)).toEqual([
-      {
-        index: 0,
-        value: expect.objectContaining({ timeOfDay: '10:30' }),
-      },
-    ]);
+    expect(wrapper.find('[data-testid="goal-workflow-task-editor"]').exists()).toBe(true);
+    expect(wrapper.findAll('[data-testid="goal-workflow-knowledge-editor"]')).toHaveLength(2);
+    expect(wrapper.text()).toContain('task:regression-gate');
+    expect(wrapper.text()).toContain('Daily ×1');
+    expect(wrapper.text()).toContain('note:goal-brief');
+    expect(wrapper.text()).toContain('notes/adr-099.md');
+    expect(wrapper.text()).toContain('note:existing-architecture');
+    expect(wrapper.text()).toContain('kdoc_550e8400-e29b-41d4-a716-446655440011');
   });
 
   it('renders recovery directly from the durable Workflow suspension', () => {
@@ -271,10 +283,10 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
         retryable: true,
         failures: [
           {
-            operation: 'reminder',
-            index: 0,
+            operation: 'knowledge_link',
+            draftRef: 'note:goal-brief',
             code: 'SERVICE_UNAVAILABLE',
-            message: 'Reminder store unavailable',
+            message: 'Knowledge relation unavailable',
             retryable: true,
           },
         ],
@@ -287,7 +299,7 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
     expect(wrapper.find('[data-testid="goal-workflow-recovery"]').exists()).toBe(true);
     expect(wrapper.text()).toContain('SERVICE_UNAVAILABLE');
     expect(wrapper.text()).toContain('Execution failed (SERVICE_UNAVAILABLE)');
-    expect(wrapper.text()).not.toContain('Reminder store unavailable');
+    expect(wrapper.text()).not.toContain('Knowledge relation unavailable');
     expect(wrapper.text()).toContain('retryable');
   });
 
@@ -301,10 +313,15 @@ describe('AIGoalWorkflowPanel — ADR-052 goal.create projection', () => {
         workflowRunId: 'workflow-complete',
         revision: 2,
         status: 'success',
-        goalId: 'IGoalId_550e8400-e29b-41d4-a716-446655440000',
-        keyResultIds: ['IKeyResultId_550e8400-e29b-41d4-a716-446655440001'],
-        taskIds: ['ITaskTemplateId_550e8400-e29b-41d4-a716-446655440002'],
-        reminderIds: ['IReminderTemplateId_550e8400-e29b-41d4-a716-446655440003'],
+        referenceMap: {
+          goal: 'IGoalId_550e8400-e29b-41d4-a716-446655440000',
+          'kr:reference-journey': 'IKeyResultId_550e8400-e29b-41d4-a716-446655440001',
+          'task:regression-gate': 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440002',
+          'note:goal-brief': 'kdoc_550e8400-e29b-41d4-a716-446655440003',
+        },
+        relationIds: { 'note:goal-brief': 'relation-1' },
+        goalVersion: 2,
+        appliedGoalStatus: 'InProgress',
         failures: [],
         retryable: false,
       },

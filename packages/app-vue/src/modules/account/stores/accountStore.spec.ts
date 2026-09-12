@@ -4,23 +4,13 @@ import { AccountStatus } from '@memoflow/contracts/account';
 import { createTestPinia } from '@memoflow/test-utils';
 import { useAccountStore } from './account-store';
 
-function createAccount(
-  overrides: Partial<AccountClientDTO> = {},
-): AccountClientDTO {
+function createAccount(overrides: Partial<AccountClientDTO> = {}): AccountClientDTO {
   return {
     id: 'account-1' as AccountClientDTO['id'],
     status: AccountStatus.Active,
     profile: {
       nickname: 'Baker',
       avatarUrl: 'avatar.png',
-    },
-    email: {
-      address: 'baker@example.com',
-      isVerified: true,
-    },
-    phone: {
-      number: '123456',
-      isVerified: false,
     },
     ...overrides,
   } as AccountClientDTO;
@@ -31,7 +21,7 @@ describe('useAccountStore', () => {
     createTestPinia();
   });
 
-  it('exposes account identity, profile, contact getters, and lifecycle actions', () => {
+  it('exposes account identity, product profile, and lifecycle actions', () => {
     const store = useAccountStore();
     store.setCurrentAccount(createAccount());
     store.setInitialized(true);
@@ -43,10 +33,6 @@ describe('useAccountStore', () => {
     expect(store.isActiveAccount).toBe(true);
     expect(store.getNickname).toBe('Baker');
     expect(store.getAvatarUrl).toBe('avatar.png');
-    expect(store.getEmail).toBe('baker@example.com');
-    expect(store.isEmailVerified).toBe(true);
-    expect(store.getPhone).toBe('123456');
-    expect(store.isPhoneVerified).toBe(false);
     expect(store.isLoading).toBe(true);
     expect(store.error).toBe('failed');
 

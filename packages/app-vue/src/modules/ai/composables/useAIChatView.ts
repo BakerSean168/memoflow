@@ -91,7 +91,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         title: goal.name,
         status: String(goal.status),
         updatedAt: Number(goal.updatedAt ?? 0),
-        dueDate: goal.dueDate === null ? null : Number(goal.dueDate),
         progress: goal.overallProgress,
       })),
   );
@@ -100,7 +99,12 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     [...recentKnowledgeNotes.notes.value]
       .sort((left, right) => Number(right.updatedAt) - Number(left.updatedAt))
       .slice(0, 5)
-      .map((note) => ({ id: note.id, title: note.title, path: note.path, updatedAt: note.updatedAt })),
+      .map((note) => ({
+        id: note.id,
+        title: note.title,
+        path: note.path,
+        updatedAt: note.updatedAt,
+      })),
   );
 
   const providerList = computed<ProviderListItem[]>(() => providers.value);
@@ -202,8 +206,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     clarificationAnswers: goalWorkflow.clarificationAnswers,
     editableGoal: goalWorkflow.editableGoal,
     editableKeyResults: goalWorkflow.editableKeyResults,
-    editableTaskTemplates: goalWorkflow.editableTaskTemplates,
-    editableReminders: goalWorkflow.editableReminders,
+    editableTasks: goalWorkflow.editableTasks,
+    editableKnowledge: goalWorkflow.editableKnowledge,
     showGoalDraftEditor: goalWorkflow.showGoalDraftEditor,
     resetWorkflowArtifacts,
   });
@@ -242,7 +246,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       : t(`aiAssistant.chatPage.workflow.tools.${getToolLocaleKey(toolMode.value)}`),
   );
   const currentToolButtonLabel = computed(() =>
-    toolMode.value === 'chat' ? t('aiAssistant.chatPage.workflow.toolButton') : currentToolLabel.value,
+    toolMode.value === 'chat'
+      ? t('aiAssistant.chatPage.workflow.toolButton')
+      : currentToolLabel.value,
   );
 
   const workflowStatusText = computed(() =>
@@ -362,7 +368,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       recentKnowledgeNotesEmailVerificationRequired: computed(
         () => recentKnowledgeNotes.emailVerificationRequired.value,
       ),
-      recentKnowledgeNotesErrorMessageKey: computed(() => recentKnowledgeNotes.errorMessageKey.value),
+      recentKnowledgeNotesErrorMessageKey: computed(
+        () => recentKnowledgeNotes.errorMessageKey.value,
+      ),
       messagesViewport: chatSession.messagesViewport,
       lastRuntimeUsage: chatSession.lastRuntimeUsage,
       selectConversation,

@@ -7,7 +7,7 @@
 
 import { calculateKeyResultProgress, type IGoalRepository } from '../../../domain';
 import type { Goal } from '../../../domain';
-import type { GoalStatus } from '@memoflow/contracts/goal';
+import type { GoalStatus, GoalTimeframe } from '@memoflow/contracts/goal';
 import { createLogger } from '@memoflow/utils/logger';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
@@ -20,9 +20,9 @@ const logger = createLogger('GoalCrossModuleQueryService');
 export interface GoalBindingOption {
   id: string;
   title: string;
-  description?: string | null;
+  summary?: string | null;
   status: GoalStatus;
-  dueDate?: number | null;
+  target?: GoalTimeframe | null;
   progress?: number;
 }
 
@@ -58,7 +58,7 @@ export class GoalCrossModuleQueryServiceUseCase {
     status?: GoalStatus[];
   }): Promise<Result<GoalBindingOption[]>> {
     // 默认只返回进行中和未开始的目标
-    const statusFilter = params.status || ['IN_PROGRESS', 'NOT_STARTED'];
+    const statusFilter = params.status ?? ['InProgress', 'Planned'];
 
     const goals = await this.goalRepository.findByIdentityId(params.identityId);
 
@@ -68,9 +68,9 @@ export class GoalCrossModuleQueryServiceUseCase {
         .map((goal: Goal) => ({
           id: goal.id,
           title: goal.name,
-          description: goal.description,
+          summary: goal.summary,
           status: goal.status,
-          dueDate: goal.dueDate ?? null,
+          target: goal.target ?? null,
           progress: goal.progress,
         })),
     );

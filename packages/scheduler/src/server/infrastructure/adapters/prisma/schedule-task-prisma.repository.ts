@@ -50,6 +50,20 @@ interface ScheduleTaskDb {
 type PrismaTransactionRoot = Pick<PrismaClient, '$transaction'>;
 type ScheduleTaskRootDb = ScheduleTaskDb & PrismaTransactionRoot;
 
+const SERIALIZABLE_TRANSACTION_MAX_ATTEMPTS = 3;
+const SERIALIZABLE_TRANSACTION_RETRY_DELAY_MS = 15;
+
+function isSerializableTransactionConflict(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null || !('code' in error)) return false;
+  return (error as { code?: unknown }).code === 'P2034';
+}
+
+async function waitBeforeSerializableRetry(attempt: number): Promise<void> {
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, SERIALIZABLE_TRANSACTION_RETRY_DELAY_MS * attempt);
+  });
+}
+
 function isScheduleTaskRootDb(db: ScheduleTaskDb | ScheduleTaskRootDb): db is ScheduleTaskRootDb {
   return '$transaction' in db;
 }
@@ -463,27 +477,43 @@ export class ScheduleTaskPrismaRepository
       throw new Error('withTransaction requires a root PrismaClient (not a TransactionClient)');
     }
 
-    const deferredAggregates = new Set<ScheduleTask>();
-    const result = await this.rootClient.$transaction(
-      async (tx) => {
-        const txRepo = new ScheduleTaskPrismaRepository(
-          tx,
-          undefined,
-          this.outboxWriter,
-          deferredAggregates,
+    for (let attempt = 1; attempt <= SERIALIZABLE_TRANSACTION_MAX_ATTEMPTS; attempt += 1) {
+      // A failed Serializable attempt may already have staged aggregates in memory.
+      // Keep that staging set attempt-local so rolled-back events can never leak into a retry.
+      const deferredAggregates = new Set<ScheduleTask>();
+      try {
+        const result = await this.rootClient.$transaction(
+          async (tx) => {
+            const txRepo = new ScheduleTaskPrismaRepository(
+              tx,
+              undefined,
+              this.outboxWriter,
+              deferredAggregates,
+            );
+            return fn(txRepo);
+          },
+          { isolationLevel: 'Serializable' },
         );
-        return fn(txRepo);
-      },
-      { isolationLevel: 'Serializable' },
-    );
 
-    // Publish only after the owner-level transaction committed successfully.
-    for (const aggregate of deferredAggregates) {
-      await publishAggregateEvents(aggregate, {
-        eventBus: eventBusAdapter,
-        outboxWriter: this.outboxWriter,
-      });
+        // Publish only after the successful owner-level transaction committed.
+        for (const aggregate of deferredAggregates) {
+          await publishAggregateEvents(aggregate, {
+            eventBus: eventBusAdapter,
+            outboxWriter: this.outboxWriter,
+          });
+        }
+        return result;
+      } catch (error) {
+        if (
+          !isSerializableTransactionConflict(error) ||
+          attempt === SERIALIZABLE_TRANSACTION_MAX_ATTEMPTS
+        ) {
+          throw error;
+        }
+        await waitBeforeSerializableRetry(attempt);
+      }
     }
-    return result;
+
+    throw new Error('Serializable transaction retry loop exhausted unexpectedly');
   }
 }

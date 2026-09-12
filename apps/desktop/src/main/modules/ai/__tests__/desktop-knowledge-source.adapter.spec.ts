@@ -2,8 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 import type { LocalVaultElectronPort } from '@memoflow/repository/electron';
 import { DesktopKnowledgeSourceAdapter } from '../desktop-knowledge-source.adapter';
 
+const BINDING_ID = 'LocalVaultBindingId_550e8400-e29b-41d4-a716-446655440010' as never;
+const SPACE_ID = 'KnowledgeSpaceId_550e8400-e29b-41d4-a716-446655440011' as never;
+const DOCUMENT_ID = 'kdoc_550e8400-e29b-41d4-a716-446655440521' as never;
+
 const summary = {
   relativePath: 'Architecture/Runtime.md',
+  knowledgeDocumentId: DOCUMENT_ID,
   title: 'Runtime architecture',
   excerpt: 'Capability resolution',
   tags: ['architecture'],
@@ -14,17 +19,35 @@ const summary = {
 
 function createLocalVaultPort(active = true): LocalVaultElectronPort {
   return {
-    getBinding: vi.fn(async () =>
-      active
-        ? ({ id: 'vault-1', status: 'Active' } as Awaited<
-            ReturnType<LocalVaultElectronPort['getBinding']>
-          >)
-        : null,
-    ),
+    getBinding: vi.fn(async () => {
+      if (!active) return null;
+      const bindingId = BINDING_ID;
+      return {
+        binding: {
+          id: bindingId,
+          knowledgeSpaceId: SPACE_ID,
+          localProfileId: 'p_ai_source',
+          rootPath: '/vault',
+          displayName: 'Vault',
+          boundAt: 1,
+          detachedAt: null,
+        },
+        health: { bindingId, state: 'Available' as const, observedAt: 1, detail: null },
+      };
+    }),
     selectVault: vi.fn(),
     detachVault: vi.fn(),
     scanVault: vi.fn(async () => ({
-      binding: { id: 'vault-1' } as never,
+      binding: {
+        id: BINDING_ID,
+        knowledgeSpaceId: SPACE_ID,
+        localProfileId: 'p_ai_source',
+        rootPath: '/vault',
+        displayName: 'Vault',
+        boundAt: 1,
+        detachedAt: null,
+      },
+      health: { bindingId: BINDING_ID, state: 'Available' as const, observedAt: 1, detail: null },
       notes: [summary],
       scannedAt: 1_750_000_000_000 as never,
     })),
@@ -50,14 +73,12 @@ describe('DesktopKnowledgeSourceAdapter', () => {
 
     const resources = await adapter.listRelevantNotes('identity-1', 'capability', 5);
 
-    expect(localVault.searchVault).toHaveBeenCalledWith('identity-1', {
-      query: 'capability',
-      limit: 5,
-    });
+    expect(localVault.searchVault).toHaveBeenCalledWith({ query: 'capability', limit: 5 });
     expect(resources).toHaveLength(1);
     expect(resources[0]).toMatchObject({
       identityId: 'identity-1',
-      repositoryId: 'vault-1',
+      repositoryId: BINDING_ID,
+      resourceId: DOCUMENT_ID,
       resourcePath: 'Architecture/Runtime.md',
       title: 'Runtime architecture',
       content: '# Runtime architecture\n\nCapability resolution is explicit.',
@@ -65,6 +86,8 @@ describe('DesktopKnowledgeSourceAdapter', () => {
     expect(resources[0]?.metadata).toMatchObject({
       owner: 'platform',
       tags: ['architecture'],
+      knowledgeDocumentId: DOCUMENT_ID,
+      knowledgeSpaceId: SPACE_ID,
     });
   });
 

@@ -15,17 +15,16 @@ function createTestGoal(name = 'Test Goal'): Goal {
   return Goal.create({
     identityId: 'test-identity-id' as any,
     name,
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
+    summary: null,
     startDate: null,
-    dueDate: null,
+    target: null,
     reminderConfig: null,
   });
 }
 
 function createCompletedGoal(name = 'Completed Goal'): Goal {
   const goal = createTestGoal(name);
+  goal.activate();
   goal.markAsCompleted();
   return goal;
 }

@@ -13,6 +13,7 @@
 
 import { CreateNotificationUseCase } from '../application/use-cases/commands/create-notification.use-case';
 import type { ScheduleNotificationPort } from '../../schedule-execution';
+import type { UserTimeContextPort } from '@memoflow/time';
 import type {
   INotificationRepository,
   INotificationPreferenceRepository,
@@ -22,6 +23,7 @@ export interface CreateNotificationScheduleNotificationPortDeps {
   readonly notificationRepository: INotificationRepository;
   readonly notificationPreferenceRepository: INotificationPreferenceRepository;
   readonly closureChecker: (identityId: string) => Promise<boolean>;
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
 /**
@@ -43,6 +45,7 @@ export function createNotificationScheduleNotificationPort(
     deps.notificationRepository,
     deps.notificationPreferenceRepository,
     deps.closureChecker,
+    deps.userTimeContextPort,
   );
 
   return {

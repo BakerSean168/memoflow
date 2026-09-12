@@ -1,12 +1,8 @@
 import type { TaskPlanExecutionFailure, TaskPlanExecutionReceipt } from '@memoflow/contracts/ai';
 import type { ResultError } from '@memoflow/contracts/result';
-import {
-  TaskGoalBindingTrigger,
-  TaskTimeType,
-  TaskType,
-  type CreateTaskTemplateReq,
-} from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger, type CreateTaskPlanReq } from '@memoflow/contracts/task';
 import { taskWorkflowEntityId } from './deterministic-entity-id';
+import { taskPlanScheduleFromDraft } from './task-plan-schedule.mapper';
 import type { ApplyTaskPlanInput, TaskPlanMutationPort } from './task-plan-mutation.port';
 
 const RETRYABLE_LEGACY_CODES = new Set([
@@ -37,71 +33,46 @@ function failure(
   };
 }
 
-function parseMinuteOfDay(value: string): number {
-  const match = /^(\d{2}):(\d{2})$/.exec(value);
-  if (!match) throw new Error(`Invalid timeOfDay: ${value}`);
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  if (hour > 23 || minute > 59) throw new Error(`Invalid timeOfDay: ${value}`);
-  return hour * 60 + minute;
-}
-
 function taskRequest(
   draft: import('@memoflow/contracts/ai').TaskPlanDraft,
   id: string,
   labelIds: readonly string[],
-): CreateTaskTemplateReq {
+): CreateTaskPlanReq {
   const task = draft.task;
-  const timePoint = task.timeOfDay ? parseMinuteOfDay(task.timeOfDay) : null;
-  const oneTime = task.cadence === 'once';
-  const recurrenceRule: CreateTaskTemplateReq['recurrenceRule'] = oneTime
-    ? null
-    : {
-        frequency: task.cadence === 'daily' ? ('Daily' as const) : ('Weekly' as const),
-        interval: 1,
-        daysOfWeek:
-          task.cadence === 'weekly'
-            ? (task.daysOfWeek as NonNullable<
-                CreateTaskTemplateReq['recurrenceRule']
-              >['daysOfWeek'])
-            : [],
-        endDate: null,
-        occurrences: task.occurrences,
-      };
+  const schedule = taskPlanScheduleFromDraft({
+    cadence: task.cadence,
+    startDate: task.startDate,
+    timeOfDay: task.timeOfDay,
+    timezone: task.timezone,
+    daysOfWeek: task.daysOfWeek,
+    occurrences: task.occurrences,
+  });
 
   return {
-    id: id as NonNullable<CreateTaskTemplateReq['id']>,
+    id: id as NonNullable<CreateTaskPlanReq['id']>,
     name: task.title,
     description: task.description ?? null,
-    taskType: oneTime ? TaskType.OneTime : TaskType.Recurring,
-    timeConfig: {
-      timeType: timePoint === null ? TaskTimeType.AllDay : TaskTimeType.TimePoint,
-      startDate: task.startDate,
-      timePoint,
-      timeRange: null,
-    },
-    recurrenceRule,
+    schedule,
     reminderConfig: null,
     importance: task.importance,
     labelIds: [...labelIds],
-    goalBinding:
-      task.goalId && task.keyResultId
-        ? {
-            goalId: task.goalId as NonNullable<
-              NonNullable<CreateTaskTemplateReq['goalBinding']>['goalId']
-            >,
-            keyResultId: task.keyResultId as NonNullable<
-              NonNullable<CreateTaskTemplateReq['goalBinding']>['keyResultId']
-            >,
-            contribution:
-              task.contributionValue === null
-                ? null
-                : {
-                    value: task.contributionValue,
-                    trigger: TaskGoalBindingTrigger.EachCompletion,
-                  },
-          }
-        : null,
+    goalBinding: task.goalId
+      ? {
+          goalId: task.goalId as NonNullable<
+            NonNullable<CreateTaskPlanReq['goalBinding']>['goalId']
+          >,
+          keyResultId: task.keyResultId as NonNullable<
+            CreateTaskPlanReq['goalBinding']
+          >['keyResultId'],
+          contribution:
+            task.keyResultId && task.contributionValue !== null
+              ? {
+                  value: task.contributionValue,
+                  trigger: TaskGoalBindingTrigger.EachCompletion,
+                }
+              : null,
+        }
+      : null,
   };
 }
 
@@ -130,13 +101,13 @@ export class ApplyTaskPlanService {
     });
     // Idempotency: if the prior receipt already applied this exact entity, do not
     // call the mutation port again.
-    if (prior?.status === 'success' && prior.taskTemplateId === expectedTaskId) {
+    if (prior?.status === 'success' && prior.taskPlanId === expectedTaskId) {
       return prior;
     }
 
     const failures: TaskPlanExecutionFailure[] = [];
     let created: string | undefined =
-      prior?.taskTemplateId === expectedTaskId ? prior.taskTemplateId : undefined;
+      prior?.taskPlanId === expectedTaskId ? prior.taskPlanId : undefined;
     let taskIds: string[] = prior?.taskIds ?? [];
 
     if (!created) {
@@ -153,7 +124,7 @@ export class ApplyTaskPlanService {
         };
       }
 
-      let request: CreateTaskTemplateReq;
+      let request: CreateTaskPlanReq;
       try {
         request = taskRequest(draft, expectedTaskId, labelsResult.data);
       } catch (cause) {
@@ -173,7 +144,7 @@ export class ApplyTaskPlanService {
           retryable: false,
         };
       }
-      const result = await this.mutations.createTaskTemplate(request, context);
+      const result = await this.mutations.createTaskPlan(request, context);
       if (result.ok) {
         if (result.data.taskId !== expectedTaskId) {
           failures.push({
@@ -195,7 +166,7 @@ export class ApplyTaskPlanService {
       workflowRunId,
       revision: draft.revision,
       status: failures.length ? (created ? 'partial' : 'failed') : 'success',
-      ...(created ? { taskTemplateId: created } : {}),
+      ...(created ? { taskPlanId: created } : {}),
       taskIds,
       failures,
       retryable: failures.some((item) => item.retryable),

@@ -45,6 +45,7 @@ COPY packages/governance/package.json ./packages/governance/package.json
 COPY packages/http-client/package.json ./packages/http-client/package.json
 COPY packages/ipc-client/package.json ./packages/ipc-client/package.json
 COPY packages/label/package.json ./packages/label/package.json
+COPY packages/relation/package.json ./packages/relation/package.json
 COPY packages/notification/package.json ./packages/notification/package.json
 COPY packages/patterns/package.json ./packages/patterns/package.json
 COPY packages/powersync-schema/package.json ./packages/powersync-schema/package.json
@@ -83,6 +84,7 @@ COPY packages/governance ./packages/governance
 COPY packages/http-client ./packages/http-client
 COPY packages/ipc-client ./packages/ipc-client
 COPY packages/label ./packages/label
+COPY packages/relation ./packages/relation
 COPY packages/notification ./packages/notification
 COPY packages/patterns ./packages/patterns
 COPY packages/powersync-schema ./packages/powersync-schema

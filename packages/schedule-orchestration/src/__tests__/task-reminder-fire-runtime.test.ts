@@ -14,9 +14,9 @@ import type { TaskReminderScheduledPayload } from '@memoflow/task/schedule-proje
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 
 const IDENTITY = 'IdentityId_task-owner';
-const TEMPLATE_ID = 'TaskTemplateId_template';
-const INSTANCE_ID = 'TaskInstanceId_instance-1';
-const OCCURRENCE_KEY = 'TaskTemplateId_template:2030-01-10';
+const TEMPLATE_ID = 'TaskPlanId_template';
+const INSTANCE_ID = 'TaskOccurrenceId_instance-1';
+const OCCURRENCE_KEY = 'TaskPlanId_template:2030-01-10';
 const SINGLE_REMINDER_KEY = buildSchedulingKey('task.reminder', OCCURRENCE_KEY, 'relative:30:Minutes');
 const REMINDER_AT = Date.UTC(2030, 0, 10, 13, 30);
 const ANCHOR_AT = Date.UTC(2030, 0, 10, 14);
@@ -141,10 +141,10 @@ function createDurableWriterHarness(): DurableWriterHarness {
 
 function createHandler(writer: DurableWriterHarness, instance: unknown, template: unknown) {
   return createTaskReminderScheduledHandlerRegistration({
-    taskInstanceRepository: {
+    taskOccurrenceRepository: {
       findByIdForIdentity: vi.fn().mockResolvedValue(instance),
     },
-    taskTemplateRepository: {
+    taskPlanRepository: {
       findByIdForIdentity: vi.fn().mockResolvedValue(template),
     },
     notificationRequestedWriter: writer.writer,

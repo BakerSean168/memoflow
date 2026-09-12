@@ -2,16 +2,23 @@ import type {
   ReminderTimeUnit,
   TaskEventMap,
   TaskReminderType,
-  TaskTemplateServerDTO,
+  TaskPlanServerDTO,
 } from '@memoflow/contracts/task';
-import { TaskInstanceStatus, TaskTimeType } from '@memoflow/contracts/task';
+import { TaskOccurrenceStatus, TaskTimeType } from '@memoflow/contracts/task';
 import type {
   ScheduledIntent,
   SchedulingOwner,
   SchedulingPriority,
 } from '@memoflow/contracts/schedule';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
-import type { ITaskInstanceRepository, ITaskTemplateRepository } from '../domain';
+import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '../domain';
+import {
+  asHm,
+  combineYmdHmWithTimeZone,
+  createTimeFacade,
+  type TimeContext,
+  type UserTimeContextPort,
+} from '@memoflow/time';
 
 const DEFAULT_ALL_DAY_REMINDER_MINUTES = 9 * 60;
 export const TASK_REMINDER_HANDLER_KEY = 'task.reminder.fire';
@@ -94,43 +101,53 @@ function formatUnit(unit: ReminderTimeUnit): string {
   }
 }
 
-function convertUnitToMs(value: number, unit: ReminderTimeUnit): number {
+function convertDurationUnitToMs(value: number, unit: ReminderTimeUnit): number {
   switch (unit) {
     case 'Minutes':
       return value * 60 * 1000;
     case 'Hours':
       return value * 60 * 60 * 1000;
     case 'Days':
-      return value * 24 * 60 * 60 * 1000;
+      throw new Error('Days are calendar-relative and must not be converted to 24h duration');
     default:
       return 0;
   }
 }
 
-function getInstanceAnchorTime(instance: {
-  instanceDate: number;
-  timeConfig: {
-    timeType: string;
-    timePoint: number | null;
-    timeRange?: { start: number; end: number } | null;
-  };
-}): number {
-  const dayStart = instance.instanceDate;
+function minuteOfDayToHm(minute: number) {
+  const hours = Math.floor(minute / 60);
+  const minutes = minute % 60;
+  return asHm(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`);
+}
 
-  if (instance.timeConfig.timeType === TaskTimeType.TimePoint) {
-    return (
-      dayStart + (instance.timeConfig.timePoint ?? DEFAULT_ALL_DAY_REMINDER_MINUTES) * 60 * 1000
-    );
+function getInstanceAnchorTime(
+  instance: {
+    instanceDate: number;
+    timeConfig: {
+      timeType: string;
+      timePoint: number | null;
+      timeRange?: { start: number; end: number } | null;
+    };
+  },
+  timeContext: TimeContext,
+): number {
+  const time = createTimeFacade({ context: timeContext });
+  const day = time.calendar.toYmd(instance.instanceDate);
+  const minute =
+    instance.timeConfig.timeType === TaskTimeType.TimePoint
+      ? (instance.timeConfig.timePoint ?? DEFAULT_ALL_DAY_REMINDER_MINUTES)
+      : instance.timeConfig.timeType === TaskTimeType.TimeRange
+        ? (instance.timeConfig.timeRange?.start ?? DEFAULT_ALL_DAY_REMINDER_MINUTES)
+        : DEFAULT_ALL_DAY_REMINDER_MINUTES;
+  const anchor = combineYmdHmWithTimeZone(
+    day,
+    minuteOfDayToHm(minute),
+    timeContext.timeZone,
+  );
+  if (anchor == null) {
+    throw new Error(`Could not resolve Task reminder anchor ${day} ${minuteOfDayToHm(minute)}`);
   }
-
-  if (instance.timeConfig.timeType === TaskTimeType.TimeRange) {
-    return (
-      dayStart +
-      (instance.timeConfig.timeRange?.start ?? DEFAULT_ALL_DAY_REMINDER_MINUTES) * 60 * 1000
-    );
-  }
-
-  return dayStart + DEFAULT_ALL_DAY_REMINDER_MINUTES * 60 * 1000;
+  return Number(anchor);
 }
 
 function calculateReminderAt(
@@ -148,6 +165,7 @@ function calculateReminderAt(
     relativeValue: number | null;
     relativeUnit: ReminderTimeUnit | null;
   },
+  timeContext: TimeContext,
 ): number | null {
   if (trigger.type === 'Absolute') {
     return trigger.absoluteTime;
@@ -157,13 +175,21 @@ function calculateReminderAt(
     return null;
   }
 
-  return (
-    getInstanceAnchorTime(instance) - convertUnitToMs(trigger.relativeValue, trigger.relativeUnit)
-  );
+  const anchorTime = getInstanceAnchorTime(instance, timeContext);
+  if (trigger.relativeUnit === 'Days') {
+    return Number(
+      createTimeFacade({ context: timeContext }).calendar.addDays(
+        anchorTime,
+        -trigger.relativeValue,
+      ),
+    );
+  }
+
+  return anchorTime - convertDurationUnitToMs(trigger.relativeValue, trigger.relativeUnit);
 }
 
 function buildIntentName(
-  template: TaskTemplateServerDTO,
+  template: TaskPlanServerDTO,
   trigger: {
     type: TaskReminderType;
     absoluteTime: number | null;
@@ -181,7 +207,7 @@ function buildIntentName(
   return `${template.name} · 定时提醒`;
 }
 
-function shouldScheduleTemplate(template: TaskTemplateServerDTO): boolean {
+function shouldScheduleTemplate(template: TaskPlanServerDTO): boolean {
   return (
     template.status === 'Active' &&
     template.deletedAt === null &&
@@ -193,8 +219,8 @@ function shouldScheduleTemplate(template: TaskTemplateServerDTO): boolean {
 function isSchedulableInstance(instance: { status: string; deletedAt: number | null }): boolean {
   return (
     instance.deletedAt === null &&
-    (instance.status === TaskInstanceStatus.Pending ||
-      instance.status === TaskInstanceStatus.InProgress)
+    (instance.status === TaskOccurrenceStatus.Pending ||
+      instance.status === TaskOccurrenceStatus.InProgress)
   );
 }
 
@@ -221,8 +247,9 @@ function neutralPriority(importance: string): SchedulingPriority {
 }
 
 export function createTaskScheduleProjectionSource(deps: {
-  taskTemplateRepository: ITaskTemplateRepository;
-  taskInstanceRepository: ITaskInstanceRepository;
+  taskPlanRepository: ITaskPlanRepository;
+  taskOccurrenceRepository: ITaskOccurrenceRepository;
+  userTimeContextPort: UserTimeContextPort;
 }): TaskScheduleProjectionSource {
   return {
     buildTemplateOwner(templateId, identityId) {
@@ -230,13 +257,13 @@ export function createTaskScheduleProjectionSource(deps: {
     },
 
     async listTemplateRefs() {
-      const refs = await deps.taskTemplateRepository.findAllTemplateRefs();
+      const refs = await deps.taskPlanRepository.findAllTemplateRefs();
       return refs.map((ref) => ({ templateId: ref.id, identityId: ref.identityId }));
     },
 
     async buildTemplatePlan(templateId, identityId) {
       const owner = taskOwner(templateId, identityId);
-      const template = await deps.taskTemplateRepository.findByIdForIdentity(
+      const template = await deps.taskPlanRepository.findByIdForIdentity(
         identityId,
         templateId,
       );
@@ -244,13 +271,14 @@ export function createTaskScheduleProjectionSource(deps: {
         return { owner, desired: [] };
       }
 
+      const timeContext = await deps.userTimeContextPort.getUserTimeContext(identityId);
       const templateDTO = template.toServerDTO();
       const canonicalOwner = taskOwner(templateId, String(templateDTO.identityId));
       if (!shouldScheduleTemplate(templateDTO) || !templateDTO.reminderConfig) {
         return { owner: canonicalOwner, desired: [] };
       }
 
-      const instances = await deps.taskInstanceRepository.findByTemplateId(
+      const instances = await deps.taskOccurrenceRepository.findByTemplateId(
         templateId,
         String(templateDTO.identityId),
       );
@@ -259,10 +287,10 @@ export function createTaskScheduleProjectionSource(deps: {
 
       for (const instance of instances.filter(isSchedulableInstance)) {
         const occurrenceIdentity = instance.occurrenceKey ?? instance.id;
-        const anchorTime = getInstanceAnchorTime(instance);
+        const anchorTime = getInstanceAnchorTime(instance, timeContext);
 
         for (const trigger of templateDTO.reminderConfig.triggers) {
-          const reminderAt = calculateReminderAt(instance, trigger);
+          const reminderAt = calculateReminderAt(instance, trigger, timeContext);
           if (reminderAt === null || reminderAt <= now) continue;
 
           const schedulingKey = buildSchedulingKey(
@@ -323,24 +351,24 @@ export function createTaskScheduleProjectionEventHandlers(
     'task:instance-generated': async (event) =>
       handlers.upsertTemplate(event.templateId, String(event.identityId)),
     'task:template-schedule-time-changed': async (event) =>
-      handlers.upsertTemplate(event.taskTemplate.id, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlan.id, String(event.identityId)),
     'task:template-recurrence-changed': async (event) =>
-      handlers.upsertTemplate(event.taskTemplate.id, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlan.id, String(event.identityId)),
     'task:template-resumed': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
     'task:deleted': async (event) =>
-      handlers.deleteTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.deleteTemplate(event.taskPlanId, String(event.identityId)),
     'task:template-paused': async (event) =>
-      handlers.deleteTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.deleteTemplate(event.taskPlanId, String(event.identityId)),
     'task:instance-completed': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
     'task:instance-skipped': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
     'task:instance-deleted': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
     'task:instance-uncompleted': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
     'task:rescheduled': async (event) =>
-      handlers.upsertTemplate(event.taskTemplateId, String(event.identityId)),
+      handlers.upsertTemplate(event.taskPlanId, String(event.identityId)),
   };
 }

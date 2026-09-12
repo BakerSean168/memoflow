@@ -8,6 +8,7 @@ import { Account } from '../../../domain/aggregates/account';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { AccountStatus } from '../../../domain/value-objects';
 import { createUnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';
+import { asInstant, createFixedClock } from '@memoflow/time';
 
 describe('AccountClosureCoordinator Unit Tests', () => {
   let closureOpRepo: InMemoryAccountClosureOperationRepository;
@@ -25,7 +26,9 @@ describe('AccountClosureCoordinator Unit Tests', () => {
 
     testAccount = Account.create({
       id: IdentityId.of(testIdentityId),
-      email: 'user@example.com',
+      nicknameSeed: 'user@example.com',
+
+      now: asInstant(1_700_000_000_000),
     });
 
     mockAccountRepo = {
@@ -34,10 +37,6 @@ describe('AccountClosureCoordinator Unit Tests', () => {
         return null;
       }),
       save: vi.fn().mockResolvedValue(undefined),
-      findByNickname: vi.fn(),
-      findByEmail: vi.fn(),
-      existsByNickname: vi.fn(),
-      existsByEmail: vi.fn(),
       delete: vi.fn(),
       findAll: vi.fn(),
     };
@@ -55,7 +54,7 @@ describe('AccountClosureCoordinator Unit Tests', () => {
       closureOperationRepository: closureOpRepo,
       revocationPort: mockRevocationPort,
       eventPublisher: mockEventPublisher,
-      clock: { now: () => new Date(1700000000000) },
+      clock: createFixedClock(1_700_000_000_000),
     });
   });
 
@@ -69,7 +68,7 @@ describe('AccountClosureCoordinator Unit Tests', () => {
 
     // Verify side effects
     expect(mockRevocationPort.revokeAll).toHaveBeenCalledWith(testIdentityId);
-    expect(AccountStatus.isDeactivated(testAccount.status)).toBe(true);
+    expect(AccountStatus.isClosed(testAccount.status)).toBe(true);
     expect(mockAccountRepo.save).toHaveBeenCalledWith(testAccount);
     expect(mockEventPublisher.publishAccountClosed).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -106,14 +105,14 @@ describe('AccountClosureCoordinator Unit Tests', () => {
     expect(receipt1.attempts).toBe(1);
 
     // Account should NOT be closed yet
-    expect(AccountStatus.isDeactivated(testAccount.status)).toBe(false);
+    expect(AccountStatus.isClosed(testAccount.status)).toBe(false);
 
     // Retry execution
     const receipt2 = await coordinator.execute(testIdentityId, 'idempotency-key-retry');
     expect(receipt2.status).toBe('succeeded');
     expect(receipt2.phase).toBe('closed');
     expect(receipt2.attempts).toBe(2);
-    expect(AccountStatus.isDeactivated(testAccount.status)).toBe(true);
+    expect(AccountStatus.isClosed(testAccount.status)).toBe(true);
   });
 
   it('should handle failure when account is not found', async () => {
@@ -133,7 +132,7 @@ describe('AccountClosureCoordinator Unit Tests', () => {
       closureOperationRepository: closureOpRepo,
       revocationPort: mockRevocationPort,
       eventPublisher: mockEventPublisher,
-      clock: { now: () => new Date(1700000000000) },
+      clock: createFixedClock(1_700_000_000_000),
       metrics: recorder,
     });
 
@@ -151,10 +150,13 @@ describe('AccountClosureCoordinator Unit Tests', () => {
       accountRepository: mockAccountRepo,
       closureOperationRepository: closureOpRepo,
       revocationPort: {
-        revokeAll: vi.fn().mockRejectedValueOnce(new Error('auth down')).mockResolvedValueOnce({ revokedSessions: 1 }),
+        revokeAll: vi
+          .fn()
+          .mockRejectedValueOnce(new Error('auth down'))
+          .mockResolvedValueOnce({ revokedSessions: 1 }),
       },
       eventPublisher: mockEventPublisher,
-      clock: { now: () => new Date(1700000000000) },
+      clock: createFixedClock(1_700_000_000_000),
       metrics: recorder,
     });
     await failedCoordinator.execute(testIdentityId, 'idempotency-key-metrics-2');
@@ -199,11 +201,13 @@ describe('AccountClosureCoordinator Unit Tests', () => {
       closureOperationRepository: closureOpRepo,
       revocationPort: mockRevocationPort,
       eventPublisher: mockEventPublisher,
-      clock: { now: () => new Date(1700000000000) },
+      clock: createFixedClock(1_700_000_000_000),
       metrics: recorder,
     });
     const receipt = await claimCoordinator.execute(testIdentityId, 'idempotency-key-claimed');
     expect(receipt.status).toBe('succeeded');
-    expect(recorder.snapshot()['memoflow.account-closure.outbox.claimed']).toBeGreaterThanOrEqual(1);
+    expect(recorder.snapshot()['memoflow.account-closure.outbox.claimed']).toBeGreaterThanOrEqual(
+      1,
+    );
   });
 });

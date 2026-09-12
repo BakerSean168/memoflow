@@ -82,7 +82,7 @@ export const notificationQueryKeys = {
  * Field order is frozen: `page/limit/status/goalId/labelIdsAll`.
  * 字段顺序冻结为：`page/limit/status/goalId/labelIdsAll`。
  */
-export interface CanonicalTaskTemplateListQuery {
+export interface CanonicalTaskPlanListQuery {
   page: number;
   limit: number;
   status?: string[];
@@ -91,7 +91,7 @@ export interface CanonicalTaskTemplateListQuery {
 }
 
 /** Input accepted by the Task canonicalizer (may omit defaults/undefined). */
-export type TaskTemplateListQueryInput = Partial<CanonicalTaskTemplateListQuery>;
+export type TaskPlanListQueryInput = Partial<CanonicalTaskPlanListQuery>;
 
 /**
  * Normalize a string array for the cache key (copy, dedupe, sort).
@@ -107,9 +107,9 @@ function normalizeStringArray(value: string[] | undefined): string[] | undefined
  * Materialize a Task template list query into its canonical, key-safe form.
  * 把任务模板列表查询规范化为键安全形态：补齐分页默认值、规范化 status/labelIdsAll 数组、删除空字段。
  */
-export function canonicalizeTaskTemplateListQuery(
-  query?: TaskTemplateListQueryInput,
-): CanonicalTaskTemplateListQuery {
+export function canonicalizeTaskPlanListQuery(
+  query?: TaskPlanListQueryInput,
+): CanonicalTaskPlanListQuery {
   const { page, limit, status, goalId, labelIdsAll } = query ?? {};
   const normalizedStatus = normalizeStringArray(status);
   const normalizedLabelIds = normalizeStringArray(labelIdsAll);
@@ -126,17 +126,17 @@ export function canonicalizeTaskTemplateListQuery(
  * Frozen Task template query key factories.
  * 冻结的 Task template 查询键工厂（§3.2）。
  */
-export const taskTemplateQueryKeys = {
-  all: ['server-state', 'task-template'] as const,
-  identity: (identityScope: string) => [...taskTemplateQueryKeys.all, identityScope] as const,
+export const taskPlanQueryKeys = {
+  all: ['server-state', 'task-plan'] as const,
+  identity: (identityScope: string) => [...taskPlanQueryKeys.all, identityScope] as const,
   lists: (identityScope: string) =>
-    [...taskTemplateQueryKeys.identity(identityScope), 'list'] as const,
-  list: (identityScope: string, query: CanonicalTaskTemplateListQuery) =>
-    [...taskTemplateQueryKeys.lists(identityScope), query] as const,
+    [...taskPlanQueryKeys.identity(identityScope), 'list'] as const,
+  list: (identityScope: string, query: CanonicalTaskPlanListQuery) =>
+    [...taskPlanQueryKeys.lists(identityScope), query] as const,
   details: (identityScope: string) =>
-    [...taskTemplateQueryKeys.identity(identityScope), 'detail'] as const,
+    [...taskPlanQueryKeys.identity(identityScope), 'detail'] as const,
   detail: (identityScope: string, id: string) =>
-    [...taskTemplateQueryKeys.details(identityScope), id] as const,
+    [...taskPlanQueryKeys.details(identityScope), id] as const,
 };
 
 // ─── Governance ───────────────────────────────────────────────────────────────
@@ -200,7 +200,7 @@ export const governanceQueryKeys = {
 
 /** Type alias so the frozen key shape stays importable for dispatcher typing. */
 export type NotificationQueryKeys = typeof notificationQueryKeys;
-export type TaskTemplateQueryKeys = typeof taskTemplateQueryKeys;
+export type TaskPlanQueryKeys = typeof taskPlanQueryKeys;
 export type GovernanceQueryKeys = typeof governanceQueryKeys;
 
 /** Type guard for identity-scoped pilot query keys. */
@@ -208,6 +208,6 @@ export function isServerStateQueryKey(key: QueryKey | readonly unknown[]): boole
   return (
     key.length >= 2 &&
     key[0] === 'server-state' &&
-    (key[1] === 'notification' || key[1] === 'task-template' || key[1] === 'governance')
+    (key[1] === 'notification' || key[1] === 'task-plan' || key[1] === 'governance')
   );
 }

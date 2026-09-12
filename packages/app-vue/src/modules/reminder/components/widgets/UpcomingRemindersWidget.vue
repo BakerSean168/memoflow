@@ -54,9 +54,7 @@
               class="flex items-start gap-2.5 py-1.5 rounded-md hover:bg-muted/50 px-1 transition-colors"
             >
               <div class="flex flex-col items-center bg-muted/80 rounded px-1.5 py-0.5 shrink-0">
-                <span class="text-[10px] text-muted-foreground leading-none">
-                  今天
-                </span>
+                <span class="text-[10px] text-muted-foreground leading-none"> 今天 </span>
                 <span class="text-xs font-semibold text-foreground leading-tight">
                   {{ formatReminderTime(item.nextTriggerAt) }}
                 </span>
@@ -79,7 +77,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { formatLocalHHmm } from '../../../../shared/utils/format-local-hhmm';
+import { getProductTime, productTimeRevision } from '../../../../shared/utils/product-time';
 import {
   Card,
   CardContent,
@@ -117,8 +115,8 @@ const currentDayKey = ref(getDayKey(Date.now()));
 let nowTimer: number | null = null;
 
 function getDayKey(timestamp: number): string {
-  const date = new Date(timestamp);
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  void productTimeRevision.value;
+  return String(getProductTime().calendar.toYmd(timestamp));
 }
 
 function startNowTimer() {
@@ -167,12 +165,11 @@ const visibleItems = computed<ReminderTodayScheduleItem[]>(() =>
   remainingItems.value.slice(0, props.maxItems),
 );
 
-/**
- * Residual 1294: HH:mm dual retired onto formatLocalHHmm sole; null → '--:--' stays local.
- */
+/** Current reminder wall-clock display follows the session Product Time context. */
 function formatReminderTime(timestamp: number | null): string {
   if (!timestamp) return '--:--';
-  return formatLocalHHmm(timestamp);
+  void productTimeRevision.value;
+  return getProductTime().format.hm(timestamp);
 }
 
 onMounted(() => {
@@ -180,12 +177,9 @@ onMounted(() => {
   startNowTimer();
 });
 
-watch(
-  () => props.refreshKey,
-  () => {
-    void loadReminders();
-  },
-);
+watch([() => props.refreshKey, productTimeRevision], () => {
+  void loadReminders();
+});
 
 onBeforeUnmount(() => {
   stopNowTimer();

@@ -4,7 +4,7 @@ import {
   TaskGoalSettlementSourceType,
   TaskPlanOutcome,
   type TaskGoalProgressOutboxEventV2,
-  type TaskInstanceCompletedEvent,
+  type TaskOccurrenceCompletedEvent,
   type TaskPlanOutcomeChangedEvent,
   type TaskUncompletedEvent,
 } from '@memoflow/contracts/task';
@@ -12,8 +12,8 @@ import {
 export interface TaskGoalOutboxRecord {
   eventId: string;
   identityId: string;
-  taskInstanceId: string;
-  taskTemplateId: string;
+  taskOccurrenceId: string;
+  taskPlanId: string;
   goalId: string;
   keyResultId: string;
   payload: string;
@@ -31,17 +31,17 @@ export interface TaskGoalOutboxWriter {
 export function toTaskGoalOutboxRecord(event: IDomainEvent): TaskGoalOutboxRecord | null {
   if (event.eventType === 'task:instance-uncompleted') {
     const payload = event.payload as TaskUncompletedEvent;
-    const eventId = `task-goal-revert:instance:${String(payload.taskInstanceId)}:${payload.uncompletedAt}`;
+    const eventId = `task-goal-revert:instance:${String(payload.taskOccurrenceId)}:${payload.uncompletedAt}`;
     const durableEvent: TaskGoalProgressOutboxEventV2 = {
       eventId,
       schemaVersion: 2,
       eventType: 'task.goal-progress-requested',
       action: 'revert',
       identityId: payload.identityId,
-      taskInstanceId: payload.taskInstanceId,
-      taskTemplateId: payload.taskTemplateId,
+      taskOccurrenceId: payload.taskOccurrenceId,
+      taskPlanId: payload.taskPlanId,
       sources: [
-        { type: TaskGoalSettlementSourceType.TaskInstance, id: String(payload.taskInstanceId) },
+        { type: TaskGoalSettlementSourceType.TaskOccurrence, id: String(payload.taskOccurrenceId) },
       ],
       occurredAt: payload.uncompletedAt,
     };
@@ -49,8 +49,8 @@ export function toTaskGoalOutboxRecord(event: IDomainEvent): TaskGoalOutboxRecor
     return outboxRecord({
       eventId,
       identityId: String(payload.identityId),
-      taskInstanceId: String(payload.taskInstanceId),
-      taskTemplateId: String(payload.taskTemplateId),
+      taskOccurrenceId: String(payload.taskOccurrenceId),
+      taskPlanId: String(payload.taskPlanId),
       durableEvent,
       occurredAt: event.occurredAt,
     });
@@ -65,20 +65,21 @@ export function toTaskGoalOutboxRecord(event: IDomainEvent): TaskGoalOutboxRecor
 
   if (event.eventType !== 'task:instance-completed') return null;
 
-  const payload = event.payload as TaskInstanceCompletedEvent;
+  const payload = event.payload as TaskOccurrenceCompletedEvent;
   const binding = payload.goalBinding;
   const contribution = binding?.contribution;
   if (
     !binding ||
     !contribution ||
+    !binding.keyResultId ||
     contribution.trigger !== TaskGoalBindingTrigger.EachCompletion
   ) {
     return null;
   }
 
   const source = {
-    type: TaskGoalSettlementSourceType.TaskInstance,
-    id: String(payload.taskInstanceId),
+    type: TaskGoalSettlementSourceType.TaskOccurrence,
+    id: String(payload.taskOccurrenceId),
   } as const;
   const eventId = `task-goal-apply:${source.type}:${source.id}:${payload.completedAt}`;
   const durableEvent: TaskGoalProgressOutboxEventV2 = {
@@ -87,8 +88,8 @@ export function toTaskGoalOutboxRecord(event: IDomainEvent): TaskGoalOutboxRecor
     eventType: 'task.goal-progress-requested',
     action: 'apply',
     identityId: payload.identityId,
-    taskInstanceId: payload.taskInstanceId,
-    taskTemplateId: payload.taskTemplateId,
+    taskOccurrenceId: payload.taskOccurrenceId,
+    taskPlanId: payload.taskPlanId,
     goalId: binding.goalId,
     keyResultId: binding.keyResultId,
     value: contribution.value,
@@ -100,8 +101,8 @@ export function toTaskGoalOutboxRecord(event: IDomainEvent): TaskGoalOutboxRecor
   return outboxRecord({
     eventId,
     identityId: String(payload.identityId),
-    taskInstanceId: String(payload.taskInstanceId),
-    taskTemplateId: String(payload.taskTemplateId),
+    taskOccurrenceId: String(payload.taskOccurrenceId),
+    taskPlanId: String(payload.taskPlanId),
     goalId: String(binding.goalId),
     keyResultId: String(binding.keyResultId),
     durableEvent,
@@ -118,6 +119,7 @@ function planOutcomeSettlementRecord(
   if (
     !binding ||
     !contribution ||
+    !binding.keyResultId ||
     contribution.trigger !== TaskGoalBindingTrigger.PlanCompletion ||
     payload.previousOutcome === payload.nextOutcome
   ) {
@@ -125,21 +127,21 @@ function planOutcomeSettlementRecord(
   }
 
   if (payload.nextOutcome === TaskPlanOutcome.Succeeded) {
-    const eventId = `task-goal-plan-apply:${String(payload.taskTemplateId)}:v${payload.planVersion}`;
+    const eventId = `task-goal-plan-apply:${String(payload.taskPlanId)}:v${payload.planVersion}`;
     const durableEvent: TaskGoalProgressOutboxEventV2 = {
       eventId,
       schemaVersion: 2,
       eventType: 'task.goal-progress-requested',
       action: 'apply',
       identityId: payload.identityId,
-      taskInstanceId: payload.triggeringTaskInstanceId,
-      taskTemplateId: payload.taskTemplateId,
+      taskOccurrenceId: payload.triggeringTaskOccurrenceId,
+      taskPlanId: payload.taskPlanId,
       goalId: binding.goalId,
       keyResultId: binding.keyResultId,
       value: contribution.value,
       source: {
         type: TaskGoalSettlementSourceType.TaskPlan,
-        id: String(payload.taskTemplateId),
+        id: String(payload.taskPlanId),
       },
       taskTitle: payload.taskTitle,
       occurredAt: payload.changedAt,
@@ -147,8 +149,8 @@ function planOutcomeSettlementRecord(
     return outboxRecord({
       eventId,
       identityId: String(payload.identityId),
-      taskInstanceId: String(payload.triggeringTaskInstanceId),
-      taskTemplateId: String(payload.taskTemplateId),
+      taskOccurrenceId: String(payload.triggeringTaskOccurrenceId),
+      taskPlanId: String(payload.taskPlanId),
       goalId: String(binding.goalId),
       keyResultId: String(binding.keyResultId),
       durableEvent,
@@ -157,25 +159,25 @@ function planOutcomeSettlementRecord(
   }
 
   if (payload.previousOutcome === TaskPlanOutcome.Succeeded) {
-    const eventId = `task-goal-plan-revert:${String(payload.taskTemplateId)}:v${payload.planVersion}`;
+    const eventId = `task-goal-plan-revert:${String(payload.taskPlanId)}:v${payload.planVersion}`;
     const durableEvent: TaskGoalProgressOutboxEventV2 = {
       eventId,
       schemaVersion: 2,
       eventType: 'task.goal-progress-requested',
       action: 'revert',
       identityId: payload.identityId,
-      taskInstanceId: payload.triggeringTaskInstanceId,
-      taskTemplateId: payload.taskTemplateId,
+      taskOccurrenceId: payload.triggeringTaskOccurrenceId,
+      taskPlanId: payload.taskPlanId,
       sources: [
-        { type: TaskGoalSettlementSourceType.TaskPlan, id: String(payload.taskTemplateId) },
+        { type: TaskGoalSettlementSourceType.TaskPlan, id: String(payload.taskPlanId) },
       ],
       occurredAt: payload.changedAt,
     };
     return outboxRecord({
       eventId,
       identityId: String(payload.identityId),
-      taskInstanceId: String(payload.triggeringTaskInstanceId),
-      taskTemplateId: String(payload.taskTemplateId),
+      taskOccurrenceId: String(payload.triggeringTaskOccurrenceId),
+      taskPlanId: String(payload.taskPlanId),
       durableEvent,
       occurredAt,
     });
@@ -187,8 +189,8 @@ function planOutcomeSettlementRecord(
 function outboxRecord(input: {
   eventId: string;
   identityId: string;
-  taskInstanceId: string;
-  taskTemplateId: string;
+  taskOccurrenceId: string;
+  taskPlanId: string;
   goalId?: string;
   keyResultId?: string;
   durableEvent: TaskGoalProgressOutboxEventV2;
@@ -197,8 +199,8 @@ function outboxRecord(input: {
   return {
     eventId: input.eventId,
     identityId: input.identityId,
-    taskInstanceId: input.taskInstanceId,
-    taskTemplateId: input.taskTemplateId,
+    taskOccurrenceId: input.taskOccurrenceId,
+    taskPlanId: input.taskPlanId,
     goalId: input.goalId ?? '',
     keyResultId: input.keyResultId ?? '',
     payload: JSON.stringify(input.durableEvent),

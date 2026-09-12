@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { UserSettingPreferences } from '@memoflow/contracts/setting';
+import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
 import type { AppLocale } from '../../../plugins/i18n';
 // Residual 1005: sole presentation helpers (local dual retired).
 import {
@@ -33,17 +33,9 @@ export const usePresentationPreferenceStore = defineStore('presentation-preferen
       this.theme = normalizeTheme(theme);
     },
 
-    syncFromUserSetting(preferences?: Partial<UserSettingPreferences> | null) {
-      const locale = preferences?.locale?.language;
-      const theme = preferences?.appearance?.theme;
-
-      if (locale !== undefined) {
-        this.locale = normalizeLocale(locale);
-      }
-
-      if (theme !== undefined) {
-        this.theme = normalizeTheme(theme);
-      }
+    syncFromUserPreferenceProfile(profile: UserPreferenceProfile) {
+      this.locale = normalizeLocale(profile.presentation.language);
+      this.theme = normalizeTheme(profile.presentation.theme);
     },
   },
 

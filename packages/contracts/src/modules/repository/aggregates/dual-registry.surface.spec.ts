@@ -31,15 +31,11 @@ import { describe, expect, it } from 'vitest';
       expect(source).toContain(
         'export type SearchLocalVaultReq = z.infer<typeof SearchLocalVaultReqSchema>',
       );
-      expect(source).toContain(
-        'export const OpenLocalVaultInObsidianReqSchema = z.object({',
-      );
+      expect(source).toContain('export const OpenLocalVaultInObsidianReqSchema = z.object({');
       expect(source).toContain(
         'export type OpenLocalVaultInObsidianReq = z.infer<typeof OpenLocalVaultInObsidianReqSchema>',
       );
-      expect(source).toContain(
-        'export const ConfirmedLocalVaultWriteReqSchema = z.object({',
-      );
+      expect(source).toContain('export const ConfirmedLocalVaultWriteReqSchema = z.object({');
       expect(source).toContain(
         'export type ConfirmedLocalVaultWriteReq = z.infer<typeof ConfirmedLocalVaultWriteReqSchema>',
       );
@@ -74,12 +70,10 @@ import { describe, expect, it } from 'vitest';
 
     it('owns nested DTO schemas and ResSchema + z.infer aliases', () => {
       expect(source).toContain('Residual 793');
-      expect(source).toContain(
-        'export const LocalVaultBindingClientDTOSchema = z.object({',
-      );
-      expect(source).toContain(
-        'export const LocalVaultNoteSummaryDTOSchema = z.object({',
-      );
+      expect(source).toContain('export const LocalVaultBindingClientDTOSchema');
+      expect(source).toContain('export const LocalVaultHealthDTOSchema');
+      expect(source).toContain('export const LocalVaultBindingSnapshotDTOSchema');
+      expect(source).toContain('export const LocalVaultNoteSummaryDTOSchema = z.object({');
       expect(source).toContain(
         'export const LocalVaultNoteDTOSchema = LocalVaultNoteSummaryDTOSchema.extend({',
       );
@@ -91,9 +85,7 @@ import { describe, expect, it } from 'vitest';
       expect(source).toContain(
         'export type SearchLocalVaultRes = z.infer<typeof SearchLocalVaultResSchema>',
       );
-      expect(source).toContain(
-        'export const ConfirmedLocalVaultWriteResSchema = z.object({',
-      );
+      expect(source).toContain('export const ConfirmedLocalVaultWriteResSchema = z.object({');
       expect(source).toContain(
         'export type ConfirmedLocalVaultWriteRes = z.infer<typeof ConfirmedLocalVaultWriteResSchema>',
       );
@@ -108,6 +100,20 @@ import { describe, expect, it } from 'vitest';
       expect(source).not.toMatch(/export interface LocalVaultNoteDTO\b/);
       expect(source).not.toMatch(/export interface LocalVaultSearchMatchDTO\b/);
       expect(source).not.toMatch(/export interface LocalVaultSearchResultDTO\b/);
+    });
+
+    it('separates durable local binding ownership from filesystem health', () => {
+      expect(source).toContain('knowledgeSpaceId: brandedId<KnowledgeSpaceId>');
+      expect(source).toContain('localProfileId: z.string().min(1)');
+      expect(source).toContain('boundAt: z.number()');
+      expect(source).toContain('detachedAt: z.number().nullable()');
+      expect(source).not.toContain('identityId:');
+      expect(source).not.toContain('obsidianVaultId');
+      expect(source).not.toContain('lastScannedAt');
+      expect(source).not.toContain("'Active'");
+      expect(source).toContain("z.enum(['Available', 'Missing', 'Unreadable'])");
+      expect(source).toContain('binding: LocalVaultBindingClientDTOSchema');
+      expect(source).toContain('health: LocalVaultHealthDTOSchema');
     });
 
     it('nests binding/note schemas inside Res schemas', () => {

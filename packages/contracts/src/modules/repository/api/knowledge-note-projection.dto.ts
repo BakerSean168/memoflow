@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { KnowledgeDocumentIdSchema } from '../aggregates/knowledge-document-identity';
 
 const vaultRelativeMarkdownPath = z
   .string()
@@ -44,6 +45,7 @@ export type KnowledgeNoteProjectionIndexStatus = z.infer<
 export const KnowledgeNoteProjectionClientSchema = z.object({
   id: z.string().min(1),
   connectionId: z.string().min(1),
+  knowledgeDocumentId: KnowledgeDocumentIdSchema.nullable(),
   relativePath: vaultRelativeMarkdownPath,
   title: z.string().min(1),
   commitSha: z.string().min(1),
@@ -121,21 +123,34 @@ export const KnowledgeNoteLinkGraphResponseSchema = z.object({
 });
 export type KnowledgeNoteLinkGraphResponse = z.infer<typeof KnowledgeNoteLinkGraphResponseSchema>;
 
-export const CreateConfirmedKnowledgeNoteSchema = z.object({
-  connectionId: z.string().min(1),
-  proposalId: z.string().trim().min(1),
-  revision: z.number().int().min(1),
-  requestId: z.string().trim().min(1),
-  proposedPath: vaultRelativeMarkdownPath,
-  title: z.string().trim().min(1).max(200),
-  frontmatter: z.record(z.string(), z.unknown()).default({}),
-  content: z.string().min(1).max(500_000),
-  reason: z.string().trim().min(1).max(2_000),
-});
+export const CreateConfirmedKnowledgeNoteSchema = z
+  .object({
+    connectionId: z.string().min(1),
+    knowledgeDocumentId: KnowledgeDocumentIdSchema,
+    proposalId: z.string().trim().min(1),
+    revision: z.number().int().min(1),
+    requestId: z.string().trim().min(1),
+    proposedPath: vaultRelativeMarkdownPath,
+    title: z.string().trim().min(1).max(200),
+    frontmatter: z.record(z.string(), z.unknown()).default({}),
+    content: z.string().min(1).max(500_000),
+    reason: z.string().trim().min(1).max(2_000),
+  })
+  .superRefine((value, ctx) => {
+    const embedded = value.frontmatter['memoflow_id'];
+    if (embedded !== undefined && embedded !== value.knowledgeDocumentId) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['frontmatter', 'memoflow_id'],
+        message: 'frontmatter memoflow_id must match knowledgeDocumentId',
+      });
+    }
+  });
 export type CreateConfirmedKnowledgeNoteReq = z.infer<typeof CreateConfirmedKnowledgeNoteSchema>;
 
 export const CreateConfirmedKnowledgeNoteResponseSchema = z.object({
   requestId: z.string().min(1),
+  knowledgeDocumentId: KnowledgeDocumentIdSchema,
   relativePath: vaultRelativeMarkdownPath,
   commitSha: z.string().min(1),
   status: z.literal('Committed'),
@@ -143,6 +158,23 @@ export const CreateConfirmedKnowledgeNoteResponseSchema = z.object({
 export type CreateConfirmedKnowledgeNoteResponse = z.infer<
   typeof CreateConfirmedKnowledgeNoteResponseSchema
 >;
+
+export const AdoptKnowledgeDocumentSchema = z.object({
+  projectionId: z.string().min(1),
+  knowledgeDocumentId: KnowledgeDocumentIdSchema,
+  requestId: z.string().trim().min(1),
+  expectedBlobSha: z.string().trim().min(1),
+});
+export type AdoptKnowledgeDocumentReq = z.infer<typeof AdoptKnowledgeDocumentSchema>;
+
+export const AdoptKnowledgeDocumentResponseSchema = z.object({
+  requestId: z.string().min(1),
+  knowledgeDocumentId: KnowledgeDocumentIdSchema,
+  relativePath: vaultRelativeMarkdownPath,
+  commitSha: z.string().min(1),
+  status: z.literal('Committed'),
+});
+export type AdoptKnowledgeDocumentResponse = z.infer<typeof AdoptKnowledgeDocumentResponseSchema>;
 
 /**
  * W6-A: write-request ledger DTO exposed to the UI. The Git commit state
@@ -165,6 +197,7 @@ export type KnowledgeWriteRequestProjectionStatus = z.infer<
 export const KnowledgeWriteRequestClientSchema = z.object({
   id: z.string().min(1),
   connectionId: z.string().min(1),
+  knowledgeDocumentId: KnowledgeDocumentIdSchema,
   requestId: z.string().min(1),
   relativePath: vaultRelativeMarkdownPath,
   status: KnowledgeWriteRequestStatusSchema,
@@ -191,9 +224,7 @@ export type ListKnowledgeWriteRequestsReq = z.infer<typeof ListKnowledgeWriteReq
 export const ListKnowledgeWriteRequestsResSchema = z.object({
   writeRequests: z.array(KnowledgeWriteRequestClientSchema),
 });
-export type ListKnowledgeWriteRequestsRes = z.infer<
-  typeof ListKnowledgeWriteRequestsResSchema
->;
+export type ListKnowledgeWriteRequestsRes = z.infer<typeof ListKnowledgeWriteRequestsResSchema>;
 
 export const KnowledgeWriteRequestReplayResponseSchema = z.object({
   writeRequestId: z.string().min(1),

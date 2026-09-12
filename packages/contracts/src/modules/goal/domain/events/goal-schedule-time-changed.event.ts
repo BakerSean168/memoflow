@@ -4,7 +4,7 @@ import type { IdentityId } from '../../../../primitives';
 /**
  * Goal Schedule Time Changed Event
  *
- * Triggered when: Goal time range changes (start/due dates)
+ * Triggered when: Goal planning time changes (start date / target timeframe)
  * Subscribers: Schedule service
  */
 export interface GoalScheduleTimeChangedEvent {
@@ -14,6 +14,6 @@ export interface GoalScheduleTimeChangedEvent {
   /** Updated goal snapshot */
   goal: GoalServerDTO;
 
-  /** Changed time fields */
+  /** Changed planning-time fields (`startDate` / `target`) */
   changes: string[];
 }

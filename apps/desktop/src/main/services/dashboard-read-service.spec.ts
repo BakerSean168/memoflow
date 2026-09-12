@@ -24,31 +24,31 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@memoflow/dashboard', () => ({
   getDashboardData: mocks.getDashboardData,
   toDashboardGoalRecord: (goal: unknown) => goal,
-  toDashboardTaskInstanceRecord: (instance: unknown) => instance,
+  toDashboardTaskOccurrenceRecord: (instance: unknown) => instance,
 }));
 
 import type { DashboardData } from '@memoflow/contracts/dashboard';
 import {
   getDesktopDashboardData,
-  type DashboardRepositoryDependencies,
+  type DashboardReadDependencies,
 } from './dashboard-read-service';
 
 const identityId = 'identity-1';
 
-function createFakeDependencies(): DashboardRepositoryDependencies {
+function createFakeDependencies(): DashboardReadDependencies {
   const goalRepository = {
     findByIdentityId: vi.fn().mockResolvedValue([
       {
-        toClientDTO: () => ({ id: 'g1', name: 'Goal', status: 'Active', deletedAt: null }),
+        toClientDTO: () => ({ id: 'g1', name: 'Goal', status: 'InProgress', deletedAt: null }),
       },
     ]),
   };
-  const taskTemplateRepository = {
+  const taskPlanRepository = {
     findByIdentityId: vi.fn().mockResolvedValue([
       { id: 't1', title: 'Task', status: 'Active', deletedAt: null, createdAt: Date.now() },
     ]),
   };
-  const taskInstanceRepository = {
+  const taskOccurrenceRepository = {
     findByIdentityId: vi.fn().mockResolvedValue([
       {
         id: 'i1',
@@ -58,6 +58,16 @@ function createFakeDependencies(): DashboardRepositoryDependencies {
         actualEndTime: null,
         updatedAt: Date.now(),
         deletedAt: null,
+        toClientDTOAt: vi.fn(() => ({
+          id: 'i1',
+          templateId: 't1',
+          status: 'Pending',
+          instanceDate: Date.now(),
+          actualEndTime: null,
+          updatedAt: Date.now(),
+          deletedAt: null,
+          isOverdue: false,
+        })),
       },
     ]),
   };
@@ -85,21 +95,24 @@ function createFakeDependencies(): DashboardRepositoryDependencies {
 
   return {
     goalRepository: goalRepository as never,
-    taskTemplateRepository: taskTemplateRepository as never,
-    taskInstanceRepository: taskInstanceRepository as never,
+    taskPlanRepository: taskPlanRepository as never,
+    taskOccurrenceRepository: taskOccurrenceRepository as never,
     scheduleRepository: scheduleRepository as never,
     scheduleTaskRepository: {} as never,
     reminderTemplateRepository: reminderTemplateRepository as never,
     notificationRepository: notificationRepository as never,
+    userTimeContextPort: {
+      getUserTimeContext: vi.fn(async () => ({ timeZone: 'UTC', weekStartsOn: 1 })),
+    } as never,
   };
 }
 
-function captureDashboardSource(_deps: DashboardRepositoryDependencies) {
+function captureDashboardSource(_deps: DashboardReadDependencies) {
   mocks.getDashboardData.mockImplementationOnce(
     async (id: string, source: Parameters<typeof getDesktopDashboardData>[0]) => {
       await source.listGoals(id);
-      await source.listTaskTemplates(id);
-      await source.listTaskInstances(id);
+      await source.listTaskPlans(id);
+      await source.listTaskOccurrences(id);
       await source.listSchedules(id);
       await source.listUpcomingReminders(id, Date.now());
       await source.countUnreadNotifications(id);
@@ -120,8 +133,8 @@ describe('getDesktopDashboardData instance-bound aggregation', () => {
       includeChildren: true,
       systemView: 'active',
     });
-    expect(deps.taskTemplateRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
-    expect(deps.taskInstanceRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
+    expect(deps.taskPlanRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
+    expect(deps.taskOccurrenceRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
     expect(deps.scheduleRepository.findByIdentityId).toHaveBeenCalledWith(identityId);
     expect(deps.reminderTemplateRepository.findByNextTriggerBefore).toHaveBeenCalledWith(
       expect.any(Number),
@@ -130,14 +143,15 @@ describe('getDesktopDashboardData instance-bound aggregation', () => {
     expect(deps.notificationRepository.countUnread).toHaveBeenCalledWith(identityId);
   });
 
-  it('does not import package-level accessors (no global repository read)', () => {
+  it('does not import package-level accessors (no global repository read)', async () => {
     const deps = createFakeDependencies();
     captureDashboardSource(deps);
 
     const identity = 'another-identity';
     mocks.getDashboardData.mockClear();
-    void getDesktopDashboardData(identity, deps);
+    await getDesktopDashboardData(identity, deps);
 
+    expect(deps.userTimeContextPort.getUserTimeContext).toHaveBeenCalledWith(identity);
     expect(mocks.getDashboardData).toHaveBeenCalledWith(
       identity,
       expect.objectContaining({
@@ -146,6 +160,7 @@ describe('getDesktopDashboardData instance-bound aggregation', () => {
         listUpcomingReminders: expect.any(Function),
         countUnreadNotifications: expect.any(Function),
       }),
+      { timeZone: 'UTC', weekStartsOn: 1 },
     );
   });
 });

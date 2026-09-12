@@ -7,17 +7,16 @@ function createTestGoal(): Goal {
   return Goal.create({
     identityId: 'IdentityId_550e8400-e29b-41d4-a716-446655440001' as any,
     name: 'Test Goal',
-    description: null,
-    feasibilityAnalysis: null,
-    motivation: null,
+    summary: null,
     startDate: null,
-    dueDate: null,
+    target: null,
     reminderConfig: null,
   });
 }
 
 function createCompletedGoal(): Goal {
   const goal = createTestGoal();
+  goal.activate();
   goal.markAsCompleted();
   return goal;
 }
@@ -35,13 +34,16 @@ describe('GoalPolicy vNext archive/status separation', () => {
     policy = new GoalPolicy();
   });
 
-  it('allows modification for unarchived Active, Completed, and Abandoned goals', () => {
-    const active = createTestGoal();
+  it('allows modification for unarchived Planned, InProgress, Completed, and Abandoned goals', () => {
+    const planned = createTestGoal();
+    const inProgress = createTestGoal();
+    inProgress.activate();
     const completed = createCompletedGoal();
     const abandoned = createTestGoal();
     abandoned.abandon();
 
-    expect(() => policy.ensureGoalCanBeModified(active)).not.toThrow();
+    expect(() => policy.ensureGoalCanBeModified(planned)).not.toThrow();
+    expect(() => policy.ensureGoalCanBeModified(inProgress)).not.toThrow();
     expect(() => policy.ensureGoalCanBeModified(completed)).not.toThrow();
     expect(() => policy.ensureGoalCanBeModified(abandoned)).not.toThrow();
   });

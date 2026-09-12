@@ -52,13 +52,13 @@
             <Badge variant="secondary">{{ notes.length }}</Badge>
           </div>
           <p class="mt-1 truncate text-xs text-muted-foreground">
-            {{ selectedConnection?.githubRepositoryFullName }} ·
-            {{ selectedConnection?.defaultBranch }}
-            <span v-if="selectedConnection?.lastProjectedCommitSha">
+            {{ selectedConnection ? repositoryDisplayName(selectedConnection) : '' }} ·
+            {{ selectedConnection ? repositoryDefaultBranch(selectedConnection) : '—' }}
+            <span v-if="selectedConnection?.projectionCheckpoint?.projectedCommitSha">
               ·
               {{
                 t('repository.projection.commit', {
-                  sha: selectedConnection.lastProjectedCommitSha.slice(0, 8),
+                  sha: selectedConnection.projectionCheckpoint!.projectedCommitSha!.slice(0, 8),
                 })
               }}
             </span>
@@ -74,11 +74,19 @@
           @change="handleConnectionChange"
         >
           <option v-for="connection in connections" :key="connection.id" :value="connection.id">
-            {{ connection.githubRepositoryFullName }}
+            {{ repositoryDisplayName(connection) }}
           </option>
         </select>
-        <Badge :variant="selectedConnection?.status === 'Active' ? 'secondary' : 'outline'">
-          {{ connectionStatusLabel(selectedConnection?.status) }}
+        <Badge
+          :variant="
+            selectedConnection?.observation?.eligibility.state === 'Ready' ? 'secondary' : 'outline'
+          "
+        >
+          {{
+            selectedConnection
+              ? providerStateLabel(selectedConnection)
+              : t('repository.projection.providerStatus.Unchecked')
+          }}
         </Badge>
         <Button
           variant="ghost"
@@ -94,7 +102,7 @@
         </Button>
         <Button
           size="sm"
-          :disabled="selectedConnection?.status !== 'Active'"
+          :disabled="selectedConnection?.observation?.eligibility.state !== 'Ready'"
           data-testid="knowledge-projection-create"
           @click="openCreateDialog"
         >
@@ -233,9 +241,26 @@
                   {{ t('repository.projection.relationsTab') }}
                 </button>
               </div>
+              <Button
+                v-if="selectedNote.knowledgeDocumentId === null"
+                size="sm"
+                variant="outline"
+                data-testid="knowledge-projection-adopt"
+                @click="openAdoptionDialog"
+              >
+                <Link2 class="mr-2 h-3.5 w-3.5" />
+                {{ t('repository.projection.adoptAction') }}
+              </Button>
+              <Badge v-else variant="outline" data-testid="knowledge-projection-document-id">
+                {{ selectedNote.knowledgeDocumentId }}
+              </Badge>
               <Badge variant="outline">{{ t('repository.projection.readOnly') }}</Badge>
             </div>
-            <div v-if="noteView === 'preview'" class="min-h-0 flex-1 overflow-y-auto" data-scroll-host="repository-preview">
+            <div
+              v-if="noteView === 'preview'"
+              class="min-h-0 flex-1 overflow-y-auto"
+              data-scroll-host="repository-preview"
+            >
               <article
                 class="preview-content mx-auto max-w-3xl px-5 py-5"
                 data-testid="knowledge-projection-preview"
@@ -334,6 +359,12 @@
               <span class="text-muted-foreground">{{ t('repository.projection.noteReason') }}</span>
               <p>{{ draft.reason }}</p>
             </div>
+            <div class="sm:col-span-2">
+              <span class="text-muted-foreground">{{ t('repository.projection.documentId') }}</span>
+              <p class="font-mono text-xs" data-testid="knowledge-projection-create-document-id">
+                memoflow_id: {{ proposal.knowledgeDocumentId }}
+              </p>
+            </div>
           </div>
           <div class="max-h-72 overflow-auto rounded-md border bg-muted/10 p-4">
             <article class="preview-content" v-html="draftPreview" />
@@ -385,6 +416,54 @@
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <Dialog v-model:open="adoptionDialogOpen">
+      <DialogContent class="sm:max-w-lg" data-testid="knowledge-projection-adopt-dialog">
+        <DialogHeader>
+          <DialogTitle>{{ t('repository.projection.adoptTitle') }}</DialogTitle>
+          <DialogDescription>{{ t('repository.projection.adoptDescription') }}</DialogDescription>
+        </DialogHeader>
+
+        <div v-if="adoptionProposal" class="space-y-3 text-sm">
+          <div class="rounded-md border bg-muted/20 p-3">
+            <p class="text-xs text-muted-foreground">{{ t('repository.projection.notePath') }}</p>
+            <p class="mt-1 font-mono text-xs">{{ adoptionProposal.relativePath }}</p>
+          </div>
+          <div class="rounded-md border bg-muted/20 p-3">
+            <p class="text-xs text-muted-foreground">{{ t('repository.projection.adoptPatch') }}</p>
+            <p class="mt-1 font-mono text-xs" data-testid="knowledge-projection-adopt-document-id">
+              memoflow_id: {{ adoptionProposal.knowledgeDocumentId }}
+            </p>
+          </div>
+          <p class="text-xs text-muted-foreground">
+            {{ t('repository.projection.adoptImmutable') }}
+          </p>
+        </div>
+
+        <p
+          v-if="adoptionError"
+          class="text-sm text-destructive"
+          role="alert"
+          data-testid="knowledge-projection-adopt-error"
+        >
+          {{ adoptionError }}
+        </p>
+        <DialogFooter>
+          <Button variant="outline" :disabled="adopting" @click="closeAdoptionDialog">
+            {{ t('common.cancel') }}
+          </Button>
+          <Button
+            :disabled="adopting || !adoptionProposal"
+            data-testid="knowledge-projection-adopt-confirm"
+            @click="confirmAdoption"
+          >
+            <Loader2 v-if="adopting" class="mr-2 h-4 w-4 animate-spin" />
+            <GitCommitHorizontal v-else class="mr-2 h-4 w-4" />
+            {{ t('repository.projection.adoptConfirmAction') }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 
@@ -423,9 +502,12 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import {
   CreateConfirmedKnowledgeNoteSchema,
+  AdoptKnowledgeDocumentSchema,
+  KnowledgeDocumentIdSchema,
   type CreateConfirmedKnowledgeNoteReq,
+  type AdoptKnowledgeDocumentReq,
   type KnowledgeNoteProjectionClientDTO,
-  type KnowledgeRepositoryConnectionClientDTO,
+  type KnowledgeRemoteBindingClientDTO,
 } from '@memoflow/contracts/repository';
 import { renderSafeMarkdown } from '../../../shared/utils/safe-markdown';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
@@ -437,7 +519,7 @@ const router = useRouter();
 const route = useRoute();
 const service = useStrictInject(REPOSITORY_SERVICE_KEY, 'RepositoryService');
 
-const connections = ref<KnowledgeRepositoryConnectionClientDTO[]>([]);
+const connections = ref<KnowledgeRemoteBindingClientDTO[]>([]);
 const selectedConnectionId = ref('');
 const notes = ref<KnowledgeNoteProjectionClientDTO[]>([]);
 const selectedNoteId = ref('');
@@ -472,7 +554,16 @@ const createDialogOpen = ref(false);
 const stage = ref<'draft' | 'review'>('draft');
 const creating = ref(false);
 const createError = ref('');
-const proposal = ref({ proposalId: '', requestId: '', revision: 1 });
+const adoptionDialogOpen = ref(false);
+const adopting = ref(false);
+const adoptionError = ref('');
+const adoptionProposal = ref<(AdoptKnowledgeDocumentReq & { relativePath: string }) | null>(null);
+const proposal = ref({
+  proposalId: '',
+  requestId: '',
+  knowledgeDocumentId: createKnowledgeDocumentId(),
+  revision: 1,
+});
 const draft = ref({ title: '', proposedPath: '', content: '', reason: '' });
 const reviewedProposal = ref<{
   fingerprint: string;
@@ -484,8 +575,8 @@ let noteLoadSequence = 0;
 // （设置场景守卫 / Tab 切换 / 关面板）要求确认；创建提交中标记 busy 禁止离开。
 // 每次求值都读取两个源，避免提前 return 清空响应式依赖。
 const surfaceStatus = computed<PanelSurfaceStatus>(() => {
-  const creatingNow = creating.value;
-  const dialogOpen = createDialogOpen.value;
+  const creatingNow = creating.value || adopting.value;
+  const dialogOpen = createDialogOpen.value || adoptionDialogOpen.value;
   if (creatingNow) return 'busy';
   return dialogOpen ? 'dirty' : 'clean';
 });
@@ -511,18 +602,42 @@ const canReview = computed(
     draft.value.reason.trim().length > 0,
 );
 
-function createId(prefix: string): string {
-  const uuid =
-    globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  return `${prefix}-${uuid}`;
+function createUuidV4(): string {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  const bytes = new Uint8Array(16);
+  if (globalThis.crypto?.getRandomValues) {
+    globalThis.crypto.getRandomValues(bytes);
+  } else {
+    for (let index = 0; index < bytes.length; index += 1) {
+      bytes[index] = Math.floor(Math.random() * 256);
+    }
+  }
+  bytes[6] = (bytes[6]! & 0x0f) | 0x40;
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80;
+  const hex = [...bytes].map((value) => value.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
-function connectionStatusLabel(
-  status: KnowledgeRepositoryConnectionClientDTO['status'] | undefined,
-): string {
-  return status
-    ? t(`repository.projection.status.${status}`)
-    : t('repository.projection.status.Unknown');
+function createId(prefix: string): string {
+  return `${prefix}-${createUuidV4()}`;
+}
+
+function createKnowledgeDocumentId(): CreateConfirmedKnowledgeNoteReq['knowledgeDocumentId'] {
+  return KnowledgeDocumentIdSchema.parse(`kdoc_${createUuidV4()}`);
+}
+
+function repositoryDisplayName(binding: KnowledgeRemoteBindingClientDTO): string {
+  return binding.observation?.repositoryFullName ?? binding.repositoryFullNameSnapshot;
+}
+
+function repositoryDefaultBranch(binding: KnowledgeRemoteBindingClientDTO): string {
+  return binding.observation?.defaultBranch ?? binding.historyFence?.defaultBranch ?? '—';
+}
+
+function providerStateLabel(binding: KnowledgeRemoteBindingClientDTO): string {
+  return t(
+    `repository.projection.providerStatus.${binding.observation?.eligibility.state ?? 'Unchecked'}`,
+  );
 }
 
 function indexStatusLabel(status: KnowledgeNoteProjectionClientDTO['indexStatus']): string {
@@ -543,7 +658,8 @@ async function loadConnections(): Promise<void> {
   connections.value = result.data.connections;
   if (!connections.value.some((connection) => connection.id === selectedConnectionId.value)) {
     selectedConnectionId.value =
-      connections.value.find((connection) => connection.status === 'Active')?.id ??
+      connections.value.find((connection) => connection.observation?.eligibility.state === 'Ready')
+        ?.id ??
       connections.value[0]?.id ??
       '';
   }
@@ -626,12 +742,60 @@ function openRepositorySettings(): void {
   void router.push({ path: '/settings', query: { tab: 'repository' } });
 }
 
+function openAdoptionDialog(): void {
+  const note = selectedNote.value;
+  if (!note || note.knowledgeDocumentId !== null) return;
+  const parsed = AdoptKnowledgeDocumentSchema.safeParse({
+    projectionId: note.id,
+    knowledgeDocumentId: createKnowledgeDocumentId(),
+    requestId: createId('adopt'),
+    expectedBlobSha: note.blobSha,
+  });
+  if (!parsed.success) {
+    adoptionError.value = parsed.error.issues[0]?.message ?? 'Invalid adoption request';
+    return;
+  }
+  adoptionProposal.value = { ...parsed.data, relativePath: note.relativePath };
+  adoptionError.value = '';
+  adoptionDialogOpen.value = true;
+}
+
+function closeAdoptionDialog(): void {
+  if (adopting.value) return;
+  adoptionDialogOpen.value = false;
+}
+
+async function confirmAdoption(): Promise<void> {
+  const proposal = adoptionProposal.value;
+  if (!proposal) return;
+  adopting.value = true;
+  adoptionError.value = '';
+  const { relativePath: _relativePath, ...request } = proposal;
+  const result = await service.adoptKnowledgeDocument(request);
+  if (!result.ok) {
+    adoptionError.value = result.error.message;
+    adopting.value = false;
+    return;
+  }
+
+  adoptionDialogOpen.value = false;
+  adopting.value = false;
+  await loadNotes();
+  const adopted = notes.value.find(
+    (note) =>
+      note.knowledgeDocumentId === result.data.knowledgeDocumentId ||
+      note.relativePath === result.data.relativePath,
+  );
+  if (adopted) selectedNoteId.value = adopted.id;
+}
+
 function openCreateDialog(): void {
   stage.value = 'draft';
   createError.value = '';
   proposal.value = {
     proposalId: createId('proposal'),
     requestId: createId('request'),
+    knowledgeDocumentId: createKnowledgeDocumentId(),
     revision: 1,
   };
   draft.value = { title: '', proposedPath: '', content: '', reason: '' };
@@ -656,6 +820,7 @@ function reviewDraft(): void {
     proposalId: proposal.value.proposalId,
     revision: proposal.value.revision,
     requestId: proposal.value.requestId,
+    knowledgeDocumentId: proposal.value.knowledgeDocumentId,
     proposedPath: draft.value.proposedPath,
     title: draft.value.title,
     frontmatter: {},
@@ -681,6 +846,7 @@ function reviewDraft(): void {
           proposalId: proposal.value.proposalId,
           revision: proposal.value.revision + 1,
           requestId: createId('request'),
+          knowledgeDocumentId: proposal.value.knowledgeDocumentId,
         }
       : proposal.value;
 

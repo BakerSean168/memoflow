@@ -8,11 +8,15 @@
  */
 
 import type { PrismaClient, Account as PrismaAccount, Prisma } from '@memoflow/database';
-import type { AccountProfileDTO, AccountSettingsDTO } from '@memoflow/contracts/account';
+import type { AccountProfileDTO } from '@memoflow/contracts/account';
 import type { IAccountRepository } from '../../../domain';
 import { Account } from '../../../domain';
 import { AccountPrismaMapper } from './mappers/account-prisma.mapper';
-import { AggregateRepositoryBase, createEventBusAdapter, publishAggregateEvents } from '@memoflow/patterns';
+import {
+  AggregateRepositoryBase,
+  createEventBusAdapter,
+  publishAggregateEvents,
+} from '@memoflow/patterns';
 import { eventBus } from '@memoflow/utils/domain';
 
 const eventBusAdapter = createEventBusAdapter(eventBus);
@@ -26,10 +30,10 @@ interface AccountDb {
 }
 
 /**
- * Residual 1159 keep-boundary: account profile/settings DTO → Prisma.InputJsonObject cast only.
+ * Residual 1159 keep-boundary: account profile DTO → Prisma.InputJsonObject cast only.
  * Soft residual 1159: AI toPrismaJson deep-clones unknown → InputJsonValue (no force-merge).
  */
-function toPrismaJson(value: AccountProfileDTO | AccountSettingsDTO): Prisma.InputJsonObject {
+function toPrismaJson(value: AccountProfileDTO): Prisma.InputJsonObject {
   return value as unknown as Prisma.InputJsonObject;
 }
 
@@ -58,37 +62,17 @@ export class PrismaAccountRepository
       where: { id: account.id.toString() },
       update: {
         status: account.status.toString(),
-        emailAddress: account.email.address,
-        emailIsVerified: account.email.isVerified,
-        emailVerifiedAt: account.email.verifiedAt != null ? new Date(account.email.verifiedAt) : null,
-        emailIsPrimary: account.email.isPrimary,
-        phoneCountryCode: account.phone?.countryCode ?? null,
-        phoneNumber: account.phone?.number ?? null,
-        phoneFullNumber: account.phone?.fullNumber ?? null,
-        phoneIsVerified: account.phone?.isVerified ?? null,
-        phoneVerifiedAt: account.phone?.verifiedAt != null ? new Date(account.phone.verifiedAt) : null,
         profile: toPrismaJson(account.profile.toDTO()),
-        settings: toPrismaJson(account.settings.toDTO()),
-        version: account.version,
         updatedAt: new Date(account.updatedAt),
+        closedAt: account.closedAt != null ? new Date(account.closedAt) : null,
       },
       create: {
         id: account.id.toString(),
         status: account.status.toString(),
-        emailAddress: account.email.address,
-        emailIsVerified: account.email.isVerified,
-        emailVerifiedAt: account.email.verifiedAt != null ? new Date(account.email.verifiedAt) : null,
-        emailIsPrimary: account.email.isPrimary,
-        phoneCountryCode: account.phone?.countryCode ?? null,
-        phoneNumber: account.phone?.number ?? null,
-        phoneFullNumber: account.phone?.fullNumber ?? null,
-        phoneIsVerified: account.phone?.isVerified ?? null,
-        phoneVerifiedAt: account.phone?.verifiedAt != null ? new Date(account.phone.verifiedAt) : null,
         profile: toPrismaJson(account.profile.toDTO()),
-        settings: toPrismaJson(account.settings.toDTO()),
-        version: account.version,
         createdAt: new Date(account.createdAt),
         updatedAt: new Date(account.updatedAt),
+        closedAt: account.closedAt != null ? new Date(account.closedAt) : null,
       },
     });
   }
@@ -107,32 +91,6 @@ export class PrismaAccountRepository
     return AccountPrismaMapper.toDomain(row);
   }
 
-  async findByNickname(nickname: string, tx?: AccountDb): Promise<Account | null> {
-    const rows = await this.client(tx).account.findMany({
-      where: { profile: { path: ['nickname'], equals: nickname } },
-      take: 1,
-    });
-    if (!rows || rows.length === 0) return null;
-    return AccountPrismaMapper.toDomain(rows[0]);
-  }
-
-  async findByEmail(email: string, tx?: AccountDb): Promise<Account | null> {
-    const row = await this.client(tx).account.findFirst({ where: { emailAddress: email } });
-    if (!row) return null;
-    return AccountPrismaMapper.toDomain(row);
-  }
-
-
-  async existsByNickname(nickname: string, tx?: AccountDb): Promise<boolean> {
-    const account = await this.findByNickname(nickname, tx);
-    return account !== null;
-  }
-
-  async existsByEmail(email: string, tx?: AccountDb): Promise<boolean> {
-    const count = await this.client(tx).account.count({ where: { emailAddress: email } });
-    return count > 0;
-  }
-
   async delete(id: string, tx?: AccountDb): Promise<void> {
     await this.client(tx).account.delete({ where: { id } });
   }
@@ -141,7 +99,7 @@ export class PrismaAccountRepository
     options?: {
       page?: number;
       pageSize?: number;
-      status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'DELETED';
+      status?: 'Active' | 'Closed';
     },
     tx?: AccountDb,
   ): Promise<{ accounts: Account[]; total: number }> {

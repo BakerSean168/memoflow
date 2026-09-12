@@ -4,7 +4,7 @@
  * ADR-037 W5: birthday is a calendar day (`Ymd`), not midnight Date / epoch Instant.
  */
 
-import type { TransferDate, Ymd } from '../../../primitives';
+import type { Ymd } from '../../../primitives';
 
 import type { GenderType } from './gender-type';
 
@@ -24,9 +24,6 @@ export interface AccountProfileDTO {
   avatarUrl: string | null;
   bio: string | null;
   gender: GenderType;
-  /**
-   * Wire birthday as Ymd string. Legacy epoch-ms values are accepted in mappers
-   * via Codec during migration; new writes must use Ymd.
-   */
-  birthday: Ymd | TransferDate | null;
+  /** Canonical wire birthday is a calendar day, never an epoch Instant. */
+  birthday: Ymd | null;
 }

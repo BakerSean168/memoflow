@@ -6,7 +6,7 @@
  */
 
 import type { Result } from '@memoflow/contracts/result';
-import { GoalChannels } from '@memoflow/contracts/electron';
+import { GoalChannels, GoalWorkspaceChannels } from '@memoflow/contracts/electron';
 import type { IGoalApiClient, IResultIpcClient } from '../types';
 import type {
   GoalClientDTO,
@@ -31,6 +31,12 @@ import type {
   DeleteGoalRecordReq,
   GetGoalRecordsRes,
   GetGoalAggregateRes,
+  GetGoalWorkspaceReq,
+  GoalWorkspaceReadModel,
+  GoalWorkspaceTaskPageRequest,
+  GoalWorkspaceTaskPage,
+  GoalWorkspacePageRequest,
+  GoalWorkspaceKnowledgePage,
 } from '@memoflow/contracts/goal';
 
 export class GoalIpcAdapter implements IGoalApiClient {
@@ -68,7 +74,32 @@ export class GoalIpcAdapter implements IGoalApiClient {
     return this.ipcClient.invoke(GoalChannels.DELETE, id, request);
   }
 
+  async getGoalWorkspace(
+    goalId: string,
+    request?: GetGoalWorkspaceReq,
+  ): Promise<Result<GoalWorkspaceReadModel>> {
+    return this.ipcClient.invoke(GoalWorkspaceChannels.GET, { goalId, ...request });
+  }
+
+  async getGoalWorkspaceTasks(
+    goalId: string,
+    request?: GoalWorkspaceTaskPageRequest,
+  ): Promise<Result<GoalWorkspaceTaskPage>> {
+    return this.ipcClient.invoke(GoalWorkspaceChannels.TASKS, { goalId, ...request });
+  }
+
+  async getGoalWorkspaceKnowledge(
+    goalId: string,
+    request?: GoalWorkspacePageRequest,
+  ): Promise<Result<GoalWorkspaceKnowledgePage>> {
+    return this.ipcClient.invoke(GoalWorkspaceChannels.KNOWLEDGE, { goalId, ...request });
+  }
+
   // ===== Goal Status =====
+
+  async planGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>> {
+    return this.ipcClient.invoke(GoalChannels.PLAN, id, { expectedVersion });
+  }
 
   async activateGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>> {
     return this.ipcClient.invoke(GoalChannels.ACTIVATE, id, { expectedVersion });
@@ -136,7 +167,6 @@ export class GoalIpcAdapter implements IGoalApiClient {
   ): Promise<Result<GoalMutationReceipt>> {
     return this.ipcClient.invoke(GoalChannels.KEY_RESULT_BATCH_UPDATE_WEIGHTS, goalId, request);
   }
-
 
   // ===== GoalReview Management =====
 

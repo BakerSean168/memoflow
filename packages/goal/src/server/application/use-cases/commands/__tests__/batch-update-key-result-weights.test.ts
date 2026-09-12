@@ -10,16 +10,7 @@ function createGoalFixture() {
   const goal = Goal.create({
     identityId: 'identity-1' as any,
     name: 'Test Goal',
-    description: null,
-    color: '#3B82F6',
-    feasibilityAnalysis: null,
-    motivation: null,
-    importance: 'Moderate' as any,
-    category: null,
-    tags: [],
     startDate: null,
-    targetDate: null,
-    parentGoalId: null,
     reminderConfig: null,
   });
   const first = goal.createAndAddKeyResult({
@@ -84,7 +75,9 @@ describe('BatchUpdateKeyResultWeightsUseCase', () => {
     if (result.ok) {
       expect(result.data.goalVersion).toBe(2);
       expect(result.data.affectedEntityIds.keyResultIds).toEqual([first.id, second.id]);
-      expect(result.data.readModel.keyResults?.map((keyResult) => keyResult.weight)).toEqual([4, 5]);
+      expect(result.data.readModel.keyResults?.map((keyResult) => keyResult.weight)).toEqual([
+        4, 5,
+      ]);
     }
   });
 

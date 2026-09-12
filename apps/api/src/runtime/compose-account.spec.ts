@@ -29,6 +29,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
 import type { AccountApiModuleContext } from '@memoflow/account/api';
 import type { AccountRuntimeContributionsInput, CloudAuthLike } from '@memoflow/account';
+import { createFixedClock } from '@memoflow/time';
 
 vi.mock('@memoflow/account', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@memoflow/account')>();
@@ -57,6 +58,7 @@ import {
 import { createAccountApiModule } from '@memoflow/account/api';
 
 const fakeDb = {} as unknown as PrismaClient;
+const fakeClock = createFixedClock(1_700_000_000_000);
 const fakeCloudAuth = {
   revokeAllSessions: vi.fn(async () => ({ revokedSessions: 0 })),
 } as unknown as CloudAuthLike;
@@ -68,7 +70,7 @@ describe('composeAccount assembly order', () => {
   });
 
   it('assembles in plan §3.3 order: repositories → runtime contributions → module → api module', () => {
-    composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth });
+    composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
 
     const reposOrder = createAccountPrismaRepositories.mock.invocationCallOrder[0];
     const runtimeOrder = createAccountRuntimeContributions.mock.invocationCallOrder[0];
@@ -81,10 +83,11 @@ describe('composeAccount assembly order', () => {
   });
 
   it('passes the exact host cloudAuth port into the repository factory unchanged', () => {
-    composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth });
+    composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
 
     expect(createAccountPrismaRepositories).toHaveBeenCalledWith({
       db: fakeDb,
+      clock: fakeClock,
       cloudAuth: fakeCloudAuth,
     });
   });
@@ -93,6 +96,7 @@ describe('composeAccount assembly order', () => {
     composeAccount({
       db: fakeDb,
       cloudAuth: fakeCloudAuth,
+      clock: fakeClock,
       runtimeContributions: hostRuntime,
     });
 
@@ -110,6 +114,7 @@ describe('composeAccount assembly order', () => {
       eventPublisher: repoSet.eventPublisher,
       laneCapability: 'api',
       auditRepository: repoSet.auditRepository,
+      clock: fakeClock,
     });
     expect(moduleCall.runtimeContributions).toEqual(
       createAccountRuntimeContributions.mock.results[0].value,
@@ -120,7 +125,7 @@ describe('composeAccount assembly order', () => {
   });
 
   it('returns a module handle with name Account plus register and destroy', () => {
-    const handle = composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth });
+    const handle = composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
 
     expect(handle).toMatchObject({ name: 'Account' });
     expect(typeof handle.register).toBe('function');
@@ -150,7 +155,7 @@ describe('composeAccount structural registration', () => {
   });
 
   it('mounts /accounts on the router and starts the owned instance', () => {
-    const handle = composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth });
+    const handle = composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
 
     const instance = createAccountModule.mock.results[0].value;
     const startSpy = vi.spyOn(instance, 'start');

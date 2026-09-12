@@ -15,12 +15,13 @@
  * `rules`, and `rule_revisions` do not have `identityId`.
  */
 export const IDENTITY_ID_TABLES = new Set([
-  'user_settings',
+  'user_preference_records',
   'goals',
   'key_results',
   'goal_records',
   'goal_reviews',
   'key_result_weight_snapshots',
+  'relations',
   'task_templates',
   'task_instances',
   'task_statistics',
@@ -40,13 +41,6 @@ export const IDENTITY_ID_TABLES = new Set([
   'notification_preferences',
   'notification_channels',
   'notification_history',
-  // Residual 539: editor_* tables stay for portable backup re-import / PowerSync
-  // Residual 885: portable boundary re-lock — editor_* is backup continuity only, not product editor runtime.
-  // continuity only — not a first-party @memoflow/editor product runtime surface.
-  'editor_workspaces',
-  'editor_workspace_sessions',
-  'editor_workspace_session_groups',
-  'editor_workspace_session_group_tabs',
   'ai_conversations',
   'ai_messages',
   'ai_generation_tasks',
@@ -65,16 +59,17 @@ export const IDENTITY_ID_TABLES = new Set([
 
 const TABLE_TO_MODEL: Record<string, string> = {
   accounts: 'account',
-  user_settings: 'userSetting',
+  user_preference_records: 'userPreferenceRecord',
   goals: 'goal',
   key_results: 'keyResult',
   goal_records: 'goalRecord',
   goal_reviews: 'goalReview',
   key_result_weight_snapshots: 'keyResultWeightSnapshot',
-  task_templates: 'taskTemplate',
-  task_instances: 'taskInstance',
+  relations: 'relation',
+  task_templates: 'taskPlan',
+  task_instances: 'taskOccurrence',
   task_statistics: 'taskStatistic',
-  task_template_history: 'taskTemplateHistory',
+  task_template_history: 'taskPlanHistory',
   schedules: 'schedule',
   schedule_tasks: 'scheduleTask',
   schedule_statistics: 'scheduleStatistic',
@@ -91,10 +86,6 @@ const TABLE_TO_MODEL: Record<string, string> = {
   notification_channels: 'notificationChannel',
   notification_history: 'notificationHistory',
   notification_templates: 'notificationTemplate',
-  editor_workspaces: 'editorWorkspace',
-  editor_workspace_sessions: 'editorWorkspaceSession',
-  editor_workspace_session_groups: 'editorWorkspaceSessionGroup',
-  editor_workspace_session_group_tabs: 'editorWorkspaceSessionGroupTab',
   ai_conversations: 'aiConversation',
   ai_messages: 'aiMessage',
   ai_generation_tasks: 'aiGenerationTask',

@@ -1,4 +1,4 @@
-import type { TaskGoalBindingTriggerValue } from '@memoflow/contracts/task';
+import type { TaskGoalBindingTriggerValue, TaskPlanSchedule } from '@memoflow/contracts/task';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
 
 export type UIPriority = 'high' | 'normal' | 'low' | 'urgent';
@@ -30,8 +30,8 @@ export interface TaskGoalContributionViewModel {
 }
 
 export interface TaskGoalBindingViewModel {
-  goalId?: string;
-  keyResultId?: string;
+  goalId: string;
+  keyResultId: string | null;
   contribution?: TaskGoalContributionViewModel;
 }
 
@@ -60,7 +60,7 @@ export interface KeyResultBindingOption {
   progress: GoalBindingProgress;
 }
 
-export interface TaskTemplateViewModel {
+export interface TaskPlanViewModel {
   id: string;
   title: string;
   description?: string;
@@ -71,13 +71,14 @@ export interface TaskTemplateViewModel {
   isArchived?: boolean;
   importance?: string;
   importanceText?: string;
-  estimatedMinutes?: number | null;
-  dueDate?: string | number | null;
   recurrenceText?: string;
   labels?: LabelClientDTO[];
   labelIds?: string[];
   goalBinding?: TaskGoalBindingViewModel | null;
+  schedule: TaskPlanSchedule;
+  /** Transitional form projection derived from schedule; not persistence/domain truth. */
   timeConfig: TaskTimeConfigViewModel;
+  /** Transitional form projection derived from schedule; removed by TASK-7307. */
   recurrenceRule?: Record<string, unknown> | null;
   reminderConfig?: Record<string, unknown> | null;
   instanceCount?: number;
@@ -90,12 +91,12 @@ export interface TaskTemplateViewModel {
   singleInstanceStatus?: 'Pending' | 'InProgress' | 'Completed' | 'Missed' | 'Skipped' | null;
   completionRate?: number;
   formattedCreatedAt?: string;
-  /** TaskType enum value mapped for CreateTaskTemplateReq.taskType */
+  /** Transitional form projection; removed by TASK-7307. */
   taskType?: string;
 }
 
-export interface TaskTemplateFormProps {
-  modelValue?: TaskTemplateViewModel | null;
+export interface TaskPlanFormProps {
+  modelValue?: TaskPlanViewModel | null;
   isEditMode?: boolean;
   readonly?: boolean;
   goals?: GoalBindingOption[];
@@ -109,17 +110,17 @@ export interface TaskTemplateFormProps {
   ) => Promise<KeyResultBindingOption[] | void> | void;
 }
 
-export interface TaskTemplateFormValidationState {
+export interface TaskPlanFormValidationState {
   isValid: boolean;
 }
 
-export interface TaskTemplateFormEmits {
-  'update:modelValue': [value: TaskTemplateViewModel];
-  'update:validation': [validation: TaskTemplateFormValidationState];
+export interface TaskPlanFormEmits {
+  'update:modelValue': [value: TaskPlanViewModel];
+  'update:validation': [validation: TaskPlanFormValidationState];
   close: [];
 }
 
-export interface TaskInstanceViewModel {
+export interface TaskOccurrenceViewModel {
   id: string;
   templateId?: string;
   templateTitle?: string;

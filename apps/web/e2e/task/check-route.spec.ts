@@ -29,10 +29,10 @@ test('Check tasks route', async ({ page }) => {
   const h1 = await page.locator('h1, h2, h3').first().textContent().catch(() => 'No heading');
   console.log('First heading:', h1);
 
-  // 查找 TaskTemplateManagement 组件
-  const managementDiv = page.locator('#task-template-management');
+  // 查找 TaskPlanManagement 组件
+  const managementDiv = page.locator('#task-plan-management');
   const exists = await managementDiv.count();
-  console.log('TaskTemplateManagement component exists:', exists > 0);
+  console.log('TaskPlanManagement component exists:', exists > 0);
 
   // 打印页面文本内容（前1000字符）
   const bodyText = await page.locator('body').textContent();

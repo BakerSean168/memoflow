@@ -1,16 +1,16 @@
 import { ResultErrorException, type ResultError } from '@memoflow/contracts/result';
-import type { ITaskInstanceRepository } from '../../../domain/repositories/i-task-instance-repository';
+import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import {
   TaskLabelOwnershipError,
-  type ITaskTemplateRepository,
-} from '../../../domain/repositories/i-task-template-repository';
+  type ITaskPlanRepository,
+} from '../../../domain/repositories/i-task-plan-repository';
 import { mapInfraErrorToResultError } from '@memoflow/utils/errors';
 import { OptimisticConcurrencyError } from '../../../domain/errors/optimistic-concurrency.error';
 
 export interface TaskWriteRepositories {
   /** 完整事务（complete 等）需要模板读取；仅实例操作（uncomplete）可省略。 */
-  readonly templateRepository?: ITaskTemplateRepository;
-  readonly instanceRepository: ITaskInstanceRepository;
+  readonly templateRepository?: ITaskPlanRepository;
+  readonly instanceRepository: ITaskOccurrenceRepository;
 }
 
 export interface TaskWriteTransactionRunner {

@@ -11,3 +11,4 @@
 
 export * from './governance.application.port';
 export * from './use-cases';
+export * from './governance-rule-bundle';

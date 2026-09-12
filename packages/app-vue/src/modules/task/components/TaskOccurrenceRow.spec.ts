@@ -3,7 +3,7 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import type { TaskInstanceClientDTO, TaskTemplateClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import enTask from '../../../locales/en-US/task';
 import TaskOccurrenceRow from './TaskOccurrenceRow.vue';
 
@@ -18,7 +18,7 @@ const i18n = createI18n({
 });
 const day = new Date(2026, 7, 28).getTime();
 
-function instance(overrides: Partial<TaskInstanceClientDTO> = {}): TaskInstanceClientDTO {
+function instance(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
   return {
     id: 'occurrence-1',
     templateId: 'plan-1',
@@ -41,7 +41,7 @@ function instance(overrides: Partial<TaskInstanceClientDTO> = {}): TaskInstanceC
     updatedAt: day,
     deletedAt: null,
     ...overrides,
-  } as TaskInstanceClientDTO;
+  } as TaskOccurrenceClientDTO;
 }
 
 const template = {
@@ -57,9 +57,9 @@ const template = {
     endDate: null,
     occurrences: 10,
   },
-} as TaskTemplateClientDTO;
+} as TaskPlanClientDTO;
 
-function mountRow(overrides: Partial<TaskInstanceClientDTO> = {}) {
+function mountRow(overrides: Partial<TaskOccurrenceClientDTO> = {}) {
   return mount(TaskOccurrenceRow, {
     props: {
       occurrence: instance(overrides),

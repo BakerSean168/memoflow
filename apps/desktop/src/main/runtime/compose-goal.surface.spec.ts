@@ -20,12 +20,20 @@ describe('goal desktop runtime composer surface', () => {
   const main = readFileSync(resolve(dir, 'main.ts'), 'utf8');
   const composer = readFileSync(resolve(__dirname, 'compose-goal.ts'), 'utf8');
 
-  it('main.ts composes goal via composeGoal({ db, taskBindingReadPort: new PowerSyncTaskBindingReadPort(db) })', () => {
+  it('main.ts reuses owner read instances across Goal core, Goal Workspace and Goal Knowledge transports', () => {
     expect(main).toContain("from './runtime/compose-goal'");
-    expect(main).toMatch(
-      /composeGoal\(\{\s*db,\s*taskBindingReadPort: new PowerSyncTaskBindingReadPort\(db\),?\s*\}/,
-    );
+    expect(main).toContain('const taskGoalContextReadPort = new PowerSyncTaskBindingReadPort(db);');
+    expect(main).toContain('const relationRepository = new PowerSyncRelationRepository(db);');
+    expect(main).toContain('const goalKnowledgeService = new GoalKnowledgeService(');
+    expect(main).toMatch(/taskBindingReadPort:\s*taskGoalContextReadPort/);
+    expect(main).toMatch(/taskContextReadPort:\s*taskGoalContextReadPort/);
+    expect(main).toMatch(/knowledgeRelationReadPort:\s*goalKnowledgeService/);
+    expect(main).toContain('createGoalKnowledgeElectronModule({');
+    expect(main).toContain('service: goalKnowledgeService');
+    expect(main).toContain('createGoalWorkspaceElectronModule({');
+    expect(main).toContain('port: goalWorkspaceService');
     expect(main).toContain('.register(goalComposed.module)');
+    expect(main).toContain('.register(goalWorkspaceElectronModule)');
   });
 
   it('main.ts no longer references createGoalElectronModule or the goal/electron seam', () => {
@@ -36,6 +44,8 @@ describe('goal desktop runtime composer surface', () => {
   it('composer selects PowerSync adapters and returns the module plus repository view', () => {
     expect(composer).toContain('interface ComposeGoalDependencies');
     expect(composer).toContain('createGoalPowerSyncRepositories');
+    expect(composer).toContain('createGoalPowerSyncDeletionTransactionRunner');
+    expect(composer).toContain('relationCleanupFactory');
     expect(composer).toContain('repositories');
     expect(composer).toContain("from '@memoflow/goal/electron'");
     expect(composer).not.toMatch(/@memoflow\/goal\/server/);

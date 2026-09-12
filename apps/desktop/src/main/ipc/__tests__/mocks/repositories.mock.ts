@@ -35,7 +35,7 @@ export function createMockGoalRepository(): MockGoalRepository {
 
 // ===== Task Repository Mocks =====
 
-export interface MockTaskTemplateRepository {
+export interface MockTaskPlanRepository {
   save: ReturnType<typeof vi.fn>;
   findById: ReturnType<typeof vi.fn>;
   findByGoalId: ReturnType<typeof vi.fn>;
@@ -44,7 +44,7 @@ export interface MockTaskTemplateRepository {
   exists: ReturnType<typeof vi.fn>;
 }
 
-export function createMockTaskTemplateRepository(): MockTaskTemplateRepository {
+export function createMockTaskPlanRepository(): MockTaskPlanRepository {
   return {
     save: vi.fn().mockResolvedValue(undefined),
     findById: vi.fn().mockResolvedValue(null),
@@ -55,7 +55,7 @@ export function createMockTaskTemplateRepository(): MockTaskTemplateRepository {
   };
 }
 
-export interface MockTaskInstanceRepository {
+export interface MockTaskOccurrenceRepository {
   save: ReturnType<typeof vi.fn>;
   findById: ReturnType<typeof vi.fn>;
   findByTemplateId: ReturnType<typeof vi.fn>;
@@ -65,7 +65,7 @@ export interface MockTaskInstanceRepository {
   exists: ReturnType<typeof vi.fn>;
 }
 
-export function createMockTaskInstanceRepository(): MockTaskInstanceRepository {
+export function createMockTaskOccurrenceRepository(): MockTaskOccurrenceRepository {
   return {
     save: vi.fn().mockResolvedValue(undefined),
     findById: vi.fn().mockResolvedValue(null),
@@ -110,12 +110,10 @@ export function createMockGoalDTO(overrides: Partial<GoalServerDTO> = {}): GoalS
     id: `goal-${goalCounter}-${now}` as unknown as GoalId,
     identityId: 'test-account-uuid' as unknown as IdentityId,
     name: `Test Goal ${goalCounter}`,
-    description: 'Test goal description',
-    feasibilityAnalysis: null,
-    motivation: null,
-    status: GoalStatus.Active,
+    summary: 'Test goal summary',
+    status: GoalStatus.InProgress,
     startDate: null,
-    dueDate: null,
+    target: null,
     completedAt: null,
     archivedAt: null,
     sortOrder: goalCounter,
@@ -137,12 +135,10 @@ export function createMockGoal(overrides: Partial<GoalServerDTO> = {}): Goal {
     id: dto.id,
     identityId: dto.identityId,
     name: dto.name,
-    description: dto.description,
-    feasibilityAnalysis: dto.feasibilityAnalysis,
-    motivation: dto.motivation,
+    summary: dto.summary,
     status: dto.status,
     startDate: dto.startDate ?? null,
-    dueDate: dto.dueDate ?? null,
+    target: dto.target ?? null,
     completedAt: dto.completedAt ?? null,
     archivedAt: dto.archivedAt ?? null,
     sortOrder: dto.sortOrder,

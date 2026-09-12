@@ -16,6 +16,7 @@ import { TitleComponent, TooltipComponent, GridComponent } from 'echarts/compone
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ECElementEvent } from 'echarts';
 import type { GoalClientDTO, GoalRecordClientDTO } from '@memoflow/contracts/goal';
+import { getProductTime, productTimeRevision } from '../../../../shared/utils/product-time';
 
 use([TitleComponent, TooltipComponent, GridComponent, BarChart, CanvasRenderer]);
 
@@ -48,14 +49,11 @@ function classifyGoalRecordsByPeriod(records: GoalRecordClientDTO[]): Record<Tim
     }
 
     try {
-      const date =
-        typeof rec.createdAt === 'number' ? new Date(rec.createdAt) : new Date(rec.createdAt);
+      const timestamp =
+        typeof rec.createdAt === 'number' ? rec.createdAt : Date.parse(String(rec.createdAt));
+      if (!Number.isFinite(timestamp)) continue;
 
-      if (isNaN(date.getTime())) {
-        continue;
-      }
-
-      const period = getTimePeriod(date);
+      const period = getTimePeriod(timestamp);
       stat[period]++;
     } catch {
       continue;
@@ -64,8 +62,8 @@ function classifyGoalRecordsByPeriod(records: GoalRecordClientDTO[]): Record<Tim
   return stat;
 }
 
-function getTimePeriod(date: Date): TimePeriod {
-  const hour = date.getHours();
+function getTimePeriod(timestamp: number): TimePeriod {
+  const hour = Number(String(getProductTime().input.timeValue(timestamp)).slice(0, 2));
   if (hour >= 6 && hour < 12) return '早晨';
   if (hour >= 12 && hour < 18) return '下午';
   if (hour >= 18 && hour < 24) return '晚上';
@@ -80,6 +78,7 @@ const translatedTimePeriods = computed(() => [
 ]);
 
 const periodBarOption = computed(() => {
+  void productTimeRevision.value;
   const records = props.goal?.records ?? [];
   const stat = classifyGoalRecordsByPeriod(records);
   const dataArr = timePeriods.map((period) => stat[period]);

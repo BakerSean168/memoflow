@@ -4,7 +4,8 @@ import type { TaskClientPort } from '@memoflow/task/client';
 import type { Result } from '@memoflow/contracts/result';
 import type { CalendarEventProjection, PlannerEventRange } from '@memoflow/contracts/schedule';
 import type { RescheduleTaskInput, TaskTimeConfigDTO } from '@memoflow/contracts/task';
-import { defaultTime, type Instant, type Ymd } from '@memoflow/time';
+import type { Instant, Ymd } from '@memoflow/time';
+import { getProductTime } from '../../../shared/utils/product-time';
 
 const MINUTE_MS = 60_000;
 
@@ -34,9 +35,9 @@ export interface PlannerMutationTimePort {
 }
 
 export const defaultPlannerMutationTimePort: PlannerMutationTimePort = {
-  toYmd: (instant) => defaultTime.calendar.toYmd(instant),
-  startOfDay: (instant) => defaultTime.calendar.startOfDay(instant),
-  startOfYmd: (ymd) => defaultTime.codec.startOfYmd(ymd),
+  toYmd: (instant) => getProductTime().calendar.toYmd(instant),
+  startOfDay: (instant) => getProductTime().calendar.startOfDay(instant),
+  startOfYmd: (ymd) => getProductTime().codec.startOfYmd(ymd),
 };
 
 export interface RoutinePlannerOwnerCommandPort {
@@ -187,9 +188,8 @@ export function createPlannerOwnerCommandRouter(
           const nextDay = request.nextRange.allDay
             ? request.nextRange.start
             : time.toYmd(request.nextRange.start);
-          const dayStart = Number(time.startOfYmd(nextDay));
           const semantic = projection.displayMetadata.semantic;
-          if (semantic !== 'goal-start' && semantic !== 'goal-deadline') {
+          if (semantic !== 'goal-start' && semantic !== 'goal-target') {
             return {
               status: 'invalid',
               message: `Unsupported Goal Planner semantic '${semantic}'`,
@@ -197,8 +197,11 @@ export function createPlannerOwnerCommandRouter(
           }
           const requestBody =
             semantic === 'goal-start'
-              ? { startDate: dayStart, expectedVersion: projection.revision }
-              : { dueDate: dayStart, expectedVersion: projection.revision };
+              ? { startDate: nextDay, expectedVersion: projection.revision }
+              : {
+                  target: { kind: 'day' as const, date: nextDay },
+                  expectedVersion: projection.revision,
+                };
           return resultOutcome(
             await dependencies.goal.updateGoal(owner.ownerId, requestBody),
             owner.ownerType,

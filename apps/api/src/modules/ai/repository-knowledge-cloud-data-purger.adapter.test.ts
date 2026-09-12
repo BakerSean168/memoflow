@@ -3,9 +3,9 @@ import type { PrismaClient } from '@memoflow/database';
 import { RepositoryKnowledgeCloudDataPurgerAdapter } from './repository-knowledge-cloud-data-purger.adapter';
 
 describe('RepositoryKnowledgeCloudDataPurgerAdapter', () => {
-  it('revalidates ownership and deletes the AI index before the cascading connection row', async () => {
+  it('revalidates ownership and deletes the AI index before the cascading remote binding row', async () => {
     const tx = {
-      knowledgeRepositoryConnection: {
+      knowledgeRemoteBinding: {
         findFirst: vi.fn(async () => ({ id: 'connection-1' })),
         deleteMany: vi.fn(async () => ({ count: 1 })),
       },
@@ -19,24 +19,24 @@ describe('RepositoryKnowledgeCloudDataPurgerAdapter', () => {
     const adapter = new RepositoryKnowledgeCloudDataPurgerAdapter(db);
 
     await expect(adapter.purge('identity-1', 'connection-1')).resolves.toBe(true);
-    expect(tx.knowledgeRepositoryConnection.findFirst).toHaveBeenCalledWith({
-      where: { id: 'connection-1', identityId: 'identity-1', deletedAt: null },
+    expect(tx.knowledgeRemoteBinding.findFirst).toHaveBeenCalledWith({
+      where: { id: 'connection-1', identityId: 'identity-1', disconnectedAt: null },
       select: { id: true },
     });
     expect(tx.aiKnowledgeIndexEntry.deleteMany).toHaveBeenCalledWith({
       where: { identityId: 'identity-1', repositoryId: 'connection-1' },
     });
-    expect(tx.knowledgeRepositoryConnection.deleteMany).toHaveBeenCalledWith({
+    expect(tx.knowledgeRemoteBinding.deleteMany).toHaveBeenCalledWith({
       where: { id: 'connection-1', identityId: 'identity-1' },
     });
     expect(tx.aiKnowledgeIndexEntry.deleteMany.mock.invocationCallOrder[0]).toBeLessThan(
-      tx.knowledgeRepositoryConnection.deleteMany.mock.invocationCallOrder[0],
+      tx.knowledgeRemoteBinding.deleteMany.mock.invocationCallOrder[0],
     );
   });
 
   it('does not mutate either table when the identity-scoped connection is absent', async () => {
     const tx = {
-      knowledgeRepositoryConnection: {
+      knowledgeRemoteBinding: {
         findFirst: vi.fn(async () => null),
         deleteMany: vi.fn(),
       },
@@ -50,6 +50,6 @@ describe('RepositoryKnowledgeCloudDataPurgerAdapter', () => {
       new RepositoryKnowledgeCloudDataPurgerAdapter(db).purge('identity-2', 'connection-1'),
     ).resolves.toBe(false);
     expect(tx.aiKnowledgeIndexEntry.deleteMany).not.toHaveBeenCalled();
-    expect(tx.knowledgeRepositoryConnection.deleteMany).not.toHaveBeenCalled();
+    expect(tx.knowledgeRemoteBinding.deleteMany).not.toHaveBeenCalled();
   });
 });

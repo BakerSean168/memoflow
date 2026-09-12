@@ -4,6 +4,7 @@ import { GoalChannels } from './ipc-channels';
 describe('GoalChannels vNext surface', () => {
   it('keeps canonical status commands and retires legacy folder/focus/auto-expiry channels', () => {
     expect(GoalChannels.ARCHIVE).toBe('goal:archive');
+    expect(GoalChannels.PLAN).toBe('goal:plan');
     expect(GoalChannels.ACTIVATE).toBe('goal:activate');
     expect(GoalChannels.COMPLETE).toBe('goal:complete');
     expect(GoalChannels.ABANDON).toBe('goal:abandon');

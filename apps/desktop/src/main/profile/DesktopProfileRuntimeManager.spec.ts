@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SharedPathResolver } from '../paths';
 import { ProfileRegistry } from './profile-registry';
 import { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
+import { createFixedClock } from '@memoflow/time';
 
 const mocks = vi.hoisted(() => ({
   shutdownPowerSync: vi.fn(),
@@ -30,7 +31,11 @@ vi.mock('../database/powersync', () => ({
 
 vi.mock('./profile-snapshot-service', () => ({
   ProfileSnapshotService: class {
-    hydrateIfNeeded = vi.fn(async () => ({ hydrated: false, skippedReason: 'none', metadata: null }));
+    hydrateIfNeeded = vi.fn(async () => ({
+      hydrated: false,
+      skippedReason: 'none',
+      metadata: null,
+    }));
   },
 }));
 
@@ -51,7 +56,12 @@ function sharedResolver(rootDir: string): SharedPathResolver {
     profilesRegistryDir: path.join(rootDir, 'shared', 'profiles'),
     deviceIdPath: path.join(rootDir, 'shared', 'auth', 'device-id'),
     runtimeConfigPath: path.join(rootDir, 'shared', 'config', 'desktop-runtime.json'),
-    profileAccessWindowStatePath: path.join(rootDir, 'shared', 'ui', 'profile-access-window-state.json'),
+    profileAccessWindowStatePath: path.join(
+      rootDir,
+      'shared',
+      'ui',
+      'profile-access-window-state.json',
+    ),
     registryPath: path.join(rootDir, 'shared', 'profiles', 'registry.json'),
     cacheDir: path.join(rootDir, 'cache'),
     snapshotStagingDir: path.join(rootDir, 'cache', 'snapshot-staging'),
@@ -73,7 +83,11 @@ describe('DesktopProfileRuntimeManager', () => {
   beforeEach(async () => {
     rootDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'profile-runtime-'));
     registry = new ProfileRegistry(sharedResolver(rootDir));
-    runtime = new DesktopProfileRuntimeManager(sharedResolver(rootDir), registry);
+    runtime = new DesktopProfileRuntimeManager(
+      sharedResolver(rootDir),
+      registry,
+      createFixedClock(1_700_000_000_000),
+    );
     runtime.setModuleRegistration(mocks.moduleRegistration);
     vi.clearAllMocks();
     mocks.bootstrapInit.mockResolvedValue(undefined);
@@ -81,10 +95,12 @@ describe('DesktopProfileRuntimeManager', () => {
     mocks.shutdownPowerSync.mockResolvedValue(undefined);
     mocks.getOptional.mockResolvedValue(null);
     mocks.execute.mockResolvedValue(undefined);
-    mocks.writeTransaction.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => fn({
-      getOptional: mocks.getOptional,
-      execute: mocks.execute,
-    }));
+    mocks.writeTransaction.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) =>
+      fn({
+        getOptional: mocks.getOptional,
+        execute: mocks.execute,
+      }),
+    );
   });
 
   afterEach(async () => fs.promises.rm(rootDir, { recursive: true, force: true }));
@@ -116,7 +132,9 @@ describe('DesktopProfileRuntimeManager', () => {
 
     expect(runtime.getActiveProfileId()).toBeNull();
     expect(fs.existsSync(prepared.profileResolver.profileDir)).toBe(true);
-    expect((await registry.findByOwnerId(prepared.descriptor.localOwnerId))?.profileId).toBe(prepared.descriptor.profileId);
+    expect((await registry.findByOwnerId(prepared.descriptor.localOwnerId))?.profileId).toBe(
+      prepared.descriptor.profileId,
+    );
   });
 
   it('preserves the selected Profile when releasing runtime resources for shutdown', async () => {
@@ -159,7 +177,9 @@ describe('DesktopProfileRuntimeManager', () => {
   });
 
   it('keeps local access active when cloud restore fails', async () => {
-    runtime.setAfterActivation(async () => { throw new Error('offline'); });
+    runtime.setAfterActivation(async () => {
+      throw new Error('offline');
+    });
     const prepared = await runtime.prepareGuestProfile();
 
     await expect(runtime.activatePreparedProfile()).resolves.toBeUndefined();
@@ -219,7 +239,9 @@ describe('DesktopProfileRuntimeManager', () => {
     ).rejects.toThrow('拒绝静默合并');
 
     expect(mocks.writeTransaction).not.toHaveBeenCalled();
-    expect((await registry.findByOwnerId(prepared.descriptor.localOwnerId))?.profileKind).toBe('guest');
+    expect((await registry.findByOwnerId(prepared.descriptor.localOwnerId))?.profileKind).toBe(
+      'guest',
+    );
   });
 
   it('preserves the local Profile display name when adopting a cloud account', async () => {
@@ -248,9 +270,27 @@ describe('DesktopProfileRuntimeManager', () => {
   it('removes a non-active Profile with its local data and secure credentials', async () => {
     const descriptor = await registry.register('cloud-1', 'Cloud User', 'user@example.com');
     const profileDir = path.join(rootDir, 'profiles', descriptor.profileId);
-    const keyPath = path.join(rootDir, 'shared', 'secure', 'profile-keys', `${descriptor.profileId}.bin`);
-    const pinPath = path.join(rootDir, 'shared', 'secure', 'profile-pins', `${descriptor.profileId}.json`);
-    const sessionPath = path.join(rootDir, 'shared', 'secure', 'cloud-sessions', `${descriptor.profileId}.bin`);
+    const keyPath = path.join(
+      rootDir,
+      'shared',
+      'secure',
+      'profile-keys',
+      `${descriptor.profileId}.bin`,
+    );
+    const pinPath = path.join(
+      rootDir,
+      'shared',
+      'secure',
+      'profile-pins',
+      `${descriptor.profileId}.json`,
+    );
+    const sessionPath = path.join(
+      rootDir,
+      'shared',
+      'secure',
+      'cloud-sessions',
+      `${descriptor.profileId}.bin`,
+    );
     await Promise.all([
       fs.promises.mkdir(profileDir, { recursive: true }),
       fs.promises.mkdir(path.dirname(keyPath), { recursive: true }),

@@ -9,8 +9,8 @@
  *
  * Route prefixes (fixed, set by registerTaskRoutes):
  * 路由前缀（固定，由 registerTaskRoutes 设定）：
- * - /task-templates
- * - /task-instances
+ * - /task-plans
+ * - /task-occurrences
  * - /tasks
  */
 

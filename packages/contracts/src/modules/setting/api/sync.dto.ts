@@ -9,18 +9,19 @@ export const SyncSettingsSchema = z.object({
 });
 export type SyncSettingsReq = z.infer<typeof SyncSettingsSchema>;
 
-export const ExportSettingsSchema = z.object({
-  format: z.enum(['json']).default('json').optional(),
-});
+/** V3 preference export is JSON-only; no legacy format selector remains. */
+export const ExportSettingsSchema = z.object({}).strict();
 export type ExportSettingsReq = z.infer<typeof ExportSettingsSchema>;
 
 // Residual 771: export/import settings Res duals retired — OpenAPI + transport use
 // *ResponseSchema (semantic Res are z.infer aliases).
 export type ExportSettingsRes = z.infer<typeof ExportSettingsResponseSchema>;
 
-export const ImportSettingsSchema = z.object({
-  data: z.string().min(1),
-  overwrite: z.boolean().optional(),
-});
+/** V3-only preference import. Legacy overwrite/merge switches are intentionally retired. */
+export const ImportSettingsSchema = z
+  .object({
+    data: z.string().min(1),
+  })
+  .strict();
 export type ImportSettingsReq = z.infer<typeof ImportSettingsSchema>;
 export type ImportSettingsRes = z.infer<typeof ImportSettingsResponseSchema>;

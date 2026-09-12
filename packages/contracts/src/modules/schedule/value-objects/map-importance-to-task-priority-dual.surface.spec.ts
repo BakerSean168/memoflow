@@ -8,7 +8,6 @@ import { TaskPriority, mapImportanceToTaskPriority } from './task-priority';
  * Legacy ScheduleTask keeps one TaskPriority mapper. TASK-3101 moved the Task
  * business projector to neutral SchedulingPriority, so it must not depend on it.
  * Soft residual 1168: buildTaskName / trigger scheduling stay domain-specific (no force-merge).
- * Soft residual 1165: startOfDay keep-boundary remains separate.
  * Does not flip §13.2 checkboxes.
  */
 describe('mapImportanceToTaskPriority dual retired (residual 1168)', () => {

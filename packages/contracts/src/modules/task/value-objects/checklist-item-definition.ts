@@ -1,15 +1,14 @@
+import { z } from 'zod';
+
 /**
- * ChecklistItemDefinition Value Object
- *
- * Residual 853: ChecklistItemDefinitionDTO dual retired — sole ChecklistItemDefinition interface + type alias.
+ * Task Plan checklist definition. Completion is occurrence-owned, so the
+ * definition carries stable identity but no completion flag.
  */
+export const ChecklistItemDefinitionSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().trim().min(1).max(200),
+  order: z.number().int().nonnegative(),
+});
 
-// Residual 853: sole ChecklistItemDefinition body.
-export interface ChecklistItemDefinition {
-  title: string;
-  order: number;
-  // 注意：这里没有 isCompleted，因为模版是“死”的
-}
-
-// Residual 853: ChecklistItemDefinitionDTO dual retired — DTO is the ChecklistItemDefinition shape.
+export type ChecklistItemDefinition = z.infer<typeof ChecklistItemDefinitionSchema>;
 export type ChecklistItemDefinitionDTO = ChecklistItemDefinition;

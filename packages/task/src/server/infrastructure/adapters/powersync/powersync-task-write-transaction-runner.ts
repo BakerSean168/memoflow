@@ -8,8 +8,8 @@ import {
   BufferedTaskWriteEventBus,
   committedTaskWriteEventBus,
 } from '../task-write-buffered-event-bus';
-import { PowerSyncTaskInstanceRepository } from './task-instance-powersync.repository';
-import { PowerSyncTaskTemplateRepository } from './task-template-powersync.repository';
+import { PowerSyncTaskOccurrenceRepository } from './task-occurrence-powersync.repository';
+import { PowerSyncTaskPlanRepository } from './task-plan-powersync.repository';
 import { toTaskGoalOutboxRecord } from '../../task-goal-outbox';
 
 export class PowerSyncTaskWriteTransactionRunner implements TaskWriteTransactionRunner {
@@ -24,8 +24,8 @@ export class PowerSyncTaskWriteTransactionRunner implements TaskWriteTransaction
     let postCommitEvents: import('@memoflow/contracts/shared').IDomainEvent[] = [];
     const result = await this.db.writeTransaction(async (tx: IElectronDatabaseTransaction) => {
       const result = await work({
-        templateRepository: new PowerSyncTaskTemplateRepository(tx, bufferedEventBus),
-        instanceRepository: new PowerSyncTaskInstanceRepository(tx, bufferedEventBus),
+        templateRepository: new PowerSyncTaskPlanRepository(tx, bufferedEventBus),
+        instanceRepository: new PowerSyncTaskOccurrenceRepository(tx, bufferedEventBus),
       });
       const events = bufferedEventBus.drain();
       const eventsToPublish = [];
@@ -38,8 +38,8 @@ export class PowerSyncTaskWriteTransactionRunner implements TaskWriteTransaction
             [
               record.eventId,
               record.identityId,
-              record.taskInstanceId,
-              record.taskTemplateId,
+              record.taskOccurrenceId,
+              record.taskPlanId,
               record.goalId,
               record.keyResultId,
               record.payload,

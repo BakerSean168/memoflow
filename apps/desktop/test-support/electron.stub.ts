@@ -287,7 +287,7 @@ export class Notification extends EventEmitter {
 
   readonly show = vi.fn();
 
-  constructor(_options?: Record<string, unknown>) {
+  constructor(readonly options: Record<string, unknown> = {}) {
     super();
     Notification.instances.push(this);
   }

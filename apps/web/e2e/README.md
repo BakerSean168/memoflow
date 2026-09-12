@@ -34,7 +34,7 @@ pnpm nx run web:e2e:report
 - `goal/goal-crud.spec.ts`
 - `notification/notification-center.spec.ts`
 - `reminder/reminder-template-crud.spec.ts`
-- `task/task-template-crud.spec.ts`
+- `task/task-plan-crud.spec.ts`
 - `user-settings/notifications.spec.ts`
 - `user-settings/persistence.spec.ts`
 

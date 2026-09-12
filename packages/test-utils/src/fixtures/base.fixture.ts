@@ -35,7 +35,7 @@ export function timestamps(offsetMs = -TimeOffset.MINUTE) {
 
 /**
  * Standard timestamp set using numeric (epoch ms) timestamps.
- * Used by aggregates that store timestamps as numbers (e.g., TaskInstance).
+ * Used by aggregates that store timestamps as numbers (e.g., TaskOccurrence).
  */
 export function numericTimestamps(offsetMs = -TimeOffset.MINUTE) {
   const now = timestampFrom(offsetMs);

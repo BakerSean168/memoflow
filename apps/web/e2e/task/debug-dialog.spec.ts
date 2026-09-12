@@ -37,7 +37,7 @@ test.describe('Debug Dialog', () => {
     console.log('URL:', await page.url());
     
     // 点击创建按钮
-    const createButton = page.locator('[data-testid="create-task-template-button"]');
+    const createButton = page.locator('[data-testid="create-task-plan-button"]');
     console.log('\n=== Step 2: Try to open dialog ===');
     console.log('Clicking main create button');
     await createButton.click();
@@ -95,8 +95,8 @@ test.describe('Debug Dialog', () => {
     console.log('\n=== Basic Info Section visible:', await basicInfo.isVisible());
     
     // 尝试通过不同方式定位输入框
-    const titleViaTestId = page.locator('[data-testid="task-template-title-input"]');
-    const titleViaTestIdInput = page.locator('[data-testid="task-template-title-input"] input');
+    const titleViaTestId = page.locator('[data-testid="task-plan-title-input"]');
+    const titleViaTestIdInput = page.locator('[data-testid="task-plan-title-input"] input');
     console.log('\n=== Title input locators:');
     console.log('  - via data-testid:', await titleViaTestId.count());
     console.log('  - via data-testid input:', await titleViaTestIdInput.count());

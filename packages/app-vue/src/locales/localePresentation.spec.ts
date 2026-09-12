@@ -7,9 +7,9 @@ import zhCN from './zh-CN';
 
 const localeAwareSurfaces = [
   'src/modules/schedule/components/CreateScheduleDialog.vue',
-  'src/modules/task/components/TaskTemplateForm/sections/ReminderSection.vue',
-  'src/modules/task/components/TaskTemplateForm/sections/RecurrenceSection.vue',
-  'src/modules/task/components/TaskTemplateForm/sections/TimeConfigSection.vue',
+  'src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue',
+  'src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue',
+  'src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue',
   'src/modules/goal/views/GoalDetailView.vue',
   'src/modules/notification/views/SSEMonitorPage.vue',
 ];

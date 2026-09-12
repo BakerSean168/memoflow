@@ -9,6 +9,8 @@ import { ScheduleTaskCard } from '../components/ScheduleTaskCard';
 import { useAppSession } from '../hooks/useAppSession';
 import { useScheduleAgenda } from '../hooks/useScheduleAgenda';
 import { useScheduleTasks, type ScheduleStatusFilter, type ScheduleTaskSummary } from '../hooks/useScheduleTasks';
+import { useAppPreferences } from '../providers/app-preference-provider';
+import { getProductTime } from '../utils/product-time';
 
 import {
   PageShell,
@@ -30,12 +32,11 @@ const FILTERS: Array<{ label: string; value: ScheduleStatusFilter }> = [
 ];
 
 function buildTaskLanes(tasks: ScheduleTaskSummary[]) {
-  const now = Date.now();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const startOfToday = today.getTime();
-  const endOfToday = startOfToday + 24 * 60 * 60 * 1000 - 1;
-  const endOfWeek = endOfToday + 6 * 24 * 60 * 60 * 1000;
+  const time = getProductTime();
+  const now = Number(time.now());
+  const startOfToday = Number(time.calendar.startOfDay(now));
+  const endOfToday = Number(time.calendar.endOfDay(now));
+  const endOfWeek = Number(time.calendar.endOfDay(time.calendar.addDays(startOfToday, 6)));
 
   const activeStatuses = new Set<ScheduleTaskStatus>([ScheduleTaskStatus.Active, ScheduleTaskStatus.Paused, ScheduleTaskStatus.Failed]);
 
@@ -67,6 +68,7 @@ function buildTaskLanes(tasks: ScheduleTaskSummary[]) {
 export function ScheduleScreen() {
   const router = useRouter();
   const { signOut } = useAppSession();
+  const { profile } = useAppPreferences();
   const {
     error,
     filteredTasks,
@@ -89,7 +91,7 @@ export function ScheduleScreen() {
   const activeCount = tasks.filter((item) => item.status === ScheduleTaskStatus.Active).length;
   const overdueCount = tasks.filter((item) => item.isOverdue).length;
   const conflictCount = entries.filter((item) => item.hasConflict).length;
-  const taskLanes = useMemo(() => buildTaskLanes(filteredTasks), [filteredTasks]);
+  const taskLanes = useMemo(() => buildTaskLanes(filteredTasks), [filteredTasks, profile]);
   const actionSections = [
     {
       title: 'Views',

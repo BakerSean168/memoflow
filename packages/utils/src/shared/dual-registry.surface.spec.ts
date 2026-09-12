@@ -65,10 +65,6 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
         resolve(sharedDir, '../../../database/scripts/verify-ai-knowledge-index.ts'),
         'utf8',
       ),
-      prepareEditor: readFileSync(
-        resolve(sharedDir, '../../../database/scripts/prepare-editor-workspace-natural-key.ts'),
-        'utf8',
-      ),
     } as const;
 
     it('owns residual 999 sole errorMessage body and shared barrel export', () => {
@@ -79,7 +75,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(index).toContain("export * from './error-message'");
     });
 
-    it('four database CLI scripts import sole without local dual bodies', () => {
+    it('database CLI scripts import sole without local dual bodies', () => {
       for (const [label, source] of Object.entries(scripts)) {
         expect(source, label).toContain('Residual 1019');
         expect(source, label).toContain(
@@ -172,13 +168,6 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
           'verify-ai-knowledge-index',
           readFileSync(
             resolve(sharedDir, '../../../database/scripts/verify-ai-knowledge-index.ts'),
-            'utf8',
-          ),
-        ],
-        [
-          'prepare-editor-workspace-natural-key',
-          readFileSync(
-            resolve(sharedDir, '../../../database/scripts/prepare-editor-workspace-natural-key.ts'),
             'utf8',
           ),
         ],

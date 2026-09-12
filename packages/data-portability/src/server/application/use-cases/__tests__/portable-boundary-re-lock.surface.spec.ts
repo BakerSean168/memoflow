@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Residual 885: portable editor backup vs server-held disclosure boundary re-lock.
+ * Residual 885: retired Editor vs server-held disclosure boundary re-lock.
  * Re-asserts stage-6 residual 193/303/539 invariants with Residual 885 markers.
  * Does not flip §13.2 checkboxes; OAuth / multi-engine Agent / full PR gate remain open.
  */
@@ -45,12 +45,10 @@ describe('portable boundary re-lock (residual 885)', () => {
     'utf8',
   );
 
-  it('stamps Residual 885 markers and keeps packages/editor runtime deleted', () => {
+  it('keeps surviving Residual 885 boundaries while retired Editor surfaces stay deleted', () => {
     expect(importSafety).toContain('Residual 885');
     expect(exportDisclosure).toContain('Residual 885');
     expect(ipcChannels).toContain('Residual 885');
-    expect(powersyncTableMapping).toContain('Residual 885');
-    expect(desktopPowersync).toContain('Residual 885');
     expect(repositoryRoutesIndex).toContain('Residual 885');
     expect(appShellStore).toContain('Residual 885');
     expect(existsSync(resolve(repoRoot, 'packages/editor'))).toBe(false);
@@ -79,11 +77,11 @@ describe('portable boundary re-lock (residual 885)', () => {
     );
   });
 
-  it('keeps editor_* portable backup continuity + knowledge-only routes + /note strip', () => {
-    expect(powersyncTableMapping).toContain("'editor_workspaces'");
-    expect(powersyncTableMapping).toContain('portable backup');
-    expect(desktopPowersync).toContain("'editor_workspaces'");
-    expect(desktopPowersync).toContain('portable backup continuity');
+  it('keeps retired Editor out of PowerSync while preserving knowledge-only routes + /note strip', () => {
+    expect(powersyncTableMapping).not.toContain("'editor_workspaces'");
+    expect(powersyncTableMapping).not.toContain('portable backup');
+    expect(desktopPowersync).not.toContain("'editor_workspaces'");
+    expect(desktopPowersync).not.toContain('portable backup continuity');
     expect(repositoryRoutesIndex).toContain('registerKnowledgeRepositoryConnectionRoutes');
     expect(repositoryRoutesIndex).not.toMatch(/registerFolderRoutes|registerResourceRoutes/);
     expect(appShellStore).toContain("tab.route === '/note'");

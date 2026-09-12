@@ -22,6 +22,7 @@ import {
   type AssistantRuntimeHistoryView,
 } from '@memoflow/contracts/ai';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { UserTimeContextPort } from '@memoflow/time';
 import type {
   AIUsageSummary,
   IAIExecutionLogPort,
@@ -113,6 +114,8 @@ export interface MastraAIRuntimeDependencies {
   readonly taskPlanMutationPort: TaskPlanMutationPort;
   /** Host-bound canonical knowledge-note persistence mutation for knowledge.capture. */
   readonly knowledgeCaptureMutationPort: KnowledgeCaptureMutationPort;
+  /** Existing Knowledge read owner reused by GoalPlan V2 for search/reuse evidence. */
+  readonly knowledgeSourcePort: import('../../application/ports').IKnowledgeSourcePort;
   /** Canonical runtime observability sink; host-owned and persistence-agnostic. */
   readonly executionLogPort?: IAIExecutionLogPort;
   /** Durable indexed usage projection for run/thread queries and workflow views. */
@@ -120,6 +123,8 @@ export interface MastraAIRuntimeDependencies {
   readonly routineCommandPort: IAIRoutineCommandPort;
   readonly plannerReadPort: IAIPlannerReadPort;
   readonly notificationReadPort: IAINotificationReadPort;
+  /** Identity-scoped Product Time context injected into every model-facing request. */
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
 type ActiveRun = {
@@ -159,7 +164,11 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       plannerReadPort: deps.plannerReadPort,
       notificationReadPort: deps.notificationReadPort,
     });
-    this.goalPlanner = new GoalPlannerWorker(deps.modelResolver, deps.executionLogPort);
+    this.goalPlanner = new GoalPlannerWorker(
+      deps.modelResolver,
+      deps.knowledgeSourcePort,
+      deps.executionLogPort,
+    );
     this.goalCreateWorkflow = createGoalCreateWorkflow({
       planner: this.goalPlanner,
       applyService: new ApplyGoalPlanService(deps.goalPlanMutationPort),
@@ -182,12 +191,14 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       storage: deps.storage,
       memory: this.memory,
       agent: this.assistant,
-      modes: [{
-        id: 'assistant',
-        name: 'Assistant',
-        tools: productTools,
-        availableTools: Object.keys(productTools),
-      }],
+      modes: [
+        {
+          id: 'assistant',
+          name: 'Assistant',
+          tools: productTools,
+          availableTools: Object.keys(productTools),
+        },
+      ],
       defaultModeId: 'assistant',
       disableBuiltinTools: [
         'ask_user',
@@ -239,7 +250,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     await this.disposePromise;
   }
 
-  private workflowRequestContext(
+  private async workflowRequestContext(
     context: ExecutionContext,
     input: {
       conversationId: string;
@@ -247,10 +258,12 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       providerId?: string;
       modelId?: string;
     },
-  ): RequestContext {
+  ): Promise<RequestContext> {
     const requestContext = new RequestContext();
+    const timeContext = await this.deps.userTimeContextPort.getUserTimeContext(context.identityId);
     requestContext.setRaw('identityId', context.identityId);
     requestContext.setRaw('locale', input.locale ?? 'zh-CN');
+    requestContext.setRaw('timeContext', timeContext);
     if (input.providerId) requestContext.setRaw('providerId', input.providerId);
     if (input.modelId) requestContext.setRaw('modelId', input.modelId);
     // The current entry context is supplied on every start/resume. Credentials
@@ -536,7 +549,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         await run.start({
           inputData: goalInput,
           initialState: initialGoalCreateWorkflowState(goalInput),
-          requestContext: this.workflowRequestContext(input.context, goalInput),
+          requestContext: await this.workflowRequestContext(input.context, goalInput),
         });
       } catch (cause) {
         const persisted = await this.get({
@@ -559,7 +572,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         await run.start({
           inputData: taskInput,
           initialState: initialTaskCreateWorkflowState(taskInput),
-          requestContext: this.workflowRequestContext(input.context, taskInput),
+          requestContext: await this.workflowRequestContext(input.context, taskInput),
         });
       } catch (cause) {
         const persisted = await this.get({
@@ -581,7 +594,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       await run.start({
         inputData: knowledgeInput,
         initialState: initialKnowledgeCaptureWorkflowState(knowledgeInput),
-        requestContext: this.workflowRequestContext(input.context, knowledgeInput),
+        requestContext: await this.workflowRequestContext(input.context, knowledgeInput),
       });
     } catch (cause) {
       const persisted = await this.get({
@@ -674,7 +687,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       await run.resume({
         step: lifecycleStepId,
         resumeData: input.request.command,
-        requestContext: this.workflowRequestContext(input.context, workflowInput),
+        requestContext: await this.workflowRequestContext(input.context, workflowInput),
       });
     } catch (cause) {
       const persisted = await this.get({
@@ -757,14 +770,20 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       runId: input.runId,
     });
     if (goalRow) {
-      return this.attachWorkflowUsage(this.projectGoalCreateRun(goalRow, input.identityId), input.identityId);
+      return this.attachWorkflowUsage(
+        this.projectGoalCreateRun(goalRow, input.identityId),
+        input.identityId,
+      );
     }
     const taskRow = await store.getWorkflowRunById({
       workflowName: TASK_CREATE_WORKFLOW_ID,
       runId: input.runId,
     });
     if (taskRow) {
-      return this.attachWorkflowUsage(this.projectTaskCreateRun(taskRow, input.identityId), input.identityId);
+      return this.attachWorkflowUsage(
+        this.projectTaskCreateRun(taskRow, input.identityId),
+        input.identityId,
+      );
     }
     const knowledgeRow = await store.getWorkflowRunById({
       workflowName: KNOWLEDGE_CAPTURE_WORKFLOW_ID,
@@ -893,7 +912,9 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       modelId: input.modelId,
     });
     const requestContext = new RequestContext();
+    const timeContext = await this.deps.userTimeContextPort.getUserTimeContext(input.identityId);
     requestContext.setRaw('identityId', input.identityId);
+    requestContext.setRaw('timeContext', timeContext);
     requestContext.setRaw('providerId', resolvedModel.providerId);
     requestContext.setRaw('modelId', resolvedModel.modelId);
     requestContext.setRaw('locale', input.locale ?? 'zh-CN');

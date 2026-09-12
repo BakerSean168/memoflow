@@ -21,28 +21,28 @@ import { createTaskApiModule, type TaskApiModuleContext } from './module';
 function createApiStub(): TaskApplicationPort {
   const noop = vi.fn();
   return {
-    createTaskTemplate: noop,
-    updateTaskTemplate: noop,
-    activateTaskTemplate: noop,
-    pauseTaskTemplate: noop,
-    archiveTaskTemplate: noop,
-    deleteTaskTemplate: noop,
-    generateTaskInstances: noop,
+    createTaskPlan: noop,
+    updateTaskPlan: noop,
+    activateTaskPlan: noop,
+    pauseTaskPlan: noop,
+    archiveTaskPlan: noop,
+    deleteTaskPlan: noop,
+    generateTaskOccurrences: noop,
     bindTaskToGoal: noop,
     unbindTaskFromGoal: noop,
-    getTaskTemplate: noop,
-    listTaskTemplates: noop,
-    completeTaskInstance: noop,
-    uncompleteTaskInstance: noop,
-    skipTaskInstance: noop,
-    startTaskInstance: noop,
-    deleteTaskInstance: noop,
-    markTaskInstanceMissed: noop,
-    getTaskInstance: noop,
-    listTaskInstancesByAccount: noop,
-    listTaskInstancesByTemplate: noop,
-    listTaskInstancesByStatus: noop,
-    getTaskInstancesByDateRange: noop,
+    getTaskPlan: noop,
+    listTaskPlans: noop,
+    completeTaskOccurrence: noop,
+    uncompleteTaskOccurrence: noop,
+    skipTaskOccurrence: noop,
+    startTaskOccurrence: noop,
+    deleteTaskOccurrence: noop,
+    markTaskOccurrenceMissed: noop,
+    getTaskOccurrence: noop,
+    listTaskOccurrencesByAccount: noop,
+    listTaskOccurrencesByTemplate: noop,
+    listTaskOccurrencesByStatus: noop,
+    getTaskOccurrencesByDateRange: noop,
   } as TaskApplicationPort;
 }
 
@@ -101,9 +101,9 @@ describe('createTaskApiModule lifecycle', () => {
     await expect(moduleDef.register(contextWithoutDb)).resolves.toBeUndefined();
 
     // The single combined task router was mounted once (registerTaskRoutes
-    // itself fixes the /task-templates, /task-instances, /tasks prefixes).
+    // itself fixes the /task-plans, /task-occurrences, /tasks prefixes).
     // 组合后的 task router 被挂载一次（registerTaskRoutes 内部固定了
-    // /task-templates、/task-instances、/tasks 前缀）。
+    // /task-plans、/task-occurrences、/tasks 前缀）。
     const routerUse = context.router.use as ReturnType<typeof vi.fn>;
     expect(routerUse).toHaveBeenCalledTimes(1);
     expect(routerUse).toHaveBeenCalledWith(expect.anything());

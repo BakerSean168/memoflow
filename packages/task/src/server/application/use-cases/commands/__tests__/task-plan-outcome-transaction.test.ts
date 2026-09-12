@@ -4,56 +4,61 @@ import { createMockRepo } from '@memoflow/test-utils/mocks';
 import {
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
-  TaskTemplateStatus,
+  TaskPlanStatus,
 } from '@memoflow/contracts/task';
-import type { ITaskInstanceRepository } from '../../../../domain/repositories/i-task-instance-repository';
-import type { ITaskTemplateRepository } from '../../../../domain/repositories/i-task-template-repository';
-import { aLoadedTaskTemplate, aTaskInstance } from '../../../../../testing';
-import { MarkTaskInstanceMissedUseCase } from '../mark-task-instance-missed.use-case';
-import { CompleteTaskInstanceUseCase } from '../complete-task-instance.use-case';
+import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
+import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
+import { aLoadedTaskPlan, aTaskOccurrence, TASK_TEST_OCCURRENCE_PROJECTION } from '../../../../../testing';
+import { MarkTaskOccurrenceMissedUseCase } from '../mark-task-occurrence-missed.use-case';
+import { CompleteTaskOccurrenceUseCase } from '../complete-task-occurrence.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
 
 describe('Task plan outcome transaction integration (TASK-2202)', () => {
   it('explicit Missed -> strict Failed, then late completion correction -> Succeeded in the same write runner', async () => {
-    const template = aLoadedTaskTemplate({
+    const template = aLoadedTaskPlan({
       completionPolicy: TaskPlanCompletionPolicy.StrictNoBackfill,
     });
-    const instance = await aTaskInstance({
+    const instance = await aTaskOccurrence({
       templateId: template.id,
       identityId: template.identityId,
     });
 
-    const templateRepository = createMockRepo<ITaskTemplateRepository>({
+    const templateRepository = createMockRepo<ITaskPlanRepository>({
       findByIdForIdentity: vi.fn().mockResolvedValue(template),
       save: vi.fn().mockResolvedValue(undefined),
     });
-    const instanceRepository = createMockRepo<ITaskInstanceRepository>({
+    const instanceRepository = createMockRepo<ITaskOccurrenceRepository>({
       findByIdForIdentity: vi.fn().mockResolvedValue(instance),
       findByTemplateId: vi.fn().mockResolvedValue([instance]),
       save: vi.fn().mockResolvedValue(undefined),
     });
     const runner = createInlineTaskWriteTransactionRunner({ templateRepository, instanceRepository });
 
-    const missed = await new MarkTaskInstanceMissedUseCase(instanceRepository, runner).execute(
+    const missed = await new MarkTaskOccurrenceMissedUseCase(
+      instanceRepository,
+      runner,
+      TASK_TEST_OCCURRENCE_PROJECTION,
+    ).execute(
       instance.id,
       instance.identityId,
       { reason: 'day not completed' },
     );
     expect(missed).toBeOk();
     expect(template.outcome).toBe(TaskPlanOutcome.Failed);
-    expect(template.status).toBe(TaskTemplateStatus.Closed);
+    expect(template.status).toBe(TaskPlanStatus.Closed);
     expect(templateRepository.save).toHaveBeenCalledWith(template);
 
     vi.mocked(templateRepository.save).mockClear();
-    const corrected = await new CompleteTaskInstanceUseCase(
+    const corrected = await new CompleteTaskOccurrenceUseCase(
       instanceRepository,
       templateRepository,
       runner,
+      TASK_TEST_OCCURRENCE_PROJECTION,
     ).execute(instance.id, instance.identityId);
 
     expect(corrected).toBeOk();
     expect(template.outcome).toBe(TaskPlanOutcome.Succeeded);
-    expect(template.status).toBe(TaskTemplateStatus.Closed);
+    expect(template.status).toBe(TaskPlanStatus.Closed);
     expect(templateRepository.save).toHaveBeenCalledWith(template);
   });
 });

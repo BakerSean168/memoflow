@@ -143,8 +143,11 @@ export interface AutoLaunchPort {
  * notification was rendered; callers that need the raw instance cast it.
  */
 export interface NotificationPort {
-  /** Switch between the custom in-app rendering and native notifications. */
-  setUseCustomNotification(useCustom: boolean): void;
+  getDevicePreference(): import('@memoflow/contracts/electron').DesktopNotificationPreference;
+  updateDevicePreference(
+    patch: import('@memoflow/contracts/electron').DesktopNotificationPreferencePatch,
+  ): import('@memoflow/contracts/electron').DesktopNotificationPreference;
+  resetDevicePreference(): import('@memoflow/contracts/electron').DesktopNotificationPreference;
 
   // ===== Do Not Disturb =====
   enableDND(): void;

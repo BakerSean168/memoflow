@@ -1,6 +1,6 @@
 /**
  * Task -> Goal semantic link and optional automatic contribution rule.
- * ADR-056: business context linking is independent from progress settlement.
+ * ADR-056/ADR-075: context linking is independent from progress settlement.
  */
 
 import { z } from 'zod';
@@ -14,18 +14,25 @@ export const GoalContributionRuleSchema = z.object({
 });
 export type GoalContributionRule = z.infer<typeof GoalContributionRuleSchema>;
 
-export const TaskGoalLinkSchema = z.object({
-  goalId: brandedId<GoalId>(),
-  keyResultId: brandedId<KeyResultId>(),
-  contribution: GoalContributionRuleSchema.nullable().optional().default(null),
-});
+export const TaskGoalLinkSchema = z
+  .object({
+    goalId: brandedId<GoalId>(),
+    keyResultId: brandedId<KeyResultId>().nullable().optional().default(null),
+    contribution: GoalContributionRuleSchema.nullable().optional().default(null),
+  })
+  .superRefine((value, ctx) => {
+    if (value.contribution && !value.keyResultId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['keyResultId'],
+        message: 'Automatic Goal contribution requires a Key Result',
+      });
+    }
+  });
 export type TaskGoalLinkDTO = z.infer<typeof TaskGoalLinkSchema>;
 export type TaskGoalLink = TaskGoalLinkDTO;
 
-/**
- * Transitional symbol aliases while call sites move from the historical
- * "binding" noun. The serialized shape is already the canonical ADR-056 link.
- */
+/** Historical binding aliases are removed after the vNext call-site migration. */
 export const TaskGoalBindingSchema = TaskGoalLinkSchema;
 export type TaskGoalBindingDTO = z.infer<typeof TaskGoalBindingSchema>;
 export type TaskGoalBinding = TaskGoalBindingDTO;

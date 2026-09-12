@@ -49,6 +49,7 @@
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/setting": "workspace:*",
+    "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "@opentelemetry/api": "^1.9.1",
     "express": "^5.2.1",

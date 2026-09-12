@@ -15,12 +15,7 @@
  * 只使用构造函数注入，不使用隐藏的服务定位器。
  */
 
-import type {
-  IGoalRepository,
-  IGoalRecordRepository,
-  IRelationRepository,
-  IWalletRepository,
-} from '../domain';
+import type { IGoalRepository, IGoalRecordRepository, IWalletRepository } from '../domain';
 import { GoalPolicy } from '../domain';
 import {
   CreateGoalUseCase,
@@ -30,6 +25,7 @@ import {
   DeleteGoalUseCase,
   ArchiveGoalUseCase,
   ActivateGoalUseCase,
+  PlanGoalUseCase,
   AbandonGoalUseCase,
   CompleteGoalUseCase,
   SearchGoalsUseCase,
@@ -52,21 +48,19 @@ import {
   BatchUpdateKeyResultWeightsUseCase,
 } from '../application';
 import type { GoalSystemView } from '@memoflow/contracts/goal';
+import type { UserTimeContextPort } from '@memoflow/time';
 import { GoalReviewContextBuilder } from '../application';
 import { createLogger } from '@memoflow/utils/logger';
 import type { GoalApplicationPort } from '../application';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
 import type { GoalWriteTransactionRunner } from '../application/use-cases/commands/goal-write-support';
+import type { GoalDeletionTransactionRunner } from '../application/use-cases/commands/goal-deletion-support';
 import {
   CreateHabitUseCase,
   RecordHabitCheckInUseCase,
   ListHabitUseCase,
   type IHabitRepository,
 } from '../application/use-cases/commands/habit.use-cases';
-import {
-  CreateRelationUseCase,
-  ListRelationsUseCase,
-} from '../application/use-cases/commands/relation.use-cases';
 import {
   CreateWalletAccountUseCase,
   ListWalletUseCase,
@@ -92,12 +86,13 @@ export interface GoalModuleDependencies {
   readonly goalRepository: IGoalRepository;
   readonly goalRecordRepository: IGoalRecordRepository;
   readonly goalWriteTransactionRunner: GoalWriteTransactionRunner;
+  readonly goalDeletionTransactionRunner: GoalDeletionTransactionRunner;
   readonly taskBindingReadPort: GoalDependencyReadPort;
   readonly runtimeContributions?: GoalRuntimeContributionsInput;
   /** R4：习惯仓储（可选；提供时启用 habit use cases）。 */
   readonly habitRepository?: IHabitRepository;
-  /** R5：关系仓储（可选；提供时启用 relation use cases）。 */
-  readonly relationRepository?: IRelationRepository;
+  /** Canonical identity-scoped Product Time context for all Goal calendar-day semantics. */
+  readonly userTimeContextPort: UserTimeContextPort;
   /** R7：钱包仓储（可选；提供时启用 wallet use cases）。 */
   readonly walletRepository?: IWalletRepository;
 }
@@ -132,11 +127,6 @@ export interface GoalModuleUseCases {
     readonly checkIn: RecordHabitCheckInUseCase;
     readonly list: ListHabitUseCase;
   };
-  // R5 Relation / 关系
-  readonly relation?: {
-    readonly create: CreateRelationUseCase;
-    readonly list: ListRelationsUseCase;
-  };
   // R7 Wallet / 钱包
   readonly wallet?: {
     readonly createAccount: CreateWalletAccountUseCase;
@@ -151,6 +141,7 @@ export interface GoalModuleUseCases {
   readonly deleteGoal: DeleteGoalUseCase;
   readonly permanentlyDeleteGoal: PermanentlyDeleteGoalUseCase;
   readonly archiveGoal: ArchiveGoalUseCase;
+  readonly planGoal: PlanGoalUseCase;
   readonly activateGoal: ActivateGoalUseCase;
   readonly abandonGoal: AbandonGoalUseCase;
   readonly completeGoal: CompleteGoalUseCase;
@@ -196,6 +187,7 @@ export interface GoalModuleInstance {
   readonly goalRepository: IGoalRepository;
   readonly goalRecordRepository: IGoalRecordRepository;
   readonly goalWriteTransactionRunner: GoalWriteTransactionRunner;
+  readonly goalDeletionTransactionRunner: GoalDeletionTransactionRunner;
   readonly useCases: GoalModuleUseCases;
   readonly api: GoalApplicationPort;
   start(): void;
@@ -218,14 +210,27 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
       'taskBindingReadPort must be explicitly provided to GoalModule (no inline fallback allowed).',
     );
   }
+  if (!deps.goalDeletionTransactionRunner) {
+    throw new Error(
+      'goalDeletionTransactionRunner must be explicitly provided to GoalModule (no inline fallback allowed).',
+    );
+  }
 
-  const { goalRepository, goalRecordRepository, goalWriteTransactionRunner, taskBindingReadPort } =
-    deps;
+  const {
+    goalRepository,
+    goalRecordRepository,
+    goalWriteTransactionRunner,
+    goalDeletionTransactionRunner,
+    taskBindingReadPort,
+  } = deps;
 
   const goalPolicy = new GoalPolicy();
 
   const habitRepository: IHabitRepository | undefined = deps.habitRepository;
-  const relationRepository: IRelationRepository | undefined = deps.relationRepository;
+  const userTimeContextPort = deps.userTimeContextPort;
+  if (!userTimeContextPort) {
+    throw new Error('userTimeContextPort must be explicitly provided to GoalModule');
+  }
   const walletRepository: IWalletRepository | undefined = deps.walletRepository;
 
   return {
@@ -233,18 +238,9 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
     ...(habitRepository
       ? {
           habit: {
-            create: new CreateHabitUseCase(habitRepository),
-            checkIn: new RecordHabitCheckInUseCase(habitRepository),
-            list: new ListHabitUseCase(habitRepository),
-          },
-        }
-      : {}),
-    // R5 Relation（可选：未注入仓储时不启用）
-    ...(relationRepository
-      ? {
-          relation: {
-            create: new CreateRelationUseCase(relationRepository),
-            list: new ListRelationsUseCase(relationRepository),
+            create: new CreateHabitUseCase(habitRepository, userTimeContextPort),
+            checkIn: new RecordHabitCheckInUseCase(habitRepository, userTimeContextPort),
+            list: new ListHabitUseCase(habitRepository, userTimeContextPort),
           },
         }
       : {}),
@@ -263,9 +259,18 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
     getGoal: new GetGoalUseCase(goalRepository),
     listGoals: new ListGoalsUseCase(goalRepository),
     updateGoal: new UpdateGoalUseCase(goalRepository, goalPolicy, goalWriteTransactionRunner),
-    deleteGoal: new DeleteGoalUseCase(goalRepository, goalPolicy, taskBindingReadPort),
-    permanentlyDeleteGoal: new PermanentlyDeleteGoalUseCase(goalRepository, goalPolicy),
+    deleteGoal: new DeleteGoalUseCase(
+      goalRepository,
+      goalPolicy,
+      taskBindingReadPort,
+      goalDeletionTransactionRunner,
+    ),
+    permanentlyDeleteGoal: new PermanentlyDeleteGoalUseCase(
+      goalPolicy,
+      goalDeletionTransactionRunner,
+    ),
     archiveGoal: new ArchiveGoalUseCase(goalRepository, goalPolicy, goalWriteTransactionRunner),
+    planGoal: new PlanGoalUseCase(goalRepository, goalPolicy),
     activateGoal: new ActivateGoalUseCase(goalRepository, goalPolicy),
     abandonGoal: new AbandonGoalUseCase(goalRepository, goalPolicy),
     completeGoal: new CompleteGoalUseCase(goalRepository, goalPolicy, goalWriteTransactionRunner),
@@ -282,11 +287,13 @@ export function createGoalUseCases(deps: GoalModuleDependencies): GoalModuleUseC
       goalRepository,
       goalPolicy,
       new GoalReviewContextBuilder(goalRecordRepository),
+      userTimeContextPort,
     ),
     listReviews: new ListGoalReviewsUseCase(goalRepository),
     getReviewContext: new GetGoalReviewContextUseCase(
       goalRepository,
       new GoalReviewContextBuilder(goalRecordRepository),
+      userTimeContextPort,
     ),
     updateReview: new UpdateGoalReviewUseCase(goalRepository, goalPolicy),
     deleteReview: new DeleteGoalReviewUseCase(goalRepository, goalPolicy),
@@ -370,6 +377,11 @@ export function createGoalModule(deps: GoalModuleDependencies): GoalModuleInstan
       'taskBindingReadPort must be explicitly provided to GoalModule (no inline fallback allowed).',
     );
   }
+  if (!deps.goalDeletionTransactionRunner) {
+    throw new Error(
+      'goalDeletionTransactionRunner must be explicitly provided to GoalModule (no inline fallback allowed).',
+    );
+  }
   const { goalRepository, goalRecordRepository, goalWriteTransactionRunner } = deps;
   const runtimeContributions = normalizeGoalRuntimeContributions(deps.runtimeContributions);
   const useCases = createGoalUseCases(deps);
@@ -390,6 +402,8 @@ export function createGoalModule(deps: GoalModuleDependencies): GoalModuleInstan
       useCases.archiveGoal.execute(id, identityId, expectedVersion),
     abandonGoal: (id, identityId, expectedVersion) =>
       useCases.abandonGoal.execute(id, identityId, expectedVersion),
+    planGoal: (id, identityId, expectedVersion) =>
+      useCases.planGoal.execute(id, identityId, expectedVersion),
     activateGoal: (id, identityId, expectedVersion) =>
       useCases.activateGoal.execute(id, identityId, expectedVersion),
     completeGoal: (id, identityId, expectedVersion) =>
@@ -452,6 +466,7 @@ export function createGoalModule(deps: GoalModuleDependencies): GoalModuleInstan
     goalRepository,
     goalRecordRepository,
     goalWriteTransactionRunner,
+    goalDeletionTransactionRunner: deps.goalDeletionTransactionRunner,
     useCases,
     api,
 

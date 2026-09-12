@@ -17,6 +17,7 @@
 
 import type { PrismaClient } from '@memoflow/database';
 import type { NotificationRequestedWriterPort } from '@memoflow/notification';
+import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createReminderModule,
   createReminderPrismaRepositories,
@@ -47,6 +48,8 @@ export interface ComposeReminderDependencies {
   readonly db: PrismaClient;
   /** Reminder-owned durable NotificationRequested writer; Scheduler never receives it. */
   readonly notificationRequestedWriter: NotificationRequestedWriterPort;
+  /** Canonical identity-scoped Product Time context owned by Setting preferences. */
+  readonly userTimeContextPort: UserTimeContextPort;
   /** Host-owned account-active checker (fail-closed for closed accounts). 宿主持有的账户激活检查器（对已关闭账户 fail-closed）。 */
   readonly closureChecker: (identityId: string) => Promise<boolean>;
   /**
@@ -70,7 +73,7 @@ export interface ComposeReminderDependencies {
  * Build the host-owned executor closure predicate frozen from merge-base.
  * 构建从 merge-base 冻结的、宿主持有的 executor 闭户谓词。
  *
- * Blocks when the account row is missing / `Deactivated` / `Closed`, or when an
+ * Blocks when the account row is missing / `Closed`, or when an
  * active account-closure operation exists in phases `requested` | `revoking` |
  * `closing`. A `revoked` / `closed` operation alone does NOT block, and the
  * account status is always inspected first — exactly the predicate the
@@ -78,7 +81,7 @@ export interface ComposeReminderDependencies {
  * so the AI executor path keeps the pre-RefArch behavior while sharing the
  * single composed reminder instance.
  *
- * 账户缺失 / `Deactivated` / `Closed` 时阻断；或存在处于 `requested` | `revoking`
+ * 账户缺失 / `Closed` 时阻断；或存在处于 `requested` | `revoking`
  * | `closing` 阶段的有效闭户操作时阻断。单独的 `revoked` / `closed` 操作不阻断，
  * 且始终先检查账户状态——这正是 merge-base 时代 executor 传给其自建提醒模块的
  * 谓词。在此恢复，使 AI executor 路径在共享单一组合提醒实例的同时保持
@@ -95,7 +98,7 @@ export function createExecutorClosureChecker(
       where: { id: identityId },
       select: { status: true },
     });
-    if (!account || account.status === 'Deactivated' || account.status === 'Closed') {
+    if (!account || account.status === 'Closed') {
       return true;
     }
     const pendingClosure = await db.accountClosureOperation.findFirst({
@@ -176,6 +179,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
     userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
     routineProfileStore: repositories.routineProfileStore,
     closureChecker: dependencies.closureChecker,
+    userTimeContextPort: dependencies.userTimeContextPort,
     reliablePort: repositories.reliablePort,
     snoozeOverrideWriter: repositories.snoozeOverrideWriter,
     auditRepository: repositories.auditRepository,
@@ -215,6 +219,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
           userReminderPreferenceRepository: repositories.userReminderPreferenceRepository,
           routineProfileStore: repositories.routineProfileStore,
           closureChecker: dependencies.executorClosureChecker,
+          userTimeContextPort: dependencies.userTimeContextPort,
         });
 
   const executorReminderPort: ReminderApplicationPort =

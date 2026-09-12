@@ -55,8 +55,8 @@ import {
   createTaskPrismaRepositories,
   createTaskRuntimeContribution,
   normalizeTaskRuntimeContributions,
-  type ITaskInstanceRepository,
-  type ITaskTemplateRepository,
+  type ITaskOccurrenceRepository,
+  type ITaskPlanRepository,
   type TaskApplicationPort,
   type TaskRuntimeContributionsInput,
 } from '@memoflow/task';
@@ -65,6 +65,7 @@ import {
   type TaskApiModuleDef,
 } from '@memoflow/task/api';
 import type { TaskGoalProgressHandler } from '@memoflow/goal';
+import type { UserTimeContextPort } from '@memoflow/time';
 
 /**
  * Dependencies the task composer needs from the API host runtime.
@@ -77,6 +78,7 @@ export interface ComposeTaskDependencies {
   readonly runtimeContributions?: TaskRuntimeContributionsInput;
   /** Goal's durable Task→Goal progress handler; enables the outbox runtime when present. 目标侧持久 Task→Goal 进度处理器；提供时启用 outbox runtime。 */
   readonly goalProgressHandler?: TaskGoalProgressHandler;
+  readonly userTimeContextPort: UserTimeContextPort;
 }
 
 /**
@@ -89,9 +91,9 @@ export interface ComposedTask {
   /** The transport-neutral application port (`instance.api`) for sibling modules to orchestrate. 供兄弟模块编排的与传输无关 application port（`instance.api`）。 */
   readonly applicationPort: TaskApplicationPort;
   /** Task instance repository for scheduled-handler registration (task.reminder.fire). 供 scheduled handler 注册（task.reminder.fire）使用的任务实例仓储。 */
-  readonly taskInstanceRepository: ITaskInstanceRepository;
+  readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
   /** Task template repository for scheduled-handler registration (task.reminder.fire). 供 scheduled handler 注册（task.reminder.fire）使用的任务模板仓储。 */
-  readonly taskTemplateRepository: ITaskTemplateRepository;
+  readonly taskPlanRepository: ITaskPlanRepository;
 }
 
 /**
@@ -136,8 +138,8 @@ export function composeTask(
   dependencies: ComposeTaskDependencies,
 ): ComposedTask {
   const {
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
   } = createTaskPrismaRepositories(dependencies.db);
 
@@ -155,16 +157,17 @@ export function composeTask(
   ];
 
   const instance = createTaskModule({
-    taskTemplateRepository,
-    taskInstanceRepository,
+    taskPlanRepository,
+    taskOccurrenceRepository,
     taskWriteTransactionRunner,
+    userTimeContextPort: dependencies.userTimeContextPort,
     runtimeContributions,
   });
 
   return {
     module: createTaskApiModule({ instance }),
     applicationPort: instance.api,
-    taskInstanceRepository,
-    taskTemplateRepository,
+    taskOccurrenceRepository,
+    taskPlanRepository,
   };
 }

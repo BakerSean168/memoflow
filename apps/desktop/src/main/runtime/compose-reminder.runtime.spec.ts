@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { asInstant } from '@memoflow/time';
+import { asInstant, createTimeContext } from '@memoflow/time';
 import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
@@ -91,6 +91,9 @@ class ControlledIdleSensor implements IdleSensorPort {
 const notificationWriter = {
   enqueueNotificationRequested: vi.fn(),
 } as unknown as NotificationRequestedWriterPort;
+const userTimeContextPort = {
+  getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
+};
 
 const trigger = createActiveUsageTrigger({
   requiredActiveMs: 1_000,
@@ -105,6 +108,7 @@ function createComposition(idleSensor = new ControlledIdleSensor()) {
       db: new RoutineDb(JSON.stringify(trigger)),
       identityId: 'identity-1',
       notificationRequestedWriter: notificationWriter,
+      userTimeContextPort,
       idleSensor,
       interventionPolicy: {
         gentleDurationMs: 100,

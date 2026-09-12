@@ -8,10 +8,12 @@ tags:
   - taxonomy
 description: Shared Label Registry、Goal/Task 标签关联与系统派生视图分离决策
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-09-08T09:00:00+08:00
+updated: 2026-09-09T00:30:00+08:00
 ---
 
 # ADR-054: Shared Labels 与 System Views 分离
+
+> **2026-09-09 第二轮收敛：** Shared Label registry、normalized uniqueness、System Views 分离与 Goal/Task 用户路径继续有效；当前实现中 LabelRepository/LabelService 反向拥有 Goal/Task assignment 的 ownership 漂移由 ADR-102/103 修正。
 
 **状态：** 已采纳并实施
 **日期：** 2026-08-25  

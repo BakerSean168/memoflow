@@ -18,7 +18,7 @@ describe('Product date presentation boundary', () => {
     'utf8',
   );
   const taskPresentation = readFileSync(
-    resolve(dir, '../../modules/task/utils/task-template-presentation.ts'),
+    resolve(dir, '../../modules/task/utils/task-plan-presentation.ts'),
     'utf8',
   );
   const schedule = readFileSync(

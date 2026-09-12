@@ -14,6 +14,13 @@ import {
   RateLimit,
   RelatedEntityType,
 } from '..';
+import { createTimeContext } from '@memoflow/time';
+
+const TOKYO_TIME_CONTEXT = createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 });
+const NEW_YORK_TIME_CONTEXT = createTimeContext({
+  timeZone: 'America/New_York',
+  weekStartsOn: 0,
+});
 
 describe('notification shared value objects', () => {
   it('handles category preferences and quiet hours', () => {
@@ -48,10 +55,12 @@ describe('notification shared value objects', () => {
     expect(quiet.isWeekdaysOnly).toBe(true);
     expect(quiet.isWeekendsOnly).toBe(false);
     expect(quiet.isEveryDay).toBe(false);
-    expect(quiet.isActiveAt(new Date('2026-04-27T22:15:00'))).toBe(true);
-    expect(quiet.isActiveAt(new Date('2026-04-27T12:00:00'))).toBe(false);
+    expect(quiet.isActiveAt(new Date('2026-04-27T13:15:00.000Z'), TOKYO_TIME_CONTEXT)).toBe(true);
+    expect(quiet.isActiveAt(new Date('2026-04-27T03:00:00.000Z'), TOKYO_TIME_CONTEXT)).toBe(false);
     expect(DoNotDisturbConfig.createDefault().isEveryDay).toBe(true);
-    expect(DoNotDisturbConfig.createDefault().setEnabled(false).isActiveAt(new Date())).toBe(false);
+    expect(DoNotDisturbConfig.createDefault()
+        .setEnabled(false)
+        .isActiveAt(new Date(), TOKYO_TIME_CONTEXT)).toBe(false);
     expect(
       DoNotDisturbConfig.create({
         enabled: true,
@@ -78,6 +87,37 @@ describe('notification shared value objects', () => {
           daysOfWeek: [7],
         }),
     ).toThrow('daysOfWeek values must be 0-6');
+  });
+
+  it('evaluates DND in canonical user time and preserves wall-clock end across DST', () => {
+    const dnd = DoNotDisturbConfig.create({
+      enabled: true,
+      startTime: '22:00',
+      endTime: '08:00',
+      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+    });
+    // New York: 2030-03-09 23:00 EST -> 2030-03-10 08:00 EDT.
+    const activeAt = new Date('2030-03-10T04:00:00.000Z');
+
+    const previousHostTz = process.env.TZ;
+    try {
+      process.env.TZ = 'UTC';
+      const utcHost = dnd.isActiveAt(activeAt, NEW_YORK_TIME_CONTEXT);
+      const utcHostEnd = dnd.nextInactiveAt(activeAt, NEW_YORK_TIME_CONTEXT);
+
+      process.env.TZ = 'Asia/Tokyo';
+      const tokyoHost = dnd.isActiveAt(activeAt, NEW_YORK_TIME_CONTEXT);
+      const tokyoHostEnd = dnd.nextInactiveAt(activeAt, NEW_YORK_TIME_CONTEXT);
+
+      expect(utcHost).toBe(true);
+      expect(tokyoHost).toBe(utcHost);
+      expect(utcHostEnd?.toISOString()).toBe('2030-03-10T12:00:00.000Z');
+      expect(tokyoHostEnd?.toISOString()).toBe(utcHostEnd?.toISOString());
+      expect(utcHostEnd!.getTime() - activeAt.getTime()).toBe(8 * 60 * 60 * 1000);
+    } finally {
+      if (previousHostTz === undefined) delete process.env.TZ;
+      else process.env.TZ = previousHostTz;
+    }
   });
 
   it('serializes metadata, limits, actions, and channel payloads', () => {

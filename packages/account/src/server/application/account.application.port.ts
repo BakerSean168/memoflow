@@ -1,15 +1,10 @@
 import type {
-  CheckAvailabilityUseCase,
   CloseAccountUseCase,
   GetAccountProfileUseCase,
   ListAccountsUseCase,
   UpdateAccountProfileUseCase,
-  UpdateAccountSettingsUseCase,
 } from './use-cases';
-import type {
-  OperationTimelineEntry,
-  OperationAuditRecord,
-} from '@memoflow/contracts/operations';
+import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/contracts/operations';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 
@@ -28,13 +23,6 @@ export interface AccountApplicationPort {
     data: Parameters<UpdateAccountProfileUseCase['execute']>[0],
     cx: Parameters<UpdateAccountProfileUseCase['execute']>[1],
   ): Promise<Awaited<ReturnType<UpdateAccountProfileUseCase['execute']>>>;
-  updateSettings(
-    data: Parameters<UpdateAccountSettingsUseCase['execute']>[0],
-    cx: Parameters<UpdateAccountSettingsUseCase['execute']>[1],
-  ): Promise<Awaited<ReturnType<UpdateAccountSettingsUseCase['execute']>>>;
-  checkAvailability(
-    data: Parameters<CheckAvailabilityUseCase['execute']>[0],
-  ): Promise<Awaited<ReturnType<CheckAvailabilityUseCase['execute']>>>;
   closeAccount(
     data: Parameters<CloseAccountUseCase['execute']>[0],
     cx: Parameters<CloseAccountUseCase['execute']>[1],

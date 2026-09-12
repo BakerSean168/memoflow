@@ -84,3 +84,42 @@ node -e "console.log('see docs/governance/dual-registry.md')"
 ```
 
 E3b tax cut may merge many `*-dual.surface.spec.ts` in one directory into `dual-registry.surface.spec.ts` (table/describe suite). Locks must be preserved.
+
+## Pinned GovernanceRuleBundle engineering bridge
+
+`GOV-1904` keeps product Governance truth and repository engineering enforcement separate:
+
+```text
+Rule + RuleRevision (product truth)
+→ explicit GovernanceRuleBundle export (GOV-1903)
+→ reviewed repository snapshot + semantic-hash pin
+→ explicit engineering adapter registry
+→ check / report / autofix-proposal
+```
+
+CI consumes only the committed snapshot at
+`published/governance-rule-bundle.v1.json`, pinned by `pinned-rule-bundles.json`; it never
+connects to a live Governance database or network endpoint. `engineering-rule-adapters.json`
+is an allowlist, not an executable command registry. A Rule's `Mandatory` severity does not
+make it a CI gate by itself. Unmapped rules stay visible as `unmapped (non-enforcing)`.
+The current `DDD-003` mapping reuses the package-internal boundary runner and is explicitly
+`partial` coverage rather than claiming full Layer Isolation enforcement.
+
+```bash
+node tools/governance/governance-rule-bundle-adapter.mjs \
+  --bundle tools/governance/published/governance-rule-bundle.v1.json \
+  --mode check
+
+node tools/governance/governance-rule-bundle-adapter.mjs \
+  --bundle tools/governance/published/governance-rule-bundle.v1.json \
+  --mode report
+
+node tools/governance/governance-rule-bundle-adapter.mjs \
+  --bundle tools/governance/published/governance-rule-bundle.v1.json \
+  --mode autofix-proposal
+```
+
+`autofix-proposal` is proposal-only: it emits review-required guidance and never mutates
+product source. The standalone `package-internal-boundary-audit.mjs` remains a first-class,
+independently runnable repository gate; the bundle bridge composes with it rather than
+replacing it.

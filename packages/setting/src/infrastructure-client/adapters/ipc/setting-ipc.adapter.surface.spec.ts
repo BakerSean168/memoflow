@@ -3,32 +3,35 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { SettingChannels } from '@memoflow/contracts/electron';
 
-/**
- * Setting IPC adapter surface (stage-6 residual):
- * Invokes contracts SettingChannels only — no string-template dual-track channel names.
- */
-describe('SettingIpcAdapter channel surface', () => {
+describe('Setting IPC adapter canonical channel surface', () => {
   const source = readFileSync(resolve(__dirname, 'setting-ipc.adapter.ts'), 'utf8');
 
-  it('invokes SettingChannels and does not hardcode setting: channel strings', () => {
-    expect(source).toContain("import { SettingChannels } from '@memoflow/contracts/electron'");
-    expect(source).toContain('SettingChannels.GET_ALL');
-    expect(source).toContain('SettingChannels.PATCH');
-    expect(source).toContain('SettingChannels.RESET');
-    expect(source).toContain('SettingChannels.IMPORT');
-    expect(source).toContain('SettingChannels.EXPORT');
-    expect(source).not.toMatch(/\$\{this\.channel\}/);
-    expect(source).not.toContain("private readonly channel = 'setting'");
-  });
-
-  it('keeps live SettingChannels names stable', () => {
+  it('uses only the seven canonical preference/portability channels', () => {
     expect(Object.values(SettingChannels)).toEqual([
-      'setting:all',
-      'setting:defaults',
-      'setting:patch',
-      'setting:reset',
       'setting:import',
       'setting:export',
+      'setting:preferences:profile',
+      'setting:preferences:reset',
+      'setting:preference:get',
+      'setting:preference:patch',
+      'setting:preference:reset',
     ]);
+    for (const key of [
+      'PREFERENCES_PROFILE_GET',
+      'PREFERENCES_RESET',
+      'PREFERENCE_GET',
+      'PREFERENCE_PATCH',
+      'PREFERENCE_RESET',
+      'IMPORT',
+      'EXPORT',
+    ]) expect(source).toContain(`SettingChannels.${key}`);
+  });
+
+  it('has no deleted giant-tree channels or hard-coded setting channel strings', () => {
+    expect(source).not.toContain('SettingChannels.GET_ALL');
+    expect(source).not.toContain('SettingChannels.GET_DEFAULTS');
+    expect(source).not.toContain('SettingChannels.PATCH');
+    expect(source).not.toContain('SettingChannels.RESET');
+    expect(source).not.toMatch(/['\"]setting:(all|defaults|patch|reset)['\"]/);
   });
 });

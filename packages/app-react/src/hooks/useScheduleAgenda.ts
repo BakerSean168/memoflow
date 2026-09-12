@@ -4,7 +4,9 @@ import type { CalendarEntryClientDTO } from '@memoflow/contracts/schedule';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
+import { useAppPreferences } from '../providers/app-preference-provider';
 import { useScheduleService } from './useScheduleService';
+import { getProductTime } from '../utils/product-time';
 
 export type AgendaEntrySummary = {
   id: string;
@@ -28,49 +30,18 @@ export type ScheduleAgendaOptions = {
   daysAfter?: number;
 };
 
-/**
- * Residual 1165 keep-boundary: schedule agenda startOfDay — Date in/out (local calendar day).
- * Soft residual 1165: dashboard projection startOfDay uses timestamp ms in/out (no force-merge).
- */
-function startOfDay(date: Date) {
-  const next = new Date(date);
-  next.setHours(0, 0, 0, 0);
-  return next;
-}
-
-function endOfDay(date: Date) {
-  const next = new Date(date);
-  next.setHours(23, 59, 59, 999);
-  return next;
-}
-
+/** Canonical Product Time projection for Schedule agenda windows and labels. */
 function formatDayKey(timestamp: number) {
-  const date = new Date(timestamp);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return String(getProductTime().calendar.toYmd(timestamp));
 }
 
 function formatDayLabel(timestamp: number) {
-  return new Intl.DateTimeFormat('zh-CN', {
-    month: 'short',
-    day: 'numeric',
-    weekday: 'short',
-  }).format(new Date(timestamp));
+  return getProductTime().format.pattern(timestamp, 'MMM d, EEE');
 }
 
-/**
- * Residual 1213 keep-boundary: app-react formatTimeRange — fixed Intl zh-CN start/end pair.
- * Agenda summary clock range (two epoch numbers); separator " - "; no all-day branch.
- * Soft residual 1213: app-vue schedule formatTimeRange is event+all-day+padStart (no force-merge).
- */
 function formatTimeRange(startTime: number, endTime: number) {
-  const formatter = new Intl.DateTimeFormat('zh-CN', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  return `${formatter.format(new Date(startTime))} - ${formatter.format(new Date(endTime))}`;
+  const time = getProductTime();
+  return `${time.format.hm(startTime)} - ${time.format.hm(endTime)}`;
 }
 
 function mapAgendaEntry(entry: CalendarEntryClientDTO): AgendaEntrySummary {
@@ -98,21 +69,23 @@ function resolveRange(options: ScheduleAgendaOptions) {
     };
   }
 
-  const now = new Date();
+  const time = getProductTime();
+  const now = time.now();
   const before = options.daysBefore ?? 1;
   const after = options.daysAfter ?? 14;
-  const rangeStart = startOfDay(new Date(now.getTime() - before * 24 * 60 * 60 * 1000));
-  const rangeEnd = endOfDay(new Date(now.getTime() + after * 24 * 60 * 60 * 1000));
+  const rangeStart = time.calendar.startOfDay(time.calendar.addDays(now, -before));
+  const rangeEnd = time.calendar.endOfDay(time.calendar.addDays(now, after));
 
   return {
-    startTime: rangeStart.getTime(),
-    endTime: rangeEnd.getTime(),
+    startTime: Number(rangeStart),
+    endTime: Number(rangeEnd),
   };
 }
 
 export function useScheduleAgenda(options: ScheduleAgendaOptions = {}) {
   const service = useScheduleService();
   const { isRemoteAuthenticated } = useAppSession();
+  const { profile } = useAppPreferences();
 
   const [entries, setEntries] = useState<AgendaEntrySummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -120,7 +93,7 @@ export function useScheduleAgenda(options: ScheduleAgendaOptions = {}) {
 
   const range = useMemo(
     () => resolveRange(options),
-    [options.daysAfter, options.daysBefore, options.endTime, options.startTime],
+    [options.daysAfter, options.daysBefore, options.endTime, options.startTime, profile],
   );
 
   async function loadAgenda() {
@@ -152,7 +125,7 @@ export function useScheduleAgenda(options: ScheduleAgendaOptions = {}) {
 
   useEffect(() => {
     void loadAgenda();
-  }, [isRemoteAuthenticated, range.endTime, range.startTime, service]);
+  }, [isRemoteAuthenticated, profile, range.endTime, range.startTime, service]);
 
   const groupedEntries = useMemo(() => {
     const groups = new Map<string, { dayLabel: string; items: AgendaEntrySummary[] }>();

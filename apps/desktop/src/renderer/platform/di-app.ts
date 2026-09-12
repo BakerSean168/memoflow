@@ -44,6 +44,7 @@ import {
   DATA_PORTABILITY_SERVICE_KEY,
   DESKTOP_AUTH_API_KEY,
   DESKTOP_BRIDGE_KEY,
+  DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY,
   MODULE_CAPSULES_KEY,
   LOGOUT_HANDLER_KEY,
   PROFILE_LOCK_HANDLER_KEY,
@@ -58,7 +59,11 @@ import { readDesktopAccessSnapshot } from '@memoflow/app-vue/desktop';
 // Residual 941: host bridge via requireElectronBridge sole helper.
 import { requireElectronBridge } from './electron-bridge';
 import { clearDesktopServerStateIdentity } from './server-state';
-import { ProfileAccessChannels, WindowChannels } from '@memoflow/contracts/electron';
+import {
+  ProfileAccessChannels,
+  WindowChannels,
+  type DesktopNotificationPreferencePatch,
+} from '@memoflow/contracts/electron';
 import { fromIpcResult, isOk, type IpcResult } from '@memoflow/contracts/result';
 
 function getAppT(): (key: string) => string {
@@ -91,6 +96,12 @@ export function installDesktopAppServices(app: App): void {
   app.provide(REPOSITORY_SERVICE_KEY, createRepositoryIpcClient(resultIpcClient));
 
   app.provide(NOTIFICATION_SERVICE_KEY, createNotificationIpcClient(resultIpcClient));
+  app.provide(DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY, {
+    get: () => resultIpcClient.invoke('desktop:notification:device-preference:get'),
+    update: (patch: DesktopNotificationPreferencePatch) =>
+      resultIpcClient.invoke('desktop:notification:device-preference:update', patch),
+    reset: () => resultIpcClient.invoke('desktop:notification:device-preference:reset'),
+  });
 
   app.provide(SETTING_SERVICE_KEY, createSettingIpcClient(resultIpcClient));
 

@@ -18,10 +18,10 @@ export interface TimestampedImportInput extends CreatedImportInput {
 
 // --- Settings (singletons) ---
 
-export interface UpsertUserSettingInput {
-  id?: string;
+export interface UpsertUserPreferencesInput {
   identityId: string;
-  preferences: Record<string, unknown>;
+  presentation: Record<string, unknown>;
+  regional: Record<string, unknown>;
 }
 
 export interface UpsertNotificationPreferenceInput {
@@ -86,12 +86,11 @@ export interface CreateGoalInput extends TimestampedImportInput {
   id: string;
   identityId: string;
   name: string;
-  description: string | null;
-  feasibilityAnalysis: string | null;
-  motivation: string | null;
+  summary: string | null;
   status: string;
   startDate: string | null;
-  dueDate: string | null;
+  targetKind: string | null;
+  targetEndDate: string | null;
   completedAt: string | null;
   archivedAt: string | null;
   sortOrder: number;
@@ -105,10 +104,12 @@ export interface CreateKeyResultInput extends TimestampedImportInput {
   title: string;
   description: string | null;
   aggregationMethod: string;
-  startingValue: number;
-  progressBaselineValue: number | null;
+  initialValue: number;
+  trackingBaseValue: number;
   targetValue: number;
   currentValue: number;
+  targetKind: string | null;
+  targetEndDate: string | null;
   unit: string | null;
   weight: number;
   order: number;
@@ -138,7 +139,7 @@ export interface CreateGoalRecordInput extends TimestampedImportInput {
 
 // --- Task ---
 
-export interface CreateTaskTemplateInput extends TimestampedImportInput {
+export interface CreateTaskPlanInput extends TimestampedImportInput {
   id: string;
   identityId: string;
   name: string;
@@ -177,7 +178,7 @@ export interface CreateTaskTemplateInput extends TimestampedImportInput {
   checklist: string | null;
 }
 
-export interface CreateTaskInstanceInput extends TimestampedImportInput {
+export interface CreateTaskOccurrenceInput extends TimestampedImportInput {
   id: string;
   templateId: string;
   identityId: string;
@@ -284,54 +285,6 @@ export interface CreateReminderResponseInput extends CreatedImportInput {
   timestamp: string;
 }
 
-// --- Editor ---
-
-export interface CreateEditorWorkspaceInput extends TimestampedImportInput {
-  id: string;
-  identityId: string;
-  name: string;
-  description: string | null;
-  projectPath: string;
-  projectType: string;
-  layout: unknown;
-  setting: unknown;
-  isActive: boolean;
-}
-
-export interface CreateEditorSessionInput extends TimestampedImportInput {
-  id: string;
-  workspaceId: string;
-  identityId: string;
-  name: string;
-  layout: unknown;
-  isActive: boolean;
-}
-
-export interface CreateEditorGroupInput extends TimestampedImportInput {
-  id: string;
-  sessionId: string;
-  workspaceId: string;
-  identityId: string;
-  groupIndex: number;
-  name: string | null;
-  splitDirection: string;
-}
-
-export interface CreateEditorTabInput extends TimestampedImportInput {
-  id: string;
-  groupId: string;
-  sessionId: string;
-  workspaceId: string;
-  identityId: string;
-  tabIndex: number;
-  tabType: string;
-  title: string;
-  viewState: unknown;
-  isPinned: boolean;
-  isActive: boolean;
-  resourceId: string | null;
-}
-
 // --- AI ---
 
 export interface CreateAIConversationInput extends TimestampedImportInput {
@@ -354,7 +307,7 @@ export interface CreateAIMessageInput extends CreatedImportInput {
 
 export interface DataPortabilityImportTx {
   // Singletons (upsert)
-  upsertUserSetting(input: UpsertUserSettingInput): Promise<void>;
+  upsertUserPreferences(input: UpsertUserPreferencesInput): Promise<void>;
   upsertNotificationPreference(input: UpsertNotificationPreferenceInput): Promise<void>;
   upsertUserReminderPreference(input: UpsertUserReminderPreferenceInput): Promise<void>;
 
@@ -370,8 +323,8 @@ export interface DataPortabilityImportTx {
   createGoalRecord(input: CreateGoalRecordInput): Promise<void>;
 
   // Task
-  createTaskTemplate(input: CreateTaskTemplateInput): Promise<void>;
-  createTaskInstance(input: CreateTaskInstanceInput): Promise<void>;
+  createTaskPlan(input: CreateTaskPlanInput): Promise<void>;
+  createTaskOccurrence(input: CreateTaskOccurrenceInput): Promise<void>;
 
   // Schedule
   createSchedule(input: CreateScheduleInput): Promise<void>;
@@ -381,12 +334,6 @@ export interface DataPortabilityImportTx {
   createReminderGroup(input: CreateReminderGroupInput): Promise<void>;
   createReminderTemplate(input: CreateReminderTemplateInput): Promise<void>;
   createReminderResponse(input: CreateReminderResponseInput): Promise<void>;
-
-  // Editor
-  createEditorWorkspace(input: CreateEditorWorkspaceInput): Promise<void>;
-  createEditorSession(input: CreateEditorSessionInput): Promise<void>;
-  createEditorGroup(input: CreateEditorGroupInput): Promise<void>;
-  createEditorTab(input: CreateEditorTabInput): Promise<void>;
 
   // AI
   createAIConversation(input: CreateAIConversationInput): Promise<void>;

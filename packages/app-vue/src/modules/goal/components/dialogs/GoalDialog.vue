@@ -7,7 +7,22 @@
       initial-focus-selector="[data-testid='goal-name-input']"
     >
       <template #title>
-        {{ mode === 'edit' ? t('goal.dialog.editGoal') : t('goal.dialog.createGoal') }}
+        <div class="flex min-w-0 items-center justify-between gap-3">
+          <span>{{
+            mode === 'edit' ? t('goal.dialog.editGoal') : t('goal.dialog.createGoal')
+          }}</span>
+          <Button
+            v-if="mode === 'create'"
+            type="button"
+            variant="ghost"
+            size="sm"
+            data-testid="goal-create-with-ai"
+            @click="emit('create-with-ai')"
+          >
+            <Sparkles class="mr-1 h-4 w-4" />
+            {{ t('goal.dialog.createWithAI') }}
+          </Button>
+        </div>
       </template>
       <template #description>{{ t('goal.dialog.vNextDescription') }}</template>
 
@@ -18,51 +33,126 @@
             id="goal-name"
             v-model="draft.name"
             data-testid="goal-name-input"
+            class="h-11 text-lg font-medium"
             maxlength="256"
             :placeholder="t('goal.dialog.goalTitlePlaceholder')"
           />
         </div>
 
-        <div class="space-y-2">
-          <Label for="goal-description">{{ t('goal.dialog.description') }}</Label>
-          <Textarea
-            id="goal-description"
-            v-model="draft.description"
-            data-testid="goal-description-input"
-            class="min-h-24"
-            maxlength="2000"
-            :placeholder="t('goal.dialog.descriptionPlaceholder')"
+        <Input
+          id="goal-summary"
+          v-model="draft.summary"
+          data-testid="goal-summary-input"
+          maxlength="500"
+          :placeholder="t('goal.dialog.summaryPlaceholder')"
+        />
+
+        <div class="flex flex-wrap items-center gap-2" data-testid="goal-property-chips">
+          <span
+            class="inline-flex h-8 items-center rounded-full border bg-background px-3 text-sm"
+            data-testid="goal-status-chip"
+          >
+            {{ goalStatusLabel }}
+          </span>
+
+          <Popover>
+            <PopoverTrigger as-child>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                class="h-8 rounded-full px-3 font-normal"
+                data-testid="goal-start-chip"
+              >
+                <CalendarDays class="mr-1 h-3.5 w-3.5" />
+                {{ startChipLabel }}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" class="w-auto space-y-2 p-3">
+              <Label for="goal-start-date">{{ t('goal.dialog.startDate') }}</Label>
+              <Input id="goal-start-date" v-model="draft.startDate" type="date" />
+              <Button
+                v-if="draft.startDate"
+                type="button"
+                size="sm"
+                variant="ghost"
+                @click="draft.startDate = ''"
+              >
+                {{ t('common.clear') }}
+              </Button>
+            </PopoverContent>
+          </Popover>
+
+          <GoalTimeframePicker
+            v-model="draft.target"
+            test-id="goal-target-chip"
+            :aria-label="t('goal.dialog.target')"
+            :placeholder="t('goal.dialog.target')"
           />
-        </div>
 
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div class="space-y-2">
-            <Label for="goal-start-date">{{ t('goal.dialog.startDate') }}</Label>
-            <Input id="goal-start-date" v-model="draft.startDate" type="date" />
-          </div>
-          <div class="space-y-2">
-            <Label for="goal-due-date">{{ t('goal.dialog.dueDate') }}</Label>
-            <Input id="goal-due-date" v-model="draft.dueDate" type="date" />
-          </div>
-        </div>
-
-        <div class="space-y-2">
-          <Label>{{ t('goal.dialog.labels') }}</Label>
           <LabelPicker
             v-model="draft.labelIds"
             :options="labelOptions"
             :disabled="labelsLoading || isSaving"
-            :placeholder="t('goal.dialog.labelsPlaceholder')"
+            :placeholder="t('goal.dialog.labels')"
             :search-placeholder="t('goal.list.searchLabels')"
             :empty-text="t('goal.list.noLabels')"
             :create-label="t('goal.dialog.createLabel')"
             :aria-label="t('goal.dialog.labels')"
+            compact
             @create="createAndSelectLabel"
           />
-          <p v-if="labelCreateError" role="alert" class="text-xs text-destructive">
-            {{ labelCreateError }}
-          </p>
+
+          <GoalReminderChip
+            v-model="draft.reminderConfig"
+            :start-date="draft.startDate || null"
+            :target="draft.target"
+          />
+
+          <Popover>
+            <PopoverTrigger as-child>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                class="h-8 rounded-full px-3 font-normal"
+                data-testid="goal-notes-chip"
+              >
+                <NotebookText class="mr-1 h-3.5 w-3.5" />
+                {{ t('goal.dialog.notes') }}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" class="w-72 space-y-3 p-3">
+              <p class="text-sm text-muted-foreground">{{ t('goal.dialog.notesHint') }}</p>
+              <Button
+                v-if="mode === 'edit' && goal"
+                type="button"
+                variant="outline"
+                size="sm"
+                @click="emit('open-knowledge', String(goal.id))"
+              >
+                {{ t('goal.dialog.openKnowledge') }}
+              </Button>
+              <Button
+                v-else
+                type="button"
+                variant="outline"
+                size="sm"
+                @click="emit('create-with-ai')"
+              >
+                <Sparkles class="mr-1 h-4 w-4" />
+                {{ t('goal.dialog.createWithAI') }}
+              </Button>
+            </PopoverContent>
+          </Popover>
         </div>
+
+        <p v-if="labelCreateError" role="alert" class="text-xs text-destructive">
+          {{ labelCreateError }}
+        </p>
+        <p v-if="formError" role="alert" class="text-xs text-destructive">
+          {{ formError }}
+        </p>
 
         <section class="space-y-3" data-testid="goal-key-results-editor">
           <div class="flex items-center justify-between gap-3">
@@ -108,7 +198,7 @@
               >
                 <p class="truncate text-sm font-medium">{{ keyResult.title }}</p>
                 <p class="mt-0.5 text-xs text-muted-foreground">
-                  {{ keyResult.currentValue ?? keyResult.startingValue ?? 0 }} →
+                  {{ keyResult.currentValue ?? keyResult.initialValue }} →
                   {{ keyResult.targetValue }}
                   <span v-if="keyResult.unit"> {{ keyResult.unit }}</span>
                 </p>
@@ -152,7 +242,16 @@
               />
             </div>
 
-            <div class="grid gap-3 sm:grid-cols-2">
+            <div class="grid gap-3 sm:grid-cols-3">
+              <div class="space-y-2">
+                <Label for="draft-kr-initial">{{ t('goal.dialog.krInitialValue') }}</Label>
+                <Input
+                  id="draft-kr-initial"
+                  v-model.number="krForm.initialValue"
+                  type="number"
+                  data-testid="draft-kr-initial-input"
+                />
+              </div>
               <div class="space-y-2">
                 <Label for="draft-kr-current">{{ t('goal.dialog.krCurrentValue') }}</Label>
                 <Input
@@ -173,15 +272,26 @@
               </div>
             </div>
 
-            <div class="space-y-2">
-              <Label for="draft-kr-unit">{{ t('goal.dialog.krUnit') }}</Label>
-              <Input
-                id="draft-kr-unit"
-                v-model="krForm.unit"
-                data-testid="draft-kr-unit-input"
-                maxlength="20"
-                :placeholder="t('goal.dialog.krUnitPlaceholder')"
-              />
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="space-y-2">
+                <Label for="draft-kr-unit">{{ t('goal.dialog.krUnit') }}</Label>
+                <Input
+                  id="draft-kr-unit"
+                  v-model="krForm.unit"
+                  data-testid="draft-kr-unit-input"
+                  maxlength="20"
+                  :placeholder="t('goal.dialog.krUnitPlaceholder')"
+                />
+              </div>
+              <div class="space-y-2">
+                <Label>{{ t('goal.dialog.krTargetTimeframe') }}</Label>
+                <GoalTimeframePicker
+                  v-model="krForm.target"
+                  test-id="draft-kr-target-timeframe"
+                  :aria-label="t('goal.dialog.krTargetTimeframe')"
+                  :placeholder="t('goal.dialog.krTargetTimeframe')"
+                />
+              </div>
             </div>
 
             <Collapsible v-model:open="krAdvancedOpen">
@@ -196,16 +306,12 @@
               </CollapsibleTrigger>
               <CollapsibleContent class="mt-2 grid gap-3 sm:grid-cols-2">
                 <div class="space-y-2 sm:col-span-2">
-                  <Label for="draft-kr-baseline">{{ t('goal.dialog.krProgressBaseline') }}</Label>
-                  <Input
-                    id="draft-kr-baseline"
-                    v-model="krForm.progressBaselineValue"
-                    type="number"
-                    :placeholder="t('goal.dialog.optional')"
+                  <Label for="draft-kr-description">{{ t('goal.dialog.description') }}</Label>
+                  <Textarea
+                    id="draft-kr-description"
+                    v-model="krForm.description"
+                    maxlength="2000"
                   />
-                  <p class="text-[11px] text-muted-foreground">
-                    {{ t('goal.dialog.krProgressBaselineHint') }}
-                  </p>
                 </div>
                 <div class="space-y-2">
                   <Label>{{ t('goal.dialog.krCalculationMethod') }}</Label>
@@ -279,10 +385,21 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ChevronRight, Pencil, Plus, Trash2 } from '@lucide/vue';
+import {
+  CalendarDays,
+  ChevronRight,
+  NotebookText,
+  Pencil,
+  Plus,
+  Sparkles,
+  Trash2,
+} from '@lucide/vue';
 import {
   KeyResultCalculationMethod,
+  ReminderTriggerType,
+  type GoalReminderConfigDTO,
   type GoalClientDTO,
+  type GoalTimeframe,
   type CreateGoalReq,
   type UpdateGoalReq,
 } from '@memoflow/contracts/goal';
@@ -294,6 +411,9 @@ import {
   Dialog,
   Input,
   Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
@@ -302,9 +422,11 @@ import {
   Textarea,
 } from '@memoflow/ui-vue-shadcn';
 import { LabelPicker, ProductDialogShell } from '../../../../shared/components';
+import GoalReminderChip from '../GoalReminderChip.vue';
+import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 import {
-  fromProductDateInputValue,
-  toProductDateInputValue,
+  fromProductYmdInputValue,
+  toProductYmdInputValue,
 } from '../../../../shared/utils/product-time';
 import { useLabelCatalog } from '../../../../shared/composables/useLabelCatalog';
 import { useGoal } from '../../composables/useGoal';
@@ -321,6 +443,8 @@ const emit = defineEmits<{
   created: [GoalClientDTO];
   updated: [GoalClientDTO];
   'dirty-change': [boolean];
+  'create-with-ai': [];
+  'open-knowledge': [goalId: string];
 }>();
 
 const { t } = useI18n();
@@ -329,14 +453,16 @@ const { options: labelOptions, isLoading: labelsLoading, createLabel } = useLabe
 
 const draft = reactive({
   name: '',
-  description: '',
+  summary: '',
   startDate: '',
-  dueDate: '',
+  target: null as GoalTimeframe | null,
+  reminderConfig: null as GoalReminderConfigDTO | null,
   labelIds: [] as string[],
   keyResults: [] as DraftKeyResult[],
 });
 const initialSnapshot = ref('');
 const labelCreateError = ref<string | null>(null);
+const formError = ref<string | null>(null);
 const krEditorOpen = ref(false);
 const editingKrIndex = ref<number | null>(null);
 const krAdvancedOpen = ref(false);
@@ -345,11 +471,11 @@ const calculationMethods = Object.values(KeyResultCalculationMethod);
 const krForm = reactive({
   id: undefined as KrId | undefined,
   title: '',
-  description: null as string | null,
-  startingValue: 0,
+  description: '',
+  initialValue: 0,
   currentValue: 0,
   targetValue: '' as number | '',
-  progressBaselineValue: '' as number | '',
+  target: null as GoalTimeframe | null,
   calculationMethod: KeyResultCalculationMethod.Sum as KeyResultCalculationMethod,
   unit: '',
   weight: 3,
@@ -359,18 +485,29 @@ const canSaveKeyResult = computed(
   () =>
     krForm.title.trim().length > 0 &&
     krForm.targetValue !== '' &&
+    Number.isFinite(Number(krForm.initialValue)) &&
     Number.isFinite(Number(krForm.currentValue)) &&
     Number.isFinite(Number(krForm.targetValue)),
 );
 
+const goalStatusLabel = computed(() => {
+  const status = props.mode === 'edit' && props.goal ? props.goal.status : 'Planned';
+  const labels: Record<string, string> = {
+    Planned: t('goal.list.statusPlanned'),
+    InProgress: t('goal.list.statusInProgress'),
+    Completed: t('goal.list.statusCompleted'),
+    Abandoned: t('goal.list.statusAbandoned'),
+  };
+  return labels[status] ?? status;
+});
+const startChipLabel = computed(() =>
+  draft.startDate
+    ? `${t('goal.dialog.startDate')}: ${draft.startDate}`
+    : t('goal.dialog.startDate'),
+);
+
 function snapshotDraft(): string {
   return JSON.stringify(draft);
-}
-function fromMs(value: number | null | undefined): string {
-  return toProductDateInputValue(value);
-}
-function toMs(value: string): number | undefined {
-  return fromProductDateInputValue(value) ?? undefined;
 }
 function mapKeyResult(goalKr: NonNullable<GoalClientDTO['keyResults']>[number]): DraftKeyResult {
   return {
@@ -378,22 +515,29 @@ function mapKeyResult(goalKr: NonNullable<GoalClientDTO['keyResults']>[number]):
     title: goalKr.title,
     description: goalKr.description,
     calculationMethod: goalKr.progress.aggregationMethod,
-    startingValue: goalKr.progress.startingValue,
+    initialValue: goalKr.progress.initialValue,
     currentValue: goalKr.progress.currentValue,
     targetValue: goalKr.progress.targetValue,
-    progressBaselineValue: goalKr.progress.progressBaselineValue,
+    target: goalKr.target,
     unit: goalKr.progress.unit,
     weight: goalKr.weight,
   };
 }
 function reset(): void {
   draft.name = props.goal?.name ?? '';
-  draft.description = props.goal?.description ?? '';
-  draft.startDate = fromMs(props.goal?.startDate);
-  draft.dueDate = fromMs(props.goal?.dueDate);
+  draft.summary = props.goal?.summary ?? '';
+  draft.startDate = toProductYmdInputValue(props.goal?.startDate);
+  draft.target = props.goal?.target ? { ...props.goal.target } : null;
+  draft.reminderConfig = props.goal?.reminderConfig
+    ? {
+        enabled: props.goal.reminderConfig.enabled,
+        triggers: props.goal.reminderConfig.triggers.map((trigger) => ({ ...trigger })),
+      }
+    : null;
   draft.labelIds = props.goal?.labels.map((label) => label.id) ?? [];
   draft.keyResults = props.goal?.keyResults?.map(mapKeyResult) ?? [];
   labelCreateError.value = null;
+  formError.value = null;
   cancelKeyResultEdit();
   initialSnapshot.value = snapshotDraft();
   emit('dirty-change', false);
@@ -428,11 +572,11 @@ async function createAndSelectLabel(name: string): Promise<void> {
 function resetKrForm(): void {
   krForm.id = undefined;
   krForm.title = '';
-  krForm.description = null;
-  krForm.startingValue = 0;
+  krForm.description = '';
+  krForm.initialValue = 0;
   krForm.currentValue = 0;
   krForm.targetValue = '';
-  krForm.progressBaselineValue = '';
+  krForm.target = null;
   krForm.calculationMethod = KeyResultCalculationMethod.Sum;
   krForm.unit = '';
   krForm.weight = 3;
@@ -452,11 +596,11 @@ function openEditKeyResult(index: number): void {
   editingKrIndex.value = index;
   krForm.id = keyResult.id;
   krForm.title = keyResult.title;
-  krForm.description = keyResult.description ?? null;
-  krForm.startingValue = keyResult.startingValue ?? keyResult.currentValue ?? 0;
-  krForm.currentValue = keyResult.currentValue ?? keyResult.startingValue ?? 0;
+  krForm.description = keyResult.description ?? '';
+  krForm.initialValue = keyResult.initialValue;
+  krForm.currentValue = keyResult.currentValue ?? keyResult.initialValue;
   krForm.targetValue = keyResult.targetValue;
-  krForm.progressBaselineValue = keyResult.progressBaselineValue ?? '';
+  krForm.target = keyResult.target ? { ...keyResult.target } : null;
   krForm.calculationMethod = keyResult.calculationMethod;
   krForm.unit = keyResult.unit ?? '';
   krForm.weight = keyResult.weight;
@@ -469,21 +613,15 @@ function cancelKeyResultEdit(): void {
 }
 function validateKrMeasurement(): boolean {
   krFormError.value = null;
+  const initial = Number(krForm.initialValue);
   const current = Number(krForm.currentValue);
   const target = Number(krForm.targetValue);
-  const baseline =
-    krForm.progressBaselineValue === '' ? null : Number(krForm.progressBaselineValue);
-  const isNew = editingKrIndex.value === null;
-  const starting = isNew ? current : Number(krForm.startingValue);
-
-  if (baseline === null && (target <= 0 || target < starting)) {
-    krFormError.value = t('goal.dialog.krBaselineRequired');
-    krAdvancedOpen.value = true;
+  if (![initial, current, target].every(Number.isFinite)) {
+    krFormError.value = t('common.operationFailed');
     return false;
   }
-  if (baseline !== null && baseline === target) {
-    krFormError.value = t('goal.dialog.krBaselineTargetConflict');
-    krAdvancedOpen.value = true;
+  if (initial === target) {
+    krFormError.value = t('goal.dialog.krInitialTargetConflict');
     return false;
   }
   return true;
@@ -494,13 +632,12 @@ function saveKeyResultDraft(): void {
   const keyResult: DraftKeyResult = {
     ...(krForm.id ? { id: krForm.id } : {}),
     title: krForm.title.trim(),
-    description: krForm.description,
+    description: krForm.description.trim() || null,
     calculationMethod: krForm.calculationMethod,
-    startingValue: editingKrIndex.value === null ? current : Number(krForm.startingValue),
+    initialValue: Number(krForm.initialValue),
     currentValue: current,
     targetValue: Number(krForm.targetValue),
-    progressBaselineValue:
-      krForm.progressBaselineValue === '' ? null : Number(krForm.progressBaselineValue),
+    target: krForm.target,
     unit: krForm.unit.trim() || null,
     weight: Math.max(1, Math.min(5, Math.round(Number(krForm.weight) || 3))),
   };
@@ -522,15 +659,36 @@ function calculationMethodLabel(method: KeyResultCalculationMethod): string {
   return labels[method];
 }
 
+function validateReminderConfig(): boolean {
+  formError.value = null;
+  const config = draft.reminderConfig;
+  if (!config?.enabled) return true;
+  for (const trigger of config.triggers.filter((item) => item.enabled)) {
+    if (trigger.type === ReminderTriggerType.RemainingDays && !draft.target) {
+      formError.value = t('goal.dialog.reminderRemainingDaysRequiresTargetDate');
+      return false;
+    }
+    if (
+      trigger.type === ReminderTriggerType.TimeProgressPercentage &&
+      (!draft.startDate || !draft.target)
+    ) {
+      formError.value = t('goal.dialog.reminderTimeProgressRequiresRange');
+      return false;
+    }
+  }
+  return true;
+}
+
 async function save(): Promise<void> {
-  if (!draft.name.trim() || krEditorOpen.value) return;
+  if (!draft.name.trim() || krEditorOpen.value || !validateReminderConfig()) return;
   const labelIds = [...draft.labelIds];
   const keyResults = draft.keyResults.map((item) => ({ ...item }));
+  const startDate = fromProductYmdInputValue(draft.startDate);
   const common = {
     name: draft.name.trim(),
-    description: draft.description.trim() || undefined,
-    startDate: toMs(draft.startDate),
-    dueDate: toMs(draft.dueDate),
+    summary: draft.summary.trim() || undefined,
+    startDate: startDate ?? undefined,
+    target: draft.target ?? undefined,
     labelIds,
   };
 
@@ -538,9 +696,10 @@ async function save(): Promise<void> {
     const req: UpdateGoalReq = {
       expectedVersion: props.goal.version,
       ...common,
-      description: common.description ?? null,
+      summary: common.summary ?? null,
       startDate: common.startDate ?? null,
-      dueDate: common.dueDate ?? null,
+      target: common.target ?? null,
+      reminderConfig: draft.reminderConfig,
       keyResults,
     };
     const saved = await updateGoal(String(props.goal.id), req);
@@ -553,6 +712,7 @@ async function save(): Promise<void> {
 
   const req: CreateGoalReq = {
     ...common,
+    ...(draft.reminderConfig ? { reminderConfig: draft.reminderConfig } : {}),
     initialKeyResults: keyResults.map(({ id: _id, ...item }) => item),
   };
   const saved = await createGoal(req);

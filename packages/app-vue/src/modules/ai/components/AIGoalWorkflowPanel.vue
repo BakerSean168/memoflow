@@ -116,81 +116,42 @@
         />
 
         <div
-          class="space-y-4 rounded-2xl border border-border/60 bg-muted/20 p-4"
+          class="space-y-5 rounded-2xl border border-border/60 bg-muted/20 p-4"
           data-testid="goal-workflow-supporting-drafts-editor"
         >
           <div class="space-y-3">
-            <div class="flex items-center justify-between gap-3">
-              <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                {{ t('aiAssistant.goalDraft.taskTemplates') }}
-              </p>
-              <Button variant="outline" size="sm" @click="$emit('add-task-template')">
-                {{ t('aiAssistant.goalDraft.addTaskTemplate') }}
-              </Button>
-            </div>
-
-            <div v-if="editableTaskTemplates.length" class="space-y-3">
+            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              {{ t('aiAssistant.goalDraft.tasks') }}
+            </p>
+            <div v-if="editableTasks.length" class="space-y-3">
               <div
-                v-for="(item, index) in editableTaskTemplates"
-                :key="`task-template-${index}`"
+                v-for="(item, index) in editableTasks"
+                :key="item.draftRef"
                 class="space-y-3 rounded-xl border border-border/50 bg-background/70 p-3"
-                data-testid="goal-workflow-task-template-editor"
+                data-testid="goal-workflow-task-editor"
               >
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-[10px] font-mono text-muted-foreground">{{
+                    item.draftRef
+                  }}</span>
+                  <Button variant="outline" size="sm" @click="$emit('remove-task', index)">
+                    {{ t('aiAssistant.goalDraft.removeTask') }}
+                  </Button>
+                </div>
                 <Input
-                  :model-value="item.name"
-                  :placeholder="t('aiAssistant.goalDraft.taskTemplateName')"
-                  @update:model-value="updateTaskTemplate(index, { name: String($event ?? '') })"
+                  :model-value="item.title"
+                  :placeholder="t('aiAssistant.goalDraft.taskName')"
+                  @update:model-value="updateTask(index, { title: String($event ?? '') })"
                 />
                 <Textarea
                   class="min-h-20"
-                  :model-value="item.description"
-                  :placeholder="t('aiAssistant.goalDraft.taskTemplateDescription')"
+                  :model-value="item.description ?? ''"
+                  :placeholder="t('aiAssistant.goalDraft.taskDescription')"
                   @update:model-value="
-                    updateTaskTemplate(index, { description: String($event ?? '') })
+                    updateTask(index, { description: String($event ?? '') || null })
                   "
                 />
-                <div class="grid gap-3 @sm/ai:grid-cols-3">
-                  <div class="grid gap-2">
-                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {{ t('aiAssistant.goalDraft.cadence') }}
-                    </p>
-                    <Select
-                      :model-value="item.cadence"
-                      @update:model-value="
-                        updateTaskTemplate(index, {
-                          cadence: $event as EditableGoalTaskTemplate['cadence'],
-                        })
-                      "
-                    >
-                      <SelectTrigger>
-                        <SelectValue :placeholder="t('aiAssistant.goalDraft.selectCadence')" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem
-                          v-for="option in cadenceOptions"
-                          :key="option.value"
-                          :value="option.value"
-                        >
-                          {{ option.label }}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div class="grid gap-2">
-                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {{ t('aiAssistant.goalDraft.reminderTime') }}
-                    </p>
-                    <Input
-                      type="time"
-                      :model-value="item.timeOfDay"
-                      data-testid="goal-workflow-task-time"
-                      @update:model-value="
-                        updateTaskTemplate(index, { timeOfDay: String($event ?? '') })
-                      "
-                    />
-                  </div>
-
+                <div class="grid gap-3 @sm/ai:grid-cols-2">
                   <div class="grid gap-2">
                     <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                       {{ t('aiAssistant.goalDraft.importance') }}
@@ -198,14 +159,12 @@
                     <Select
                       :model-value="item.importance"
                       @update:model-value="
-                        updateTaskTemplate(index, {
-                          importance: $event as EditableGoalTaskTemplate['importance'],
+                        updateTask(index, {
+                          importance: $event as EditableGoalTask['importance'],
                         })
                       "
                     >
-                      <SelectTrigger>
-                        <SelectValue :placeholder="t('aiAssistant.goalDraft.selectImportance')" />
-                      </SelectTrigger>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem
                           v-for="option in importanceOptions"
@@ -217,121 +176,93 @@
                       </SelectContent>
                     </Select>
                   </div>
+                  <div class="rounded-xl border bg-muted/20 p-3 text-sm text-muted-foreground">
+                    <p class="text-[10px] uppercase tracking-[0.16em]">
+                      {{ t('aiAssistant.goalDraft.schedule') }}
+                    </p>
+                    <p class="mt-1 text-foreground">{{ formatTaskSchedule(item) }}</p>
+                  </div>
                 </div>
-                <Button variant="outline" @click="$emit('remove-task-template', index)">
-                  {{ t('aiAssistant.goalDraft.removeTaskTemplate') }}
-                </Button>
+                <p class="text-xs text-muted-foreground">
+                  {{ item.goalRef }}<span v-if="item.keyResultRef"> → {{ item.keyResultRef }}</span>
+                </p>
               </div>
             </div>
             <p v-else class="text-sm leading-6 text-muted-foreground">
-              {{ t('aiAssistant.goalDraft.noTaskTemplates') }}
+              {{ t('aiAssistant.goalDraft.noTasks') }}
             </p>
           </div>
 
           <div class="space-y-3">
-            <div class="flex items-center justify-between gap-3">
-              <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                {{ t('aiAssistant.goalDraft.reminders') }}
-              </p>
-              <Button variant="outline" size="sm" @click="$emit('add-reminder')">
-                {{ t('aiAssistant.goalDraft.addReminder') }}
-              </Button>
-            </div>
-
-            <div v-if="editableReminders.length" class="space-y-3">
+            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              {{ t('aiAssistant.goalDraft.knowledge') }}
+            </p>
+            <div v-if="editableKnowledge.length" class="space-y-3">
               <div
-                v-for="(item, index) in editableReminders"
-                :key="`reminder-${index}`"
+                v-for="(item, index) in editableKnowledge"
+                :key="item.draftRef"
                 class="space-y-3 rounded-xl border border-border/50 bg-background/70 p-3"
-                data-testid="goal-workflow-reminder-editor"
+                data-testid="goal-workflow-knowledge-editor"
               >
-                <Input
-                  :model-value="item.title"
-                  :placeholder="t('aiAssistant.goalDraft.reminderTitle')"
-                  @update:model-value="updateReminder(index, { title: String($event ?? '') })"
-                />
-                <Textarea
-                  class="min-h-20"
-                  :model-value="item.description"
-                  :placeholder="t('aiAssistant.goalDraft.reminderDescription')"
-                  @update:model-value="updateReminder(index, { description: String($event ?? '') })"
-                />
-                <div class="grid gap-3 @sm/ai:grid-cols-3">
-                  <div class="grid gap-2">
-                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {{ t('aiAssistant.goalDraft.cadence') }}
-                    </p>
-                    <Select
-                      :model-value="item.cadence"
-                      @update:model-value="
-                        updateReminder(index, {
-                          cadence: $event as EditableGoalReminder['cadence'],
-                        })
-                      "
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-[10px] font-mono text-muted-foreground">{{
+                      item.draftRef
+                    }}</span>
+                    <span
+                      class="rounded-full border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground"
                     >
-                      <SelectTrigger>
-                        <SelectValue :placeholder="t('aiAssistant.goalDraft.selectCadence')" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem
-                          v-for="option in cadenceOptions"
-                          :key="option.value"
-                          :value="option.value"
-                        >
-                          {{ option.label }}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                      {{ item.mode }}
+                    </span>
                   </div>
-
-                  <div class="grid gap-2">
-                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {{ t('aiAssistant.goalDraft.reminderTime') }}
-                    </p>
-                    <Input
-                      type="time"
-                      :model-value="item.timeOfDay"
-                      data-testid="goal-workflow-reminder-time"
-                      @update:model-value="
-                        updateReminder(index, { timeOfDay: String($event ?? '') })
-                      "
-                    />
-                  </div>
-
-                  <div class="grid gap-2">
-                    <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                      {{ t('aiAssistant.goalDraft.importance') }}
-                    </p>
-                    <Select
-                      :model-value="item.importance"
-                      @update:model-value="
-                        updateReminder(index, {
-                          importance: $event as EditableGoalReminder['importance'],
-                        })
-                      "
-                    >
-                      <SelectTrigger>
-                        <SelectValue :placeholder="t('aiAssistant.goalDraft.selectImportance')" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem
-                          v-for="option in importanceOptions"
-                          :key="option.value"
-                          :value="option.value"
-                        >
-                          {{ option.label }}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Button variant="outline" size="sm" @click="$emit('remove-knowledge', index)">
+                    Remove
+                  </Button>
                 </div>
-                <Button variant="outline" @click="$emit('remove-reminder', index)">
-                  {{ t('aiAssistant.goalDraft.removeReminder') }}
-                </Button>
+
+                <template v-if="item.mode === 'create'">
+                  <Input
+                    :model-value="item.title"
+                    @update:model-value="
+                      updateKnowledgeCreate(index, { title: String($event ?? '') })
+                    "
+                  />
+                  <Input
+                    :model-value="item.targetSubpath"
+                    @update:model-value="
+                      updateKnowledgeCreate(index, { targetSubpath: String($event ?? '') })
+                    "
+                  />
+                  <Textarea
+                    class="min-h-32"
+                    :model-value="item.markdown"
+                    @update:model-value="
+                      updateKnowledgeCreate(index, { markdown: String($event ?? '') })
+                    "
+                  />
+                  <div
+                    v-if="item.sourceRefs.length"
+                    class="space-y-1 text-xs text-muted-foreground"
+                  >
+                    <p class="font-medium text-foreground">
+                      {{ t('aiAssistant.goalDraft.sources') }}
+                    </p>
+                    <p v-for="source in item.sourceRefs" :key="source" class="break-all">
+                      {{ source }}
+                    </p>
+                  </div>
+                </template>
+                <template v-else>
+                  <p class="text-sm font-medium text-foreground">{{ item.title }}</p>
+                  <p class="break-all font-mono text-xs text-muted-foreground">
+                    {{ item.knowledgeDocument.knowledgeSpaceId }} /
+                    {{ item.knowledgeDocument.documentId }}
+                  </p>
+                </template>
               </div>
             </div>
             <p v-else class="text-sm leading-6 text-muted-foreground">
-              {{ t('aiAssistant.goalDraft.noReminders') }}
+              {{ t('aiAssistant.goalDraft.noKnowledge') }}
             </p>
           </div>
         </div>
@@ -348,7 +279,7 @@
         </div>
         <div
           v-for="(failure, index) in goalRecovery.failures"
-          :key="`${failure.operation}-${failure.index ?? 'root'}-${index}`"
+          :key="`${failure.operation}-${failure.code}-${index}`"
           class="rounded-2xl border bg-muted/20 p-4"
         >
           <p class="text-sm font-medium text-foreground">
@@ -368,18 +299,19 @@
           {{ formatExecutionOutcome(goalWorkflowRun.result.status) }}
         </p>
         <div class="grid gap-2 @sm/ai:grid-cols-2">
-          <div v-if="goalWorkflowRun.result.goalId" class="rounded-2xl border bg-muted/20 p-4">
+          <div
+            v-if="goalWorkflowRun.result.referenceMap['goal']"
+            class="rounded-2xl border bg-muted/20 p-4"
+          >
             <p class="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Goal</p>
             <p class="mt-1 break-all text-sm font-medium text-foreground">
-              {{ goalWorkflowRun.result.goalId }}
+              {{ goalWorkflowRun.result.referenceMap['goal'] }}
             </p>
           </div>
           <div class="rounded-2xl border bg-muted/20 p-4">
             <p class="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Mutations</p>
             <p class="mt-1 text-sm font-medium text-foreground">
-              {{
-                goalWorkflowRun.result.taskIds.length + goalWorkflowRun.result.reminderIds.length
-              }}
+              {{ appliedMutationCount(goalWorkflowRun.result) }}
             </p>
           </div>
         </div>
@@ -527,9 +459,9 @@ import AIRuntimeUsageBadge from './AIRuntimeUsageBadge.vue';
 import { getAIWorkflowFailureMessage } from '../composables/error';
 import type {
   EditableGoal,
+  EditableGoalKnowledge,
+  EditableGoalTask,
   EditableKeyResult,
-  EditableGoalReminder,
-  EditableGoalTaskTemplate,
   GoalClarificationView,
   KnowledgeAnswer,
   WorkflowMode,
@@ -542,8 +474,8 @@ const props = defineProps<{
   clarificationAnswers: string[];
   editableGoal: EditableGoal;
   editableKeyResults: EditableKeyResult[];
-  editableTaskTemplates: EditableGoalTaskTemplate[];
-  editableReminders: EditableGoalReminder[];
+  editableTasks: EditableGoalTask[];
+  editableKnowledge: EditableGoalKnowledge[];
   showGoalDraftEditor: boolean;
   knowledgeAnswer: KnowledgeAnswer | null;
   formatExecutionOutcome: (status: 'success' | 'partial' | 'failed') => string;
@@ -556,12 +488,10 @@ const emit = defineEmits<{
   'remove-key-result': [index: number];
   'update-goal': [payload: EditableGoal];
   'update-key-result': [payload: { index: number; value: EditableKeyResult }];
-  'add-task-template': [];
-  'remove-task-template': [index: number];
-  'update-task-template': [payload: { index: number; value: EditableGoalTaskTemplate }];
-  'add-reminder': [];
-  'remove-reminder': [index: number];
-  'update-reminder': [payload: { index: number; value: EditableGoalReminder }];
+  'remove-task': [index: number];
+  'update-task': [payload: { index: number; value: EditableGoalTask }];
+  'remove-knowledge': [index: number];
+  'update-knowledge': [payload: { index: number; value: EditableGoalKnowledge }];
   'open-knowledge-citation': [resourceId: string];
 }>();
 
@@ -576,12 +506,6 @@ const importanceOptions = computed(() => [
   { value: 'Moderate', label: t('aiAssistant.goalDraft.importanceLevels.moderate') },
   { value: 'Minor', label: t('aiAssistant.goalDraft.importanceLevels.minor') },
   { value: 'Trivial', label: t('aiAssistant.goalDraft.importanceLevels.trivial') },
-]);
-
-const cadenceOptions = computed(() => [
-  { value: 'daily', label: t('aiAssistant.goalDraft.cadenceDaily') },
-  { value: 'weekly', label: t('aiAssistant.goalDraft.cadenceWeekly') },
-  { value: 'once', label: t('aiAssistant.goalDraft.cadenceOnce') },
 ]);
 
 const goalReviewDraft = computed(() => {
@@ -600,18 +524,38 @@ function updateClarificationAnswer(index: number, value: string) {
   emit('update:clarificationAnswers', next);
 }
 
-function updateTaskTemplate(index: number, patch: Partial<EditableGoalTaskTemplate>) {
-  emit('update-task-template', {
-    index,
-    value: { ...props.editableTaskTemplates[index], ...patch },
-  });
+function updateTask(index: number, patch: Partial<EditableGoalTask>) {
+  const current = props.editableTasks[index];
+  if (!current) return;
+  emit('update-task', { index, value: { ...current, ...patch } });
 }
 
-function updateReminder(index: number, patch: Partial<EditableGoalReminder>) {
-  emit('update-reminder', {
-    index,
-    value: { ...props.editableReminders[index], ...patch },
-  });
+function updateKnowledgeCreate(
+  index: number,
+  patch: Partial<Extract<EditableGoalKnowledge, { mode: 'create' }>>,
+) {
+  const current = props.editableKnowledge[index];
+  if (!current || current.mode !== 'create') return;
+  emit('update-knowledge', { index, value: { ...current, ...patch } });
+}
+
+function formatTaskSchedule(task: EditableGoalTask): string {
+  const schedule = task.schedule;
+  const timing =
+    schedule.timing.kind === 'AllDay'
+      ? t('aiAssistant.goalDraft.allDay')
+      : schedule.timing.kind === 'At'
+        ? schedule.timing.time
+        : `${schedule.timing.start}–${schedule.timing.end}`;
+  if (schedule.kind === 'OneTime') return `${schedule.date} · ${timing}`;
+  const recurrence = schedule.recurrence;
+  return `${schedule.startDate} · ${recurrence.frequency} ×${recurrence.interval} · ${timing}`;
+}
+
+function appliedMutationCount(
+  receipt: NonNullable<Extract<AIWorkflowRunView, { kind: 'goal.create' }>['result']>,
+): number {
+  return Object.keys(receipt.referenceMap).length + Object.keys(receipt.relationIds).length;
 }
 
 function getKnowledgeRelatedNotes(answer: KnowledgeAnswer | null): KnowledgeRelatedNote[] {

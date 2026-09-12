@@ -27,20 +27,9 @@ import { column, Schema, Table } from '@powersync/common';
 const accounts = new Table({
   status: column.text,
   profile: column.text, // JSON
-  settings: column.text, // JSON
-  email_address: column.text,
-  email_is_verified: column.integer, // boolean
-  email_verified_at: column.text, // DateTime
-  email_is_primary: column.integer, // boolean
-  phone_country_code: column.text,
-  phone_number: column.text,
-  phone_full_number: column.text,
-  phone_is_verified: column.integer, // boolean
-  phone_verified_at: column.text, // DateTime
-  version: column.integer,
   created_at: column.text, // DateTime
   updated_at: column.text, // DateTime
-  deleted_at: column.text, // DateTime
+  closed_at: column.text, // DateTime
 });
 
 /**
@@ -92,10 +81,11 @@ const account_closure_requested = new Table(
 // Settings
 // ──────────────────────────────────────────────
 
-const user_settings = new Table({
+const user_preference_records = new Table({
   identity_id: column.text,
-  preferences: column.text, // JSON
-  version: column.integer,
+  namespace: column.text,
+  payload: column.text, // JSON
+  revision: column.integer,
   created_at: column.text,
   updated_at: column.text,
 });
@@ -107,12 +97,11 @@ const user_settings = new Table({
 const goals = new Table({
   identity_id: column.text,
   name: column.text,
-  description: column.text,
-  feasibility_analysis: column.text,
-  motivation: column.text,
+  summary: column.text,
   status: column.text,
   start_date: column.text,
-  due_date: column.text,
+  target_kind: column.text,
+  target_end_date: column.text,
   completed_at: column.text,
   archived_at: column.text,
   sort_order: column.integer,
@@ -129,10 +118,12 @@ const key_results = new Table({
   title: column.text,
   description: column.text,
   aggregation_method: column.text,
-  starting_value: column.real,
-  progress_baseline_value: column.real,
+  initial_value: column.real,
+  tracking_base_value: column.real,
   target_value: column.real,
   current_value: column.real,
+  target_kind: column.text,
+  target_end_date: column.text,
   unit: column.text,
   weight: column.real,
   order: column.integer,
@@ -304,6 +295,21 @@ const task_labels = new Table({
   identity_id: column.text,
   task_template_id: column.text,
   label_id: column.text,
+});
+
+// ──────────────────────────────────────────────
+// Shared Relations (ADR-069 / ADR-090)
+// ──────────────────────────────────────────────
+
+const relations = new Table({
+  identity_id: column.text,
+  subject_type: column.text,
+  subject_id: column.text,
+  relation_type: column.text,
+  object_type: column.text,
+  object_id: column.text,
+  created_at: column.text,
+  updated_at: column.text,
 });
 
 // ──────────────────────────────────────────────
@@ -756,69 +762,6 @@ const notification_templates = new Table({
 });
 
 // ──────────────────────────────────────────────
-// Editor
-// ──────────────────────────────────────────────
-
-const editor_workspaces = new Table({
-  identity_id: column.text,
-  name: column.text,
-  description: column.text,
-  project_path: column.text,
-  project_type: column.text,
-  layout: column.text, // JSON
-  setting: column.text, // JSON
-  is_active: column.integer, // boolean
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  accessed_at: column.text,
-  deleted_at: column.text,
-});
-
-const editor_workspace_sessions = new Table({
-  workspace_id: column.text, // FK
-  identity_id: column.text,
-  name: column.text,
-  layout: column.text, // JSON
-  is_active: column.integer, // boolean
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const editor_workspace_session_groups = new Table({
-  session_id: column.text, // FK
-  workspace_id: column.text, // FK
-  identity_id: column.text,
-  group_index: column.integer,
-  name: column.text,
-  split_direction: column.text,
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-const editor_workspace_session_group_tabs = new Table({
-  group_id: column.text, // FK
-  session_id: column.text, // FK
-  workspace_id: column.text, // FK
-  identity_id: column.text,
-  resource_id: column.text,
-  tab_index: column.integer,
-  tab_type: column.text,
-  title: column.text,
-  view_state: column.text, // JSON
-  is_pinned: column.integer, // boolean
-  is_active: column.integer, // boolean
-  version: column.integer,
-  created_at: column.text,
-  updated_at: column.text,
-  deleted_at: column.text,
-});
-
-// ──────────────────────────────────────────────
 // AI
 // ──────────────────────────────────────────────
 
@@ -917,6 +860,33 @@ const ai_provider_onboarding_sessions = new Table(
     consumed_at: column.integer,
     created_at: column.integer,
     updated_at: column.integer,
+  },
+  { localOnly: true },
+);
+
+/**
+ * Device-local rebuildable AI index over the active knowledge source.
+ * It is deliberately not synced: Web/API use the Prisma index table while
+ * Desktop rebuilds this cache from the Local Vault.
+ */
+const ai_knowledge_index_entries_local = new Table(
+  {
+    identity_id: column.text,
+    repository_id: column.text,
+    resource_id: column.text,
+    resource_path: column.text,
+    title: column.text,
+    mime_type: column.text,
+    content_hash: column.text,
+    status: column.text,
+    summary: column.text,
+    keywords_json: column.text,
+    embedding_json: column.text,
+    chunks_json: column.text,
+    metadata_json: column.text,
+    error: column.text,
+    indexed_at: column.integer,
+    last_requested_at: column.integer,
   },
   { localOnly: true },
 );
@@ -1096,7 +1066,7 @@ export const PowerSyncAppSchema = new Schema({
   profile_adoption_journal,
   account_profile_sync_outbox,
   account_closure_requested,
-  user_settings,
+  user_preference_records,
   // Goal
   goals,
   key_results,
@@ -1107,6 +1077,7 @@ export const PowerSyncAppSchema = new Schema({
   labels,
   goal_labels,
   task_labels,
+  relations,
   // Task
   task_templates,
   task_instances,
@@ -1143,10 +1114,6 @@ export const PowerSyncAppSchema = new Schema({
   notification_preferences,
   notification_templates,
   // Editor
-  editor_workspaces,
-  editor_workspace_sessions,
-  editor_workspace_session_groups,
-  editor_workspace_session_group_tabs,
   // AI
   ai_conversations,
   ai_messages,
@@ -1154,6 +1121,7 @@ export const PowerSyncAppSchema = new Schema({
   ai_usage_quotas,
   ai_provider_configs,
   ai_provider_onboarding_sessions,
+  ai_knowledge_index_entries_local,
   task_goal_outbox,
   dashboard_configs,
   // Repository

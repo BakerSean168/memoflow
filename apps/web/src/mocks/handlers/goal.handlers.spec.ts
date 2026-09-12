@@ -48,13 +48,13 @@ describe('goal handlers contracts', () => {
 
     const createPayload = expectSchemaSuccess(CreateGoalSchema, {
       name: 'Ship web contracts',
-      description: 'Unify adapter payloads',
+      summary: 'Unify adapter payloads',
       dueDate: Date.now(),
     });
     const updatePayload = expectSchemaSuccess(UpdateGoalSchema, {
       expectedVersion: 1,
       name: 'Ship web contracts v2',
-      description: 'Updated scope',
+      summary: 'Updated scope',
     });
     const clonePayload = expectSchemaSuccess(CloneGoalSchema, {
       name: 'Ship web contracts (copy)',

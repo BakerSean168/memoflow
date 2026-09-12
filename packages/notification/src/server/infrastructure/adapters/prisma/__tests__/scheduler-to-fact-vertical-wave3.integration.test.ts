@@ -1,5 +1,6 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'crypto';
+import { createTimeContext } from '@memoflow/time';
 import type {
   ScheduledIntent,
   ScheduledInvocationContext,
@@ -13,9 +14,9 @@ import {
 } from '@memoflow/contracts/notification';
 import {
   ReminderTimeUnit,
-  TaskInstanceStatus,
+  TaskOccurrenceStatus,
   TaskReminderType,
-  TaskTemplateStatus,
+  TaskPlanStatus,
 } from '@memoflow/contracts/task';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
 // eslint-disable-next-line @nx/enforce-module-boundaries
@@ -63,10 +64,10 @@ import {
 } from '@memoflow/test-utils/setup/integration-helpers';
 
 const FIXTURE_D = {
-  templateId: 'TaskTemplateId_wave3-d',
-  instanceId: 'TaskInstanceId_wave3-d',
+  templateId: 'TaskPlanId_wave3-d',
+  instanceId: 'TaskOccurrenceId_wave3-d',
   runAt: Date.parse('2026-08-10T08:45:00.000Z'),
-  schedulingKey: 'TaskInstanceId_wave3-d|2026-08-10T08:45:00.000Z',
+  schedulingKey: 'TaskOccurrenceId_wave3-d|2026-08-10T08:45:00.000Z',
   anchorTime: 1_704_000_000_000,
 } as const;
 
@@ -82,6 +83,11 @@ const FIXTURE_F = {
   firstOccurrenceAt: Date.parse('2026-08-25T15:30:00.000Z'),
   nextOccurrenceAt: Date.parse('2026-08-26T15:30:00.000Z'),
 } as const;
+
+const TEST_NOTIFICATION_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+const TEST_USER_TIME_CONTEXT_PORT = {
+  getUserTimeContext: async () => TEST_NOTIFICATION_TIME_CONTEXT,
+};
 
 describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> Notification Fact (WAVE3-0002)', () => {
   let prisma: ReturnType<typeof getPrisma>;
@@ -112,6 +118,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
 
   function buildNotificationRuntime() {
     return createNotificationRuntimeContribution({
+      userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
       environment: 'test',
       ownerToken: `worker-${randomUUID()}`,
       repository: notificationRepo,
@@ -198,23 +205,23 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     const registry = new ScheduledHandlerRegistry();
     registry.register(
       createTaskReminderScheduledHandlerRegistration({
-        taskInstanceRepository: {
+        taskOccurrenceRepository: {
           findByIdForIdentity: async () => ({
             id: instanceId,
             identityId,
             templateId,
             occurrenceKey: null,
-            status: TaskInstanceStatus.Pending,
+            status: TaskOccurrenceStatus.Pending,
             deletedAt: null,
           }),
         },
-        taskTemplateRepository: {
+        taskPlanRepository: {
           findByIdForIdentity: async () => ({
             toServerDTO: () => ({
               id: templateId,
               identityId,
               name: 'Ship R07',
-              status: TaskTemplateStatus.Active,
+              status: TaskPlanStatus.Active,
               deletedAt: null,
               reminderConfig: {
                 enabled: true,
@@ -257,7 +264,9 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     expect(fact.relatedEntityType).toBe(RelatedEntityType.Task);
     expect(fact.relatedEntityId).toBe(instanceId);
     expect(
-      await prisma.notification.count({ where: { identityId, idempotencyKey: shared.idempotencyKey! } }),
+      await prisma.notification.count({
+        where: { identityId, idempotencyKey: shared.idempotencyKey! },
+      }),
     ).toBe(1);
   });
 
@@ -295,8 +304,8 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
               id: goalId,
               identityId,
               name: 'Ship R06',
-              description: null,
-              status: GoalStatus.Active,
+              summary: null,
+              status: GoalStatus.InProgress,
               deletedAt: null,
               archivedAt: null,
               completedAt: null,
@@ -344,7 +353,9 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     expect(fact.relatedEntityType).toBe(RelatedEntityType.Goal);
     expect(fact.relatedEntityId).toBe(goalId);
     expect(
-      await prisma.notification.count({ where: { identityId, idempotencyKey: shared.idempotencyKey! } }),
+      await prisma.notification.count({
+        where: { identityId, idempotencyKey: shared.idempotencyKey! },
+      }),
     ).toBe(1);
   });
 
@@ -408,7 +419,9 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     expect(fact.relatedEntityType).toBe('routine');
     expect(fact.relatedEntityId).toBe(routineId);
     expect(
-      await prisma.notification.count({ where: { identityId, idempotencyKey: shared.idempotencyKey! } }),
+      await prisma.notification.count({
+        where: { identityId, idempotencyKey: shared.idempotencyKey! },
+      }),
     ).toBe(1);
   });
 });

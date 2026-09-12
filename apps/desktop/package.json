@@ -6,7 +6,7 @@
     "name": "bakersean",
     "email": "lulouhao@stu.sicau.edu.cn"
   },
-  "description": "知行 (MemoFlow) desktop application",
+  "description": "\u77e5\u884c (MemoFlow) desktop application",
   "homepage": "https://github.com/BakerSean168/memoflow",
   "repository": {
     "type": "git",
@@ -82,7 +82,8 @@
     "undici": "^8.7.0",
     "winston": "3.19.0",
     "winston-daily-rotate-file": "5.0.0",
-    "xtend": "4.0.2"
+    "xtend": "4.0.2",
+    "@memoflow/relation": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

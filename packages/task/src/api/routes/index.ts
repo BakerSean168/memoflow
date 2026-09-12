@@ -7,10 +7,10 @@
 
 import { Router, type RequestHandler } from 'express';
 import type { OpenApiRegistryLike } from '@memoflow/utils/result';
-import type { TaskTemplateController } from '../../server/transport/task-template.controller';
-import type { TaskInstanceController } from '../../server/transport/task-instance.controller';
-import { registerTaskTemplateRoutes } from './task-template.routes';
-import { registerTaskInstanceRoutes } from './task-instance.routes';
+import type { TaskPlanController } from '../../server/transport/task-plan.controller';
+import type { TaskOccurrenceController } from '../../server/transport/task-occurrence.controller';
+import { registerTaskPlanRoutes } from './task-plan.routes';
+import { registerTaskOccurrenceRoutes } from './task-occurrence.routes';
 
 // ============ Types ============
 
@@ -20,8 +20,8 @@ interface PlatformMiddleware {
 }
 
 interface TaskControllers {
-  templateController: TaskTemplateController;
-  instanceController: TaskInstanceController;
+  templateController: TaskPlanController;
+  instanceController: TaskOccurrenceController;
 }
 
 // ============ Route Registration ============
@@ -36,21 +36,21 @@ export function registerTaskRoutes(
 ): Router {
   const router = Router();
 
-  // Task Templates: /api/task-templates
-  const templateRouter = registerTaskTemplateRoutes(
+  // Task Templates: /api/task-plans
+  const templateRouter = registerTaskPlanRoutes(
     controllers.templateController,
     middleware,
     openApiRegistry,
   );
-  router.use('/task-templates', templateRouter);
+  router.use('/task-plans', templateRouter);
 
-  // Task Instances: /api/task-instances
-  const instanceRouter = registerTaskInstanceRoutes(
+  // Task Instances: /api/task-occurrences
+  const instanceRouter = registerTaskOccurrenceRoutes(
     controllers.instanceController,
     middleware,
     openApiRegistry,
   );
-  router.use('/task-instances', instanceRouter);
+  router.use('/task-occurrences', instanceRouter);
 
 
   return router;

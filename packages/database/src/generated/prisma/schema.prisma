@@ -21,78 +21,60 @@ datasource db {
 // ==========================================
 
 model Account {
-  id               String    @id // same as CloudAuthUser.id for cloud accounts
-  status           String    @default("ACTIVE") // AccountStatus: ACTIVE | INACTIVE | SUSPENDED | DELETED
+  id        String    @id // same as CloudAuthUser.id for cloud accounts
+  status    String    @default("Active") // AccountStatus: Active | Closed
   // profile
-  profile          Json
-  // settings
-  settings         Json
-  // email object value
-  emailAddress     String    @unique @map("email_address") // jdoe@example.com
-  emailIsVerified  Boolean   @default(false) @map("email_is_verified")
-  emailVerifiedAt  DateTime? @map("email_verified_at")
-  emailIsPrimary   Boolean   @default(false) @map("email_is_primary")
-  // phone object value
-  phoneCountryCode String?   @map("phone_country_code") // +86
-  phoneNumber      String?   @map("phone_number") // 13800138000
-  phoneFullNumber  String?   @map("phone_full_number") // +8613800138000 (E.164格式)
-  phoneIsVerified  Boolean?  @default(false) @map("phone_is_verified")
-  phoneVerifiedAt  DateTime? @map("phone_verified_at")
-  version          Int       @default(1)
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-  deletedAt        DateTime? @map("deleted_at")
+  profile   Json
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  closedAt  DateTime? @map("closed_at")
 
   // 关联关系
   cloudUser CloudAuthUser @relation(fields: [id], references: [id], onDelete: Cascade)
 
   // 关联的业务模块
-  editorWorkspaces                EditorWorkspace[]
-  editorWorkspaceSessions         EditorWorkspaceSession[]
-  editorWorkspaceSessionGroups    EditorWorkspaceSessionGroup[]
-  editorWorkspaceSessionGroupTabs EditorWorkspaceSessionGroupTab[]
-  goals                           Goal[]
-  labels                          Label[]
-  goalLabels                      GoalLabel[]
-  taskLabels                      TaskLabel[]
-  reminderGroups                  ReminderGroup[]
-  reminderTemplates               ReminderTemplate[]
-  reminderInstances               ReminderInstance[]
-  reminderStatistics              ReminderStatistic?
-  routineDefinitions              RoutineDefinition[]
-  routineTemporaryOverrides       RoutineTemporaryOverride[]
-  routineProfiles                 RoutineProfile[]
-  routineProfileMemberships       RoutineProfileMembership[]
-  routineProtocolDefinitions      RoutineProtocolDefinition[]
-  routineProtocolSessions         RoutineProtocolSession[]
-  userReminderPreferences         UserReminderPreference?
-  repositories                    Repository[]
-  repositoryExplorers             RepositoryExplorer[]
-  repositoryStatistics            RepositoryStatistic?
-  schedules                       Schedule[]
-  scheduleTasks                   ScheduleTask[]
-  schedulingReconcileOperations   SchedulingReconcileOperation[]
-  scheduleStatistics              ScheduleStatistic?
-  habits                          Habit[]
-  relations                       Relation[]
-  walletAccounts                  WalletAccount[]
-  walletTransactions              WalletTransaction[]              @relation("AccountWalletTransactions")
-  activityLedger                  ActivityLedger[]
-  taskTemplates                   TaskTemplate[]
-  taskInstances                   TaskInstance[]
-  taskStatistics                  TaskStatistic?
-  userSettings                    UserSetting?
-  notifications                   Notification[]
-  aiConversations                 AiConversation[]
-  aiGenerationTasks               AiGenerationTask[]
-  aiKnowledgeIndexEntries         AiKnowledgeIndexEntry[]
-  aiUsageQuotas                   AiUsageQuota?
-  aiProviderConfigs               AiProviderConfig[]
-  aiProviderOnboardingSessions    AiProviderOnboardingSession[]
-  dashboardConfigs                DashboardConfig?
+  goals                         Goal[]
+  labels                        Label[]
+  goalLabels                    GoalLabel[]
+  taskLabels                    TaskLabel[]
+  reminderGroups                ReminderGroup[]
+  reminderTemplates             ReminderTemplate[]
+  reminderInstances             ReminderInstance[]
+  reminderStatistics            ReminderStatistic?
+  routineDefinitions            RoutineDefinition[]
+  routineTemporaryOverrides     RoutineTemporaryOverride[]
+  routineProfiles               RoutineProfile[]
+  routineProfileMemberships     RoutineProfileMembership[]
+  routineProtocolDefinitions    RoutineProtocolDefinition[]
+  routineProtocolSessions       RoutineProtocolSession[]
+  userReminderPreferences       UserReminderPreference?
+  repositories                  Repository[]
+  repositoryExplorers           RepositoryExplorer[]
+  repositoryStatistics          RepositoryStatistic?
+  schedules                     Schedule[]
+  scheduleTasks                 ScheduleTask[]
+  schedulingReconcileOperations SchedulingReconcileOperation[]
+  scheduleStatistics            ScheduleStatistic?
+  habits                        Habit[]
+  relations                     Relation[]
+  walletAccounts                WalletAccount[]
+  walletTransactions            WalletTransaction[]            @relation("AccountWalletTransactions")
+  activityLedger                ActivityLedger[]
+  taskPlans                     TaskPlan[]
+  taskOccurrences               TaskOccurrence[]
+  taskStatistics                TaskStatistic?
+  userPreferenceRecords         UserPreferenceRecord[]
+  notifications                 Notification[]
+  aiConversations               AiConversation[]
+  aiGenerationTasks             AiGenerationTask[]
+  aiKnowledgeIndexEntries       AiKnowledgeIndexEntry[]
+  aiUsageQuotas                 AiUsageQuota?
+  aiProviderConfigs             AiProviderConfig[]
+  aiProviderOnboardingSessions  AiProviderOnboardingSession[]
+  dashboardConfigs              DashboardConfig?
 
   // PowerSync: denormalized identity relations
-  taskTemplateHistory                    TaskTemplateHistory[]                   @relation("AccountTaskTemplateHistory")
+  taskPlanHistory                        TaskPlanHistory[]                       @relation("AccountTaskPlanHistory")
   scheduleExecutions                     ScheduleExecution[]                     @relation("AccountScheduleExecutions")
   reminderHistory                        ReminderHistory[]                       @relation("AccountReminderHistory")
   reminderResponses                      ReminderResponse[]                      @relation("AccountReminderResponses")
@@ -105,12 +87,10 @@ model Account {
   folders                                Folder[]                                @relation("AccountFolders")
   resources                              Resource[]                              @relation("AccountResources")
   repositoryResources                    RepositoryResource[]                    @relation("AccountRepositoryResources")
-  knowledgeRepositoryConnections         KnowledgeRepositoryConnection[]
+  knowledgeRemoteBindings                KnowledgeRemoteBinding[]
   knowledgeRepositoryInstallationIntents KnowledgeRepositoryInstallationIntent[]
   knowledgeWriteRequests                 KnowledgeWriteRequest[]
 
-  @@index([emailAddress])
-  @@index([phoneFullNumber])
   @@map("accounts")
 }
 
@@ -366,7 +346,6 @@ model CloudAuthUser {
   email         String    @unique
   emailVerified Boolean   @default(false) @map("email_verified")
   image         String?
-  status        String    @default("active")
   disabledAt    DateTime? @map("disabled_at")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
@@ -450,123 +429,27 @@ model CloudAuthDeviceCode {
 }
 
 // ==========================================
-// Editor Module
-// 编辑器工作区、会话、标签页
-// ==========================================
-
-model EditorWorkspace {
-  id          String    @id
-  identityId  String    @map("identity_id")
-  name        String
-  description String?
-  projectPath String    @map("project_path")
-  projectType String    @map("project_type")
-  layout      Json
-  setting     Json
-  isActive    Boolean   @default(true) @map("is_active")
-  version     Int       @default(1)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  accessedAt  DateTime  @default(now()) @map("accessed_at")
-  deletedAt   DateTime? @map("deleted_at")
-
-  sessions EditorWorkspaceSession[]
-  account  Account                  @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@unique([identityId, projectPath])
-  @@index([isActive])
-  @@map("editor_workspaces")
-}
-
-model EditorWorkspaceSession {
-  id          String    @id
-  workspaceId String    @map("workspace_id")
-  identityId  String    @map("identity_id")
-  name        String
-  layout      Json
-  isActive    Boolean   @default(true) @map("is_active")
-  version     Int       @default(1)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-
-  groups    EditorWorkspaceSessionGroup[]
-  account   Account                       @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  workspace EditorWorkspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId])
-  @@map("editor_workspace_sessions")
-}
-
-model EditorWorkspaceSessionGroup {
-  id             String    @id
-  sessionId      String    @map("session_id")
-  workspaceId    String    @map("workspace_id")
-  identityId     String    @map("identity_id")
-  groupIndex     Int       @map("group_index")
-  name           String?
-  splitDirection String    @map("split_direction")
-  version        Int       @default(1)
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-  deletedAt      DateTime? @map("deleted_at")
-
-  tabs    EditorWorkspaceSessionGroupTab[]
-  account Account                          @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  session EditorWorkspaceSession           @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId])
-  @@map("editor_workspace_session_groups")
-}
-
-model EditorWorkspaceSessionGroupTab {
-  id          String    @id
-  groupId     String    @map("group_id")
-  sessionId   String    @map("session_id")
-  workspaceId String    @map("workspace_id")
-  identityId  String    @map("identity_id")
-  resourceId  String?   @map("resource_id")
-  tabIndex    Int       @map("tab_index")
-  tabType     String    @map("tab_type")
-  title       String
-  viewState   Json      @map("view_state")
-  isPinned    Boolean   @default(false) @map("is_pinned")
-  isActive    Boolean   @default(false) @map("is_active")
-  version     Int       @default(1)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
-
-  account Account                     @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  group   EditorWorkspaceSessionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId])
-  @@map("editor_workspace_session_group_tabs")
-}
-
-// ==========================================
 // Goal Module — Core vNext
 // Goal = Direction + Measurement
 // ==========================================
 
 model Goal {
-  id                  String    @id
-  identityId          String    @map("identity_id")
-  name                String
-  description         String?
-  feasibilityAnalysis String?   @map("feasibility_analysis")
-  motivation          String?
-  status              String    @default("Active")
-  startDate           DateTime? @map("start_date")
-  dueDate             DateTime? @map("due_date")
-  completedAt         DateTime? @map("completed_at")
-  archivedAt          DateTime? @map("archived_at")
-  sortOrder           Int       @default(0) @map("sort_order")
-  reminderConfig      String?   @map("reminder_config")
-  version             Int       @default(1)
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
-  deletedAt           DateTime? @map("deleted_at")
+  id             String    @id
+  identityId     String    @map("identity_id")
+  name           String
+  summary        String?
+  status         String    @default("Planned")
+  startDate      String?   @map("start_date")
+  targetKind     String?   @map("target_kind")
+  targetEndDate  String?   @map("target_end_date")
+  completedAt    DateTime? @map("completed_at")
+  archivedAt     DateTime? @map("archived_at")
+  sortOrder      Int       @default(0) @map("sort_order")
+  reminderConfig String?   @map("reminder_config")
+  version        Int       @default(1)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
 
   account                  Account                   @relation(fields: [identityId], references: [id], onDelete: Cascade)
   keyResults               KeyResult[]               @relation("GoalKeyResults")
@@ -576,31 +459,33 @@ model Goal {
 
   @@unique([id, identityId])
   @@index([identityId, status])
-  @@index([identityId, dueDate])
-  @@index([dueDate])
+  @@index([identityId, targetEndDate])
+  @@index([targetEndDate])
   @@index([deletedAt])
   @@map("goals")
 }
 
 model KeyResult {
-  id                    String   @id
-  identityId            String   @map("identity_id")
-  goalId                String   @map("goal_id")
-  title                 String
-  description           String?
-  aggregationMethod     String   @map("aggregation_method")
-  startingValue         Float    @default(0) @map("starting_value")
-  progressBaselineValue Float?   @map("progress_baseline_value")
-  targetValue           Float    @map("target_value")
-  currentValue          Float    @default(0) @map("current_value")
-  unit                  String?
-  weight                Int      @default(1)
-  order                 Int      @default(0)
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  id                String   @id
+  identityId        String   @map("identity_id")
+  goalId            String   @map("goal_id")
+  title             String
+  description       String?
+  aggregationMethod String   @map("aggregation_method")
+  initialValue      Float    @default(0) @map("initial_value")
+  trackingBaseValue Float    @default(0) @map("tracking_base_value")
+  targetValue       Float    @map("target_value")
+  currentValue      Float    @default(0) @map("current_value")
+  targetKind        String?  @map("target_kind")
+  targetEndDate     String?  @map("target_end_date")
+  unit              String?
+  weight            Int      @default(1)
+  order             Int      @default(0)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   goal                     Goal                      @relation("GoalKeyResults", fields: [goalId, identityId], references: [id, identityId], onDelete: Cascade)
-  linkedTaskTemplates      TaskTemplate[]            @relation("KeyResultTaskTemplates")
+  linkedTaskPlans          TaskPlan[]                @relation("KeyResultTaskPlans")
   records                  GoalRecord[]
   keyResultWeightSnapshots KeyResultWeightSnapshot[]
 
@@ -843,16 +728,16 @@ model GoalLabel {
 }
 
 model TaskLabel {
-  identityId     String @map("identity_id")
-  taskTemplateId String @map("task_template_id")
-  labelId        String @map("label_id")
+  identityId String @map("identity_id")
+  taskPlanId String @map("task_template_id")
+  labelId    String @map("label_id")
 
-  account      Account      @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  taskTemplate TaskTemplate @relation(fields: [taskTemplateId, identityId], references: [id, identityId], onDelete: Cascade)
-  label        Label        @relation(fields: [labelId, identityId], references: [id, identityId], onDelete: Cascade)
+  account  Account  @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  taskPlan TaskPlan @relation(fields: [taskPlanId, identityId], references: [id, identityId], onDelete: Cascade)
+  label    Label    @relation(fields: [labelId, identityId], references: [id, identityId], onDelete: Cascade)
 
-  @@id([identityId, taskTemplateId, labelId])
-  @@index([identityId, labelId, taskTemplateId])
+  @@id([identityId, taskPlanId, labelId])
+  @@index([identityId, labelId, taskPlanId])
   @@map("task_labels")
 }
 
@@ -1762,45 +1647,123 @@ model KnowledgeRepositoryInstallationIntent {
   @@map("knowledge_repository_installation_intents")
 }
 
-/// GitHub App installation bound to one explicitly selected knowledge repository.
-/// This authorization is independent from AuthOAuthBinding login credentials.
-model KnowledgeRepositoryConnection {
-  id                       String    @id
-  identityId               String    @map("identity_id")
-  githubUserId             String    @map("github_user_id")
-  githubRepositoryId       String    @map("github_repository_id")
-  githubRepositoryFullName String    @map("github_repository_full_name")
-  installationId           String    @map("installation_id")
-  defaultBranch            String    @default("main") @map("default_branch")
-  isPrivate                Boolean   @default(true) @map("is_private")
-  status                   String    @default("PENDING_INSTALL")
-  lastSyncedCommitSha      String?   @map("last_synced_commit_sha")
-  lastProjectedCommitSha   String?   @map("last_projected_commit_sha")
-  lastErrorCode            String?   @map("last_error_code")
-  lastErrorMessage         String?   @map("last_error_message")
-  version                  Int       @default(1)
-  createdAt                DateTime  @default(now()) @map("created_at")
-  updatedAt                DateTime  @updatedAt @map("updated_at")
-  deletedAt                DateTime? @map("deleted_at")
+/// Stable logical knowledge space shared by local/remote bindings.
+model KnowledgeSpace {
+  id        String   @id
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
+  remoteBindings     KnowledgeRemoteBinding[]
+  documentIdentities KnowledgeDocumentIdentity[]
+
+  @@map("knowledge_spaces")
+}
+
+/// ADR-090 durable identity registry. `id` is a technical row key; the product key is
+/// `(knowledgeSpaceId, knowledgeDocumentId)` and the external identity is carried by Markdown.
+model KnowledgeDocumentIdentity {
+  id                  String   @id @default(uuid())
+  knowledgeSpaceId    String   @map("knowledge_space_id")
+  knowledgeDocumentId String   @map("knowledge_document_id")
+  origin              String
+  originRequestId     String?  @map("origin_request_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  knowledgeSpace KnowledgeSpace @relation(fields: [knowledgeSpaceId], references: [id], onDelete: Cascade)
+
+  @@unique([knowledgeSpaceId, knowledgeDocumentId])
+  @@index([knowledgeSpaceId])
+  @@map("knowledge_document_identities")
+}
+
+/// ADR-089 durable user choice: one GitHub repository is bound to a KnowledgeSpace.
+/// Provider health, sync history safety and projection state live in separate models.
+model KnowledgeRemoteBinding {
+  id                         String    @id
+  knowledgeSpaceId           String    @map("knowledge_space_id")
+  identityId                 String    @map("identity_id")
+  provider                   String    @default("GitHub")
+  installationId             String    @map("installation_id")
+  repositoryId               String    @map("repository_id")
+  repositoryFullNameSnapshot String    @map("repository_full_name_snapshot")
+  connectedAt                DateTime  @map("connected_at")
+  disconnectedAt             DateTime? @map("disconnected_at")
+  version                    Int       @default(1)
+
+  knowledgeSpace          KnowledgeSpace                    @relation(fields: [knowledgeSpaceId], references: [id], onDelete: Cascade)
   account                 Account                           @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  observation             RemoteRepositoryObservation?
+  historyFence            RemoteHistoryFence?
+  projectionCheckpoint    KnowledgeProjectionCheckpoint?
   webhookDeliveries       GithubWebhookDelivery[]
   noteProjections         KnowledgeNoteProjection[]
   attachmentProjections   KnowledgeAttachmentProjection[]
   attachmentContentCaches KnowledgeAttachmentContentCache[]
   writeRequests           KnowledgeWriteRequest[]
 
-  @@unique([identityId, githubRepositoryId])
-  @@unique([githubRepositoryId])
-  @@index([identityId, status])
+  @@unique([identityId, repositoryId])
+  @@unique([repositoryId])
+  @@index([identityId, disconnectedAt])
+  @@index([knowledgeSpaceId, disconnectedAt])
   @@index([installationId])
-  @@map("knowledge_repository_connections")
+  @@map("knowledge_remote_bindings")
+}
+
+/// Latest provider observation. Provider loss never disconnects the durable binding.
+model RemoteRepositoryObservation {
+  bindingId             String   @id @map("binding_id")
+  observedAt            DateTime @map("observed_at")
+  accountId             String   @map("account_id")
+  repositoryFullName    String   @map("repository_full_name")
+  defaultBranch         String   @map("default_branch")
+  isPrivate             Boolean  @map("is_private")
+  archived              Boolean
+  disabled              Boolean
+  contentsPermission    String   @map("contents_permission")
+  installationSuspended Boolean  @map("installation_suspended")
+  eligibilityState      String   @map("eligibility_state")
+  blockReason           String?  @map("block_reason")
+
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
+
+  @@index([eligibilityState])
+  @@map("remote_repository_observations")
+}
+
+/// Remote Git history safety cursor confirmed by the Desktop Git runtime + server preflight.
+model RemoteHistoryFence {
+  bindingId                  String   @id @map("binding_id")
+  defaultBranch              String   @map("default_branch")
+  lastConfirmedRemoteHeadSha String   @map("last_confirmed_remote_head_sha")
+  confirmedAt                DateTime @map("confirmed_at")
+
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
+
+  @@map("remote_history_fences")
+}
+
+/// Server projection cursor/failure axis, independent from binding/provider state.
+model KnowledgeProjectionCheckpoint {
+  bindingId          String    @id @map("binding_id")
+  branch             String
+  projectedCommitSha String?   @map("projected_commit_sha")
+  state              String
+  failureCode        String?   @map("failure_code")
+  failureMessage     String?   @map("failure_message")
+  lastAttemptAt      DateTime? @map("last_attempt_at")
+  projectedAt        DateTime? @map("projected_at")
+
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
+
+  @@index([state])
+  @@map("knowledge_projection_checkpoints")
 }
 
 /// Deduplication and processing cursor for GitHub webhook deliveries.
 model GithubWebhookDelivery {
   id           String    @id
-  connectionId String    @map("connection_id")
+  bindingId    String    @map("binding_id")
   deliveryId   String    @unique @map("delivery_id")
   eventName    String    @map("event_name")
   beforeSha    String?   @map("before_sha")
@@ -1811,31 +1774,33 @@ model GithubWebhookDelivery {
   receivedAt   DateTime  @default(now()) @map("received_at")
   processedAt  DateTime? @map("processed_at")
 
-  connection KnowledgeRepositoryConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
 
-  @@index([connectionId, status])
+  @@index([bindingId, status])
   @@map("github_webhook_deliveries")
 }
 
 /// Rebuildable read model derived only from the connected repository default branch.
 model KnowledgeNoteProjection {
-  id              String    @id
-  connectionId    String    @map("connection_id")
-  relativePath    String    @map("relative_path")
-  commitSha       String    @map("commit_sha")
-  blobSha         String    @map("blob_sha")
-  contentHash     String    @map("content_hash")
-  frontmatter     Json      @default("{}")
-  markdownContent String    @map("markdown_content") @db.Text
-  indexStatus     String    @default("PENDING") @map("index_status")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  deletedAt       DateTime? @map("deleted_at")
+  id                  String    @id
+  bindingId           String    @map("binding_id")
+  knowledgeDocumentId String?   @map("knowledge_document_id")
+  relativePath        String    @map("relative_path")
+  commitSha           String    @map("commit_sha")
+  blobSha             String    @map("blob_sha")
+  contentHash         String    @map("content_hash")
+  frontmatter         Json      @default("{}")
+  markdownContent     String    @map("markdown_content") @db.Text
+  indexStatus         String    @default("PENDING") @map("index_status")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  deletedAt           DateTime? @map("deleted_at")
 
-  connection KnowledgeRepositoryConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
 
-  @@unique([connectionId, relativePath])
-  @@index([connectionId, commitSha])
+  @@unique([bindingId, relativePath])
+  @@index([bindingId, commitSha])
+  @@index([knowledgeDocumentId])
   @@index([contentHash])
   @@index([indexStatus])
   @@map("knowledge_note_projections")
@@ -1843,7 +1808,7 @@ model KnowledgeNoteProjection {
 
 model KnowledgeAttachmentProjection {
   id           String    @id
-  connectionId String    @map("connection_id")
+  bindingId    String    @map("binding_id")
   relativePath String    @map("relative_path")
   commitSha    String    @map("commit_sha")
   blobSha      String    @map("blob_sha")
@@ -1853,26 +1818,26 @@ model KnowledgeAttachmentProjection {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   deletedAt    DateTime? @map("deleted_at")
 
-  connection KnowledgeRepositoryConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
 
-  @@unique([connectionId, relativePath])
-  @@index([connectionId, commitSha])
+  @@unique([bindingId, relativePath])
+  @@index([bindingId, commitSha])
   @@index([blobSha])
   @@map("knowledge_attachment_projections")
 }
 
 /// Short-lived shared cache for immutable GitHub attachment bytes.
 model KnowledgeAttachmentContentCache {
-  connectionId String   @map("connection_id")
+  bindingId    String   @map("binding_id")
   blobSha      String   @map("blob_sha")
   byteSize     Int      @map("byte_size")
   contentBytes Bytes    @map("content_bytes")
   cachedAt     DateTime @default(now()) @map("cached_at")
   expiresAt    DateTime @map("expires_at")
 
-  connection KnowledgeRepositoryConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
 
-  @@id([connectionId, blobSha])
+  @@id([bindingId, blobSha])
   @@index([expiresAt])
   @@map("knowledge_attachment_content_cache")
 }
@@ -1885,7 +1850,8 @@ model KnowledgeAttachmentContentCache {
 model KnowledgeWriteRequest {
   id                     String    @id
   identityId             String    @map("identity_id")
-  connectionId           String    @map("connection_id")
+  bindingId              String    @map("binding_id")
+  knowledgeDocumentId    String    @map("knowledge_document_id")
   requestId              String    @map("request_id")
   requestHash            String    @map("request_hash")
   relativePath           String    @map("relative_path")
@@ -1904,11 +1870,12 @@ model KnowledgeWriteRequest {
   updatedAt              DateTime  @updatedAt @map("updated_at")
   completedAt            DateTime? @map("completed_at")
 
-  account    Account                       @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  connection KnowledgeRepositoryConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  account Account                @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  binding KnowledgeRemoteBinding @relation(fields: [bindingId], references: [id], onDelete: Cascade)
 
   @@unique([identityId, requestId])
-  @@index([connectionId, status])
+  @@index([bindingId, status])
+  @@index([knowledgeDocumentId])
   @@map("knowledge_write_requests")
 }
 
@@ -2165,21 +2132,24 @@ model ScheduleEventDeliveryLog {
 
 // ==========================================
 // Setting Module
-// User settings with JSONB preferences storage
+// Canonical user preferences: namespace-scoped persistence
 // ==========================================
 
-model UserSetting {
-  id          String   @id @default(uuid())
-  identityId  String   @unique @map("identity_id")
-  preferences Json     @default("{}")
-  version     Int      @default(1)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+// Canonical Setting vNext preferences. Namespace rows are the sync/CAS unit.
+model UserPreferenceRecord {
+  id         String   @id @default(uuid())
+  identityId String   @map("identity_id")
+  namespace  String
+  payload    Json
+  revision   Int      @default(1)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
 
+  @@unique([identityId, namespace])
   @@index([identityId])
-  @@map("user_settings")
+  @@map("user_preference_records")
 }
 
 // ==========================================
@@ -2187,9 +2157,9 @@ model UserSetting {
 // 任务计划、实例、历史、统计
 // ==========================================
 
-/// TaskTemplate 聚合根 - 任务模板
+/// TaskPlan 聚合根 - 任务模板
 /// 管理任务的完整定义，包括时间配置、重复规则、提醒、Goal绑定等
-model TaskTemplate {
+model TaskPlan {
   // ============ 主键与外键 ============
   id         String @id
   identityId String @map("identity_id")
@@ -2248,11 +2218,11 @@ model TaskTemplate {
 
   // ============ 关系映射 ============
   account   Account    @relation(fields: [identityId], references: [id], onDelete: Cascade)
-  keyResult KeyResult? @relation("KeyResultTaskTemplates", fields: [keyResultId, goalId, identityId], references: [id, goalId, identityId], onDelete: Restrict)
+  keyResult KeyResult? @relation("KeyResultTaskPlans", fields: [keyResultId, goalId, identityId], references: [id, goalId, identityId], onDelete: Restrict)
 
   // 实例
-  instances  TaskInstance[]
-  history    TaskTemplateHistory[]
+  instances  TaskOccurrence[]
+  history    TaskPlanHistory[]
   labelLinks TaskLabel[]
 
   // ============ 索引优化 ============
@@ -2266,9 +2236,9 @@ model TaskTemplate {
   @@map("task_templates")
 }
 
-/// TaskInstance 聚合根 - 任务实例
+/// TaskOccurrence 聚合根 - 任务实例
 /// 从模板生成的具体任务实例，包含执行状态和时间追踪
-model TaskInstance {
+model TaskOccurrence {
   // ============ 主键与外键 ============
   id         String @id
   templateId String @map("template_id")
@@ -2277,7 +2247,7 @@ model TaskInstance {
   // ============ 实例基本信息 ============
   instanceDate  DateTime @map("instance_date")
   occurrenceKey String?  @map("occurrence_key") /// R2-1 幂等键 templateId:localDate
-  status        String /// TaskInstanceStatus
+  status        String /// TaskOccurrenceStatus
   importance    String   @default("moderate") /// ImportanceLevel
 
   // ============ 时间追踪 ============
@@ -2295,8 +2265,8 @@ model TaskInstance {
   deletedAt DateTime? @map("deleted_at")
 
   // ============ 关系映射 ============
-  account  Account      @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  account  Account  @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  template TaskPlan @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   // R2-1：同一模板同一天最多一个实例（幂等键，防双宿主/并发重复生成）。
   @@unique([templateId, occurrenceKey])
@@ -2310,29 +2280,29 @@ model TaskInstance {
 /// Durable delivery log for completed tasks that contribute Goal progress.
 /// It is intentionally task-specific rather than a generic application outbox.
 model TaskGoalOutbox {
-  eventId        String    @id @map("event_id")
-  identityId     String    @map("identity_id")
-  taskInstanceId String    @map("task_instance_id")
-  taskTemplateId String    @map("task_template_id")
-  goalId         String    @map("goal_id")
-  keyResultId    String    @map("key_result_id")
-  payload        String
-  action         String    @default("complete")
-  status         String    @default("PENDING")
-  attempts       Int       @default(0)
-  availableAt    DateTime  @default(now()) @map("available_at")
-  lastError      String?   @map("last_error")
-  dispatchedAt   DateTime? @map("dispatched_at")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  eventId          String    @id @map("event_id")
+  identityId       String    @map("identity_id")
+  taskOccurrenceId String    @map("task_instance_id")
+  taskPlanId       String    @map("task_template_id")
+  goalId           String    @map("goal_id")
+  keyResultId      String    @map("key_result_id")
+  payload          String
+  action           String    @default("complete")
+  status           String    @default("PENDING")
+  attempts         Int       @default(0)
+  availableAt      DateTime  @default(now()) @map("available_at")
+  lastError        String?   @map("last_error")
+  dispatchedAt     DateTime? @map("dispatched_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   @@index([identityId, status, availableAt])
   @@index([status, availableAt])
-  @@index([taskInstanceId])
+  @@index([taskOccurrenceId])
   @@map("task_goal_outbox")
 }
 
-model TaskTemplateHistory {
+model TaskPlanHistory {
   id         String   @id
   identityId String   @map("identity_id")
   templateId String   @map("template_id")
@@ -2340,8 +2310,8 @@ model TaskTemplateHistory {
   changes    String?
   createdAt  DateTime @default(now()) @map("created_at")
 
-  identity Account      @relation("AccountTaskTemplateHistory", fields: [identityId], references: [id])
-  template TaskTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  identity Account  @relation("AccountTaskPlanHistory", fields: [identityId], references: [id])
+  template TaskPlan @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
   @@index([templateId])

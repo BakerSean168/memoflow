@@ -1,5 +1,15 @@
 import type { Instant, Ymd } from '@memoflow/contracts/primitives';
-import type { Clock, TimeEngine, TimeStyle } from '../types';
+import type { Clock, TimeContext } from '../types';
+import {
+  addCalendarDaysInContext,
+  diffCalendarDaysInContext,
+  diffCalendarWeeksInContext,
+  endOfDayInContext,
+  instantToYmdInTimeZone,
+  isSameDayInContext,
+  startOfDayInContext,
+  startOfWeekInContext,
+} from '../timezone/wall-clock';
 
 export interface CalendarApi {
   startOfDay(instant: Instant | number): Instant;
@@ -13,39 +23,35 @@ export interface CalendarApi {
   isToday(instant: Instant | number): boolean;
 }
 
-export function createCalendar(
-  style: TimeStyle,
-  engine: TimeEngine,
-  clock: Clock,
-): CalendarApi {
-  const asI = (v: Instant | number): Instant => v as Instant;
+export function createCalendar(context: TimeContext, clock: Clock): CalendarApi {
+  const asI = (value: Instant | number): Instant => value as Instant;
   return {
     startOfDay(instant) {
-      return engine.startOfDay(asI(instant));
+      return startOfDayInContext(asI(instant), context);
     },
     endOfDay(instant) {
-      return engine.endOfDay(asI(instant));
+      return endOfDayInContext(asI(instant), context);
     },
     addDays(instant, n) {
-      return engine.addDays(asI(instant), n);
+      return addCalendarDaysInContext(asI(instant), n, context);
     },
     diffCalendarDays(a, b) {
-      return engine.diffCalendarDays(asI(a), asI(b));
+      return diffCalendarDaysInContext(asI(a), asI(b), context);
     },
     diffCalendarWeeks(a, b) {
-      return engine.diffCalendarWeeks(asI(a), asI(b), style.calendar.weekStartsOn);
+      return diffCalendarWeeksInContext(asI(a), asI(b), context);
     },
     startOfWeek(instant) {
-      return engine.startOfWeek(asI(instant), style.calendar.weekStartsOn);
+      return startOfWeekInContext(asI(instant), context);
     },
     toYmd(instant) {
-      return engine.toYmd(asI(instant));
+      return instantToYmdInTimeZone(asI(instant), context.timeZone);
     },
     isSameDay(a, b) {
-      return engine.isSameDay(asI(a), asI(b));
+      return isSameDayInContext(asI(a), asI(b), context);
     },
     isToday(instant) {
-      return engine.isSameDay(asI(instant), clock.now());
+      return isSameDayInContext(asI(instant), clock.now(), context);
     },
   };
 }

@@ -61,8 +61,8 @@ const dangerousPatchKeys = new Set(['__proto__', 'prototype', 'constructor']);
 const allowedDraftPatchKeys = new Set([
   'goal',
   'keyResults',
-  'taskTemplates',
-  'reminders',
+  'tasks',
+  'knowledge',
   'rationale',
   'warnings',
 ]);
@@ -77,7 +77,10 @@ function mergeStructuredPatch(base: unknown, patch: unknown): unknown {
   return result;
 }
 
-function applyStructuredDraftPatch(draft: GoalPlanDraft, patch: Record<string, unknown>): GoalPlanDraft {
+function applyStructuredDraftPatch(
+  draft: GoalPlanDraft,
+  patch: Record<string, unknown>,
+): GoalPlanDraft {
   for (const key of Object.keys(patch)) {
     if (!allowedDraftPatchKeys.has(key)) {
       throw new Error(`Unsupported goal draft patch field: ${key}`);
@@ -126,15 +129,7 @@ export function createGoalCreateWorkflow(input: {
     stateSchema: GoalCreateWorkflowStateSchema,
     resumeSchema: AIWorkflowResumeCommandSchema,
     suspendSchema: AIWorkflowSuspensionSchema,
-    execute: async ({
-      inputData,
-      state,
-      setState,
-      resumeData,
-      suspend,
-      runId,
-      requestContext,
-    }) => {
+    execute: async ({ inputData, state, setState, resumeData, suspend, runId, requestContext }) => {
       let current = GoalCreateWorkflowStateSchema.parse(state);
       const workflowInput = GoalCreateWorkflowInputSchema.parse(inputData);
       if (
@@ -280,7 +275,9 @@ export function createGoalCreateWorkflow(input: {
           current.pendingQuestions.length === 0 ||
           current.pendingQuestions.length !== resumeData.answers.length
         ) {
-          throw new Error('goal.create clarification answer count does not match pending questions');
+          throw new Error(
+            'goal.create clarification answer count does not match pending questions',
+          );
         }
         const nextClarification = GoalClarificationStateSchema.parse({
           rounds: [
@@ -339,7 +336,7 @@ export function createGoalCreateWorkflow(input: {
           return applyAndResolve(priorReceipt);
         }
         if (resumeData.type === 'accept_partial') {
-          if (priorReceipt.status !== 'partial' || !priorReceipt.goalId) {
+          if (priorReceipt.status !== 'partial' || !priorReceipt.referenceMap.goal) {
             throw new Error('goal.create has no partial business result to accept');
           }
           await persist({ ...current, phase: 'completed' });
@@ -349,7 +346,7 @@ export function createGoalCreateWorkflow(input: {
           });
         }
         if (resumeData.type === 'cancel_remaining') {
-          if (priorReceipt.status === 'partial' && priorReceipt.goalId) {
+          if (priorReceipt.status === 'partial' && Boolean(priorReceipt.referenceMap.goal)) {
             await persist({ ...current, phase: 'completed' });
             return GoalCreateWorkflowOutputSchema.parse({
               outcome: 'completed',
