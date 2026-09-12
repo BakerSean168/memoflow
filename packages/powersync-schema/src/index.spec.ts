@@ -12,6 +12,7 @@ describe('PowerSyncAppSchema', () => {
   it('keeps the key sync tables in the exported schema', () => {
     expect(PowerSyncAppSchema.props).toHaveProperty('user_preference_records');
     expect(PowerSyncAppSchema.props).toHaveProperty('task_templates');
+    expect(PowerSyncAppSchema.props).toHaveProperty('relations');
     expect(PowerSyncAppSchema.props).toHaveProperty('schedule_tasks');
     expect(PowerSyncAppSchema.props).toHaveProperty('notifications');
     expect(PowerSyncAppSchema.props).toHaveProperty('repositories');
@@ -23,6 +24,15 @@ describe('PowerSyncAppSchema', () => {
     expect(getColumnType('user_preference_records', 'namespace')).toBe('TEXT');
     expect(getColumnType('user_preference_records', 'payload')).toBe('TEXT');
     expect(getColumnType('user_preference_records', 'revision')).toBe('INTEGER');
+  });
+
+  it('syncs generic Relation rows with stable scalar identity columns', () => {
+    expect(getColumnType('relations', 'identity_id')).toBe('TEXT');
+    expect(getColumnType('relations', 'subject_type')).toBe('TEXT');
+    expect(getColumnType('relations', 'subject_id')).toBe('TEXT');
+    expect(getColumnType('relations', 'relation_type')).toBe('TEXT');
+    expect(getColumnType('relations', 'object_type')).toBe('TEXT');
+    expect(getColumnType('relations', 'object_id')).toBe('TEXT');
   });
 
   it('preserves critical task relation and schedule column types', () => {

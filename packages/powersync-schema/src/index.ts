@@ -298,6 +298,21 @@ const task_labels = new Table({
 });
 
 // ──────────────────────────────────────────────
+// Shared Relations (ADR-069 / ADR-090)
+// ──────────────────────────────────────────────
+
+const relations = new Table({
+  identity_id: column.text,
+  subject_type: column.text,
+  subject_id: column.text,
+  relation_type: column.text,
+  object_type: column.text,
+  object_id: column.text,
+  created_at: column.text,
+  updated_at: column.text,
+});
+
+// ──────────────────────────────────────────────
 // Schedule
 // ──────────────────────────────────────────────
 
@@ -1062,6 +1077,7 @@ export const PowerSyncAppSchema = new Schema({
   labels,
   goal_labels,
   task_labels,
+  relations,
   // Task
   task_templates,
   task_instances,

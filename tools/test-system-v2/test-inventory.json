@@ -208,6 +208,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/powersync/relation-crud-executor.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/powersync/snapshot-builder.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -239,6 +249,16 @@
     },
     {
       "path": "apps/api/src/modules/powersync/user-preference-sync.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/relation/module.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/api/vitest.config.ts"
@@ -889,6 +909,22 @@
     },
     {
       "path": "apps/desktop/src/main/modules/label/label.electron-module.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/relation/local-vault-knowledge-document-ref.resolver.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/relation/relation.electron-module.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -5204,6 +5240,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/relation/relation-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/reliable-messaging/reliable-messaging-contracts.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6333,17 +6377,6 @@
       ]
     },
     {
-      "path": "packages/goal/src/server/application/use-cases/commands/__tests__/relation.use-cases.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts",
-        "packages/goal/vitest.use-cases.config.ts"
-      ]
-    },
-    {
       "path": "packages/goal/src/server/application/use-cases/commands/__tests__/remove-task-goal-contribution.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6791,17 +6824,6 @@
       ]
     },
     {
-      "path": "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-relation.mapper.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts",
-        "packages/goal/vitest.mappers.config.ts"
-      ]
-    },
-    {
       "path": "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-wallet.mapper.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6835,7 +6857,7 @@
       ]
     },
     {
-      "path": "packages/goal/src/server/infrastructure/adapters/prisma/relation-prisma.repository.integration.test.ts",
+      "path": "packages/goal/src/server/infrastructure/adapters/prisma/prisma-goal-deletion-transaction-runner.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
         "packages/goal/vitest.integration.config.ts"
@@ -7869,6 +7891,46 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/relation/src/__tests__/goal-knowledge-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/relation/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/relation/src/__tests__/powersync-relation.repository.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/relation/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/relation/src/__tests__/prisma-relation.repository.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/relation/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/relation/src/__tests__/relation-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/relation/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/relation/src/client/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/relation/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/reminder/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8798,6 +8860,14 @@
     },
     {
       "path": "packages/repository/src/server/application/services/knowledge-attachment-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository/src/server/application/services/knowledge-document-ref-resolver.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository/vitest.config.ts"
@@ -11280,7 +11350,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 67
+      "fileCount": 69
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -11322,21 +11392,21 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 82
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 8
+      "fileCount": 7
     },
     {
       "id": "packages/goal/vitest.use-cases.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 31
+      "fileCount": 30
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11591,6 +11661,13 @@
       "fileCount": 3
     },
     {
+      "id": "packages/relation/vitest.integration.config.ts",
+      "type": "primary",
+      "suite": "integration",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/reminder/vitest.integration.config.ts",
       "type": "primary",
       "suite": "integration",
@@ -11651,14 +11728,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 67
+      "fileCount": 69
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 63
+      "fileCount": 65
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -11714,7 +11791,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 83
+      "fileCount": 84
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11749,7 +11826,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 82
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11801,6 +11878,13 @@
       "fileCount": 1
     },
     {
+      "id": "packages/relation/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 4
+    },
+    {
       "id": "packages/reminder/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -11812,7 +11896,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 37
+      "fileCount": 38
     },
     {
       "id": "packages/schedule-orchestration/vitest.config.ts",
@@ -11895,10 +11979,12 @@
       "apps/api/src/modules/powersync/module.spec.ts",
       "apps/api/src/modules/powersync/parse-json-like-string-keep-boundary.surface.spec.ts",
       "apps/api/src/modules/powersync/powersync-schema-result-envelope.surface.spec.ts",
+      "apps/api/src/modules/powersync/relation-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/snapshot-builder.spec.ts",
       "apps/api/src/modules/powersync/snapshot-storage.spec.ts",
       "apps/api/src/modules/powersync/user-preference-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/user-preference-sync.surface.spec.ts",
+      "apps/api/src/modules/relation/module.spec.ts",
       "apps/api/src/outbox/prisma-outbox-writer.spec.ts",
       "apps/api/src/runtime/compose-account.spec.ts",
       "apps/api/src/runtime/compose-account.surface.spec.ts",
@@ -12131,7 +12217,6 @@
       "packages/goal/src/server/application/use-cases/commands/__tests__/delete-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/permanently-delete-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/plan-goal.test.ts",
-      "packages/goal/src/server/application/use-cases/commands/__tests__/relation.use-cases.spec.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/remove-task-goal-contribution.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/update-goal-key-result-progress.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/update-goal-key-result.test.ts",
@@ -12174,7 +12259,6 @@
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-goal-mapper.additional.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-goal-mapper.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-goal-record-mapper.spec.ts",
-      "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-relation.mapper.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-wallet.mapper.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-weight-snapshot-mapper.additional.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-weight-snapshot-mapper.spec.ts",
@@ -12481,8 +12565,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1076,
-    "integration": 37,
+    "unit": 1084,
+    "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,
     "boundary-main": 6,

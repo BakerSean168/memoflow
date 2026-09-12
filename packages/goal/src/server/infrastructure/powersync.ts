@@ -15,6 +15,10 @@ import {
 import { GoalPowerSyncRepository } from './adapters/powersync/goal-powersync.repository';
 import { GoalRecordPowerSyncRepository } from './adapters/powersync/goal-record-powersync.repository';
 import { PowerSyncGoalWriteTransactionRunner } from './adapters/powersync/powersync-goal-write-transaction-runner';
+import {
+  PowerSyncGoalDeletionTransactionRunner,
+  type PowerSyncGoalRelationCleanupFactory,
+} from './adapters/powersync/powersync-goal-deletion-transaction-runner';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import { createGoalScheduleProjectionSource } from './schedule-projection-source';
 import {
@@ -51,6 +55,8 @@ export function createGoalPowerSyncModule(
     /** Required: W0 GoalDependencyReadPort implementation (provided by the Task package). */
     taskBindingReadPort: GoalDependencyReadPort;
     userTimeContextPort: UserTimeContextPort;
+    /** Shared Relation supplies a transaction-scoped cleanup adapter. */
+    relationCleanupFactory: PowerSyncGoalRelationCleanupFactory;
   },
 ): GoalModuleInstance {
   if (!options?.taskBindingReadPort) {
@@ -59,12 +65,21 @@ export function createGoalPowerSyncModule(
   if (!options?.userTimeContextPort) {
     throw new Error('[FAIL-CLOSED] createGoalPowerSyncModule requires options.userTimeContextPort');
   }
+  if (!options?.relationCleanupFactory) {
+    throw new Error(
+      '[FAIL-CLOSED] createGoalPowerSyncModule requires options.relationCleanupFactory',
+    );
+  }
   const { goalRepository, goalRecordRepository, goalWriteTransactionRunner } =
     createGoalPowerSyncRepositories(db);
   return createGoalModule({
     goalRepository,
     goalRecordRepository,
     goalWriteTransactionRunner,
+    goalDeletionTransactionRunner: new PowerSyncGoalDeletionTransactionRunner(
+      db,
+      options.relationCleanupFactory,
+    ),
     taskBindingReadPort: options.taskBindingReadPort,
     userTimeContextPort: options.userTimeContextPort,
     runtimeContributions: options?.runtimeContributions,
@@ -93,6 +108,13 @@ export function createGoalPowerSyncRepositories(db: IElectronDatabase): GoalRepo
     goalRecordRepository: new GoalRecordPowerSyncRepository(db),
     goalWriteTransactionRunner: new PowerSyncGoalWriteTransactionRunner(db),
   };
+}
+
+export function createGoalPowerSyncDeletionTransactionRunner(
+  db: IElectronDatabase,
+  relationCleanupFactory: PowerSyncGoalRelationCleanupFactory,
+): PowerSyncGoalDeletionTransactionRunner {
+  return new PowerSyncGoalDeletionTransactionRunner(db, relationCleanupFactory);
 }
 
 export function createGoalPowerSyncScheduleProjectionSource(
@@ -126,3 +148,5 @@ export function createGoalPowerSyncReminderFireHandler(
 }
 
 export { GoalPowerSyncRepository, GoalRecordPowerSyncRepository };
+
+export type { PowerSyncGoalRelationCleanupFactory };

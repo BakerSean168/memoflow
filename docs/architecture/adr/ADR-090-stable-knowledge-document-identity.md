@@ -295,6 +295,8 @@ Linked knowledge unavailable/deleted
 
 用户显式 unlink 才删除 relation 本身。
 
+这里描述的是 **KnowledgeDocument 作为 relation target 被删除** 的语义。GOAL-7206 中 **Goal 作为 relation source 被删除** 是另一条边界：Goal soft/permanent delete 会通过 Relation owner 的窄 cleanup port 原子 unlink 所有引用该 Goal 的 edge，但不会删除 KnowledgeDocument。Prisma/PowerSync lane 都把 Goal mutation 与 edge cleanup 放在同一个 business-database transaction 中；失败时一起回滚。
+
 ## 13. AI Index identity
 
 AI index 从当前：

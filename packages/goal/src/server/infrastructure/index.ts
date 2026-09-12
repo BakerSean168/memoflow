@@ -25,12 +25,7 @@ export {
 export type { GoalApplicationPort } from '../application';
 
 // ============ Repository Ports referenced by GoalRepositorySet ============
-export type {
-  IGoalRecordRepository,
-  IGoalRepository,
-  IRelationRepository,
-  IWalletRepository,
-} from '../domain';
+export type { IGoalRecordRepository, IGoalRepository, IWalletRepository } from '../domain';
 export type { GoalWriteTransactionRunner } from '../application/use-cases/commands/goal-write-support';
 export type { IHabitRepository } from '../application/use-cases/commands/habit.use-cases';
 
@@ -38,9 +33,11 @@ export {
   createGoalPrismaModule,
   createGoalPrismaRepositories,
   createGoalTaskProgressPrismaHandler,
+  createGoalPrismaDeletionTransactionRunner,
   createGoalPrismaScheduleProjectionSource,
   createGoalPrismaReminderFireHandler,
   type GoalRepositorySet,
+  type PrismaGoalRelationCleanupFactory,
 } from './prisma';
 export {
   createGoalRuntimeContribution,
@@ -51,8 +48,10 @@ export {
   createGoalPowerSyncModule,
   createGoalPowerSyncRepositories,
   createGoalTaskProgressPowerSyncHandler,
+  createGoalPowerSyncDeletionTransactionRunner,
   createGoalPowerSyncScheduleProjectionSource,
   createGoalPowerSyncReminderFireHandler,
+  type PowerSyncGoalRelationCleanupFactory,
 } from './powersync';
 export {
   createGoalReminderFireHandler,

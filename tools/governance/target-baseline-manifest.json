@@ -66,6 +66,7 @@
     "domain-shared": "runtime-lib",
     "contracts": "runtime-lib",
     "label": "runtime-lib",
+    "relation": "runtime-lib",
     "repository": "runtime-lib",
     "database": "runtime-lib",
     "http-client": "runtime-lib",

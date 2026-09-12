@@ -38,6 +38,13 @@ import {
 import { createSchedulePowerSyncRepositories } from '@memoflow/schedule';
 import { createSchedulerPowerSyncRepositories } from '@memoflow/scheduler';
 import { LabelService, PowerSyncLabelRepository } from '@memoflow/label';
+import {
+  GoalKnowledgeService,
+  PowerSyncRelationRepository,
+  PowerSyncGoalRelationCleanupCapability,
+} from '@memoflow/relation';
+import { createGoalKnowledgeElectronModule } from './modules/relation/relation.electron-module';
+import { LocalVaultKnowledgeDocumentRefResolver } from './modules/relation/local-vault-knowledge-document-ref.resolver';
 import { createSystemClock } from '@memoflow/time';
 import { createLabelElectronModule } from './modules/label/label.electron-module';
 import { composeGovernance } from './runtime/compose-governance';
@@ -320,16 +327,24 @@ async function registerBusinessModules(
   );
   const taskElectronModule = taskComposed.module;
 
+  const relationRepository = new PowerSyncRelationRepository(db);
   const goalComposed = composeGoal({
     db,
     taskBindingReadPort: new PowerSyncTaskBindingReadPort(db),
     userTimeContextPort: settingElectronModule.userTimeContextPort,
+    relationCleanupFactory: (tx) => new PowerSyncGoalRelationCleanupCapability(tx),
   });
 
   const labelService = new LabelService(new PowerSyncLabelRepository(db), {
     clock: createSystemClock(),
   });
   const labelElectronModule = createLabelElectronModule({ service: labelService });
+  const goalKnowledgeElectronModule = createGoalKnowledgeElectronModule({
+    service: new GoalKnowledgeService(
+      relationRepository,
+      new LocalVaultKnowledgeDocumentRefResolver(localVaultRuntime),
+    ),
+  });
 
   const dashboardRepositories: DashboardReadDependencies = {
     goalRepository: goalComposed.repositories.goalRepository,
@@ -545,6 +560,7 @@ async function registerBusinessModules(
     // Feature modules
     .register(goalComposed.module)
     .register(labelElectronModule)
+    .register(goalKnowledgeElectronModule)
     .register(taskElectronModule)
     .register(scheduleComposed.calendarModule)
     .register(scheduleComposed.schedulerModule)

@@ -1,0 +1,35 @@
+{
+  "name": "@memoflow/relation",
+  "version": "0.0.1",
+  "private": false,
+  "description": "MemoFlow shared cross-module Relation capability",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js"
+    }
+  },
+  "dependencies": {
+    "@memoflow/contracts": "workspace:*",
+    "@memoflow/database": "workspace:*",
+    "@memoflow/http-client": "workspace:*",
+    "@memoflow/ipc-client": "workspace:*"
+  },
+  "devDependencies": {
+    "@memoflow/test-utils": "workspace:*",
+    "tsup": "^8.5.1",
+    "typescript": "~6.0.3",
+    "vitest": "4.1.10"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false
+}

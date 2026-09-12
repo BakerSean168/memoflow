@@ -23,7 +23,7 @@ describe('goal desktop runtime composer surface', () => {
   it('main.ts composes goal with Task binding and canonical UserTimeContext ports', () => {
     expect(main).toContain("from './runtime/compose-goal'");
     expect(main).toMatch(
-      /composeGoal\(\{\s*db,\s*taskBindingReadPort: new PowerSyncTaskBindingReadPort\(db\),\s*userTimeContextPort: settingElectronModule\.userTimeContextPort,?\s*\}/,
+      /composeGoal\(\{\s*db,\s*taskBindingReadPort: new PowerSyncTaskBindingReadPort\(db\),\s*userTimeContextPort: settingElectronModule\.userTimeContextPort,\s*relationCleanupFactory: \(tx\) => new PowerSyncGoalRelationCleanupCapability\(tx\),?\s*\}/,
     );
     expect(main).toContain('.register(goalComposed.module)');
   });
@@ -36,6 +36,8 @@ describe('goal desktop runtime composer surface', () => {
   it('composer selects PowerSync adapters and returns the module plus repository view', () => {
     expect(composer).toContain('interface ComposeGoalDependencies');
     expect(composer).toContain('createGoalPowerSyncRepositories');
+    expect(composer).toContain('createGoalPowerSyncDeletionTransactionRunner');
+    expect(composer).toContain('relationCleanupFactory');
     expect(composer).toContain('repositories');
     expect(composer).toContain("from '@memoflow/goal/electron'");
     expect(composer).not.toMatch(/@memoflow\/goal\/server/);

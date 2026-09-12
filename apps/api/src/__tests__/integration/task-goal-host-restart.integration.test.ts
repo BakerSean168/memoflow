@@ -8,6 +8,7 @@ import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createGoalPrismaModule, createGoalTaskProgressPrismaHandler } from '@memoflow/goal';
+import { PrismaGoalRelationCleanupCapability } from '@memoflow/relation';
 import {
   PrismaTaskBindingReadPort,
   createTaskModule,
@@ -31,10 +32,7 @@ function composeRestartedTaskHost(): TaskApiModuleDef {
   const taskRepositories = createTaskPrismaRepositories(prisma);
   const runtimeContributions = [
     createTaskRuntimeContribution(),
-    createTaskPrismaGoalOutboxRuntime(
-      prisma,
-      createGoalTaskProgressPrismaHandler(prisma),
-    ),
+    createTaskPrismaGoalOutboxRuntime(prisma, createGoalTaskProgressPrismaHandler(prisma)),
   ];
   const instance = createTaskModule({
     ...taskRepositories,
@@ -44,7 +42,6 @@ function composeRestartedTaskHost(): TaskApiModuleDef {
 
   return createTaskApiModule({ instance });
 }
-
 
 describe('API host Task -> Goal restart recovery', () => {
   beforeEach(async () => {
@@ -63,6 +60,7 @@ describe('API host Task -> Goal restart recovery', () => {
     const goalModule = createGoalPrismaModule(prisma, {
       taskBindingReadPort: new PrismaTaskBindingReadPort(prisma),
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+      relationCleanupFactory: (tx) => new PrismaGoalRelationCleanupCapability(tx),
     });
     const createdGoal = await goalModule.api.createGoal(
       {
@@ -95,7 +93,9 @@ describe('API host Task -> Goal restart recovery', () => {
     const taskModule = createTaskPrismaModule(prisma, {
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
     });
-    const taskDate = createTimeFacade({ context: TASK_TEST_TIME_CONTEXT }).calendar.toYmd(Date.now());
+    const taskDate = createTimeFacade({ context: TASK_TEST_TIME_CONTEXT }).calendar.toYmd(
+      Date.now(),
+    );
     const createdTask = await taskModule.api.createTaskPlan({
       identityId,
       name: 'Persist contribution before host exit',

@@ -19,6 +19,7 @@ import type { UserTimeContextPort } from '@memoflow/time';
 import { SearchGoalsUseCase } from '@memoflow/goal/analytics';
 import { createGoalPrismaModule } from '@memoflow/goal';
 import { PrismaTaskBindingReadPort } from '@memoflow/task';
+import { PrismaGoalRelationCleanupCapability } from '@memoflow/relation';
 import { GetTaskDashboardUseCase } from '@memoflow/task/analytics';
 import { createTaskPrismaRepositories } from '@memoflow/task';
 
@@ -35,13 +36,10 @@ export class ControlledAnalyticsReadAdapter implements IAnalyticsReadPort {
     const goalModule = createGoalPrismaModule(this.db, {
       taskBindingReadPort: new PrismaTaskBindingReadPort(this.db),
       userTimeContextPort: this.userTimeContextPort,
+      relationCleanupFactory: (tx) => new PrismaGoalRelationCleanupCapability(tx),
     });
     const taskRepos = createTaskPrismaRepositories(this.db);
-    const dashboard = await getApiDashboardData(
-      this.db,
-      identityId,
-      this.userTimeContextPort,
-    );
+    const dashboard = await getApiDashboardData(this.db, identityId, this.userTimeContextPort);
     const taskDashboard = await new GetTaskDashboardUseCase(
       taskRepos.taskPlanRepository,
       taskRepos.taskOccurrenceRepository,

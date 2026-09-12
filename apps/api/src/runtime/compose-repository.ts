@@ -46,11 +46,9 @@ import {
   createRepositoryPrismaRuntimeContributions,
   type GithubAppConfig,
   type IKnowledgeRepositoryCloudDataPurger,
+  KnowledgeDocumentRefResolverService,
 } from '@memoflow/repository';
-import {
-  createRepositoryApiModule,
-  type RepositoryApiModuleDef,
-} from '@memoflow/repository/api';
+import { createRepositoryApiModule, type RepositoryApiModuleDef } from '@memoflow/repository/api';
 
 /**
  * Dependencies the repository composer needs from the API host runtime.
@@ -103,9 +101,13 @@ export interface ComposeRepositoryDependencies {
  * @param dependencies - ComposeRepositoryDependencies with the runtime Prisma client and host ports.
  * @returns RepositoryApiModuleDef — an already-bound IApiModule-compatible handle.
  */
+export interface ComposedRepositoryApiModule extends RepositoryApiModuleDef {
+  readonly knowledgeDocumentRefResolver: KnowledgeDocumentRefResolverService;
+}
+
 export function composeRepository(
   dependencies: ComposeRepositoryDependencies,
-): RepositoryApiModuleDef {
+): ComposedRepositoryApiModule {
   const repositories = createRepositoryPrismaRepositories(dependencies.db);
 
   const runtime = createRepositoryPrismaRuntimeContributions({
@@ -120,11 +122,15 @@ export function composeRepository(
     knowledgeRepositoryConnectionService: runtime.knowledgeRepositoryConnectionService,
     knowledgeRepositoryProjectionService: runtime.knowledgeRepositoryProjectionService,
     knowledgeNoteCommitService: runtime.knowledgeNoteCommitService,
-    runtimeContributions: runtime.runtimeContribution
-      ? [runtime.runtimeContribution]
-      : [],
+    runtimeContributions: runtime.runtimeContribution ? [runtime.runtimeContribution] : [],
     auditRepository: repositories.auditRepository,
   });
 
-  return createRepositoryApiModule({ instance });
+  const module = createRepositoryApiModule({ instance });
+  return Object.assign(module, {
+    knowledgeDocumentRefResolver: new KnowledgeDocumentRefResolverService(
+      repositories.bindingRepository,
+      repositories.documentIdentityRepository,
+    ),
+  });
 }

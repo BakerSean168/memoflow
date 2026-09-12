@@ -7,7 +7,6 @@ import { randomUUID } from 'node:crypto';
 import type { ModuleManifest } from '@memoflow/contracts/shared';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { CreateGoalUseCase } from '../application/use-cases/commands/create-goal.use-case';
-import type { CreateRelationUseCase } from '../application/use-cases/commands/relation.use-cases';
 import type {
   CreateWalletAccountUseCase,
   RecordWalletTransactionUseCase,
@@ -34,7 +33,6 @@ export function createSystemExecutionContext(identityId: string): ExecutionConte
 
 export interface GoalManifestDeps {
   createGoal: CreateGoalUseCase;
-  createRelation: CreateRelationUseCase;
   wallet: {
     createAccount: CreateWalletAccountUseCase;
     recordTransaction: RecordWalletTransactionUseCase;
@@ -52,11 +50,6 @@ export function createGoalModuleManifest(deps: GoalManifestDeps): ModuleManifest
           deps.createGoal.execute(payload as never, createSystemExecutionContext(identityId)),
       },
       {
-        name: 'relation.create',
-        module: 'goal',
-        execute: (identityId, payload) => deps.createRelation.execute(identityId, payload as never),
-      },
-      {
         name: 'wallet.account.create',
         module: 'wallet',
         execute: (identityId, payload) =>
@@ -69,11 +62,6 @@ export function createGoalModuleManifest(deps: GoalManifestDeps): ModuleManifest
           deps.wallet.recordTransaction.execute(identityId, payload as never),
       },
     ],
-    relations: {
-      subjectTypes: ['note', 'goal', 'task', 'reminder', 'habit', 'wallet'],
-      relationTypes: ['references', 'related', 'depends_on', 'contributes_to'],
-      module: 'goal',
-    },
     activities: {
       events: [
         { event: 'goal:created', action: 'created' },

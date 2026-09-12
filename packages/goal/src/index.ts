@@ -16,9 +16,11 @@ export {
   createGoalPrismaModule,
   createGoalPrismaRepositories,
   createGoalTaskProgressPrismaHandler,
+  createGoalPrismaDeletionTransactionRunner,
   createGoalPowerSyncModule,
   createGoalPowerSyncRepositories,
   createGoalTaskProgressPowerSyncHandler,
+  createGoalPowerSyncDeletionTransactionRunner,
   createGoalRuntimeContribution,
   createGoalEventListenersRuntime,
   createGoalUseCases,
@@ -30,10 +32,11 @@ export {
   type GoalModuleUseCases,
   type GoalRuntimeContributionsInput,
   type GoalRepositorySet,
+  type PrismaGoalRelationCleanupFactory,
+  type PowerSyncGoalRelationCleanupFactory,
   type GoalEventListenersRuntime,
   type IGoalRepository,
   type IGoalRecordRepository,
-  type IRelationRepository,
   type IWalletRepository,
 } from './server';
 export type { IHabitRepository } from './server/application/use-cases/commands/habit.use-cases';
@@ -43,4 +46,10 @@ export {
   GoalTaskProgressHandler,
   createGoalTaskProgressHandler,
   type TaskGoalProgressHandler,
+} from './server/application';
+
+export type {
+  GoalDeletionTransactionRunner,
+  GoalDeletionTransactionContext,
+  GoalRelationCleanupPort,
 } from './server/application';

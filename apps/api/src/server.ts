@@ -81,6 +81,12 @@ import { composePowerSyncApiModule } from './modules/powersync/module.js';
 import { composeDashboardApiModule } from './modules/dashboard/module.js';
 import { composeLabelApiModule } from './modules/label/module.js';
 import { LabelService, PrismaLabelRepository } from '@memoflow/label';
+import {
+  GoalKnowledgeService,
+  PrismaRelationRepository,
+  PrismaGoalRelationCleanupCapability,
+} from '@memoflow/relation';
+import { composeGoalKnowledgeApiModule } from './modules/relation/module.js';
 import { createSystemClock } from '@memoflow/time';
 import { PrismaDashboardReadPort } from './modules/dashboard/dashboard-read-port.js';
 import {
@@ -286,10 +292,12 @@ async function bootstrap(): Promise<void> {
       notificationRequestedWriter: notificationApiModule.repositories.requestedWriter,
     }),
   );
+  const relationRepository = new PrismaRelationRepository(prisma);
   const goalComposed = composeGoal({
     db: prisma,
     taskBindingReadPort: new PrismaTaskBindingReadPort(prisma),
     userTimeContextPort: settingApiModule.userTimeContextPort,
+    relationCleanupFactory: (tx) => new PrismaGoalRelationCleanupCapability(tx),
   });
   if (!env.DATABASE_URL) {
     throw new Error('AI Mastra runtime requires DATABASE_URL after environment normalization');
@@ -317,6 +325,12 @@ async function bootstrap(): Promise<void> {
   // mounts routes against the transport-only context.
   const powerSyncApiModule = composePowerSyncApiModule({ db: prisma });
   const labelApiModule = composeLabelApiModule({ service: labelService });
+  const goalKnowledgeApiModule = composeGoalKnowledgeApiModule({
+    service: new GoalKnowledgeService(
+      relationRepository,
+      repositoryApiModule.knowledgeDocumentRefResolver,
+    ),
+  });
   const dashboardApiModule = composeDashboardApiModule({
     dashboardReadPort: new PrismaDashboardReadPort(prisma, settingApiModule.userTimeContextPort),
     activityLedgerRuntime: createActivityLedgerRecorder(new PrismaActivityLedgerWriter(prisma)),
@@ -335,6 +349,7 @@ async function bootstrap(): Promise<void> {
     .register(aiApiModule) // ✅ AI 模块 (runtime composer)
     .register(goalComposed.module) // ✅ 目标模块
     .register(labelApiModule) // ✅ 共享标签目录
+    .register(goalKnowledgeApiModule) // ✅ Shared Relation / Goal Knowledge
     .register(dataPortabilityApiModule.module) // ✅ 数据导入导出模块 (runtime composer)
     .register(powerSyncApiModule) // ✅ PowerSync 同步模块
     .register(dashboardApiModule) // ✅ 仪表盘聚合模块

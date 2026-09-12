@@ -24,6 +24,13 @@ export const TaskChannels = {
   INSTANCE_RESCHEDULE: 'task:reschedule-instance',
 } as const;
 
+export const RelationChannels = {
+  GOAL_KNOWLEDGE_LINK: 'relation:goal-knowledge:link',
+  GOAL_KNOWLEDGE_UNLINK: 'relation:goal-knowledge:unlink',
+  GOAL_KNOWLEDGE_LIST: 'relation:goal-knowledge:list',
+  GOAL_KNOWLEDGE_REVERSE_LIST: 'relation:goal-knowledge:reverse-list',
+} as const;
+
 export const LabelChannels = {
   LIST: 'label:list',
   CREATE: 'label:create',

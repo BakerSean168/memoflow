@@ -6,10 +6,10 @@
  * 永久删除是不可逆操作，会级联删除所有子实体。
  */
 
-import type { IGoalRepository } from '../../../domain';
 import { GoalPolicy, GoalVersionConflictError } from '../../../domain';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
+import type { GoalDeletionTransactionRunner } from './goal-deletion-support';
 
 /**
  * PermanentlyDeleteGoalUseCase
@@ -22,8 +22,8 @@ import { ok, error } from '@memoflow/contracts/result';
  */
 export class PermanentlyDeleteGoalUseCase {
   constructor(
-    private readonly goalRepository: IGoalRepository,
     private readonly goalPolicy: GoalPolicy,
+    private readonly deletionTransactionRunner: GoalDeletionTransactionRunner,
   ) {}
 
   /**
@@ -37,27 +37,26 @@ export class PermanentlyDeleteGoalUseCase {
     identityId: string,
     expectedVersion: number,
   ): Promise<Result<{ id: string }>> {
-    const goal = await this.goalRepository.findByIdForIdentity(identityId, id, {
-      includeChildren: true,
-    });
-    if (!goal) {
-      return error('NOT_FOUND', `Goal not found: ${id}`);
-    }
-    if (goal.version !== expectedVersion) {
-      return error('CONFLICT', 'Goal has been modified by another client');
-    }
-
-    // 业务规则：只有已归档的目标才能被永久删除
-    this.goalPolicy.ensureGoalCanBePermanentlyDeleted(goal);
-
-    // 执行物理删除（级联删除所有子实体）
     try {
-      await this.goalRepository.deleteWithExpectedVersion(identityId, id, expectedVersion);
+      return await this.deletionTransactionRunner.run(
+        async ({ goalRepository, relationCleanup }) => {
+          const goal = await goalRepository.findByIdForIdentity(identityId, id, {
+            includeChildren: true,
+          });
+          if (!goal) return error('NOT_FOUND', `Goal not found: ${id}`);
+          if (goal.version !== expectedVersion) {
+            return error('CONFLICT', 'Goal has been modified by another client');
+          }
+
+          this.goalPolicy.ensureGoalCanBePermanentlyDeleted(goal);
+          await goalRepository.deleteWithExpectedVersion(identityId, id, expectedVersion);
+          await relationCleanup.unlinkAllForGoal(identityId, id);
+          return ok({ id });
+        },
+      );
     } catch (cause) {
       if (cause instanceof GoalVersionConflictError) return error('CONFLICT', cause.message);
       throw cause;
     }
-
-    return ok({ id });
   }
 }

@@ -5,12 +5,12 @@ tags:
   - goal
 description: Goal vNext 当前功能、产品语义与模块边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-12T12:13:00+08:00
+updated: 2026-09-12T17:55:00+08:00
 ---
 
 # Goal 模块说明
 
-> **当前收敛状态（2026-09-12）：** GOAL-7202/7203/7204 已落地：Goal identity/lifecycle、planning time 与 KR Measurement V3 已切到 `name + summary`、`Planned/InProgress/Completed/Abandoned`、`startDate: Ymd`、`GoalTimeframe target`、`Initial / Current / Target + hidden tracking base`。Goal Workspace、AI Plan V2 与完整 Target property picker 仍按 [active plan](../../plan/active/2026-09-08-goal-vnext-model-convergence.md) 后续票实施，不应提前写成当前能力。
+> **当前收敛状态（2026-09-12）：** GOAL-7202~7206 已落地：除 Goal identity/lifecycle、planning time 与 KR Measurement V3 外，Task context 已支持 Goal-only / Goal+KR link / KR contribution 三态，Knowledge context 已切到 Shared Relation + ADR-090 stable `KnowledgeDocumentId`。Goal Workspace、AI Plan V2 与完整 Target property picker 仍按 [active plan](../../plan/active/2026-09-08-goal-vnext-model-convergence.md) 后续票实施，不应提前写成当前能力。
 
 ## 1. 功能定位
 
@@ -26,6 +26,7 @@ Goal 负责个人目标的 **Direction + Measurement**：用户定义想达到�
 - Goal Review：记录阶段性复盘；
 - Shared Label：Goal 与 Task 共用 identity-scoped Label registry，创建/更新提交 `labelIds`，多标签筛选使用 `labelIdsAll` AND 语义；
 - Task Link：Task 可以链接 Goal/KR，但 Goal 不反向拥有 Task；
+- Knowledge Link：通过 Shared Relation 的 typed GoalKnowledge facade 链接 reusable KnowledgeDocument；持久化端点只使用 stable `KnowledgeDocumentId`，rename/move 不改变关系身份；
 - AI Goal draft：Mastra durable workflow 生成当前 Goal/KR/Label 语义的可审阅草稿，确认后由 Goal application port 写入。
 
 已退休且不得恢复为产品真值：`GoalFolder`、Goal category/string tags、Parent Goal、Importance/Priority、Goal Focus Session、MultiGoalComparison、Standalone ProgressBreakdown。
@@ -59,6 +60,7 @@ Abandoned
 - 修改既有 aggregate 使用 `expectedVersion`，冲突显式返回而不是静默覆盖；
 - mutation 返回权威 `GoalMutationReceipt`，客户端按 ID 原子合并；
 - Task contribution 通过自包含、幂等的跨模块事件/settlement 进入 Goal，不共享 repository 或数据库事务；
+- generic Relation 不属于 Goal；Goal 删除只依赖窄 `GoalRelationCleanupPort`，由 host 注入 transaction-scoped Shared Relation adapter，使 Goal 删除与 edge unlink 在同一 Prisma/PowerSync 数据库事务中原子提交/回滚，且永不删除 KnowledgeDocument；
 - AI 只生成草稿并调用 Goal/Task owner application port，不直接写数据库。
 
 ## 6. 用户视图
@@ -73,6 +75,8 @@ Web/Desktop 与 React/Mobile 均使用同一公开 contracts；移动端不存�
 - 设计总览：[Goal / Task vNext](../goal-task-vnext.md)
 - 产品边界：[ADR-053](../../architecture/adr/ADR-053-goal-task-personal-product-boundary.md)
 - Shared Label：[ADR-054](../../architecture/adr/ADR-054-shared-labels-and-system-views.md)
+- Goal Workspace / Shared Relation：[ADR-069](../../architecture/adr/ADR-069-goal-workspace-cross-module-context.md)
+- Stable Knowledge identity：[ADR-090](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)
 - KR Measurement V3：[ADR-068](../../architecture/adr/ADR-068-key-result-measurement-v3.md)（ADR-055 保留为已被修订的 V2 历史决策）
 - Task settlement：[ADR-056](../../architecture/adr/ADR-056-task-plan-goal-link-contribution-settlement.md)
 - 文件索引：[Goal 模块文件索引](../module-index/goal-files.md)

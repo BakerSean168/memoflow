@@ -14,7 +14,6 @@ import {
   type IGoalRecordRepository,
   type IGoalRepository,
   type IHabitRepository,
-  type IRelationRepository,
   type IWalletRepository,
   type GoalModuleInstance,
 } from '../../../../src';
@@ -45,12 +44,11 @@ describe('goal repository factories surface', () => {
     expect(set).toHaveProperty('goalRecordRepository');
     expect(set).toHaveProperty('goalWriteTransactionRunner');
     expect(set).toHaveProperty('habitRepository');
-    expect(set).toHaveProperty('relationRepository');
+    expect(set).not.toHaveProperty('relationRepository');
     expect(set).toHaveProperty('walletRepository');
     const typed: GoalRepositorySet = set;
     expect(typeof typed.goalWriteTransactionRunner.run).toBe('function');
     expect(typeof typed.habitRepository?.findByIdentityId).toBe('function');
-    expect(typeof typed.relationRepository?.findBySubject).toBe('function');
     expect(typeof typed.walletRepository?.listAccounts).toBe('function');
   });
 
@@ -69,7 +67,7 @@ describe('goal repository factories surface', () => {
 
   it('Prisma and PowerSync sets agree on all non-optional Port field names', () => {
     const prismaKeys = Object.keys(createGoalPrismaRepositories(fakePrisma)).filter(
-      (key) => !['habitRepository', 'relationRepository', 'walletRepository'].includes(key),
+      (key) => !['habitRepository', 'walletRepository'].includes(key),
     );
     const powerSyncKeys = Object.keys(createGoalPowerSyncRepositories(fakeElectronDb));
     expect(prismaKeys.sort()).toEqual(powerSyncKeys.sort());
@@ -81,6 +79,7 @@ describe('goal repository factories surface', () => {
     const prismaInstance = createGoalPrismaModule(fakePrisma, {
       taskBindingReadPort: fakeReadPort,
       userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+      relationCleanupFactory: () => ({ unlinkAllForGoal: async () => 0 }),
     });
     expect(prismaInstance).toHaveProperty('api');
     expect(typeof prismaInstance.start).toBe('function');
@@ -91,6 +90,7 @@ describe('goal repository factories surface', () => {
     const powerSyncInstance = createGoalPowerSyncModule(fakeElectronDb, {
       taskBindingReadPort: fakeReadPort,
       userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+      relationCleanupFactory: () => ({ unlinkAllForGoal: async () => 0 }),
     });
     expect(powerSyncInstance).toHaveProperty('api');
     expect(typeof powerSyncInstance.start).toBe('function');
@@ -154,14 +154,12 @@ describe('goal repository factories surface', () => {
     const habit = (_t: IHabitRepository) => undefined;
     const goal = (_t: IGoalRepository) => undefined;
     const record = (_t: IGoalRecordRepository) => undefined;
-    const relation = (_t: IRelationRepository) => undefined;
     const wallet = (_t: IWalletRepository) => undefined;
 
     expect(typeof run).toBe('function');
     expect(typeof habit).toBe('function');
     expect(typeof goal).toBe('function');
     expect(typeof record).toBe('function');
-    expect(typeof relation).toBe('function');
     expect(typeof wallet).toBe('function');
   });
 

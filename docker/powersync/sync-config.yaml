@@ -15,6 +15,7 @@ streams:
       - SELECT * FROM goal_records WHERE identity_id = auth.user_id()
       - SELECT * FROM goal_reviews WHERE identity_id = auth.user_id()
       - SELECT * FROM key_result_weight_snapshots WHERE identity_id = auth.user_id()
+      - SELECT * FROM relations WHERE identity_id = auth.user_id()
       - SELECT * FROM task_templates WHERE identity_id = auth.user_id()
       - SELECT * FROM task_instances WHERE identity_id = auth.user_id()
       - SELECT * FROM task_statistics WHERE identity_id = auth.user_id()

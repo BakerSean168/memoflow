@@ -83,6 +83,7 @@ describe('GoalElectronModule.register() startup (W4 P2-1)', () => {
           checkActiveTaskBindings: async () => ({ hasActiveBindings: false, activeCount: 0 }),
         },
         userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+        relationCleanupFactory: () => ({ unlinkAllForGoal: async () => 0 }),
       }),
     ).not.toThrow();
   });

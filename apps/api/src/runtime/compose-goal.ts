@@ -41,15 +41,14 @@ import {
   createGoalEventListenersRuntime,
   createGoalModule,
   createGoalPrismaRepositories,
+  createGoalPrismaDeletionTransactionRunner,
   createGoalRuntimeContribution,
   normalizeGoalRuntimeContributions,
   type GoalApplicationPort,
   type GoalRuntimeContributionsInput,
+  type PrismaGoalRelationCleanupFactory,
 } from '@memoflow/goal';
-import {
-  createGoalApiModule,
-  type GoalApiModuleDef,
-} from '@memoflow/goal/api';
+import { createGoalApiModule, type GoalApiModuleDef } from '@memoflow/goal/api';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
 import type { UserTimeContextPort } from '@memoflow/time';
 
@@ -64,6 +63,8 @@ export interface ComposeGoalDependencies {
   readonly taskBindingReadPort: GoalDependencyReadPort;
   /** Canonical identity-scoped Product Time context; required because Prisma enables Habit. */
   readonly userTimeContextPort: UserTimeContextPort;
+  /** Shared Relation transaction-scoped cleanup adapter. */
+  readonly relationCleanupFactory: PrismaGoalRelationCleanupFactory;
   /** Extra runtime contributions from the host (e.g. schedule projection). 宿主提供的额外运行时贡献。 */
   readonly runtimeContributions?: GoalRuntimeContributionsInput;
 }
@@ -111,15 +112,12 @@ export interface ComposedGoal {
  * @param dependencies - ComposeGoalDependencies with the runtime Prisma client.
  * @returns ComposedGoal — the bound module handle and the shared application port.
  */
-export function composeGoal(
-  dependencies: ComposeGoalDependencies,
-): ComposedGoal {
+export function composeGoal(dependencies: ComposeGoalDependencies): ComposedGoal {
   const {
     goalRepository,
     goalRecordRepository,
     goalWriteTransactionRunner,
     habitRepository,
-    relationRepository,
     walletRepository,
   } = createGoalPrismaRepositories(dependencies.db);
 
@@ -139,8 +137,11 @@ export function composeGoal(
     goalRepository,
     goalRecordRepository,
     goalWriteTransactionRunner,
+    goalDeletionTransactionRunner: createGoalPrismaDeletionTransactionRunner(
+      dependencies.db,
+      dependencies.relationCleanupFactory,
+    ),
     habitRepository,
-    relationRepository,
     walletRepository,
     taskBindingReadPort: dependencies.taskBindingReadPort,
     userTimeContextPort: dependencies.userTimeContextPort,

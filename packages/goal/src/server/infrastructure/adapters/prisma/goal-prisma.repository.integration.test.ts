@@ -6,6 +6,7 @@ import { requireYmd } from '@memoflow/contracts/primitives';
 import { Goal } from '../../../domain/aggregates/goal';
 import { GoalLabelOwnershipError, GoalReminderConfig } from '../../../domain';
 import { GoalPrismaRepository } from './goal-prisma.repository';
+import { PrismaGoalDeletionTransactionRunner } from './prisma-goal-deletion-transaction-runner';
 import {
   cleanAll,
   disconnectPrisma,
@@ -370,6 +371,9 @@ describe('GoalApiModule.register() lifecycle (W4 P2-1)', () => {
     });
     const instance = createGoalModule({
       ...repositories,
+      goalDeletionTransactionRunner: new PrismaGoalDeletionTransactionRunner(prisma, () => ({
+        unlinkAllForGoal: async () => 0,
+      })),
       taskBindingReadPort: {
         checkActiveTaskBindings: async () => ({ hasActiveBindings: false, activeCount: 0 }),
       },

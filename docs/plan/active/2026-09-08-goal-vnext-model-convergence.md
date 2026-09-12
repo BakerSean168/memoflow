@@ -461,6 +461,8 @@ Core identity    Target/time        KR Measurement V3
 
 ### GOAL-7206 — Promote Relation to shared capability and implement Goal Knowledge links
 
+**Status:** DONE on `chatgpt/goal-7206-shared-relation`; destructive owner cutover and dual-host runtime evidence below.
+
 **Goal:** Goal can link reusable Knowledge Documents through a shared Relation owner on both Prisma and PowerSync lanes, using ADR-090 stable `KnowledgeDocumentId`.
 
 **Scope:**
@@ -488,6 +490,8 @@ Core identity    Target/time        KR Measurement V3
 10. remove generic Relation ownership from Goal package.
 
 **Acceptance:** Web/Desktop can create/read/delete Goal Knowledge relations offline/online; KnowledgeDocument survives unlink/Goal delete and rename/move keeps the relation resolvable; no Goal.noteIds/Note.goalId/path-derived relation dual truth.
+
+**Closure evidence:** `@memoflow/relation` is now the single generic Relation owner with Prisma + PowerSync repositories and a typed GoalKnowledge facade; the old Goal-owned `IRelationRepository`, Relation use cases, Prisma repository/mapper and `relation.create` manifest command are deleted. Note endpoints persist only ADR-090 `KnowledgeDocumentId` (`kdoc_<uuid>`); cloud resolution uses Repository active-binding/document-identity ports, Desktop resolution uses Local Vault stable frontmatter identity, and ambiguity fails closed. PowerSync now carries `relations` in schema/sync rules and validates immutable PUT/DELETE uploads server-side; PATCH and path-derived Note ids are rejected. Goal soft/permanent deletion receives only a narrow cleanup port and executes Goal mutation + Relation unlink in the same Prisma/PowerSync business-database transaction without importing `@memoflow/relation`; PostgreSQL integration proves both commit and rollback atomicity. Verification baseline before final governance closure: Relation 4 files / 10 unit tests + 1 file / 2 PostgreSQL integration tests PASS; Goal 82/465 unit + 4 files/18 integration PASS; Contracts 84/573 PASS; API Relation upload 4/4 and PowerSync schema 7/7 PASS; API/Desktop typecheck and production builds PASS. Governance tools 19 files / 139 tests PASS; generated test inventory is current at 1258 files; docs-check PASS; full governance-check PASS, including the canonical `shared-relation-ownership-audit` that rejects owner/path-identity/parity/deletion-transaction resurrection.
 
 **Dependencies:** GOAL-7201; GOAL-7202 migration consumes Goal Brief path once available; **hard external gate: ADR-090 stable KnowledgeDocument identity must be implemented before durable relation persistence is enabled.**
 

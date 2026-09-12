@@ -5,6 +5,7 @@ import type { IGoalRepository } from '../../../../domain/repositories/i-goal-rep
 import { Goal, GoalPolicy } from '../../../../domain';
 import { DeleteGoalUseCase } from '../delete-goal.use-case';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { GoalDeletionTransactionRunner } from '../goal-deletion-support';
 
 // ============================================================
 // Helpers
@@ -30,6 +31,8 @@ function createCompletedGoal(name = 'Completed Goal'): Goal {
 describe('DeleteGoalUseCase', () => {
   let goalRepo: ReturnType<typeof createMockRepo<IGoalRepository>>;
   let taskBindingReadPort: GoalDependencyReadPort;
+  let unlinkAllForGoal: ReturnType<typeof vi.fn>;
+  let deletionTransactionRunner: GoalDeletionTransactionRunner;
   let useCase: DeleteGoalUseCase;
 
   beforeEach(() => {
@@ -44,13 +47,39 @@ describe('DeleteGoalUseCase', () => {
         .fn()
         .mockResolvedValue({ hasActiveBindings: false, activeCount: 0 }),
     };
-    useCase = new DeleteGoalUseCase(goalRepo, new GoalPolicy(), taskBindingReadPort);
+    unlinkAllForGoal = vi.fn().mockResolvedValue(0);
+    deletionTransactionRunner = {
+      run: (work) =>
+        work({
+          goalRepository: goalRepo,
+          relationCleanup: { unlinkAllForGoal },
+        }),
+    };
+    useCase = new DeleteGoalUseCase(
+      goalRepo,
+      new GoalPolicy(),
+      taskBindingReadPort,
+      deletionTransactionRunner,
+    );
   });
 
   it('throws an error if taskBindingReadPort is missing', () => {
-    expect(() => new DeleteGoalUseCase(goalRepo, new GoalPolicy(), undefined as any)).toThrow(
-      'ITaskBindingReadPort must be explicitly provided to DeleteGoalUseCase',
-    );
+    expect(
+      () =>
+        new DeleteGoalUseCase(
+          goalRepo,
+          new GoalPolicy(),
+          undefined as any,
+          deletionTransactionRunner,
+        ),
+    ).toThrow('ITaskBindingReadPort must be explicitly provided to DeleteGoalUseCase');
+  });
+
+  it('throws an error if the atomic deletion transaction runner is missing', () => {
+    expect(
+      () =>
+        new DeleteGoalUseCase(goalRepo, new GoalPolicy(), taskBindingReadPort, undefined as any),
+    ).toThrow('GoalDeletionTransactionRunner must be explicitly provided to DeleteGoalUseCase');
   });
 
   describe('execute()', () => {
@@ -72,6 +101,7 @@ describe('DeleteGoalUseCase', () => {
       expect(result).toBeOk();
       expect(goal.deletedAt).not.toBeNull();
       expect(goalRepo.saveRootWithExpectedVersion).toHaveBeenCalledWith(goal, 1);
+      expect(unlinkAllForGoal).toHaveBeenCalledWith('identity-1', goal.id);
     });
 
     it('should soft delete an active goal when no task bindings exist', async () => {
@@ -100,6 +130,7 @@ describe('DeleteGoalUseCase', () => {
       }
       expect(goal.deletedAt).toBeNull();
       expect(goalRepo.saveRootWithExpectedVersion).not.toHaveBeenCalled();
+      expect(unlinkAllForGoal).not.toHaveBeenCalled();
     });
 
     it('isolates task binding queries by identityId', async () => {
@@ -146,6 +177,7 @@ describe('DeleteGoalUseCase', () => {
       expect(result).toBeErrorWithCode('CONFLICT');
       expect(goal.deletedAt).toBeNull();
       expect(goalRepo.saveRootWithExpectedVersion).not.toHaveBeenCalled();
+      expect(unlinkAllForGoal).not.toHaveBeenCalled();
     });
   });
 

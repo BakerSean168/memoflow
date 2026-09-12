@@ -14,7 +14,8 @@ import {
   GoalPrismaRepository,
   GoalRecordPrismaRepository,
   PrismaGoalWriteTransactionRunner,
-  RelationPrismaRepository,
+  PrismaGoalDeletionTransactionRunner,
+  type PrismaGoalRelationCleanupFactory,
   WalletPrismaRepository,
 } from './adapters/prisma';
 import { PrismaHabitRepository } from './adapters/prisma/prisma-habit.repository';
@@ -28,12 +29,7 @@ import type { ScheduledHandlerRegistration } from '@memoflow/contracts/schedule'
 import type { GoalScheduleProjectionSource } from '../../schedule-projection';
 import { createGoalTaskProgressHandler } from '../application/event-handlers';
 import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
-import type {
-  IGoalRecordRepository,
-  IGoalRepository,
-  IRelationRepository,
-  IWalletRepository,
-} from '../domain';
+import type { IGoalRecordRepository, IGoalRepository, IWalletRepository } from '../domain';
 import type { IHabitRepository } from '../application/use-cases/commands/habit.use-cases';
 import type { GoalWriteTransactionRunner } from '../application/use-cases/commands/goal-write-support';
 
@@ -52,17 +48,13 @@ import type { GoalWriteTransactionRunner } from '../application/use-cases/comman
  * only the Prisma lane supplies it.
  * `habitRepository` 是可选的，因为 PowerSync 没有习惯适配器；仅 Prisma 一条线提供它。
  *
- * `relationRepository`/`walletRepository` are optional for the same reason:
- * PowerSync stays default-absent (no fake adapters are created).
- * `relationRepository`/`walletRepository` 同理可选：PowerSync 保持缺省，不伪造实现。
+ * `walletRepository` remains optional because PowerSync has no Wallet adapter.
  */
 export interface GoalRepositorySet {
   readonly goalRepository: IGoalRepository;
   readonly goalRecordRepository: IGoalRecordRepository;
   readonly goalWriteTransactionRunner: GoalWriteTransactionRunner;
   readonly habitRepository?: IHabitRepository;
-  /** R5：关系仓储（仅 Prisma 提供）/ Relation repository (Prisma lane only). */
-  readonly relationRepository?: IRelationRepository;
   /** R7：钱包仓储（仅 Prisma 提供）/ Wallet repository (Prisma lane only). */
   readonly walletRepository?: IWalletRepository;
 }
@@ -91,6 +83,8 @@ export function createGoalPrismaModule(
     taskBindingReadPort: GoalDependencyReadPort;
     /** Required because the Prisma lane enables Habit. */
     userTimeContextPort: UserTimeContextPort;
+    /** Shared Relation supplies a transaction-scoped cleanup adapter. */
+    relationCleanupFactory: PrismaGoalRelationCleanupFactory;
   },
 ): GoalModuleInstance {
   if (!options?.taskBindingReadPort) {
@@ -99,23 +93,28 @@ export function createGoalPrismaModule(
   if (!options?.userTimeContextPort) {
     throw new Error('[FAIL-CLOSED] createGoalPrismaModule requires options.userTimeContextPort');
   }
+  if (!options?.relationCleanupFactory) {
+    throw new Error('[FAIL-CLOSED] createGoalPrismaModule requires options.relationCleanupFactory');
+  }
   const {
     goalRepository,
     goalRecordRepository,
     goalWriteTransactionRunner,
     habitRepository,
-    relationRepository,
     walletRepository,
   } = createGoalPrismaRepositories(db);
   return createGoalModule({
     goalRepository,
     goalRecordRepository,
     goalWriteTransactionRunner,
+    goalDeletionTransactionRunner: new PrismaGoalDeletionTransactionRunner(
+      db,
+      options.relationCleanupFactory,
+    ),
     taskBindingReadPort: options.taskBindingReadPort,
     userTimeContextPort: options.userTimeContextPort,
     runtimeContributions: options?.runtimeContributions,
     habitRepository,
-    relationRepository,
     walletRepository,
   });
 }
@@ -141,11 +140,16 @@ export function createGoalPrismaRepositories(db: PrismaClient): GoalRepositorySe
     goalWriteTransactionRunner: new PrismaGoalWriteTransactionRunner(db),
     // R4：习惯仓储（Habit 模块）
     habitRepository: new PrismaHabitRepository(db),
-    // R5：关系仓储（Relation 模块）
-    relationRepository: new RelationPrismaRepository(db),
     // R7：钱包仓储（Wallet 外部模块）
     walletRepository: new WalletPrismaRepository(db),
   };
+}
+
+export function createGoalPrismaDeletionTransactionRunner(
+  db: PrismaClient,
+  relationCleanupFactory: PrismaGoalRelationCleanupFactory,
+): PrismaGoalDeletionTransactionRunner {
+  return new PrismaGoalDeletionTransactionRunner(db, relationCleanupFactory);
 }
 
 /** Host-level Task -> Goal integration handler backed by one Goal transaction. */
@@ -179,3 +183,5 @@ export function createGoalPrismaReminderFireHandler(
     requestedWriter,
   });
 }
+
+export type { PrismaGoalRelationCleanupFactory };

@@ -1,3 +1,4 @@
+export { KnowledgeDocumentRefResolverService } from './knowledge-document-ref-resolver.service';
 export { KnowledgeRepositoryConnectionService } from './knowledge-repository-connection.service';
 export type { KnowledgeRepositoryConnectionServiceOptions } from './knowledge-repository-connection.service';
 export {

@@ -59,10 +59,12 @@ import {
   createGoalEventListenersRuntime,
   createGoalModule,
   createGoalPowerSyncRepositories,
+  createGoalPowerSyncDeletionTransactionRunner,
   createGoalRuntimeContribution,
   normalizeGoalRuntimeContributions,
   type GoalApplicationPort,
   type GoalRuntimeContributionsInput,
+  type PowerSyncGoalRelationCleanupFactory,
   type IGoalRecordRepository,
   type IGoalRepository,
 } from '@memoflow/goal';
@@ -80,6 +82,8 @@ export interface ComposeGoalDependencies {
   /** Host-provided Task→Goal dependency read port (PowerSyncTaskBindingReadPort). 宿主提供的 Task→Goal 依赖读取端口。 */
   readonly taskBindingReadPort: GoalDependencyReadPort;
   readonly userTimeContextPort: UserTimeContextPort;
+  /** Shared Relation transaction-scoped cleanup adapter. */
+  readonly relationCleanupFactory: PowerSyncGoalRelationCleanupFactory;
   /** Extra runtime contributions from the host (e.g. schedule projection). 宿主提供的额外运行时贡献。 */
   readonly runtimeContributions?: GoalRuntimeContributionsInput;
 }
@@ -144,11 +148,8 @@ export interface ComposeGoalResult {
  * @returns ComposeGoalResult — the bound Electron module handle plus repository view.
  */
 export function composeGoal(dependencies: ComposeGoalDependencies): ComposeGoalResult {
-  const {
-    goalRepository,
-    goalRecordRepository,
-    goalWriteTransactionRunner,
-  } = createGoalPowerSyncRepositories(dependencies.db);
+  const { goalRepository, goalRecordRepository, goalWriteTransactionRunner } =
+    createGoalPowerSyncRepositories(dependencies.db);
 
   const listenerRuntime = createGoalEventListenersRuntime({
     goalRepository,
@@ -166,6 +167,10 @@ export function composeGoal(dependencies: ComposeGoalDependencies): ComposeGoalR
     goalRepository,
     goalRecordRepository,
     goalWriteTransactionRunner,
+    goalDeletionTransactionRunner: createGoalPowerSyncDeletionTransactionRunner(
+      dependencies.db,
+      dependencies.relationCleanupFactory,
+    ),
     taskBindingReadPort: dependencies.taskBindingReadPort,
     userTimeContextPort: dependencies.userTimeContextPort,
     runtimeContributions,

@@ -8,5 +8,4 @@
 export { PrismaGoalMapper, type PrismaGoalWithRelations } from './prisma-goal-mapper';
 export { PrismaGoalRecordMapper } from './prisma-goal-record-mapper';
 export { PrismaWeightSnapshotMapper } from './prisma-weight-snapshot-mapper';
-export { PrismaRelationMapper } from './prisma-relation.mapper';
 export { PrismaWalletMapper } from './prisma-wallet.mapper';

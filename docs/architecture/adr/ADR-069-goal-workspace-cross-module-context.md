@@ -252,11 +252,9 @@ Relation store 继续支持 forward/reverse lookup；UI 不需要理解 subject/
 
 ## 7. Relation ownership 必须从 Goal package 抽离
 
-当前 `IRelationRepository` / Relation use cases 暂驻 `packages/goal`，并且 Prisma lane 有实现，PowerSync/Desktop lane 没有完整对等能力。
+GOAL-7206 已完成该边界切换：旧 `IRelationRepository` / Relation use cases / Prisma mapper+repository / `relation.create` manifest command 已从 `packages/goal` 删除，generic Relation 的唯一 owner 是 `packages/relation`。Prisma 与 PowerSync/Desktop 两条持久化 lane 已对等。
 
-一旦 Goal <-> Note 成为正式产品能力，Relation 就不再可以被当成 Goal 内部附带功能。
-
-目标：
+当前 owner 结构：
 
 ```text
 @memoflow/relation
@@ -269,17 +267,17 @@ Relation store 继续支持 forward/reverse lookup；UI 不需要理解 subject/
 
 Goal、Repository/Knowledge、Task 等模块只通过 Relation application port / typed facade 使用它。
 
-迁移后 `packages/goal` 不再拥有 generic Relation repository class。
+`packages/goal` 不拥有 generic Relation repository class，也不依赖 `@memoflow/relation`；API/Desktop host 通过窄 port/factory 组合 Relation 能力。
 
 ## 8. Typed facade：不要让 generic string relation 泄漏到产品 UI
 
 底层可以继续使用 generic Relation，但产品层应提供 typed intent：
 
 ```text
-linkGoalKnowledge(goalId, noteId)
-unlinkGoalKnowledge(goalId, noteId)
+linkGoalKnowledge(goalId, knowledgeDocumentRef)
+unlinkGoalKnowledge(goalId, knowledgeDocumentRef)
 listGoalKnowledge(goalId)
-listGoalsForKnowledge(noteId)
+listGoalsForKnowledge(knowledgeDocumentRef)
 ```
 
 内部映射：
