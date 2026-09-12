@@ -718,6 +718,8 @@ Recurrence UNTIL
 
 **Delivery gate:** local review is complete, but GOAL-7211 is **not archived yet**. The exact-head GitHub PR required checks are the authoritative delivery evidence. After that head is green, archive this plan in a new commit and require the archive head itself to pass the same PR gate before declaring GOAL-7211 DONE.
 
+**Resolved first-PR finding:** PR #340 run `34701316259` on head `cdb3f39a380` exposed one P1 delivery blocker in `schedule-orchestration` test fixtures: two Goal reminder fixtures still constructed payload v1 / `dueDate` even though production had already moved to `GOAL_REMINDER_PAYLOAD_VERSION = 2` with `GoalTimeframe target`. No production fallback was restored. Both fixtures now use the exported payload version, canonical Ymd/GoalTimeframe values, and the actual reminder instant; focused `schedule-orchestration:typecheck` plus the full package test suite (9 files / 34 tests) PASS. Unresolved P0/P1 remains zero; a new exact-head PR run is required.
+
 ## 17. Implementation order and parallelism
 
 Safe parallelism after GOAL-7201:
