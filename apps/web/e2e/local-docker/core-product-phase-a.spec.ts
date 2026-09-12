@@ -18,6 +18,57 @@ type KeyResultProjection = {
 };
 
 test.describe('Local Docker core product Phase A', () => {
+  test('[P0][GOAL-7205] preserves Goal-only and Goal/KR link-only context without progress side effects', async ({
+    page,
+  }) => {
+    const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const goalOnlyTaskName = `[PM-A] Goal context only ${suffix}`;
+    const keyResultTaskName = `[PM-A] KR context only ${suffix}`;
+
+    await registerAndLogin(page, {
+      email: `pm-phase-a-context-${suffix}@test.com`,
+      password,
+      landingPath: '/goals',
+    });
+
+    const headers = {};
+    const fixture = await createGoalWithKeyResult(page, headers, {
+      name: `[PM-A] Context owner ${suffix}`,
+      keyResultName: `[PM-A] Context KR ${suffix}`,
+    });
+
+    const goalOnly = await createTaskPlanWithContext(page, goalOnlyTaskName, fixture, 'goal');
+    expect(goalOnly.goalBinding).toEqual({
+      goalId: fixture.id,
+      keyResultId: null,
+      contribution: null,
+    });
+
+    const keyResultOnly = await createTaskPlanWithContext(
+      page,
+      keyResultTaskName,
+      fixture,
+      'keyResult',
+    );
+    expect(keyResultOnly.goalBinding).toEqual({
+      goalId: fixture.id,
+      keyResultId: fixture.keyResultId,
+      contribution: null,
+    });
+
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await showTodayOverview(page);
+    for (const taskName of [goalOnlyTaskName, keyResultTaskName]) {
+      const taskItem = page
+        .getByTestId('daily-todo-item')
+        .filter({ has: page.getByText(taskName, { exact: true }) });
+      await expect(taskItem).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
+      await taskItem.locator('button[title]').click();
+      await expect(taskItem).toHaveAttribute('data-task-status', 'Completed');
+      await expectGoalContribution(page, headers, fixture, { currentValue: 0, recordCount: 0 });
+    }
+  });
+
   test('[P0][Fixture B] local Docker closes EachCompletion apply/replay/uncomplete/reapply without duplicate progress', async ({
     page,
   }) => {
@@ -220,6 +271,73 @@ async function selectBinding(page: Page, fixture: GoalFixture): Promise<void> {
   await keyResultTrigger.click();
   await page.getByRole('option').filter({ hasText: fixture.keyResultName }).click();
   await expect(keyResultTrigger).toContainText(fixture.keyResultName);
+}
+
+async function createTaskPlanWithContext(
+  page: Page,
+  taskName: string,
+  fixture: GoalFixture,
+  level: 'goal' | 'keyResult',
+): Promise<{
+  id: string;
+  goalBinding: {
+    goalId: string;
+    keyResultId: string | null;
+    contribution: { value: number; trigger: string } | null;
+  } | null;
+}> {
+  await page.goto('/tasks', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByTestId('task-management-view')).toBeVisible({
+    timeout: TIMEOUT_CONFIG.NAVIGATION,
+  });
+  await page.getByTestId('create-task-plan-button').click();
+  await expect(page.getByTestId('task-plan-dialog')).toBeVisible();
+  await page.getByTestId('task-plan-title-input').fill(taskName);
+  await page
+    .getByTestId('task-plan-description-input')
+    .fill('GOAL-7205 context-only runtime proof.');
+
+  const toggle = page.getByTestId('task-goal-binding-toggle');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('data-state', 'checked');
+  await page.getByTestId('task-goal-select-trigger').click();
+  await page.getByRole('option').filter({ hasText: fixture.name }).click();
+  await expect(page.getByTestId('task-goal-select-trigger')).toContainText(fixture.name);
+
+  if (level === 'keyResult') {
+    const keyResultTrigger = page.getByTestId('task-key-result-select-trigger');
+    await expect(keyResultTrigger).toBeEnabled();
+    await keyResultTrigger.click();
+    await page.getByRole('option').filter({ hasText: fixture.keyResultName }).click();
+    await expect(keyResultTrigger).toContainText(fixture.keyResultName);
+  }
+
+  await expect(page.getByTestId('task-goal-contribution-toggle')).toHaveAttribute(
+    'data-state',
+    'unchecked',
+  );
+  const responsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      new URL(response.url()).pathname.endsWith('/api/v1/task-plans'),
+  );
+  await page.getByTestId('task-dialog-save-button').click();
+  const creation = await expectApiData<{
+    template: {
+      id: string;
+      goalBinding: {
+        goalId: string;
+        keyResultId: string | null;
+        contribution: { value: number; trigger: string } | null;
+      } | null;
+    };
+    todayInstanceCreated: boolean;
+  }>(await responsePromise);
+  expect(creation.todayInstanceCreated).toBe(true);
+  await expect(page.getByTestId('task-plan-dialog')).toBeHidden({
+    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+  });
+  return creation.template;
 }
 
 async function showTodayOverview(page: Page): Promise<void> {

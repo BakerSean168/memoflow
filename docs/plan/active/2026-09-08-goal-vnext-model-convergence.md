@@ -431,6 +431,8 @@ Core identity    Target/time        KR Measurement V3
 
 ### GOAL-7205 — Allow Goal-level Task links and add reverse Task context queries
 
+**Status:** DONE on `chatgpt/goal-7205-task-links`; integrated implementation/runtime evidence below.
+
 **Goal:** Task can relate to a Goal without being forced into a KR, while contribution remains KR-scoped.
 
 **Scope:**
@@ -452,6 +454,8 @@ Core identity    Target/time        KR Measurement V3
 6. update DB constraint `task-goal-binding` to the new invariant.
 
 **Acceptance:** three valid states exist: goal-only、goal+KR、goal+KR+contribution; no contribution can exist without KR.
+
+**Closure evidence:** Task full unit suite 73 files / 686 tests PASS and Task PostgreSQL integration 6 files / 31 tests PASS; Contracts 83/570 and AI 79/428 PASS; App-Vue Goal/KR Task editor 10/10 PASS; PowerSync Goal-context adapter 4/4 and Prisma Goal-context integration 2/2 PASS; HTTP/controller/Electron/domain-client parity 4 files / 52 tests PASS. Contracts/Task/AI/App-Vue/API/Migrator/Desktop type/build gates PASS; App-Vue production build PASS; Governance tools 19/139 PASS, production lint 21 files with 0 warnings/errors, test inventory 1249 current, docs-check and full governance-check PASS. Local-Docker Phase A using the canonical local-compose runtime environment passes 2/2: Goal-only and Goal+KR link-only Tasks complete without changing KR progress, while Goal+KR+EachCompletion retains apply/replay/uncomplete/reapply idempotency. Live PostgreSQL uses `memoflow.task-goal-binding/v3`; the Goal-only row persists `key_result_id/contribution = NULL`, the Goal+KR link-only row persists contribution fields `NULL`, and both completed context-only Tasks have zero `task_goal_outbox` rows. Existing contributed bindings survived the in-place v2 -> v3 constraint reconciliation.
 
 **Dependencies:** GOAL-7204 for final KR contract.
 
