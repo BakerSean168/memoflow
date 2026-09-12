@@ -23,6 +23,7 @@ export type GoalSummary = {
   status: GoalStatus;
   startDate: Ymd | null;
   target: GoalTimeframe | null;
+  reminderConfig: GoalClientDTO['reminderConfig'];
   archivedAt: number | null;
   updatedAt: number;
   labels: GoalClientDTO['labels'];
@@ -50,6 +51,7 @@ export type GoalDetail = GoalSummary & {
     initialValue: number;
     unit: string | null;
     progress: number;
+    target: GoalTimeframe | null;
   }>;
   reviewsCount: number;
 };
@@ -67,6 +69,7 @@ function mapGoalDTO(dto: GoalClientDTO): GoalSummary {
     status: dto.status,
     startDate: dto.startDate,
     target: dto.target,
+    reminderConfig: dto.reminderConfig,
     archivedAt: dto.archivedAt,
     updatedAt: dto.updatedAt,
     labels: dto.labels,
@@ -92,6 +95,7 @@ export function mapGoalDetail(goal: GoalAggregateReadModel): GoalDetail {
       initialValue: item.progress.initialValue,
       unit: item.progress.unit,
       progress: progressPercentage(item),
+      target: item.target,
     })),
     reviewsCount: goal.reviews.length,
   };

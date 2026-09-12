@@ -281,7 +281,7 @@
 
 <script setup lang="ts">
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Menu, PanelRightOpen, Plus } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
@@ -305,6 +305,7 @@ import { useAIChatView } from '../composables/useAIChatView';
 import type { ConversationSummary, WorkflowMode } from '../composables/types';
 
 const { t } = useI18n();
+const route = useRoute();
 const router = useRouter();
 
 withDefaults(
@@ -469,6 +470,19 @@ watch(
   ([available, itemCount], [wasAvailable]) => {
     shellStore?.setWorkflowAvailable(available, itemCount);
     if (available && !wasAvailable) requestContextPanel('automatic');
+  },
+  { immediate: true },
+);
+
+watch(
+  () => route.query.workflow,
+  (workflow) => {
+    if (workflow !== 'goal-create') return;
+    startNewConversation('goal-create');
+    requestContextPanel('explicit');
+    const query = { ...route.query };
+    delete query.workflow;
+    void router.replace({ path: route.path, query });
   },
   { immediate: true },
 );

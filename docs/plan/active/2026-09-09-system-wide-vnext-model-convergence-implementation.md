@@ -488,6 +488,8 @@ Core outputs:
 
 **GOAL-7208 DONE:** `goal.create` now uses GoalPlanDraft V2 with stable workflow-local `draftRef`s across Goal/KR/Task/Knowledge, owner-domain Task schedule/Goal-KR links, and explicit Knowledge `create | linkExisting` intents. Deterministic entity/request IDs plus durable `referenceMap + relationIds` receipts make multi-owner application resumable without pretending to be a cross-domain DB transaction: a restarted partial apply reuses only verified deterministic successes and retries only missing work, while owner identity drift fails closed. API and Desktop compose the same mutation port over Goal, Task, Knowledge and Shared Relation owners; Vue review can edit/remove proposed children before approval and routes successful completion through the V2 Goal reference. Closure evidence: Contracts 85/580 and AI 79/425 full suites PASS; focused API 7/7, Desktop 6/6, Vue Goal/i18n/chat 26/26 and shared recovery panels 9/9 PASS; Contracts/AI/App-Vue/API/Desktop typechecks and App-Vue/API/Desktop production builds PASS; changed-code ESLint and diff gates PASS; Prettier-managed changed files PASS while legacy-format Goal locale files retain their existing style; test inventory is current at 1266 files; `docs:check` and full `governance:check` PASS; Web typecheck/build PASS. GOAL-7209 is now dependency-ready.
 
+**GOAL-7209 DONE:** Goal UI now matches the vNext product information architecture without moving owner boundaries. Vue/Web/Desktop create/edit uses compact Name + Summary plus status/Start/Target/Labels/Reminder/Notes property chips; a shared `GoalTimeframePicker` preserves Day/Month/Quarter/Half-year/Year precision for Goal and KR targets, and KR editing keeps Initial/Current/Target visible. Goal detail consumes the 7207 `GoalWorkspaceReadModel` for bounded Task/Knowledge previews, linked-task counts, recent progress/reviews and light `Past target` signaling; Task/KR deep links now carry and consume owner context filters rather than acting as decorative links. `Create with AI` enters the durable GoalPlanDraft V2 flow through a consumed-once route intent. React/Mobile keeps the same `GoalTimeframe` parser and Workspace semantics in a compressed layout, including Task/Knowledge context and Goal/KR task navigation. Notes continue to route into the Knowledge surface instead of creating Goal-owned note storage. Closure evidence: App-Vue Goal 15 files / 48 tests and focused UI/i18n 5 files / 20 tests PASS; App-Vue/App-React/Mobile typechecks PASS; Web/Desktop typechecks and production builds PASS; changed-source ESLint is zero-warning, diff gate PASS, and test inventory is current at 1267 files; `docs:check` and full `governance:check` PASS. GOAL-7210 is now dependency-ready.
+
 ## TASK lane — continue Task plan from clean checkpoint
 
 Resume only after Time/Label owner seams are ready. Continue from the existing TaskPlan/TaskOccurrence/schedule checkpoint, not from legacy templates.
@@ -680,9 +682,9 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 ## 7. Immediate next tickets
 
-TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, and Goal `GOAL-7202..7208` are complete. Current dependency-ready work is:
+TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, and Goal `GOAL-7202..7209` are complete. Current dependency-ready work is:
 
-1. `GOAL-7209` — Linear-style Goal property-chip create/edit plus Workspace detail UI convergence;
+1. `GOAL-7210` — destructively retire the remaining Goal/KR legacy compatibility tracks now that all vNext consumers are on canonical UI/contracts;
 2. `TASK-7302` + `TASK-7303` — converge TaskPlan and TaskOccurrence aggregates, then continue the Task vNext dependency chain;
 3. `SETTING-9210` — five-layer review, exact-head CI/build, docs integrity and Setting plan archive;
 4. continue `PORT-1601/1602` owner capability registration as surviving owner models stabilize; execute final V2 deletion only when V3 preserves all required product coverage.

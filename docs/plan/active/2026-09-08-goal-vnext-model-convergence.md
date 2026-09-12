@@ -611,6 +611,10 @@ Core identity    Target/time        KR Measurement V3
 
 **Dependencies:** GOAL-7202~7208; can develop components in parallel behind new contracts after those contracts freeze.
 
+**Implementation result:** DONE. Vue/Web/Desktop manual create/edit is now compact Name + Summary plus status/Start/Target/Labels/Reminder/Notes property chips. `GoalTimeframePicker` edits Day/Month/Quarter/Half-year/Year directly and never collapses broad targets into fake end dates; Goal and KR editors both preserve the canonical `GoalTimeframe`. Reminder UI projects the existing Goal-owned `RemainingDays` / `TimeProgressPercentage` contract instead of inventing a second reminder model. Goal detail now renders the `GoalWorkspaceReadModel`: bounded Task/Knowledge previews, KR linked-task counts, recent progress/reviews and light `Past target` presentation are composed without importing Task or Repository ownership into Goal UI. Task deep links carry Goal/KR query context and both Vue and React task lists consume those filters. `Create with AI` enters the durable `goal.create` flow through a one-shot route intent. React/Mobile uses the same precision-preserving target parser and Workspace read model while compressing the presentation for small screens rather than cloning desktop layout. The Notes chip routes to the Knowledge owner surface; persisted note creation/linking remains Knowledge + Shared Relation responsibility.
+
+**Closure evidence:** App-Vue Goal module 15 files / 48 tests PASS, including the new four-case `GOAL-7209 UI convergence lock`; focused Goal dialog/KR/layout/i18n suite 5 files / 20 tests PASS. App-Vue, App-React and Mobile typechecks PASS; Web and Desktop typechecks plus production builds PASS. Changed TypeScript/Vue ESLint is zero-warning, `git diff --check` PASS, and test inventory is current at 1267 files; `docs:check` and full `governance:check` PASS.
+
 ## 15. Phase 7 — Direct cleanup and truth convergence
 
 ### GOAL-7210 — Remove legacy Goal/KR tracks and finalize cutover
@@ -757,9 +761,9 @@ GOAL-7205  DONE — Goal-level Task/KR context ownership + runtime proof
 GOAL-7206  DONE — Shared Relation + stable KnowledgeDocumentId Goal links
 GOAL-7207  DONE — GoalWorkspaceReadModel + bounded owner composition
 GOAL-7208  DONE — GoalPlanDraft V2 + deterministic multi-owner apply/retry
-GOAL-7209  PLANNED — next dependency-ready Goal ticket
-GOAL-7210  PLANNED
+GOAL-7209  DONE — property-chip create/edit + Workspace UI + React/Mobile parity
+GOAL-7210  PLANNED — next dependency-ready Goal ticket
 GOAL-7211  PLANNED
 ```
 
-GOAL-7201 froze the design package; GOAL-7202～7208 are now implemented production truth. GOAL-7209 is the next Goal implementation ticket.
+GOAL-7201 froze the design package; GOAL-7202～7209 are now implemented production truth. GOAL-7210 is the next Goal implementation ticket.

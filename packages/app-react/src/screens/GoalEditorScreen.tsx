@@ -3,27 +3,24 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { presentErrorMessage } from '@memoflow/http-client';
-import {
-  goalTimeframeLabel,
-  type CreateGoalReq,
-  type UpdateGoalReq,
-} from '@memoflow/contracts/goal';
+import type { CreateGoalReq, UpdateGoalReq } from '@memoflow/contracts/goal';
 
 import { useGoalDetail } from '../hooks/useGoalDetail';
 import { useGoalService } from '../hooks/useGoalService';
-import { getProductTime, parseProductYmdInput } from '../utils/product-time';
+import {
+  goalTimeframeInputValue,
+  parseGoalTimeframeInput,
+  parseProductYmdInput,
+} from '../utils/product-time';
 import {
   PageShell,
   PrimaryButton,
   PrimaryTextField,
   SectionCard,
   Spacing,
+  StatusPill,
   ThemedText,
 } from '@memoflow/ui-react-native';
-
-function targetDateInput(goal: ReturnType<typeof useGoalDetail>['goal']): string {
-  return goal?.target?.kind === 'day' ? goal.target.date : '';
-}
 
 export function GoalEditorScreen() {
   const router = useRouter();
@@ -35,8 +32,8 @@ export function GoalEditorScreen() {
 
   const [name, setName] = useState('');
   const [summary, setSummary] = useState('');
-  const [targetDate, setTargetDate] = useState('');
-  const [targetTouched, setTargetTouched] = useState(false);
+  const [startDate, setStartDate] = useState('');
+  const [targetInput, setTargetInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,8 +41,8 @@ export function GoalEditorScreen() {
     if (!goal) return;
     setName(goal.name);
     setSummary(goal.summary ?? '');
-    setTargetDate(targetDateInput(goal));
-    setTargetTouched(false);
+    setStartDate(goal.startDate ?? '');
+    setTargetInput(goalTimeframeInputValue(goal.target));
   }, [goal?.id]);
 
   async function handleSubmit() {
@@ -54,18 +51,17 @@ export function GoalEditorScreen() {
       return;
     }
 
-    const parsedTargetDate =
-      targetDate.trim().length === 0 ? null : parseProductYmdInput(targetDate);
-    if (targetDate.trim().length > 0 && parsedTargetDate === null) {
-      setError('Target date must use YYYY-MM-DD.');
+    const parsedStartDate = startDate.trim().length === 0 ? null : parseProductYmdInput(startDate);
+    if (startDate.trim().length > 0 && parsedStartDate === null) {
+      setError('Start date must use YYYY-MM-DD.');
       return;
     }
-    const target =
-      goalId && goal && !targetTouched
-        ? (goal.target ?? null)
-        : parsedTargetDate
-          ? ({ kind: 'day', date: parsedTargetDate } as const)
-          : null;
+
+    const target = targetInput.trim().length === 0 ? null : parseGoalTimeframeInput(targetInput);
+    if (targetInput.trim().length > 0 && target === null) {
+      setError('Target supports YYYY-MM-DD, YYYY-MM, Q4 2026, H1 2027, or YYYY.');
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);
@@ -75,12 +71,14 @@ export function GoalEditorScreen() {
           name: name.trim(),
           expectedVersion: goal?.version ?? 1,
           summary: summary.trim().length > 0 ? summary.trim() : null,
+          startDate: parsedStartDate,
           target,
         } satisfies UpdateGoalReq)
       : await service.createGoal({
           name: name.trim(),
           summary: summary.trim().length > 0 ? summary.trim() : undefined,
-          target: target ?? undefined,
+          ...(parsedStartDate ? { startDate: parsedStartDate } : {}),
+          ...(target ? { target } : {}),
         } satisfies CreateGoalReq);
 
     setIsSubmitting(false);
@@ -92,11 +90,13 @@ export function GoalEditorScreen() {
     router.replace(`../${String(result.data.readModel.id)}`);
   }
 
+  const reminderCount = goal?.reminderConfig?.triggers.filter((item) => item.enabled).length ?? 0;
+
   return (
     <PageShell
       eyebrow="Goals"
       title={goalId ? 'Edit goal' : 'Create goal'}
-      subtitle="Goal = direction + measurement. Labels and key results are managed separately."
+      subtitle="Direction + measurable outcomes, with the same precision-preserving Goal contract as Web/Desktop."
     >
       <SectionCard title="Navigation" description="Goal editor">
         <View style={styles.actionRow}>
@@ -120,40 +120,51 @@ export function GoalEditorScreen() {
       <ScrollView contentContainerStyle={styles.formColumn}>
         <SectionCard
           title="Direction"
-          description="Name the goal and keep its identity summary concise."
+          description="Name is the only required text field; summary stays concise."
         >
           <PrimaryTextField
             label="Name"
             value={name}
             onChangeText={setName}
-            placeholder="Ship mobile migration"
+            placeholder="What do you want to achieve?"
           />
           <PrimaryTextField
             label="Summary"
             value={summary}
             onChangeText={setSummary}
-            placeholder="What this goal is trying to achieve"
+            placeholder="What does success mean?"
             maxLength={500}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-            style={styles.multilineField}
           />
-          {goal?.target && goal.target.kind !== 'day' && !targetTouched ? (
-            <ThemedText type="small" themeColor="textSecondary">
-              Current target:{' '}
-              {goalTimeframeLabel(goal.target, getProductTime().presentation.locale)}
-            </ThemedText>
-          ) : null}
+        </SectionCard>
+
+        <SectionCard
+          title="Planning properties"
+          description="Mobile compresses the property row instead of inventing another Goal contract."
+        >
+          <View style={styles.propertyRow}>
+            <StatusPill label={goal?.status ?? 'Planned'} tone="tint" />
+            <StatusPill
+              label={goal?.labels.length ? `${goal.labels.length} labels` : 'No labels'}
+              tone="textSecondary"
+            />
+            <StatusPill
+              label={reminderCount > 0 ? `${reminderCount} reminders` : 'No reminders'}
+              tone="textSecondary"
+            />
+          </View>
           <PrimaryTextField
-            label="Target date"
-            value={targetDate}
-            onChangeText={(value) => {
-              setTargetDate(value);
-              setTargetTouched(true);
-            }}
-            placeholder="2026-12-31"
-            hint="Use YYYY-MM-DD. Choosing a date replaces any broader target period."
+            label="Start"
+            value={startDate}
+            onChangeText={setStartDate}
+            placeholder="2026-09-12"
+            hint="Exact date, YYYY-MM-DD."
+          />
+          <PrimaryTextField
+            label="Target"
+            value={targetInput}
+            onChangeText={setTargetInput}
+            placeholder="Q4 2026"
+            hint="Use YYYY-MM-DD, YYYY-MM, Q4 2026, H1 2027, or YYYY. Precision is preserved."
           />
         </SectionCard>
       </ScrollView>
@@ -164,5 +175,5 @@ export function GoalEditorScreen() {
 const styles = StyleSheet.create({
   actionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   formColumn: { gap: Spacing.three, paddingBottom: Spacing.six },
-  multilineField: { minHeight: 110 },
+  propertyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
 });

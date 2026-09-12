@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { GoalId } from '@memoflow/contracts/primitives';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
 import type { TaskPlanClientDTO, TaskPlanStatus, TaskPlanSchedule } from '@memoflow/contracts/task';
 import type { TaskPlan } from '@memoflow/task/client';
@@ -28,6 +29,7 @@ export type TaskPlanSummary = {
   singleInstanceStatus: TaskPlanClientDTO['singleInstanceStatus'];
   labels: LabelClientDTO[];
   updatedAt: number;
+  goalBinding: TaskPlanClientDTO['goalBinding'];
 };
 
 export type TaskStatusFilter = 'all' | TaskPlanStatus;
@@ -58,6 +60,7 @@ function mapTemplate(template: TaskPlan): TaskPlanSummary {
     singleInstanceStatus: template.singleInstanceStatus,
     labels: template.labels,
     updatedAt: template.updatedAt,
+    goalBinding: template.goalBinding ? { ...template.goalBinding } : null,
   };
 }
 
@@ -85,7 +88,9 @@ function sortTemplates(templates: TaskPlanSummary[], sortBy: TaskSortOption) {
   return next;
 }
 
-export function useTaskPlans() {
+export function useTaskPlans(
+  options: { goalId?: string | null; keyResultId?: string | null } = {},
+) {
   const service = useTaskService();
   const { isRemoteAuthenticated } = useAppSession();
 
@@ -101,6 +106,7 @@ export function useTaskPlans() {
       page: 1,
       limit: 100,
       status: filter === 'all' ? undefined : [filter],
+      ...(options.goalId ? { goalId: options.goalId as GoalId } : {}),
     });
     if (!result.ok) {
       setTemplates([]);
@@ -128,6 +134,7 @@ export function useTaskPlans() {
         page: 1,
         limit: 100,
         status: statusFilter === 'all' ? undefined : [statusFilter],
+        ...(options.goalId ? { goalId: options.goalId as GoalId } : {}),
       });
       if (cancelled) return;
       if (!result.ok) {
@@ -144,7 +151,7 @@ export function useTaskPlans() {
     return () => {
       cancelled = true;
     };
-  }, [isRemoteAuthenticated, service, statusFilter]);
+  }, [isRemoteAuthenticated, options.goalId, service, statusFilter]);
 
   async function refresh() {
     if (!isRemoteAuthenticated) return;
@@ -154,10 +161,16 @@ export function useTaskPlans() {
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const filteredTemplates = useMemo(() => {
+    const byGoal = options.goalId
+      ? templates.filter((template) => template.goalBinding?.goalId === options.goalId)
+      : templates;
+    const byKeyResult = options.keyResultId
+      ? byGoal.filter((template) => template.goalBinding?.keyResultId === options.keyResultId)
+      : byGoal;
     const byQuery =
       normalizedQuery.length === 0
-        ? templates
-        : templates.filter((template) =>
+        ? byKeyResult
+        : byKeyResult.filter((template) =>
             [
               template.name,
               template.description ?? '',
@@ -168,7 +181,7 @@ export function useTaskPlans() {
               .includes(normalizedQuery),
           );
     return sortTemplates(byQuery, sortBy);
-  }, [normalizedQuery, sortBy, templates]);
+  }, [normalizedQuery, options.goalId, options.keyResultId, sortBy, templates]);
 
   return {
     error,

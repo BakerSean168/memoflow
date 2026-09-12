@@ -3702,6 +3702,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/goal/goal-vnext-ui-convergence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/goal/index.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11842,7 +11850,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 207
+      "fileCount": 208
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12641,7 +12649,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1092,
+    "unit": 1093,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

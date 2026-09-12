@@ -6,6 +6,8 @@ export { default as KRPreviewList } from './KRPreviewList.vue';
 
 // Product list rows
 export { default as GoalProgressRow } from './GoalProgressRow.vue';
+export { default as GoalTimeframePicker } from './GoalTimeframePicker.vue';
+export { default as GoalReminderChip } from './GoalReminderChip.vue';
 
 // Cards
 export { default as GoalRecordCardFromCards } from './cards/GoalRecordCard.vue';

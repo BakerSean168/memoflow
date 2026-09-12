@@ -1,5 +1,5 @@
 import { RefreshControl, StyleSheet, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { TaskPlanStatus } from '@memoflow/contracts/task';
 
 import { TaskPlanCard } from '../components/TaskPlanCard';
@@ -30,6 +30,12 @@ const SORTS: Array<{ label: string; value: TaskSortOption }> = [
 
 export function TasksScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    goalId?: string | string[];
+    keyResultId?: string | string[];
+  }>();
+  const goalId = typeof params.goalId === 'string' ? params.goalId : null;
+  const keyResultId = typeof params.keyResultId === 'string' ? params.keyResultId : null;
   const { signOut } = useAppSession();
   const {
     error,
@@ -44,7 +50,7 @@ export function TasksScreen() {
     sortBy,
     statusFilter,
     templates,
-  } = useTaskPlans();
+  } = useTaskPlans({ goalId, keyResultId });
 
   const activeCount = templates.filter((item) => item.status === TaskPlanStatus.Active).length;
   const totalPending = templates.reduce((sum, item) => sum + item.pendingInstanceCount, 0);
@@ -80,6 +86,23 @@ export function TasksScreen() {
         </SectionCard>
       ) : (
         <>
+          {goalId ? (
+            <SectionCard
+              title="Goal context"
+              description={
+                keyResultId
+                  ? `Showing tasks linked to KR ${keyResultId}.`
+                  : `Showing tasks linked to Goal ${goalId}.`
+              }
+            >
+              <PrimaryButton
+                label="Clear goal filter"
+                onPress={() => router.replace('/tasks')}
+                variant="ghost"
+              />
+            </SectionCard>
+          ) : null}
+
           <SectionCard title="Summary" description="Plans and pending occurrences.">
             <View style={styles.overviewRow}>
               <StatusPill label={`${templates.length} templates`} tone="tint" />
@@ -88,7 +111,10 @@ export function TasksScreen() {
             </View>
           </SectionCard>
 
-          <SectionCard title="Search and filters" description="Filter by plan lifecycle and execution facts.">
+          <SectionCard
+            title="Search and filters"
+            description="Filter by plan lifecycle and execution facts."
+          >
             <PrimaryTextField
               autoCapitalize="none"
               autoCorrect={false}
@@ -121,7 +147,9 @@ export function TasksScreen() {
 
           {error ? (
             <SectionCard title="Task load failed" description="Unable to load tasks.">
-              <ThemedText type="small" themeColor="warning">{error}</ThemedText>
+              <ThemedText type="small" themeColor="warning">
+                {error}
+              </ThemedText>
               <PrimaryButton label="Retry" onPress={refresh} variant="secondary" />
             </SectionCard>
           ) : null}
@@ -129,7 +157,9 @@ export function TasksScreen() {
           {!isLoading && filteredTemplates.length === 0 ? (
             <SectionCard
               title="No tasks matched"
-              description={templates.length === 0 ? 'No task templates yet.' : 'Try another filter.'}
+              description={
+                templates.length === 0 ? 'No task templates yet.' : 'Try another filter.'
+              }
             >
               <ThemedText type="small" themeColor="textSecondary">
                 Search: {searchQuery.trim().length === 0 ? 'none' : searchQuery}

@@ -51,6 +51,20 @@
       data-testid="task-management-scroll-host"
     >
       <div class="mx-auto flex w-full max-w-5xl flex-col gap-4">
+        <div
+          v-if="queryGoalId"
+          class="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"
+          data-testid="task-goal-deeplink-filter"
+        >
+          <span class="text-muted-foreground">
+            Goal {{ queryGoalId
+            }}<template v-if="queryKeyResultId"> · KR {{ queryKeyResultId }}</template>
+          </span>
+          <Button size="sm" variant="ghost" @click="router.replace({ name: 'task-list' })">
+            {{ t('common.clear') }}
+          </Button>
+        </div>
+
         <section
           class="grid gap-2 rounded-xl border bg-card p-3 @2xl/panel:grid-cols-[minmax(0,1fr)_repeat(3,minmax(9rem,auto))]"
           data-testid="task-filter-bar"
@@ -275,9 +289,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Badge, Button, Input, useConfirm } from '@memoflow/ui-vue-shadcn';
 import {
@@ -311,6 +325,7 @@ import {
   type TaskOccurrenceSort,
 } from '../utils/task-occurrence-presentation';
 
+const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const surfaces = ['today', 'upcoming', 'plans'] as const;
@@ -333,12 +348,27 @@ const dialogMode = ref<'create' | 'edit'>('create');
 const selectedTemplate = ref<TaskPlanViewModel | null>(null);
 const busyOccurrenceId = ref<string | null>(null);
 
+const queryGoalId = computed(() =>
+  typeof route.query.goalId === 'string' && route.query.goalId.length > 0
+    ? route.query.goalId
+    : null,
+);
+const queryKeyResultId = computed(() =>
+  typeof route.query.keyResultId === 'string' && route.query.keyResultId.length > 0
+    ? route.query.keyResultId
+    : null,
+);
+const taskListParams = computed(() => ({
+  page: 1,
+  limit: 500,
+  ...(queryGoalId.value ? { goalId: queryGoalId.value } : {}),
+}));
 const {
   templates,
   isLoading: templatesLoading,
   isError: templatesError,
   refetch: refetchTemplates,
-} = useTaskPlanListQuery({ page: 1, limit: 500 });
+} = useTaskPlanListQuery(taskListParams);
 const {
   createTemplateSafe,
   updateTemplateSafe,
@@ -371,6 +401,9 @@ const loadError = computed(() => templatesError.value || Boolean(instancesError.
 function templateMatchesFilters(templateId: string): boolean {
   const template = templateById.value.get(templateId);
   if (!template) return false;
+  if (queryGoalId.value && template.goalBinding?.goalId !== queryGoalId.value) return false;
+  if (queryKeyResultId.value && template.goalBinding?.keyResultId !== queryKeyResultId.value)
+    return false;
   const query = searchQuery.value.trim().toLowerCase();
   if (
     query &&
@@ -519,6 +552,17 @@ const completeOccurrence = (id: string) => runOccurrenceAction(id, completeInsta
 const uncompleteOccurrence = (id: string) => runOccurrenceAction(id, uncompleteInstance);
 const markOccurrenceMissed = (id: string) => runOccurrenceAction(id, markInstanceMissed);
 const skipOccurrence = (id: string) => runOccurrenceAction(id, skipInstance);
+
+watch(
+  [queryGoalId, queryKeyResultId],
+  ([goalId]) => {
+    if (goalId) {
+      activeSurface.value = 'plans';
+      goalFilter.value = 'linked';
+    }
+  },
+  { immediate: true },
+);
 
 onMounted(() => {
   void fetchInstances({ page: 1, limit: 500 });

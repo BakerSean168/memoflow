@@ -12,7 +12,12 @@ import {
 } from '@memoflow/contracts/goal';
 import { useGoalService } from '../hooks/useGoalService';
 
-import { emptyKind, formatProductDateTime, parseProductYmdInput } from '../utils/product-time';
+import {
+  emptyKind,
+  formatProductDateTime,
+  goalTimeframeInputValue,
+  parseGoalTimeframeInput,
+} from '../utils/product-time';
 
 import {
   PageShell,
@@ -48,8 +53,7 @@ export function GoalKeyResultScreen() {
   const [initialValue, setInitialValue] = useState('0');
   const [currentValue, setCurrentValue] = useState('');
   const [targetValue, setTargetValue] = useState('');
-  const [targetDate, setTargetDate] = useState('');
-  const [targetTouched, setTargetTouched] = useState(false);
+  const [targetInput, setTargetInput] = useState('');
   const [unit, setUnit] = useState('');
   const [weight, setWeight] = useState('1');
   const [recordValue, setRecordValue] = useState('');
@@ -96,8 +100,7 @@ export function GoalKeyResultScreen() {
     setInitialValue(String(found.progress.initialValue));
     setCurrentValue(String(found.progress.currentValue));
     setTargetValue(String(found.progress.targetValue));
-    setTargetDate(found.target?.kind === 'day' ? found.target.date : '');
-    setTargetTouched(false);
+    setTargetInput(goalTimeframeInputValue(found.target));
     setUnit(found.progress.unit ?? '');
     setWeight(String(found.weight));
     setRecordValue(String(found.progress.currentValue));
@@ -129,7 +132,11 @@ export function GoalKeyResultScreen() {
       setError('Initial value must differ from target value.');
       return;
     }
-    const parsedTargetDate = targetTouched ? parseProductYmdInput(targetDate) : null;
+    const target = targetInput.trim().length === 0 ? null : parseGoalTimeframeInput(targetInput);
+    if (targetInput.trim().length > 0 && target === null) {
+      setError('Target supports YYYY-MM-DD, YYYY-MM, Q4 2026, H1 2027, or YYYY.');
+      return;
+    }
 
     setIsMutating(true);
     setError(null);
@@ -140,9 +147,7 @@ export function GoalKeyResultScreen() {
       initialValue: nextInitialValue,
       currentValue: nextCurrentValue,
       targetValue: nextTargetValue,
-      ...(targetTouched
-        ? { target: parsedTargetDate ? ({ kind: 'day', date: parsedTargetDate } as const) : null }
-        : {}),
+      target,
       unit: unit.trim() || null,
       weight: Math.max(1, Math.min(5, Number.parseInt(weight, 10) || 1)),
     });
@@ -260,14 +265,13 @@ export function GoalKeyResultScreen() {
               keyboardType="numeric"
             />
             <PrimaryTextField
-              label="Target timeframe (YYYY-MM-DD, optional)"
-              value={targetDate}
-              onChangeText={(value) => {
-                setTargetTouched(true);
-                setTargetDate(value);
-              }}
+              label="Target timeframe"
+              value={targetInput}
+              onChangeText={setTargetInput}
+              placeholder="Q4 2026"
+              hint="Use YYYY-MM-DD, YYYY-MM, Q4 2026, H1 2027, or YYYY. Precision is preserved."
             />
-            {!targetTouched && keyResult.target && keyResult.target.kind !== 'day' ? (
+            {keyResult.target ? (
               <ThemedText type="small" themeColor="textSecondary">
                 Current target: {goalTimeframeLabel(keyResult.target)}
               </ThemedText>

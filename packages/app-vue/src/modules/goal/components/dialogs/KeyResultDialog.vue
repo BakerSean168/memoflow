@@ -68,19 +68,13 @@
             <Input id="key-result-unit" v-model="draft.unit" maxlength="20" />
           </div>
           <div class="space-y-2">
-            <Label for="key-result-target-timeframe">{{
-              t('goal.dialog.krTargetTimeframe')
-            }}</Label>
-            <Input
-              id="key-result-target-timeframe"
-              v-model="draft.targetDate"
-              type="date"
-              data-testid="key-result-target-date-input"
-              @update:model-value="targetTouched = true"
+            <Label>{{ t('goal.dialog.krTargetTimeframe') }}</Label>
+            <GoalTimeframePicker
+              v-model="draft.target"
+              test-id="key-result-target-chip"
+              :aria-label="t('goal.dialog.krTargetTimeframe')"
+              :placeholder="t('goal.dialog.krTargetTimeframe')"
             />
-            <p v-if="coarseTargetLabel" class="text-[11px] text-muted-foreground">
-              {{ t('goal.dialog.krCurrentTarget') }}: {{ coarseTargetLabel }}
-            </p>
           </div>
         </div>
 
@@ -144,12 +138,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
+import { reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ChevronRight } from '@lucide/vue';
 import {
   KeyResultCalculationMethod,
-  goalTimeframeLabel,
   type AddKeyResultReq,
   type GoalTimeframe,
   type KeyResultClientDTO,
@@ -170,10 +163,7 @@ import {
   Textarea,
 } from '@memoflow/ui-vue-shadcn';
 import { ProductDialogShell } from '../../../../shared/components';
-import {
-  fromProductYmdInputValue,
-  toProductYmdInputValue,
-} from '../../../../shared/utils/product-time';
+import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 
 type KeyResultInput = Omit<AddKeyResultReq, 'goalId' | 'expectedVersion'>;
 
@@ -186,7 +176,7 @@ const props = defineProps<{
   }) => Promise<boolean> | boolean;
 }>();
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const open = ref(false);
 const editing = ref(false);
 const goalId = ref('');
@@ -194,8 +184,6 @@ const keyResultId = ref<string>();
 const isSubmitting = ref(false);
 const submitError = ref<string | null>(null);
 const advancedOpen = ref(false);
-const targetTouched = ref(false);
-const originalTarget = ref<GoalTimeframe | null>(null);
 const methods = Object.values(KeyResultCalculationMethod);
 const draft = reactive({
   title: '',
@@ -204,15 +192,9 @@ const draft = reactive({
   initialValue: 0,
   currentValue: 0,
   targetValue: 100,
-  targetDate: '',
+  target: null as GoalTimeframe | null,
   unit: '',
   weight: 3,
-});
-
-const coarseTargetLabel = computed(() => {
-  const target = originalTarget.value;
-  if (targetTouched.value || !target || target.kind === 'day') return '';
-  return goalTimeframeLabel(target, locale.value);
 });
 
 function reset(): void {
@@ -222,11 +204,9 @@ function reset(): void {
   draft.initialValue = 0;
   draft.currentValue = 0;
   draft.targetValue = 100;
-  draft.targetDate = '';
+  draft.target = null;
   draft.unit = '';
   draft.weight = 3;
-  originalTarget.value = null;
-  targetTouched.value = false;
   advancedOpen.value = false;
   submitError.value = null;
   isSubmitting.value = false;
@@ -251,9 +231,7 @@ function openForUpdateKeyResult(id: string, keyResult: KeyResultClientDTO): void
   draft.initialValue = keyResult.progress.initialValue;
   draft.currentValue = keyResult.progress.currentValue;
   draft.targetValue = keyResult.progress.targetValue;
-  originalTarget.value = keyResult.target;
-  draft.targetDate =
-    keyResult.target?.kind === 'day' ? toProductYmdInputValue(keyResult.target.date) : '';
+  draft.target = keyResult.target ? { ...keyResult.target } : null;
   draft.unit = keyResult.progress.unit ?? '';
   draft.weight = keyResult.weight;
   open.value = true;
@@ -263,12 +241,6 @@ function setOpen(value: boolean): void {
   if (!value && isSubmitting.value) return;
   open.value = value;
   if (!value) submitError.value = null;
-}
-
-function resolvedTarget(): GoalTimeframe | null {
-  if (!targetTouched.value) return originalTarget.value;
-  const date = fromProductYmdInputValue(draft.targetDate);
-  return date ? { kind: 'day', date } : null;
 }
 
 async function submit(): Promise<void> {
@@ -292,7 +264,7 @@ async function submit(): Promise<void> {
     initialValue,
     currentValue,
     targetValue,
-    target: resolvedTarget(),
+    target: draft.target,
     unit: draft.unit.trim() || null,
     weight: Math.max(1, Math.min(5, Math.round(Number(draft.weight)))),
   };

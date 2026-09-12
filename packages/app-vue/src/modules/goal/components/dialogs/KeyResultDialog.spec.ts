@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../../locales/en-US';
 import type { KeyResultClientDTO } from '@memoflow/contracts/goal';
 import KeyResultDialog from './KeyResultDialog.vue';
+import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 
 const i18n = createI18n({
   legacy: false,
@@ -194,7 +195,11 @@ describe('KeyResultDialog submission lifecycle', () => {
     await nextTick();
 
     expect(document.body.textContent).toContain('2027 Q4');
-    expect((dom('key-result-target-date-input').element as HTMLInputElement).value).toBe('');
+    expect(wrapper.getComponent(GoalTimeframePicker).props('modelValue')).toEqual({
+      kind: 'quarter',
+      year: 2027,
+      quarter: 4,
+    });
     await dom('save-key-result-button').trigger('click');
     await flushPromises();
     expect(onSubmit).toHaveBeenLastCalledWith(
@@ -205,7 +210,11 @@ describe('KeyResultDialog submission lifecycle', () => {
 
     wrapper.vm.openForUpdateKeyResult('goal-1', keyResult);
     await nextTick();
-    await dom('key-result-target-date-input').setValue('2027-11-15');
+    wrapper.getComponent(GoalTimeframePicker).vm.$emit('update:modelValue', {
+      kind: 'day',
+      date: '2027-11-15',
+    });
+    await nextTick();
     await dom('save-key-result-button').trigger('click');
     await flushPromises();
     expect(onSubmit).toHaveBeenLastCalledWith(

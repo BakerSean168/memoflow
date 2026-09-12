@@ -9,6 +9,7 @@ import path from 'node:path';
 import { productionLocaleMessages } from '../../../../locales/production-messages';
 import { createMockGoal } from '@memoflow/contracts/mocks';
 import { LabelPicker } from '../../../../shared/components';
+import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 import GoalDialog from './GoalDialog.vue';
 
 const mocks = vi.hoisted(() => ({
@@ -64,7 +65,9 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
 
   it('edits only vNext Direction + Measurement fields without retired taxonomy or motivation forms', () => {
     const source = fs.readFileSync(path.resolve(__dirname, '../dialogs/GoalDialog.vue'), 'utf8');
-    expect(source).toContain('targetDate');
+    expect(source).toContain('GoalTimeframePicker');
+    expect(source).toContain('goal-property-chips');
+    expect(source).toContain('GoalReminderChip');
     expect(source).toContain('LabelPicker');
     expect(source).toContain('initialKeyResults');
     expect(source).toContain('keyResults');
@@ -82,7 +85,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     }
   });
 
-  it('preserves a broader target precision when edit does not touch the day target field', async () => {
+  it('preserves a broader target precision when edit does not change the precision picker', async () => {
     const goal = createMockGoal({
       name: 'Ship in Q4',
       summary: 'Preserve quarter precision',
@@ -100,7 +103,11 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     await nextTick();
 
     expect(document.body.textContent).toContain('2027 Q4');
-    expect((dom('goal-target-date-input').element as HTMLInputElement).value).toBe('');
+    expect(wrapper.getComponent(GoalTimeframePicker).props('modelValue')).toEqual({
+      kind: 'quarter',
+      year: 2027,
+      quarter: 4,
+    });
 
     await dom('save-goal-button').trigger('click');
     await flushPromises();
@@ -116,7 +123,7 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     wrapper.unmount();
   });
 
-  it('replaces a broader target with a day target only after the date field is edited', async () => {
+  it('replaces a broader target when the precision picker emits a day target', async () => {
     const goal = createMockGoal({
       name: 'Ship in Q4',
       target: { kind: 'quarter', year: 2027, quarter: 4 },
@@ -132,7 +139,11 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     });
     await nextTick();
 
-    await dom('goal-target-date-input').setValue('2027-11-15');
+    wrapper.getComponent(GoalTimeframePicker).vm.$emit('update:modelValue', {
+      kind: 'day',
+      date: '2027-11-15',
+    });
+    await nextTick();
     await dom('save-goal-button').trigger('click');
     await flushPromises();
 

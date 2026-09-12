@@ -7,7 +7,22 @@
       initial-focus-selector="[data-testid='goal-name-input']"
     >
       <template #title>
-        {{ mode === 'edit' ? t('goal.dialog.editGoal') : t('goal.dialog.createGoal') }}
+        <div class="flex min-w-0 items-center justify-between gap-3">
+          <span>{{
+            mode === 'edit' ? t('goal.dialog.editGoal') : t('goal.dialog.createGoal')
+          }}</span>
+          <Button
+            v-if="mode === 'create'"
+            type="button"
+            variant="ghost"
+            size="sm"
+            data-testid="goal-create-with-ai"
+            @click="emit('create-with-ai')"
+          >
+            <Sparkles class="mr-1 h-4 w-4" />
+            {{ t('goal.dialog.createWithAI') }}
+          </Button>
+        </div>
       </template>
       <template #description>{{ t('goal.dialog.vNextDescription') }}</template>
 
@@ -18,60 +33,126 @@
             id="goal-name"
             v-model="draft.name"
             data-testid="goal-name-input"
+            class="h-11 text-lg font-medium"
             maxlength="256"
             :placeholder="t('goal.dialog.goalTitlePlaceholder')"
           />
         </div>
 
-        <div class="space-y-2">
-          <Label for="goal-summary">{{ t('goal.dialog.summary') }}</Label>
-          <Textarea
-            id="goal-summary"
-            v-model="draft.summary"
-            data-testid="goal-summary-input"
-            class="min-h-24"
-            maxlength="500"
-            :placeholder="t('goal.dialog.summaryPlaceholder')"
+        <Input
+          id="goal-summary"
+          v-model="draft.summary"
+          data-testid="goal-summary-input"
+          maxlength="500"
+          :placeholder="t('goal.dialog.summaryPlaceholder')"
+        />
+
+        <div class="flex flex-wrap items-center gap-2" data-testid="goal-property-chips">
+          <span
+            class="inline-flex h-8 items-center rounded-full border bg-background px-3 text-sm"
+            data-testid="goal-status-chip"
+          >
+            {{ goalStatusLabel }}
+          </span>
+
+          <Popover>
+            <PopoverTrigger as-child>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                class="h-8 rounded-full px-3 font-normal"
+                data-testid="goal-start-chip"
+              >
+                <CalendarDays class="mr-1 h-3.5 w-3.5" />
+                {{ startChipLabel }}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" class="w-auto space-y-2 p-3">
+              <Label for="goal-start-date">{{ t('goal.dialog.startDate') }}</Label>
+              <Input id="goal-start-date" v-model="draft.startDate" type="date" />
+              <Button
+                v-if="draft.startDate"
+                type="button"
+                size="sm"
+                variant="ghost"
+                @click="draft.startDate = ''"
+              >
+                {{ t('common.clear') }}
+              </Button>
+            </PopoverContent>
+          </Popover>
+
+          <GoalTimeframePicker
+            v-model="draft.target"
+            test-id="goal-target-chip"
+            :aria-label="t('goal.dialog.target')"
+            :placeholder="t('goal.dialog.target')"
           />
-        </div>
 
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div class="space-y-2">
-            <Label for="goal-start-date">{{ t('goal.dialog.startDate') }}</Label>
-            <Input id="goal-start-date" v-model="draft.startDate" type="date" />
-          </div>
-          <div class="space-y-2">
-            <Label for="goal-target-date">{{ t('goal.dialog.targetDate') }}</Label>
-            <Input
-              id="goal-target-date"
-              v-model="draft.targetDate"
-              data-testid="goal-target-date-input"
-              type="date"
-              @update:model-value="targetTouched = true"
-            />
-            <p v-if="coarseTargetLabel" class="text-xs text-muted-foreground">
-              {{ t('goal.dialog.currentTarget', { target: coarseTargetLabel }) }}
-            </p>
-          </div>
-        </div>
-
-        <div class="space-y-2">
-          <Label>{{ t('goal.dialog.labels') }}</Label>
           <LabelPicker
             v-model="draft.labelIds"
             :options="labelOptions"
             :disabled="labelsLoading || isSaving"
-            :placeholder="t('goal.dialog.labelsPlaceholder')"
+            :placeholder="t('goal.dialog.labels')"
             :search-placeholder="t('goal.list.searchLabels')"
             :empty-text="t('goal.list.noLabels')"
             :create-label="t('goal.dialog.createLabel')"
             :aria-label="t('goal.dialog.labels')"
+            compact
             @create="createAndSelectLabel"
           />
-          <p v-if="labelCreateError" role="alert" class="text-xs text-destructive">
-            {{ labelCreateError }}
-          </p>
+
+          <GoalReminderChip
+            v-model="draft.reminderConfig"
+            :start-date="draft.startDate || null"
+            :target="draft.target"
+          />
+
+          <Popover>
+            <PopoverTrigger as-child>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                class="h-8 rounded-full px-3 font-normal"
+                data-testid="goal-notes-chip"
+              >
+                <NotebookText class="mr-1 h-3.5 w-3.5" />
+                {{ t('goal.dialog.notes') }}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" class="w-72 space-y-3 p-3">
+              <p class="text-sm text-muted-foreground">{{ t('goal.dialog.notesHint') }}</p>
+              <Button
+                v-if="mode === 'edit' && goal"
+                type="button"
+                variant="outline"
+                size="sm"
+                @click="emit('open-knowledge', String(goal.id))"
+              >
+                {{ t('goal.dialog.openKnowledge') }}
+              </Button>
+              <Button
+                v-else
+                type="button"
+                variant="outline"
+                size="sm"
+                @click="emit('create-with-ai')"
+              >
+                <Sparkles class="mr-1 h-4 w-4" />
+                {{ t('goal.dialog.createWithAI') }}
+              </Button>
+            </PopoverContent>
+          </Popover>
         </div>
+
+        <p v-if="labelCreateError" role="alert" class="text-xs text-destructive">
+          {{ labelCreateError }}
+        </p>
+        <p v-if="formError" role="alert" class="text-xs text-destructive">
+          {{ formError }}
+        </p>
 
         <section class="space-y-3" data-testid="goal-key-results-editor">
           <div class="flex items-center justify-between gap-3">
@@ -203,18 +284,13 @@
                 />
               </div>
               <div class="space-y-2">
-                <Label for="draft-kr-target-timeframe">{{
-                  t('goal.dialog.krTargetTimeframe')
-                }}</Label>
-                <Input
-                  id="draft-kr-target-timeframe"
-                  v-model="krForm.targetDate"
-                  type="date"
-                  @update:model-value="krTargetTouched = true"
+                <Label>{{ t('goal.dialog.krTargetTimeframe') }}</Label>
+                <GoalTimeframePicker
+                  v-model="krForm.target"
+                  test-id="draft-kr-target-timeframe"
+                  :aria-label="t('goal.dialog.krTargetTimeframe')"
+                  :placeholder="t('goal.dialog.krTargetTimeframe')"
                 />
-                <p v-if="krCoarseTargetLabel" class="text-[11px] text-muted-foreground">
-                  {{ t('goal.dialog.krCurrentTarget') }}: {{ krCoarseTargetLabel }}
-                </p>
               </div>
             </div>
 
@@ -309,10 +385,19 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ChevronRight, Pencil, Plus, Trash2 } from '@lucide/vue';
+import {
+  CalendarDays,
+  ChevronRight,
+  NotebookText,
+  Pencil,
+  Plus,
+  Sparkles,
+  Trash2,
+} from '@lucide/vue';
 import {
   KeyResultCalculationMethod,
-  goalTimeframeLabel,
+  ReminderTriggerType,
+  type GoalReminderConfigDTO,
   type GoalClientDTO,
   type GoalTimeframe,
   type CreateGoalReq,
@@ -326,6 +411,9 @@ import {
   Dialog,
   Input,
   Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
@@ -334,6 +422,8 @@ import {
   Textarea,
 } from '@memoflow/ui-vue-shadcn';
 import { LabelPicker, ProductDialogShell } from '../../../../shared/components';
+import GoalReminderChip from '../GoalReminderChip.vue';
+import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 import {
   fromProductYmdInputValue,
   toProductYmdInputValue,
@@ -353,9 +443,11 @@ const emit = defineEmits<{
   created: [GoalClientDTO];
   updated: [GoalClientDTO];
   'dirty-change': [boolean];
+  'create-with-ai': [];
+  'open-knowledge': [goalId: string];
 }>();
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const { createGoal, updateGoal, isSaving } = useGoal();
 const { options: labelOptions, isLoading: labelsLoading, createLabel } = useLabelCatalog();
 
@@ -363,18 +455,17 @@ const draft = reactive({
   name: '',
   summary: '',
   startDate: '',
-  targetDate: '',
+  target: null as GoalTimeframe | null,
+  reminderConfig: null as GoalReminderConfigDTO | null,
   labelIds: [] as string[],
   keyResults: [] as DraftKeyResult[],
 });
 const initialSnapshot = ref('');
-const targetTouched = ref(false);
 const labelCreateError = ref<string | null>(null);
+const formError = ref<string | null>(null);
 const krEditorOpen = ref(false);
 const editingKrIndex = ref<number | null>(null);
 const krAdvancedOpen = ref(false);
-const krTargetTouched = ref(false);
-const krOriginalTarget = ref<GoalTimeframe | null>(null);
 const krFormError = ref<string | null>(null);
 const calculationMethods = Object.values(KeyResultCalculationMethod);
 const krForm = reactive({
@@ -384,7 +475,7 @@ const krForm = reactive({
   initialValue: 0,
   currentValue: 0,
   targetValue: '' as number | '',
-  targetDate: '',
+  target: null as GoalTimeframe | null,
   calculationMethod: KeyResultCalculationMethod.Sum as KeyResultCalculationMethod,
   unit: '',
   weight: 3,
@@ -399,16 +490,21 @@ const canSaveKeyResult = computed(
     Number.isFinite(Number(krForm.targetValue)),
 );
 
-const coarseTargetLabel = computed(() => {
-  if (targetTouched.value || !props.goal?.target || props.goal.target.kind === 'day') return '';
-  return goalTimeframeLabel(props.goal.target, locale.value);
+const goalStatusLabel = computed(() => {
+  const status = props.mode === 'edit' && props.goal ? props.goal.status : 'Planned';
+  const labels: Record<string, string> = {
+    Planned: t('goal.list.statusPlanned'),
+    InProgress: t('goal.list.statusInProgress'),
+    Completed: t('goal.list.statusCompleted'),
+    Abandoned: t('goal.list.statusAbandoned'),
+  };
+  return labels[status] ?? status;
 });
-
-const krCoarseTargetLabel = computed(() => {
-  const target = krOriginalTarget.value;
-  if (krTargetTouched.value || !target || target.kind === 'day') return '';
-  return goalTimeframeLabel(target, locale.value);
-});
+const startChipLabel = computed(() =>
+  draft.startDate
+    ? `${t('goal.dialog.startDate')}: ${draft.startDate}`
+    : t('goal.dialog.startDate'),
+);
 
 function snapshotDraft(): string {
   return JSON.stringify(draft);
@@ -431,12 +527,17 @@ function reset(): void {
   draft.name = props.goal?.name ?? '';
   draft.summary = props.goal?.summary ?? '';
   draft.startDate = toProductYmdInputValue(props.goal?.startDate);
-  draft.targetDate =
-    props.goal?.target?.kind === 'day' ? toProductYmdInputValue(props.goal.target.date) : '';
-  targetTouched.value = false;
+  draft.target = props.goal?.target ? { ...props.goal.target } : null;
+  draft.reminderConfig = props.goal?.reminderConfig
+    ? {
+        enabled: props.goal.reminderConfig.enabled,
+        triggers: props.goal.reminderConfig.triggers.map((trigger) => ({ ...trigger })),
+      }
+    : null;
   draft.labelIds = props.goal?.labels.map((label) => label.id) ?? [];
   draft.keyResults = props.goal?.keyResults?.map(mapKeyResult) ?? [];
   labelCreateError.value = null;
+  formError.value = null;
   cancelKeyResultEdit();
   initialSnapshot.value = snapshotDraft();
   emit('dirty-change', false);
@@ -475,9 +576,7 @@ function resetKrForm(): void {
   krForm.initialValue = 0;
   krForm.currentValue = 0;
   krForm.targetValue = '';
-  krForm.targetDate = '';
-  krOriginalTarget.value = null;
-  krTargetTouched.value = false;
+  krForm.target = null;
   krForm.calculationMethod = KeyResultCalculationMethod.Sum;
   krForm.unit = '';
   krForm.weight = 3;
@@ -501,10 +600,7 @@ function openEditKeyResult(index: number): void {
   krForm.initialValue = keyResult.initialValue;
   krForm.currentValue = keyResult.currentValue ?? keyResult.initialValue;
   krForm.targetValue = keyResult.targetValue;
-  krOriginalTarget.value = keyResult.target ?? null;
-  krForm.targetDate =
-    keyResult.target?.kind === 'day' ? toProductYmdInputValue(keyResult.target.date) : '';
-  krTargetTouched.value = false;
+  krForm.target = keyResult.target ? { ...keyResult.target } : null;
   krForm.calculationMethod = keyResult.calculationMethod;
   krForm.unit = keyResult.unit ?? '';
   krForm.weight = keyResult.weight;
@@ -541,12 +637,7 @@ function saveKeyResultDraft(): void {
     initialValue: Number(krForm.initialValue),
     currentValue: current,
     targetValue: Number(krForm.targetValue),
-    target: !krTargetTouched.value
-      ? krOriginalTarget.value
-      : (() => {
-          const date = fromProductYmdInputValue(krForm.targetDate);
-          return date ? ({ kind: 'day', date } as const) : null;
-        })(),
+    target: krForm.target,
     unit: krForm.unit.trim() || null,
     weight: Math.max(1, Math.min(5, Math.round(Number(krForm.weight) || 3))),
   };
@@ -568,22 +659,36 @@ function calculationMethodLabel(method: KeyResultCalculationMethod): string {
   return labels[method];
 }
 
+function validateReminderConfig(): boolean {
+  formError.value = null;
+  const config = draft.reminderConfig;
+  if (!config?.enabled) return true;
+  for (const trigger of config.triggers.filter((item) => item.enabled)) {
+    if (trigger.type === ReminderTriggerType.RemainingDays && !draft.target) {
+      formError.value = t('goal.dialog.reminderRemainingDaysRequiresTargetDate');
+      return false;
+    }
+    if (
+      trigger.type === ReminderTriggerType.TimeProgressPercentage &&
+      (!draft.startDate || !draft.target)
+    ) {
+      formError.value = t('goal.dialog.reminderTimeProgressRequiresRange');
+      return false;
+    }
+  }
+  return true;
+}
+
 async function save(): Promise<void> {
-  if (!draft.name.trim() || krEditorOpen.value) return;
+  if (!draft.name.trim() || krEditorOpen.value || !validateReminderConfig()) return;
   const labelIds = [...draft.labelIds];
   const keyResults = draft.keyResults.map((item) => ({ ...item }));
   const startDate = fromProductYmdInputValue(draft.startDate);
-  const target =
-    props.mode === 'edit' && props.goal && !targetTouched.value
-      ? (props.goal.target ?? null)
-      : draft.targetDate
-        ? { kind: 'day' as const, date: fromProductYmdInputValue(draft.targetDate)! }
-        : null;
   const common = {
     name: draft.name.trim(),
     summary: draft.summary.trim() || undefined,
     startDate: startDate ?? undefined,
-    target: target ?? undefined,
+    target: draft.target ?? undefined,
     labelIds,
   };
 
@@ -594,6 +699,7 @@ async function save(): Promise<void> {
       summary: common.summary ?? null,
       startDate: common.startDate ?? null,
       target: common.target ?? null,
+      reminderConfig: draft.reminderConfig,
       keyResults,
     };
     const saved = await updateGoal(String(props.goal.id), req);
@@ -606,6 +712,7 @@ async function save(): Promise<void> {
 
   const req: CreateGoalReq = {
     ...common,
+    ...(draft.reminderConfig ? { reminderConfig: draft.reminderConfig } : {}),
     initialKeyResults: keyResults.map(({ id: _id, ...item }) => item),
   };
   const saved = await createGoal(req);
