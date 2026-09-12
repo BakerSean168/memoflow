@@ -20,12 +20,20 @@ describe('goal API runtime composer surface', () => {
   const server = readFileSync(resolve(dir, 'server.ts'), 'utf8');
   const composer = readFileSync(resolve(dir, 'runtime/compose-goal.ts'), 'utf8');
 
-  it('server.ts composes goal via composeGoal({ db: prisma, taskBindingReadPort: new PrismaTaskBindingReadPort(prisma), userTimeContextPort: settingApiModule.userTimeContextPort })', () => {
+  it('server.ts reuses owner read instances across Goal core, Goal Workspace and Goal Knowledge transports', () => {
     expect(server).toContain("from './runtime/compose-goal'");
-    expect(server).toMatch(
-      /composeGoal\(\{\s*db: prisma,\s*taskBindingReadPort: new PrismaTaskBindingReadPort\(prisma\),\s*userTimeContextPort: settingApiModule\.userTimeContextPort,?\s*\}/,
+    expect(server).toContain(
+      'const taskGoalContextReadPort = new PrismaTaskBindingReadPort(prisma);',
     );
+    expect(server).toContain('const relationRepository = new PrismaRelationRepository(prisma);');
+    expect(server).toContain('const goalKnowledgeService = new GoalKnowledgeService(');
+    expect(server).toMatch(/taskBindingReadPort:\s*taskGoalContextReadPort/);
+    expect(server).toMatch(/taskContextReadPort:\s*taskGoalContextReadPort/);
+    expect(server).toMatch(/knowledgeRelationReadPort:\s*goalKnowledgeService/);
+    expect(server).toContain('composeGoalKnowledgeApiModule({ service: goalKnowledgeService })');
+    expect(server).toContain('composeGoalWorkspaceApiModule({ port: goalWorkspaceService })');
     expect(server).toContain('.register(goalComposed.module)');
+    expect(server).toContain('.register(goalWorkspaceApiModule)');
   });
 
   it('server.ts no longer references createGoalApiModule or the goal/api seam', () => {

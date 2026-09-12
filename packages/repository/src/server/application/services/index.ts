@@ -23,3 +23,8 @@ export {
   type KnowledgeProjectionChangeSet,
   type KnowledgeProjectionSnapshot,
 } from './knowledge-projection.engine';
+
+export {
+  KnowledgeDocumentWorkspaceResolverService,
+  type KnowledgeDocumentWorkspaceProjection,
+} from './knowledge-document-workspace-resolver.service';

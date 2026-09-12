@@ -32,6 +32,12 @@ import type {
   DeleteGoalRecordReq,
   GetGoalRecordsRes,
   GetGoalAggregateRes,
+  GetGoalWorkspaceReq,
+  GoalWorkspaceReadModel,
+  GoalWorkspaceTaskPageRequest,
+  GoalWorkspaceTaskPage,
+  GoalWorkspacePageRequest,
+  GoalWorkspaceKnowledgePage,
 } from '@memoflow/contracts/goal';
 
 export interface IGoalApiClient {
@@ -51,6 +57,20 @@ export interface IGoalApiClient {
   getGoalById(id: string, includeChildren?: boolean): Promise<Result<GoalClientDTO>>;
   updateGoal(id: string, request: UpdateGoalReq): Promise<Result<GoalMutationReceipt>>;
   deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>>;
+
+  // Goal Workspace read composition
+  getGoalWorkspace(
+    goalId: string,
+    request?: GetGoalWorkspaceReq,
+  ): Promise<Result<GoalWorkspaceReadModel>>;
+  getGoalWorkspaceTasks(
+    goalId: string,
+    request?: GoalWorkspaceTaskPageRequest,
+  ): Promise<Result<GoalWorkspaceTaskPage>>;
+  getGoalWorkspaceKnowledge(
+    goalId: string,
+    request?: GoalWorkspacePageRequest,
+  ): Promise<Result<GoalWorkspaceKnowledgePage>>;
 
   // Goal Status
   planGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;

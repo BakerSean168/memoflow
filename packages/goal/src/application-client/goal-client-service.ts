@@ -36,6 +36,12 @@ import type {
   GetGoalRecordsRes,
   GetGoalReviewsRes,
   GetGoalAggregateRes,
+  GetGoalWorkspaceReq,
+  GoalWorkspaceReadModel,
+  GoalWorkspaceTaskPageRequest,
+  GoalWorkspaceTaskPage,
+  GoalWorkspacePageRequest,
+  GoalWorkspaceKnowledgePage,
 } from '@memoflow/contracts/goal';
 import type { IGoalApiClient } from './ports/goal-api-client.port';
 import {
@@ -139,6 +145,18 @@ export interface GoalClientPort {
   }): Promise<Result<{ goals: Goal[]; pagination: QueryGoalsRes['pagination'] }>>;
   updateGoal(id: string, request: UpdateGoalReq): Promise<Result<GoalMutationReceipt>>;
   deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>>;
+  getGoalWorkspace(
+    goalId: string,
+    request?: GetGoalWorkspaceReq,
+  ): Promise<Result<GoalWorkspaceReadModel>>;
+  getGoalWorkspaceTasks(
+    goalId: string,
+    request?: GoalWorkspaceTaskPageRequest,
+  ): Promise<Result<GoalWorkspaceTaskPage>>;
+  getGoalWorkspaceKnowledge(
+    goalId: string,
+    request?: GoalWorkspacePageRequest,
+  ): Promise<Result<GoalWorkspaceKnowledgePage>>;
   planGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
   activateGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
   completeGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>>;
@@ -227,6 +245,9 @@ export class GoalClientService implements GoalClientPort {
     this.listGoals = this.listGoals.bind(this);
     this.updateGoal = this.updateGoal.bind(this);
     this.deleteGoal = this.deleteGoal.bind(this);
+    this.getGoalWorkspace = this.getGoalWorkspace.bind(this);
+    this.getGoalWorkspaceTasks = this.getGoalWorkspaceTasks.bind(this);
+    this.getGoalWorkspaceKnowledge = this.getGoalWorkspaceKnowledge.bind(this);
     this.planGoal = this.planGoal.bind(this);
     this.activateGoal = this.activateGoal.bind(this);
     this.completeGoal = this.completeGoal.bind(this);
@@ -291,6 +312,27 @@ export class GoalClientService implements GoalClientPort {
 
   async deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>> {
     return this.goalApi.deleteGoal(id, request);
+  }
+
+  async getGoalWorkspace(
+    goalId: string,
+    request?: GetGoalWorkspaceReq,
+  ): Promise<Result<GoalWorkspaceReadModel>> {
+    return this.goalApi.getGoalWorkspace(goalId, request);
+  }
+
+  async getGoalWorkspaceTasks(
+    goalId: string,
+    request?: GoalWorkspaceTaskPageRequest,
+  ): Promise<Result<GoalWorkspaceTaskPage>> {
+    return this.goalApi.getGoalWorkspaceTasks(goalId, request);
+  }
+
+  async getGoalWorkspaceKnowledge(
+    goalId: string,
+    request?: GoalWorkspacePageRequest,
+  ): Promise<Result<GoalWorkspaceKnowledgePage>> {
+    return this.goalApi.getGoalWorkspaceKnowledge(goalId, request);
   }
 
   async planGoal(id: string, expectedVersion: number): Promise<Result<GoalMutationReceipt>> {

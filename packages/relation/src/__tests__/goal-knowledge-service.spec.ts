@@ -44,6 +44,20 @@ function repository(): RelationRepository {
         createdAt: 1,
       }),
     ]),
+    findPageBySubject: vi.fn(async (query) => ({
+      items: [
+        RelationDTOSchema.parse({
+          id: 'rel-1',
+          subject: GOAL_REF,
+          relationType: 'related',
+          object: NOTE_REF,
+          createdAt: 1,
+        }),
+      ],
+      total: 1,
+      limit: query.limit,
+      offset: query.offset,
+    })),
     findByObject: vi.fn(async () => [
       RelationDTOSchema.parse({
         id: 'rel-1',
@@ -94,5 +108,53 @@ describe('GoalKnowledgeService', () => {
     ).resolves.toHaveLength(1);
     await expect(service.unlinkAllForGoal('identity-1', GOAL_ID as never)).resolves.toBe(2);
     expect(relations.deleteAllForEntity).toHaveBeenCalledWith('identity-1', GOAL_REF);
+  });
+
+  it('lists stable edge refs through an owner-bounded page without resolving Knowledge', async () => {
+    const repo = repository();
+    const missingDocument = SubjectRefSchema.parse({
+      type: 'note',
+      id: 'kdoc_550e8400-e29b-41d4-a716-446655440099',
+    }).id;
+    repo.findPageBySubject = vi.fn().mockResolvedValue({
+      items: [
+        {
+          id: 'relation-2',
+          subject: { type: 'goal', id: GOAL_ID },
+          relationType: 'related',
+          object: { type: 'note', id: missingDocument },
+          createdAt: 2,
+        },
+      ],
+      total: 2,
+      limit: 1,
+      offset: 1,
+    });
+    const resolver = { resolve: vi.fn().mockResolvedValue(null) };
+    const service = new GoalKnowledgeService(repo, resolver);
+
+    const page = await service.listEdgeRefsForGoal('identity-1', {
+      goalId: GOAL_ID,
+      limit: 1,
+      offset: 1,
+    });
+
+    expect(page).toEqual({
+      items: [
+        { relationId: 'relation-2', goalId: GOAL_ID, documentId: missingDocument, createdAt: 2 },
+      ],
+      total: 2,
+      limit: 1,
+      offset: 1,
+    });
+    expect(repo.findPageBySubject).toHaveBeenCalledWith({
+      identityId: 'identity-1',
+      subject: GOAL_REF,
+      relationType: 'related',
+      objectType: 'note',
+      limit: 1,
+      offset: 1,
+    });
+    expect(resolver.resolve).not.toHaveBeenCalled();
   });
 });

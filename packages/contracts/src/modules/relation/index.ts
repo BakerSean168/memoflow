@@ -80,3 +80,36 @@ export const GoalKnowledgeRelationSchema = z
 export type GoalKnowledgeRelation = z.infer<typeof GoalKnowledgeRelationSchema>;
 
 export type GoalKnowledgeDocumentRef = KnowledgeDocumentRef;
+
+export const GoalKnowledgeEdgePageRequestSchema = z
+  .object({
+    limit: z.coerce.number().int().min(1).max(100).default(20),
+    offset: z.coerce.number().int().min(0).default(0),
+  })
+  .strict();
+export type GoalKnowledgeEdgePageRequest = z.input<typeof GoalKnowledgeEdgePageRequestSchema>;
+
+export const GoalKnowledgeEdgeListReqSchema = GoalKnowledgeEdgePageRequestSchema.extend({
+  goalId: brandedId<GoalId>(),
+});
+export type GoalKnowledgeEdgeListReq = z.input<typeof GoalKnowledgeEdgeListReqSchema>;
+
+export const GoalKnowledgeEdgeRefSchema = z
+  .object({
+    relationId: z.string().min(1),
+    goalId: brandedId<GoalId>(),
+    documentId: KnowledgeDocumentIdSchema,
+    createdAt: z.number().finite(),
+  })
+  .strict();
+export type GoalKnowledgeEdgeRef = z.infer<typeof GoalKnowledgeEdgeRefSchema>;
+
+export const GoalKnowledgeEdgePageSchema = z
+  .object({
+    items: z.array(GoalKnowledgeEdgeRefSchema),
+    total: z.number().int().min(0),
+    limit: z.number().int().min(1).max(100),
+    offset: z.number().int().min(0),
+  })
+  .strict();
+export type GoalKnowledgeEdgePage = z.infer<typeof GoalKnowledgeEdgePageSchema>;

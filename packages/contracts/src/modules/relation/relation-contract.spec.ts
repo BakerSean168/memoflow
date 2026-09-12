@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { GoalKnowledgeLinkReqSchema, RelationDTOSchema, SubjectRefSchema } from './index';
+import {
+  GoalKnowledgeEdgeListReqSchema,
+  GoalKnowledgeEdgePageSchema,
+  GoalKnowledgeLinkReqSchema,
+  RelationDTOSchema,
+  SubjectRefSchema,
+} from './index';
 
 const GOAL_ID = 'IGoalId_550e8400-e29b-41d4-a716-446655440000';
 const DOCUMENT_ID = 'kdoc_550e8400-e29b-41d4-a716-446655440090';
@@ -50,5 +56,30 @@ describe('Shared Relation contracts', () => {
       goalId: GOAL_ID,
       knowledgeDocument: { knowledgeSpaceId: SPACE_ID, documentId: DOCUMENT_ID },
     });
+  });
+
+  it('keeps Goal Knowledge edge pagination stable-id only', () => {
+    const req = GoalKnowledgeEdgeListReqSchema.parse({ goalId: GOAL_ID, limit: 5, offset: 10 });
+    expect(req).toEqual({ goalId: GOAL_ID, limit: 5, offset: 10 });
+    expect(
+      GoalKnowledgeEdgePageSchema.parse({
+        items: [
+          { relationId: 'relation-1', goalId: GOAL_ID, documentId: DOCUMENT_ID, createdAt: 1 },
+        ],
+        total: 21,
+        limit: 5,
+        offset: 10,
+      }),
+    ).toMatchObject({ total: 21, limit: 5, offset: 10 });
+    expect(
+      GoalKnowledgeEdgePageSchema.safeParse({
+        items: [
+          { relationId: 'relation-1', goalId: GOAL_ID, documentId: 'notes/path.md', createdAt: 1 },
+        ],
+        total: 1,
+        limit: 5,
+        offset: 0,
+      }).success,
+    ).toBe(false);
   });
 });

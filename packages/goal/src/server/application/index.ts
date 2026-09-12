@@ -76,3 +76,17 @@ export type {
   GoalDeletionTransactionContext,
   GoalDeletionTransactionRunner,
 } from './use-cases/commands/goal-deletion-support';
+
+export {
+  GoalWorkspaceQueryService,
+  type GoalWorkspaceQueryServiceDependencies,
+} from './services/goal-workspace-query.service';
+
+export type { GoalWorkspaceApplicationPort } from './goal-workspace.application.port';
+
+export type {
+  GoalWorkspaceTaskContextReadPort,
+  GoalWorkspaceKnowledgeRelationReadPort,
+  GoalWorkspaceKnowledgeProjection,
+  GoalWorkspaceKnowledgeContextReadPort,
+} from './ports/goal-workspace-read.ports';

@@ -158,6 +158,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/goal/goal-workspace.module.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/label/module.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -908,6 +918,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/modules/goal/goal-workspace.electron-module.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/modules/label/label.electron-module.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -917,6 +935,14 @@
     },
     {
       "path": "apps/desktop/src/main/modules/relation/local-vault-knowledge-document-ref.resolver.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/relation/local-vault-knowledge-workspace.resolver.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -5112,6 +5138,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/goal/api/goal-workspace.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/goal/protocol/goal-rpc-map.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6134,6 +6168,16 @@
       ]
     },
     {
+      "path": "packages/goal/src/infrastructure-client/adapters/goal-workspace-client-parity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc-channels.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6193,6 +6237,16 @@
     },
     {
       "path": "packages/goal/src/server/application/goal-application-types-barrel.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/application/services/__tests__/goal-workspace-query.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -8875,6 +8929,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/repository/src/server/application/services/knowledge-document-workspace-resolver.service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/repository/src/server/application/services/knowledge-note-commit.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11350,7 +11412,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 69
+      "fileCount": 70
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -11392,7 +11454,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 82
+      "fileCount": 84
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -11728,14 +11790,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 69
+      "fileCount": 70
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 65
+      "fileCount": 67
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -11791,7 +11853,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 84
+      "fileCount": 85
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11826,7 +11888,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 82
+      "fileCount": 84
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -11896,7 +11958,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 38
+      "fileCount": 39
     },
     {
       "id": "packages/schedule-orchestration/vitest.config.ts",
@@ -11974,6 +12036,7 @@
       "apps/api/src/modules/ai/repository-knowledge-source.adapter.test.ts",
       "apps/api/src/modules/ai/routine-command.adapter.spec.ts",
       "apps/api/src/modules/dashboard/module.spec.ts",
+      "apps/api/src/modules/goal/goal-workspace.module.spec.ts",
       "apps/api/src/modules/label/module.spec.ts",
       "apps/api/src/modules/powersync/crud-normalization.spec.ts",
       "apps/api/src/modules/powersync/module.spec.ts",
@@ -12195,12 +12258,14 @@
       "packages/goal/src/application-client/goal-client-port-facade-dual.surface.spec.ts",
       "packages/goal/src/electron/goal-electron.surface.spec.ts",
       "packages/goal/src/electron/index.spec.ts",
+      "packages/goal/src/infrastructure-client/adapters/goal-workspace-client-parity.spec.ts",
       "packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc-channels.surface.spec.ts",
       "packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc.adapter.surface.spec.ts",
       "packages/goal/src/server/application/errors/weight-snapshot-errors.spec.ts",
       "packages/goal/src/server/application/event-handlers/__tests__/register-goal-event-listeners.test.ts",
       "packages/goal/src/server/application/event-handlers/task-goal-progress.handler.spec.ts",
       "packages/goal/src/server/application/goal-application-types-barrel.surface.spec.ts",
+      "packages/goal/src/server/application/services/__tests__/goal-workspace-query.service.spec.ts",
       "packages/goal/src/server/application/services/goal-review-context-builder.spec.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/abandon-goal.test.ts",
       "packages/goal/src/server/application/use-cases/commands/__tests__/activate-goal.test.ts",
@@ -12565,7 +12630,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1084,
+    "unit": 1091,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

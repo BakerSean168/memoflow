@@ -1,3 +1,4 @@
+export { GoalWorkspaceQueryService } from './application';
 /**
  * Canonical goal server seam.
  */

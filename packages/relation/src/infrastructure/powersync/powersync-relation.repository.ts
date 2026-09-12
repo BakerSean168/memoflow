@@ -1,6 +1,11 @@
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import { RelationDTOSchema, type RelationDTO, type SubjectRef } from '@memoflow/contracts/relation';
-import type { AddRelationInput, RelationRepository } from '../../domain/relation-repository';
+import type {
+  AddRelationInput,
+  RelationPage,
+  RelationRepository,
+  RelationSubjectPageQuery,
+} from '../../domain/relation-repository';
 
 interface RelationRow {
   id: string;
@@ -89,6 +94,39 @@ export class PowerSyncRelationRepository implements RelationRepository {
       [identityId, subject.type, subject.id],
     );
     return rows.map(fromRow);
+  }
+
+  async findPageBySubject(query: RelationSubjectPageQuery): Promise<RelationPage> {
+    const clauses = ['identity_id = ?', 'subject_type = ?', 'subject_id = ?'];
+    const params: unknown[] = [query.identityId, query.subject.type, query.subject.id];
+    if (query.relationType) {
+      clauses.push('relation_type = ?');
+      params.push(query.relationType);
+    }
+    if (query.objectType) {
+      clauses.push('object_type = ?');
+      params.push(query.objectType);
+    }
+    const where = clauses.join(' AND ');
+    const [rows, counts] = await Promise.all([
+      this.db.getAll<RelationRow>(
+        `SELECT * FROM relations
+         WHERE ${where}
+         ORDER BY created_at ASC, id ASC
+         LIMIT ? OFFSET ?`,
+        [...params, query.limit, query.offset],
+      ),
+      this.db.getAll<{ count: number }>(
+        `SELECT COUNT(*) as count FROM relations WHERE ${where}`,
+        params,
+      ),
+    ]);
+    return {
+      items: rows.map(fromRow),
+      total: Number(counts[0]?.count ?? 0),
+      limit: query.limit,
+      offset: query.offset,
+    };
   }
 
   async findByObject(identityId: string, object: SubjectRef): Promise<RelationDTO[]> {

@@ -79,4 +79,47 @@ describe('PrismaRelationRepository integration', () => {
     await expect(repository.deleteAllForEntity('relation-cleanup', GOAL_REF)).resolves.toBe(2);
     expect(await db.relation.count({ where: { identityId: 'relation-cleanup' } })).toBe(1);
   });
+
+  it('pages Goal Knowledge edges in the owner query without scanning unrelated relations', async () => {
+    await seedAccount({ id: 'relation-page' });
+    const db = await getPrisma();
+    let next = 0;
+    const repository = new PrismaRelationRepository(db, () => `page-${++next}`);
+    const note2 = SubjectRefSchema.parse({
+      type: 'note',
+      id: 'kdoc_550e8400-e29b-41d4-a716-446655440091',
+    });
+    await repository.add({
+      identityId: 'relation-page',
+      subject: GOAL_REF,
+      relationType: 'related',
+      object: NOTE_REF,
+    });
+    await repository.add({
+      identityId: 'relation-page',
+      subject: GOAL_REF,
+      relationType: 'related',
+      object: note2,
+    });
+    await repository.add({
+      identityId: 'relation-page',
+      subject: GOAL_REF,
+      relationType: 'depends_on',
+      object: TASK_REF,
+    });
+
+    const page = await repository.findPageBySubject({
+      identityId: 'relation-page',
+      subject: GOAL_REF,
+      relationType: 'related',
+      objectType: 'note',
+      limit: 1,
+      offset: 1,
+    });
+
+    expect(page).toMatchObject({ total: 2, limit: 1, offset: 1 });
+    expect(page.items).toHaveLength(1);
+    expect(page.items[0]?.relationType).toBe('related');
+    expect(page.items[0]?.object.type).toBe('note');
+  });
 });

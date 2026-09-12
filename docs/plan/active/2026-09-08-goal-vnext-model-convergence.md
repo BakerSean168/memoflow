@@ -501,6 +501,8 @@ Core identity    Target/time        KR Measurement V3
 
 ### GOAL-7207 — Build GoalWorkspaceReadModel
 
+**Status:** DONE on `chatgpt/goal-7207-workspace`; integration evidence below.
+
 **Goal:** One query returns Goal authoritative state plus Task/Knowledge context summary without moving ownership into Goal.
 
 **Scope:**
@@ -516,16 +518,21 @@ Core identity    Target/time        KR Measurement V3
 
 **Implementation:**
 
-1. define no-duplicate-authority DTO shape;
-2. inject Task/Knowledge/Relation read ports at host composition;
-3. implement Task summary and preview;
-4. implement Knowledge summary and preview;
-5. compose recent GoalRecord/Review from Goal owner;
-6. add pagination/deep-link contracts for full lists;
-7. test missing external context, offline, empty, permission, deleted-reference behavior;
-8. add HTTP/IPC parity fixture.
+1. `GoalWorkspaceReadModel` keeps `goal` as the only Goal/KR authority. There is no top-level duplicate `keyResults`, no `taskIds[]`, and no `noteIds[]`. Recent GoalRecord/Review projections are explicit read-only context.
+2. Workspace is a separate read application port/service, not part of the Goal write-module `GoalApplicationPort`; Goal core therefore does not acquire Task/Knowledge construction dependencies.
+3. `GoalWorkspaceQueryService` depends only on structural consumer ports plus Goal-owned repositories. It does not import Task, Relation or Repository implementation packages and never queries Prisma/PowerSync directly.
+4. API/Desktop composition reuses the exact Task binding read port, Goal Knowledge service and Goal repository instances already owned by their host runtimes. No second owner runtime or shadow repository is created for Workspace.
+5. Task context uses the Task-owned bounded summary/list port from GOAL-7205. First paint returns summary + preview; full Task lists are paginated and may optionally scope by KR after Goal ownership validation.
+6. Knowledge context reads stable Goal -> `KnowledgeDocumentId` edges from Shared Relation, then resolves current display projection through Repository/Local Vault owner adapters. An unresolved document remains an explicit `Missing` item instead of silently deleting/filtering the historical edge.
+7. Relation pagination is storage-bounded: Prisma uses filtered `count + take/skip`; PowerSync uses filtered `COUNT(*) + LIMIT/OFFSET`. Workspace does not load every relation and slice in memory.
+8. First-paint failures of Task or Knowledge context degrade that context only to `Unavailable`; Goal authority still loads. Empty owner results stay `Available` with zero summary/preview. Explicit full-list owner failure returns `SERVICE_UNAVAILABLE`.
+9. HTTP and IPC expose the same three read operations (`workspace`, `workspace/tasks`, `workspace/knowledge`) through canonical invocation schemas. Goal HTTP/IPC client adapters and `GoalClientService` expose the same methods.
+10. Vue/Web/Desktop and React/Mobile now have read-only `useGoalWorkspace` adapters; GOAL-7209 owns the visual Workspace convergence rather than duplicating read semantics in UI components.
+11. `goal-workspace-read-model-audit` is part of canonical `governance:check` and rejects external-ID dual truth, concrete owner imports, unbounded Relation pagination, host instance duplication and HTTP/IPC/React/Vue parity drift.
 
 **Acceptance:** Goal Detail can answer “what is connected to this Goal?” without Goal querying concrete Task/Knowledge repositories.
+
+**Closure evidence:** Contracts 85 files / 578 tests PASS; Relation 4 files / 12 unit tests plus 1 file / 3 PostgreSQL integration tests PASS; Repository 39 files / 252 tests PASS; Goal 84 files / 474 tests PASS, including 7 GoalWorkspaceQueryService behavior tests and 2 HTTP/IPC client-parity tests. API Goal Workspace transport 2/2 and Desktop IPC transport 2/2 PASS; Cloud Knowledge workspace resolver 3/3 and Local Vault resolver 2/2 PASS; API Goal composition 7/7 and Desktop Goal composition surface 3/3 PASS. Relation/Repository/Goal typecheck+build PASS; API typecheck+production build PASS; Desktop typecheck+production build PASS; React/Mobile and Vue typecheck PASS, and App-Vue production build PASS. Governance tools 19 files / 139 tests PASS; generated test inventory is current at 1265 files; docs-check PASS; full governance-check PASS with `goal-workspace-read-model-audit` executed in the canonical gate; all 49 changed code files pass ESLint with zero warnings/errors and all changed text files pass Prettier.
 
 **Dependencies:** GOAL-7205, GOAL-7206.
 

@@ -64,7 +64,7 @@ import {
 } from '@memoflow/cloud-auth/server';
 import { composeGoal } from './runtime/compose-goal';
 import { PrismaTaskBindingReadPort } from '@memoflow/task';
-import { createGoalTaskProgressPrismaHandler } from '@memoflow/goal';
+import { createGoalTaskProgressPrismaHandler, GoalWorkspaceQueryService } from '@memoflow/goal';
 import { createGoalPrismaReminderFireHandler } from '@memoflow/goal/schedule-execution';
 import { createGoalPrismaScheduleProjectionSource } from '@memoflow/goal/schedule-projection';
 import { resolveRepositoryStorageBaseDir } from '@memoflow/repository';
@@ -87,6 +87,7 @@ import {
   PrismaGoalRelationCleanupCapability,
 } from '@memoflow/relation';
 import { composeGoalKnowledgeApiModule } from './modules/relation/module.js';
+import { composeGoalWorkspaceApiModule } from './modules/goal/goal-workspace.module.js';
 import { createSystemClock } from '@memoflow/time';
 import { PrismaDashboardReadPort } from './modules/dashboard/dashboard-read-port.js';
 import {
@@ -292,12 +293,24 @@ async function bootstrap(): Promise<void> {
       notificationRequestedWriter: notificationApiModule.repositories.requestedWriter,
     }),
   );
+  const taskGoalContextReadPort = new PrismaTaskBindingReadPort(prisma);
   const relationRepository = new PrismaRelationRepository(prisma);
+  const goalKnowledgeService = new GoalKnowledgeService(
+    relationRepository,
+    repositoryApiModule.knowledgeDocumentRefResolver,
+  );
   const goalComposed = composeGoal({
     db: prisma,
-    taskBindingReadPort: new PrismaTaskBindingReadPort(prisma),
+    taskBindingReadPort: taskGoalContextReadPort,
     userTimeContextPort: settingApiModule.userTimeContextPort,
     relationCleanupFactory: (tx) => new PrismaGoalRelationCleanupCapability(tx),
+  });
+  const goalWorkspaceService = new GoalWorkspaceQueryService({
+    goalRepository: goalComposed.repositories.goalRepository,
+    goalRecordRepository: goalComposed.repositories.goalRecordRepository,
+    taskContextReadPort: taskGoalContextReadPort,
+    knowledgeRelationReadPort: goalKnowledgeService,
+    knowledgeContextReadPort: repositoryApiModule.knowledgeDocumentWorkspaceResolver,
   });
   if (!env.DATABASE_URL) {
     throw new Error('AI Mastra runtime requires DATABASE_URL after environment normalization');
@@ -325,12 +338,8 @@ async function bootstrap(): Promise<void> {
   // mounts routes against the transport-only context.
   const powerSyncApiModule = composePowerSyncApiModule({ db: prisma });
   const labelApiModule = composeLabelApiModule({ service: labelService });
-  const goalKnowledgeApiModule = composeGoalKnowledgeApiModule({
-    service: new GoalKnowledgeService(
-      relationRepository,
-      repositoryApiModule.knowledgeDocumentRefResolver,
-    ),
-  });
+  const goalKnowledgeApiModule = composeGoalKnowledgeApiModule({ service: goalKnowledgeService });
+  const goalWorkspaceApiModule = composeGoalWorkspaceApiModule({ port: goalWorkspaceService });
   const dashboardApiModule = composeDashboardApiModule({
     dashboardReadPort: new PrismaDashboardReadPort(prisma, settingApiModule.userTimeContextPort),
     activityLedgerRuntime: createActivityLedgerRecorder(new PrismaActivityLedgerWriter(prisma)),
@@ -348,6 +357,7 @@ async function bootstrap(): Promise<void> {
     .register(taskComposed.module) // ✅ 任务模块
     .register(aiApiModule) // ✅ AI 模块 (runtime composer)
     .register(goalComposed.module) // ✅ 目标模块
+    .register(goalWorkspaceApiModule) // ✅ Goal Workspace read composition
     .register(labelApiModule) // ✅ 共享标签目录
     .register(goalKnowledgeApiModule) // ✅ Shared Relation / Goal Knowledge
     .register(dataPortabilityApiModule.module) // ✅ 数据导入导出模块 (runtime composer)

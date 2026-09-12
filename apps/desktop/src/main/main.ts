@@ -24,7 +24,7 @@ import { registerDashboardIpcHandler } from './ipc/dashboard-handler';
 
 // ── Module Electron Entry Points ─────────────────────────────────────
 import { PowerSyncTaskBindingReadPort } from '@memoflow/task';
-import { createGoalTaskProgressPowerSyncHandler } from '@memoflow/goal';
+import { createGoalTaskProgressPowerSyncHandler, GoalWorkspaceQueryService } from '@memoflow/goal';
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 import { createTaskPowerSyncScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import { createScheduleOrchestrationModule } from '@memoflow/schedule-orchestration';
@@ -45,6 +45,8 @@ import {
 } from '@memoflow/relation';
 import { createGoalKnowledgeElectronModule } from './modules/relation/relation.electron-module';
 import { LocalVaultKnowledgeDocumentRefResolver } from './modules/relation/local-vault-knowledge-document-ref.resolver';
+import { LocalVaultKnowledgeWorkspaceResolver } from './modules/relation/local-vault-knowledge-workspace.resolver';
+import { createGoalWorkspaceElectronModule } from './modules/goal/goal-workspace.electron-module';
 import { createSystemClock } from '@memoflow/time';
 import { createLabelElectronModule } from './modules/label/label.electron-module';
 import { composeGovernance } from './runtime/compose-governance';
@@ -327,12 +329,27 @@ async function registerBusinessModules(
   );
   const taskElectronModule = taskComposed.module;
 
+  const taskGoalContextReadPort = new PowerSyncTaskBindingReadPort(db);
   const relationRepository = new PowerSyncRelationRepository(db);
+  const localVaultKnowledgeRefResolver = new LocalVaultKnowledgeDocumentRefResolver(
+    localVaultRuntime,
+  );
+  const goalKnowledgeService = new GoalKnowledgeService(
+    relationRepository,
+    localVaultKnowledgeRefResolver,
+  );
   const goalComposed = composeGoal({
     db,
-    taskBindingReadPort: new PowerSyncTaskBindingReadPort(db),
+    taskBindingReadPort: taskGoalContextReadPort,
     userTimeContextPort: settingElectronModule.userTimeContextPort,
     relationCleanupFactory: (tx) => new PowerSyncGoalRelationCleanupCapability(tx),
+  });
+  const goalWorkspaceService = new GoalWorkspaceQueryService({
+    goalRepository: goalComposed.repositories.goalRepository,
+    goalRecordRepository: goalComposed.repositories.goalRecordRepository,
+    taskContextReadPort: taskGoalContextReadPort,
+    knowledgeRelationReadPort: goalKnowledgeService,
+    knowledgeContextReadPort: new LocalVaultKnowledgeWorkspaceResolver(localVaultRuntime),
   });
 
   const labelService = new LabelService(new PowerSyncLabelRepository(db), {
@@ -340,10 +357,10 @@ async function registerBusinessModules(
   });
   const labelElectronModule = createLabelElectronModule({ service: labelService });
   const goalKnowledgeElectronModule = createGoalKnowledgeElectronModule({
-    service: new GoalKnowledgeService(
-      relationRepository,
-      new LocalVaultKnowledgeDocumentRefResolver(localVaultRuntime),
-    ),
+    service: goalKnowledgeService,
+  });
+  const goalWorkspaceElectronModule = createGoalWorkspaceElectronModule({
+    port: goalWorkspaceService,
   });
 
   const dashboardRepositories: DashboardReadDependencies = {
@@ -559,6 +576,7 @@ async function registerBusinessModules(
     .register(dataPortabilityElectronModule)
     // Feature modules
     .register(goalComposed.module)
+    .register(goalWorkspaceElectronModule)
     .register(labelElectronModule)
     .register(goalKnowledgeElectronModule)
     .register(taskElectronModule)

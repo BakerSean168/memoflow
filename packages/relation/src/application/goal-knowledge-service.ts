@@ -1,7 +1,11 @@
 import {
+  GoalKnowledgeEdgeListReqSchema,
+  GoalKnowledgeEdgePageSchema,
   GoalKnowledgeLinkReqSchema,
   GoalKnowledgeListReqSchema,
   GoalsForKnowledgeReqSchema,
+  type GoalKnowledgeEdgeListReq,
+  type GoalKnowledgeEdgePage,
   type GoalKnowledgeLinkReq,
   type GoalKnowledgeRelation,
   type GoalKnowledgeListReq,
@@ -48,6 +52,32 @@ export class GoalKnowledgeService {
       subject: { type: 'goal', id: parsed.goalId },
       relationType: 'related',
       object: { type: 'note', id: parsed.knowledgeDocument.documentId },
+    });
+  }
+
+  async listEdgeRefsForGoal(
+    identityId: string,
+    request: GoalKnowledgeEdgeListReq,
+  ): Promise<GoalKnowledgeEdgePage> {
+    const parsed = GoalKnowledgeEdgeListReqSchema.parse(request);
+    const page = await this.relations.findPageBySubject({
+      identityId,
+      subject: { type: 'goal', id: parsed.goalId },
+      relationType: 'related',
+      objectType: 'note',
+      limit: parsed.limit,
+      offset: parsed.offset,
+    });
+    return GoalKnowledgeEdgePageSchema.parse({
+      items: page.items.map((row) => ({
+        relationId: row.id,
+        goalId: parsed.goalId,
+        documentId: row.object.id,
+        createdAt: row.createdAt,
+      })),
+      total: page.total,
+      limit: page.limit,
+      offset: page.offset,
     });
   }
 

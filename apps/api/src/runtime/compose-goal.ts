@@ -46,6 +46,8 @@ import {
   normalizeGoalRuntimeContributions,
   type GoalApplicationPort,
   type GoalRuntimeContributionsInput,
+  type IGoalRecordRepository,
+  type IGoalRepository,
   type PrismaGoalRelationCleanupFactory,
 } from '@memoflow/goal';
 import { createGoalApiModule, type GoalApiModuleDef } from '@memoflow/goal/api';
@@ -78,6 +80,11 @@ export interface ComposedGoal {
   readonly module: GoalApiModuleDef;
   /** The transport-neutral application port (`instance.api`) for sibling modules to orchestrate. 供兄弟模块编排的与传输无关 application port（`instance.api`）。 */
   readonly applicationPort: GoalApplicationPort;
+  /** Exact instance-bound owner repositories for host read-composition adapters. */
+  readonly repositories: {
+    readonly goalRepository: IGoalRepository;
+    readonly goalRecordRepository: IGoalRecordRepository;
+  };
 }
 
 /**
@@ -151,5 +158,6 @@ export function composeGoal(dependencies: ComposeGoalDependencies): ComposedGoal
   return {
     module: createGoalApiModule({ instance }),
     applicationPort: instance.api,
+    repositories: { goalRepository, goalRecordRepository },
   };
 }

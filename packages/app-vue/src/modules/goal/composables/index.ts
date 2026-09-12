@@ -3,6 +3,7 @@
  */
 
 export { useGoal } from './useGoal';
+export { useGoalWorkspace } from './useGoalWorkspace';
 export { useGoalFilters } from './useGoalFilters';
 export { useGoalTimeline } from './useGoalTimeline';
 export { useWeightSnapshot } from './useWeightSnapshot';

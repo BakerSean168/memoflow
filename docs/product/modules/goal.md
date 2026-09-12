@@ -5,12 +5,12 @@ tags:
   - goal
 description: Goal vNext 当前功能、产品语义与模块边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-12T17:55:00+08:00
+updated: 2026-09-12T19:25:00+08:00
 ---
 
 # Goal 模块说明
 
-> **当前收敛状态（2026-09-12）：** GOAL-7202~7206 已落地：除 Goal identity/lifecycle、planning time 与 KR Measurement V3 外，Task context 已支持 Goal-only / Goal+KR link / KR contribution 三态，Knowledge context 已切到 Shared Relation + ADR-090 stable `KnowledgeDocumentId`。Goal Workspace、AI Plan V2 与完整 Target property picker 仍按 [active plan](../../plan/active/2026-09-08-goal-vnext-model-convergence.md) 后续票实施，不应提前写成当前能力。
+> **当前收敛状态（2026-09-12）：** GOAL-7202~7207 已落地：Goal identity/lifecycle、planning time、KR Measurement V3、Task context 三态、Shared Relation + stable Knowledge identity，以及 read-only Goal Workspace composition 均已实现。AI Plan V2 与完整 Target property picker 仍按 [active plan](../../plan/active/2026-09-08-goal-vnext-model-convergence.md) 后续票实施，不应提前写成当前能力。
 
 ## 1. 功能定位
 
@@ -27,6 +27,7 @@ Goal 负责个人目标的 **Direction + Measurement**：用户定义想达到�
 - Shared Label：Goal 与 Task 共用 identity-scoped Label registry，创建/更新提交 `labelIds`，多标签筛选使用 `labelIdsAll` AND 语义；
 - Task Link：Task 可以链接 Goal/KR，但 Goal 不反向拥有 Task；
 - Knowledge Link：通过 Shared Relation 的 typed GoalKnowledge facade 链接 reusable KnowledgeDocument；持久化端点只使用 stable `KnowledgeDocumentId`，rename/move 不改变关系身份；
+- Goal Workspace：一次 bounded read 返回 Goal authority + Task/Knowledge summary/preview + recent Record/Review；Task/Knowledge owner 暂时不可用时只降级对应 context，unresolved Knowledge edge 显式显示为 `Missing`；完整 Task/Knowledge 列表使用分页 query，不把 external entity ids 写回 Goal；
 - AI Goal draft：Mastra durable workflow 生成当前 Goal/KR/Label 语义的可审阅草稿，确认后由 Goal application port 写入。
 
 已退休且不得恢复为产品真值：`GoalFolder`、Goal category/string tags、Parent Goal、Importance/Priority、Goal Focus Session、MultiGoalComparison、Standalone ProgressBreakdown。
@@ -62,12 +63,13 @@ Abandoned
 - Task contribution 通过自包含、幂等的跨模块事件/settlement 进入 Goal，不共享 repository 或数据库事务；
 - generic Relation 不属于 Goal；Goal 删除只依赖窄 `GoalRelationCleanupPort`，由 host 注入 transaction-scoped Shared Relation adapter，使 Goal 删除与 edge unlink 在同一 Prisma/PowerSync 数据库事务中原子提交/回滚，且永不删除 KnowledgeDocument；
 - AI 只生成草稿并调用 Goal/Task owner application port，不直接写数据库。
+- Goal Workspace 是独立 read composition：Goal application/read layer 只依赖 structural consumer ports；API/Desktop host 复用 Task/Relation/Goal owner 实例，Goal package 不直接 import Task/Relation/Repository persistence。
 
 ## 6. 用户视图
 
 当前列表仍使用 `Active / Completed / All` 这组 **System View** 展示标签，其中 `Active` 视图是 UI/read-model 聚合，包含 `Planned + InProgress`，不是第五种 Goal status。归档与放弃属于历史入口；System View 都是状态/时间派生视图，不是 Label。用户可叠加 Shared Label 过滤。
 
-Web/Desktop 与 React/Mobile 均使用同一公开 contracts；移动端不存在 Folder/Comparison/Focus 等已退休 UI。
+Web/Desktop 与 React/Mobile 均使用同一公开 contracts；Vue/React 均已有只读 `useGoalWorkspace` client adapter。GOAL-7209 才负责把当前 Goal Detail 视觉收敛到完整 Workspace；移动端不存在 Folder/Comparison/Focus 等已退休 UI。
 
 ## 7. 相关资产
 

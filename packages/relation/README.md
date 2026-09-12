@@ -39,6 +39,8 @@ Both lanes implement the same `RelationRepository` behavior:
 - Prisma/PostgreSQL for Cloud/API.
 - PowerSync/SQLite for Desktop.
 
+Goal Workspace uses the typed stable-edge read path rather than generic Relation DTOs. Pagination is owner-bounded at persistence: Prisma executes filtered `count + take/skip`; PowerSync executes filtered `COUNT(*) + LIMIT/OFFSET`. An unresolved KnowledgeDocument therefore remains a paged stable edge for Workspace to surface as `Missing` instead of being filtered before counting.
+
 PowerSync syncs `relations` by `identity_id`. Offline upload is immutable-edge semantics: PUT creates/idempotently reconciles, DELETE is identity-scoped, and PATCH is rejected. The API re-validates `SubjectRef`, so an offline client cannot bypass the stable Note identity contract.
 
 ## Goal deletion boundary

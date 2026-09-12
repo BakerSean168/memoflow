@@ -20,12 +20,20 @@ describe('goal desktop runtime composer surface', () => {
   const main = readFileSync(resolve(dir, 'main.ts'), 'utf8');
   const composer = readFileSync(resolve(__dirname, 'compose-goal.ts'), 'utf8');
 
-  it('main.ts composes goal with Task binding and canonical UserTimeContext ports', () => {
+  it('main.ts reuses owner read instances across Goal core, Goal Workspace and Goal Knowledge transports', () => {
     expect(main).toContain("from './runtime/compose-goal'");
-    expect(main).toMatch(
-      /composeGoal\(\{\s*db,\s*taskBindingReadPort: new PowerSyncTaskBindingReadPort\(db\),\s*userTimeContextPort: settingElectronModule\.userTimeContextPort,\s*relationCleanupFactory: \(tx\) => new PowerSyncGoalRelationCleanupCapability\(tx\),?\s*\}/,
-    );
+    expect(main).toContain('const taskGoalContextReadPort = new PowerSyncTaskBindingReadPort(db);');
+    expect(main).toContain('const relationRepository = new PowerSyncRelationRepository(db);');
+    expect(main).toContain('const goalKnowledgeService = new GoalKnowledgeService(');
+    expect(main).toMatch(/taskBindingReadPort:\s*taskGoalContextReadPort/);
+    expect(main).toMatch(/taskContextReadPort:\s*taskGoalContextReadPort/);
+    expect(main).toMatch(/knowledgeRelationReadPort:\s*goalKnowledgeService/);
+    expect(main).toContain('createGoalKnowledgeElectronModule({');
+    expect(main).toContain('service: goalKnowledgeService');
+    expect(main).toContain('createGoalWorkspaceElectronModule({');
+    expect(main).toContain('port: goalWorkspaceService');
     expect(main).toContain('.register(goalComposed.module)');
+    expect(main).toContain('.register(goalWorkspaceElectronModule)');
   });
 
   it('main.ts no longer references createGoalElectronModule or the goal/electron seam', () => {

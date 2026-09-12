@@ -1,6 +1,11 @@
 import type { PrismaClient } from '@memoflow/database';
 import { RelationDTOSchema, type RelationDTO, type SubjectRef } from '@memoflow/contracts/relation';
-import type { AddRelationInput, RelationRepository } from '../../domain/relation-repository';
+import type {
+  AddRelationInput,
+  RelationPage,
+  RelationRepository,
+  RelationSubjectPageQuery,
+} from '../../domain/relation-repository';
 
 type Db = Pick<PrismaClient, 'relation'>;
 type RelationRow = Awaited<ReturnType<Db['relation']['findFirst']>>;
@@ -63,6 +68,31 @@ export class PrismaRelationRepository implements RelationRepository {
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     });
     return rows.map(toDTO);
+  }
+
+  async findPageBySubject(query: RelationSubjectPageQuery): Promise<RelationPage> {
+    const where = {
+      identityId: query.identityId,
+      subjectType: query.subject.type,
+      subjectId: query.subject.id,
+      ...(query.relationType ? { relationType: query.relationType } : {}),
+      ...(query.objectType ? { objectType: query.objectType } : {}),
+    };
+    const [rows, total] = await Promise.all([
+      this.db.relation.findMany({
+        where,
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        take: query.limit,
+        skip: query.offset,
+      }),
+      this.db.relation.count({ where }),
+    ]);
+    return {
+      items: rows.map(toDTO),
+      total,
+      limit: query.limit,
+      offset: query.offset,
+    };
   }
 
   async findByObject(identityId: string, object: SubjectRef): Promise<RelationDTO[]> {

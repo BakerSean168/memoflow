@@ -25,6 +25,12 @@ function repository(): RelationRepository {
     deleteExact: vi.fn(async () => true),
     deleteAllForEntity: vi.fn(async () => 1),
     findBySubject: vi.fn(async () => []),
+    findPageBySubject: vi.fn(async (query) => ({
+      items: [],
+      total: 0,
+      limit: query.limit,
+      offset: query.offset,
+    })),
     findByObject: vi.fn(async () => []),
   };
 }

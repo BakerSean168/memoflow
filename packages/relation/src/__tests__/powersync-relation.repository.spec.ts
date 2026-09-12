@@ -37,20 +37,21 @@ function row() {
 function createDb(existing: boolean) {
   const execute = vi.fn(async () => ({ rowsAffected: 1 }));
   const getOptional = vi.fn(async () => (existing ? row() : null));
+  const getAll = vi.fn(async () => [] as unknown[]);
   const tx = {
     execute,
     getOptional,
-    getAll: vi.fn(async () => []),
+    getAll,
     get: vi.fn(),
   } as unknown as IElectronDatabaseTransaction;
   const db = {
     execute,
     getOptional,
-    getAll: vi.fn(async () => []),
+    getAll,
     get: vi.fn(),
     writeTransaction: vi.fn(async (work) => work(tx)),
   } as unknown as IElectronDatabase;
-  return { db, execute, getOptional };
+  return { db, execute, getOptional, getAll };
 }
 
 describe('PowerSyncRelationRepository', () => {
@@ -107,5 +108,34 @@ describe('PowerSyncRelationRepository', () => {
       'goal',
       GOAL_ID,
     ]);
+  });
+  it('pushes filtered pagination and total count into PowerSync SQL', async () => {
+    const { db, getAll } = createDb(false);
+    getAll.mockResolvedValueOnce([row()]).mockResolvedValueOnce([{ count: 7 }]);
+    const repository = new PowerSyncRelationRepository(db);
+
+    await expect(
+      repository.findPageBySubject({
+        identityId: 'identity-1',
+        subject: GOAL_REF,
+        relationType: 'related',
+        objectType: 'note',
+        limit: 2,
+        offset: 4,
+      }),
+    ).resolves.toMatchObject({ total: 7, limit: 2, offset: 4 });
+
+    expect(getAll).toHaveBeenNthCalledWith(
+      1,
+      expect.stringMatching(/relation_type = \?.*object_type = \?[\s\S]*LIMIT \? OFFSET \?/),
+      ['identity-1', 'goal', GOAL_ID, 'related', 'note', 2, 4],
+    );
+    expect(getAll).toHaveBeenNthCalledWith(
+      2,
+      expect.stringMatching(
+        /SELECT COUNT\(\*\) as count[\s\S]*relation_type = \?.*object_type = \?/,
+      ),
+      ['identity-1', 'goal', GOAL_ID, 'related', 'note'],
+    );
   });
 });

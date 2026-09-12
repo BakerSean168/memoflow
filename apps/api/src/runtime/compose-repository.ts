@@ -44,6 +44,7 @@ import {
   createRepositoryModule,
   createRepositoryPrismaRepositories,
   createRepositoryPrismaRuntimeContributions,
+  KnowledgeDocumentWorkspaceResolverService,
   type GithubAppConfig,
   type IKnowledgeRepositoryCloudDataPurger,
   KnowledgeDocumentRefResolverService,
@@ -103,6 +104,7 @@ export interface ComposeRepositoryDependencies {
  */
 export interface ComposedRepositoryApiModule extends RepositoryApiModuleDef {
   readonly knowledgeDocumentRefResolver: KnowledgeDocumentRefResolverService;
+  readonly knowledgeDocumentWorkspaceResolver: KnowledgeDocumentWorkspaceResolverService;
 }
 
 export function composeRepository(
@@ -131,6 +133,11 @@ export function composeRepository(
     knowledgeDocumentRefResolver: new KnowledgeDocumentRefResolverService(
       repositories.bindingRepository,
       repositories.documentIdentityRepository,
+    ),
+    knowledgeDocumentWorkspaceResolver: new KnowledgeDocumentWorkspaceResolverService(
+      repositories.bindingRepository,
+      repositories.documentIdentityRepository,
+      repositories.noteProjectionRepository,
     ),
   });
 }

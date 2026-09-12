@@ -155,7 +155,12 @@ describe('composeGoal assembly order', () => {
     expect(typeof composed.module.destroy).toBe('function');
 
     const instance = createGoalModule.mock.results[0].value;
+    const repoSet = createGoalPrismaRepositories.mock.results[0].value;
     expect(composed.applicationPort).toBe(instance.api);
+    expect(composed.repositories).toEqual({
+      goalRepository: repoSet.goalRepository,
+      goalRecordRepository: repoSet.goalRecordRepository,
+    });
   });
 });
 

@@ -30,6 +30,12 @@ import type {
   DeleteGoalRecordReq,
   GetGoalRecordsRes,
   GetGoalAggregateRes,
+  GetGoalWorkspaceReq,
+  GoalWorkspaceReadModel,
+  GoalWorkspaceTaskPageRequest,
+  GoalWorkspaceTaskPage,
+  GoalWorkspacePageRequest,
+  GoalWorkspaceKnowledgePage,
 } from '@memoflow/contracts/goal';
 
 export class GoalHttpAdapter implements IGoalApiClient {
@@ -71,6 +77,29 @@ export class GoalHttpAdapter implements IGoalApiClient {
 
   async deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>> {
     return this.httpClient.delete(`${this.baseUrl}/${id}`, { params: request });
+  }
+
+  async getGoalWorkspace(
+    goalId: string,
+    request?: GetGoalWorkspaceReq,
+  ): Promise<Result<GoalWorkspaceReadModel>> {
+    return this.httpClient.get(`${this.baseUrl}/${goalId}/workspace`, { params: request });
+  }
+
+  async getGoalWorkspaceTasks(
+    goalId: string,
+    request?: GoalWorkspaceTaskPageRequest,
+  ): Promise<Result<GoalWorkspaceTaskPage>> {
+    return this.httpClient.get(`${this.baseUrl}/${goalId}/workspace/tasks`, { params: request });
+  }
+
+  async getGoalWorkspaceKnowledge(
+    goalId: string,
+    request?: GoalWorkspacePageRequest,
+  ): Promise<Result<GoalWorkspaceKnowledgePage>> {
+    return this.httpClient.get(`${this.baseUrl}/${goalId}/workspace/knowledge`, {
+      params: request,
+    });
   }
 
   // ===== Goal Status =====

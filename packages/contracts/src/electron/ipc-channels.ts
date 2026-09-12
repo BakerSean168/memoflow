@@ -67,6 +67,12 @@ export const GoalChannels = {
   RECORD_DELETE: 'goal:record:delete',
 } as const;
 
+export const GoalWorkspaceChannels = {
+  GET: 'goal:workspace:get',
+  TASKS: 'goal:workspace:tasks',
+  KNOWLEDGE: 'goal:workspace:knowledge',
+} as const;
+
 export const ScheduleChannels = {
   LIST: 'schedule:list',
   LIST_BY_DATE_RANGE: 'schedule:list-by-date-range',
