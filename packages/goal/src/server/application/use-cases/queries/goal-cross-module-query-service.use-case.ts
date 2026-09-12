@@ -7,7 +7,7 @@
 
 import { calculateKeyResultProgress, type IGoalRepository } from '../../../domain';
 import type { Goal } from '../../../domain';
-import type { GoalStatus } from '@memoflow/contracts/goal';
+import type { GoalStatus, GoalTimeframe } from '@memoflow/contracts/goal';
 import { createLogger } from '@memoflow/utils/logger';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
@@ -22,7 +22,7 @@ export interface GoalBindingOption {
   title: string;
   summary?: string | null;
   status: GoalStatus;
-  dueDate?: number | null;
+  target?: GoalTimeframe | null;
   progress?: number;
 }
 
@@ -70,7 +70,7 @@ export class GoalCrossModuleQueryServiceUseCase {
           title: goal.name,
           summary: goal.summary,
           status: goal.status,
-          dueDate: goal.dueDate ?? null,
+          target: goal.target ?? null,
           progress: goal.progress,
         })),
     );

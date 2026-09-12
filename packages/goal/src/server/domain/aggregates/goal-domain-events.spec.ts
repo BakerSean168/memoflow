@@ -8,7 +8,7 @@ function createGoalAggregate(): Goal {
     name: 'Launch Goal',
     summary: 'Ship the launch plan',
     startDate: null,
-    dueDate: null,
+    target: null,
     reminderConfig: null,
   });
 }

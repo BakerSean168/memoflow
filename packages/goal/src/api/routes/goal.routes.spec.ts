@@ -352,7 +352,7 @@ describe('goal route contracts', () => {
           summary: null,
           status: 'InProgress',
           startDate: null,
-          dueDate: null,
+          target: null,
           completedAt: null,
           archivedAt: null,
           sortOrder: 0,

@@ -3,7 +3,7 @@ import { RefreshControl, StyleSheet, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { GoalStatus } from '@memoflow/contracts/goal';
+import { GoalStatus, goalTimeframeLabel } from '@memoflow/contracts/goal';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useGoalDetail } from '../hooks/useGoalDetail';
@@ -19,8 +19,7 @@ import {
   ThemedView,
 } from '@memoflow/ui-react-native';
 
-// Residual 1261: formatDate dual retired onto shared formatDateNotSet sole (date-only + English 'Not set').
-import { formatDateNotSet as formatDate } from '../utils/format-date-not-set';
+import { formatProductYmd, getProductTime } from '../utils/product-time';
 
 export function GoalDetailScreen() {
   const router = useRouter();
@@ -240,8 +239,15 @@ export function GoalDetailScreen() {
           </SectionCard>
 
           <SectionCard title="Goal timeline" description="Direction dates and labels.">
-            <MetaRow label="Start date" value={formatDate(goal.startDate)} />
-            <MetaRow label="Due date" value={formatDate(goal.dueDate)} />
+            <MetaRow label="Start date" value={formatProductYmd(goal.startDate, 'Not set')} />
+            <MetaRow
+              label="Target"
+              value={
+                goal.target
+                  ? goalTimeframeLabel(goal.target, getProductTime().presentation.locale)
+                  : 'Not set'
+              }
+            />
             <MetaRow
               label="Labels"
               value={

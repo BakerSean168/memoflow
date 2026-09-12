@@ -9,8 +9,9 @@ model Goal {
   name                String
   summary             String?
   status              String    @default("Planned")
-  startDate           DateTime? @map("start_date")
-  dueDate             DateTime? @map("due_date")
+  startDate           String?   @map("start_date")
+  targetKind          String?   @map("target_kind")
+  targetEndDate       String?   @map("target_end_date")
   completedAt         DateTime? @map("completed_at")
   archivedAt          DateTime? @map("archived_at")
   sortOrder           Int       @default(0) @map("sort_order")
@@ -28,8 +29,8 @@ model Goal {
 
   @@unique([id, identityId])
   @@index([identityId, status])
-  @@index([identityId, dueDate])
-  @@index([dueDate])
+  @@index([identityId, targetEndDate])
+  @@index([targetEndDate])
   @@index([deletedAt])
   @@map("goals")
 }

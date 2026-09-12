@@ -95,6 +95,10 @@ describe('HARD-7102 core vNext architecture lock', () => {
         relPath: 'packages/database/prisma/schema/task.prisma',
         content: `model TaskPlan {\n  id String @id\n  tags String\n}`,
       },
+      {
+        relPath: 'packages/goal/src/server/domain/legacy-time.ts',
+        content: `const overdue = goal.isOverdue || goal.dueDate;`,
+      },
     );
     const kinds = new Set(violations.map((v) => v.kind));
     expect(kinds).toEqual(expect.objectContaining({}));
@@ -115,6 +119,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
       'ai-raw-scheduler-access',
       'ai-retired-goal-task-draft',
       'task-legacy-classification',
+      'goal-legacy-due-time',
     ]) {
       expect(kinds.has(kind), `missing violation kind ${kind}`).toBe(true);
     }
@@ -177,6 +182,14 @@ describe('HARD-7102 core vNext architecture lock', () => {
       {
         relPath: 'packages/app-vue/src/modules/task/TaskView.vue',
         content: `const labelIds = template.labels.map((label) => label.id);`,
+      },
+      {
+        relPath: 'packages/task/src/server/domain/task-time.ts',
+        content: `const overdue = occurrence.isOverdue; const dueDate = occurrence.dueDate;`,
+      },
+      {
+        relPath: 'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
+        content: `const GoalPlanDraftV1 = z.object({ dueDate: z.number().nullable() });`,
       },
     );
     expect(violations).toHaveLength(0);

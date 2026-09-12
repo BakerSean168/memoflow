@@ -353,6 +353,8 @@ Core identity    Target/time        KR Measurement V3
 
 ### GOAL-7203 — Replace Goal dueDate with Target Timeframe
 
+**Status:** DONE on `chatgpt/goal-7203-target-timeframe`; integration evidence below.
+
 **Goal:** Goal uses `startDate?: Ymd` and `target?: GoalTimeframe`; Task due semantics stay untouched.
 
 **Why now:** Core planning semantics must stabilize before UI/AI contracts.
@@ -369,19 +371,21 @@ Core identity    Target/time        KR Measurement V3
 
 **Implementation:**
 
-1. characterize current Goal date round trips and reminder projection;
-2. add GoalTimeframe schema + domain helper with start/end boundary;
-3. migrate exact legacy dueDate to `target(kind=day)` through Product Time conversion path;
-4. convert Goal start to date-only `Ymd` semantics;
-5. replace Goal due/overdue names with target/past-target names;
-6. update reminder relative-target wording and end-boundary semantics;
-7. add governance scan that only forbids Goal canonical dueDate, not Task dueDate.
+1. `GoalTimeframe` is the sole Goal target contract with exact `day | month | quarter | halfYear | year` variants, deterministic start/end boundaries, locale-aware precision-preserving labels, target-end comparison and `isPastGoalTarget`. Calendar math is Ymd-based and never guesses from the host JS timezone.
+2. Goal root planning time is `startDate: Ymd | null` plus `target: GoalTimeframe | null`. Prisma/PowerSync normalize target storage to the reversible pair `target_kind + target_end_date`; partial pairs and non-canonical end dates fail closed. ADR-111 applies a direct schema/source cutover, so there is no legacy Goal `due_date` backfill or dual-read path.
+3. Reminder and Schedule use `goalTimeframeEndBoundary(target)` only as a derived execution boundary. Day targets keep exact-date wording; Month/Quarter/Half-year/Year targets use period-end wording. Passing the target boundary never mutates Goal lifecycle.
+4. Vue/Web/Desktop and React/Mobile consume the same target contract. The current simple edit surface may replace a target with an exact day; when an existing Month/Quarter/Half-year/Year target is not touched it preserves and displays the original precision. The full precision picker/property-chip UI remains GOAL-7209 rather than being pulled into this contract ticket.
+5. AI GoalPlanDraft V1 still owns epoch `startDate/dueDate` until its GOAL-7210 retirement. Its apply adapter now requires an explicit user timezone and projects those legacy instants to Goal Ymd plus a day `GoalTimeframe`, so no ambient timezone conversion leaks into the new Goal model.
+6. Data Portability exports/imports `startDate + target`; Dashboard/Calendar projections use target semantics; Goal `overdue/due` presentation is replaced by `past target/target` while Task due/overdue vocabulary remains owned by Task.
+7. `core-vnext-architecture-lock` now has an owner-scoped `goal-legacy-due-time` rule that rejects `dueDate`, `isOverdue`, `GoalDueDateNotSetError` and `due_date` only on canonical Goal surfaces. The lock explicitly permits Task due semantics and the temporary AI Draft V1 compatibility contract.
+
+**Acceptance evidence:** Contracts full suite 82 files / 565 tests PASS, including 25 GoalTimeframe tests; Goal full suite 84 / 465 PASS; Data Portability 36 / 148 PASS; PowerSync schema 6/6 PASS; Goal planning/reminder/schedule focused 3 files / 27 tests PASS; App-Vue Goal/Schedule focused suite PASS and GoalDialog precision-preservation/replacement behavior 4/4 PASS; AI Goal apply 10/10 PASS; Dashboard 5 / 24 PASS; Task due/overdue focused suite 3 files / 119 tests PASS. Contracts/Goal/Data Portability/PowerSync/AI/Dashboard/React/App-Vue/Web typechecks PASS; App-Vue production build PASS. Prisma generate + validate PASS and generated/schema scan contains no Goal due field. Governance tools 19 files / 137 tests PASS with the owner-scoped anti-resurrection lock. Authored production ESLint PASS on 54 changed production files with 0 warnings/errors; test inventory regenerated/current at 1247 files; `docs:check` PASS; full `governance:check` PASS; `git diff --check` PASS at closure.
 
 **Acceptance:** Goal exposes one target concept; Q4/Month/Year preserve displayed precision; passing target never mutates status; Task due tests remain green.
 
-**Dependencies:** GOAL-7201, coordinate contract merge with GOAL-7202.
+**Dependencies:** GOAL-7201, GOAL-7202.
 
-**Risks:** timezone/date migration; use ADR-037 Product Time helpers and explicit migration fixtures, never JS ambient timezone guessing.
+**Risks:** ADR-111 intentionally discards legacy Goal due rows during environment cutover. AI Draft V1 still needs explicit timezone projection until GOAL-7210; do not add an ambient-Date compatibility path.
 
 ## 10. Phase 2 — KR Measurement V3
 

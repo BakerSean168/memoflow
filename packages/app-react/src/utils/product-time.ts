@@ -3,6 +3,7 @@
  * Single session — Screens must not createTimeFacade for routine display.
  */
 import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import {
   createSystemTimeZoneSource,
   createTimeContext,
@@ -83,6 +84,15 @@ function toMs(value: number | string | Date | null | undefined): number | null {
 }
 
 /** Empty-safe date via session (optional empty override string). */
+export function formatProductYmd(value: Ymd | null | undefined, empty?: string): string {
+  if (value == null) return empty ?? sessionTime.presentation.empty.display;
+  return sessionTime.format.ymdDisplay(value) || (empty ?? sessionTime.presentation.empty.unknown);
+}
+
+export function parseProductYmdInput(value: string): Ymd | null {
+  return sessionTime.input.parseDateValue(value.trim());
+}
+
 export function formatProductDate(
   value: number | string | Date | null | undefined,
   empty?: string,

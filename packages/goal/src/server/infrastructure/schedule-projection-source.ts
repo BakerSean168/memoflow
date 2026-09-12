@@ -1,12 +1,27 @@
-import type { GoalEventMap, GoalServerDTO, ReminderTrigger } from '@memoflow/contracts/goal';
-import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
+import type {
+  GoalEventMap,
+  GoalServerDTO,
+  GoalTimeframe,
+  ReminderTrigger,
+} from '@memoflow/contracts/goal';
+import {
+  GoalStatus,
+  ReminderTriggerType,
+  goalTimeframeEndBoundary,
+} from '@memoflow/contracts/goal';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
-import { createTimeFacade, type TimeFacade, type UserTimeContextPort } from '@memoflow/time';
+import {
+  addYmdDays,
+  createTimeFacade,
+  type TimeFacade,
+  type UserTimeContextPort,
+} from '@memoflow/time';
 import type { IGoalRepository } from '../domain';
 
 export const GOAL_REMINDER_HANDLER_KEY = 'goal.reminder.fire';
-export const GOAL_REMINDER_PAYLOAD_VERSION = 1;
+export const GOAL_REMINDER_PAYLOAD_VERSION = 2;
 export const GOAL_SCHEDULING_OWNER_TYPE = 'goal.goal';
 
 export interface GoalReminderScheduledPayload {
@@ -14,8 +29,8 @@ export interface GoalReminderScheduledPayload {
   readonly goalTitle: string;
   readonly triggerType: ReminderTriggerType;
   readonly triggerValue: number;
-  readonly startDate: number | null;
-  readonly dueDate: number | null;
+  readonly startDate: Ymd | null;
+  readonly target: GoalTimeframe | null;
   readonly reminderTime: number;
 }
 
@@ -42,24 +57,27 @@ function shouldScheduleGoal(goal: GoalServerDTO): boolean {
   );
 }
 
-/** Product Time semantics: RemainingDays is a calendar-day offset from the due date. */
+/** Product Time semantics: reminders are derived from calendar-native planning dates. */
 function calculateTriggerAt(
   goal: GoalServerDTO,
   trigger: ReminderTrigger,
   time: TimeFacade,
 ): number | null {
+  if (!goal.target) return null;
+  const targetEnd = goalTimeframeEndBoundary(goal.target);
+
   if (trigger.type === ReminderTriggerType.RemainingDays) {
-    if (!goal.dueDate) {
-      return null;
-    }
-    return time.calendar.addDays(goal.dueDate, -trigger.value);
+    return time.codec.startOfYmd(addYmdDays(targetEnd, -trigger.value));
   }
 
   if (trigger.type === ReminderTriggerType.TimeProgressPercentage) {
-    if (!goal.startDate || !goal.dueDate || goal.dueDate <= goal.startDate) {
-      return null;
-    }
-    return goal.startDate + (goal.dueDate - goal.startDate) * (trigger.value / 100);
+    if (!goal.startDate) return null;
+    const startAt = time.codec.startOfYmd(goal.startDate);
+    const targetEndAt = time.codec.startOfYmd(targetEnd);
+    if (targetEndAt <= startAt) return null;
+    const totalCalendarDays = time.calendar.diffCalendarDays(targetEndAt, startAt);
+    const offsetDays = Math.round(totalCalendarDays * (trigger.value / 100));
+    return time.calendar.addDays(startAt, offsetDays);
   }
 
   return null;
@@ -177,7 +195,7 @@ export function createGoalScheduleProjectionSource(deps: {
             triggerType: trigger.type,
             triggerValue: trigger.value,
             startDate: goalDTO.startDate,
-            dueDate: goalDTO.dueDate,
+            target: goalDTO.target,
             reminderTime: triggerAt,
           },
           sourceRevision: String(goalDTO.version),

@@ -5,12 +5,12 @@ tags:
   - goal
 description: Goal vNext 当前功能、产品语义与模块边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-08T17:55:00+08:00
+updated: 2026-09-12T10:14:00+08:00
 ---
 
 # Goal 模块说明
 
-> **下一版目标设计（2026-09-08，待实施）：** 当前本文仍描述已实现的 Goal vNext。新的 Goal Model Convergence 已由 [ADR-067](../../architecture/adr/ADR-067-goal-vnext-product-model-and-lifecycle.md)～[ADR-070](../../architecture/adr/ADR-070-ai-goal-plan-orchestration.md) 与 [Goal vNext Workspace UI](../goal-vnext-workspace-and-create-ui.md) 冻结，实施计划见 [active plan](../../plan/active/2026-09-08-goal-vnext-model-convergence.md)。在代码迁移完成前不要把 target design 误写成当前事实。
+> **当前收敛状态（2026-09-12）：** GOAL-7202/7203 已落地：Goal identity/lifecycle 与 planning time 已切到 `name + summary`、`Planned/InProgress/Completed/Abandoned`、`startDate: Ymd`、`GoalTimeframe target`。KR Measurement V3、Goal Workspace、AI Plan V2 与完整 Target property picker 仍按 [active plan](../../plan/active/2026-09-08-goal-vnext-model-convergence.md) 后续票实施，不应提前写成当前能力。
 
 ## 1. 功能定位
 
@@ -18,7 +18,9 @@ Goal 负责个人目标的 **Direction + Measurement**：用户定义想达到�
 
 ## 2. 当前产品能力
 
-- Goal 创建、编辑、激活、完成、放弃、归档与删除；
+- Goal 创建、编辑、回到规划、开始、完成、放弃、归档与删除；
+- Goal identity：`name + summary`；新 Goal 默认 `Planned`；
+- Planning time：`startDate?: Ymd` + `target?: GoalTimeframe`，Target 支持 Day / Month / Quarter / Half-year / Year 精度；目标周期过去只产生 `Past Target` 展示信号，不产生 Task-style overdue，也不自动改变状态；
 - Key Result Measurement V2：`baseline / current / target / unit / direction` 等测量语义由统一 calculator 解释；
 - Goal Record：记录 KR 的真实测量事实；
 - Goal Review：记录阶段性复盘；
@@ -33,14 +35,25 @@ Goal 负责个人目标的 **Direction + Measurement**：用户定义想达到�
 Goal 业务状态只有：
 
 ```text
-Active
+Planned
+InProgress
 Completed
 Abandoned
 ```
 
-`archivedAt` 是独立的历史/显示属性，不是第四种业务状态。完成判定由 Goal/KR 领域语义决定；weighted progress 是展示用进度，不是自动完成开关。
+状态只能通过显式 `plan / activate / complete / abandon` 业务动作改变。`archivedAt` 是独立的历史/显示属性，不是业务状态；start/target/KR/Task/Reminder 都不会自动切换 Goal status。进入 Completed 设置 `completedAt`，重新进入 InProgress 会清除它。
 
-## 4. 写入与一致性边界
+## 4. Planning time 边界
+
+- `startDate` 是 Product Time 的 date-only `Ymd`，不是 epoch instant；
+- `target` 是 `GoalTimeframe`：Day / Month / Quarter / Half-year / Year，展示必须保留用户选择的精度；
+- 持久化使用 `target_kind + target_end_date` 的规范化可逆 pair，应用层仍只暴露 `GoalTimeframe`；
+- Reminder/Schedule 可以从 target 派生 period end boundary，但这个 boundary 不是新的 Goal deadline truth；
+- Task `dueDate/isOverdue` 属于 Task owner，不能因为 Goal 去除 due 语义而删除或复用。
+
+完整 Target property picker 属于 GOAL-7209；当前基础编辑器会保留未触碰的 Month/Quarter/Half-year/Year target，只有用户选择具体日期时才显式替换为 Day target。
+
+## 5. 写入与一致性边界
 
 - Goal aggregate 是 Goal/KR/Record/Review 的一致性边界；
 - 修改既有 aggregate 使用 `expectedVersion`，冲突显式返回而不是静默覆盖；
@@ -48,14 +61,15 @@ Abandoned
 - Task contribution 通过自包含、幂等的跨模块事件/settlement 进入 Goal，不共享 repository 或数据库事务；
 - AI 只生成草稿并调用 Goal/Task owner application port，不直接写数据库。
 
-## 5. 用户视图
+## 6. 用户视图
 
-主要视图是 `Active / Completed / All`，归档与放弃属于历史入口；它们都是状态/日期派生的 **System View**，不是 Label。用户可叠加 Shared Label 过滤，例如 `Active AND #工作 AND #AI`。
+当前列表仍使用 `Active / Completed / All` 这组 **System View** 展示标签，其中 `Active` 视图是 UI/read-model 聚合，包含 `Planned + InProgress`，不是第五种 Goal status。归档与放弃属于历史入口；System View 都是状态/时间派生视图，不是 Label。用户可叠加 Shared Label 过滤。
 
 Web/Desktop 与 React/Mobile 均使用同一公开 contracts；移动端不存在 Folder/Comparison/Focus 等已退休 UI。
 
-## 6. 相关资产
+## 7. 相关资产
 
+- 当前 Goal model/lifecycle/timeframe：[ADR-067](../../architecture/adr/ADR-067-goal-vnext-product-model-and-lifecycle.md)
 - 设计总览：[Goal / Task vNext](../goal-task-vnext.md)
 - 产品边界：[ADR-053](../../architecture/adr/ADR-053-goal-task-personal-product-boundary.md)
 - Shared Label：[ADR-054](../../architecture/adr/ADR-054-shared-labels-and-system-views.md)

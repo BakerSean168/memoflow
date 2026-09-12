@@ -59,8 +59,8 @@ function goalFromDTO(dto: GoalClientDTO): Goal {
     name: dto.name,
     summary: dto.summary,
     status: dto.status,
-    startDate: dto.startDate ? dto.startDate : null,
-    dueDate: dto.dueDate ? dto.dueDate : null,
+    startDate: dto.startDate ?? null,
+    target: dto.target ?? null,
     completedAt: dto.completedAt ? dto.completedAt : null,
     archivedAt: dto.archivedAt ? dto.archivedAt : null,
     sortOrder: dto.sortOrder,
@@ -133,8 +133,8 @@ export interface GoalClientPort {
     status?: string[];
     systemView?: GoalSystemView;
     labelIdsAll?: string[];
-    startDate?: number;
-    endDate?: number;
+    targetStart?: import('@memoflow/contracts/primitives').Ymd;
+    targetEnd?: import('@memoflow/contracts/primitives').Ymd;
   }): Promise<Result<{ goals: Goal[]; pagination: QueryGoalsRes['pagination'] }>>;
   updateGoal(id: string, request: UpdateGoalReq): Promise<Result<GoalMutationReceipt>>;
   deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>>;
@@ -268,8 +268,8 @@ export class GoalClientService implements GoalClientPort {
     status?: string[];
     systemView?: GoalSystemView;
     labelIdsAll?: string[];
-    startDate?: number;
-    endDate?: number;
+    targetStart?: import('@memoflow/contracts/primitives').Ymd;
+    targetEnd?: import('@memoflow/contracts/primitives').Ymd;
   }): Promise<Result<{ goals: Goal[]; pagination: QueryGoalsRes['pagination'] }>> {
     const result = await this.goalApi.getGoals(params);
     return mapResult(result, (data: QueryGoalsRes) => ({

@@ -9,8 +9,9 @@ describe('PrismaGoalMapper additional coverage', () => {
       name: 'Goal',
       summary: null,
       status: 'InProgress',
-      startDate: new Date(1_000),
-      dueDate: new Date(2_000),
+      startDate: '2026-01-15',
+      targetKind: 'quarter',
+      targetEndDate: '2026-12-31',
       completedAt: null,
       archivedAt: null,
       sortOrder: null,
@@ -72,7 +73,9 @@ describe('PrismaGoalMapper additional coverage', () => {
 
     const dto = PrismaGoalMapper.toDomainDTO(row);
 
-    expect(dto.dueDate).toBe(2_000);
+    expect(dto.startDate).toBe('2026-01-15');
+    expect(dto.targetKind).toBe('quarter');
+    expect(dto.targetEndDate).toBe('2026-12-31');
     expect('color' in dto).toBe(false);
     expect('priority' in dto).toBe(false);
     expect('tags' in dto).toBe(false);
@@ -101,7 +104,8 @@ describe('PrismaGoalMapper additional coverage', () => {
       summary: 'desc',
       status: 'Completed',
       startDate: null,
-      dueDate: null,
+      targetKind: null,
+      targetEndDate: null,
       completedAt: null,
       archivedAt: null,
       sortOrder: 2,
@@ -187,8 +191,9 @@ describe('PrismaGoalMapper fallback branches (R4)', () => {
       name: 'Goal',
       summary: null,
       status: 'InProgress',
-      startDate: Date.parse('2026-01-01T00:00:00.000Z'),
-      dueDate: null,
+      startDate: '2026-01-01',
+      targetKind: null,
+      targetEndDate: null,
       completedAt: null,
       archivedAt: null,
       sortOrder: null,
@@ -203,12 +208,13 @@ describe('PrismaGoalMapper fallback branches (R4)', () => {
     };
 
     const raw = PrismaGoalMapper.toDomainDTO(row as never);
-    expect(raw.dueDate).toBeNull();
+    expect(raw.targetKind).toBeNull();
+    expect(raw.targetEndDate).toBeNull();
     expect(raw.sortOrder).toBe(0);
     expect(raw.version).toBe(1);
     expect(raw.reminderConfig).toBeNull();
     expect(raw.keyResults).toBeNull();
-    expect(raw.startDate).toBe(Date.parse('2026-01-01T00:00:00.000Z'));
+    expect(raw.startDate).toBe('2026-01-01');
     expect(raw.createdAt).toBe(1_000);
     expect(raw.updatedAt).toBe(2_000);
   });

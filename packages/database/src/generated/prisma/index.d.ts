@@ -31094,8 +31094,9 @@ export namespace Prisma {
     name: string | null
     summary: string | null
     status: string | null
-    startDate: Date | null
-    dueDate: Date | null
+    startDate: string | null
+    targetKind: string | null
+    targetEndDate: string | null
     completedAt: Date | null
     archivedAt: Date | null
     sortOrder: number | null
@@ -31112,8 +31113,9 @@ export namespace Prisma {
     name: string | null
     summary: string | null
     status: string | null
-    startDate: Date | null
-    dueDate: Date | null
+    startDate: string | null
+    targetKind: string | null
+    targetEndDate: string | null
     completedAt: Date | null
     archivedAt: Date | null
     sortOrder: number | null
@@ -31131,7 +31133,8 @@ export namespace Prisma {
     summary: number
     status: number
     startDate: number
-    dueDate: number
+    targetKind: number
+    targetEndDate: number
     completedAt: number
     archivedAt: number
     sortOrder: number
@@ -31161,7 +31164,8 @@ export namespace Prisma {
     summary?: true
     status?: true
     startDate?: true
-    dueDate?: true
+    targetKind?: true
+    targetEndDate?: true
     completedAt?: true
     archivedAt?: true
     sortOrder?: true
@@ -31179,7 +31183,8 @@ export namespace Prisma {
     summary?: true
     status?: true
     startDate?: true
-    dueDate?: true
+    targetKind?: true
+    targetEndDate?: true
     completedAt?: true
     archivedAt?: true
     sortOrder?: true
@@ -31197,7 +31202,8 @@ export namespace Prisma {
     summary?: true
     status?: true
     startDate?: true
-    dueDate?: true
+    targetKind?: true
+    targetEndDate?: true
     completedAt?: true
     archivedAt?: true
     sortOrder?: true
@@ -31301,8 +31307,9 @@ export namespace Prisma {
     name: string
     summary: string | null
     status: string
-    startDate: Date | null
-    dueDate: Date | null
+    startDate: string | null
+    targetKind: string | null
+    targetEndDate: string | null
     completedAt: Date | null
     archivedAt: Date | null
     sortOrder: number
@@ -31339,7 +31346,8 @@ export namespace Prisma {
     summary?: boolean
     status?: boolean
     startDate?: boolean
-    dueDate?: boolean
+    targetKind?: boolean
+    targetEndDate?: boolean
     completedAt?: boolean
     archivedAt?: boolean
     sortOrder?: boolean
@@ -31363,7 +31371,8 @@ export namespace Prisma {
     summary?: boolean
     status?: boolean
     startDate?: boolean
-    dueDate?: boolean
+    targetKind?: boolean
+    targetEndDate?: boolean
     completedAt?: boolean
     archivedAt?: boolean
     sortOrder?: boolean
@@ -31382,7 +31391,8 @@ export namespace Prisma {
     summary?: boolean
     status?: boolean
     startDate?: boolean
-    dueDate?: boolean
+    targetKind?: boolean
+    targetEndDate?: boolean
     completedAt?: boolean
     archivedAt?: boolean
     sortOrder?: boolean
@@ -31401,7 +31411,8 @@ export namespace Prisma {
     summary?: boolean
     status?: boolean
     startDate?: boolean
-    dueDate?: boolean
+    targetKind?: boolean
+    targetEndDate?: boolean
     completedAt?: boolean
     archivedAt?: boolean
     sortOrder?: boolean
@@ -31412,7 +31423,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type GoalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "summary" | "status" | "startDate" | "dueDate" | "completedAt" | "archivedAt" | "sortOrder" | "reminderConfig" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["goal"]>
+  export type GoalOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "summary" | "status" | "startDate" | "targetKind" | "targetEndDate" | "completedAt" | "archivedAt" | "sortOrder" | "reminderConfig" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["goal"]>
   export type GoalInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     keyResults?: boolean | Goal$keyResultsArgs<ExtArgs>
@@ -31443,8 +31454,9 @@ export namespace Prisma {
       name: string
       summary: string | null
       status: string
-      startDate: Date | null
-      dueDate: Date | null
+      startDate: string | null
+      targetKind: string | null
+      targetEndDate: string | null
       completedAt: Date | null
       archivedAt: Date | null
       sortOrder: number
@@ -31886,8 +31898,9 @@ export namespace Prisma {
     readonly name: FieldRef<"Goal", 'String'>
     readonly summary: FieldRef<"Goal", 'String'>
     readonly status: FieldRef<"Goal", 'String'>
-    readonly startDate: FieldRef<"Goal", 'DateTime'>
-    readonly dueDate: FieldRef<"Goal", 'DateTime'>
+    readonly startDate: FieldRef<"Goal", 'String'>
+    readonly targetKind: FieldRef<"Goal", 'String'>
+    readonly targetEndDate: FieldRef<"Goal", 'String'>
     readonly completedAt: FieldRef<"Goal", 'DateTime'>
     readonly archivedAt: FieldRef<"Goal", 'DateTime'>
     readonly sortOrder: FieldRef<"Goal", 'Int'>
@@ -127829,7 +127842,8 @@ export namespace Prisma {
     summary: 'summary',
     status: 'status',
     startDate: 'startDate',
-    dueDate: 'dueDate',
+    targetKind: 'targetKind',
+    targetEndDate: 'targetEndDate',
     completedAt: 'completedAt',
     archivedAt: 'archivedAt',
     sortOrder: 'sortOrder',
@@ -131050,8 +131064,9 @@ export namespace Prisma {
     name?: StringFilter<"Goal"> | string
     summary?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
-    startDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
-    dueDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
+    startDate?: StringNullableFilter<"Goal"> | string | null
+    targetKind?: StringNullableFilter<"Goal"> | string | null
+    targetEndDate?: StringNullableFilter<"Goal"> | string | null
     completedAt?: DateTimeNullableFilter<"Goal"> | Date | string | null
     archivedAt?: DateTimeNullableFilter<"Goal"> | Date | string | null
     sortOrder?: IntFilter<"Goal"> | number
@@ -131074,7 +131089,8 @@ export namespace Prisma {
     summary?: SortOrderInput | SortOrder
     status?: SortOrder
     startDate?: SortOrderInput | SortOrder
-    dueDate?: SortOrderInput | SortOrder
+    targetKind?: SortOrderInput | SortOrder
+    targetEndDate?: SortOrderInput | SortOrder
     completedAt?: SortOrderInput | SortOrder
     archivedAt?: SortOrderInput | SortOrder
     sortOrder?: SortOrder
@@ -131100,8 +131116,9 @@ export namespace Prisma {
     name?: StringFilter<"Goal"> | string
     summary?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
-    startDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
-    dueDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
+    startDate?: StringNullableFilter<"Goal"> | string | null
+    targetKind?: StringNullableFilter<"Goal"> | string | null
+    targetEndDate?: StringNullableFilter<"Goal"> | string | null
     completedAt?: DateTimeNullableFilter<"Goal"> | Date | string | null
     archivedAt?: DateTimeNullableFilter<"Goal"> | Date | string | null
     sortOrder?: IntFilter<"Goal"> | number
@@ -131124,7 +131141,8 @@ export namespace Prisma {
     summary?: SortOrderInput | SortOrder
     status?: SortOrder
     startDate?: SortOrderInput | SortOrder
-    dueDate?: SortOrderInput | SortOrder
+    targetKind?: SortOrderInput | SortOrder
+    targetEndDate?: SortOrderInput | SortOrder
     completedAt?: SortOrderInput | SortOrder
     archivedAt?: SortOrderInput | SortOrder
     sortOrder?: SortOrder
@@ -131149,8 +131167,9 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Goal"> | string
     summary?: StringNullableWithAggregatesFilter<"Goal"> | string | null
     status?: StringWithAggregatesFilter<"Goal"> | string
-    startDate?: DateTimeNullableWithAggregatesFilter<"Goal"> | Date | string | null
-    dueDate?: DateTimeNullableWithAggregatesFilter<"Goal"> | Date | string | null
+    startDate?: StringNullableWithAggregatesFilter<"Goal"> | string | null
+    targetKind?: StringNullableWithAggregatesFilter<"Goal"> | string | null
+    targetEndDate?: StringNullableWithAggregatesFilter<"Goal"> | string | null
     completedAt?: DateTimeNullableWithAggregatesFilter<"Goal"> | Date | string | null
     archivedAt?: DateTimeNullableWithAggregatesFilter<"Goal"> | Date | string | null
     sortOrder?: IntWithAggregatesFilter<"Goal"> | number
@@ -140557,8 +140576,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -140580,8 +140600,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -140601,8 +140622,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -140624,8 +140646,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -140646,8 +140669,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -140663,8 +140687,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -140681,8 +140706,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -150936,7 +150962,8 @@ export namespace Prisma {
     summary?: SortOrder
     status?: SortOrder
     startDate?: SortOrder
-    dueDate?: SortOrder
+    targetKind?: SortOrder
+    targetEndDate?: SortOrder
     completedAt?: SortOrder
     archivedAt?: SortOrder
     sortOrder?: SortOrder
@@ -150959,7 +150986,8 @@ export namespace Prisma {
     summary?: SortOrder
     status?: SortOrder
     startDate?: SortOrder
-    dueDate?: SortOrder
+    targetKind?: SortOrder
+    targetEndDate?: SortOrder
     completedAt?: SortOrder
     archivedAt?: SortOrder
     sortOrder?: SortOrder
@@ -150977,7 +151005,8 @@ export namespace Prisma {
     summary?: SortOrder
     status?: SortOrder
     startDate?: SortOrder
-    dueDate?: SortOrder
+    targetKind?: SortOrder
+    targetEndDate?: SortOrder
     completedAt?: SortOrder
     archivedAt?: SortOrder
     sortOrder?: SortOrder
@@ -162210,8 +162239,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -162231,8 +162261,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -164606,8 +164637,9 @@ export namespace Prisma {
     name?: StringFilter<"Goal"> | string
     summary?: StringNullableFilter<"Goal"> | string | null
     status?: StringFilter<"Goal"> | string
-    startDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
-    dueDate?: DateTimeNullableFilter<"Goal"> | Date | string | null
+    startDate?: StringNullableFilter<"Goal"> | string | null
+    targetKind?: StringNullableFilter<"Goal"> | string | null
+    targetEndDate?: StringNullableFilter<"Goal"> | string | null
     completedAt?: DateTimeNullableFilter<"Goal"> | Date | string | null
     archivedAt?: DateTimeNullableFilter<"Goal"> | Date | string | null
     sortOrder?: IntFilter<"Goal"> | number
@@ -170330,8 +170362,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -170352,8 +170385,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -170548,8 +170582,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -170570,8 +170605,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -170748,8 +170784,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -170770,8 +170807,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -170806,8 +170844,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -170828,8 +170867,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -170848,8 +170888,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -170870,8 +170911,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -170950,8 +170992,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -170972,8 +171015,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -172281,8 +172325,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -172303,8 +172348,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -172503,8 +172549,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -172525,8 +172572,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -189940,8 +189988,9 @@ export namespace Prisma {
     name: string
     summary?: string | null
     status?: string
-    startDate?: Date | string | null
-    dueDate?: Date | string | null
+    startDate?: string | null
+    targetKind?: string | null
+    targetEndDate?: string | null
     completedAt?: Date | string | null
     archivedAt?: Date | string | null
     sortOrder?: number
@@ -190701,8 +190750,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -190722,8 +190772,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
@@ -190743,8 +190794,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startDate?: NullableStringFieldUpdateOperationsInput | string | null
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number

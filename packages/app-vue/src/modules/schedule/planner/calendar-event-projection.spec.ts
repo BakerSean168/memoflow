@@ -15,15 +15,13 @@ import {
 
 const dayStart = asInstant(Date.parse('2026-08-27T00:00:00.000Z'));
 const taskDay = asInstant(Date.parse('2026-08-28T00:00:00.000Z'));
-const goalStart = asInstant(Date.parse('2026-09-01T00:00:00.000Z'));
-const goalDue = asInstant(Date.parse('2026-09-30T00:00:00.000Z'));
+const goalStart = asYmd('2026-09-01');
+const goalTarget = asYmd('2026-09-30');
 
 const time: PlannerProductTimePort = {
   startOfDay: (instant) => instant,
   toYmd: (instant) => {
     if (instant === taskDay) return asYmd('2026-08-28');
-    if (instant === goalStart) return asYmd('2026-09-01');
-    if (instant === goalDue) return asYmd('2026-09-30');
     throw new Error(`Unexpected Instant ${instant}`);
   },
 };
@@ -82,15 +80,15 @@ function goal(overrides: Partial<GoalClientDTO> = {}): GoalClientDTO {
     name: 'Ship Core vNext',
     summary: null,
     status: 'InProgress',
-    startDate: Number(goalStart),
-    dueDate: Number(goalDue),
+    startDate: goalStart,
+    target: { kind: 'day', date: goalTarget },
     completedAt: null,
     archivedAt: null,
     sortOrder: 0,
     reminderConfig: null,
     labels: [],
-    createdAt: Number(goalStart),
-    updatedAt: Number(goalStart),
+    createdAt: Number(dayStart),
+    updatedAt: Number(dayStart),
     deletedAt: null,
     version: 12,
     keyResults: null,
@@ -162,21 +160,34 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
     expect(timed.end).toBe(Number(taskDay) + (15 * 60 + 30) * 60_000);
   });
 
-  it('projects Goal start/deadline as distinct all-day facts targeting the Goal owner', () => {
+  it('projects Goal start/target as distinct all-day facts targeting the Goal owner', () => {
     const events = projectGoalDates(goal(), time);
     expect(events).toHaveLength(2);
-    expect(events.map((event) => event.sourceId)).toEqual(['goal-1:start-date', 'goal-1:due-date']);
+    expect(events.map((event) => event.sourceId)).toEqual(['goal-1:start-date', 'goal-1:target']);
     expect(events[1]).toMatchObject({
       allDay: true,
       start: '2026-09-30',
-      displayMetadata: { semantic: 'goal-deadline' },
+      displayMetadata: { semantic: 'goal-target' },
       ownerCommandTarget: { ownerType: 'goal.goal', ownerId: 'goal-1' },
       editableCapabilities: { move: true, resize: false },
       revision: 12,
     });
-    const deadline = events[1]!;
-    if (!deadline.allDay) throw new Error('Goal date must be all-day');
-    expectTypeOf(deadline.start).toEqualTypeOf<Ymd>();
+    const target = events[1]!;
+    if (!target.allDay) throw new Error('Goal target must be all-day');
+    expectTypeOf(target.start).toEqualTypeOf<Ymd>();
+  });
+
+  it('projects a coarse Target Timeframe at its end boundary but keeps it read-only', () => {
+    const events = projectGoalDates(
+      goal({ target: { kind: 'quarter', year: 2026, quarter: 4 } }),
+      time,
+    );
+    expect(events[1]).toMatchObject({
+      sourceId: 'goal-1:target',
+      start: '2026-12-31',
+      editableCapabilities: { move: false, resize: false },
+      displayMetadata: { semantic: 'goal-target', tone: 'muted' },
+    });
   });
 
   it('keeps non-terminal Goal dates editable without turning lifecycle into calendar state', () => {
@@ -193,7 +204,7 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
       projectGoalDates(goal({ status: 'Abandoned' }), time)[0]?.editableCapabilities.move,
     ).toBe(false);
     expect(
-      projectGoalDates(goal({ status: 'InProgress', archivedAt: Number(goalStart) }), time)[0]
+      projectGoalDates(goal({ status: 'InProgress', archivedAt: Number(dayStart) }), time)[0]
         ?.editableCapabilities.move,
     ).toBe(false);
   });

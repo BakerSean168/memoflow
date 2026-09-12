@@ -67,7 +67,7 @@ export class CreateGoalUseCase {
         name: input.name,
         summary: input.summary ?? null,
         startDate: input.startDate ?? null,
-        dueDate: input.dueDate ?? null,
+        target: input.target ?? null,
         reminderConfig: input.reminderConfig
           ? GoalReminderConfig.fromDTO(input.reminderConfig)
           : null,

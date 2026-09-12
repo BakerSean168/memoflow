@@ -61,16 +61,16 @@ export default {
     "searchLabels": "搜索标签…",
     "noLabels": "暂无标签",
     "matchesAllLabels": "匹配全部已选标签",
-    "overdue": "逾期",
     "abandoned": "已放弃",
     "completed": "已完成",
-    "due": "截止",
     "from": "开始于",
     "noGoalsFound": "还没有进行中的目标",
     "createToStart": "目标用于记录你真正想达成的结果，并通过关键结果衡量进度。",
     "createGoal": "创建目标",
     "askAi": "让 AI 帮我规划 →",
-    "viewEmpty": "此视图暂无目标"
+    "viewEmpty": "此视图暂无目标",
+    "pastTarget": "已超过目标周期",
+    "target": "目标"
   },
   "systemFolders": {
     "active": "进行中",
@@ -93,7 +93,6 @@ export default {
     "backToList": "回到目标列表",
     "noDescription": "暂无描述",
     "startDate": "开始日期",
-    "targetDate": "目标日期",
     "category": "分类",
     "notSet": "未设置",
     "uncategorized": "未分类",
@@ -123,7 +122,8 @@ export default {
     "recordIncrement": "增量值",
     "recordValueAfter": "变更后值",
     "recordKeyResult": "关键结果",
-    "recordTime": "记录时间"
+    "recordTime": "记录时间",
+    "target": "目标"
   },
   "reviewCreation": {
     "back": "返回",
@@ -424,7 +424,6 @@ export default {
     "timeline": "时间线",
     "startDate": "开始日期",
     "vNextDescription": "用清晰结果、时间与关键结果定义这个目标。",
-    "dueDate": "截止日期",
     "labels": "标签",
     "labelsPlaceholder": "添加标签",
     "createLabel": "创建标签",
@@ -516,7 +515,8 @@ export default {
     "titleRequired": "目标名称不能为空",
     "krTitleRequired": "所有关键结果都必须有标题。",
     "krWeightInvalid": "关键结果权重必须是 1 到 5 之间的整数。",
-    "krTargetInvalid": "关键结果目标值必须大于 0。"
+    "krTargetInvalid": "关键结果目标值必须大于 0。",
+    "currentTarget": "当前目标周期：{target}。选择日期后将替换为具体目标日期。"
   },
   "krDialog": {
     "editTitle": "编辑关键结果",

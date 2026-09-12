@@ -7,7 +7,14 @@ import type {
   PortableGoalReview,
   PortableGoalReviewSystemContext,
 } from '@memoflow/contracts/data-portability';
-import { parseJsonField, toDateString, toRecord, resolveExportRefOrThrow } from './projection-helpers';
+import {
+  parseJsonField,
+  toDateString,
+  toRecord,
+  resolveExportRefOrThrow,
+} from './projection-helpers';
+import { GoalTimeframeKindSchema, goalTimeframeFromEndBoundary } from '@memoflow/contracts/goal';
+import { requireYmd } from '@memoflow/contracts/primitives';
 
 export function projectGoals(goals: unknown[], ctx: ExportContext): PortableGoal[] {
   return goals.map((g) => {
@@ -27,8 +34,8 @@ export function projectGoals(goals: unknown[], ctx: ExportContext): PortableGoal
       name: String(goal.name ?? ''),
       summary: goal.summary as string | null | undefined,
       status: String(goal.status ?? 'Planned') as PortableGoal['status'],
-      startDate: toDateString(goal.startDate),
-      dueDate: toDateString(goal.dueDate),
+      startDate: goal.startDate == null ? null : requireYmd(String(goal.startDate)),
+      target: projectGoalTarget(goal),
       completedAt: toDateString(goal.completedAt),
       archivedAt: toDateString(goal.archivedAt),
       sortOrder: Number(goal.sortOrder ?? 0),
@@ -41,6 +48,19 @@ export function projectGoals(goals: unknown[], ctx: ExportContext): PortableGoal
   });
 }
 
+function projectGoalTarget(goal: Record<string, unknown>): PortableGoal['target'] {
+  const kind = goal.targetKind ?? goal.target_kind;
+  const endDate = goal.targetEndDate ?? goal.target_end_date;
+  if (kind == null && endDate == null) return null;
+  if (kind == null || endDate == null) {
+    throw new TypeError('Portable Goal export requires a complete target persistence pair');
+  }
+  return goalTimeframeFromEndBoundary(
+    GoalTimeframeKindSchema.parse(String(kind)),
+    requireYmd(String(endDate)),
+  );
+}
+
 function projectKeyResult(kr: unknown, ctx: ExportContext): PortableKeyResult {
   const entity = kr as Record<string, unknown>;
   const ref = ctx.refAllocator.allocate('keyResult');
@@ -50,7 +70,9 @@ function projectKeyResult(kr: unknown, ctx: ExportContext): PortableKeyResult {
     _ref: ref,
     title: String(entity.title ?? ''),
     description: entity.description as string | null | undefined,
-    calculationMethod: String(progress.aggregationMethod ?? 'Last') as PortableKeyResult['calculationMethod'],
+    calculationMethod: String(
+      progress.aggregationMethod ?? 'Last',
+    ) as PortableKeyResult['calculationMethod'],
     startingValue: Number(progress.startingValue ?? 0),
     progressBaselineValue:
       progress.progressBaselineValue == null ? null : Number(progress.progressBaselineValue),
@@ -110,7 +132,10 @@ function projectGoalReview(review: unknown, ctx: ExportContext): PortableGoalRev
     challenges: entity.challenges as string | null | undefined,
     adjustments: entity.adjustments as string | null | undefined,
     systemContext,
-    reviewedAt: toDateString(entity.reviewedAt) ?? toDateString(entity.createdAt) ?? new Date(0).toISOString(),
+    reviewedAt:
+      toDateString(entity.reviewedAt) ??
+      toDateString(entity.createdAt) ??
+      new Date(0).toISOString(),
     createdAt: toDateString(entity.createdAt),
     updatedAt: toDateString(entity.updatedAt),
   };

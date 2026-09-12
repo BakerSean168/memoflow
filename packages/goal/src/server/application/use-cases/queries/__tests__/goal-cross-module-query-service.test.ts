@@ -21,21 +21,14 @@ vi.mock('@memoflow/utils', async () => {
 // ============================================================
 
 function createGoalFixture(overrides?: Record<string, any>) {
-  const { dueDate: rawTargetDate, ...rest } = overrides ?? {};
-  // ADR-037: Instant epoch ms (not Date)
-  const dueDate =
-    rawTargetDate != null
-      ? rawTargetDate instanceof Date
-        ? rawTargetDate.getTime()
-        : Number(rawTargetDate)
-      : null;
+  const rest = overrides ?? {};
   return {
     id: rest.id ?? 'goal-id-1',
     name: rest.name ?? rest.title ?? 'Test Goal',
     description: rest.description ?? 'Test description',
     status: rest.status ?? 'IN_PROGRESS',
     title: rest.title ?? 'Test Goal',
-    dueDate,
+    target: rest.target ?? null,
     keyResults: rest.keyResults ?? [],
     progress: rest.progress ?? 50,
     getOverallProgress: vi.fn().mockReturnValue(rest.progress ?? 50),
@@ -133,7 +126,7 @@ describe('GoalCrossModuleQueryServiceUseCase', () => {
         title: 'My Goal',
         summary: 'Desc',
         status: 'InProgress',
-        dueDate: 1700000000,
+        target: { kind: 'quarter', year: 2026, quarter: 4 },
         progress: 75,
       });
       const goalRepo = createMockRepo<IGoalRepository>({
@@ -150,7 +143,7 @@ describe('GoalCrossModuleQueryServiceUseCase', () => {
           title: 'My Goal',
           summary: 'Desc',
           status: 'InProgress',
-          dueDate: 1700000000,
+          target: { kind: 'quarter', year: 2026, quarter: 4 },
           progress: 75,
         });
       }

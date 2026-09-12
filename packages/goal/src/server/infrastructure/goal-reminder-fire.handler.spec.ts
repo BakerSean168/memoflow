@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
+import { requireYmd } from '@memoflow/contracts/primitives';
 import {
   NotificationCategory,
   NotificationChannelType,
@@ -16,7 +17,10 @@ import {
   GoalReminderFirePayloadSchema,
   type GoalReminderFirePayload,
 } from './goal-reminder-fire.handler';
-import { GOAL_REMINDER_HANDLER_KEY } from './schedule-projection-source';
+import {
+  GOAL_REMINDER_HANDLER_KEY,
+  GOAL_REMINDER_PAYLOAD_VERSION,
+} from './schedule-projection-source';
 
 const IDENTITY_ID = 'IdentityId_goal-owner';
 const GOAL_ID = 'GoalId_goal-1';
@@ -27,8 +31,8 @@ const payload: GoalReminderFirePayload = {
   goalTitle: 'Ship R06',
   triggerType: ReminderTriggerType.RemainingDays,
   triggerValue: 3,
-  startDate: Date.UTC(2026, 1, 1),
-  dueDate: Date.UTC(2026, 8, 1),
+  startDate: requireYmd('2026-02-01'),
+  target: { kind: 'quarter', year: 2026, quarter: 4 },
   reminderTime: 8 * 60,
 };
 
@@ -38,7 +42,7 @@ const context = {
   schedulingKey: SCHEDULING_KEY,
   handlerKey: GOAL_REMINDER_HANDLER_KEY,
   runAt: new Date('2026-08-10T08:45:00.000Z').toISOString(),
-  payloadVersion: 1,
+  payloadVersion: GOAL_REMINDER_PAYLOAD_VERSION,
   payload,
 };
 
@@ -48,7 +52,7 @@ function makeGoal(overrides: Record<string, unknown> = {}) {
       id: GOAL_ID,
       identityId: IDENTITY_ID,
       name: 'Ship R06',
-      description: null,
+      summary: null,
       status: GoalStatus.InProgress,
       deletedAt: null,
       archivedAt: null,
@@ -151,7 +155,7 @@ describe('executeGoalReminderFire', () => {
         type: NotificationType.Reminder,
         category: NotificationCategory.Goal,
         title: '目标提醒：Ship R06',
-        content: '目标「Ship R06」距离截止还有 3 天。',
+        content: '目标「Ship R06」距离目标周期结束还有 3 天。',
       },
       suggestedChannels: [NotificationChannelType.InApp, NotificationChannelType.Push],
       correlationId: SCHEDULING_KEY,
@@ -172,6 +176,30 @@ describe('executeGoalReminderFire', () => {
         idempotencyKey: expectedIdempotencyKey,
       },
     });
+  });
+
+  it('uses target-date wording for a day-precision target', async () => {
+    const findByIdForIdentity = vi.fn().mockResolvedValue(makeGoal());
+    const writer = makeWriter();
+
+    await executeGoalReminderFire(
+      {
+        goalRepository: { findByIdForIdentity },
+        requestedWriter: { enqueueNotificationRequested: writer.enqueueNotificationRequested },
+      },
+      {
+        ...context,
+        payload: {
+          ...payload,
+          target: { kind: 'day', date: requireYmd('2026-09-01') },
+        },
+      },
+    );
+
+    const envelope = writer.lastEnvelope()!;
+    expect((envelope.content as { content: string }).content).toBe(
+      '目标「Ship R06」距离目标日期还有 3 天。',
+    );
   });
 
   it('uses the TimeProgressPercentage content for that trigger type', async () => {

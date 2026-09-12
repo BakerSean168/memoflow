@@ -73,7 +73,7 @@ describe('PrismaDataPortabilityImportStore', () => {
         summary: null,
         status: 'Planned',
         startDate: null,
-        dueDate: null,
+        target: null,
         completedAt: null,
         archivedAt: null,
         sortOrder: 0,

@@ -9,7 +9,7 @@ function createTestGoal(): Goal {
     name: 'Test Goal',
     summary: null,
     startDate: null,
-    dueDate: null,
+    target: null,
     reminderConfig: null,
   });
 }

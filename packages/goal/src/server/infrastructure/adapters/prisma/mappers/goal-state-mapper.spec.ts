@@ -17,8 +17,9 @@ describe('rawDataToGoalState', () => {
       name: 'Goal',
       summary: null,
       status: 'InProgress',
-      startDate: new Date(1_000),
-      dueDate: new Date(2_000),
+      startDate: '2026-01-15',
+      targetKind: 'quarter',
+      targetEndDate: '2026-12-31',
       completedAt: null,
       archivedAt: null,
       sortOrder: 1,
@@ -95,7 +96,8 @@ describe('rawDataToGoalState', () => {
 
     const state = rawDataToGoalState(raw);
 
-    expect(state.dueDate).toBe(2_000);
+    expect(state.startDate).toBe('2026-01-15');
+    expect(state.target).toEqual({ kind: 'quarter', year: 2026, quarter: 4 });
     expect('tags' in state).toBe(false);
     expect('folderId' in state).toBe(false);
     expect('parentGoalId' in state).toBe(false);
@@ -118,7 +120,8 @@ describe('rawDataToGoalState', () => {
       summary: 'desc',
       status: 'Completed',
       startDate: null,
-      dueDate: null,
+      targetKind: null,
+      targetEndDate: null,
       completedAt: new Date(3_000),
       archivedAt: null,
       sortOrder: 2,
@@ -139,12 +142,63 @@ describe('rawDataToGoalState', () => {
 
     const state = rawDataToGoalState(raw);
 
-    expect(state.dueDate).toBeNull();
+    expect(state.target).toBeNull();
     expect('category' in state).toBe(false);
     expect('importance' in state).toBe(false);
     expect(state.keyResults).toEqual([]);
     expect(state.goalReviews).toEqual([]);
     expect(state.weightSnapshots).toEqual([]);
     expect(state.deletedAt).toBe(3_100);
+  });
+  it('fails closed when the normalized target pair is partial', () => {
+    const raw = {
+      id: GOAL_ID_2,
+      identityId: IDENTITY_ID_1,
+      name: 'Broken target',
+      summary: null,
+      status: 'Planned',
+      startDate: null,
+      targetKind: 'quarter',
+      targetEndDate: null,
+      completedAt: null,
+      archivedAt: null,
+      sortOrder: 0,
+      reminderConfig: null,
+      keyResults: null,
+      goalReviews: null,
+      weightSnapshots: null,
+      createdAt: 1_000,
+      updatedAt: 1_000,
+      deletedAt: null,
+      version: 1,
+    };
+
+    expect(() => rawDataToGoalState(raw)).toThrow(/both target_kind and target_end_date/);
+  });
+
+  it('fails closed when the normalized target end is not canonical for its precision', () => {
+    const raw = {
+      id: GOAL_ID_2,
+      identityId: IDENTITY_ID_1,
+      name: 'Broken quarter',
+      summary: null,
+      status: 'Planned',
+      startDate: null,
+      targetKind: 'quarter',
+      targetEndDate: '2026-11-30',
+      completedAt: null,
+      archivedAt: null,
+      sortOrder: 0,
+      reminderConfig: null,
+      keyResults: null,
+      goalReviews: null,
+      weightSnapshots: null,
+      createdAt: 1_000,
+      updatedAt: 1_000,
+      deletedAt: null,
+      version: 1,
+    };
+
+    expect(() => rawDataToGoalState(raw)).toThrow(/Non-canonical GoalTimeframe/);
   });
 });

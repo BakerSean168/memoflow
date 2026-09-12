@@ -10,7 +10,7 @@ function createGoal() {
     name: 'Abandon me',
     summary: null,
     startDate: null,
-    dueDate: null,
+    target: null,
     reminderConfig: null,
   });
 }

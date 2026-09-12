@@ -1,14 +1,15 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { Goal } from './goal';
-import { GoalReminderConfig } from '../../domain';
+import { GoalInvalidPlanningWindowError, GoalReminderConfig } from '../../domain';
+import { requireYmd } from '@memoflow/contracts/primitives';
 
 function createGoal(overrides?: Partial<Parameters<typeof Goal.create>[0]>): Goal {
   return Goal.create({
     identityId: 'IdentityId_1' as never,
     name: 'Launch Goal',
     summary: ' Ship it ',
-    startDate: new Date('2026-04-20T00:00:00.000Z').getTime(),
-    dueDate: new Date('2026-04-30T00:00:00.000Z').getTime(),
+    startDate: requireYmd('2026-04-20'),
+    target: { kind: 'month', year: 2026, month: 4 },
     reminderConfig: GoalReminderConfig.createDefault(),
     ...overrides,
   });
@@ -28,10 +29,10 @@ describe('Goal aggregate management', () => {
     expect(() => createGoal({ name: '   ' })).toThrow();
     expect(() =>
       createGoal({
-        startDate: new Date('2026-05-10T00:00:00.000Z').getTime(),
-        dueDate: new Date('2026-05-01T00:00:00.000Z').getTime(),
+        startDate: requireYmd('2026-05-10'),
+        target: { kind: 'day', date: requireYmd('2026-05-01') },
       }),
-    ).toThrow('截止日期范围无效');
+    ).toThrow(GoalInvalidPlanningWindowError);
 
     const goal = createGoal();
     goal.pullDomainEvents();
@@ -60,12 +61,12 @@ describe('Goal aggregate management', () => {
     const goal = createGoal();
     goal.pullDomainEvents();
 
-    goal.updateTimeRange({
-      startDate: new Date('2026-04-18T00:00:00.000Z').getTime(),
-      dueDate: new Date('2026-05-05T00:00:00.000Z').getTime(),
+    goal.updatePlanningTime({
+      startDate: requireYmd('2026-04-18'),
+      target: { kind: 'day', date: requireYmd('2026-05-05') },
     });
-    expect(new Date(goal.startDate!).toISOString()).toBe('2026-04-18T00:00:00.000Z');
-    expect(new Date(goal.dueDate!).toISOString()).toBe('2026-05-05T00:00:00.000Z');
+    expect(goal.startDate).toBe('2026-04-18');
+    expect(goal.target).toEqual({ kind: 'day', date: '2026-05-05' });
 
     goal.updateSortOrder(7);
     expect(goal.sortOrder).toBe(7);

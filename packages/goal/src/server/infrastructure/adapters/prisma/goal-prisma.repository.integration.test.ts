@@ -2,6 +2,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createTimeContext } from '@memoflow/time';
+import { requireYmd } from '@memoflow/contracts/primitives';
 import { Goal } from '../../../domain/aggregates/goal';
 import { GoalLabelOwnershipError, GoalReminderConfig } from '../../../domain';
 import { GoalPrismaRepository } from './goal-prisma.repository';
@@ -17,8 +18,8 @@ function createIntegrationGoal(identityId: string) {
     identityId: identityId as IdentityId,
     name: 'Harden AI Oracle',
     summary: 'Turn persistence tests into a reliable oracle',
-    startDate: new Date('2026-04-01T00:00:00.000Z').getTime(),
-    dueDate: new Date('2026-05-01T00:00:00.000Z').getTime(),
+    startDate: requireYmd('2026-04-01'),
+    target: { kind: 'quarter', year: 2026, quarter: 2 },
     reminderConfig: GoalReminderConfig.create({
       enabled: true,
       triggers: [
@@ -95,7 +96,11 @@ describe('GoalPrismaRepository integration', () => {
 
     expect(loaded).not.toBeNull();
     expect(loaded?.identityId).toBe(identityId);
-    expect(loaded?.dueDate).toBe(new Date('2026-05-01T00:00:00.000Z').getTime());
+    expect(row?.startDate).toBe('2026-04-01');
+    expect(row?.targetKind).toBe('quarter');
+    expect(row?.targetEndDate).toBe('2026-06-30');
+    expect(loaded?.startDate).toBe('2026-04-01');
+    expect(loaded?.target).toEqual({ kind: 'quarter', year: 2026, quarter: 2 });
     expect('importance' in (loaded as object)).toBe(false);
     expect(loaded?.reminderConfig?.enabled).toBe(true);
     expect(loaded?.reminderConfig?.triggers).toHaveLength(2);
@@ -122,7 +127,7 @@ describe('GoalPrismaRepository integration', () => {
       name: 'Only work label',
       summary: null,
       startDate: null,
-      dueDate: null,
+      target: null,
       reminderConfig: null,
     });
     await repository.save(goal);
@@ -187,7 +192,7 @@ describe('GoalPrismaRepository integration', () => {
       name: 'Keep default E2E small',
       summary: null,
       startDate: null,
-      dueDate: null,
+      target: null,
       reminderConfig: null,
     });
     const foreignGoal = Goal.create({
@@ -195,7 +200,7 @@ describe('GoalPrismaRepository integration', () => {
       name: 'Foreign goal',
       summary: null,
       startDate: null,
-      dueDate: null,
+      target: null,
       reminderConfig: null,
     });
 

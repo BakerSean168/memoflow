@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GoalStatus } from '@memoflow/contracts/goal';
 import { IdentityId } from '@memoflow/domain-shared';
+import { requireYmd } from '@memoflow/contracts/primitives';
 import { Goal } from './goal';
 
 function createGoal() {
@@ -8,8 +9,8 @@ function createGoal() {
     identityId: IdentityId.of('IdentityId_550e8400-e29b-41d4-a716-446655440021'),
     name: 'Graduate',
     summary: 'Finish the degree',
-    startDate: 1_700_000_000_000,
-    dueDate: 1_800_000_000_000,
+    startDate: requireYmd('2026-09-01'),
+    target: { kind: 'quarter', year: 2026, quarter: 4 },
     reminderConfig: null,
   });
 }
@@ -78,12 +79,14 @@ describe('GOAL-7202 canonical lifecycle', () => {
     expect(goal.domainEvents).toHaveLength(eventCount);
   });
 
-  it('uses dueDate consistently in aggregate state', () => {
+  it('preserves Target Timeframe precision in aggregate state', () => {
     const goal = createGoal();
-    expect(goal.dueDate).toBe(1_800_000_000_000);
-    goal.updateTimeRange({ dueDate: 1_800_086_400_000 });
-    expect(goal.dueDate).toBe(1_800_086_400_000);
-    expect(goal.toServerDTO().dueDate).toBe(goal.dueDate);
+    expect(goal.startDate).toBe('2026-09-01');
+    expect(goal.target).toEqual({ kind: 'quarter', year: 2026, quarter: 4 });
+    goal.updatePlanningTime({ target: { kind: 'halfYear', year: 2027, half: 1 } });
+    expect(goal.target).toEqual({ kind: 'halfYear', year: 2027, half: 1 });
+    expect(goal.toServerDTO().target).toEqual(goal.target);
+    expect('dueDate' in goal.toServerDTO()).toBe(false);
     expect('targetDate' in goal.toServerDTO()).toBe(false);
   });
 

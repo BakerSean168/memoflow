@@ -3,11 +3,15 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { presentErrorMessage } from '@memoflow/http-client';
-import type { CreateGoalReq, UpdateGoalReq } from '@memoflow/contracts/goal';
+import {
+  goalTimeframeLabel,
+  type CreateGoalReq,
+  type UpdateGoalReq,
+} from '@memoflow/contracts/goal';
 
 import { useGoalDetail } from '../hooks/useGoalDetail';
 import { useGoalService } from '../hooks/useGoalService';
-import { getProductTime } from '../utils/product-time';
+import { getProductTime, parseProductYmdInput } from '../utils/product-time';
 import {
   PageShell,
   PrimaryButton,
@@ -17,13 +21,8 @@ import {
   ThemedText,
 } from '@memoflow/ui-react-native';
 
-function toDateInput(timestamp: number | null): string {
-  return getProductTime().input.dateValue(timestamp);
-}
-
-function parseDateInput(value: string): number | null {
-  const ymd = getProductTime().input.parseDateValue(value.trim());
-  return ymd ? getProductTime().codec.startOfYmd(ymd) : null;
+function targetDateInput(goal: ReturnType<typeof useGoalDetail>['goal']): string {
+  return goal?.target?.kind === 'day' ? goal.target.date : '';
 }
 
 export function GoalEditorScreen() {
@@ -36,7 +35,8 @@ export function GoalEditorScreen() {
 
   const [name, setName] = useState('');
   const [summary, setSummary] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  const [targetDate, setTargetDate] = useState('');
+  const [targetTouched, setTargetTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,7 +44,8 @@ export function GoalEditorScreen() {
     if (!goal) return;
     setName(goal.name);
     setSummary(goal.summary ?? '');
-    setDueDate(toDateInput(goal.dueDate));
+    setTargetDate(targetDateInput(goal));
+    setTargetTouched(false);
   }, [goal?.id]);
 
   async function handleSubmit() {
@@ -53,11 +54,18 @@ export function GoalEditorScreen() {
       return;
     }
 
-    const parsedDueDate = dueDate.trim().length === 0 ? null : parseDateInput(dueDate);
-    if (dueDate.trim().length > 0 && parsedDueDate === null) {
-      setError('Due date must use YYYY-MM-DD.');
+    const parsedTargetDate =
+      targetDate.trim().length === 0 ? null : parseProductYmdInput(targetDate);
+    if (targetDate.trim().length > 0 && parsedTargetDate === null) {
+      setError('Target date must use YYYY-MM-DD.');
       return;
     }
+    const target =
+      goalId && goal && !targetTouched
+        ? (goal.target ?? null)
+        : parsedTargetDate
+          ? ({ kind: 'day', date: parsedTargetDate } as const)
+          : null;
 
     setIsSubmitting(true);
     setError(null);
@@ -67,12 +75,12 @@ export function GoalEditorScreen() {
           name: name.trim(),
           expectedVersion: goal?.version ?? 1,
           summary: summary.trim().length > 0 ? summary.trim() : null,
-          dueDate: parsedDueDate,
+          target,
         } satisfies UpdateGoalReq)
       : await service.createGoal({
           name: name.trim(),
           summary: summary.trim().length > 0 ? summary.trim() : undefined,
-          dueDate: parsedDueDate ?? undefined,
+          target: target ?? undefined,
         } satisfies CreateGoalReq);
 
     setIsSubmitting(false);
@@ -131,12 +139,21 @@ export function GoalEditorScreen() {
             textAlignVertical="top"
             style={styles.multilineField}
           />
+          {goal?.target && goal.target.kind !== 'day' && !targetTouched ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              Current target:{' '}
+              {goalTimeframeLabel(goal.target, getProductTime().presentation.locale)}
+            </ThemedText>
+          ) : null}
           <PrimaryTextField
-            label="Due date"
-            value={dueDate}
-            onChangeText={setDueDate}
+            label="Target date"
+            value={targetDate}
+            onChangeText={(value) => {
+              setTargetDate(value);
+              setTargetTouched(true);
+            }}
             placeholder="2026-12-31"
-            hint="Use YYYY-MM-DD."
+            hint="Use YYYY-MM-DD. Choosing a date replaces any broader target period."
           />
         </SectionCard>
       </ScrollView>

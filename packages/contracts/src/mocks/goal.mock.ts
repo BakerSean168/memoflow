@@ -13,6 +13,7 @@
  */
 
 import { faker } from '@faker-js/faker';
+import { requireYmd } from '../primitives';
 import type { GoalClientDTO } from '../modules/goal/aggregates/goal-client';
 import type { KeyResultClientDTO } from '../modules/goal/entities/key-result-client';
 import type { GoalRecordClientDTO } from '../modules/goal/aggregates/goal-record-client';
@@ -48,8 +49,8 @@ export function createMockGoal(overrides: Partial<GoalClientDTO> = {}): GoalClie
       'Completed',
       'Abandoned',
     ] as const),
-    startDate: faker.datatype.boolean() ? faker.date.past({ years: 1 }).getTime() : null,
-    dueDate: faker.datatype.boolean() ? faker.date.future({ years: 1 }).getTime() : null,
+    startDate: faker.datatype.boolean() ? requireYmd('2026-01-15') : null,
+    target: faker.datatype.boolean() ? { kind: 'quarter', year: 2026, quarter: 4 } : null,
     completedAt: null,
     archivedAt: null,
     sortOrder: faker.number.int({ min: 0, max: 1000 }),

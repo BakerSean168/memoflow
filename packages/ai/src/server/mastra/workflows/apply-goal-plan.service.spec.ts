@@ -110,7 +110,12 @@ describe('ApplyGoalPlanService', () => {
     const service = new ApplyGoalPlanService(port);
     const expected = ids();
 
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    const receipt = await service.apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+      timeZone: 'Asia/Shanghai',
+    });
 
     expect(receipt).toMatchObject({
       workflowRunId: 'workflow-1',
@@ -128,6 +133,8 @@ describe('ApplyGoalPlanService', () => {
       id: expected.goal,
       name: 'Pass JLPT N1',
       summary: 'Build a durable study plan.',
+      startDate: '2026-09-01',
+      target: { kind: 'day', date: '2026-12-01' },
       initialKeyResults: [{ id: expected.kr0, title: 'Complete mock exams' }],
       labelIds: ['label:learning'],
     });
@@ -202,6 +209,7 @@ describe('ApplyGoalPlanService', () => {
       workflowRunId: 'workflow-dst',
       draft: dstDraft,
       context,
+      timeZone: 'Asia/Shanghai',
     });
 
     expect(receipt.status).toBe('success');
@@ -212,6 +220,34 @@ describe('ApplyGoalPlanService', () => {
         type: 'FixedTime',
         fixedTime: { time: '09:30', timezone: 'America/New_York' },
       },
+    });
+  });
+
+  it('projects draft instants to Goal Ymd/Target in the explicit user timezone', async () => {
+    const port = mutationPort();
+    const service = new ApplyGoalPlanService(port);
+    const boundaryDraft = GoalPlanDraftSchema.parse({
+      ...draft,
+      goal: {
+        ...draft.goal,
+        startDate: Date.parse('2026-09-01T23:30:00.000Z'),
+        dueDate: Date.parse('2026-12-01T23:30:00.000Z'),
+      },
+      taskPlans: [],
+      reminders: [],
+    });
+
+    const receipt = await service.apply({
+      workflowRunId: 'workflow-timezone',
+      draft: boundaryDraft,
+      context,
+      timeZone: 'Asia/Tokyo',
+    });
+
+    expect(receipt.status).toBe('success');
+    expect(port.createGoal.mock.calls[0]?.[0]).toMatchObject({
+      startDate: '2026-09-02',
+      target: { kind: 'day', date: '2026-12-02' },
     });
   });
 
@@ -243,6 +279,7 @@ describe('ApplyGoalPlanService', () => {
       workflowRunId: 'workflow-1',
       draft,
       context,
+      timeZone: 'Asia/Shanghai',
       priorReceipt,
     });
 
@@ -260,7 +297,12 @@ describe('ApplyGoalPlanService', () => {
     port.createGoal.mockResolvedValueOnce(error('VALIDATION_ERROR', 'goal is invalid'));
     const service = new ApplyGoalPlanService(port);
 
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    const receipt = await service.apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+      timeZone: 'Asia/Shanghai',
+    });
 
     expect(receipt.status).toBe('failed');
     expect(receipt.goalId).toBeUndefined();
@@ -284,7 +326,12 @@ describe('ApplyGoalPlanService', () => {
     const service = new ApplyGoalPlanService(port);
     const expected = ids();
 
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    const receipt = await service.apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+      timeZone: 'Asia/Shanghai',
+    });
 
     expect(receipt.status).toBe('partial');
     expect(receipt.retryable).toBe(true);
@@ -308,7 +355,12 @@ describe('ApplyGoalPlanService', () => {
     );
     const service = new ApplyGoalPlanService(port);
 
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    const receipt = await service.apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+      timeZone: 'Asia/Shanghai',
+    });
 
     expect(receipt.status).toBe('partial');
     expect(receipt.retryable).toBe(false);
@@ -329,7 +381,12 @@ describe('ApplyGoalPlanService', () => {
     );
     const service = new ApplyGoalPlanService(port);
 
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    const receipt = await service.apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+      timeZone: 'Asia/Shanghai',
+    });
 
     expect(receipt.status).toBe('failed');
     expect(receipt.retryable).toBe(true);
@@ -355,7 +412,12 @@ describe('ApplyGoalPlanService', () => {
     const service = new ApplyGoalPlanService(port);
     const expected = ids();
 
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    const receipt = await service.apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+      timeZone: 'Asia/Shanghai',
+    });
 
     expect(receipt.status).toBe('partial');
     expect(receipt.retryable).toBe(true);
@@ -380,7 +442,12 @@ describe('ApplyGoalPlanService', () => {
     const service = new ApplyGoalPlanService(port);
     const expected = ids();
 
-    const receipt = await service.apply({ workflowRunId: 'workflow-1', draft, context });
+    const receipt = await service.apply({
+      workflowRunId: 'workflow-1',
+      draft,
+      context,
+      timeZone: 'Asia/Shanghai',
+    });
 
     expect(receipt.status).toBe('partial');
     expect(receipt.retryable).toBe(true);

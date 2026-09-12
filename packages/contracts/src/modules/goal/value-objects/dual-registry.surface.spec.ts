@@ -4,7 +4,7 @@
  * Behavior/assertions preserved; individual *-dual.surface.spec.ts removed.
  * Sources: instant-transfer-date dual keep-boundary (was domain-date dual), exact-vo-dto-dual.surface.spec.ts
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -35,15 +35,15 @@ import { describe, expect, it } from 'vitest';
       expect(index).toContain("export type { Hm } from './hm'");
     });
 
-    it('keeps goal time range Instant dual names; weight Instant dual remains separate interfaces', () => {
-      const goalTime = readFileSync(resolve(goalVo, 'goal-time-range.ts'), 'utf8');
+    it('retires GoalTimeRange and owns GoalTimeframe as calendar-native product truth', () => {
+      expect(existsSync(resolve(goalVo, 'goal-time-range.ts'))).toBe(false);
+      const goalTime = readFileSync(resolve(goalVo, 'goal-timeframe.ts'), 'utf8');
       const weight = readFileSync(resolve(goalVo, 'key-result-weight-snapshot.ts'), 'utf8');
-      expect(goalTime).toMatch(/export interface GoalTimeRange\b/);
-      expect(goalTime).toMatch(/export type GoalTimeRangeDTO = GoalTimeRange\b/);
-      expect(goalTime).toContain('export type GoalTimeRangeDTO = GoalTimeRange');
-      expect(goalTime).toContain('Instant');
-      expect(goalTime).toContain('TransferDate');
-      expect(goalTime).not.toContain('DomainDate');
+      expect(goalTime).toContain('GoalTimeframeSchema');
+      expect(goalTime).toContain('YmdSchema');
+      expect(goalTime).not.toContain('Instant');
+      expect(goalTime).not.toContain('TransferDate');
+      expect(goalTime).not.toContain('dueDate');
       expect(weight).toMatch(/export interface KeyResultWeightSnapshot\b/);
       expect(weight).toMatch(/export interface KeyResultWeightSnapshotDTO\b/);
       expect(weight).not.toContain(
@@ -103,11 +103,9 @@ import { describe, expect, it } from 'vitest';
         'export type ChecklistItemDefinitionDTO = ChecklistItemDefinition',
       );
       expect(checklist).not.toMatch(/export interface ChecklistItemDefinitionDTO\b/);
-      // Instant/TransferDate duals remain separate interface bodies (residual 859).
-      const goalTime = readFileSync(resolve(goalVo, 'goal-time-range.ts'), 'utf8');
+      // GoalTimeRange was retired by GOAL-7203; Task completion keeps its Instant transfer boundary.
+      expect(existsSync(resolve(goalVo, 'goal-time-range.ts'))).toBe(false);
       const completion = readFileSync(resolve(taskVo, 'completion-record.ts'), 'utf8');
-      expect(goalTime).toMatch(/export interface GoalTimeRange\b/);
-      expect(goalTime).toMatch(/export type GoalTimeRangeDTO = GoalTimeRange\b/);
       expect(completion).toMatch(/export interface CompletionRecord\b/);
       expect(completion).toMatch(/export interface CompletionRecordDTO\b/);
     });

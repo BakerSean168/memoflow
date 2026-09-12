@@ -29,6 +29,7 @@ import {
 import { eventBus } from '@memoflow/utils/domain';
 import { PrismaGoalMapper, type PrismaGoalWithRelations } from './mappers/prisma-goal-mapper';
 import { rawDataToGoalState, type RawKeyResultData } from './mappers/goal-state-mapper';
+import { encodeGoalTimeframe } from '../goal-timeframe-persistence';
 
 const eventBusAdapter = createEventBusAdapter(eventBus);
 
@@ -240,6 +241,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
    */
   protected async persist(goal: Goal): Promise<void> {
     const dto = goal.toServerDTO(true);
+    const target = encodeGoalTimeframe(dto.target);
 
     // Run in a transaction for consistency
     const persistInTransaction = async (tx: Prisma.TransactionClient) => {
@@ -252,8 +254,9 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
           name: dto.name,
           summary: dto.summary,
           status: dto.status,
-          startDate: dto.startDate ? new Date(dto.startDate) : null,
-          dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+          startDate: dto.startDate,
+          targetKind: target.targetKind,
+          targetEndDate: target.targetEndDate,
           completedAt: dto.completedAt ? new Date(dto.completedAt) : null,
           archivedAt: dto.archivedAt ? new Date(dto.archivedAt) : null,
           sortOrder: dto.sortOrder,
@@ -265,8 +268,9 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
           name: dto.name,
           summary: dto.summary,
           status: dto.status,
-          startDate: dto.startDate ? new Date(dto.startDate) : null,
-          dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+          startDate: dto.startDate,
+          targetKind: target.targetKind,
+          targetEndDate: target.targetEndDate,
           completedAt: dto.completedAt ? new Date(dto.completedAt) : null,
           archivedAt: dto.archivedAt ? new Date(dto.archivedAt) : null,
           sortOrder: dto.sortOrder,
@@ -414,14 +418,16 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
 
   private async persistWithExpectedVersion(goal: Goal, expectedVersion: number): Promise<void> {
     const dto = goal.toServerDTO(false);
+    const target = encodeGoalTimeframe(dto.target);
     const result = await this.prisma.goal.updateMany({
       where: { id: String(dto.id), identityId: String(dto.identityId), version: expectedVersion },
       data: {
         name: dto.name,
         summary: dto.summary,
         status: dto.status,
-        startDate: dto.startDate ? new Date(dto.startDate) : null,
-        dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+        startDate: dto.startDate,
+        targetKind: target.targetKind,
+        targetEndDate: target.targetEndDate,
         completedAt: dto.completedAt ? new Date(dto.completedAt) : null,
         archivedAt: dto.archivedAt ? new Date(dto.archivedAt) : null,
         reminderConfig: dto.reminderConfig ? JSON.stringify(dto.reminderConfig) : null,

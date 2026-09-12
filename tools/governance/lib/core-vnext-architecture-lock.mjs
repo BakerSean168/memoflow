@@ -65,6 +65,23 @@ export const TASK_LEGACY_CLASSIFICATION_PATTERN =
 export const TASK_LEGACY_CONTRACT_FIELD_PATTERN = /\b(?:tags|color)\??\s*:/;
 export const TASK_LEGACY_PRISMA_FIELD_PATTERN = /^\s*(?:tags|color)\s+String\??(?:\s|$)/m;
 
+export const GOAL_LEGACY_TIME_PATTERN = /\b(?:dueDate|isOverdue|GoalDueDateNotSetError)\b|\bdue_date\b/;
+
+const GOAL_TIME_OWNER_ROOTS = [
+  'packages/goal/src/',
+  'packages/contracts/src/modules/goal/',
+  'packages/app-vue/src/modules/goal/',
+  'packages/app-react/src/screens/Goal',
+];
+const GOAL_TIME_OWNER_FILES = new Set([
+  'packages/app-react/src/components/GoalCard.tsx',
+  'packages/app-react/src/hooks/useGoals.ts',
+  'packages/database/prisma/schema/goal.prisma',
+  'packages/contracts/src/modules/data-portability/dtos/portable-goals.dto.ts',
+  'packages/data-portability/src/server/application/use-cases/importers/goal.importer.ts',
+  'packages/data-portability/src/server/application/use-cases/projections/goal.projection.ts',
+]);
+
 export function isTestLikePath(relPath) {
   return /(?:^|\/)(?:__tests__|__mocks__|test|tests|e2e|stories)(?:\/|$)/.test(relPath)
     || /\.(?:spec|test|stories)\.[^.]+$/i.test(relPath);
@@ -290,6 +307,20 @@ export function findCoreVnextArchitectureLockViolations(files) {
         'task-legacy-classification',
       );
     }
+
+
+    // ADR-067 / GOAL-7203: Goal owns Target Timeframe, never Task-style due/overdue truth.
+    // Scope this lock to Goal-owned canonical surfaces so Task dueDate/isOverdue and the
+    // temporary AI GoalPlanDraft V1 compatibility contract remain independently owned.
+    if (startsWithAny(relPath, GOAL_TIME_OWNER_ROOTS) || GOAL_TIME_OWNER_FILES.has(relPath)) {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        GOAL_LEGACY_TIME_PATTERN,
+        'goal-legacy-due-time',
+      );
+    }
   }
 
   // Canonical Notification path is a positive lock, not merely absence of the
@@ -341,6 +372,7 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
     'ai-raw-scheduler-access': 'AI tools/adapters may read Planner/Notification product projections but must never import or mutate raw Scheduler worker state',
     'ai-retired-goal-task-draft': 'AI production code must use canonical Goal/Task workflow contracts and must not resurrect retired Goal/Task draft fields or validators',
     'task-legacy-classification': 'Task classification must use Shared Label; legacy string tags/custom Task color are forbidden',
+    'goal-legacy-due-time': 'Goal planning time must use startDate + GoalTimeframe target; Task-style dueDate/isOverdue truth is forbidden in Goal-owned surfaces',
   };
   return `${file}:${line}: ${messages[kind] ?? kind} [${text}]`;
 }

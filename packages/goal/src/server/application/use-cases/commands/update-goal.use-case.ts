@@ -70,11 +70,11 @@ export class UpdateGoalUseCase {
       summary: input.summary,
     });
 
-    // 4. Update the product time window using canonical dueDate naming.
-    if (input.startDate !== undefined || input.dueDate !== undefined) {
-      goal.updateTimeRange({
+    // 4. Update calendar-native planning time without inventing a deadline.
+    if (input.startDate !== undefined || input.target !== undefined) {
+      goal.updatePlanningTime({
         startDate: input.startDate !== undefined ? (input.startDate ?? null) : undefined,
-        dueDate: input.dueDate !== undefined ? (input.dueDate ?? null) : undefined,
+        target: input.target !== undefined ? (input.target ?? null) : undefined,
       });
     }
 

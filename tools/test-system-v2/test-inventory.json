@@ -1568,7 +1568,8 @@
       "path": "apps/web/e2e/goal/goal-crud.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.config.ts"
+        "apps/web/playwright.config.ts",
+        "apps/web/playwright.local-docker.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -5091,6 +5092,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/goal/value-objects/goal-timeframe.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/governance/aggregates/rule-server-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6503,6 +6512,16 @@
     },
     {
       "path": "packages/goal/src/server/domain/aggregates/goal-management.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/domain/aggregates/goal-planning-time.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -11285,7 +11304,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 83
+      "fileCount": 84
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -11467,7 +11486,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 9
+      "fileCount": 10
     },
     {
       "id": "apps/web/playwright.oauth-real.config.ts",
@@ -11677,7 +11696,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 81
+      "fileCount": 82
     },
     {
       "id": "packages/dashboard/vitest.config.ts",
@@ -11712,7 +11731,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 83
+      "fileCount": 84
     },
     {
       "id": "packages/governance/vitest.config.ts",
@@ -12112,6 +12131,7 @@
       "packages/goal/src/server/application/use-cases/queries/__tests__/search-goals.test.ts",
       "packages/goal/src/server/domain/aggregates/goal-domain-events.spec.ts",
       "packages/goal/src/server/domain/aggregates/goal-management.spec.ts",
+      "packages/goal/src/server/domain/aggregates/goal-planning-time.spec.ts",
       "packages/goal/src/server/domain/aggregates/goal-record.spec.ts",
       "packages/goal/src/server/domain/aggregates/goal-w2.spec.ts",
       "packages/goal/src/server/domain/aggregates/goal.spec.ts",
@@ -12442,7 +12462,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1072,
+    "unit": 1074,
     "integration": 37,
     "smoke": 3,
     "boundary-ipc": 9,

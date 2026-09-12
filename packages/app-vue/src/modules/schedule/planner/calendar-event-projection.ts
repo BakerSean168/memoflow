@@ -1,4 +1,4 @@
-import type { GoalClientDTO } from '@memoflow/contracts/goal';
+import { goalTimeframeEndBoundary, type GoalClientDTO } from '@memoflow/contracts/goal';
 import type {
   CalendarEntryClientDTO,
   CalendarEventProjection,
@@ -139,7 +139,7 @@ export function projectTaskOccurrence(
 
 export function projectGoalDates(
   goal: GoalClientDTO,
-  time: PlannerProductTimePort = defaultPlannerProductTimePort,
+  _time: PlannerProductTimePort = defaultPlannerProductTimePort,
 ): GoalCalendarEventProjection[] {
   if (goal.deletedAt != null) return [];
 
@@ -160,7 +160,7 @@ export function projectGoalDates(
       ...base,
       sourceId: `${String(goal.id)}:start-date`,
       allDay: true,
-      start: time.toYmd(asInstant(Number(goal.startDate))),
+      start: goal.startDate,
       end: null,
       displayMetadata: {
         semantic: 'goal-start',
@@ -171,17 +171,19 @@ export function projectGoalDates(
     });
   }
 
-  if (goal.dueDate != null) {
+  if (goal.target != null) {
+    const targetEditable = editable && goal.target.kind === 'day';
     events.push({
       ...base,
-      sourceId: `${String(goal.id)}:due-date`,
+      sourceId: `${String(goal.id)}:target`,
       allDay: true,
-      start: time.toYmd(asInstant(Number(goal.dueDate))),
+      start: goalTimeframeEndBoundary(goal.target),
       end: null,
+      editableCapabilities: { move: targetEditable, resize: false },
       displayMetadata: {
-        semantic: 'goal-deadline',
+        semantic: 'goal-target',
         subtitle: null,
-        tone: editable ? 'default' : 'muted',
+        tone: targetEditable ? 'default' : 'muted',
         status: goal.status,
       },
     });

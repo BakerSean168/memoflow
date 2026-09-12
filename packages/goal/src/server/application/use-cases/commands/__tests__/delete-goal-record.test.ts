@@ -80,7 +80,7 @@ describe('DeleteGoalRecordUseCase', () => {
       name: 'Reach 70 kg',
       summary: null,
       startDate: null,
-      dueDate: null,
+      target: null,
       reminderConfig: null,
     });
     const keyResult = goal.createAndAddKeyResult({

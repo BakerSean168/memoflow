@@ -4,6 +4,7 @@
  */
 
 import { ResultErrorException } from '@memoflow/contracts/result';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import type { GoalId } from './goal-id';
 
 /**
@@ -15,17 +16,15 @@ export class GoalNameRequiredError extends ResultErrorException {
   }
 }
 
-/**
- * Goal due-date range error
- */
-export class GoalInvalidDateRangeError extends ResultErrorException {
+/** Goal planning window is incoherent when it begins after the target timeframe ends. */
+export class GoalInvalidPlanningWindowError extends ResultErrorException {
   constructor(
-    public readonly startDate: number,
-    public readonly dueDate: number,
+    public readonly startDate: Ymd,
+    public readonly targetEndDate: Ymd,
   ) {
     super(
-      `截止日期范围无效：开始日期 ${startDate} 晚于截止日期 ${dueDate}`,
-      'goal_invalid_date_range',
+      `目标时间范围无效：开始日期 ${startDate} 晚于目标时间范围结束 ${targetEndDate}`,
+      'goal_invalid_planning_window',
       undefined,
       undefined,
       400,

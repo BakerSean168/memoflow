@@ -4,6 +4,7 @@ import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
 import type { GoalClientDTO } from '@memoflow/contracts/goal';
+import { requireYmd } from '@memoflow/contracts/primitives';
 import GoalProgressRow from './GoalProgressRow.vue';
 
 const i18n = createI18n({
@@ -14,10 +15,10 @@ const i18n = createI18n({
       common: { edit: 'Edit', delete: 'Delete' },
       goal: {
         list: {
-          overdue: 'Overdue',
+          pastTarget: 'Past Target',
           completed: 'Completed',
           abandoned: 'Abandoned',
-          due: 'Due',
+          target: 'Target',
           from: 'From',
         },
         cards: { keyResultsCount: '{done}/{total} key results' },
@@ -33,8 +34,8 @@ function goal(overrides: Partial<GoalClientDTO> = {}): GoalClientDTO {
     name: 'Ship MemoFlow vNext',
     summary: null,
     status: 'InProgress',
-    startDate: Date.UTC(2026, 7, 25),
-    dueDate: Date.UTC(2026, 8, 30),
+    startDate: requireYmd('2026-08-25'),
+    target: { kind: 'day', date: requireYmd('2026-09-30') },
     completedAt: null,
     archivedAt: null,
     sortOrder: 0,
@@ -88,13 +89,18 @@ describe('GoalProgressRow (GOAL-5101)', () => {
     vi.useRealTimers();
   });
 
-  it('derives overdue display from an in-progress due date without persisting an overdue status', () => {
+  it('derives Past Target display without persisting a lifecycle status', () => {
     vi.setSystemTime(new Date('2026-08-27T12:00:00Z'));
     const wrapper = mount(GoalProgressRow, {
-      props: { goal: goal({ dueDate: Date.UTC(2026, 7, 20), status: 'InProgress' }) },
+      props: {
+        goal: goal({
+          target: { kind: 'day', date: requireYmd('2026-08-20') },
+          status: 'InProgress',
+        }),
+      },
       global: { plugins: [i18n] },
     });
-    expect(wrapper.text()).toContain('Overdue');
+    expect(wrapper.text()).toContain('Past Target');
     vi.useRealTimers();
   });
 });

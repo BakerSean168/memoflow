@@ -168,7 +168,7 @@ describe('CreateGoalUseCase', () => {
       name: 'Learn TypeScript',
       summary: null,
       startDate: null,
-      dueDate: null,
+      target: null,
       reminderConfig: null,
     });
     committed.createAndAddKeyResult({

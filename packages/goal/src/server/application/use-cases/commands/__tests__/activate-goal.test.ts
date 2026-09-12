@@ -15,7 +15,7 @@ function createTestGoal(name = 'Test Goal'): Goal {
     name,
     summary: null,
     startDate: null,
-    dueDate: null,
+    target: null,
     reminderConfig: null,
   });
 }

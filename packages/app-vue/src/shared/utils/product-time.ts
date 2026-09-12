@@ -5,6 +5,7 @@ import { shallowRef } from 'vue';
  * P1: empty kinds via resolveEmptyLabel / emptyKind — no L5 formatDate wrappers.
  */
 import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import {
   createSystemTimeZoneSource,
   createTimeContext,
@@ -118,6 +119,28 @@ export function fromProductDateInputValue(raw: string): number | null {
   const ymd = sessionTime.input.parseDateValue(raw);
   if (ymd == null) return null;
   return sessionTime.input.combine(ymd, '00:00') as number | null;
+}
+
+/** Calendar-native Goal/date-only input value. Never converts through Instant/JS Date. */
+export function toProductYmdInputValue(value: Ymd | null | undefined): string {
+  return value ?? '';
+}
+
+/** Parse a native date input as canonical Ymd without applying a timezone. */
+export function fromProductYmdInputValue(raw: string): Ymd | null {
+  return sessionTime.input.parseDateValue(raw);
+}
+
+/** Render a calendar-native Ymd without host-timezone reinterpretation. */
+export function formatProductYmd(value: Ymd | null | undefined, empty?: EmptyLabel): string {
+  const labels = emptyLabels(empty);
+  if (value == null || value === '') return labels.display;
+  return sessionTime.format.ymdDisplay(value) || labels.unknown;
+}
+
+/** Current product calendar day in the signed-in user's canonical timezone. */
+export function getProductTodayYmd(): Ymd {
+  return sessionTime.calendar.toYmd(sessionTime.now());
 }
 
 export function formatProductDate(

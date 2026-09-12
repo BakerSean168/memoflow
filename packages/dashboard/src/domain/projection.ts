@@ -108,7 +108,7 @@ export async function getDashboardData(
       name: goal.name,
       progress: normalizePercentage(goal.overallProgress),
       status: goal.status as GoalStatus,
-      dueDate: goal.dueDate ?? 0,
+      target: goal.target,
       keyResultCount: goal.totalKeyResults,
     }));
 

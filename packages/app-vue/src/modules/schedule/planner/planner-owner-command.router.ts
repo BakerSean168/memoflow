@@ -188,9 +188,8 @@ export function createPlannerOwnerCommandRouter(
           const nextDay = request.nextRange.allDay
             ? request.nextRange.start
             : time.toYmd(request.nextRange.start);
-          const dayStart = Number(time.startOfYmd(nextDay));
           const semantic = projection.displayMetadata.semantic;
-          if (semantic !== 'goal-start' && semantic !== 'goal-deadline') {
+          if (semantic !== 'goal-start' && semantic !== 'goal-target') {
             return {
               status: 'invalid',
               message: `Unsupported Goal Planner semantic '${semantic}'`,
@@ -198,8 +197,11 @@ export function createPlannerOwnerCommandRouter(
           }
           const requestBody =
             semantic === 'goal-start'
-              ? { startDate: dayStart, expectedVersion: projection.revision }
-              : { dueDate: dayStart, expectedVersion: projection.revision };
+              ? { startDate: nextDay, expectedVersion: projection.revision }
+              : {
+                  target: { kind: 'day' as const, date: nextDay },
+                  expectedVersion: projection.revision,
+                };
           return resultOutcome(
             await dependencies.goal.updateGoal(owner.ownerId, requestBody),
             owner.ownerType,

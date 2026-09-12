@@ -5,7 +5,7 @@ tags:
   - goal
 description: 目标模块相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-08-26T00:00:00
+updated: 2026-09-12T10:14:00+08:00
 ---
 
 # 目标模块文件索引
@@ -76,6 +76,7 @@ updated: 2026-08-26T00:00:00
 | [`packages/goal/src/server/application/use-cases/queries/get-goal-aggregate.use-case.ts`](../../../packages/goal/src/server/application/use-cases/queries/get-goal-aggregate.use-case.ts) | 获取目标聚合查询 |
 | [`packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts`](../../../packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts) | Prisma 目标仓储 |
 | [`packages/goal/src/server/infrastructure/adapters/powersync/goal-powersync.repository.ts`](../../../packages/goal/src/server/infrastructure/adapters/powersync/goal-powersync.repository.ts) | PowerSync 目标仓储 |
+| [`packages/goal/src/server/infrastructure/adapters/goal-timeframe-persistence.ts`](../../../packages/goal/src/server/infrastructure/adapters/goal-timeframe-persistence.ts) | GoalTimeframe 与 `target_kind + target_end_date` 持久化 pair 的可逆编码/校验 |
 
 ## Contracts 与数据结构
 
@@ -87,6 +88,7 @@ updated: 2026-08-26T00:00:00
 | [`packages/contracts/src/modules/goal/api/goal-review.dto.ts`](../../../packages/contracts/src/modules/goal/api/goal-review.dto.ts) | 目标复盘 DTO |
 | [`packages/contracts/src/modules/goal/api/goal-record.dto.ts`](../../../packages/contracts/src/modules/goal/api/goal-record.dto.ts) | 目标记录 DTO |
 | [`packages/contracts/src/modules/goal/api/response-schemas.ts`](../../../packages/contracts/src/modules/goal/api/response-schemas.ts) | API response schemas |
+| [`packages/contracts/src/modules/goal/value-objects/goal-timeframe.ts`](../../../packages/contracts/src/modules/goal/value-objects/goal-timeframe.ts) | Goal Target Timeframe 的 Day/Month/Quarter/Half-year/Year contract、边界与精度展示 helper |
 | [`packages/contracts/src/modules/goal/protocol/goal-rpc-map.ts`](../../../packages/contracts/src/modules/goal/protocol/goal-rpc-map.ts) | 目标模块 RPC map |
 | [`packages/contracts/src/modules/goal/protocol/goal-event-map.ts`](../../../packages/contracts/src/modules/goal/protocol/goal-event-map.ts) | 目标模块事件 map |
 | [`packages/database/prisma/schema/goal.prisma`](../../../packages/database/prisma/schema/goal.prisma) | 目标模块 Prisma schema |
@@ -111,6 +113,8 @@ updated: 2026-08-26T00:00:00
 | [`packages/goal/src/server/application/use-cases/commands/__tests__/add-goal-review.test.ts`](../../../packages/goal/src/server/application/use-cases/commands/__tests__/add-goal-review.test.ts) | 添加复盘用例测试 |
 | [`packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-aggregate.test.ts`](../../../packages/goal/src/server/application/use-cases/queries/__tests__/get-goal-aggregate.test.ts) | 目标聚合查询测试 |
 | [`packages/goal/src/api/routes/goal.routes.spec.ts`](../../../packages/goal/src/api/routes/goal.routes.spec.ts) | 目标 routes 测试 |
+| [`packages/goal/src/server/domain/aggregates/goal-planning-time.spec.ts`](../../../packages/goal/src/server/domain/aggregates/goal-planning-time.spec.ts) | Goal start/target planning-time 与生命周期正交性测试 |
+| [`packages/contracts/src/modules/goal/value-objects/goal-timeframe.spec.ts`](../../../packages/contracts/src/modules/goal/value-objects/goal-timeframe.spec.ts) | GoalTimeframe 精度、边界、排序、past-target 与 label 测试 |
 | [`packages/app-vue/src/modules/goal/stores/goalStore.spec.ts`](../../../packages/app-vue/src/modules/goal/stores/goalStore.spec.ts) | 目标 store 测试 |
 | [`packages/app-vue/src/modules/goal/index.spec.ts`](../../../packages/app-vue/src/modules/goal/index.spec.ts) | 前端目标模块入口测试 |
 | [`apps/web/e2e/goal/goal-crud.spec.ts`](../../../apps/web/e2e/goal/goal-crud.spec.ts) | Web 目标 CRUD e2e |

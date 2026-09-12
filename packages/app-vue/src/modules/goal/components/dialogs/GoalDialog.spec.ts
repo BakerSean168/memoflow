@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { productionLocaleMessages } from '../../../../locales/production-messages';
+import { createMockGoal } from '@memoflow/contracts/mocks';
 import { LabelPicker } from '../../../../shared/components';
 import GoalDialog from './GoalDialog.vue';
 
@@ -63,13 +64,13 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
 
   it('edits only vNext Direction + Measurement fields without retired taxonomy or motivation forms', () => {
     const source = fs.readFileSync(path.resolve(__dirname, '../dialogs/GoalDialog.vue'), 'utf8');
-    expect(source).toContain('dueDate');
+    expect(source).toContain('targetDate');
     expect(source).toContain('LabelPicker');
     expect(source).toContain('initialKeyResults');
     expect(source).toContain('keyResults');
     expect(source).toContain('ProductDialogShell');
     for (const retired of [
-      'targetDate',
+      'dueDate',
       'folderId',
       'parentGoalId',
       'category',
@@ -79,6 +80,71 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     ]) {
       expect(source).not.toContain(retired);
     }
+  });
+
+  it('preserves a broader target precision when edit does not touch the day target field', async () => {
+    const goal = createMockGoal({
+      name: 'Ship in Q4',
+      summary: 'Preserve quarter precision',
+      target: { kind: 'quarter', year: 2027, quarter: 4 },
+      version: 7,
+      keyResults: [],
+    });
+    mocks.updateGoal.mockResolvedValue(goal);
+
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'edit', goal },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    expect(document.body.textContent).toContain('2027 Q4');
+    expect((dom('goal-target-date-input').element as HTMLInputElement).value).toBe('');
+
+    await dom('save-goal-button').trigger('click');
+    await flushPromises();
+
+    expect(mocks.updateGoal).toHaveBeenCalledOnce();
+    expect(mocks.updateGoal).toHaveBeenCalledWith(
+      String(goal.id),
+      expect.objectContaining({
+        expectedVersion: 7,
+        target: { kind: 'quarter', year: 2027, quarter: 4 },
+      }),
+    );
+    wrapper.unmount();
+  });
+
+  it('replaces a broader target with a day target only after the date field is edited', async () => {
+    const goal = createMockGoal({
+      name: 'Ship in Q4',
+      target: { kind: 'quarter', year: 2027, quarter: 4 },
+      version: 8,
+      keyResults: [],
+    });
+    mocks.updateGoal.mockResolvedValue(goal);
+
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'edit', goal },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    await dom('goal-target-date-input').setValue('2027-11-15');
+    await dom('save-goal-button').trigger('click');
+    await flushPromises();
+
+    expect(mocks.updateGoal).toHaveBeenCalledOnce();
+    expect(mocks.updateGoal).toHaveBeenCalledWith(
+      String(goal.id),
+      expect.objectContaining({
+        expectedVersion: 8,
+        target: { kind: 'day', date: '2027-11-15' },
+      }),
+    );
+    wrapper.unmount();
   });
 
   it('creates a label and submits labels plus locally drafted KRs in one Goal aggregate command', async () => {
@@ -118,9 +184,9 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     expect(mocks.createGoal).toHaveBeenCalledOnce();
     expect(mocks.createGoal).toHaveBeenCalledWith({
       name: 'Ship MemoFlow vNext',
-      description: undefined,
+      summary: undefined,
       startDate: undefined,
-      dueDate: undefined,
+      target: undefined,
       labelIds: ['label-work'],
       initialKeyResults: [
         {

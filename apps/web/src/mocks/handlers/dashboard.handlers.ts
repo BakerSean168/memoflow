@@ -69,7 +69,12 @@ function generateDashboardStats() {
     name: faker.lorem.words({ min: 2, max: 4 }),
     progress: faker.number.int({ min: 5, max: 95 }),
     status: GoalStatus.InProgress,
-    dueDate: now + faker.number.int({ min: 7 * DAY, max: 90 * DAY }),
+    target: {
+      kind: 'day' as const,
+      date: new Date(now + faker.number.int({ min: 7 * DAY, max: 90 * DAY }))
+        .toISOString()
+        .slice(0, 10),
+    },
     keyResultCount: faker.number.int({ min: 1, max: 5 }),
   }));
 

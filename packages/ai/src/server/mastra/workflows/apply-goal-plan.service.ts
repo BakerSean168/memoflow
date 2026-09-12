@@ -213,6 +213,7 @@ export class ApplyGoalPlanService {
 
   async apply(input: ApplyGoalPlanInput): Promise<GoalPlanExecutionReceipt> {
     const { workflowRunId, draft, context } = input;
+    const goalTime = productTime(input.timeZone);
     const prior =
       input.priorReceipt?.workflowRunId === workflowRunId &&
       input.priorReceipt.revision === draft.revision
@@ -279,8 +280,12 @@ export class ApplyGoalPlanService {
         id: expectedGoalId as NonNullable<CreateGoalReq['id']>,
         name: draft.goal.name,
         summary: draft.goal.description,
-        startDate: draft.goal.startDate ?? undefined,
-        dueDate: draft.goal.dueDate ?? undefined,
+        startDate:
+          draft.goal.startDate == null ? undefined : goalTime.calendar.toYmd(draft.goal.startDate),
+        target:
+          draft.goal.dueDate == null
+            ? undefined
+            : { kind: 'day', date: goalTime.calendar.toYmd(draft.goal.dueDate) },
         labelIds: goalLabelsResult.data,
         initialKeyResults: draft.keyResults.map((keyResult, index) => ({
           id: expectedKeyResultIds[index] as NonNullable<

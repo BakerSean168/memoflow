@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { compareGoalTimeframesByEnd } from '@memoflow/contracts/goal';
 import type {
   GoalAggregateReadModel,
   GoalClientDTO,
   GoalStatus,
+  GoalTimeframe,
   KeyResultClientDTO,
 } from '@memoflow/contracts/goal';
 import type { Goal } from '@memoflow/goal/client';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
@@ -18,8 +21,8 @@ export type GoalSummary = {
   name: string;
   summary: string | null;
   status: GoalStatus;
-  startDate: number | null;
-  dueDate: number | null;
+  startDate: Ymd | null;
+  target: GoalTimeframe | null;
   archivedAt: number | null;
   updatedAt: number;
   labels: GoalClientDTO['labels'];
@@ -29,7 +32,7 @@ export type GoalSummary = {
 };
 
 export type GoalStatusFilter = 'all' | GoalStatus;
-export type GoalSortField = 'progress' | 'dueDate' | 'updatedAt';
+export type GoalSortField = 'progress' | 'target' | 'updatedAt';
 export type GoalSortDirection = 'asc' | 'desc';
 
 export interface GoalSortOption {
@@ -63,7 +66,7 @@ function mapGoalDTO(dto: GoalClientDTO): GoalSummary {
     summary: dto.summary,
     status: dto.status,
     startDate: dto.startDate,
-    dueDate: dto.dueDate,
+    target: dto.target,
     archivedAt: dto.archivedAt,
     updatedAt: dto.updatedAt,
     labels: dto.labels,
@@ -188,11 +191,8 @@ export function useGoals() {
         case 'progress':
           comparison = a.overallProgress - b.overallProgress;
           break;
-        case 'dueDate':
-          if (a.dueDate === null && b.dueDate === null) comparison = 0;
-          else if (a.dueDate === null) comparison = 1;
-          else if (b.dueDate === null) comparison = -1;
-          else comparison = a.dueDate - b.dueDate;
+        case 'target':
+          comparison = compareGoalTimeframesByEnd(a.target, b.target);
           break;
         case 'updatedAt':
           comparison = a.updatedAt - b.updatedAt;

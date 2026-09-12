@@ -25,7 +25,7 @@ const FILTERS: Array<{ label: string; value: GoalStatusFilter }> = [
 
 const SORT_OPTIONS: Array<{ label: string; field: GoalSortField }> = [
   { label: 'Progress', field: 'progress' },
-  { label: 'Due date', field: 'dueDate' },
+  { label: 'Target', field: 'target' },
   { label: 'Updated', field: 'updatedAt' },
 ];
 

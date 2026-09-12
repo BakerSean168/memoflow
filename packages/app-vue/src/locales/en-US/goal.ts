@@ -61,16 +61,16 @@ export default {
     "searchLabels": "Search labels…",
     "noLabels": "No labels found",
     "matchesAllLabels": "Matches all selected labels",
-    "overdue": "Overdue",
     "abandoned": "Abandoned",
     "completed": "Completed",
-    "due": "Due",
     "from": "From",
     "noGoalsFound": "No active goals yet",
     "createToStart": "Goals capture outcomes you want to achieve and measure them with key results.",
     "createGoal": "Create Goal",
     "askAi": "Let AI plan it with me →",
-    "viewEmpty": "No goals in this view"
+    "viewEmpty": "No goals in this view",
+    "pastTarget": "Past Target",
+    "target": "Target"
   },
   "systemFolders": {
     "active": "Active",
@@ -93,7 +93,6 @@ export default {
     "backToList": "Back to Goals",
     "noDescription": "No description",
     "startDate": "Start Date",
-    "targetDate": "Target Date",
     "category": "Category",
     "notSet": "Not set",
     "uncategorized": "Uncategorized",
@@ -123,7 +122,8 @@ export default {
     "recordIncrement": "Increment",
     "recordValueAfter": "Value After",
     "recordKeyResult": "Key Result",
-    "recordTime": "Recorded At"
+    "recordTime": "Recorded At",
+    "target": "Target"
   },
   "reviewCreation": {
     "back": "Back",
@@ -424,7 +424,6 @@ export default {
     "timeline": "Timeline",
     "startDate": "Start date",
     "vNextDescription": "Define a clear outcome, its timing, and how you will measure progress.",
-    "dueDate": "Due date",
     "labels": "Labels",
     "labelsPlaceholder": "Add labels",
     "createLabel": "Create label",
@@ -516,7 +515,8 @@ export default {
     "titleRequired": "Goal name is required",
     "krTitleRequired": "All key results must have a title.",
     "krWeightInvalid": "Key result weight must be an integer between 1 and 5.",
-    "krTargetInvalid": "Key result target value must be greater than 0."
+    "krTargetInvalid": "Key result target value must be greater than 0.",
+    "currentTarget": "Current target: {target}. Choose a date to replace it."
   },
   "krDialog": {
     "editTitle": "Edit Key Result",
@@ -811,8 +811,8 @@ export default {
       "empty": "No active goals",
       "completed": "Done",
       "time": "Time",
-      "overdue": "Overdue",
-      "remaining": "Left"
+      "remaining": "Left",
+      "pastTarget": "Past Target"
     }
   },
   "progressChart": {

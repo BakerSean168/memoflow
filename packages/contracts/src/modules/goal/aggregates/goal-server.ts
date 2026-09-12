@@ -4,14 +4,14 @@
  * Goal answers only Direction + Measurement.
  * Legacy fields retired: color, importance, priority, category, tags,
  * folderId, parentGoalId, rollupPolicy.
- * `targetDate` renamed to `dueDate`. `archivedAt` is a display attribute.
+ * Planning uses calendar-native startDate + precision-preserving target timeframe.
  */
 
-import type { TransferDate, GoalId, IdentityId } from '../../../primitives';
+import type { TransferDate, GoalId, IdentityId, Ymd } from '../../../primitives';
 import type { GoalStatus } from '../value-objects/goal-status';
 import type { KeyResultServerDTO } from '../entities/key-result-server';
 import type { GoalReviewServerDTO } from '../entities/goal-review-server';
-import type { GoalReminderConfigDTO } from '../value-objects';
+import type { GoalReminderConfigDTO, GoalTimeframe } from '../value-objects';
 import type { KeyResultWeightSnapshotDTO } from '../value-objects/key-result-weight-snapshot';
 
 // ============ Transfer DTO ============
@@ -23,8 +23,8 @@ export interface GoalServerDTO {
   name: string;
   summary: string | null;
   status: GoalStatus;
-  startDate: TransferDate | null;
-  dueDate: TransferDate | null;
+  startDate: Ymd | null;
+  target: GoalTimeframe | null;
   completedAt: TransferDate | null;
   archivedAt: TransferDate | null;
   sortOrder: number;

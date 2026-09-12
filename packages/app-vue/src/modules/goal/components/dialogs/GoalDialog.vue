@@ -41,8 +41,17 @@
             <Input id="goal-start-date" v-model="draft.startDate" type="date" />
           </div>
           <div class="space-y-2">
-            <Label for="goal-due-date">{{ t('goal.dialog.dueDate') }}</Label>
-            <Input id="goal-due-date" v-model="draft.dueDate" type="date" />
+            <Label for="goal-target-date">{{ t('goal.dialog.targetDate') }}</Label>
+            <Input
+              id="goal-target-date"
+              v-model="draft.targetDate"
+              data-testid="goal-target-date-input"
+              type="date"
+              @update:model-value="targetTouched = true"
+            />
+            <p v-if="coarseTargetLabel" class="text-xs text-muted-foreground">
+              {{ t('goal.dialog.currentTarget', { target: coarseTargetLabel }) }}
+            </p>
           </div>
         </div>
 
@@ -282,6 +291,7 @@ import { useI18n } from 'vue-i18n';
 import { ChevronRight, Pencil, Plus, Trash2 } from '@lucide/vue';
 import {
   KeyResultCalculationMethod,
+  goalTimeframeLabel,
   type GoalClientDTO,
   type CreateGoalReq,
   type UpdateGoalReq,
@@ -303,8 +313,8 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { LabelPicker, ProductDialogShell } from '../../../../shared/components';
 import {
-  fromProductDateInputValue,
-  toProductDateInputValue,
+  fromProductYmdInputValue,
+  toProductYmdInputValue,
 } from '../../../../shared/utils/product-time';
 import { useLabelCatalog } from '../../../../shared/composables/useLabelCatalog';
 import { useGoal } from '../../composables/useGoal';
@@ -323,7 +333,7 @@ const emit = defineEmits<{
   'dirty-change': [boolean];
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { createGoal, updateGoal, isSaving } = useGoal();
 const { options: labelOptions, isLoading: labelsLoading, createLabel } = useLabelCatalog();
 
@@ -331,11 +341,12 @@ const draft = reactive({
   name: '',
   summary: '',
   startDate: '',
-  dueDate: '',
+  targetDate: '',
   labelIds: [] as string[],
   keyResults: [] as DraftKeyResult[],
 });
 const initialSnapshot = ref('');
+const targetTouched = ref(false);
 const labelCreateError = ref<string | null>(null);
 const krEditorOpen = ref(false);
 const editingKrIndex = ref<number | null>(null);
@@ -363,14 +374,13 @@ const canSaveKeyResult = computed(
     Number.isFinite(Number(krForm.targetValue)),
 );
 
+const coarseTargetLabel = computed(() => {
+  if (targetTouched.value || !props.goal?.target || props.goal.target.kind === 'day') return '';
+  return goalTimeframeLabel(props.goal.target, locale.value);
+});
+
 function snapshotDraft(): string {
   return JSON.stringify(draft);
-}
-function fromMs(value: number | null | undefined): string {
-  return toProductDateInputValue(value);
-}
-function toMs(value: string): number | undefined {
-  return fromProductDateInputValue(value) ?? undefined;
 }
 function mapKeyResult(goalKr: NonNullable<GoalClientDTO['keyResults']>[number]): DraftKeyResult {
   return {
@@ -389,8 +399,10 @@ function mapKeyResult(goalKr: NonNullable<GoalClientDTO['keyResults']>[number]):
 function reset(): void {
   draft.name = props.goal?.name ?? '';
   draft.summary = props.goal?.summary ?? '';
-  draft.startDate = fromMs(props.goal?.startDate);
-  draft.dueDate = fromMs(props.goal?.dueDate);
+  draft.startDate = toProductYmdInputValue(props.goal?.startDate);
+  draft.targetDate =
+    props.goal?.target?.kind === 'day' ? toProductYmdInputValue(props.goal.target.date) : '';
+  targetTouched.value = false;
   draft.labelIds = props.goal?.labels.map((label) => label.id) ?? [];
   draft.keyResults = props.goal?.keyResults?.map(mapKeyResult) ?? [];
   labelCreateError.value = null;
@@ -526,11 +538,18 @@ async function save(): Promise<void> {
   if (!draft.name.trim() || krEditorOpen.value) return;
   const labelIds = [...draft.labelIds];
   const keyResults = draft.keyResults.map((item) => ({ ...item }));
+  const startDate = fromProductYmdInputValue(draft.startDate);
+  const target =
+    props.mode === 'edit' && props.goal && !targetTouched.value
+      ? (props.goal.target ?? null)
+      : draft.targetDate
+        ? { kind: 'day' as const, date: fromProductYmdInputValue(draft.targetDate)! }
+        : null;
   const common = {
     name: draft.name.trim(),
     summary: draft.summary.trim() || undefined,
-    startDate: toMs(draft.startDate),
-    dueDate: toMs(draft.dueDate),
+    startDate: startDate ?? undefined,
+    target: target ?? undefined,
     labelIds,
   };
 
@@ -540,7 +559,7 @@ async function save(): Promise<void> {
       ...common,
       summary: common.summary ?? null,
       startDate: common.startDate ?? null,
-      dueDate: common.dueDate ?? null,
+      target: common.target ?? null,
       keyResults,
     };
     const saved = await updateGoal(String(props.goal.id), req);

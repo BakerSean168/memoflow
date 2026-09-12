@@ -23,11 +23,11 @@ export type ReminderMutationResult = { reminderId: string };
  * ports.
  */
 export interface GoalPlanMutationPort {
-  resolveLabels(
-    names: readonly string[],
+  resolveLabels(names: readonly string[], context: ExecutionContext): Promise<Result<string[]>>;
+  createGoal(
+    request: CreateGoalReq,
     context: ExecutionContext,
-  ): Promise<Result<string[]>>;
-  createGoal(request: CreateGoalReq, context: ExecutionContext): Promise<Result<GoalMutationResult>>;
+  ): Promise<Result<GoalMutationResult>>;
   createTaskPlan(
     request: CreateTaskPlanReq,
     context: ExecutionContext,
@@ -42,5 +42,6 @@ export interface ApplyGoalPlanInput {
   readonly workflowRunId: string;
   readonly draft: import('@memoflow/contracts/ai').GoalPlanDraft;
   readonly context: ExecutionContext;
+  readonly timeZone: string;
   readonly priorReceipt?: GoalPlanExecutionReceipt;
 }

@@ -1,4 +1,4 @@
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { Instant, Ymd } from '@memoflow/contracts/primitives';
 import type { LabelDto } from '@memoflow/contracts/label';
 /**
  * Goal 聚合根实现
@@ -33,11 +33,16 @@ import { AggregateRoot } from '@memoflow/utils/domain';
 import { IdentityId } from '@memoflow/domain-shared';
 import { GoalId, KeyResultWeightSnapshotId, KeyResultId } from '../value-objects';
 import type { GoalEventMap } from '@memoflow/contracts/goal';
-import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
+import {
+  GoalStatus,
+  ReminderTriggerType,
+  goalTimeframeEndBoundary,
+} from '@memoflow/contracts/goal';
 import type {
   SnapshotTrigger,
   GoalReminderConfigDTO,
   GoalReviewSystemContext,
+  GoalTimeframe,
 } from '@memoflow/contracts/goal';
 import type {
   GoalServerDTO,
@@ -52,7 +57,7 @@ import {
   KeyResultWeightSnapshot,
   KeyResultNotFoundInGoalError,
   GoalNameRequiredError,
-  GoalInvalidDateRangeError,
+  GoalInvalidPlanningWindowError,
   GoalKeyResultNotFoundError,
   GoalReviewNotFoundError,
   GoalDeletedError,
@@ -74,8 +79,8 @@ export interface GoalState {
   name: string;
   summary: string | null;
   status: GoalStatus;
-  startDate: Instant | null;
-  dueDate: Instant | null;
+  startDate: Ymd | null;
+  target: GoalTimeframe | null;
   completedAt: Instant | null;
   archivedAt: Instant | null;
   sortOrder: number;
@@ -118,7 +123,7 @@ export class Goal extends AggregateRoot<GoalId> {
       summary: params.summary ?? null,
       status: params.status,
       startDate: params.startDate ?? null,
-      dueDate: params.dueDate ?? null,
+      target: params.target ?? null,
       completedAt: params.completedAt ?? null,
       archivedAt: params.archivedAt ?? null,
       sortOrder: params.sortOrder,
@@ -157,12 +162,12 @@ export class Goal extends AggregateRoot<GoalId> {
     return this._props.status;
   }
 
-  get startDate(): Instant | null {
+  get startDate(): Ymd | null {
     return this._props.startDate;
   }
 
-  get dueDate(): Instant | null {
-    return this._props.dueDate;
+  get target(): GoalTimeframe | null {
+    return this._props.target;
   }
 
   get completedAt(): Instant | null {
@@ -243,22 +248,21 @@ export class Goal extends AggregateRoot<GoalId> {
    * @param params 创建参数
    * @throws {GoalNameRequiredError} 当名称为空时
    * @throws {GoalNameTooLongError} 当名称超过200字符时
-   * @throws {GoalInvalidDateRangeError} 当开始日期晚于截止日期时
    */
   public static create(params: {
     id?: GoalId;
     identityId: IdentityId;
     name: string;
     summary: string | null;
-    startDate: Instant | null;
-    dueDate: Instant | null;
+    startDate: Ymd | null;
+    target: GoalTimeframe | null;
     reminderConfig: GoalReminderConfig | null;
   }): Goal {
     if (!params.identityId) {
       throw new GoalNameRequiredError();
     }
     Goal.validateTitle(params.name);
-    Goal.validateDateRange(params.startDate, params.dueDate);
+    Goal.validatePlanningWindow(params.startDate, params.target);
 
     const now = Date.now();
     const goal = new Goal({
@@ -268,7 +272,7 @@ export class Goal extends AggregateRoot<GoalId> {
       summary: params.summary?.trim() || null,
       status: GoalStatus.Planned,
       startDate: params.startDate ?? null,
-      dueDate: params.dueDate ?? null,
+      target: params.target ?? null,
       completedAt: null,
       archivedAt: null,
       sortOrder: 0,
@@ -335,15 +339,29 @@ export class Goal extends AggregateRoot<GoalId> {
     }
   }
 
-  public updateTimeRange(params: { startDate?: Instant | null; dueDate?: Instant | null }): void {
+  public updatePlanningTime(params: {
+    startDate?: Ymd | null;
+    target?: GoalTimeframe | null;
+  }): void {
+    this.ensureModifiable();
     const nextStartDate = params.startDate !== undefined ? params.startDate : this._props.startDate;
-    const nextDueDate = params.dueDate !== undefined ? params.dueDate : this._props.dueDate;
-    if (nextStartDate === this._props.startDate && nextDueDate === this._props.dueDate) return;
-    Goal.validateDateRange(nextStartDate, nextDueDate);
-    if (params.startDate !== undefined) this._props.startDate = params.startDate;
-    if (params.dueDate !== undefined) this._props.dueDate = params.dueDate;
+    const nextTarget = params.target !== undefined ? params.target : this._props.target;
+    Goal.validatePlanningWindow(nextStartDate, nextTarget);
+    const targetUnchanged = Goal.sameTimeframe(nextTarget, this._props.target);
+    if (nextStartDate === this._props.startDate && targetUnchanged) return;
+
+    const changes: string[] = [];
+    if (params.startDate !== undefined && params.startDate !== this._props.startDate) {
+      this._props.startDate = params.startDate;
+      changes.push('startDate');
+    }
+    if (params.target !== undefined && !targetUnchanged) {
+      this._props.target = params.target;
+      changes.push('target');
+    }
+    if (changes.length === 0) return;
+
     this._props.updatedAt = Date.now();
-    const changes = Object.keys(params);
     this.emitGoalUpdated(changes);
     this.addDomainEvent<GoalEventMap['goal:schedule-time-changed']>('goal:schedule-time-changed', {
       identityId: this._props.identityId,
@@ -933,7 +951,7 @@ export class Goal extends AggregateRoot<GoalId> {
       summary: this._props.summary,
       status: this._props.status,
       startDate: this._props.startDate,
-      dueDate: this._props.dueDate,
+      target: this._props.target,
       completedAt: this._props.completedAt,
       archivedAt: this._props.archivedAt,
       sortOrder: this._props.sortOrder,
@@ -978,7 +996,7 @@ export class Goal extends AggregateRoot<GoalId> {
       summary: this._props.summary,
       status: this._props.status,
       startDate: this._props.startDate ?? null,
-      dueDate: this._props.dueDate ?? null,
+      target: this._props.target ?? null,
       completedAt: this._props.completedAt ?? null,
       archivedAt: this._props.archivedAt ?? null,
       sortOrder: this._props.sortOrder,
@@ -1041,14 +1059,23 @@ export class Goal extends AggregateRoot<GoalId> {
     }
   }
 
-  /**
-   * 验证日期范围
-   * @throws {GoalInvalidDateRangeError} 当开始日期晚于截止日期时
-   */
-  public static validateDateRange(startDate?: Instant | null, dueDate?: Instant | null): void {
-    if (startDate && dueDate && Number(startDate) > Number(dueDate)) {
-      throw new GoalInvalidDateRangeError(startDate, dueDate);
+  /** Goal start may sit inside a coarse target period, but never after that period ends. */
+  public static validatePlanningWindow(
+    startDate: Ymd | null | undefined,
+    target: GoalTimeframe | null | undefined,
+  ): void {
+    if (startDate == null || target == null) return;
+    const targetEndDate = goalTimeframeEndBoundary(target);
+    if (startDate > targetEndDate) {
+      throw new GoalInvalidPlanningWindowError(startDate, targetEndDate);
     }
+  }
+
+  private static sameTimeframe(left: GoalTimeframe | null, right: GoalTimeframe | null): boolean {
+    if (left === null || right === null) return left === right;
+    return (
+      left.kind === right.kind && goalTimeframeEndBoundary(left) === goalTimeframeEndBoundary(right)
+    );
   }
 
   /**

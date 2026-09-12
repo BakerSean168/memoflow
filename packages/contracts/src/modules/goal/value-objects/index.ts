@@ -6,7 +6,17 @@
 export type { GoalId } from './goal-id';
 export type { KeyResultId } from './key-result-id';
 
-export type { GoalTimeRange, GoalTimeRangeDTO } from './goal-time-range';
+export {
+  GoalTimeframeSchema,
+  GoalTimeframeKindSchema,
+  goalTimeframeStartBoundary,
+  goalTimeframeEndBoundary,
+  isPastGoalTarget,
+  compareGoalTimeframesByEnd,
+  goalTimeframeLabel,
+  goalTimeframeFromEndBoundary,
+} from './goal-timeframe';
+export type { GoalTimeframe, GoalTimeframeKind } from './goal-timeframe';
 
 export type { KeyResultProgress, KeyResultProgressDTO } from './key-result-progress';
 export { KeyResultProgressDTOSchema } from './key-result-progress';
@@ -27,7 +37,6 @@ export type {
   KeyResultWeightSnapshotDTO,
 } from './key-result-weight-snapshot';
 
-
 // ============ 枚举值对象 ============
 export { GoalStatus } from './goal-status';
 
@@ -37,5 +46,13 @@ export { KeyResultCalculationMethod } from './key-result-calculation-method';
 
 export { ReminderTriggerType } from './reminder-trigger-type';
 
-export { GoalReviewSystemContextSchema, GoalReviewKeyResultContextSchema, GoalReviewTrendPointSchema } from './goal-review-context';
-export type { GoalReviewSystemContext, GoalReviewKeyResultContext, GoalReviewTrendPoint } from './goal-review-context';
+export {
+  GoalReviewSystemContextSchema,
+  GoalReviewKeyResultContextSchema,
+  GoalReviewTrendPointSchema,
+} from './goal-review-context';
+export type {
+  GoalReviewSystemContext,
+  GoalReviewKeyResultContext,
+  GoalReviewTrendPoint,
+} from './goal-review-context';

@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { PortableRefSchema, IsoDateString } from './portable-common.dto';
 import { KeyResultCalculationMethod } from '../../goal/value-objects/key-result-calculation-method';
 import { GoalStatus } from '../../goal/value-objects/goal-status';
+import { GoalTimeframeSchema } from '../../goal/value-objects/goal-timeframe';
+import { YmdSchema } from '../../../primitives';
 
 export const PortableKeyResultSchema = z.object({
   _ref: PortableRefSchema,
@@ -70,8 +72,8 @@ export const PortableGoalSchema = z.object({
   name: z.string(),
   summary: z.string().max(500).nullable().optional(),
   status: z.enum(GoalStatus),
-  startDate: IsoDateString.nullable().optional(),
-  dueDate: IsoDateString.nullable().optional(),
+  startDate: YmdSchema.nullable().optional(),
+  target: GoalTimeframeSchema.nullable().optional(),
   completedAt: IsoDateString.nullable().optional(),
   archivedAt: IsoDateString.nullable().optional(),
   sortOrder: z.number(),

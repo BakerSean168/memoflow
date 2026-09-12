@@ -44,8 +44,8 @@ export interface IGoalApiClient {
     status?: string[];
     systemView?: GoalSystemView;
     labelIdsAll?: string[];
-    startDate?: number;
-    endDate?: number;
+    targetStart?: import('@memoflow/contracts/primitives').Ymd;
+    targetEnd?: import('@memoflow/contracts/primitives').Ymd;
     includeChildren?: boolean;
   }): Promise<Result<QueryGoalsRes>>;
   getGoalById(id: string, includeChildren?: boolean): Promise<Result<GoalClientDTO>>;

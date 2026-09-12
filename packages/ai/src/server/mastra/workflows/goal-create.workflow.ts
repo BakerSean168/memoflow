@@ -77,7 +77,10 @@ function mergeStructuredPatch(base: unknown, patch: unknown): unknown {
   return result;
 }
 
-function applyStructuredDraftPatch(draft: GoalPlanDraft, patch: Record<string, unknown>): GoalPlanDraft {
+function applyStructuredDraftPatch(
+  draft: GoalPlanDraft,
+  patch: Record<string, unknown>,
+): GoalPlanDraft {
   for (const key of Object.keys(patch)) {
     if (!allowedDraftPatchKeys.has(key)) {
       throw new Error(`Unsupported goal draft patch field: ${key}`);
@@ -126,15 +129,7 @@ export function createGoalCreateWorkflow(input: {
     stateSchema: GoalCreateWorkflowStateSchema,
     resumeSchema: AIWorkflowResumeCommandSchema,
     suspendSchema: AIWorkflowSuspensionSchema,
-    execute: async ({
-      inputData,
-      state,
-      setState,
-      resumeData,
-      suspend,
-      runId,
-      requestContext,
-    }) => {
+    execute: async ({ inputData, state, setState, resumeData, suspend, runId, requestContext }) => {
       let current = GoalCreateWorkflowStateSchema.parse(state);
       const workflowInput = GoalCreateWorkflowInputSchema.parse(inputData);
       if (
@@ -230,6 +225,7 @@ export function createGoalCreateWorkflow(input: {
           workflowRunId: runId,
           draft: current.draft,
           context: currentExecutionContext(requestContext, current.input.identityId),
+          timeZone: current.input.surfaceContext?.timezone ?? 'UTC',
           priorReceipt,
         });
         if (receipt.status === 'success') {
@@ -280,7 +276,9 @@ export function createGoalCreateWorkflow(input: {
           current.pendingQuestions.length === 0 ||
           current.pendingQuestions.length !== resumeData.answers.length
         ) {
-          throw new Error('goal.create clarification answer count does not match pending questions');
+          throw new Error(
+            'goal.create clarification answer count does not match pending questions',
+          );
         }
         const nextClarification = GoalClarificationStateSchema.parse({
           rounds: [

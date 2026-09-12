@@ -89,7 +89,8 @@ export interface CreateGoalInput extends TimestampedImportInput {
   summary: string | null;
   status: string;
   startDate: string | null;
-  dueDate: string | null;
+  targetKind: string | null;
+  targetEndDate: string | null;
   completedAt: string | null;
   archivedAt: string | null;
   sortOrder: number;

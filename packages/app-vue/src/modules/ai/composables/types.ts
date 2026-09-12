@@ -114,7 +114,6 @@ export type AIWorkspaceRecentGoal = {
   title: string;
   status: string;
   updatedAt: number;
-  dueDate: number | null;
   progress: number | null;
 };
 export type AIWorkspaceRecentKnowledgeNote = {
@@ -150,6 +149,7 @@ export type EditableGoal = {
   motivation: string;
   feasibilityAnalysis: string;
   startDate: number | null;
+  /** AI GoalPlanDraft V1 only; converted to Goal Target Timeframe at the apply seam. */
   dueDate: number | null;
 };
 
@@ -202,7 +202,14 @@ export type PersistedWorkflowEntry = {
 export type PersistedConversationModelMap = Record<string, string>;
 
 export function createEmptyGoalDraft(): EditableGoal {
-  return { name: '', description: '', motivation: '', feasibilityAnalysis: '', startDate: null, dueDate: null };
+  return {
+    name: '',
+    description: '',
+    motivation: '',
+    feasibilityAnalysis: '',
+    startDate: null,
+    dueDate: null,
+  };
 }
 
 export function createEmptyGoalTaskPlanDraft(): EditableGoalTaskPlan {

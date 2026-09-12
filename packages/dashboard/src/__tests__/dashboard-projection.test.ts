@@ -23,7 +23,7 @@ function makeGoal(overrides: Partial<DashboardGoalRecord> = {}): DashboardGoalRe
     deletedAt: null,
     updatedAt: Date.now(),
     overallProgress: 50,
-    dueDate: null,
+    target: null,
     totalKeyResults: 0,
     ...overrides,
   };

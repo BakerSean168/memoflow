@@ -1,8 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 
-import { GoalStatus } from '@memoflow/contracts/goal';
+import { GoalStatus, goalTimeframeLabel } from '@memoflow/contracts/goal';
 import type { GoalSummary } from '../hooks/useGoals';
-import { formatProductDate, emptyKind } from '../utils/product-time';
+import { formatProductYmd, emptyKind, getProductTime } from '../utils/product-time';
 import {
   PrimaryButton,
   SectionCard,
@@ -57,8 +57,15 @@ export function GoalCard({ goal, onOpen }: { goal: GoalSummary; onOpen?: () => v
       </ThemedView>
 
       <View style={styles.metaRow}>
-        <Meta label="Start" value={formatProductDate(goal.startDate, emptyKind('notSet'))} />
-        <Meta label="Due" value={formatProductDate(goal.dueDate, emptyKind('notSet'))} />
+        <Meta label="Start" value={formatProductYmd(goal.startDate, emptyKind('notSet'))} />
+        <Meta
+          label="Target"
+          value={
+            goal.target
+              ? goalTimeframeLabel(goal.target, getProductTime().presentation.locale)
+              : emptyKind('notSet')
+          }
+        />
       </View>
 
       {goal.labels.length > 0 ? (

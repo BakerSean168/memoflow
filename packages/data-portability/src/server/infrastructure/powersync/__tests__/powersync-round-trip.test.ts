@@ -106,6 +106,9 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(folder.repository_id).toBe(repository.id);
     expect(resource.repository_id).toBe(repository.id);
     expect(resource.folder_id).toBe(folder.id);
+    expect(goal.start_date).toBe('2026-06-04');
+    expect(goal.target_kind).toBe('quarter');
+    expect(goal.target_end_date).toBe('2026-09-30');
     expect(keyResult.goal_id).toBe(goal.id);
     expect(goalRecord.key_result_id).toBe(keyResult.id);
     expect(taskPlan.goal_id).toBe(goal.id);
@@ -119,7 +122,7 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(routineMembership.routine_id).toBe(routineDefinition.id);
     expect(routineMembership.enabled).toBe(0);
     expect(reminderResponse.template_id).toBe(reminderTemplate.id);
-    expect(reminderResponse.action).toBe("SNOOZED");
+    expect(reminderResponse.action).toBe('SNOOZED');
     expect(reminderResponse.response_time).toBe(7);
     expect(reminderResponse.snooze_duration_seconds).toBe(900);
     expect(message.conversation_id).toBe(conversation.id);
@@ -354,8 +357,7 @@ class FakePowerSyncDb {
           .map((row) => row.id);
 
         return rows.filter(
-          (row) =>
-            row.identity_id === identityId && keyResultIds.includes(row.key_result_id),
+          (row) => row.identity_id === identityId && keyResultIds.includes(row.key_result_id),
         );
       }
       case 'key_results':
@@ -420,9 +422,15 @@ function existingPreference(identityUuid: unknown, namespace: unknown): Row {
     id: `existing-preference-${String(namespace)}`,
     identity_id: identityUuid,
     namespace,
-    payload: namespace === 'presentation'
-      ? JSON.stringify({ theme: 'auto', language: 'en-US' })
-      : JSON.stringify({ timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 }),
+    payload:
+      namespace === 'presentation'
+        ? JSON.stringify({ theme: 'auto', language: 'en-US' })
+        : JSON.stringify({
+            timeZone: 'UTC',
+            dateStyle: 'medium',
+            timeStyle: '24h',
+            weekStartsOn: 1,
+          }),
     revision: 1,
     created_at: now,
     updated_at: now,
@@ -595,8 +603,9 @@ function seedProfile(identityUuid: string): SeedTables {
         name: 'Ship portability',
         summary: 'Complete desktop portability while protecting user data',
         status: 'InProgress',
-        start_date: now,
-        due_date: later,
+        start_date: '2026-06-04',
+        target_kind: 'quarter',
+        target_end_date: '2026-09-30',
         completed_at: null,
         archived_at: null,
         sort_order: 0,
@@ -638,18 +647,20 @@ function seedProfile(identityUuid: string): SeedTables {
           windowStartAt: Date.parse(now),
           windowEndAt: Date.parse(later),
           overallProgress: { startPercentage: 0, endPercentage: 100, deltaPercentage: 100 },
-          keyResults: [{
-            keyResultId: 'kr-a',
-            title: 'Round trip passes',
-            unit: 'test',
-            startPercentage: 0,
-            endPercentage: 100,
-            deltaPercentage: 100,
-            trend: [
-              { at: Date.parse(now), progressPercentage: 0 },
-              { at: Date.parse(later), progressPercentage: 100 },
-            ],
-          }],
+          keyResults: [
+            {
+              keyResultId: 'kr-a',
+              title: 'Round trip passes',
+              unit: 'test',
+              startPercentage: 0,
+              endPercentage: 100,
+              deltaPercentage: 100,
+              trend: [
+                { at: Date.parse(now), progressPercentage: 0 },
+                { at: Date.parse(later), progressPercentage: 100 },
+              ],
+            },
+          ],
           summary: { recordCount: 1, manualRecordCount: 1, taskContributionCount: 0 },
         }),
         reviewed_at: later,

@@ -2,7 +2,7 @@
  * Goal reminder fire handler (GOAL-3202).
  * 目标提醒触发处理器（GOAL-3202）。
  *
- * Registers `goal.reminder.fire` (payloadVersion 1). The handler re-reads the
+ * Registers `goal.reminder.fire` (payloadVersion 2). The handler re-reads the
  * current Goal aggregate at fire time — if the Goal is no longer eligible
  * (completed / abandoned / archived / deleted / reminder disabled / trigger
  * disabled / missing) it returns `skipped` and writes nothing. Otherwise it
@@ -13,7 +13,7 @@
  * The Scheduler stays domain-neutral: it only knows the handlerKey +
  * payloadVersion. All Goal + NotificationRequested semantics live here.
  *
- * 注册 `goal.reminder.fire`（payloadVersion 1）。处理器在触发时重新读取 Goal
+ * 注册 `goal.reminder.fire`（payloadVersion 2）。处理器在触发时重新读取 Goal
  * 聚合根——若 Goal 不再符合条件（已完成 / 已放弃 / 已归档 / 已删除 / 提醒关闭 /
  * 触发器关闭 / 不存在）则返回 `skipped` 且不写入任何内容。否则写入 ONE 条幂等
  * durable `NotificationRequested` 信封，其 occurrence 身份由 invocation
@@ -23,7 +23,13 @@
  * NotificationRequested 的全部语义都在本文件。
  */
 
-import { GoalStatus, ReminderTriggerType, type GoalServerDTO } from '@memoflow/contracts/goal';
+import {
+  GoalStatus,
+  GoalTimeframeSchema,
+  ReminderTriggerType,
+  type GoalServerDTO,
+} from '@memoflow/contracts/goal';
+import { YmdSchema } from '@memoflow/contracts/primitives';
 import {
   NotificationCategory,
   NotificationChannelType,
@@ -54,7 +60,7 @@ export const GOAL_REMINDER_NOTIFICATION_SOURCE = 'goal-reminder' as const;
 export const GOAL_REMINDER_WORKFLOW_KEY = 'goal.reminder' as const;
 
 /**
- * Zod schema mirroring GoalReminderScheduledPayload (payloadVersion 1).
+ * Zod schema mirroring GoalReminderScheduledPayload (payloadVersion 2).
  * The registry validates every invocation payload against this schema before
  * the handler runs.
  */
@@ -63,8 +69,8 @@ export const GoalReminderFirePayloadSchema = z.object({
   goalTitle: z.string(),
   triggerType: z.enum(ReminderTriggerType),
   triggerValue: z.number(),
-  startDate: z.number().int().nullable(),
-  dueDate: z.number().int().nullable(),
+  startDate: YmdSchema.nullable(),
+  target: GoalTimeframeSchema.nullable(),
   reminderTime: z.number().int(),
 });
 export type GoalReminderFirePayload = z.infer<typeof GoalReminderFirePayloadSchema>;
@@ -131,7 +137,10 @@ function buildReminderContent(
   if (payload.triggerType === ReminderTriggerType.RemainingDays) {
     return {
       title: `目标提醒：${goal.name}`,
-      content: `目标「${goal.name}」距离截止还有 ${payload.triggerValue} 天。`,
+      content:
+        payload.target && payload.target.kind !== 'day'
+          ? `目标「${goal.name}」距离目标周期结束还有 ${payload.triggerValue} 天。`
+          : `目标「${goal.name}」距离目标日期还有 ${payload.triggerValue} 天。`,
     };
   }
   if (payload.triggerType === ReminderTriggerType.TimeProgressPercentage) {

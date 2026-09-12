@@ -27,7 +27,7 @@ import {
   BatchKeyResultWeightsInvocationSchema,
 } from '@memoflow/contracts/goal';
 import type { ListGoalFilters } from '@memoflow/contracts/goal';
-import { brandedId } from '@memoflow/contracts/primitives';
+import { brandedId, parseYmd } from '@memoflow/contracts/primitives';
 import type { GoalId } from '@memoflow/contracts/primitives';
 import type { GoalController } from '../../server/transport/goal.controller';
 // Residual 985: sole parseBoolean (local dual retired).
@@ -69,8 +69,12 @@ function normalizeGoalListQuery(query: Record<string, unknown>): ListGoalFilters
     systemView: query.systemView as ListGoalFilters['systemView'],
     query: (query.query as string | undefined) ?? undefined,
     labelIdsAll: parseStringArray(query.labelIdsAll),
-    startDate: parseNumber(query.startDate),
-    endDate: parseNumber(query.endDate),
+    targetStart:
+      typeof query.targetStart === 'string'
+        ? (parseYmd(query.targetStart) ?? undefined)
+        : undefined,
+    targetEnd:
+      typeof query.targetEnd === 'string' ? (parseYmd(query.targetEnd) ?? undefined) : undefined,
     sortBy: query.sortBy as ListGoalFilters['sortBy'],
     sortOrder: query.sortOrder as ListGoalFilters['sortOrder'],
     page: parseNumber(query.page),
