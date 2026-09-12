@@ -11,7 +11,7 @@ tags:
   - migration
 description: Goal vNext 产品模型、KR Measurement V3、Task/Knowledge Context、AI Plan 与 Linear-style UI 的一次性收敛实施计划
 created: 2026-09-08T17:55:00+08:00
-updated: 2026-09-08T21:25:00+08:00
+updated: 2026-09-12T12:13:00+08:00
 status: active
 ---
 
@@ -391,6 +391,8 @@ Core identity    Target/time        KR Measurement V3
 
 ### GOAL-7204 — Replace KR baseline semantics with Initial/Current/Target
 
+**Status:** DONE — direct canonical cutover completed 2026-09-12 under ADR-111.
+
 **Goal:** User-facing KR model becomes `initial/current/target`; records use hidden tracking base.
 
 **Why now:** AI/UI/task context all depend on stable KR semantics.
@@ -422,6 +424,8 @@ Core identity    Target/time        KR Measurement V3
 **Dependencies:** GOAL-7201, GOAL-7203 GoalTimeframe contract.
 
 **Risks:** mixing progress baseline and aggregation seed is a data-corruption risk; migration fixtures must prove both independently.
+
+**Closure evidence:** canonical contracts/domain/persistence/UI use `initial/current/target + hidden trackingBaseValue`; Goal 84 files / 469 tests, Contracts 82/565, Data Portability 36/148, AI 79/427, PowerSync 1/6, Task V3 integration 3 files / 10 tests, Vue Goal/KR dialogs 2 files / 10 tests PASS. Goal build, App-Vue production build, API build and Migrator build PASS; Contracts/Data Portability/Vue/React/AI/Task/PowerSync/Desktop typechecks PASS. Architecture lock rejects canonical V2 field resurrection and client tracking-base leakage while explicitly permitting temporary AI Draft V1 until GOAL-7210.
 
 ## 11. Phase 3 — Context ownership and relation parity
 
@@ -727,9 +731,9 @@ After implementation:
 
 ```text
 GOAL-7201  DONE — design package written and active plan expanded
-GOAL-7202  PLANNED
-GOAL-7203  PLANNED
-GOAL-7204  PLANNED
+GOAL-7202  DONE — identity/lifecycle direct cutover
+GOAL-7203  DONE — Product Time + GoalTimeframe direct cutover
+GOAL-7204  DONE — KR Measurement V3 + optional KR timeframe direct cutover
 GOAL-7205  PLANNED
 GOAL-7206  PLANNED
 GOAL-7207  PLANNED
@@ -739,4 +743,4 @@ GOAL-7210  PLANNED
 GOAL-7211  PLANNED
 ```
 
-No production implementation is claimed by GOAL-7201.
+GOAL-7201 itself only froze the design package; GOAL-7202/7203/7204 are now implemented production truth.

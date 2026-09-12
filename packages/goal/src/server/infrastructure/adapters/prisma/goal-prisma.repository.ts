@@ -296,6 +296,7 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
         // Upsert each KeyResult
         for (const kr of dto.keyResults) {
           const progress = parseKeyResultProgressForPrisma(kr);
+          const keyResultTarget = encodeGoalTimeframe(kr.target);
           await tx.keyResult.upsert({
             where: { id: kr.id as string },
             create: {
@@ -305,10 +306,12 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
               title: kr.title,
               description: kr.description,
               aggregationMethod: progress.aggregationMethod,
-              startingValue: progress.startingValue,
-              progressBaselineValue: progress.progressBaselineValue,
+              initialValue: progress.initialValue,
+              trackingBaseValue: progress.trackingBaseValue,
               targetValue: progress.targetValue,
               currentValue: progress.currentValue,
+              targetKind: keyResultTarget.targetKind,
+              targetEndDate: keyResultTarget.targetEndDate,
               unit: progress.unit,
               weight: kr.weight,
               order: kr.sortOrder,
@@ -317,10 +320,12 @@ export class GoalPrismaRepository extends AggregateRepositoryBase<Goal> implemen
               title: kr.title,
               description: kr.description,
               aggregationMethod: progress.aggregationMethod,
-              startingValue: progress.startingValue,
-              progressBaselineValue: progress.progressBaselineValue,
+              initialValue: progress.initialValue,
+              trackingBaseValue: progress.trackingBaseValue,
               targetValue: progress.targetValue,
               currentValue: progress.currentValue,
+              targetKind: keyResultTarget.targetKind,
+              targetEndDate: keyResultTarget.targetEndDate,
               unit: progress.unit,
               weight: kr.weight,
               order: kr.sortOrder,

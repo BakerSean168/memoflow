@@ -237,7 +237,7 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createKeyResult(input: CreateKeyResultInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO key_results (id, identity_id, goal_id, title, description, aggregation_method, starting_value, progress_baseline_value, target_value, current_value, unit, weight, "order", created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO key_results (id, identity_id, goal_id, title, description, aggregation_method, initial_value, tracking_base_value, target_value, current_value, target_kind, target_end_date, unit, weight, "order", created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.id,
         input.identityId,
@@ -245,10 +245,12 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
         input.title,
         str(input.description),
         input.aggregationMethod,
-        input.startingValue,
-        input.progressBaselineValue,
+        input.initialValue,
+        input.trackingBaseValue,
         input.targetValue,
         input.currentValue,
+        str(input.targetKind),
+        str(input.targetEndDate),
         str(input.unit),
         input.weight,
         input.order,

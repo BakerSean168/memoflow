@@ -5,7 +5,7 @@ tags:
   - ai
 description: AI 模块当前功能、Mastra durable workflows、Routine tools 与产品读写边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-12T12:13:00+08:00
 ---
 
 # AI 模块说明
@@ -33,7 +33,7 @@ MastraAIRuntime
 
 ## 3. Durable workflows
 
-- `goal.create`：clarify / draft / review / revise / approve，草稿使用当前 Shared Label 与 KR Measurement V2；
+- `goal.create`：clarify / draft / review / revise / approve；在 GOAL-7210 前，durable Draft V1 仍保留旧 KR draft 字段作为 workflow compatibility surface，但 apply adapter 已显式投影到 canonical KR Measurement V3（`initial/current/target`），旧字段不会进入 Goal owner contract/persistence；
 - `task.create`：使用当前 recurrence、Shared Label、Goal Link 与 optional contribution contract；
 - `knowledge.capture`：结构化知识草稿，经确认后由 Repository owner port 持久化；
 - workflow apply 使用稳定 entity/request identity，重试不会重复创建业务对象或 Label。

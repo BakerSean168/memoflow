@@ -7,9 +7,17 @@ import { GoalPrismaRepository } from '../../infrastructure/adapters/prisma/goal-
 import { GoalRecordPrismaRepository } from '../../infrastructure/adapters/prisma/goal-record-prisma.repository';
 import { createGoalTaskProgressHandler } from './index';
 import { PrismaGoalWriteTransactionRunner } from '../../infrastructure/adapters/prisma/prisma-goal-write-transaction-runner';
-import { cleanAll, disconnectPrisma, getPrisma, seedAccount } from '../../../__tests__/integration-helpers';
+import {
+  cleanAll,
+  disconnectPrisma,
+  getPrisma,
+  seedAccount,
+} from '../../../__tests__/integration-helpers';
 
-async function waitFor<T>(probe: () => Promise<T | null | undefined>, timeoutMs = 5000): Promise<T> {
+async function waitFor<T>(
+  probe: () => Promise<T | null | undefined>,
+  timeoutMs = 5000,
+): Promise<T> {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const value = await probe();
@@ -48,7 +56,7 @@ describe('GoalTaskProgressHandler V2 integration', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Completed tasks',
       aggregationMethod: 'Sum',
-      startingValue: 0,
+      initialValue: 0,
       currentValue: 0,
       targetValue: 10,
       weight: 1,
@@ -57,8 +65,11 @@ describe('GoalTaskProgressHandler V2 integration', () => {
     await goalRepository.save(goal);
 
     const readProgress = async () =>
-      (await goalRepository.findByIdForIdentity(String(identityId), goal.id, { includeChildren: true }))
-        ?.getKeyResult(String(keyResult.id))?.progress.currentValue;
+      (
+        await goalRepository.findByIdForIdentity(String(identityId), goal.id, {
+          includeChildren: true,
+        })
+      )?.getKeyResult(String(keyResult.id))?.progress.currentValue;
     const waitForProgress = (expected: number) =>
       waitFor(async () => ((await readProgress()) === expected ? expected : null));
 

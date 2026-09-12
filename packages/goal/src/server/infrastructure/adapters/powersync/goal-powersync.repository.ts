@@ -505,6 +505,7 @@ export class GoalPowerSyncRepository
         typeof keyResult.progress === 'string'
           ? JSON.parse(keyResult.progress)
           : keyResult.progress;
+      const target = encodeGoalTimeframe(keyResult.target);
 
       const existingKeyResult = await tx.getOptional<{ id: string }>(
         `SELECT id FROM key_results WHERE id = ? LIMIT 1`,
@@ -519,10 +520,12 @@ export class GoalPowerSyncRepository
                title = ?,
                description = ?,
                aggregation_method = ?,
-               starting_value = ?,
-               progress_baseline_value = ?,
+               initial_value = ?,
+               tracking_base_value = ?,
                target_value = ?,
                current_value = ?,
+               target_kind = ?,
+               target_end_date = ?,
                unit = ?,
                weight = ?,
                "order" = ?,
@@ -534,10 +537,12 @@ export class GoalPowerSyncRepository
             keyResult.title,
             keyResult.description,
             progress.aggregationMethod ?? 'Last',
-            progress.startingValue ?? 0,
-            progress.progressBaselineValue ?? null,
+            progress.initialValue ?? 0,
+            progress.trackingBaseValue ?? progress.currentValue ?? 0,
             progress.targetValue ?? 100,
             progress.currentValue ?? 0,
+            target.targetKind,
+            target.targetEndDate,
             progress.unit ?? null,
             keyResult.weight,
             keyResult.sortOrder,
@@ -549,9 +554,9 @@ export class GoalPowerSyncRepository
         await tx.execute(
           `INSERT INTO key_results (
              id, identity_id, goal_id, title, description, aggregation_method,
-             starting_value, progress_baseline_value, target_value, current_value,
-             unit, weight, "order", created_at, updated_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             initial_value, tracking_base_value, target_value, current_value,
+             target_kind, target_end_date, unit, weight, "order", created_at, updated_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             keyResult.id,
             identityId,
@@ -559,10 +564,12 @@ export class GoalPowerSyncRepository
             keyResult.title,
             keyResult.description,
             progress.aggregationMethod ?? 'Last',
-            progress.startingValue ?? 0,
-            progress.progressBaselineValue ?? null,
+            progress.initialValue ?? 0,
+            progress.trackingBaseValue ?? progress.currentValue ?? 0,
             progress.targetValue ?? 100,
             progress.currentValue ?? 0,
+            target.targetKind,
+            target.targetEndDate,
             progress.unit ?? null,
             keyResult.weight,
             keyResult.sortOrder,

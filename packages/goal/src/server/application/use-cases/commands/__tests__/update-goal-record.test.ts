@@ -19,13 +19,13 @@ function createGoalWithSum() {
   const keyResult = goal.createAndAddKeyResult({
     title: 'Run 100km',
     aggregationMethod: 'Sum',
-    startingValue: 10,
-    currentValue: 22,
+    initialValue: 0,
+    currentValue: 10,
     targetValue: 100,
-    progressBaselineValue: null,
     unit: 'km',
     weight: 3,
   });
+  keyResult.recalculateProgress(22);
   return { goal, keyResult };
 }
 
@@ -93,13 +93,13 @@ describe('UpdateGoalRecordUseCase', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Weight',
       aggregationMethod: 'Last',
-      startingValue: 75,
-      currentValue: 73,
+      initialValue: 75,
+      currentValue: 75,
       targetValue: 70,
-      progressBaselineValue: 75,
       unit: 'kg',
       weight: 1,
     });
+    keyResult.recalculateProgress(73);
     const older = GoalRecord.create({
       id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440201' as never,
       keyResultId: keyResult.id as never,

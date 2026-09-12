@@ -135,7 +135,17 @@ describe('ApplyGoalPlanService', () => {
       summary: 'Build a durable study plan.',
       startDate: '2026-09-01',
       target: { kind: 'day', date: '2026-12-01' },
-      initialKeyResults: [{ id: expected.kr0, title: 'Complete mock exams' }],
+      initialKeyResults: [
+        {
+          id: expected.kr0,
+          title: 'Complete mock exams',
+          initialValue: 0,
+          currentValue: 0,
+          targetValue: 8,
+          unit: 'exams',
+          weight: 5,
+        },
+      ],
       labelIds: ['label:learning'],
     });
     expect(port.createTaskPlan.mock.calls[0]?.[0]).toMatchObject({

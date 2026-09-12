@@ -56,7 +56,7 @@ describe('CreateGoalRecordUseCase', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Concurrent progress',
       aggregationMethod: 'Sum',
-      startingValue: 4,
+      initialValue: 0,
       currentValue: 4,
       targetValue: 10,
       weight: 1,
@@ -76,12 +76,12 @@ describe('CreateGoalRecordUseCase', () => {
     expect(goalRepository.saveRootWithExpectedVersion).not.toHaveBeenCalled();
   });
 
-  it('uses startingValue as the authoritative Sum seed when creating a record', async () => {
+  it('uses the create-time current value as the hidden tracking seed when creating a record', async () => {
     const goal = createTestGoal();
     const keyResult = goal.createAndAddKeyResult({
       title: 'Second-class points',
       aggregationMethod: 'Sum',
-      startingValue: 41,
+      initialValue: 0,
       currentValue: 41,
       targetValue: 50,
       weight: 1,
@@ -118,7 +118,7 @@ describe('CreateGoalRecordUseCase', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Latest score',
       aggregationMethod: 'Last',
-      startingValue: 41,
+      initialValue: 0,
       currentValue: 41,
       targetValue: 50,
       weight: 1,
@@ -153,7 +153,7 @@ describe('CreateGoalRecordUseCase', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Latest score',
       aggregationMethod: 'Last',
-      startingValue: 41,
+      initialValue: 0,
       currentValue: 41,
       targetValue: 50,
       weight: 1,
@@ -181,7 +181,7 @@ describe('CreateGoalRecordUseCase', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Completed tasks',
       aggregationMethod: 'Sum',
-      startingValue: 0,
+      initialValue: 0,
       currentValue: 0,
       targetValue: 10,
       weight: 1,
@@ -214,7 +214,7 @@ describe('CreateGoalRecordUseCase', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Atomic progress',
       aggregationMethod: 'Sum',
-      startingValue: 4,
+      initialValue: 0,
       currentValue: 4,
       targetValue: 10,
       weight: 1,

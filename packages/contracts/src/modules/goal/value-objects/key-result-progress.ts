@@ -1,23 +1,31 @@
 import { z } from 'zod';
 import { KeyResultCalculationMethod } from './key-result-calculation-method';
 
-/** Canonical KR Measurement V2 shape. */
+/** User-visible KR Measurement V3 projection. */
 export interface KeyResultProgress {
-  startingValue: number;
+  initialValue: number;
   currentValue: number;
   targetValue: number;
-  progressBaselineValue: number | null;
   aggregationMethod: KeyResultCalculationMethod;
   unit: string | null;
 }
 
-export const KeyResultProgressDTOSchema = z.object({
-  startingValue: z.number(),
-  currentValue: z.number(),
-  targetValue: z.number(),
-  progressBaselineValue: z.number().nullable(),
-  aggregationMethod: z.enum(KeyResultCalculationMethod),
-  unit: z.string().max(20).nullable(),
-});
+/**
+ * Public/client KR measurement. Internal aggregation state is deliberately absent.
+ */
+export const KeyResultProgressDTOSchema = z
+  .object({
+    initialValue: z.number(),
+    currentValue: z.number(),
+    targetValue: z.number(),
+    aggregationMethod: z.enum(KeyResultCalculationMethod),
+    unit: z.string().max(20).nullable(),
+  })
+  .strict();
 
 export type KeyResultProgressDTO = z.infer<typeof KeyResultProgressDTOSchema>;
+
+/** Server/domain KR measurement. trackingBaseValue is never part of normal client UI. */
+export interface KeyResultMeasurement extends KeyResultProgress {
+  trackingBaseValue: number;
+}

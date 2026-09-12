@@ -190,7 +190,7 @@ const validAddKr = {
   goalId: GOAL_ID,
   title: 'KR',
   calculationMethod: 'Sum',
-  startingValue: 0,
+  initialValue: 0,
   currentValue: 0,
   targetValue: 10,
   weight: 3,

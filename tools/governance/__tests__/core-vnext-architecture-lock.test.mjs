@@ -99,6 +99,14 @@ describe('HARD-7102 core vNext architecture lock', () => {
         relPath: 'packages/goal/src/server/domain/legacy-time.ts',
         content: `const overdue = goal.isOverdue || goal.dueDate;`,
       },
+      {
+        relPath: 'packages/goal/src/server/domain/legacy-measurement.ts',
+        content: `const base = kr.startingValue ?? kr.progressBaselineValue;`,
+      },
+      {
+        relPath: 'packages/app-vue/src/modules/goal/LegacyKr.vue',
+        content: `const hidden = keyResult.trackingBaseValue;`,
+      },
     );
     const kinds = new Set(violations.map((v) => v.kind));
     expect(kinds).toEqual(expect.objectContaining({}));
@@ -120,6 +128,8 @@ describe('HARD-7102 core vNext architecture lock', () => {
       'ai-retired-goal-task-draft',
       'task-legacy-classification',
       'goal-legacy-due-time',
+      'kr-legacy-measurement',
+      'kr-tracking-base-ui-leak',
     ]) {
       expect(kinds.has(kind), `missing violation kind ${kind}`).toBe(true);
     }
@@ -190,6 +200,14 @@ describe('HARD-7102 core vNext architecture lock', () => {
       {
         relPath: 'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
         content: `const GoalPlanDraftV1 = z.object({ dueDate: z.number().nullable() });`,
+      },
+      {
+        relPath: 'packages/contracts/src/modules/ai/api/goal-plan-draft-v1.ts',
+        content: `const DraftKr = z.object({ startingValue: z.number(), progressBaselineValue: z.number().nullable() });`,
+      },
+      {
+        relPath: 'packages/task/src/server/domain/task-metric.ts',
+        content: `const startingValue = occurrence.metric.startingValue;`,
       },
     );
     expect(violations).toHaveLength(0);

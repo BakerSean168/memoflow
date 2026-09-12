@@ -56,13 +56,15 @@ export interface RawKeyResultData {
   title: string;
   description: string | null;
   progress: {
-    startingValue: number;
-    progressBaselineValue: number | null;
+    initialValue: number;
+    trackingBaseValue: number;
     currentValue: number;
     targetValue: number;
     aggregationMethod: string;
     unit: string | null;
   };
+  targetKind: string | null;
+  targetEndDate: string | null;
   weight: number;
   sortOrder: number;
   createdAt: number;
@@ -95,13 +97,14 @@ export function rawDataToGoalState(raw: RawGoalData): GoalState {
       title: kr.title,
       description: kr.description ?? null,
       progress: {
-        startingValue: kr.progress.startingValue ?? 0,
-        progressBaselineValue: kr.progress.progressBaselineValue ?? null,
+        initialValue: kr.progress.initialValue ?? 0,
+        trackingBaseValue: kr.progress.trackingBaseValue ?? kr.progress.currentValue ?? 0,
         currentValue: kr.progress.currentValue ?? 0,
         targetValue: kr.progress.targetValue ?? 100,
         aggregationMethod: (kr.progress.aggregationMethod ?? 'Last') as KeyResultCalculationMethod,
         unit: kr.progress.unit ?? null,
       },
+      target: decodeGoalTimeframe(kr.targetKind, kr.targetEndDate),
       weight: kr.weight,
       sortOrder: kr.sortOrder,
       createdAt: Number(kr.createdAt),

@@ -32437,8 +32437,8 @@ export namespace Prisma {
   }
 
   export type KeyResultAvgAggregateOutputType = {
-    startingValue: number | null
-    progressBaselineValue: number | null
+    initialValue: number | null
+    trackingBaseValue: number | null
     targetValue: number | null
     currentValue: number | null
     weight: number | null
@@ -32446,8 +32446,8 @@ export namespace Prisma {
   }
 
   export type KeyResultSumAggregateOutputType = {
-    startingValue: number | null
-    progressBaselineValue: number | null
+    initialValue: number | null
+    trackingBaseValue: number | null
     targetValue: number | null
     currentValue: number | null
     weight: number | null
@@ -32461,10 +32461,12 @@ export namespace Prisma {
     title: string | null
     description: string | null
     aggregationMethod: string | null
-    startingValue: number | null
-    progressBaselineValue: number | null
+    initialValue: number | null
+    trackingBaseValue: number | null
     targetValue: number | null
     currentValue: number | null
+    targetKind: string | null
+    targetEndDate: string | null
     unit: string | null
     weight: number | null
     order: number | null
@@ -32479,10 +32481,12 @@ export namespace Prisma {
     title: string | null
     description: string | null
     aggregationMethod: string | null
-    startingValue: number | null
-    progressBaselineValue: number | null
+    initialValue: number | null
+    trackingBaseValue: number | null
     targetValue: number | null
     currentValue: number | null
+    targetKind: string | null
+    targetEndDate: string | null
     unit: string | null
     weight: number | null
     order: number | null
@@ -32497,10 +32501,12 @@ export namespace Prisma {
     title: number
     description: number
     aggregationMethod: number
-    startingValue: number
-    progressBaselineValue: number
+    initialValue: number
+    trackingBaseValue: number
     targetValue: number
     currentValue: number
+    targetKind: number
+    targetEndDate: number
     unit: number
     weight: number
     order: number
@@ -32511,8 +32517,8 @@ export namespace Prisma {
 
 
   export type KeyResultAvgAggregateInputType = {
-    startingValue?: true
-    progressBaselineValue?: true
+    initialValue?: true
+    trackingBaseValue?: true
     targetValue?: true
     currentValue?: true
     weight?: true
@@ -32520,8 +32526,8 @@ export namespace Prisma {
   }
 
   export type KeyResultSumAggregateInputType = {
-    startingValue?: true
-    progressBaselineValue?: true
+    initialValue?: true
+    trackingBaseValue?: true
     targetValue?: true
     currentValue?: true
     weight?: true
@@ -32535,10 +32541,12 @@ export namespace Prisma {
     title?: true
     description?: true
     aggregationMethod?: true
-    startingValue?: true
-    progressBaselineValue?: true
+    initialValue?: true
+    trackingBaseValue?: true
     targetValue?: true
     currentValue?: true
+    targetKind?: true
+    targetEndDate?: true
     unit?: true
     weight?: true
     order?: true
@@ -32553,10 +32561,12 @@ export namespace Prisma {
     title?: true
     description?: true
     aggregationMethod?: true
-    startingValue?: true
-    progressBaselineValue?: true
+    initialValue?: true
+    trackingBaseValue?: true
     targetValue?: true
     currentValue?: true
+    targetKind?: true
+    targetEndDate?: true
     unit?: true
     weight?: true
     order?: true
@@ -32571,10 +32581,12 @@ export namespace Prisma {
     title?: true
     description?: true
     aggregationMethod?: true
-    startingValue?: true
-    progressBaselineValue?: true
+    initialValue?: true
+    trackingBaseValue?: true
     targetValue?: true
     currentValue?: true
+    targetKind?: true
+    targetEndDate?: true
     unit?: true
     weight?: true
     order?: true
@@ -32676,10 +32688,12 @@ export namespace Prisma {
     title: string
     description: string | null
     aggregationMethod: string
-    startingValue: number
-    progressBaselineValue: number | null
+    initialValue: number
+    trackingBaseValue: number
     targetValue: number
     currentValue: number
+    targetKind: string | null
+    targetEndDate: string | null
     unit: string | null
     weight: number
     order: number
@@ -32713,10 +32727,12 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     aggregationMethod?: boolean
-    startingValue?: boolean
-    progressBaselineValue?: boolean
+    initialValue?: boolean
+    trackingBaseValue?: boolean
     targetValue?: boolean
     currentValue?: boolean
+    targetKind?: boolean
+    targetEndDate?: boolean
     unit?: boolean
     weight?: boolean
     order?: boolean
@@ -32736,10 +32752,12 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     aggregationMethod?: boolean
-    startingValue?: boolean
-    progressBaselineValue?: boolean
+    initialValue?: boolean
+    trackingBaseValue?: boolean
     targetValue?: boolean
     currentValue?: boolean
+    targetKind?: boolean
+    targetEndDate?: boolean
     unit?: boolean
     weight?: boolean
     order?: boolean
@@ -32755,10 +32773,12 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     aggregationMethod?: boolean
-    startingValue?: boolean
-    progressBaselineValue?: boolean
+    initialValue?: boolean
+    trackingBaseValue?: boolean
     targetValue?: boolean
     currentValue?: boolean
+    targetKind?: boolean
+    targetEndDate?: boolean
     unit?: boolean
     weight?: boolean
     order?: boolean
@@ -32774,10 +32794,12 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     aggregationMethod?: boolean
-    startingValue?: boolean
-    progressBaselineValue?: boolean
+    initialValue?: boolean
+    trackingBaseValue?: boolean
     targetValue?: boolean
     currentValue?: boolean
+    targetKind?: boolean
+    targetEndDate?: boolean
     unit?: boolean
     weight?: boolean
     order?: boolean
@@ -32785,7 +32807,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type KeyResultOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "goalId" | "title" | "description" | "aggregationMethod" | "startingValue" | "progressBaselineValue" | "targetValue" | "currentValue" | "unit" | "weight" | "order" | "createdAt" | "updatedAt", ExtArgs["result"]["keyResult"]>
+  export type KeyResultOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "goalId" | "title" | "description" | "aggregationMethod" | "initialValue" | "trackingBaseValue" | "targetValue" | "currentValue" | "targetKind" | "targetEndDate" | "unit" | "weight" | "order" | "createdAt" | "updatedAt", ExtArgs["result"]["keyResult"]>
   export type KeyResultInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     goal?: boolean | GoalDefaultArgs<ExtArgs>
     linkedTaskPlans?: boolean | KeyResult$linkedTaskPlansArgs<ExtArgs>
@@ -32815,10 +32837,12 @@ export namespace Prisma {
       title: string
       description: string | null
       aggregationMethod: string
-      startingValue: number
-      progressBaselineValue: number | null
+      initialValue: number
+      trackingBaseValue: number
       targetValue: number
       currentValue: number
+      targetKind: string | null
+      targetEndDate: string | null
       unit: string | null
       weight: number
       order: number
@@ -33257,10 +33281,12 @@ export namespace Prisma {
     readonly title: FieldRef<"KeyResult", 'String'>
     readonly description: FieldRef<"KeyResult", 'String'>
     readonly aggregationMethod: FieldRef<"KeyResult", 'String'>
-    readonly startingValue: FieldRef<"KeyResult", 'Float'>
-    readonly progressBaselineValue: FieldRef<"KeyResult", 'Float'>
+    readonly initialValue: FieldRef<"KeyResult", 'Float'>
+    readonly trackingBaseValue: FieldRef<"KeyResult", 'Float'>
     readonly targetValue: FieldRef<"KeyResult", 'Float'>
     readonly currentValue: FieldRef<"KeyResult", 'Float'>
+    readonly targetKind: FieldRef<"KeyResult", 'String'>
+    readonly targetEndDate: FieldRef<"KeyResult", 'String'>
     readonly unit: FieldRef<"KeyResult", 'String'>
     readonly weight: FieldRef<"KeyResult", 'Int'>
     readonly order: FieldRef<"KeyResult", 'Int'>
@@ -127864,10 +127890,12 @@ export namespace Prisma {
     title: 'title',
     description: 'description',
     aggregationMethod: 'aggregationMethod',
-    startingValue: 'startingValue',
-    progressBaselineValue: 'progressBaselineValue',
+    initialValue: 'initialValue',
+    trackingBaseValue: 'trackingBaseValue',
     targetValue: 'targetValue',
     currentValue: 'currentValue',
+    targetKind: 'targetKind',
+    targetEndDate: 'targetEndDate',
     unit: 'unit',
     weight: 'weight',
     order: 'order',
@@ -131190,10 +131218,12 @@ export namespace Prisma {
     title?: StringFilter<"KeyResult"> | string
     description?: StringNullableFilter<"KeyResult"> | string | null
     aggregationMethod?: StringFilter<"KeyResult"> | string
-    startingValue?: FloatFilter<"KeyResult"> | number
-    progressBaselineValue?: FloatNullableFilter<"KeyResult"> | number | null
+    initialValue?: FloatFilter<"KeyResult"> | number
+    trackingBaseValue?: FloatFilter<"KeyResult"> | number
     targetValue?: FloatFilter<"KeyResult"> | number
     currentValue?: FloatFilter<"KeyResult"> | number
+    targetKind?: StringNullableFilter<"KeyResult"> | string | null
+    targetEndDate?: StringNullableFilter<"KeyResult"> | string | null
     unit?: StringNullableFilter<"KeyResult"> | string | null
     weight?: IntFilter<"KeyResult"> | number
     order?: IntFilter<"KeyResult"> | number
@@ -131212,10 +131242,12 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrderInput | SortOrder
     aggregationMethod?: SortOrder
-    startingValue?: SortOrder
-    progressBaselineValue?: SortOrderInput | SortOrder
+    initialValue?: SortOrder
+    trackingBaseValue?: SortOrder
     targetValue?: SortOrder
     currentValue?: SortOrder
+    targetKind?: SortOrderInput | SortOrder
+    targetEndDate?: SortOrderInput | SortOrder
     unit?: SortOrderInput | SortOrder
     weight?: SortOrder
     order?: SortOrder
@@ -131239,10 +131271,12 @@ export namespace Prisma {
     title?: StringFilter<"KeyResult"> | string
     description?: StringNullableFilter<"KeyResult"> | string | null
     aggregationMethod?: StringFilter<"KeyResult"> | string
-    startingValue?: FloatFilter<"KeyResult"> | number
-    progressBaselineValue?: FloatNullableFilter<"KeyResult"> | number | null
+    initialValue?: FloatFilter<"KeyResult"> | number
+    trackingBaseValue?: FloatFilter<"KeyResult"> | number
     targetValue?: FloatFilter<"KeyResult"> | number
     currentValue?: FloatFilter<"KeyResult"> | number
+    targetKind?: StringNullableFilter<"KeyResult"> | string | null
+    targetEndDate?: StringNullableFilter<"KeyResult"> | string | null
     unit?: StringNullableFilter<"KeyResult"> | string | null
     weight?: IntFilter<"KeyResult"> | number
     order?: IntFilter<"KeyResult"> | number
@@ -131261,10 +131295,12 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrderInput | SortOrder
     aggregationMethod?: SortOrder
-    startingValue?: SortOrder
-    progressBaselineValue?: SortOrderInput | SortOrder
+    initialValue?: SortOrder
+    trackingBaseValue?: SortOrder
     targetValue?: SortOrder
     currentValue?: SortOrder
+    targetKind?: SortOrderInput | SortOrder
+    targetEndDate?: SortOrderInput | SortOrder
     unit?: SortOrderInput | SortOrder
     weight?: SortOrder
     order?: SortOrder
@@ -131287,10 +131323,12 @@ export namespace Prisma {
     title?: StringWithAggregatesFilter<"KeyResult"> | string
     description?: StringNullableWithAggregatesFilter<"KeyResult"> | string | null
     aggregationMethod?: StringWithAggregatesFilter<"KeyResult"> | string
-    startingValue?: FloatWithAggregatesFilter<"KeyResult"> | number
-    progressBaselineValue?: FloatNullableWithAggregatesFilter<"KeyResult"> | number | null
+    initialValue?: FloatWithAggregatesFilter<"KeyResult"> | number
+    trackingBaseValue?: FloatWithAggregatesFilter<"KeyResult"> | number
     targetValue?: FloatWithAggregatesFilter<"KeyResult"> | number
     currentValue?: FloatWithAggregatesFilter<"KeyResult"> | number
+    targetKind?: StringNullableWithAggregatesFilter<"KeyResult"> | string | null
+    targetEndDate?: StringNullableWithAggregatesFilter<"KeyResult"> | string | null
     unit?: StringNullableWithAggregatesFilter<"KeyResult"> | string | null
     weight?: IntWithAggregatesFilter<"KeyResult"> | number
     order?: IntWithAggregatesFilter<"KeyResult"> | number
@@ -140724,10 +140762,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -140746,10 +140786,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -140765,10 +140807,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -140787,10 +140831,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -140808,10 +140854,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -140824,10 +140872,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -140842,10 +140892,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -151066,10 +151118,12 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     aggregationMethod?: SortOrder
-    startingValue?: SortOrder
-    progressBaselineValue?: SortOrder
+    initialValue?: SortOrder
+    trackingBaseValue?: SortOrder
     targetValue?: SortOrder
     currentValue?: SortOrder
+    targetKind?: SortOrder
+    targetEndDate?: SortOrder
     unit?: SortOrder
     weight?: SortOrder
     order?: SortOrder
@@ -151078,8 +151132,8 @@ export namespace Prisma {
   }
 
   export type KeyResultAvgOrderByAggregateInput = {
-    startingValue?: SortOrder
-    progressBaselineValue?: SortOrder
+    initialValue?: SortOrder
+    trackingBaseValue?: SortOrder
     targetValue?: SortOrder
     currentValue?: SortOrder
     weight?: SortOrder
@@ -151093,10 +151147,12 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     aggregationMethod?: SortOrder
-    startingValue?: SortOrder
-    progressBaselineValue?: SortOrder
+    initialValue?: SortOrder
+    trackingBaseValue?: SortOrder
     targetValue?: SortOrder
     currentValue?: SortOrder
+    targetKind?: SortOrder
+    targetEndDate?: SortOrder
     unit?: SortOrder
     weight?: SortOrder
     order?: SortOrder
@@ -151111,10 +151167,12 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     aggregationMethod?: SortOrder
-    startingValue?: SortOrder
-    progressBaselineValue?: SortOrder
+    initialValue?: SortOrder
+    trackingBaseValue?: SortOrder
     targetValue?: SortOrder
     currentValue?: SortOrder
+    targetKind?: SortOrder
+    targetEndDate?: SortOrder
     unit?: SortOrder
     weight?: SortOrder
     order?: SortOrder
@@ -151123,8 +151181,8 @@ export namespace Prisma {
   }
 
   export type KeyResultSumOrderByAggregateInput = {
-    startingValue?: SortOrder
-    progressBaselineValue?: SortOrder
+    initialValue?: SortOrder
+    trackingBaseValue?: SortOrder
     targetValue?: SortOrder
     currentValue?: SortOrder
     weight?: SortOrder
@@ -169971,10 +170029,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -169990,10 +170050,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -170264,10 +170326,12 @@ export namespace Prisma {
     title?: StringFilter<"KeyResult"> | string
     description?: StringNullableFilter<"KeyResult"> | string | null
     aggregationMethod?: StringFilter<"KeyResult"> | string
-    startingValue?: FloatFilter<"KeyResult"> | number
-    progressBaselineValue?: FloatNullableFilter<"KeyResult"> | number | null
+    initialValue?: FloatFilter<"KeyResult"> | number
+    trackingBaseValue?: FloatFilter<"KeyResult"> | number
     targetValue?: FloatFilter<"KeyResult"> | number
     currentValue?: FloatFilter<"KeyResult"> | number
+    targetKind?: StringNullableFilter<"KeyResult"> | string | null
+    targetEndDate?: StringNullableFilter<"KeyResult"> | string | null
     unit?: StringNullableFilter<"KeyResult"> | string | null
     weight?: IntFilter<"KeyResult"> | number
     order?: IntFilter<"KeyResult"> | number
@@ -170690,10 +170754,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -170711,10 +170777,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -170745,10 +170813,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -170766,10 +170836,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -170937,10 +171009,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -170958,10 +171032,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -171047,10 +171123,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -171068,10 +171146,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -187802,10 +187882,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -187823,10 +187905,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -188083,10 +188167,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -188104,10 +188190,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -193305,10 +193393,12 @@ export namespace Prisma {
     title: string
     description?: string | null
     aggregationMethod: string
-    startingValue?: number
-    progressBaselineValue?: number | null
+    initialValue?: number
+    trackingBaseValue?: number
     targetValue: number
     currentValue?: number
+    targetKind?: string | null
+    targetEndDate?: string | null
     unit?: string | null
     weight?: number
     order?: number
@@ -193349,10 +193439,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -193368,10 +193460,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number
@@ -193387,10 +193481,12 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     aggregationMethod?: StringFieldUpdateOperationsInput | string
-    startingValue?: FloatFieldUpdateOperationsInput | number
-    progressBaselineValue?: NullableFloatFieldUpdateOperationsInput | number | null
+    initialValue?: FloatFieldUpdateOperationsInput | number
+    trackingBaseValue?: FloatFieldUpdateOperationsInput | number
     targetValue?: FloatFieldUpdateOperationsInput | number
     currentValue?: FloatFieldUpdateOperationsInput | number
+    targetKind?: NullableStringFieldUpdateOperationsInput | string | null
+    targetEndDate?: NullableStringFieldUpdateOperationsInput | string | null
     unit?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: IntFieldUpdateOperationsInput | number
     order?: IntFieldUpdateOperationsInput | number

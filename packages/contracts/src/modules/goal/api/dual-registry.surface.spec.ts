@@ -372,7 +372,7 @@ import { describe, expect, it } from 'vitest';
    * Residual 737: goal key-result progress/snapshot dual bodies retired.
    * KeyResultProgressDTO / KeyResultSnapshotDTO reuse *DTOSchema only.
    */
-  describe('goal key-result progress/snapshot dual retired (residual 737)', () => {
+  describe('goal key-result Measurement V3 progress/snapshot ownership', () => {
     const apiDir = __dirname;
     const progress = readFileSync(
       resolve(apiDir, '../value-objects/key-result-progress.ts'),
@@ -384,11 +384,17 @@ import { describe, expect, it } from 'vitest';
     );
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
 
-    it('exports canonical Measurement V2 progress/snapshot schemas from VO modules', () => {
-      expect(progress).toContain('export const KeyResultProgressDTOSchema = z.object({');
-      expect(progress).toContain('startingValue: z.number()');
+    it('exports canonical Measurement V3 public progress and server-only tracking state', () => {
+      expect(progress).toContain('export const KeyResultProgressDTOSchema = z');
+      expect(progress).toContain('initialValue: z.number()');
+      expect(progress).toContain('currentValue: z.number()');
+      expect(progress).toContain('targetValue: z.number()');
       expect(progress).toContain('aggregationMethod: z.enum(KeyResultCalculationMethod)');
-      expect(snapshot).toContain('export const KeyResultSnapshotDTOSchema = z.object({');
+      expect(progress).not.toContain('startingValue: z.number()');
+      expect(progress).not.toContain('progressBaselineValue: z.number()');
+      expect(progress).toContain('export interface KeyResultMeasurement extends KeyResultProgress');
+      expect(progress).toContain('trackingBaseValue: number');
+      expect(snapshot).toContain('initialValue: z.number()');
       expect(snapshot).toContain('progressPercentage: z.number().min(0).max(100)');
     });
 

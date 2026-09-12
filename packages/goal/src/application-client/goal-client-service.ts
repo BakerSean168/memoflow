@@ -84,6 +84,7 @@ function keyResultFromDTO(dto: KeyResultClientDTO): KeyResult {
     title: dto.title,
     description: dto.description,
     progress: dto.progress,
+    target: dto.target,
     progressPercentage: dto.progressPercentage,
     isCompleted: dto.isCompleted,
     weight: dto.weight,

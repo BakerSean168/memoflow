@@ -34,10 +34,12 @@ describe('projection from PowerSync-shaped rows', () => {
               id: 'kr-db-id',
               title: 'Round trip passes',
               aggregationMethod: 'Sum',
-              startingValue: 0,
-              progressBaselineValue: null,
+              initialValue: 0,
+              trackingBaseValue: 0,
               targetValue: 1,
               currentValue: 1,
+              target_kind: 'month',
+              target_end_date: '2026-09-30',
               weight: 2,
               order: 3,
             },
@@ -67,10 +69,11 @@ describe('projection from PowerSync-shaped rows', () => {
         {
           _ref: 'keyResult:1',
           calculationMethod: 'Sum',
-          startingValue: 0,
-          progressBaselineValue: null,
+          initialValue: 0,
+          trackingBaseValue: 0,
           targetValue: 1,
           currentValue: 1,
+          target: { kind: 'month', year: 2026, month: 9 },
           sortOrder: 3,
         },
       ],
@@ -126,28 +129,30 @@ describe('projection from PowerSync-shaped rows', () => {
     expect(templates[0]).not.toHaveProperty('goalProgressTrigger');
   });
 
-
   it('exports a Task Goal link without inventing a zero contribution', () => {
     const ctx = createExportContext({
       'goal-db-id': 'goal:1',
       'kr-db-id': 'keyResult:1',
     });
-    const [template] = projectTaskPlans([
-      {
-        id: 'task-link-only',
-        name: 'Read linked context',
-        status: 'Active',
-        outcome: 'Open',
-        completionPolicy: 'AllowCorrection',
-        importance: 'moderate',
-        tags: '[]',
-        goalId: 'goal-db-id',
-        keyResultId: 'kr-db-id',
-        goalRecordValue: null,
-        goalProgressTrigger: null,
-        checklist: '[]',
-      },
-    ], ctx);
+    const [template] = projectTaskPlans(
+      [
+        {
+          id: 'task-link-only',
+          name: 'Read linked context',
+          status: 'Active',
+          outcome: 'Open',
+          completionPolicy: 'AllowCorrection',
+          importance: 'moderate',
+          tags: '[]',
+          goalId: 'goal-db-id',
+          keyResultId: 'kr-db-id',
+          goalRecordValue: null,
+          goalProgressTrigger: null,
+          checklist: '[]',
+        },
+      ],
+      ctx,
+    );
 
     expect(template).toMatchObject({
       goalRef: 'goal:1',
@@ -211,9 +216,7 @@ describe('projection from PowerSync-shaped rows', () => {
         enabled: true,
         trigger: { type: 'WallClock' },
       },
-      profileMemberships: [
-        { profileRef: 'reminderGroup:1', enabled: false },
-      ],
+      profileMemberships: [{ profileRef: 'reminderGroup:1', enabled: false }],
       tags: ['work'],
     });
     expect(responses[0]?.templateRef).toBe('reminderTemplate:1');
@@ -250,5 +253,4 @@ describe('projection from PowerSync-shaped rows', () => {
     expect(Object.prototype.hasOwnProperty.call(tasks[0], 'schedule')).toBe(true);
     expect(Object.prototype.hasOwnProperty.call(tasks[0], 'execution')).toBe(true);
   });
-
 });

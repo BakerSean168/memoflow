@@ -571,30 +571,31 @@ export class Goal extends AggregateRoot<GoalId> {
     title: string;
     description?: string | null;
     aggregationMethod?: KeyResultServerDTO['progress']['aggregationMethod'];
-    startingValue?: number;
+    initialValue?: number;
     currentValue?: number;
     targetValue: number;
-    progressBaselineValue?: number | null;
+    target?: GoalTimeframe | null;
     unit?: string | null;
     weight?: number;
   }): KeyResult {
     this.ensureModifiable();
     const weight = params.weight ?? 3;
     Goal.validateKeyResultWeight(weight);
-    const currentValue = params.currentValue ?? params.startingValue ?? 0;
-    const startingValue = params.startingValue ?? currentValue;
+    const initialValue = params.initialValue ?? 0;
+    const currentValue = params.currentValue ?? initialValue;
     const keyResult = KeyResult.create({
       id: params.id,
       title: params.title,
       description: params.description ?? undefined,
       progress: {
-        startingValue,
+        initialValue,
         currentValue,
         targetValue: params.targetValue,
-        progressBaselineValue: params.progressBaselineValue ?? null,
+        trackingBaseValue: currentValue,
         aggregationMethod: params.aggregationMethod ?? 'Sum',
         unit: params.unit?.trim() || null,
       },
+      target: params.target ?? null,
       weight,
       sortOrder: this._props.keyResults.length,
     });
@@ -620,10 +621,10 @@ export class Goal extends AggregateRoot<GoalId> {
       title?: string;
       description?: string | null;
       weight?: number;
-      startingValue?: number;
+      initialValue?: number;
       currentValue?: number;
       targetValue?: number;
-      progressBaselineValue?: number | null;
+      target?: GoalTimeframe | null;
       unit?: string | null;
       aggregationMethod?: KeyResultServerDTO['progress']['aggregationMethod'];
     },
@@ -642,17 +643,15 @@ export class Goal extends AggregateRoot<GoalId> {
       keyResult.updateWeight(updates.weight);
     }
     const measurementPatch = {
-      ...(updates.startingValue !== undefined ? { startingValue: updates.startingValue } : {}),
+      ...(updates.initialValue !== undefined ? { initialValue: updates.initialValue } : {}),
       ...(updates.currentValue !== undefined ? { currentValue: updates.currentValue } : {}),
       ...(updates.targetValue !== undefined ? { targetValue: updates.targetValue } : {}),
-      ...(updates.progressBaselineValue !== undefined
-        ? { progressBaselineValue: updates.progressBaselineValue }
-        : {}),
       ...(updates.aggregationMethod !== undefined
         ? { aggregationMethod: updates.aggregationMethod }
         : {}),
     };
     if (Object.keys(measurementPatch).length > 0) keyResult.updateMeasurement(measurementPatch);
+    if (updates.target !== undefined) keyResult.updateTarget(updates.target);
     if (updates.unit !== undefined) keyResult.updateUnit(updates.unit);
 
     this._props.updatedAt = Date.now();

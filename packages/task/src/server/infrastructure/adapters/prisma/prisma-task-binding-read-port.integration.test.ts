@@ -45,9 +45,9 @@ describe('PrismaTaskBindingReadPort (W4 P2-3)', () => {
     });
     await prisma.keyResult.createMany({
       data: [
-        { id: keyResultA, identityId: identityA, goalId: goalA, title: 'KR A', aggregationMethod: 'Sum', startingValue: 0, currentValue: 0, targetValue: 1, weight: 1 },
-        { id: keyResultB, identityId: identityA, goalId: goalB, title: 'KR B', aggregationMethod: 'Sum', startingValue: 0, currentValue: 0, targetValue: 1, weight: 1 },
-        { id: foreignKeyResult, identityId: identityB, goalId: foreignGoal, title: 'Foreign KR', aggregationMethod: 'Sum', startingValue: 0, currentValue: 0, targetValue: 1, weight: 1 },
+        { id: keyResultA, identityId: identityA, goalId: goalA, title: 'KR A', aggregationMethod: 'Sum', initialValue: 0, trackingBaseValue: 0, currentValue: 0, targetValue: 1, weight: 1 },
+        { id: keyResultB, identityId: identityA, goalId: goalB, title: 'KR B', aggregationMethod: 'Sum', initialValue: 0, trackingBaseValue: 0, currentValue: 0, targetValue: 1, weight: 1 },
+        { id: foreignKeyResult, identityId: identityB, goalId: foreignGoal, title: 'Foreign KR', aggregationMethod: 'Sum', initialValue: 0, trackingBaseValue: 0, currentValue: 0, targetValue: 1, weight: 1 },
       ],
     });
 

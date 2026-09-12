@@ -7,21 +7,21 @@ tags:
   - measurement
 description: Key Result Measurement V2，删除 valueType、拆分记录起点与进度基线并统一进度/完成语义
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-09-08T17:55:00+08:00
+updated: 2026-09-12T12:13:00+08:00
 ---
 
 # ADR-055: Key Result Measurement & Progress V2
 
-**状态：** 已采纳并实施
+**状态：** 已实施，后由 ADR-068 修订（V2 仅保留历史决策）
 **日期：** 2026-08-25  
 **影响范围：** Goal domain、contracts、database、Task contribution、Goal UI、Review snapshots、AI Goal workflow  
 **关联：** ADR-038、ADR-052、ADR-053、ADR-056
 
-> **2026-09-08 后续修订：** [ADR-068](./ADR-068-key-result-measurement-v3.md) 已采纳 `initialValue/currentValue/targetValue + trackingBaseValue` 的 V3 用户模型。V3 实施完成前，本 ADR 仍是当前代码算术真值；迁移完成后，V2 的 `startingValue/progressBaselineValue` 用户字段与 baseline 解释由 ADR-068 取代。
+> **2026-09-12 后续状态：** [ADR-068](./ADR-068-key-result-measurement-v3.md) 已完成实施，`initialValue/currentValue/targetValue + trackingBaseValue` 现为 canonical KR 模型。V2 的 `startingValue/progressBaselineValue` 已从 Goal owner contract/domain/persistence/UI 删除；本 ADR 仅保留历史设计与迁移语义。
 
-## 2026-09-08 实现状态
+## 2026-09-12 实现状态
 
-KR Measurement V2 已是当前 contract/domain/UI 真值；旧 `valueType` 产品语义已退休。统一 progress calculator 负责 baseline/current/target/direction 解释，Goal 完成与 weighted progress 展示保持分离；AI Goal draft 与 React/Mobile 也消费当前 Measurement contract。
+KR Measurement V2 已被 ADR-068 的 Measurement V3 取代。旧 `valueType`、`startingValue`、`progressBaselineValue` 均不再是 Goal owner 产品真值；统一 calculator、Goal Record aggregation、Review snapshot、Prisma/PowerSync、Vue/React 与 Data Portability 已切到 V3。AI GoalPlanDraft V1 仅在 GOAL-7210 前作为 workflow compatibility surface 暂存旧字段，并在 apply 边界投影为 V3。
 
 ## 1. 背景
 

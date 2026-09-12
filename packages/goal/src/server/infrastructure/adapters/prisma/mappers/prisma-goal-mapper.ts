@@ -85,13 +85,15 @@ export class PrismaGoalMapper {
       title: row.title,
       description: row.description ?? null,
       progress: {
-        startingValue: row.startingValue ?? 0,
-        progressBaselineValue: row.progressBaselineValue ?? null,
+        initialValue: row.initialValue ?? 0,
+        trackingBaseValue: row.trackingBaseValue ?? row.currentValue ?? 0,
         currentValue: row.currentValue ?? 0,
         targetValue: row.targetValue ?? 100,
         aggregationMethod: row.aggregationMethod ?? 'Last',
         unit: row.unit ?? null,
       },
+      targetKind: row.targetKind ?? null,
+      targetEndDate: row.targetEndDate ?? null,
       weight: row.weight ?? 1,
       sortOrder: row.order ?? 0,
       createdAt: requiredInstant(row.createdAt),
@@ -146,8 +148,8 @@ export class PrismaGoalMapper {
   static parseKeyResultProgress(kr: RawKeyResultData) {
     return {
       aggregationMethod: kr.progress.aggregationMethod ?? 'Last',
-      startingValue: kr.progress.startingValue ?? 0,
-      progressBaselineValue: kr.progress.progressBaselineValue ?? null,
+      initialValue: kr.progress.initialValue ?? 0,
+      trackingBaseValue: kr.progress.trackingBaseValue ?? kr.progress.currentValue ?? 0,
       targetValue: kr.progress.targetValue ?? 100,
       currentValue: kr.progress.currentValue ?? 0,
       unit: kr.progress.unit ?? null,

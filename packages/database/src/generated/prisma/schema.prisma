@@ -466,21 +466,23 @@ model Goal {
 }
 
 model KeyResult {
-  id                    String   @id
-  identityId            String   @map("identity_id")
-  goalId                String   @map("goal_id")
-  title                 String
-  description           String?
-  aggregationMethod     String   @map("aggregation_method")
-  startingValue         Float    @default(0) @map("starting_value")
-  progressBaselineValue Float?   @map("progress_baseline_value")
-  targetValue           Float    @map("target_value")
-  currentValue          Float    @default(0) @map("current_value")
-  unit                  String?
-  weight                Int      @default(1)
-  order                 Int      @default(0)
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  id                String   @id
+  identityId        String   @map("identity_id")
+  goalId            String   @map("goal_id")
+  title             String
+  description       String?
+  aggregationMethod String   @map("aggregation_method")
+  initialValue      Float    @default(0) @map("initial_value")
+  trackingBaseValue Float    @default(0) @map("tracking_base_value")
+  targetValue       Float    @map("target_value")
+  currentValue      Float    @default(0) @map("current_value")
+  targetKind        String?  @map("target_kind")
+  targetEndDate     String?  @map("target_end_date")
+  unit              String?
+  weight            Int      @default(1)
+  order             Int      @default(0)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   goal                     Goal                      @relation("GoalKeyResults", fields: [goalId, identityId], references: [id, identityId], onDelete: Cascade)
   linkedTaskPlans          TaskPlan[]                @relation("KeyResultTaskPlans")

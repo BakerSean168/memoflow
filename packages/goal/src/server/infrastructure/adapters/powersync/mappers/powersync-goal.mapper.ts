@@ -63,14 +63,15 @@ export class PowerSyncGoalMapper {
       title: String(row.title),
       description: row.description ? String(row.description) : null,
       progress: {
-        startingValue: Number(row.starting_value ?? 0),
-        progressBaselineValue:
-          row.progress_baseline_value == null ? null : Number(row.progress_baseline_value),
+        initialValue: Number(row.initial_value ?? 0),
+        trackingBaseValue: Number(row.tracking_base_value ?? row.current_value ?? 0),
         currentValue: Number(row.current_value ?? 0),
         targetValue: Number(row.target_value ?? 100),
         aggregationMethod: row.aggregation_method ? String(row.aggregation_method) : 'Last',
         unit: row.unit ? String(row.unit) : null,
       },
+      targetKind: row.target_kind ? String(row.target_kind) : null,
+      targetEndDate: row.target_end_date ? String(row.target_end_date) : null,
       weight: Number(row.weight ?? 1),
       sortOrder: Number(row.order ?? 0),
       createdAt: requiredMs(row.created_at ? String(row.created_at) : null),

@@ -82,20 +82,21 @@ comparison
 
 ```text
 title
+initialValue = 0
 currentValue
 targetValue
 unit?
+target?        # optional GoalTimeframe
 ```
 
 高级：
 
 ```text
-progressBaselineValue?
 aggregationMethod = Sum
 weight = 3
 ```
 
-不再有 Value Type。
+系统内部另有 `trackingBaseValue` 作为 Record 聚合 seed；它不进入普通产品 UI，也不作为 0% baseline。Increasing / decreasing KR 统一使用 `Initial -> Current -> Target` 公式，不再有 Value Type 或 `progressBaselineValue`。
 
 ### 2.3 Task
 

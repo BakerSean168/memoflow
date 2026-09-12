@@ -38,7 +38,7 @@ function addKeyResult(
 ): KeyResult {
   return goal.createAndAddKeyResult({
     title: params.title,
-    startingValue: 0,
+    initialValue: 0,
     targetValue: params.targetValue,
     currentValue: params.currentValue ?? 0,
     weight: params.weight,

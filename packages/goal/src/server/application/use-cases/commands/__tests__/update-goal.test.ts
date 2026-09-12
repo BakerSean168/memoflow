@@ -131,8 +131,7 @@ describe('UpdateGoalUseCase', () => {
           id: existing.id,
           title: 'Updated KR',
           calculationMethod: 'Last',
-          startingValue: 0,
-          progressBaselineValue: null,
+          initialValue: 0,
           currentValue: 25,
           targetValue: 100,
           weight: 3,
@@ -151,10 +150,10 @@ describe('UpdateGoalUseCase', () => {
     expect(goal.getAllKeyResults()).toHaveLength(2);
     expect(goal.getKeyResult(String(existing.id))?.title).toBe('Updated KR');
     expect(goal.getKeyResult(String(existing.id))?.progress).toMatchObject({
-      startingValue: 0,
+      initialValue: 0,
       currentValue: 25,
       targetValue: 100,
-      progressBaselineValue: null,
+      trackingBaseValue: 0,
       aggregationMethod: 'Last',
     });
     expect(goalRepo.saveRootWithExpectedVersion).toHaveBeenCalledOnce();

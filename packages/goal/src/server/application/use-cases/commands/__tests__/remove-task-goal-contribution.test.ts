@@ -19,12 +19,13 @@ function createGoalWithProgress() {
   const keyResult = goal.createAndAddKeyResult({
     title: 'Completed tasks',
     aggregationMethod: 'Sum',
-    startingValue: 0,
-    currentValue: 3,
+    initialValue: 0,
+    currentValue: 0,
     targetValue: 10,
     weight: 1,
     unit: 'tasks',
   });
+  keyResult.recalculateProgress(3);
   return { goal, keyResult };
 }
 

@@ -23,10 +23,12 @@ describe('PrismaGoalMapper additional coverage', () => {
           title: 'KR',
           description: null,
           aggregationMethod: 'Last',
-          startingValue: 0,
-          progressBaselineValue: null,
+          initialValue: 0,
+          trackingBaseValue: 0,
           targetValue: 100,
           currentValue: 0,
+          targetKind: 'month',
+          targetEndDate: '2026-09-30',
           unit: null,
           weight: 1,
           order: 0,
@@ -156,8 +158,8 @@ describe('PrismaGoalMapper additional coverage', () => {
     const fromFull = PrismaGoalMapper.parseKeyResultProgress({
       progress: {
         aggregationMethod: 'Max',
-        startingValue: 2,
-        progressBaselineValue: null,
+        initialValue: 1,
+        trackingBaseValue: 2,
         targetValue: 20,
         currentValue: 10,
         unit: 'pt',
@@ -166,16 +168,16 @@ describe('PrismaGoalMapper additional coverage', () => {
 
     expect(fromPartial).toEqual({
       aggregationMethod: 'Last',
-      startingValue: 0,
-      progressBaselineValue: null,
+      initialValue: 0,
+      trackingBaseValue: 8,
       targetValue: 100,
       currentValue: 8,
       unit: null,
     });
     expect(fromFull).toEqual({
       aggregationMethod: 'Max',
-      startingValue: 2,
-      progressBaselineValue: null,
+      initialValue: 1,
+      trackingBaseValue: 2,
       targetValue: 20,
       currentValue: 10,
       unit: 'pt',

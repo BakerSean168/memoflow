@@ -35,12 +35,15 @@ describe('rawDataToGoalState', () => {
           description: null,
           progress: {
             initialValue: 0,
+            trackingBaseValue: 0,
             currentValue: 0,
             targetValue: 100,
             valueType: 'Incremental',
             aggregationMethod: 'Last',
             unit: null,
           },
+          targetKind: 'month',
+          targetEndDate: '2026-09-30',
           weight: 2,
           sortOrder: 3,
           version: 2,
@@ -105,6 +108,7 @@ describe('rawDataToGoalState', () => {
     expect(state.keyResults).toHaveLength(1);
     expect(state.keyResults[0].progress.aggregationMethod).toBe('Last');
     expect(state.keyResults[0].progress.currentValue).toBe(0);
+    expect(state.keyResults[0].target).toEqual({ kind: 'month', year: 2026, month: 9 });
     expect(state.goalReviews).toHaveLength(1);
     expect(state.goalReviews[0].reflection).toBe('ok');
     expect(state.goalReviews[0].systemContext.overallProgress.endPercentage).toBe(50);
@@ -174,6 +178,100 @@ describe('rawDataToGoalState', () => {
     };
 
     expect(() => rawDataToGoalState(raw)).toThrow(/both target_kind and target_end_date/);
+  });
+
+  it('fails closed when a KR target persistence pair is partial', () => {
+    const raw = {
+      id: GOAL_ID_2,
+      identityId: IDENTITY_ID_1,
+      name: 'Broken KR target',
+      summary: null,
+      status: 'Planned',
+      startDate: null,
+      targetKind: null,
+      targetEndDate: null,
+      completedAt: null,
+      archivedAt: null,
+      sortOrder: 0,
+      reminderConfig: null,
+      keyResults: [
+        {
+          id: KEY_RESULT_ID_1,
+          goalId: GOAL_ID_2,
+          title: 'KR',
+          description: null,
+          progress: {
+            initialValue: 0,
+            trackingBaseValue: 0,
+            currentValue: 0,
+            targetValue: 100,
+            aggregationMethod: 'Last',
+            unit: null,
+          },
+          targetKind: 'quarter',
+          targetEndDate: null,
+          weight: 1,
+          sortOrder: 0,
+          createdAt: 1_000,
+          updatedAt: 1_000,
+        },
+      ],
+      goalReviews: null,
+      weightSnapshots: null,
+      createdAt: 1_000,
+      updatedAt: 1_000,
+      deletedAt: null,
+      version: 1,
+    };
+
+    expect(() => rawDataToGoalState(raw)).toThrow(/both target_kind and target_end_date/);
+  });
+
+  it('fails closed when a KR target end is non-canonical for its precision', () => {
+    const raw = {
+      id: GOAL_ID_2,
+      identityId: IDENTITY_ID_1,
+      name: 'Broken KR quarter',
+      summary: null,
+      status: 'Planned',
+      startDate: null,
+      targetKind: null,
+      targetEndDate: null,
+      completedAt: null,
+      archivedAt: null,
+      sortOrder: 0,
+      reminderConfig: null,
+      keyResults: [
+        {
+          id: KEY_RESULT_ID_1,
+          goalId: GOAL_ID_2,
+          title: 'KR',
+          description: null,
+          progress: {
+            initialValue: 0,
+            trackingBaseValue: 0,
+            currentValue: 0,
+            targetValue: 100,
+            aggregationMethod: 'Last',
+            unit: null,
+          },
+          targetKind: 'quarter',
+          targetEndDate: '2026-11-30',
+          weight: 1,
+          sortOrder: 0,
+          createdAt: 1_000,
+          updatedAt: 1_000,
+        },
+      ],
+      goalReviews: null,
+      weightSnapshots: null,
+      createdAt: 1_000,
+      updatedAt: 1_000,
+      deletedAt: null,
+      version: 1,
+    };
+
+    expect(() => rawDataToGoalState(raw)).toThrow(/Non-canonical GoalTimeframe/);
   });
 
   it('fails closed when the normalized target end is not canonical for its precision', () => {

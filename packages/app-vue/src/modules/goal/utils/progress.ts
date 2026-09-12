@@ -12,9 +12,11 @@ function clampPercentage(value: number): number {
   return Math.min(100, Math.max(0, value));
 }
 
-export function getKeyResultProgressPercentage(progress: KeyResultProgress | null | undefined): number {
+export function getKeyResultProgressPercentage(
+  progress: KeyResultProgress | null | undefined,
+): number {
   if (!progress) return 0;
-  const initialValue = progress.startingValue ?? 0;
+  const initialValue = progress.initialValue;
   const currentValue = progress.currentValue ?? 0;
   const targetValue = progress.targetValue ?? 0;
 

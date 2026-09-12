@@ -4,7 +4,11 @@ import type {
   PortableGoalData,
   PortableGoalReviewSystemContext,
 } from '@memoflow/contracts/data-portability';
-import { goalTimeframeEndBoundary, type GoalReviewSystemContext } from '@memoflow/contracts/goal';
+import {
+  goalTimeframeEndBoundary,
+  type GoalReviewSystemContext,
+  type GoalTimeframe,
+} from '@memoflow/contracts/goal';
 import type { TxClient } from './import-helpers';
 import { allocateId, resolveRef, jsonStringify, inc, rec, timestamps } from './import-helpers';
 
@@ -43,11 +47,13 @@ export async function importGoals(
         title: String(k.title),
         description: (k.description as string | null | undefined) ?? null,
         aggregationMethod: String(k.calculationMethod ?? 'Last'),
-        startingValue: Number(k.startingValue ?? 0),
-        progressBaselineValue:
-          k.progressBaselineValue == null ? null : Number(k.progressBaselineValue),
+        initialValue: Number(k.initialValue ?? 0),
+        trackingBaseValue: Number(k.trackingBaseValue ?? k.currentValue ?? 0),
         targetValue: Number(k.targetValue ?? 0),
-        currentValue: Number(k.currentValue ?? k.startingValue ?? 0),
+        currentValue: Number(k.currentValue ?? 0),
+        targetKind: (k.target as GoalTimeframe | null | undefined)?.kind ?? null,
+        targetEndDate:
+          k.target == null ? null : goalTimeframeEndBoundary(k.target as GoalTimeframe),
         unit: (k.unit as string | null | undefined) ?? null,
         weight: Number(k.weight ?? 1),
         order: Number(k.sortOrder ?? 0),

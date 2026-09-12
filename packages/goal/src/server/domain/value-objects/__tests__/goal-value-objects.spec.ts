@@ -107,7 +107,7 @@ describe('goal shared value objects', () => {
       title: 'Launch',
       currentValue: 60,
       targetValue: 100,
-      progressBaselineValue: null,
+      initialValue: 0,
       aggregationMethod: 'Sum',
       weight: 3,
       progressPercentage: 60,
@@ -142,13 +142,13 @@ describe('goal shared value objects', () => {
     ).toThrow('must be finite');
   });
 
-  it('covers Measurement V2 progress calculation and weight snapshots', () => {
+  it('covers Measurement V3 progress calculation and weight snapshots', () => {
     const progress = KeyResultProgress.create({
       aggregationMethod: 'Sum',
-      startingValue: 10,
+      initialValue: 0,
+      trackingBaseValue: 10,
       currentValue: 40,
       targetValue: 100,
-      progressBaselineValue: null,
       unit: 'points',
     });
 
@@ -175,10 +175,10 @@ describe('goal shared value objects', () => {
       expect(
         KeyResultProgress.create({
           aggregationMethod,
-          startingValue: 0,
+          initialValue: 0,
+          trackingBaseValue: 0,
           currentValue: 0,
           targetValue: 100,
-          progressBaselineValue: null,
           unit: null,
         }).calculateAggregatedValue([10, 20, 30]),
       ).toBe(expected);
@@ -186,10 +186,10 @@ describe('goal shared value objects', () => {
 
     const decreasing = KeyResultProgress.create({
       aggregationMethod: 'Last',
-      startingValue: 80,
+      initialValue: 75,
+      trackingBaseValue: 80,
       currentValue: 73,
       targetValue: 70,
-      progressBaselineValue: 75,
       unit: 'kg',
     });
     expect(decreasing.getDirection()).toBe('down');
@@ -197,26 +197,26 @@ describe('goal shared value objects', () => {
     expect(decreasing.isCompleted).toBe(false);
     expect(decreasing.updateCurrentValue(70).isCompleted).toBe(true);
     expect(KeyResultProgress.fromDTO(progress.toDTO()).toDTO()).toEqual(progress.toDTO());
-    expect(() =>
+    expect(
       KeyResultProgress.create({
         aggregationMethod: 'Last',
-        startingValue: 80,
+        initialValue: 80,
+        trackingBaseValue: 80,
         currentValue: 73,
         targetValue: 70,
-        progressBaselineValue: null,
         unit: 'kg',
-      }),
-    ).toThrow('progressBaselineValue is required for a decreasing target');
+      }).getDirection(),
+    ).toBe('down');
     expect(() =>
       KeyResultProgress.create({
         aggregationMethod: 'Sum',
-        startingValue: 0,
+        initialValue: 0,
+        trackingBaseValue: 0,
         currentValue: 0,
         targetValue: 0,
-        progressBaselineValue: null,
         unit: null,
       }),
-    ).toThrow('progressBaselineValue is required when targetValue is zero');
+    ).toThrow('targetValue must differ from initialValue');
     expect(() => KeyResultProgress.create({ ...progress.toDTO(), unit: 'x'.repeat(21) })).toThrow(
       'Unit too long',
     );

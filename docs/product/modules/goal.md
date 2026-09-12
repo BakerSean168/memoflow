@@ -5,23 +5,23 @@ tags:
   - goal
 description: Goal vNext 当前功能、产品语义与模块边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-12T10:14:00+08:00
+updated: 2026-09-12T12:13:00+08:00
 ---
 
 # Goal 模块说明
 
-> **当前收敛状态（2026-09-12）：** GOAL-7202/7203 已落地：Goal identity/lifecycle 与 planning time 已切到 `name + summary`、`Planned/InProgress/Completed/Abandoned`、`startDate: Ymd`、`GoalTimeframe target`。KR Measurement V3、Goal Workspace、AI Plan V2 与完整 Target property picker 仍按 [active plan](../../plan/active/2026-09-08-goal-vnext-model-convergence.md) 后续票实施，不应提前写成当前能力。
+> **当前收敛状态（2026-09-12）：** GOAL-7202/7203/7204 已落地：Goal identity/lifecycle、planning time 与 KR Measurement V3 已切到 `name + summary`、`Planned/InProgress/Completed/Abandoned`、`startDate: Ymd`、`GoalTimeframe target`、`Initial / Current / Target + hidden tracking base`。Goal Workspace、AI Plan V2 与完整 Target property picker 仍按 [active plan](../../plan/active/2026-09-08-goal-vnext-model-convergence.md) 后续票实施，不应提前写成当前能力。
 
 ## 1. 功能定位
 
-Goal 负责个人目标的 **Direction + Measurement**：用户定义想达到什么结果，用 Key Result Measurement V2 表达可验证的衡量方式，并通过 Record / Review 跟踪事实与复盘。Goal 不再承担任务编排、专注计时、目录层级或动态优先级等其他产品职责。
+Goal 负责个人目标的 **Direction + Measurement**：用户定义想达到什么结果，用 Key Result Measurement V3 的 `Initial / Current / Target` 表达可验证的衡量方式，并通过 Record / Review 跟踪事实与复盘。Goal 不再承担任务编排、专注计时、目录层级或动态优先级等其他产品职责。
 
 ## 2. 当前产品能力
 
 - Goal 创建、编辑、回到规划、开始、完成、放弃、归档与删除；
 - Goal identity：`name + summary`；新 Goal 默认 `Planned`；
 - Planning time：`startDate?: Ymd` + `target?: GoalTimeframe`，Target 支持 Day / Month / Quarter / Half-year / Year 精度；目标周期过去只产生 `Past Target` 展示信号，不产生 Task-style overdue，也不自动改变状态；
-- Key Result Measurement V2：`baseline / current / target / unit / direction` 等测量语义由统一 calculator 解释；
+- Key Result Measurement V3：普通产品面只暴露 `initialValue / currentValue / targetValue / unit / optional target timeframe`；统一 calculator 使用 `(current - initial) / (target - initial)`，系统聚合 seed `trackingBaseValue` 仅存在于服务端/可移植备份协议，不进入普通 UI；
 - Goal Record：记录 KR 的真实测量事实；
 - Goal Review：记录阶段性复盘；
 - Shared Label：Goal 与 Task 共用 identity-scoped Label registry，创建/更新提交 `labelIds`，多标签筛选使用 `labelIdsAll` AND 语义；
@@ -73,6 +73,6 @@ Web/Desktop 与 React/Mobile 均使用同一公开 contracts；移动端不存�
 - 设计总览：[Goal / Task vNext](../goal-task-vnext.md)
 - 产品边界：[ADR-053](../../architecture/adr/ADR-053-goal-task-personal-product-boundary.md)
 - Shared Label：[ADR-054](../../architecture/adr/ADR-054-shared-labels-and-system-views.md)
-- KR Measurement V2：[ADR-055](../../architecture/adr/ADR-055-key-result-measurement-progress-v2.md)
+- KR Measurement V3：[ADR-068](../../architecture/adr/ADR-068-key-result-measurement-v3.md)（ADR-055 保留为已被修订的 V2 历史决策）
 - Task settlement：[ADR-056](../../architecture/adr/ADR-056-task-plan-goal-link-contribution-settlement.md)
 - 文件索引：[Goal 模块文件索引](../module-index/goal-files.md)

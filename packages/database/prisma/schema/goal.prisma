@@ -42,10 +42,12 @@ model KeyResult {
   title                 String
   description           String?
   aggregationMethod     String  @map("aggregation_method")
-  startingValue         Float   @default(0) @map("starting_value")
-  progressBaselineValue Float?  @map("progress_baseline_value")
+  initialValue          Float   @default(0) @map("initial_value")
+  trackingBaseValue     Float   @default(0) @map("tracking_base_value")
   targetValue           Float   @map("target_value")
   currentValue          Float   @default(0) @map("current_value")
+  targetKind            String? @map("target_kind")
+  targetEndDate         String? @map("target_end_date")
   unit                   String?
   weight                 Int     @default(1)
   order                  Int     @default(0)

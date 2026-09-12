@@ -18,12 +18,13 @@ describe('DeleteGoalRecordUseCase', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Points',
       aggregationMethod: 'Sum',
-      startingValue: 0,
-      currentValue: 5,
+      initialValue: 0,
+      currentValue: 0,
       targetValue: 20,
       weight: 1,
       unit: 'points',
     });
+    keyResult.recalculateProgress(5);
     const deletedRecord = GoalRecord.create({
       keyResultId: keyResult.id as any,
       identityId: 'identity-1' as any,
@@ -86,13 +87,13 @@ describe('DeleteGoalRecordUseCase', () => {
     const keyResult = goal.createAndAddKeyResult({
       title: 'Weight',
       aggregationMethod: 'Last',
-      startingValue: 75,
-      currentValue: 70,
+      initialValue: 75,
+      currentValue: 75,
       targetValue: 70,
-      progressBaselineValue: 75,
       weight: 1,
       unit: 'kg',
     });
+    keyResult.recalculateProgress(70);
     const previous = GoalRecord.create({
       id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440301' as any,
       keyResultId: keyResult.id as any,

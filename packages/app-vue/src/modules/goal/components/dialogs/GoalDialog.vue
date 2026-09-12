@@ -117,7 +117,7 @@
               >
                 <p class="truncate text-sm font-medium">{{ keyResult.title }}</p>
                 <p class="mt-0.5 text-xs text-muted-foreground">
-                  {{ keyResult.currentValue ?? keyResult.startingValue ?? 0 }} →
+                  {{ keyResult.currentValue ?? keyResult.initialValue }} →
                   {{ keyResult.targetValue }}
                   <span v-if="keyResult.unit"> {{ keyResult.unit }}</span>
                 </p>
@@ -161,7 +161,16 @@
               />
             </div>
 
-            <div class="grid gap-3 sm:grid-cols-2">
+            <div class="grid gap-3 sm:grid-cols-3">
+              <div class="space-y-2">
+                <Label for="draft-kr-initial">{{ t('goal.dialog.krInitialValue') }}</Label>
+                <Input
+                  id="draft-kr-initial"
+                  v-model.number="krForm.initialValue"
+                  type="number"
+                  data-testid="draft-kr-initial-input"
+                />
+              </div>
               <div class="space-y-2">
                 <Label for="draft-kr-current">{{ t('goal.dialog.krCurrentValue') }}</Label>
                 <Input
@@ -182,15 +191,31 @@
               </div>
             </div>
 
-            <div class="space-y-2">
-              <Label for="draft-kr-unit">{{ t('goal.dialog.krUnit') }}</Label>
-              <Input
-                id="draft-kr-unit"
-                v-model="krForm.unit"
-                data-testid="draft-kr-unit-input"
-                maxlength="20"
-                :placeholder="t('goal.dialog.krUnitPlaceholder')"
-              />
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div class="space-y-2">
+                <Label for="draft-kr-unit">{{ t('goal.dialog.krUnit') }}</Label>
+                <Input
+                  id="draft-kr-unit"
+                  v-model="krForm.unit"
+                  data-testid="draft-kr-unit-input"
+                  maxlength="20"
+                  :placeholder="t('goal.dialog.krUnitPlaceholder')"
+                />
+              </div>
+              <div class="space-y-2">
+                <Label for="draft-kr-target-timeframe">{{
+                  t('goal.dialog.krTargetTimeframe')
+                }}</Label>
+                <Input
+                  id="draft-kr-target-timeframe"
+                  v-model="krForm.targetDate"
+                  type="date"
+                  @update:model-value="krTargetTouched = true"
+                />
+                <p v-if="krCoarseTargetLabel" class="text-[11px] text-muted-foreground">
+                  {{ t('goal.dialog.krCurrentTarget') }}: {{ krCoarseTargetLabel }}
+                </p>
+              </div>
             </div>
 
             <Collapsible v-model:open="krAdvancedOpen">
@@ -205,16 +230,12 @@
               </CollapsibleTrigger>
               <CollapsibleContent class="mt-2 grid gap-3 sm:grid-cols-2">
                 <div class="space-y-2 sm:col-span-2">
-                  <Label for="draft-kr-baseline">{{ t('goal.dialog.krProgressBaseline') }}</Label>
-                  <Input
-                    id="draft-kr-baseline"
-                    v-model="krForm.progressBaselineValue"
-                    type="number"
-                    :placeholder="t('goal.dialog.optional')"
+                  <Label for="draft-kr-description">{{ t('goal.dialog.description') }}</Label>
+                  <Textarea
+                    id="draft-kr-description"
+                    v-model="krForm.description"
+                    maxlength="2000"
                   />
-                  <p class="text-[11px] text-muted-foreground">
-                    {{ t('goal.dialog.krProgressBaselineHint') }}
-                  </p>
                 </div>
                 <div class="space-y-2">
                   <Label>{{ t('goal.dialog.krCalculationMethod') }}</Label>
@@ -293,6 +314,7 @@ import {
   KeyResultCalculationMethod,
   goalTimeframeLabel,
   type GoalClientDTO,
+  type GoalTimeframe,
   type CreateGoalReq,
   type UpdateGoalReq,
 } from '@memoflow/contracts/goal';
@@ -351,16 +373,18 @@ const labelCreateError = ref<string | null>(null);
 const krEditorOpen = ref(false);
 const editingKrIndex = ref<number | null>(null);
 const krAdvancedOpen = ref(false);
+const krTargetTouched = ref(false);
+const krOriginalTarget = ref<GoalTimeframe | null>(null);
 const krFormError = ref<string | null>(null);
 const calculationMethods = Object.values(KeyResultCalculationMethod);
 const krForm = reactive({
   id: undefined as KrId | undefined,
   title: '',
-  description: null as string | null,
-  startingValue: 0,
+  description: '',
+  initialValue: 0,
   currentValue: 0,
   targetValue: '' as number | '',
-  progressBaselineValue: '' as number | '',
+  targetDate: '',
   calculationMethod: KeyResultCalculationMethod.Sum as KeyResultCalculationMethod,
   unit: '',
   weight: 3,
@@ -370,6 +394,7 @@ const canSaveKeyResult = computed(
   () =>
     krForm.title.trim().length > 0 &&
     krForm.targetValue !== '' &&
+    Number.isFinite(Number(krForm.initialValue)) &&
     Number.isFinite(Number(krForm.currentValue)) &&
     Number.isFinite(Number(krForm.targetValue)),
 );
@@ -377,6 +402,12 @@ const canSaveKeyResult = computed(
 const coarseTargetLabel = computed(() => {
   if (targetTouched.value || !props.goal?.target || props.goal.target.kind === 'day') return '';
   return goalTimeframeLabel(props.goal.target, locale.value);
+});
+
+const krCoarseTargetLabel = computed(() => {
+  const target = krOriginalTarget.value;
+  if (krTargetTouched.value || !target || target.kind === 'day') return '';
+  return goalTimeframeLabel(target, locale.value);
 });
 
 function snapshotDraft(): string {
@@ -388,10 +419,10 @@ function mapKeyResult(goalKr: NonNullable<GoalClientDTO['keyResults']>[number]):
     title: goalKr.title,
     description: goalKr.description,
     calculationMethod: goalKr.progress.aggregationMethod,
-    startingValue: goalKr.progress.startingValue,
+    initialValue: goalKr.progress.initialValue,
     currentValue: goalKr.progress.currentValue,
     targetValue: goalKr.progress.targetValue,
-    progressBaselineValue: goalKr.progress.progressBaselineValue,
+    target: goalKr.target,
     unit: goalKr.progress.unit,
     weight: goalKr.weight,
   };
@@ -440,11 +471,13 @@ async function createAndSelectLabel(name: string): Promise<void> {
 function resetKrForm(): void {
   krForm.id = undefined;
   krForm.title = '';
-  krForm.description = null;
-  krForm.startingValue = 0;
+  krForm.description = '';
+  krForm.initialValue = 0;
   krForm.currentValue = 0;
   krForm.targetValue = '';
-  krForm.progressBaselineValue = '';
+  krForm.targetDate = '';
+  krOriginalTarget.value = null;
+  krTargetTouched.value = false;
   krForm.calculationMethod = KeyResultCalculationMethod.Sum;
   krForm.unit = '';
   krForm.weight = 3;
@@ -464,11 +497,14 @@ function openEditKeyResult(index: number): void {
   editingKrIndex.value = index;
   krForm.id = keyResult.id;
   krForm.title = keyResult.title;
-  krForm.description = keyResult.description ?? null;
-  krForm.startingValue = keyResult.startingValue ?? keyResult.currentValue ?? 0;
-  krForm.currentValue = keyResult.currentValue ?? keyResult.startingValue ?? 0;
+  krForm.description = keyResult.description ?? '';
+  krForm.initialValue = keyResult.initialValue;
+  krForm.currentValue = keyResult.currentValue ?? keyResult.initialValue;
   krForm.targetValue = keyResult.targetValue;
-  krForm.progressBaselineValue = keyResult.progressBaselineValue ?? '';
+  krOriginalTarget.value = keyResult.target ?? null;
+  krForm.targetDate =
+    keyResult.target?.kind === 'day' ? toProductYmdInputValue(keyResult.target.date) : '';
+  krTargetTouched.value = false;
   krForm.calculationMethod = keyResult.calculationMethod;
   krForm.unit = keyResult.unit ?? '';
   krForm.weight = keyResult.weight;
@@ -481,21 +517,15 @@ function cancelKeyResultEdit(): void {
 }
 function validateKrMeasurement(): boolean {
   krFormError.value = null;
+  const initial = Number(krForm.initialValue);
   const current = Number(krForm.currentValue);
   const target = Number(krForm.targetValue);
-  const baseline =
-    krForm.progressBaselineValue === '' ? null : Number(krForm.progressBaselineValue);
-  const isNew = editingKrIndex.value === null;
-  const starting = isNew ? current : Number(krForm.startingValue);
-
-  if (baseline === null && (target <= 0 || target < starting)) {
-    krFormError.value = t('goal.dialog.krBaselineRequired');
-    krAdvancedOpen.value = true;
+  if (![initial, current, target].every(Number.isFinite)) {
+    krFormError.value = t('common.operationFailed');
     return false;
   }
-  if (baseline !== null && baseline === target) {
-    krFormError.value = t('goal.dialog.krBaselineTargetConflict');
-    krAdvancedOpen.value = true;
+  if (initial === target) {
+    krFormError.value = t('goal.dialog.krInitialTargetConflict');
     return false;
   }
   return true;
@@ -506,13 +536,17 @@ function saveKeyResultDraft(): void {
   const keyResult: DraftKeyResult = {
     ...(krForm.id ? { id: krForm.id } : {}),
     title: krForm.title.trim(),
-    description: krForm.description,
+    description: krForm.description.trim() || null,
     calculationMethod: krForm.calculationMethod,
-    startingValue: editingKrIndex.value === null ? current : Number(krForm.startingValue),
+    initialValue: Number(krForm.initialValue),
     currentValue: current,
     targetValue: Number(krForm.targetValue),
-    progressBaselineValue:
-      krForm.progressBaselineValue === '' ? null : Number(krForm.progressBaselineValue),
+    target: !krTargetTouched.value
+      ? krOriginalTarget.value
+      : (() => {
+          const date = fromProductYmdInputValue(krForm.targetDate);
+          return date ? ({ kind: 'day', date } as const) : null;
+        })(),
     unit: krForm.unit.trim() || null,
     weight: Math.max(1, Math.min(5, Math.round(Number(krForm.weight) || 3))),
   };

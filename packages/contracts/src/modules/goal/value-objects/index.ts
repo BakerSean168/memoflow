@@ -18,7 +18,11 @@ export {
 } from './goal-timeframe';
 export type { GoalTimeframe, GoalTimeframeKind } from './goal-timeframe';
 
-export type { KeyResultProgress, KeyResultProgressDTO } from './key-result-progress';
+export type {
+  KeyResultProgress,
+  KeyResultProgressDTO,
+  KeyResultMeasurement,
+} from './key-result-progress';
 export { KeyResultProgressDTOSchema } from './key-result-progress';
 
 export type { KeyResultSnapshot, KeyResultSnapshotDTO } from './key-result-snapshot';

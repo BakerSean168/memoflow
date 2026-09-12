@@ -104,10 +104,12 @@ export interface CreateKeyResultInput extends TimestampedImportInput {
   title: string;
   description: string | null;
   aggregationMethod: string;
-  startingValue: number;
-  progressBaselineValue: number | null;
+  initialValue: number;
+  trackingBaseValue: number;
   targetValue: number;
   currentValue: number;
+  targetKind: string | null;
+  targetEndDate: string | null;
   unit: string | null;
   weight: number;
   order: number;

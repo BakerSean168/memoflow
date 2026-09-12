@@ -5,6 +5,7 @@ import type {
   GetGoalRes,
   GoalMutationReceipt,
   GoalReviewSystemContext,
+  GoalTimeframe,
   ListGoalsQuery,
   QueryGoalsRes,
   UpdateGoalReq,
@@ -71,10 +72,10 @@ export interface GoalApplicationPort {
     keyResult: {
       title: string;
       aggregationMethod?: import('@memoflow/contracts/goal').KeyResultCalculationMethod;
-      startingValue?: number;
+      initialValue?: number;
       targetValue: number;
       currentValue?: number;
-      progressBaselineValue?: number | null;
+      target?: GoalTimeframe | null;
       unit?: string | null;
       weight?: number;
       expectedVersion: number;
@@ -88,8 +89,8 @@ export interface GoalApplicationPort {
       title?: string;
       description?: string;
       weight?: number;
-      startingValue?: number;
-      progressBaselineValue?: number | null;
+      initialValue?: number;
+      target?: GoalTimeframe | null;
       aggregationMethod?: import('@memoflow/contracts/goal').KeyResultCalculationMethod;
       currentValue?: number;
       targetValue?: number;

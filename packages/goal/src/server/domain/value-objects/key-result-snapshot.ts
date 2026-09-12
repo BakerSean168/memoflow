@@ -31,11 +31,8 @@ export class KeyResultSnapshot
     if (props.progressPercentage < 0 || props.progressPercentage > 100) {
       throw new Error('Progress percentage must be between 0-100');
     }
-    for (const value of [props.currentValue, props.targetValue]) {
+    for (const value of [props.initialValue, props.currentValue, props.targetValue]) {
       if (!Number.isFinite(value)) throw new Error('Snapshot measurement values must be finite');
-    }
-    if (props.progressBaselineValue !== null && !Number.isFinite(props.progressBaselineValue)) {
-      throw new Error('Snapshot progressBaselineValue must be finite');
     }
     if (!Number.isInteger(props.weight) || props.weight < 1 || props.weight > 5) {
       throw new Error('Snapshot weight must be an integer between 1 and 5');
@@ -54,8 +51,8 @@ export class KeyResultSnapshot
   public get targetValue(): number {
     return this.props.targetValue;
   }
-  public get progressBaselineValue(): number | null {
-    return this.props.progressBaselineValue;
+  public get initialValue(): number {
+    return this.props.initialValue;
   }
   public get aggregationMethod(): KeyResultCalculationMethod {
     return this.props.aggregationMethod;

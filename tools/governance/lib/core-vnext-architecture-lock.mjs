@@ -66,6 +66,9 @@ export const TASK_LEGACY_CONTRACT_FIELD_PATTERN = /\b(?:tags|color)\??\s*:/;
 export const TASK_LEGACY_PRISMA_FIELD_PATTERN = /^\s*(?:tags|color)\s+String\??(?:\s|$)/m;
 
 export const GOAL_LEGACY_TIME_PATTERN = /\b(?:dueDate|isOverdue|GoalDueDateNotSetError)\b|\bdue_date\b/;
+export const KR_LEGACY_MEASUREMENT_PATTERN =
+  /\b(?:startingValue|progressBaselineValue)\b|\b(?:starting_value|progress_baseline_value)\b/;
+export const KR_CLIENT_TRACKING_STATE_PATTERN = /\btrackingBaseValue\b/;
 
 const GOAL_TIME_OWNER_ROOTS = [
   'packages/goal/src/',
@@ -80,6 +83,34 @@ const GOAL_TIME_OWNER_FILES = new Set([
   'packages/contracts/src/modules/data-portability/dtos/portable-goals.dto.ts',
   'packages/data-portability/src/server/application/use-cases/importers/goal.importer.ts',
   'packages/data-portability/src/server/application/use-cases/projections/goal.projection.ts',
+]);
+
+const KR_MEASUREMENT_OWNER_ROOTS = [
+  'packages/goal/src/',
+  'packages/contracts/src/modules/goal/',
+  'packages/app-vue/src/modules/goal/',
+  'packages/app-react/src/screens/Goal',
+];
+const KR_MEASUREMENT_OWNER_FILES = new Set([
+  'packages/app-react/src/components/GoalCard.tsx',
+  'packages/app-react/src/hooks/useGoals.ts',
+  'packages/database/prisma/schema/goal.prisma',
+  'packages/powersync-schema/src/index.ts',
+  'packages/contracts/src/modules/data-portability/dtos/portable-goals.dto.ts',
+  'packages/data-portability/src/server/application/import-store/data-portability-import-store.ts',
+  'packages/data-portability/src/server/application/use-cases/importers/goal.importer.ts',
+  'packages/data-portability/src/server/application/use-cases/projections/goal.projection.ts',
+  'packages/data-portability/src/server/infrastructure/powersync/powersync-import-store.ts',
+  'packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.ts',
+]);
+const KR_CLIENT_SURFACE_ROOTS = [
+  'packages/app-vue/src/modules/goal/',
+  'packages/app-react/src/screens/Goal',
+];
+const KR_CLIENT_SURFACE_FILES = new Set([
+  'packages/app-react/src/components/GoalCard.tsx',
+  'packages/app-react/src/hooks/useGoals.ts',
+  'packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.ts',
 ]);
 
 export function isTestLikePath(relPath) {
@@ -321,6 +352,31 @@ export function findCoreVnextArchitectureLockViolations(files) {
         'goal-legacy-due-time',
       );
     }
+
+
+    // ADR-068 / GOAL-7204: canonical KR measurement is Initial/Current/Target.
+    // The AI GoalPlanDraft V1 compatibility contract is intentionally outside this owner scope
+    // until GOAL-7210 retires it, so its legacy input fields remain explicit and reviewable.
+    if (startsWithAny(relPath, KR_MEASUREMENT_OWNER_ROOTS) || KR_MEASUREMENT_OWNER_FILES.has(relPath)) {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        KR_LEGACY_MEASUREMENT_PATTERN,
+        'kr-legacy-measurement',
+      );
+    }
+
+    // trackingBaseValue is server/backup state only; ordinary product UI must not expose it.
+    if (startsWithAny(relPath, KR_CLIENT_SURFACE_ROOTS) || KR_CLIENT_SURFACE_FILES.has(relPath)) {
+      pushPatternViolations(
+        violations,
+        relPath,
+        content,
+        KR_CLIENT_TRACKING_STATE_PATTERN,
+        'kr-tracking-base-ui-leak',
+      );
+    }
   }
 
   // Canonical Notification path is a positive lock, not merely absence of the
@@ -373,6 +429,8 @@ export function formatCoreVnextArchitectureLockViolation({ file, line, kind, tex
     'ai-retired-goal-task-draft': 'AI production code must use canonical Goal/Task workflow contracts and must not resurrect retired Goal/Task draft fields or validators',
     'task-legacy-classification': 'Task classification must use Shared Label; legacy string tags/custom Task color are forbidden',
     'goal-legacy-due-time': 'Goal planning time must use startDate + GoalTimeframe target; Task-style dueDate/isOverdue truth is forbidden in Goal-owned surfaces',
+    'kr-legacy-measurement': 'KR Measurement V3 must use initialValue/currentValue/targetValue plus internal trackingBaseValue; V2 starting/baseline names are forbidden on canonical KR surfaces',
+    'kr-tracking-base-ui-leak': 'trackingBaseValue is internal aggregation state and must never appear in ordinary Goal/KR product UI',
   };
   return `${file}:${line}: ${messages[kind] ?? kind} [${text}]`;
 }

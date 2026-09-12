@@ -15,10 +15,10 @@ describe('GoalReviewContextBuilder', () => {
       title: 'Running',
       weight: 1,
       progress: {
-        startingValue: 0,
+        trackingBaseValue: 0,
         currentValue: 40,
         targetValue: 100,
-        progressBaselineValue: null,
+        initialValue: 0,
         aggregationMethod: 'Sum',
         unit: 'km',
       },
@@ -28,10 +28,10 @@ describe('GoalReviewContextBuilder', () => {
       title: 'Weight',
       weight: 3,
       progress: {
-        startingValue: 80,
+        trackingBaseValue: 80,
         currentValue: 75,
         targetValue: 70,
-        progressBaselineValue: 80,
+        initialValue: 80,
         aggregationMethod: 'Last',
         unit: 'kg',
       },
@@ -98,18 +98,41 @@ describe('GoalReviewContextBuilder', () => {
 
   it('uses the same weighted semantics instead of a simple average', async () => {
     const repo = {
-      findByKeyResultIds: vi.fn().mockResolvedValue(new Map([['a', []], ['b', []]])),
+      findByKeyResultIds: vi.fn().mockResolvedValue(
+        new Map([
+          ['a', []],
+          ['b', []],
+        ]),
+      ),
     } as any;
     const goal = {
       identityId: 'identity-1',
       keyResults: [
         {
-          id: 'a', title: 'A', weight: 1,
-          progress: { startingValue: 0, currentValue: 0, targetValue: 100, progressBaselineValue: null, aggregationMethod: 'Last', unit: null },
+          id: 'a',
+          title: 'A',
+          weight: 1,
+          progress: {
+            trackingBaseValue: 0,
+            currentValue: 0,
+            targetValue: 100,
+            initialValue: 0,
+            aggregationMethod: 'Last',
+            unit: null,
+          },
         },
         {
-          id: 'b', title: 'B', weight: 3,
-          progress: { startingValue: 100, currentValue: 100, targetValue: 100, progressBaselineValue: null, aggregationMethod: 'Last', unit: null },
+          id: 'b',
+          title: 'B',
+          weight: 3,
+          progress: {
+            trackingBaseValue: 100,
+            currentValue: 100,
+            targetValue: 100,
+            initialValue: 0,
+            aggregationMethod: 'Last',
+            unit: null,
+          },
         },
       ],
     } as any;

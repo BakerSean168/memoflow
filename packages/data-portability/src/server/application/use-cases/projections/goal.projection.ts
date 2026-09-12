@@ -73,17 +73,31 @@ function projectKeyResult(kr: unknown, ctx: ExportContext): PortableKeyResult {
     calculationMethod: String(
       progress.aggregationMethod ?? 'Last',
     ) as PortableKeyResult['calculationMethod'],
-    startingValue: Number(progress.startingValue ?? 0),
-    progressBaselineValue:
-      progress.progressBaselineValue == null ? null : Number(progress.progressBaselineValue),
+    initialValue: Number(progress.initialValue ?? 0),
+    trackingBaseValue: Number(progress.trackingBaseValue ?? progress.currentValue ?? 0),
     targetValue: Number(progress.targetValue ?? 0),
-    currentValue: Number(progress.currentValue ?? progress.startingValue ?? 0),
+    currentValue: Number(progress.currentValue ?? 0),
+    target: projectKeyResultTarget(entity),
     unit: progress.unit as string | null | undefined,
     weight: Number(entity.weight ?? 1),
     sortOrder: Number(entity.sortOrder ?? entity.order ?? 0),
     createdAt: toDateString(entity.createdAt),
     updatedAt: toDateString(entity.updatedAt),
   };
+}
+
+function projectKeyResultTarget(entity: Record<string, unknown>): PortableKeyResult['target'] {
+  if (entity.target != null) return entity.target as PortableKeyResult['target'];
+  const kind = entity.targetKind ?? entity.target_kind;
+  const endDate = entity.targetEndDate ?? entity.target_end_date;
+  if (kind == null && endDate == null) return null;
+  if (kind == null || endDate == null) {
+    throw new TypeError('Portable Key Result export requires a complete target persistence pair');
+  }
+  return goalTimeframeFromEndBoundary(
+    GoalTimeframeKindSchema.parse(String(kind)),
+    requireYmd(String(endDate)),
+  );
 }
 
 function projectGoalReview(review: unknown, ctx: ExportContext): PortableGoalReview {

@@ -50,6 +50,7 @@ export const KeyResultClientDTOSchema = z.object({
   title: z.string(),
   description: z.string().nullable(),
   progress: KeyResultProgressDTOSchema,
+  target: GoalTimeframeSchema.nullable(),
   progressPercentage: z.number().min(0).max(100),
   isCompleted: z.boolean(),
   weight: z.number().int().min(1).max(5),

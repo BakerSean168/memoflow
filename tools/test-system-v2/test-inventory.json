@@ -6591,7 +6591,7 @@
       ]
     },
     {
-      "path": "packages/goal/src/server/domain/services/key-result-measurement-v2.spec.ts",
+      "path": "packages/goal/src/server/domain/services/key-result-measurement-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -12138,7 +12138,7 @@
       "packages/goal/src/server/domain/habit/__tests__/habit.spec.ts",
       "packages/goal/src/server/domain/services/__tests__/goal-policy.service.spec.ts",
       "packages/goal/src/server/domain/services/__tests__/goal-progress-calculator.spec.ts",
-      "packages/goal/src/server/domain/services/key-result-measurement-v2.spec.ts",
+      "packages/goal/src/server/domain/services/key-result-measurement-v3.spec.ts",
       "packages/goal/src/server/domain/value-objects/__tests__/goal-id.spec.ts",
       "packages/goal/src/server/domain/value-objects/__tests__/goal-value-objects.spec.ts",
       "packages/goal/src/server/domain/value-objects/__tests__/key-result-weight-snapshot-impl.spec.ts",

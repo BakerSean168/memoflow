@@ -47,7 +47,7 @@ export type GoalDetail = GoalSummary & {
     description: string | null;
     currentValue: number;
     targetValue: number;
-    startingValue: number;
+    initialValue: number;
     unit: string | null;
     progress: number;
   }>;
@@ -89,7 +89,7 @@ export function mapGoalDetail(goal: GoalAggregateReadModel): GoalDetail {
       description: item.description,
       currentValue: item.progress.currentValue,
       targetValue: item.progress.targetValue,
-      startingValue: item.progress.startingValue,
+      initialValue: item.progress.initialValue,
       unit: item.progress.unit,
       progress: progressPercentage(item),
     })),
