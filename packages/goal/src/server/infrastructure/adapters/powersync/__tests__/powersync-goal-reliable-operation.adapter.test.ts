@@ -160,12 +160,11 @@ describe('PowerSyncGoalWriteTransactionRunner receipt rollback (W4 P1-1)', () =>
     id TEXT PRIMARY KEY,
     identity_id TEXT NOT NULL,
     name TEXT NOT NULL,
-    description TEXT,
-    feasibility_analysis TEXT,
-    motivation TEXT,
+    summary TEXT,
     status TEXT NOT NULL,
     start_date TEXT,
-    due_date TEXT,
+    target_kind TEXT,
+    target_end_date TEXT,
     completed_at TEXT,
     archived_at TEXT,
     sort_order INTEGER,
@@ -192,7 +191,7 @@ describe('PowerSyncGoalWriteTransactionRunner receipt rollback (W4 P1-1)', () =>
     const identityId = 'user-runner';
     const goalId = 'goal-runner-1';
 
-    // Seed the goal row directly (Active, version 1)
+    // Seed the goal row directly (InProgress, version 1)
     const now = new Date().toISOString();
     await db.execute(
       `INSERT INTO goals (
@@ -221,7 +220,7 @@ describe('PowerSyncGoalWriteTransactionRunner receipt rollback (W4 P1-1)', () =>
     // The complete flow must fail: the receipt write aborts the transaction
     await expect(useCase.execute(goalId, identityId, 1)).rejects.toThrow();
 
-    // Goal CAS write rolled back: still version 1, still Active
+    // Goal CAS write rolled back: still version 1, still InProgress
     const saved = await repo.findByIdForIdentity(identityId, goalId);
     expect(saved?.version).toBe(1);
     expect(saved?.status).toBe('InProgress');

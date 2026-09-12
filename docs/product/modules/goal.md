@@ -5,12 +5,12 @@ tags:
   - goal
 description: Goal vNext 当前功能、产品语义与模块边界
 created: 2026-06-02T00:00:00
-updated: 2026-09-12T19:25:00+08:00
+updated: 2026-09-12T21:49:00+08:00
 ---
 
 # Goal 模块说明
 
-> **当前收敛状态（2026-09-12）：** GOAL-7202~7207 已落地：Goal identity/lifecycle、planning time、KR Measurement V3、Task context 三态、Shared Relation + stable Knowledge identity，以及 read-only Goal Workspace composition 均已实现。AI Plan V2 与完整 Target property picker 仍按 [active plan](../../plan/active/2026-09-08-goal-vnext-model-convergence.md) 后续票实施，不应提前写成当前能力。
+> **当前收敛状态（2026-09-12）：** GOAL-7202~7209 已落地：Goal identity/lifecycle、planning time、KR Measurement V3、Task context 三态、Shared Relation + stable Knowledge identity、Goal Workspace、durable GoalPlanDraft V2、property-chip create/edit、五精度 Target picker 与 React/Mobile parity 均已实现。GOAL-7210 已完成 destructive truth cleanup：旧 GoalTemplate/standalone AI-KR 轨道已删除，anti-resurrection governance 已扩展到 AI/persistence/portability surfaces，同时 Task deadline 语义保持不变。剩余 `GOAL-7211` 只负责最终五层审查、exact-head CI/build 与归档交付。
 
 ## 1. 功能定位
 
@@ -28,9 +28,9 @@ Goal 负责个人目标的 **Direction + Measurement**：用户定义想达到�
 - Task Link：Task 可以链接 Goal/KR，但 Goal 不反向拥有 Task；
 - Knowledge Link：通过 Shared Relation 的 typed GoalKnowledge facade 链接 reusable KnowledgeDocument；持久化端点只使用 stable `KnowledgeDocumentId`，rename/move 不改变关系身份；
 - Goal Workspace：一次 bounded read 返回 Goal authority + Task/Knowledge summary/preview + recent Record/Review；Task/Knowledge owner 暂时不可用时只降级对应 context，unresolved Knowledge edge 显式显示为 `Missing`；完整 Task/Knowledge 列表使用分页 query，不把 external entity ids 写回 Goal；
-- AI Goal draft：Mastra durable workflow 生成当前 Goal/KR/Label 语义的可审阅草稿，确认后由 Goal application port 写入。
+- AI Goal plan：Mastra durable `goal.create` workflow 使用 GoalPlanDraft V2，可同时审阅/编辑 Goal、KR、Task 与 Knowledge intents；Apply 通过各 owner application ports + deterministic receipts 幂等执行，不直接写数据库。
 
-已退休且不得恢复为产品真值：`GoalFolder`、Goal category/string tags、Parent Goal、Importance/Priority、Goal Focus Session、MultiGoalComparison、Standalone ProgressBreakdown。
+已退休且不得恢复为产品真值：`GoalFolder`、Goal category/string tags、Parent Goal、Importance/Priority、Goal Focus Session、MultiGoalComparison、Standalone ProgressBreakdown、旧 `GoalTemplate` OKR catalog、旧 standalone “AI Generate KR” flow。
 
 ## 3. 状态与完成语义
 
@@ -53,7 +53,7 @@ Abandoned
 - Reminder/Schedule 可以从 target 派生 period end boundary，但这个 boundary 不是新的 Goal deadline truth；
 - Task `dueDate/isOverdue` 属于 Task owner，不能因为 Goal 去除 due 语义而删除或复用。
 
-完整 Target property picker 属于 GOAL-7209；当前基础编辑器会保留未触碰的 Month/Quarter/Half-year/Year target，只有用户选择具体日期时才显式替换为 Day target。
+Web/Desktop 使用 property-chip create/edit 与统一 `GoalTimeframePicker`；Goal 与 KR 都可直接编辑 Day / Month / Quarter / Half-year / Year，并保持用户选择的原始精度。React/Mobile 使用同一 GoalTimeframe contract 与 precision-preserving parser，以适合小屏的输入/摘要方式呈现。
 
 ## 5. 写入与一致性边界
 
@@ -69,7 +69,7 @@ Abandoned
 
 当前列表仍使用 `Active / Completed / All` 这组 **System View** 展示标签，其中 `Active` 视图是 UI/read-model 聚合，包含 `Planned + InProgress`，不是第五种 Goal status。归档与放弃属于历史入口；System View 都是状态/时间派生视图，不是 Label。用户可叠加 Shared Label 过滤。
 
-Web/Desktop 与 React/Mobile 均使用同一公开 contracts；Vue/React 均已有只读 `useGoalWorkspace` client adapter。GOAL-7209 才负责把当前 Goal Detail 视觉收敛到完整 Workspace；移动端不存在 Folder/Comparison/Focus 等已退休 UI。
+Web/Desktop 与 React/Mobile 均使用同一公开 contracts 与 `GoalWorkspaceReadModel`。Vue/React 详情页都展示 bounded Task/Knowledge context、KR measurement、recent progress/reviews 与轻量 `Past Target` signal；移动端仅压缩布局，不引入第二套 Goal contract，也不存在 Folder/Comparison/Focus 等已退休 UI。
 
 ## 7. 相关资产
 

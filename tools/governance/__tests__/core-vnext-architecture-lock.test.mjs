@@ -126,6 +126,18 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `const overdue = goal.isOverdue || goal.dueDate;`,
       },
       {
+        relPath: 'packages/goal/src/server/domain/legacy-identity.ts',
+        content: `const motivation = goal.motivation; const feasibilityAnalysis = goal.feasibilityAnalysis;`,
+      },
+      {
+        relPath: 'packages/goal/src/application-client/legacy-template.ts',
+        content: `interface GoalTemplate { suggestedStartValue?: number } const BUILT_IN_TEMPLATES = [];`,
+      },
+      {
+        relPath: 'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
+        content: `const legacy = { dueDate: 1, startingValue: 0, progressBaselineValue: 0 };`,
+      },
+      {
         relPath: 'packages/goal/src/server/domain/legacy-measurement.ts',
         content: `const base = kr.startingValue ?? kr.progressBaselineValue;`,
       },
@@ -162,6 +174,8 @@ describe('HARD-7102 core vNext architecture lock', () => {
       'ai-retired-goal-task-draft',
       'task-legacy-classification',
       'goal-legacy-due-time',
+      'goal-legacy-identity-field',
+      'goal-retired-template-track',
       'kr-legacy-measurement',
       'kr-tracking-base-ui-leak',
       'task-goal-ownerless-kr-query',
@@ -236,11 +250,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
       },
       {
         relPath: 'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
-        content: `const GoalPlanDraftV1 = z.object({ dueDate: z.number().nullable() });`,
-      },
-      {
-        relPath: 'packages/contracts/src/modules/ai/api/goal-plan-draft-v1.ts',
-        content: `const DraftKr = z.object({ startingValue: z.number(), progressBaselineValue: z.number().nullable() });`,
+        content: `const GoalPlanDraftV2 = z.object({ target: GoalTimeframeSchema, initialValue: z.number(), currentValue: z.number(), targetValue: z.number() });`,
       },
       {
         relPath: 'packages/task/src/server/domain/task-metric.ts',

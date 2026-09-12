@@ -8,7 +8,7 @@ tags:
   - migration
 description: Key Result Measurement V3，以 initial/current/target 为用户真值并分离 tracking seed
 created: 2026-09-08T17:55:00+08:00
-updated: 2026-09-12T12:13:00+08:00
+updated: 2026-09-12T21:49:00+08:00
 ---
 
 # ADR-068: Key Result Measurement V3 — Initial / Current / Target
@@ -21,7 +21,7 @@ updated: 2026-09-12T12:13:00+08:00
 
 ## 2026-09-12 实现状态
 
-GOAL-7204 已完成 direct canonical cutover：公开 KR 使用 `initialValue/currentValue/targetValue`，server measurement 额外持有 `trackingBaseValue`；普通 client projection/UI 不暴露 tracking base。GoalRecord 的 Sum/Average/Max/Min/Last 聚合仅使用 tracking base 作为 seed/fallback；Initial 编辑不会隐式 rebase。Prisma/PowerSync 使用 `initial_value + tracking_base_value + target_kind + target_end_date`，KR target 复用 GoalTimeframe 的可逆/fail-closed codec。Data Portability 保留 tracking base 以保证 restore 后聚合语义不漂移。AI GoalPlanDraft V1 暂时保留旧 draft 字段至 GOAL-7210，但 apply adapter 已转换到本 ADR 的 V3 owner contract。
+GOAL-7204 已完成 direct canonical cutover：公开 KR 使用 `initialValue/currentValue/targetValue`，server measurement 额外持有 `trackingBaseValue`；普通 client projection/UI 不暴露 tracking base。GoalRecord 的 Sum/Average/Max/Min/Last 聚合仅使用 tracking base 作为 seed/fallback；Initial 编辑不会隐式 rebase。Prisma/PowerSync 使用 `initial_value + tracking_base_value + target_kind + target_end_date`，KR target 复用 GoalTimeframe 的可逆/fail-closed codec。Data Portability 保留 tracking base 以保证 restore 后聚合语义不漂移。GOAL-7208 已将 AI workflow 直接切到 GoalPlanDraft V2；GOAL-7210 删除旧兼容轨道并扩大 anti-resurrection governance，因此当前 AI surface 也只接受本 ADR 的 V3 measurement vocabulary。
 
 ## 1. 问题
 

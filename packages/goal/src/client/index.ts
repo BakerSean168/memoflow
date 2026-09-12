@@ -9,17 +9,10 @@
 
 import type { IResultHttpClient } from '@memoflow/http-client';
 import {
-  BUILT_IN_TEMPLATES,
   GoalClientService,
   createGoalClientService,
   createGoalServiceFromHttpClient,
-  getTemplateById,
-  getTemplatesByCategory,
-  getTemplatesByIndustry,
-  getTemplatesByRole,
   type GoalClientPort,
-  type GoalTemplate,
-  type KeyResultTemplate,
 } from '../application-client';
 import { Goal, GoalRecord, GoalReview, KeyResult } from '../domain-client';
 import {
@@ -38,11 +31,9 @@ export type {
   GoalClientPort,
   GoalHttpAdapters,
   GoalIpcAdapters,
-  GoalTemplate,
   IGoalApiClient,
   IResultHttpClient,
   IResultIpcClient,
-  KeyResultTemplate,
 };
 
 export function createGoalHttpClient(httpClient: IResultHttpClient): GoalClientPort {
@@ -55,7 +46,6 @@ export function createGoalIpcClient(ipcClient: IResultIpcClient): GoalClientPort
 }
 
 export {
-  BUILT_IN_TEMPLATES,
   Goal,
   GoalClientService,
   GoalHttpAdapter,
@@ -66,8 +56,4 @@ export {
   createGoalClientService,
   createGoalHttpAdapters,
   createGoalIpcAdapters,
-  getTemplateById,
-  getTemplatesByCategory,
-  getTemplatesByIndustry,
-  getTemplatesByRole,
 };

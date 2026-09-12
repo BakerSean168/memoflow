@@ -8,12 +8,12 @@ tags:
   - domain
 description: Goal / Task vNext 的产品模型、页面信息架构、交互文案与跨模块闭环
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-09-08T17:55:00+08:00
+updated: 2026-09-12T21:49:00+08:00
 ---
 
 # Goal / Task vNext 产品设计
 
-> **2026-09-08 Goal 后续设计：** 本文保留 2026-08-25 已实施版本的历史设计语义。Goal 的下一轮 accepted target design 已扩展为 `summary + Planned/InProgress + Target Timeframe + KR Measurement V3 + Goal Workspace + AI multi-entity plan`，详见 [Goal vNext active plan](../plan/active/2026-09-08-goal-vnext-model-convergence.md) 与 ADR-067～070。Task 的既有 vNext lifecycle/due/overdue 语义除 ADR-069 的 Goal-level link 外保持不变。
+> **2026-09-12 canonical state：** Goal 已完成 vNext direct cutover：identity 为 `name + summary`，lifecycle 为 `Planned / InProgress / Completed / Abandoned`，planning time 为 `startDate + GoalTimeframe target`，KR 使用 Measurement V3，Goal Workspace 组合 Task/Knowledge context，AI 使用 durable GoalPlanDraft V2。Task 的 vNext lifecycle/due/overdue 语义保持 Task owner 真值。详见 [Goal vNext active plan](../plan/active/2026-09-08-goal-vnext-model-convergence.md) 与 ADR-067～070。
 
 ## 1. North Star
 
@@ -44,12 +44,13 @@ Goal 与 Task 独立可用，联合使用时自动闭环。
 用户可见字段：
 
 ```text
-title
-description?
-status
-startDate?
-dueDate?
+name
+summary?
+status = Planned | InProgress | Completed | Abandoned
+startDate?     # Ymd
+target?        # GoalTimeframe: Day / Month / Quarter / Half-year / Year
 labels[]
+reminderConfig?
 keyResults[]
 ```
 

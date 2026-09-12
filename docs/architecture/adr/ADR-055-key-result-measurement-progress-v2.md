@@ -7,7 +7,7 @@ tags:
   - measurement
 description: Key Result Measurement V2，删除 valueType、拆分记录起点与进度基线并统一进度/完成语义
 created: 2026-08-25T14:28:00+08:00
-updated: 2026-09-12T12:13:00+08:00
+updated: 2026-09-12T21:49:00+08:00
 ---
 
 # ADR-055: Key Result Measurement & Progress V2
@@ -21,7 +21,7 @@ updated: 2026-09-12T12:13:00+08:00
 
 ## 2026-09-12 实现状态
 
-KR Measurement V2 已被 ADR-068 的 Measurement V3 取代。旧 `valueType`、`startingValue`、`progressBaselineValue` 均不再是 Goal owner 产品真值；统一 calculator、Goal Record aggregation、Review snapshot、Prisma/PowerSync、Vue/React 与 Data Portability 已切到 V3。AI GoalPlanDraft V1 仅在 GOAL-7210 前作为 workflow compatibility surface 暂存旧字段，并在 apply 边界投影为 V3。
+KR Measurement V2 已被 ADR-068 的 Measurement V3 取代。旧 `valueType`、`startingValue`、`progressBaselineValue` 均不再是 Goal owner 产品真值；统一 calculator、Goal Record aggregation、Review snapshot、Prisma/PowerSync、Vue/React 与 Data Portability 已切到 V3。GOAL-7208 已将 AI workflow 切到 GoalPlanDraft V2，GOAL-7210 进一步删除旧兼容产品轨道并让治理门禁拒绝这些字段重新进入当前 Goal/AI/persistence surface。
 
 ## 1. 背景
 
