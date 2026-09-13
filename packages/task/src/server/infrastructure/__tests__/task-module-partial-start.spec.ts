@@ -42,7 +42,7 @@ function makeContribution(name: string, failOnStart = false): FakeContribution {
 function makeDeps(runtimeContributions: TaskModuleRuntimeContribution[]): TaskModuleDependencies {
   return {
     taskPlanRepository: {
-      findNeedGenerateInstances: vi.fn(async () => []),
+      findActiveRecurringPlansForMaterialization: vi.fn(async () => []),
     } as unknown as ITaskPlanRepository,
     taskOccurrenceRepository: {} as unknown as ITaskOccurrenceRepository,
     taskWriteTransactionRunner: {} as unknown as TaskWriteTransactionRunner,

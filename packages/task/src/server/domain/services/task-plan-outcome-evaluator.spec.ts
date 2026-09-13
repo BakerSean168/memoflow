@@ -30,7 +30,8 @@ function fifteenDayPlan(policy = TaskPlanCompletionPolicy.AllowCorrection) {
     endDate: null,
     occurrences: 15,
   });
-  const timeConfig = TaskTimeConfig.createAllDay(new Date());
+  const base = Date.parse('2026-03-01T00:00:00.000Z');
+  const timeConfig = TaskTimeConfig.createAllDay(new Date(base));
   const template = TaskPlan.load(
     aTaskPlanState({
       taskType: TaskType.Recurring,
@@ -39,7 +40,6 @@ function fifteenDayPlan(policy = TaskPlanCompletionPolicy.AllowCorrection) {
       completionPolicy: policy,
     }),
   );
-  const base = Date.now() - 15 * 86_400_000;
   const instances = Array.from({ length: 15 }, (_, index) =>
     TaskOccurrence.create({
       planId: template.id,
@@ -137,7 +137,50 @@ describe('TaskPlanOutcomeEvaluator (TASK-2202)', () => {
     );
   });
 
-  it('uses the identity timezone when deciding whether an Until scope is fully generated', () => {
+  it('requires the expected Count dates rather than any equally-sized occurrence set', () => {
+    const schedule = TaskPlanSchedule.create({
+      kind: TaskPlanScheduleKind.Recurring,
+      startDate: asYmd('2026-03-01'),
+      timing: { kind: TaskTimingKind.AllDay },
+      recurrence: {
+        frequency: RecurrenceFrequency.Daily,
+        interval: 1,
+        byWeekday: [],
+        end: { kind: TaskRecurrenceEndKind.Count, count: 3 },
+      },
+    });
+    const template = TaskPlan.load(aTaskPlanState({ schedule }));
+    const makeCompleted = (date: string) => {
+      const instance = TaskOccurrence.create({
+        planId: template.id,
+        identityId: template.identityId,
+        scheduleSnapshot: TaskOccurrenceScheduleSnapshot.create({
+          date: asYmd(date),
+          timing: { kind: TaskTimingKind.AllDay },
+        }),
+        importanceSnapshot: ImportanceLevel.Moderate,
+      });
+      instance.complete();
+      return instance;
+    };
+
+    expect(
+      evaluator.evaluate(
+        template,
+        ['2026-03-01', '2026-03-02', '2026-03-04'].map(makeCompleted),
+        TASK_TEST_TIME_CONTEXT,
+      ),
+    ).toBe(TaskPlanOutcome.Open);
+    expect(
+      evaluator.evaluate(
+        template,
+        ['2026-03-01', '2026-03-02', '2026-03-03'].map(makeCompleted),
+        TASK_TEST_TIME_CONTEXT,
+      ),
+    ).toBe(TaskPlanOutcome.Succeeded);
+  });
+
+  it('requires every expected Until recurrence date instead of trusting a generation cursor', () => {
     const timeContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });
     const schedule = TaskPlanSchedule.create({
       kind: TaskPlanScheduleKind.Recurring,
@@ -150,37 +193,57 @@ describe('TaskPlanOutcomeEvaluator (TASK-2202)', () => {
         end: { kind: TaskRecurrenceEndKind.Until, date: asYmd('2026-03-09') },
       },
     });
-    const timeConfig = TaskTimeConfig.createAllDay(Date.parse('2026-03-08T05:00:00.000Z'));
-    const instance = TaskOccurrence.create({
-      planId: aTaskPlanState().id,
-      identityId: aTaskPlanState().identityId,
-      scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
-        Date.parse('2026-03-08T05:00:00.000Z'),
-        timeConfig,
-        timeContext,
-      ),
-      importanceSnapshot: ImportanceLevel.Moderate,
+    const template = TaskPlan.load(aTaskPlanState({ schedule }));
+    const instances = Array.from({ length: 9 }, (_, index) => {
+      const day = String(index + 1).padStart(2, '0');
+      const instance = TaskOccurrence.create({
+        planId: template.id,
+        identityId: template.identityId,
+        scheduleSnapshot: TaskOccurrenceScheduleSnapshot.create({
+          date: asYmd(`2026-03-${day}`),
+          timing: { kind: TaskTimingKind.AllDay },
+        }),
+        importanceSnapshot: ImportanceLevel.Moderate,
+      });
+      instance.complete();
+      return instance;
     });
-    instance.complete();
 
-    const beforeLocalMidnight = TaskPlan.load(
-      aTaskPlanState({
-        schedule,
-        lastGeneratedDate: Date.parse('2026-03-09T03:30:00.000Z'), // Mar 8 23:30 in New York
-      }),
-    );
-    expect(evaluator.evaluate(beforeLocalMidnight, [instance], timeContext)).toBe(
+    expect(evaluator.evaluate(template, instances.slice(0, 8), timeContext)).toBe(
       TaskPlanOutcome.Open,
     );
+    expect(evaluator.evaluate(template, instances, timeContext)).toBe(TaskPlanOutcome.Succeeded);
+  });
 
-    const atLocalMidnight = TaskPlan.load(
-      aTaskPlanState({
-        schedule,
-        lastGeneratedDate: Date.parse('2026-03-09T04:00:00.000Z'), // Mar 9 00:00 in New York
-      }),
-    );
-    expect(evaluator.evaluate(atLocalMidnight, [instance], timeContext)).toBe(
-      TaskPlanOutcome.Succeeded,
+  it('stays Open when an Until scope contains a materialization hole', () => {
+    const schedule = TaskPlanSchedule.create({
+      kind: TaskPlanScheduleKind.Recurring,
+      startDate: asYmd('2026-03-01'),
+      timing: { kind: TaskTimingKind.AllDay },
+      recurrence: {
+        frequency: RecurrenceFrequency.Daily,
+        interval: 1,
+        byWeekday: [],
+        end: { kind: TaskRecurrenceEndKind.Until, date: asYmd('2026-03-03') },
+      },
+    });
+    const template = TaskPlan.load(aTaskPlanState({ schedule }));
+    const instances = ['2026-03-01', '2026-03-03'].map((date) => {
+      const instance = TaskOccurrence.create({
+        planId: template.id,
+        identityId: template.identityId,
+        scheduleSnapshot: TaskOccurrenceScheduleSnapshot.create({
+          date: asYmd(date),
+          timing: { kind: TaskTimingKind.AllDay },
+        }),
+        importanceSnapshot: ImportanceLevel.Moderate,
+      });
+      instance.complete();
+      return instance;
+    });
+
+    expect(evaluator.evaluate(template, instances, TASK_TEST_TIME_CONTEXT)).toBe(
+      TaskPlanOutcome.Open,
     );
   });
 

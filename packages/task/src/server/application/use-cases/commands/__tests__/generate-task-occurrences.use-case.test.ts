@@ -47,7 +47,6 @@ describe('GenerateTaskOccurrencesUseCase (TASK-2204)', () => {
       taskType: TaskType.Recurring,
       timeConfig,
       recurrenceRule: aDailyRecurrenceRule(),
-      lastGeneratedDate: null,
     });
     const existing = await aTaskOccurrence({
       templateId: template.id,

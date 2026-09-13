@@ -113,8 +113,6 @@ export class PowerSyncTaskPlanRepository
       ['reminder_config_time_offset_minutes', data.reminderConfigTimeOffsetMinutes],
       ['reminder_config_unit', data.reminderConfigUnit],
       ['reminder_config_channel', data.reminderConfigChannel],
-      ['last_generated_date', data.lastGeneratedDate],
-      ['generate_ahead_days', data.generateAheadDays],
       ['goal_id', data.goalId],
       ['key_result_id', data.keyResultId],
       ['goal_record_value', data.goalRecordValue],
@@ -248,18 +246,14 @@ export class PowerSyncTaskPlanRepository
     return rows.map((row) => ({ id: String(row.id), identityId: String(row.identity_id) }));
   }
 
-  async findNeedGenerateInstances(toDate: number): Promise<TaskPlan[]> {
-    const rawRows = await this.db.getAll<PowerSyncTaskPlanRow>(
+  async findActiveRecurringPlansForMaterialization(): Promise<TaskPlan[]> {
+    const rows = await this.db.getAll<PowerSyncTaskPlanRow>(
       `SELECT * FROM task_templates
        WHERE recurrence_rule_type IS NOT NULL AND status = 'Active' AND deleted_at IS NULL
        ORDER BY updated_at ASC`,
       [],
     );
-    const rows = rawRows.map((row) => PowerSyncTaskPlanMapper.toDomain(row));
-    return rows.filter((template) => {
-      const lastGeneratedDate = template.toServerDTO().lastGeneratedDate;
-      return lastGeneratedDate == null || lastGeneratedDate < toDate;
-    });
+    return rows.map((row) => PowerSyncTaskPlanMapper.toDomain(row));
   }
 
   async delete(identityId: string, id: string): Promise<void> {

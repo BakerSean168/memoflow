@@ -128,8 +128,6 @@ export function projectTaskPlans(templates: unknown[], ctx: ExportContext): Port
       timeConfig: parseJsonField(entity.timeConfig, flattenedTimeConfig) ?? flattenedTimeConfig,
       recurrenceRule: recurrenceRule ?? null,
       reminderConfig: parseJsonField(entity.reminderConfig, flattenedReminder) ?? flattenedReminder,
-      lastGeneratedDate: toDateString(entity.lastGeneratedDate),
-      generateAheadDays: entity.generateAheadDays == null ? null : Number(entity.generateAheadDays),
       createdAt: toDateString(entity.createdAt),
       updatedAt: toDateString(entity.updatedAt),
     };

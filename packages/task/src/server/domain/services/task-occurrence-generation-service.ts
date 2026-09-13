@@ -1,9 +1,8 @@
 /**
- * TaskOccurrenceGenerationService - task instance generation domain service.
+ * TaskOccurrenceGenerationService - task occurrence materialization domain service.
  *
- * Pure business calculation only. The caller resolves the user's Product Time
- * context at the application/runtime boundary and passes the immutable value in;
- * this service never reads the host timezone.
+ * Materialization is derived exclusively from the canonical TaskPlan schedule plus
+ * independently-owned occurrence facts. No generation cursor is stored on TaskPlan.
  */
 
 import { TaskPlan, TaskOccurrence } from '../aggregates';
@@ -11,7 +10,7 @@ import * as instanceGeneration from '../aggregates/instance-generation.policy';
 import { TASK_INSTANCE_GENERATION_CONFIG } from '@memoflow/contracts/task';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
 
-const { TARGET_GENERATE_AHEAD_DAYS, REFILL_THRESHOLD_DAYS } = TASK_INSTANCE_GENERATION_CONFIG;
+const { TARGET_GENERATE_AHEAD_DAYS } = TASK_INSTANCE_GENERATION_CONFIG;
 
 export class TaskOccurrenceGenerationService {
   private buildContext(
@@ -56,16 +55,21 @@ export class TaskOccurrenceGenerationService {
       date,
     );
   }
-  /** Generate occurrences for one plan without persistence side effects. */
+
+  /**
+   * Idempotently materialize occurrences for a bounded window.
+   *
+   * The default window is `now -> now + TARGET_GENERATE_AHEAD_DAYS`. Re-enumerating
+   * that window is deliberate: the existing occurrence keys are the durable truth,
+   * so a missing date anywhere inside the window can be repaired without a cursor.
+   */
   generateInstances(
     template: TaskPlan,
     timeContext: TimeContext,
     options: {
-      forceGenerate?: boolean;
       targetDate?: number;
-      /** Explicit requested range start; wins over lastGeneratedTime/now. */
       fromDate?: number;
-      /** Existing independently-owned occurrences used only for idempotent materialization. */
+      /** Existing independently-owned occurrences used for idempotent materialization. */
       existingInstances?: readonly TaskOccurrence[];
       /** Injectable instant for deterministic tests/runtime passes. */
       now?: number;
@@ -73,18 +77,10 @@ export class TaskOccurrenceGenerationService {
   ): TaskOccurrence[] {
     const now = options.now ?? Date.now();
     const taskTime = createTimeFacade({ context: timeContext });
-    const { forceGenerate = false } = options;
-
-    const lastGeneratedTime = template.lastGeneratedDate;
-    const fromDate =
-      options.fromDate ??
-      (!forceGenerate && lastGeneratedTime ? taskTime.calendar.addDays(lastGeneratedTime, 1) : now);
-
+    const fromDate = options.fromDate ?? now;
     const toDate = options.targetDate ?? taskTime.calendar.addDays(now, TARGET_GENERATE_AHEAD_DAYS);
 
-    if (fromDate > toDate) {
-      return [];
-    }
+    if (fromDate > toDate) return [];
 
     const result = instanceGeneration.generateInstances(
       this.buildContext(template, timeContext, options.existingInstances ?? []),
@@ -92,8 +88,7 @@ export class TaskOccurrenceGenerationService {
       toDate,
     );
 
-    if (result.lastGeneratedDate != null) {
-      template.recordGenerationHorizon(result.lastGeneratedDate);
+    if (result.instances.length > 0) {
       template.publishDomainEvent('task:instance-generated', {
         identityId: template.identityId,
         templateId: template.id,
@@ -104,25 +99,5 @@ export class TaskOccurrenceGenerationService {
     }
 
     return result.instances;
-  }
-
-  /** Whether the plan's generated horizon is below the refill threshold. */
-  shouldRefillInstances(template: TaskPlan, timeContext: TimeContext, now = Date.now()): boolean {
-    if (template.status !== 'Active') {
-      return false;
-    }
-
-    const taskTime = createTimeFacade({ context: timeContext });
-    const lastGenerated = template.lastGeneratedDate || 0;
-    const daysRemaining = taskTime.calendar.diffCalendarDays(lastGenerated, now);
-    return daysRemaining < REFILL_THRESHOLD_DAYS;
-  }
-
-  /** Calculate the canonical refill horizon in the supplied user calendar. */
-  calculateRefillTargetDate(timeContext: TimeContext, now = Date.now()): number {
-    return createTimeFacade({ context: timeContext }).calendar.addDays(
-      now,
-      TARGET_GENERATE_AHEAD_DAYS,
-    );
   }
 }

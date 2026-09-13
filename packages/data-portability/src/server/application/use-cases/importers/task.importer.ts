@@ -97,8 +97,6 @@ export async function importTasks(
         (rc?.channel as string | undefined) ??
         (reminderTrigger?.channel as string | undefined) ??
         null,
-      lastGeneratedDate: t.lastGeneratedDate ? String(t.lastGeneratedDate) : null,
-      generateAheadDays: t.generateAheadDays == null ? null : Number(t.generateAheadDays),
       goalId: optRef(t.goalRef as string | null, ctx),
       keyResultId: optRef(t.keyResultRef as string | null, ctx),
       goalRecordValue: contribution?.value == null ? null : Number(contribution.value),

@@ -59,8 +59,6 @@ export const PortableTaskPlanSchema = z
     timeConfig: z.unknown(),
     recurrenceRule: z.unknown().nullable().optional(),
     reminderConfig: z.unknown().nullable().optional(),
-    lastGeneratedDate: IsoDateString.nullable().optional(),
-    generateAheadDays: z.number().int().nullable().optional(),
     createdAt: IsoDateString.optional(),
     updatedAt: IsoDateString.optional(),
   })

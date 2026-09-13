@@ -117,7 +117,6 @@ describe('Instance maintenance use-cases', () => {
 
       expect(result).toBeOkWith([] as any);
       expect(mockGenerateInstances).toHaveBeenCalledWith(template, TASK_TEST_TIME_CONTEXT, {
-        forceGenerate: true,
         targetDate: 2,
         fromDate: 1,
         existingInstances: [],

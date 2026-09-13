@@ -31,8 +31,6 @@ export interface TaskPlanClientDTO {
   closedAt: TransferDate | null;
   archivedAt: TransferDate | null;
   abandonedReason: string | null;
-  lastGeneratedDate: TransferDate | null;
-  generateAheadDays: number | null; // null for ONE_TIME tasks
   version: number;
   createdAt: TransferDate;
   updatedAt: TransferDate;

@@ -52,6 +52,49 @@ describe('Task vNext simplified domain surface', () => {
     expect(templateRepositoryPort).not.toContain('findByIdWithChildren');
   });
 
+  it('keeps materialization cursor-free at product and domain boundaries (TASK-7304)', () => {
+    const serverContract = readFileSync(
+      resolve(contractsTask, 'aggregates/task-plan-server.ts'),
+      'utf8',
+    );
+    const clientContract = readFileSync(
+      resolve(contractsTask, 'aggregates/task-plan-client.ts'),
+      'utf8',
+    );
+    const responseSchema = readFileSync(resolve(contractsTask, 'api/response-schemas.ts'), 'utf8');
+    const generationService = readFileSync(
+      resolve(__dirname, 'services/task-occurrence-generation-service.ts'),
+      'utf8',
+    );
+    const outcomeEvaluator = readFileSync(
+      resolve(__dirname, 'services/task-plan-outcome-evaluator.ts'),
+      'utf8',
+    );
+    const portableTask = readFileSync(
+      resolve(taskRoot, '../contracts/src/modules/data-portability/dtos/portable-tasks.dto.ts'),
+      'utf8',
+    );
+
+    for (const source of [
+      templateState,
+      serverContract,
+      clientContract,
+      responseSchema,
+      portableTask,
+    ]) {
+      expect(source).not.toMatch(/lastGeneratedDate|generateAheadDays/);
+    }
+    expect(template).not.toMatch(/recordGenerationHorizon|lastGeneratedDate|generateAheadDays/);
+    expect(templateRepositoryPort).not.toContain('findNeedGenerateInstances');
+    expect(templateRepositoryPort).toContain('findActiveRecurringPlansForMaterialization');
+    expect(generationService).not.toMatch(
+      /recordGenerationHorizon|lastGeneratedDate|shouldRefillInstances|calculateRefillTargetDate/,
+    );
+    expect(generationService).toContain('existingInstances');
+    expect(outcomeEvaluator).not.toContain('lastGeneratedDate');
+    expect(outcomeEvaluator).toContain('recurrenceDatesBetween');
+  });
+
   it('keeps user priority as importance and preserves execution capabilities', () => {
     expect(templateState).toContain('importance: ImportanceLevel');
     expect(templateState).toContain('checklist: ChecklistItemDefinition[]');

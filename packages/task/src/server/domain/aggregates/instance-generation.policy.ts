@@ -40,7 +40,6 @@ export interface InstanceGenerationContext {
 /** Result of instance generation. */
 export interface InstanceGenerationResult {
   instances: TaskOccurrence[];
-  lastGeneratedDate: number | null;
 }
 
 /** Parameters for createInstance. */
@@ -190,7 +189,7 @@ export function generateInstances(
     ).length;
 
     if (maxOccurrences !== null && existingInstanceCount >= maxOccurrences) {
-      return { instances: [], lastGeneratedDate: null };
+      return { instances: [] };
     }
 
     const candidateDates = recurrenceDatesBetween(
@@ -224,8 +223,7 @@ export function generateInstances(
     }
   }
 
-  const lastGeneratedDate = instances.length > 0 ? toDate : null;
-  return { instances, lastGeneratedDate };
+  return { instances };
 }
 
 /**

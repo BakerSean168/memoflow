@@ -169,8 +169,6 @@ export interface CreateTaskPlanInput extends TimestampedImportInput {
   reminderConfigTimeOffsetMinutes: number | null;
   reminderConfigUnit: string | null;
   reminderConfigChannel: string | null;
-  lastGeneratedDate: string | null;
-  generateAheadDays: number | null;
   goalId: string | null;
   keyResultId: string | null;
   goalRecordValue: number | null;

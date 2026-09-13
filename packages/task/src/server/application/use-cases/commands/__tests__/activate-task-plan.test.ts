@@ -17,8 +17,6 @@ vi.mock('../../../../domain/services', () => {
   return {
     TaskOccurrenceGenerationService: class {
       generateInstances = mockGenerateInstances;
-      shouldRefillInstances = vi.fn().mockReturnValue(false);
-      calculateRefillTargetDate = vi.fn().mockReturnValue(Date.now());
     },
   };
 });
@@ -109,7 +107,6 @@ describe('ActivateTaskPlanUseCase', () => {
     await useCase.execute(template.id, template.identityId);
 
     expect(mockGenerateInstances).toHaveBeenCalledWith(template, TASK_TEST_TIME_CONTEXT, {
-      forceGenerate: true,
       fromDate: expect.any(Number),
       existingInstances: [],
     });

@@ -307,7 +307,6 @@ describe('UpdateTaskPlanUseCase', () => {
       taskType: TaskType.Recurring,
       timeConfig,
       recurrenceRule,
-      lastGeneratedDate: effectiveFrom + 3 * 86400000,
     });
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
     useCase = new UpdateTaskPlanUseCase(
@@ -341,7 +340,6 @@ describe('UpdateTaskPlanUseCase', () => {
       taskType: TaskType.Recurring,
       timeConfig: oldTimeConfig,
       recurrenceRule: RecurrenceRule.createDaily(),
-      lastGeneratedDate: effectiveFrom + 3 * day,
       importance: ImportanceLevel.Moderate,
     });
     const futurePending = await aTaskOccurrence({
@@ -398,7 +396,7 @@ describe('UpdateTaskPlanUseCase', () => {
     expect(futureInProgress.scheduleSnapshot.timing).toEqual({ kind: 'At', time: '09:00' });
   });
 
-  it('does not expand the generation horizon when no future Pending instance exists', async () => {
+  it('does not synthesize a regeneration horizon when no future Pending fact exists', async () => {
     const day = 86400000;
     const effectiveFrom = Date.UTC(2026, 6, 30, 12);
     const oldTimeConfig = aTimePointConfig(540, new Date(effectiveFrom - day));
@@ -406,7 +404,6 @@ describe('UpdateTaskPlanUseCase', () => {
       taskType: TaskType.Recurring,
       timeConfig: oldTimeConfig,
       recurrenceRule: RecurrenceRule.createDaily(),
-      lastGeneratedDate: effectiveFrom - 1,
     });
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
     vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([]);

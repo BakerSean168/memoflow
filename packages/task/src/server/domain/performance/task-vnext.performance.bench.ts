@@ -11,6 +11,7 @@ import { TaskPlan } from '../aggregates/task-plan';
 import { TaskPlanId } from '../value-objects/task-plan-id';
 import { TaskPlanStatus } from '../value-objects/task-plan-status';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createTaskRecurrenceDateAdapter } from '../aggregates/task-recurrence-date.adapter';
 import { TaskPlanOutcomeEvaluator } from '../services/task-plan-outcome-evaluator';
@@ -58,14 +59,13 @@ describe('Task vNext performance budgets', () => {
       goalBinding: null,
       checklist: [],
       reminderConfig: null,
-      lastGeneratedDate: null,
-      generateAheadDays: null,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
       version: 1,
     });
-    const occurrences = Array.from({ length: occurrenceCount }, () => ({
+    const occurrences = Array.from({ length: occurrenceCount }, (_, index) => ({
+      scheduleDate: new Date(Date.UTC(2026, 0, index + 1)).toISOString().slice(0, 10) as Ymd,
       status: TaskOccurrenceStatus.Completed,
       deletedAt: null,
     }));

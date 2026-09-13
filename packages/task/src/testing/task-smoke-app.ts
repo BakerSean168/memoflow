@@ -48,7 +48,7 @@ export function createMockTemplateRepo(): ITaskPlanRepository {
     findByGoalId: vi.fn().mockResolvedValue([]),
     findByLabelIdsAll: vi.fn().mockResolvedValue([]),
     replaceLabels: vi.fn().mockResolvedValue([]),
-    findNeedGenerateInstances: vi.fn().mockResolvedValue([]),
+    findActiveRecurringPlansForMaterialization: vi.fn().mockResolvedValue([]),
     delete: vi.fn().mockResolvedValue(undefined),
     softDelete: vi.fn().mockResolvedValue(undefined),
     restore: vi.fn().mockResolvedValue(undefined),

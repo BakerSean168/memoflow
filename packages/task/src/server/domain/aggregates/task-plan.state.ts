@@ -27,8 +27,6 @@ export interface TaskPlanState {
   goalBinding: TaskGoalBinding | null;
   checklist: ChecklistItemDefinition[];
   reminderConfig: TaskReminderConfig | null;
-  lastGeneratedDate: Instant | null;
-  generateAheadDays: number | null;
   createdAt: Instant;
   updatedAt: Instant;
   deletedAt: Instant | null;

@@ -36,8 +36,6 @@ vi.mock('../../../../domain/services', () => {
   return {
     TaskOccurrenceGenerationService: class {
       generateInstances = mockGenerateInstances;
-      shouldRefillInstances = vi.fn().mockReturnValue(false);
-      calculateRefillTargetDate = vi.fn().mockReturnValue(Date.now());
     },
   };
 });

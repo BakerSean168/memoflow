@@ -39,8 +39,6 @@ export const TaskPlanResponseSchema = z.object({
   closedAt: z.number().nullable(),
   archivedAt: z.number().nullable(),
   abandonedReason: z.string().nullable(),
-  lastGeneratedDate: z.number().nullable(),
-  generateAheadDays: z.number().nullable(),
   version: z.number(),
   createdAt: z.number(),
   updatedAt: z.number(),

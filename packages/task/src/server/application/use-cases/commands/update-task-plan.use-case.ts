@@ -114,7 +114,6 @@ export class UpdateTaskPlanUseCase {
               instance.status === TaskOccurrenceStatus.Pending &&
               instance.scheduleDate > effectiveFromDate,
           );
-          const originalGenerationHorizon = template.lastGeneratedDate;
 
           if (request.name !== undefined) {
             template.updateTitle(request.name);
@@ -164,15 +163,13 @@ export class UpdateTaskPlanUseCase {
               (instance) => !affectedIdSet.has(String(instance.id)),
             );
 
-            const generationHorizon = Math.max(
-              originalGenerationHorizon ?? 0,
-              ...affectedPendingInstances.map((instance) =>
-                Number(instance.scheduledStartOfDayAt(timeContext)),
-              ),
+            const generationHorizon = affectedPendingInstances.reduce(
+              (latest, instance) =>
+                Math.max(latest, Number(instance.scheduledStartOfDayAt(timeContext))),
+              effectiveFrom,
             );
             if (template.status === TaskPlanStatus.Active && generationHorizon > effectiveFrom) {
               const regenerated = this.generationService.generateInstances(template, timeContext, {
-                forceGenerate: true,
                 fromDate: effectiveFrom,
                 targetDate: generationHorizon,
                 existingInstances: preservedInstances,

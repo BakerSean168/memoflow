@@ -165,10 +165,6 @@ export class PowerSyncTaskPlanMapper {
               ),
           )
         : [],
-      lastGeneratedDate: data.last_generated_date
-        ? new Date(data.last_generated_date).getTime()
-        : null,
-      generateAheadDays: data.generate_ahead_days ?? null,
       createdAt: new Date(data.created_at).getTime(),
       updatedAt: new Date(data.updated_at).getTime(),
       deletedAt: data.deleted_at ? new Date(data.deleted_at).getTime() : null,
@@ -219,9 +215,6 @@ export class PowerSyncTaskPlanMapper {
       reminderConfigTimeOffsetMinutes: reminderTrigger?.relativeValue ?? null,
       reminderConfigUnit: reminderTrigger?.relativeUnit ?? null,
       reminderConfigChannel: reminderTrigger ? 'PUSH' : null,
-      lastGeneratedDate:
-        dto.lastGeneratedDate != null ? new Date(dto.lastGeneratedDate).toISOString() : null,
-      generateAheadDays: dto.generateAheadDays ?? null,
       goalId: dto.goalBinding?.goalId ?? null,
       keyResultId: dto.goalBinding?.keyResultId ?? null,
       goalRecordValue: dto.goalBinding?.contribution?.value ?? null,

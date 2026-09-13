@@ -110,8 +110,6 @@ function makeState(
     goalBinding: overrides.goalBinding ?? null,
     checklist: overrides.checklist ?? [],
     reminderConfig: overrides.reminderConfig ?? null,
-    lastGeneratedDate: overrides.lastGeneratedDate ?? null,
-    generateAheadDays: overrides.generateAheadDays ?? null,
     createdAt: overrides.createdAt ?? now,
     updatedAt: overrides.updatedAt ?? now,
     deletedAt: overrides.deletedAt ?? null,
@@ -279,20 +277,6 @@ describe('TaskPlan Aggregate', () => {
         expect(template.schedule.toLegacyRecurrenceRule(TASK_TEST_TIME_CONTEXT)?.toDTO()).toEqual(
           recurrenceRule.toDTO(),
         );
-        expect(template.generateAheadDays).toBe(30);
-      });
-
-      it('should accept custom generateAheadDays', () => {
-        const template = TaskPlan.createRecurringTask({
-          identityId: makeIdentityId(),
-          title: 'Task',
-          timeConfig: makeAllDayTimeConfig(),
-          recurrenceRule: makeDailyRule(),
-          generateAheadDays: 7,
-          timeContext: TASK_TEST_TIME_CONTEXT,
-        });
-
-        expect(template.generateAheadDays).toBe(7);
       });
 
       it('should accept a reminder config', () => {
@@ -805,7 +789,6 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
         const existing = generationService.generateInstances(template, TASK_TEST_TIME_CONTEXT, {
-          forceGenerate: true,
           fromDate: new Date('2025-06-15T00:00:00Z').getTime(),
           targetDate: new Date('2025-06-15T23:59:59Z').getTime(),
         });

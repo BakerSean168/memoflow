@@ -61,7 +61,6 @@ export class ActivateTaskPlanUseCase {
           // Existing occurrences are independent facts; pass them explicitly to materialization.
           const existingInstances = await instanceRepository.findByTemplateId(id, identityId);
           const instances = this.generationService.generateInstances(template, timeContext, {
-            forceGenerate: true,
             fromDate: Date.now(),
             existingInstances,
           });

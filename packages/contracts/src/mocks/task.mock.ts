@@ -41,8 +41,6 @@ export function createMockTaskPlan(overrides: Partial<TaskPlanClientDTO> = {}): 
     closedAt: status === 'Closed' ? now : null,
     archivedAt: null,
     abandonedReason: outcome === 'Abandoned' ? 'Mock abandoned task plan' : null,
-    lastGeneratedDate: null,
-    generateAheadDays: null,
     version: 1,
     createdAt: now - faker.number.int({ min: 0, max: 30 * 24 * 60 * 60 * 1000 }),
     updatedAt: now,

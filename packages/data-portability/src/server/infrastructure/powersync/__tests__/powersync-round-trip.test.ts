@@ -51,6 +51,8 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(exported.content).not.toContain('apiKey');
     expect(exported.content).not.toContain('secret-key');
     expect(exported.content).not.toContain('sessionToken');
+    expect(exported.content).not.toContain('lastGeneratedDate');
+    expect(exported.content).not.toContain('generateAheadDays');
     expect(exported.content).toContain('"repositories"');
     expect(exported.content).toContain('"goals"');
     expect(JSON.parse(exported.content).schemaVersion).toBe(2);

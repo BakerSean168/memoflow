@@ -271,13 +271,12 @@ export class TaskPlanPrismaRepository
     return rows.map((row) => ({ id: row.id, identityId: row.identityId }));
   }
 
-  async findNeedGenerateInstances(toDate: number): Promise<TaskPlan[]> {
+  async findActiveRecurringPlansForMaterialization(): Promise<TaskPlan[]> {
     const data = await this.db.taskPlan.findMany({
       where: {
         recurrenceRuleType: { not: null },
         status: 'Active',
         deletedAt: null,
-        OR: [{ lastGeneratedDate: null }, { lastGeneratedDate: { lt: new Date(toDate) } }],
       },
     });
     return data.map((record: PrismaTaskPlan) => this.mapToEntity(record));

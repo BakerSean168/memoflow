@@ -42,8 +42,6 @@ function validTemplateResponse() {
     closedAt: null,
     archivedAt: null,
     abandonedReason: null,
-    lastGeneratedDate: null,
-    generateAheadDays: null,
     version: 1,
     createdAt: 1,
     updatedAt: 1,

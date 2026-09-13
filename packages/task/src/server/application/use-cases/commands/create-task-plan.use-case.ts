@@ -127,9 +127,9 @@ export class CreateTaskPlanUseCase {
               : null,
           });
 
-          // R2-5a 乐观锁：模板只保存一次。顺序：先 generate（内存更新
-          // lastGeneratedDate），再 save 模板（持久化模板供实例 FK），
-          // 最后 saveMany 实例。
+          // Materialize from canonical schedule before persistence. TaskPlan carries no
+          // generation cursor; save is still required before occurrences for the FK and
+          // to flush the generated domain event after the transaction commits.
           const instances =
             template.status === TaskPlanStatus.Active
               ? this.generationService.generateInstances(template, resolvedTimeContext)
@@ -180,7 +180,6 @@ export class CreateTaskPlanUseCase {
         }
       }
 
-      // eslint-disable-next-line no-console
       console.error('[CreateTaskPlan] failed', {
         message: caughtError instanceof Error ? caughtError.message : String(caughtError),
         code: (caughtError as { code?: string }).code,

@@ -1,231 +1,136 @@
-/**
- * TaskOccurrenceGenerationService Tests
- *
- * Tests the domain service that calculates which instances to generate
- * for a recurring task template. Pure domain logic — no persistence.
- */
-
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { TaskOccurrenceGenerationService } from './task-occurrence-generation-service';
-import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TaskType } from '@memoflow/contracts/task';
+import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import {
-  aRecurringTask,
   aLoadedTaskPlan,
+  aRecurringTask,
   anAllDayTimeConfig,
   aDailyRecurrenceRule,
   TASK_TEST_TIME_CONTEXT,
 } from '../../../testing';
 import { createTimeContext } from '@memoflow/time';
+import { TaskOccurrenceGenerationService } from './task-occurrence-generation-service';
 
-const DAY_MS = 86400000;
+const DAY_MS = 86_400_000;
 
 describe('TaskOccurrenceGenerationService', () => {
   let service: TaskOccurrenceGenerationService;
 
   beforeEach(() => {
     service = new TaskOccurrenceGenerationService();
-    // Pin Date.now for deterministic tests
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2025-06-15T00:00:00Z'));
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  afterEach(() => vi.useRealTimers());
+
+  it('materializes a bounded recurring window without a generation cursor', () => {
+    const template = aRecurringTask({ title: 'Daily standup' });
+    const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT);
+
+    expect(instances.length).toBeGreaterThan(0);
+    expect(instances.length).toBeLessThanOrEqual(101);
+    expect(template.toServerDTO()).not.toHaveProperty('lastGeneratedDate');
+    expect(template.toServerDTO()).not.toHaveProperty('generateAheadDays');
   });
 
-  // ─── generateInstances ─────────────────────────────────────────
-
-  describe('generateInstances', () => {
-    it('should generate instances for a recurring template with no prior generation', () => {
-      const template = aRecurringTask({ title: 'Daily standup' });
-      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT);
-
-      // With 100-day target and daily recurrence, expect ~100 instances
-      expect(instances.length).toBeGreaterThan(0);
-      expect(instances.length).toBeLessThanOrEqual(101);
+  it('respects an explicit target window', () => {
+    const template = aRecurringTask({ title: 'Short range' });
+    const now = Date.now();
+    const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT, {
+      now,
+      targetDate: now + 10 * DAY_MS,
     });
 
-    it('should respect targetDate override', () => {
-      const template = aRecurringTask({ title: 'Short range' });
-      const now = Date.now();
-      const tenDaysLater = now + 10 * DAY_MS;
-
-      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT, {
-        targetDate: tenDaysLater,
-      });
-
-      // Should generate at most ~10 instances
-      expect(instances.length).toBeLessThanOrEqual(11);
-      expect(instances.length).toBeGreaterThan(0);
-    });
-
-    it('should cap generated instances by recurrence occurrence limit', () => {
-      const template = aLoadedTaskPlan({
-        taskType: TaskType.Recurring,
-        status: TaskPlanStatus.Active,
-        timeConfig: anAllDayTimeConfig(),
-        recurrenceRule: aDailyRecurrenceRule().setOccurrences(3),
-      });
-
-      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT);
-
-      expect(instances).toHaveLength(3);
-    });
-
-    it('should return empty array when fromDate exceeds targetDate', () => {
-      // Create a template where lastGeneratedDate is far in the future
-      const farFuture = Date.now() + 200 * DAY_MS;
-      const template = aLoadedTaskPlan({
-        taskType: TaskType.Recurring,
-        timeConfig: anAllDayTimeConfig(),
-        recurrenceRule: aDailyRecurrenceRule(),
-        lastGeneratedDate: farFuture,
-        status: TaskPlanStatus.Active,
-      });
-
-      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT);
-      expect(instances).toHaveLength(0);
-    });
-
-    it('should use forceGenerate to start from today even if lastGeneratedDate exists', () => {
-      const yesterday = Date.now() - DAY_MS;
-      const createTemplate = () =>
-        aLoadedTaskPlan({
-          taskType: TaskType.Recurring,
-          timeConfig: anAllDayTimeConfig(),
-          recurrenceRule: aDailyRecurrenceRule(),
-          lastGeneratedDate: yesterday,
-          status: TaskPlanStatus.Active,
-        });
-
-      // Without forceGenerate — starts from lastGeneratedDate + 1 day = today
-      const normal = service.generateInstances(createTemplate(), TASK_TEST_TIME_CONTEXT, {
-        forceGenerate: false,
-      });
-
-      // With forceGenerate — starts from today regardless
-      const forced = service.generateInstances(createTemplate(), TASK_TEST_TIME_CONTEXT, {
-        forceGenerate: true,
-      });
-
-      // Generation mutates only the runtime cursor; occurrences remain separately owned.
-      expect(normal.length).toBeGreaterThan(0);
-      expect(forced.length).toBeGreaterThan(0);
-    });
-
-    it('advances the generation cursor by a Product Time calendar day across DST', () => {
-      const timeContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });
-      const lastGeneratedDate = Date.parse('2026-03-08T05:00:00.000Z');
-      const template = aLoadedTaskPlan({
-        taskType: TaskType.Recurring,
-        status: TaskPlanStatus.Active,
-        timeConfig: anAllDayTimeConfig(new Date(lastGeneratedDate)),
-        recurrenceRule: aDailyRecurrenceRule(),
-        lastGeneratedDate,
-      });
-      const instances = service.generateInstances(template, timeContext, {
-        targetDate: Date.parse('2026-03-12T04:00:00.000Z'),
-      });
-
-      expect(instances.length).toBeGreaterThan(0);
-      expect(instances[0].scheduleDate).toBe('2026-03-09');
-      expect(Number(instances[0].scheduledStartOfDayAt(timeContext)) - lastGeneratedDate).toBe(
-        23 * 60 * 60 * 1000,
-      );
-      expect(template.lastGeneratedDate).toBe(Date.parse('2026-03-12T04:00:00.000Z'));
-    });
-
-    it('materializes through the service and advances only the runtime generation cursor', () => {
-      const template = aRecurringTask({ title: 'Service-owned materialization' });
-      const before = template.lastGeneratedDate;
-
-      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT);
-
-      expect(instances.length).toBeGreaterThan(0);
-      expect(template.lastGeneratedDate).not.toBe(before);
-      expect(Reflect.get(template, 'instances')).toBeUndefined();
-      expect(Reflect.get(template, 'generateInstances')).toBeUndefined();
-    });
+    expect(instances.length).toBeGreaterThan(0);
+    expect(instances.length).toBeLessThanOrEqual(11);
   });
 
-  // ─── shouldRefillInstances ─────────────────────────────────────
-
-  describe('shouldRefillInstances', () => {
-    it('should return false for non-Active templates', () => {
-      const paused = aLoadedTaskPlan({
-        taskType: TaskType.Recurring,
-        status: TaskPlanStatus.Paused,
-        timeConfig: anAllDayTimeConfig(),
-        recurrenceRule: aDailyRecurrenceRule(),
-      });
-
-      expect(service.shouldRefillInstances(paused, TASK_TEST_TIME_CONTEXT)).toBe(false);
+  it('caps materialization by the finite recurrence count', () => {
+    const template = aLoadedTaskPlan({
+      taskType: TaskType.Recurring,
+      status: TaskPlanStatus.Active,
+      timeConfig: anAllDayTimeConfig(),
+      recurrenceRule: aDailyRecurrenceRule().setOccurrences(3),
     });
 
-    it('archive metadata does not stop an otherwise Active recurring plan', () => {
-      const archived = aLoadedTaskPlan({
-        taskType: TaskType.Recurring,
-        status: TaskPlanStatus.Active,
-        archivedAt: Date.now(),
-        timeConfig: anAllDayTimeConfig(),
-        recurrenceRule: aDailyRecurrenceRule(),
-        lastGeneratedDate: null,
-      });
-      expect(service.shouldRefillInstances(archived, TASK_TEST_TIME_CONTEXT)).toBe(true);
-    });
-
-    it('should return true for Active template with no lastGeneratedDate', () => {
-      const template = aLoadedTaskPlan({
-        taskType: TaskType.Recurring,
-        status: TaskPlanStatus.Active,
-        timeConfig: anAllDayTimeConfig(),
-        recurrenceRule: aDailyRecurrenceRule(),
-        lastGeneratedDate: null,
-      });
-
-      // lastGeneratedDate is null => 0 ms => daysRemaining is negative => needs refill
-      expect(service.shouldRefillInstances(template, TASK_TEST_TIME_CONTEXT)).toBe(true);
-    });
-
-    it('should return true when remaining days is below threshold', () => {
-      // lastGeneratedDate only 10 days ahead — below the 100-day threshold
-      const tenDaysAhead = new Date(Date.now() + 10 * DAY_MS);
-      const template = aLoadedTaskPlan({
-        taskType: TaskType.Recurring,
-        status: TaskPlanStatus.Active,
-        timeConfig: anAllDayTimeConfig(),
-        recurrenceRule: aDailyRecurrenceRule(),
-        lastGeneratedDate: tenDaysAhead,
-      });
-
-      expect(service.shouldRefillInstances(template, TASK_TEST_TIME_CONTEXT)).toBe(true);
-    });
-
-    it('should return false when remaining days exceeds threshold', () => {
-      // lastGeneratedDate 150 days ahead — above the 100-day threshold
-      const farAhead = new Date(Date.now() + 150 * DAY_MS);
-      const template = aLoadedTaskPlan({
-        taskType: TaskType.Recurring,
-        status: TaskPlanStatus.Active,
-        timeConfig: anAllDayTimeConfig(),
-        recurrenceRule: aDailyRecurrenceRule(),
-        lastGeneratedDate: farAhead,
-      });
-
-      expect(service.shouldRefillInstances(template, TASK_TEST_TIME_CONTEXT)).toBe(false);
-    });
+    expect(service.generateInstances(template, TASK_TEST_TIME_CONTEXT)).toHaveLength(3);
   });
 
-  // ─── calculateRefillTargetDate ─────────────────────────────────
+  it('returns empty when the explicit range starts after its target', () => {
+    const template = aRecurringTask();
+    const now = Date.now();
 
-  describe('calculateRefillTargetDate', () => {
-    it('should return a date 100 days from now', () => {
-      const target = service.calculateRefillTargetDate(TASK_TEST_TIME_CONTEXT);
-      const expected = Date.now() + 100 * DAY_MS;
+    expect(
+      service.generateInstances(template, TASK_TEST_TIME_CONTEXT, {
+        fromDate: now + DAY_MS,
+        targetDate: now,
+      }),
+    ).toEqual([]);
+  });
 
-      // Allow small tolerance for execution time
-      expect(target).toBe(expected);
+  it('re-enumerates the window and repairs a missing occurrence between existing facts', () => {
+    const template = aRecurringTask({ title: 'Repair holes' });
+    const now = Date.now();
+    const targetDate = now + 5 * DAY_MS;
+    const firstPass = service.generateInstances(template, TASK_TEST_TIME_CONTEXT, {
+      now,
+      targetDate,
     });
+    expect(firstPass.length).toBeGreaterThanOrEqual(4);
+
+    const missing = firstPass[Math.floor(firstPass.length / 2)];
+    const existingInstances = firstPass.filter((instance) => instance.id !== missing.id);
+    const repair = service.generateInstances(template, TASK_TEST_TIME_CONTEXT, {
+      now,
+      targetDate,
+      existingInstances,
+    });
+
+    expect(repair.map((instance) => instance.scheduleDate)).toEqual([missing.scheduleDate]);
+  });
+
+  it('is idempotent when the bounded window is already materialized', () => {
+    const template = aRecurringTask({ title: 'Idempotent reconcile' });
+    const now = Date.now();
+    const targetDate = now + 5 * DAY_MS;
+    const existingInstances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT, {
+      now,
+      targetDate,
+    });
+
+    expect(
+      service.generateInstances(template, TASK_TEST_TIME_CONTEXT, {
+        now,
+        targetDate,
+        existingInstances,
+      }),
+    ).toEqual([]);
+  });
+
+  it('uses Product Time calendar dates across spring-forward DST without mutating Plan state', () => {
+    const timeContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });
+    const march8 = Date.parse('2026-03-08T05:00:00.000Z');
+    const template = aLoadedTaskPlan({
+      taskType: TaskType.Recurring,
+      status: TaskPlanStatus.Active,
+      timeConfig: anAllDayTimeConfig(new Date(march8)),
+      recurrenceRule: aDailyRecurrenceRule(),
+    });
+    const before = template.toServerDTO();
+
+    const instances = service.generateInstances(template, timeContext, {
+      fromDate: march8,
+      targetDate: Date.parse('2026-03-12T04:00:00.000Z'),
+      now: march8,
+    });
+
+    expect(instances.map((instance) => instance.scheduleDate)).toContain('2026-03-09');
+    const march9 = instances.find((instance) => instance.scheduleDate === '2026-03-09');
+    expect(march9).toBeDefined();
+    expect(Number(march9!.scheduledStartOfDayAt(timeContext)) - march8).toBe(23 * 60 * 60 * 1000);
+    expect(template.toServerDTO()).toEqual(before);
+    expect(Reflect.get(template, 'instances')).toBeUndefined();
+    expect(Reflect.get(template, 'generateInstances')).toBeUndefined();
   });
 });

@@ -5,10 +5,16 @@ import {
   TaskRecurrenceEndKind,
   type TaskPlanOutcomeValue,
 } from '@memoflow/contracts/task';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import type { TaskPlan } from '../aggregates/task-plan';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
+import {
+  nextRecurrenceDate,
+  recurrenceDatesBetween,
+} from '../aggregates/task-recurrence-date.adapter';
 
 export interface TaskPlanOccurrenceFact {
+  scheduleDate: Ymd;
   status: (typeof TaskOccurrenceStatus)[keyof typeof TaskOccurrenceStatus];
   deletedAt: number | null;
 }
@@ -33,10 +39,12 @@ export class TaskPlanOutcomeEvaluator {
       return TaskPlanOutcome.Failed;
     }
 
-    if (!this.isScopeFullyKnown(template, relevant.length, timeContext)) return TaskPlanOutcome.Open;
+    if (!this.isScopeFullyKnown(template, relevant, timeContext)) return TaskPlanOutcome.Open;
 
     // Skipped is a waiver: it is excluded from required completion scope.
-    const required = relevant.filter((instance) => instance.status !== TaskOccurrenceStatus.Skipped);
+    const required = relevant.filter(
+      (instance) => instance.status !== TaskOccurrenceStatus.Skipped,
+    );
     if (required.some((instance) => instance.status === TaskOccurrenceStatus.Missed)) {
       return TaskPlanOutcome.Open;
     }
@@ -54,21 +62,49 @@ export class TaskPlanOutcomeEvaluator {
 
   private isScopeFullyKnown(
     template: TaskPlan,
-    instanceCount: number,
+    instances: readonly TaskPlanOccurrenceFact[],
     timeContext: TimeContext,
   ): boolean {
-    if (!template.schedule.isRecurring) return instanceCount >= 1;
+    if (!template.schedule.isRecurring) return instances.length >= 1;
     const recurrence = template.schedule.recurrence;
     if (!recurrence) return false;
+
+    const actualDates = new Set(instances.map((instance) => String(instance.scheduleDate)));
+    const time = createTimeFacade({ context: timeContext });
+    const startYmd = time.codec.parseYmd(template.schedule.calendarDate, { onInvalid: 'throw' });
+    if (!startYmd) return false;
+
+    const rule = template.schedule.toLegacyRecurrenceRule(timeContext);
+    if (!rule) return false;
+    const timeConfig = template.schedule.toLegacyTimeConfig(timeContext);
+    const startAt = Number(time.codec.startOfYmd(startYmd));
+
+    let expectedDates: Set<string>;
     if (recurrence.end.kind === TaskRecurrenceEndKind.Count) {
-      return instanceCount >= recurrence.end.count;
-    }
-    if (recurrence.end.kind !== TaskRecurrenceEndKind.Until || template.lastGeneratedDate === null) {
+      expectedDates = new Set<string>();
+      let cursor = startAt - 1;
+      for (let index = 0; index < recurrence.end.count; index += 1) {
+        const next = nextRecurrenceDate(rule, timeConfig, cursor, timeContext);
+        if (next == null) return false;
+        expectedDates.add(String(time.calendar.toYmd(next)));
+        cursor = next;
+      }
+    } else if (recurrence.end.kind === TaskRecurrenceEndKind.Until) {
+      const endYmd = time.codec.parseYmd(recurrence.end.date, { onInvalid: 'throw' });
+      if (!endYmd) return false;
+      expectedDates = new Set(
+        recurrenceDatesBetween(
+          rule,
+          timeConfig,
+          startAt,
+          time.calendar.endOfDay(time.codec.startOfYmd(endYmd)),
+          timeContext,
+        ).map((date) => String(time.calendar.toYmd(date))),
+      );
+    } else {
       return false;
     }
-    const generatedThrough = String(
-      createTimeFacade({ context: timeContext }).calendar.toYmd(template.lastGeneratedDate),
-    );
-    return generatedThrough >= String(recurrence.end.date);
+
+    return expectedDates.size > 0 && [...expectedDates].every((date) => actualDates.has(date));
   }
 }

@@ -4,7 +4,6 @@ import { createMockRepo } from '@memoflow/test-utils/mocks';
 import {
   aOneTimeTask,
   aLoadedTaskPlan,
-  aRecurringTask,
   anIdentityId,
   TASK_TEST_USER_TIME_CONTEXT_PORT,
 } from '../../../../../testing';
@@ -22,19 +21,6 @@ vi.mock('@memoflow/utils', async () => {
   };
 });
 
-// Mock TaskOccurrenceGenerationService
-const mockShouldRefill = vi.fn().mockReturnValue(false);
-const mockGenerateInstances = vi.fn().mockReturnValue([]);
-vi.mock('../../../../domain/services', () => {
-  return {
-    TaskOccurrenceGenerationService: class {
-      shouldRefillInstances = mockShouldRefill;
-      generateInstances = mockGenerateInstances;
-      calculateRefillTargetDate = vi.fn().mockReturnValue(Date.now());
-    },
-  };
-});
-
 describe('ListTaskPlansUseCase', () => {
   let templateRepo: ReturnType<typeof createMockRepo<ITaskPlanRepository>>;
   let instanceRepo: ReturnType<typeof createMockRepo<ITaskOccurrenceRepository>>;
@@ -43,9 +29,6 @@ describe('ListTaskPlansUseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockShouldRefill.mockReturnValue(false);
-    mockGenerateInstances.mockReturnValue([]);
-
     templateRepo = createMockRepo<ITaskPlanRepository>({
       findByIdentityId: vi.fn().mockResolvedValue([]),
       findByStatus: vi.fn().mockResolvedValue([]),

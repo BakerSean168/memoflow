@@ -6,7 +6,7 @@ tags:
   - refactor
 description: Task Plan / Occurrence 聚合边界、Schedule ADT、Result/Checklist、Reminder parity、Goal/Workspace 一次性收敛实施计划
 created: 2026-09-08T19:35:00+08:00
-updated: 2026-09-13T12:34:39+08:00
+updated: 2026-09-13T13:13:39+08:00
 ---
 
 # Task vNext Model Convergence
@@ -22,8 +22,8 @@ updated: 2026-09-13T12:34:39+08:00
 - old `TaskTemplate`/`TaskInstance` persistence and compatibility DTOs are deleted rather than translated;
 - no legacy round-trip fixture is required; fresh TaskPlan/TaskOccurrence round-trip remains required.
 
-**状态：ACTIVE / TASK-7303 complete; TASK-7304 next**
-**执行分支：** `feat/system-wide-vnext-convergence`（ticket worktree: `chatgpt/task-7302-7303-domain`）
+**状态：ACTIVE / TASK-7304 complete; TASK-7305 next**
+**执行分支：** `feat/system-wide-vnext-convergence`（ticket worktree: `chatgpt/task-7304-materialization`）
 **上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）
 **基线：** Task Vitest 71 files / 717 tests PASS
 
@@ -100,6 +100,14 @@ TaskWorkspace  = Plan + Occurrences + Cross-module Context
 - application/domain service 根据 Plan schedule + existing occurrence keys 生成；
 - generation cursor/runtime state 不进入产品 DTO；
 - finite plan outcome 不依赖 public `lastGeneratedDate`。
+
+**TASK-7304 DONE（2026-09-13）：** occurrence materialization 已完全改为 **cursor-free reconcile**。`TaskPlan` aggregate/state、server/client DTO、response schema、client aggregate、当前 portability payload 均删除 `lastGeneratedDate / generateAheadDays`；`recordGenerationHorizon / shouldRefillInstances / calculateRefillTargetDate / forceGenerate / findNeedGenerateInstances` 等旧 runtime-cursor surface 全部退出业务代码。`TaskOccurrenceGenerationService` 每轮仅依据 canonical Plan schedule + 显式 `existingInstances` 在 Product-Time 有界窗口内重新枚举 recurrence，并以 occurrence key/Ymd 幂等去重；这样不仅不会重复生成，也能自动补回窗口中间丢失的 occurrence，而不依赖“最新生成日期 + 1 天”的脆弱游标。maintenance runtime 现在扫描 Active recurring plans、加载该 Plan 当前 occurrence facts，再执行 reconcile；没有缺口时不写 occurrence/Plan，有新增时 Plan save 仅用于沿既有可靠写边界 flush generated domain event，不持久化 generation state。
+
+finite-plan settlement 同步去 cursor 化：`TaskPlanOutcomeEvaluator` 的 occurrence fact 增加 canonical `scheduleDate: Ymd`；Count scope 依据实际 distinct occurrence dates，Until scope 通过 canonical recurrence + Product Time 计算“应存在的 Ymd 集合”，只有实际 occurrence 覆盖全部 expected dates 才视为 scope fully known。缺一天即保持 `Open`，不会因为某个 cursor 声称“已生成到 Until”而错误结算。DST spring-forward、窗口补洞、重复 reconcile 幂等与 Until hole 都已有行为测试。
+
+Prisma/PowerSync TaskPlan mapper 已停止读取/写入 cursor；当前 Data Portability TaskPlan export/import 也不再携带或写入 runtime cursor。**物理 `task_templates.last_generated_date / generate_ahead_days` 列仍暂留在 Prisma + PowerSync schema，仅作为 TASK-7305 destructive schema cutover 的待删除残余；7304 不把这两列视为有效 truth，也不误标 7305 完成。** Anti-resurrection lock 已加入 `task-domain-simplification.surface.spec.ts`，禁止 cursor surface 回流到 product/domain/portable boundary。
+
+本地验收：Task unit **74 files / 601 tests PASS**；真实 PostgreSQL integration **6 files / 31 tests PASS**；Contracts **85 files / 580 tests PASS**；Data Portability **36 files / 148 tests PASS**；Database **10 files / 35 tests PASS**；PowerSync schema **1 file / 7 tests PASS**；Task direct typecheck/build PASS；Data Portability direct typecheck/build PASS；Task lint **0 errors**（52 个既有 warnings）；production cursor residual scan **0 命中**，仅剩 Prisma/PowerSync 两个物理 schema 列等待 TASK-7305 删除。
 
 ### TASK-7305 — Persistence single-track cutover
 
@@ -202,7 +210,7 @@ full CI exact-head
 - [x] TASK-7301
 - [x] TASK-7302
 - [x] TASK-7303
-- [ ] TASK-7304
+- [x] TASK-7304
 - [ ] TASK-7305
 - [ ] TASK-7306
 - [ ] TASK-7307
@@ -210,4 +218,4 @@ full CI exact-head
 - [ ] TASK-7309
 - [ ] TASK-7310
 
-**Next:** TASK-7304 closes the remaining occurrence-materialization runtime concerns: remove product-visible generation cursor/horizon residue, ensure finite-plan outcome does not depend on public `lastGeneratedDate`, and keep materialization exclusively service-owned. Then complete TASK-7305 for the remaining TaskPlan/reminder/schedule persistence single-track cutover. TASK-7303 already consumed only the minimum occurrence-row slice required for truthful Product-Time persistence; do not mark TASK-7305 complete until the remaining Plan persistence and parity work is deleted/validated.
+**Next:** TASK-7305 is now the sole next Task dependency: complete the remaining TaskPlan persistence single-track cutover across Prisma + PowerSync, persist canonical schedule/reminder/checklist truth, and physically delete the dead flattened time/recurrence/reminder columns plus `last_generated_date / generate_ahead_days`. TASK-7303 already landed the canonical occurrence-row slice and TASK-7304 removed runtime cursor ownership; do not retain compatibility readers/backfill because ADR-111 requires destructive cutover. After fresh DB/PowerSync/portable parity is proven, proceed to TASK-7306 application/HTTP/IPC/AI cutover.

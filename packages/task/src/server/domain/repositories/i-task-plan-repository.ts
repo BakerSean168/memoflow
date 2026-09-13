@@ -78,10 +78,8 @@ export interface ITaskPlanRepository {
     labelIds: readonly string[],
   ): Promise<LabelClientDTO[]>;
 
-  /**
-   * 查找需要生成实例的模板（供定时任务使用）
-   */
-  findNeedGenerateInstances(toDate: number): Promise<TaskPlan[]>;
+  /** Active recurring plans eligible for occurrence materialization. */
+  findActiveRecurringPlansForMaterialization(): Promise<TaskPlan[]>;
 
   /**
    * 全量模板引用（R1-4 projection reconcile 用）。

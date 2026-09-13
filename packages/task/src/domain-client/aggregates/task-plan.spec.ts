@@ -28,8 +28,6 @@ function stateWithGoalOnlyLink(): TaskPlanState {
     closedAt: null,
     archivedAt: null,
     abandonedReason: null,
-    lastGeneratedDate: null,
-    generateAheadDays: null,
     version: 1,
     createdAt: 1 as TaskPlanState['createdAt'],
     updatedAt: 1 as TaskPlanState['updatedAt'],

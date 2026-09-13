@@ -73,8 +73,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       description: rest.description ?? null,
       goalBinding: rest.goalBinding ?? null,
       reminderConfig: rest.reminderConfig ?? null,
-      lastGeneratedDate: rest.lastGeneratedDate ?? null,
-      generateAheadDays: rest.generateAheadDays ?? null,
       checklist: rest.checklist ?? [],
       outcome: rest.outcome ?? TaskPlanOutcome.Open,
       completionPolicy: rest.completionPolicy ?? TaskPlanCompletionPolicy.AllowCorrection,
@@ -193,16 +191,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     return this._props.abandonedReason;
   }
 
-  public get lastGeneratedDate(): Instant | null {
-    const v = this._props.lastGeneratedDate;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  public get generateAheadDays(): number | null {
-    return this._props.generateAheadDays;
-  }
-
   public get checklist(): ChecklistItemDefinition[] {
     return [...this._props.checklist];
   }
@@ -239,12 +227,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   /** Internal props — used by extracted policy modules. */
   get props(): TaskPlanProps {
     return this._props;
-  }
-
-  /** Runtime generation cursor update. Occurrences remain independently owned. */
-  public recordGenerationHorizon(lastGeneratedDate: Instant): void {
-    this._props.lastGeneratedDate = lastGeneratedDate;
-    this._props.updatedAt = Date.now();
   }
 
   private getScheduleContext(timeContext: TimeContext): instanceGen.InstanceGenerationContext {
@@ -502,8 +484,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       closedAt: this._props.closedAt,
       archivedAt: this._props.archivedAt,
       abandonedReason: this._props.abandonedReason,
-      lastGeneratedDate: this._props.lastGeneratedDate ?? null,
-      generateAheadDays: this._props.generateAheadDays,
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
       deletedAt: this._props.deletedAt ?? null,
@@ -536,8 +516,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       closedAt: this._props.closedAt,
       archivedAt: this._props.archivedAt,
       abandonedReason: this._props.abandonedReason,
-      lastGeneratedDate: this._props.lastGeneratedDate ?? null,
-      generateAheadDays: this._props.generateAheadDays,
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
       deletedAt: this._props.deletedAt ?? null,
@@ -594,8 +572,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
         params.timeContext,
       ),
       reminderConfig: null,
-      lastGeneratedDate: null,
-      generateAheadDays: null,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
@@ -614,7 +590,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     recurrenceRule: RecurrenceRule;
     reminderConfig?: TaskReminderConfig;
     importance?: ImportanceLevel;
-    generateAheadDays?: number;
     timeContext: TimeContext;
   }): TaskPlan {
     TaskPlan.assertIdentityId(params.identityId, 'createRecurringTask');
@@ -649,8 +624,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
         params.timeContext,
       ),
       reminderConfig: params.reminderConfig ?? null,
-      lastGeneratedDate: null,
-      generateAheadDays: params.generateAheadDays ?? 30,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
@@ -669,7 +642,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     schedule: TaskPlanSchedule;
     reminderConfig?: TaskReminderConfig;
     importance?: ImportanceLevel;
-    generateAheadDays?: number;
     goalBinding?: {
       goalId: string;
       keyResultId?: string | null;
@@ -703,8 +675,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       checklist: [],
       schedule: params.schedule,
       reminderConfig: params.reminderConfig ?? null,
-      lastGeneratedDate: null,
-      generateAheadDays: params.generateAheadDays ?? 30,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,

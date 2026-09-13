@@ -56,7 +56,6 @@ export class GenerateTaskOccurrencesUseCase {
             identityId,
           );
           const instances = this.generationService.generateInstances(template, timeContext, {
-            forceGenerate: true,
             targetDate: request.toDate,
             // R2-2：force 路径不再忽略请求区间——从 fromDate 生成到 toDate。
             fromDate: request.fromDate,

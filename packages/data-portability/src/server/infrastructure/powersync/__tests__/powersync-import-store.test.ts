@@ -121,6 +121,8 @@ describe('PowerSyncDataPortabilityImportStore', () => {
     expect(insert?.sql).toContain('goal_progress_trigger');
     expect(insert?.sql).not.toContain('goal_binding');
     expect(insert?.sql).not.toContain('is_blocked');
+    expect(insert?.sql).not.toContain('last_generated_date');
+    expect(insert?.sql).not.toContain('generate_ahead_days');
     expect(insert?.sql).not.toContain('timeConfigType');
     expect(insert?.parameters).toContain(JSON.stringify(['qa']));
     expect(insert?.parameters).toContain('goal-1');
@@ -143,9 +145,15 @@ describe('PowerSyncDataPortabilityImportStore', () => {
     );
 
     expect(statements).toHaveLength(2);
-    expect(statements.every((statement) => statement.sql.includes('UPDATE user_preference_records'))).toBe(true);
-    expect(statements[0]?.parameters).toContain(JSON.stringify({ theme: 'dark', language: 'en-US' }));
-    expect(statements[1]?.parameters).toContain(JSON.stringify({ timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 }));
+    expect(
+      statements.every((statement) => statement.sql.includes('UPDATE user_preference_records')),
+    ).toBe(true);
+    expect(statements[0]?.parameters).toContain(
+      JSON.stringify({ theme: 'dark', language: 'en-US' }),
+    );
+    expect(statements[1]?.parameters).toContain(
+      JSON.stringify({ timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 }),
+    );
   });
 
   it('writes schedule task scheduler fields and imported timestamps', async () => {

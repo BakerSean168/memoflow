@@ -136,6 +136,8 @@ describe('PrismaTaskPlanMapper', () => {
 
       expect(domain.id).toBe(TEMPLATE_ID_2);
       expect(domain.title).toBe('Complex Recurring Task');
+      expect(domain.toServerDTO()).not.toHaveProperty('lastGeneratedDate');
+      expect(domain.toServerDTO()).not.toHaveProperty('generateAheadDays');
       expect(domain.description).toBe('A task with full configuration');
       expect(domain.importance).toBe('Important');
       expect(domain.status).toBe('Active');
@@ -277,7 +279,8 @@ describe('PrismaTaskPlanMapper', () => {
       expect(persistence.recurrenceRuleInterval).toBe(1);
       expect(persistence.reminderConfigEnabled).toBe(true);
       expect(persistence.reminderConfigTimeOffsetMinutes).toBe(15);
-      expect(persistence.generateAheadDays).toBe(7);
+      expect(persistence).not.toHaveProperty('lastGeneratedDate');
+      expect(persistence).not.toHaveProperty('generateAheadDays');
     });
 
     it('serializes checklist and expands the goal binding', () => {

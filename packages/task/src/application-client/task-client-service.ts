@@ -52,8 +52,6 @@ function taskPlanFromDTO(dto: TaskPlanClientDTO): TaskPlan {
     closedAt: dto.closedAt,
     archivedAt: dto.archivedAt,
     abandonedReason: dto.abandonedReason,
-    lastGeneratedDate: dto.lastGeneratedDate ?? null,
-    generateAheadDays: dto.generateAheadDays,
     version: dto.version,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,

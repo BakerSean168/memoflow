@@ -73,7 +73,6 @@ export interface RecurringTaskOverrides {
   timeConfig?: TaskTimeConfig;
   recurrenceRule?: RecurrenceRule;
   reminderConfig?: TaskReminderConfig;
-  generateAheadDays?: number;
 }
 
 export function aRecurringTask(overrides: RecurringTaskOverrides = {}): TaskPlan {
@@ -85,7 +84,6 @@ export function aRecurringTask(overrides: RecurringTaskOverrides = {}): TaskPlan
     timeConfig: overrides.timeConfig ?? anAllDayTimeConfig(),
     recurrenceRule: overrides.recurrenceRule ?? aDailyRecurrenceRule(),
     reminderConfig: overrides.reminderConfig,
-    generateAheadDays: overrides.generateAheadDays,
     timeContext: TASK_TEST_TIME_CONTEXT,
   });
 }
@@ -123,8 +121,6 @@ export function aTaskPlanState(
     goalBinding: overrides.goalBinding ?? null,
     checklist: overrides.checklist ?? [],
     reminderConfig: overrides.reminderConfig ?? null,
-    lastGeneratedDate: overrides.lastGeneratedDate ?? null,
-    generateAheadDays: overrides.generateAheadDays ?? null,
     createdAt: overrides.createdAt ?? now,
     updatedAt: overrides.updatedAt ?? now,
     deletedAt: overrides.deletedAt ?? null,

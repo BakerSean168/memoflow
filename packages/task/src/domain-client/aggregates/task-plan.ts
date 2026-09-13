@@ -22,7 +22,13 @@ import type {
 } from '@memoflow/contracts/task';
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { LabelClientDTO } from '@memoflow/contracts/label';
-import type { GoalId, IdentityId, KeyResultId, Instant, TaskPlanId } from '@memoflow/contracts/primitives';
+import type {
+  GoalId,
+  IdentityId,
+  KeyResultId,
+  Instant,
+  TaskPlanId,
+} from '@memoflow/contracts/primitives';
 import { AggregateRoot } from '@memoflow/utils/domain';
 
 export interface TaskPlanState {
@@ -41,8 +47,6 @@ export interface TaskPlanState {
   closedAt: Instant | null;
   archivedAt: Instant | null;
   abandonedReason: string | null;
-  lastGeneratedDate: Instant | null;
-  generateAheadDays: number | null;
   version: number;
   createdAt: Instant;
   updatedAt: Instant;
@@ -120,16 +124,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   }
   get abandonedReason(): string | null {
     return this._props.abandonedReason;
-  }
-
-  get lastGeneratedDate(): Instant | null {
-    const v = this._props.lastGeneratedDate;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  get generateAheadDays(): number | null {
-    return this._props.generateAheadDays;
   }
 
   get version(): number {
@@ -226,8 +220,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       closedAt: this._props.closedAt,
       archivedAt: this._props.archivedAt,
       abandonedReason: this._props.abandonedReason,
-      lastGeneratedDate: this._props.lastGeneratedDate ?? null,
-      generateAheadDays: this._props.generateAheadDays,
       version: this._props.version,
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
@@ -249,7 +241,8 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   private serializeGoalBinding(binding: TaskGoalBinding): TaskGoalBindingDTO {
     return {
       goalId: String(binding.goalId) as GoalId,
-      keyResultId: binding.keyResultId == null ? null : (String(binding.keyResultId) as KeyResultId),
+      keyResultId:
+        binding.keyResultId == null ? null : (String(binding.keyResultId) as KeyResultId),
       contribution: binding.contribution ? { ...binding.contribution } : null,
     };
   }

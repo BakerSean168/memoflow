@@ -31,8 +31,6 @@ export interface TaskPlanServerDTO {
 
   schedule: TaskPlanSchedule;
   reminderConfig: TaskReminderConfigDTO | null;
-  lastGeneratedDate: TransferDate | null;
-  generateAheadDays: number | null;
 
   importance: ImportanceLevel;
   status: TaskPlanStatus;
