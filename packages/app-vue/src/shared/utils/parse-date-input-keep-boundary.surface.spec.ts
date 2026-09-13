@@ -4,16 +4,13 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * Residual 1225 closed: Goal/Task date inputs converge on Product Time.
- * UI strings are parsed as Ymd and converted to Instant through startOfYmd;
- * direct Date.parse/new Date calendar conversion must not return.
+ * Goal targets retain GoalTimeframe precision; UI calendar strings stay Ymd.
+ * Direct Date.parse/new Date calendar conversion must not return.
  */
 describe('date input Product Time boundary (residual 1225)', () => {
   const dir = __dirname;
   const vue = readFileSync(
-    resolve(
-      dir,
-      '../../modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue',
-    ),
+    resolve(dir, '../../modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue'),
     'utf8',
   );
   const react = readFileSync(
@@ -32,22 +29,21 @@ describe('date input Product Time boundary (residual 1225)', () => {
     expect(body).not.toContain('.getTime()');
   });
 
-  it('keeps app-react Goal date parsing on the same Product Time boundary', () => {
-    expect(react).toMatch(/function parseDateInput\b/);
-    expect(react).toContain('getProductTime');
-    expect(react).toContain('parseDateValue');
-    expect(react).toContain('startOfYmd');
-    const body = react.match(/function parseDateInput\([\s\S]*?\n\}/)?.[0] ?? '';
-    expect(body).not.toContain('Date.parse');
-    expect(body).not.toContain('new Date(');
-    expect(body).not.toContain('.getTime()');
+  it('keeps app-react Goal target parsing on canonical Product Time helpers', () => {
+    expect(react).toContain('goalTimeframeInputValue');
+    expect(react).toContain('parseGoalTimeframeInput');
+    expect(react).toContain('parseProductYmdInput');
+    expect(react).toContain("from '../utils/product-time'");
+    expect(react).not.toMatch(/function parseDateInput\b/);
+    expect(react).not.toContain('Date.parse');
+    expect(react).not.toContain('new Date(');
   });
 
   it('keeps date formatting on Product Time too', () => {
     expect(vue).toMatch(/const formatDateToInput\b/);
     expect(vue).toContain('dateValue');
-    expect(react).toMatch(/function toDateInput\b/);
-    expect(react).toContain('input.dateValue');
+    expect(react).toContain('goalTimeframeInputValue');
+    expect(react).not.toMatch(/function toDateInput\b/);
   });
 
   it('documents the anti-resurrection boundary', () => {
@@ -57,6 +53,6 @@ describe('date input Product Time boundary (residual 1225)', () => {
     );
     expect(self).toContain('Residual 1225 closed');
     expect(self).toContain('Product Time');
-    expect(self).toContain('direct Date.parse/new Date calendar conversion must not return');
+    expect(self).toContain('Direct Date.parse/new Date calendar conversion must not return');
   });
 });

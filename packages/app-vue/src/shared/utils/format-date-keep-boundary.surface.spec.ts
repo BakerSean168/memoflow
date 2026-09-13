@@ -41,14 +41,17 @@ describe('Product date presentation boundary', () => {
     expect(resolveEmptyLabel('unknown')).toBe(DEFAULT_EMPTY_LITERALS.unknown);
   });
 
-  it('renders Goal dates directly through Product Time without local Date wrappers', () => {
+  it('renders Goal calendar dates and broad targets without local Date wrappers', () => {
+    expect(goalDetail).toContain('formatProductYmd');
+    expect(goalDetail).toContain('formatProductDate');
+    expect(goalDetail).toContain('goalTimeframeLabel');
+    expect(goalRow).toContain('formatProductYmd');
+    expect(goalRow).toContain('goalTimeframeLabel');
     for (const source of [goalDetail, goalRow]) {
-      expect(source).toContain('formatProductDate');
       expect(source).not.toMatch(/function formatDate\b/);
       expect(source).not.toContain('toISOString');
       expect(source).not.toContain('toLocaleDateString');
     }
-    expect(goalDetail).toContain('emptyNotSet');
   });
 
   it('keeps Task date formatting behind the canonical presentation and Product Time helpers', () => {

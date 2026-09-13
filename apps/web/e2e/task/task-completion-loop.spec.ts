@@ -4,6 +4,9 @@ import { registerAndLogin } from '../helpers/testHelpers';
 
 const testPassword = 'Test123456!';
 
+// New accounts use UTC Product Time until the user changes Regional preferences.
+test.use({ timezoneId: 'UTC' });
+
 test.describe('Task completion closed loop', () => {
   test('[P0][Fixture B] EachCompletion updates task, stats, and Goal progress through the Web product loop', async ({
     page,

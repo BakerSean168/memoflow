@@ -380,21 +380,27 @@ describe('Account Closure Coordinator & Worker Real DB Concurrency Integration T
       },
     });
     const writeReqId = crypto.randomUUID();
-    await prisma.knowledgeRepositoryConnection.create({
+    const knowledgeSpaceId = `KnowledgeSpaceId_${crypto.randomUUID()}`;
+    const knowledgeBindingId = `KnowledgeRemoteBindingId_${crypto.randomUUID()}`;
+    await prisma.knowledgeSpace.create({ data: { id: knowledgeSpaceId } });
+    await prisma.knowledgeRemoteBinding.create({
       data: {
-        id: repoId,
+        id: knowledgeBindingId,
+        knowledgeSpaceId,
         identityId,
-        githubUserId: `github-user-${repoId}`,
-        githubRepositoryId: `gh-repo-${repoId}`,
-        githubRepositoryFullName: `user/test-repo-${repoId}`,
+        provider: 'GitHub',
         installationId: `install-${repoId}`,
+        repositoryId: `gh-repo-${repoId}`,
+        repositoryFullNameSnapshot: `user/test-repo-${repoId}`,
+        connectedAt: new Date(),
       },
     });
     await prisma.knowledgeWriteRequest.create({
       data: {
         id: writeReqId,
         identityId,
-        connectionId: repoId,
+        bindingId: knowledgeBindingId,
+        knowledgeDocumentId: `kdoc_${crypto.randomUUID()}`,
         requestId: `req-${writeReqId}`,
         requestHash: `hash-${writeReqId}`,
         relativePath: 'notes/readme.md',

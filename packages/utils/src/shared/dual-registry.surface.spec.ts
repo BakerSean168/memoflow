@@ -12,7 +12,12 @@ import { escapeHtml } from './escape-html';
 import { parseBoolean, parseNumber, parseString } from './parse-query-value';
 import { withCause, parseJson, parseJsonSafe } from './persistence';
 import { detectBrowserLocale, normalizeLocale, normalizeTheme } from './presentation-preference';
-import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildReminderStartTimestamp, normalizeReminderTimeOfDay } from './reminder-time-of-day';
+import {
+  DEFAULT_REMINDER_TIME_OF_DAY,
+  REMINDER_TIME_OF_DAY_PATTERN,
+  buildReminderStartTimestamp,
+  normalizeReminderTimeOfDay,
+} from './reminder-time-of-day';
 
 // --- AI-VNEXT-07: retired Goal automation helper surface ---
 {
@@ -27,8 +32,14 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
     const retiredPaths = [
       resolve(sharedDir, 'build-recurrence-rule.ts'),
       resolve(sharedDir, 'build-reminder-template-input.ts'),
-      resolve(sharedDir, '../../../../apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts'),
-      resolve(sharedDir, '../../../../apps/desktop/src/main/modules/ai/desktop-automation-tool-executor.adapter.ts'),
+      resolve(
+        sharedDir,
+        '../../../../apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts',
+      ),
+      resolve(
+        sharedDir,
+        '../../../../apps/desktop/src/main/modules/ai/desktop-automation-tool-executor.adapter.ts',
+      ),
     ];
 
     it('keeps the retired helper and AgentHost executor surfaces deleted', () => {
@@ -123,17 +134,11 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       '../../../ai/src/server/infrastructure/runtime/ai-runtime.ts',
     );
     const localVault = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../app-vue/src/modules/repository/composables/useLocalVault.ts',
-      ),
+      resolve(sharedDir, '../../../app-vue/src/modules/repository/composables/useLocalVault.ts'),
       'utf8',
     );
     const databaseScript = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../database/scripts/prepare-ai-knowledge-index-pgvector.ts',
-      ),
+      resolve(sharedDir, '../../../database/scripts/prepare-ai-knowledge-index-pgvector.ts'),
       'utf8',
     );
 
@@ -220,7 +225,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       expect(sole).toContain(".replace(/&/g, '&amp;')");
       expect(sole).toContain(".replace(/</g, '&lt;')");
       expect(sole).toContain(".replace(/>/g, '&gt;')");
-      expect(sole).toContain('.replace(/"/g, \'&quot;\')');
+      expect(sole).toContain(".replace(/\"/g, '&quot;')");
       expect(sole).toContain(".replace(/'/g, '&#39;')");
       expect(index).toContain("export * from './escape-html'");
     });
@@ -570,10 +575,7 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       'utf8',
     );
     const revisions = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../governance/src/api/routes/governance-rule-revisions.routes.ts',
-      ),
+      resolve(sharedDir, '../../../governance/src/api/routes/governance-rule-revisions.routes.ts'),
       'utf8',
     );
     const schedule = readFileSync(
@@ -591,7 +593,9 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
 
     it('governance-route-shared re-exports utils sole without local dual bodies', () => {
       expect(govShared).toContain('Residual 1023');
-      expect(govShared).toContain("export { parseNumber, parseString } from '@memoflow/utils/shared'");
+      expect(govShared).toContain(
+        "export { parseNumber, parseString } from '@memoflow/utils/shared'",
+      );
       expect(govShared).not.toMatch(/export function parseString\b/);
       expect(govShared).not.toMatch(/export function parseNumber\b/);
       expect(govShared).toMatch(/export function parseStringArray\b/);
@@ -735,21 +739,21 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
     const index = readFileSync(resolve(sharedDir, 'index.ts'), 'utf8');
     const retiredAutomationPaths = [
       resolve(sharedDir, 'build-reminder-template-input.ts'),
-      resolve(sharedDir, '../../../../apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts'),
-      resolve(sharedDir, '../../../../apps/desktop/src/main/modules/ai/desktop-automation-tool-executor.adapter.ts'),
-    ];
-    const goalWorkflow = readFileSync(
       resolve(
         sharedDir,
-        '../../../app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts',
+        '../../../../apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts',
       ),
+      resolve(
+        sharedDir,
+        '../../../../apps/desktop/src/main/modules/ai/desktop-automation-tool-executor.adapter.ts',
+      ),
+    ];
+    const goalWorkflow = readFileSync(
+      resolve(sharedDir, '../../../app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts'),
       'utf8',
     );
     const workflowPersistence = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts',
-      ),
+      resolve(sharedDir, '../../../app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts'),
       'utf8',
     );
 
@@ -766,14 +770,13 @@ import { DEFAULT_REMINDER_TIME_OF_DAY, REMINDER_TIME_OF_DAY_PATTERN, buildRemind
       for (const path of retiredAutomationPaths) expect(existsSync(path), path).toBe(false);
     });
 
-    it('app-vue goal workflow + persistence import sole without local dual pattern bodies', () => {
+    it('keeps Goal vNext free of local reminder-time helper duplicates', () => {
       for (const [label, source] of [
         ['useAIGoalWorkflow', goalWorkflow],
         ['useAIWorkflowPersistence', workflowPersistence],
       ] as const) {
-        expect(source, label).toContain("from '@memoflow/utils/shared'");
-        expect(source, label).toContain('normalizeReminderTimeOfDay');
         expect(source, label).not.toMatch(/function normalizeReminderTimeOfDay\b/);
+        expect(source, label).not.toMatch(/function buildReminderStartTimestamp\b/);
         expect(source, label).not.toMatch(/const DEFAULT_REMINDER_TIME_OF_DAY\b/);
         expect(source, label).not.toMatch(/const REMINDER_TIME_OF_DAY_PATTERN\b/);
       }

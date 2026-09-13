@@ -16,6 +16,7 @@ import {
   TaskPlanStatus,
 } from '@memoflow/contracts/task';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
+import { requireYmd } from '@memoflow/contracts/primitives';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   buildTaskReminderOperationId,
@@ -26,6 +27,8 @@ import {
   buildGoalReminderOperationId,
   createGoalReminderFireHandler,
 } from '@memoflow/goal/schedule-execution';
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { GOAL_REMINDER_PAYLOAD_VERSION } from '@memoflow/goal/schedule-projection';
 import { NotificationRequestedPrismaWriterAdapter } from '../notification-requested-writer.prisma.adapter';
 import { NotificationPrismaRepository } from '../notification-prisma.repository';
 import { NotificationPreferencePrismaRepository } from '../notification-preference-prisma.repository';
@@ -447,15 +450,15 @@ describe('NotificationRequested durable envelope consumer (NOTIF-3301)', () => {
       schedulingKey,
       handlerKey: 'goal.reminder.fire',
       runAt: '2026-08-10T08:45:00.000Z',
-      payloadVersion: 1,
+      payloadVersion: GOAL_REMINDER_PAYLOAD_VERSION,
       payload: {
         goalId,
         goalTitle: 'Ship R06',
         triggerType: ReminderTriggerType.RemainingDays,
         triggerValue: 3,
-        startDate: Date.UTC(2026, 1, 1),
-        dueDate: Date.UTC(2026, 8, 1),
-        reminderTime: 8 * 60,
+        startDate: requireYmd('2026-02-01'),
+        target: { kind: 'day' as const, date: requireYmd('2026-09-01') },
+        reminderTime: Date.parse('2026-08-10T08:45:00.000Z'),
       },
     };
     const registration = createGoalReminderFireHandler({

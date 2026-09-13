@@ -204,18 +204,20 @@ describe('W7 cross-module operation gate (real DB)', () => {
       },
     });
 
-    // Knowledge projection failed write request (needs a connection row)
-    const knowledgeConnectionId = randomUUID();
-    await prisma.knowledgeRepositoryConnection.create({
+    // Knowledge projection failed write request (needs the current Space -> RemoteBinding owner chain)
+    const knowledgeConnectionId = `KnowledgeRemoteBindingId_${randomUUID()}`;
+    const knowledgeSpaceId = `KnowledgeSpaceId_${randomUUID()}`;
+    await prisma.knowledgeSpace.create({ data: { id: knowledgeSpaceId } });
+    await prisma.knowledgeRemoteBinding.create({
       data: {
         id: knowledgeConnectionId,
+        knowledgeSpaceId,
         identityId,
-        githubUserId: `github-user-${identityId}`,
-        githubRepositoryId: `gh-repo-${identityId}`,
-        githubRepositoryFullName: `user/knowledge-${identityId}`,
+        provider: 'GitHub',
         installationId: `install-${identityId}`,
-        defaultBranch: 'main',
-        status: 'Active',
+        repositoryId: `gh-repo-${identityId}`,
+        repositoryFullNameSnapshot: `user/knowledge-${identityId}`,
+        connectedAt: now,
       },
     });
     const knowledgeOp = `knowledge-proj-${randomUUID()}`;
@@ -224,7 +226,8 @@ describe('W7 cross-module operation gate (real DB)', () => {
       data: {
         id: knowledgeOp,
         identityId,
-        connectionId: knowledgeConnectionId,
+        bindingId: knowledgeConnectionId,
+        knowledgeDocumentId: `kdoc_${randomUUID()}`,
         requestId: `gate-request-${randomUUID()}`,
         requestHash: createHash('sha256').update(knowledgeOp).digest('hex'),
         relativePath: 'notes/w7-gate.md',

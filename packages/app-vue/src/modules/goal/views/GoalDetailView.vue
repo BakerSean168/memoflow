@@ -49,7 +49,9 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-2" data-testid="goal-detail-property-chips">
-            <Badge variant="secondary">{{ statusLabel(goal.status) }}</Badge>
+            <Badge variant="secondary" data-testid="goal-status" :data-goal-status="goal.status">
+              {{ statusLabel(goal.status) }}
+            </Badge>
             <Badge v-if="goal.startDate" variant="outline">
               {{ t('goal.detail.startDate') }}: {{ formatProductYmd(goal.startDate) }}
             </Badge>
@@ -89,6 +91,7 @@
               v-if="goal.status === 'InProgress'"
               variant="outline"
               size="sm"
+              data-testid="goal-plan-action"
               :disabled="isSaving"
               @click="runLifecycle('plan')"
             >
@@ -97,6 +100,7 @@
             <Button
               v-if="goal.status === 'InProgress'"
               size="sm"
+              data-testid="goal-complete-action"
               :disabled="isSaving"
               @click="runLifecycle('complete')"
             >
@@ -105,6 +109,9 @@
             <Button
               v-if="goal.status === 'Completed' || goal.status === 'Abandoned'"
               size="sm"
+              :data-testid="
+                goal.status === 'Completed' ? 'goal-reopen-action' : 'goal-resume-action'
+              "
               :disabled="isSaving"
               @click="runLifecycle('activate')"
             >
@@ -118,6 +125,7 @@
               v-if="goal.status === 'Abandoned'"
               variant="outline"
               size="sm"
+              data-testid="goal-plan-action"
               :disabled="isSaving"
               @click="runLifecycle('plan')"
             >
@@ -128,6 +136,7 @@
               variant="ghost"
               size="sm"
               class="text-destructive"
+              data-testid="goal-abandon-action"
               :disabled="isSaving"
               @click="confirmAbandon"
             >

@@ -120,16 +120,19 @@ describe('API host account-closed consumer chain', () => {
         status: 'ACTIVE',
       },
     });
-    const connId = crypto.randomUUID();
-    await prisma.knowledgeRepositoryConnection.create({
+    const connId = `KnowledgeRemoteBindingId_${crypto.randomUUID()}`;
+    const knowledgeSpaceId = `KnowledgeSpaceId_${crypto.randomUUID()}`;
+    await prisma.knowledgeSpace.create({ data: { id: knowledgeSpaceId } });
+    await prisma.knowledgeRemoteBinding.create({
       data: {
         id: connId,
+        knowledgeSpaceId,
         identityId,
-        githubUserId: 'gh-1',
-        githubRepositoryId: 'gh-repo-1',
-        githubRepositoryFullName: 'user/repo',
+        provider: 'GitHub',
         installationId: 'inst-1',
-        status: 'ACTIVE',
+        repositoryId: `gh-repo-${crypto.randomUUID()}`,
+        repositoryFullNameSnapshot: 'user/repo',
+        connectedAt: new Date(),
       },
     });
     const writeReqId = crypto.randomUUID();
@@ -137,7 +140,8 @@ describe('API host account-closed consumer chain', () => {
       data: {
         id: writeReqId,
         identityId,
-        connectionId: connId,
+        bindingId: connId,
+        knowledgeDocumentId: `kdoc_${crypto.randomUUID()}`,
         requestId: 'req-1',
         requestHash: 'hash-1',
         relativePath: 'note.md',

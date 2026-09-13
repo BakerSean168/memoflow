@@ -19,6 +19,7 @@ import {
   TaskPlanStatus,
 } from '@memoflow/contracts/task';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/contracts/goal';
+import { requireYmd } from '@memoflow/contracts/primitives';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   buildTaskReminderOperationId,
@@ -29,6 +30,8 @@ import {
   buildGoalReminderOperationId,
   createGoalReminderFireHandler,
 } from '@memoflow/goal/schedule-execution';
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { GOAL_REMINDER_PAYLOAD_VERSION } from '@memoflow/goal/schedule-projection';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   ROUTINE_WALLCLOCK_HANDLER_KEY,
@@ -278,15 +281,15 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
       goalTitle: 'Ship R06',
       triggerType: ReminderTriggerType.RemainingDays,
       triggerValue: 3,
-      startDate: Date.UTC(2026, 1, 1),
-      dueDate: Date.UTC(2026, 8, 1),
-      reminderTime: 8 * 60,
+      startDate: requireYmd('2026-02-01'),
+      target: { kind: 'day' as const, date: requireYmd('2026-09-01') },
+      reminderTime: FIXTURE_E.runAt,
     };
     const intent: ScheduledIntent = {
       schedulingKey: FIXTURE_E.schedulingKey,
       handlerKey: 'goal.reminder.fire',
       runAt: FIXTURE_E.runAt,
-      payloadVersion: 1,
+      payloadVersion: GOAL_REMINDER_PAYLOAD_VERSION,
       payload,
     };
 
@@ -333,7 +336,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
       schedulingKey: FIXTURE_E.schedulingKey,
       handlerKey: 'goal.reminder.fire',
       runAt: FIXTURE_E.runAt,
-      payloadVersion: 1,
+      payloadVersion: GOAL_REMINDER_PAYLOAD_VERSION,
       payload,
     };
     const opId = buildGoalReminderOperationId(context);

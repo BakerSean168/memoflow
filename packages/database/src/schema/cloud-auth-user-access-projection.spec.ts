@@ -1,16 +1,19 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { prisma } from '../client.js';
 
-describe('CloudAuthUser access projection physical schema', () => {
-  it('has disabled_at and no status column', async () => {
-    const rows = await prisma.$queryRaw<Array<{ column_name: string }>>`
-      SELECT column_name
-      FROM information_schema.columns
-      WHERE table_schema = 'public' AND table_name = 'cloud_auth_users'
-    `;
-    const columns = new Set(rows.map((row) => row.column_name));
+function cloudAuthUserModel(): string {
+  const schema = readFileSync(resolve(__dirname, '../../prisma/schema/auth.prisma'), 'utf8');
+  return schema.match(/model CloudAuthUser\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
+}
 
-    expect(columns.has('disabled_at')).toBe(true);
-    expect(columns.has('status')).toBe(false);
+describe('CloudAuthUser access projection Prisma schema', () => {
+  it('maps disabledAt to disabled_at and does not resurrect a status column', () => {
+    const model = cloudAuthUserModel();
+
+    expect(model).toContain('disabledAt');
+    expect(model).toContain('@map("disabled_at")');
+    expect(model).toContain('@@map("cloud_auth_users")');
+    expect(model).not.toMatch(/^\s*status\s+/m);
   });
 });

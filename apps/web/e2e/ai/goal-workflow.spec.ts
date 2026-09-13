@@ -646,6 +646,7 @@ function createKnowledgeCaptureDraft(
 ): KnowledgeCaptureMockRun['draft'] {
   return {
     revision: 1,
+    knowledgeDocumentId: 'kdoc_550e8400-e29b-41d4-a716-446655440701',
     title,
     topic: 'Durable Mastra workflow recovery and checkpoint ownership',
     markdown: [

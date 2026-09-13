@@ -535,9 +535,19 @@ describe('OpenAPI generator ledger coverage (Phase 4)', () => {
       (candidate) => candidate.method === 'post' && candidate.path === '/api/v1/goals',
     )!;
     const goalCreateBody = getBodySchema(goalCreate)!;
-    expect(goalCreateBody.safeParse({ name: 'Ship', dueDate: Date.now() }).success).toBe(true);
+    expect(
+      goalCreateBody.safeParse({
+        name: 'Ship',
+        target: { kind: 'quarter', year: 2030, quarter: 4 },
+      }).success,
+    ).toBe(true);
     expect(goalCreateBody.safeParse({ name: '' }).success).toBe(false);
-    expect(goalCreateBody.safeParse({ name: 'Legacy', importance: 'Moderate' }).success).toBe(false);
+    expect(goalCreateBody.safeParse({ name: 'Legacy due', dueDate: Date.now() }).success).toBe(
+      false,
+    );
+    expect(goalCreateBody.safeParse({ name: 'Legacy', importance: 'Moderate' }).success).toBe(
+      false,
+    );
 
     // Notification read-all is a void command with an unread-count envelope.
     const notifReadAll = registry.rawPaths.find(

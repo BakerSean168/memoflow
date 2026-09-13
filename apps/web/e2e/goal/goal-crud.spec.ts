@@ -84,31 +84,31 @@ test.describe('Goal vNext product surface', () => {
     await expect(page.getByTestId('goal-detail-view')).toBeVisible({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
-    await expect(page.getByText('Planned', { exact: true })).toBeVisible();
+    await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Planned');
 
     await page.getByTestId('goal-start-action').click();
-    await expect(page.getByText('InProgress', { exact: true })).toBeVisible();
+    await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
 
     await page.getByTestId('goal-plan-action').click();
-    await expect(page.getByText('Planned', { exact: true })).toBeVisible();
+    await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Planned');
 
     await page.getByTestId('goal-start-action').click();
-    await expect(page.getByText('InProgress', { exact: true })).toBeVisible();
+    await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
 
     await page.getByTestId('goal-complete-action').click();
-    await expect(page.getByText('Completed', { exact: true })).toBeVisible();
+    await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Completed');
 
     await page.getByTestId('goal-reopen-action').click();
-    await expect(page.getByText('InProgress', { exact: true })).toBeVisible();
+    await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
 
     await page.getByTestId('goal-abandon-action').click();
     const abandonDialog = page.getByRole('alertdialog');
     await expect(abandonDialog).toBeVisible();
     await abandonDialog.getByRole('button', { name: /^(Abandon|放弃)$/ }).click();
-    await expect(page.getByText('Abandoned', { exact: true })).toBeVisible();
+    await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'Abandoned');
 
     await page.getByTestId('goal-resume-action').click();
-    await expect(page.getByText('InProgress', { exact: true })).toBeVisible();
+    await expect(page.getByTestId('goal-status')).toHaveAttribute('data-goal-status', 'InProgress');
   });
 
   test('[P0] deletes a goal through the progress-row action', async ({ page }) => {
