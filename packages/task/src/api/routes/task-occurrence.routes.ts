@@ -19,6 +19,7 @@ import {
   CompleteTaskOccurrenceInvocationSchema,
   MarkTaskOccurrenceMissedInvocationSchema,
   RescheduleTaskOccurrenceInvocationSchema,
+  SetTaskOccurrenceChecklistItemInvocationSchema,
   SkipTaskOccurrenceInvocationSchema,
   TaskOccurrenceIdCommandInvocationSchema,
 } from '@memoflow/contracts/task';
@@ -222,6 +223,36 @@ export function registerTaskOccurrenceRoutes(
     },
     [auth],
     (data, ctx) => controller.markMissedInstance(data.params.id, data.body, ctx),
+  );
+
+  // POST /:id/checklist — owner command for one occurrence checklist snapshot item
+  r.routeWithValidation(
+    {
+      method: 'post',
+      path: '/:id/checklist',
+      summary: '更新任务 occurrence 清单项',
+      request: {
+        params: SetTaskOccurrenceChecklistItemInvocationSchema.shape.params,
+        body: {
+          content: {
+            'application/json': {
+              schema: SetTaskOccurrenceChecklistItemInvocationSchema.shape.body,
+            },
+          },
+        },
+      },
+      responses: {
+        200: successResponse(TaskOccurrenceResponseSchema, '清单项更新成功'),
+        404: errorResponse('Occurrence 或清单项不存在'),
+        409: errorResponse('Occurrence 版本冲突'),
+      },
+      validation: {
+        schema: SetTaskOccurrenceChecklistItemInvocationSchema,
+        projectInput: (req) => ({ params: req.params, body: req.body }),
+      },
+    },
+    [auth],
+    (data, ctx) => controller.setChecklistItem(data.params.id, data.body, ctx),
   );
 
   // POST /:id/reschedule — owner command for this Task occurrence only

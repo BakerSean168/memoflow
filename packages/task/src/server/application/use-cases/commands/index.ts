@@ -15,3 +15,4 @@ export * from './unbind-task-from-goal.use-case';
 export * from './update-task-plan.use-case';
 
 export * from './abandon-task-plan.use-case';
+export * from './set-task-occurrence-checklist-item.use-case';

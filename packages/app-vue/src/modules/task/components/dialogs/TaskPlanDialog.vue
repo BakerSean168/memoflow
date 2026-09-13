@@ -90,7 +90,7 @@ import { Dialog, Button } from '@memoflow/ui-vue-shadcn';
 import { Copy, Pencil, PlusCircle } from '@lucide/vue';
 import TaskPlanForm from '../TaskPlanForm/TaskPlanForm.vue';
 import type { TaskPlanViewModel } from '../types';
-import { TaskPlanScheduleSchema, TaskType } from '@memoflow/contracts/task';
+import { TaskPlanScheduleSchema } from '@memoflow/contracts/task';
 import { getProductTime } from '../../../../shared/utils/product-time';
 import { useTaskGoalBindingOptions } from '../../composables/useTaskGoalBindingOptions';
 import { ProductDialogShell } from '../../../../shared/components';
@@ -122,22 +122,15 @@ function createBlankTemplate(): TaskPlanViewModel {
     labels: [],
     labelIds: [],
     goalBinding: null,
+    checklist: [],
     schedule: TaskPlanScheduleSchema.parse({
       kind: 'OneTime',
       date: getProductTime().input.dateValue(Date.now()),
       timing: { kind: 'AllDay' },
     }),
-    timeConfig: {
-      timeType: 'AllDay',
-      timePoint: null,
-      timeRange: null,
-      startDate: getProductTime().input.dateValue(Date.now()),
-    },
-    recurrenceRule: null,
     reminderConfig: null,
     instanceCount: 0,
     completionRate: 0,
-    taskType: TaskType.OneTime,
   };
 }
 

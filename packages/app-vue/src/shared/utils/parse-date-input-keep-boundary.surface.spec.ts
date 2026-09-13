@@ -17,16 +17,21 @@ describe('date input Product Time boundary (residual 1225)', () => {
     resolve(dir, '../../../../app-react/src/screens/GoalEditorScreen.tsx'),
     'utf8',
   );
+  const calendarSelect = readFileSync(resolve(dir, 'handle-calendar-select.ts'), 'utf8');
+  const parseCalendar = readFileSync(resolve(dir, 'parse-to-date.ts'), 'utf8');
+  const formatDisplay = readFileSync(resolve(dir, 'format-display-date.ts'), 'utf8');
 
-  it('keeps app-vue Task date parsing on Product Time', () => {
-    expect(vue).toMatch(/const parseDateInput\b/);
-    expect(vue).toContain('getProductTime');
-    expect(vue).toContain('parseDateValue');
-    expect(vue).toContain('startOfYmd');
-    const body = vue.match(/const parseDateInput = \([\s\S]*?\n\};/)?.[0] ?? '';
-    expect(body).not.toContain('Date.parse');
-    expect(body).not.toContain('new Date(');
-    expect(body).not.toContain('.getTime()');
+  it('keeps app-vue Task date parsing on canonical Ymd calendar adapters', () => {
+    expect(vue).toContain('parseToCalendarDate');
+    expect(vue).toContain('handleCalendarSelect');
+    expect(parseCalendar).toContain('ymdToCalendarDateValue');
+    expect(parseCalendar).toContain('requireYmd');
+    expect(calendarSelect).toContain('calendarDateValueToYmd');
+    for (const source of [vue, parseCalendar, calendarSelect]) {
+      expect(source).not.toContain('Date.parse');
+      expect(source).not.toContain('getTimezoneOffset');
+      expect(source).not.toContain('toISOString().slice');
+    }
   });
 
   it('keeps app-react Goal target parsing on canonical Product Time helpers', () => {
@@ -39,9 +44,9 @@ describe('date input Product Time boundary (residual 1225)', () => {
     expect(react).not.toContain('new Date(');
   });
 
-  it('keeps date formatting on Product Time too', () => {
-    expect(vue).toMatch(/const formatDateToInput\b/);
-    expect(vue).toContain('dateValue');
+  it('keeps date formatting on the shared Product Time formatter', () => {
+    expect(vue).toContain('formatDisplayDate');
+    expect(formatDisplay).toContain("from '@memoflow/time'");
     expect(react).toContain('goalTimeframeInputValue');
     expect(react).not.toMatch(/function toDateInput\b/);
   });

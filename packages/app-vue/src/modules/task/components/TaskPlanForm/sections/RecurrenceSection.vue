@@ -193,9 +193,10 @@ import {
   RecurrenceFrequency,
   DayOfWeek,
   RECURRENCE_RULE_DEFAULTS,
-  TaskType,
+  TaskPlanScheduleSchema,
+  TaskYmdSchema,
 } from '@memoflow/contracts/task';
-import type { RecurrenceRuleDTO } from '@memoflow/contracts/task';
+import type { TaskPlanSchedule, TaskRecurrence, TaskRecurrenceEnd } from '@memoflow/contracts/task';
 import type { TaskPlanViewModel } from '../../types';
 import {
   Alert,
@@ -224,60 +225,71 @@ import { getProductTime } from '../../../../../shared/utils/product-time';
 import { addYmdDays } from '@memoflow/time';
 
 const { t, locale } = useI18n();
-
-// TIME-1206: recurrence date display consumes canonical Ymd and never routes through Date -> Ymd compatibility helpers.
-// Residual 1267: handleEndDateCalendarSelect dual retired onto handleCalendarSelect sole (setter → endDate ref).
-
-/** Convert endDate string to Date for Calendar :selected */
-/** Soft residual 1255: endDateAsDate inline YYYY-MM-DD→Date (parseToDate sole available; keep co-located). */
-const endDateAsDate = computed(() => {
-  if (!endDate.value) return undefined;
-  return new Date(endDate.value + 'T00:00:00');
-});
-
-/** Handle Calendar selection for end date — Residual 1267 dual retired onto handleCalendarSelect sole. */
-function handleEndDateCalendarSelect(date: unknown) {
-  handleCalendarSelect(date, (value) => {
-    endDate.value = value;
-  });
-}
-
-/**
- * 获取默认结束日期（今天 + 配置的天数）
- */
-const getDefaultEndDate = (): string => {
-  const today = getProductTime().calendar.toYmd(Date.now());
-  return String(addYmdDays(today, RECURRENCE_RULE_DEFAULTS.DEFAULT_END_DATE_DAYS));
-};
-
-const props = defineProps<{
-  modelValue: TaskPlanViewModel;
-}>();
+const props = defineProps<{ modelValue: TaskPlanViewModel }>();
 const emit = defineEmits<{
   'update:modelValue': [value: TaskPlanViewModel];
   'update:validation': [isValid: boolean];
 }>();
 
-const updateTemplate = (updater: (template: TaskPlanViewModel) => void) => {
-  const currentRule = props.modelValue.recurrenceRule as unknown as RecurrenceRuleDTO | null;
-  const updatedTemplate: TaskPlanViewModel = {
-    ...props.modelValue,
-    timeConfig: { ...(props.modelValue.timeConfig || {}) },
-    recurrenceRule: currentRule ? { ...currentRule } : null,
-  } as TaskPlanViewModel;
-  updater(updatedTemplate);
-  emit('update:modelValue', updatedTemplate);
-};
+function schedule(): TaskPlanSchedule {
+  return TaskPlanScheduleSchema.parse(props.modelValue.schedule);
+}
 
-// 重复频率选项
+function emitSchedule(next: TaskPlanSchedule): void {
+  emit('update:modelValue', { ...props.modelValue, schedule: TaskPlanScheduleSchema.parse(next) });
+}
+
+function defaultRecurrence(): TaskRecurrence {
+  return {
+    frequency: RecurrenceFrequency.Daily,
+    interval: 1,
+    byWeekday: [],
+    end: { kind: 'Never' },
+  };
+}
+
+const recurrenceEnabled = computed({
+  get: () => schedule().kind === 'Recurring',
+  set: (enabled: boolean) => {
+    const current = schedule();
+    if (enabled && current.kind === 'OneTime') {
+      emitSchedule({
+        kind: 'Recurring',
+        startDate: current.date,
+        timing: current.timing,
+        recurrence: defaultRecurrence(),
+      });
+    } else if (!enabled && current.kind === 'Recurring') {
+      emitSchedule({ kind: 'OneTime', date: current.startDate, timing: current.timing });
+    }
+  },
+});
+
+function recurrence(): TaskRecurrence {
+  const current = schedule();
+  return current.kind === 'Recurring' ? current.recurrence : defaultRecurrence();
+}
+
+function updateRecurrence(updates: Partial<TaskRecurrence>): void {
+  const current = schedule();
+  if (current.kind !== 'Recurring') return;
+  emitSchedule({
+    ...current,
+    recurrence: {
+      ...current.recurrence,
+      ...updates,
+      byWeekday: updates.byWeekday ?? current.recurrence.byWeekday,
+      end: updates.end ?? current.recurrence.end,
+    },
+  });
+}
+
 const frequencyOptions = computed(() => [
   { title: t('task.recurrence.daily'), value: RecurrenceFrequency.Daily },
   { title: t('task.recurrence.weekly'), value: RecurrenceFrequency.Weekly },
   { title: t('task.recurrence.monthly'), value: RecurrenceFrequency.Monthly },
   { title: t('task.recurrence.yearly'), value: RecurrenceFrequency.Yearly },
 ]);
-
-// 星期选项
 const dayOptions = computed(() => [
   { title: t('task.recurrence.sun'), value: DayOfWeek.Sunday },
   { title: t('task.recurrence.mon'), value: DayOfWeek.Monday },
@@ -288,170 +300,94 @@ const dayOptions = computed(() => [
   { title: t('task.recurrence.sat'), value: DayOfWeek.Saturday },
 ]);
 
-// Toggle day for weekly selection (replaces v-chip-group)
-const toggleDay = (day: DayOfWeek) => {
-  const current = selectedDays.value;
-  if (current.includes(day)) {
-    selectedDays.value = current.filter((d) => d !== day);
-  } else {
-    selectedDays.value = [...current, day];
-  }
-};
-
-// 重复启用状态
-const recurrenceEnabled = computed({
-  get: () => !!props.modelValue.recurrenceRule,
-  set: (value: boolean) => {
-    if (value && !props.modelValue.recurrenceRule) {
-      // 启用重复：创建默认规则
-      const defaultRule: RecurrenceRuleDTO = {
-        frequency: RecurrenceFrequency.Daily,
-        interval: 1,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: null,
-      };
-      updateTemplate((template) => {
-        template.recurrenceRule = defaultRule as unknown as Record<string, unknown>;
-        template.taskType = TaskType.Recurring;
-      });
-    } else if (!value) {
-      // 禁用重复：清空规则
-      updateTemplate((template) => {
-        template.recurrenceRule = null;
-        template.taskType = TaskType.OneTime;
-      });
-    }
-  },
-});
-
-// 频率
 const frequency = computed({
-  get: () =>
-    (props.modelValue.recurrenceRule as unknown as RecurrenceRuleDTO | null)?.frequency ??
-    RecurrenceFrequency.Daily,
+  get: () => recurrence().frequency,
   set: (value: RecurrenceFrequency) => {
-    updateRecurrenceRule({ frequency: value });
+    updateRecurrence({
+      frequency: value,
+      byWeekday:
+        value === RecurrenceFrequency.Weekly
+          ? recurrence().byWeekday.length > 0
+            ? recurrence().byWeekday
+            : [DayOfWeek.Monday]
+          : [],
+    });
   },
 });
-
-// 间隔
 const interval = computed({
-  get: () =>
-    (props.modelValue.recurrenceRule as unknown as RecurrenceRuleDTO | null)?.interval ?? 1,
-  set: (value: number) => {
-    updateRecurrenceRule({ interval: value });
-  },
+  get: () => recurrence().interval,
+  set: (value: number) => updateRecurrence({ interval: value }),
 });
-
-// 选中的星期
 const selectedDays = computed({
-  get: () =>
-    (props.modelValue.recurrenceRule as unknown as RecurrenceRuleDTO | null)?.daysOfWeek ?? [],
-  set: (value: DayOfWeek[]) => {
-    updateRecurrenceRule({ daysOfWeek: value });
-  },
+  get: () => [...recurrence().byWeekday],
+  set: (value: DayOfWeek[]) => updateRecurrence({ byWeekday: value }),
 });
+function toggleDay(day: DayOfWeek): void {
+  const current = selectedDays.value;
+  selectedDays.value = current.includes(day)
+    ? current.filter((candidate) => candidate !== day)
+    : [...current, day];
+}
 
-// 结束条件类型
 const endConditionType = ref<'never' | 'date' | 'count'>('never');
-
-// 结束日期
-const endDate = ref<string>('');
-
-// 重复次数
-const occurrences = ref<number>(1);
-
-// 初始化结束条件
-const initializeEndCondition = () => {
-  const rule = props.modelValue.recurrenceRule as unknown as RecurrenceRuleDTO | null;
-  if (!rule) {
-    endConditionType.value = 'never';
-    return;
+const endDate = ref('');
+const occurrences = ref(1);
+const endDateAsDate = computed(() =>
+  endDate.value ? new Date(`${endDate.value}T00:00:00`) : undefined,
+);
+function handleEndDateCalendarSelect(date: unknown): void {
+  handleCalendarSelect(date, (value) => {
+    endDate.value = value;
+  });
+}
+function getDefaultEndDate(): string {
+  return String(
+    addYmdDays(
+      getProductTime().calendar.toYmd(Date.now()),
+      RECURRENCE_RULE_DEFAULTS.DEFAULT_END_DATE_DAYS,
+    ),
+  );
+}
+function endFromForm(): TaskRecurrenceEnd {
+  if (endConditionType.value === 'date') {
+    return { kind: 'Until', date: TaskYmdSchema.parse(endDate.value) };
   }
-
-  if (rule.endDate) {
+  if (endConditionType.value === 'count') return { kind: 'Count', count: occurrences.value };
+  return { kind: 'Never' };
+}
+function initializeEndCondition(): void {
+  const end = recurrence().end;
+  if (end.kind === 'Until') {
     endConditionType.value = 'date';
-    endDate.value = new Date(rule.endDate).toISOString().split('T')[0];
-  } else if (rule.occurrences) {
+    endDate.value = String(end.date);
+  } else if (end.kind === 'Count') {
     endConditionType.value = 'count';
-    occurrences.value = rule.occurrences;
+    occurrences.value = end.count;
   } else {
     endConditionType.value = 'never';
   }
-};
-
-// 更新重复规则
-const updateRecurrenceRule = (updates: Partial<RecurrenceRuleDTO>) => {
-  const currentRule = props.modelValue.recurrenceRule as unknown as RecurrenceRuleDTO | null;
-  if (!currentRule) return;
-
-  const newRuleDTO: RecurrenceRuleDTO = {
-    frequency: updates.frequency ?? currentRule.frequency,
-    interval: updates.interval ?? currentRule.interval,
-    daysOfWeek: updates.daysOfWeek ?? currentRule.daysOfWeek,
-    endDate: updates.endDate !== undefined ? updates.endDate : currentRule.endDate,
-    occurrences: updates.occurrences !== undefined ? updates.occurrences : currentRule.occurrences,
-  };
-
-  updateTemplate((template) => {
-    template.recurrenceRule = newRuleDTO as unknown as Record<string, unknown>;
-  });
-};
-
-// 监听结束条件类型变化
-watch(endConditionType, (newValue) => {
-  switch (newValue) {
-    case 'never':
-      updateRecurrenceRule({ endDate: null, occurrences: null });
-      break;
-    case 'date':
-      // 如果没有设置结束日期，使用默认值（今天 + 30 天）
-      if (!endDate.value) {
-        endDate.value = getDefaultEndDate();
-      }
-      updateRecurrenceRule({
-        endDate: new Date(endDate.value).getTime(),
-        occurrences: null,
-      });
-      break;
-    case 'count':
-      // 如果没有设置次数，使用默认值
-      if (!occurrences.value || occurrences.value < 1) {
-        occurrences.value = RECURRENCE_RULE_DEFAULTS.DEFAULT_OCCURRENCES;
-      }
-      updateRecurrenceRule({
-        endDate: null,
-        occurrences: occurrences.value,
-      });
-      break;
+}
+watch(endConditionType, (kind) => {
+  if (!recurrenceEnabled.value) return;
+  if (kind === 'date' && !endDate.value) endDate.value = getDefaultEndDate();
+  if (kind === 'count' && occurrences.value < 1) {
+    occurrences.value = RECURRENCE_RULE_DEFAULTS.DEFAULT_OCCURRENCES;
+  }
+  updateRecurrence({ end: endFromForm() });
+});
+watch(endDate, (value) => {
+  if (recurrenceEnabled.value && endConditionType.value === 'date' && value) {
+    updateRecurrence({ end: { kind: 'Until', date: TaskYmdSchema.parse(value) } });
+  }
+});
+watch(occurrences, (value) => {
+  if (recurrenceEnabled.value && endConditionType.value === 'count' && value > 0) {
+    updateRecurrence({ end: { kind: 'Count', count: value } });
   }
 });
 
-// 监听结束日期变化
-watch(endDate, (newValue) => {
-  if (endConditionType.value === 'date' && newValue) {
-    updateRecurrenceRule({
-      endDate: new Date(newValue).getTime(),
-      occurrences: null,
-    });
-  }
-});
-
-// 监听重复次数变化
-watch(occurrences, (newValue) => {
-  if (endConditionType.value === 'count' && newValue > 0) {
-    updateRecurrenceRule({
-      endDate: null,
-      occurrences: newValue,
-    });
-  }
-});
-
-// UI 辅助
 const intervalHint = computed(() => {
-  const freq = frequency.value;
-  switch (freq) {
+  switch (frequency.value) {
     case RecurrenceFrequency.Daily:
       return t('task.recurrence.intervalHintDay');
     case RecurrenceFrequency.Weekly:
@@ -460,81 +396,34 @@ const intervalHint = computed(() => {
       return t('task.recurrence.intervalHintMonth');
     case RecurrenceFrequency.Yearly:
       return t('task.recurrence.intervalHintYear');
-    default:
-      return '';
   }
 });
-
 const hasRecurrence = computed(() => recurrenceEnabled.value);
-
 const recurrenceDescription = computed(() => {
-  const rule = props.modelValue.recurrenceRule as unknown as RecurrenceRuleDTO | null;
-  if (!rule) return '';
-  const freq = rule.frequency;
-  const interval = rule.interval;
-  const freqText =
-    freq === RecurrenceFrequency.Daily
-      ? t('task.recurrence.intervalHintDay')
-      : freq === RecurrenceFrequency.Weekly
-        ? t('task.recurrence.intervalHintWeek')
-        : freq === RecurrenceFrequency.Monthly
-          ? t('task.recurrence.intervalHintMonth')
-          : t('task.recurrence.intervalHintYear');
-  return t('task.recurrence.description', { interval, unit: freqText });
+  if (!recurrenceEnabled.value) return '';
+  return t('task.recurrence.description', {
+    interval: recurrence().interval,
+    unit: intervalHint.value,
+  });
 });
-
-// 验证
-const validationErrors = ref<string[]>([]);
-
-const validateRecurrence = () => {
-  validationErrors.value = [];
-
-  if (recurrenceEnabled.value) {
-    const rule = props.modelValue.recurrenceRule as unknown as RecurrenceRuleDTO | null;
-    if (!rule) {
-      validationErrors.value.push(t('task.recurrence.invalidConfig'));
-      return;
-    }
-
-    if (rule.interval < 1 || rule.interval > 365) {
-      validationErrors.value.push(t('task.recurrence.intervalRange'));
-    }
-
-    if (rule.frequency === RecurrenceFrequency.Weekly && rule.daysOfWeek.length === 0) {
-      validationErrors.value.push(t('task.recurrence.weekdayRequired'));
-    }
-
-    if (endConditionType.value === 'date' && !endDate.value) {
-      validationErrors.value.push(t('task.recurrence.selectEndDate'));
-    }
-
-    if (endConditionType.value === 'count' && (!occurrences.value || occurrences.value < 1)) {
-      validationErrors.value.push(t('task.recurrence.countPositive'));
-    }
+const validationErrors = computed(() => {
+  if (!recurrenceEnabled.value) return [];
+  const rule = recurrence();
+  const errors: string[] = [];
+  if (rule.interval < 1 || rule.interval > 365) errors.push(t('task.recurrence.intervalRange'));
+  if (rule.frequency === RecurrenceFrequency.Weekly && rule.byWeekday.length === 0) {
+    errors.push(t('task.recurrence.weekdayRequired'));
   }
-};
-
-const isValid = computed(() => {
-  validateRecurrence();
-  return validationErrors.value.length === 0;
+  if (rule.end.kind === 'Until' && !rule.end.date) errors.push(t('task.recurrence.selectEndDate'));
+  if (rule.end.kind === 'Count' && rule.end.count < 1)
+    errors.push(t('task.recurrence.countPositive'));
+  return errors;
 });
-
-// 监听验证状态变化
+const isValid = computed(() => validationErrors.value.length === 0);
+watch(isValid, (value) => emit('update:validation', value), { immediate: true });
 watch(
-  isValid,
-  (newValue) => {
-    emit('update:validation', newValue);
-  },
-  { immediate: true },
-);
-
-// 监听模板变化
-watch(
-  () => props.modelValue.recurrenceRule,
-  () => {
-    initializeEndCondition();
-    validateRecurrence();
-  },
+  () => props.modelValue.schedule,
+  () => initializeEndCondition(),
   { deep: true, immediate: true },
 );
 </script>

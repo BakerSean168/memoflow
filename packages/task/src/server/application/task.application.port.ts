@@ -4,6 +4,7 @@ import type { AbandonTaskPlanUseCase } from './use-cases/commands/abandon-task-p
 import type { BindTaskToGoalUseCase } from './use-cases/commands/bind-task-to-goal.use-case';
 import type { MarkTaskOccurrenceMissedUseCase } from './use-cases/commands/mark-task-occurrence-missed.use-case';
 import type { RescheduleTaskOccurrenceUseCase } from './use-cases/commands/reschedule-task-occurrence.use-case';
+import type { SetTaskOccurrenceChecklistItemUseCase } from './use-cases/commands/set-task-occurrence-checklist-item.use-case';
 import type { CompleteTaskOccurrenceUseCase } from './use-cases/commands/complete-task-occurrence.use-case';
 import type { UncompleteTaskOccurrenceUseCase } from './use-cases/commands/uncomplete-task-occurrence.use-case';
 import type { CreateTaskPlanUseCase } from './use-cases/commands/create-task-plan.use-case';
@@ -53,6 +54,7 @@ export interface TaskApplicationPort {
   startTaskOccurrence: TaskPortFn<StartTaskOccurrenceUseCase['execute']>;
   deleteTaskOccurrence: TaskPortFn<DeleteTaskOccurrenceUseCase['execute']>;
   rescheduleTaskOccurrence: TaskPortFn<RescheduleTaskOccurrenceUseCase['execute']>;
+  setTaskOccurrenceChecklistItem: TaskPortFn<SetTaskOccurrenceChecklistItemUseCase['execute']>;
 
   // Instance queries
   getTaskOccurrence: TaskPortFn<GetTaskOccurrenceUseCase['execute']>;

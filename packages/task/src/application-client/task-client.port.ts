@@ -9,6 +9,7 @@ import type {
   MarkTaskOccurrenceMissedReq,
   SkipTaskOccurrenceReq,
   RescheduleTaskInput,
+  SetTaskOccurrenceChecklistItemReq,
 } from '@memoflow/contracts/task';
 import type { TaskPlanListParams } from './ports/task-plan-api-client.port';
 import type { TaskPlan } from '../domain-client/aggregates/task-plan';
@@ -63,4 +64,8 @@ export interface TaskClientPort {
     request?: MarkTaskOccurrenceMissedReq,
   ): Promise<Result<TaskOccurrence>>;
   rescheduleInstance(id: string, request: RescheduleTaskInput): Promise<Result<TaskOccurrence>>;
+  setChecklistItem(
+    id: string,
+    request: SetTaskOccurrenceChecklistItemReq,
+  ): Promise<Result<TaskOccurrence>>;
 }

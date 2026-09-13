@@ -40,7 +40,12 @@
           <!-- 提醒触发器列表 -->
           <div class="col-span-12">
             <div class="text-sm font-medium mb-2">{{ t('task.reminderSection.triggers') }}</div>
-            <Card v-for="(trigger, index) in triggers" :key="index" class="mb-3">
+            <Card
+              v-for="(trigger, index) in triggers"
+              :key="index"
+              class="mb-3"
+              :data-testid="`task-reminder-trigger-${index}`"
+            >
               <CardContent class="pt-4">
                 <div class="grid grid-cols-12 gap-4">
                   <div class="col-span-12 md:col-span-4">
@@ -218,7 +223,7 @@
               </CardContent>
             </Card>
 
-            <Button variant="outline" @click="addTrigger">
+            <Button data-testid="task-reminder-add-trigger" variant="outline" @click="addTrigger">
               <Plus class="h-4 w-4 mr-2" />
               {{ t('task.reminderSection.addTrigger') }}
             </Button>

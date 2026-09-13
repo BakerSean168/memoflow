@@ -14,16 +14,17 @@ import type {
   CompleteTaskOccurrenceInvocation,
   GenerateInstancesInvocation,
   MarkTaskOccurrenceMissedInvocation,
+  SetTaskOccurrenceChecklistItemInvocation,
   SkipTaskOccurrenceInvocation,
   TaskOccurrenceIdCommandInvocation,
   TaskPlanIdCommandInvocation,
   UpdateTaskPlanInvocation,
 } from '../api/task-invocation.schemas';
-import type { GetTaskOccurrencesByRangeReq, GetTaskOccurrencesByRangeRes } from '../api/task-occurrence.dto';
 import type {
-  TaskOccurrenceResponse,
-  TaskPlanResponse,
-} from '../api/response-schemas';
+  GetTaskOccurrencesByRangeReq,
+  GetTaskOccurrencesByRangeRes,
+} from '../api/task-occurrence.dto';
+import type { TaskOccurrenceResponse, TaskPlanResponse } from '../api/response-schemas';
 
 export type TaskRpcMap = {
   'task:template:create': [CreateTaskPlanReq, CreateTaskPlanRes];
@@ -45,8 +46,8 @@ export type TaskRpcMap = {
   'task:instance:uncomplete': [TaskOccurrenceIdCommandInvocation, TaskOccurrenceResponse];
   'task:instance:skip': [SkipTaskOccurrenceInvocation, TaskOccurrenceResponse];
   'task:instance:mark-missed': [MarkTaskOccurrenceMissedInvocation, TaskOccurrenceResponse];
+  'task:instance:checklist-set': [SetTaskOccurrenceChecklistItemInvocation, TaskOccurrenceResponse];
   'task:instance:get-by-date-range': [GetTaskOccurrencesByRangeReq, GetTaskOccurrencesByRangeRes];
-
 
   'task:reschedule-instance': [RescheduleTaskReq, RescheduleTaskRes];
 };

@@ -15,6 +15,7 @@ import type {
   MarkTaskOccurrenceMissedReq,
   SkipTaskOccurrenceReq,
   RescheduleTaskInput,
+  SetTaskOccurrenceChecklistItemReq,
 } from '@memoflow/contracts/task';
 
 export class TaskOccurrenceIpcAdapter implements ITaskOccurrenceApiClient {
@@ -81,6 +82,13 @@ export class TaskOccurrenceIpcAdapter implements ITaskOccurrenceApiClient {
       scheduleSnapshot: request.scheduleSnapshot,
       expectedVersion: request.expectedVersion,
     });
+  }
+
+  async setTaskOccurrenceChecklistItem(
+    id: string,
+    request: SetTaskOccurrenceChecklistItemReq,
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    return this.ipcClient.invoke(TaskChannels.INSTANCE_CHECKLIST_SET, { id, request });
   }
 }
 

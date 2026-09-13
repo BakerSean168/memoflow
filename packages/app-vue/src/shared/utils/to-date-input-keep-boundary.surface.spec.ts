@@ -32,9 +32,12 @@ describe('date input product-time boundary', () => {
     }
   });
 
-  it('keeps Task date input on the same Product Time facade', () => {
-    expect(vueTask).toContain('getProductTime');
-    expect(vueTask).toContain('dateValue');
+  it('keeps Task date input on the canonical Ymd calendar boundary', () => {
+    expect(vueTask).toContain('TaskPlanScheduleSchema');
+    expect(vueTask).toContain('parseToCalendarDate');
+    expect(vueTask).toContain('handleCalendarSelect');
+    expect(vueTask).not.toContain('new Date(');
     expect(vueTask).not.toContain('getTimezoneOffset');
+    expect(vueTask).not.toContain('toISOString().slice');
   });
 });

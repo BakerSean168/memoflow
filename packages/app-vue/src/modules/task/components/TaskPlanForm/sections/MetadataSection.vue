@@ -85,7 +85,6 @@ const updateTemplate = (updater: (template: TaskPlanViewModel) => void) => {
     ...props.modelValue,
     labels: [...(props.modelValue.labels ?? [])],
     labelIds: [...(props.modelValue.labelIds ?? [])],
-    timeConfig: { ...(props.modelValue.timeConfig || {}) },
   };
   updater(updatedTemplate);
   emit('update:modelValue', updatedTemplate);
@@ -108,7 +107,9 @@ const importance = computed({
   },
 });
 
-const labelIds = computed(() => props.modelValue.labelIds ?? props.modelValue.labels?.map((label) => label.id) ?? []);
+const labelIds = computed(
+  () => props.modelValue.labelIds ?? props.modelValue.labels?.map((label) => label.id) ?? [],
+);
 
 function updateLabelIds(ids: string[]): void {
   const selected = new Set(ids);
@@ -124,7 +125,8 @@ async function createAndSelectLabel(name: string): Promise<void> {
     const label = await createLabel(name);
     updateLabelIds([...new Set([...labelIds.value, label.id])]);
   } catch (error) {
-    labelCreateError.value = error instanceof Error ? error.message : t('task.metadata.labelCreateFailed');
+    labelCreateError.value =
+      error instanceof Error ? error.message : t('task.metadata.labelCreateFailed');
   }
 }
 

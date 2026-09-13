@@ -243,11 +243,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import {
-  TaskGoalBindingTrigger,
-  type RecurrenceRuleDTO,
-  type TaskGoalBindingTriggerValue,
-} from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger, type TaskGoalBindingTriggerValue } from '@memoflow/contracts/task';
 import type { TaskPlanViewModel, GoalBindingOption, KeyResultBindingOption } from '../../types';
 import {
   Card,
@@ -359,8 +355,8 @@ const keyResultItems = computed(() => {
 });
 
 const wholePlanTriggerAllowed = computed(() => {
-  const recurrenceRule = props.modelValue.recurrenceRule as RecurrenceRuleDTO | null | undefined;
-  return !recurrenceRule || recurrenceRule.endDate !== null || recurrenceRule.occurrences !== null;
+  const schedule = props.modelValue.schedule;
+  return schedule.kind === 'OneTime' || schedule.recurrence.end.kind !== 'Never';
 });
 
 const triggerItems = computed(() => [
@@ -564,7 +560,7 @@ watch(
 );
 
 watch(
-  () => [props.modelValue.recurrenceRule, props.modelValue.taskType] as const,
+  () => props.modelValue.schedule,
   () => {
     if (
       contributionEnabled.value &&

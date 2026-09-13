@@ -19,6 +19,7 @@ import type {
   MarkTaskOccurrenceMissedReq,
   SkipTaskOccurrenceReq,
   RescheduleTaskInput,
+  SetTaskOccurrenceChecklistItemReq,
   GetTaskOccurrencesByRangeReq,
   TaskOccurrenceClientDTO,
   TaskPlanClientDTO,
@@ -43,6 +44,7 @@ function taskPlanFromDTO(dto: TaskPlanClientDTO): TaskPlan {
     reminderConfig: dto.reminderConfig as TaskReminderConfig | null,
     importance: dto.importance,
     goalBinding: dto.goalBinding ? parseGoalBinding(dto.goalBinding) : null,
+    checklist: dto.checklist.map((item) => ({ ...item })),
     labels: dto.labels ?? [],
     status: dto.status,
     outcome: dto.outcome,
@@ -108,6 +110,7 @@ export class TaskClientService implements TaskClientPort {
     this.skipInstance = this.skipInstance.bind(this);
     this.markInstanceMissed = this.markInstanceMissed.bind(this);
     this.rescheduleInstance = this.rescheduleInstance.bind(this);
+    this.setChecklistItem = this.setChecklistItem.bind(this);
   }
 
   // ===== Task Template Operations =====
@@ -268,6 +271,14 @@ export class TaskClientService implements TaskClientPort {
     request: RescheduleTaskInput,
   ): Promise<Result<TaskOccurrence>> {
     const result = await this.instanceApi.rescheduleTaskOccurrence(id, request);
+    return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
+  }
+
+  async setChecklistItem(
+    id: string,
+    request: SetTaskOccurrenceChecklistItemReq,
+  ): Promise<Result<TaskOccurrence>> {
+    const result = await this.instanceApi.setTaskOccurrenceChecklistItem(id, request);
     return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
   }
 }

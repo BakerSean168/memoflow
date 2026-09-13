@@ -35,6 +35,7 @@ function validTemplateResponse() {
     reminderConfig: null,
     importance: ImportanceLevel.Moderate,
     goalBinding: null,
+    checklist: [],
     labels: [{ id: 'label-planning', name: 'Planning', color: null, createdAt: 1, updatedAt: 1 }],
     status: TaskPlanStatus.Active,
     outcome: TaskPlanOutcome.Open,

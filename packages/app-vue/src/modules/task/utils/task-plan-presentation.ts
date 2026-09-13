@@ -112,102 +112,13 @@ export function toTaskTimeConfigPayload(timeConfig?: TaskTimePayloadInput): Task
   };
 }
 
-function hmToMinuteOfDay(value: string): number {
-  const [hour, minute] = value.split(':').map(Number);
-  return hour * 60 + minute;
-}
-
-function minuteOfDayToHm(value: number): string {
-  const safe = Math.max(0, Math.min(1439, value));
-  return formatHHmmParts(Math.floor(safe / 60), safe % 60);
-}
-
 function scheduleDate(schedule: TaskPlanSchedule): string {
-  return schedule.kind === 'OneTime' ? schedule.date : schedule.startDate;
+  return schedule.kind === 'OneTime' ? String(schedule.date) : String(schedule.startDate);
 }
 
-function scheduleToTimeConfigProjection(schedule: TaskPlanSchedule): TaskTimeConfigViewModel {
-  const timing = schedule.timing;
-  return {
-    startDate: scheduleDate(schedule),
-    timeType:
-      timing.kind === 'AllDay' ? 'AllDay' : timing.kind === 'At' ? 'TimePoint' : 'TimeRange',
-    timePoint: timing.kind === 'At' ? hmToMinuteOfDay(timing.time) : null,
-    timeRange:
-      timing.kind === 'Window'
-        ? { start: hmToMinuteOfDay(timing.start), end: hmToMinuteOfDay(timing.end) }
-        : null,
-  };
-}
-
-function scheduleToRecurrenceProjection(
-  schedule: TaskPlanSchedule,
-): Record<string, unknown> | null {
-  if (schedule.kind !== 'Recurring') return null;
-  const end = schedule.recurrence.end;
-  return {
-    frequency: schedule.recurrence.frequency,
-    interval: schedule.recurrence.interval,
-    daysOfWeek: [...schedule.recurrence.byWeekday],
-    endDate: end.kind === 'Until' ? getProductTime().codec.startOfYmd(end.date) : null,
-    occurrences: end.kind === 'Count' ? end.count : null,
-  };
-}
-
-function inputDateToYmd(value: TaskTimeConfigViewModel['startDate']): string {
-  if (typeof value === 'string') {
-    const parsed = getProductTime().input.parseDateValue(value);
-    if (parsed) return parsed;
-  }
-  const epoch =
-    value instanceof Date ? value.getTime() : typeof value === 'number' ? value : Date.now();
-  return getProductTime().input.dateValue(epoch);
-}
-
-/** Temporary adapter for the existing form. Transport receives only canonical schedule. */
+/** Canonical form boundary: TaskPlanViewModel.schedule is the only schedule truth. */
 export function toTaskPlanSchedulePayload(vm: TaskPlanViewModel): TaskPlanSchedule {
-  const date = inputDateToYmd(vm.timeConfig.startDate);
-  const timeType = vm.timeConfig.timeType ?? 'AllDay';
-  const timing =
-    timeType === 'TimePoint'
-      ? { kind: 'At' as const, time: minuteOfDayToHm(vm.timeConfig.timePoint ?? 0) }
-      : timeType === 'TimeRange' && vm.timeConfig.timeRange
-        ? {
-            kind: 'Window' as const,
-            start: minuteOfDayToHm(vm.timeConfig.timeRange.start),
-            end: minuteOfDayToHm(vm.timeConfig.timeRange.end),
-          }
-        : { kind: 'AllDay' as const };
-  const rule = vm.recurrenceRule as
-    | {
-        frequency?: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
-        interval?: number;
-        daysOfWeek?: number[];
-        endDate?: number | null;
-        occurrences?: number | null;
-      }
-    | null
-    | undefined;
-  if (!rule) {
-    return TaskPlanScheduleSchema.parse({ kind: 'OneTime', date, timing });
-  }
-  const end =
-    rule.occurrences != null
-      ? { kind: 'Count' as const, count: rule.occurrences }
-      : rule.endDate != null
-        ? { kind: 'Until' as const, date: getProductTime().input.dateValue(rule.endDate) }
-        : { kind: 'Never' as const };
-  return TaskPlanScheduleSchema.parse({
-    kind: 'Recurring',
-    startDate: date,
-    timing,
-    recurrence: {
-      frequency: rule.frequency ?? 'Daily',
-      interval: rule.interval ?? 1,
-      byWeekday: rule.frequency === 'Weekly' ? (rule.daysOfWeek ?? []) : [],
-      end,
-    },
-  });
+  return TaskPlanScheduleSchema.parse(vm.schedule);
 }
 
 export function getTaskPlanScheduleTimeDisplay(
@@ -271,6 +182,7 @@ export function mapTaskPlanDtoToViewModel(dto: TaskPlanClientDTO, t: Translate):
     recurrenceText: getTaskRecurrenceText(t, dto),
     labels: dto.labels ?? [],
     labelIds: (dto.labels ?? []).map((label) => label.id),
+    checklist: dto.checklist.map((item) => ({ ...item })),
     goalBinding: dto.goalBinding
       ? {
           goalId: dto.goalBinding.goalId,
@@ -287,9 +199,7 @@ export function mapTaskPlanDtoToViewModel(dto: TaskPlanClientDTO, t: Translate):
     // presentation boundary to validate the canonical schedule and materialize plain data;
     // native structuredClone cannot clone Vue Proxy objects.
     schedule: TaskPlanScheduleSchema.parse(dto.schedule),
-    timeConfig: scheduleToTimeConfigProjection(dto.schedule),
     reminderConfig: (dto.reminderConfig as unknown as Record<string, unknown>) ?? null,
-    recurrenceRule: scheduleToRecurrenceProjection(dto.schedule),
     instanceCount: dto.instanceCount ?? 0,
     completedInstanceCount: dto.completedInstanceCount ?? 0,
     pendingInstanceCount: dto.pendingInstanceCount ?? 0,
@@ -300,6 +210,5 @@ export function mapTaskPlanDtoToViewModel(dto: TaskPlanClientDTO, t: Translate):
     singleInstanceStatus: dto.singleInstanceStatus ?? null,
     completionRate: dto.completionRate ?? 0,
     formattedCreatedAt: dto.createdAt ? formatProductDate(dto.createdAt) : undefined,
-    taskType: dto.schedule.kind,
   };
 }

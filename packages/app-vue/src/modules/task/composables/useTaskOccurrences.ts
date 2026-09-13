@@ -11,6 +11,7 @@ import { sanitizeForIpc } from '../../../shared/utils/ipc';
 import type {
   CompleteTaskOccurrenceReq,
   RescheduleTaskInput,
+  SetTaskOccurrenceChecklistItemReq,
   TaskPlanClientDTO,
 } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
@@ -179,6 +180,18 @@ export function useTaskOccurrences() {
     return result;
   }
 
+  async function setChecklistItem(id: string, request: SetTaskOccurrenceChecklistItemReq) {
+    const result = await executeTaskOperation(
+      () =>
+        service.setChecklistItem(id, sanitizeForIpc(request) as SetTaskOccurrenceChecklistItemReq),
+      'task.error.operationFailed',
+    );
+    if (result.ok) {
+      return updateInstanceProjection(result.data);
+    }
+    return null;
+  }
+
   async function skipInstance(id: string) {
     const result = await executeTaskOperation(
       () => service.skipInstance(id),
@@ -200,6 +213,7 @@ export function useTaskOccurrences() {
     uncompleteInstance,
     markInstanceMissed,
     rescheduleInstance,
+    setChecklistItem,
     skipInstance,
   };
 }

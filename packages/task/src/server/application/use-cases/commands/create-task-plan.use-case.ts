@@ -118,6 +118,7 @@ export class CreateTaskPlanUseCase {
             reminderConfig,
             importance: request.importance,
             completionPolicy: request.completionPolicy,
+            checklist: request.checklist,
             goalBinding: request.goalBinding
               ? {
                   goalId: request.goalBinding.goalId,

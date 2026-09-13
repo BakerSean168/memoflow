@@ -62,15 +62,23 @@ const template = {
   id: 'plan-1',
   name: 'Morning review',
   description: null,
+  status: 'Active',
+  schedule: {
+    kind: 'Recurring',
+    startDate: '2026-08-28',
+    timing: { kind: 'At', time: '09:00' },
+    recurrence: {
+      frequency: 'Daily',
+      interval: 1,
+      byWeekday: [],
+      end: { kind: 'Count', count: 10 },
+    },
+  },
+  importance: 'Moderate',
+  reminderConfig: null,
+  checklist: [{ id: 'check-1', title: 'Prepare evidence', order: 0 }],
   labels: [{ id: 'label-focus', name: 'Focus', color: null }],
   goalBinding: { goalId: 'goal-1', keyResultId: 'kr-1', contribution: null },
-  recurrenceRule: {
-    frequency: 'Daily',
-    interval: 1,
-    daysOfWeek: [],
-    endDate: null,
-    occurrences: 10,
-  },
 } as TaskPlanClientDTO;
 
 function mountRow(overrides: Partial<TaskOccurrenceClientDTO> = {}) {
@@ -110,6 +118,28 @@ describe('TaskOccurrenceRow', () => {
     expect(wrapper.emitted('missed')).toEqual([['occurrence-1']]);
     expect(wrapper.emitted('skip')).toEqual([['occurrence-1']]);
     expect(wrapper.emitted('open-plan')).toEqual([['plan-1']]);
+  });
+
+  it('renders checklist snapshot items and emits an owner command with optimistic version', async () => {
+    const wrapper = mountRow({
+      checklistState: [
+        {
+          definitionId: 'check-1',
+          titleSnapshot: 'Prepare evidence',
+          orderSnapshot: 0,
+          completed: false,
+          completedAt: null,
+        },
+      ],
+      version: 7,
+    });
+
+    expect(wrapper.get('[data-testid="task-occurrence-checklist"]').text()).toContain(
+      'Prepare evidence',
+    );
+    await wrapper.get('[data-testid="task-occurrence-checklist-check-1"]').trigger('click');
+
+    expect(wrapper.emitted('checklist-change')).toEqual([['occurrence-1', 'check-1', true, 7]]);
   });
 
   it('offers undo instead of completing an already-completed occurrence', async () => {

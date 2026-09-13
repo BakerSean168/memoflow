@@ -73,6 +73,7 @@ function createApiStub(): TaskApplicationPort {
     startTaskOccurrence: instanceFn,
     deleteTaskOccurrence: instanceFn,
     markTaskOccurrenceMissed: instanceFn,
+    setTaskOccurrenceChecklistItem: instanceFn,
     getTaskOccurrence: instanceFn,
     listTaskOccurrencesByAccount: instanceFn,
     listTaskOccurrencesByTemplate: instanceFn,

@@ -41,6 +41,7 @@ import { BindTaskToGoalUseCase } from '../application/use-cases/commands/bind-ta
 import { UnbindTaskFromGoalUseCase } from '../application/use-cases/commands/unbind-task-from-goal.use-case';
 import { MarkTaskOccurrenceMissedUseCase } from '../application/use-cases/commands/mark-task-occurrence-missed.use-case';
 import { RescheduleTaskOccurrenceUseCase } from '../application/use-cases/commands/reschedule-task-occurrence.use-case';
+import { SetTaskOccurrenceChecklistItemUseCase } from '../application/use-cases/commands/set-task-occurrence-checklist-item.use-case';
 import type { TaskWriteTransactionRunner } from '../application/use-cases/commands/task-write-support';
 import type { TaskApplicationPort } from '../application';
 import { TaskOccurrenceProjectionService } from '../application/services/task-occurrence-projection.service';
@@ -123,6 +124,7 @@ export interface TaskModuleUseCases {
   readonly startTaskOccurrence: StartTaskOccurrenceUseCase;
   readonly deleteTaskOccurrence: DeleteTaskOccurrenceUseCase;
   readonly rescheduleTaskOccurrence: RescheduleTaskOccurrenceUseCase;
+  readonly setTaskOccurrenceChecklistItem: SetTaskOccurrenceChecklistItemUseCase;
 
   // Instance queries
   readonly getTaskOccurrence: GetTaskOccurrenceUseCase;
@@ -186,8 +188,7 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
     );
   }
 
-  const { taskPlanRepository, taskOccurrenceRepository, taskWriteTransactionRunner } =
-    dependencies;
+  const { taskPlanRepository, taskOccurrenceRepository, taskWriteTransactionRunner } = dependencies;
   const occurrenceProjection = new TaskOccurrenceProjectionService(
     dependencies.userTimeContextPort,
   );
@@ -243,10 +244,7 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
       taskWriteTransactionRunner,
       dependencies.userTimeContextPort,
     ),
-    bindTaskToGoal: new BindTaskToGoalUseCase(
-      taskPlanRepository,
-      dependencies.userTimeContextPort,
-    ),
+    bindTaskToGoal: new BindTaskToGoalUseCase(taskPlanRepository, dependencies.userTimeContextPort),
     unbindTaskFromGoal: new UnbindTaskFromGoalUseCase(
       taskPlanRepository,
       dependencies.userTimeContextPort,
@@ -290,6 +288,11 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
     rescheduleTaskOccurrence: new RescheduleTaskOccurrenceUseCase(
       taskOccurrenceRepository,
       dependencies.userTimeContextPort,
+    ),
+    setTaskOccurrenceChecklistItem: new SetTaskOccurrenceChecklistItemUseCase(
+      taskOccurrenceRepository,
+      taskWriteTransactionRunner,
+      occurrenceProjection,
     ),
 
     // Instance queries
@@ -379,6 +382,8 @@ export function createTaskModule(dependencies: TaskModuleDependencies): TaskModu
     deleteTaskOccurrence: (id, identityId) => useCases.deleteTaskOccurrence.execute(id, identityId),
     rescheduleTaskOccurrence: (id, identityId, input) =>
       useCases.rescheduleTaskOccurrence.execute(id, identityId, input),
+    setTaskOccurrenceChecklistItem: (id, identityId, input) =>
+      useCases.setTaskOccurrenceChecklistItem.execute(id, identityId, input),
     getTaskOccurrence: (id, identityId) => useCases.getTaskOccurrence.execute(id, identityId),
     listTaskOccurrencesByAccount: (identityId) =>
       useCases.listTaskOccurrencesByAccount.execute(identityId),

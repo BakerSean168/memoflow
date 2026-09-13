@@ -29,6 +29,7 @@ import {
 import {
   CompleteTaskOccurrenceSchema,
   MarkTaskOccurrenceMissedSchema,
+  SetTaskOccurrenceChecklistItemSchema,
   SkipTaskOccurrenceSchema,
 } from './task-occurrence.dto';
 import { RescheduleTaskBodySchema } from './task-schedule.dto';
@@ -92,7 +93,9 @@ export const CompleteTaskOccurrenceInvocationSchema = z.object({
   params: TaskOccurrenceIdParamsSchema,
   body: CompleteTaskOccurrenceSchema,
 });
-export type CompleteTaskOccurrenceInvocation = z.infer<typeof CompleteTaskOccurrenceInvocationSchema>;
+export type CompleteTaskOccurrenceInvocation = z.infer<
+  typeof CompleteTaskOccurrenceInvocationSchema
+>;
 
 /** POST /:id/skip — skip an instance. 跳过任务实例。 */
 export const SkipTaskOccurrenceInvocationSchema = z.object({
@@ -110,6 +113,15 @@ export type MarkTaskOccurrenceMissedInvocation = z.infer<
   typeof MarkTaskOccurrenceMissedInvocationSchema
 >;
 
+/** POST /:id/checklist — set one occurrence-owned checklist item state. */
+export const SetTaskOccurrenceChecklistItemInvocationSchema = z.object({
+  params: TaskOccurrenceIdParamsSchema,
+  body: SetTaskOccurrenceChecklistItemSchema,
+});
+export type SetTaskOccurrenceChecklistItemInvocation = z.infer<
+  typeof SetTaskOccurrenceChecklistItemInvocationSchema
+>;
+
 /** POST /:id/reschedule — mutate this occurrence's own time, never the template or Scheduler row. */
 export const RescheduleTaskOccurrenceInvocationSchema = z.object({
   params: TaskOccurrenceIdParamsSchema,
@@ -123,4 +135,6 @@ export type RescheduleTaskOccurrenceInvocation = z.infer<
 export const TaskOccurrenceIdCommandInvocationSchema = z.object({
   params: TaskOccurrenceIdParamsSchema,
 });
-export type TaskOccurrenceIdCommandInvocation = z.infer<typeof TaskOccurrenceIdCommandInvocationSchema>;
+export type TaskOccurrenceIdCommandInvocation = z.infer<
+  typeof TaskOccurrenceIdCommandInvocationSchema
+>;

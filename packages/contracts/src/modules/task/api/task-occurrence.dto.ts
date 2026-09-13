@@ -56,6 +56,18 @@ export const MarkTaskOccurrenceMissedSchema = z
 
 export type MarkTaskOccurrenceMissedReq = z.infer<typeof MarkTaskOccurrenceMissedSchema>;
 
+export const SetTaskOccurrenceChecklistItemSchema = z
+  .object({
+    definitionId: z.string().min(1),
+    completed: z.boolean(),
+    expectedVersion: z.number().int().positive().optional(),
+  })
+  .strict();
+
+export type SetTaskOccurrenceChecklistItemReq = z.infer<
+  typeof SetTaskOccurrenceChecklistItemSchema
+>;
+
 // Residual 789: complete/skip operation Res dual retired — sole ResSchema + z.infer.
 export const TaskOccurrenceOperationResSchema = z.object({
   instance: TaskOccurrenceResponseSchema,

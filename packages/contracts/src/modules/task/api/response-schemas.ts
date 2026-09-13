@@ -22,6 +22,7 @@ import { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-
 import { TaskOccurrenceScheduleSnapshotSchema } from '../value-objects/task-occurrence-schedule-snapshot';
 import { TaskOccurrenceResultSchema } from '../value-objects/task-occurrence-result';
 import { TaskOccurrenceChecklistItemSchema } from '../value-objects/task-occurrence-checklist';
+import { ChecklistItemDefinitionSchema } from '../value-objects/checklist-item-definition';
 
 // ============ TaskPlan Response Schema ============
 
@@ -34,6 +35,7 @@ export const TaskPlanResponseSchema = z.object({
   reminderConfig: TaskReminderConfigSchema.nullable(),
   importance: z.enum(ImportanceLevel),
   goalBinding: TaskGoalBindingSchema.nullable(),
+  checklist: z.array(ChecklistItemDefinitionSchema),
   labels: z.array(LabelClientDTOSchema),
   status: z.enum(TaskPlanStatus),
   outcome: z.enum(TaskPlanOutcome),

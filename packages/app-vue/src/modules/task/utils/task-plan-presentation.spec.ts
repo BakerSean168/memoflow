@@ -6,7 +6,8 @@ import { mapTaskPlanDtoToViewModel } from './task-plan-presentation';
 function taskPlan(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {
   return {
     id: 'ITaskPlanId_11111111-1111-4111-8111-111111111111' as TaskPlanClientDTO['id'],
-    identityId: 'IdentityId_22222222-2222-4222-8222-222222222222' as TaskPlanClientDTO['identityId'],
+    identityId:
+      'IdentityId_22222222-2222-4222-8222-222222222222' as TaskPlanClientDTO['identityId'],
     name: 'Reactive task',
     description: null,
     schedule: {
@@ -17,6 +18,7 @@ function taskPlan(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO
     reminderConfig: null,
     importance: 'Moderate',
     goalBinding: null,
+    checklist: [],
     labels: [],
     status: 'Active',
     outcome: 'Open',
@@ -24,8 +26,6 @@ function taskPlan(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO
     closedAt: null,
     archivedAt: null,
     abandonedReason: null,
-    lastGeneratedDate: null,
-    generateAheadDays: null,
     version: 1,
     createdAt: 1 as TaskPlanClientDTO['createdAt'],
     updatedAt: 1 as TaskPlanClientDTO['updatedAt'],

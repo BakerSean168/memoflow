@@ -85,6 +85,7 @@ import {
   ListTaskPlanFiltersSchema,
   MarkTaskOccurrenceMissedInvocationSchema,
   RescheduleTaskOccurrenceInvocationSchema,
+  SetTaskOccurrenceChecklistItemInvocationSchema,
   SkipTaskOccurrenceInvocationSchema,
   TaskOccurrenceIdCommandInvocationSchema,
   TaskPlanIdCommandInvocationSchema,
@@ -459,6 +460,18 @@ export function createTaskElectronModule(
           }),
         );
         installed.push(TaskChannels.INSTANCE_MARK_MISSED);
+        registerValidatedChannel(
+          ctx,
+          TaskChannels.INSTANCE_CHECKLIST_SET,
+          SetTaskOccurrenceChecklistItemInvocationSchema,
+          (data, requestContext) =>
+            instanceController.setChecklistItem(data.params.id, data.body, requestContext),
+          (args) => ({
+            params: { id: (args as { id?: string }).id ?? (args as string) },
+            body: (args as { request?: unknown }).request,
+          }),
+        );
+        installed.push(TaskChannels.INSTANCE_CHECKLIST_SET);
         registerValidatedChannel(
           ctx,
           TaskChannels.INSTANCE_RESCHEDULE,

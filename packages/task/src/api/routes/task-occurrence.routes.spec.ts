@@ -34,6 +34,7 @@ function createControllerStub(): TaskOccurrenceController {
     startInstance: vi.fn(),
     deleteInstance: vi.fn(),
     markMissedInstance: vi.fn(),
+    setChecklistItem: vi.fn(),
     rescheduleInstance: vi.fn(),
   } as unknown as TaskOccurrenceController;
 }
@@ -245,6 +246,29 @@ describe('task-occurrence route contracts', () => {
     expect(bodySchema.safeParse({ reason: 'Deferred until tomorrow' }).success).toBe(true);
   });
 
+  it('POST /{id}/checklist validates one occurrence-owned checklist mutation', () => {
+    const registry = new TestOpenApiRegistry();
+    registerAll(registry);
+
+    const route = getRegisteredRoute(registry, 'post', `${BASE}/{id}/checklist`);
+    const bodySchema = getJsonBodySchema(route);
+    const responseSchema = getResponseSchema(route, 200);
+
+    expect(responseSchema).toBeDefined();
+    expect(
+      bodySchema.safeParse({
+        definitionId: 'check-1',
+        completed: true,
+        expectedVersion: 3,
+      }).success,
+    ).toBe(true);
+    expect(bodySchema.safeParse({ definitionId: '', completed: true }).success).toBe(false);
+    expect(
+      bodySchema.safeParse({ definitionId: 'check-1', completed: 'yes', expectedVersion: 3 })
+        .success,
+    ).toBe(false);
+  });
+
   it('POST /{id}/reschedule requires canonical occurrence schedule + expectedVersion', () => {
     const registry = new TestOpenApiRegistry();
     registerAll(registry);
@@ -320,6 +344,7 @@ describe('task-occurrence route contracts', () => {
       [`${BASE}/{id}/skip`, 'post'],
       [`${BASE}/{id}/start`, 'post'],
       [`${BASE}/{id}/reschedule`, 'post'],
+      [`${BASE}/{id}/checklist`, 'post'],
       [`${BASE}/{id}`, 'delete'],
     ] as const;
 

@@ -70,7 +70,6 @@ const hasInteracted = ref(false);
 const updateTemplate = (updater: (template: TaskPlanViewModel) => void) => {
   const updatedTemplate: TaskPlanViewModel = {
     ...props.modelValue,
-    timeConfig: { ...(props.modelValue.timeConfig || {}) },
     labels: [...(props.modelValue.labels ?? [])],
     labelIds: [...(props.modelValue.labelIds ?? [])],
     goalBinding: props.modelValue.goalBinding ? { ...props.modelValue.goalBinding } : null,

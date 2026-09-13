@@ -13,6 +13,7 @@ import type {
   MarkTaskOccurrenceMissedReq,
   SkipTaskOccurrenceReq,
   RescheduleTaskInput,
+  SetTaskOccurrenceChecklistItemReq,
 } from '@memoflow/contracts/task';
 
 export interface ITaskOccurrenceApiClient {
@@ -44,5 +45,9 @@ export interface ITaskOccurrenceApiClient {
   rescheduleTaskOccurrence(
     id: string,
     request: RescheduleTaskInput,
+  ): Promise<Result<TaskOccurrenceClientDTO>>;
+  setTaskOccurrenceChecklistItem(
+    id: string,
+    request: SetTaskOccurrenceChecklistItemReq,
   ): Promise<Result<TaskOccurrenceClientDTO>>;
 }

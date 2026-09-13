@@ -42,7 +42,10 @@ const i18n = createI18n({
   },
 });
 
-function instance(status: TaskOccurrenceClientDTO['status']): TaskOccurrenceClientDTO {
+function instance(
+  status: TaskOccurrenceClientDTO['status'],
+  overrides: Partial<TaskOccurrenceClientDTO> = {},
+): TaskOccurrenceClientDTO {
   const now = Date.now();
   const result =
     status === 'Completed'
@@ -78,6 +81,7 @@ function instance(status: TaskOccurrenceClientDTO['status']): TaskOccurrenceClie
     createdAt: now,
     updatedAt: now,
     deletedAt: null,
+    ...overrides,
   };
 }
 
@@ -101,6 +105,24 @@ function mountComposable() {
     completeInstance: vi.fn().mockResolvedValue(ok(entity(completed))),
     uncompleteInstance: vi.fn().mockResolvedValue(ok(entity(pending))),
     markInstanceMissed: vi.fn().mockResolvedValue(ok(entity(missed))),
+    setChecklistItem: vi.fn().mockResolvedValue(
+      ok(
+        entity(
+          instance('Pending', {
+            version: 2,
+            checklistState: [
+              {
+                definitionId: 'check-1',
+                titleSnapshot: 'Prepare evidence',
+                orderSnapshot: 0,
+                completed: true,
+                completedAt: Date.now(),
+              },
+            ],
+          }),
+        ),
+      ),
+    ),
     getTemplate: vi
       .fn()
       .mockResolvedValueOnce(ok(entity(template(100))))
@@ -170,5 +192,27 @@ describe('useTaskOccurrences template projection refresh', () => {
         taskPlanQueryKeys.detail('identity-1', 'template-a'),
       )?.completionRate,
     ).toBe(25);
+  });
+
+  it('updates one occurrence checklist snapshot through the owner command and refreshes the plan projection', async () => {
+    const { composable, service } = mountComposable();
+
+    const updated = await composable.setChecklistItem('instance-a', {
+      definitionId: 'check-1',
+      completed: true,
+      expectedVersion: 1,
+    });
+
+    expect(service.setChecklistItem).toHaveBeenCalledWith('instance-a', {
+      definitionId: 'check-1',
+      completed: true,
+      expectedVersion: 1,
+    });
+    expect(updated?.checklistState[0]).toMatchObject({
+      definitionId: 'check-1',
+      completed: true,
+    });
+    expect(useTaskStore().instances[0]?.checklistState[0]?.completed).toBe(true);
+    expect(service.getTemplate).toHaveBeenCalledWith('template-a');
   });
 });

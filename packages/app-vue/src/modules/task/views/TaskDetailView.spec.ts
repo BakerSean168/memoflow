@@ -6,7 +6,8 @@ const source = readFileSync(resolve(__dirname, 'TaskDetailView.vue'), 'utf8');
 
 describe('TaskDetailView occurrence correction and plan settings', () => {
   it('shows plan-owned recurrence, scheduling, reminders, and Goal binding through one editor', () => {
-    expect(source).toContain('data-testid="task-plan-settings"');
+    expect(source).toContain('data-testid="task-plan-workspace"');
+    expect(source).toContain('data-testid="task-plan-workspace-properties"');
     expect(source).toContain('recurrenceBoundaryText');
     expect(source).toContain('scheduleText');
     expect(source).toContain('reminderText');
@@ -24,6 +25,7 @@ describe('TaskDetailView occurrence correction and plan settings', () => {
       'uncompleteInstance',
       'markInstanceMissed',
       'skipInstance',
+      'setChecklistItem',
     ]) {
       expect(source).toContain(operation);
     }

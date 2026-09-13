@@ -12,6 +12,7 @@ import {
   TaskType,
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
+  type ChecklistItemDefinitionDTO,
 } from '@memoflow/contracts/task';
 import { anIdentityId } from '@memoflow/test-utils/fixtures';
 import { createTimeContext, type TimeContext, type UserTimeContextPort } from '@memoflow/time';
@@ -138,6 +139,7 @@ export interface TaskOccurrenceOverrides {
   instanceDate?: number;
   timeConfig?: TaskTimeConfig;
   importance?: ImportanceLevel;
+  checklistDefinition?: readonly ChecklistItemDefinitionDTO[];
   timeContext?: TimeContext;
 }
 
@@ -154,6 +156,7 @@ export async function aTaskOccurrence(overrides: TaskOccurrenceOverrides = {}) {
       timeContext,
     ),
     importanceSnapshot: overrides.importance ?? ImportanceLevel.Moderate,
+    checklistDefinition: overrides.checklistDefinition,
   });
 }
 

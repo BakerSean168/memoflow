@@ -40,6 +40,13 @@ const i18n = createI18n({
           advancedSettings: 'Advanced settings',
           advancedSettingsDescription: 'Reminders, organization, and dependencies',
         },
+        timeConfig: { title: 'Schedule', allDay: 'All day' },
+        recurrence: { title: 'Repeat' },
+        krLinks: { title: 'Goal', linkedCount: 'Goal linked' },
+        reminderSection: { title: 'Reminder' },
+        metadata: { title: 'Properties' },
+        templateCard: { noRecurrence: 'No recurrence' },
+        checklist: { title: 'Checklist' },
       },
     },
   },
@@ -95,9 +102,11 @@ function createTemplate(overrides: Partial<TaskPlanViewModel> = {}): TaskPlanVie
     id: 'template-1',
     title: 'Morning planning',
     status: 'Active',
-    timeConfig: {
-      timeType: 'AllDay',
-    },
+    schedule: { kind: 'OneTime', date: '2026-09-13', timing: { kind: 'AllDay' } },
+    importance: 'Moderate',
+    reminderConfig: null,
+    goalBinding: null,
+    checklist: [],
     ...overrides,
   };
 }
@@ -115,6 +124,7 @@ function mountForm(modelValue: TaskPlanViewModel | null = createTemplate()) {
       stubs: {
         Button: ButtonStub,
         AlertCircle: true,
+        ListChecks: true,
         BasicInfoSection: createSectionStub('BasicInfoSection', (value) => ({
           ...value,
           title: 'Updated title',
@@ -124,6 +134,7 @@ function mountForm(modelValue: TaskPlanViewModel | null = createTemplate()) {
         ReminderSection: createSectionStub('ReminderSection'),
         MetadataSection: createSectionStub('MetadataSection'),
         KeyResultLinksSection: createSectionStub('KeyResultLinksSection'),
+        ChecklistSection: createSectionStub('ChecklistSection'),
       },
     },
   });
@@ -168,21 +179,40 @@ describe('TaskPlanForm', () => {
   it('includes key-result binding validity in the whole form state', async () => {
     const wrapper = mountForm();
 
+    await wrapper.get('[data-testid="task-goal-chip"]').trigger('click');
     await wrapper.get('[data-stub="KeyResultLinksSection"]').trigger('click');
 
     expect(updateGoalBindingValidation).toHaveBeenCalledWith({ isValid: true });
   });
 
-  it('keeps advanced reminder and metadata sections collapsed until requested', async () => {
+  it('uses property chips as the primary entry point for plan settings', async () => {
     const wrapper = mountForm();
 
+    expect(wrapper.get('[data-testid="task-plan-property-chips"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="task-plan-property-editor"]').exists()).toBe(false);
+    expect(wrapper.find('[data-stub="TimeConfigSection"]').exists()).toBe(false);
+    expect(wrapper.find('[data-stub="RecurrenceSection"]').exists()).toBe(false);
+
+    await wrapper.get('[data-testid="task-schedule-chip"]').trigger('click');
+    expect(wrapper.get('[data-stub="TimeConfigSection"]').exists()).toBe(true);
+
+    await wrapper.get('[data-testid="task-reminder-chip"]').trigger('click');
+    expect(wrapper.find('[data-stub="TimeConfigSection"]').exists()).toBe(false);
+    expect(wrapper.get('[data-stub="ReminderSection"]').exists()).toBe(true);
+
+    await wrapper.get('[data-testid="task-checklist-chip"]').trigger('click');
     expect(wrapper.find('[data-stub="ReminderSection"]').exists()).toBe(false);
-    expect(wrapper.find('[data-stub="MetadataSection"]').exists()).toBe(false);
+    expect(wrapper.get('[data-stub="ChecklistSection"]').exists()).toBe(true);
 
-    await wrapper.get('[data-testid="task-form-advanced-toggle"]').trigger('click');
+    await wrapper.get('[data-testid="task-properties-chip"]').trigger('click');
+    expect(wrapper.find('[data-stub="ChecklistSection"]').exists()).toBe(false);
+    expect(wrapper.get('[data-stub="MetadataSection"]').exists()).toBe(true);
+  });
 
-    expect(wrapper.find('[data-stub="ReminderSection"]').exists()).toBe(true);
-    expect(wrapper.find('[data-stub="MetadataSection"]').exists()).toBe(true);
+  it('opens the Goal editor without requiring a Key Result', async () => {
+    const wrapper = mountForm();
+    await wrapper.get('[data-testid="task-goal-chip"]').trigger('click');
+    expect(wrapper.get('[data-stub="KeyResultLinksSection"]').exists()).toBe(true);
   });
 
   it('exposes the composable validate method to parent callers', async () => {

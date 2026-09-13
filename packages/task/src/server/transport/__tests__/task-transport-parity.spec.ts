@@ -94,6 +94,7 @@ function createPortStub(): TaskApplicationPort {
     startTaskOccurrence: fn(FAKE_INSTANCE),
     deleteTaskOccurrence: fn(null),
     rescheduleTaskOccurrence: fn(FAKE_INSTANCE),
+    setTaskOccurrenceChecklistItem: fn({ instance: FAKE_INSTANCE }),
     getTaskPlan: vi.fn(),
     listTaskPlans: vi.fn(),
     listTaskOccurrencesByTemplate: vi.fn(),
@@ -183,6 +184,17 @@ const malformedComplete = { rating: 99 };
 
 const validSkip = { reason: 'Too tired' };
 const malformedSkip = { reason: 42 };
+
+const validChecklistItem = {
+  definitionId: 'check-1',
+  completed: true,
+  expectedVersion: 3,
+};
+const malformedChecklistItem = {
+  definitionId: '',
+  completed: 'yes',
+  expectedVersion: 0,
+};
 
 const validReschedule = {
   scheduleSnapshot: {
@@ -601,6 +613,27 @@ describe('task transport parity (Phase 4) — production registrations', () => {
             expect(mock).toHaveBeenCalledTimes(2);
             for (const call of mock.mock.calls) {
               expect(call[0]).toBe(INSTANCE_ID);
+            }
+          },
+        },
+      ],
+      [
+        'instance checklist-set',
+        {
+          httpKey: 'instance POST /:id/checklist',
+          ipcChannel: TaskChannels.INSTANCE_CHECKLIST_SET,
+          httpReq: { params: { id: INSTANCE_ID }, body: validChecklistItem },
+          ipcArgs: { id: INSTANCE_ID, request: validChecklistItem },
+          validInvocation: { params: { id: INSTANCE_ID }, body: validChecklistItem },
+          malformedHttpReq: { params: { id: INSTANCE_ID }, body: malformedChecklistItem },
+          malformedIpcArgs: { id: INSTANCE_ID, request: malformedChecklistItem },
+          assertPort: (port) => {
+            const mock = port.setTaskOccurrenceChecklistItem as ReturnType<typeof vi.fn>;
+            expect(mock).toHaveBeenCalledTimes(2);
+            for (const call of mock.mock.calls) {
+              expect(call[0]).toBe(INSTANCE_ID);
+              expect(call[1]).toBe('identity-1');
+              expect(call[2]).toEqual(validChecklistItem);
             }
           },
         },

@@ -34,6 +34,7 @@ export function createMockTaskPlan(overrides: Partial<TaskPlanClientDTO> = {}): 
       'Trivial',
     ] as const),
     goalBinding: null,
+    checklist: [],
     labels: [],
     status,
     outcome,

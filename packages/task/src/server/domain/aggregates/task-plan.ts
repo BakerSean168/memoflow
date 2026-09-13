@@ -366,6 +366,24 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     });
   }
 
+  /** Replaces the Plan-owned checklist definition. Existing occurrence snapshots are not rewritten. */
+  public updateChecklist(items: ReadonlyArray<{ id: string; title: string; order: number }>): void {
+    const next = items
+      .map((item) => ChecklistItemDefinition.fromDTO(item))
+      .sort((left, right) => left.order - right.order);
+    const oldChecklist = this._props.checklist.map((item) => item.toDTO());
+    const nextChecklist = next.map((item) => item.toDTO());
+    if (JSON.stringify(oldChecklist) === JSON.stringify(nextChecklist)) return;
+    this._props.checklist = next;
+    this._props.updatedAt = Date.now();
+    this.addHistory('checklist_updated', { oldChecklist, newChecklist: nextChecklist });
+    this.addDomainEvent<TaskEventMap['task:updated']>('task:updated', {
+      identityId: this._props.identityId,
+      task: this.toServerDTO(),
+      changes: ['checklist'],
+    });
+  }
+
   /** Updates the reminder configuration. */
   public updateReminderConfig(newReminderConfig: TaskReminderConfig | null): void {
     const oldReminderConfig = this._props.reminderConfig?.toDTO() ?? null;
@@ -509,6 +527,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       reminderConfig: this._props.reminderConfig?.toDTO() ?? null,
       importance: this._props.importance,
       goalBinding: this._props.goalBinding?.toDTO() ?? null,
+      checklist: this._props.checklist.map((item) => item.toDTO()),
       labels: this._labelProjection.map((label) => ({ ...label })),
       status: this._props.status,
       outcome: this._props.outcome,
@@ -642,6 +661,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     schedule: TaskPlanSchedule;
     reminderConfig?: TaskReminderConfig;
     importance?: ImportanceLevel;
+    checklist?: Array<{ id: string; title: string; order: number }>;
     goalBinding?: {
       goalId: string;
       keyResultId?: string | null;
@@ -672,7 +692,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
             contribution: params.goalBinding.contribution ?? null,
           })
         : null,
-      checklist: [],
+      checklist: (params.checklist ?? []).map((item) => ChecklistItemDefinition.fromDTO(item)),
       schedule: params.schedule,
       reminderConfig: params.reminderConfig ?? null,
       createdAt: now,

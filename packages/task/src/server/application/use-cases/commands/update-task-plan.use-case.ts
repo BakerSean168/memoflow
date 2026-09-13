@@ -127,6 +127,9 @@ export class UpdateTaskPlanUseCase {
           if (importanceChanged && request.importance !== undefined) {
             template.updatePriority(request.importance);
           }
+          if (request.checklist !== undefined) {
+            template.updateChecklist(request.checklist);
+          }
           if (request.reminderConfig !== undefined) {
             const nextReminderConfig = request.reminderConfig
               ? TaskReminderConfig.fromDTO(request.reminderConfig)

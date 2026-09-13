@@ -21,6 +21,7 @@ import type {
   MarkTaskOccurrenceMissedReq,
   SkipTaskOccurrenceReq,
   RescheduleTaskInput,
+  SetTaskOccurrenceChecklistItemReq,
 } from '@memoflow/contracts/task';
 import type { CompleteTaskOccurrenceUseCase } from '../application/use-cases/commands/complete-task-occurrence.use-case';
 import type { UncompleteTaskOccurrenceUseCase } from '../application/use-cases/commands/uncomplete-task-occurrence.use-case';
@@ -34,6 +35,7 @@ import type { SkipTaskOccurrenceUseCase } from '../application/use-cases/command
 import type { StartTaskOccurrenceUseCase } from '../application/use-cases/commands/start-task-occurrence.use-case';
 import type { MarkTaskOccurrenceMissedUseCase } from '../application/use-cases/commands/mark-task-occurrence-missed.use-case';
 import type { RescheduleTaskOccurrenceUseCase } from '../application/use-cases/commands/reschedule-task-occurrence.use-case';
+import type { SetTaskOccurrenceChecklistItemUseCase } from '../application/use-cases/commands/set-task-occurrence-checklist-item.use-case';
 
 type TaskControllerFn<T extends (...args: never[]) => unknown> = (
   ...args: Parameters<T>
@@ -52,6 +54,7 @@ export interface TaskOccurrenceUseCases {
   start: TaskControllerFn<StartTaskOccurrenceUseCase['execute']>;
   deleteInstance: TaskControllerFn<DeleteTaskOccurrenceUseCase['execute']>;
   reschedule: TaskControllerFn<RescheduleTaskOccurrenceUseCase['execute']>;
+  setChecklistItem: TaskControllerFn<SetTaskOccurrenceChecklistItemUseCase['execute']>;
 }
 
 /**
@@ -168,6 +171,17 @@ export class TaskOccurrenceController {
    */
   async startInstance(id: string, ctx: Context): Promise<Result<TaskOccurrenceClientDTO>> {
     return await this.useCases.start(id, ctx.identityId);
+  }
+
+  /** Toggle one checklist item on this occurrence snapshot only. */
+  async setChecklistItem(
+    id: string,
+    input: SetTaskOccurrenceChecklistItemReq,
+    ctx: Context,
+  ): Promise<Result<TaskOccurrenceClientDTO>> {
+    const result = await this.useCases.setChecklistItem(id, ctx.identityId, input);
+    if (!isOk(result)) return result as Result<TaskOccurrenceClientDTO>;
+    return ok(result.data.instance);
   }
 
   /** Reschedule this occurrence only; identity is always host-injected. */

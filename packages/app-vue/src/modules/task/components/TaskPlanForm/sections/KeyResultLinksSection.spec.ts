@@ -89,7 +89,9 @@ function makeTemplate(): TaskPlanViewModel {
     title: 'Keep this title',
     description: 'Keep this description',
     status: 'ACTIVE',
-    timeConfig: { timeType: 'AllDay', startDate: Date.now() },
+    schedule: { kind: 'OneTime', date: '2026-09-13', timing: { kind: 'AllDay' } },
+    importance: 'Moderate',
+    reminderConfig: null,
     goalBinding: null,
   };
 }
@@ -230,13 +232,11 @@ describe('KeyResultLinksSection', () => {
 
   it('disables whole-plan progress for an unlimited recurring plan', async () => {
     const template = makeTemplate();
-    template.taskType = 'RECURRING';
-    template.recurrenceRule = {
-      frequency: 'DAILY',
-      interval: 1,
-      daysOfWeek: [],
-      endDate: null,
-      occurrences: null,
+    template.schedule = {
+      kind: 'Recurring',
+      startDate: '2026-09-13',
+      timing: { kind: 'AllDay' },
+      recurrence: { frequency: 'Daily', interval: 1, byWeekday: [], end: { kind: 'Never' } },
     };
 
     template.goalBinding = {
@@ -251,9 +251,7 @@ describe('KeyResultLinksSection', () => {
     });
     await nextTick();
 
-    const wholePlanOption = wrapper.get(
-      '[data-testid="kr-progress-trigger-PlanCompletion"]',
-    );
+    const wholePlanOption = wrapper.get('[data-testid="kr-progress-trigger-PlanCompletion"]');
     expect(wholePlanOption.attributes('disabled')).toBeDefined();
     expect(wrapper.text()).toContain(
       'Available only for plans with an end date or occurrence limit.',

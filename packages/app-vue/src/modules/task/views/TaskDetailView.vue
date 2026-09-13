@@ -1,7 +1,7 @@
 <template>
   <section
     class="flex h-full min-h-0 flex-col overflow-hidden bg-background"
-    data-testid="task-detail-view"
+    data-testid="task-plan-workspace"
   >
     <ModuleHeader data-testid="task-detail-toolbar">
       <template #leading>
@@ -101,7 +101,10 @@
           </div>
         </article>
 
-        <section aria-labelledby="task-plan-settings-heading" data-testid="task-plan-settings">
+        <section
+          aria-labelledby="task-plan-settings-heading"
+          data-testid="task-plan-workspace-properties"
+        >
           <div class="mb-3 flex items-center justify-between gap-3">
             <div>
               <h2 id="task-plan-settings-heading" class="font-semibold">
@@ -184,6 +187,7 @@
               @uncomplete="uncompleteOccurrence"
               @missed="markOccurrenceMissed"
               @skip="skipOccurrence"
+              @checklist-change="setOccurrenceChecklistItem"
             />
           </div>
           <div
@@ -274,8 +278,14 @@ const {
   deleteTemplateSafe,
   isSaving,
 } = useTaskPlanMutations();
-const { fetchInstances, completeInstance, uncompleteInstance, markInstanceMissed, skipInstance } =
-  useTaskOccurrences();
+const {
+  fetchInstances,
+  completeInstance,
+  uncompleteInstance,
+  markInstanceMissed,
+  skipInstance,
+  setChecklistItem,
+} = useTaskOccurrences();
 const taskStore = useTaskStore();
 const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
 const viewModel = computed(() =>
@@ -357,6 +367,7 @@ async function saveEdit(vm: TaskPlanViewModel) {
     importance: (vm.importance as ImportanceLevel) ?? ImportanceLevel.Moderate,
     labelIds: vm.labelIds ?? vm.labels?.map((label) => label.id) ?? [],
     goalBinding: goalBinding(vm),
+    checklist: vm.checklist,
   });
   if (result) {
     showEditDialog.value = false;
@@ -384,7 +395,7 @@ async function remove() {
   if (await deleteTemplateSafe(id.value)) await router.push({ name: 'task-list' });
 }
 async function reloadDetail() {
-  await Promise.all([refetch(), fetchInstances({ page: 1, limit: 500, templateId: id.value })]);
+  await Promise.all([refetch(), fetchInstances({ page: 1, limit: 500, planId: id.value })]);
 }
 async function runOccurrenceAction(instanceId: string, action: (id: string) => Promise<unknown>) {
   busyOccurrenceId.value = instanceId;
@@ -401,12 +412,21 @@ const uncompleteOccurrence = (instanceId: string) =>
 const markOccurrenceMissed = (instanceId: string) =>
   runOccurrenceAction(instanceId, markInstanceMissed);
 const skipOccurrence = (instanceId: string) => runOccurrenceAction(instanceId, skipInstance);
+const setOccurrenceChecklistItem = (
+  occurrenceId: string,
+  definitionId: string,
+  completed: boolean,
+  expectedVersion: number,
+) =>
+  runOccurrenceAction(occurrenceId, (id) =>
+    setChecklistItem(id, { definitionId, completed, expectedVersion }),
+  );
 const noop = () => undefined;
 
 watch(
   id,
   (templateId) => {
-    if (templateId) void fetchInstances({ page: 1, limit: 500, templateId });
+    if (templateId) void fetchInstances({ page: 1, limit: 500, planId: templateId });
   },
   { immediate: true },
 );

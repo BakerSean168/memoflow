@@ -39,6 +39,11 @@ const TASK_LEDGER = [
   ['task:instance:uncomplete', 'void', 'TaskOccurrenceClientDTO'],
   ['task:instance:skip', 'SkipTaskOccurrenceSchema', 'TaskOccurrenceClientDTO'],
   ['task:instance:mark-missed', 'MarkTaskOccurrenceMissedSchema', 'TaskOccurrenceClientDTO'],
+  [
+    'task:instance:checklist-set',
+    'SetTaskOccurrenceChecklistItemSchema',
+    'TaskOccurrenceClientDTO',
+  ],
 ] as const;
 
 const API_DTO_FILES = [
@@ -89,7 +94,9 @@ describe('task RPC map surface (Phase 4 ledger)', () => {
     const responseSchemas = readApiFile('response-schemas.ts');
     expect(responseSchemas).toContain('export const TaskPlanResponseSchema');
     expect(responseSchemas).toContain('export const TaskOccurrenceResponseSchema');
-    expect(readApiFile('task-occurrence.dto.ts')).toContain('export type TaskOccurrenceOperationRes =');
+    expect(readApiFile('task-occurrence.dto.ts')).toContain(
+      'export type TaskOccurrenceOperationRes =',
+    );
   });
 
   it('imported names are all referenced by the map body (no dead imports)', () => {

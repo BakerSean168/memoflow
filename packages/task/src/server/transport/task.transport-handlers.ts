@@ -62,6 +62,7 @@ export function createTaskTransportHandlers(api: TaskApplicationPort): TaskTrans
       start: api.startTaskOccurrence,
       deleteInstance: api.deleteTaskOccurrence,
       reschedule: api.rescheduleTaskOccurrence,
+      setChecklistItem: api.setTaskOccurrenceChecklistItem,
     },
   };
 }

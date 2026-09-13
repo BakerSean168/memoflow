@@ -16,6 +16,7 @@ function stateWithGoalOnlyLink(): TaskPlanState {
     schedule: { kind: 'OneTime', date: '2026-09-12', timing: { kind: 'AllDay' } },
     reminderConfig: null,
     importance: ImportanceLevel.Moderate,
+    checklist: [],
     goalBinding: {
       goalId: 'IGoalId_550e8400-e29b-41d4-a716-446655440002',
       keyResultId: null,

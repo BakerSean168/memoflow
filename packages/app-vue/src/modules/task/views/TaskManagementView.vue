@@ -254,6 +254,7 @@
               @uncomplete="uncompleteOccurrence"
               @missed="markOccurrenceMissed"
               @skip="skipOccurrence"
+              @checklist-change="setOccurrenceChecklistItem"
             />
           </div>
           <div
@@ -376,8 +377,14 @@ const {
   deleteTemplateSafe,
   isSaving,
 } = useTaskPlanMutations();
-const { fetchInstances, completeInstance, uncompleteInstance, markInstanceMissed, skipInstance } =
-  useTaskOccurrences();
+const {
+  fetchInstances,
+  completeInstance,
+  uncompleteInstance,
+  markInstanceMissed,
+  skipInstance,
+  setChecklistItem,
+} = useTaskOccurrences();
 const taskStore = useTaskStore();
 const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
 
@@ -516,6 +523,7 @@ async function handleSubmit(vm: TaskPlanViewModel) {
     importance: (vm.importance as ImportanceLevel) ?? ImportanceLevel.Moderate,
     labelIds: vm.labelIds ?? vm.labels?.map((label) => label.id) ?? [],
     goalBinding: goalBinding(vm),
+    checklist: vm.checklist,
   };
   const saved =
     dialogMode.value === 'edit' && vm.id
@@ -552,6 +560,15 @@ const completeOccurrence = (id: string) => runOccurrenceAction(id, completeInsta
 const uncompleteOccurrence = (id: string) => runOccurrenceAction(id, uncompleteInstance);
 const markOccurrenceMissed = (id: string) => runOccurrenceAction(id, markInstanceMissed);
 const skipOccurrence = (id: string) => runOccurrenceAction(id, skipInstance);
+const setOccurrenceChecklistItem = (
+  occurrenceId: string,
+  definitionId: string,
+  completed: boolean,
+  expectedVersion: number,
+) =>
+  runOccurrenceAction(occurrenceId, (id) =>
+    setChecklistItem(id, { definitionId, completed, expectedVersion }),
+  );
 
 watch(
   [queryGoalId, queryKeyResultId],
