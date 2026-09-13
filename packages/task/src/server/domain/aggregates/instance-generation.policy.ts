@@ -29,7 +29,7 @@ export interface InstanceGenerationContext {
   timeConfig: TaskTimeConfig | null;
   recurrenceRule: RecurrenceRule | null;
   importance: ImportanceLevel;
-  existingInstances: { instanceDate: number; deletedAt: number | null }[];
+  existingInstances: readonly { instanceDate: number; deletedAt: number | null }[];
   timeContext: TimeContext;
 }
 
@@ -234,7 +234,7 @@ export function isActiveOnDate(ctx: InstanceGenerationContext, date: number): bo
     return (
       ctx.timeConfig?.startDate != null &&
       startOfLocalDay(ctx.timeConfig.startDate, ctx.timeContext) ===
-      startOfLocalDay(date, ctx.timeContext)
+        startOfLocalDay(date, ctx.timeContext)
     );
   }
   if (!ctx.recurrenceRule) {
@@ -243,7 +243,7 @@ export function isActiveOnDate(ctx: InstanceGenerationContext, date: number): bo
   if (
     ctx.recurrenceRule.endDate &&
     startOfLocalDay(date, ctx.timeContext) >
-    startOfLocalDay(ctx.recurrenceRule.endDate, ctx.timeContext)
+      startOfLocalDay(ctx.recurrenceRule.endDate, ctx.timeContext)
   ) {
     return false;
   }

@@ -7,13 +7,10 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TaskOccurrenceGenerationService } from './task-occurrence-generation-service';
-import { TaskPlan } from '../aggregates';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { TaskType } from '@memoflow/contracts/task';
 import {
   aRecurringTask,
-  aOneTimeTask,
   aLoadedTaskPlan,
   anAllDayTimeConfig,
   aDailyRecurrenceRule,
@@ -54,7 +51,9 @@ describe('TaskOccurrenceGenerationService', () => {
       const now = Date.now();
       const tenDaysLater = now + 10 * DAY_MS;
 
-      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT, { targetDate: tenDaysLater });
+      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT, {
+        targetDate: tenDaysLater,
+      });
 
       // Should generate at most ~10 instances
       expect(instances.length).toBeLessThanOrEqual(11);
@@ -101,12 +100,16 @@ describe('TaskOccurrenceGenerationService', () => {
         });
 
       // Without forceGenerate — starts from lastGeneratedDate + 1 day = today
-      const normal = service.generateInstances(createTemplate(), TASK_TEST_TIME_CONTEXT, { forceGenerate: false });
+      const normal = service.generateInstances(createTemplate(), TASK_TEST_TIME_CONTEXT, {
+        forceGenerate: false,
+      });
 
       // With forceGenerate — starts from today regardless
-      const forced = service.generateInstances(createTemplate(), TASK_TEST_TIME_CONTEXT, { forceGenerate: true });
+      const forced = service.generateInstances(createTemplate(), TASK_TEST_TIME_CONTEXT, {
+        forceGenerate: true,
+      });
 
-      // Use isolated aggregates because a generation mutates the template's instance collection.
+      // Generation mutates only the runtime cursor; occurrences remain separately owned.
       expect(normal.length).toBeGreaterThan(0);
       expect(forced.length).toBeGreaterThan(0);
     });
@@ -122,27 +125,26 @@ describe('TaskOccurrenceGenerationService', () => {
         recurrenceRule: aDailyRecurrenceRule(),
         lastGeneratedDate,
       });
-      const spy = vi.spyOn(template, 'generateInstances').mockReturnValue([]);
-      service.generateInstances(template, timeContext, {
+      const instances = service.generateInstances(template, timeContext, {
         targetDate: Date.parse('2026-03-12T04:00:00.000Z'),
       });
-      const [fromDate, , delegatedContext] = spy.mock.calls[0];
-      expect(String(time.calendar.toYmd(fromDate))).toBe('2026-03-09');
-      expect(fromDate - lastGeneratedDate).toBe(23 * 60 * 60 * 1000);
-      expect(delegatedContext).toEqual(timeContext);
+
+      expect(instances.length).toBeGreaterThan(0);
+      expect(String(time.calendar.toYmd(instances[0].instanceDate))).toBe('2026-03-09');
+      expect(instances[0].instanceDate - lastGeneratedDate).toBe(23 * 60 * 60 * 1000);
+      expect(template.lastGeneratedDate).toBe(Date.parse('2026-03-12T04:00:00.000Z'));
     });
 
-    it('should delegate to template.generateInstances with correct date range', () => {
-      const template = aRecurringTask({ title: 'Spy test' });
-      const spy = vi.spyOn(template, 'generateInstances');
+    it('materializes through the service and advances only the runtime generation cursor', () => {
+      const template = aRecurringTask({ title: 'Service-owned materialization' });
+      const before = template.lastGeneratedDate;
 
-      service.generateInstances(template, TASK_TEST_TIME_CONTEXT);
+      const instances = service.generateInstances(template, TASK_TEST_TIME_CONTEXT);
 
-      expect(spy).toHaveBeenCalledOnce();
-      const [fromDate, toDate] = spy.mock.calls[0];
-      expect(fromDate).toBeTypeOf('number');
-      expect(toDate).toBeTypeOf('number');
-      expect(toDate).toBeGreaterThan(fromDate);
+      expect(instances.length).toBeGreaterThan(0);
+      expect(template.lastGeneratedDate).not.toBe(before);
+      expect(Reflect.get(template, 'instances')).toBeUndefined();
+      expect(Reflect.get(template, 'generateInstances')).toBeUndefined();
     });
   });
 

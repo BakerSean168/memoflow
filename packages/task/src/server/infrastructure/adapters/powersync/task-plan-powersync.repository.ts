@@ -13,10 +13,6 @@ import {
   PowerSyncTaskPlanMapper,
   type PowerSyncTaskPlanRow,
 } from './mappers/powersync-task-plan.mapper';
-import {
-  PowerSyncTaskOccurrenceMapper,
-  type PowerSyncTaskOccurrenceRow,
-} from './mappers/powersync-task-occurrence.mapper';
 
 const eventBusAdapter = createEventBusAdapter(eventBus);
 
@@ -154,20 +150,6 @@ export class PowerSyncTaskPlanRepository
       [id, identityId],
     );
     return this.hydrateTemplate(identityId, row ? PowerSyncTaskPlanMapper.toDomain(row) : null);
-  }
-
-  async findByIdWithChildren(identityId: string, id: string): Promise<TaskPlan | null> {
-    const template = await this.findByIdForIdentity(identityId, id);
-    if (!template) return null;
-
-    const instances = await this.db.getAll<PowerSyncTaskOccurrenceRow>(
-      'SELECT * FROM task_instances WHERE template_id = ? AND identity_id = ? ORDER BY instance_date DESC',
-      [id, identityId],
-    );
-    instances
-      .map((row) => PowerSyncTaskOccurrenceMapper.toDomain(row))
-      .forEach((instance) => template.addInstance(instance));
-    return template;
   }
 
   async findByIdentityId(identityId: string): Promise<TaskPlan[]> {

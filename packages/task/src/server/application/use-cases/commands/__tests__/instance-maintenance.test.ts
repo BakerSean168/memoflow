@@ -72,11 +72,7 @@ describe('Instance maintenance use-cases', () => {
         instanceRepo,
         createInlineTaskWriteTransactionRunner({ instanceRepository: instanceRepo }),
         TASK_TEST_OCCURRENCE_PROJECTION,
-      ).execute(
-        'i-1',
-        'identity-1',
-        { reason: 'No completion evidence' },
-      );
+      ).execute('i-1', 'identity-1', { reason: 'No completion evidence' });
 
       expect(instance.markMissed).toHaveBeenCalledWith('No completion evidence');
       expect(instanceRepo.save).toHaveBeenCalledWith(instance);
@@ -88,7 +84,9 @@ describe('Instance maintenance use-cases', () => {
     it('throws an error if transactionRunner is missing', () => {
       expect(
         () => new GenerateTaskOccurrencesUseCase(templateRepo, instanceRepo, undefined as any),
-      ).toThrow('TaskWriteTransactionRunner must be explicitly provided to GenerateTaskOccurrencesUseCase');
+      ).toThrow(
+        'TaskWriteTransactionRunner must be explicitly provided to GenerateTaskOccurrencesUseCase',
+      );
     });
 
     it('returns NOT_FOUND when template does not exist', async () => {
@@ -118,15 +116,12 @@ describe('Instance maintenance use-cases', () => {
       });
 
       expect(result).toBeOkWith([] as any);
-      expect(mockGenerateInstances).toHaveBeenCalledWith(
-        template,
-        TASK_TEST_TIME_CONTEXT,
-        {
-          forceGenerate: true,
+      expect(mockGenerateInstances).toHaveBeenCalledWith(template, TASK_TEST_TIME_CONTEXT, {
+        forceGenerate: true,
         targetDate: 2,
-          fromDate: 1,
-        },
-      );
+        fromDate: 1,
+        existingInstances: [],
+      });
       expect(instanceRepo.saveMany).not.toHaveBeenCalled();
       expect(templateRepo.save).not.toHaveBeenCalled();
     });

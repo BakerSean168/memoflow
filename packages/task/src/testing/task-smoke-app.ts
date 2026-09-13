@@ -42,7 +42,6 @@ export function createMockTemplateRepo(): ITaskPlanRepository {
   return {
     save: vi.fn().mockResolvedValue(undefined),
     findByIdForIdentity: vi.fn().mockResolvedValue(null),
-    findByIdWithChildren: vi.fn().mockResolvedValue(null),
     findByIdentityId: vi.fn().mockResolvedValue([]),
     findByStatus: vi.fn().mockResolvedValue([]),
     findActiveTemplates: vi.fn().mockResolvedValue([]),

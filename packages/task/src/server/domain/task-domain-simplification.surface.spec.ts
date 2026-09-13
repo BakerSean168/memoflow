@@ -9,6 +9,10 @@ describe('Task vNext simplified domain surface', () => {
   const contractsTask = resolve(taskRoot, '../contracts/src/modules/task');
   const template = readFileSync(resolve(__dirname, 'aggregates/task-plan.ts'), 'utf8');
   const templateState = readFileSync(resolve(__dirname, 'aggregates/task-plan.state.ts'), 'utf8');
+  const templateRepositoryPort = readFileSync(
+    resolve(__dirname, 'repositories/i-task-plan-repository.ts'),
+    'utf8',
+  );
   const module = readFileSync(resolve(taskSrc, 'server/infrastructure/task.module.ts'), 'utf8');
   const rpcMap = readFileSync(resolve(contractsTask, 'protocol/task-rpc-map.ts'), 'utf8');
   const templateContract = readFileSync(resolve(contractsTask, 'api/task-plan.dto.ts'), 'utf8');
@@ -38,6 +42,14 @@ describe('Task vNext simplified domain surface', () => {
     expect(module).not.toMatch(/TaskDependency|TaskFolder|TaskPlanGraph|ByPriority/);
     expect(rpcMap).not.toMatch(/template:graph|dependency:/);
     expect(templateContract).not.toMatch(/folderId|parentTaskId|QueryTaskPlanGraphRes/);
+  });
+
+  it('keeps TaskPlan independent from TaskOccurrence ownership', () => {
+    expect(template).not.toMatch(
+      /private _instances|addInstance\(|removeInstance\(|getAllInstances\(/,
+    );
+    expect(template).not.toMatch(/createInstance\(|generateInstances\(|getInstanceForDate\(/);
+    expect(templateRepositoryPort).not.toContain('findByIdWithChildren');
   });
 
   it('keeps user priority as importance and preserves execution capabilities', () => {

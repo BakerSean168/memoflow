@@ -13,7 +13,10 @@ describe('task instance ownership surface', () => {
     resolve(__dirname, '../../../../domain/repositories/i-task-occurrence-repository.ts'),
     'utf8',
   );
-  const prisma = readFileSync(resolve(__dirname, '../task-occurrence-prisma.repository.ts'), 'utf8');
+  const prisma = readFileSync(
+    resolve(__dirname, '../task-occurrence-prisma.repository.ts'),
+    'utf8',
+  );
   const powersync = readFileSync(
     resolve(__dirname, '../../powersync/task-occurrence-powersync.repository.ts'),
     'utf8',
@@ -59,17 +62,11 @@ describe('task instance ownership surface', () => {
     'utf8',
   );
   const pauseTemplate = readFileSync(
-    resolve(
-      __dirname,
-      '../../../../application/use-cases/commands/pause-task-plan.use-case.ts',
-    ),
+    resolve(__dirname, '../../../../application/use-cases/commands/pause-task-plan.use-case.ts'),
     'utf8',
   );
   const deleteTemplate = readFileSync(
-    resolve(
-      __dirname,
-      '../../../../application/use-cases/commands/delete-task-plan.use-case.ts',
-    ),
+    resolve(__dirname, '../../../../application/use-cases/commands/delete-task-plan.use-case.ts'),
     'utf8',
   );
   const listTemplates = readFileSync(
@@ -117,7 +114,9 @@ describe('task instance ownership surface', () => {
     expect(port).toContain('deleteIncompleteInstancesFrom(');
     expect(prisma).toContain('where: { templateId, identityId }');
     expect(prisma).toMatch(/getTemplateStats\([\s\S]*identityId/);
-    expect(getTemplate).toContain('getTemplateStats([id], identityId, { windowStart, asOf })');
+    expect(getTemplate).toMatch(
+      /getTemplateStats\([\s\S]*\[id\][\s\S]*identityId[\s\S]*windowStart[\s\S]*asOf/,
+    );
     expect(listTemplates).toContain('getTemplateStats(');
     expect(listTemplates).toContain('request.identityId');
     expect(listTemplates).toContain('{ windowStart, asOf }');

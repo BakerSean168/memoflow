@@ -12,7 +12,6 @@ import type {
 import { TaskPlanCompletionPolicy, TaskPlanOutcome } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskType } from '../value-objects';
-import { TaskOccurrenceStatus } from '../../domain/value-objects';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { TaskPlanId } from '../../domain/value-objects/task-plan-id';
 import type { TaskOccurrenceId } from '../../domain/value-objects/task-occurrence-id';
@@ -30,7 +29,6 @@ import {
   TaskPlanSchedule,
 } from '../value-objects';
 import { TaskPlanHistory } from '../entities';
-import { TaskOccurrence } from './task-occurrence';
 import type { TaskPlanProps, TaskPlanState } from './task-plan.state';
 import * as instanceGen from './instance-generation.policy';
 import * as goalPolicy from './task-plan-goal.policy';
@@ -43,7 +41,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
 
   // ===== Child entity collections =====
   private _history: TaskPlanHistory[];
-  private _instances: TaskOccurrence[];
   private _labelProjection: LabelClientDTO[] = [];
 
   // ===== Constructor (use factory methods to create) =====
@@ -89,7 +86,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     };
 
     this._history = [];
-    this._instances = [];
   }
 
   private static instantiate(state: TaskPlanState): TaskPlan {
@@ -240,58 +236,18 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     return this._history;
   }
 
-  public get instances(): TaskOccurrence[] {
-    return [...this._instances];
-  }
-
   /** Internal props — used by extracted policy modules. */
   get props(): TaskPlanProps {
     return this._props;
   }
 
-  // ===== Instance Generation Methods (delegated to instance-generation.policy) =====
-
-  /** Generates task instances within the specified date range. */
-  public generateInstances(
-    fromDate: number,
-    toDate: number,
-    timeContext: TimeContext,
-  ): TaskOccurrence[] {
-    const { instances, lastGeneratedDate } = instanceGen.generateInstances(
-      this.getInstanceContext(timeContext),
-      fromDate,
-      toDate,
-    );
-    this._instances.push(...instances);
-    if (lastGeneratedDate) {
-      this._props.lastGeneratedDate = lastGeneratedDate;
-      this._props.updatedAt = Date.now();
-      this.addDomainEvent<TaskEventMap['task:instance-generated']>('task:instance-generated', {
-        identityId: this._props.identityId,
-        templateId: this.id,
-        templateTitle: this.title,
-        instanceCount: instances.length,
-        strategy: instances.length <= 20 ? 'full' : 'summary',
-      });
-    }
-    return instances;
+  /** Runtime generation cursor update. Occurrences remain independently owned. */
+  public recordGenerationHorizon(lastGeneratedDate: Instant): void {
+    this._props.lastGeneratedDate = lastGeneratedDate;
+    this._props.updatedAt = Date.now();
   }
 
-  /** Gets the task instance for a specific date. */
-  public getInstanceForDate(date: number, timeContext: TimeContext): TaskOccurrence | null {
-    const time = createTimeFacade({ context: timeContext });
-    const targetDay = time.calendar.startOfDay(date);
-    return (
-      this._instances.find((i) => time.calendar.startOfDay(i.instanceDate) === targetDay) ?? null
-    );
-  }
-
-  /** Determines whether an instance should be generated for the given date. */
-  public shouldGenerateInstance(date: number, timeContext: TimeContext): boolean {
-    return instanceGen.shouldGenerateInstance(this.getInstanceContext(timeContext), date);
-  }
-
-  private getInstanceContext(timeContext: TimeContext): instanceGen.InstanceGenerationContext {
+  private getScheduleContext(timeContext: TimeContext): instanceGen.InstanceGenerationContext {
     return {
       templateId: this.id,
       identityId: this._props.identityId,
@@ -300,7 +256,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       timeConfig: this._props.schedule.toLegacyTimeConfig(timeContext),
       recurrenceRule: this._props.schedule.toLegacyRecurrenceRule(timeContext),
       importance: this._props.importance,
-      existingInstances: this._instances,
+      existingInstances: [],
       timeContext,
     };
   }
@@ -385,11 +341,11 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   // ===== Time-related methods (delegated to instance-generation.policy) =====
 
   public isActiveOnDate(date: number, timeContext: TimeContext): boolean {
-    return instanceGen.isActiveOnDate(this.getInstanceContext(timeContext), date);
+    return instanceGen.isActiveOnDate(this.getScheduleContext(timeContext), date);
   }
 
   public getNextOccurrence(afterDate: number, timeContext: TimeContext): number | null {
-    return instanceGen.getNextOccurrence(this.getInstanceContext(timeContext), afterDate);
+    return instanceGen.getNextOccurrence(this.getScheduleContext(timeContext), afterDate);
   }
 
   // ===== One-time task time methods =====
@@ -526,47 +482,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     this._props.updatedAt = Date.now();
   }
 
-  // ===== Instance Management Methods =====
-
-  /** Creates an instance from this template. */
-  public createInstance(
-    params: instanceGen.CreateInstanceParams,
-    timeContext: TimeContext,
-  ): string {
-    const instance = instanceGen.createInstanceFromTemplate(
-      this.getInstanceContext(timeContext),
-      params,
-    );
-    this._instances.push(instance);
-    this._props.updatedAt = Date.now();
-    return instance.id;
-  }
-
-  /** Adds an existing instance to this template. */
-  public addInstance(instance: TaskOccurrence): void {
-    this._instances.push(instance);
-    this._props.updatedAt = Date.now();
-  }
-
-  /** Removes an instance by ID. */
-  public removeInstance(instanceId: string): TaskOccurrence | null {
-    const index = this._instances.findIndex((i) => i.id === instanceId);
-    if (index === -1) return null;
-    const [removed] = this._instances.splice(index, 1);
-    this._props.updatedAt = Date.now();
-    return removed;
-  }
-
-  /** Gets an instance by ID. */
-  public getInstance(instanceId: string): TaskOccurrence | null {
-    return this._instances.find((i) => i.id === instanceId) ?? null;
-  }
-
-  /** Gets all instances. */
-  public getAllInstances(): TaskOccurrence[] {
-    return [...this._instances];
-  }
-
   // ===== DTO Conversion =====
 
   public toServerDTO(): TaskPlanServerDTO {
@@ -595,35 +510,15 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     };
   }
 
-  /** Product-Time-aware client projection for current Task consumers. */
+  /**
+   * Product-Time-aware base projection. Occurrence statistics/children are read-model data
+   * and are composed by application queries through ITaskOccurrenceRepository.
+   */
   public toClientDTOAt(
-    timeContext: TimeContext,
-    includeChildren: boolean = false,
-    asOf: number = Date.now(),
+    _timeContext: TimeContext,
+    includeHistory: boolean = false,
+    _asOf: number = Date.now(),
   ): TaskPlanClientDTO {
-    const time = createTimeFacade({ context: timeContext });
-    const completionWindowDays = 30 as const;
-    const completionWindowStart = Number(
-      time.calendar.startOfDay(time.calendar.addDays(asOf, -(completionWindowDays - 1))),
-    );
-    const completedCount = this._instances.filter(
-      (instance) => instance.status === TaskOccurrenceStatus.Completed,
-    ).length;
-    const pendingCount = this._instances.filter(
-      (instance) => instance.status === TaskOccurrenceStatus.Pending,
-    ).length;
-    const totalCount = this._instances.length;
-    const dueInstances = this._instances.filter(
-      (instance) => instance.instanceDate >= completionWindowStart && instance.instanceDate <= asOf,
-    );
-    const completedDueInstanceCount = dueInstances.filter(
-      (instance) => instance.status === TaskOccurrenceStatus.Completed,
-    ).length;
-    const completionRate =
-      dueInstances.length > 0
-        ? Math.round((completedDueInstanceCount / dueInstances.length) * 100)
-        : 0;
-
     return {
       id: this.id,
       identityId: this._props.identityId,
@@ -646,22 +541,17 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       updatedAt: this._props.updatedAt,
       deletedAt: this._props.deletedAt ?? null,
       version: this._props.version,
-      history: includeChildren ? this._history.map((entry) => entry.toClientDTO()) : undefined,
-      instances: includeChildren
-        ? this._instances.map((instance) => instance.toClientDTOAt(timeContext, asOf))
-        : undefined,
-      instanceCount: totalCount,
-      completedInstanceCount: completedCount,
-      pendingInstanceCount: pendingCount,
-      dueInstanceCount: dueInstances.length,
-      completedDueInstanceCount,
-      completionWindowDays,
-      futurePendingInstanceCount: this._instances.filter(
-        (instance) =>
-          instance.status === TaskOccurrenceStatus.Pending && instance.instanceDate > asOf,
-      ).length,
-      singleInstanceStatus: this._instances.length === 1 ? this._instances[0].status : null,
-      completionRate,
+      history: includeHistory ? this._history.map((entry) => entry.toClientDTO()) : undefined,
+      instances: undefined,
+      instanceCount: 0,
+      completedInstanceCount: 0,
+      pendingInstanceCount: 0,
+      dueInstanceCount: 0,
+      completedDueInstanceCount: 0,
+      completionWindowDays: 30,
+      futurePendingInstanceCount: 0,
+      singleInstanceStatus: null,
+      completionRate: 0,
     };
   }
 

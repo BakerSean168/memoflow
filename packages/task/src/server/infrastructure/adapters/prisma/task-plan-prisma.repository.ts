@@ -155,14 +155,6 @@ export class TaskPlanPrismaRepository
     return this.hydrateTemplate(identityId, data ? this.mapToEntity(data) : null);
   }
 
-  async findByIdWithChildren(identityId: string, id: string): Promise<TaskPlan | null> {
-    const data = await this.db.taskPlan.findFirst({
-      where: { id, identityId },
-      include: { instances: true },
-    });
-    return this.hydrateTemplate(identityId, data ? this.mapToEntity(data) : null);
-  }
-
   async findByIdentityId(identityId: string): Promise<TaskPlan[]> {
     const data = await this.db.taskPlan.findMany({
       where: { identityId, deletedAt: null },

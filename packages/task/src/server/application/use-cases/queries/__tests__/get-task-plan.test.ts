@@ -21,17 +21,12 @@ describe('GetTaskPlanUseCase', () => {
     vi.clearAllMocks();
     templateRepo = createMockRepo<ITaskPlanRepository>({
       findByIdForIdentity: vi.fn(),
-      findByIdWithChildren: vi.fn(),
     });
     instanceRepo = createMockRepo<ITaskOccurrenceRepository>({
       findByTemplateId: vi.fn(),
     });
     vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([]);
-    useCase = new GetTaskPlanUseCase(
-      templateRepo,
-      instanceRepo,
-      TASK_TEST_USER_TIME_CONTEXT_PORT,
-    );
+    useCase = new GetTaskPlanUseCase(templateRepo, instanceRepo, TASK_TEST_USER_TIME_CONTEXT_PORT);
   });
 
   it('should return null when template does not exist', async () => {
@@ -97,14 +92,10 @@ describe('GetTaskPlanUseCase', () => {
 
     await dstUseCase.execute(template.id, template.identityId);
 
-    expect(instanceRepo.getTemplateStats).toHaveBeenCalledWith(
-      [template.id],
-      template.identityId,
-      {
-        windowStart: Date.parse('2026-02-07T05:00:00.000Z'),
-        asOf,
-      },
-    );
+    expect(instanceRepo.getTemplateStats).toHaveBeenCalledWith([template.id], template.identityId, {
+      windowStart: Date.parse('2026-02-07T05:00:00.000Z'),
+      asOf,
+    });
     expect(asOf - Date.parse('2026-02-07T05:00:00.000Z')).not.toBe(30 * 24 * 60 * 60 * 1000);
   });
 
@@ -115,24 +106,29 @@ describe('GetTaskPlanUseCase', () => {
     await useCase.execute(template.id, template.identityId);
 
     expect(templateRepo.findByIdForIdentity).toHaveBeenCalledWith(template.identityId, template.id);
-    expect(templateRepo.findByIdWithChildren).not.toHaveBeenCalled();
   });
 
-  it('should use findByIdWithChildren when includeChildren is true', async () => {
+  it('composes occurrence children from the occurrence repository without hydrating TaskPlan', async () => {
     const template = aOneTimeTask();
-    vi.mocked(templateRepo.findByIdWithChildren).mockResolvedValue(template);
+    const occurrence = await aTaskOccurrence({ templateId: template.id as any });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([occurrence]);
 
-    await useCase.execute(template.id, template.identityId, true);
+    const result = await useCase.execute(template.id, template.identityId, true);
 
-    expect(templateRepo.findByIdWithChildren).toHaveBeenCalledWith(template.identityId, template.id);
-    expect(templateRepo.findByIdForIdentity).not.toHaveBeenCalled();
-    expect(instanceRepo.findByTemplateId).not.toHaveBeenCalled();
+    expect(templateRepo.findByIdForIdentity).toHaveBeenCalledWith(template.identityId, template.id);
+    expect(instanceRepo.findByTemplateId).toHaveBeenCalledWith(template.id, template.identityId);
+    expect(result).toBeOk();
+    if (result.ok && result.data) {
+      expect(result.data.instances).toHaveLength(1);
+      expect(result.data.instanceCount).toBe(1);
+    }
   });
 
   it('should pass includeChildren to toClientDTO', async () => {
     const template = aOneTimeTask();
     const spy = vi.spyOn(template, 'toClientDTOAt');
-    vi.mocked(templateRepo.findByIdWithChildren).mockResolvedValue(template);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
 
     await useCase.execute(template.id, template.identityId, true);
 

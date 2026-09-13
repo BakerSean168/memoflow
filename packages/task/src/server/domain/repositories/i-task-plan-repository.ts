@@ -49,11 +49,6 @@ export interface ITaskPlanRepository {
   findByIdForIdentity(identityId: string, id: string): Promise<TaskPlan | null>;
 
   /**
-   * 根据 ID + identity 查找任务模板（包含实例）
-   */
-  findByIdWithChildren(identityId: string, id: string): Promise<TaskPlan | null>;
-
-  /**
    * 根据用户 ID 查找所有任务模板
    */
   findByIdentityId(identityId: string): Promise<TaskPlan[]>;

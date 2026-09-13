@@ -6,6 +6,7 @@ import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-pl
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import { TaskPlanSchedule } from '../../../domain/value-objects/task-plan-schedule';
 import { TaskReminderConfig } from '../../../domain/value-objects/task-reminder-config';
+import { TaskOccurrenceGenerationService } from '../../../domain/services/task-occurrence-generation-service';
 import {
   TaskGoalBindingTrigger,
   TaskOccurrenceStatus,
@@ -32,6 +33,7 @@ function isFiniteSchedule(schedule: TaskPlanSchedule): boolean {
 }
 
 export class UpdateTaskPlanUseCase {
+  private readonly generationService = new TaskOccurrenceGenerationService();
   private readonly logger = createLogger('UpdateTaskPlanUseCase');
   private readonly transactionRunner: TaskWriteTransactionRunner;
 
@@ -155,20 +157,22 @@ export class UpdateTaskPlanUseCase {
             }
 
             const affectedIdSet = new Set(affectedIds);
-            instances
-              .filter((instance) => !affectedIdSet.has(String(instance.id)))
-              .forEach((instance) => template.addInstance(instance));
+            const preservedInstances = instances.filter(
+              (instance) => !affectedIdSet.has(String(instance.id)),
+            );
 
             const generationHorizon = Math.max(
               originalGenerationHorizon ?? 0,
               ...affectedPendingInstances.map((instance) => instance.instanceDate),
             );
             if (template.status === TaskPlanStatus.Active && generationHorizon > effectiveFrom) {
-              const regenerated = template.generateInstances(
-                effectiveFrom,
-                generationHorizon,
-                timeContext,
-              );
+              const regenerated = this.generationService.generateInstances(template, timeContext, {
+                forceGenerate: true,
+                fromDate: effectiveFrom,
+                targetDate: generationHorizon,
+                existingInstances: preservedInstances,
+                now: effectiveFrom,
+              });
               if (regenerated.length > 0) {
                 await instanceRepository.saveMany(regenerated);
               }

@@ -35,7 +35,9 @@ export class ActivateTaskPlanUseCase {
     private readonly userTimeContextPort: UserTimeContextPort,
   ) {
     if (!transactionRunner) {
-      throw new Error('TaskWriteTransactionRunner must be explicitly provided to ActivateTaskPlanUseCase');
+      throw new Error(
+        'TaskWriteTransactionRunner must be explicitly provided to ActivateTaskPlanUseCase',
+      );
     }
     this.generationService = new TaskOccurrenceGenerationService();
     this.transactionRunner = transactionRunner;
@@ -47,42 +49,40 @@ export class ActivateTaskPlanUseCase {
   ): Promise<Result<{ template: TaskPlanClientDTO; instancesGenerated: number }>> {
     try {
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
-      return await this.transactionRunner.run(async ({ templateRepository, instanceRepository }) => {
-        const template = await templateRepository!.findByIdForIdentity(identityId, id);
-        if (!template) {
-          return error('NOT_FOUND', `TaskPlan ${id} not found`);
-        }
+      return await this.transactionRunner.run(
+        async ({ templateRepository, instanceRepository }) => {
+          const template = await templateRepository!.findByIdForIdentity(identityId, id);
+          if (!template) {
+            return error('NOT_FOUND', `TaskPlan ${id} not found`);
+          }
 
-        template.activate();
+          template.activate();
 
-        // Rehydrate existing facts so recurrence filtering is domain-correct, then
-        // refill from the activation point. Pause intentionally may retain the old
-        // generation horizon after deleting future incomplete occurrences.
-        const existingInstances = await instanceRepository.findByTemplateId(id, identityId);
-        existingInstances.forEach((instance) => template.addInstance(instance));
-        const instances = this.generationService.generateInstances(template, timeContext, {
-          forceGenerate: true,
-          fromDate: Date.now(),
-        });
-        let instancesGenerated = 0;
+          // Existing occurrences are independent facts; pass them explicitly to materialization.
+          const existingInstances = await instanceRepository.findByTemplateId(id, identityId);
+          const instances = this.generationService.generateInstances(template, timeContext, {
+            forceGenerate: true,
+            fromDate: Date.now(),
+            existingInstances,
+          });
+          let instancesGenerated = 0;
 
-        if (instances.length > 0) {
-          await instanceRepository.saveMany(instances);
-          instancesGenerated = instances.length;
-        }
+          if (instances.length > 0) {
+            await instanceRepository.saveMany(instances);
+            instancesGenerated = instances.length;
+          }
 
-        await templateRepository!.save(template);
+          await templateRepository!.save(template);
 
-        return ok({
-          template: template.toClientDTOAt(timeContext),
-          instancesGenerated,
-        });
-      });
+          return ok({
+            template: template.toClientDTOAt(timeContext),
+            instancesGenerated,
+          });
+        },
+      );
     } catch (caughtError) {
       this.logger.error('Failed to activate task template', { error: caughtError });
-      return fail(
-        mapTaskWriteErrorToResultError(caughtError, 'Failed to activate task template'),
-      );
+      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to activate task template'));
     }
   }
 }

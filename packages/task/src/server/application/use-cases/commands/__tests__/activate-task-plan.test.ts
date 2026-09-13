@@ -58,9 +58,9 @@ describe('ActivateTaskPlanUseCase', () => {
   });
 
   it('throws an error if transactionRunner is missing', () => {
-    expect(
-      () => new ActivateTaskPlanUseCase(templateRepo, instanceRepo, undefined as any),
-    ).toThrow('TaskWriteTransactionRunner must be explicitly provided to ActivateTaskPlanUseCase');
+    expect(() => new ActivateTaskPlanUseCase(templateRepo, instanceRepo, undefined as any)).toThrow(
+      'TaskWriteTransactionRunner must be explicitly provided to ActivateTaskPlanUseCase',
+    );
   });
 
   it('should return NOT_FOUND when template does not exist', async () => {
@@ -108,14 +108,11 @@ describe('ActivateTaskPlanUseCase', () => {
 
     await useCase.execute(template.id, template.identityId);
 
-    expect(mockGenerateInstances).toHaveBeenCalledWith(
-      template,
-      TASK_TEST_TIME_CONTEXT,
-      {
-        forceGenerate: true,
-        fromDate: expect.any(Number),
-      },
-    );
+    expect(mockGenerateInstances).toHaveBeenCalledWith(template, TASK_TEST_TIME_CONTEXT, {
+      forceGenerate: true,
+      fromDate: expect.any(Number),
+      existingInstances: [],
+    });
   });
 
   it('should save generated instances when there are some', async () => {

@@ -6,7 +6,7 @@ tags:
   - refactor
 description: Task Plan / Occurrence 聚合边界、Schedule ADT、Result/Checklist、Reminder parity、Goal/Workspace 一次性收敛实施计划
 created: 2026-09-08T19:35:00+08:00
-updated: 2026-09-08T21:25:00+08:00
+updated: 2026-09-13T10:50:00+08:00
 ---
 
 # Task vNext Model Convergence
@@ -22,8 +22,8 @@ updated: 2026-09-08T21:25:00+08:00
 - old `TaskTemplate`/`TaskInstance` persistence and compatibility DTOs are deleted rather than translated;
 - no legacy round-trip fixture is required; fresh TaskPlan/TaskOccurrence round-trip remains required.
 
-**状态：ACTIVE / implementation started**
-**分支：** `feat/task-vnext-model-convergence`
+**状态：ACTIVE / TASK-7302 complete; TASK-7303 next**
+**执行分支：** `feat/system-wide-vnext-convergence`（ticket worktree: `chatgpt/task-7302-7303-domain`）
 **上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）
 **基线：** Task Vitest 71 files / 717 tests PASS
 
@@ -75,6 +75,8 @@ TaskWorkspace  = Plan + Occurrences + Cross-module Context
 - lifecycle/outcome/completion policy 保持；
 - Goal-level link；
 - Plan 不再持有 occurrence collection。
+
+**TASK-7302 DONE（2026-09-13）：** TaskPlan 已不再拥有或 rehydrate TaskOccurrence collection。`_instances / addInstance / removeInstance / getAllInstances / createInstance / generateInstances / getInstanceForDate` 等 aggregate-owned occurrence surface 已删除；Plan repository 同时删除 `findByIdWithChildren`。Occurrence materialization 由 `TaskOccurrenceGenerationService` 基于 Plan schedule + 显式 `existingInstances` 完成，Plan 仅暂时保留 runtime generation horizon（后续 TASK-7304/7305 继续收口）。`GetTaskPlanUseCase` 现在分别从 TaskPlan owner 与 TaskOccurrence owner 组合 children/stats，不再把执行事实塞回 Plan aggregate。Anti-resurrection lock 已加入 `task-domain-simplification.surface.spec.ts`。本地验收：Task unit **73 files / 671 tests PASS**、真实 PostgreSQL integration **6 files / 31 tests PASS**、Task typecheck/build PASS、Task lint **0 errors**（既有 warnings 保留）。
 
 ### TASK-7303 — TaskOccurrence aggregate convergence
 
@@ -192,7 +194,7 @@ full CI exact-head
 - [x] Baseline Task tests 71/717 PASS
 - [x] ADR-071～075 frozen
 - [x] TASK-7301
-- [ ] TASK-7302
+- [x] TASK-7302
 - [ ] TASK-7303
 - [ ] TASK-7304
 - [ ] TASK-7305
@@ -201,3 +203,5 @@ full CI exact-head
 - [ ] TASK-7308
 - [ ] TASK-7309
 - [ ] TASK-7310
+
+**Next:** TASK-7303 must converge TaskOccurrence to planId + schedule snapshot + Result/checklist truth. Because the current physical occurrence row still stores legacy `instanceDate + timeConfig`, TASK-7303 may consume the minimal ADR-111 direct-cutover slice of TASK-7305 needed to persist a truthful Product-Time schedule snapshot; do not synthesize Ymd with an implicit UTC fallback or reintroduce dual-read compatibility. TASK-7304 is partially advanced by this ticket (generation moved out of TaskPlan) but remains open until runtime cursor/product DTO cleanup is complete.
