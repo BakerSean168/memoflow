@@ -13,7 +13,7 @@ updated: 2026-09-12T21:49:00+08:00
 
 # Goal / Task vNext 产品设计
 
-> **2026-09-12 canonical state：** Goal 已完成 vNext direct cutover：identity 为 `name + summary`，lifecycle 为 `Planned / InProgress / Completed / Abandoned`，planning time 为 `startDate + GoalTimeframe target`，KR 使用 Measurement V3，Goal Workspace 组合 Task/Knowledge context，AI 使用 durable GoalPlanDraft V2。Task 的 vNext lifecycle/due/overdue 语义保持 Task owner 真值。详见 [Goal vNext active plan](../plan/active/2026-09-08-goal-vnext-model-convergence.md) 与 ADR-067～070。
+> **2026-09-12 canonical state：** Goal 已完成 vNext direct cutover：identity 为 `name + summary`，lifecycle 为 `Planned / InProgress / Completed / Abandoned`，planning time 为 `startDate + GoalTimeframe target`，KR 使用 Measurement V3，Goal Workspace 组合 Task/Knowledge context，AI 使用 durable GoalPlanDraft V2。Task 的 vNext lifecycle/due/overdue 语义保持 Task owner 真值。详见 [Goal vNext archived plan](../plan/archive/2026-09-08-goal-vnext-model-convergence.md) 与 ADR-067～070。
 
 ## 1. North Star
 

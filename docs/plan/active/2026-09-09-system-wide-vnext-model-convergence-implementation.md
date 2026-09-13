@@ -462,7 +462,7 @@ Add an explicit adapter from a pinned/versioned rule bundle into `tools/governan
 
 ## GOAL lane — execute GOAL-7202..7211
 
-Use Goal active plan as scoped detail. Hard dependency: KnowledgeDocumentId before durable Note relations.
+Use the archived Goal plan (`../archive/2026-09-08-goal-vnext-model-convergence.md`) as scoped implementation/review evidence. Hard dependency: KnowledgeDocumentId before durable Note relations.
 
 Core outputs:
 
@@ -491,6 +491,8 @@ Core outputs:
 **GOAL-7209 DONE:** Goal UI now matches the vNext product information architecture without moving owner boundaries. Vue/Web/Desktop create/edit uses compact Name + Summary plus status/Start/Target/Labels/Reminder/Notes property chips; a shared `GoalTimeframePicker` preserves Day/Month/Quarter/Half-year/Year precision for Goal and KR targets, and KR editing keeps Initial/Current/Target visible. Goal detail consumes the 7207 `GoalWorkspaceReadModel` for bounded Task/Knowledge previews, linked-task counts, recent progress/reviews and light `Past target` signaling; Task/KR deep links now carry and consume owner context filters rather than acting as decorative links. `Create with AI` enters the durable GoalPlanDraft V2 flow through a consumed-once route intent. React/Mobile keeps the same `GoalTimeframe` parser and Workspace semantics in a compressed layout, including Task/Knowledge context and Goal/KR task navigation. Notes continue to route into the Knowledge surface instead of creating Goal-owned note storage. Closure evidence: App-Vue Goal 15 files / 48 tests and focused UI/i18n 5 files / 20 tests PASS; App-Vue/App-React/Mobile typechecks PASS; Web/Desktop typechecks and production builds PASS; changed-source ESLint is zero-warning, diff gate PASS, and test inventory is current at 1267 files; `docs:check` and full `governance:check` PASS. GOAL-7210 is now dependency-ready.
 
 **GOAL-7210 DONE:** The last duplicate Goal/KR product tracks are destructively retired. Canonical persistence/portable truth was already vNext, so no fake migration was introduced; instead the public legacy `GoalTemplate` OKR catalog/template recommendation UI and standalone pre-durable AI-KR generation chain were deleted, stale GoalFolder/status-rule/Importance/Motivation/Feasibility/due/overdue locale truth was removed, and PowerSync test schemas now mirror canonical `summary + target_kind + target_end_date`. Product/ADR/current docs describe GoalPlanDraft V2 rather than a temporary V1 compatibility path. `core-vnext-architecture-lock` now audits Goal/KR owners plus AI GoalPlan, API/Desktop mutation adapters, Prisma source/generated schema, PowerSync and Data Portability, with explicit rejection for Goal legacy due-time, identity fields, KR V2 measurement vocabulary and retired GoalTemplate tracks. Owner-scoped repository scans are zero-hit for retired Goal/KR production truth while valid Task `dueDate/isOverdue` paths remain. Closure evidence: Goal 84/474, Contracts 85/578, AI 79/425, Data Portability 36/148, Vue Goal+i18n 15/51, PowerSync 7/7, Governance tools 19/139 and core-vNext lock 6/6 PASS; the lock audits 2082 production source files; cross-surface typechecks and Web/Desktop production builds PASS; test inventory is current at 1266 files; `docs:check` and full `governance:check` PASS. GOAL-7211 is now dependency-ready.
+
+**GOAL-7211 ARCHIVED / FINAL CI PENDING:** Five-layer review closed with P0/P1 = 0. After three delivery repair passes, PR #340 exact head `a6c9d622f0b79285ffe3994a38c243b1bc389586` passed CI run `34730694318` end to end: Scope/Static/Governance/Build/Typecheck/Unit/Verification, all four Web Flow shards, and all Governance/Validate/Web Flow/Boundary/Integration/Coverage/Performance Oracles were SUCCESS. The Goal module plan has therefore moved to archive. Per its delivery contract, GOAL-7211 becomes DONE only after this archive-head commit passes the same required CI gate.
 
 ## TASK lane — continue Task plan from clean checkpoint
 
@@ -684,11 +686,10 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 ## 7. Immediate next tickets
 
-TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, and Goal `GOAL-7202..7210` are complete. Current dependency-ready work is:
+TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, and Goal `GOAL-7202..7210` are complete. Goal `GOAL-7211` is archived and awaiting only its final archive-head CI gate. Current dependency-ready implementation work is:
 
-1. `GOAL-7211` — local five-layer review is complete with P0/P1 = 0; obtain exact-head PR required-CI evidence, then archive Goal plan and re-run the final archive head gate;
-2. `TASK-7302` + `TASK-7303` — converge TaskPlan and TaskOccurrence aggregates, then continue the Task vNext dependency chain;
-3. `SETTING-9210` — five-layer review, exact-head CI/build, docs integrity and Setting plan archive;
-4. continue `PORT-1601/1602` owner capability registration as surviving owner models stabilize; execute final V2 deletion only when V3 preserves all required product coverage.
+1. `TASK-7302` + `TASK-7303` — converge TaskPlan and TaskOccurrence aggregates, then continue the Task vNext dependency chain;
+2. `SETTING-9210` — five-layer review, exact-head CI/build, docs integrity and Setting plan archive;
+3. continue `PORT-1601/1602` owner capability registration as surviving owner models stabilize; execute final V2 deletion only when V3 preserves all required product coverage.
 
 `SETTING-9209` deliberately kept the current V2 full-backup envelope's `settings` singleton as a strict canonical UserPreferenceProfile adapter while deleting all legacy Setting persistence/protocol/client code. Therefore PORT-1603 remains independent cross-module work rather than a reason to retain `user_settings`.

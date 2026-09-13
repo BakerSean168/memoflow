@@ -1,7 +1,7 @@
 ---
 tags:
   - plan
-  - active
+  - archive
   - goal
   - product
   - domain
@@ -11,13 +11,13 @@ tags:
   - migration
 description: Goal vNext 产品模型、KR Measurement V3、Task/Knowledge Context、AI Plan 与 Linear-style UI 的一次性收敛实施计划
 created: 2026-09-08T17:55:00+08:00
-updated: 2026-09-12T23:05:00+08:00
-status: active
+updated: 2026-09-13T09:09:00+08:00
+status: archived
 ---
 
-# Goal vNext Model Convergence — Active Plan
+# Goal vNext Model Convergence — Archived Plan
 
-> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](../active/2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
 >
 > **ADR-111 zero-legacy-data override:** 本文中所有仅用于保存当前旧数据/旧备份/旧客户端的 migration、backfill、compatibility reader/adapter、dual-read/write、redirect window、before/after old-data parity 要求均已被 ADR-111 supersede。领域目标与行为验收继续有效；实施时直接切 current consumers、删除旧 surface、reset/reseed persistence。
 
@@ -716,7 +716,7 @@ Recurrence UNTIL
 
 **Local verification ledger at implementation head `72934633222`:** Goal 84 files / 474 tests; Contracts 85 / 578; AI 79 / 425; Data Portability 36 / 148; App-Vue Goal+i18n 15 / 51; PowerSync schema 7 / 7; Governance tools 19 / 139; Relation unit 12 / 12; Relation PostgreSQL 3 / 3; Goal PostgreSQL 18 / 18; Task PostgreSQL 31 / 31; focused Workspace/Relation transport 14 / 14. Cross-surface typechecks and Web/Desktop production builds PASS.
 
-**Delivery gate:** local review is complete, but GOAL-7211 is **not archived yet**. The exact-head GitHub PR required checks are the authoritative delivery evidence. After that head is green, archive this plan in a new commit and require the archive head itself to pass the same PR gate before declaring GOAL-7211 DONE.
+**First exact-head delivery gate: PASS.** PR #340 run `34730694318` on head `a6c9d622f0b79285ffe3994a38c243b1bc389586` completed SUCCESS with Scope Detector, Static Analysis, Governance, Build, Typecheck, Unit Tests, Verification Children, all four Web Flow shards, Governance/Validate/Web Flow Oracles, and Boundary/Integration/Coverage/Performance Oracles all green. This evidence authorizes archival. GOAL-7211 remains **ARCHIVED / FINAL ARCHIVE-HEAD CI PENDING** until this archive commit itself passes the same required gate.
 
 **Resolved first-PR finding:** PR #340 run `34701316259` on head `cdb3f39a380` exposed one P1 delivery blocker in `schedule-orchestration` test fixtures: two Goal reminder fixtures still constructed payload v1 / `dueDate` even though production had already moved to `GOAL_REMINDER_PAYLOAD_VERSION = 2` with `GoalTimeframe target`. No production fallback was restored. Both fixtures now use the exported payload version, canonical Ymd/GoalTimeframe values, and the actual reminder instant; focused `schedule-orchestration:typecheck` plus the full package test suite (9 files / 34 tests) PASS. Unresolved P0/P1 remains zero; a new exact-head PR run is required.
 
@@ -793,7 +793,7 @@ GOAL-7207  DONE — GoalWorkspaceReadModel + bounded owner composition
 GOAL-7208  DONE — GoalPlanDraft V2 + deterministic multi-owner apply/retry
 GOAL-7209  DONE — property-chip create/edit + Workspace UI + React/Mobile parity
 GOAL-7210  DONE — destructive legacy-track retirement + expanded anti-resurrection locks
-GOAL-7211  REVIEW COMPLETE / DELIVERY PENDING — P0/P1 = 0; exact-head PR CI pending
+GOAL-7211  ARCHIVED / FINAL CI PENDING — P0/P1 = 0; first exact-head PR CI green
 ```
 
-GOAL-7201 froze the design package; GOAL-7202～7210 are implemented production truth. GOAL-7211 local five-layer review is complete with P0/P1 = 0; exact-head PR CI and post-CI archive are the remaining delivery gates.
+GOAL-7201 froze the design package; GOAL-7202～7210 are implemented production truth. GOAL-7211 local five-layer review is complete with P0/P1 = 0 and the first exact-head PR gate is green; this archived plan now awaits only the final archive-head CI gate before DONE becomes effective.
