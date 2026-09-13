@@ -688,7 +688,7 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, and Goal `GOAL-7202..7211` are complete; the Goal plan is archived with both exact-head delivery gates green. Current dependency-ready implementation work is:
 
-1. `TASK-7308` — TASK-7307 UI convergence is accepted; now compose TaskPlanWorkspace context read model from labels + Goal/KR + occurrence summary + recent occurrences + ADR-090 `KnowledgeDocumentRef` linked notes, without moving context into Task aggregate or creating path-derived durable relations;
+1. `TASK-7309` — TASK-7308 TaskPlanWorkspace read composition is accepted; now delete the remaining canonical/public TaskTemplate / TaskInstance symbols plus obsolete TaskPlan fields/status/reminder persistence listed by the Task vNext plan, while allowing only migration files and historical ADRs to retain old names;
 2. `SETTING-9210` — five-layer review, exact-head CI/build, docs integrity and Setting plan archive;
 3. continue `PORT-1601/1602` owner capability registration as surviving owner models stabilize; execute final V2 deletion only when V3 preserves all required product coverage.
 

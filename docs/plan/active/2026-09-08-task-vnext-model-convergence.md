@@ -22,8 +22,8 @@ updated: 2026-09-13T16:42:00+08:00
 - old `TaskTemplate`/`TaskInstance` persistence and compatibility DTOs are deleted rather than translated;
 - no legacy round-trip fixture is required; fresh TaskPlan/TaskOccurrence round-trip remains required.
 
-**状态：ACTIVE / TASK-7307 complete; TASK-7308 next**
-**执行分支：** `feat/system-wide-vnext-convergence`（next ticket worktree: `delegated/task-7308-context`）
+**状态：ACTIVE / TASK-7308 complete; TASK-7309 next**
+**执行分支：** `feat/system-wide-vnext-convergence`（next ticket worktree: `delegated/task-7309-legacy`）
 **上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）
 **基线：** Task Vitest 71 files / 717 tests PASS
 
@@ -158,6 +158,8 @@ Scheduling reminder payload 升为 canonical Plan/Occurrence vocabulary 与 v2 p
 - 不把 context 塞回 Aggregate；
 - 与 ADR-069 shared Relation 实施保持单一 ownership。
 
+**TASK-7308 DONE（2026-09-13）：** TaskPlanWorkspace read model 已完成独立 read-side composition：严格 contract 组合 `plan + labels + Goal/KR context + all-time occurrence summary + bounded recentOccurrences + linkedNotes`；Task occurrence owner 使用 Prisma `groupBy/take` 与 PowerSync `GROUP BY/LIMIT`，详情页不再拉 500 条 occurrence 假装 workspace。Goal 通过 owner port fail-soft 解析，Relation 增加独立 `TaskKnowledgeService`，Repository stable-document resolver 产出 ADR-090 `KnowledgeDocumentRef`，`relativePath` 仅作 display metadata。HTTP `/tasks/:planId/workspace` 与独立 `TaskWorkspaceChannels.GET` 已组合到 API/Desktop，避免污染 legacy Task channel ownership。Task Detail 已切到 workspace summary/Goal/KR/linked knowledge，并在 occurrence/checklist mutation 后刷新 workspace。Reviewer repair 修复了 channel ownership、Goal Missing/Unavailable 语义、per-document note fail-soft、bounded recent position 假象等问题。独立验收：Task 全套 **77 files / 605 tests PASS**；7308 critical focused **Task 18 + Contracts 3 + Relation 1 + App-Vue 6 + Desktop 2 tests PASS**；Contracts / Task / Relation / App-Vue / API / Desktop typecheck 全绿；目标文件 ESLint 0 warning/error；`git diff --check` PASS。最终实现 head `9b5229c09b9`。
+
 ### TASK-7309 — Legacy deletion
 
 必须为 0：
@@ -230,8 +232,8 @@ full CI exact-head
 - [x] TASK-7305
 - [x] TASK-7306
 - [x] TASK-7307
-- [ ] TASK-7308
+- [x] TASK-7308
 - [ ] TASK-7309
 - [ ] TASK-7310
 
-**Next:** TASK-7308 is now the sole next Task dependency: compose the TaskPlanWorkspace context read model from labels + Goal/KR + occurrence summary + recent occurrences + linked notes. Linked notes must use ADR-090 `KnowledgeDocumentRef`; do not persist path-derived durable relations, do not move context into the Task aggregate, and preserve ADR-069 shared Relation single ownership.
+**Next:** TASK-7309 is now the sole next Task dependency: delete canonical/public legacy TaskTemplate / TaskInstance symbols and the remaining obsolete TaskPlan fields/status/reminder persistence listed above. Migration files and historical ADR references may retain old names; active runtime/contracts/owners may not. Preserve the accepted TaskPlanWorkspace composition and do not collapse its owner boundaries while deleting legacy surfaces.
