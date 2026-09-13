@@ -34,7 +34,7 @@ describe('DeleteTaskOccurrenceUseCase', () => {
     return { useCase, instanceRepo };
   }
 
-  it('should be idempotent when instance is missing or unowned', async () => {
+  it('should be idempotent when occurrence is missing or unowned', async () => {
     const { useCase, instanceRepo } = setup();
 
     const result = await useCase.execute('non-existent-id', 'identity-1');
@@ -45,29 +45,29 @@ describe('DeleteTaskOccurrenceUseCase', () => {
     expect(taskEventSend).not.toHaveBeenCalled();
   });
 
-  it('should delete the owned instance and return ok', async () => {
+  it('should delete the owned occurrence and return ok', async () => {
     const { useCase, instanceRepo } = setup();
-    const instance = await aTaskOccurrence();
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+    const occurrence = await aTaskOccurrence();
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(instance.id, instance.identityId);
+    const result = await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(result).toBeOk();
-    expect(instanceRepo.delete).toHaveBeenCalledWith(instance.identityId, instance.id);
+    expect(instanceRepo.delete).toHaveBeenCalledWith(occurrence.identityId, occurrence.id);
     expect(instanceRepo.delete).toHaveBeenCalledTimes(1);
   });
 
-  it('should publish task:instance-deleted when the instance exists', async () => {
+  it('should publish task:occurrence-deleted when the occurrence exists', async () => {
     const { useCase, instanceRepo } = setup();
-    const instance = await aTaskOccurrence();
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+    const occurrence = await aTaskOccurrence();
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    await useCase.execute(instance.id, instance.identityId);
+    await useCase.execute(occurrence.id, occurrence.identityId);
 
-    expect(taskEventSend).toHaveBeenCalledWith('task:instance-deleted', {
-      identityId: instance.identityId,
-      taskOccurrenceId: instance.id,
-      taskPlanId: instance.planId,
+    expect(taskEventSend).toHaveBeenCalledWith('task:occurrence-deleted', {
+      identityId: occurrence.identityId,
+      taskOccurrenceId: occurrence.id,
+      taskPlanId: occurrence.planId,
       deletedAt: expect.any(Number),
     });
   });

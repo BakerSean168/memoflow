@@ -115,7 +115,7 @@ describe('invalidation-dispatcher — key mapping', () => {
     expect(keys).not.toContainEqual(taskPlanQueryKeys.details('id-1'));
   });
 
-  it('task_templates table change (projection all) invalidates lists + details prefix', async () => {
+  it('task_plans table change (projection all) invalidates lists + details prefix', async () => {
     const dispatcher = createServerStateInvalidationDispatcher(queryClient);
     await dispatcher.invalidate({
       target: 'task-plan',

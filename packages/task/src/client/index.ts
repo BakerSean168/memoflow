@@ -53,7 +53,7 @@ export function createTaskHttpClient(httpClient: IResultHttpClient): TaskClientP
 
 export function createTaskIpcClient(ipcClient: IResultIpcClient): TaskClientPort {
   const adapters = createTaskIpcAdapters(ipcClient);
-  return createTaskClientService(adapters.template, adapters.instance);
+  return createTaskClientService(adapters.plan, adapters.occurrence);
 }
 
 export {

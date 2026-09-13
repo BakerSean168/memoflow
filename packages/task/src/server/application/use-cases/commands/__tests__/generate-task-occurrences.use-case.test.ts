@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { TaskType } from '@memoflow/contracts/task';
+import { TaskPlanScheduleKind } from '@memoflow/contracts/task';
 import {
-  aDailyRecurrenceRule,
+  aDailyRecurrence,
   aLoadedTaskPlan,
-  anAllDayTimeConfig,
+  anAllDayTiming,
+  canonicalTaskPlanScheduleForTest,
   aTaskOccurrence,
   TASK_TEST_USER_TIME_CONTEXT_PORT,
 } from '../../../../../testing';
@@ -25,15 +26,15 @@ describe('GenerateTaskOccurrencesUseCase (TASK-2204)', () => {
       save: vi.fn().mockResolvedValue(undefined),
     });
     instanceRepo = createMockRepo<ITaskOccurrenceRepository>({
-      findByTemplateId: vi.fn().mockResolvedValue([]),
+      findByPlanId: vi.fn().mockResolvedValue([]),
       saveMany: vi.fn().mockResolvedValue(undefined),
     });
     useCase = new GenerateTaskOccurrencesUseCase(
       templateRepo,
       instanceRepo,
       createInlineTaskWriteTransactionRunner({
-        templateRepository: templateRepo,
-        instanceRepository: instanceRepo,
+        planRepository: templateRepo,
+        occurrenceRepository: instanceRepo,
       }),
       TASK_TEST_USER_TIME_CONTEXT_PORT,
     );
@@ -41,29 +42,31 @@ describe('GenerateTaskOccurrencesUseCase (TASK-2204)', () => {
 
   it('filters already persisted occurrence days before returning generated DTOs', async () => {
     const start = Date.UTC(2026, 0, 1, 0, 0, 0);
-    const timeConfig = anAllDayTimeConfig(new Date(start));
-    const template = aLoadedTaskPlan({
-      taskType: TaskType.Recurring,
-      timeConfig,
-      recurrenceRule: aDailyRecurrenceRule(),
+    const plan = aLoadedTaskPlan({
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        start,
+        anAllDayTiming(),
+        aDailyRecurrence(),
+      ),
     });
     const existing = await aTaskOccurrence({
-      templateId: template.id,
-      identityId: template.identityId,
-      instanceDate: start,
-      timeConfig,
+      planId: plan.id,
+      identityId: plan.identityId,
+      occurrenceDate: start,
+      timing: anAllDayTiming(),
     });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([existing]);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([existing]);
 
-    const result = await useCase.execute(String(template.id), String(template.identityId), {
+    const result = await useCase.execute(String(plan.id), String(plan.identityId), {
       fromDate: start,
       toDate: Date.UTC(2026, 0, 2, 23, 59, 59, 999),
     });
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.map((instance) => instance.scheduleSnapshot.date)).toEqual(['2026-01-02']);
+      expect(result.data.map((occurrence) => occurrence.scheduleSnapshot.date)).toEqual(['2026-01-02']);
     }
     expect(instanceRepo.saveMany).toHaveBeenCalledTimes(1);
     expect(vi.mocked(instanceRepo.saveMany).mock.calls[0][0]).toHaveLength(1);

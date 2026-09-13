@@ -80,7 +80,7 @@ const {
 } = useLabelCatalog();
 const labelCreateError = ref<string | null>(null);
 
-const updateTemplate = (updater: (template: TaskPlanViewModel) => void) => {
+const updatePlan = (updater: (template: TaskPlanViewModel) => void) => {
   const updatedTemplate: TaskPlanViewModel = {
     ...props.modelValue,
     labels: [...(props.modelValue.labels ?? [])],
@@ -101,7 +101,7 @@ const importanceOptions = computed(() => [
 const importance = computed({
   get: () => props.modelValue.importance,
   set: (value: ImportanceLevel) => {
-    updateTemplate((template) => {
+    updatePlan((template) => {
       template.importance = value;
     });
   },
@@ -113,7 +113,7 @@ const labelIds = computed(
 
 function updateLabelIds(ids: string[]): void {
   const selected = new Set(ids);
-  updateTemplate((template) => {
+  updatePlan((template) => {
     template.labelIds = [...ids];
     template.labels = labelCatalog.value.filter((label) => selected.has(label.id));
   });

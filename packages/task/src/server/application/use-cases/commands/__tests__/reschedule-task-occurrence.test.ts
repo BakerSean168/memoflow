@@ -6,7 +6,8 @@ import {
   aTaskOccurrence,
   aTaskPlanId,
   anIdentityId,
-  aTimePointConfig,
+  aTimePointTiming,
+  anAllDayTiming,
 } from '../../../../../testing';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { RescheduleTaskOccurrenceUseCase } from '../reschedule-task-occurrence.use-case';
@@ -34,73 +35,73 @@ function target(dayOffset = 1, minute = 16 * 60) {
 }
 
 describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
-  it('reschedules the owned occurrence, bumps revision, and persists only the instance', async () => {
+  it('reschedules the owned occurrence, bumps revision, and persists only the occurrence', async () => {
     const identityId = anIdentityId();
-    const templateId = aTaskPlanId();
-    const instance = await aTaskOccurrence({
+    const planId = aTaskPlanId();
+    const occurrence = await aTaskOccurrence({
       identityId,
-      templateId,
-      timeConfig: aTimePointConfig(14 * 60),
+      planId,
+      timing: aTimePointTiming(14 * 60),
     });
     const repo = createMockRepo<ITaskOccurrenceRepository>({
-      findByIdForIdentity: vi.fn().mockResolvedValue(instance),
-      findByTemplateIdAndDateRange: vi.fn().mockResolvedValue([]),
+      findByIdForIdentity: vi.fn().mockResolvedValue(occurrence),
+      findByPlanIdAndDateRange: vi.fn().mockResolvedValue([]),
       save: vi.fn().mockResolvedValue(undefined),
     });
     const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
     const { start, scheduleSnapshot } = target(1, 16 * 60);
 
-    const result = await useCase.execute(instance.id, String(identityId), {
+    const result = await useCase.execute(occurrence.id, String(identityId), {
       scheduleSnapshot,
       expectedVersion: 1,
     });
 
     expect(result).toBeOk();
-    expect(instance.version).toBe(2);
-    expect(instance.scheduleDate).toBe(time.calendar.toYmd(start));
-    expect(instance.scheduleSnapshot.toDTO()).toEqual({
+    expect(occurrence.version).toBe(2);
+    expect(occurrence.scheduleDate).toBe(time.calendar.toYmd(start));
+    expect(occurrence.scheduleSnapshot.toDTO()).toEqual({
       date: time.calendar.toYmd(start),
       timing: { kind: 'At', time: '16:00' },
     });
-    expect(repo.save).toHaveBeenCalledWith(instance);
+    expect(repo.save).toHaveBeenCalledWith(occurrence);
   });
 
   it('rejects a stale Planner revision before mutation', async () => {
     const identityId = anIdentityId();
-    const instance = await aTaskOccurrence({ identityId });
+    const occurrence = await aTaskOccurrence({ identityId, timing: anAllDayTiming() });
     const repo = createMockRepo<ITaskOccurrenceRepository>({
-      findByIdForIdentity: vi.fn().mockResolvedValue(instance),
-      findByTemplateIdAndDateRange: vi.fn(),
+      findByIdForIdentity: vi.fn().mockResolvedValue(occurrence),
+      findByPlanIdAndDateRange: vi.fn(),
       save: vi.fn(),
     });
     const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
 
-    const result = await useCase.execute(instance.id, String(identityId), {
+    const result = await useCase.execute(occurrence.id, String(identityId), {
       scheduleSnapshot: target().scheduleSnapshot,
       expectedVersion: 99,
     });
 
     expect(result).toBeErrorWithCode('CONFLICT');
-    expect(instance.version).toBe(1);
-    expect(repo.findByTemplateIdAndDateRange).not.toHaveBeenCalled();
+    expect(occurrence.version).toBe(1);
+    expect(repo.findByPlanIdAndDateRange).not.toHaveBeenCalled();
     expect(repo.save).not.toHaveBeenCalled();
   });
 
   it('rejects a target-day occurrence collision before persistence', async () => {
     const identityId = anIdentityId();
-    const templateId = aTaskPlanId();
-    const source = await aTaskOccurrence({ identityId, templateId });
+    const planId = aTaskPlanId();
+    const source = await aTaskOccurrence({ identityId, planId });
     const { start, scheduleSnapshot } = target();
     const collision = await aTaskOccurrence({
       identityId,
-      templateId,
-      instanceDate: Number(start),
-      timeConfig: aTimePointConfig(9 * 60, new Date(Number(start))),
+      planId,
+      occurrenceDate: Number(start),
+      timing: aTimePointTiming(9 * 60),
       timeContext,
     });
     const repo = createMockRepo<ITaskOccurrenceRepository>({
       findByIdForIdentity: vi.fn().mockResolvedValue(source),
-      findByTemplateIdAndDateRange: vi.fn().mockResolvedValue([collision]),
+      findByPlanIdAndDateRange: vi.fn().mockResolvedValue([collision]),
       save: vi.fn(),
     });
     const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
@@ -116,18 +117,18 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
 
   it('does not reschedule terminal task occurrences', async () => {
     const identityId = anIdentityId();
-    const instance = await aTaskOccurrence({ identityId });
-    instance.complete();
+    const occurrence = await aTaskOccurrence({ identityId });
+    occurrence.complete();
     const repo = createMockRepo<ITaskOccurrenceRepository>({
-      findByIdForIdentity: vi.fn().mockResolvedValue(instance),
-      findByTemplateIdAndDateRange: vi.fn(),
+      findByIdForIdentity: vi.fn().mockResolvedValue(occurrence),
+      findByPlanIdAndDateRange: vi.fn(),
       save: vi.fn(),
     });
     const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
 
-    const result = await useCase.execute(instance.id, String(identityId), {
+    const result = await useCase.execute(occurrence.id, String(identityId), {
       scheduleSnapshot: target().scheduleSnapshot,
-      expectedVersion: instance.version,
+      expectedVersion: occurrence.version,
     });
 
     expect(result).toBeErrorWithCode('VALIDATION_ERROR');

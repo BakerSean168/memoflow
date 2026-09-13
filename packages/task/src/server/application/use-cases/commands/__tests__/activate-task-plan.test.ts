@@ -12,11 +12,11 @@ const userTimeContextPort = {
   getUserTimeContext: vi.fn().mockResolvedValue(TASK_TEST_TIME_CONTEXT),
 };
 
-const mockGenerateInstances = vi.fn().mockReturnValue([]);
+const mockGenerateOccurrences = vi.fn().mockReturnValue([]);
 vi.mock('../../../../domain/services', () => {
   return {
     TaskOccurrenceGenerationService: class {
-      generateInstances = mockGenerateInstances;
+      generateOccurrences = mockGenerateOccurrences;
     },
   };
 });
@@ -29,14 +29,14 @@ describe('ActivateTaskPlanUseCase', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    mockGenerateInstances.mockReturnValue([]);
+    mockGenerateOccurrences.mockReturnValue([]);
 
     templateRepo = createMockRepo<ITaskPlanRepository>({
       findByIdForIdentity: vi.fn(),
       save: vi.fn().mockResolvedValue(undefined),
     });
     instanceRepo = createMockRepo<ITaskOccurrenceRepository>({
-      findByTemplateId: vi.fn().mockResolvedValue([]),
+      findByPlanId: vi.fn().mockResolvedValue([]),
       saveMany: vi.fn().mockResolvedValue(undefined),
     });
 
@@ -44,8 +44,8 @@ describe('ActivateTaskPlanUseCase', () => {
       templateRepo,
       instanceRepo,
       createInlineTaskWriteTransactionRunner({
-        templateRepository: templateRepo,
-        instanceRepository: instanceRepo,
+        planRepository: templateRepo,
+        occurrenceRepository: instanceRepo,
       }),
       userTimeContextPort,
     );
@@ -61,7 +61,7 @@ describe('ActivateTaskPlanUseCase', () => {
     );
   });
 
-  it('should return NOT_FOUND when template does not exist', async () => {
+  it('should return NOT_FOUND when plan does not exist', async () => {
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(null);
 
     const result = await useCase.execute('non-existent', 'identity-1');
@@ -70,114 +70,114 @@ describe('ActivateTaskPlanUseCase', () => {
     expect(templateRepo.save).not.toHaveBeenCalled();
   });
 
-  it('should activate a paused template', async () => {
-    const template = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+  it('should activate a paused plan', async () => {
+    const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeOk();
-    expect(template.status).toBe(TaskPlanStatus.Active);
-    expect(templateRepo.save).toHaveBeenCalledWith(template);
+    expect(plan.status).toBe(TaskPlanStatus.Active);
+    expect(templateRepo.save).toHaveBeenCalledWith(plan);
   });
 
-  it('should return BAD_REQUEST when template cannot be activated from its current state', async () => {
-    const template = aLoadedTaskPlan({ status: TaskPlanStatus.Active });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+  it('should return BAD_REQUEST when plan cannot be activated from its current state', async () => {
+    const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Active });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeErrorWithCode('BAD_REQUEST');
     expect(templateRepo.save).not.toHaveBeenCalled();
   });
 
-  it('should save template at least once after activating', async () => {
-    const template = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+  it('should save plan at least once after activating', async () => {
+    const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    await useCase.execute(template.id, template.identityId);
+    await useCase.execute(plan.id, plan.identityId);
 
     expect(templateRepo.save).toHaveBeenCalled();
   });
 
-  it('should generate instances after activation', async () => {
-    const template = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+  it('should generate occurrences after activation', async () => {
+    const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    await useCase.execute(template.id, template.identityId);
+    await useCase.execute(plan.id, plan.identityId);
 
-    expect(mockGenerateInstances).toHaveBeenCalledWith(template, TASK_TEST_TIME_CONTEXT, {
+    expect(mockGenerateOccurrences).toHaveBeenCalledWith(plan, TASK_TEST_TIME_CONTEXT, {
       fromDate: expect.any(Number),
-      existingInstances: [],
+      existingOccurrences: [],
     });
   });
 
-  it('should save generated instances when there are some', async () => {
-    const template = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+  it('should save generated occurrences when there are some', async () => {
+    const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
     const fakeInstances = [{}, {}, {}];
-    mockGenerateInstances.mockReturnValue(fakeInstances);
+    mockGenerateOccurrences.mockReturnValue(fakeInstances);
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeOk();
     expect(instanceRepo.saveMany).toHaveBeenCalledWith(fakeInstances);
     if (result.ok) {
-      expect(result.data.instancesGenerated).toBe(3);
+      expect(result.data.occurrencesGenerated).toBe(3);
     }
   });
 
-  it('should not save instances when none are generated', async () => {
-    const template = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-    mockGenerateInstances.mockReturnValue([]);
+  it('should not save occurrences when none are generated', async () => {
+    const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    mockGenerateOccurrences.mockReturnValue([]);
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeOk();
     expect(instanceRepo.saveMany).not.toHaveBeenCalled();
     if (result.ok) {
-      expect(result.data.instancesGenerated).toBe(0);
+      expect(result.data.occurrencesGenerated).toBe(0);
     }
   });
 
-  it('should return instancesGenerated count', async () => {
-    const template = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-    mockGenerateInstances.mockReturnValue([{}, {}, {}, {}, {}]);
+  it('should return occurrencesGenerated count', async () => {
+    const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    mockGenerateOccurrences.mockReturnValue([{}, {}, {}, {}, {}]);
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.instancesGenerated).toBe(5);
+      expect(result.data.occurrencesGenerated).toBe(5);
     }
   });
 
-  it('should return the template client DTO', async () => {
-    const template = aLoadedTaskPlan({
+  it('should return the plan client DTO', async () => {
+    const plan = aLoadedTaskPlan({
       status: TaskPlanStatus.Paused,
       title: 'Reactivated Task',
     });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.template).toBeDefined();
-      expect(result.data.template.name).toBe('Reactivated Task');
+      expect(result.data.plan).toBeDefined();
+      expect(result.data.plan.name).toBe('Reactivated Task');
     }
   });
 
-  it('should return INTERNAL_ERROR when template persistence fails', async () => {
-    const template = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-    mockGenerateInstances.mockReturnValue([{}, {}]);
+  it('should return INTERNAL_ERROR when plan persistence fails', async () => {
+    const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    mockGenerateOccurrences.mockReturnValue([{}, {}]);
     vi.mocked(templateRepo.save).mockRejectedValueOnce(new Error('save failed'));
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeErrorWithCode('INTERNAL_ERROR');
   });

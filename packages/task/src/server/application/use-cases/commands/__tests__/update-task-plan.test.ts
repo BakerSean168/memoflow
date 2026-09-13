@@ -5,16 +5,16 @@ import {
   aOneTimeTask,
   aLoadedTaskPlan,
   aTaskOccurrence,
-  aTimePointConfig,
+  aDailyRecurrence,
+  aTimePointTiming,
+  canonicalTaskPlanScheduleForTest,
   TASK_TEST_TIME_CONTEXT,
 } from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { UpdateTaskPlanUseCase } from '../update-task-plan.use-case';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import { TaskGoalBindingTrigger, TaskType } from '@memoflow/contracts/task';
-import { RecurrenceRule } from '../../../../domain/value-objects/recurrence-rule';
-import { TaskPlanSchedule } from '../../../../domain/value-objects/task-plan-schedule';
+import { TaskGoalBindingTrigger, TaskPlanScheduleKind, TaskTimingKind } from '@memoflow/contracts/task';
 import {
   createInlineTaskWriteTransactionRunner,
   type TaskWriteTransactionRunner,
@@ -35,7 +35,7 @@ describe('UpdateTaskPlanUseCase', () => {
       save: vi.fn().mockResolvedValue(undefined),
     });
     instanceRepo = createMockRepo<ITaskOccurrenceRepository>({
-      findByTemplateId: vi.fn().mockResolvedValue([]),
+      findByPlanId: vi.fn().mockResolvedValue([]),
       saveMany: vi.fn().mockResolvedValue(undefined),
       deleteMany: vi.fn().mockResolvedValue(undefined),
     });
@@ -43,8 +43,8 @@ describe('UpdateTaskPlanUseCase', () => {
       templateRepo,
       instanceRepo,
       createInlineTaskWriteTransactionRunner({
-        templateRepository: templateRepo,
-        instanceRepository: instanceRepo,
+        planRepository: templateRepo,
+        occurrenceRepository: instanceRepo,
       }),
       userTimeContextPort,
     );
@@ -56,7 +56,7 @@ describe('UpdateTaskPlanUseCase', () => {
     );
   });
 
-  it('should return NOT_FOUND when template does not exist', async () => {
+  it('should return NOT_FOUND when plan does not exist', async () => {
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(null);
 
     const result = await useCase.execute('non-existent', 'identity-1', { name: 'New Name' });
@@ -66,12 +66,12 @@ describe('UpdateTaskPlanUseCase', () => {
   });
 
   it('should return CONFLICT when expectedVersion does not match current version (R2-5a)', async () => {
-    const template = aOneTimeTask({ title: 'Old Name' });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aOneTimeTask({ title: 'Old Name' });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       name: 'New Name',
-      expectedVersion: template.version + 1,
+      expectedVersion: plan.version + 1,
     });
 
     expect(result).toBeErrorWithCode('CONFLICT');
@@ -79,113 +79,113 @@ describe('UpdateTaskPlanUseCase', () => {
   });
 
   it('should accept expectedVersion matching current version and bump version on save (R2-5a)', async () => {
-    const template = aOneTimeTask({ title: 'Old Name' });
-    const versionBefore = template.version;
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aOneTimeTask({ title: 'Old Name' });
+    const versionBefore = plan.version;
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       name: 'New Name',
       expectedVersion: versionBefore,
     });
 
     expect(result).toBeOk();
-    expect(template.version).toBe(versionBefore + 1);
-    expect(templateRepo.save).toHaveBeenCalledWith(template);
+    expect(plan.version).toBe(versionBefore + 1);
+    expect(templateRepo.save).toHaveBeenCalledWith(plan);
   });
 
   it('should bump version on save even when expectedVersion is omitted (backward compat)', async () => {
-    const template = aOneTimeTask({ title: 'Old Name' });
-    const versionBefore = template.version;
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aOneTimeTask({ title: 'Old Name' });
+    const versionBefore = plan.version;
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    await useCase.execute(template.id, template.identityId, { name: 'New Name' });
+    await useCase.execute(plan.id, plan.identityId, { name: 'New Name' });
 
-    expect(template.version).toBe(versionBefore + 1);
+    expect(plan.version).toBe(versionBefore + 1);
   });
 
   it('should update the title when name is provided', async () => {
-    const template = aOneTimeTask({ title: 'Old Name' });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aOneTimeTask({ title: 'Old Name' });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId, { name: 'New Name' });
+    const result = await useCase.execute(plan.id, plan.identityId, { name: 'New Name' });
 
     expect(result).toBeOk();
-    expect(template.title).toBe('New Name');
-    expect(templateRepo.save).toHaveBeenCalledWith(template);
+    expect(plan.title).toBe('New Name');
+    expect(templateRepo.save).toHaveBeenCalledWith(plan);
   });
 
   it('should update the description', async () => {
-    const template = aOneTimeTask();
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aOneTimeTask();
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       description: 'Updated description',
     });
 
     expect(result).toBeOk();
-    expect(template.description).toBe('Updated description');
+    expect(plan.description).toBe('Updated description');
   });
 
   it('should clear the description when null is passed', async () => {
-    const template = aLoadedTaskPlan({ description: 'Some description' });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aLoadedTaskPlan({ description: 'Some description' });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       description: null as any,
     });
 
     expect(result).toBeOk();
-    expect(template.description).toBeNull();
+    expect(plan.description).toBeNull();
   });
 
   it('should update importance', async () => {
-    const template = aOneTimeTask({ importance: ImportanceLevel.Moderate });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aOneTimeTask({ importance: ImportanceLevel.Moderate });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       importance: ImportanceLevel.Vital,
     });
 
     expect(result).toBeOk();
-    expect(template.importance).toBe(ImportanceLevel.Vital);
+    expect(plan.importance).toBe(ImportanceLevel.Vital);
   });
 
   it('should update multiple fields at once', async () => {
-    const template = aOneTimeTask({ title: 'Old', importance: ImportanceLevel.Minor });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aOneTimeTask({ title: 'Old', importance: ImportanceLevel.Minor });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       name: 'New Name',
       importance: ImportanceLevel.Vital,
     });
 
     expect(result).toBeOk();
-    expect(template.title).toBe('New Name');
-    expect(template.importance).toBe(ImportanceLevel.Vital);
+    expect(plan.title).toBe('New Name');
+    expect(plan.importance).toBe(ImportanceLevel.Vital);
   });
 
   it('should not modify fields that are not in the request', async () => {
-    const template = aOneTimeTask({
+    const plan = aOneTimeTask({
       title: 'Keep Me',
       importance: ImportanceLevel.Important,
     });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       description: 'Only this field changes',
     });
 
     expect(result).toBeOk();
-    expect(template.title).toBe('Keep Me');
-    expect(template.importance).toBe(ImportanceLevel.Important);
-    expect(template.description).toBe('Only this field changes');
+    expect(plan.title).toBe('Keep Me');
+    expect(plan.importance).toBe(ImportanceLevel.Important);
+    expect(plan.description).toBe('Only this field changes');
   });
 
   it('should save exactly once', async () => {
-    const template = aOneTimeTask();
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aOneTimeTask();
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    await useCase.execute(template.id, template.identityId, {
+    await useCase.execute(plan.id, plan.identityId, {
       name: 'A',
       description: 'B',
       importance: ImportanceLevel.Vital,
@@ -195,10 +195,10 @@ describe('UpdateTaskPlanUseCase', () => {
   });
 
   it('should return the updated client DTO', async () => {
-    const template = aOneTimeTask({ title: 'Before' });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aOneTimeTask({ title: 'Before' });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId, { name: 'After' });
+    const result = await useCase.execute(plan.id, plan.identityId, { name: 'After' });
 
     expect(result).toBeOk();
     if (result.ok) {
@@ -207,28 +207,32 @@ describe('UpdateTaskPlanUseCase', () => {
   });
 
   it('should treat clearing a missing goal binding as a no-op', async () => {
-    const template = aOneTimeTask({ title: 'No Goal Binding' });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aOneTimeTask({ title: 'No Goal Binding' });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId, { goalBinding: null });
+    const result = await useCase.execute(plan.id, plan.identityId, { goalBinding: null });
 
     expect(result).toBeOk();
-    expect(template.goalBinding).toBeNull();
-    expect(templateRepo.save).toHaveBeenCalledWith(template);
+    expect(plan.goalBinding).toBeNull();
+    expect(templateRepo.save).toHaveBeenCalledWith(plan);
   });
 
   it('rejects whole-plan progress when updating an unlimited recurring task', async () => {
-    const template = aLoadedTaskPlan({
-      taskType: TaskType.Recurring,
-      recurrenceRule: RecurrenceRule.createDaily(),
+    const plan = aLoadedTaskPlan({
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        Date.now(),
+        aTimePointTiming(),
+        aDailyRecurrence(),
+      ),
     });
-    template.bindToGoal('goal-1', 'kr-1', {
+    plan.bindToGoal('goal-1', 'kr-1', {
       value: 1,
       trigger: TaskGoalBindingTrigger.EachCompletion,
     });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       goalBinding: {
         goalId: 'goal-1',
         keyResultId: 'kr-1',
@@ -240,36 +244,36 @@ describe('UpdateTaskPlanUseCase', () => {
     expect(templateRepo.save).not.toHaveBeenCalled();
   });
 
-  it('propagates importance only to Pending instances strictly after the effective time', async () => {
+  it('propagates importance only to Pending occurrences strictly after the effective time', async () => {
     const effectiveFrom = Date.UTC(2026, 6, 30, 12);
-    const template = aOneTimeTask({ importance: ImportanceLevel.Moderate });
+    const plan = aOneTimeTask({ importance: ImportanceLevel.Moderate });
     const pastPending = await aTaskOccurrence({
-      templateId: template.id,
-      identityId: template.identityId,
-      instanceDate: effectiveFrom - 86_400_000,
+      planId: plan.id,
+      identityId: plan.identityId,
+      occurrenceDate: effectiveFrom - 86_400_000,
       importance: ImportanceLevel.Moderate,
     });
     const futurePending = await aTaskOccurrence({
-      templateId: template.id,
-      identityId: template.identityId,
-      instanceDate: effectiveFrom + 86_400_000,
+      planId: plan.id,
+      identityId: plan.identityId,
+      occurrenceDate: effectiveFrom + 86_400_000,
       importance: ImportanceLevel.Moderate,
     });
     const boundaryPending = await aTaskOccurrence({
-      templateId: template.id,
-      identityId: template.identityId,
-      instanceDate: effectiveFrom,
+      planId: plan.id,
+      identityId: plan.identityId,
+      occurrenceDate: effectiveFrom,
       importance: ImportanceLevel.Moderate,
     });
     const futureInProgress = await aTaskOccurrence({
-      templateId: template.id,
-      identityId: template.identityId,
-      instanceDate: effectiveFrom + 2 * 86_400_000,
+      planId: plan.id,
+      identityId: plan.identityId,
+      occurrenceDate: effectiveFrom + 2 * 86_400_000,
       importance: ImportanceLevel.Moderate,
     });
     futureInProgress.start();
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([
       pastPending,
       boundaryPending,
       futurePending,
@@ -279,14 +283,14 @@ describe('UpdateTaskPlanUseCase', () => {
       templateRepo,
       instanceRepo,
       createInlineTaskWriteTransactionRunner({
-        templateRepository: templateRepo,
-        instanceRepository: instanceRepo,
+        planRepository: templateRepo,
+        occurrenceRepository: instanceRepo,
       }),
       userTimeContextPort,
       () => effectiveFrom,
     );
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       importance: ImportanceLevel.Vital,
     });
 
@@ -299,32 +303,29 @@ describe('UpdateTaskPlanUseCase', () => {
     expect(instanceRepo.deleteMany).not.toHaveBeenCalled();
   });
 
-  it('does not rebuild Pending instances when a full form sends unchanged schedule values', async () => {
+  it('does not rebuild Pending occurrences when a full form sends unchanged schedule values', async () => {
     const effectiveFrom = Date.UTC(2026, 6, 30, 12);
-    const timeConfig = aTimePointConfig(540, new Date(effectiveFrom - 86400000));
-    const recurrenceRule = RecurrenceRule.createDaily();
-    const template = aLoadedTaskPlan({
-      taskType: TaskType.Recurring,
-      timeConfig,
-      recurrenceRule,
+    const timing = aTimePointTiming(540);
+    const recurrence = aDailyRecurrence();
+    const plan = aLoadedTaskPlan({
+      schedule: canonicalTaskPlanScheduleForTest(TaskPlanScheduleKind.Recurring, effectiveFrom - 86400000, timing, recurrence),
     });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
     useCase = new UpdateTaskPlanUseCase(
       templateRepo,
       instanceRepo,
       createInlineTaskWriteTransactionRunner({
-        templateRepository: templateRepo,
-        instanceRepository: instanceRepo,
+        planRepository: templateRepo,
+        occurrenceRepository: instanceRepo,
       }),
       userTimeContextPort,
       () => effectiveFrom,
     );
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       name: 'Only the title changed',
-      timeConfig: timeConfig.toDTO(),
-      recurrenceRule: recurrenceRule.toDTO(),
-      importance: template.importance,
+      schedule: canonicalTaskPlanScheduleForTest(TaskPlanScheduleKind.Recurring, effectiveFrom - 86400000, timing, recurrence).toDTO(),
+      importance: plan.importance,
     });
 
     expect(result).toBeOk();
@@ -332,66 +333,65 @@ describe('UpdateTaskPlanUseCase', () => {
     expect(instanceRepo.saveMany).not.toHaveBeenCalled();
   });
 
-  it('rebuilds future Pending instances for schedule changes without replacing InProgress dates', async () => {
+  it('rebuilds future Pending occurrences for schedule changes without replacing InProgress dates', async () => {
     const day = 86400000;
     const effectiveFrom = Date.UTC(2026, 6, 30, 12);
-    const oldTimeConfig = aTimePointConfig(540, new Date(effectiveFrom - day));
-    const template = aLoadedTaskPlan({
-      taskType: TaskType.Recurring,
-      timeConfig: oldTimeConfig,
-      recurrenceRule: RecurrenceRule.createDaily(),
+    const oldTiming = aTimePointTiming(540);
+    const plan = aLoadedTaskPlan({
+      schedule: canonicalTaskPlanScheduleForTest(TaskPlanScheduleKind.Recurring, effectiveFrom - day, oldTiming, aDailyRecurrence()),
       importance: ImportanceLevel.Moderate,
     });
     const futurePending = await aTaskOccurrence({
-      templateId: template.id,
-      identityId: template.identityId,
-      instanceDate: effectiveFrom + day,
-      timeConfig: oldTimeConfig,
+      planId: plan.id,
+      identityId: plan.identityId,
+      occurrenceDate: effectiveFrom + day,
+      timing: oldTiming,
     });
     const futureInProgress = await aTaskOccurrence({
-      templateId: template.id,
-      identityId: template.identityId,
-      instanceDate: effectiveFrom + 2 * day,
-      timeConfig: oldTimeConfig,
+      planId: plan.id,
+      identityId: plan.identityId,
+      occurrenceDate: effectiveFrom + 2 * day,
+      timing: oldTiming,
     });
     futureInProgress.start();
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([futurePending, futureInProgress]);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([futurePending, futureInProgress]);
     useCase = new UpdateTaskPlanUseCase(
       templateRepo,
       instanceRepo,
       createInlineTaskWriteTransactionRunner({
-        templateRepository: templateRepo,
-        instanceRepository: instanceRepo,
+        planRepository: templateRepo,
+        occurrenceRepository: instanceRepo,
       }),
       userTimeContextPort,
       () => effectiveFrom,
     );
-    const newTimeConfig = aTimePointConfig(600, new Date(effectiveFrom - day));
+    const newTiming = aTimePointTiming(600);
 
-    const result = await useCase.execute(template.id, template.identityId, {
-      schedule: TaskPlanSchedule.fromLegacy(
-        TaskType.Recurring,
-        newTimeConfig,
-        RecurrenceRule.createDaily(),
+    const result = await useCase.execute(plan.id, plan.identityId, {
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        effectiveFrom - day,
+        newTiming,
+        aDailyRecurrence(),
         TASK_TEST_TIME_CONTEXT,
       ).toDTO(),
     });
 
     expect(result).toBeOk();
-    expect(instanceRepo.deleteMany).toHaveBeenCalledWith(template.identityId, [futurePending.id]);
+    expect(instanceRepo.deleteMany).toHaveBeenCalledWith(plan.identityId, [futurePending.id]);
     const generated = vi.mocked(instanceRepo.saveMany).mock.calls[0]?.[0] ?? [];
     expect(generated.length).toBeGreaterThan(0);
-    expect(generated.every((instance) => instance.status === 'Pending')).toBe(true);
+    expect(generated.every((occurrence) => occurrence.status === 'Pending')).toBe(true);
     expect(
       generated.every(
-        (instance) =>
-          instance.scheduleSnapshot.timing.kind === 'At' &&
-          instance.scheduleSnapshot.timing.time === '10:00',
+        (occurrence) =>
+          occurrence.scheduleSnapshot.timing.kind === 'At' &&
+          occurrence.scheduleSnapshot.timing.time === '10:00',
       ),
     ).toBe(true);
     expect(
-      generated.some((instance) => instance.scheduleDate === futureInProgress.scheduleDate),
+      generated.some((occurrence) => occurrence.scheduleDate === futureInProgress.scheduleDate),
     ).toBe(false);
     expect(futureInProgress.scheduleSnapshot.timing).toEqual({ kind: 'At', time: '09:00' });
   });
@@ -399,30 +399,29 @@ describe('UpdateTaskPlanUseCase', () => {
   it('does not synthesize a regeneration horizon when no future Pending fact exists', async () => {
     const day = 86400000;
     const effectiveFrom = Date.UTC(2026, 6, 30, 12);
-    const oldTimeConfig = aTimePointConfig(540, new Date(effectiveFrom - day));
-    const template = aLoadedTaskPlan({
-      taskType: TaskType.Recurring,
-      timeConfig: oldTimeConfig,
-      recurrenceRule: RecurrenceRule.createDaily(),
+    const oldTiming = aTimePointTiming(540);
+    const plan = aLoadedTaskPlan({
+      schedule: canonicalTaskPlanScheduleForTest(TaskPlanScheduleKind.Recurring, effectiveFrom - day, oldTiming, aDailyRecurrence()),
     });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([]);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([]);
     useCase = new UpdateTaskPlanUseCase(
       templateRepo,
       instanceRepo,
       createInlineTaskWriteTransactionRunner({
-        templateRepository: templateRepo,
-        instanceRepository: instanceRepo,
+        planRepository: templateRepo,
+        occurrenceRepository: instanceRepo,
       }),
       userTimeContextPort,
       () => effectiveFrom,
     );
 
-    const result = await useCase.execute(template.id, template.identityId, {
-      schedule: TaskPlanSchedule.fromLegacy(
-        TaskType.Recurring,
-        aTimePointConfig(600, new Date(effectiveFrom - day)),
-        RecurrenceRule.createDaily(),
+    const result = await useCase.execute(plan.id, plan.identityId, {
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        effectiveFrom - day,
+        aTimePointTiming(600),
+        aDailyRecurrence(),
         TASK_TEST_TIME_CONTEXT,
       ).toDTO(),
     });
@@ -430,15 +429,15 @@ describe('UpdateTaskPlanUseCase', () => {
     expect(result).toBeOk();
     expect(instanceRepo.deleteMany).not.toHaveBeenCalled();
     expect(instanceRepo.saveMany).not.toHaveBeenCalled();
-    expect(template.schedule.toLegacyTimeConfig(TASK_TEST_TIME_CONTEXT).timePoint).toBe(600);
+    expect(plan.schedule.timing).toEqual({ kind: TaskTimingKind.At, time: '10:00' });
   });
 
-  it('runs template and instance writes through the provided transaction boundary', async () => {
-    const template = aOneTimeTask();
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+  it('runs plan and occurrence writes through the provided transaction boundary', async () => {
+    const plan = aOneTimeTask();
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
     const transactionRunner: TaskWriteTransactionRunner = {
       run: vi.fn((work) =>
-        work({ templateRepository: templateRepo, instanceRepository: instanceRepo }),
+        work({ planRepository: templateRepo, occurrenceRepository: instanceRepo }),
       ),
     };
     useCase = new UpdateTaskPlanUseCase(
@@ -448,7 +447,7 @@ describe('UpdateTaskPlanUseCase', () => {
       userTimeContextPort,
     );
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       name: 'Transactional',
     });
 
@@ -457,17 +456,17 @@ describe('UpdateTaskPlanUseCase', () => {
   });
 
   it('replaces shared labels only when labelIds is present and returns the hydrated projection', async () => {
-    const template = aOneTimeTask();
+    const plan = aOneTimeTask();
     const labels = [{ id: 'label-work', name: 'Work', color: null, createdAt: 1, updatedAt: 2 }];
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
     vi.mocked(templateRepo.replaceLabels).mockResolvedValue(labels);
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       labelIds: ['label-work'],
     });
 
     expect(result).toBeOk();
-    expect(templateRepo.replaceLabels).toHaveBeenCalledWith(template.identityId, template.id, [
+    expect(templateRepo.replaceLabels).toHaveBeenCalledWith(plan.identityId, plan.id, [
       'label-work',
     ]);
     expect(result.ok && result.data.labels).toEqual(labels);

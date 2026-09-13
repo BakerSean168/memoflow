@@ -19,7 +19,7 @@ describe('task void success envelope surface', () => {
     'utf8',
   );
   const electron = readFileSync(resolve(__dirname, '../../electron/index.ts'), 'utf8');
-  const deleteTemplateUseCase = readFileSync(
+  const deletePlanUseCase = readFileSync(
     resolve(
       __dirname,
       '../../server/application/use-cases/commands/delete-task-plan.use-case.ts',
@@ -33,17 +33,17 @@ describe('task void success envelope surface', () => {
   });
 
   it('use case / controllers return void then ok(null) for deletes', () => {
-    expect(deleteTemplateUseCase).toContain('Promise<Result<void>>');
-    expect(deleteTemplateUseCase).toContain('return ok(undefined)');
-    expect(deleteTemplateUseCase).not.toContain('success: true');
-    expect(templateController).toMatch(/async deleteTemplate[\s\S]*?Promise<Result<null>>/);
-    expect(instanceController).toMatch(/async deleteInstance[\s\S]*?Promise<Result<null>>/);
+    expect(deletePlanUseCase).toContain('Promise<Result<void>>');
+    expect(deletePlanUseCase).toContain('return ok(undefined)');
+    expect(deletePlanUseCase).not.toContain('success: true');
+    expect(templateController).toMatch(/async deletePlan[\s\S]*?Promise<Result<null>>/);
+    expect(instanceController).toMatch(/async deleteOccurrence[\s\S]*?Promise<Result<null>>/);
     expect(templateController).toContain('return ok(null)');
     expect(instanceController).toContain('return ok(null)');
   });
 
   it('Desktop IPC void delete handlers normalize to ok(null)', () => {
-    for (const channel of ['TEMPLATE_DELETE', 'INSTANCE_DELETE']) {
+    for (const channel of ['PLAN_DELETE', 'OCCURRENCE_DELETE']) {
       expect(electron).toContain(`TaskChannels.${channel}`);
     }
     expect(electron.match(/return ok\(null\)/g)?.length ?? 0).toBeGreaterThanOrEqual(2);

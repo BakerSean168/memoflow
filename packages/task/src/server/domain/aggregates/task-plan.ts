@@ -11,18 +11,15 @@ import type {
 } from '@memoflow/contracts/task';
 import { TaskPlanCompletionPolicy, TaskPlanOutcome } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import { TaskType } from '../value-objects';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { TaskPlanId } from '../../domain/value-objects/task-plan-id';
 import type { TaskOccurrenceId } from '../../domain/value-objects/task-occurrence-id';
 import { IdentityId } from '@memoflow/domain-shared';
 import type { Instant } from '@memoflow/contracts/primitives';
-import { createTimeFacade, type TimeContext } from '@memoflow/time';
+import { type TimeContext } from '@memoflow/time';
 
 import { AggregateRoot } from '@memoflow/utils/domain';
 import {
-  TaskTimeConfig,
-  RecurrenceRule,
   TaskReminderConfig,
   TaskGoalBinding,
   ChecklistItemDefinition,
@@ -30,7 +27,7 @@ import {
 } from '../value-objects';
 import { TaskPlanHistory } from '../entities';
 import type { TaskPlanProps, TaskPlanState } from './task-plan.state';
-import * as instanceGen from './instance-generation.policy';
+import * as instanceGen from './occurrence-generation.policy';
 import * as goalPolicy from './task-plan-goal.policy';
 import * as lifecyclePolicy from './task-plan-lifecycle.policy';
 import {
@@ -53,7 +50,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       throw new InvalidTaskPlanStateError(
         `Invalid persisted TaskPlanStatus: ${String(state.status)}`,
         {
-          templateId: state.id,
+          planId: state.id,
           currentStatus: state.status,
           attemptedAction: 'load',
         },
@@ -63,7 +60,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       throw new InvalidTaskPlanStateError(
         `Invalid persisted TaskPlanOutcome: ${String(state.outcome)}`,
         {
-          templateId: state.id,
+          planId: state.id,
           currentStatus: state.status,
           attemptedAction: 'load',
         },
@@ -104,7 +101,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     }
 
     throw new InvalidTaskPlanStateError('Identity ID is required', {
-      templateId: '',
+      planId: '',
       currentStatus: 'N/A',
       attemptedAction,
     });
@@ -113,7 +110,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   private static normalizeTitle(title: string, attemptedAction: string): string {
     if (!title || title.trim().length === 0) {
       throw new InvalidTaskPlanStateError('Title is required', {
-        templateId: '',
+        planId: '',
         currentStatus: 'N/A',
         attemptedAction,
       });
@@ -151,11 +148,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
 
   public get schedule(): TaskPlanSchedule {
     return this._props.schedule;
-  }
-
-  /** Transitional derived compatibility; canonical state is schedule. */
-  public get taskType(): TaskType {
-    return this._props.schedule.isRecurring ? TaskType.Recurring : TaskType.OneTime;
   }
 
   public get reminderConfig(): TaskReminderConfig | null {
@@ -232,17 +224,15 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     return this._props;
   }
 
-  private getScheduleContext(timeContext: TimeContext): instanceGen.InstanceGenerationContext {
+  private getScheduleContext(timeContext: TimeContext): instanceGen.OccurrenceGenerationContext {
     return {
       planId: this.id,
       identityId: this._props.identityId,
       status: this._props.status,
-      taskType: this.taskType,
-      timeConfig: this._props.schedule.toLegacyTimeConfig(timeContext),
-      recurrenceRule: this._props.schedule.toLegacyRecurrenceRule(timeContext),
+      schedule: this._props.schedule.toDTO(),
       importance: this._props.importance,
       checklistDefinition: this._props.checklist.map((item) => item.toDTO()),
-      existingInstances: [],
+      existingOccurrences: [],
       timeContext,
     };
   }
@@ -266,7 +256,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       throw new InvalidTaskPlanStateError(
         'Cannot change completion policy on a closed or deleted task plan',
         {
-          templateId: this.id,
+          planId: this.id,
           currentStatus: this._props.status,
           attemptedAction: 'updateCompletionPolicy',
         },
@@ -324,7 +314,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     this.advanceVersion();
   }
 
-  // ===== Time-related methods (delegated to instance-generation.policy) =====
+  // ===== Time-related methods (delegated to occurrence-generation.policy) =====
 
   public isActiveOnDate(date: number, timeContext: TimeContext): boolean {
     return instanceGen.isActiveOnDate(this.getScheduleContext(timeContext), date);
@@ -340,7 +330,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   public updateTitle(newTitle: string): void {
     if (!newTitle || newTitle.trim().length === 0) {
       throw new InvalidTaskPlanStateError('Title cannot be empty', {
-        templateId: this.id,
+        planId: this.id,
         currentStatus: this._props.status,
         attemptedAction: 'updateTitle',
       });
@@ -428,15 +418,11 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     this._props.schedule = newSchedule;
     this._props.updatedAt = Date.now();
     this.addHistory('schedule_updated', { oldSchedule, newSchedule: nextSchedule });
-    this.addDomainEvent<TaskEventMap['task:template-schedule-time-changed']>(
-      'task:template-schedule-time-changed',
-      {
-        identityId: this._props.identityId,
-        taskPlan: this.toServerDTO(),
-        oldTimeConfig: null,
-        newTimeConfig: null,
-      },
-    );
+    this.addDomainEvent<TaskEventMap['task:updated']>('task:updated', {
+      identityId: this._props.identityId,
+      task: this.toServerDTO(),
+      changes: ['schedule'],
+    });
   }
 
   /** Updates the importance level. */
@@ -460,15 +446,15 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     return this._props.reminderConfig !== null && this._props.reminderConfig.enabled;
   }
 
-  /** Gets the reminder time for a given instance date. */
-  public getReminderTime(instanceDate: number): number | null {
+  /** Gets the reminder time for a given occurrence date. */
+  public getReminderTime(occurrenceDate: number): number | null {
     if (!this.hasReminder() || !this._props.reminderConfig) {
       return null;
     }
 
     // Standardized fallback: return 1 hour before (real implementation should use reminder configuration offset)
     const ONE_HOUR_MS = 3600000;
-    return instanceDate - ONE_HOUR_MS;
+    return occurrenceDate - ONE_HOUR_MS;
   }
 
   // ===== Goal Binding Methods (delegated to task-plan-goal.policy) =====
@@ -494,7 +480,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
   /** Adds a history record. */
   public addHistory(action: string, changes?: unknown): void {
     const history = TaskPlanHistory.create({
-      templateId: this.id,
+      planId: this.id,
       action,
       changes: changes ? JSON.stringify(changes) : null,
     });
@@ -559,117 +545,16 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       deletedAt: this._props.deletedAt ?? null,
       version: this._props.version,
       history: includeHistory ? this._history.map((entry) => entry.toClientDTO()) : undefined,
-      instances: undefined,
-      instanceCount: 0,
-      completedInstanceCount: 0,
-      pendingInstanceCount: 0,
-      dueInstanceCount: 0,
-      completedDueInstanceCount: 0,
+      occurrenceCount: 0,
+      completedOccurrenceCount: 0,
+      pendingOccurrenceCount: 0,
+      dueOccurrenceCount: 0,
+      completedDueOccurrenceCount: 0,
       completionWindowDays: 30,
-      futurePendingInstanceCount: 0,
-      singleInstanceStatus: null,
+      futurePendingOccurrenceCount: 0,
+      singleOccurrenceStatus: null,
       completionRate: 0,
     };
-  }
-
-  // ===== Factory Methods =====
-
-  public static createOneTimeTask(params: {
-    id?: TaskPlanId;
-    identityId: IdentityId;
-    title: string;
-    description?: string;
-    importance?: ImportanceLevel;
-    startDate?: Instant;
-    timeContext: TimeContext;
-  }): TaskPlan {
-    TaskPlan.assertIdentityId(params.identityId, 'createOneTimeTask');
-    const title = TaskPlan.normalizeTitle(params.title, 'createOneTimeTask');
-
-    const now = Date.now();
-    const time = createTimeFacade({ context: params.timeContext });
-    const occurrenceDate = params.startDate ?? time.calendar.startOfDay(now);
-    const template = TaskPlan.instantiate({
-      id: params.id ?? TaskPlanId.generate(),
-      identityId: params.identityId,
-      title,
-      description: params.description ?? null,
-      importance: params.importance ?? ImportanceLevel.Moderate,
-      status: TaskPlanStatus.Active,
-      outcome: TaskPlanOutcome.Open,
-      completionPolicy: TaskPlanCompletionPolicy.AllowCorrection,
-      closedAt: null,
-      archivedAt: null,
-      abandonedReason: null,
-      goalBinding: null,
-      checklist: [],
-      schedule: TaskPlanSchedule.fromLegacy(
-        TaskType.OneTime,
-        TaskTimeConfig.createAllDay(occurrenceDate),
-        null,
-        params.timeContext,
-      ),
-      reminderConfig: null,
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: null,
-      version: 1,
-    });
-
-    template.addHistory('created', { taskType: TaskType.OneTime });
-    return template;
-  }
-
-  public static createRecurringTask(params: {
-    identityId: IdentityId;
-    title: string;
-    description?: string;
-    timeConfig: TaskTimeConfig;
-    recurrenceRule: RecurrenceRule;
-    reminderConfig?: TaskReminderConfig;
-    importance?: ImportanceLevel;
-    timeContext: TimeContext;
-  }): TaskPlan {
-    TaskPlan.assertIdentityId(params.identityId, 'createRecurringTask');
-    const title = TaskPlan.normalizeTitle(params.title, 'createRecurringTask');
-    if (params.timeConfig.startDate == null) {
-      throw new InvalidTaskPlanStateError('Recurring Task requires a date', {
-        templateId: '',
-        currentStatus: 'N/A',
-        attemptedAction: 'createRecurringTask',
-      });
-    }
-
-    const now = Date.now();
-    const template = TaskPlan.instantiate({
-      id: TaskPlanId.generate(),
-      identityId: params.identityId,
-      title,
-      description: params.description ?? null,
-      importance: params.importance ?? ImportanceLevel.Moderate,
-      status: TaskPlanStatus.Active,
-      outcome: TaskPlanOutcome.Open,
-      completionPolicy: TaskPlanCompletionPolicy.AllowCorrection,
-      closedAt: null,
-      archivedAt: null,
-      abandonedReason: null,
-      goalBinding: null,
-      checklist: [],
-      schedule: TaskPlanSchedule.fromLegacy(
-        TaskType.Recurring,
-        params.timeConfig,
-        params.recurrenceRule,
-        params.timeContext,
-      ),
-      reminderConfig: params.reminderConfig ?? null,
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: null,
-      version: 1,
-    });
-
-    template.addHistory('created', { taskType: TaskType.Recurring });
-    return template;
   }
 
   public static create(params: {
@@ -692,7 +577,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     const title = TaskPlan.normalizeTitle(params.title, 'create');
 
     const now = Date.now();
-    const template = TaskPlan.instantiate({
+    const plan = TaskPlan.instantiate({
       id: params.id ?? TaskPlanId.generate(),
       identityId: params.identityId,
       title,
@@ -720,15 +605,15 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       version: 1,
     });
 
-    template.addHistory('created');
-    template.publishDomainEvent<TaskEventMap['task:created']>('task:created', {
+    plan.addHistory('created');
+    plan.publishDomainEvent<TaskEventMap['task:created']>('task:created', {
       identityId: params.identityId,
-      task: template.toServerDTO(),
-      templateId: template.id,
-      goalId: template.goalBinding?.goalId ?? null,
+      task: plan.toServerDTO(),
+      planId: plan.id,
+      goalId: plan.goalBinding?.goalId ?? null,
     });
 
-    return template;
+    return plan;
   }
 
   public static load(state: TaskPlanState): TaskPlan {

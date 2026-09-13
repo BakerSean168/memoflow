@@ -42,10 +42,10 @@ function event(start: Date | null, p: CalendarEventProjection): EventApi {
 
 describe('FullCalendar Planner owner mutation bridge (PLAN-4303)', () => {
   it('converts eventDrop Date into Product Time and reverts a failed Task owner command', async () => {
-    const rescheduleInstance = vi
+    const rescheduleOccurrence = vi
       .fn()
       .mockResolvedValue(fail({ code: 'CONFLICT', message: 'stale' }));
-    const router = createPlannerOwnerCommandRouter({ task: { rescheduleInstance }, time });
+    const router = createPlannerOwnerCommandRouter({ task: { rescheduleOccurrence }, time });
     const revert = vi.fn();
 
     const outcome = await applyFullCalendarPlannerMutation(
@@ -55,7 +55,7 @@ describe('FullCalendar Planner owner mutation bridge (PLAN-4303)', () => {
       time,
     );
 
-    expect(rescheduleInstance).toHaveBeenCalledWith(
+    expect(rescheduleOccurrence).toHaveBeenCalledWith(
       'task-1',
       expect.objectContaining({
         expectedVersion: 6,
@@ -67,8 +67,8 @@ describe('FullCalendar Planner owner mutation bridge (PLAN-4303)', () => {
   });
 
   it('defensively reverts malformed FullCalendar events before owner routing', async () => {
-    const rescheduleInstance = vi.fn();
-    const router = createPlannerOwnerCommandRouter({ task: { rescheduleInstance }, time });
+    const rescheduleOccurrence = vi.fn();
+    const router = createPlannerOwnerCommandRouter({ task: { rescheduleOccurrence }, time });
     const revert = vi.fn();
 
     const outcome = await applyFullCalendarPlannerMutation(
@@ -79,7 +79,7 @@ describe('FullCalendar Planner owner mutation bridge (PLAN-4303)', () => {
     );
 
     expect(outcome.status).toBe('invalid');
-    expect(rescheduleInstance).not.toHaveBeenCalled();
+    expect(rescheduleOccurrence).not.toHaveBeenCalled();
     expect(revert).toHaveBeenCalledTimes(1);
   });
 });

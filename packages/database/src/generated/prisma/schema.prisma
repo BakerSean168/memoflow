@@ -62,7 +62,6 @@ model Account {
   activityLedger                ActivityLedger[]
   taskPlans                     TaskPlan[]
   taskOccurrences               TaskOccurrence[]
-  taskStatistics                TaskStatistic?
   userPreferenceRecords         UserPreferenceRecord[]
   notifications                 Notification[]
   aiConversations               AiConversation[]
@@ -729,7 +728,7 @@ model GoalLabel {
 
 model TaskLabel {
   identityId String @map("identity_id")
-  taskPlanId String @map("task_template_id")
+  taskPlanId String @map("task_plan_id")
   labelId    String @map("label_id")
 
   account  Account  @relation(fields: [identityId], references: [id], onDelete: Cascade)
@@ -2199,9 +2198,9 @@ model TaskPlan {
   keyResult KeyResult? @relation("KeyResultTaskPlans", fields: [keyResultId, goalId, identityId], references: [id, goalId, identityId], onDelete: Restrict)
 
   // 实例
-  instances  TaskOccurrence[]
-  history    TaskPlanHistory[]
-  labelLinks TaskLabel[]
+  occurrences TaskOccurrence[]
+  history     TaskPlanHistory[]
+  labelLinks  TaskLabel[]
 
   // ============ 索引优化 ============
   @@unique([id, identityId])
@@ -2211,7 +2210,7 @@ model TaskPlan {
   @@index([identityId, goalId, deletedAt])
   @@index([identityId, keyResultId, deletedAt])
   @@index([deletedAt])
-  @@map("task_templates")
+  @@map("task_plans")
 }
 
 /// TaskOccurrence 聚合根 - 任务实例
@@ -2240,7 +2239,7 @@ model TaskOccurrence {
   @@index([planId, scheduleDate])
   @@index([identityId, status])
   @@index([identityId, scheduleDate])
-  @@map("task_instances")
+  @@map("task_occurrences")
 }
 
 /// Durable delivery log for completed tasks that contribute Goal progress.
@@ -2248,8 +2247,8 @@ model TaskOccurrence {
 model TaskGoalOutbox {
   eventId          String    @id @map("event_id")
   identityId       String    @map("identity_id")
-  taskOccurrenceId String    @map("task_instance_id")
-  taskPlanId       String    @map("task_template_id")
+  taskOccurrenceId String    @map("task_occurrence_id")
+  taskPlanId       String    @map("task_plan_id")
   goalId           String    @map("goal_id")
   keyResultId      String    @map("key_result_id")
   payload          String
@@ -2271,57 +2270,17 @@ model TaskGoalOutbox {
 model TaskPlanHistory {
   id         String   @id
   identityId String   @map("identity_id")
-  templateId String   @map("template_id")
+  planId     String   @map("plan_id")
   action     String
   changes    String?
   createdAt  DateTime @default(now()) @map("created_at")
 
   identity Account  @relation("AccountTaskPlanHistory", fields: [identityId], references: [id])
-  template TaskPlan @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  plan     TaskPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@index([identityId])
-  @@index([templateId])
-  @@map("task_template_history")
-}
-
-model TaskStatistic {
-  id                       String   @id
-  identityId               String   @unique @map("identity_id")
-  calculatedAt             DateTime @map("calculated_at")
-  templateTotal            Int      @map("template_total")
-  templateActive           Int      @map("template_active")
-  templatePaused           Int      @map("template_paused")
-  templateArchived         Int      @map("template_archived")
-  templateOneTime          Int      @map("template_one_time")
-  templateRecurring        Int      @map("template_recurring")
-  instanceTotal            Int      @map("instance_total")
-  instanceToday            Int      @map("instance_today")
-  instanceWeek             Int      @map("instance_week")
-  instanceMonth            Int      @map("instance_month")
-  instancePending          Int      @map("instance_pending")
-  instanceInProgress       Int      @map("instance_in_progress")
-  instanceCompleted        Int      @map("instance_completed")
-  instanceSkipped          Int      @map("instance_skipped")
-  instanceMissed           Int      @map("instance_missed")
-  completionToday          Int      @map("completion_today")
-  completionWeek           Int      @map("completion_week")
-  completionMonth          Int      @map("completion_month")
-  completionTotal          Int      @map("completion_total")
-  completionAvgTime        Float?   @map("completion_avg_time")
-  completionRate           Float    @map("completion_rate")
-  timeAllDay               Int      @map("time_all_day")
-  timePoint                Int      @map("time_point")
-  timeRange                Int      @map("time_range")
-  timeOverdue              Int      @map("time_overdue")
-  timeUpcoming             Int      @map("time_upcoming")
-  distributionByImportance String   @map("distribution_by_importance")
-  distributionByUrgency    String   @map("distribution_by_urgency")
-  distributionByTag        String   @map("distribution_by_tag")
-
-  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
-
-  @@index([identityId])
-  @@map("task_statistics")
+  @@index([planId])
+  @@map("task_plan_history")
 }
 
 // ==========================================

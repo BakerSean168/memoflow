@@ -47,25 +47,25 @@ export const TaskPlanResponseSchema = z.object({
   createdAt: z.number(),
   updatedAt: z.number(),
   deletedAt: z.number().nullable(),
-  instanceCount: z.number(),
-  completedInstanceCount: z.number(),
-  pendingInstanceCount: z.number(),
-  dueInstanceCount: z.number(),
-  completedDueInstanceCount: z.number(),
+  occurrenceCount: z.number(),
+  completedOccurrenceCount: z.number(),
+  pendingOccurrenceCount: z.number(),
+  dueOccurrenceCount: z.number(),
+  completedDueOccurrenceCount: z.number(),
   completionWindowDays: z.literal(30),
-  futurePendingInstanceCount: z.number(),
-  singleInstanceStatus: z.enum(TaskOccurrenceStatus).nullable(),
+  futurePendingOccurrenceCount: z.number(),
+  singleOccurrenceStatus: z.enum(TaskOccurrenceStatus).nullable(),
   completionRate: z.number(),
 });
 
 export const CreateTaskPlanResponseSchema = z.object({
-  template: TaskPlanResponseSchema,
-  instanceCount: z.number().int().nonnegative(),
-  todayInstanceCreated: z.boolean(),
+  plan: TaskPlanResponseSchema,
+  occurrenceCount: z.number().int().nonnegative(),
+  todayOccurrenceCreated: z.boolean(),
 });
 
 export const TaskPlanListResponseSchema = z.object({
-  templates: z.array(TaskPlanResponseSchema),
+  plans: z.array(TaskPlanResponseSchema),
   total: z.number(),
 });
 
@@ -106,7 +106,7 @@ export type TaskOccurrenceResponse = z.infer<typeof TaskOccurrenceResponseSchema
 // Residual 843: TaskPlanHistoryServerDTO also z.infer of this schema (client+server single-track).
 export const TaskPlanHistoryResponseSchema = z.object({
   id: z.string(),
-  templateId: z.string(),
+  planId: z.string(),
   action: z.string(),
   changes: z.unknown(),
   createdAt: z.number(),

@@ -2,9 +2,9 @@
  * Activate Task Template Use Case
  *
  * Business flow:
- * 1. Mark the template as active.
- * 2. Generate the next task instances immediately.
- * 3. Persist both template state and generated instances in one write boundary.
+ * 1. Mark the plan as active.
+ * 2. Generate the next task occurrences immediately.
+ * 3. Persist both plan state and generated occurrences in one write boundary.
  */
 
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
@@ -29,8 +29,8 @@ export class ActivateTaskPlanUseCase {
   private readonly transactionRunner: TaskWriteTransactionRunner;
 
   constructor(
-    private readonly templateRepository: ITaskPlanRepository,
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly planRepository: ITaskPlanRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
     private readonly userTimeContextPort: UserTimeContextPort,
   ) {
@@ -46,42 +46,42 @@ export class ActivateTaskPlanUseCase {
   async execute(
     id: string,
     identityId: string,
-  ): Promise<Result<{ template: TaskPlanClientDTO; instancesGenerated: number }>> {
+  ): Promise<Result<{ plan: TaskPlanClientDTO; occurrencesGenerated: number }>> {
     try {
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
       return await this.transactionRunner.run(
-        async ({ templateRepository, instanceRepository }) => {
-          const template = await templateRepository!.findByIdForIdentity(identityId, id);
-          if (!template) {
+        async ({ planRepository, occurrenceRepository }) => {
+          const plan = await planRepository!.findByIdForIdentity(identityId, id);
+          if (!plan) {
             return error('NOT_FOUND', `TaskPlan ${id} not found`);
           }
 
-          template.activate();
+          plan.activate();
 
           // Existing occurrences are independent facts; pass them explicitly to materialization.
-          const existingInstances = await instanceRepository.findByTemplateId(id, identityId);
-          const instances = this.generationService.generateInstances(template, timeContext, {
+          const existingOccurrences = await occurrenceRepository.findByPlanId(id, identityId);
+          const occurrences = this.generationService.generateOccurrences(plan, timeContext, {
             fromDate: Date.now(),
-            existingInstances,
+            existingOccurrences,
           });
-          let instancesGenerated = 0;
+          let occurrencesGenerated = 0;
 
-          if (instances.length > 0) {
-            await instanceRepository.saveMany(instances);
-            instancesGenerated = instances.length;
+          if (occurrences.length > 0) {
+            await occurrenceRepository.saveMany(occurrences);
+            occurrencesGenerated = occurrences.length;
           }
 
-          await templateRepository!.save(template);
+          await planRepository!.save(plan);
 
           return ok({
-            template: template.toClientDTOAt(timeContext),
-            instancesGenerated,
+            plan: plan.toClientDTOAt(timeContext),
+            occurrencesGenerated,
           });
         },
       );
     } catch (caughtError) {
-      this.logger.error('Failed to activate task template', { error: caughtError });
-      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to activate task template'));
+      this.logger.error('Failed to activate task plan', { error: caughtError });
+      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to activate task plan'));
     }
   }
 }

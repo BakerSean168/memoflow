@@ -13,21 +13,29 @@ function template(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO
     identityId: SCOPE as TaskPlanClientDTO['identityId'],
     name: 'Draft',
     description: null,
-    timeConfig: { timeType: 'AllDay', startDate: 1 },
-    recurrenceRule: null,
+    schedule: {
+      kind: 'OneTime',
+      date: '2026-09-10',
+      timing: { kind: 'AllDay' },
+    },
     reminderConfig: null,
     importance: 'Moderate',
-    tags: [],
-    color: null,
+    goalBinding: null,
+    checklist: [],
+    labels: [],
     status: 'Active',
+    outcome: 'Open',
+    completionPolicy: 'AllOccurrences',
+    closedAt: null,
+    archivedAt: null,
+    abandonedReason: null,
     version: 1,
     createdAt: 1,
     updatedAt: 1,
     deletedAt: null,
-    goalBinding: null,
-    instanceCount: 0,
-    completedInstanceCount: 0,
-    pendingInstanceCount: 0,
+    occurrenceCount: 0,
+    completedOccurrenceCount: 0,
+    pendingOccurrenceCount: 0,
     ...overrides,
   } as TaskPlanClientDTO;
 }
@@ -38,14 +46,14 @@ function entity(dto: TaskPlanClientDTO) {
 
 function makeService(overrides: Record<string, ReturnType<typeof vi.fn>> = {}) {
   return {
-    listTemplates: vi.fn(),
-    getTemplate: vi.fn(),
-    createTemplate: vi.fn(),
-    updateTemplate: vi.fn(),
-    deleteTemplate: vi.fn(),
-    activateTemplate: vi.fn(),
-    pauseTemplate: vi.fn(),
-    archiveTemplate: vi.fn(),
+    listPlans: vi.fn(),
+    getPlan: vi.fn(),
+    createPlan: vi.fn(),
+    updatePlan: vi.fn(),
+    deletePlan: vi.fn(),
+    activatePlan: vi.fn(),
+    pausePlan: vi.fn(),
+    archivePlan: vi.fn(),
     ...overrides,
   };
 }
@@ -54,7 +62,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
   it('optimistic update patches matching list/detail entries and rolls back exactly on failure', async () => {
     const tpl = template();
     const service = makeService({
-      updateTemplate: vi
+      updatePlan: vi
         .fn()
         .mockResolvedValueOnce(ok(entity(template({ name: 'Published', version: 2 }))))
         .mockResolvedValueOnce(fail({ code: 'VALIDATION_ERROR', message: 'nope' })),
@@ -67,12 +75,12 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     runtime.queryClient.setQueryData(detailKey, tpl);
 
     // Success: optimistic patch converges to the server-confirmed DTO everywhere.
-    const okResult = await api.updateTemplateSafe(tpl.id, { name: 'Published' });
+    const okResult = await api.updatePlanSafe(tpl.id, { name: 'Published' });
     expect(okResult).toBeTruthy();
     expect(runtime.queryClient.getQueryData(detailKey)?.name).toBe('Published');
 
     // Failure: exact restore of every snapshot key (to the pre-mutation 'Published' state).
-    await api.updateTemplateSafe(tpl.id, { name: 'Broken' });
+    await api.updatePlanSafe(tpl.id, { name: 'Broken' });
     expect(runtime.queryClient.getQueryData(detailKey)?.name).toBe('Published');
     const afterFailList = runtime.queryClient.getQueryData(listKey) as {
       templates: TaskPlanClientDTO[];
@@ -83,8 +91,8 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
   it('status mutations (activate/pause) apply optimistic status and restore on failure', async () => {
     const tpl = template();
     const service = makeService({
-      activateTemplate: vi.fn().mockResolvedValue(ok(entity(template({ status: 'Active' })))),
-      pauseTemplate: vi.fn().mockResolvedValue(fail({ code: 'VALIDATION_ERROR', message: 'nope' })),
+      activatePlan: vi.fn().mockResolvedValue(ok(entity(template({ status: 'Active' })))),
+      pausePlan: vi.fn().mockResolvedValue(fail({ code: 'VALIDATION_ERROR', message: 'nope' })),
     });
     const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
 
@@ -93,18 +101,18 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     runtime.queryClient.setQueryData(detailKey, tpl);
     runtime.queryClient.setQueryData(listKey, { templates: [tpl], total: 1 });
 
-    await api.activateTemplateSafe(tpl.id);
+    await api.activatePlanSafe(tpl.id);
     expect(runtime.queryClient.getQueryData(detailKey)?.status).toBe('Active');
 
     // Pause failure restores the pre-mutation status.
-    await api.pauseTemplateSafe(tpl.id);
+    await api.pausePlanSafe(tpl.id);
     expect(runtime.queryClient.getQueryData(detailKey)?.status).toBe('Active');
   });
 
   it('status mutation derives from the complete cached projection, not a bare {id,status} DTO', async () => {
     const tpl = template({ name: 'Full DTO', description: 'kept' });
     const service = makeService({
-      pauseTemplate: vi.fn().mockResolvedValue(fail({ code: 'VALIDATION_ERROR', message: 'nope' })),
+      pausePlan: vi.fn().mockResolvedValue(fail({ code: 'VALIDATION_ERROR', message: 'nope' })),
     });
     const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
 
@@ -114,7 +122,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     const listKey = taskPlanQueryKeys.list(SCOPE, { page: 1, limit: 20 });
     runtime.queryClient.setQueryData(listKey, { templates: [tpl], total: 1 });
 
-    await api.pauseTemplateSafe(tpl.id);
+    await api.pausePlanSafe(tpl.id);
 
     const listData = runtime.queryClient.getQueryData(listKey) as {
       templates: TaskPlanClientDTO[];
@@ -128,7 +136,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
   it('rolls back a newly-created detail key (optimistic patch residue) when the mutation fails', async () => {
     const tpl = template();
     const service = makeService({
-      updateTemplate: vi
+      updatePlan: vi
         .fn()
         .mockResolvedValue(fail({ code: 'VALIDATION_ERROR', message: 'nope' })),
     });
@@ -140,7 +148,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     runtime.queryClient.setQueryData(listKey, { templates: [tpl], total: 1 });
     expect(runtime.queryClient.getQueryData(detailKey)).toBeUndefined();
 
-    await api.updateTemplateSafe(tpl.id, { name: 'Broken' });
+    await api.updatePlanSafe(tpl.id, { name: 'Broken' });
 
     // The optimistic patch may create a detail key, but a failed mutation must remove it.
     expect(runtime.queryClient.getQueryData(detailKey)).toBeUndefined();
@@ -149,19 +157,19 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
   it('create success keeps server-confirmed semantics (no fake id) and invalidates task-plan lists', async () => {
     const created = template({ id: 'template-new' as TaskPlanClientDTO['id'] });
     const service = makeService({
-      createTemplate: vi
+      createPlan: vi
         .fn()
         .mockResolvedValue(
-          ok({ template: entity(created), instanceCount: 7, todayInstanceCreated: true }),
+          ok({ plan: entity(created), occurrenceCount: 7, todayOccurrenceCreated: true }),
         ),
     });
     const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
     const invalidate = vi.spyOn(runtime.dispatcher, 'invalidate');
 
-    const result = await api.createTemplateSafe({ name: 'New' } as never);
-    expect(result?.instanceCount).toBe(7);
-    expect(result?.todayInstanceCreated).toBe(true);
-    expect(result?.template.toDTO().id).toBe('template-new');
+    const result = await api.createPlanSafe({ name: 'New' } as never);
+    expect(result?.occurrenceCount).toBe(7);
+    expect(result?.todayOccurrenceCreated).toBe(true);
+    expect(result?.plan.toDTO().id).toBe('template-new');
     expect(invalidate).toHaveBeenCalledWith(
       expect.objectContaining({ target: 'task-plan', source: 'mutation' }),
     );
@@ -173,7 +181,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
   it('single delete removes the item from cache after server confirmation and invalidates detail', async () => {
     const tpl = template();
     const service = makeService({
-      deleteTemplate: vi.fn().mockResolvedValue(ok(undefined)),
+      deletePlan: vi.fn().mockResolvedValue(ok(undefined)),
     });
     const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
 
@@ -183,7 +191,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     runtime.queryClient.setQueryData(detailKey, tpl);
     const invalidate = vi.spyOn(runtime.dispatcher, 'invalidate');
 
-    const deleted = await api.deleteTemplateSafe(tpl.id);
+    const deleted = await api.deletePlanSafe(tpl.id);
     expect(deleted).toBe(true);
     const remaining = (
       runtime.queryClient.getQueryData(listKey) as {
@@ -201,7 +209,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     const first = template();
     const second = template({ id: 'template-2' as TaskPlanClientDTO['id'] });
     const service = makeService({
-      deleteTemplate: vi
+      deletePlan: vi
         .fn()
         .mockResolvedValueOnce(ok(undefined))
         .mockResolvedValueOnce(fail({ code: 'VALIDATION_ERROR', message: 'Cannot delete' })),
@@ -211,9 +219,9 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     const listKey = taskPlanQueryKeys.list(SCOPE, { page: 1, limit: 20 });
     runtime.queryClient.setQueryData(listKey, { templates: [first, second], total: 2 });
 
-    const deleted = await api.deleteTemplatesSafe([first.id, second.id]);
+    const deleted = await api.deletePlansSafe([first.id, second.id]);
     expect(deleted).toBe(false);
-    expect(service.deleteTemplate).toHaveBeenCalledTimes(2);
+    expect(service.deletePlan).toHaveBeenCalledTimes(2);
     const remaining = (
       runtime.queryClient.getQueryData(listKey) as {
         templates: TaskPlanClientDTO[];
@@ -226,7 +234,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
   it('resolves identityScope at mutation begin and carries it through callbacks (P1-2)', async () => {
     const tpl = template();
     const service = makeService({
-      updateTemplate: vi.fn().mockResolvedValue(ok(entity(template({ name: 'Confirmed' })))),
+      updatePlan: vi.fn().mockResolvedValue(ok(entity(template({ name: 'Confirmed' })))),
     });
     const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
 
@@ -235,7 +243,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     runtime.queryClient.setQueryData(listKey, { templates: [tpl], total: 1 });
     const invalidate = vi.spyOn(runtime.dispatcher, 'invalidate');
 
-    await api.updateTemplateSafe(tpl.id, { name: 'Renamed' });
+    await api.updatePlanSafe(tpl.id, { name: 'Renamed' });
 
     // The mutation patched and invalidated the begin-scope identity.
     expect(invalidate).toHaveBeenCalledWith(
@@ -256,7 +264,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
       resolveB = resolve;
     });
     const service = makeService({
-      deleteTemplate: vi.fn().mockReturnValueOnce(pendingA).mockReturnValueOnce(pendingB),
+      deletePlan: vi.fn().mockReturnValueOnce(pendingA).mockReturnValueOnce(pendingB),
     });
     // Batch A begins at identity A; the identity then switches to B while it is pending, and a
     // competing batch B for the new identity starts — its onMutate overwrites the pre-fix shared
@@ -273,11 +281,11 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     runtime.queryClient.setQueryData(listKeyA, { templates: [tpl], total: 1 });
     runtime.queryClient.setQueryData(listKeyB, { templates: [tpl], total: 1 });
 
-    const batchA = api.deleteTemplatesSafe([tpl.id]);
+    const batchA = api.deletePlansSafe([tpl.id]);
     // The identity switches while batch A is pending; a competing batch for the new identity
     // begins and completes before batch A resolves.
     currentIdentity = 'identity-b';
-    const batchB = api.deleteTemplatesSafe([tpl.id]);
+    const batchB = api.deletePlansSafe([tpl.id]);
     resolveB(ok(undefined));
     await batchB;
     resolveA(ok(undefined));
@@ -307,7 +315,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
       resolveB = resolve;
     });
     const service = makeService({
-      deleteTemplate: vi.fn().mockReturnValueOnce(pendingA).mockReturnValueOnce(pendingB),
+      deletePlan: vi.fn().mockReturnValueOnce(pendingA).mockReturnValueOnce(pendingB),
     });
     // Both identities cache both templates so a misdirected removal is observable: A's batch
     // must remove only tplA from A's cache, and B's batch only tplB from B's cache.
@@ -324,9 +332,9 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
 
     // The identity flips to B before the second batch begins; each invocation must keep the
     // scope captured at ITS OWN begin, not a shared value the other invocation overwrote.
-    const batchA = api.deleteTemplatesSafe([tplA.id]);
+    const batchA = api.deletePlansSafe([tplA.id]);
     currentIdentity = 'identity-b';
-    const batchB = api.deleteTemplatesSafe([tplB.id]);
+    const batchB = api.deletePlansSafe([tplB.id]);
     resolveA(ok(undefined));
     resolveB(ok(undefined));
     await Promise.all([batchA, batchB]);

@@ -26,16 +26,16 @@ const authMiddleware = ((_, __, next) => next()) as RequestHandler;
 function createControllerStub(): TaskPlanController {
   const okResult = { ok: true, data: null };
   return {
-    createTemplate: vi.fn(async () => okResult),
-    getTemplate: vi.fn(async () => okResult),
-    listTemplates: vi.fn(async () => okResult),
-    updateTemplate: vi.fn(async () => okResult),
-    deleteTemplate: vi.fn(async () => okResult),
-    activateTemplate: vi.fn(async () => okResult),
-    pauseTemplate: vi.fn(async () => okResult),
-    archiveTemplate: vi.fn(async () => okResult),
-    generateInstances: vi.fn(async () => okResult),
-    getInstancesByTemplate: vi.fn(async () => okResult),
+    createPlan: vi.fn(async () => okResult),
+    getPlan: vi.fn(async () => okResult),
+    listPlans: vi.fn(async () => okResult),
+    updatePlan: vi.fn(async () => okResult),
+    deletePlan: vi.fn(async () => okResult),
+    activatePlan: vi.fn(async () => okResult),
+    pausePlan: vi.fn(async () => okResult),
+    archivePlan: vi.fn(async () => okResult),
+    generateOccurrences: vi.fn(async () => okResult),
+    getOccurrencesByPlan: vi.fn(async () => okResult),
     bindToGoal: vi.fn(async () => okResult),
     unbindFromGoal: vi.fn(async () => okResult),
   } as unknown as TaskPlanController;
@@ -119,7 +119,7 @@ function registerAll(registry: TestOpenApiRegistry) {
 }
 
 describe('task-plan route contracts', () => {
-  it('POST / creates a template with proper body and response schemas', () => {
+  it('POST / creates a plan with proper body and response schemas', () => {
     const registry = new TestOpenApiRegistry();
     registerAll(registry);
 
@@ -273,11 +273,11 @@ describe('task-plan route contracts', () => {
     expect(responseSchema).toBeDefined();
   });
 
-  it('POST /{id}/generate-instances returns z.array(TaskOccurrenceResponseSchema)', () => {
+  it('POST /{id}/generate-occurrences returns z.array(TaskOccurrenceResponseSchema)', () => {
     const registry = new TestOpenApiRegistry();
     registerAll(registry);
 
-    const route = getRegisteredRoute(registry, 'post', `${BASE}/{id}/generate-instances`);
+    const route = getRegisteredRoute(registry, 'post', `${BASE}/{id}/generate-occurrences`);
     const responseSchema = getResponseSchema(route, 200);
     expect(responseSchema).toBeDefined();
     // Array should pass
@@ -292,11 +292,11 @@ describe('task-plan route contracts', () => {
     ).toBe(true);
   });
 
-  it('GET /{id}/instances query uses TaskPlanInstancesQuerySchema', () => {
+  it('GET /{id}/occurrences query uses TaskPlanOccurrencesQuerySchema', () => {
     const registry = new TestOpenApiRegistry();
     registerAll(registry);
 
-    const route = getRegisteredRoute(registry, 'get', `${BASE}/{id}/instances`);
+    const route = getRegisteredRoute(registry, 'get', `${BASE}/{id}/occurrences`);
     const querySchema = getQuerySchema(route);
     expect(querySchema).toBeDefined();
     expect(querySchema.safeParse({ from: Date.now(), to: Date.now() + 60_000 }).success).toBe(true);
@@ -360,8 +360,8 @@ describe('task-plan route contracts', () => {
       `${BASE}/{id}/activate`,
       `${BASE}/{id}/pause`,
       `${BASE}/{id}/archive`,
-      `${BASE}/{id}/generate-instances`,
-      `${BASE}/{id}/instances`,
+      `${BASE}/{id}/generate-occurrences`,
+      `${BASE}/{id}/occurrences`,
       `${BASE}/{id}/bind-goal`,
       `${BASE}/{id}/unbind-goal`,
     ];
@@ -384,7 +384,7 @@ describe('task-plan route contracts', () => {
   });
 });
 
-describe('task template mutation routes run the real validation adapter (Phase 4)', () => {
+describe('task plan mutation routes run the real validation adapter (Phase 4)', () => {
   function getHandler(
     router: ReturnType<typeof registerTaskPlanRoutes>,
     method: string,
@@ -452,7 +452,7 @@ describe('task template mutation routes run the real validation adapter (Phase 4
     await handler(createReq({ name: '' }), badRes);
     expect(badRes.statusCode).toBe(400);
     expect(badRes.body.error.code).toBe('VALIDATION_ERROR');
-    expect(controller.createTemplate).not.toHaveBeenCalled();
+    expect(controller.createPlan).not.toHaveBeenCalled();
 
     const validRes = createRes();
     await handler(
@@ -464,7 +464,7 @@ describe('task template mutation routes run the real validation adapter (Phase 4
       validRes,
     );
     expect(validRes.statusCode).toBe(201);
-    expect(controller.createTemplate).toHaveBeenCalledTimes(1);
+    expect(controller.createPlan).toHaveBeenCalledTimes(1);
   });
 
   it('update: params + body are validated together before the controller', async () => {
@@ -475,11 +475,11 @@ describe('task template mutation routes run the real validation adapter (Phase 4
     const badRes = createRes();
     await handler(createReq({ name: '' }), badRes);
     expect(badRes.statusCode).toBe(400);
-    expect(controller.updateTemplate).not.toHaveBeenCalled();
+    expect(controller.updatePlan).not.toHaveBeenCalled();
 
     const validRes = createRes();
     await handler(createReq({ name: 'Updated Name' }), validRes);
     expect(validRes.statusCode).toBe(200);
-    expect(controller.updateTemplate).toHaveBeenCalledTimes(1);
+    expect(controller.updatePlan).toHaveBeenCalledTimes(1);
   });
 });

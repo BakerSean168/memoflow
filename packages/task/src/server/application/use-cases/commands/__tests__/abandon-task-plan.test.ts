@@ -10,27 +10,27 @@ import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
 
 describe('AbandonTaskPlanUseCase (TASK-2202)', () => {
   it('closes the plan as explicitly Abandoned without using delete', async () => {
-    const template = aOneTimeTask({ title: 'Try for 15 days' });
-    const templateRepository = createMockRepo<ITaskPlanRepository>({
-      findByIdForIdentity: vi.fn().mockResolvedValue(template),
+    const plan = aOneTimeTask({ title: 'Try for 15 days' });
+    const planRepository = createMockRepo<ITaskPlanRepository>({
+      findByIdForIdentity: vi.fn().mockResolvedValue(plan),
       save: vi.fn().mockResolvedValue(undefined),
     });
-    const instanceRepository = createMockRepo<ITaskOccurrenceRepository>();
+    const occurrenceRepository = createMockRepo<ITaskOccurrenceRepository>();
     const useCase = new AbandonTaskPlanUseCase(
-      templateRepository,
-      createInlineTaskWriteTransactionRunner({ templateRepository, instanceRepository }),
+      planRepository,
+      createInlineTaskWriteTransactionRunner({ planRepository, occurrenceRepository }),
       TASK_TEST_USER_TIME_CONTEXT_PORT,
     );
 
-    const result = await useCase.execute(template.id, template.identityId, {
+    const result = await useCase.execute(plan.id, plan.identityId, {
       reason: 'User changed direction',
     });
 
     expect(result).toBeOk();
-    expect(template.status).toBe(TaskPlanStatus.Closed);
-    expect(template.outcome).toBe(TaskPlanOutcome.Abandoned);
-    expect(template.abandonedReason).toBe('User changed direction');
-    expect(template.deletedAt).toBeNull();
-    expect(templateRepository.save).toHaveBeenCalledWith(template);
+    expect(plan.status).toBe(TaskPlanStatus.Closed);
+    expect(plan.outcome).toBe(TaskPlanOutcome.Abandoned);
+    expect(plan.abandonedReason).toBe('User changed direction');
+    expect(plan.deletedAt).toBeNull();
+    expect(planRepository.save).toHaveBeenCalledWith(plan);
   });
 });

@@ -78,11 +78,11 @@ export function useTask() {
     // Instance operations
     fetchInstances: instanceOps.fetchInstances,
     fetchInstancesByDateRange: instanceOps.fetchInstancesByDateRange,
-    startInstance: instanceOps.startInstance,
-    completeInstance: instanceOps.completeInstance,
-    uncompleteInstance: instanceOps.uncompleteInstance,
-    rescheduleInstance: instanceOps.rescheduleInstance,
-    skipInstance: instanceOps.skipInstance,
+    startOccurrence: instanceOps.startOccurrence,
+    completeOccurrence: instanceOps.completeOccurrence,
+    uncompleteOccurrence: instanceOps.uncompleteOccurrence,
+    rescheduleOccurrence: instanceOps.rescheduleOccurrence,
+    skipOccurrence: instanceOps.skipOccurrence,
     // Pagination
     setPage,
   };

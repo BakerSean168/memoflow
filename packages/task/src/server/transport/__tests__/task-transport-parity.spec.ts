@@ -80,24 +80,24 @@ function createPortStub(): TaskApplicationPort {
     createTaskPlan: fn(FAKE_TEMPLATE),
     updateTaskPlan: fn(FAKE_TEMPLATE),
     deleteTaskPlan: fn(null),
-    activateTaskPlan: fn({ template: FAKE_TEMPLATE }),
-    pauseTaskPlan: fn({ template: FAKE_TEMPLATE }),
+    activateTaskPlan: fn({ plan: FAKE_TEMPLATE }),
+    pauseTaskPlan: fn({ plan: FAKE_TEMPLATE }),
     archiveTaskPlan: fn(FAKE_TEMPLATE),
     abandonTaskPlan: fn(FAKE_TEMPLATE),
     generateTaskOccurrences: fn([FAKE_INSTANCE]),
     bindTaskToGoal: fn(FAKE_TEMPLATE),
     unbindTaskFromGoal: fn(FAKE_TEMPLATE),
-    completeTaskOccurrence: fn({ instance: FAKE_INSTANCE }),
-    uncompleteTaskOccurrence: fn({ instance: FAKE_INSTANCE }),
-    skipTaskOccurrence: fn({ instance: FAKE_INSTANCE }),
-    markTaskOccurrenceMissed: fn({ instance: FAKE_INSTANCE }),
+    completeTaskOccurrence: fn({ occurrence: FAKE_INSTANCE }),
+    uncompleteTaskOccurrence: fn({ occurrence: FAKE_INSTANCE }),
+    skipTaskOccurrence: fn({ occurrence: FAKE_INSTANCE }),
+    markTaskOccurrenceMissed: fn({ occurrence: FAKE_INSTANCE }),
     startTaskOccurrence: fn(FAKE_INSTANCE),
     deleteTaskOccurrence: fn(null),
     rescheduleTaskOccurrence: fn(FAKE_INSTANCE),
-    setTaskOccurrenceChecklistItem: fn({ instance: FAKE_INSTANCE }),
+    setTaskOccurrenceChecklistItem: fn({ occurrence: FAKE_INSTANCE }),
     getTaskPlan: vi.fn(),
     listTaskPlans: vi.fn(),
-    listTaskOccurrencesByTemplate: vi.fn(),
+    listTaskOccurrencesByPlan: vi.fn(),
     getTaskOccurrence: vi.fn(),
     listTaskOccurrencesByAccount: vi.fn(),
     listTaskOccurrencesByStatus: vi.fn(),
@@ -139,7 +139,7 @@ interface RowSpec {
   readonly httpKey: string;
   /** Production IPC channel name. */
   readonly ipcChannel: string;
-  /** HTTP success status for the valid fixture (template create is 201). */
+  /** HTTP success status for the valid fixture (plan create is 201). */
   readonly successStatus?: number;
   /** Raw wire request fixture (body/params/query). */
   readonly httpReq: HttpFixture;
@@ -226,11 +226,11 @@ describe('task transport parity (Phase 4) — production registrations', () => {
 
   function buildHttp(port: TaskApplicationPort) {
     const handlers = createTaskTransportHandlers(port);
-    const templateController = new TaskPlanController(handlers.template);
-    const instanceController = new TaskOccurrenceController(handlers.instance);
+    const templateController = new TaskPlanController(handlers.plan);
+    const instanceController = new TaskOccurrenceController(handlers.occurrence);
     const routers = [
-      ['template', registerTaskPlanRoutes(templateController, middleware, null)],
-      ['instance', registerTaskOccurrenceRoutes(instanceController, middleware, null)],
+      ['plan', registerTaskPlanRoutes(templateController, middleware, null)],
+      ['occurrence', registerTaskOccurrenceRoutes(instanceController, middleware, null)],
     ] as const;
     const map = new Map<string, (req: unknown, res: unknown) => Promise<unknown>>();
     for (const [ns, router] of routers) {
@@ -258,8 +258,8 @@ describe('task transport parity (Phase 4) — production registrations', () => {
   }
 
   async function buildIpc(port: TaskApplicationPort) {
-    const instance = { api: port, start: vi.fn(), dispose: vi.fn() };
-    const moduleDef = createTaskElectronModule({ instance });
+    const occurrence = { api: port, start: vi.fn(), dispose: vi.fn() };
+    const moduleDef = createTaskElectronModule({ occurrence });
     const context = {
       db: {},
       auth: { requireRequestContext: async () => fixtureContext },
@@ -309,13 +309,13 @@ describe('task transport parity (Phase 4) — production registrations', () => {
     expect(badIpcResult.error?.details).toEqual(badHttpRes.body.error.details);
   }
 
-  describe('task template mutations', () => {
+  describe('task plan mutations', () => {
     it.each<[string, RowSpec]>([
       [
-        'template create',
+        'plan create',
         {
-          httpKey: 'template POST /',
-          ipcChannel: TaskChannels.TEMPLATE_CREATE,
+          httpKey: 'plan POST /',
+          ipcChannel: TaskChannels.PLAN_CREATE,
           successStatus: 201,
           httpReq: { body: validCreateTemplate },
           ipcArgs: validCreateTemplate,
@@ -333,10 +333,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template update',
+        'plan update',
         {
-          httpKey: 'template PUT /:id',
-          ipcChannel: TaskChannels.TEMPLATE_UPDATE,
+          httpKey: 'plan PUT /:id',
+          ipcChannel: TaskChannels.PLAN_UPDATE,
           httpReq: { params: { id: TEMPLATE_ID }, body: validUpdateTemplate },
           ipcArgs: { id: TEMPLATE_ID, request: validUpdateTemplate },
           validInvocation: { params: { id: TEMPLATE_ID }, body: validUpdateTemplate },
@@ -354,10 +354,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template delete',
+        'plan delete',
         {
-          httpKey: 'template DELETE /:id',
-          ipcChannel: TaskChannels.TEMPLATE_DELETE,
+          httpKey: 'plan DELETE /:id',
+          ipcChannel: TaskChannels.PLAN_DELETE,
           httpReq: { params: { id: TEMPLATE_ID } },
           ipcArgs: { id: TEMPLATE_ID },
           validInvocation: { params: { id: TEMPLATE_ID } },
@@ -373,10 +373,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template activate',
+        'plan activate',
         {
-          httpKey: 'template POST /:id/activate',
-          ipcChannel: TaskChannels.TEMPLATE_ACTIVATE,
+          httpKey: 'plan POST /:id/activate',
+          ipcChannel: TaskChannels.PLAN_ACTIVATE,
           httpReq: { params: { id: TEMPLATE_ID } },
           ipcArgs: { id: TEMPLATE_ID },
           validInvocation: { params: { id: TEMPLATE_ID } },
@@ -392,10 +392,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template pause',
+        'plan pause',
         {
-          httpKey: 'template POST /:id/pause',
-          ipcChannel: TaskChannels.TEMPLATE_PAUSE,
+          httpKey: 'plan POST /:id/pause',
+          ipcChannel: TaskChannels.PLAN_PAUSE,
           httpReq: { params: { id: TEMPLATE_ID } },
           ipcArgs: { id: TEMPLATE_ID },
           validInvocation: { params: { id: TEMPLATE_ID } },
@@ -411,10 +411,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template archive',
+        'plan archive',
         {
-          httpKey: 'template POST /:id/archive',
-          ipcChannel: TaskChannels.TEMPLATE_ARCHIVE,
+          httpKey: 'plan POST /:id/archive',
+          ipcChannel: TaskChannels.PLAN_ARCHIVE,
           httpReq: { params: { id: TEMPLATE_ID } },
           ipcArgs: { id: TEMPLATE_ID },
           validInvocation: { params: { id: TEMPLATE_ID } },
@@ -430,10 +430,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template abandon',
+        'plan abandon',
         {
-          httpKey: 'template POST /:id/abandon',
-          ipcChannel: TaskChannels.TEMPLATE_ABANDON,
+          httpKey: 'plan POST /:id/abandon',
+          ipcChannel: TaskChannels.PLAN_ABANDON,
           httpReq: { params: { id: TEMPLATE_ID }, body: { reason: 'User stopped' } },
           ipcArgs: { id: TEMPLATE_ID, request: { reason: 'User stopped' } },
           validInvocation: { params: { id: TEMPLATE_ID }, body: { reason: 'User stopped' } },
@@ -451,10 +451,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template generate-instances',
+        'plan generate-occurrences',
         {
-          httpKey: 'template POST /:id/generate-instances',
-          ipcChannel: TaskChannels.TEMPLATE_GENERATE_INSTANCES,
+          httpKey: 'plan POST /:id/generate-occurrences',
+          ipcChannel: TaskChannels.PLAN_GENERATE_OCCURRENCES,
           httpReq: { params: { id: TEMPLATE_ID }, body: validGenerate },
           ipcArgs: { planId: TEMPLATE_ID, request: validGenerate },
           validInvocation: { params: { id: TEMPLATE_ID }, body: validGenerate },
@@ -471,10 +471,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template bind-goal',
+        'plan bind-goal',
         {
-          httpKey: 'template POST /:id/bind-goal',
-          ipcChannel: TaskChannels.TEMPLATE_BIND_GOAL,
+          httpKey: 'plan POST /:id/bind-goal',
+          ipcChannel: TaskChannels.PLAN_BIND_GOAL,
           httpReq: { params: { id: TEMPLATE_ID }, body: validBindGoal },
           ipcArgs: { planId: TEMPLATE_ID, request: validBindGoal },
           validInvocation: { params: { id: TEMPLATE_ID }, body: validBindGoal },
@@ -491,10 +491,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'template unbind-goal',
+        'plan unbind-goal',
         {
-          httpKey: 'template POST /:id/unbind-goal',
-          ipcChannel: TaskChannels.TEMPLATE_UNBIND_GOAL,
+          httpKey: 'plan POST /:id/unbind-goal',
+          ipcChannel: TaskChannels.PLAN_UNBIND_GOAL,
           httpReq: { params: { id: TEMPLATE_ID } },
           ipcArgs: { planId: TEMPLATE_ID },
           validInvocation: { params: { id: TEMPLATE_ID } },
@@ -518,13 +518,13 @@ describe('task transport parity (Phase 4) — production registrations', () => {
     );
   });
 
-  describe('task instance mutations', () => {
+  describe('task occurrence mutations', () => {
     it.each<[string, RowSpec]>([
       [
-        'instance complete',
+        'occurrence complete',
         {
-          httpKey: 'instance POST /:id/complete',
-          ipcChannel: TaskChannels.INSTANCE_COMPLETE,
+          httpKey: 'occurrence POST /:id/complete',
+          ipcChannel: TaskChannels.OCCURRENCE_COMPLETE,
           httpReq: { params: { id: INSTANCE_ID }, body: validComplete },
           ipcArgs: { id: INSTANCE_ID, request: validComplete },
           validInvocation: { params: { id: INSTANCE_ID }, body: validComplete },
@@ -541,10 +541,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance skip',
+        'occurrence skip',
         {
-          httpKey: 'instance POST /:id/skip',
-          ipcChannel: TaskChannels.INSTANCE_SKIP,
+          httpKey: 'occurrence POST /:id/skip',
+          ipcChannel: TaskChannels.OCCURRENCE_SKIP,
           httpReq: { params: { id: INSTANCE_ID }, body: validSkip },
           ipcArgs: { id: INSTANCE_ID, request: validSkip },
           validInvocation: { params: { id: INSTANCE_ID }, body: validSkip },
@@ -561,10 +561,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance start',
+        'occurrence start',
         {
-          httpKey: 'instance POST /:id/start',
-          ipcChannel: TaskChannels.INSTANCE_CREATE,
+          httpKey: 'occurrence POST /:id/start',
+          ipcChannel: TaskChannels.OCCURRENCE_CREATE,
           httpReq: { params: { id: INSTANCE_ID } },
           ipcArgs: { id: INSTANCE_ID },
           validInvocation: { params: { id: INSTANCE_ID } },
@@ -580,10 +580,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance delete',
+        'occurrence delete',
         {
-          httpKey: 'instance DELETE /:id',
-          ipcChannel: TaskChannels.INSTANCE_DELETE,
+          httpKey: 'occurrence DELETE /:id',
+          ipcChannel: TaskChannels.OCCURRENCE_DELETE,
           httpReq: { params: { id: INSTANCE_ID } },
           ipcArgs: { id: INSTANCE_ID },
           validInvocation: { params: { id: INSTANCE_ID } },
@@ -599,10 +599,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance uncomplete',
+        'occurrence uncomplete',
         {
-          httpKey: 'instance POST /:id/uncomplete',
-          ipcChannel: TaskChannels.INSTANCE_UNCOMPLETE,
+          httpKey: 'occurrence POST /:id/uncomplete',
+          ipcChannel: TaskChannels.OCCURRENCE_UNCOMPLETE,
           httpReq: { params: { id: INSTANCE_ID } },
           ipcArgs: { id: INSTANCE_ID },
           validInvocation: { params: { id: INSTANCE_ID } },
@@ -618,10 +618,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance checklist-set',
+        'occurrence checklist-set',
         {
-          httpKey: 'instance POST /:id/checklist',
-          ipcChannel: TaskChannels.INSTANCE_CHECKLIST_SET,
+          httpKey: 'occurrence POST /:id/checklist',
+          ipcChannel: TaskChannels.OCCURRENCE_CHECKLIST_SET,
           httpReq: { params: { id: INSTANCE_ID }, body: validChecklistItem },
           ipcArgs: { id: INSTANCE_ID, request: validChecklistItem },
           validInvocation: { params: { id: INSTANCE_ID }, body: validChecklistItem },
@@ -639,10 +639,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance reschedule',
+        'occurrence reschedule',
         {
-          httpKey: 'instance POST /:id/reschedule',
-          ipcChannel: TaskChannels.INSTANCE_RESCHEDULE,
+          httpKey: 'occurrence POST /:id/reschedule',
+          ipcChannel: TaskChannels.OCCURRENCE_RESCHEDULE,
           httpReq: { params: { id: INSTANCE_ID }, body: validReschedule },
           ipcArgs: { occurrenceId: INSTANCE_ID, ...validReschedule },
           validInvocation: { params: { id: INSTANCE_ID }, body: validReschedule },
@@ -660,10 +660,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
         },
       ],
       [
-        'instance mark-missed',
+        'occurrence mark-missed',
         {
-          httpKey: 'instance POST /:id/missed',
-          ipcChannel: TaskChannels.INSTANCE_MARK_MISSED,
+          httpKey: 'occurrence POST /:id/missed',
+          ipcChannel: TaskChannels.OCCURRENCE_MARK_MISSED,
           httpReq: { params: { id: INSTANCE_ID }, body: { reason: 'No completion evidence' } },
           ipcArgs: { id: INSTANCE_ID, request: { reason: 'No completion evidence' } },
           validInvocation: {

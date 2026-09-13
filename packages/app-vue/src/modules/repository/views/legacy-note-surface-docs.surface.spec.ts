@@ -89,7 +89,7 @@ describe('legacy note surface docs and menu dual-track retirement', () => {
       expect(locale).not.toMatch(/["']?addBookmark["']?\s*:/);
       expect(locale).not.toMatch(/["']?removeBookmark["']?\s*:/);
       expect(locale).not.toMatch(/["']bookmark["']\s*:/);
-      expect(locale).toMatch(/["']?pauseTemplate["']?\s*:/);
+      expect(locale).toMatch(/["']?pausePlan["']?\s*:/);
       expect(locale).toMatch(/["']?enableTemplate["']?\s*:/);
     }
   });

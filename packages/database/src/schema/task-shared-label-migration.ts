@@ -102,7 +102,7 @@ export async function prepareTaskSharedLabelMigration(
   options: { readonly idFactory?: () => string } = {},
 ): Promise<TaskSharedLabelMigrationReport> {
   const idFactory = options.idFactory ?? randomUUID;
-  const taskTablePresent = await hasTable(db, 'task_templates');
+  const taskTablePresent = await hasTable(db, 'task_plans');
   if (!taskTablePresent) {
     return {
       taskTablePresent: false,
@@ -115,8 +115,8 @@ export async function prepareTaskSharedLabelMigration(
     };
   }
 
-  const legacyTagsPresent = await hasColumn(db, 'task_templates', 'tags');
-  const legacyColorPresent = await hasColumn(db, 'task_templates', 'color');
+  const legacyTagsPresent = await hasColumn(db, 'task_plans', 'tags');
+  const legacyColorPresent = await hasColumn(db, 'task_plans', 'color');
   if (!legacyTagsPresent && !legacyColorPresent) {
     return {
       taskTablePresent: true,
@@ -139,7 +139,7 @@ export async function prepareTaskSharedLabelMigration(
       const labelTablePresent = await hasTable(db, 'labels');
       const assignmentTablePresent = await hasTable(db, 'task_labels');
       const tasks = await db.query<{ id: string; identity_id: string; tags: string | null }>(
-        'SELECT id, identity_id, tags FROM task_templates WHERE tags IS NOT NULL ORDER BY identity_id, id',
+        'SELECT id, identity_id, tags FROM task_plans WHERE tags IS NOT NULL ORDER BY identity_id, id',
       );
       tasksScanned = tasks.rows.length;
 
@@ -183,7 +183,7 @@ export async function prepareTaskSharedLabelMigration(
           }
 
           const assignment = await db.query(
-            `INSERT INTO task_labels (identity_id, task_template_id, label_id)
+            `INSERT INTO task_labels (identity_id, task_plan_id, label_id)
              VALUES ($1, $2, $3)
              ON CONFLICT DO NOTHING`,
             [task.identity_id, task.id, labelId],
@@ -195,11 +195,11 @@ export async function prepareTaskSharedLabelMigration(
 
     const columnsRetired: string[] = [];
     if (legacyTagsPresent) {
-      await db.query('ALTER TABLE task_templates DROP COLUMN tags');
+      await db.query('ALTER TABLE task_plans DROP COLUMN tags');
       columnsRetired.push('tags');
     }
     if (legacyColorPresent) {
-      await db.query('ALTER TABLE task_templates DROP COLUMN color');
+      await db.query('ALTER TABLE task_plans DROP COLUMN color');
       columnsRetired.push('color');
     }
 

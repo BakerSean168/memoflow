@@ -29,7 +29,7 @@ export function useTaskPlanDetail(taskId: string | null) {
       setIsLoading(true);
       setError(null);
 
-      const result = await service.getTemplate(activeTaskId);
+      const result = await service.getPlan(activeTaskId);
       if (cancelled) {
         return;
       }
@@ -58,7 +58,7 @@ export function useTaskPlanDetail(taskId: string | null) {
     }
 
     setIsLoading(true);
-    const result = await service.getTemplate(taskId);
+    const result = await service.getPlan(taskId);
     if (!result.ok) {
       setTemplate(null);
       setError(presentErrorMessage(result.error));

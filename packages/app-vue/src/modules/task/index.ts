@@ -6,7 +6,7 @@
 
 // Types
 
-// Store (instances/currentInstance + UI state; templates live in the query cache)
+// Store (occurrences/currentOccurrence + UI state; plans live in the query cache)
 export { useTaskStore } from './stores/task-store';
 export type { TaskStoreType } from './stores/task-store';
 
@@ -16,7 +16,7 @@ export {
   useTaskPlanListQuery,
   useTaskPlanDetailQuery,
   useTaskPlanMutations,
-  type CreateTemplateFeedbackIntent,
+  type CreatePlanFeedbackIntent,
 } from './composables';
 
 // Routes

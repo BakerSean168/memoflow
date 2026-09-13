@@ -1,4 +1,4 @@
-export const TASK_GOAL_BINDING_CONSTRAINT = 'task_templates_goal_binding_complete';
+export const TASK_GOAL_BINDING_CONSTRAINT = 'task_plans_goal_binding_complete';
 export const TASK_GOAL_BINDING_CONSTRAINT_VERSION = 'memoflow.task-goal-binding/v3';
 
 export interface TaskGoalBindingSchemaQueryClient {
@@ -30,7 +30,7 @@ export function describeTaskGoalBindingConstraintReport(
 }
 
 const canonicalConstraintSql = `
-  ALTER TABLE task_templates
+  ALTER TABLE task_plans
   ADD CONSTRAINT "${TASK_GOAL_BINDING_CONSTRAINT}"
   CHECK (
     (
@@ -52,7 +52,7 @@ const canonicalConstraintSql = `
 `;
 
 const migrateLegacyTriggersSql = `
-  UPDATE task_templates
+  UPDATE task_plans
   SET goal_progress_trigger = CASE goal_progress_trigger
     WHEN 'PER_INSTANCE' THEN 'EachCompletion'
     WHEN 'ALL_INSTANCES_COMPLETED' THEN 'PlanCompletion'
@@ -81,13 +81,13 @@ async function installCanonicalConstraint(
   try {
     if (replaceExisting) {
       await client.query(
-        `ALTER TABLE task_templates DROP CONSTRAINT "${TASK_GOAL_BINDING_CONSTRAINT}"`,
+        `ALTER TABLE task_plans DROP CONSTRAINT "${TASK_GOAL_BINDING_CONSTRAINT}"`,
       );
     }
     await client.query(migrateLegacyTriggersSql);
     await client.query(canonicalConstraintSql);
     await client.query(`
-      COMMENT ON CONSTRAINT "${TASK_GOAL_BINDING_CONSTRAINT}" ON task_templates
+      COMMENT ON CONSTRAINT "${TASK_GOAL_BINDING_CONSTRAINT}" ON task_plans
       IS '${TASK_GOAL_BINDING_CONSTRAINT_VERSION}'
     `);
     await client.query('COMMIT');
@@ -111,7 +111,7 @@ async function installCanonicalConstraint(
 export async function ensureTaskGoalBindingConstraint(
   client: TaskGoalBindingSchemaQueryClient,
 ): Promise<TaskGoalBindingConstraintReport> {
-  const tableResult = await client.query(`SELECT to_regclass('public.task_templates') AS regclass`);
+  const tableResult = await client.query(`SELECT to_regclass('public.task_plans') AS regclass`);
   if (!tableResult.rows[0]?.regclass) {
     return { tablePresent: false, constraintCreated: false, constraintReplaced: false };
   }
@@ -122,7 +122,7 @@ export async function ensureTaskGoalBindingConstraint(
       obj_description(oid, 'pg_constraint') AS comment
     FROM pg_constraint
     WHERE conname = '${TASK_GOAL_BINDING_CONSTRAINT}'
-      AND conrelid = 'public.task_templates'::regclass
+      AND conrelid = 'public.task_plans'::regclass
   `);
   const existing = constraintResult.rows[0];
   if (isCanonicalConstraint(existing)) {

@@ -38,7 +38,7 @@ model GoalLabel {
 
 model TaskLabel {
   identityId    String @map("identity_id")
-  taskPlanId String @map("task_template_id")
+  taskPlanId String @map("task_plan_id")
   labelId       String @map("label_id")
 
   account      Account      @relation(fields: [identityId], references: [id], onDelete: Cascade)

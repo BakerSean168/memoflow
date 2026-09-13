@@ -220,11 +220,11 @@ describe('composeReminder assembly order', () => {
 
     const instance = createReminderModule.mock.results[0].value;
     // The module api keeps the module checker; the executor port swaps only
-    // createTemplate to the executor use case carrying the frozen predicate.
+    // createPlan to the executor use case carrying the frozen predicate.
     expect(composed.applicationPort).toBe(instance.api);
     expect(composed.executorReminderPort).not.toBe(instance.api);
-    expect(composed.executorReminderPort.createTemplate).not.toBe(instance.api.createTemplate);
-    expect(composed.executorReminderPort.listTemplates).toBe(instance.api.listTemplates);
+    expect(composed.executorReminderPort.createPlan).not.toBe(instance.api.createPlan);
+    expect(composed.executorReminderPort.listPlans).toBe(instance.api.listPlans);
   });
 });
 

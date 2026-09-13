@@ -1,14 +1,9 @@
 import type { TaskOccurrenceScheduleSnapshot as TaskOccurrenceScheduleSnapshotDTO } from '@memoflow/contracts/task';
 import { TaskOccurrenceScheduleSnapshotSchema } from '@memoflow/contracts/task';
 import type { Instant } from '@memoflow/contracts/primitives';
+import type { TimeContext } from '@memoflow/time';
 import { ValueObject } from '@memoflow/utils/domain';
-import { createTimeFacade, type TimeContext } from '@memoflow/time';
-import { TaskTimeConfig } from './task-time-config';
-import {
-  taskTimingDueAt,
-  taskTimingFromLegacy,
-  taskTimingToLegacy,
-} from './task-timing-conversion';
+import { taskTimingDueAt } from './task-timing-conversion';
 
 /** Immutable ADR-071 schedule snapshot owned by one TaskOccurrence. */
 export class TaskOccurrenceScheduleSnapshot extends ValueObject<TaskOccurrenceScheduleSnapshotDTO> {
@@ -18,18 +13,6 @@ export class TaskOccurrenceScheduleSnapshot extends ValueObject<TaskOccurrenceSc
 
   static create(props: TaskOccurrenceScheduleSnapshotDTO): TaskOccurrenceScheduleSnapshot {
     return new TaskOccurrenceScheduleSnapshot(TaskOccurrenceScheduleSnapshotSchema.parse(props));
-  }
-
-  static fromLegacy(
-    instanceDate: number,
-    timeConfig: TaskTimeConfig,
-    timeContext: TimeContext,
-  ): TaskOccurrenceScheduleSnapshot {
-    const facade = createTimeFacade({ context: timeContext });
-    return TaskOccurrenceScheduleSnapshot.create({
-      date: facade.calendar.toYmd(instanceDate),
-      timing: taskTimingFromLegacy(timeConfig),
-    });
   }
 
   get date() {
@@ -42,10 +25,6 @@ export class TaskOccurrenceScheduleSnapshot extends ValueObject<TaskOccurrenceSc
 
   dueAt(timeContext: TimeContext): Instant {
     return taskTimingDueAt(this.props.timing, this.props.date, timeContext);
-  }
-
-  toLegacyTimeConfig(timeContext: TimeContext): TaskTimeConfig {
-    return taskTimingToLegacy(this.props.timing, this.props.date, timeContext);
   }
 
   toDTO(): TaskOccurrenceScheduleSnapshotDTO {

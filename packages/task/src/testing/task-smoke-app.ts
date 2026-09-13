@@ -58,7 +58,7 @@ export function createMockTemplateRepo(): ITaskPlanRepository {
     countTasks: vi.fn().mockResolvedValue(0),
     saveBatch: vi.fn().mockResolvedValue(undefined),
     deleteBatch: vi.fn().mockResolvedValue(undefined),
-    findAllTemplateRefs: vi.fn(async () => []),
+    findAllPlanRefs: vi.fn(async () => []),
   };
 }
 
@@ -67,20 +67,20 @@ export function createMockInstanceRepo(): ITaskOccurrenceRepository {
     save: vi.fn().mockResolvedValue(undefined),
     saveMany: vi.fn().mockResolvedValue(undefined),
     findByIdForIdentity: vi.fn().mockResolvedValue(null),
-    findByTemplateId: vi.fn().mockResolvedValue([]),
+    findByPlanId: vi.fn().mockResolvedValue([]),
     findByIdentityId: vi.fn().mockResolvedValue([]),
     findByDateRange: vi.fn().mockResolvedValue([]),
     findByStatus: vi.fn().mockResolvedValue([]),
-    findOverdueInstances: vi.fn().mockResolvedValue([]),
+    findOverdueOccurrences: vi.fn().mockResolvedValue([]),
     delete: vi.fn().mockResolvedValue(undefined),
     deleteMany: vi.fn().mockResolvedValue(undefined),
-    deleteByTemplateId: vi.fn().mockResolvedValue(undefined),
-    countFutureInstances: vi.fn().mockResolvedValue(0),
-    findByTemplateIdAndDateRange: vi.fn().mockResolvedValue([]),
-    getTemplateStats: vi.fn().mockResolvedValue({}),
+    deleteByPlanId: vi.fn().mockResolvedValue(undefined),
+    countFutureOccurrences: vi.fn().mockResolvedValue(0),
+    findByPlanIdAndDateRange: vi.fn().mockResolvedValue([]),
+    getPlanStats: vi.fn().mockResolvedValue({}),
     getStatusCountsForPlan: vi.fn().mockResolvedValue({ total: 0, completed: 0, missed: 0, skipped: 0, pending: 0, inProgress: 0 }),
     findRecentByPlan: vi.fn().mockResolvedValue([]),
-    deleteIncompleteInstancesFrom: vi.fn().mockResolvedValue(0),
+    deleteIncompleteOccurrencesFrom: vi.fn().mockResolvedValue(0),
   };
 }
 
@@ -111,7 +111,7 @@ export function createTaskSmokeApp(): TaskSmokeApp {
     taskPlanRepository: templateRepo,
     taskOccurrenceRepository: instanceRepo,
     taskWriteTransactionRunner: {
-      run: (work) => work({ templateRepository: templateRepo, instanceRepository: instanceRepo }),
+      run: (work) => work({ planRepository: templateRepo, occurrenceRepository: instanceRepo }),
     },
     userTimeContextPort: {
       getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
@@ -119,8 +119,8 @@ export function createTaskSmokeApp(): TaskSmokeApp {
   } satisfies TaskModuleDependencies);
   const handlers = createTaskTransportHandlers(taskModule.api);
 
-  const templateController = new TaskPlanController(handlers.template);
-  const instanceController = new TaskOccurrenceController(handlers.instance);
+  const templateController = new TaskPlanController(handlers.plan);
+  const instanceController = new TaskOccurrenceController(handlers.occurrence);
 
   const app = express();
   app.use(express.json());

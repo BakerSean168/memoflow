@@ -102,7 +102,7 @@ function skipped(
   return { status: 'skipped', reason, result };
 }
 
-/** Which trigger a scheduled payload was projected from (must match the template). */
+/** Which trigger a scheduled payload was projected from (must match the plan). */
 function reminderTriggerIdentity(input: {
   type: TaskReminderType;
   absoluteTime: number | null;
@@ -116,35 +116,35 @@ function reminderTriggerIdentity(input: {
 }
 
 export function taskReminderSkippedReasonFromPlan(
-  template: TaskPlanServerDTO | null,
+  plan: TaskPlanServerDTO | null,
   planId: string,
   payload: Pick<
     ParsedTaskReminderScheduledPayload,
     'reminderType' | 'reminderValue' | 'reminderUnit' | 'reminderAbsoluteTime'
   >,
 ): { keep: true } | { keep: false; reason: TaskReminderSkipReason; message: string } {
-  if (!template) {
+  if (!plan) {
     return {
       keep: false,
       reason: 'TASK_PLAN_UNAVAILABLE',
       message: `TaskPlan '${planId}' no longer exists; reminder is not fireable.`,
     };
   }
-  if (template.deletedAt !== null) {
+  if (plan.deletedAt !== null) {
     return {
       keep: false,
       reason: 'TASK_PLAN_UNAVAILABLE',
       message: `TaskPlan '${planId}' is deleted; reminder is not fireable.`,
     };
   }
-  if (template.status !== TaskPlanStatus.Active) {
+  if (plan.status !== TaskPlanStatus.Active) {
     return {
       keep: false,
       reason: 'TASK_PLAN_UNAVAILABLE',
-      message: `TaskPlan '${planId}' status is '${template.status}', not 'Active'; reminder is not fireable.`,
+      message: `TaskPlan '${planId}' status is '${plan.status}', not 'Active'; reminder is not fireable.`,
     };
   }
-  if (!template.reminderConfig?.enabled || template.reminderConfig.triggers.length === 0) {
+  if (!plan.reminderConfig?.enabled || plan.reminderConfig.triggers.length === 0) {
     return {
       keep: false,
       reason: 'TASK_PLAN_UNAVAILABLE',
@@ -160,7 +160,7 @@ export function taskReminderSkippedReasonFromPlan(
     relativeValue: payload.reminderValue,
     relativeUnit: payload.reminderUnit,
   });
-  const stillConfigured = template.reminderConfig.triggers.some(
+  const stillConfigured = plan.reminderConfig.triggers.some(
     (trigger) => reminderTriggerIdentity(trigger) === scheduledIdentity,
   );
   if (!stillConfigured) {
@@ -189,11 +189,11 @@ export function createTaskReminderScheduledHandlerRegistration(
         context: ScheduledInvocationContext<TaskReminderScheduledPayload>,
       ): Promise<ScheduledHandlerResult> {
         const { identityId, schedulingKey, payload } = context;
-        const instance = await deps.taskOccurrenceRepository.findByIdForIdentity(
+        const occurrence = await deps.taskOccurrenceRepository.findByIdForIdentity(
           identityId,
           payload.occurrenceId,
         );
-        if (!instance) {
+        if (!occurrence) {
           return skipped(
             'TASK_OCCURRENCE_NOT_FOUND',
             `TaskOccurrence '${payload.occurrenceId}' no longer exists; reminder is not fireable.`,
@@ -202,51 +202,51 @@ export function createTaskReminderScheduledHandlerRegistration(
             },
           );
         }
-        if (instance.deletedAt !== null) {
+        if (occurrence.deletedAt !== null) {
           return skipped(
             'TASK_OCCURRENCE_UNAVAILABLE',
-            `TaskOccurrence '${instance.id}' is deleted; reminder is not fireable.`,
+            `TaskOccurrence '${occurrence.id}' is deleted; reminder is not fireable.`,
             {
-              occurrenceId: instance.id,
-              status: instance.status,
+              occurrenceId: occurrence.id,
+              status: occurrence.status,
             },
           );
         }
         if (
-          instance.status !== TaskOccurrenceStatus.Pending &&
-          instance.status !== TaskOccurrenceStatus.InProgress
+          occurrence.status !== TaskOccurrenceStatus.Pending &&
+          occurrence.status !== TaskOccurrenceStatus.InProgress
         ) {
           return skipped(
             'TASK_OCCURRENCE_UNAVAILABLE',
-            `TaskOccurrence '${instance.id}' status is '${instance.status}', not pending/in-progress; reminder is not fireable.`,
+            `TaskOccurrence '${occurrence.id}' status is '${occurrence.status}', not pending/in-progress; reminder is not fireable.`,
             {
-              occurrenceId: instance.id,
-              status: instance.status,
+              occurrenceId: occurrence.id,
+              status: occurrence.status,
             },
           );
         }
-        if (instance.occurrenceKey !== payload.occurrenceKey) {
+        if (occurrence.occurrenceKey !== payload.occurrenceKey) {
           return skipped(
             'TASK_OCCURRENCE_STALE',
-            `TaskOccurrence '${instance.id}' moved to a newer occurrence; stale reminder is not fireable.`,
+            `TaskOccurrence '${occurrence.id}' moved to a newer occurrence; stale reminder is not fireable.`,
             {
-              occurrenceId: instance.id,
+              occurrenceId: occurrence.id,
               staleOccurrence: payload.occurrenceKey,
-              currentOccurrence: instance.occurrenceKey,
+              currentOccurrence: occurrence.occurrenceKey,
             },
           );
         }
 
-        const planId = String(instance.planId);
-        const template = await deps.taskPlanRepository.findByIdForIdentity(identityId, planId);
+        const planId = String(occurrence.planId);
+        const plan = await deps.taskPlanRepository.findByIdForIdentity(identityId, planId);
         const planDecision = taskReminderSkippedReasonFromPlan(
-          template?.toServerDTO() ?? null,
+          plan?.toServerDTO() ?? null,
           planId,
           payload,
         );
         if (!planDecision.keep) {
           return skipped(planDecision.reason, planDecision.message, {
-            occurrenceId: instance.id,
+            occurrenceId: occurrence.id,
             planId,
           });
         }
@@ -265,7 +265,7 @@ export function createTaskReminderScheduledHandlerRegistration(
           topic: TASK_REMINDER_WORKFLOW_KEY,
           relatedEntity: {
             type: 'Task',
-            id: instance.id,
+            id: occurrence.id,
           },
           content: {
             title: `任务提醒：${taskTitle}`,
@@ -288,7 +288,7 @@ export function createTaskReminderScheduledHandlerRegistration(
         return {
           status: 'succeeded',
           result: {
-            occurrenceId: instance.id,
+            occurrenceId: occurrence.id,
             planId,
             schedulingKey,
             notificationOperationId: receipt.operationId,

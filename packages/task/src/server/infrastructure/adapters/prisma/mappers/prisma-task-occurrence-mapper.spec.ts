@@ -145,8 +145,7 @@ describe('PrismaTaskOccurrenceMapper canonical persistence', () => {
       PrismaTaskOccurrenceMapper.toDomain(pendingRow()),
     );
     for (const retired of [
-      'templateId',
-      'instanceDate',
+      'occurrenceDate',
       'timeConfig',
       'importance',
       'actualStartTime',

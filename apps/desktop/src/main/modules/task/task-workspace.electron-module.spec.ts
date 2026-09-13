@@ -26,7 +26,7 @@ describe('Task Workspace Electron module', () => {
 
     await handlers.get(TaskWorkspaceChannels.GET)?.({}, { planId: PLAN_ID, recentLimit: 3 });
     expect(port.getWorkspace).toHaveBeenCalledWith(IDENTITY_ID, PLAN_ID, { recentLimit: 3 });
-    expect(handlers.has(TaskChannels.TEMPLATE_LIST)).toBe(false);
+    expect(handlers.has(TaskChannels.PLAN_LIST)).toBe(false);
     module.destroy?.();
     expect(handlers.has(TaskWorkspaceChannels.GET)).toBe(false);
   });

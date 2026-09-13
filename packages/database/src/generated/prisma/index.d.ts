@@ -513,11 +513,6 @@ export type TaskGoalOutbox = $Result.DefaultSelection<Prisma.$TaskGoalOutboxPayl
  */
 export type TaskPlanHistory = $Result.DefaultSelection<Prisma.$TaskPlanHistoryPayload>
 /**
- * Model TaskStatistic
- *
- */
-export type TaskStatistic = $Result.DefaultSelection<Prisma.$TaskStatisticPayload>
-/**
  * Model WalletAccount
  *
  */
@@ -1590,16 +1585,6 @@ export class PrismaClient<
   get taskPlanHistory(): Prisma.TaskPlanHistoryDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.taskStatistic`: Exposes CRUD operations for the **TaskStatistic** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more TaskStatistics
-    * const taskStatistics = await prisma.taskStatistic.findMany()
-    * ```
-    */
-  get taskStatistic(): Prisma.TaskStatisticDelegate<ExtArgs, ClientOptions>;
-
-  /**
    * `prisma.walletAccount`: Exposes CRUD operations for the **WalletAccount** model.
     * Example usage:
     * ```ts
@@ -2146,7 +2131,6 @@ export namespace Prisma {
     TaskOccurrence: 'TaskOccurrence',
     TaskGoalOutbox: 'TaskGoalOutbox',
     TaskPlanHistory: 'TaskPlanHistory',
-    TaskStatistic: 'TaskStatistic',
     WalletAccount: 'WalletAccount',
     WalletTransaction: 'WalletTransaction'
   };
@@ -2164,7 +2148,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "taskStatistic" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "activityLedger" | "aiConversation" | "aiMessage" | "aiGenerationTask" | "aiUsageQuota" | "aiProviderConfig" | "aiProviderOnboardingSession" | "knowledgeGenerationTask" | "aiKnowledgeIndexEntry" | "dashboardConfig" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "rule" | "ruleRevision" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationChannel" | "notificationHistory" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationTemplate" | "notificationDispatchOutbox" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "reminderTemplate" | "reminderGroup" | "reminderInstance" | "reminderHistory" | "reminderStatistic" | "reminderResponse" | "userReminderPreference" | "reminderOccurrence" | "routineDefinition" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineTemporaryOverride" | "repository" | "folder" | "resource" | "repositoryResource" | "linkedContent" | "resourceReference" | "repositoryExplorer" | "repositoryStatistic" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduleTask" | "schedulingReconcileOperation" | "scheduleExecution" | "scheduleStatistic" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -9124,80 +9108,6 @@ export namespace Prisma {
           }
         }
       }
-      TaskStatistic: {
-        payload: Prisma.$TaskStatisticPayload<ExtArgs>
-        fields: Prisma.TaskStatisticFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.TaskStatisticFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskStatisticPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.TaskStatisticFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskStatisticPayload>
-          }
-          findFirst: {
-            args: Prisma.TaskStatisticFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskStatisticPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.TaskStatisticFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskStatisticPayload>
-          }
-          findMany: {
-            args: Prisma.TaskStatisticFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskStatisticPayload>[]
-          }
-          create: {
-            args: Prisma.TaskStatisticCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskStatisticPayload>
-          }
-          createMany: {
-            args: Prisma.TaskStatisticCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.TaskStatisticCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskStatisticPayload>[]
-          }
-          delete: {
-            args: Prisma.TaskStatisticDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskStatisticPayload>
-          }
-          update: {
-            args: Prisma.TaskStatisticUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskStatisticPayload>
-          }
-          deleteMany: {
-            args: Prisma.TaskStatisticDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.TaskStatisticUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.TaskStatisticUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskStatisticPayload>[]
-          }
-          upsert: {
-            args: Prisma.TaskStatisticUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskStatisticPayload>
-          }
-          aggregate: {
-            args: Prisma.TaskStatisticAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateTaskStatistic>
-          }
-          groupBy: {
-            args: Prisma.TaskStatisticGroupByArgs<ExtArgs>
-            result: $Utils.Optional<TaskStatisticGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.TaskStatisticCountArgs<ExtArgs>
-            result: $Utils.Optional<TaskStatisticCountAggregateOutputType> | number
-          }
-        }
-      }
       WalletAccount: {
         payload: Prisma.$WalletAccountPayload<ExtArgs>
         fields: Prisma.WalletAccountFieldRefs
@@ -9548,7 +9458,6 @@ export namespace Prisma {
     taskOccurrence?: TaskOccurrenceOmit
     taskGoalOutbox?: TaskGoalOutboxOmit
     taskPlanHistory?: TaskPlanHistoryOmit
-    taskStatistic?: TaskStatisticOmit
     walletAccount?: WalletAccountOmit
     walletTransaction?: WalletTransactionOmit
   }
@@ -10899,13 +10808,13 @@ export namespace Prisma {
    */
 
   export type TaskPlanCountOutputType = {
-    instances: number
+    occurrences: number
     history: number
     labelLinks: number
   }
 
   export type TaskPlanCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    instances?: boolean | TaskPlanCountOutputTypeCountInstancesArgs
+    occurrences?: boolean | TaskPlanCountOutputTypeCountOccurrencesArgs
     history?: boolean | TaskPlanCountOutputTypeCountHistoryArgs
     labelLinks?: boolean | TaskPlanCountOutputTypeCountLabelLinksArgs
   }
@@ -10924,7 +10833,7 @@ export namespace Prisma {
   /**
    * TaskPlanCountOutputType without action
    */
-  export type TaskPlanCountOutputTypeCountInstancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TaskPlanCountOutputTypeCountOccurrencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TaskOccurrenceWhereInput
   }
 
@@ -11176,7 +11085,6 @@ export namespace Prisma {
     activityLedger?: boolean | Account$activityLedgerArgs<ExtArgs>
     taskPlans?: boolean | Account$taskPlansArgs<ExtArgs>
     taskOccurrences?: boolean | Account$taskOccurrencesArgs<ExtArgs>
-    taskStatistics?: boolean | Account$taskStatisticsArgs<ExtArgs>
     userPreferenceRecords?: boolean | Account$userPreferenceRecordsArgs<ExtArgs>
     notifications?: boolean | Account$notificationsArgs<ExtArgs>
     aiConversations?: boolean | Account$aiConversationsArgs<ExtArgs>
@@ -11266,7 +11174,6 @@ export namespace Prisma {
     activityLedger?: boolean | Account$activityLedgerArgs<ExtArgs>
     taskPlans?: boolean | Account$taskPlansArgs<ExtArgs>
     taskOccurrences?: boolean | Account$taskOccurrencesArgs<ExtArgs>
-    taskStatistics?: boolean | Account$taskStatisticsArgs<ExtArgs>
     userPreferenceRecords?: boolean | Account$userPreferenceRecordsArgs<ExtArgs>
     notifications?: boolean | Account$notificationsArgs<ExtArgs>
     aiConversations?: boolean | Account$aiConversationsArgs<ExtArgs>
@@ -11334,7 +11241,6 @@ export namespace Prisma {
       activityLedger: Prisma.$ActivityLedgerPayload<ExtArgs>[]
       taskPlans: Prisma.$TaskPlanPayload<ExtArgs>[]
       taskOccurrences: Prisma.$TaskOccurrencePayload<ExtArgs>[]
-      taskStatistics: Prisma.$TaskStatisticPayload<ExtArgs> | null
       userPreferenceRecords: Prisma.$UserPreferenceRecordPayload<ExtArgs>[]
       notifications: Prisma.$NotificationPayload<ExtArgs>[]
       aiConversations: Prisma.$AiConversationPayload<ExtArgs>[]
@@ -11792,7 +11698,6 @@ export namespace Prisma {
     activityLedger<T extends Account$activityLedgerArgs<ExtArgs> = {}>(args?: Subset<T, Account$activityLedgerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLedgerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     taskPlans<T extends Account$taskPlansArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskPlansArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     taskOccurrences<T extends Account$taskOccurrencesArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskOccurrencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskOccurrencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    taskStatistics<T extends Account$taskStatisticsArgs<ExtArgs> = {}>(args?: Subset<T, Account$taskStatisticsArgs<ExtArgs>>): Prisma__TaskStatisticClient<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     userPreferenceRecords<T extends Account$userPreferenceRecordsArgs<ExtArgs> = {}>(args?: Subset<T, Account$userPreferenceRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPreferenceRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notifications<T extends Account$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     aiConversations<T extends Account$aiConversationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$aiConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12927,25 +12832,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TaskOccurrenceScalarFieldEnum | TaskOccurrenceScalarFieldEnum[]
-  }
-
-  /**
-   * Account.taskStatistics
-   */
-  export type Account$taskStatisticsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticInclude<ExtArgs> | null
-    where?: TaskStatisticWhereInput
   }
 
   /**
@@ -118836,7 +118722,7 @@ export namespace Prisma {
     deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
     keyResult?: boolean | TaskPlan$keyResultArgs<ExtArgs>
-    instances?: boolean | TaskPlan$instancesArgs<ExtArgs>
+    occurrences?: boolean | TaskPlan$occurrencesArgs<ExtArgs>
     history?: boolean | TaskPlan$historyArgs<ExtArgs>
     labelLinks?: boolean | TaskPlan$labelLinksArgs<ExtArgs>
     _count?: boolean | TaskPlanCountOutputTypeDefaultArgs<ExtArgs>
@@ -118925,7 +118811,7 @@ export namespace Prisma {
   export type TaskPlanInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     keyResult?: boolean | TaskPlan$keyResultArgs<ExtArgs>
-    instances?: boolean | TaskPlan$instancesArgs<ExtArgs>
+    occurrences?: boolean | TaskPlan$occurrencesArgs<ExtArgs>
     history?: boolean | TaskPlan$historyArgs<ExtArgs>
     labelLinks?: boolean | TaskPlan$labelLinksArgs<ExtArgs>
     _count?: boolean | TaskPlanCountOutputTypeDefaultArgs<ExtArgs>
@@ -118944,7 +118830,7 @@ export namespace Prisma {
     objects: {
       account: Prisma.$AccountPayload<ExtArgs>
       keyResult: Prisma.$KeyResultPayload<ExtArgs> | null
-      instances: Prisma.$TaskOccurrencePayload<ExtArgs>[]
+      occurrences: Prisma.$TaskOccurrencePayload<ExtArgs>[]
       history: Prisma.$TaskPlanHistoryPayload<ExtArgs>[]
       labelLinks: Prisma.$TaskLabelPayload<ExtArgs>[]
     }
@@ -119385,7 +119271,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     keyResult<T extends TaskPlan$keyResultArgs<ExtArgs> = {}>(args?: Subset<T, TaskPlan$keyResultArgs<ExtArgs>>): Prisma__KeyResultClient<$Result.GetResult<Prisma.$KeyResultPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    instances<T extends TaskPlan$instancesArgs<ExtArgs> = {}>(args?: Subset<T, TaskPlan$instancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskOccurrencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    occurrences<T extends TaskPlan$occurrencesArgs<ExtArgs> = {}>(args?: Subset<T, TaskPlan$occurrencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskOccurrencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     history<T extends TaskPlan$historyArgs<ExtArgs> = {}>(args?: Subset<T, TaskPlan$historyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPlanHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     labelLinks<T extends TaskPlan$labelLinksArgs<ExtArgs> = {}>(args?: Subset<T, TaskPlan$labelLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskLabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -119859,9 +119745,9 @@ export namespace Prisma {
   }
 
   /**
-   * TaskPlan.instances
+   * TaskPlan.occurrences
    */
-  export type TaskPlan$instancesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TaskPlan$occurrencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the TaskOccurrence
      */
@@ -122376,7 +122262,7 @@ export namespace Prisma {
   export type TaskPlanHistoryMinAggregateOutputType = {
     id: string | null
     identityId: string | null
-    templateId: string | null
+    planId: string | null
     action: string | null
     changes: string | null
     createdAt: Date | null
@@ -122385,7 +122271,7 @@ export namespace Prisma {
   export type TaskPlanHistoryMaxAggregateOutputType = {
     id: string | null
     identityId: string | null
-    templateId: string | null
+    planId: string | null
     action: string | null
     changes: string | null
     createdAt: Date | null
@@ -122394,7 +122280,7 @@ export namespace Prisma {
   export type TaskPlanHistoryCountAggregateOutputType = {
     id: number
     identityId: number
-    templateId: number
+    planId: number
     action: number
     changes: number
     createdAt: number
@@ -122405,7 +122291,7 @@ export namespace Prisma {
   export type TaskPlanHistoryMinAggregateInputType = {
     id?: true
     identityId?: true
-    templateId?: true
+    planId?: true
     action?: true
     changes?: true
     createdAt?: true
@@ -122414,7 +122300,7 @@ export namespace Prisma {
   export type TaskPlanHistoryMaxAggregateInputType = {
     id?: true
     identityId?: true
-    templateId?: true
+    planId?: true
     action?: true
     changes?: true
     createdAt?: true
@@ -122423,7 +122309,7 @@ export namespace Prisma {
   export type TaskPlanHistoryCountAggregateInputType = {
     id?: true
     identityId?: true
-    templateId?: true
+    planId?: true
     action?: true
     changes?: true
     createdAt?: true
@@ -122505,7 +122391,7 @@ export namespace Prisma {
   export type TaskPlanHistoryGroupByOutputType = {
     id: string
     identityId: string
-    templateId: string
+    planId: string
     action: string
     changes: string | null
     createdAt: Date
@@ -122531,69 +122417,69 @@ export namespace Prisma {
   export type TaskPlanHistorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     identityId?: boolean
-    templateId?: boolean
+    planId?: boolean
     action?: boolean
     changes?: boolean
     createdAt?: boolean
     identity?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["taskPlanHistory"]>
 
   export type TaskPlanHistorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     identityId?: boolean
-    templateId?: boolean
+    planId?: boolean
     action?: boolean
     changes?: boolean
     createdAt?: boolean
     identity?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["taskPlanHistory"]>
 
   export type TaskPlanHistorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     identityId?: boolean
-    templateId?: boolean
+    planId?: boolean
     action?: boolean
     changes?: boolean
     createdAt?: boolean
     identity?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["taskPlanHistory"]>
 
   export type TaskPlanHistorySelectScalar = {
     id?: boolean
     identityId?: boolean
-    templateId?: boolean
+    planId?: boolean
     action?: boolean
     changes?: boolean
     createdAt?: boolean
   }
 
-  export type TaskPlanHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "templateId" | "action" | "changes" | "createdAt", ExtArgs["result"]["taskPlanHistory"]>
+  export type TaskPlanHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "planId" | "action" | "changes" | "createdAt", ExtArgs["result"]["taskPlanHistory"]>
   export type TaskPlanHistoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     identity?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }
   export type TaskPlanHistoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     identity?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }
   export type TaskPlanHistoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     identity?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }
 
   export type $TaskPlanHistoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "TaskPlanHistory"
     objects: {
       identity: Prisma.$AccountPayload<ExtArgs>
-      template: Prisma.$TaskPlanPayload<ExtArgs>
+      plan: Prisma.$TaskPlanPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       identityId: string
-      templateId: string
+      planId: string
       action: string
       changes: string | null
       createdAt: Date
@@ -122992,7 +122878,7 @@ export namespace Prisma {
   export interface Prisma__TaskPlanHistoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     identity<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    template<T extends TaskPlanDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskPlanDefaultArgs<ExtArgs>>): Prisma__TaskPlanClient<$Result.GetResult<Prisma.$TaskPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    plan<T extends TaskPlanDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskPlanDefaultArgs<ExtArgs>>): Prisma__TaskPlanClient<$Result.GetResult<Prisma.$TaskPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -123024,7 +122910,7 @@ export namespace Prisma {
   interface TaskPlanHistoryFieldRefs {
     readonly id: FieldRef<"TaskPlanHistory", 'String'>
     readonly identityId: FieldRef<"TaskPlanHistory", 'String'>
-    readonly templateId: FieldRef<"TaskPlanHistory", 'String'>
+    readonly planId: FieldRef<"TaskPlanHistory", 'String'>
     readonly action: FieldRef<"TaskPlanHistory", 'String'>
     readonly changes: FieldRef<"TaskPlanHistory", 'String'>
     readonly createdAt: FieldRef<"TaskPlanHistory", 'DateTime'>
@@ -123444,1554 +123330,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: TaskPlanHistoryInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model TaskStatistic
-   */
-
-  export type AggregateTaskStatistic = {
-    _count: TaskStatisticCountAggregateOutputType | null
-    _avg: TaskStatisticAvgAggregateOutputType | null
-    _sum: TaskStatisticSumAggregateOutputType | null
-    _min: TaskStatisticMinAggregateOutputType | null
-    _max: TaskStatisticMaxAggregateOutputType | null
-  }
-
-  export type TaskStatisticAvgAggregateOutputType = {
-    templateTotal: number | null
-    templateActive: number | null
-    templatePaused: number | null
-    templateArchived: number | null
-    templateOneTime: number | null
-    templateRecurring: number | null
-    instanceTotal: number | null
-    instanceToday: number | null
-    instanceWeek: number | null
-    instanceMonth: number | null
-    instancePending: number | null
-    instanceInProgress: number | null
-    instanceCompleted: number | null
-    instanceSkipped: number | null
-    instanceMissed: number | null
-    completionToday: number | null
-    completionWeek: number | null
-    completionMonth: number | null
-    completionTotal: number | null
-    completionAvgTime: number | null
-    completionRate: number | null
-    timeAllDay: number | null
-    timePoint: number | null
-    timeRange: number | null
-    timeOverdue: number | null
-    timeUpcoming: number | null
-  }
-
-  export type TaskStatisticSumAggregateOutputType = {
-    templateTotal: number | null
-    templateActive: number | null
-    templatePaused: number | null
-    templateArchived: number | null
-    templateOneTime: number | null
-    templateRecurring: number | null
-    instanceTotal: number | null
-    instanceToday: number | null
-    instanceWeek: number | null
-    instanceMonth: number | null
-    instancePending: number | null
-    instanceInProgress: number | null
-    instanceCompleted: number | null
-    instanceSkipped: number | null
-    instanceMissed: number | null
-    completionToday: number | null
-    completionWeek: number | null
-    completionMonth: number | null
-    completionTotal: number | null
-    completionAvgTime: number | null
-    completionRate: number | null
-    timeAllDay: number | null
-    timePoint: number | null
-    timeRange: number | null
-    timeOverdue: number | null
-    timeUpcoming: number | null
-  }
-
-  export type TaskStatisticMinAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    calculatedAt: Date | null
-    templateTotal: number | null
-    templateActive: number | null
-    templatePaused: number | null
-    templateArchived: number | null
-    templateOneTime: number | null
-    templateRecurring: number | null
-    instanceTotal: number | null
-    instanceToday: number | null
-    instanceWeek: number | null
-    instanceMonth: number | null
-    instancePending: number | null
-    instanceInProgress: number | null
-    instanceCompleted: number | null
-    instanceSkipped: number | null
-    instanceMissed: number | null
-    completionToday: number | null
-    completionWeek: number | null
-    completionMonth: number | null
-    completionTotal: number | null
-    completionAvgTime: number | null
-    completionRate: number | null
-    timeAllDay: number | null
-    timePoint: number | null
-    timeRange: number | null
-    timeOverdue: number | null
-    timeUpcoming: number | null
-    distributionByImportance: string | null
-    distributionByUrgency: string | null
-    distributionByTag: string | null
-  }
-
-  export type TaskStatisticMaxAggregateOutputType = {
-    id: string | null
-    identityId: string | null
-    calculatedAt: Date | null
-    templateTotal: number | null
-    templateActive: number | null
-    templatePaused: number | null
-    templateArchived: number | null
-    templateOneTime: number | null
-    templateRecurring: number | null
-    instanceTotal: number | null
-    instanceToday: number | null
-    instanceWeek: number | null
-    instanceMonth: number | null
-    instancePending: number | null
-    instanceInProgress: number | null
-    instanceCompleted: number | null
-    instanceSkipped: number | null
-    instanceMissed: number | null
-    completionToday: number | null
-    completionWeek: number | null
-    completionMonth: number | null
-    completionTotal: number | null
-    completionAvgTime: number | null
-    completionRate: number | null
-    timeAllDay: number | null
-    timePoint: number | null
-    timeRange: number | null
-    timeOverdue: number | null
-    timeUpcoming: number | null
-    distributionByImportance: string | null
-    distributionByUrgency: string | null
-    distributionByTag: string | null
-  }
-
-  export type TaskStatisticCountAggregateOutputType = {
-    id: number
-    identityId: number
-    calculatedAt: number
-    templateTotal: number
-    templateActive: number
-    templatePaused: number
-    templateArchived: number
-    templateOneTime: number
-    templateRecurring: number
-    instanceTotal: number
-    instanceToday: number
-    instanceWeek: number
-    instanceMonth: number
-    instancePending: number
-    instanceInProgress: number
-    instanceCompleted: number
-    instanceSkipped: number
-    instanceMissed: number
-    completionToday: number
-    completionWeek: number
-    completionMonth: number
-    completionTotal: number
-    completionAvgTime: number
-    completionRate: number
-    timeAllDay: number
-    timePoint: number
-    timeRange: number
-    timeOverdue: number
-    timeUpcoming: number
-    distributionByImportance: number
-    distributionByUrgency: number
-    distributionByTag: number
-    _all: number
-  }
-
-
-  export type TaskStatisticAvgAggregateInputType = {
-    templateTotal?: true
-    templateActive?: true
-    templatePaused?: true
-    templateArchived?: true
-    templateOneTime?: true
-    templateRecurring?: true
-    instanceTotal?: true
-    instanceToday?: true
-    instanceWeek?: true
-    instanceMonth?: true
-    instancePending?: true
-    instanceInProgress?: true
-    instanceCompleted?: true
-    instanceSkipped?: true
-    instanceMissed?: true
-    completionToday?: true
-    completionWeek?: true
-    completionMonth?: true
-    completionTotal?: true
-    completionAvgTime?: true
-    completionRate?: true
-    timeAllDay?: true
-    timePoint?: true
-    timeRange?: true
-    timeOverdue?: true
-    timeUpcoming?: true
-  }
-
-  export type TaskStatisticSumAggregateInputType = {
-    templateTotal?: true
-    templateActive?: true
-    templatePaused?: true
-    templateArchived?: true
-    templateOneTime?: true
-    templateRecurring?: true
-    instanceTotal?: true
-    instanceToday?: true
-    instanceWeek?: true
-    instanceMonth?: true
-    instancePending?: true
-    instanceInProgress?: true
-    instanceCompleted?: true
-    instanceSkipped?: true
-    instanceMissed?: true
-    completionToday?: true
-    completionWeek?: true
-    completionMonth?: true
-    completionTotal?: true
-    completionAvgTime?: true
-    completionRate?: true
-    timeAllDay?: true
-    timePoint?: true
-    timeRange?: true
-    timeOverdue?: true
-    timeUpcoming?: true
-  }
-
-  export type TaskStatisticMinAggregateInputType = {
-    id?: true
-    identityId?: true
-    calculatedAt?: true
-    templateTotal?: true
-    templateActive?: true
-    templatePaused?: true
-    templateArchived?: true
-    templateOneTime?: true
-    templateRecurring?: true
-    instanceTotal?: true
-    instanceToday?: true
-    instanceWeek?: true
-    instanceMonth?: true
-    instancePending?: true
-    instanceInProgress?: true
-    instanceCompleted?: true
-    instanceSkipped?: true
-    instanceMissed?: true
-    completionToday?: true
-    completionWeek?: true
-    completionMonth?: true
-    completionTotal?: true
-    completionAvgTime?: true
-    completionRate?: true
-    timeAllDay?: true
-    timePoint?: true
-    timeRange?: true
-    timeOverdue?: true
-    timeUpcoming?: true
-    distributionByImportance?: true
-    distributionByUrgency?: true
-    distributionByTag?: true
-  }
-
-  export type TaskStatisticMaxAggregateInputType = {
-    id?: true
-    identityId?: true
-    calculatedAt?: true
-    templateTotal?: true
-    templateActive?: true
-    templatePaused?: true
-    templateArchived?: true
-    templateOneTime?: true
-    templateRecurring?: true
-    instanceTotal?: true
-    instanceToday?: true
-    instanceWeek?: true
-    instanceMonth?: true
-    instancePending?: true
-    instanceInProgress?: true
-    instanceCompleted?: true
-    instanceSkipped?: true
-    instanceMissed?: true
-    completionToday?: true
-    completionWeek?: true
-    completionMonth?: true
-    completionTotal?: true
-    completionAvgTime?: true
-    completionRate?: true
-    timeAllDay?: true
-    timePoint?: true
-    timeRange?: true
-    timeOverdue?: true
-    timeUpcoming?: true
-    distributionByImportance?: true
-    distributionByUrgency?: true
-    distributionByTag?: true
-  }
-
-  export type TaskStatisticCountAggregateInputType = {
-    id?: true
-    identityId?: true
-    calculatedAt?: true
-    templateTotal?: true
-    templateActive?: true
-    templatePaused?: true
-    templateArchived?: true
-    templateOneTime?: true
-    templateRecurring?: true
-    instanceTotal?: true
-    instanceToday?: true
-    instanceWeek?: true
-    instanceMonth?: true
-    instancePending?: true
-    instanceInProgress?: true
-    instanceCompleted?: true
-    instanceSkipped?: true
-    instanceMissed?: true
-    completionToday?: true
-    completionWeek?: true
-    completionMonth?: true
-    completionTotal?: true
-    completionAvgTime?: true
-    completionRate?: true
-    timeAllDay?: true
-    timePoint?: true
-    timeRange?: true
-    timeOverdue?: true
-    timeUpcoming?: true
-    distributionByImportance?: true
-    distributionByUrgency?: true
-    distributionByTag?: true
-    _all?: true
-  }
-
-  export type TaskStatisticAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which TaskStatistic to aggregate.
-     */
-    where?: TaskStatisticWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of TaskStatistics to fetch.
-     */
-    orderBy?: TaskStatisticOrderByWithRelationInput | TaskStatisticOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the start position
-     */
-    cursor?: TaskStatisticWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` TaskStatistics from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` TaskStatistics.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Count returned TaskStatistics
-    **/
-    _count?: true | TaskStatisticCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to average
-    **/
-    _avg?: TaskStatisticAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to sum
-    **/
-    _sum?: TaskStatisticSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the minimum value
-    **/
-    _min?: TaskStatisticMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
-     * Select which fields to find the maximum value
-    **/
-    _max?: TaskStatisticMaxAggregateInputType
-  }
-
-  export type GetTaskStatisticAggregateType<T extends TaskStatisticAggregateArgs> = {
-        [P in keyof T & keyof AggregateTaskStatistic]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateTaskStatistic[P]>
-      : GetScalarType<T[P], AggregateTaskStatistic[P]>
-  }
-
-
-
-
-  export type TaskStatisticGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskStatisticWhereInput
-    orderBy?: TaskStatisticOrderByWithAggregationInput | TaskStatisticOrderByWithAggregationInput[]
-    by: TaskStatisticScalarFieldEnum[] | TaskStatisticScalarFieldEnum
-    having?: TaskStatisticScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: TaskStatisticCountAggregateInputType | true
-    _avg?: TaskStatisticAvgAggregateInputType
-    _sum?: TaskStatisticSumAggregateInputType
-    _min?: TaskStatisticMinAggregateInputType
-    _max?: TaskStatisticMaxAggregateInputType
-  }
-
-  export type TaskStatisticGroupByOutputType = {
-    id: string
-    identityId: string
-    calculatedAt: Date
-    templateTotal: number
-    templateActive: number
-    templatePaused: number
-    templateArchived: number
-    templateOneTime: number
-    templateRecurring: number
-    instanceTotal: number
-    instanceToday: number
-    instanceWeek: number
-    instanceMonth: number
-    instancePending: number
-    instanceInProgress: number
-    instanceCompleted: number
-    instanceSkipped: number
-    instanceMissed: number
-    completionToday: number
-    completionWeek: number
-    completionMonth: number
-    completionTotal: number
-    completionAvgTime: number | null
-    completionRate: number
-    timeAllDay: number
-    timePoint: number
-    timeRange: number
-    timeOverdue: number
-    timeUpcoming: number
-    distributionByImportance: string
-    distributionByUrgency: string
-    distributionByTag: string
-    _count: TaskStatisticCountAggregateOutputType | null
-    _avg: TaskStatisticAvgAggregateOutputType | null
-    _sum: TaskStatisticSumAggregateOutputType | null
-    _min: TaskStatisticMinAggregateOutputType | null
-    _max: TaskStatisticMaxAggregateOutputType | null
-  }
-
-  type GetTaskStatisticGroupByPayload<T extends TaskStatisticGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<TaskStatisticGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof TaskStatisticGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], TaskStatisticGroupByOutputType[P]>
-            : GetScalarType<T[P], TaskStatisticGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type TaskStatisticSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    calculatedAt?: boolean
-    templateTotal?: boolean
-    templateActive?: boolean
-    templatePaused?: boolean
-    templateArchived?: boolean
-    templateOneTime?: boolean
-    templateRecurring?: boolean
-    instanceTotal?: boolean
-    instanceToday?: boolean
-    instanceWeek?: boolean
-    instanceMonth?: boolean
-    instancePending?: boolean
-    instanceInProgress?: boolean
-    instanceCompleted?: boolean
-    instanceSkipped?: boolean
-    instanceMissed?: boolean
-    completionToday?: boolean
-    completionWeek?: boolean
-    completionMonth?: boolean
-    completionTotal?: boolean
-    completionAvgTime?: boolean
-    completionRate?: boolean
-    timeAllDay?: boolean
-    timePoint?: boolean
-    timeRange?: boolean
-    timeOverdue?: boolean
-    timeUpcoming?: boolean
-    distributionByImportance?: boolean
-    distributionByUrgency?: boolean
-    distributionByTag?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["taskStatistic"]>
-
-  export type TaskStatisticSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    calculatedAt?: boolean
-    templateTotal?: boolean
-    templateActive?: boolean
-    templatePaused?: boolean
-    templateArchived?: boolean
-    templateOneTime?: boolean
-    templateRecurring?: boolean
-    instanceTotal?: boolean
-    instanceToday?: boolean
-    instanceWeek?: boolean
-    instanceMonth?: boolean
-    instancePending?: boolean
-    instanceInProgress?: boolean
-    instanceCompleted?: boolean
-    instanceSkipped?: boolean
-    instanceMissed?: boolean
-    completionToday?: boolean
-    completionWeek?: boolean
-    completionMonth?: boolean
-    completionTotal?: boolean
-    completionAvgTime?: boolean
-    completionRate?: boolean
-    timeAllDay?: boolean
-    timePoint?: boolean
-    timeRange?: boolean
-    timeOverdue?: boolean
-    timeUpcoming?: boolean
-    distributionByImportance?: boolean
-    distributionByUrgency?: boolean
-    distributionByTag?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["taskStatistic"]>
-
-  export type TaskStatisticSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    identityId?: boolean
-    calculatedAt?: boolean
-    templateTotal?: boolean
-    templateActive?: boolean
-    templatePaused?: boolean
-    templateArchived?: boolean
-    templateOneTime?: boolean
-    templateRecurring?: boolean
-    instanceTotal?: boolean
-    instanceToday?: boolean
-    instanceWeek?: boolean
-    instanceMonth?: boolean
-    instancePending?: boolean
-    instanceInProgress?: boolean
-    instanceCompleted?: boolean
-    instanceSkipped?: boolean
-    instanceMissed?: boolean
-    completionToday?: boolean
-    completionWeek?: boolean
-    completionMonth?: boolean
-    completionTotal?: boolean
-    completionAvgTime?: boolean
-    completionRate?: boolean
-    timeAllDay?: boolean
-    timePoint?: boolean
-    timeRange?: boolean
-    timeOverdue?: boolean
-    timeUpcoming?: boolean
-    distributionByImportance?: boolean
-    distributionByUrgency?: boolean
-    distributionByTag?: boolean
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["taskStatistic"]>
-
-  export type TaskStatisticSelectScalar = {
-    id?: boolean
-    identityId?: boolean
-    calculatedAt?: boolean
-    templateTotal?: boolean
-    templateActive?: boolean
-    templatePaused?: boolean
-    templateArchived?: boolean
-    templateOneTime?: boolean
-    templateRecurring?: boolean
-    instanceTotal?: boolean
-    instanceToday?: boolean
-    instanceWeek?: boolean
-    instanceMonth?: boolean
-    instancePending?: boolean
-    instanceInProgress?: boolean
-    instanceCompleted?: boolean
-    instanceSkipped?: boolean
-    instanceMissed?: boolean
-    completionToday?: boolean
-    completionWeek?: boolean
-    completionMonth?: boolean
-    completionTotal?: boolean
-    completionAvgTime?: boolean
-    completionRate?: boolean
-    timeAllDay?: boolean
-    timePoint?: boolean
-    timeRange?: boolean
-    timeOverdue?: boolean
-    timeUpcoming?: boolean
-    distributionByImportance?: boolean
-    distributionByUrgency?: boolean
-    distributionByTag?: boolean
-  }
-
-  export type TaskStatisticOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "calculatedAt" | "templateTotal" | "templateActive" | "templatePaused" | "templateArchived" | "templateOneTime" | "templateRecurring" | "instanceTotal" | "instanceToday" | "instanceWeek" | "instanceMonth" | "instancePending" | "instanceInProgress" | "instanceCompleted" | "instanceSkipped" | "instanceMissed" | "completionToday" | "completionWeek" | "completionMonth" | "completionTotal" | "completionAvgTime" | "completionRate" | "timeAllDay" | "timePoint" | "timeRange" | "timeOverdue" | "timeUpcoming" | "distributionByImportance" | "distributionByUrgency" | "distributionByTag", ExtArgs["result"]["taskStatistic"]>
-  export type TaskStatisticInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type TaskStatisticIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-  export type TaskStatisticIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    account?: boolean | AccountDefaultArgs<ExtArgs>
-  }
-
-  export type $TaskStatisticPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "TaskStatistic"
-    objects: {
-      account: Prisma.$AccountPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      identityId: string
-      calculatedAt: Date
-      templateTotal: number
-      templateActive: number
-      templatePaused: number
-      templateArchived: number
-      templateOneTime: number
-      templateRecurring: number
-      instanceTotal: number
-      instanceToday: number
-      instanceWeek: number
-      instanceMonth: number
-      instancePending: number
-      instanceInProgress: number
-      instanceCompleted: number
-      instanceSkipped: number
-      instanceMissed: number
-      completionToday: number
-      completionWeek: number
-      completionMonth: number
-      completionTotal: number
-      completionAvgTime: number | null
-      completionRate: number
-      timeAllDay: number
-      timePoint: number
-      timeRange: number
-      timeOverdue: number
-      timeUpcoming: number
-      distributionByImportance: string
-      distributionByUrgency: string
-      distributionByTag: string
-    }, ExtArgs["result"]["taskStatistic"]>
-    composites: {}
-  }
-
-  type TaskStatisticGetPayload<S extends boolean | null | undefined | TaskStatisticDefaultArgs> = $Result.GetResult<Prisma.$TaskStatisticPayload, S>
-
-  type TaskStatisticCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<TaskStatisticFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: TaskStatisticCountAggregateInputType | true
-    }
-
-  export interface TaskStatisticDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TaskStatistic'], meta: { name: 'TaskStatistic' } }
-    /**
-     * Find zero or one TaskStatistic that matches the filter.
-     * @param {TaskStatisticFindUniqueArgs} args - Arguments to find a TaskStatistic
-     * @example
-     * // Get one TaskStatistic
-     * const taskStatistic = await prisma.taskStatistic.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends TaskStatisticFindUniqueArgs>(args: SelectSubset<T, TaskStatisticFindUniqueArgs<ExtArgs>>): Prisma__TaskStatisticClient<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one TaskStatistic that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {TaskStatisticFindUniqueOrThrowArgs} args - Arguments to find a TaskStatistic
-     * @example
-     * // Get one TaskStatistic
-     * const taskStatistic = await prisma.taskStatistic.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends TaskStatisticFindUniqueOrThrowArgs>(args: SelectSubset<T, TaskStatisticFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TaskStatisticClient<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first TaskStatistic that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskStatisticFindFirstArgs} args - Arguments to find a TaskStatistic
-     * @example
-     * // Get one TaskStatistic
-     * const taskStatistic = await prisma.taskStatistic.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends TaskStatisticFindFirstArgs>(args?: SelectSubset<T, TaskStatisticFindFirstArgs<ExtArgs>>): Prisma__TaskStatisticClient<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first TaskStatistic that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskStatisticFindFirstOrThrowArgs} args - Arguments to find a TaskStatistic
-     * @example
-     * // Get one TaskStatistic
-     * const taskStatistic = await prisma.taskStatistic.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends TaskStatisticFindFirstOrThrowArgs>(args?: SelectSubset<T, TaskStatisticFindFirstOrThrowArgs<ExtArgs>>): Prisma__TaskStatisticClient<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more TaskStatistics that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskStatisticFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all TaskStatistics
-     * const taskStatistics = await prisma.taskStatistic.findMany()
-     *
-     * // Get first 10 TaskStatistics
-     * const taskStatistics = await prisma.taskStatistic.findMany({ take: 10 })
-     *
-     * // Only select the `id`
-     * const taskStatisticWithIdOnly = await prisma.taskStatistic.findMany({ select: { id: true } })
-     *
-     */
-    findMany<T extends TaskStatisticFindManyArgs>(args?: SelectSubset<T, TaskStatisticFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a TaskStatistic.
-     * @param {TaskStatisticCreateArgs} args - Arguments to create a TaskStatistic.
-     * @example
-     * // Create one TaskStatistic
-     * const TaskStatistic = await prisma.taskStatistic.create({
-     *   data: {
-     *     // ... data to create a TaskStatistic
-     *   }
-     * })
-     *
-     */
-    create<T extends TaskStatisticCreateArgs>(args: SelectSubset<T, TaskStatisticCreateArgs<ExtArgs>>): Prisma__TaskStatisticClient<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many TaskStatistics.
-     * @param {TaskStatisticCreateManyArgs} args - Arguments to create many TaskStatistics.
-     * @example
-     * // Create many TaskStatistics
-     * const taskStatistic = await prisma.taskStatistic.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     */
-    createMany<T extends TaskStatisticCreateManyArgs>(args?: SelectSubset<T, TaskStatisticCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many TaskStatistics and returns the data saved in the database.
-     * @param {TaskStatisticCreateManyAndReturnArgs} args - Arguments to create many TaskStatistics.
-     * @example
-     * // Create many TaskStatistics
-     * const taskStatistic = await prisma.taskStatistic.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Create many TaskStatistics and only return the `id`
-     * const taskStatisticWithIdOnly = await prisma.taskStatistic.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    createManyAndReturn<T extends TaskStatisticCreateManyAndReturnArgs>(args?: SelectSubset<T, TaskStatisticCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a TaskStatistic.
-     * @param {TaskStatisticDeleteArgs} args - Arguments to delete one TaskStatistic.
-     * @example
-     * // Delete one TaskStatistic
-     * const TaskStatistic = await prisma.taskStatistic.delete({
-     *   where: {
-     *     // ... filter to delete one TaskStatistic
-     *   }
-     * })
-     *
-     */
-    delete<T extends TaskStatisticDeleteArgs>(args: SelectSubset<T, TaskStatisticDeleteArgs<ExtArgs>>): Prisma__TaskStatisticClient<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one TaskStatistic.
-     * @param {TaskStatisticUpdateArgs} args - Arguments to update one TaskStatistic.
-     * @example
-     * // Update one TaskStatistic
-     * const taskStatistic = await prisma.taskStatistic.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    update<T extends TaskStatisticUpdateArgs>(args: SelectSubset<T, TaskStatisticUpdateArgs<ExtArgs>>): Prisma__TaskStatisticClient<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more TaskStatistics.
-     * @param {TaskStatisticDeleteManyArgs} args - Arguments to filter TaskStatistics to delete.
-     * @example
-     * // Delete a few TaskStatistics
-     * const { count } = await prisma.taskStatistic.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     *
-     */
-    deleteMany<T extends TaskStatisticDeleteManyArgs>(args?: SelectSubset<T, TaskStatisticDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more TaskStatistics.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskStatisticUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many TaskStatistics
-     * const taskStatistic = await prisma.taskStatistic.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     *
-     */
-    updateMany<T extends TaskStatisticUpdateManyArgs>(args: SelectSubset<T, TaskStatisticUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more TaskStatistics and returns the data updated in the database.
-     * @param {TaskStatisticUpdateManyAndReturnArgs} args - Arguments to update many TaskStatistics.
-     * @example
-     * // Update many TaskStatistics
-     * const taskStatistic = await prisma.taskStatistic.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *
-     * // Update zero or more TaskStatistics and only return the `id`
-     * const taskStatisticWithIdOnly = await prisma.taskStatistic.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     *
-     */
-    updateManyAndReturn<T extends TaskStatisticUpdateManyAndReturnArgs>(args: SelectSubset<T, TaskStatisticUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one TaskStatistic.
-     * @param {TaskStatisticUpsertArgs} args - Arguments to update or create a TaskStatistic.
-     * @example
-     * // Update or create a TaskStatistic
-     * const taskStatistic = await prisma.taskStatistic.upsert({
-     *   create: {
-     *     // ... data to create a TaskStatistic
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the TaskStatistic we want to update
-     *   }
-     * })
-     */
-    upsert<T extends TaskStatisticUpsertArgs>(args: SelectSubset<T, TaskStatisticUpsertArgs<ExtArgs>>): Prisma__TaskStatisticClient<$Result.GetResult<Prisma.$TaskStatisticPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of TaskStatistics.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskStatisticCountArgs} args - Arguments to filter TaskStatistics to count.
-     * @example
-     * // Count the number of TaskStatistics
-     * const count = await prisma.taskStatistic.count({
-     *   where: {
-     *     // ... the filter for the TaskStatistics we want to count
-     *   }
-     * })
-    **/
-    count<T extends TaskStatisticCountArgs>(
-      args?: Subset<T, TaskStatisticCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], TaskStatisticCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a TaskStatistic.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskStatisticAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends TaskStatisticAggregateArgs>(args: Subset<T, TaskStatisticAggregateArgs>): Prisma.PrismaPromise<GetTaskStatisticAggregateType<T>>
-
-    /**
-     * Group by TaskStatistic.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskStatisticGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     *
-    **/
-    groupBy<
-      T extends TaskStatisticGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: TaskStatisticGroupByArgs['orderBy'] }
-        : { orderBy?: TaskStatisticGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, TaskStatisticGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTaskStatisticGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the TaskStatistic model
-   */
-  readonly fields: TaskStatisticFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for TaskStatistic.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__TaskStatisticClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the TaskStatistic model
-   */
-  interface TaskStatisticFieldRefs {
-    readonly id: FieldRef<"TaskStatistic", 'String'>
-    readonly identityId: FieldRef<"TaskStatistic", 'String'>
-    readonly calculatedAt: FieldRef<"TaskStatistic", 'DateTime'>
-    readonly templateTotal: FieldRef<"TaskStatistic", 'Int'>
-    readonly templateActive: FieldRef<"TaskStatistic", 'Int'>
-    readonly templatePaused: FieldRef<"TaskStatistic", 'Int'>
-    readonly templateArchived: FieldRef<"TaskStatistic", 'Int'>
-    readonly templateOneTime: FieldRef<"TaskStatistic", 'Int'>
-    readonly templateRecurring: FieldRef<"TaskStatistic", 'Int'>
-    readonly instanceTotal: FieldRef<"TaskStatistic", 'Int'>
-    readonly instanceToday: FieldRef<"TaskStatistic", 'Int'>
-    readonly instanceWeek: FieldRef<"TaskStatistic", 'Int'>
-    readonly instanceMonth: FieldRef<"TaskStatistic", 'Int'>
-    readonly instancePending: FieldRef<"TaskStatistic", 'Int'>
-    readonly instanceInProgress: FieldRef<"TaskStatistic", 'Int'>
-    readonly instanceCompleted: FieldRef<"TaskStatistic", 'Int'>
-    readonly instanceSkipped: FieldRef<"TaskStatistic", 'Int'>
-    readonly instanceMissed: FieldRef<"TaskStatistic", 'Int'>
-    readonly completionToday: FieldRef<"TaskStatistic", 'Int'>
-    readonly completionWeek: FieldRef<"TaskStatistic", 'Int'>
-    readonly completionMonth: FieldRef<"TaskStatistic", 'Int'>
-    readonly completionTotal: FieldRef<"TaskStatistic", 'Int'>
-    readonly completionAvgTime: FieldRef<"TaskStatistic", 'Float'>
-    readonly completionRate: FieldRef<"TaskStatistic", 'Float'>
-    readonly timeAllDay: FieldRef<"TaskStatistic", 'Int'>
-    readonly timePoint: FieldRef<"TaskStatistic", 'Int'>
-    readonly timeRange: FieldRef<"TaskStatistic", 'Int'>
-    readonly timeOverdue: FieldRef<"TaskStatistic", 'Int'>
-    readonly timeUpcoming: FieldRef<"TaskStatistic", 'Int'>
-    readonly distributionByImportance: FieldRef<"TaskStatistic", 'String'>
-    readonly distributionByUrgency: FieldRef<"TaskStatistic", 'String'>
-    readonly distributionByTag: FieldRef<"TaskStatistic", 'String'>
-  }
-
-
-  // Custom InputTypes
-  /**
-   * TaskStatistic findUnique
-   */
-  export type TaskStatisticFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticInclude<ExtArgs> | null
-    /**
-     * Filter, which TaskStatistic to fetch.
-     */
-    where: TaskStatisticWhereUniqueInput
-  }
-
-  /**
-   * TaskStatistic findUniqueOrThrow
-   */
-  export type TaskStatisticFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticInclude<ExtArgs> | null
-    /**
-     * Filter, which TaskStatistic to fetch.
-     */
-    where: TaskStatisticWhereUniqueInput
-  }
-
-  /**
-   * TaskStatistic findFirst
-   */
-  export type TaskStatisticFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticInclude<ExtArgs> | null
-    /**
-     * Filter, which TaskStatistic to fetch.
-     */
-    where?: TaskStatisticWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of TaskStatistics to fetch.
-     */
-    orderBy?: TaskStatisticOrderByWithRelationInput | TaskStatisticOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for TaskStatistics.
-     */
-    cursor?: TaskStatisticWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` TaskStatistics from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` TaskStatistics.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of TaskStatistics.
-     */
-    distinct?: TaskStatisticScalarFieldEnum | TaskStatisticScalarFieldEnum[]
-  }
-
-  /**
-   * TaskStatistic findFirstOrThrow
-   */
-  export type TaskStatisticFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticInclude<ExtArgs> | null
-    /**
-     * Filter, which TaskStatistic to fetch.
-     */
-    where?: TaskStatisticWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of TaskStatistics to fetch.
-     */
-    orderBy?: TaskStatisticOrderByWithRelationInput | TaskStatisticOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for searching for TaskStatistics.
-     */
-    cursor?: TaskStatisticWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` TaskStatistics from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` TaskStatistics.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of TaskStatistics.
-     */
-    distinct?: TaskStatisticScalarFieldEnum | TaskStatisticScalarFieldEnum[]
-  }
-
-  /**
-   * TaskStatistic findMany
-   */
-  export type TaskStatisticFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticInclude<ExtArgs> | null
-    /**
-     * Filter, which TaskStatistics to fetch.
-     */
-    where?: TaskStatisticWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
-     * Determine the order of TaskStatistics to fetch.
-     */
-    orderBy?: TaskStatisticOrderByWithRelationInput | TaskStatisticOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
-     * Sets the position for listing TaskStatistics.
-     */
-    cursor?: TaskStatisticWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Take `±n` TaskStatistics from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
-     * Skip the first `n` TaskStatistics.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
-     * Filter by unique combinations of TaskStatistics.
-     */
-    distinct?: TaskStatisticScalarFieldEnum | TaskStatisticScalarFieldEnum[]
-  }
-
-  /**
-   * TaskStatistic create
-   */
-  export type TaskStatisticCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticInclude<ExtArgs> | null
-    /**
-     * The data needed to create a TaskStatistic.
-     */
-    data: XOR<TaskStatisticCreateInput, TaskStatisticUncheckedCreateInput>
-  }
-
-  /**
-   * TaskStatistic createMany
-   */
-  export type TaskStatisticCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many TaskStatistics.
-     */
-    data: TaskStatisticCreateManyInput | TaskStatisticCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * TaskStatistic createManyAndReturn
-   */
-  export type TaskStatisticCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * The data used to create many TaskStatistics.
-     */
-    data: TaskStatisticCreateManyInput | TaskStatisticCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * TaskStatistic update
-   */
-  export type TaskStatisticUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticInclude<ExtArgs> | null
-    /**
-     * The data needed to update a TaskStatistic.
-     */
-    data: XOR<TaskStatisticUpdateInput, TaskStatisticUncheckedUpdateInput>
-    /**
-     * Choose, which TaskStatistic to update.
-     */
-    where: TaskStatisticWhereUniqueInput
-  }
-
-  /**
-   * TaskStatistic updateMany
-   */
-  export type TaskStatisticUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update TaskStatistics.
-     */
-    data: XOR<TaskStatisticUpdateManyMutationInput, TaskStatisticUncheckedUpdateManyInput>
-    /**
-     * Filter which TaskStatistics to update
-     */
-    where?: TaskStatisticWhereInput
-    /**
-     * Limit how many TaskStatistics to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * TaskStatistic updateManyAndReturn
-   */
-  export type TaskStatisticUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * The data used to update TaskStatistics.
-     */
-    data: XOR<TaskStatisticUpdateManyMutationInput, TaskStatisticUncheckedUpdateManyInput>
-    /**
-     * Filter which TaskStatistics to update
-     */
-    where?: TaskStatisticWhereInput
-    /**
-     * Limit how many TaskStatistics to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * TaskStatistic upsert
-   */
-  export type TaskStatisticUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticInclude<ExtArgs> | null
-    /**
-     * The filter to search for the TaskStatistic to update in case it exists.
-     */
-    where: TaskStatisticWhereUniqueInput
-    /**
-     * In case the TaskStatistic found by the `where` argument doesn't exist, create a new TaskStatistic with this data.
-     */
-    create: XOR<TaskStatisticCreateInput, TaskStatisticUncheckedCreateInput>
-    /**
-     * In case the TaskStatistic was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<TaskStatisticUpdateInput, TaskStatisticUncheckedUpdateInput>
-  }
-
-  /**
-   * TaskStatistic delete
-   */
-  export type TaskStatisticDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticInclude<ExtArgs> | null
-    /**
-     * Filter which TaskStatistic to delete.
-     */
-    where: TaskStatisticWhereUniqueInput
-  }
-
-  /**
-   * TaskStatistic deleteMany
-   */
-  export type TaskStatisticDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which TaskStatistics to delete
-     */
-    where?: TaskStatisticWhereInput
-    /**
-     * Limit how many TaskStatistics to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * TaskStatistic without action
-   */
-  export type TaskStatisticDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskStatistic
-     */
-    select?: TaskStatisticSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskStatistic
-     */
-    omit?: TaskStatisticOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskStatisticInclude<ExtArgs> | null
   }
 
 
@@ -128999,51 +127337,13 @@ export namespace Prisma {
   export const TaskPlanHistoryScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
-    templateId: 'templateId',
+    planId: 'planId',
     action: 'action',
     changes: 'changes',
     createdAt: 'createdAt'
   };
 
   export type TaskPlanHistoryScalarFieldEnum = (typeof TaskPlanHistoryScalarFieldEnum)[keyof typeof TaskPlanHistoryScalarFieldEnum]
-
-
-  export const TaskStatisticScalarFieldEnum: {
-    id: 'id',
-    identityId: 'identityId',
-    calculatedAt: 'calculatedAt',
-    templateTotal: 'templateTotal',
-    templateActive: 'templateActive',
-    templatePaused: 'templatePaused',
-    templateArchived: 'templateArchived',
-    templateOneTime: 'templateOneTime',
-    templateRecurring: 'templateRecurring',
-    instanceTotal: 'instanceTotal',
-    instanceToday: 'instanceToday',
-    instanceWeek: 'instanceWeek',
-    instanceMonth: 'instanceMonth',
-    instancePending: 'instancePending',
-    instanceInProgress: 'instanceInProgress',
-    instanceCompleted: 'instanceCompleted',
-    instanceSkipped: 'instanceSkipped',
-    instanceMissed: 'instanceMissed',
-    completionToday: 'completionToday',
-    completionWeek: 'completionWeek',
-    completionMonth: 'completionMonth',
-    completionTotal: 'completionTotal',
-    completionAvgTime: 'completionAvgTime',
-    completionRate: 'completionRate',
-    timeAllDay: 'timeAllDay',
-    timePoint: 'timePoint',
-    timeRange: 'timeRange',
-    timeOverdue: 'timeOverdue',
-    timeUpcoming: 'timeUpcoming',
-    distributionByImportance: 'distributionByImportance',
-    distributionByUrgency: 'distributionByUrgency',
-    distributionByTag: 'distributionByTag'
-  };
-
-  export type TaskStatisticScalarFieldEnum = (typeof TaskStatisticScalarFieldEnum)[keyof typeof TaskStatisticScalarFieldEnum]
 
 
   export const WalletAccountScalarFieldEnum: {
@@ -129290,7 +127590,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerListRelationFilter
     taskPlans?: TaskPlanListRelationFilter
     taskOccurrences?: TaskOccurrenceListRelationFilter
-    taskStatistics?: XOR<TaskStatisticNullableScalarRelationFilter, TaskStatisticWhereInput> | null
     userPreferenceRecords?: UserPreferenceRecordListRelationFilter
     notifications?: NotificationListRelationFilter
     aiConversations?: AiConversationListRelationFilter
@@ -129355,7 +127654,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerOrderByRelationAggregateInput
     taskPlans?: TaskPlanOrderByRelationAggregateInput
     taskOccurrences?: TaskOccurrenceOrderByRelationAggregateInput
-    taskStatistics?: TaskStatisticOrderByWithRelationInput
     userPreferenceRecords?: UserPreferenceRecordOrderByRelationAggregateInput
     notifications?: NotificationOrderByRelationAggregateInput
     aiConversations?: AiConversationOrderByRelationAggregateInput
@@ -129423,7 +127721,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerListRelationFilter
     taskPlans?: TaskPlanListRelationFilter
     taskOccurrences?: TaskOccurrenceListRelationFilter
-    taskStatistics?: XOR<TaskStatisticNullableScalarRelationFilter, TaskStatisticWhereInput> | null
     userPreferenceRecords?: UserPreferenceRecordListRelationFilter
     notifications?: NotificationListRelationFilter
     aiConversations?: AiConversationListRelationFilter
@@ -137695,7 +135992,7 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
     keyResult?: XOR<KeyResultNullableScalarRelationFilter, KeyResultWhereInput> | null
-    instances?: TaskOccurrenceListRelationFilter
+    occurrences?: TaskOccurrenceListRelationFilter
     history?: TaskPlanHistoryListRelationFilter
     labelLinks?: TaskLabelListRelationFilter
   }
@@ -137725,7 +136022,7 @@ export namespace Prisma {
     deletedAt?: SortOrderInput | SortOrder
     account?: AccountOrderByWithRelationInput
     keyResult?: KeyResultOrderByWithRelationInput
-    instances?: TaskOccurrenceOrderByRelationAggregateInput
+    occurrences?: TaskOccurrenceOrderByRelationAggregateInput
     history?: TaskPlanHistoryOrderByRelationAggregateInput
     labelLinks?: TaskLabelOrderByRelationAggregateInput
   }
@@ -137759,7 +136056,7 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
     keyResult?: XOR<KeyResultNullableScalarRelationFilter, KeyResultWhereInput> | null
-    instances?: TaskOccurrenceListRelationFilter
+    occurrences?: TaskOccurrenceListRelationFilter
     history?: TaskPlanHistoryListRelationFilter
     labelLinks?: TaskLabelListRelationFilter
   }, "id" | "id_identityId">
@@ -138043,23 +136340,23 @@ export namespace Prisma {
     NOT?: TaskPlanHistoryWhereInput | TaskPlanHistoryWhereInput[]
     id?: StringFilter<"TaskPlanHistory"> | string
     identityId?: StringFilter<"TaskPlanHistory"> | string
-    templateId?: StringFilter<"TaskPlanHistory"> | string
+    planId?: StringFilter<"TaskPlanHistory"> | string
     action?: StringFilter<"TaskPlanHistory"> | string
     changes?: StringNullableFilter<"TaskPlanHistory"> | string | null
     createdAt?: DateTimeFilter<"TaskPlanHistory"> | Date | string
     identity?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    template?: XOR<TaskPlanScalarRelationFilter, TaskPlanWhereInput>
+    plan?: XOR<TaskPlanScalarRelationFilter, TaskPlanWhereInput>
   }
 
   export type TaskPlanHistoryOrderByWithRelationInput = {
     id?: SortOrder
     identityId?: SortOrder
-    templateId?: SortOrder
+    planId?: SortOrder
     action?: SortOrder
     changes?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     identity?: AccountOrderByWithRelationInput
-    template?: TaskPlanOrderByWithRelationInput
+    plan?: TaskPlanOrderByWithRelationInput
   }
 
   export type TaskPlanHistoryWhereUniqueInput = Prisma.AtLeast<{
@@ -138068,18 +136365,18 @@ export namespace Prisma {
     OR?: TaskPlanHistoryWhereInput[]
     NOT?: TaskPlanHistoryWhereInput | TaskPlanHistoryWhereInput[]
     identityId?: StringFilter<"TaskPlanHistory"> | string
-    templateId?: StringFilter<"TaskPlanHistory"> | string
+    planId?: StringFilter<"TaskPlanHistory"> | string
     action?: StringFilter<"TaskPlanHistory"> | string
     changes?: StringNullableFilter<"TaskPlanHistory"> | string | null
     createdAt?: DateTimeFilter<"TaskPlanHistory"> | Date | string
     identity?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    template?: XOR<TaskPlanScalarRelationFilter, TaskPlanWhereInput>
+    plan?: XOR<TaskPlanScalarRelationFilter, TaskPlanWhereInput>
   }, "id">
 
   export type TaskPlanHistoryOrderByWithAggregationInput = {
     id?: SortOrder
     identityId?: SortOrder
-    templateId?: SortOrder
+    planId?: SortOrder
     action?: SortOrder
     changes?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -138094,202 +136391,10 @@ export namespace Prisma {
     NOT?: TaskPlanHistoryScalarWhereWithAggregatesInput | TaskPlanHistoryScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"TaskPlanHistory"> | string
     identityId?: StringWithAggregatesFilter<"TaskPlanHistory"> | string
-    templateId?: StringWithAggregatesFilter<"TaskPlanHistory"> | string
+    planId?: StringWithAggregatesFilter<"TaskPlanHistory"> | string
     action?: StringWithAggregatesFilter<"TaskPlanHistory"> | string
     changes?: StringNullableWithAggregatesFilter<"TaskPlanHistory"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"TaskPlanHistory"> | Date | string
-  }
-
-  export type TaskStatisticWhereInput = {
-    AND?: TaskStatisticWhereInput | TaskStatisticWhereInput[]
-    OR?: TaskStatisticWhereInput[]
-    NOT?: TaskStatisticWhereInput | TaskStatisticWhereInput[]
-    id?: StringFilter<"TaskStatistic"> | string
-    identityId?: StringFilter<"TaskStatistic"> | string
-    calculatedAt?: DateTimeFilter<"TaskStatistic"> | Date | string
-    templateTotal?: IntFilter<"TaskStatistic"> | number
-    templateActive?: IntFilter<"TaskStatistic"> | number
-    templatePaused?: IntFilter<"TaskStatistic"> | number
-    templateArchived?: IntFilter<"TaskStatistic"> | number
-    templateOneTime?: IntFilter<"TaskStatistic"> | number
-    templateRecurring?: IntFilter<"TaskStatistic"> | number
-    instanceTotal?: IntFilter<"TaskStatistic"> | number
-    instanceToday?: IntFilter<"TaskStatistic"> | number
-    instanceWeek?: IntFilter<"TaskStatistic"> | number
-    instanceMonth?: IntFilter<"TaskStatistic"> | number
-    instancePending?: IntFilter<"TaskStatistic"> | number
-    instanceInProgress?: IntFilter<"TaskStatistic"> | number
-    instanceCompleted?: IntFilter<"TaskStatistic"> | number
-    instanceSkipped?: IntFilter<"TaskStatistic"> | number
-    instanceMissed?: IntFilter<"TaskStatistic"> | number
-    completionToday?: IntFilter<"TaskStatistic"> | number
-    completionWeek?: IntFilter<"TaskStatistic"> | number
-    completionMonth?: IntFilter<"TaskStatistic"> | number
-    completionTotal?: IntFilter<"TaskStatistic"> | number
-    completionAvgTime?: FloatNullableFilter<"TaskStatistic"> | number | null
-    completionRate?: FloatFilter<"TaskStatistic"> | number
-    timeAllDay?: IntFilter<"TaskStatistic"> | number
-    timePoint?: IntFilter<"TaskStatistic"> | number
-    timeRange?: IntFilter<"TaskStatistic"> | number
-    timeOverdue?: IntFilter<"TaskStatistic"> | number
-    timeUpcoming?: IntFilter<"TaskStatistic"> | number
-    distributionByImportance?: StringFilter<"TaskStatistic"> | string
-    distributionByUrgency?: StringFilter<"TaskStatistic"> | string
-    distributionByTag?: StringFilter<"TaskStatistic"> | string
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }
-
-  export type TaskStatisticOrderByWithRelationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    calculatedAt?: SortOrder
-    templateTotal?: SortOrder
-    templateActive?: SortOrder
-    templatePaused?: SortOrder
-    templateArchived?: SortOrder
-    templateOneTime?: SortOrder
-    templateRecurring?: SortOrder
-    instanceTotal?: SortOrder
-    instanceToday?: SortOrder
-    instanceWeek?: SortOrder
-    instanceMonth?: SortOrder
-    instancePending?: SortOrder
-    instanceInProgress?: SortOrder
-    instanceCompleted?: SortOrder
-    instanceSkipped?: SortOrder
-    instanceMissed?: SortOrder
-    completionToday?: SortOrder
-    completionWeek?: SortOrder
-    completionMonth?: SortOrder
-    completionTotal?: SortOrder
-    completionAvgTime?: SortOrderInput | SortOrder
-    completionRate?: SortOrder
-    timeAllDay?: SortOrder
-    timePoint?: SortOrder
-    timeRange?: SortOrder
-    timeOverdue?: SortOrder
-    timeUpcoming?: SortOrder
-    distributionByImportance?: SortOrder
-    distributionByUrgency?: SortOrder
-    distributionByTag?: SortOrder
-    account?: AccountOrderByWithRelationInput
-  }
-
-  export type TaskStatisticWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    identityId?: string
-    AND?: TaskStatisticWhereInput | TaskStatisticWhereInput[]
-    OR?: TaskStatisticWhereInput[]
-    NOT?: TaskStatisticWhereInput | TaskStatisticWhereInput[]
-    calculatedAt?: DateTimeFilter<"TaskStatistic"> | Date | string
-    templateTotal?: IntFilter<"TaskStatistic"> | number
-    templateActive?: IntFilter<"TaskStatistic"> | number
-    templatePaused?: IntFilter<"TaskStatistic"> | number
-    templateArchived?: IntFilter<"TaskStatistic"> | number
-    templateOneTime?: IntFilter<"TaskStatistic"> | number
-    templateRecurring?: IntFilter<"TaskStatistic"> | number
-    instanceTotal?: IntFilter<"TaskStatistic"> | number
-    instanceToday?: IntFilter<"TaskStatistic"> | number
-    instanceWeek?: IntFilter<"TaskStatistic"> | number
-    instanceMonth?: IntFilter<"TaskStatistic"> | number
-    instancePending?: IntFilter<"TaskStatistic"> | number
-    instanceInProgress?: IntFilter<"TaskStatistic"> | number
-    instanceCompleted?: IntFilter<"TaskStatistic"> | number
-    instanceSkipped?: IntFilter<"TaskStatistic"> | number
-    instanceMissed?: IntFilter<"TaskStatistic"> | number
-    completionToday?: IntFilter<"TaskStatistic"> | number
-    completionWeek?: IntFilter<"TaskStatistic"> | number
-    completionMonth?: IntFilter<"TaskStatistic"> | number
-    completionTotal?: IntFilter<"TaskStatistic"> | number
-    completionAvgTime?: FloatNullableFilter<"TaskStatistic"> | number | null
-    completionRate?: FloatFilter<"TaskStatistic"> | number
-    timeAllDay?: IntFilter<"TaskStatistic"> | number
-    timePoint?: IntFilter<"TaskStatistic"> | number
-    timeRange?: IntFilter<"TaskStatistic"> | number
-    timeOverdue?: IntFilter<"TaskStatistic"> | number
-    timeUpcoming?: IntFilter<"TaskStatistic"> | number
-    distributionByImportance?: StringFilter<"TaskStatistic"> | string
-    distributionByUrgency?: StringFilter<"TaskStatistic"> | string
-    distributionByTag?: StringFilter<"TaskStatistic"> | string
-    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-  }, "id" | "identityId">
-
-  export type TaskStatisticOrderByWithAggregationInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    calculatedAt?: SortOrder
-    templateTotal?: SortOrder
-    templateActive?: SortOrder
-    templatePaused?: SortOrder
-    templateArchived?: SortOrder
-    templateOneTime?: SortOrder
-    templateRecurring?: SortOrder
-    instanceTotal?: SortOrder
-    instanceToday?: SortOrder
-    instanceWeek?: SortOrder
-    instanceMonth?: SortOrder
-    instancePending?: SortOrder
-    instanceInProgress?: SortOrder
-    instanceCompleted?: SortOrder
-    instanceSkipped?: SortOrder
-    instanceMissed?: SortOrder
-    completionToday?: SortOrder
-    completionWeek?: SortOrder
-    completionMonth?: SortOrder
-    completionTotal?: SortOrder
-    completionAvgTime?: SortOrderInput | SortOrder
-    completionRate?: SortOrder
-    timeAllDay?: SortOrder
-    timePoint?: SortOrder
-    timeRange?: SortOrder
-    timeOverdue?: SortOrder
-    timeUpcoming?: SortOrder
-    distributionByImportance?: SortOrder
-    distributionByUrgency?: SortOrder
-    distributionByTag?: SortOrder
-    _count?: TaskStatisticCountOrderByAggregateInput
-    _avg?: TaskStatisticAvgOrderByAggregateInput
-    _max?: TaskStatisticMaxOrderByAggregateInput
-    _min?: TaskStatisticMinOrderByAggregateInput
-    _sum?: TaskStatisticSumOrderByAggregateInput
-  }
-
-  export type TaskStatisticScalarWhereWithAggregatesInput = {
-    AND?: TaskStatisticScalarWhereWithAggregatesInput | TaskStatisticScalarWhereWithAggregatesInput[]
-    OR?: TaskStatisticScalarWhereWithAggregatesInput[]
-    NOT?: TaskStatisticScalarWhereWithAggregatesInput | TaskStatisticScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"TaskStatistic"> | string
-    identityId?: StringWithAggregatesFilter<"TaskStatistic"> | string
-    calculatedAt?: DateTimeWithAggregatesFilter<"TaskStatistic"> | Date | string
-    templateTotal?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    templateActive?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    templatePaused?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    templateArchived?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    templateOneTime?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    templateRecurring?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    instanceTotal?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    instanceToday?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    instanceWeek?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    instanceMonth?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    instancePending?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    instanceInProgress?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    instanceCompleted?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    instanceSkipped?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    instanceMissed?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    completionToday?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    completionWeek?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    completionMonth?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    completionTotal?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    completionAvgTime?: FloatNullableWithAggregatesFilter<"TaskStatistic"> | number | null
-    completionRate?: FloatWithAggregatesFilter<"TaskStatistic"> | number
-    timeAllDay?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    timePoint?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    timeRange?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    timeOverdue?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    timeUpcoming?: IntWithAggregatesFilter<"TaskStatistic"> | number
-    distributionByImportance?: StringWithAggregatesFilter<"TaskStatistic"> | string
-    distributionByUrgency?: StringWithAggregatesFilter<"TaskStatistic"> | string
-    distributionByTag?: StringWithAggregatesFilter<"TaskStatistic"> | string
   }
 
   export type WalletAccountWhereInput = {
@@ -138483,7 +136588,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -138547,7 +136651,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -138611,7 +136714,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -138675,7 +136777,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -147997,8 +146098,8 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTaskPlansInput
     keyResult?: KeyResultCreateNestedOneWithoutLinkedTaskPlansInput
-    instances?: TaskOccurrenceCreateNestedManyWithoutPlanInput
-    history?: TaskPlanHistoryCreateNestedManyWithoutTemplateInput
+    occurrences?: TaskOccurrenceCreateNestedManyWithoutPlanInput
+    history?: TaskPlanHistoryCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelCreateNestedManyWithoutTaskPlanInput
   }
 
@@ -148025,8 +146126,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
-    history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutTemplateInput
+    occurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
+    history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelUncheckedCreateNestedManyWithoutTaskPlanInput
   }
 
@@ -148052,8 +146153,8 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTaskPlansNestedInput
     keyResult?: KeyResultUpdateOneWithoutLinkedTaskPlansNestedInput
-    instances?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
-    history?: TaskPlanHistoryUpdateManyWithoutTemplateNestedInput
+    occurrences?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
+    history?: TaskPlanHistoryUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUpdateManyWithoutTaskPlanNestedInput
   }
 
@@ -148080,8 +146181,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    instances?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
-    history?: TaskPlanHistoryUncheckedUpdateManyWithoutTemplateNestedInput
+    occurrences?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
+    history?: TaskPlanHistoryUncheckedUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUncheckedUpdateManyWithoutTaskPlanNestedInput
   }
 
@@ -148172,7 +146273,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTaskOccurrencesInput
-    plan: TaskPlanCreateNestedOneWithoutInstancesInput
+    plan: TaskPlanCreateNestedOneWithoutOccurrencesInput
   }
 
   export type TaskOccurrenceUncheckedCreateInput = {
@@ -148208,7 +146309,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTaskOccurrencesNestedInput
-    plan?: TaskPlanUpdateOneRequiredWithoutInstancesNestedInput
+    plan?: TaskPlanUpdateOneRequiredWithoutOccurrencesNestedInput
   }
 
   export type TaskOccurrenceUncheckedUpdateInput = {
@@ -148413,13 +146514,13 @@ export namespace Prisma {
     changes?: string | null
     createdAt?: Date | string
     identity: AccountCreateNestedOneWithoutTaskPlanHistoryInput
-    template: TaskPlanCreateNestedOneWithoutHistoryInput
+    plan: TaskPlanCreateNestedOneWithoutHistoryInput
   }
 
   export type TaskPlanHistoryUncheckedCreateInput = {
     id: string
     identityId: string
-    templateId: string
+    planId: string
     action: string
     changes?: string | null
     createdAt?: Date | string
@@ -148431,13 +146532,13 @@ export namespace Prisma {
     changes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     identity?: AccountUpdateOneRequiredWithoutTaskPlanHistoryNestedInput
-    template?: TaskPlanUpdateOneRequiredWithoutHistoryNestedInput
+    plan?: TaskPlanUpdateOneRequiredWithoutHistoryNestedInput
   }
 
   export type TaskPlanHistoryUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    templateId?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     changes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -148446,7 +146547,7 @@ export namespace Prisma {
   export type TaskPlanHistoryCreateManyInput = {
     id: string
     identityId: string
-    templateId: string
+    planId: string
     action: string
     changes?: string | null
     createdAt?: Date | string
@@ -148462,254 +146563,10 @@ export namespace Prisma {
   export type TaskPlanHistoryUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    templateId?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     changes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type TaskStatisticCreateInput = {
-    id: string
-    calculatedAt: Date | string
-    templateTotal: number
-    templateActive: number
-    templatePaused: number
-    templateArchived: number
-    templateOneTime: number
-    templateRecurring: number
-    instanceTotal: number
-    instanceToday: number
-    instanceWeek: number
-    instanceMonth: number
-    instancePending: number
-    instanceInProgress: number
-    instanceCompleted: number
-    instanceSkipped: number
-    instanceMissed: number
-    completionToday: number
-    completionWeek: number
-    completionMonth: number
-    completionTotal: number
-    completionAvgTime?: number | null
-    completionRate: number
-    timeAllDay: number
-    timePoint: number
-    timeRange: number
-    timeOverdue: number
-    timeUpcoming: number
-    distributionByImportance: string
-    distributionByUrgency: string
-    distributionByTag: string
-    account: AccountCreateNestedOneWithoutTaskStatisticsInput
-  }
-
-  export type TaskStatisticUncheckedCreateInput = {
-    id: string
-    identityId: string
-    calculatedAt: Date | string
-    templateTotal: number
-    templateActive: number
-    templatePaused: number
-    templateArchived: number
-    templateOneTime: number
-    templateRecurring: number
-    instanceTotal: number
-    instanceToday: number
-    instanceWeek: number
-    instanceMonth: number
-    instancePending: number
-    instanceInProgress: number
-    instanceCompleted: number
-    instanceSkipped: number
-    instanceMissed: number
-    completionToday: number
-    completionWeek: number
-    completionMonth: number
-    completionTotal: number
-    completionAvgTime?: number | null
-    completionRate: number
-    timeAllDay: number
-    timePoint: number
-    timeRange: number
-    timeOverdue: number
-    timeUpcoming: number
-    distributionByImportance: string
-    distributionByUrgency: string
-    distributionByTag: string
-  }
-
-  export type TaskStatisticUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    calculatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    templateTotal?: IntFieldUpdateOperationsInput | number
-    templateActive?: IntFieldUpdateOperationsInput | number
-    templatePaused?: IntFieldUpdateOperationsInput | number
-    templateArchived?: IntFieldUpdateOperationsInput | number
-    templateOneTime?: IntFieldUpdateOperationsInput | number
-    templateRecurring?: IntFieldUpdateOperationsInput | number
-    instanceTotal?: IntFieldUpdateOperationsInput | number
-    instanceToday?: IntFieldUpdateOperationsInput | number
-    instanceWeek?: IntFieldUpdateOperationsInput | number
-    instanceMonth?: IntFieldUpdateOperationsInput | number
-    instancePending?: IntFieldUpdateOperationsInput | number
-    instanceInProgress?: IntFieldUpdateOperationsInput | number
-    instanceCompleted?: IntFieldUpdateOperationsInput | number
-    instanceSkipped?: IntFieldUpdateOperationsInput | number
-    instanceMissed?: IntFieldUpdateOperationsInput | number
-    completionToday?: IntFieldUpdateOperationsInput | number
-    completionWeek?: IntFieldUpdateOperationsInput | number
-    completionMonth?: IntFieldUpdateOperationsInput | number
-    completionTotal?: IntFieldUpdateOperationsInput | number
-    completionAvgTime?: NullableFloatFieldUpdateOperationsInput | number | null
-    completionRate?: FloatFieldUpdateOperationsInput | number
-    timeAllDay?: IntFieldUpdateOperationsInput | number
-    timePoint?: IntFieldUpdateOperationsInput | number
-    timeRange?: IntFieldUpdateOperationsInput | number
-    timeOverdue?: IntFieldUpdateOperationsInput | number
-    timeUpcoming?: IntFieldUpdateOperationsInput | number
-    distributionByImportance?: StringFieldUpdateOperationsInput | string
-    distributionByUrgency?: StringFieldUpdateOperationsInput | string
-    distributionByTag?: StringFieldUpdateOperationsInput | string
-    account?: AccountUpdateOneRequiredWithoutTaskStatisticsNestedInput
-  }
-
-  export type TaskStatisticUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    calculatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    templateTotal?: IntFieldUpdateOperationsInput | number
-    templateActive?: IntFieldUpdateOperationsInput | number
-    templatePaused?: IntFieldUpdateOperationsInput | number
-    templateArchived?: IntFieldUpdateOperationsInput | number
-    templateOneTime?: IntFieldUpdateOperationsInput | number
-    templateRecurring?: IntFieldUpdateOperationsInput | number
-    instanceTotal?: IntFieldUpdateOperationsInput | number
-    instanceToday?: IntFieldUpdateOperationsInput | number
-    instanceWeek?: IntFieldUpdateOperationsInput | number
-    instanceMonth?: IntFieldUpdateOperationsInput | number
-    instancePending?: IntFieldUpdateOperationsInput | number
-    instanceInProgress?: IntFieldUpdateOperationsInput | number
-    instanceCompleted?: IntFieldUpdateOperationsInput | number
-    instanceSkipped?: IntFieldUpdateOperationsInput | number
-    instanceMissed?: IntFieldUpdateOperationsInput | number
-    completionToday?: IntFieldUpdateOperationsInput | number
-    completionWeek?: IntFieldUpdateOperationsInput | number
-    completionMonth?: IntFieldUpdateOperationsInput | number
-    completionTotal?: IntFieldUpdateOperationsInput | number
-    completionAvgTime?: NullableFloatFieldUpdateOperationsInput | number | null
-    completionRate?: FloatFieldUpdateOperationsInput | number
-    timeAllDay?: IntFieldUpdateOperationsInput | number
-    timePoint?: IntFieldUpdateOperationsInput | number
-    timeRange?: IntFieldUpdateOperationsInput | number
-    timeOverdue?: IntFieldUpdateOperationsInput | number
-    timeUpcoming?: IntFieldUpdateOperationsInput | number
-    distributionByImportance?: StringFieldUpdateOperationsInput | string
-    distributionByUrgency?: StringFieldUpdateOperationsInput | string
-    distributionByTag?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type TaskStatisticCreateManyInput = {
-    id: string
-    identityId: string
-    calculatedAt: Date | string
-    templateTotal: number
-    templateActive: number
-    templatePaused: number
-    templateArchived: number
-    templateOneTime: number
-    templateRecurring: number
-    instanceTotal: number
-    instanceToday: number
-    instanceWeek: number
-    instanceMonth: number
-    instancePending: number
-    instanceInProgress: number
-    instanceCompleted: number
-    instanceSkipped: number
-    instanceMissed: number
-    completionToday: number
-    completionWeek: number
-    completionMonth: number
-    completionTotal: number
-    completionAvgTime?: number | null
-    completionRate: number
-    timeAllDay: number
-    timePoint: number
-    timeRange: number
-    timeOverdue: number
-    timeUpcoming: number
-    distributionByImportance: string
-    distributionByUrgency: string
-    distributionByTag: string
-  }
-
-  export type TaskStatisticUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    calculatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    templateTotal?: IntFieldUpdateOperationsInput | number
-    templateActive?: IntFieldUpdateOperationsInput | number
-    templatePaused?: IntFieldUpdateOperationsInput | number
-    templateArchived?: IntFieldUpdateOperationsInput | number
-    templateOneTime?: IntFieldUpdateOperationsInput | number
-    templateRecurring?: IntFieldUpdateOperationsInput | number
-    instanceTotal?: IntFieldUpdateOperationsInput | number
-    instanceToday?: IntFieldUpdateOperationsInput | number
-    instanceWeek?: IntFieldUpdateOperationsInput | number
-    instanceMonth?: IntFieldUpdateOperationsInput | number
-    instancePending?: IntFieldUpdateOperationsInput | number
-    instanceInProgress?: IntFieldUpdateOperationsInput | number
-    instanceCompleted?: IntFieldUpdateOperationsInput | number
-    instanceSkipped?: IntFieldUpdateOperationsInput | number
-    instanceMissed?: IntFieldUpdateOperationsInput | number
-    completionToday?: IntFieldUpdateOperationsInput | number
-    completionWeek?: IntFieldUpdateOperationsInput | number
-    completionMonth?: IntFieldUpdateOperationsInput | number
-    completionTotal?: IntFieldUpdateOperationsInput | number
-    completionAvgTime?: NullableFloatFieldUpdateOperationsInput | number | null
-    completionRate?: FloatFieldUpdateOperationsInput | number
-    timeAllDay?: IntFieldUpdateOperationsInput | number
-    timePoint?: IntFieldUpdateOperationsInput | number
-    timeRange?: IntFieldUpdateOperationsInput | number
-    timeOverdue?: IntFieldUpdateOperationsInput | number
-    timeUpcoming?: IntFieldUpdateOperationsInput | number
-    distributionByImportance?: StringFieldUpdateOperationsInput | string
-    distributionByUrgency?: StringFieldUpdateOperationsInput | string
-    distributionByTag?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type TaskStatisticUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    identityId?: StringFieldUpdateOperationsInput | string
-    calculatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    templateTotal?: IntFieldUpdateOperationsInput | number
-    templateActive?: IntFieldUpdateOperationsInput | number
-    templatePaused?: IntFieldUpdateOperationsInput | number
-    templateArchived?: IntFieldUpdateOperationsInput | number
-    templateOneTime?: IntFieldUpdateOperationsInput | number
-    templateRecurring?: IntFieldUpdateOperationsInput | number
-    instanceTotal?: IntFieldUpdateOperationsInput | number
-    instanceToday?: IntFieldUpdateOperationsInput | number
-    instanceWeek?: IntFieldUpdateOperationsInput | number
-    instanceMonth?: IntFieldUpdateOperationsInput | number
-    instancePending?: IntFieldUpdateOperationsInput | number
-    instanceInProgress?: IntFieldUpdateOperationsInput | number
-    instanceCompleted?: IntFieldUpdateOperationsInput | number
-    instanceSkipped?: IntFieldUpdateOperationsInput | number
-    instanceMissed?: IntFieldUpdateOperationsInput | number
-    completionToday?: IntFieldUpdateOperationsInput | number
-    completionWeek?: IntFieldUpdateOperationsInput | number
-    completionMonth?: IntFieldUpdateOperationsInput | number
-    completionTotal?: IntFieldUpdateOperationsInput | number
-    completionAvgTime?: NullableFloatFieldUpdateOperationsInput | number | null
-    completionRate?: FloatFieldUpdateOperationsInput | number
-    timeAllDay?: IntFieldUpdateOperationsInput | number
-    timePoint?: IntFieldUpdateOperationsInput | number
-    timeRange?: IntFieldUpdateOperationsInput | number
-    timeOverdue?: IntFieldUpdateOperationsInput | number
-    timeUpcoming?: IntFieldUpdateOperationsInput | number
-    distributionByImportance?: StringFieldUpdateOperationsInput | string
-    distributionByUrgency?: StringFieldUpdateOperationsInput | string
-    distributionByTag?: StringFieldUpdateOperationsInput | string
   }
 
   export type WalletAccountCreateInput = {
@@ -149107,11 +146964,6 @@ export namespace Prisma {
     every?: TaskOccurrenceWhereInput
     some?: TaskOccurrenceWhereInput
     none?: TaskOccurrenceWhereInput
-  }
-
-  export type TaskStatisticNullableScalarRelationFilter = {
-    is?: TaskStatisticWhereInput | null
-    isNot?: TaskStatisticWhereInput | null
   }
 
   export type UserPreferenceRecordListRelationFilter = {
@@ -155006,7 +152858,7 @@ export namespace Prisma {
   export type TaskPlanHistoryCountOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
-    templateId?: SortOrder
+    planId?: SortOrder
     action?: SortOrder
     changes?: SortOrder
     createdAt?: SortOrder
@@ -155015,7 +152867,7 @@ export namespace Prisma {
   export type TaskPlanHistoryMaxOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
-    templateId?: SortOrder
+    planId?: SortOrder
     action?: SortOrder
     changes?: SortOrder
     createdAt?: SortOrder
@@ -155024,173 +152876,10 @@ export namespace Prisma {
   export type TaskPlanHistoryMinOrderByAggregateInput = {
     id?: SortOrder
     identityId?: SortOrder
-    templateId?: SortOrder
+    planId?: SortOrder
     action?: SortOrder
     changes?: SortOrder
     createdAt?: SortOrder
-  }
-
-  export type TaskStatisticCountOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    calculatedAt?: SortOrder
-    templateTotal?: SortOrder
-    templateActive?: SortOrder
-    templatePaused?: SortOrder
-    templateArchived?: SortOrder
-    templateOneTime?: SortOrder
-    templateRecurring?: SortOrder
-    instanceTotal?: SortOrder
-    instanceToday?: SortOrder
-    instanceWeek?: SortOrder
-    instanceMonth?: SortOrder
-    instancePending?: SortOrder
-    instanceInProgress?: SortOrder
-    instanceCompleted?: SortOrder
-    instanceSkipped?: SortOrder
-    instanceMissed?: SortOrder
-    completionToday?: SortOrder
-    completionWeek?: SortOrder
-    completionMonth?: SortOrder
-    completionTotal?: SortOrder
-    completionAvgTime?: SortOrder
-    completionRate?: SortOrder
-    timeAllDay?: SortOrder
-    timePoint?: SortOrder
-    timeRange?: SortOrder
-    timeOverdue?: SortOrder
-    timeUpcoming?: SortOrder
-    distributionByImportance?: SortOrder
-    distributionByUrgency?: SortOrder
-    distributionByTag?: SortOrder
-  }
-
-  export type TaskStatisticAvgOrderByAggregateInput = {
-    templateTotal?: SortOrder
-    templateActive?: SortOrder
-    templatePaused?: SortOrder
-    templateArchived?: SortOrder
-    templateOneTime?: SortOrder
-    templateRecurring?: SortOrder
-    instanceTotal?: SortOrder
-    instanceToday?: SortOrder
-    instanceWeek?: SortOrder
-    instanceMonth?: SortOrder
-    instancePending?: SortOrder
-    instanceInProgress?: SortOrder
-    instanceCompleted?: SortOrder
-    instanceSkipped?: SortOrder
-    instanceMissed?: SortOrder
-    completionToday?: SortOrder
-    completionWeek?: SortOrder
-    completionMonth?: SortOrder
-    completionTotal?: SortOrder
-    completionAvgTime?: SortOrder
-    completionRate?: SortOrder
-    timeAllDay?: SortOrder
-    timePoint?: SortOrder
-    timeRange?: SortOrder
-    timeOverdue?: SortOrder
-    timeUpcoming?: SortOrder
-  }
-
-  export type TaskStatisticMaxOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    calculatedAt?: SortOrder
-    templateTotal?: SortOrder
-    templateActive?: SortOrder
-    templatePaused?: SortOrder
-    templateArchived?: SortOrder
-    templateOneTime?: SortOrder
-    templateRecurring?: SortOrder
-    instanceTotal?: SortOrder
-    instanceToday?: SortOrder
-    instanceWeek?: SortOrder
-    instanceMonth?: SortOrder
-    instancePending?: SortOrder
-    instanceInProgress?: SortOrder
-    instanceCompleted?: SortOrder
-    instanceSkipped?: SortOrder
-    instanceMissed?: SortOrder
-    completionToday?: SortOrder
-    completionWeek?: SortOrder
-    completionMonth?: SortOrder
-    completionTotal?: SortOrder
-    completionAvgTime?: SortOrder
-    completionRate?: SortOrder
-    timeAllDay?: SortOrder
-    timePoint?: SortOrder
-    timeRange?: SortOrder
-    timeOverdue?: SortOrder
-    timeUpcoming?: SortOrder
-    distributionByImportance?: SortOrder
-    distributionByUrgency?: SortOrder
-    distributionByTag?: SortOrder
-  }
-
-  export type TaskStatisticMinOrderByAggregateInput = {
-    id?: SortOrder
-    identityId?: SortOrder
-    calculatedAt?: SortOrder
-    templateTotal?: SortOrder
-    templateActive?: SortOrder
-    templatePaused?: SortOrder
-    templateArchived?: SortOrder
-    templateOneTime?: SortOrder
-    templateRecurring?: SortOrder
-    instanceTotal?: SortOrder
-    instanceToday?: SortOrder
-    instanceWeek?: SortOrder
-    instanceMonth?: SortOrder
-    instancePending?: SortOrder
-    instanceInProgress?: SortOrder
-    instanceCompleted?: SortOrder
-    instanceSkipped?: SortOrder
-    instanceMissed?: SortOrder
-    completionToday?: SortOrder
-    completionWeek?: SortOrder
-    completionMonth?: SortOrder
-    completionTotal?: SortOrder
-    completionAvgTime?: SortOrder
-    completionRate?: SortOrder
-    timeAllDay?: SortOrder
-    timePoint?: SortOrder
-    timeRange?: SortOrder
-    timeOverdue?: SortOrder
-    timeUpcoming?: SortOrder
-    distributionByImportance?: SortOrder
-    distributionByUrgency?: SortOrder
-    distributionByTag?: SortOrder
-  }
-
-  export type TaskStatisticSumOrderByAggregateInput = {
-    templateTotal?: SortOrder
-    templateActive?: SortOrder
-    templatePaused?: SortOrder
-    templateArchived?: SortOrder
-    templateOneTime?: SortOrder
-    templateRecurring?: SortOrder
-    instanceTotal?: SortOrder
-    instanceToday?: SortOrder
-    instanceWeek?: SortOrder
-    instanceMonth?: SortOrder
-    instancePending?: SortOrder
-    instanceInProgress?: SortOrder
-    instanceCompleted?: SortOrder
-    instanceSkipped?: SortOrder
-    instanceMissed?: SortOrder
-    completionToday?: SortOrder
-    completionWeek?: SortOrder
-    completionMonth?: SortOrder
-    completionTotal?: SortOrder
-    completionAvgTime?: SortOrder
-    completionRate?: SortOrder
-    timeAllDay?: SortOrder
-    timePoint?: SortOrder
-    timeRange?: SortOrder
-    timeOverdue?: SortOrder
-    timeUpcoming?: SortOrder
   }
 
   export type DecimalFilter<$PrismaModel = never> = {
@@ -155513,12 +153202,6 @@ export namespace Prisma {
     connectOrCreate?: TaskOccurrenceCreateOrConnectWithoutAccountInput | TaskOccurrenceCreateOrConnectWithoutAccountInput[]
     createMany?: TaskOccurrenceCreateManyAccountInputEnvelope
     connect?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
-  }
-
-  export type TaskStatisticCreateNestedOneWithoutAccountInput = {
-    create?: XOR<TaskStatisticCreateWithoutAccountInput, TaskStatisticUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: TaskStatisticCreateOrConnectWithoutAccountInput
-    connect?: TaskStatisticWhereUniqueInput
   }
 
   export type UserPreferenceRecordCreateNestedManyWithoutAccountInput = {
@@ -155891,12 +153574,6 @@ export namespace Prisma {
     connectOrCreate?: TaskOccurrenceCreateOrConnectWithoutAccountInput | TaskOccurrenceCreateOrConnectWithoutAccountInput[]
     createMany?: TaskOccurrenceCreateManyAccountInputEnvelope
     connect?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
-  }
-
-  export type TaskStatisticUncheckedCreateNestedOneWithoutAccountInput = {
-    create?: XOR<TaskStatisticCreateWithoutAccountInput, TaskStatisticUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: TaskStatisticCreateOrConnectWithoutAccountInput
-    connect?: TaskStatisticWhereUniqueInput
   }
 
   export type UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput = {
@@ -156480,16 +154157,6 @@ export namespace Prisma {
     update?: TaskOccurrenceUpdateWithWhereUniqueWithoutAccountInput | TaskOccurrenceUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: TaskOccurrenceUpdateManyWithWhereWithoutAccountInput | TaskOccurrenceUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: TaskOccurrenceScalarWhereInput | TaskOccurrenceScalarWhereInput[]
-  }
-
-  export type TaskStatisticUpdateOneWithoutAccountNestedInput = {
-    create?: XOR<TaskStatisticCreateWithoutAccountInput, TaskStatisticUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: TaskStatisticCreateOrConnectWithoutAccountInput
-    upsert?: TaskStatisticUpsertWithoutAccountInput
-    disconnect?: TaskStatisticWhereInput | boolean
-    delete?: TaskStatisticWhereInput | boolean
-    connect?: TaskStatisticWhereUniqueInput
-    update?: XOR<XOR<TaskStatisticUpdateToOneWithWhereWithoutAccountInput, TaskStatisticUpdateWithoutAccountInput>, TaskStatisticUncheckedUpdateWithoutAccountInput>
   }
 
   export type UserPreferenceRecordUpdateManyWithoutAccountNestedInput = {
@@ -157222,16 +154889,6 @@ export namespace Prisma {
     update?: TaskOccurrenceUpdateWithWhereUniqueWithoutAccountInput | TaskOccurrenceUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: TaskOccurrenceUpdateManyWithWhereWithoutAccountInput | TaskOccurrenceUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: TaskOccurrenceScalarWhereInput | TaskOccurrenceScalarWhereInput[]
-  }
-
-  export type TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput = {
-    create?: XOR<TaskStatisticCreateWithoutAccountInput, TaskStatisticUncheckedCreateWithoutAccountInput>
-    connectOrCreate?: TaskStatisticCreateOrConnectWithoutAccountInput
-    upsert?: TaskStatisticUpsertWithoutAccountInput
-    disconnect?: TaskStatisticWhereInput | boolean
-    delete?: TaskStatisticWhereInput | boolean
-    connect?: TaskStatisticWhereUniqueInput
-    update?: XOR<XOR<TaskStatisticUpdateToOneWithWhereWithoutAccountInput, TaskStatisticUpdateWithoutAccountInput>, TaskStatisticUncheckedUpdateWithoutAccountInput>
   }
 
   export type UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -161076,10 +158733,10 @@ export namespace Prisma {
     connect?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
   }
 
-  export type TaskPlanHistoryCreateNestedManyWithoutTemplateInput = {
-    create?: XOR<TaskPlanHistoryCreateWithoutTemplateInput, TaskPlanHistoryUncheckedCreateWithoutTemplateInput> | TaskPlanHistoryCreateWithoutTemplateInput[] | TaskPlanHistoryUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TaskPlanHistoryCreateOrConnectWithoutTemplateInput | TaskPlanHistoryCreateOrConnectWithoutTemplateInput[]
-    createMany?: TaskPlanHistoryCreateManyTemplateInputEnvelope
+  export type TaskPlanHistoryCreateNestedManyWithoutPlanInput = {
+    create?: XOR<TaskPlanHistoryCreateWithoutPlanInput, TaskPlanHistoryUncheckedCreateWithoutPlanInput> | TaskPlanHistoryCreateWithoutPlanInput[] | TaskPlanHistoryUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: TaskPlanHistoryCreateOrConnectWithoutPlanInput | TaskPlanHistoryCreateOrConnectWithoutPlanInput[]
+    createMany?: TaskPlanHistoryCreateManyPlanInputEnvelope
     connect?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
   }
 
@@ -161097,10 +158754,10 @@ export namespace Prisma {
     connect?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
   }
 
-  export type TaskPlanHistoryUncheckedCreateNestedManyWithoutTemplateInput = {
-    create?: XOR<TaskPlanHistoryCreateWithoutTemplateInput, TaskPlanHistoryUncheckedCreateWithoutTemplateInput> | TaskPlanHistoryCreateWithoutTemplateInput[] | TaskPlanHistoryUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TaskPlanHistoryCreateOrConnectWithoutTemplateInput | TaskPlanHistoryCreateOrConnectWithoutTemplateInput[]
-    createMany?: TaskPlanHistoryCreateManyTemplateInputEnvelope
+  export type TaskPlanHistoryUncheckedCreateNestedManyWithoutPlanInput = {
+    create?: XOR<TaskPlanHistoryCreateWithoutPlanInput, TaskPlanHistoryUncheckedCreateWithoutPlanInput> | TaskPlanHistoryCreateWithoutPlanInput[] | TaskPlanHistoryUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: TaskPlanHistoryCreateOrConnectWithoutPlanInput | TaskPlanHistoryCreateOrConnectWithoutPlanInput[]
+    createMany?: TaskPlanHistoryCreateManyPlanInputEnvelope
     connect?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
   }
 
@@ -161143,17 +158800,17 @@ export namespace Prisma {
     deleteMany?: TaskOccurrenceScalarWhereInput | TaskOccurrenceScalarWhereInput[]
   }
 
-  export type TaskPlanHistoryUpdateManyWithoutTemplateNestedInput = {
-    create?: XOR<TaskPlanHistoryCreateWithoutTemplateInput, TaskPlanHistoryUncheckedCreateWithoutTemplateInput> | TaskPlanHistoryCreateWithoutTemplateInput[] | TaskPlanHistoryUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TaskPlanHistoryCreateOrConnectWithoutTemplateInput | TaskPlanHistoryCreateOrConnectWithoutTemplateInput[]
-    upsert?: TaskPlanHistoryUpsertWithWhereUniqueWithoutTemplateInput | TaskPlanHistoryUpsertWithWhereUniqueWithoutTemplateInput[]
-    createMany?: TaskPlanHistoryCreateManyTemplateInputEnvelope
+  export type TaskPlanHistoryUpdateManyWithoutPlanNestedInput = {
+    create?: XOR<TaskPlanHistoryCreateWithoutPlanInput, TaskPlanHistoryUncheckedCreateWithoutPlanInput> | TaskPlanHistoryCreateWithoutPlanInput[] | TaskPlanHistoryUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: TaskPlanHistoryCreateOrConnectWithoutPlanInput | TaskPlanHistoryCreateOrConnectWithoutPlanInput[]
+    upsert?: TaskPlanHistoryUpsertWithWhereUniqueWithoutPlanInput | TaskPlanHistoryUpsertWithWhereUniqueWithoutPlanInput[]
+    createMany?: TaskPlanHistoryCreateManyPlanInputEnvelope
     set?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
     disconnect?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
     delete?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
     connect?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
-    update?: TaskPlanHistoryUpdateWithWhereUniqueWithoutTemplateInput | TaskPlanHistoryUpdateWithWhereUniqueWithoutTemplateInput[]
-    updateMany?: TaskPlanHistoryUpdateManyWithWhereWithoutTemplateInput | TaskPlanHistoryUpdateManyWithWhereWithoutTemplateInput[]
+    update?: TaskPlanHistoryUpdateWithWhereUniqueWithoutPlanInput | TaskPlanHistoryUpdateWithWhereUniqueWithoutPlanInput[]
+    updateMany?: TaskPlanHistoryUpdateManyWithWhereWithoutPlanInput | TaskPlanHistoryUpdateManyWithWhereWithoutPlanInput[]
     deleteMany?: TaskPlanHistoryScalarWhereInput | TaskPlanHistoryScalarWhereInput[]
   }
 
@@ -161185,17 +158842,17 @@ export namespace Prisma {
     deleteMany?: TaskOccurrenceScalarWhereInput | TaskOccurrenceScalarWhereInput[]
   }
 
-  export type TaskPlanHistoryUncheckedUpdateManyWithoutTemplateNestedInput = {
-    create?: XOR<TaskPlanHistoryCreateWithoutTemplateInput, TaskPlanHistoryUncheckedCreateWithoutTemplateInput> | TaskPlanHistoryCreateWithoutTemplateInput[] | TaskPlanHistoryUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TaskPlanHistoryCreateOrConnectWithoutTemplateInput | TaskPlanHistoryCreateOrConnectWithoutTemplateInput[]
-    upsert?: TaskPlanHistoryUpsertWithWhereUniqueWithoutTemplateInput | TaskPlanHistoryUpsertWithWhereUniqueWithoutTemplateInput[]
-    createMany?: TaskPlanHistoryCreateManyTemplateInputEnvelope
+  export type TaskPlanHistoryUncheckedUpdateManyWithoutPlanNestedInput = {
+    create?: XOR<TaskPlanHistoryCreateWithoutPlanInput, TaskPlanHistoryUncheckedCreateWithoutPlanInput> | TaskPlanHistoryCreateWithoutPlanInput[] | TaskPlanHistoryUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: TaskPlanHistoryCreateOrConnectWithoutPlanInput | TaskPlanHistoryCreateOrConnectWithoutPlanInput[]
+    upsert?: TaskPlanHistoryUpsertWithWhereUniqueWithoutPlanInput | TaskPlanHistoryUpsertWithWhereUniqueWithoutPlanInput[]
+    createMany?: TaskPlanHistoryCreateManyPlanInputEnvelope
     set?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
     disconnect?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
     delete?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
     connect?: TaskPlanHistoryWhereUniqueInput | TaskPlanHistoryWhereUniqueInput[]
-    update?: TaskPlanHistoryUpdateWithWhereUniqueWithoutTemplateInput | TaskPlanHistoryUpdateWithWhereUniqueWithoutTemplateInput[]
-    updateMany?: TaskPlanHistoryUpdateManyWithWhereWithoutTemplateInput | TaskPlanHistoryUpdateManyWithWhereWithoutTemplateInput[]
+    update?: TaskPlanHistoryUpdateWithWhereUniqueWithoutPlanInput | TaskPlanHistoryUpdateWithWhereUniqueWithoutPlanInput[]
+    updateMany?: TaskPlanHistoryUpdateManyWithWhereWithoutPlanInput | TaskPlanHistoryUpdateManyWithWhereWithoutPlanInput[]
     deleteMany?: TaskPlanHistoryScalarWhereInput | TaskPlanHistoryScalarWhereInput[]
   }
 
@@ -161219,9 +158876,9 @@ export namespace Prisma {
     connect?: AccountWhereUniqueInput
   }
 
-  export type TaskPlanCreateNestedOneWithoutInstancesInput = {
-    create?: XOR<TaskPlanCreateWithoutInstancesInput, TaskPlanUncheckedCreateWithoutInstancesInput>
-    connectOrCreate?: TaskPlanCreateOrConnectWithoutInstancesInput
+  export type TaskPlanCreateNestedOneWithoutOccurrencesInput = {
+    create?: XOR<TaskPlanCreateWithoutOccurrencesInput, TaskPlanUncheckedCreateWithoutOccurrencesInput>
+    connectOrCreate?: TaskPlanCreateOrConnectWithoutOccurrencesInput
     connect?: TaskPlanWhereUniqueInput
   }
 
@@ -161233,12 +158890,12 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutTaskOccurrencesInput, AccountUpdateWithoutTaskOccurrencesInput>, AccountUncheckedUpdateWithoutTaskOccurrencesInput>
   }
 
-  export type TaskPlanUpdateOneRequiredWithoutInstancesNestedInput = {
-    create?: XOR<TaskPlanCreateWithoutInstancesInput, TaskPlanUncheckedCreateWithoutInstancesInput>
-    connectOrCreate?: TaskPlanCreateOrConnectWithoutInstancesInput
-    upsert?: TaskPlanUpsertWithoutInstancesInput
+  export type TaskPlanUpdateOneRequiredWithoutOccurrencesNestedInput = {
+    create?: XOR<TaskPlanCreateWithoutOccurrencesInput, TaskPlanUncheckedCreateWithoutOccurrencesInput>
+    connectOrCreate?: TaskPlanCreateOrConnectWithoutOccurrencesInput
+    upsert?: TaskPlanUpsertWithoutOccurrencesInput
     connect?: TaskPlanWhereUniqueInput
-    update?: XOR<XOR<TaskPlanUpdateToOneWithWhereWithoutInstancesInput, TaskPlanUpdateWithoutInstancesInput>, TaskPlanUncheckedUpdateWithoutInstancesInput>
+    update?: XOR<XOR<TaskPlanUpdateToOneWithWhereWithoutOccurrencesInput, TaskPlanUpdateWithoutOccurrencesInput>, TaskPlanUncheckedUpdateWithoutOccurrencesInput>
   }
 
   export type AccountCreateNestedOneWithoutTaskPlanHistoryInput = {
@@ -161267,20 +158924,6 @@ export namespace Prisma {
     upsert?: TaskPlanUpsertWithoutHistoryInput
     connect?: TaskPlanWhereUniqueInput
     update?: XOR<XOR<TaskPlanUpdateToOneWithWhereWithoutHistoryInput, TaskPlanUpdateWithoutHistoryInput>, TaskPlanUncheckedUpdateWithoutHistoryInput>
-  }
-
-  export type AccountCreateNestedOneWithoutTaskStatisticsInput = {
-    create?: XOR<AccountCreateWithoutTaskStatisticsInput, AccountUncheckedCreateWithoutTaskStatisticsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutTaskStatisticsInput
-    connect?: AccountWhereUniqueInput
-  }
-
-  export type AccountUpdateOneRequiredWithoutTaskStatisticsNestedInput = {
-    create?: XOR<AccountCreateWithoutTaskStatisticsInput, AccountUncheckedCreateWithoutTaskStatisticsInput>
-    connectOrCreate?: AccountCreateOrConnectWithoutTaskStatisticsInput
-    upsert?: AccountUpsertWithoutTaskStatisticsInput
-    connect?: AccountWhereUniqueInput
-    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutTaskStatisticsInput, AccountUpdateWithoutTaskStatisticsInput>, AccountUncheckedUpdateWithoutTaskStatisticsInput>
   }
 
   export type AccountCreateNestedOneWithoutWalletAccountsInput = {
@@ -162832,8 +160475,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     deletedAt?: Date | string | null
     keyResult?: KeyResultCreateNestedOneWithoutLinkedTaskPlansInput
-    instances?: TaskOccurrenceCreateNestedManyWithoutPlanInput
-    history?: TaskPlanHistoryCreateNestedManyWithoutTemplateInput
+    occurrences?: TaskOccurrenceCreateNestedManyWithoutPlanInput
+    history?: TaskPlanHistoryCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelCreateNestedManyWithoutTaskPlanInput
   }
 
@@ -162859,8 +160502,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
-    history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutTemplateInput
+    occurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
+    history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelUncheckedCreateNestedManyWithoutTaskPlanInput
   }
 
@@ -162888,7 +160531,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    plan: TaskPlanCreateNestedOneWithoutInstancesInput
+    plan: TaskPlanCreateNestedOneWithoutOccurrencesInput
   }
 
   export type TaskOccurrenceUncheckedCreateWithoutAccountInput = {
@@ -162916,79 +160559,6 @@ export namespace Prisma {
   export type TaskOccurrenceCreateManyAccountInputEnvelope = {
     data: TaskOccurrenceCreateManyAccountInput | TaskOccurrenceCreateManyAccountInput[]
     skipDuplicates?: boolean
-  }
-
-  export type TaskStatisticCreateWithoutAccountInput = {
-    id: string
-    calculatedAt: Date | string
-    templateTotal: number
-    templateActive: number
-    templatePaused: number
-    templateArchived: number
-    templateOneTime: number
-    templateRecurring: number
-    instanceTotal: number
-    instanceToday: number
-    instanceWeek: number
-    instanceMonth: number
-    instancePending: number
-    instanceInProgress: number
-    instanceCompleted: number
-    instanceSkipped: number
-    instanceMissed: number
-    completionToday: number
-    completionWeek: number
-    completionMonth: number
-    completionTotal: number
-    completionAvgTime?: number | null
-    completionRate: number
-    timeAllDay: number
-    timePoint: number
-    timeRange: number
-    timeOverdue: number
-    timeUpcoming: number
-    distributionByImportance: string
-    distributionByUrgency: string
-    distributionByTag: string
-  }
-
-  export type TaskStatisticUncheckedCreateWithoutAccountInput = {
-    id: string
-    calculatedAt: Date | string
-    templateTotal: number
-    templateActive: number
-    templatePaused: number
-    templateArchived: number
-    templateOneTime: number
-    templateRecurring: number
-    instanceTotal: number
-    instanceToday: number
-    instanceWeek: number
-    instanceMonth: number
-    instancePending: number
-    instanceInProgress: number
-    instanceCompleted: number
-    instanceSkipped: number
-    instanceMissed: number
-    completionToday: number
-    completionWeek: number
-    completionMonth: number
-    completionTotal: number
-    completionAvgTime?: number | null
-    completionRate: number
-    timeAllDay: number
-    timePoint: number
-    timeRange: number
-    timeOverdue: number
-    timeUpcoming: number
-    distributionByImportance: string
-    distributionByUrgency: string
-    distributionByTag: string
-  }
-
-  export type TaskStatisticCreateOrConnectWithoutAccountInput = {
-    where: TaskStatisticWhereUniqueInput
-    create: XOR<TaskStatisticCreateWithoutAccountInput, TaskStatisticUncheckedCreateWithoutAccountInput>
   }
 
   export type UserPreferenceRecordCreateWithoutAccountInput = {
@@ -163379,12 +160949,12 @@ export namespace Prisma {
     action: string
     changes?: string | null
     createdAt?: Date | string
-    template: TaskPlanCreateNestedOneWithoutHistoryInput
+    plan: TaskPlanCreateNestedOneWithoutHistoryInput
   }
 
   export type TaskPlanHistoryUncheckedCreateWithoutIdentityInput = {
     id: string
-    templateId: string
+    planId: string
     action: string
     changes?: string | null
     createdAt?: Date | string
@@ -165128,85 +162698,6 @@ export namespace Prisma {
     deletedAt?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
   }
 
-  export type TaskStatisticUpsertWithoutAccountInput = {
-    update: XOR<TaskStatisticUpdateWithoutAccountInput, TaskStatisticUncheckedUpdateWithoutAccountInput>
-    create: XOR<TaskStatisticCreateWithoutAccountInput, TaskStatisticUncheckedCreateWithoutAccountInput>
-    where?: TaskStatisticWhereInput
-  }
-
-  export type TaskStatisticUpdateToOneWithWhereWithoutAccountInput = {
-    where?: TaskStatisticWhereInput
-    data: XOR<TaskStatisticUpdateWithoutAccountInput, TaskStatisticUncheckedUpdateWithoutAccountInput>
-  }
-
-  export type TaskStatisticUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    calculatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    templateTotal?: IntFieldUpdateOperationsInput | number
-    templateActive?: IntFieldUpdateOperationsInput | number
-    templatePaused?: IntFieldUpdateOperationsInput | number
-    templateArchived?: IntFieldUpdateOperationsInput | number
-    templateOneTime?: IntFieldUpdateOperationsInput | number
-    templateRecurring?: IntFieldUpdateOperationsInput | number
-    instanceTotal?: IntFieldUpdateOperationsInput | number
-    instanceToday?: IntFieldUpdateOperationsInput | number
-    instanceWeek?: IntFieldUpdateOperationsInput | number
-    instanceMonth?: IntFieldUpdateOperationsInput | number
-    instancePending?: IntFieldUpdateOperationsInput | number
-    instanceInProgress?: IntFieldUpdateOperationsInput | number
-    instanceCompleted?: IntFieldUpdateOperationsInput | number
-    instanceSkipped?: IntFieldUpdateOperationsInput | number
-    instanceMissed?: IntFieldUpdateOperationsInput | number
-    completionToday?: IntFieldUpdateOperationsInput | number
-    completionWeek?: IntFieldUpdateOperationsInput | number
-    completionMonth?: IntFieldUpdateOperationsInput | number
-    completionTotal?: IntFieldUpdateOperationsInput | number
-    completionAvgTime?: NullableFloatFieldUpdateOperationsInput | number | null
-    completionRate?: FloatFieldUpdateOperationsInput | number
-    timeAllDay?: IntFieldUpdateOperationsInput | number
-    timePoint?: IntFieldUpdateOperationsInput | number
-    timeRange?: IntFieldUpdateOperationsInput | number
-    timeOverdue?: IntFieldUpdateOperationsInput | number
-    timeUpcoming?: IntFieldUpdateOperationsInput | number
-    distributionByImportance?: StringFieldUpdateOperationsInput | string
-    distributionByUrgency?: StringFieldUpdateOperationsInput | string
-    distributionByTag?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type TaskStatisticUncheckedUpdateWithoutAccountInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    calculatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    templateTotal?: IntFieldUpdateOperationsInput | number
-    templateActive?: IntFieldUpdateOperationsInput | number
-    templatePaused?: IntFieldUpdateOperationsInput | number
-    templateArchived?: IntFieldUpdateOperationsInput | number
-    templateOneTime?: IntFieldUpdateOperationsInput | number
-    templateRecurring?: IntFieldUpdateOperationsInput | number
-    instanceTotal?: IntFieldUpdateOperationsInput | number
-    instanceToday?: IntFieldUpdateOperationsInput | number
-    instanceWeek?: IntFieldUpdateOperationsInput | number
-    instanceMonth?: IntFieldUpdateOperationsInput | number
-    instancePending?: IntFieldUpdateOperationsInput | number
-    instanceInProgress?: IntFieldUpdateOperationsInput | number
-    instanceCompleted?: IntFieldUpdateOperationsInput | number
-    instanceSkipped?: IntFieldUpdateOperationsInput | number
-    instanceMissed?: IntFieldUpdateOperationsInput | number
-    completionToday?: IntFieldUpdateOperationsInput | number
-    completionWeek?: IntFieldUpdateOperationsInput | number
-    completionMonth?: IntFieldUpdateOperationsInput | number
-    completionTotal?: IntFieldUpdateOperationsInput | number
-    completionAvgTime?: NullableFloatFieldUpdateOperationsInput | number | null
-    completionRate?: FloatFieldUpdateOperationsInput | number
-    timeAllDay?: IntFieldUpdateOperationsInput | number
-    timePoint?: IntFieldUpdateOperationsInput | number
-    timeRange?: IntFieldUpdateOperationsInput | number
-    timeOverdue?: IntFieldUpdateOperationsInput | number
-    timeUpcoming?: IntFieldUpdateOperationsInput | number
-    distributionByImportance?: StringFieldUpdateOperationsInput | string
-    distributionByUrgency?: StringFieldUpdateOperationsInput | string
-    distributionByTag?: StringFieldUpdateOperationsInput | string
-  }
-
   export type UserPreferenceRecordUpsertWithWhereUniqueWithoutAccountInput = {
     where: UserPreferenceRecordWhereUniqueInput
     update: XOR<UserPreferenceRecordUpdateWithoutAccountInput, UserPreferenceRecordUncheckedUpdateWithoutAccountInput>
@@ -165557,7 +163048,7 @@ export namespace Prisma {
     NOT?: TaskPlanHistoryScalarWhereInput | TaskPlanHistoryScalarWhereInput[]
     id?: StringFilter<"TaskPlanHistory"> | string
     identityId?: StringFilter<"TaskPlanHistory"> | string
-    templateId?: StringFilter<"TaskPlanHistory"> | string
+    planId?: StringFilter<"TaskPlanHistory"> | string
     action?: StringFilter<"TaskPlanHistory"> | string
     changes?: StringNullableFilter<"TaskPlanHistory"> | string | null
     createdAt?: DateTimeFilter<"TaskPlanHistory"> | Date | string
@@ -166150,7 +163641,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -166213,7 +163703,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -166292,7 +163781,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -166355,7 +163843,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -166419,7 +163906,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
@@ -166482,7 +163968,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
@@ -166589,7 +164074,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
@@ -166652,7 +164136,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
@@ -166731,7 +164214,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -166794,7 +164276,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -166904,7 +164385,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -166967,7 +164447,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -167067,7 +164546,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -167130,7 +164608,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -167209,7 +164686,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -167272,7 +164748,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -167335,7 +164810,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -167398,7 +164872,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -167477,7 +164950,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -167540,7 +165012,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -167603,7 +165074,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -167666,7 +165136,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -167745,7 +165214,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -167808,7 +165276,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -167871,7 +165338,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -167934,7 +165400,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -168013,7 +165478,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -168076,7 +165540,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -168139,7 +165602,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -168202,7 +165664,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -168281,7 +165742,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -168344,7 +165804,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -168407,7 +165866,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -168470,7 +165928,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -168549,7 +166006,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -168612,7 +166068,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -168778,7 +166233,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -168841,7 +166295,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -169017,7 +166470,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -169080,7 +166532,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -169359,7 +166810,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -169422,7 +166872,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -169640,7 +167089,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -169703,7 +167151,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -169922,8 +167369,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTaskPlansInput
-    instances?: TaskOccurrenceCreateNestedManyWithoutPlanInput
-    history?: TaskPlanHistoryCreateNestedManyWithoutTemplateInput
+    occurrences?: TaskOccurrenceCreateNestedManyWithoutPlanInput
+    history?: TaskPlanHistoryCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelCreateNestedManyWithoutTaskPlanInput
   }
 
@@ -169947,8 +167394,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
-    history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutTemplateInput
+    occurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
+    history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelUncheckedCreateNestedManyWithoutTaskPlanInput
   }
 
@@ -170746,7 +168193,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -170809,7 +168255,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -170937,7 +168382,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -171000,7 +168444,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171365,7 +168808,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -171428,7 +168870,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -171545,7 +168986,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -171608,7 +169048,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171703,7 +169142,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -171766,7 +169204,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -171921,7 +169358,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -171984,7 +169420,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -172135,7 +169570,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -172198,7 +169632,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -172253,8 +169686,8 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTaskPlansInput
     keyResult?: KeyResultCreateNestedOneWithoutLinkedTaskPlansInput
-    instances?: TaskOccurrenceCreateNestedManyWithoutPlanInput
-    history?: TaskPlanHistoryCreateNestedManyWithoutTemplateInput
+    occurrences?: TaskOccurrenceCreateNestedManyWithoutPlanInput
+    history?: TaskPlanHistoryCreateNestedManyWithoutPlanInput
   }
 
   export type TaskPlanUncheckedCreateWithoutLabelLinksInput = {
@@ -172280,8 +169713,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
-    history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutTemplateInput
+    occurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
+    history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutPlanInput
   }
 
   export type TaskPlanCreateOrConnectWithoutLabelLinksInput = {
@@ -172362,7 +169795,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -172425,7 +169857,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -172486,8 +169917,8 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTaskPlansNestedInput
     keyResult?: KeyResultUpdateOneWithoutLinkedTaskPlansNestedInput
-    instances?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
-    history?: TaskPlanHistoryUpdateManyWithoutTemplateNestedInput
+    occurrences?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
+    history?: TaskPlanHistoryUpdateManyWithoutPlanNestedInput
   }
 
   export type TaskPlanUncheckedUpdateWithoutLabelLinksInput = {
@@ -172513,8 +169944,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    instances?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
-    history?: TaskPlanHistoryUncheckedUpdateManyWithoutTemplateNestedInput
+    occurrences?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
+    history?: TaskPlanHistoryUncheckedUpdateManyWithoutPlanNestedInput
   }
 
   export type LabelUpsertWithoutTaskLinksInput = {
@@ -172752,7 +170183,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
@@ -172815,7 +170245,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
@@ -172974,7 +170403,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
@@ -173037,7 +170465,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
@@ -173100,7 +170527,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -173163,7 +170589,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -173309,7 +170734,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -173372,7 +170796,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -173508,7 +170931,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -173571,7 +170993,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -173717,7 +171138,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -173780,7 +171200,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -174123,7 +171542,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -174186,7 +171604,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -174338,7 +171755,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -174401,7 +171817,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -174463,7 +171878,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -174526,7 +171940,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -174605,7 +172018,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -174668,7 +172080,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -174889,7 +172300,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -174952,7 +172362,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -175095,7 +172504,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -175158,7 +172566,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -175221,7 +172628,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -175284,7 +172690,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -175363,7 +172768,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -175426,7 +172830,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -175489,7 +172892,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -175552,7 +172954,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -175692,7 +173093,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -175755,7 +173155,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -175886,7 +173285,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -175949,7 +173347,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -176089,7 +173486,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -176152,7 +173548,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -176281,7 +173676,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -176344,7 +173738,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -176423,7 +173816,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -176486,7 +173878,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -176550,7 +173941,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -176613,7 +174003,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -176753,7 +174142,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -176816,7 +174204,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -176945,7 +174332,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -177008,7 +174394,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -177087,7 +174472,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -177150,7 +174534,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -177275,7 +174658,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -177338,7 +174720,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -177484,7 +174865,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -177547,7 +174927,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -177609,7 +174988,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -177672,7 +175050,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -177857,7 +175234,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -177920,7 +175296,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -178039,7 +175414,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -178102,7 +175476,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -178208,7 +175581,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -178271,7 +175643,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -178350,7 +175721,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -178413,7 +175783,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -178554,7 +175923,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -178617,7 +175985,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -178754,7 +176121,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -178817,7 +176183,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -178931,7 +176296,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -178994,7 +176358,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -179073,7 +176436,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -179136,7 +176498,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -179240,7 +176601,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -179303,7 +176663,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -179431,7 +176790,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -179494,7 +176852,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -179612,7 +176969,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -179675,7 +177031,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -179770,7 +177125,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -179833,7 +177187,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -179951,7 +177304,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -180014,7 +177366,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -180077,7 +177428,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -180140,7 +177490,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -180407,7 +177756,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -180470,7 +177818,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -180598,7 +177945,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -180661,7 +178007,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -180862,7 +178207,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -180925,7 +178269,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -181100,7 +178443,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -181163,7 +178505,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -181293,7 +178634,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -181356,7 +178696,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -181518,7 +178857,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -181581,7 +178919,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -181807,7 +179144,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -181870,7 +179206,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -182347,7 +179682,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -182410,7 +179744,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -182540,7 +179873,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -182603,7 +179935,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -182723,7 +180054,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -182786,7 +180116,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -182865,7 +180194,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -182928,7 +180256,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -182992,7 +180319,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -183055,7 +180381,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -183134,7 +180459,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -183197,7 +180521,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -183446,7 +180769,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -183509,7 +180831,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -183880,7 +181201,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -183943,7 +181263,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -184915,7 +182234,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -184978,7 +182296,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -185102,7 +182419,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -185165,7 +182481,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -185278,7 +182593,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -185341,7 +182655,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -185420,7 +182733,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -185483,7 +182795,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -185580,7 +182891,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -185643,7 +182953,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -185738,7 +183047,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -185801,7 +183109,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -185864,7 +183171,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -185927,7 +183233,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -186006,7 +183311,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -186069,7 +183373,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -186133,7 +183436,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -186196,7 +183498,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -186362,7 +183663,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -186425,7 +183725,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -186580,7 +183879,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -186643,7 +183941,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -186722,7 +184019,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -186785,7 +184081,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -186849,7 +184144,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
@@ -186912,7 +184206,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
     aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
@@ -186991,7 +184284,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
@@ -187054,7 +184346,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
     aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
@@ -187116,7 +184407,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -187179,7 +184469,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -187304,7 +184593,7 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type TaskPlanHistoryCreateWithoutTemplateInput = {
+  export type TaskPlanHistoryCreateWithoutPlanInput = {
     id: string
     action: string
     changes?: string | null
@@ -187312,7 +184601,7 @@ export namespace Prisma {
     identity: AccountCreateNestedOneWithoutTaskPlanHistoryInput
   }
 
-  export type TaskPlanHistoryUncheckedCreateWithoutTemplateInput = {
+  export type TaskPlanHistoryUncheckedCreateWithoutPlanInput = {
     id: string
     identityId: string
     action: string
@@ -187320,13 +184609,13 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
-  export type TaskPlanHistoryCreateOrConnectWithoutTemplateInput = {
+  export type TaskPlanHistoryCreateOrConnectWithoutPlanInput = {
     where: TaskPlanHistoryWhereUniqueInput
-    create: XOR<TaskPlanHistoryCreateWithoutTemplateInput, TaskPlanHistoryUncheckedCreateWithoutTemplateInput>
+    create: XOR<TaskPlanHistoryCreateWithoutPlanInput, TaskPlanHistoryUncheckedCreateWithoutPlanInput>
   }
 
-  export type TaskPlanHistoryCreateManyTemplateInputEnvelope = {
-    data: TaskPlanHistoryCreateManyTemplateInput | TaskPlanHistoryCreateManyTemplateInput[]
+  export type TaskPlanHistoryCreateManyPlanInputEnvelope = {
+    data: TaskPlanHistoryCreateManyPlanInput | TaskPlanHistoryCreateManyPlanInput[]
     skipDuplicates?: boolean
   }
 
@@ -187395,7 +184684,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -187458,7 +184746,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -187556,20 +184843,20 @@ export namespace Prisma {
     data: XOR<TaskOccurrenceUpdateManyMutationInput, TaskOccurrenceUncheckedUpdateManyWithoutPlanInput>
   }
 
-  export type TaskPlanHistoryUpsertWithWhereUniqueWithoutTemplateInput = {
+  export type TaskPlanHistoryUpsertWithWhereUniqueWithoutPlanInput = {
     where: TaskPlanHistoryWhereUniqueInput
-    update: XOR<TaskPlanHistoryUpdateWithoutTemplateInput, TaskPlanHistoryUncheckedUpdateWithoutTemplateInput>
-    create: XOR<TaskPlanHistoryCreateWithoutTemplateInput, TaskPlanHistoryUncheckedCreateWithoutTemplateInput>
+    update: XOR<TaskPlanHistoryUpdateWithoutPlanInput, TaskPlanHistoryUncheckedUpdateWithoutPlanInput>
+    create: XOR<TaskPlanHistoryCreateWithoutPlanInput, TaskPlanHistoryUncheckedCreateWithoutPlanInput>
   }
 
-  export type TaskPlanHistoryUpdateWithWhereUniqueWithoutTemplateInput = {
+  export type TaskPlanHistoryUpdateWithWhereUniqueWithoutPlanInput = {
     where: TaskPlanHistoryWhereUniqueInput
-    data: XOR<TaskPlanHistoryUpdateWithoutTemplateInput, TaskPlanHistoryUncheckedUpdateWithoutTemplateInput>
+    data: XOR<TaskPlanHistoryUpdateWithoutPlanInput, TaskPlanHistoryUncheckedUpdateWithoutPlanInput>
   }
 
-  export type TaskPlanHistoryUpdateManyWithWhereWithoutTemplateInput = {
+  export type TaskPlanHistoryUpdateManyWithWhereWithoutPlanInput = {
     where: TaskPlanHistoryScalarWhereInput
-    data: XOR<TaskPlanHistoryUpdateManyMutationInput, TaskPlanHistoryUncheckedUpdateManyWithoutTemplateInput>
+    data: XOR<TaskPlanHistoryUpdateManyMutationInput, TaskPlanHistoryUncheckedUpdateManyWithoutPlanInput>
   }
 
   export type TaskLabelUpsertWithWhereUniqueWithoutTaskPlanInput = {
@@ -187623,7 +184910,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -187686,7 +184972,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -187719,7 +185004,7 @@ export namespace Prisma {
     create: XOR<AccountCreateWithoutTaskOccurrencesInput, AccountUncheckedCreateWithoutTaskOccurrencesInput>
   }
 
-  export type TaskPlanCreateWithoutInstancesInput = {
+  export type TaskPlanCreateWithoutOccurrencesInput = {
     id: string
     name: string
     description?: string | null
@@ -187741,11 +185026,11 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTaskPlansInput
     keyResult?: KeyResultCreateNestedOneWithoutLinkedTaskPlansInput
-    history?: TaskPlanHistoryCreateNestedManyWithoutTemplateInput
+    history?: TaskPlanHistoryCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelCreateNestedManyWithoutTaskPlanInput
   }
 
-  export type TaskPlanUncheckedCreateWithoutInstancesInput = {
+  export type TaskPlanUncheckedCreateWithoutOccurrencesInput = {
     id: string
     identityId: string
     name: string
@@ -187768,13 +185053,13 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutTemplateInput
+    history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelUncheckedCreateNestedManyWithoutTaskPlanInput
   }
 
-  export type TaskPlanCreateOrConnectWithoutInstancesInput = {
+  export type TaskPlanCreateOrConnectWithoutOccurrencesInput = {
     where: TaskPlanWhereUniqueInput
-    create: XOR<TaskPlanCreateWithoutInstancesInput, TaskPlanUncheckedCreateWithoutInstancesInput>
+    create: XOR<TaskPlanCreateWithoutOccurrencesInput, TaskPlanUncheckedCreateWithoutOccurrencesInput>
   }
 
   export type AccountUpsertWithoutTaskOccurrencesInput = {
@@ -187823,7 +185108,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -187886,7 +185170,6 @@ export namespace Prisma {
     walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -187914,18 +185197,18 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
 
-  export type TaskPlanUpsertWithoutInstancesInput = {
-    update: XOR<TaskPlanUpdateWithoutInstancesInput, TaskPlanUncheckedUpdateWithoutInstancesInput>
-    create: XOR<TaskPlanCreateWithoutInstancesInput, TaskPlanUncheckedCreateWithoutInstancesInput>
+  export type TaskPlanUpsertWithoutOccurrencesInput = {
+    update: XOR<TaskPlanUpdateWithoutOccurrencesInput, TaskPlanUncheckedUpdateWithoutOccurrencesInput>
+    create: XOR<TaskPlanCreateWithoutOccurrencesInput, TaskPlanUncheckedCreateWithoutOccurrencesInput>
     where?: TaskPlanWhereInput
   }
 
-  export type TaskPlanUpdateToOneWithWhereWithoutInstancesInput = {
+  export type TaskPlanUpdateToOneWithWhereWithoutOccurrencesInput = {
     where?: TaskPlanWhereInput
-    data: XOR<TaskPlanUpdateWithoutInstancesInput, TaskPlanUncheckedUpdateWithoutInstancesInput>
+    data: XOR<TaskPlanUpdateWithoutOccurrencesInput, TaskPlanUncheckedUpdateWithoutOccurrencesInput>
   }
 
-  export type TaskPlanUpdateWithoutInstancesInput = {
+  export type TaskPlanUpdateWithoutOccurrencesInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -187947,11 +185230,11 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTaskPlansNestedInput
     keyResult?: KeyResultUpdateOneWithoutLinkedTaskPlansNestedInput
-    history?: TaskPlanHistoryUpdateManyWithoutTemplateNestedInput
+    history?: TaskPlanHistoryUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUpdateManyWithoutTaskPlanNestedInput
   }
 
-  export type TaskPlanUncheckedUpdateWithoutInstancesInput = {
+  export type TaskPlanUncheckedUpdateWithoutOccurrencesInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
@@ -187974,7 +185257,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    history?: TaskPlanHistoryUncheckedUpdateManyWithoutTemplateNestedInput
+    history?: TaskPlanHistoryUncheckedUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUncheckedUpdateManyWithoutTaskPlanNestedInput
   }
 
@@ -188014,7 +185297,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -188077,7 +185359,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -188131,7 +185412,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTaskPlansInput
     keyResult?: KeyResultCreateNestedOneWithoutLinkedTaskPlansInput
-    instances?: TaskOccurrenceCreateNestedManyWithoutPlanInput
+    occurrences?: TaskOccurrenceCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelCreateNestedManyWithoutTaskPlanInput
   }
 
@@ -188158,7 +185439,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
+    occurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelUncheckedCreateNestedManyWithoutTaskPlanInput
   }
 
@@ -188214,7 +185495,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -188277,7 +185557,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -188337,7 +185616,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTaskPlansNestedInput
     keyResult?: KeyResultUpdateOneWithoutLinkedTaskPlansNestedInput
-    instances?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
+    occurrences?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUpdateManyWithoutTaskPlanNestedInput
   }
 
@@ -188364,276 +185643,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    instances?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
+    occurrences?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUncheckedUpdateManyWithoutTaskPlanNestedInput
-  }
-
-  export type AccountCreateWithoutTaskStatisticsInput = {
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
-    goals?: GoalCreateNestedManyWithoutAccountInput
-    labels?: LabelCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticCreateNestedOneWithoutAccountInput
-    habits?: HabitCreateNestedManyWithoutAccountInput
-    relations?: RelationCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
-    notifications?: NotificationCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageCreateNestedManyWithoutIdentityInput
-    folders?: FolderCreateNestedManyWithoutIdentityInput
-    resources?: ResourceCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountUncheckedCreateWithoutTaskStatisticsInput = {
-    id: string
-    status?: string
-    profile: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    closedAt?: Date | string | null
-    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
-    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
-    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
-    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
-    reminderGroups?: ReminderGroupUncheckedCreateNestedManyWithoutAccountInput
-    reminderTemplates?: ReminderTemplateUncheckedCreateNestedManyWithoutAccountInput
-    reminderInstances?: ReminderInstanceUncheckedCreateNestedManyWithoutAccountInput
-    reminderStatistics?: ReminderStatisticUncheckedCreateNestedOneWithoutAccountInput
-    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
-    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedCreateNestedOneWithoutAccountInput
-    repositories?: RepositoryUncheckedCreateNestedManyWithoutAccountInput
-    repositoryExplorers?: RepositoryExplorerUncheckedCreateNestedManyWithoutAccountInput
-    repositoryStatistics?: RepositoryStatisticUncheckedCreateNestedOneWithoutAccountInput
-    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
-    scheduleTasks?: ScheduleTaskUncheckedCreateNestedManyWithoutAccountInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
-    scheduleStatistics?: ScheduleStatisticUncheckedCreateNestedOneWithoutAccountInput
-    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
-    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
-    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
-    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
-    activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
-    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
-    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
-    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedCreateNestedManyWithoutAccountInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedCreateNestedOneWithoutAccountInput
-    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
-    dashboardConfigs?: DashboardConfigUncheckedCreateNestedOneWithoutAccountInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    scheduleExecutions?: ScheduleExecutionUncheckedCreateNestedManyWithoutIdentityInput
-    reminderHistory?: ReminderHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    reminderResponses?: ReminderResponseUncheckedCreateNestedManyWithoutIdentityInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    notificationChannels?: NotificationChannelUncheckedCreateNestedManyWithoutIdentityInput
-    notificationHistory?: NotificationHistoryUncheckedCreateNestedManyWithoutIdentityInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
-    aiMessages?: AiMessageUncheckedCreateNestedManyWithoutIdentityInput
-    folders?: FolderUncheckedCreateNestedManyWithoutIdentityInput
-    resources?: ResourceUncheckedCreateNestedManyWithoutIdentityInput
-    repositoryResources?: RepositoryResourceUncheckedCreateNestedManyWithoutIdentityInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
-  }
-
-  export type AccountCreateOrConnectWithoutTaskStatisticsInput = {
-    where: AccountWhereUniqueInput
-    create: XOR<AccountCreateWithoutTaskStatisticsInput, AccountUncheckedCreateWithoutTaskStatisticsInput>
-  }
-
-  export type AccountUpsertWithoutTaskStatisticsInput = {
-    update: XOR<AccountUpdateWithoutTaskStatisticsInput, AccountUncheckedUpdateWithoutTaskStatisticsInput>
-    create: XOR<AccountCreateWithoutTaskStatisticsInput, AccountUncheckedCreateWithoutTaskStatisticsInput>
-    where?: AccountWhereInput
-  }
-
-  export type AccountUpdateToOneWithWhereWithoutTaskStatisticsInput = {
-    where?: AccountWhereInput
-    data: XOR<AccountUpdateWithoutTaskStatisticsInput, AccountUncheckedUpdateWithoutTaskStatisticsInput>
-  }
-
-  export type AccountUpdateWithoutTaskStatisticsInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
-    goals?: GoalUpdateManyWithoutAccountNestedInput
-    labels?: LabelUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUpdateOneWithoutAccountNestedInput
-    habits?: HabitUpdateManyWithoutAccountNestedInput
-    relations?: RelationUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
-  }
-
-  export type AccountUncheckedUpdateWithoutTaskStatisticsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
-    profile?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
-    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
-    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
-    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
-    reminderGroups?: ReminderGroupUncheckedUpdateManyWithoutAccountNestedInput
-    reminderTemplates?: ReminderTemplateUncheckedUpdateManyWithoutAccountNestedInput
-    reminderInstances?: ReminderInstanceUncheckedUpdateManyWithoutAccountNestedInput
-    reminderStatistics?: ReminderStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
-    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
-    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
-    userReminderPreferences?: UserReminderPreferenceUncheckedUpdateOneWithoutAccountNestedInput
-    repositories?: RepositoryUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryExplorers?: RepositoryExplorerUncheckedUpdateManyWithoutAccountNestedInput
-    repositoryStatistics?: RepositoryStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleTasks?: ScheduleTaskUncheckedUpdateManyWithoutAccountNestedInput
-    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
-    scheduleStatistics?: ScheduleStatisticUncheckedUpdateOneWithoutAccountNestedInput
-    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
-    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
-    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
-    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
-    activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
-    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
-    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
-    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
-    aiGenerationTasks?: AiGenerationTaskUncheckedUpdateManyWithoutAccountNestedInput
-    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
-    aiUsageQuotas?: AiUsageQuotaUncheckedUpdateOneWithoutAccountNestedInput
-    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
-    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
-    dashboardConfigs?: DashboardConfigUncheckedUpdateOneWithoutAccountNestedInput
-    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    scheduleExecutions?: ScheduleExecutionUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderHistory?: ReminderHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderResponses?: ReminderResponseUncheckedUpdateManyWithoutIdentityNestedInput
-    reminderOccurrences?: ReminderOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    notificationChannels?: NotificationChannelUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationHistory?: NotificationHistoryUncheckedUpdateManyWithoutIdentityNestedInput
-    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
-    aiMessages?: AiMessageUncheckedUpdateManyWithoutIdentityNestedInput
-    folders?: FolderUncheckedUpdateManyWithoutIdentityNestedInput
-    resources?: ResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    repositoryResources?: RepositoryResourceUncheckedUpdateManyWithoutIdentityNestedInput
-    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
-    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
 
   export type AccountCreateWithoutWalletAccountsInput = {
@@ -188671,7 +185682,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -188734,7 +185744,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -188847,7 +185856,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -188910,7 +185918,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -189014,7 +186021,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
     notifications?: NotificationCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
@@ -189077,7 +186083,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedCreateNestedManyWithoutAccountInput
     taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
     taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
-    taskStatistics?: TaskStatisticUncheckedCreateNestedOneWithoutAccountInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
     aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
@@ -189187,7 +186192,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
@@ -189250,7 +186254,6 @@ export namespace Prisma {
     activityLedger?: ActivityLedgerUncheckedUpdateManyWithoutAccountNestedInput
     taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
     taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
-    taskStatistics?: TaskStatisticUncheckedUpdateOneWithoutAccountNestedInput
     userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
     aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
@@ -189766,7 +186769,7 @@ export namespace Prisma {
 
   export type TaskPlanHistoryCreateManyIdentityInput = {
     id: string
-    templateId: string
+    planId: string
     action: string
     changes?: string | null
     createdAt?: Date | string
@@ -191045,8 +188048,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     keyResult?: KeyResultUpdateOneWithoutLinkedTaskPlansNestedInput
-    instances?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
-    history?: TaskPlanHistoryUpdateManyWithoutTemplateNestedInput
+    occurrences?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
+    history?: TaskPlanHistoryUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUpdateManyWithoutTaskPlanNestedInput
   }
 
@@ -191072,8 +188075,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    instances?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
-    history?: TaskPlanHistoryUncheckedUpdateManyWithoutTemplateNestedInput
+    occurrences?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
+    history?: TaskPlanHistoryUncheckedUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUncheckedUpdateManyWithoutTaskPlanNestedInput
   }
 
@@ -191115,7 +188118,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    plan?: TaskPlanUpdateOneRequiredWithoutInstancesNestedInput
+    plan?: TaskPlanUpdateOneRequiredWithoutOccurrencesNestedInput
   }
 
   export type TaskOccurrenceUncheckedUpdateWithoutAccountInput = {
@@ -191548,12 +188551,12 @@ export namespace Prisma {
     action?: StringFieldUpdateOperationsInput | string
     changes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    template?: TaskPlanUpdateOneRequiredWithoutHistoryNestedInput
+    plan?: TaskPlanUpdateOneRequiredWithoutHistoryNestedInput
   }
 
   export type TaskPlanHistoryUncheckedUpdateWithoutIdentityInput = {
     id?: StringFieldUpdateOperationsInput | string
-    templateId?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     changes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -191561,7 +188564,7 @@ export namespace Prisma {
 
   export type TaskPlanHistoryUncheckedUpdateManyWithoutIdentityInput = {
     id?: StringFieldUpdateOperationsInput | string
-    templateId?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     changes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -192788,8 +189791,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTaskPlansNestedInput
-    instances?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
-    history?: TaskPlanHistoryUpdateManyWithoutTemplateNestedInput
+    occurrences?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
+    history?: TaskPlanHistoryUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUpdateManyWithoutTaskPlanNestedInput
   }
 
@@ -192813,8 +189816,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    instances?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
-    history?: TaskPlanHistoryUncheckedUpdateManyWithoutTemplateNestedInput
+    occurrences?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
+    history?: TaskPlanHistoryUncheckedUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUncheckedUpdateManyWithoutTaskPlanNestedInput
   }
 
@@ -194689,7 +191692,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
   }
 
-  export type TaskPlanHistoryCreateManyTemplateInput = {
+  export type TaskPlanHistoryCreateManyPlanInput = {
     id: string
     identityId: string
     action: string
@@ -194752,7 +191755,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type TaskPlanHistoryUpdateWithoutTemplateInput = {
+  export type TaskPlanHistoryUpdateWithoutPlanInput = {
     id?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
     changes?: NullableStringFieldUpdateOperationsInput | string | null
@@ -194760,7 +191763,7 @@ export namespace Prisma {
     identity?: AccountUpdateOneRequiredWithoutTaskPlanHistoryNestedInput
   }
 
-  export type TaskPlanHistoryUncheckedUpdateWithoutTemplateInput = {
+  export type TaskPlanHistoryUncheckedUpdateWithoutPlanInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
@@ -194768,7 +191771,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type TaskPlanHistoryUncheckedUpdateManyWithoutTemplateInput = {
+  export type TaskPlanHistoryUncheckedUpdateManyWithoutPlanInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string

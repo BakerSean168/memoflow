@@ -18,11 +18,11 @@ const userTimeContextPort = {
   getUserTimeContext: vi.fn().mockResolvedValue(TASK_TEST_TIME_CONTEXT),
 };
 
-const mockGenerateInstances = vi.fn();
+const mockGenerateOccurrences = vi.fn();
 vi.mock('../../../../domain/services', () => {
   return {
     TaskOccurrenceGenerationService: class {
-      generateInstances = mockGenerateInstances;
+      generateOccurrences = mockGenerateOccurrences;
     },
   };
 });
@@ -36,8 +36,8 @@ describe('Instance maintenance use-cases', () => {
       templateRepo,
       instanceRepo,
       createInlineTaskWriteTransactionRunner({
-        templateRepository: templateRepo,
-        instanceRepository: instanceRepo,
+        planRepository: templateRepo,
+        occurrenceRepository: instanceRepo,
       }),
       userTimeContextPort,
     );
@@ -53,30 +53,30 @@ describe('Instance maintenance use-cases', () => {
 
     instanceRepo = createMockRepo<ITaskOccurrenceRepository>({
       findByIdentityId: vi.fn().mockResolvedValue([]),
-      findByTemplateId: vi.fn().mockResolvedValue([]),
+      findByPlanId: vi.fn().mockResolvedValue([]),
       saveMany: vi.fn().mockResolvedValue(undefined),
     });
   });
 
   describe('MarkTaskOccurrenceMissedUseCase', () => {
     it('persists Missed only after an explicit command', async () => {
-      const instance = {
+      const occurrence = {
         canMarkMissed: vi.fn().mockReturnValue(true),
         markMissed: vi.fn(),
         toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-1', status: 'Missed' }),
       } as any;
-      vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+      vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
       vi.mocked(instanceRepo.save).mockResolvedValue(undefined);
 
       const result = await new MarkTaskOccurrenceMissedUseCase(
         instanceRepo,
-        createInlineTaskWriteTransactionRunner({ instanceRepository: instanceRepo }),
+        createInlineTaskWriteTransactionRunner({ occurrenceRepository: instanceRepo }),
         TASK_TEST_OCCURRENCE_PROJECTION,
       ).execute('i-1', 'identity-1', { reason: 'No completion evidence' });
 
-      expect(instance.markMissed).toHaveBeenCalledWith('No completion evidence');
-      expect(instanceRepo.save).toHaveBeenCalledWith(instance);
-      expect(result).toBeOkWith({ instance: { id: 'i-1', status: 'Missed' } } as any);
+      expect(occurrence.markMissed).toHaveBeenCalledWith('No completion evidence');
+      expect(instanceRepo.save).toHaveBeenCalledWith(occurrence);
+      expect(result).toBeOkWith({ occurrence: { id: 'i-1', status: 'Missed' } } as any);
     });
   });
 
@@ -89,7 +89,7 @@ describe('Instance maintenance use-cases', () => {
       );
     });
 
-    it('returns NOT_FOUND when template does not exist', async () => {
+    it('returns NOT_FOUND when plan does not exist', async () => {
       vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(null);
       const useCase = createGenerateUseCase();
 
@@ -99,15 +99,15 @@ describe('Instance maintenance use-cases', () => {
       });
 
       expect(result).toBeErrorWithCode('NOT_FOUND');
-      expect(mockGenerateInstances).not.toHaveBeenCalled();
+      expect(mockGenerateOccurrences).not.toHaveBeenCalled();
       expect(instanceRepo.saveMany).not.toHaveBeenCalled();
       expect(templateRepo.save).not.toHaveBeenCalled();
     });
 
     it('returns empty list without persisting when generator yields none', async () => {
-      const template = { id: 'tpl-1' } as any;
-      vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-      mockGenerateInstances.mockReturnValue([]);
+      const plan = { id: 'tpl-1' } as any;
+      vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+      mockGenerateOccurrences.mockReturnValue([]);
       const useCase = createGenerateUseCase();
 
       const result = await useCase.execute('tpl-1', 'identity-1', {
@@ -116,23 +116,23 @@ describe('Instance maintenance use-cases', () => {
       });
 
       expect(result).toBeOkWith([] as any);
-      expect(mockGenerateInstances).toHaveBeenCalledWith(template, TASK_TEST_TIME_CONTEXT, {
+      expect(mockGenerateOccurrences).toHaveBeenCalledWith(plan, TASK_TEST_TIME_CONTEXT, {
         targetDate: 2,
         fromDate: 1,
-        existingInstances: [],
+        existingOccurrences: [],
       });
       expect(instanceRepo.saveMany).not.toHaveBeenCalled();
       expect(templateRepo.save).not.toHaveBeenCalled();
     });
 
-    it('persists generated instances and returns DTO list', async () => {
-      const template = { id: 'tpl-1' } as any;
+    it('persists generated occurrences and returns DTO list', async () => {
+      const plan = { id: 'tpl-1' } as any;
       const generated = [
         { toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-1' }) },
         { toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-2' }) },
       ];
-      vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-      mockGenerateInstances.mockReturnValue(generated as any);
+      vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+      mockGenerateOccurrences.mockReturnValue(generated as any);
       const useCase = createGenerateUseCase();
 
       const result = await useCase.execute('tpl-1', 'identity-1', {
@@ -142,18 +142,18 @@ describe('Instance maintenance use-cases', () => {
 
       expect(result).toBeOkWith([{ id: 'i-1' }, { id: 'i-2' }] as any);
       expect(instanceRepo.saveMany).toHaveBeenCalledWith(generated);
-      expect(templateRepo.save).toHaveBeenCalledWith(template);
+      expect(templateRepo.save).toHaveBeenCalledWith(plan);
     });
 
-    it('returns BAD_REQUEST when the template cannot generate instances in its current state', async () => {
-      const template = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
-      vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-      mockGenerateInstances.mockImplementation(() => {
-        throw new InvalidTaskPlanStateError('Can only generate instances for active templates');
+    it('returns BAD_REQUEST when the plan cannot generate occurrences in its current state', async () => {
+      const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
+      vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+      mockGenerateOccurrences.mockImplementation(() => {
+        throw new InvalidTaskPlanStateError('Can only generate occurrences for active plans');
       });
       const useCase = createGenerateUseCase();
 
-      const result = await useCase.execute(template.id, template.identityId, {
+      const result = await useCase.execute(plan.id, plan.identityId, {
         fromDate: 10,
         toDate: 20,
       });
@@ -162,15 +162,15 @@ describe('Instance maintenance use-cases', () => {
       expect(instanceRepo.saveMany).not.toHaveBeenCalled();
     });
 
-    it('returns INTERNAL_ERROR when template persistence fails after generating instances', async () => {
-      const template = aLoadedTaskPlan();
+    it('returns INTERNAL_ERROR when plan persistence fails after generating occurrences', async () => {
+      const plan = aLoadedTaskPlan();
       const generated = [{ toClientDTOAt: vi.fn().mockReturnValue({ id: 'i-1' }) }];
-      vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-      mockGenerateInstances.mockReturnValue(generated as any);
+      vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+      mockGenerateOccurrences.mockReturnValue(generated as any);
       vi.mocked(templateRepo.save).mockRejectedValue(new Error('save failed'));
       const useCase = createGenerateUseCase();
 
-      const result = await useCase.execute(template.id, template.identityId, {
+      const result = await useCase.execute(plan.id, plan.identityId, {
         fromDate: 10,
         toDate: 20,
       });

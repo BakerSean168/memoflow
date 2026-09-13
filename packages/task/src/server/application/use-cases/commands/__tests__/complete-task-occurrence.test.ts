@@ -19,7 +19,7 @@ describe('CompleteTaskOccurrenceUseCase', () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     instanceRepo = createMockRepo<ITaskOccurrenceRepository>({
       findByIdForIdentity: vi.fn(),
-      findByTemplateId: vi.fn().mockResolvedValue([]),
+      findByPlanId: vi.fn().mockResolvedValue([]),
       save: vi.fn().mockResolvedValue(undefined),
     });
     templateRepo = createMockRepo<ITaskPlanRepository>({
@@ -29,8 +29,8 @@ describe('CompleteTaskOccurrenceUseCase', () => {
       instanceRepo,
       templateRepo,
       createInlineTaskWriteTransactionRunner({
-        instanceRepository: instanceRepo,
-        templateRepository: templateRepo,
+        occurrenceRepository: instanceRepo,
+        planRepository: templateRepo,
       }),
       TASK_TEST_OCCURRENCE_PROJECTION,
     );
@@ -46,7 +46,7 @@ describe('CompleteTaskOccurrenceUseCase', () => {
     ).toThrow('TaskWriteTransactionRunner must be explicitly provided to CompleteTaskOccurrenceUseCase');
   });
 
-  it('should return NOT_FOUND when instance does not exist', async () => {
+  it('should return NOT_FOUND when occurrence does not exist', async () => {
     vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(null);
 
     const result = await useCase.execute('non-existent', 'identity-1');
@@ -56,75 +56,75 @@ describe('CompleteTaskOccurrenceUseCase', () => {
   });
 
   it('allows a skipped waiver to be corrected by a later Completed fact', async () => {
-    const instance = await aTaskOccurrence();
-    instance.skip('not applicable');
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+    const occurrence = await aTaskOccurrence();
+    occurrence.skip('not applicable');
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(instance.id, instance.identityId);
+    const result = await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(result).toBeOk();
-    expect(instance.status).toBe('Completed');
-    expect(instanceRepo.save).toHaveBeenCalledWith(instance);
+    expect(occurrence.status).toBe('Completed');
+    expect(instanceRepo.save).toHaveBeenCalledWith(occurrence);
   });
 
   it('allows an explicitly Missed occurrence to be corrected by late completion', async () => {
-    const instance = await aTaskOccurrence();
-    instance.markMissed('forgot yesterday');
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+    const occurrence = await aTaskOccurrence();
+    occurrence.markMissed('forgot yesterday');
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(instance.id, instance.identityId);
+    const result = await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(result).toBeOk();
-    expect(instance.status).toBe('Completed');
-    expect(instanceRepo.save).toHaveBeenCalledWith(instance);
+    expect(occurrence.status).toBe('Completed');
+    expect(instanceRepo.save).toHaveBeenCalledWith(occurrence);
   });
 
-  it('treats an already completed instance as an idempotent success', async () => {
-    const instance = await aTaskOccurrence();
-    instance.complete();
-    const completeSpy = vi.spyOn(instance, 'complete');
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+  it('treats an already completed occurrence as an idempotent success', async () => {
+    const occurrence = await aTaskOccurrence();
+    occurrence.complete();
+    const completeSpy = vi.spyOn(occurrence, 'complete');
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(instance.id, instance.identityId);
+    const result = await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.instance.id).toBe(instance.id);
-      expect(result.data.instance.status).toBe('Completed');
+      expect(result.data.occurrence.id).toBe(occurrence.id);
+      expect(result.data.occurrence.status).toBe('Completed');
     }
     expect(completeSpy).not.toHaveBeenCalled();
     expect(templateRepo.findByIdForIdentity).not.toHaveBeenCalled();
     expect(instanceRepo.save).not.toHaveBeenCalled();
   });
 
-  it('should complete a Pending instance', async () => {
-    const instance = await aTaskOccurrence();
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+  it('should complete a Pending occurrence', async () => {
+    const occurrence = await aTaskOccurrence();
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(instance.id, instance.identityId);
+    const result = await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(result).toBeOk();
-    expect(instance.status).toBe('Completed');
-    expect(instanceRepo.save).toHaveBeenCalledWith(instance);
+    expect(occurrence.status).toBe('Completed');
+    expect(instanceRepo.save).toHaveBeenCalledWith(occurrence);
   });
 
-  it('should complete an InProgress instance', async () => {
-    const instance = await aTaskOccurrence();
-    instance.start();
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+  it('should complete an InProgress occurrence', async () => {
+    const occurrence = await aTaskOccurrence();
+    occurrence.start();
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(instance.id, instance.identityId);
+    const result = await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(result).toBeOk();
-    expect(instance.status).toBe('Completed');
+    expect(occurrence.status).toBe('Completed');
   });
 
   it('should pass duration, note, and rating to complete()', async () => {
-    const instance = await aTaskOccurrence();
-    const completeSpy = vi.spyOn(instance, 'complete');
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+    const occurrence = await aTaskOccurrence();
+    const completeSpy = vi.spyOn(occurrence, 'complete');
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    await useCase.execute(instance.id, instance.identityId, {
+    await useCase.execute(occurrence.id, occurrence.identityId, {
       duration: 45,
       note: 'Great work',
       rating: 5,
@@ -137,39 +137,39 @@ describe('CompleteTaskOccurrenceUseCase', () => {
   });
 
   it('includes the task goal binding in the completion event context', async () => {
-    const template = aLoadedTaskPlan({ title: 'Ship linked task' });
-    template.bindToGoal('goal-1', 'kr-1', { value: 2, trigger: TaskGoalBindingTrigger.EachCompletion });
-    const instance = await aTaskOccurrence({ templateId: template.id });
-    const completeSpy = vi.spyOn(instance, 'complete');
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aLoadedTaskPlan({ title: 'Ship linked task' });
+    plan.bindToGoal('goal-1', 'kr-1', { value: 2, trigger: TaskGoalBindingTrigger.EachCompletion });
+    const occurrence = await aTaskOccurrence({ planId: plan.id });
+    const completeSpy = vi.spyOn(occurrence, 'complete');
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    await useCase.execute(instance.id, instance.identityId);
+    await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(completeSpy).toHaveBeenCalledWith(undefined, undefined, undefined, {
       taskTitle: 'Ship linked task',
-      goalBinding: template.goalBinding?.toDTO(),
+      goalBinding: plan.goalBinding?.toDTO(),
     });
   });
 
   it('publishes the authoritative Succeeded transition after the final completion', async () => {
-    const template = aLoadedTaskPlan({ title: 'Finish recurring work' });
-    template.bindToGoal('goal-1', 'kr-1', { value: 3, trigger: TaskGoalBindingTrigger.PlanCompletion });
-    const instance = await aTaskOccurrence({ templateId: template.id, instanceDate: 200 });
-    const completedSibling = await aTaskOccurrence({ templateId: template.id, instanceDate: 100 });
+    const plan = aLoadedTaskPlan({ title: 'Finish recurring work' });
+    plan.bindToGoal('goal-1', 'kr-1', { value: 3, trigger: TaskGoalBindingTrigger.PlanCompletion });
+    const occurrence = await aTaskOccurrence({ planId: plan.id, occurrenceDate: 200 });
+    const completedSibling = await aTaskOccurrence({ planId: plan.id, occurrenceDate: 100 });
     completedSibling.complete();
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
-    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([completedSibling, instance]);
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([completedSibling, occurrence]);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    await useCase.execute(instance.id, instance.identityId);
+    await useCase.execute(occurrence.id, occurrence.identityId);
 
-    expect(template.outcome).toBe(TaskPlanOutcome.Succeeded);
-    expect(template.domainEvents).toContainEqual(
+    expect(plan.outcome).toBe(TaskPlanOutcome.Succeeded);
+    expect(plan.domainEvents).toContainEqual(
       expect.objectContaining({
         eventType: 'task:plan-outcome-changed',
         payload: expect.objectContaining({
-          triggeringTaskOccurrenceId: instance.id,
+          triggeringTaskOccurrenceId: occurrence.id,
           previousOutcome: TaskPlanOutcome.Open,
           nextOutcome: TaskPlanOutcome.Succeeded,
         }),
@@ -178,44 +178,44 @@ describe('CompleteTaskOccurrenceUseCase', () => {
   });
 
   it('keeps the plan Open while a future sibling is still pending', async () => {
-    const template = aLoadedTaskPlan({ title: 'Finish the complete plan' });
-    template.bindToGoal('goal-1', 'kr-1', { value: 3, trigger: TaskGoalBindingTrigger.PlanCompletion });
-    const instance = await aTaskOccurrence({ templateId: template.id, instanceDate: 200 });
-    const completedSibling = await aTaskOccurrence({ templateId: template.id, instanceDate: 100 });
+    const plan = aLoadedTaskPlan({ title: 'Finish the complete plan' });
+    plan.bindToGoal('goal-1', 'kr-1', { value: 3, trigger: TaskGoalBindingTrigger.PlanCompletion });
+    const occurrence = await aTaskOccurrence({ planId: plan.id, occurrenceDate: 200 });
+    const completedSibling = await aTaskOccurrence({ planId: plan.id, occurrenceDate: 100 });
     const futurePendingSibling = await aTaskOccurrence({
-      templateId: template.id,
-      instanceDate: 300,
+      planId: plan.id,
+      occurrenceDate: 300,
     });
     completedSibling.complete();
-    const completeSpy = vi.spyOn(instance, 'complete');
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
-    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([
+    const completeSpy = vi.spyOn(occurrence, 'complete');
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([
       completedSibling,
-      instance,
+      occurrence,
       futurePendingSibling,
     ]);
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    await useCase.execute(instance.id, instance.identityId);
+    await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(completeSpy).toHaveBeenCalledWith(undefined, undefined, undefined, {
       taskTitle: 'Finish the complete plan',
-      goalBinding: template.goalBinding?.toDTO(),
+      goalBinding: plan.goalBinding?.toDTO(),
     });
-    expect(template.outcome).toBe(TaskPlanOutcome.Open);
-    expect(template.domainEvents.filter((event) => event.eventType === 'task:plan-outcome-changed')).toHaveLength(0);
+    expect(plan.outcome).toBe(TaskPlanOutcome.Open);
+    expect(plan.domainEvents.filter((event) => event.eventType === 'task:plan-outcome-changed')).toHaveLength(0);
   });
 
-  it('should return the instance client DTO in the response', async () => {
-    const instance = await aTaskOccurrence();
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+  it('should return the occurrence client DTO in the response', async () => {
+    const occurrence = await aTaskOccurrence();
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(instance.id, instance.identityId);
+    const result = await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.instance).toBeDefined();
-      expect(result.data.instance.id).toBe(instance.id);
+      expect(result.data.occurrence).toBeDefined();
+      expect(result.data.occurrence.id).toBe(occurrence.id);
     }
   });
 });

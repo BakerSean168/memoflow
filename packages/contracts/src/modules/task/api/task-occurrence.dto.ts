@@ -1,8 +1,8 @@
 /**
  * Task Instance Query Operations
  *
- * This file contains DTOs for querying task instances.
- * Task instances represent actual occurrences of task templates in a time range.
+ * This file contains DTOs for querying task occurrences.
+ * Task occurrences represent actual occurrences of task plans in a time range.
  */
 
 import { z } from 'zod';
@@ -70,6 +70,6 @@ export type SetTaskOccurrenceChecklistItemReq = z.infer<
 
 // Residual 789: complete/skip operation Res dual retired — sole ResSchema + z.infer.
 export const TaskOccurrenceOperationResSchema = z.object({
-  instance: TaskOccurrenceResponseSchema,
+  occurrence: TaskOccurrenceResponseSchema,
 });
 export type TaskOccurrenceOperationRes = z.infer<typeof TaskOccurrenceOperationResSchema>;

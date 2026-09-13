@@ -29,8 +29,8 @@ export function toDashboardTaskOccurrenceRecord(
     templateId: String(occurrence.planId),
     status: occurrence.status,
     // Dashboard is a temporary legacy read model. Feed it the Product-Time dueAt
-    // projection rather than resurrecting TaskOccurrence.instanceDate.
-    instanceDate: occurrence.dueAt,
+    // projection rather than resurrecting TaskOccurrence.occurrenceDate.
+    occurrenceDate: occurrence.dueAt,
     actualEndTime: occurrence.result?.kind === 'Completed' ? occurrence.result.recordedAt : null,
     updatedAt: occurrence.updatedAt,
     deletedAt: occurrence.deletedAt,

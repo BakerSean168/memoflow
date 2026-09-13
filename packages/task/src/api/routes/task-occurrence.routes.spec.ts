@@ -25,17 +25,17 @@ const authMiddleware = ((_, __, next) => next()) as RequestHandler;
 
 function createControllerStub(): TaskOccurrenceController {
   return {
-    getInstance: vi.fn(),
-    listInstances: vi.fn(),
-    getInstancesByDateRange: vi.fn(),
-    completeInstance: vi.fn(),
-    uncompleteInstance: vi.fn(),
-    skipInstance: vi.fn(),
-    startInstance: vi.fn(),
-    deleteInstance: vi.fn(),
-    markMissedInstance: vi.fn(),
-    setChecklistItem: vi.fn(),
-    rescheduleInstance: vi.fn(),
+    getOccurrence: vi.fn(),
+    listOccurrences: vi.fn(),
+    getOccurrencesByDateRange: vi.fn(),
+    completeOccurrence: vi.fn(),
+    uncompleteOccurrence: vi.fn(),
+    skipOccurrence: vi.fn(),
+    startOccurrence: vi.fn(),
+    deleteOccurrence: vi.fn(),
+    markOccurrenceMissed: vi.fn(),
+    setOccurrenceChecklistItem: vi.fn(),
+    rescheduleOccurrence: vi.fn(),
   } as unknown as TaskOccurrenceController;
 }
 
@@ -221,7 +221,7 @@ describe('task-occurrence route contracts', () => {
     );
   });
 
-  it('POST /{id}/uncomplete restores a completed task instance', () => {
+  it('POST /{id}/uncomplete restores a completed task occurrence', () => {
     const registry = new TestOpenApiRegistry();
     registerAll(registry);
 

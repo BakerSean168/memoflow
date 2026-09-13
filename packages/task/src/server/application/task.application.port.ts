@@ -21,7 +21,7 @@ import type { GetTaskOccurrencesByDateRangeUseCase } from './use-cases/queries/g
 import type { GetTaskPlanUseCase } from './use-cases/queries/get-task-plan.use-case';
 import type { ListTaskOccurrencesByAccountUseCase } from './use-cases/queries/list-task-occurrences-by-account.use-case';
 import type { ListTaskOccurrencesByStatusUseCase } from './use-cases/queries/list-task-occurrences-by-status.use-case';
-import type { ListTaskOccurrencesByTemplateUseCase } from './use-cases/queries/list-task-occurrences-by-template.use-case';
+import type { ListTaskOccurrencesByPlanUseCase } from './use-cases/queries/list-task-occurrences-by-plan.use-case';
 import type { ListTaskPlansUseCase } from './use-cases/queries/list-task-plans.use-case';
 
 type TaskPortFn<T extends (...args: never[]) => unknown> = (
@@ -59,7 +59,7 @@ export interface TaskApplicationPort {
   // Instance queries
   getTaskOccurrence: TaskPortFn<GetTaskOccurrenceUseCase['execute']>;
   listTaskOccurrencesByAccount: TaskPortFn<ListTaskOccurrencesByAccountUseCase['execute']>;
-  listTaskOccurrencesByTemplate: TaskPortFn<ListTaskOccurrencesByTemplateUseCase['execute']>;
+  listTaskOccurrencesByPlan: TaskPortFn<ListTaskOccurrencesByPlanUseCase['execute']>;
   listTaskOccurrencesByStatus: TaskPortFn<ListTaskOccurrencesByStatusUseCase['execute']>;
   getTaskOccurrencesByDateRange: TaskPortFn<GetTaskOccurrencesByDateRangeUseCase['execute']>;
 }

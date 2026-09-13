@@ -4,8 +4,8 @@
  *
  * Verifies that createTaskElectronModule is a pure transport/lifecycle
  * adapter: it registers all task channels, AWAITS the already-assembled
- * instance start, routes IPC calls through Task controllers to the same
- * instance api, removes all channels on destroy, disposes exactly once, and
+ * occurrence start, routes IPC calls through Task controllers to the same
+ * occurrence api, removes all channels on destroy, disposes exactly once, and
  * cleans up on start failure. It also locks the per-handle state machine:
  * double register() throws, register-after-destroy throws, and a failed
  * registration reverses exactly the channels installed by that call.
@@ -76,7 +76,7 @@ function createApiStub(): TaskApplicationPort {
     setTaskOccurrenceChecklistItem: instanceFn,
     getTaskOccurrence: instanceFn,
     listTaskOccurrencesByAccount: instanceFn,
-    listTaskOccurrencesByTemplate: instanceFn,
+    listTaskOccurrencesByPlan: instanceFn,
     listTaskOccurrencesByStatus: instanceFn,
     getTaskOccurrencesByDateRange: instanceFn,
   } as TaskApplicationPort;
@@ -86,8 +86,8 @@ function createFakeInstance() {
   const api = createApiStub();
   const start = vi.fn(async () => {});
   const dispose = vi.fn(async () => {});
-  const instance: TaskModuleInstance = { api, start, dispose } as TaskModuleInstance;
-  return { instance, api, start, dispose };
+  const occurrence: TaskModuleInstance = { api, start, dispose } as TaskModuleInstance;
+  return { occurrence, api, start, dispose };
 }
 
 function createFakeContext(): IElectronModuleContext {
@@ -113,7 +113,7 @@ describe('createTaskElectronModule IPC lifecycle', () => {
   beforeEach(() => {
     fake = createFakeInstance();
     context = createFakeContext();
-    moduleDef = createTaskElectronModule({ instance: fake.instance });
+    moduleDef = createTaskElectronModule({ occurrence: fake.occurrence });
   });
 
   afterEach(() => {
@@ -132,7 +132,7 @@ describe('createTaskElectronModule IPC lifecycle', () => {
     mocks.handlers.clear();
   });
 
-  it('registers all task channels and awaits the instance start once', async () => {
+  it('registers all task channels and awaits the occurrence start once', async () => {
     await moduleDef.register(context);
 
     for (const channel of Object.values(TaskChannels)) {
@@ -157,21 +157,21 @@ describe('createTaskElectronModule IPC lifecycle', () => {
     expect(fake.start).toHaveBeenCalledTimes(1);
   });
 
-  it('routes IPC calls through the controllers to the same instance api', async () => {
+  it('routes IPC calls through the controllers to the same occurrence api', async () => {
     await moduleDef.register(context);
 
-    const listResult = await registered(TaskChannels.TEMPLATE_LIST)(undefined, {});
+    const listResult = await registered(TaskChannels.PLAN_LIST)(undefined, {});
     expect(listResult).toMatchObject({ ok: true });
     expect(fake.api.listTaskPlans).toHaveBeenCalledTimes(1);
 
-    const instanceResult = await registered(TaskChannels.INSTANCE_LIST)(undefined, {});
+    const instanceResult = await registered(TaskChannels.OCCURRENCE_LIST)(undefined, {});
     expect(instanceResult).toMatchObject({ ok: true });
     expect(fake.api.listTaskOccurrencesByAccount).toHaveBeenCalledTimes(1);
   });
 
   it('validates Goal+KR list filters before invoking the Task application port', async () => {
     await moduleDef.register(context);
-    const handler = registered(TaskChannels.TEMPLATE_LIST);
+    const handler = registered(TaskChannels.PLAN_LIST);
     const goalId = 'IGoalId_550e8400-e29b-41d4-a716-446655440000';
     const keyResultId = 'IKeyResultId_550e8400-e29b-41d4-a716-446655440001';
 

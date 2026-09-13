@@ -10,7 +10,7 @@ import { mapTaskWriteErrorToResultError, type TaskWriteTransactionRunner } from 
 export class AbandonTaskPlanUseCase {
   private readonly logger = createLogger('AbandonTaskPlanUseCase');
   constructor(
-    private readonly templateRepository: ITaskPlanRepository,
+    private readonly planRepository: ITaskPlanRepository,
     private readonly transactionRunner: TaskWriteTransactionRunner,
     private readonly userTimeContextPort: UserTimeContextPort,
   ) {
@@ -20,12 +20,12 @@ export class AbandonTaskPlanUseCase {
   async execute(id: string, identityId: string, request?: AbandonTaskPlanReq): Promise<Result<TaskPlanClientDTO>> {
     try {
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
-      return await this.transactionRunner.run(async ({ templateRepository }) => {
-        const template = await templateRepository!.findByIdForIdentity(identityId, id);
-        if (!template) return error('NOT_FOUND', `TaskPlan ${id} not found`);
-        template.abandon(request?.reason);
-        await templateRepository!.save(template);
-        return ok(template.toClientDTOAt(timeContext));
+      return await this.transactionRunner.run(async ({ planRepository }) => {
+        const plan = await planRepository!.findByIdForIdentity(identityId, id);
+        if (!plan) return error('NOT_FOUND', `TaskPlan ${id} not found`);
+        plan.abandon(request?.reason);
+        await planRepository!.save(plan);
+        return ok(plan.toClientDTOAt(timeContext));
       });
     } catch (caughtError) {
       this.logger.error('Failed to abandon task plan', { error: caughtError });

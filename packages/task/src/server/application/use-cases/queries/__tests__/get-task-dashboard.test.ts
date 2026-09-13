@@ -7,7 +7,7 @@ import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/
 import {
   aOneTimeTask,
   aTaskOccurrence,
-  aTimePointConfig,
+  aTimePointTiming,
   anIdentityId,
 } from '../../../../../testing';
 import { TaskPlanStatus } from '@memoflow/contracts/task';
@@ -86,8 +86,8 @@ describe('GetTaskDashboardUseCase', () => {
   });
 
   it('returns occurrence DTOs for today and overdue', async () => {
-    const today = await aTaskOccurrence({ identityId, instanceDate: NOW });
-    const overdue = await aTaskOccurrence({ identityId, instanceDate: NOW - 86_400_000 });
+    const today = await aTaskOccurrence({ identityId, occurrenceDate: NOW });
+    const overdue = await aTaskOccurrence({ identityId, occurrenceDate: NOW - 86_400_000 });
     vi.mocked(occurrenceRepo.findByDateRange)
       .mockResolvedValueOnce([today])
       .mockResolvedValueOnce([]);
@@ -107,8 +107,8 @@ describe('GetTaskDashboardUseCase', () => {
     const shanghai = createTimeContext({ timeZone: 'Asia/Shanghai', weekStartsOn: 1 });
     const laterToday = await aTaskOccurrence({
       identityId,
-      instanceDate: todayStart,
-      timeConfig: aTimePointConfig(18 * 60, new Date(todayStart)),
+      occurrenceDate: todayStart,
+      timing: aTimePointTiming(18 * 60),
       timeContext: shanghai,
     });
     vi.mocked(occurrenceRepo.findByIdentityId).mockResolvedValue([laterToday]);
@@ -123,7 +123,7 @@ describe('GetTaskDashboardUseCase', () => {
   });
 
   it('counts actual completed occurrences for completedToday', async () => {
-    const completed = await aTaskOccurrence({ identityId, instanceDate: NOW });
+    const completed = await aTaskOccurrence({ identityId, occurrenceDate: NOW });
     completed.complete();
     vi.mocked(occurrenceRepo.findByDateRange)
       .mockResolvedValueOnce([completed])

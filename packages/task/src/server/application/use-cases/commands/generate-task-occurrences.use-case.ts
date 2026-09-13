@@ -23,8 +23,8 @@ export class GenerateTaskOccurrencesUseCase {
   private readonly transactionRunner: TaskWriteTransactionRunner;
 
   constructor(
-    private readonly templateRepository: ITaskPlanRepository,
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly planRepository: ITaskPlanRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
     private readonly userTimeContextPort: UserTimeContextPort,
   ) {
@@ -38,41 +38,41 @@ export class GenerateTaskOccurrencesUseCase {
   }
 
   async execute(
-    templateId: string,
+    planId: string,
     identityId: string,
     request: { fromDate: number; toDate: number },
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
     try {
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
       return await this.transactionRunner.run(
-        async ({ templateRepository, instanceRepository }) => {
-          const template = await templateRepository!.findByIdForIdentity(identityId, templateId);
-          if (!template) {
-            return error('NOT_FOUND', `TaskPlan ${templateId} not found`);
+        async ({ planRepository, occurrenceRepository }) => {
+          const plan = await planRepository!.findByIdForIdentity(identityId, planId);
+          if (!plan) {
+            return error('NOT_FOUND', `TaskPlan ${planId} not found`);
           }
 
-          const existingInstances = await instanceRepository.findByTemplateId(
-            templateId,
+          const existingOccurrences = await occurrenceRepository.findByPlanId(
+            planId,
             identityId,
           );
-          const instances = this.generationService.generateInstances(template, timeContext, {
+          const occurrences = this.generationService.generateOccurrences(plan, timeContext, {
             targetDate: request.toDate,
             // R2-2：force 路径不再忽略请求区间——从 fromDate 生成到 toDate。
             fromDate: request.fromDate,
-            existingInstances,
+            existingOccurrences,
           });
 
-          if (instances.length > 0) {
-            await instanceRepository.saveMany(instances);
-            await templateRepository!.save(template);
+          if (occurrences.length > 0) {
+            await occurrenceRepository.saveMany(occurrences);
+            await planRepository!.save(plan);
           }
 
-          return ok(instances.map((instance) => instance.toClientDTOAt(timeContext)));
+          return ok(occurrences.map((occurrence) => occurrence.toClientDTOAt(timeContext)));
         },
       );
     } catch (caughtError) {
-      this.logger.error('Failed to generate task instances', { error: caughtError });
-      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to generate task instances'));
+      this.logger.error('Failed to generate task occurrences', { error: caughtError });
+      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to generate task occurrences'));
     }
   }
 }

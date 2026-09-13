@@ -6,13 +6,13 @@
  */
 
 import { createLogger } from '@memoflow/utils/logger';
-import { TASK_INSTANCE_GENERATION_CONFIG } from '@memoflow/contracts/task';
+import { TASK_OCCURRENCE_GENERATION_CONFIG } from '@memoflow/contracts/task';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '../../domain/repositories';
 import type { TaskModuleRuntimeContribution } from '../task.module';
 import { TaskOccurrenceGenerationService } from '../../domain/services';
 import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 
-const { TARGET_GENERATE_AHEAD_DAYS } = TASK_INSTANCE_GENERATION_CONFIG;
+const { TARGET_GENERATE_AHEAD_DAYS } = TASK_OCCURRENCE_GENERATION_CONFIG;
 const DEFAULT_REFILL_INTERVAL_MS = 5 * 60 * 1000;
 const logger = createLogger('TaskOccurrenceMaintenanceRuntime');
 
@@ -49,17 +49,17 @@ export function createTaskOccurrenceMaintenanceRuntime(
             TARGET_GENERATE_AHEAD_DAYS,
           ),
         );
-        const existingInstances = await deps.taskOccurrenceRepository.findByTemplateId(
+        const existingOccurrences = await deps.taskOccurrenceRepository.findByPlanId(
           planId,
           identityId,
         );
-        const instances = generationService.generateInstances(plan, timeContext, {
+        const occurrences = generationService.generateOccurrences(plan, timeContext, {
           now,
           targetDate,
-          existingInstances,
+          existingOccurrences,
         });
-        if (instances.length > 0) {
-          await deps.taskOccurrenceRepository.saveMany(instances);
+        if (occurrences.length > 0) {
+          await deps.taskOccurrenceRepository.saveMany(occurrences);
           // TaskPlan itself is unchanged; save only flushes the generated domain event
           // through the existing reliable write boundary.
           await deps.taskPlanRepository.save(plan);

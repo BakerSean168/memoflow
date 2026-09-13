@@ -31,11 +31,11 @@ vi.mock('@memoflow/utils', async () => {
   };
 });
 
-const mockGenerateInstances = vi.fn().mockReturnValue([]);
+const mockGenerateOccurrences = vi.fn().mockReturnValue([]);
 vi.mock('../../../../domain/services', () => {
   return {
     TaskOccurrenceGenerationService: class {
-      generateInstances = mockGenerateInstances;
+      generateOccurrences = mockGenerateOccurrences;
     },
   };
 });
@@ -79,7 +79,7 @@ describe('CreateTaskPlanUseCase', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    mockGenerateInstances.mockReturnValue([]);
+    mockGenerateOccurrences.mockReturnValue([]);
 
     templateRepo = createMockRepo<ITaskPlanRepository>({
       save: vi.fn().mockResolvedValue(undefined),
@@ -89,8 +89,8 @@ describe('CreateTaskPlanUseCase', () => {
     });
 
     const transactionRunner = createInlineTaskWriteTransactionRunner({
-      templateRepository: templateRepo,
-      instanceRepository: instanceRepo,
+      planRepository: templateRepo,
+      occurrenceRepository: instanceRepo,
     });
 
     useCase = new CreateTaskPlanUseCase(
@@ -111,7 +111,7 @@ describe('CreateTaskPlanUseCase', () => {
     );
   });
 
-  it('should create a one-time task template', async () => {
+  it('should create a one-time task plan', async () => {
     const request = aCreateRequest({ name: 'Buy groceries' });
 
     const result = await useCase.execute(request);
@@ -119,11 +119,11 @@ describe('CreateTaskPlanUseCase', () => {
     expect(result).toBeOk();
     expect(templateRepo.save).toHaveBeenCalled();
     if (result.ok) {
-      expect(result.data.template.name).toBe('Buy groceries');
+      expect(result.data.plan.name).toBe('Buy groceries');
     }
   });
 
-  it('should save the template to the repository', async () => {
+  it('should save the plan to the repository', async () => {
     const request = aCreateRequest();
 
     await useCase.execute(request);
@@ -131,35 +131,35 @@ describe('CreateTaskPlanUseCase', () => {
     expect(templateRepo.save).toHaveBeenCalledTimes(1);
   });
 
-  it('preserves a caller-supplied template ID and replays an existing template without new mutation', async () => {
-    const templateId = 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440002';
-    const request = aCreateRequest({ id: templateId as never });
+  it('preserves a caller-supplied plan ID and replays an existing plan without new mutation', async () => {
+    const planId = 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440002';
+    const request = aCreateRequest({ id: planId as never });
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(null);
-    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([]);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([]);
 
     const first = await useCase.execute(request);
 
     expect(first).toBeOk();
-    expect(first.ok && first.data.template.id).toBe(templateId);
+    expect(first.ok && first.data.plan.id).toBe(planId);
     const persisted = vi.mocked(templateRepo.save).mock.calls[0]?.[0];
-    expect(persisted?.id).toBe(templateId);
+    expect(persisted?.id).toBe(planId);
 
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(persisted ?? null);
-    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([]);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([]);
     vi.mocked(templateRepo.save).mockClear();
     vi.mocked(instanceRepo.saveMany).mockClear();
-    mockGenerateInstances.mockClear();
+    mockGenerateOccurrences.mockClear();
 
     const replay = await useCase.execute(request);
 
     expect(replay).toBeOk();
-    expect(replay.ok && replay.data.template.id).toBe(templateId);
+    expect(replay.ok && replay.data.plan.id).toBe(planId);
     expect(templateRepo.save).not.toHaveBeenCalled();
     expect(instanceRepo.saveMany).not.toHaveBeenCalled();
-    expect(mockGenerateInstances).not.toHaveBeenCalled();
+    expect(mockGenerateOccurrences).not.toHaveBeenCalled();
   });
 
-  it('should persist goal binding on the created template', async () => {
+  it('should persist goal binding on the created plan', async () => {
     const request = aCreateRequest({
       goalBinding: {
         goalId: 'goal-1',
@@ -181,7 +181,7 @@ describe('CreateTaskPlanUseCase', () => {
     );
   });
 
-  it('should create a recurring task template', async () => {
+  it('should create a recurring task plan', async () => {
     const request = aCreateRequest({
       name: 'Daily standup',
       schedule: recurringSchedule(),
@@ -229,10 +229,10 @@ describe('CreateTaskPlanUseCase', () => {
     expect(result).toBeOk();
   });
 
-  describe('instance generation for Active templates', () => {
-    it('should generate instances when template is Active', async () => {
+  describe('occurrence generation for Active plans', () => {
+    it('should generate occurrences when plan is Active', async () => {
       const fakeInstances = [{}, {}, {}];
-      mockGenerateInstances.mockReturnValue(fakeInstances);
+      mockGenerateOccurrences.mockReturnValue(fakeInstances);
       const request = aCreateRequest({
         schedule: recurringSchedule(),
       });
@@ -241,13 +241,13 @@ describe('CreateTaskPlanUseCase', () => {
 
       expect(result).toBeOk();
       if (result.ok) {
-        expect(result.data.instanceCount).toBe(3);
-        expect(result.data.todayInstanceCreated).toBe(false);
+        expect(result.data.occurrenceCount).toBe(3);
+        expect(result.data.todayOccurrenceCreated).toBe(false);
       }
     });
 
-    it('reports when initial generation includes a today instance', async () => {
-      mockGenerateInstances.mockReturnValue([
+    it('reports when initial generation includes a today occurrence', async () => {
+      mockGenerateOccurrences.mockReturnValue([
         {
           scheduleDate: createTimeFacade({ context: TASK_TEST_TIME_CONTEXT }).calendar.toYmd(
             Date.now(),
@@ -259,14 +259,14 @@ describe('CreateTaskPlanUseCase', () => {
 
       expect(result).toBeOk();
       if (result.ok) {
-        expect(result.data.instanceCount).toBe(1);
-        expect(result.data.todayInstanceCreated).toBe(true);
+        expect(result.data.occurrenceCount).toBe(1);
+        expect(result.data.todayOccurrenceCreated).toBe(true);
       }
     });
 
-    it('should save generated instances', async () => {
+    it('should save generated occurrences', async () => {
       const fakeInstances = [{}, {}];
-      mockGenerateInstances.mockReturnValue(fakeInstances);
+      mockGenerateOccurrences.mockReturnValue(fakeInstances);
       const request = aCreateRequest();
 
       await useCase.execute(request);
@@ -274,22 +274,22 @@ describe('CreateTaskPlanUseCase', () => {
       expect(instanceRepo.saveMany).toHaveBeenCalledWith(fakeInstances);
     });
 
-    it('should return instanceCount=0 when no instances generated', async () => {
-      mockGenerateInstances.mockReturnValue([]);
+    it('should return occurrenceCount=0 when no occurrences generated', async () => {
+      mockGenerateOccurrences.mockReturnValue([]);
       const request = aCreateRequest();
 
       const result = await useCase.execute(request);
 
       expect(result).toBeOk();
       if (result.ok) {
-        expect(result.data.instanceCount).toBe(0);
-        expect(result.data.todayInstanceCreated).toBe(false);
+        expect(result.data.occurrenceCount).toBe(0);
+        expect(result.data.todayOccurrenceCreated).toBe(false);
       }
     });
 
-    it('should save generated instances when instances are generated', async () => {
+    it('should save generated occurrences when occurrences are generated', async () => {
       const fakeInstances = [{}, {}, {}, {}, {}];
-      mockGenerateInstances.mockReturnValue(fakeInstances);
+      mockGenerateOccurrences.mockReturnValue(fakeInstances);
       const request = aCreateRequest();
 
       await useCase.execute(request);
@@ -297,8 +297,8 @@ describe('CreateTaskPlanUseCase', () => {
       expect(instanceRepo.saveMany).toHaveBeenCalledWith(fakeInstances);
     });
 
-    it('should not save instances when no instances are generated', async () => {
-      mockGenerateInstances.mockReturnValue([]);
+    it('should not save occurrences when no occurrences are generated', async () => {
+      mockGenerateOccurrences.mockReturnValue([]);
       const request = aCreateRequest();
 
       await useCase.execute(request);
@@ -306,8 +306,8 @@ describe('CreateTaskPlanUseCase', () => {
       expect(instanceRepo.saveMany).not.toHaveBeenCalled();
     });
 
-    it('should return INTERNAL_ERROR when instance generation fails', async () => {
-      mockGenerateInstances.mockImplementation(() => {
+    it('should return INTERNAL_ERROR when occurrence generation fails', async () => {
+      mockGenerateOccurrences.mockImplementation(() => {
         throw new Error('Generation failed');
       });
       const request = aCreateRequest();
@@ -317,9 +317,9 @@ describe('CreateTaskPlanUseCase', () => {
       expect(result).toBeErrorWithCode('INTERNAL_ERROR');
     });
 
-    it('should return INTERNAL_ERROR when persisting generated instances fails', async () => {
+    it('should return INTERNAL_ERROR when persisting generated occurrences fails', async () => {
       const fakeInstances = [{}, {}];
-      mockGenerateInstances.mockReturnValue(fakeInstances);
+      mockGenerateOccurrences.mockReturnValue(fakeInstances);
       vi.mocked(instanceRepo.saveMany).mockRejectedValue(new Error('DB error'));
       const request = aCreateRequest();
 
@@ -329,16 +329,16 @@ describe('CreateTaskPlanUseCase', () => {
     });
   });
 
-  it('should return the template client DTO', async () => {
+  it('should return the plan client DTO', async () => {
     const request = aCreateRequest({ name: 'My New Task' });
 
     const result = await useCase.execute(request);
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.template).toBeDefined();
-      expect(result.data.template.name).toBe('My New Task');
-      expect(result.data.template.id).toBeDefined();
+      expect(result.data.plan).toBeDefined();
+      expect(result.data.plan.name).toBe('My New Task');
+      expect(result.data.plan.id).toBeDefined();
     }
   });
 
@@ -359,6 +359,6 @@ describe('CreateTaskPlanUseCase', () => {
       String(persisted?.id),
       ['label-work', 'label-ai'],
     );
-    expect(result.ok && result.data.template.labels).toEqual(labels);
+    expect(result.ok && result.data.plan.labels).toEqual(labels);
   });
 });

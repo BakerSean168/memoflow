@@ -1,8 +1,8 @@
 /**
  * Create Task Template Service
  *
- * Creates a task template (recurring task) and automatically
- * generates initial instances upon creation.
+ * Creates a task plan (recurring task) and automatically
+ * generates initial occurrences upon creation.
  */
 
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
@@ -36,8 +36,8 @@ export class CreateTaskPlanUseCase {
   private readonly transactionRunner: TaskWriteTransactionRunner;
 
   constructor(
-    private readonly templateRepository: ITaskPlanRepository,
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly planRepository: ITaskPlanRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
     private readonly userTimeContextPort: UserTimeContextPort,
   ) {
@@ -53,20 +53,20 @@ export class CreateTaskPlanUseCase {
   private async replayExisting(
     identityId: string,
     id: string,
-    templateRepository: ITaskPlanRepository,
-    instanceRepository: ITaskOccurrenceRepository,
+    planRepository: ITaskPlanRepository,
+    occurrenceRepository: ITaskOccurrenceRepository,
     timeContext: TimeContext,
   ): Promise<Result<CreateTaskPlanRes> | null> {
-    const existing = await templateRepository.findByIdForIdentity(identityId, id);
+    const existing = await planRepository.findByIdForIdentity(identityId, id);
     if (!existing) return null;
 
-    const instances = await instanceRepository.findByTemplateId(id, identityId);
+    const occurrences = await occurrenceRepository.findByPlanId(id, identityId);
     const time = createTimeFacade({ context: timeContext });
     const today = time.calendar.toYmd(Date.now());
     return ok({
-      template: existing.toClientDTOAt(timeContext),
-      instanceCount: instances.length,
-      todayInstanceCreated: instances.some((instance) => instance.scheduleDate === today),
+      plan: existing.toClientDTOAt(timeContext),
+      occurrenceCount: occurrences.length,
+      todayOccurrenceCreated: occurrences.some((occurrence) => occurrence.scheduleDate === today),
     });
   }
 
@@ -78,13 +78,13 @@ export class CreateTaskPlanUseCase {
       );
       timeContext = resolvedTimeContext;
       return await this.transactionRunner.run(
-        async ({ templateRepository, instanceRepository }) => {
+        async ({ planRepository, occurrenceRepository }) => {
           if (request.id) {
             const replay = await this.replayExisting(
               request.identityId,
               request.id,
-              templateRepository!,
-              instanceRepository,
+              planRepository!,
+              occurrenceRepository,
               resolvedTimeContext,
             );
             if (replay) return replay;
@@ -109,7 +109,7 @@ export class CreateTaskPlanUseCase {
             );
           }
 
-          const template = TaskPlan.create({
+          const plan = TaskPlan.create({
             id: request.id ? TaskPlanId.of(request.id) : undefined,
             identityId: request.identityId,
             title: request.name,
@@ -131,33 +131,33 @@ export class CreateTaskPlanUseCase {
           // Materialize from canonical schedule before persistence. TaskPlan carries no
           // generation cursor; save is still required before occurrences for the FK and
           // to flush the generated domain event after the transaction commits.
-          const instances =
-            template.status === TaskPlanStatus.Active
-              ? this.generationService.generateInstances(template, resolvedTimeContext)
+          const occurrences =
+            plan.status === TaskPlanStatus.Active
+              ? this.generationService.generateOccurrences(plan, resolvedTimeContext)
               : [];
 
-          await templateRepository!.save(template);
+          await planRepository!.save(plan);
           if (request.labelIds !== undefined) {
-            const labels = await templateRepository!.replaceLabels(
+            const labels = await planRepository!.replaceLabels(
               request.identityId,
-              String(template.id),
+              String(plan.id),
               request.labelIds,
             );
-            template.hydrateLabels(labels);
+            plan.hydrateLabels(labels);
           }
-          if (instances.length > 0) {
-            await instanceRepository.saveMany(instances);
+          if (occurrences.length > 0) {
+            await occurrenceRepository.saveMany(occurrences);
           }
 
           const time = createTimeFacade({ context: resolvedTimeContext });
           const today = time.calendar.toYmd(Date.now());
           const generation = {
-            instanceCount: instances.length,
-            todayInstanceCreated: instances.some((instance) => instance.scheduleDate === today),
+            occurrenceCount: occurrences.length,
+            todayOccurrenceCreated: occurrences.some((occurrence) => occurrence.scheduleDate === today),
           };
 
           return ok({
-            template: template.toClientDTOAt(resolvedTimeContext),
+            plan: plan.toClientDTOAt(resolvedTimeContext),
             ...generation,
           });
         },
@@ -171,8 +171,8 @@ export class CreateTaskPlanUseCase {
           const replay = await this.replayExisting(
             request.identityId,
             request.id,
-            this.templateRepository,
-            this.instanceRepository,
+            this.planRepository,
+            this.occurrenceRepository,
             timeContext,
           );
           if (replay) return replay;
@@ -190,8 +190,8 @@ export class CreateTaskPlanUseCase {
             ? caughtError.stack?.split('\n').slice(0, 6).join('\n')
             : undefined,
       });
-      this.logger.error('Failed to create task template', { error: caughtError });
-      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to create task template'));
+      this.logger.error('Failed to create task plan', { error: caughtError });
+      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to create task plan'));
     }
   }
 }

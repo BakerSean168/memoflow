@@ -29,9 +29,9 @@ export interface TaskGoalOutboxWriter {
  * settlement contract. Link-only Tasks deliberately return null on completion.
  */
 export function toTaskGoalOutboxRecord(event: IDomainEvent): TaskGoalOutboxRecord | null {
-  if (event.eventType === 'task:instance-uncompleted') {
+  if (event.eventType === 'task:occurrence-uncompleted') {
     const payload = event.payload as TaskUncompletedEvent;
-    const eventId = `task-goal-revert:instance:${String(payload.taskOccurrenceId)}:${payload.uncompletedAt}`;
+    const eventId = `task-goal-revert:occurrence:${String(payload.taskOccurrenceId)}:${payload.uncompletedAt}`;
     const durableEvent: TaskGoalProgressOutboxEventV2 = {
       eventId,
       schemaVersion: 2,
@@ -63,7 +63,7 @@ export function toTaskGoalOutboxRecord(event: IDomainEvent): TaskGoalOutboxRecor
     );
   }
 
-  if (event.eventType !== 'task:instance-completed') return null;
+  if (event.eventType !== 'task:occurrence-completed') return null;
 
   const payload = event.payload as TaskOccurrenceCompletedEvent;
   const binding = payload.goalBinding;

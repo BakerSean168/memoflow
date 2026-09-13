@@ -94,8 +94,8 @@ export class PrismaTaskPlanMapper {
     });
   }
 
-  static toPersistence(template: TaskPlan) {
-    const dto = template.toServerDTO();
+  static toPersistence(plan: TaskPlan) {
+    const dto = plan.toServerDTO();
     return {
       identityId: dto.identityId,
       name: dto.name,

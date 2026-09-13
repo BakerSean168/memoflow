@@ -94,7 +94,7 @@ function createInstance(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function createTemplate(overrides: Record<string, unknown> = {}) {
+function createPlan(overrides: Record<string, unknown> = {}) {
   return {
     toServerDTO: vi.fn().mockReturnValue({
       id: TEMPLATE_ID,
@@ -179,7 +179,7 @@ function executionResult(result: ScheduleTaskExecutionResult | void): ScheduleTa
 
 describe('task.reminder.fire through the neutral registry executor', () => {
   it('fires exactly one durable NotificationRequested for Fixture D', async () => {
-    const { writer, executor, task } = await harnessFor(createInstance(), createTemplate());
+    const { writer, executor, task } = await harnessFor(createInstance(), createPlan());
 
     const first = executionResult(await executor.execute(task));
     expect(first.disposition).toBe('succeeded');
@@ -203,7 +203,7 @@ describe('task.reminder.fire through the neutral registry executor', () => {
   });
 
   it('re-execution after a no-op reconcile collapses onto the same durable envelope', async () => {
-    const { writer, executor, task } = await harnessFor(createInstance(), createTemplate());
+    const { writer, executor, task } = await harnessFor(createInstance(), createPlan());
 
     await executor.execute(task);
     const replay = executionResult(await executor.execute(task));
@@ -217,7 +217,7 @@ describe('task.reminder.fire through the neutral registry executor', () => {
   it('returns a skipped receipt for a completed instance without any durable envelope', async () => {
     const { writer, executor, task } = await harnessFor(
       createInstance({ status: 'Completed' }),
-      createTemplate(),
+      createPlan(),
     );
 
     const result = executionResult(await executor.execute(task));
@@ -230,7 +230,7 @@ describe('task.reminder.fire through the neutral registry executor', () => {
   it('returns a skipped receipt for a deleted instance without any durable envelope', async () => {
     const { writer, executor, task } = await harnessFor(
       createInstance({ deletedAt: '2030-01-10T15:00:00.000Z' }),
-      createTemplate(),
+      createPlan(),
     );
 
     const result = executionResult(await executor.execute(task));
@@ -240,7 +240,7 @@ describe('task.reminder.fire through the neutral registry executor', () => {
   });
 
   it('rejects retryably when the shared outbox writer fails technically', async () => {
-    const { writer, executor, task } = await harnessFor(createInstance(), createTemplate());
+    const { writer, executor, task } = await harnessFor(createInstance(), createPlan());
     writer.enqueueNotificationRequested.mockRejectedValueOnce(new Error('outbox unavailable'));
 
     await expect(executor.execute(task)).rejects.toThrow('outbox unavailable');

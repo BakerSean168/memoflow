@@ -84,65 +84,65 @@ export class TaskPlanPrismaRepository
     return result;
   }
 
-  private async hydrateTemplates(identityId: string, templates: TaskPlan[]): Promise<TaskPlan[]> {
+  private async hydrateTemplates(identityId: string, plans: TaskPlan[]): Promise<TaskPlan[]> {
     const labelMap = await this.loadLabelMap(
       identityId,
-      templates.map((template) => String(template.id)),
+      plans.map((plan) => String(plan.id)),
     );
-    for (const template of templates) {
-      template.hydrateLabels(labelMap.get(String(template.id)) ?? []);
+    for (const plan of plans) {
+      plan.hydrateLabels(labelMap.get(String(plan.id)) ?? []);
     }
-    return templates;
+    return plans;
   }
 
   private async hydrateTemplate(
     identityId: string,
-    template: TaskPlan | null,
+    plan: TaskPlan | null,
   ): Promise<TaskPlan | null> {
-    if (!template) return null;
-    await this.hydrateTemplates(identityId, [template]);
-    return template;
+    if (!plan) return null;
+    await this.hydrateTemplates(identityId, [plan]);
+    return plan;
   }
 
   /**
    * TaskPlan 聚合根 -> Prisma write data
    */
-  private toWriteData(template: TaskPlan) {
-    return PrismaTaskPlanMapper.toPersistence(template);
+  private toWriteData(plan: TaskPlan) {
+    return PrismaTaskPlanMapper.toPersistence(plan);
   }
 
   /**
    * Protected persistence method - called by base class before event publishing
    *
-   * R2-5a：乐观锁——已存在模板必须匹配 `version: template.version - 1`，
+   * R2-5a：乐观锁——已存在模板必须匹配 `version: plan.version - 1`，
    * 否则并发修改抛 OptimisticConcurrencyError；不存在则 create。
    */
-  protected async persist(template: TaskPlan): Promise<void> {
-    const data = this.toWriteData(template);
+  protected async persist(plan: TaskPlan): Promise<void> {
+    const data = this.toWriteData(plan);
 
     const updated = await this.db.taskPlan.updateMany({
-      where: { id: template.id, version: template.version - 1 },
+      where: { id: plan.id, version: plan.version - 1 },
       data,
     });
 
     if (updated.count === 0) {
       const existing = await this.db.taskPlan.findUnique({
-        where: { id: template.id },
+        where: { id: plan.id },
         select: { id: true, version: true },
       });
       if (existing) {
         throw new OptimisticConcurrencyError(
           'TaskPlan',
-          String(template.id),
-          template.version - 1,
+          String(plan.id),
+          plan.version - 1,
           existing.version,
         );
       }
       await this.db.taskPlan.create({
         data: {
-          id: template.id,
+          id: plan.id,
           ...data,
-          createdAt: new Date(template.createdAt),
+          createdAt: new Date(plan.createdAt),
         },
       });
     }
@@ -245,7 +245,7 @@ export class TaskPlanPrismaRepository
       where: { id: taskPlanId, identityId },
       select: { id: true },
     });
-    if (!owner) throw new Error('Task template not found.');
+    if (!owner) throw new Error('Task plan not found.');
 
     const uniqueIds = [...new Set(labelIds)];
     if (uniqueIds.length > 0) {
@@ -264,7 +264,7 @@ export class TaskPlanPrismaRepository
     return (await this.loadLabelMap(identityId, [taskPlanId])).get(taskPlanId) ?? [];
   }
 
-  async findAllTemplateRefs(): Promise<Array<{ id: string; identityId: string }>> {
+  async findAllPlanRefs(): Promise<Array<{ id: string; identityId: string }>> {
     const rows = await this.db.taskPlan.findMany({
       select: { id: true, identityId: true },
     });
@@ -287,7 +287,7 @@ export class TaskPlanPrismaRepository
       where: { id, identityId },
     });
     if (deleted.count !== 1) {
-      throw new Error('Task template not found for the current identity.');
+      throw new Error('Task plan not found for the current identity.');
     }
   }
 
@@ -297,7 +297,7 @@ export class TaskPlanPrismaRepository
       data: { deletedAt: new Date() },
     });
     if (result.count !== 1) {
-      throw new Error('Task template not found for the current identity.');
+      throw new Error('Task plan not found for the current identity.');
     }
   }
 
@@ -307,7 +307,7 @@ export class TaskPlanPrismaRepository
       data: { deletedAt: null },
     });
     if (result.count !== 1) {
-      throw new Error('Task template not found for the current identity.');
+      throw new Error('Task plan not found for the current identity.');
     }
   }
 
@@ -378,12 +378,12 @@ export class TaskPlanPrismaRepository
   }
 
   /**
-   * Persist templates sequentially on the bound client.
+   * Persist plans sequentially on the bound client.
    * Avoid nested `$transaction` when already inside an interactive transaction.
    */
-  async saveBatch(templates: TaskPlan[]): Promise<void> {
-    for (const template of templates) {
-      await this.persist(template);
+  async saveBatch(plans: TaskPlan[]): Promise<void> {
+    for (const plan of plans) {
+      await this.persist(plan);
     }
   }
 

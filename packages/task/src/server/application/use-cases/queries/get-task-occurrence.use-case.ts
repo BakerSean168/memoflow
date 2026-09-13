@@ -10,7 +10,7 @@ import type { TaskOccurrenceProjectionService } from '../../services/task-occurr
 
 export class GetTaskOccurrenceUseCase {
   constructor(
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     private readonly projection: TaskOccurrenceProjectionService,
   ) {}
 
@@ -18,7 +18,7 @@ export class GetTaskOccurrenceUseCase {
     id: string,
     identityId: string,
   ): Promise<Result<TaskOccurrenceClientDTO | null>> {
-    const instance = await this.instanceRepository.findByIdForIdentity(identityId, id);
-    return ok(instance ? await this.projection.project(identityId, instance) : null);
+    const occurrence = await this.occurrenceRepository.findByIdForIdentity(identityId, id);
+    return ok(occurrence ? await this.projection.project(identityId, occurrence) : null);
   }
 }

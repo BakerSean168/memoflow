@@ -22,5 +22,4 @@ export async function cleanTaskTables(): Promise<void> {
   await prisma.taskOccurrence.deleteMany();
   await prisma.taskPlanHistory.deleteMany();
   await prisma.taskPlan.deleteMany();
-  await prisma.taskStatistic.deleteMany();
 }

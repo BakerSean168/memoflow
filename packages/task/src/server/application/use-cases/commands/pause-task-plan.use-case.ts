@@ -2,9 +2,9 @@
  * Pause Task Template Use Case
  *
  * Business flow:
- * 1. Mark the template as paused.
- * 2. Stop future instance generation from the pause timestamp forward.
- * 3. Remove incomplete future instances that should no longer be executed.
+ * 1. Mark the plan as paused.
+ * 2. Stop future occurrence generation from the pause timestamp forward.
+ * 3. Remove incomplete future occurrences that should no longer be executed.
  */
 
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
@@ -27,8 +27,8 @@ export class PauseTaskPlanUseCase {
   private readonly transactionRunner: TaskWriteTransactionRunner;
 
   constructor(
-    private readonly templateRepository: ITaskPlanRepository,
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly planRepository: ITaskPlanRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
     private readonly userTimeContextPort: UserTimeContextPort,
   ) {
@@ -44,13 +44,13 @@ export class PauseTaskPlanUseCase {
     id: string,
     identityId: string,
     _reason?: string,
-  ): Promise<Result<{ template: TaskPlanClientDTO; instancesDeleted: number }>> {
+  ): Promise<Result<{ plan: TaskPlanClientDTO; instancesDeleted: number }>> {
     try {
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
       return await this.transactionRunner.run(
-        async ({ templateRepository, instanceRepository }) => {
-          const template = await templateRepository!.findByIdForIdentity(identityId, id);
-          if (!template) {
+        async ({ planRepository, occurrenceRepository }) => {
+          const plan = await planRepository!.findByIdForIdentity(identityId, id);
+          if (!plan) {
             return error('NOT_FOUND', `TaskPlan ${id} not found`);
           }
 
@@ -59,24 +59,24 @@ export class PauseTaskPlanUseCase {
             effectiveFrom,
           );
 
-          template.pause();
-          await templateRepository!.save(template);
+          plan.pause();
+          await planRepository!.save(plan);
 
-          const instancesDeleted = await instanceRepository.deleteIncompleteInstancesFrom(
+          const instancesDeleted = await occurrenceRepository.deleteIncompleteOccurrencesFrom(
             id,
             identityId,
             effectiveFromDate,
           );
 
           return ok({
-            template: template.toClientDTOAt(timeContext, false, effectiveFrom),
+            plan: plan.toClientDTOAt(timeContext, false, effectiveFrom),
             instancesDeleted,
           });
         },
       );
     } catch (caughtError) {
-      this.logger.error('Failed to pause task template', { error: caughtError });
-      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to pause task template'));
+      this.logger.error('Failed to pause task plan', { error: caughtError });
+      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to pause task plan'));
     }
   }
 }

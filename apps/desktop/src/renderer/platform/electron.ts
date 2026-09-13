@@ -74,10 +74,9 @@ const TABLE_TO_MODULE: Record<string, string> = {
   goal_reviews: 'goal',
   key_result_weight_snapshots: 'goal',
   // Task
-  task_templates: 'task',
-  task_instances: 'task',
-  task_template_history: 'task',
-  task_statistics: 'task',
+  task_plans: 'task',
+  task_occurrences: 'task',
+  task_plan_history: 'task',
   // Schedule
   schedules: 'schedule',
   schedule_tasks: 'schedule',
@@ -120,7 +119,7 @@ const MODULE_INVALIDATORS: Record<string, () => void> = {
  */
 const PILOT_TABLES = new Set([
   'notifications',
-  'task_templates',
+  'task_plans',
   'rules',
   'rule_revisions',
 ]);

@@ -27,57 +27,57 @@ export class TaskOccurrenceIpcAdapter implements ITaskOccurrenceApiClient {
     planId?: string;
     status?: string;
   }): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    return this.ipcClient.invoke(TaskChannels.INSTANCE_LIST, params);
+    return this.ipcClient.invoke(TaskChannels.OCCURRENCE_LIST, params);
   }
 
   async getTaskOccurrencesByDateRange(
     request: GetTaskOccurrencesByRangeReq,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    return this.ipcClient.invoke(TaskChannels.INSTANCE_LIST_BY_DATE_RANGE, request);
+    return this.ipcClient.invoke(TaskChannels.OCCURRENCE_LIST_BY_DATE_RANGE, request);
   }
 
   async getTaskOccurrenceById(id: string): Promise<Result<TaskOccurrenceClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.INSTANCE_GET, { id });
+    return this.ipcClient.invoke(TaskChannels.OCCURRENCE_GET, { id });
   }
 
   async deleteTaskOccurrence(id: string): Promise<Result<void>> {
-    return this.ipcClient.invoke(TaskChannels.INSTANCE_DELETE, { id });
+    return this.ipcClient.invoke(TaskChannels.OCCURRENCE_DELETE, { id });
   }
 
   async startTaskOccurrence(id: string): Promise<Result<TaskOccurrenceClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.INSTANCE_CREATE, { id });
+    return this.ipcClient.invoke(TaskChannels.OCCURRENCE_CREATE, { id });
   }
 
   async completeTaskOccurrence(
     id: string,
     request?: CompleteTaskOccurrenceReq,
   ): Promise<Result<TaskOccurrenceClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.INSTANCE_COMPLETE, { id, request });
+    return this.ipcClient.invoke(TaskChannels.OCCURRENCE_COMPLETE, { id, request });
   }
 
   async uncompleteTaskOccurrence(id: string): Promise<Result<TaskOccurrenceClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.INSTANCE_UNCOMPLETE, { id });
+    return this.ipcClient.invoke(TaskChannels.OCCURRENCE_UNCOMPLETE, { id });
   }
 
   async skipTaskOccurrence(
     id: string,
     request?: SkipTaskOccurrenceReq,
   ): Promise<Result<TaskOccurrenceClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.INSTANCE_SKIP, { id, request });
+    return this.ipcClient.invoke(TaskChannels.OCCURRENCE_SKIP, { id, request });
   }
 
   async markTaskOccurrenceMissed(
     id: string,
     request?: MarkTaskOccurrenceMissedReq,
   ): Promise<Result<TaskOccurrenceClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.INSTANCE_MARK_MISSED, { id, request });
+    return this.ipcClient.invoke(TaskChannels.OCCURRENCE_MARK_MISSED, { id, request });
   }
 
   async rescheduleTaskOccurrence(
     id: string,
     request: RescheduleTaskInput,
   ): Promise<Result<TaskOccurrenceClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.INSTANCE_RESCHEDULE, {
+    return this.ipcClient.invoke(TaskChannels.OCCURRENCE_RESCHEDULE, {
       occurrenceId: id,
       scheduleSnapshot: request.scheduleSnapshot,
       expectedVersion: request.expectedVersion,
@@ -88,7 +88,7 @@ export class TaskOccurrenceIpcAdapter implements ITaskOccurrenceApiClient {
     id: string,
     request: SetTaskOccurrenceChecklistItemReq,
   ): Promise<Result<TaskOccurrenceClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.INSTANCE_CHECKLIST_SET, { id, request });
+    return this.ipcClient.invoke(TaskChannels.OCCURRENCE_CHECKLIST_SET, { id, request });
   }
 }
 

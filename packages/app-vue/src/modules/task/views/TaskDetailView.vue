@@ -297,19 +297,19 @@ const {
   refetch: refetchWorkspace,
 } = useTaskPlanWorkspaceQuery(id);
 const {
-  updateTemplateSafe,
-  activateTemplateSafe,
-  pauseTemplateSafe,
-  archiveTemplateSafe,
-  deleteTemplateSafe,
+  updatePlanSafe,
+  activatePlanSafe,
+  pausePlanSafe,
+  archivePlanSafe,
+  deletePlanSafe,
   isSaving,
 } = useTaskPlanMutations();
 const {
-  completeInstance,
-  uncompleteInstance,
-  markInstanceMissed,
-  skipInstance,
-  setChecklistItem,
+  completeOccurrence: completeOccurrenceMutation,
+  uncompleteOccurrence: uncompleteOccurrenceMutation,
+  markOccurrenceMissed: markOccurrenceMissedMutation,
+  skipOccurrence: skipOccurrenceMutation,
+  setOccurrenceChecklistItem: setOccurrenceChecklistItemMutation,
 } = useTaskOccurrences();
 const currentTemplate = computed(() => workspace.value?.plan ?? null);
 const viewModel = computed(() =>
@@ -379,7 +379,7 @@ function goalBinding(vm: TaskPlanViewModel) {
   };
 }
 async function saveEdit(vm: TaskPlanViewModel) {
-  const result = await updateTemplateSafe(id.value, {
+  const result = await updatePlanSafe(id.value, {
     name: vm.title,
     description: vm.description ?? null,
     schedule: toTaskPlanSchedulePayload(vm),
@@ -395,43 +395,44 @@ async function saveEdit(vm: TaskPlanViewModel) {
   }
 }
 async function pause() {
-  if (await pauseTemplateSafe(id.value)) await refetchWorkspace();
+  if (await pausePlanSafe(id.value)) await refetchWorkspace();
 }
 async function activate() {
-  if (await activateTemplateSafe(id.value)) await refetchWorkspace();
+  if (await activatePlanSafe(id.value)) await refetchWorkspace();
 }
 async function archive() {
-  if (await archiveTemplateSafe(id.value)) await reloadDetail();
+  if (await archivePlanSafe(id.value)) await reloadDetail();
 }
 async function remove() {
   const confirmed = await useConfirm({
-    title: t('task.management.deleteTemplate'),
+    title: t('task.management.deletePlan'),
     description: t('task.management.confirmDelete', { name: viewModel.value?.title ?? '' }),
     confirmText: t('common.delete'),
     cancelText: t('common.cancel'),
     variant: 'destructive',
   });
   if (!confirmed) return;
-  if (await deleteTemplateSafe(id.value)) await router.push({ name: 'task-list' });
+  if (await deletePlanSafe(id.value)) await router.push({ name: 'task-list' });
 }
 async function reloadDetail() {
   await refetchWorkspace();
 }
-async function runOccurrenceAction(instanceId: string, action: (id: string) => Promise<unknown>) {
-  busyOccurrenceId.value = instanceId;
+async function runOccurrenceAction(occurrenceId: string, action: (id: string) => Promise<unknown>) {
+  busyOccurrenceId.value = occurrenceId;
   try {
-    if (await action(instanceId)) await refetchWorkspace();
+    if (await action(occurrenceId)) await refetchWorkspace();
   } finally {
     busyOccurrenceId.value = null;
   }
 }
-const completeOccurrence = (instanceId: string) =>
-  runOccurrenceAction(instanceId, completeInstance);
-const uncompleteOccurrence = (instanceId: string) =>
-  runOccurrenceAction(instanceId, uncompleteInstance);
-const markOccurrenceMissed = (instanceId: string) =>
-  runOccurrenceAction(instanceId, markInstanceMissed);
-const skipOccurrence = (instanceId: string) => runOccurrenceAction(instanceId, skipInstance);
+const completeOccurrence = (occurrenceId: string) =>
+  runOccurrenceAction(occurrenceId, completeOccurrenceMutation);
+const uncompleteOccurrence = (occurrenceId: string) =>
+  runOccurrenceAction(occurrenceId, uncompleteOccurrenceMutation);
+const markOccurrenceMissed = (occurrenceId: string) =>
+  runOccurrenceAction(occurrenceId, markOccurrenceMissedMutation);
+const skipOccurrence = (occurrenceId: string) =>
+  runOccurrenceAction(occurrenceId, skipOccurrenceMutation);
 const setOccurrenceChecklistItem = (
   occurrenceId: string,
   definitionId: string,
@@ -439,7 +440,7 @@ const setOccurrenceChecklistItem = (
   expectedVersion: number,
 ) =>
   runOccurrenceAction(occurrenceId, (id) =>
-    setChecklistItem(id, { definitionId, completed, expectedVersion }),
+    setOccurrenceChecklistItemMutation(id, { definitionId, completed, expectedVersion }),
   );
 const noop = () => undefined;
 

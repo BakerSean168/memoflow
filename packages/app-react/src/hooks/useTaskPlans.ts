@@ -102,7 +102,7 @@ export function useTaskPlans(
   const [sortBy, setSortBy] = useState<TaskSortOption>('updated');
 
   async function fetchTemplates(filter: TaskStatusFilter) {
-    const result = await service.listTemplates({
+    const result = await service.listPlans({
       page: 1,
       limit: 100,
       status: filter === 'all' ? undefined : [filter],
@@ -130,7 +130,7 @@ export function useTaskPlans(
     let cancelled = false;
     async function loadTemplates() {
       setIsLoading(true);
-      const result = await service.listTemplates({
+      const result = await service.listPlans({
         page: 1,
         limit: 100,
         status: statusFilter === 'all' ? undefined : [statusFilter],

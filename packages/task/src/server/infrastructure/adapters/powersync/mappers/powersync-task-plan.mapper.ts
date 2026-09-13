@@ -99,8 +99,8 @@ export class PowerSyncTaskPlanMapper {
     return TaskPlan.load(state);
   }
 
-  static toPersistence(template: TaskPlan) {
-    const dto = template.toServerDTO();
+  static toPersistence(plan: TaskPlan) {
+    const dto = plan.toServerDTO();
     return {
       id: String(dto.id),
       identityId: String(dto.identityId),

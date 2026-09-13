@@ -180,7 +180,7 @@ export function TaskEditorScreen() {
         schedule,
       };
 
-      const result = await service.updateTemplate(taskId, request);
+      const result = await service.updatePlan(taskId, request);
       setIsSaving(false);
 
       if (!result.ok) {
@@ -202,7 +202,7 @@ export function TaskEditorScreen() {
       goalBinding: null,
     };
 
-    const result = await service.createTemplate(request);
+    const result = await service.createPlan(request);
     setIsSaving(false);
 
     if (!result.ok) {

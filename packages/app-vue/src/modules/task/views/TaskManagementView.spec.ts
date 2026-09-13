@@ -34,12 +34,31 @@ describe('TaskManagementView occurrence-first surface', () => {
     expect(source).toContain('<TaskPlanDialog');
     expect(source).toContain('@save="handleSubmit"');
     for (const operation of [
-      'completeInstance',
-      'uncompleteInstance',
-      'markInstanceMissed',
-      'skipInstance',
+      'completeOccurrence',
+      'uncompleteOccurrence',
+      'markOccurrenceMissed',
+      'skipOccurrence',
     ]) {
       expect(source).toContain(operation);
     }
+  });
+
+  it('aliases occurrence mutations before local wrappers to prevent self-recursion', () => {
+    for (const alias of [
+      'completeOccurrenceMutation',
+      'uncompleteOccurrenceMutation',
+      'markOccurrenceMissedMutation',
+      'skipOccurrenceMutation',
+      'setOccurrenceChecklistItemMutation',
+    ]) {
+      expect(source).toContain(alias);
+    }
+    expect(source).toContain('runOccurrenceAction(id, completeOccurrenceMutation)');
+    expect(source).toContain('runOccurrenceAction(occurrenceId, (id) =>');
+    expect(source).toContain('setOccurrenceChecklistItemMutation(id,');
+    expect(source).not.toContain('runOccurrenceAction(id, completeOccurrence)');
+    expect(source).not.toContain('runOccurrenceAction(id, uncompleteOccurrence)');
+    expect(source).not.toContain('runOccurrenceAction(id, markOccurrenceMissed)');
+    expect(source).not.toContain('runOccurrenceAction(id, skipOccurrence)');
   });
 });

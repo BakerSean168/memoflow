@@ -49,7 +49,7 @@ export interface RoutinePlannerOwnerCommandPort {
 
 export interface PlannerOwnerCommandDependencies {
   readonly schedule?: Pick<ScheduleClientPort, 'updateSchedule'>;
-  readonly task?: Pick<TaskClientPort, 'rescheduleInstance'>;
+  readonly task?: Pick<TaskClientPort, 'rescheduleOccurrence'>;
   readonly goal?: Pick<GoalClientPort, 'updateGoal'>;
   readonly routine?: RoutinePlannerOwnerCommandPort;
   readonly time?: PlannerMutationTimePort;
@@ -180,7 +180,7 @@ export function createPlannerOwnerCommandRouter(
             };
           }
           return resultOutcome(
-            await dependencies.task.rescheduleInstance(owner.ownerId, input),
+            await dependencies.task.rescheduleOccurrence(owner.ownerId, input),
             owner.ownerType,
           );
         }

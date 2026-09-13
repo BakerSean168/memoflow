@@ -21,14 +21,14 @@ function entity(dto: TaskPlanClientDTO) {
 
 function makeService() {
   return {
-    listTemplates: vi.fn(),
-    getTemplate: vi.fn(),
-    createTemplate: vi.fn(),
-    updateTemplate: vi.fn(),
-    deleteTemplate: vi.fn(),
-    activateTemplate: vi.fn(),
-    pauseTemplate: vi.fn(),
-    archiveTemplate: vi.fn(),
+    listPlans: vi.fn(),
+    getPlan: vi.fn(),
+    createPlan: vi.fn(),
+    updatePlan: vi.fn(),
+    deletePlan: vi.fn(),
+    activatePlan: vi.fn(),
+    pausePlan: vi.fn(),
+    archivePlan: vi.fn(),
   };
 }
 
@@ -37,7 +37,7 @@ describe('useTaskPlanListQuery', () => {
 
   it('fetches the flat Task Plan list and dedupes same-key consumers', async () => {
     const service = makeService();
-    service.listTemplates.mockResolvedValue(ok({ templates: [entity(template())], total: 1 }));
+    service.listPlans.mockResolvedValue(ok({ plans: [entity(template())], total: 1 }));
     const runtime = createServerStateRuntime('web');
     const first = mountTaskComposable(() => useTaskPlanListQuery({ page: 1, limit: 20 }), {
       service,
@@ -50,14 +50,14 @@ describe('useTaskPlanListQuery', () => {
 
     await vi.waitFor(() => expect(first.api.isLoading.value).toBe(false));
     await vi.waitFor(() => expect(second.api.isLoading.value).toBe(false));
-    expect(service.listTemplates).toHaveBeenCalledTimes(1);
+    expect(service.listPlans).toHaveBeenCalledTimes(1);
     expect(first.api.templates.value).toHaveLength(1);
     expect(first.api.total.value).toBe(1);
   });
 
   it('isolates the Task Plan list cache by identity scope', async () => {
     const service = makeService();
-    service.listTemplates.mockResolvedValue(ok({ templates: [], total: 0 }));
+    service.listPlans.mockResolvedValue(ok({ plans: [], total: 0 }));
     const runtime = createServerStateRuntime('web');
     const a = mountTaskComposable(() => useTaskPlanListQuery({ page: 1, limit: 20 }), {
       service,
@@ -71,7 +71,7 @@ describe('useTaskPlanListQuery', () => {
     });
     await vi.waitFor(() => expect(a.api.isLoading.value).toBe(false));
     await vi.waitFor(() => expect(b.api.isLoading.value).toBe(false));
-    expect(service.listTemplates).toHaveBeenCalledTimes(2);
+    expect(service.listPlans).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -80,21 +80,21 @@ describe('useTaskPlanDetailQuery', () => {
 
   it('stays disabled when the id is missing or "new"', async () => {
     const service = makeService();
-    service.getTemplate.mockResolvedValue(ok(entity(template())));
+    service.getPlan.mockResolvedValue(ok(entity(template())));
     const missing = mountTaskComposable(() => useTaskPlanDetailQuery(() => null), { service });
     const creating = mountTaskComposable(() => useTaskPlanDetailQuery(() => 'new'), { service });
     await Promise.resolve();
     expect(missing.api.currentTemplate.value).toBeNull();
     expect(creating.api.currentTemplate.value).toBeNull();
-    expect(service.getTemplate).not.toHaveBeenCalled();
+    expect(service.getPlan).not.toHaveBeenCalled();
   });
 
   it('fetches detail once for a stable id and isolates a different id', async () => {
     const service = makeService();
-    service.getTemplate.mockResolvedValue(ok(entity(template())));
+    service.getPlan.mockResolvedValue(ok(entity(template())));
     const first = mountTaskComposable(() => useTaskPlanDetailQuery(() => 'template-1'), { service });
     await vi.waitFor(() => expect(first.api.isLoading.value).toBe(false));
-    expect(service.getTemplate).toHaveBeenCalledTimes(1);
+    expect(service.getPlan).toHaveBeenCalledTimes(1);
     expect(first.api.currentTemplate.value?.id).toBe('template-1');
 
     const second = mountTaskComposable(() => useTaskPlanDetailQuery(() => 'template-2'), {
@@ -102,6 +102,6 @@ describe('useTaskPlanDetailQuery', () => {
       runtime: first.runtime,
     });
     await vi.waitFor(() => expect(second.api.isLoading.value).toBe(false));
-    expect(service.getTemplate).toHaveBeenCalledTimes(2);
+    expect(service.getPlan).toHaveBeenCalledTimes(2);
   });
 });

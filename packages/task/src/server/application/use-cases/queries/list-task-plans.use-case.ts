@@ -1,8 +1,8 @@
 /**
  * List Task Templates Service
  *
- * Retrieves task templates by account, automatically checking
- * and replenishing instances for active templates.
+ * Retrieves task plans by account, automatically checking
+ * and replenishing occurrences for active plans.
  */
 
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
@@ -22,70 +22,70 @@ import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
  */
 export class ListTaskPlansUseCase {
   constructor(
-    private readonly templateRepository: ITaskPlanRepository,
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly planRepository: ITaskPlanRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     private readonly userTimeContextPort: UserTimeContextPort,
     private readonly now: () => number = Date.now,
   ) {}
 
   async execute(request: QueryTaskPlansInternal): Promise<Result<QueryTaskPlansRes>> {
-    let templates: TaskPlan[];
+    let plans: TaskPlan[];
 
     // Shared Label filtering is repository-owned AND semantics. Other legacy filters
     // can further narrow the already identity-scoped result without inventing a
     // second Label filtering engine in the application layer.
     if (request.labelIdsAll && request.labelIdsAll.length > 0) {
-      templates = await this.templateRepository.findByLabelIdsAll(
+      plans = await this.planRepository.findByLabelIdsAll(
         request.identityId,
         request.labelIdsAll,
       );
       if (request.status && request.status.length > 0) {
-        templates = templates.filter((template) =>
-          request.status!.includes(String(template.status)),
+        plans = plans.filter((plan) =>
+          request.status!.includes(String(plan.status)),
         );
       }
       if (request.goalId) {
-        templates = templates.filter(
-          (template) => String(template.goalBinding?.goalId ?? '') === String(request.goalId),
+        plans = plans.filter(
+          (plan) => String(plan.goalBinding?.goalId ?? '') === String(request.goalId),
         );
       }
       if (request.keyResultId) {
-        templates = templates.filter(
-          (template) =>
-            String(template.goalBinding?.keyResultId ?? '') === String(request.keyResultId),
+        plans = plans.filter(
+          (plan) =>
+            String(plan.goalBinding?.keyResultId ?? '') === String(request.keyResultId),
         );
       }
     } else if (request.goalId && request.keyResultId) {
-      templates = await this.templateRepository.findByGoalAndKeyResultId(
+      plans = await this.planRepository.findByGoalAndKeyResultId(
         request.identityId,
         request.goalId,
         request.keyResultId,
       );
       if (request.status && request.status.length > 0) {
-        templates = templates.filter((template) =>
-          request.status!.includes(String(template.status)),
+        plans = plans.filter((plan) =>
+          request.status!.includes(String(plan.status)),
         );
       }
     } else if (request.status && request.status.length > 0) {
-      templates = await this.templateRepository.findByStatus(
+      plans = await this.planRepository.findByStatus(
         request.identityId,
         request.status[0] as TaskPlanStatusType,
       );
       if (request.goalId) {
-        templates = templates.filter(
-          (template) => String(template.goalBinding?.goalId ?? '') === String(request.goalId),
+        plans = plans.filter(
+          (plan) => String(plan.goalBinding?.goalId ?? '') === String(request.goalId),
         );
       }
       if (request.keyResultId) {
-        templates = templates.filter(
-          (template) =>
-            String(template.goalBinding?.keyResultId ?? '') === String(request.keyResultId),
+        plans = plans.filter(
+          (plan) =>
+            String(plan.goalBinding?.keyResultId ?? '') === String(request.keyResultId),
         );
       }
     } else if (request.goalId) {
-      templates = await this.templateRepository.findByGoalId(request.identityId, request.goalId);
+      plans = await this.planRepository.findByGoalId(request.identityId, request.goalId);
     } else {
-      templates = await this.templateRepository.findByIdentityId(request.identityId);
+      plans = await this.planRepository.findByIdentityId(request.identityId);
     }
 
     // R2-3：列表查询保持纯读——实例补充由显式 maintenance worker 负责。
@@ -97,16 +97,16 @@ export class ListTaskPlansUseCase {
     const windowStart = taskTime.calendar.toYmd(taskTime.calendar.addDays(asOf, -29));
     const asOfDate = taskTime.calendar.toYmd(asOf);
     const statsByTemplateId =
-      (await this.instanceRepository.getTemplateStats(
-        templates.map((template) => template.id),
+      (await this.occurrenceRepository.getPlanStats(
+        plans.map((plan) => plan.id),
         request.identityId,
         { windowStart, asOf: asOfDate },
       )) ?? {};
 
     return ok({
-      templates: templates.map((template) => {
-        const dto = template.toClientDTOAt(timeContext, false, asOf);
-        const stats = statsByTemplateId[template.id];
+      plans: plans.map((plan) => {
+        const dto = plan.toClientDTOAt(timeContext, false, asOf);
+        const stats = statsByTemplateId[plan.id];
 
         if (!stats) {
           return dto;
@@ -114,18 +114,18 @@ export class ListTaskPlansUseCase {
 
         return {
           ...dto,
-          instanceCount: stats.instanceCount,
-          completedInstanceCount: stats.completedInstanceCount,
-          pendingInstanceCount: stats.pendingInstanceCount,
-          dueInstanceCount: stats.dueInstanceCount,
-          completedDueInstanceCount: stats.completedDueInstanceCount,
+          occurrenceCount: stats.occurrenceCount,
+          completedOccurrenceCount: stats.completedOccurrenceCount,
+          pendingOccurrenceCount: stats.pendingOccurrenceCount,
+          dueOccurrenceCount: stats.dueOccurrenceCount,
+          completedDueOccurrenceCount: stats.completedDueOccurrenceCount,
           completionWindowDays: stats.completionWindowDays,
-          futurePendingInstanceCount: stats.futurePendingInstanceCount,
-          singleInstanceStatus: stats.singleInstanceStatus,
+          futurePendingOccurrenceCount: stats.futurePendingOccurrenceCount,
+          singleOccurrenceStatus: stats.singleOccurrenceStatus,
           completionRate: stats.completionRate,
         };
       }),
-      total: templates.length,
+      total: plans.length,
     });
   }
 }

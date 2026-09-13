@@ -49,13 +49,13 @@ export function TaskDetailScreen() {
   const service = useTaskService();
   const { error, isLoading, refresh, template } = useTaskPlanDetail(taskId);
   const {
-    completeInstance,
+    completeOccurrence,
     error: instancesError,
     instances,
     isLoading: instancesLoading,
     refresh: refreshInstances,
-    skipInstance,
-    startInstance,
+    skipOccurrence,
+    startOccurrence,
   } = useTaskOccurrences(taskId);
   const [isMutating, setIsMutating] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -72,7 +72,7 @@ export function TaskDetailScreen() {
 
     setIsMutating(true);
     setActionError(null);
-    const result = await service.pauseTemplate(taskId);
+    const result = await service.pausePlan(taskId);
     setIsMutating(false);
 
     if (!result.ok) {
@@ -90,7 +90,7 @@ export function TaskDetailScreen() {
 
     setIsMutating(true);
     setActionError(null);
-    const result = await service.activateTemplate(taskId);
+    const result = await service.activatePlan(taskId);
     setIsMutating(false);
 
     if (!result.ok) {
@@ -108,7 +108,7 @@ export function TaskDetailScreen() {
 
     setIsMutating(true);
     setActionError(null);
-    const result = await service.archiveTemplate(taskId);
+    const result = await service.archivePlan(taskId);
     setIsMutating(false);
 
     if (!result.ok) {
@@ -125,10 +125,10 @@ export function TaskDetailScreen() {
 
     const ok =
       action === 'start'
-        ? await startInstance(instanceId)
+        ? await startOccurrence(instanceId)
         : action === 'complete'
-          ? await completeInstance(instanceId)
-          : await skipInstance(instanceId);
+          ? await completeOccurrence(instanceId)
+          : await skipOccurrence(instanceId);
 
     setActiveInstanceId(null);
 

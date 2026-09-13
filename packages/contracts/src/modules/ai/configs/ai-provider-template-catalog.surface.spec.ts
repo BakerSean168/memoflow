@@ -11,10 +11,10 @@ describe('AI provider template catalog after GOAL-7210', () => {
   );
 
   it('keeps provider template lookup provider-owned', () => {
-    expect(ai).toMatch(/export function getTemplateById\b/);
+    expect(ai).toMatch(/export function getPlanById\b/);
     expect(ai).toContain('AIProviderTemplate');
     expect(ai).toContain('AI_PROVIDER_TEMPLATES');
-    const body = ai.match(/export function getTemplateById\([\s\S]*?\n\}/)?.[0] ?? '';
+    const body = ai.match(/export function getPlanById\([\s\S]*?\n\}/)?.[0] ?? '';
     expect(body).toContain('AI_PROVIDER_TEMPLATES.find');
     expect(body).not.toContain('GoalTemplate');
   });
@@ -22,6 +22,6 @@ describe('AI provider template catalog after GOAL-7210', () => {
   it('does not preserve the retired parallel GoalTemplate OKR catalog', () => {
     expect(existsSync(retiredGoalCatalog)).toBe(false);
     expect(ai).not.toContain('BUILT_IN_TEMPLATES');
-    expect(ai).not.toContain('goal getTemplateById');
+    expect(ai).not.toContain('goal getPlanById');
   });
 });

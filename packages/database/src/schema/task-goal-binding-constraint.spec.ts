@@ -26,10 +26,10 @@ describe('ensureTaskGoalBindingConstraint', () => {
     ).toBe('Task templates table is not present; constraint setup skipped.');
   });
 
-  it('adds the v3 binding check when task_templates exists without the constraint', async () => {
+  it('adds the v3 binding check when task_plans exists without the constraint', async () => {
     const query = vi
       .fn()
-      .mockResolvedValueOnce({ rows: [{ regclass: 'task_templates' }], rowCount: 1 })
+      .mockResolvedValueOnce({ rows: [{ regclass: 'task_plans' }], rowCount: 1 })
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
       .mockResolvedValue({ rows: [], rowCount: null });
 
@@ -51,7 +51,7 @@ describe('ensureTaskGoalBindingConstraint', () => {
   it('replaces the v2 KR-required constraint and keeps reconciliation atomic', async () => {
     const query = vi
       .fn()
-      .mockResolvedValueOnce({ rows: [{ regclass: 'task_templates' }], rowCount: 1 })
+      .mockResolvedValueOnce({ rows: [{ regclass: 'task_plans' }], rowCount: 1 })
       .mockResolvedValueOnce({
         rows: [
           {
@@ -87,7 +87,7 @@ describe('ensureTaskGoalBindingConstraint', () => {
   it('keeps an already-versioned canonical constraint unchanged', async () => {
     const query = vi
       .fn()
-      .mockResolvedValueOnce({ rows: [{ regclass: 'task_templates' }], rowCount: 1 })
+      .mockResolvedValueOnce({ rows: [{ regclass: 'task_plans' }], rowCount: 1 })
       .mockResolvedValueOnce({
         rows: [
           {

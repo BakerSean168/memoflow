@@ -102,10 +102,10 @@ function mountComposable() {
   const pending = instance('Pending');
   const missed = instance('Missed');
   const service = {
-    completeInstance: vi.fn().mockResolvedValue(ok(entity(completed))),
-    uncompleteInstance: vi.fn().mockResolvedValue(ok(entity(pending))),
-    markInstanceMissed: vi.fn().mockResolvedValue(ok(entity(missed))),
-    setChecklistItem: vi.fn().mockResolvedValue(
+    completeOccurrence: vi.fn().mockResolvedValue(ok(entity(completed))),
+    uncompleteOccurrence: vi.fn().mockResolvedValue(ok(entity(pending))),
+    markOccurrenceMissed: vi.fn().mockResolvedValue(ok(entity(missed))),
+    setOccurrenceChecklistItem: vi.fn().mockResolvedValue(
       ok(
         entity(
           instance('Pending', {
@@ -123,7 +123,7 @@ function mountComposable() {
         ),
       ),
     ),
-    getTemplate: vi
+    getPlan: vi
       .fn()
       .mockResolvedValueOnce(ok(entity(template(100))))
       .mockResolvedValueOnce(ok(entity(template(0))))
@@ -167,25 +167,25 @@ describe('useTaskOccurrences template projection refresh', () => {
   it('refreshes the canonical template projection in the query cache after complete and uncomplete', async () => {
     const { composable, service, runtime } = mountComposable();
 
-    await composable.completeInstance('instance-a');
-    expect(service.getTemplate).toHaveBeenNthCalledWith(1, 'template-a');
+    await composable.completeOccurrence('instance-a');
+    expect(service.getPlan).toHaveBeenNthCalledWith(1, 'template-a');
     expect(
       runtime.queryClient.getQueryData<TaskPlanClientDTO>(
         taskPlanQueryKeys.detail('identity-1', 'template-a'),
       )?.completionRate,
     ).toBe(100);
 
-    await composable.uncompleteInstance('instance-a');
-    expect(service.getTemplate).toHaveBeenNthCalledWith(2, 'template-a');
+    await composable.uncompleteOccurrence('instance-a');
+    expect(service.getPlan).toHaveBeenNthCalledWith(2, 'template-a');
     expect(
       runtime.queryClient.getQueryData<TaskPlanClientDTO>(
         taskPlanQueryKeys.detail('identity-1', 'template-a'),
       )?.completionRate,
     ).toBe(0);
 
-    await composable.markInstanceMissed('instance-a');
-    expect(service.markInstanceMissed).toHaveBeenCalledWith('instance-a');
-    expect(service.getTemplate).toHaveBeenNthCalledWith(3, 'template-a');
+    await composable.markOccurrenceMissed('instance-a');
+    expect(service.markOccurrenceMissed).toHaveBeenCalledWith('instance-a');
+    expect(service.getPlan).toHaveBeenNthCalledWith(3, 'template-a');
     expect(useTaskStore().instances[0]?.status).toBe('Missed');
     expect(
       runtime.queryClient.getQueryData<TaskPlanClientDTO>(
@@ -197,13 +197,13 @@ describe('useTaskOccurrences template projection refresh', () => {
   it('updates one occurrence checklist snapshot through the owner command and refreshes the plan projection', async () => {
     const { composable, service } = mountComposable();
 
-    const updated = await composable.setChecklistItem('instance-a', {
+    const updated = await composable.setOccurrenceChecklistItem('instance-a', {
       definitionId: 'check-1',
       completed: true,
       expectedVersion: 1,
     });
 
-    expect(service.setChecklistItem).toHaveBeenCalledWith('instance-a', {
+    expect(service.setOccurrenceChecklistItem).toHaveBeenCalledWith('instance-a', {
       definitionId: 'check-1',
       completed: true,
       expectedVersion: 1,
@@ -213,6 +213,6 @@ describe('useTaskOccurrences template projection refresh', () => {
       completed: true,
     });
     expect(useTaskStore().instances[0]?.checklistState[0]?.completed).toBe(true);
-    expect(service.getTemplate).toHaveBeenCalledWith('template-a');
+    expect(service.getPlan).toHaveBeenCalledWith('template-a');
   });
 });

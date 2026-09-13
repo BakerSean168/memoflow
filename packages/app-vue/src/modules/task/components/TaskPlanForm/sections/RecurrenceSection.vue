@@ -1,7 +1,6 @@
 <!--
   RecurrenceSection.vue
-  任务模板重复规则配置部分
-  使用 RecurrenceRule 值对象
+  Task Plan / canonical TaskRecurrence or TaskPlanSchedule recurrence configuration
 -->
 <template>
   <section class="space-y-4" aria-labelledby="task-recurrence-heading">

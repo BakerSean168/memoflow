@@ -3,7 +3,7 @@
  * 任务 API 模块生命周期测试
  *
  * Verifies that createTaskApiModule is a pure transport/lifecycle adapter:
- * it wires routes, AWAITS the already-assembled instance start, owns a
+ * it wires routes, AWAITS the already-assembled occurrence start, owns a
  * per-handle state machine (single registration, terminal states, idempotent
  * destroy), cleans up on start failure, and never touches `db`.
  *
@@ -40,7 +40,7 @@ function createApiStub(): TaskApplicationPort {
     markTaskOccurrenceMissed: noop,
     getTaskOccurrence: noop,
     listTaskOccurrencesByAccount: noop,
-    listTaskOccurrencesByTemplate: noop,
+    listTaskOccurrencesByPlan: noop,
     listTaskOccurrencesByStatus: noop,
     getTaskOccurrencesByDateRange: noop,
   } as TaskApplicationPort;
@@ -57,13 +57,13 @@ function createFakeInstance() {
   const start = vi.fn(async () => {});
   const dispose = vi.fn(async () => {});
 
-  const instance: TaskModuleInstance = {
+  const occurrence: TaskModuleInstance = {
     api: createApiStub(),
     start,
     dispose,
   } as TaskModuleInstance;
 
-  return { instance, start, dispose };
+  return { occurrence, start, dispose };
 }
 
 function createFakeContext(): TaskApiModuleContext {
@@ -91,7 +91,7 @@ describe('createTaskApiModule lifecycle', () => {
   });
 
   it('register wires routes once, awaits start once, and never touches db', async () => {
-    const moduleDef = createTaskApiModule({ instance: fake.instance });
+    const moduleDef = createTaskApiModule({ occurrence: fake.occurrence });
 
     // No db property on the context: register must still work.
     // 上下文没有 db 属性：register 必须照常工作。
@@ -112,7 +112,7 @@ describe('createTaskApiModule lifecycle', () => {
   });
 
   it('throws on a second register() call (single registration per handle)', async () => {
-    const moduleDef = createTaskApiModule({ instance: fake.instance });
+    const moduleDef = createTaskApiModule({ occurrence: fake.occurrence });
 
     await moduleDef.register(context);
     await expect(moduleDef.register(context)).rejects.toThrow(/only register once/);
@@ -120,7 +120,7 @@ describe('createTaskApiModule lifecycle', () => {
   });
 
   it('throws on register() after destroy()', async () => {
-    const moduleDef = createTaskApiModule({ instance: fake.instance });
+    const moduleDef = createTaskApiModule({ occurrence: fake.occurrence });
 
     await moduleDef.register(context);
     await moduleDef.destroy?.();
@@ -129,7 +129,7 @@ describe('createTaskApiModule lifecycle', () => {
   });
 
   it('destroy disposes exactly once and is idempotent', async () => {
-    const moduleDef = createTaskApiModule({ instance: fake.instance });
+    const moduleDef = createTaskApiModule({ occurrence: fake.occurrence });
 
     await moduleDef.destroy?.();
     expect(fake.dispose).toHaveBeenCalledTimes(1);
@@ -142,7 +142,7 @@ describe('createTaskApiModule lifecycle', () => {
   it('disposes and rethrows when start() rejects, leaving a handle that cannot be re-registered', async () => {
     fake.start.mockRejectedValue(new Error('start failed'));
 
-    const moduleDef = createTaskApiModule({ instance: fake.instance });
+    const moduleDef = createTaskApiModule({ occurrence: fake.occurrence });
 
     await expect(moduleDef.register(context)).rejects.toThrow('start failed');
     expect(fake.dispose).toHaveBeenCalledTimes(1);
@@ -156,7 +156,7 @@ describe('createTaskApiModule lifecycle', () => {
     fake.start.mockRejectedValue(new Error('start failed'));
 
     const routerUse = context.router.use as ReturnType<typeof vi.fn>;
-    const moduleDef = createTaskApiModule({ instance: fake.instance });
+    const moduleDef = createTaskApiModule({ occurrence: fake.occurrence });
 
     await expect(moduleDef.register(context)).rejects.toThrow('start failed');
     expect(routerUse).not.toHaveBeenCalled();
@@ -167,7 +167,7 @@ describe('createTaskApiModule lifecycle', () => {
   it('destroy() after a failed registration does not dispose a second time', async () => {
     fake.start.mockRejectedValue(new Error('start failed'));
 
-    const moduleDef = createTaskApiModule({ instance: fake.instance });
+    const moduleDef = createTaskApiModule({ occurrence: fake.occurrence });
 
     await expect(moduleDef.register(context)).rejects.toThrow('start failed');
     expect(fake.dispose).toHaveBeenCalledTimes(1);
@@ -180,7 +180,7 @@ describe('createTaskApiModule lifecycle', () => {
     fake.start.mockRejectedValue(new Error('start failed'));
     fake.dispose.mockRejectedValue(new Error('dispose failed'));
 
-    const moduleDef = createTaskApiModule({ instance: fake.instance });
+    const moduleDef = createTaskApiModule({ occurrence: fake.occurrence });
 
     await expect(moduleDef.register(context)).rejects.toThrow('start failed');
     expect(fake.dispose).toHaveBeenCalledTimes(1);

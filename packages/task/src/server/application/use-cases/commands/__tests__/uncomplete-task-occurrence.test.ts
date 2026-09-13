@@ -7,47 +7,47 @@ import { UncompleteTaskOccurrenceUseCase } from '../uncomplete-task-occurrence.u
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
 
 describe('UncompleteTaskOccurrenceUseCase', () => {
-  let instanceRepository: ReturnType<typeof createMockRepo<ITaskOccurrenceRepository>>;
+  let occurrenceRepository: ReturnType<typeof createMockRepo<ITaskOccurrenceRepository>>;
   let useCase: UncompleteTaskOccurrenceUseCase;
 
   beforeEach(() => {
-    instanceRepository = createMockRepo<ITaskOccurrenceRepository>({
+    occurrenceRepository = createMockRepo<ITaskOccurrenceRepository>({
       findByIdForIdentity: vi.fn(),
       save: vi.fn().mockResolvedValue(undefined),
     });
     useCase = new UncompleteTaskOccurrenceUseCase(
-      instanceRepository,
-      createInlineTaskWriteTransactionRunner({ instanceRepository }),
+      occurrenceRepository,
+      createInlineTaskWriteTransactionRunner({ occurrenceRepository }),
       TASK_TEST_OCCURRENCE_PROJECTION,
     );
   });
 
   it('throws an error if transactionRunner is missing', () => {
     expect(
-      () => new UncompleteTaskOccurrenceUseCase(instanceRepository, undefined as any),
+      () => new UncompleteTaskOccurrenceUseCase(occurrenceRepository, undefined as any),
     ).toThrow('TaskWriteTransactionRunner must be explicitly provided to UncompleteTaskOccurrenceUseCase');
   });
 
-  it('returns a completed instance to Pending and saves it', async () => {
-    const instance = await aTaskOccurrence();
-    instance.complete();
-    instance.pullDomainEvents();
-    vi.mocked(instanceRepository.findByIdForIdentity).mockResolvedValue(instance);
+  it('returns a completed occurrence to Pending and saves it', async () => {
+    const occurrence = await aTaskOccurrence();
+    occurrence.complete();
+    occurrence.pullDomainEvents();
+    vi.mocked(occurrenceRepository.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(String(instance.id), String(instance.identityId));
+    const result = await useCase.execute(String(occurrence.id), String(occurrence.identityId));
 
     expect(result).toBeOk();
-    expect(instance.status).toBe('Pending');
-    expect(instanceRepository.save).toHaveBeenCalledWith(instance);
+    expect(occurrence.status).toBe('Pending');
+    expect(occurrenceRepository.save).toHaveBeenCalledWith(occurrence);
   });
 
-  it('rejects an instance that is not completed', async () => {
-    const instance = await aTaskOccurrence();
-    vi.mocked(instanceRepository.findByIdForIdentity).mockResolvedValue(instance);
+  it('rejects an occurrence that is not completed', async () => {
+    const occurrence = await aTaskOccurrence();
+    vi.mocked(occurrenceRepository.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(String(instance.id), String(instance.identityId));
+    const result = await useCase.execute(String(occurrence.id), String(occurrence.identityId));
 
     expect(result).toBeErrorWithCode('VALIDATION_ERROR');
-    expect(instanceRepository.save).not.toHaveBeenCalled();
+    expect(occurrenceRepository.save).not.toHaveBeenCalled();
   });
 });

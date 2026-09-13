@@ -8,5 +8,5 @@ export { useTaskPlanDetailQuery } from './useTaskPlanDetailQuery';
 export { useTaskPlanWorkspaceQuery } from './useTaskPlanWorkspaceQuery';
 export {
   useTaskPlanMutations,
-  type CreateTemplateFeedbackIntent,
+  type CreatePlanFeedbackIntent,
 } from './useTaskPlanMutations';

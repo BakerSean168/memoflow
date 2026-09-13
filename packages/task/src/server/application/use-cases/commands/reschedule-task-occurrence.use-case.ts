@@ -8,7 +8,7 @@ import { mapTaskWriteErrorToResultError } from './task-write-support';
 /** Owner command for one TaskOccurrence. It never mutates TaskPlan or Scheduler persistence. */
 export class RescheduleTaskOccurrenceUseCase {
   constructor(
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     private readonly userTimeContextPort: UserTimeContextPort,
   ) {}
 
@@ -18,41 +18,41 @@ export class RescheduleTaskOccurrenceUseCase {
     request: RescheduleTaskInput,
   ): Promise<Result<TaskOccurrenceClientDTO>> {
     try {
-      const instance = await this.instanceRepository.findByIdForIdentity(identityId, id);
-      if (!instance) return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
-      if (instance.version !== request.expectedVersion) {
+      const occurrence = await this.occurrenceRepository.findByIdForIdentity(identityId, id);
+      if (!occurrence) return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
+      if (occurrence.version !== request.expectedVersion) {
         return error(
           'CONFLICT',
-          `TaskOccurrence ${id} version conflict: expected ${request.expectedVersion}, current ${instance.version}`,
+          `TaskOccurrence ${id} version conflict: expected ${request.expectedVersion}, current ${occurrence.version}`,
         );
       }
-      if (!instance.canReschedule()) {
-        return error('VALIDATION_ERROR', 'Cannot reschedule this task instance');
+      if (!occurrence.canReschedule()) {
+        return error('VALIDATION_ERROR', 'Cannot reschedule this task occurrence');
       }
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
       const nextSchedule = TaskOccurrenceScheduleSnapshot.create(request.scheduleSnapshot);
       const targetDate = nextSchedule.date;
-      const targetKey = String(instance.planId) + ':' + targetDate;
-      const siblings = await this.instanceRepository.findByTemplateIdAndDateRange(
-        String(instance.planId),
+      const targetKey = String(occurrence.planId) + ':' + targetDate;
+      const siblings = await this.occurrenceRepository.findByPlanIdAndDateRange(
+        String(occurrence.planId),
         identityId,
         targetDate,
         targetDate,
       );
       const collision = siblings.find(
-        (candidate) => candidate.id !== instance.id && candidate.occurrenceKey === targetKey,
+        (candidate) => candidate.id !== occurrence.id && candidate.occurrenceKey === targetKey,
       );
       if (collision) {
         return error('CONFLICT', `Task occurrence already exists on target day (${collision.id})`);
       }
 
-      const changed = instance.reschedule(nextSchedule, timeContext);
-      if (!changed) return ok(instance.toClientDTOAt(timeContext));
-      await this.instanceRepository.save(instance);
-      return ok(instance.toClientDTOAt(timeContext));
+      const changed = occurrence.reschedule(nextSchedule, timeContext);
+      if (!changed) return ok(occurrence.toClientDTOAt(timeContext));
+      await this.occurrenceRepository.save(occurrence);
+      return ok(occurrence.toClientDTOAt(timeContext));
     } catch (caughtError) {
       return fail(
-        mapTaskWriteErrorToResultError(caughtError, 'Failed to reschedule task instance'),
+        mapTaskWriteErrorToResultError(caughtError, 'Failed to reschedule task occurrence'),
       );
     }
   }

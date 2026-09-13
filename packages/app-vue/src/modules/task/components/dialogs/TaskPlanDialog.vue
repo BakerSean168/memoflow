@@ -34,14 +34,14 @@
 
       <template #status>
         <p
-          v-if="mode === 'edit' && (localTemplate?.futurePendingInstanceCount ?? 0) > 0"
+          v-if="mode === 'edit' && (localTemplate?.futurePendingOccurrenceCount ?? 0) > 0"
           class="mx-6 mt-4 rounded-md border border-info/30 bg-info/10 px-3 py-2 text-sm text-foreground"
           role="status"
           data-testid="task-plan-update-impact"
         >
           {{
             t('task.templateDialog.updateImpact', {
-              count: localTemplate?.futurePendingInstanceCount ?? 0,
+              count: localTemplate?.futurePendingOccurrenceCount ?? 0,
             })
           }}
         </p>
@@ -129,7 +129,7 @@ function createBlankTemplate(): TaskPlanViewModel {
       timing: { kind: 'AllDay' },
     }),
     reminderConfig: null,
-    instanceCount: 0,
+    occurrenceCount: 0,
     completionRate: 0,
   };
 }
@@ -169,9 +169,9 @@ function createCopyDraft(template: TaskPlanViewModel | null): TaskPlanViewModel 
     isActive: true,
     isPaused: false,
     isArchived: false,
-    instanceCount: 0,
-    completedInstanceCount: 0,
-    pendingInstanceCount: 0,
+    occurrenceCount: 0,
+    completedOccurrenceCount: 0,
+    pendingOccurrenceCount: 0,
     completionRate: 0,
     formattedCreatedAt: undefined,
   };

@@ -4,6 +4,6 @@ import type { IdentityId, TaskPlanId, GoalId } from '../../../../primitives';
 export interface TaskCreatedEvent {
   identityId: IdentityId;
   task: TaskPlanServerDTO;
-  templateId: TaskPlanId;
+  planId: TaskPlanId;
   goalId: GoalId | null;
 }

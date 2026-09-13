@@ -9,8 +9,8 @@ import {
 const UTC = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
 const NEW_YORK = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });
 
-describe('task instance occurrence key (R2-1 / TIME-1206)', () => {
-  it('is deterministic for the same template and explicit calendar day', () => {
+describe('task occurrence occurrence key (R2-1 / TIME-1206)', () => {
+  it('is deterministic for the same plan and explicit calendar day', () => {
     const now = Date.parse('2026-06-20T12:30:00.000Z');
     const a = buildTaskOccurrenceOccurrenceKey('tpl-1', startOfLocalDay(now, UTC), UTC);
     const b = buildTaskOccurrenceOccurrenceKey('tpl-1', now, UTC);
@@ -18,7 +18,7 @@ describe('task instance occurrence key (R2-1 / TIME-1206)', () => {
     expect(a).toBe('tpl-1:2026-06-20');
   });
 
-  it('differs across templates and across calendar days', () => {
+  it('differs across plans and across calendar days', () => {
     const time = createTimeFacade({ context: UTC });
     const day1 = startOfLocalDay(Date.parse('2026-06-20T12:00:00.000Z'), UTC);
     const day2 = startOfLocalDay(Number(time.calendar.addDays(day1, 1)), UTC);

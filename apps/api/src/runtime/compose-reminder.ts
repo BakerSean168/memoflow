@@ -54,13 +54,13 @@ export interface ComposeReminderDependencies {
   readonly closureChecker: (identityId: string) => Promise<boolean>;
   /**
    * Optional executor-visible closure checker. When provided, the composed
-   * result exposes `executorReminderPort`, whose `createTemplate` uses this
+   * result exposes `executorReminderPort`, whose `createPlan` uses this
    * frozen merge-base predicate (account status + requested|revoking|closing
    * phases) instead of the module's account-active checker. The AI executor
    * path MUST receive this predicate, not the module checker.
    *
    * 可选的 executor 可见闭户检查器。提供后，组装结果暴露 `executorReminderPort`，
-   * 其 `createTemplate` 使用该冻结的 merge-base 谓词（账户状态 +
+   * 其 `createPlan` 使用该冻结的 merge-base 谓词（账户状态 +
    * requested|revoking|closing 阶段），而非模块的账户激活检查器。AI executor
    * 路径必须收到该谓词，而不是模块检查器。
    */
@@ -121,11 +121,11 @@ export interface ComposedReminder {
   /** The transport-neutral application port (`instance.api`) for sibling modules to orchestrate. 供兄弟模块编排的与传输无关 application port（`instance.api`）。 */
   readonly applicationPort: ReminderApplicationPort;
   /**
-   * The application port the AI executor must consume: its `createTemplate`
+   * The application port the AI executor must consume: its `createPlan`
    * uses the frozen merge-base closure predicate when `executorClosureChecker`
    * is provided, otherwise it is the same object as `applicationPort`.
    * 供 AI executor 消费的 application port：提供 `executorClosureChecker` 时其
-   * `createTemplate` 使用冻结的 merge-base 闭户谓词，否则与 `applicationPort`
+   * `createPlan` 使用冻结的 merge-base 闭户谓词，否则与 `applicationPort`
    * 是同一对象。
    */
   readonly executorReminderPort: ReminderApplicationPort;
@@ -201,13 +201,13 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
   });
 
   // Executor-visible closure path: when the host supplies the frozen
-  // merge-base predicate, expose a port whose createTemplate runs through a
+  // merge-base predicate, expose a port whose createPlan runs through a
   // use case carrying that predicate (sharing the SAME repositories as the
   // single module instance). All other methods delegate to instance.api.
   // Without an executor checker the executor port is simply the module api.
   //
   // Executor 可见的闭户路径：宿主提供冻结的 merge-base 谓词时，暴露一个
-  // createTemplate 走该谓词 use case 的 port（与单一模块实例共享同一套仓储）。
+  // createPlan 走该谓词 use case 的 port（与单一模块实例共享同一套仓储）。
   // 其余方法全部委托给 instance.api；未提供 executor 检查器时该 port 即模块 api。
   const executorUseCases =
     dependencies.executorClosureChecker === undefined
@@ -227,7 +227,7 @@ export function composeReminder(dependencies: ComposeReminderDependencies): Comp
       ? instance.api
       : {
           ...instance.api,
-          createTemplate: (data, ctx) => executorUseCases.createReminderTemplate.execute(data, ctx),
+          createPlan: (data, ctx) => executorUseCases.createReminderTemplate.execute(data, ctx),
         };
 
   return {

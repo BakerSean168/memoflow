@@ -2,7 +2,7 @@ import { NotificationCategory, NotificationType } from '@memoflow/contracts/noti
 import { NotificationTemplate } from '../../aggregates/notification-template';
 import { NotificationTemplateDomainService } from '../notification-template-domain-service';
 
-function createTemplateConfig() {
+function createPlanConfig() {
   return {
     template: {
       title: 'Hello {{name}}',
@@ -26,12 +26,12 @@ function createTemplateConfig() {
   };
 }
 
-function createTemplate(name = 'Welcome Template', isSystemTemplate = false) {
+function createPlan(name = 'Welcome Template', isSystemTemplate = false) {
   return NotificationTemplate.create({
     name,
     type: NotificationType.Info,
     category: NotificationCategory.System,
-    template: createTemplateConfig(),
+    template: createPlanConfig(),
     isSystemTemplate,
   });
 }
@@ -57,11 +57,11 @@ describe('NotificationTemplateDomainService', () => {
     repo.isNameUsed.mockResolvedValue(false);
     const service = new NotificationTemplateDomainService(repo as never);
 
-    const template = await service.createTemplate({
+    const template = await service.createPlan({
       name: 'Welcome Template',
       type: NotificationType.Info,
       category: NotificationCategory.System,
-      template: createTemplateConfig(),
+      template: createPlanConfig(),
     });
 
     expect(template.name).toBe('Welcome Template');
@@ -70,18 +70,18 @@ describe('NotificationTemplateDomainService', () => {
     repo.isNameUsed.mockResolvedValue(true);
 
     await expect(
-      service.createTemplate({
+      service.createPlan({
         name: 'Welcome Template',
         type: NotificationType.Info,
         category: NotificationCategory.System,
-        template: createTemplateConfig(),
+        template: createPlanConfig(),
       }),
     ).rejects.toThrow('Template name is already in use');
   });
 
   it('delegates reads and lifecycle operations to the repository', async () => {
     const repo = createRepository();
-    const template = createTemplate();
+    const template = createPlan();
     repo.findById.mockResolvedValue(template);
     repo.findByName.mockResolvedValue(template);
     repo.findAll.mockResolvedValue([template]);
@@ -92,35 +92,35 @@ describe('NotificationTemplateDomainService', () => {
 
     const service = new NotificationTemplateDomainService(repo as never);
 
-    expect(await service.getTemplate(String(template.id))).toBe(template);
-    expect(await service.getTemplateByName(template.name)).toBe(template);
+    expect(await service.getPlan(String(template.id))).toBe(template);
+    expect(await service.getPlanByName(template.name)).toBe(template);
     expect(await service.getAllTemplates({ includeInactive: true })).toEqual([template]);
     expect(
-      await service.getTemplatesByCategory(NotificationCategory.System, { activeOnly: true }),
+      await service.getPlansByCategory(NotificationCategory.System, { activeOnly: true }),
     ).toEqual([template]);
     expect(
-      await service.getTemplatesByType(NotificationType.Info, { activeOnly: true }),
+      await service.getPlansByType(NotificationType.Info, { activeOnly: true }),
     ).toEqual([template]);
     expect(await service.getSystemTemplates()).toEqual([template]);
     expect(await service.countTemplates({ activeOnly: true })).toBe(3);
 
-    await service.activateTemplate(String(template.id));
+    await service.activatePlan(String(template.id));
     expect(template.isActive).toBe(true);
 
-    await service.deactivateTemplate(String(template.id));
+    await service.deactivatePlan(String(template.id));
     expect(template.isActive).toBe(false);
 
-    await service.deleteTemplate(String(template.id));
+    await service.deletePlan(String(template.id));
     expect(repo.delete).toHaveBeenCalledWith(String(template.id));
   });
 
   it('updates, previews, and validates an existing template', async () => {
     const repo = createRepository();
-    const template = createTemplate();
+    const template = createPlan();
     repo.findById.mockResolvedValue(template);
     const service = new NotificationTemplateDomainService(repo as never);
 
-    const updated = await service.updateTemplateConfig(String(template.id), {
+    const updated = await service.updatePlanConfig(String(template.id), {
       template: {
         title: 'Updated {{name}}',
         content: 'Body {{name}}',
@@ -152,17 +152,17 @@ describe('NotificationTemplateDomainService', () => {
 
   it('guards missing templates and system-template deletion', async () => {
     const repo = createRepository();
-    const systemTemplate = createTemplate('System Template', true);
+    const systemTemplate = createPlan('System Template', true);
     const service = new NotificationTemplateDomainService(repo as never);
 
     repo.findById.mockResolvedValueOnce(null);
-    await expect(service.updateTemplateConfig('missing', {})).rejects.toThrow('Template not found');
+    await expect(service.updatePlanConfig('missing', {})).rejects.toThrow('Template not found');
 
     repo.findById.mockResolvedValueOnce(null);
-    await expect(service.activateTemplate('missing')).rejects.toThrow('Template not found');
+    await expect(service.activatePlan('missing')).rejects.toThrow('Template not found');
 
     repo.findById.mockResolvedValueOnce(null);
-    await expect(service.deactivateTemplate('missing')).rejects.toThrow('Template not found');
+    await expect(service.deactivatePlan('missing')).rejects.toThrow('Template not found');
 
     repo.findById.mockResolvedValueOnce(systemTemplate);
     await expect(service.previewTemplate(String(systemTemplate.id), {})).rejects.toThrow(
@@ -170,7 +170,7 @@ describe('NotificationTemplateDomainService', () => {
     );
 
     repo.findById.mockResolvedValueOnce(systemTemplate);
-    await expect(service.deleteTemplate(String(systemTemplate.id))).rejects.toThrow(
+    await expect(service.deletePlan(String(systemTemplate.id))).rejects.toThrow(
       'Cannot delete system template',
     );
   });

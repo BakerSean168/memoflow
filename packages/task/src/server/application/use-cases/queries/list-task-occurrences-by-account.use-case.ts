@@ -10,12 +10,12 @@ import type { TaskOccurrenceProjectionService } from '../../services/task-occurr
 
 export class ListTaskOccurrencesByAccountUseCase {
   constructor(
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     private readonly projection: TaskOccurrenceProjectionService,
   ) {}
 
   async execute(identityId: string): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    const instances = await this.instanceRepository.findByIdentityId(identityId);
-    return ok(await this.projection.projectMany(identityId, instances));
+    const occurrences = await this.occurrenceRepository.findByIdentityId(identityId);
+    return ok(await this.projection.projectMany(identityId, occurrences));
   }
 }

@@ -10,7 +10,8 @@ import {
   type RecurrenceWeekday,
   type TimeContext,
 } from '@memoflow/time';
-import type { RecurrenceRule, TaskTimeConfig } from '../value-objects';
+import type { TaskRecurrence } from '@memoflow/contracts/task';
+import type { Ymd } from '@memoflow/contracts/primitives';
 
 const FREQUENCY_MAP: Record<
   (typeof TaskRecurrenceFrequency)[keyof typeof TaskRecurrenceFrequency],
@@ -24,53 +25,51 @@ const FREQUENCY_MAP: Record<
 
 export interface TaskRecurrenceDateAdapter {
   between(
-    rule: RecurrenceRule,
-    timeConfig: TaskTimeConfig | null,
+    recurrence: TaskRecurrence,
+    startDate: Ymd,
     from: number,
     to: number,
     timeContext: TimeContext,
   ): number[];
   occursOn(
-    rule: RecurrenceRule,
-    timeConfig: TaskTimeConfig | null,
+    recurrence: TaskRecurrence,
+    startDate: Ymd,
     date: number,
     timeContext: TimeContext,
   ): boolean;
   next(
-    rule: RecurrenceRule,
-    timeConfig: TaskTimeConfig | null,
+    recurrence: TaskRecurrence,
+    startDate: Ymd,
     after: number,
     timeContext: TimeContext,
   ): number | null;
 }
 
 function toSchedule(
-  rule: RecurrenceRule,
-  timeConfig: TaskTimeConfig | null,
+  recurrence: TaskRecurrence,
+  startDate: Ymd,
   timeContext: TimeContext,
 ): RecurrenceSchedule {
-  if (timeConfig?.startDate == null) {
-    throw new Error('Recurring Task requires an anchored local date');
-  }
-
   const time = createTimeFacade({ context: timeContext });
-  const startDate = time.calendar.toYmd(asInstant(timeConfig.startDate));
 
   return {
     startDate,
-    // Task recurrence owns calendar dates only. TaskTimeConfig keeps the actual
-    // point/range; recurrence must not absorb Task execution-time semantics.
+    // Canonical TaskTiming/Plan schedule owns the actual point/range; recurrence
+    // must not absorb Task execution-time semantics.
     localTime: asHm('00:00'),
     // Task currently behaves as a floating user-local calendar schedule. The
     // current user's canonical Product Time context is supplied by the caller;
     // ambient server/device timezone is never consulted here.
     timeZone: timeContext.timeZone,
-    frequency: FREQUENCY_MAP[rule.frequency],
-    interval: rule.interval,
-    byWeekday: rule.daysOfWeek as RecurrenceWeekday[],
-    count: rule.occurrences,
+    frequency: FREQUENCY_MAP[recurrence.frequency],
+    interval: recurrence.interval,
+    byWeekday: recurrence.byWeekday as RecurrenceWeekday[],
+    count: recurrence.end.kind === 'Count' ? recurrence.end.count : null,
     // Existing Task semantics define endDate as inclusive for that local day.
-    until: rule.endDate == null ? null : time.calendar.endOfDay(asInstant(rule.endDate)),
+    until:
+      recurrence.end.kind === 'Until'
+        ? time.calendar.endOfDay(asInstant(time.codec.startOfYmd(recurrence.end.date)))
+        : null,
   };
 }
 
@@ -78,20 +77,20 @@ export function createTaskRecurrenceDateAdapter(
   recurrenceEngine: RecurrenceEnginePort = createRecurrenceEngine(),
 ): TaskRecurrenceDateAdapter {
   return {
-    between(rule, timeConfig, from, to, timeContext) {
-      return recurrenceEngine.between(toSchedule(rule, timeConfig, timeContext), {
+    between(recurrence, startDate, from, to, timeContext) {
+      return recurrenceEngine.between(toSchedule(recurrence, startDate, timeContext), {
         from: asInstant(from),
         to: asInstant(to),
         inclusive: true,
       });
     },
 
-    occursOn(rule, timeConfig, date, timeContext) {
+    occursOn(recurrence, startDate, date, timeContext) {
       const time = createTimeFacade({ context: timeContext });
       const dayStart = time.calendar.startOfDay(asInstant(date));
       const dayEnd = time.calendar.endOfDay(asInstant(date));
       return (
-        recurrenceEngine.between(toSchedule(rule, timeConfig, timeContext), {
+        recurrenceEngine.between(toSchedule(recurrence, startDate, timeContext), {
           from: dayStart,
           to: dayEnd,
           inclusive: true,
@@ -99,9 +98,9 @@ export function createTaskRecurrenceDateAdapter(
       );
     },
 
-    next(rule, timeConfig, after, timeContext) {
+    next(recurrence, startDate, after, timeContext) {
       return recurrenceEngine.next(
-        toSchedule(rule, timeConfig, timeContext),
+        toSchedule(recurrence, startDate, timeContext),
         asInstant(after),
         false,
       );
@@ -112,29 +111,29 @@ export function createTaskRecurrenceDateAdapter(
 const defaultAdapter = createTaskRecurrenceDateAdapter();
 
 export function recurrenceDatesBetween(
-  rule: RecurrenceRule,
-  timeConfig: TaskTimeConfig | null,
+  recurrence: TaskRecurrence,
+  startDate: Ymd,
   from: number,
   to: number,
   timeContext: TimeContext,
 ): number[] {
-  return defaultAdapter.between(rule, timeConfig, from, to, timeContext);
+  return defaultAdapter.between(recurrence, startDate, from, to, timeContext);
 }
 
 export function recurrenceOccursOn(
-  rule: RecurrenceRule,
-  timeConfig: TaskTimeConfig | null,
+  recurrence: TaskRecurrence,
+  startDate: Ymd,
   date: number,
   timeContext: TimeContext,
 ): boolean {
-  return defaultAdapter.occursOn(rule, timeConfig, date, timeContext);
+  return defaultAdapter.occursOn(recurrence, startDate, date, timeContext);
 }
 
 export function nextRecurrenceDate(
-  rule: RecurrenceRule,
-  timeConfig: TaskTimeConfig | null,
+  recurrence: TaskRecurrence,
+  startDate: Ymd,
   after: number,
   timeContext: TimeContext,
 ): number | null {
-  return defaultAdapter.next(rule, timeConfig, after, timeContext);
+  return defaultAdapter.next(recurrence, startDate, after, timeContext);
 }

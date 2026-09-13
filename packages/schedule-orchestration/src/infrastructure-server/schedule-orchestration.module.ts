@@ -72,19 +72,19 @@ export function createScheduleOrchestrationModule(
   ];
 
   const repairLanes: ProjectionRepairLane[] = [
-    defineProjectionRepairLane<{ templateId: string; identityId: string }>({
+    defineProjectionRepairLane<{ planId: string; identityId: string }>({
       source: 'task',
-      enumerate: () => options.taskProjection.source.listTemplateRefs(),
-      describe: (ref) => `${ref.identityId}/${ref.templateId}`,
+      enumerate: () => options.taskProjection.source.listPlanRefs(),
+      describe: (ref) => `${ref.identityId}/${ref.planId}`,
       repair: async (ref) => {
-        const plan = await options.taskProjection.source.buildTemplatePlan(
-          ref.templateId,
+        const plan = await options.taskProjection.source.buildPlanProjection(
+          ref.planId,
           ref.identityId,
         );
         return schedulingPort.reconcile(plan.owner, plan.desired);
       },
       buildOwner: (ref) =>
-        options.taskProjection.source.buildTemplateOwner(ref.templateId, ref.identityId),
+        options.taskProjection.source.buildPlanOwner(ref.planId, ref.identityId),
       listSchedulerOwners: () =>
         scheduleTaskRepository.listSchedulingOwners?.(TASK_SCHEDULING_OWNER_TYPE) ??
         Promise.resolve([]),

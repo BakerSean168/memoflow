@@ -14,7 +14,7 @@ import type { TaskOccurrenceProjectionService } from '../../services/task-occurr
 export class SkipTaskOccurrenceUseCase {
   private readonly logger = createLogger('SkipTaskOccurrenceUseCase');
   constructor(
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     private readonly transactionRunner: TaskWriteTransactionRunner,
     private readonly projection: TaskOccurrenceProjectionService,
   ) {
@@ -32,23 +32,23 @@ export class SkipTaskOccurrenceUseCase {
     try {
       const timeContext = await this.projection.getTimeContext(identityId);
       return await this.transactionRunner.run(async (repositories) => {
-        const instance = await repositories.instanceRepository.findByIdForIdentity(identityId, id);
-        if (!instance) return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
-        if (!instance.canSkip()) return error('VALIDATION_ERROR', 'Cannot skip this task instance');
-        instance.skip(request?.reason);
-        await repositories.instanceRepository.save(instance);
+        const occurrence = await repositories.occurrenceRepository.findByIdForIdentity(identityId, id);
+        if (!occurrence) return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
+        if (!occurrence.canSkip()) return error('VALIDATION_ERROR', 'Cannot skip this task occurrence');
+        occurrence.skip(request?.reason);
+        await repositories.occurrenceRepository.save(occurrence);
         await reevaluateTaskPlanOutcome(
           repositories,
           identityId,
-          String(instance.planId),
-          instance.id,
+          String(occurrence.planId),
+          occurrence.id,
           timeContext,
         );
-        return ok({ instance: this.projection.projectWithContext(instance, timeContext) });
+        return ok({ occurrence: this.projection.projectWithContext(occurrence, timeContext) });
       });
     } catch (caughtError) {
-      this.logger.error('Failed to skip task instance', { error: caughtError });
-      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to skip task instance'));
+      this.logger.error('Failed to skip task occurrence', { error: caughtError });
+      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to skip task occurrence'));
     }
   }
 }

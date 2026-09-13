@@ -62,7 +62,7 @@ describe('TaskOccurrenceHttpAdapter', () => {
     );
   });
 
-  it('uses the uncomplete endpoint when restoring a completed instance', async () => {
+  it('uses the uncomplete endpoint when restoring a completed occurrence', async () => {
     const httpClient = {
       post: vi.fn().mockResolvedValue(ok({ status: 'Pending' })),
     } as any;

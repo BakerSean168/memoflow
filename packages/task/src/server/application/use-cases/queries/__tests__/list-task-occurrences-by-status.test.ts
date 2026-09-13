@@ -17,7 +17,7 @@ describe('ListTaskOccurrencesByStatusUseCase', () => {
     useCase = new ListTaskOccurrencesByStatusUseCase(instanceRepo, TASK_TEST_OCCURRENCE_PROJECTION);
   });
 
-  it('should return empty array when no instances match', async () => {
+  it('should return empty array when no occurrences match', async () => {
     const result = await useCase.execute(anIdentityId(), 'Pending');
 
     expect(result).toBeOk();
@@ -26,7 +26,7 @@ describe('ListTaskOccurrencesByStatusUseCase', () => {
     }
   });
 
-  it('should return instance DTOs for matching status', async () => {
+  it('should return occurrence DTOs for matching status', async () => {
     const instance1 = await aTaskOccurrence();
     const instance2 = await aTaskOccurrence();
     vi.mocked(instanceRepo.findByStatus).mockResolvedValue([instance1, instance2]);

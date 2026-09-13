@@ -5,16 +5,20 @@ import {
   TaskGoalBindingTrigger,
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
-  TaskType,
+  TaskPlanScheduleKind,
+  TaskRecurrenceEndKind,
 } from '@memoflow/contracts/task';
 import { TaskPlan } from '../domain/aggregates/task-plan';
 import { TaskOccurrence } from '../domain/aggregates/task-occurrence';
-import { TASK_TEST_TIME_CONTEXT, TASK_TEST_USER_TIME_CONTEXT_PORT } from '../../testing';
 import {
-  RecurrenceRule,
-  TaskOccurrenceScheduleSnapshot,
-  TaskPlanSchedule,
-  TaskTimeConfig,
+  canonicalTaskOccurrenceScheduleForTest,
+  canonicalTaskPlanScheduleForTest,
+  aDailyRecurrence,
+  anAllDayTiming,
+  TASK_TEST_TIME_CONTEXT,
+  TASK_TEST_USER_TIME_CONTEXT_PORT,
+} from '../../testing';
+import {
 } from '../domain/value-objects';
 import { createTaskPrismaModule } from './prisma';
 import {
@@ -33,7 +37,7 @@ async function seedFifteenOccurrencePlan(
 ): Promise<{
   identityId: IdentityId;
   module: ReturnType<typeof createTaskPrismaModule>;
-  template: TaskPlan;
+  plan: TaskPlan;
   finalInstance: TaskOccurrence;
 }> {
   const identityId = IdentityId.generate();
@@ -65,13 +69,14 @@ async function seedFifteenOccurrencePlan(
     userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
   });
   const start = Date.now() - 14 * DAY_MS;
-  const template = TaskPlan.create({
+  const plan = TaskPlan.create({
     identityId,
     title: 'Plant check-in 15-day plan',
-    schedule: TaskPlanSchedule.fromLegacy(
-      TaskType.Recurring,
-      TaskTimeConfig.createAllDay(new Date(start)),
-      RecurrenceRule.createDaily(1).setOccurrences(15),
+    schedule: canonicalTaskPlanScheduleForTest(
+      TaskPlanScheduleKind.Recurring,
+      start,
+      anAllDayTiming(),
+      { ...aDailyRecurrence(), end: { kind: TaskRecurrenceEndKind.Count, count: 15 } },
       TASK_TEST_TIME_CONTEXT,
     ),
     importance: ImportanceLevel.Moderate,
@@ -82,35 +87,35 @@ async function seedFifteenOccurrencePlan(
       contribution: { value: 1, trigger: TaskGoalBindingTrigger.PlanCompletion },
     },
   });
-  template.clearDomainEvents();
-  await module.taskPlanRepository.save(template);
+  plan.clearDomainEvents();
+  await module.taskPlanRepository.save(plan);
 
-  const instances: TaskOccurrence[] = [];
+  const occurrences: TaskOccurrence[] = [];
   for (let index = 0; index < 15; index += 1) {
     const occurrenceDate = start + index * DAY_MS;
-    const instance = TaskOccurrence.create({
-      planId: template.id,
+    const occurrence = TaskOccurrence.create({
+      planId: plan.id,
       identityId,
-      scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
+      scheduleSnapshot: canonicalTaskOccurrenceScheduleForTest(
         occurrenceDate,
-        TaskTimeConfig.createAllDay(new Date(occurrenceDate)),
+        anAllDayTiming(),
         TASK_TEST_TIME_CONTEXT,
       ),
       importanceSnapshot: ImportanceLevel.Moderate,
     });
-    if (index < 14) instance.complete();
-    instance.clearDomainEvents();
-    instances.push(instance);
+    if (index < 14) occurrence.complete();
+    occurrence.clearDomainEvents();
+    occurrences.push(occurrence);
   }
-  await module.taskOccurrenceRepository.saveMany(instances);
+  await module.taskOccurrenceRepository.saveMany(occurrences);
 
-  return { identityId, module, template, finalInstance: instances[14] };
+  return { identityId, module, plan, finalInstance: occurrences[14] };
 }
 
 async function loadOutcome(seed: SeededPlan) {
   const saved = await seed.module.taskPlanRepository.findByIdForIdentity(
     String(seed.identityId),
-    String(seed.template.id),
+    String(seed.plan.id),
   );
   return saved?.outcome;
 }
@@ -129,7 +134,7 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
     const prisma = await getPrisma();
 
     expect(
-      await prisma.taskGoalOutbox.count({ where: { taskPlanId: String(seed.template.id) } }),
+      await prisma.taskGoalOutbox.count({ where: { taskPlanId: String(seed.plan.id) } }),
     ).toBe(0);
 
     const result = await seed.module.api.skipTaskOccurrence(
@@ -141,13 +146,13 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
     expect(result.ok).toBe(true);
     expect(await loadOutcome(seed)).toBe(TaskPlanOutcome.Succeeded);
     const rows = await prisma.taskGoalOutbox.findMany({
-      where: { taskPlanId: String(seed.template.id) },
+      where: { taskPlanId: String(seed.plan.id) },
     });
     expect(rows).toHaveLength(1);
     expect(JSON.parse(rows[0].payload)).toMatchObject({
       schemaVersion: 2,
       action: 'apply',
-      source: { type: 'TaskPlan', id: String(seed.template.id) },
+      source: { type: 'TaskPlan', id: String(seed.plan.id) },
       value: 1,
     });
 
@@ -157,7 +162,7 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
   it('Fixture A: 15/15 settles once, uncomplete reverts, and correction can settle the plan again', async () => {
     const seed = await seedFifteenOccurrencePlan(TaskPlanCompletionPolicy.AllowCorrection);
     const prisma = await getPrisma();
-    const where = { taskPlanId: String(seed.template.id) };
+    const where = { taskPlanId: String(seed.plan.id) };
 
     expect(await prisma.taskGoalOutbox.count({ where })).toBe(0);
     expect(
@@ -174,7 +179,7 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
       .map((row) => ({ row, payload: JSON.parse(row.payload) as Record<string, unknown> }))
       .find(({ payload }) => payload.action === 'apply');
     expect(firstApply?.payload).toMatchObject({
-      source: { type: 'TaskPlan', id: String(seed.template.id) },
+      source: { type: 'TaskPlan', id: String(seed.plan.id) },
     });
 
     expect(
@@ -233,7 +238,7 @@ describe('SETTLE-3501 finite-plan durable settlement', () => {
     expect(await loadOutcome(seed)).toBe(TaskPlanOutcome.Failed);
     expect(
       await prisma.taskGoalOutbox.count({
-        where: { taskPlanId: String(seed.template.id) },
+        where: { taskPlanId: String(seed.plan.id) },
       }),
     ).toBe(0);
 

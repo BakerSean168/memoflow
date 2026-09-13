@@ -95,7 +95,7 @@ class PowerSyncTaskPlanAdapter implements TaskPlanRepoPort {
   constructor(private readonly db: IElectronDatabase) {}
   async findByIdentityId(identityId: string): Promise<unknown[]> {
     const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM task_templates WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
+      `SELECT * FROM task_plans WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
       [identityId],
     );
     return mapRows(rows);
@@ -106,7 +106,7 @@ class PowerSyncTaskOccurrenceAdapter implements TaskOccurrenceRepoPort {
   constructor(private readonly db: IElectronDatabase) {}
   async findByIdentityId(identityId: string): Promise<unknown[]> {
     const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT * FROM task_instances WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
+      `SELECT * FROM task_occurrences WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
       [identityId],
     );
     return mapRows(rows);

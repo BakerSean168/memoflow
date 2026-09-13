@@ -6,7 +6,7 @@ import { PowerSyncTaskBindingReadPort } from './powersync-task-binding-read-port
 
 function createDb(): IElectronDatabase {
   const sqlite = new Database(':memory:');
-  sqlite.exec(`CREATE TABLE IF NOT EXISTS task_templates (
+  sqlite.exec(`CREATE TABLE IF NOT EXISTS task_plans (
     id TEXT PRIMARY KEY,
     identity_id TEXT NOT NULL,
     name TEXT NOT NULL,
@@ -41,7 +41,7 @@ function createDb(): IElectronDatabase {
 
 async function seedContext(db: IElectronDatabase): Promise<void> {
   await db.execute(
-    `INSERT INTO task_templates
+    `INSERT INTO task_plans
       (id, identity_id, name, status, outcome, goal_id, key_result_id,
        goal_record_value, goal_progress_trigger, created_at, deleted_at)
      VALUES
@@ -91,7 +91,7 @@ describe('PowerSyncTaskBindingReadPort', () => {
     const db = createDb();
     await seedContext(db);
     await db.execute(
-      `INSERT INTO task_templates
+      `INSERT INTO task_plans
         (id, identity_id, name, status, outcome, goal_id, key_result_id,
          goal_record_value, goal_progress_trigger, created_at, deleted_at)
        VALUES ('t7', 'id-A', 'Same KR id, other goal', 'Active', 'Open', 'goal-2', 'kr-1', NULL, NULL, 7, NULL)`,

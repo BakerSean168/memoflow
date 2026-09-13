@@ -47,11 +47,11 @@ export class PowerSyncTaskPlanRepository
 
     const placeholders = ids.map(() => '?').join(', ');
     const rows = await this.db.getAll<Record<string, unknown>>(
-      `SELECT l.*, tl.task_template_id AS owner_id
+      `SELECT l.*, tl.task_plan_id AS owner_id
        FROM labels l
        INNER JOIN task_labels tl ON tl.label_id = l.id AND tl.identity_id = l.identity_id
-       WHERE tl.identity_id = ? AND tl.task_template_id IN (${placeholders})
-       ORDER BY tl.task_template_id ASC, l.name ASC, l.id ASC`,
+       WHERE tl.identity_id = ? AND tl.task_plan_id IN (${placeholders})
+       ORDER BY tl.task_plan_id ASC, l.name ASC, l.id ASC`,
       [identityId, ...ids],
     );
     for (const row of rows) {
@@ -60,30 +60,30 @@ export class PowerSyncTaskPlanRepository
     return result;
   }
 
-  private async hydrateTemplates(identityId: string, templates: TaskPlan[]): Promise<TaskPlan[]> {
+  private async hydrateTemplates(identityId: string, plans: TaskPlan[]): Promise<TaskPlan[]> {
     const labelMap = await this.loadLabelMap(
       identityId,
-      templates.map((template) => String(template.id)),
+      plans.map((plan) => String(plan.id)),
     );
-    for (const template of templates) {
-      template.hydrateLabels(labelMap.get(String(template.id)) ?? []);
+    for (const plan of plans) {
+      plan.hydrateLabels(labelMap.get(String(plan.id)) ?? []);
     }
-    return templates;
+    return plans;
   }
 
   private async hydrateTemplate(
     identityId: string,
-    template: TaskPlan | null,
+    plan: TaskPlan | null,
   ): Promise<TaskPlan | null> {
-    if (!template) return null;
-    await this.hydrateTemplates(identityId, [template]);
-    return template;
+    if (!plan) return null;
+    await this.hydrateTemplates(identityId, [plan]);
+    return plan;
   }
 
-  protected async persist(template: TaskPlan): Promise<void> {
-    const data = PowerSyncTaskPlanMapper.toPersistence(template);
+  protected async persist(plan: TaskPlan): Promise<void> {
+    const data = PowerSyncTaskPlanMapper.toPersistence(plan);
     const existing = await this.db.getOptional<{ id: string }>(
-      'SELECT id FROM task_templates WHERE id = ? LIMIT 1',
+      'SELECT id FROM task_plans WHERE id = ? LIMIT 1',
       [data.id],
     );
     const mutableColumns: readonly (readonly [string, unknown])[] = [
@@ -111,7 +111,7 @@ export class PowerSyncTaskPlanRepository
 
     if (existing) {
       await this.db.execute(
-        `UPDATE task_templates SET ${mutableColumns.map(([column]) => `${column} = ?`).join(', ')} WHERE id = ?`,
+        `UPDATE task_plans SET ${mutableColumns.map(([column]) => `${column} = ?`).join(', ')} WHERE id = ?`,
         [...mutableColumns.map(([, value]) => value), data.id],
       );
       return;
@@ -123,14 +123,14 @@ export class PowerSyncTaskPlanRepository
       ['created_at', data.createdAt],
     ];
     await this.db.execute(
-      `INSERT INTO task_templates (${insertColumns.map(([column]) => column).join(', ')}) VALUES (${insertColumns.map(() => '?').join(', ')})`,
+      `INSERT INTO task_plans (${insertColumns.map(([column]) => column).join(', ')}) VALUES (${insertColumns.map(() => '?').join(', ')})`,
       insertColumns.map(([, value]) => value),
     );
   }
 
   async findByIdForIdentity(identityId: string, id: string): Promise<TaskPlan | null> {
     const row = await this.db.getOptional<PowerSyncTaskPlanRow>(
-      'SELECT * FROM task_templates WHERE id = ? AND identity_id = ? LIMIT 1',
+      'SELECT * FROM task_plans WHERE id = ? AND identity_id = ? LIMIT 1',
       [id, identityId],
     );
     return this.hydrateTemplate(identityId, row ? PowerSyncTaskPlanMapper.toDomain(row) : null);
@@ -139,7 +139,7 @@ export class PowerSyncTaskPlanRepository
   async findByIdentityId(identityId: string): Promise<TaskPlan[]> {
     return this.queryTemplates(
       identityId,
-      'SELECT * FROM task_templates WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
+      'SELECT * FROM task_plans WHERE identity_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
       [identityId],
     );
   }
@@ -147,7 +147,7 @@ export class PowerSyncTaskPlanRepository
   async findByStatus(identityId: string, status: TaskPlanStatus): Promise<TaskPlan[]> {
     return this.queryTemplates(
       identityId,
-      'SELECT * FROM task_templates WHERE identity_id = ? AND status = ? AND deleted_at IS NULL ORDER BY created_at DESC',
+      'SELECT * FROM task_plans WHERE identity_id = ? AND status = ? AND deleted_at IS NULL ORDER BY created_at DESC',
       [identityId, status],
     );
   }
@@ -159,7 +159,7 @@ export class PowerSyncTaskPlanRepository
   async findByGoalId(identityId: string, goalId: string): Promise<TaskPlan[]> {
     return this.queryTemplates(
       identityId,
-      'SELECT * FROM task_templates WHERE identity_id = ? AND goal_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
+      'SELECT * FROM task_plans WHERE identity_id = ? AND goal_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
       [identityId, goalId],
     );
   }
@@ -169,10 +169,10 @@ export class PowerSyncTaskPlanRepository
     if (requiredLabelIds.length === 0) return this.findByIdentityId(identityId);
 
     const placeholders = requiredLabelIds.map(() => '?').join(', ');
-    const matches = await this.db.getAll<{ task_template_id: string }>(
-      `SELECT task_template_id FROM task_labels
+    const matches = await this.db.getAll<{ task_plan_id: string }>(
+      `SELECT task_plan_id FROM task_labels
        WHERE identity_id = ? AND label_id IN (${placeholders})
-       GROUP BY task_template_id
+       GROUP BY task_plan_id
        HAVING COUNT(DISTINCT label_id) = ?`,
       [identityId, ...requiredLabelIds, requiredLabelIds.length],
     );
@@ -181,10 +181,10 @@ export class PowerSyncTaskPlanRepository
     const templatePlaceholders = matches.map(() => '?').join(', ');
     return this.queryTemplates(
       identityId,
-      `SELECT * FROM task_templates
+      `SELECT * FROM task_plans
        WHERE identity_id = ? AND id IN (${templatePlaceholders}) AND deleted_at IS NULL
        ORDER BY created_at DESC`,
-      [identityId, ...matches.map((row) => row.task_template_id)],
+      [identityId, ...matches.map((row) => row.task_plan_id)],
     );
   }
 
@@ -194,10 +194,10 @@ export class PowerSyncTaskPlanRepository
     labelIds: readonly string[],
   ): Promise<LabelClientDTO[]> {
     const owner = await this.db.getOptional<{ id: string }>(
-      'SELECT id FROM task_templates WHERE id = ? AND identity_id = ? LIMIT 1',
+      'SELECT id FROM task_plans WHERE id = ? AND identity_id = ? LIMIT 1',
       [taskPlanId, identityId],
     );
-    if (!owner) throw new Error('Task template not found.');
+    if (!owner) throw new Error('Task plan not found.');
 
     const uniqueIds = [...new Set(labelIds)];
     for (const labelId of uniqueIds) {
@@ -209,24 +209,24 @@ export class PowerSyncTaskPlanRepository
     }
 
     await this.db.execute(
-      'DELETE FROM task_labels WHERE identity_id = ? AND task_template_id = ?',
+      'DELETE FROM task_labels WHERE identity_id = ? AND task_plan_id = ?',
       [identityId, taskPlanId],
     );
     for (const labelId of uniqueIds) {
       await this.db.execute(
-        'INSERT INTO task_labels (id, identity_id, task_template_id, label_id) VALUES (?, ?, ?, ?)',
+        'INSERT INTO task_labels (id, identity_id, task_plan_id, label_id) VALUES (?, ?, ?, ?)',
         [`${identityId}:${taskPlanId}:${labelId}`, identityId, taskPlanId, labelId],
       );
     }
     return (await this.loadLabelMap(identityId, [taskPlanId])).get(taskPlanId) ?? [];
   }
 
-  async findAllTemplateRefs(): Promise<Array<{ id: string; identityId: string }>> {
+  async findAllPlanRefs(): Promise<Array<{ id: string; identityId: string }>> {
     // PowerSync only contains rows synchronized for the local profile. Enumerate
-    // every local row (including soft-deleted/archived templates) so startup
+    // every local row (including soft-deleted/archived plans) so startup
     // repair can both recreate missed intents and remove stale Scheduler owners.
     const rows = await this.db.getAll<{ id: string; identity_id: string }>(
-      'SELECT id, identity_id FROM task_templates ORDER BY id ASC',
+      'SELECT id, identity_id FROM task_plans ORDER BY id ASC',
       [],
     );
     return rows.map((row) => ({ id: String(row.id), identityId: String(row.identity_id) }));
@@ -234,7 +234,7 @@ export class PowerSyncTaskPlanRepository
 
   async findActiveRecurringPlansForMaterialization(): Promise<TaskPlan[]> {
     const rows = await this.db.getAll<PowerSyncTaskPlanRow>(
-      `SELECT * FROM task_templates
+      `SELECT * FROM task_plans
        WHERE json_extract(schedule, '$.kind') = 'Recurring' AND status = 'Active' AND deleted_at IS NULL
        ORDER BY updated_at ASC`,
       [],
@@ -245,9 +245,9 @@ export class PowerSyncTaskPlanRepository
   async delete(identityId: string, id: string): Promise<void> {
     const existing = await this.findByIdForIdentity(identityId, id);
     if (!existing) {
-      throw new Error('Task template not found for the current identity.');
+      throw new Error('Task plan not found for the current identity.');
     }
-    await this.db.execute('DELETE FROM task_templates WHERE id = ? AND identity_id = ?', [
+    await this.db.execute('DELETE FROM task_plans WHERE id = ? AND identity_id = ?', [
       id,
       identityId,
     ]);
@@ -256,11 +256,11 @@ export class PowerSyncTaskPlanRepository
   async softDelete(identityId: string, id: string): Promise<void> {
     const existing = await this.findByIdForIdentity(identityId, id);
     if (!existing) {
-      throw new Error('Task template not found for the current identity.');
+      throw new Error('Task plan not found for the current identity.');
     }
     const now = new Date().toISOString();
     await this.db.execute(
-      'UPDATE task_templates SET deleted_at = ?, updated_at = ? WHERE id = ? AND identity_id = ?',
+      'UPDATE task_plans SET deleted_at = ?, updated_at = ? WHERE id = ? AND identity_id = ?',
       [now, now, id, identityId],
     );
   }
@@ -268,10 +268,10 @@ export class PowerSyncTaskPlanRepository
   async restore(identityId: string, id: string): Promise<void> {
     const existing = await this.findByIdForIdentity(identityId, id);
     if (!existing) {
-      throw new Error('Task template not found for the current identity.');
+      throw new Error('Task plan not found for the current identity.');
     }
     await this.db.execute(
-      'UPDATE task_templates SET deleted_at = NULL, archived_at = NULL, updated_at = ? WHERE id = ? AND identity_id = ?',
+      'UPDATE task_plans SET deleted_at = NULL, archived_at = NULL, updated_at = ? WHERE id = ? AND identity_id = ?',
       [new Date().toISOString(), id, identityId],
     );
   }
@@ -291,7 +291,7 @@ export class PowerSyncTaskPlanRepository
   ): Promise<TaskPlan[]> {
     return this.queryTemplates(
       identityId,
-      'SELECT * FROM task_templates WHERE identity_id = ? AND goal_id = ? AND key_result_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
+      'SELECT * FROM task_plans WHERE identity_id = ? AND goal_id = ? AND key_result_id = ? AND deleted_at IS NULL ORDER BY created_at DESC',
       [identityId, goalId, keyResultId],
     );
   }
@@ -303,15 +303,15 @@ export class PowerSyncTaskPlanRepository
       filters,
     );
     const result = await this.db.get<{ count: number }>(
-      `SELECT COUNT(*) as count FROM task_templates WHERE ${where.clauses.join(' AND ')}`,
+      `SELECT COUNT(*) as count FROM task_plans WHERE ${where.clauses.join(' AND ')}`,
       where.params,
     );
     return Number(result.count ?? 0);
   }
 
-  async saveBatch(templates: TaskPlan[]): Promise<void> {
-    for (const template of templates) {
-      await this.save(template);
+  async saveBatch(plans: TaskPlan[]): Promise<void> {
+    for (const plan of plans) {
+      await this.save(plan);
     }
   }
 
@@ -319,7 +319,7 @@ export class PowerSyncTaskPlanRepository
     if (ids.length === 0) return;
     const placeholders = ids.map(() => '?').join(', ');
     await this.db.execute(
-      `DELETE FROM task_templates WHERE identity_id = ? AND id IN (${placeholders})`,
+      `DELETE FROM task_plans WHERE identity_id = ? AND id IN (${placeholders})`,
       [identityId, ...ids],
     );
   }
@@ -337,7 +337,7 @@ export class PowerSyncTaskPlanRepository
         : "json_extract(schedule, '$.kind') = 'Recurring'",
     );
     const where = this.buildFilters(clauses, params, filters);
-    let sql = `SELECT * FROM task_templates WHERE ${where.clauses.join(' AND ')} ORDER BY created_at DESC`;
+    let sql = `SELECT * FROM task_plans WHERE ${where.clauses.join(' AND ')} ORDER BY created_at DESC`;
     if (filters?.limit) {
       sql += ' LIMIT ?';
       where.params.push(filters.limit);

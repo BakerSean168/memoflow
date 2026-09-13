@@ -13,25 +13,25 @@ const evaluator = new TaskPlanOutcomeEvaluator();
 export async function reevaluateTaskPlanOutcome(
   repositories: TaskWriteRepositories,
   identityId: string,
-  templateId: string,
+  planId: string,
   triggeringTaskOccurrenceId: TaskOccurrenceId,
   timeContext: TimeContext,
 ): Promise<boolean> {
-  if (!repositories.templateRepository) return false;
-  const template = await repositories.templateRepository.findByIdForIdentity(identityId, templateId);
-  if (!template || template.outcome === TaskPlanOutcome.Abandoned) return false;
+  if (!repositories.planRepository) return false;
+  const plan = await repositories.planRepository.findByIdForIdentity(identityId, planId);
+  if (!plan || plan.outcome === TaskPlanOutcome.Abandoned) return false;
 
-  const instances = await repositories.instanceRepository.findByTemplateId(templateId, identityId);
-  const next = evaluator.evaluate(template, instances, timeContext);
+  const occurrences = await repositories.occurrenceRepository.findByPlanId(planId, identityId);
+  const next = evaluator.evaluate(plan, occurrences, timeContext);
   const needsLifecycleRepair =
-    (next === TaskPlanOutcome.Open && template.status === TaskPlanStatus.Closed) ||
-    (next !== TaskPlanOutcome.Open && template.status !== TaskPlanStatus.Closed);
-  if (next === template.outcome && !needsLifecycleRepair) return false;
+    (next === TaskPlanOutcome.Open && plan.status === TaskPlanStatus.Closed) ||
+    (next !== TaskPlanOutcome.Open && plan.status !== TaskPlanStatus.Closed);
+  if (next === plan.outcome && !needsLifecycleRepair) return false;
 
-  template.applyPlanOutcome(
+  plan.applyPlanOutcome(
     next as typeof TaskPlanOutcome.Open | typeof TaskPlanOutcome.Succeeded | typeof TaskPlanOutcome.Failed,
     { triggeringTaskOccurrenceId },
   );
-  await repositories.templateRepository.save(template);
+  await repositories.planRepository.save(plan);
   return true;
 }

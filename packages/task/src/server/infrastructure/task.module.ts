@@ -32,7 +32,7 @@ import { SkipTaskOccurrenceUseCase } from '../application/use-cases/commands/ski
 import { GetTaskOccurrencesByDateRangeUseCase } from '../application/use-cases/queries/get-task-occurrences-by-date-range.use-case';
 import { GetTaskOccurrenceUseCase } from '../application/use-cases/queries/get-task-occurrence.use-case';
 import { ListTaskOccurrencesByAccountUseCase } from '../application/use-cases/queries/list-task-occurrences-by-account.use-case';
-import { ListTaskOccurrencesByTemplateUseCase } from '../application/use-cases/queries/list-task-occurrences-by-template.use-case';
+import { ListTaskOccurrencesByPlanUseCase } from '../application/use-cases/queries/list-task-occurrences-by-plan.use-case';
 import { ListTaskOccurrencesByStatusUseCase } from '../application/use-cases/queries/list-task-occurrences-by-status.use-case';
 import { StartTaskOccurrenceUseCase } from '../application/use-cases/commands/start-task-occurrence.use-case';
 import { DeleteTaskOccurrenceUseCase } from '../application/use-cases/commands/delete-task-occurrence.use-case';
@@ -59,7 +59,7 @@ const logger = createLogger('TaskModule');
  * Optional runtime side effects the module owns.
  * 模块拥有的可选运行时副作用。
  *
- * A contribution is the unit we start/stop together with the module instance.
+ * A contribution is the unit we start/stop together with the module occurrence.
  * This replaces the older global InitializationManager registration.
  */
 export interface TaskModuleRuntimeContribution {
@@ -129,7 +129,7 @@ export interface TaskModuleUseCases {
   // Instance queries
   readonly getTaskOccurrence: GetTaskOccurrenceUseCase;
   readonly listTaskOccurrencesByAccount: ListTaskOccurrencesByAccountUseCase;
-  readonly listTaskOccurrencesByTemplate: ListTaskOccurrencesByTemplateUseCase;
+  readonly listTaskOccurrencesByPlan: ListTaskOccurrencesByPlanUseCase;
   readonly listTaskOccurrencesByStatus: ListTaskOccurrencesByStatusUseCase;
   readonly getTaskOccurrencesByDateRange: GetTaskOccurrencesByDateRangeUseCase;
 }
@@ -301,7 +301,7 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
       taskOccurrenceRepository,
       occurrenceProjection,
     ),
-    listTaskOccurrencesByTemplate: new ListTaskOccurrencesByTemplateUseCase(
+    listTaskOccurrencesByPlan: new ListTaskOccurrencesByPlanUseCase(
       taskOccurrenceRepository,
       taskPlanRepository,
       occurrenceProjection,
@@ -327,7 +327,7 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
  * 2. define transport-neutral `ApplicationPort`
  * 3. assemble use cases once
  * 4. wrap them in `api`
- * 5. let the module instance own `start` / `dispose`
+ * 5. let the module occurrence own `start` / `dispose`
  */
 export function createTaskModule(dependencies: TaskModuleDependencies): TaskModuleInstance {
   if (!dependencies.taskWriteTransactionRunner) {
@@ -367,8 +367,7 @@ export function createTaskModule(dependencies: TaskModuleDependencies): TaskModu
     bindTaskToGoal: (id, identityId, input) =>
       useCases.bindTaskToGoal.execute(id, identityId, input),
     unbindTaskFromGoal: (id, identityId) => useCases.unbindTaskFromGoal.execute(id, identityId),
-    getTaskPlan: (id, identityId, includeChildren) =>
-      useCases.getTaskPlan.execute(id, identityId, includeChildren),
+    getTaskPlan: (id, identityId) => useCases.getTaskPlan.execute(id, identityId),
     listTaskPlans: (query) => useCases.listTaskPlans.execute(query),
     completeTaskOccurrence: (id, identityId, input) =>
       useCases.completeTaskOccurrence.execute(id, identityId, input),
@@ -387,8 +386,8 @@ export function createTaskModule(dependencies: TaskModuleDependencies): TaskModu
     getTaskOccurrence: (id, identityId) => useCases.getTaskOccurrence.execute(id, identityId),
     listTaskOccurrencesByAccount: (identityId) =>
       useCases.listTaskOccurrencesByAccount.execute(identityId),
-    listTaskOccurrencesByTemplate: (templateId, identityId) =>
-      useCases.listTaskOccurrencesByTemplate.execute(templateId, identityId),
+    listTaskOccurrencesByPlan: (planId, identityId) =>
+      useCases.listTaskOccurrencesByPlan.execute(planId, identityId),
     listTaskOccurrencesByStatus: (identityId, status) =>
       useCases.listTaskOccurrencesByStatus.execute(identityId, status),
     getTaskOccurrencesByDateRange: (identityId, startDate, endDate) =>

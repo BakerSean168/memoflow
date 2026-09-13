@@ -20,9 +20,9 @@ import {
   TaskPlanListResponseSchema,
   TaskOccurrenceResponseSchema,
   ListTaskPlanFiltersSchema,
-  TaskPlanInstancesQuerySchema,
+  TaskPlanOccurrencesQuerySchema,
   UpdateTaskPlanInvocationSchema,
-  GenerateInstancesInvocationSchema,
+  GenerateOccurrencesInvocationSchema,
   AbandonTaskPlanInvocationSchema,
   BindTaskToGoalInvocationSchema,
   TaskPlanIdCommandInvocationSchema,
@@ -95,7 +95,7 @@ export function registerTaskPlanRoutes(
     defaultSecurity: [{ bearerAuth: [] }],
   });
 
-  // POST / — Create template
+  // POST / — Create plan
   r.routeWithValidation(
     {
       method: 'post',
@@ -109,11 +109,11 @@ export function registerTaskPlanRoutes(
       validation: { schema: CreateTaskPlanSchema },
     },
     [auth],
-    (data, ctx) => controller.createTemplate(data, ctx),
+    (data, ctx) => controller.createPlan(data, ctx),
     { successStatus: 201 },
   );
 
-  // GET / — List templates
+  // GET / — List plans
   r.route(
     {
       method: 'get',
@@ -128,11 +128,11 @@ export function registerTaskPlanRoutes(
     },
     [auth],
     (req, ctx) =>
-      controller.listTemplates(parseTemplateFilters(req.query as Record<string, unknown>), ctx),
+      controller.listPlans(parseTemplateFilters(req.query as Record<string, unknown>), ctx),
   );
 
 
-  // GET /:id — Get template by ID
+  // GET /:id — Get plan by ID
   r.route(
     {
       method: 'get',
@@ -145,11 +145,10 @@ export function registerTaskPlanRoutes(
       },
     },
     [auth],
-    (req, ctx) =>
-      controller.getTemplate(req.params!.id, ctx, req.query?.includeChildren === 'true'),
+    (req, ctx) => controller.getPlan(req.params!.id, ctx),
   );
 
-  // PUT /:id — Update template (backwards compatibility)
+  // PUT /:id — Update plan (backwards compatibility)
   r.routeWithValidation(
     {
       method: 'put',
@@ -173,10 +172,10 @@ export function registerTaskPlanRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.updateTemplate(data.params.id, data.body, ctx),
+    (data, ctx) => controller.updatePlan(data.params.id, data.body, ctx),
   );
 
-  // PATCH /:id — Update template (preferred method for partial updates)
+  // PATCH /:id — Update plan (preferred method for partial updates)
   r.routeWithValidation(
     {
       method: 'patch',
@@ -200,10 +199,10 @@ export function registerTaskPlanRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.updateTemplate(data.params.id, data.body, ctx),
+    (data, ctx) => controller.updatePlan(data.params.id, data.body, ctx),
   );
 
-  // DELETE /:id — Delete template
+  // DELETE /:id — Delete plan
   r.routeWithValidation(
     {
       method: 'delete',
@@ -220,10 +219,10 @@ export function registerTaskPlanRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.deleteTemplate(data.params.id, ctx),
+    (data, ctx) => controller.deletePlan(data.params.id, ctx),
   );
 
-  // POST /:id/activate — Activate template
+  // POST /:id/activate — Activate plan
   r.routeWithValidation(
     {
       method: 'post',
@@ -240,7 +239,7 @@ export function registerTaskPlanRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.activateTemplate(data.params.id, ctx),
+    (data, ctx) => controller.activatePlan(data.params.id, ctx),
   );
 
   // POST /:id/abandon — Explicitly close a plan as Abandoned
@@ -266,7 +265,7 @@ export function registerTaskPlanRoutes(
     (data, ctx) => controller.abandonPlan(data.params.id, data.body, ctx),
   );
 
-  // POST /:id/pause — Pause template
+  // POST /:id/pause — Pause plan
   r.routeWithValidation(
     {
       method: 'post',
@@ -283,10 +282,10 @@ export function registerTaskPlanRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.pauseTemplate(data.params.id, ctx),
+    (data, ctx) => controller.pausePlan(data.params.id, ctx),
   );
 
-  // POST /:id/archive — Archive template
+  // POST /:id/archive — Archive plan
   r.routeWithValidation(
     {
       method: 'post',
@@ -303,19 +302,19 @@ export function registerTaskPlanRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.archiveTemplate(data.params.id, ctx),
+    (data, ctx) => controller.archivePlan(data.params.id, ctx),
   );
 
-  // POST /:id/generate-instances — Generate instances for template
+  // POST /:id/generate-occurrences — Generate occurrences for plan
   r.routeWithValidation(
     {
       method: 'post',
-      path: '/:id/generate-instances',
+      path: '/:id/generate-occurrences',
       summary: '为模板生成任务实例',
       request: {
-        params: GenerateInstancesInvocationSchema.shape.params,
+        params: GenerateOccurrencesInvocationSchema.shape.params,
         body: {
-          content: { 'application/json': { schema: GenerateInstancesInvocationSchema.shape.body } },
+          content: { 'application/json': { schema: GenerateOccurrencesInvocationSchema.shape.body } },
         },
       },
       responses: {
@@ -323,23 +322,23 @@ export function registerTaskPlanRoutes(
         404: errorResponse('模板不存在'),
       },
       validation: {
-        schema: GenerateInstancesInvocationSchema,
+        schema: GenerateOccurrencesInvocationSchema,
         projectInput: (req) => ({ params: req.params, body: req.body }),
       },
     },
     [auth],
-    (data, ctx) => controller.generateInstances(data.params.id, data.body, ctx),
+    (data, ctx) => controller.generateOccurrences(data.params.id, data.body, ctx),
   );
 
-  // GET /:id/instances — Get instances by template ID
+  // GET /:id/occurrences — Get occurrences by plan ID
   r.route(
     {
       method: 'get',
-      path: '/:id/instances',
+      path: '/:id/occurrences',
       summary: '获取模板的任务实例列表',
       request: {
         params: z.object({ id: brandedId<TaskPlanId>() }),
-        query: TaskPlanInstancesQuerySchema,
+        query: TaskPlanOccurrencesQuerySchema,
       },
       responses: {
         200: successResponse(z.array(TaskOccurrenceResponseSchema), '获取成功'),
@@ -348,14 +347,14 @@ export function registerTaskPlanRoutes(
     },
     [auth],
     (req, ctx) =>
-      controller.getInstancesByTemplate(
+      controller.getOccurrencesByPlan(
         req.params!.id,
         ctx,
         parseTemplateInstancesRange(req.query as Record<string, unknown>),
       ),
   );
 
-  // POST /:id/bind-goal — Bind template to goal
+  // POST /:id/bind-goal — Bind plan to goal
   r.routeWithValidation(
     {
       method: 'post',
@@ -380,7 +379,7 @@ export function registerTaskPlanRoutes(
     (data, ctx) => controller.bindToGoal(data.params.id, data.body, ctx),
   );
 
-  // POST /:id/unbind-goal — Unbind template from goal
+  // POST /:id/unbind-goal — Unbind plan from goal
   r.routeWithValidation(
     {
       method: 'post',

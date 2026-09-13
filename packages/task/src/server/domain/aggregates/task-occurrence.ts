@@ -196,7 +196,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     this._props.updatedAt = now as Instant;
     this.advanceVersion();
 
-    this.addDomainEvent<TaskEventMap['task:instance-completed']>('task:instance-completed', {
+    this.addDomainEvent<TaskEventMap['task:occurrence-completed']>('task:occurrence-completed', {
       identityId: this._props.identityId,
       taskOccurrenceId: this.id,
       taskPlanId: this._props.planId,
@@ -214,7 +214,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     this._props.result = null;
     this._props.updatedAt = now as Instant;
     this.advanceVersion();
-    this.addDomainEvent<TaskEventMap['task:instance-uncompleted']>('task:instance-uncompleted', {
+    this.addDomainEvent<TaskEventMap['task:occurrence-uncompleted']>('task:occurrence-uncompleted', {
       identityId: this._props.identityId,
       taskOccurrenceId: this.id,
       taskPlanId: this._props.planId,
@@ -232,7 +232,7 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     });
     this._props.updatedAt = now as Instant;
     this.advanceVersion();
-    this.addDomainEvent<TaskEventMap['task:instance-skipped']>('task:instance-skipped', {
+    this.addDomainEvent<TaskEventMap['task:occurrence-skipped']>('task:occurrence-skipped', {
       identityId: this._props.identityId,
       taskOccurrenceId: this.id,
       taskPlanId: this._props.planId,

@@ -107,12 +107,12 @@ describe('task repository factories surface', () => {
     // reachable from @memoflow/task; the following value-level assertions pin the
     // field names so a renamed/removed port fails loudly.
     const run = (_t: TaskWriteTransactionRunner) => undefined;
-    const instance = (_t: ITaskOccurrenceRepository) => undefined;
-    const template = (_t: ITaskPlanRepository) => undefined;
+    const occurrence = (_t: ITaskOccurrenceRepository) => undefined;
+    const plan = (_t: ITaskPlanRepository) => undefined;
 
     expect(typeof run).toBe('function');
-    expect(typeof instance).toBe('function');
-    expect(typeof template).toBe('function');
+    expect(typeof occurrence).toBe('function');
+    expect(typeof plan).toBe('function');
   });
 
   it('infrastructure public barrel keeps ingredient factories, set types, port types and cross-module read ports only', async () => {

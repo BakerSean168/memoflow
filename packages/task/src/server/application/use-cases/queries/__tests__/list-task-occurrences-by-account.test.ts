@@ -17,7 +17,7 @@ describe('ListTaskOccurrencesByAccountUseCase', () => {
     useCase = new ListTaskOccurrencesByAccountUseCase(instanceRepo, TASK_TEST_OCCURRENCE_PROJECTION);
   });
 
-  it('should return empty array when no instances exist', async () => {
+  it('should return empty array when no occurrences exist', async () => {
     const result = await useCase.execute(anIdentityId());
 
     expect(result).toBeOk();
@@ -26,7 +26,7 @@ describe('ListTaskOccurrencesByAccountUseCase', () => {
     }
   });
 
-  it('should return all instances for the account', async () => {
+  it('should return all occurrences for the account', async () => {
     const instance1 = await aTaskOccurrence();
     const instance2 = await aTaskOccurrence();
     vi.mocked(instanceRepo.findByIdentityId).mockResolvedValue([instance1, instance2]);

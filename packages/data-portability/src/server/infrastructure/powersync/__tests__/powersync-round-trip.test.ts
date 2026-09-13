@@ -93,8 +93,8 @@ describe('PowerSync desktop data portability round trip', () => {
     const goal = insertedRow(firstStatements, 'goals');
     const keyResult = insertedRow(firstStatements, 'key_results');
     const goalRecord = insertedRow(firstStatements, 'goal_records');
-    const taskPlan = insertedRow(firstStatements, 'task_templates');
-    const taskOccurrence = insertedRow(firstStatements, 'task_instances');
+    const taskPlan = insertedRow(firstStatements, 'task_plans');
+    const taskOccurrence = insertedRow(firstStatements, 'task_occurrences');
     const scheduleTask = insertedRow(firstStatements, 'schedule_tasks');
     const reminderGroup = insertedRow(firstStatements, 'reminder_groups');
     const reminderTemplate = insertedRow(firstStatements, 'reminder_templates');
@@ -159,7 +159,7 @@ describe('PowerSync desktop data portability round trip', () => {
     await importUseCase.execute(identityB, exported.content);
     const secondStatements = targetDb.committedStatements.slice(firstStatementCount);
     const secondRepository = insertedRow(secondStatements, 'repositories');
-    const secondTaskPlan = insertedRow(secondStatements, 'task_templates');
+    const secondTaskPlan = insertedRow(secondStatements, 'task_plans');
 
     expect(secondRepository.id).not.toBe(repository.id);
     expect(secondTaskPlan.id).not.toBe(taskPlan.id);
@@ -713,7 +713,7 @@ function seedProfile(identityUuid: string): SeedTables {
         updated_at: later,
       },
     ],
-    task_templates: [
+    task_plans: [
       {
         id: 'task-plan-a',
         identity_id: identityUuid,
@@ -753,7 +753,7 @@ function seedProfile(identityUuid: string): SeedTables {
         deleted_at: null,
       },
     ],
-    task_instances: [
+    task_occurrences: [
       {
         id: 'task-occurrence-a',
         plan_id: 'task-plan-a',

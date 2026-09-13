@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 const sourceRoot = resolve(import.meta.dirname, '..');
 const contractsFile = resolve(import.meta.dirname, '../../../contracts/src/modules/label/index.ts');
 const forbidden =
-  /\bGoal(?:Label)?\b|\bTask(?:Plan|Label)?\b|goal_labels|task_labels|goal_id|task_template_id/;
+  /\bGoal(?:Label)?\b|\bTask(?:Plan|Label)?\b|goal_labels|task_labels|goal_id|task_plan_id/;
 
 function sources(root: string): string[] {
   const result: string[] = [];

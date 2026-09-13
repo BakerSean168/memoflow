@@ -53,8 +53,8 @@ export class PrismaTaskOccurrenceMapper {
     });
   }
 
-  static toPersistence(instance: TaskOccurrence) {
-    const dto = instance.toPersistenceState();
+  static toPersistence(occurrence: TaskOccurrence) {
+    const dto = occurrence.toPersistenceState();
     return {
       planId: dto.planId,
       identityId: dto.identityId,

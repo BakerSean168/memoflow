@@ -24,15 +24,29 @@ describe('TaskDetailView occurrence correction and plan settings', () => {
     expect(source).not.toContain('fetchInstances({ page: 1, limit: 500 })');
     expect(source).not.toContain('getTaskOccurrencePosition');
     for (const operation of [
-      'completeInstance',
-      'uncompleteInstance',
-      'markInstanceMissed',
-      'skipInstance',
-      'setChecklistItem',
+      'completeOccurrence',
+      'uncompleteOccurrence',
+      'markOccurrenceMissed',
+      'skipOccurrence',
+      'setOccurrenceChecklistItem',
     ]) {
       expect(source).toContain(operation);
     }
     expect(source).toContain('refetchWorkspace');
+  });
+
+  it('routes each occurrence action to its composable mutation exactly once', () => {
+    expect(source).toContain('runOccurrenceAction(occurrenceId, completeOccurrenceMutation)');
+    expect(source).toContain('runOccurrenceAction(occurrenceId, uncompleteOccurrenceMutation)');
+    expect(source).toContain('runOccurrenceAction(occurrenceId, markOccurrenceMissedMutation)');
+    expect(source).toContain('runOccurrenceAction(occurrenceId, skipOccurrenceMutation)');
+    expect(source).toContain('setOccurrenceChecklistItemMutation(id, { definitionId, completed, expectedVersion })');
+
+    expect(source).not.toContain('runOccurrenceAction(occurrenceId, completeOccurrence)');
+    expect(source).not.toContain('runOccurrenceAction(occurrenceId, uncompleteOccurrence)');
+    expect(source).not.toContain('runOccurrenceAction(occurrenceId, markOccurrenceMissed)');
+    expect(source).not.toContain('runOccurrenceAction(occurrenceId, skipOccurrence)');
+    expect(source).not.toContain('setOccurrenceChecklistItem(id, { definitionId, completed, expectedVersion })');
   });
 
   it('does not resurrect dependency or graph state', () => {

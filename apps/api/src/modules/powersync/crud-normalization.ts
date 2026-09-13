@@ -23,7 +23,6 @@ export const JSON_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
 };
 
 export const BOOLEAN_FIELDS_BY_TABLE: Record<string, ReadonlySet<string>> = {
-  task_templates: new Set(['reminder_config_enabled', 'is_blocked']),
   schedules: new Set(['has_conflict']),
   schedule_tasks: new Set(['enabled']),
   reminder_templates: new Set(['self_enabled']),

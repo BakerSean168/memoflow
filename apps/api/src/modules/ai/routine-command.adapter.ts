@@ -61,7 +61,7 @@ export class RoutineAICommandAdapter implements IAIRoutineCommandPort {
       icon: preset?.icon ?? 'mdi-bell-outline',
       ...(input.profileIds ? { profileIds: input.profileIds as CreateReminderTemplateReq['profileIds'] } : {}),
     };
-    const created = unwrap(await this.reminder.createTemplate(request, input.context));
+    const created = unwrap(await this.reminder.createPlan(request, input.context));
     return {
       kind: 'routine' as const,
       id: String(created.id),

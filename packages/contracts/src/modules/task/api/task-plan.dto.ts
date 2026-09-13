@@ -39,9 +39,9 @@ export interface CreateTaskPlanInput extends CreateTaskPlanReq {
   identityId: IdentityId;
 }
 export type CreateTaskPlanRes = {
-  template: TaskPlanClientDTO;
-  instanceCount: number;
-  todayInstanceCreated: boolean;
+  plan: TaskPlanClientDTO;
+  occurrenceCount: number;
+  todayOccurrenceCreated: boolean;
 };
 
 export const UpdateTaskPlanSchema = z
@@ -90,12 +90,12 @@ export const ListTaskPlanFiltersSchema = z
 
 export type ListTaskPlanFilters = z.infer<typeof ListTaskPlanFiltersSchema>;
 
-export const TaskPlanInstancesQuerySchema = z.object({
+export const TaskPlanOccurrencesQuerySchema = z.object({
   from: z.coerce.number().int().optional(),
   to: z.coerce.number().int().optional(),
 });
 
-export type TaskPlanInstancesQuery = z.infer<typeof TaskPlanInstancesQuerySchema>;
+export type TaskPlanOccurrencesQuery = z.infer<typeof TaskPlanOccurrencesQuerySchema>;
 
 // Internal query type (used by controller -> use case) with identityId
 export interface QueryTaskPlansInternal {
@@ -106,17 +106,17 @@ export interface QueryTaskPlansInternal {
   labelIdsAll?: string[];
 }
 export interface QueryTaskPlansRes {
-  templates: TaskPlanClientDTO[];
+  plans: TaskPlanClientDTO[];
   total: number;
 }
 
-export const GenerateInstancesSchema = z.object({
+export const GenerateOccurrencesSchema = z.object({
   fromDate: z.number(),
   toDate: z.number(),
 });
 
-export type GenerateInstancesReq = z.infer<typeof GenerateInstancesSchema>;
-export type GenerateInstancesRes = TaskOccurrenceClientDTO[];
+export type GenerateOccurrencesReq = z.infer<typeof GenerateOccurrencesSchema>;
+export type GenerateOccurrencesRes = TaskOccurrenceClientDTO[];
 
 // Residual 667: bind-to-goal request reuses TaskGoalBindingSchema (no dual body).
 export type BindToGoalReq = z.infer<typeof TaskGoalBindingSchema>;
@@ -125,5 +125,5 @@ export type BindToGoalRes = TaskPlanClientDTO;
 export type UnbindFromGoalReq = void;
 export type UnbindFromGoalRes = TaskPlanClientDTO;
 
-export type GetTaskPlanReq = { id: TaskPlanId; includeChildren?: boolean };
+export type GetTaskPlanReq = { id: TaskPlanId };
 export type GetTaskPlanRes = TaskPlanClientDTO | null;

@@ -6,7 +6,7 @@ tags:
   - refactor
 description: Task Plan / Occurrence 聚合边界、Schedule ADT、Result/Checklist、Reminder parity、Goal/Workspace 一次性收敛实施计划
 created: 2026-09-08T19:35:00+08:00
-updated: 2026-09-13T16:42:00+08:00
+updated: 2026-09-13T17:00:00+08:00
 ---
 
 # Task vNext Model Convergence
@@ -22,7 +22,7 @@ updated: 2026-09-13T16:42:00+08:00
 - old `TaskTemplate`/`TaskInstance` persistence and compatibility DTOs are deleted rather than translated;
 - no legacy round-trip fixture is required; fresh TaskPlan/TaskOccurrence round-trip remains required.
 
-**状态：ACTIVE / TASK-7308 complete; TASK-7309 next**
+**状态：ACTIVE / TASK-7309 complete; TASK-7310 exact-head CI pending**
 **执行分支：** `feat/system-wide-vnext-convergence`（next ticket worktree: `delegated/task-7309-legacy`）
 **上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）
 **基线：** Task Vitest 71 files / 717 tests PASS
@@ -180,6 +180,8 @@ old first-trigger reminder persistence
 
 允许 migration 文件/历史 ADR 提及旧名。
 
+**TASK-7309 DONE（2026-09-13）：** destructive cutover 已完成：active `TaskTemplate` / `TaskInstance` public/domain/persistence vocabulary、旧 `TaskType` / `TaskTimeConfig` / `RecurrenceRule` / `CompletionRecord` / `SkipRecord` surfaces 均已删除；物理 persistence canonical 为 `task_plans` / `task_occurrences` / `task_plan_history`；`TaskClient` canonical API 为 Plan/Occurrence；schedule/event rails 已收敛为 canonical rails。旧的 dead Vue occurrence UI 已移除，Task Detail/Management recursive occurrence handlers 已修复；Schedule Orchestration Task runtime 使用 `taskScheduleProjectionEventNames`，Task durable repair 使用 `planId`。Reminder 继续保留 owner-canonical Template API。zero-target 仅允许 historical docs、migration 与 anti-resurrection test strings 命中旧名。
+
 ### TASK-7310 — Review / acceptance / archive
 
 五层审查：
@@ -202,6 +204,8 @@ PowerSync parity
 focused Planner/Scheduler/Goal settlement tests
 full CI exact-head
 ```
+
+**TASK-7310 local five-layer review：PASS / P0=0 / P1=0.** Layers: contract correctness; aggregate boundary; behavioral completeness; persistence/transport parity; plan/docs truth. Local evidence: Task unit **76 files / 602 tests PASS**; Task integration **6/31 PASS**; App-Vue Task **26/83 PASS**; Contracts **87/585 PASS**; Database **11/37 PASS**; PowerSync schema **1/7 PASS**; Schedule Orchestration **9/34 PASS**; Planner focused **5/12 PASS**; Goal outbox **1/4 PASS**; Goal settlement integration **1/3 PASS**; Prisma validate **PASS**; Task/contracts/database/app-vue/powersync-schema typecheck **PASS** and schedule-orchestration typecheck **PASS**; lint **0 errors** (historical warnings remain); `git diff --check` **PASS**. Full CI and implementation-head acceptance remain pending.
 
 ## 5. Dependency order
 
@@ -233,7 +237,7 @@ full CI exact-head
 - [x] TASK-7306
 - [x] TASK-7307
 - [x] TASK-7308
-- [ ] TASK-7309
+- [x] TASK-7309
 - [ ] TASK-7310
 
-**Next:** TASK-7309 is now the sole next Task dependency: delete canonical/public legacy TaskTemplate / TaskInstance symbols and the remaining obsolete TaskPlan fields/status/reminder persistence listed above. Migration files and historical ADR references may retain old names; active runtime/contracts/owners may not. Preserve the accepted TaskPlanWorkspace composition and do not collapse its owner boundaries while deleting legacy surfaces.
+**Next:** TASK-7310 exact-head CI/review/archive: push the first exact implementation head to existing PR #340 and require full exact-head CI. Archive only after that gate passes. Until then, preserve the accepted TaskPlanWorkspace composition and do not claim full CI green or implementation-head acceptance.

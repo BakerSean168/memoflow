@@ -1,35 +1,43 @@
 import {
   ChecklistItemDefinition,
-  CompletionRecord,
-  RecurrenceRule,
   TaskGoalBinding,
   TaskGoalBindingTrigger,
   TaskOccurrenceStatus,
+  TaskPlanSchedule,
   TaskReminderConfig,
   TaskPlanStatus,
-  TaskTimeConfig,
-  TaskTimeType,
 } from '..';
-import { DayOfWeek, DependencyType, ReminderTimeUnit } from '@memoflow/contracts/task';
+import {
+  DayOfWeek,
+  ReminderTimeUnit,
+  TaskOccurrenceResultSchema,
+  TaskPlanScheduleKind,
+} from '@memoflow/contracts/task';
 
 describe('task domain value objects', () => {
-  it('covers recurrence rules and reminder configuration', () => {
-    const rule = RecurrenceRule.createWeekly(
-      [DayOfWeek.Monday, DayOfWeek.Friday],
-      2,
-    ).setOccurrences(3);
-    expect(rule.isWeekly).toBe(true);
-    expect(rule.hasEndCondition).toBe(true);
-    expect(rule.getDescription()).toContain('周一');
-    expect(() =>
-      RecurrenceRule.create({
+  it('covers canonical task plan schedules and reminder configuration', () => {
+    const schedule = TaskPlanSchedule.create({
+      kind: TaskPlanScheduleKind.Recurring,
+      startDate: '2026-04-26',
+      timing: { kind: 'Window', start: '09:00', end: '10:30' },
+      recurrence: {
         frequency: 'Weekly',
-        interval: 0,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: null,
+        interval: 2,
+        byWeekday: [DayOfWeek.Monday, DayOfWeek.Friday],
+        end: { kind: 'Count', count: 3 },
+      },
+    });
+    expect(schedule.isRecurring).toBe(true);
+    expect(schedule.calendarDate).toBe('2026-04-26');
+    expect(schedule.timing).toEqual({ kind: 'Window', start: '09:00', end: '10:30' });
+    expect(schedule.recurrence?.end).toEqual({ kind: 'Count', count: 3 });
+    expect(() =>
+      TaskPlanSchedule.create({
+        kind: TaskPlanScheduleKind.OneTime,
+        date: '2026-04-26',
+        timing: { kind: 'Window', start: '10:30', end: '09:00' },
       }),
-    ).toThrow('Interval must be at least 1');
+    ).toThrow('Task timing window end must be after start');
 
     const reminders = TaskReminderConfig.createDefault()
       .setEnabled(true)
@@ -39,27 +47,15 @@ describe('task domain value objects', () => {
     expect(reminders.triggersCount).toBe(2);
   });
 
-  it('covers time config, completion records, and checklist definitions', () => {
-    const startDate = new Date('2026-04-26T00:00:00Z');
-    const timeConfig = TaskTimeConfig.createTimeRange(startDate, 540, 630);
-    expect(timeConfig.isTimeRange).toBe(true);
-    expect(timeConfig.getTimeRangeFormatted()).toBe('09:00 - 10:30');
-    expect(timeConfig.getDurationMinutes()).toBe(90);
-    expect(timeConfig.setTimePoint(null).startDate).toBe(startDate.getTime());
-    expect(() =>
-      TaskTimeConfig.create({
-        timeType: TaskTimeType.TimeRange,
-        startDate: startDate.getTime(),
-        timePoint: null,
-        timeRange: { start: 60, end: 30 },
-      }),
-    ).toThrow('Time range start must be before end');
-
-    const completion = CompletionRecord.completeWithDuration(90, Date.parse('2026-04-26T10:00:00Z'))
-      .setNote('done')
-      .setRating(5);
-    expect(completion.getDurationFormatted()).toBe('1h 30m');
-    expect(completion.isHighRating).toBe(true);
+  it('covers canonical occurrence results and checklist definitions', () => {
+    const completion = TaskOccurrenceResultSchema.parse({
+      kind: 'Completed',
+      recordedAt: Date.parse('2026-04-26T10:00:00Z'),
+      actualDurationMinutes: 90,
+      note: 'done',
+      rating: 5,
+    });
+    expect(completion).toMatchObject({ kind: 'Completed', actualDurationMinutes: 90 });
 
     const items = ChecklistItemDefinition.fromTitles(['A', 'B']);
     expect(items[1].order).toBe(1);
@@ -108,20 +104,7 @@ describe('task domain value objects', () => {
     expect(TaskPlanStatus.isAvailable(TaskPlanStatus.Paused)).toBe(true);
     expect(TaskPlanStatus.isAvailable(TaskPlanStatus.Closed)).toBe(false);
     expect(TaskPlanStatus.isExecutable(TaskPlanStatus.Active)).toBe(true);
-    expect(TaskTimeType.getAll()).toEqual([
-      TaskTimeType.AllDay,
-      TaskTimeType.TimePoint,
-      TaskTimeType.TimeRange,
-    ]);
-    expect(TaskTimeType.of('TimePoint')).toBe(TaskTimeType.TimePoint);
-    expect(TaskTimeType.isValid('TimeRange')).toBe(true);
-    expect(TaskTimeType.isAllDay(TaskTimeType.AllDay)).toBe(true);
-    expect(TaskTimeType.isTimePoint(TaskTimeType.TimePoint)).toBe(true);
-    expect(TaskTimeType.isTimeRange(TaskTimeType.TimeRange)).toBe(true);
-    expect(TaskTimeType.hasSpecificTime(TaskTimeType.TimePoint)).toBe(true);
-    expect(TaskTimeType.hasTimeRange(TaskTimeType.TimeRange)).toBe(true);
     expect(() => TaskOccurrenceStatus.of('Bad')).toThrow('Invalid TaskOccurrenceStatus');
     expect(() => TaskPlanStatus.of('Bad')).toThrow('Invalid TaskPlanStatus');
-    expect(() => TaskTimeType.of('Bad')).toThrow('Invalid TaskTimeType');
   });
 });

@@ -42,15 +42,14 @@ export interface TaskPlanClientDTO {
   updatedAt: TransferDate;
   deletedAt: TransferDate | null;
   history?: unknown[];
-  instances?: unknown[];
 
-  instanceCount: number;
-  completedInstanceCount: number;
-  pendingInstanceCount: number;
-  dueInstanceCount: number;
-  completedDueInstanceCount: number;
+  occurrenceCount: number;
+  completedOccurrenceCount: number;
+  pendingOccurrenceCount: number;
+  dueOccurrenceCount: number;
+  completedDueOccurrenceCount: number;
   completionWindowDays: 30;
-  futurePendingInstanceCount: number;
-  singleInstanceStatus: TaskOccurrenceStatus | null;
+  futurePendingOccurrenceCount: number;
+  singleOccurrenceStatus: TaskOccurrenceStatus | null;
   completionRate: number;
 }

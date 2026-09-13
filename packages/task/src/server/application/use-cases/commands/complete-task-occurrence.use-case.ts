@@ -24,7 +24,7 @@ import type { TaskOccurrenceProjectionService } from '../../services/task-occurr
 /**
  * Complete Task Instance Service
  *
- * 完成任务实例，并在发布 `task:instance-completed` 前把跨模块订阅方（Goal）
+ * 完成任务实例，并在发布 `task:occurrence-completed` 前把跨模块订阅方（Goal）
  * 所需的判定信息填齐（ADR-033 范式 A：payload 自包含）。判定逻辑本属 Task，
  * 因此从旧的 desktop handler 迁到这里，事件发布前算好。
  */
@@ -33,8 +33,8 @@ export class CompleteTaskOccurrenceUseCase {
   private readonly transactionRunner: TaskWriteTransactionRunner;
 
   constructor(
-    private readonly instanceRepository: ITaskOccurrenceRepository,
-    private readonly templateRepository: ITaskPlanRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
+    private readonly planRepository: ITaskPlanRepository,
     transactionRunner: TaskWriteTransactionRunner,
     private readonly projection: TaskOccurrenceProjectionService,
   ) {
@@ -57,8 +57,8 @@ export class CompleteTaskOccurrenceUseCase {
         this.executeInTransaction(repositories, id, identityId, timeContext, request),
       );
     } catch (caughtError) {
-      this.logger.error('Failed to complete task instance', { error: caughtError });
-      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to complete task instance'));
+      this.logger.error('Failed to complete task occurrence', { error: caughtError });
+      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to complete task occurrence'));
     }
   }
 
@@ -69,43 +69,43 @@ export class CompleteTaskOccurrenceUseCase {
     timeContext: TimeContext,
     request?: CompleteTaskOccurrenceReq,
   ): Promise<Result<TaskOccurrenceOperationRes>> {
-    const instance = await repositories.instanceRepository.findByIdForIdentity(identityId, id);
-    if (!instance) {
+    const occurrence = await repositories.occurrenceRepository.findByIdForIdentity(identityId, id);
+    if (!occurrence) {
       return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
     }
 
-    if (instance.status === TaskOccurrenceStatus.Completed) {
+    if (occurrence.status === TaskOccurrenceStatus.Completed) {
       return ok({
-        instance: this.projection.projectWithContext(instance, timeContext),
+        occurrence: this.projection.projectWithContext(occurrence, timeContext),
       });
     }
 
-    if (!instance.canComplete()) {
-      return error('VALIDATION_ERROR', 'Cannot complete this task instance');
+    if (!occurrence.canComplete()) {
+      return error('VALIDATION_ERROR', 'Cannot complete this task occurrence');
     }
 
-    const template = await repositories.templateRepository!.findByIdForIdentity(
+    const plan = await repositories.planRepository!.findByIdForIdentity(
       identityId,
-      String(instance.planId),
+      String(occurrence.planId),
     );
     const goalContext = {
-      taskTitle: template?.title ?? '',
-      goalBinding: template?.goalBinding?.toDTO() ?? null,
+      taskTitle: plan?.title ?? '',
+      goalBinding: plan?.goalBinding?.toDTO() ?? null,
     };
 
     // Mark as completed（goalContext 会被嵌入领域事件的 payload）
-    instance.complete(request?.duration, request?.note, request?.rating, goalContext);
-    await repositories.instanceRepository.save(instance);
+    occurrence.complete(request?.duration, request?.note, request?.rating, goalContext);
+    await repositories.occurrenceRepository.save(occurrence);
     await reevaluateTaskPlanOutcome(
       repositories,
       identityId,
-      String(instance.planId),
-      instance.id,
+      String(occurrence.planId),
+      occurrence.id,
       timeContext,
     );
 
     return ok({
-      instance: this.projection.projectWithContext(instance, timeContext),
+      occurrence: this.projection.projectWithContext(occurrence, timeContext),
     });
   }
 }

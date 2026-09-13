@@ -19,12 +19,12 @@ export { createTaskOccurrenceIpcAdapter } from './task-occurrence-ipc.adapter';
  * All IPC adapters for the Task module
  */
 export interface TaskIpcAdapters {
-  template: TaskPlanIpcAdapter;
-  instance: TaskOccurrenceIpcAdapter;
+  plan: TaskPlanIpcAdapter;
+  occurrence: TaskOccurrenceIpcAdapter;
 }
 
 /**
- * Create all Task IPC adapters from a single IResultIpcClient instance.
+ * Create all Task IPC adapters from a single IResultIpcClient occurrence.
  * Desktop DI injects ResultIpcClient from createResultIpcClient().
  *
  * @example
@@ -35,7 +35,7 @@ export interface TaskIpcAdapters {
  */
 export function createTaskIpcAdapters(ipcClient: IResultIpcClient): TaskIpcAdapters {
   return {
-    template: new TaskPlanIpcAdapter(ipcClient),
-    instance: new TaskOccurrenceIpcAdapter(ipcClient),
+    plan: new TaskPlanIpcAdapter(ipcClient),
+    occurrence: new TaskOccurrenceIpcAdapter(ipcClient),
   };
 }

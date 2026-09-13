@@ -24,8 +24,8 @@ export class PowerSyncTaskWriteTransactionRunner implements TaskWriteTransaction
     let postCommitEvents: import('@memoflow/contracts/shared').IDomainEvent[] = [];
     const result = await this.db.writeTransaction(async (tx: IElectronDatabaseTransaction) => {
       const result = await work({
-        templateRepository: new PowerSyncTaskPlanRepository(tx, bufferedEventBus),
-        instanceRepository: new PowerSyncTaskOccurrenceRepository(tx, bufferedEventBus),
+        planRepository: new PowerSyncTaskPlanRepository(tx, bufferedEventBus),
+        occurrenceRepository: new PowerSyncTaskOccurrenceRepository(tx, bufferedEventBus),
       });
       const events = bufferedEventBus.drain();
       const eventsToPublish = [];
@@ -33,7 +33,7 @@ export class PowerSyncTaskWriteTransactionRunner implements TaskWriteTransaction
         const record = toTaskGoalOutboxRecord(event);
         if (record) {
           await tx.execute(
-            `INSERT OR IGNORE INTO task_goal_outbox (id, identity_id, task_instance_id, task_template_id, goal_id, key_result_id, payload, status, attempts, available_at, created_at, updated_at)
+            `INSERT OR IGNORE INTO task_goal_outbox (id, identity_id, task_occurrence_id, task_plan_id, goal_id, key_result_id, payload, status, attempts, available_at, created_at, updated_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING', 0, ?, ?, ?)`,
             [
               record.eventId,

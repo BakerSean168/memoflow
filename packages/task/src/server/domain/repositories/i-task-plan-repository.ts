@@ -41,7 +41,7 @@ export interface ITaskPlanRepository {
   /**
    * 保存任务模板（创建或更新）
    */
-  save(template: TaskPlan): Promise<void>;
+  save(plan: TaskPlan): Promise<void>;
 
   /**
    * 根据 ID + identity 查找任务模板（唯一授权敏感读路径）
@@ -86,7 +86,7 @@ export interface ITaskPlanRepository {
    * 返回所有用户的 (id, identityId)，供投影 runtime 启动时全量对账；
    * 所有宿主都必须枚举其本地权威范围；API 可跨 identity，Desktop 枚举已同步到本地 profile 的行。
    */
-  findAllTemplateRefs(): Promise<Array<{ id: string; identityId: string }>>;
+  findAllPlanRefs(): Promise<Array<{ id: string; identityId: string }>>;
 
   /**
    * 硬删除任务模板（identity-scoped）
@@ -130,7 +130,7 @@ export interface ITaskPlanRepository {
   /**
    * 批量保存任务
    */
-  saveBatch(templates: TaskPlan[]): Promise<void>;
+  saveBatch(plans: TaskPlan[]): Promise<void>;
 
   /**
    * 批量删除任务

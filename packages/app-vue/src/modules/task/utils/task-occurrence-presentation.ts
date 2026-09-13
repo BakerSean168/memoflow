@@ -72,7 +72,7 @@ export function getTaskOccurrenceScheduleLabel(
 export function getTaskOccurrencePosition(
   instance: TaskOccurrenceClientDTO,
   allInstances: readonly TaskOccurrenceClientDTO[],
-  template?: Pick<TaskPlanClientDTO, 'instanceCount'> | null,
+  template?: Pick<TaskPlanClientDTO, 'occurrenceCount'> | null,
 ): { position: number; total: number } | null {
   const siblings = allInstances
     .filter((candidate) => candidate.planId === instance.planId)
@@ -86,7 +86,7 @@ export function getTaskOccurrencePosition(
   if (index < 0) return null;
   return {
     position: index + 1,
-    total: Math.max(template?.instanceCount ?? 0, siblings.length),
+    total: Math.max(template?.occurrenceCount ?? 0, siblings.length),
   };
 }
 

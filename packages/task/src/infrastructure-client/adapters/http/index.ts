@@ -19,12 +19,12 @@ export { createTaskOccurrenceHttpAdapter } from './task-occurrence-http.adapter'
  * All HTTP adapters for the Task module
  */
 export interface TaskHttpAdapters {
-  template: TaskPlanHttpAdapter;
-  instance: TaskOccurrenceHttpAdapter;
+  plan: TaskPlanHttpAdapter;
+  occurrence: TaskOccurrenceHttpAdapter;
 }
 
 /**
- * Create all Task HTTP adapters from a single IResultHttpClient instance.
+ * Create all Task HTTP adapters from a single IResultHttpClient occurrence.
  * The concrete implementation (e.g. ResultHttpClient) is created at the App layer.
  *
  * @example
@@ -37,7 +37,7 @@ export interface TaskHttpAdapters {
  */
 export function createTaskHttpAdapters(httpClient: IResultHttpClient): TaskHttpAdapters {
   return {
-    template: new TaskPlanHttpAdapter(httpClient),
-    instance: new TaskOccurrenceHttpAdapter(httpClient),
+    plan: new TaskPlanHttpAdapter(httpClient),
+    occurrence: new TaskOccurrenceHttpAdapter(httpClient),
   };
 }

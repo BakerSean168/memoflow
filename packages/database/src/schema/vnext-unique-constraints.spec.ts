@@ -9,8 +9,8 @@ const SHAPE_COLUMNS = new Map<string, string[]>([
   ['key_results', ['id', 'goal_id', 'identity_id']],
   ['notifications', ['identity_id', 'idempotency_key']],
   ['schedule_tasks', ['identity_id', 'owner_type', 'owner_id', 'scheduling_key']],
-  ['task_instances', ['plan_id', 'occurrence_key']],
-  ['task_templates', ['id', 'identity_id']],
+  ['task_occurrences', ['plan_id', 'occurrence_key']],
+  ['task_plans', ['id', 'identity_id']],
 ]);
 
 function happyClient() {
@@ -65,12 +65,12 @@ describe('prepareVnextUniqueConstraints', () => {
         const columns = SHAPE_COLUMNS.get(table) ?? [];
         return {
           rows: columns
-            .filter((column) => !(table === 'task_instances' && column === 'occurrence_key'))
+            .filter((column) => !(table === 'task_occurrences' && column === 'occurrence_key'))
             .map((column_name) => ({ column_name })),
           rowCount: columns.length,
         };
       }
-      if (sql === 'SELECT COUNT(*) AS count FROM "task_instances"') {
+      if (sql === 'SELECT COUNT(*) AS count FROM "task_occurrences"') {
         return { rows: [{ count: '0' }], rowCount: 1 };
       }
       if (sql.startsWith('ALTER TABLE')) {
@@ -85,8 +85,8 @@ describe('prepareVnextUniqueConstraints', () => {
       query,
     } as VnextUniqueConstraintQueryClient);
 
-    expect(report.addedEmptyTableColumns).toEqual(['task_instances.occurrence_key']);
-    expect(added).toContain('ALTER TABLE "task_instances" ADD COLUMN "occurrence_key" TEXT');
+    expect(report.addedEmptyTableColumns).toEqual(['task_occurrences.occurrence_key']);
+    expect(added).toContain('ALTER TABLE "task_occurrences" ADD COLUMN "occurrence_key" TEXT');
   });
 
   it('fails closed instead of inventing a backfill when a table with a missing key column has rows', async () => {

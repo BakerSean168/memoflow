@@ -97,7 +97,7 @@ const ButtonStub = defineComponent({
   },
 });
 
-function createTemplate(overrides: Partial<TaskPlanViewModel> = {}): TaskPlanViewModel {
+function createPlan(overrides: Partial<TaskPlanViewModel> = {}): TaskPlanViewModel {
   return {
     id: 'template-1',
     title: 'Morning planning',
@@ -111,7 +111,7 @@ function createTemplate(overrides: Partial<TaskPlanViewModel> = {}): TaskPlanVie
   };
 }
 
-function mountForm(modelValue: TaskPlanViewModel | null = createTemplate()) {
+function mountForm(modelValue: TaskPlanViewModel | null = createPlan()) {
   return mount(TaskPlanForm, {
     props: {
       modelValue,

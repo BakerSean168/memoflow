@@ -1502,45 +1502,10 @@ exports.Prisma.TaskGoalOutboxScalarFieldEnum = {
 exports.Prisma.TaskPlanHistoryScalarFieldEnum = {
   id: 'id',
   identityId: 'identityId',
-  templateId: 'templateId',
+  planId: 'planId',
   action: 'action',
   changes: 'changes',
   createdAt: 'createdAt'
-};
-
-exports.Prisma.TaskStatisticScalarFieldEnum = {
-  id: 'id',
-  identityId: 'identityId',
-  calculatedAt: 'calculatedAt',
-  templateTotal: 'templateTotal',
-  templateActive: 'templateActive',
-  templatePaused: 'templatePaused',
-  templateArchived: 'templateArchived',
-  templateOneTime: 'templateOneTime',
-  templateRecurring: 'templateRecurring',
-  instanceTotal: 'instanceTotal',
-  instanceToday: 'instanceToday',
-  instanceWeek: 'instanceWeek',
-  instanceMonth: 'instanceMonth',
-  instancePending: 'instancePending',
-  instanceInProgress: 'instanceInProgress',
-  instanceCompleted: 'instanceCompleted',
-  instanceSkipped: 'instanceSkipped',
-  instanceMissed: 'instanceMissed',
-  completionToday: 'completionToday',
-  completionWeek: 'completionWeek',
-  completionMonth: 'completionMonth',
-  completionTotal: 'completionTotal',
-  completionAvgTime: 'completionAvgTime',
-  completionRate: 'completionRate',
-  timeAllDay: 'timeAllDay',
-  timePoint: 'timePoint',
-  timeRange: 'timeRange',
-  timeOverdue: 'timeOverdue',
-  timeUpcoming: 'timeUpcoming',
-  distributionByImportance: 'distributionByImportance',
-  distributionByUrgency: 'distributionByUrgency',
-  distributionByTag: 'distributionByTag'
 };
 
 exports.Prisma.WalletAccountScalarFieldEnum = {
@@ -1692,7 +1657,6 @@ exports.Prisma.ModelName = {
   TaskOccurrence: 'TaskOccurrence',
   TaskGoalOutbox: 'TaskGoalOutbox',
   TaskPlanHistory: 'TaskPlanHistory',
-  TaskStatistic: 'TaskStatistic',
   WalletAccount: 'WalletAccount',
   WalletTransaction: 'WalletTransaction'
 };

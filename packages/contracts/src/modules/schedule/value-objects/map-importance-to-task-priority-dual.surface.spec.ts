@@ -39,7 +39,7 @@ describe('mapImportanceToTaskPriority dual retired (residual 1168)', () => {
     expect(task).toMatch(/function neutralPriority\b/);
     expect(task).toContain("if (importance === 'Vital') return 'urgent'");
     expect(task).toContain("if (importance === 'Important') return 'high'");
-    expect(task).toContain('priority: neutralPriority(templateDTO.importance)');
+    expect(task).toContain('priority: neutralPriority(planDTO.importance)');
 
     expect(goal).not.toContain('mapImportanceToTaskPriority');
     expect(goal).not.toContain('goalDTO.importance');

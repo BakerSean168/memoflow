@@ -57,7 +57,7 @@ const eventBus: IEventBus = { publish: vi.fn().mockResolvedValue(undefined) };
 
 function boundColumnParameters(sql: string, parameters: unknown[]) {
   const columns = sql
-    .match(/INSERT INTO task_templates\s*\(([^)]+)\)/s)?.[1]
+    .match(/INSERT INTO task_plans\s*\(([^)]+)\)/s)?.[1]
     .split(',')
     .map((column) => column.trim());
   if (!columns) throw new Error('Expected an INSERT column list.');
@@ -65,7 +65,7 @@ function boundColumnParameters(sql: string, parameters: unknown[]) {
   return Object.fromEntries(columns.map((column, index) => [column, parameters[index]]));
 }
 
-describe('PowerSync task template goal binding', () => {
+describe('PowerSync task plan goal binding', () => {
   it('round-trips every relational goal binding column through the mapper', () => {
     const persistence = PowerSyncTaskPlanMapper.toPersistence(
       PowerSyncTaskPlanMapper.toDomain(createBoundRow()),
@@ -98,7 +98,7 @@ describe('PowerSync task template goal binding', () => {
     );
   });
 
-  it('enumerates every local template ref for startup repair, including non-active rows', async () => {
+  it('enumerates every local plan ref for startup repair, including non-active rows', async () => {
     const db = createDatabase({
       getAll: vi.fn().mockResolvedValue([
         { id: 'task-plan-1', identity_id: 'identity-1' },
@@ -107,12 +107,12 @@ describe('PowerSync task template goal binding', () => {
     });
     const repository = new PowerSyncTaskPlanRepository(db, eventBus);
 
-    await expect(repository.findAllTemplateRefs()).resolves.toEqual([
+    await expect(repository.findAllPlanRefs()).resolves.toEqual([
       { id: 'task-plan-1', identityId: 'identity-1' },
       { id: 'task-plan-soft-deleted', identityId: 'identity-1' },
     ]);
     expect(db.getAll).toHaveBeenCalledWith(
-      'SELECT id, identity_id FROM task_templates ORDER BY id ASC',
+      'SELECT id, identity_id FROM task_plans ORDER BY id ASC',
       [],
     );
   });
@@ -120,9 +120,9 @@ describe('PowerSync task template goal binding', () => {
   it('writes relational binding values in the matching INSERT columns', async () => {
     const db = createDatabase();
     const repository = new PowerSyncTaskPlanRepository(db, eventBus);
-    const template = PowerSyncTaskPlanMapper.toDomain(createBoundRow());
+    const plan = PowerSyncTaskPlanMapper.toDomain(createBoundRow());
 
-    await repository.save(template);
+    await repository.save(plan);
 
     const [sql, parameters] = vi.mocked(db.execute).mock.calls[0];
     for (const column of [
@@ -169,11 +169,11 @@ describe('PowerSync task template goal binding', () => {
 
   it('uses strict AND label filtering and hydrates the shared label projection', async () => {
     const getAll = vi.fn(async (sql: string, parameters?: unknown[]) => {
-      if (sql.includes('SELECT task_template_id FROM task_labels')) {
+      if (sql.includes('SELECT task_plan_id FROM task_labels')) {
         expect(parameters).toEqual([identityId, 'label-work', 'label-ai', 2]);
-        return [{ task_template_id: 'task-plan-1' }];
+        return [{ task_plan_id: 'task-plan-1' }];
       }
-      if (sql.includes('SELECT * FROM task_templates')) return [createBoundRow()];
+      if (sql.includes('SELECT * FROM task_plans')) return [createBoundRow()];
       if (sql.includes('INNER JOIN task_labels')) {
         return [
           {

@@ -21,7 +21,7 @@ import type {
 /**
  * TaskOccurrenceHttpAdapter
  *
- * HTTP implementation of the task instance API client.
+ * HTTP implementation of the task occurrence API client.
  */
 export class TaskOccurrenceHttpAdapter implements ITaskOccurrenceApiClient {
   private readonly baseUrl = '/task-occurrences';

@@ -364,7 +364,7 @@ const emit = defineEmits<{
   'update:validation': [isValid: boolean];
 }>();
 
-const updateTemplate = (updater: (template: TaskPlanViewModel) => void) => {
+const updatePlan = (updater: (template: TaskPlanViewModel) => void) => {
   const currentConfig = props.modelValue.reminderConfig as unknown as TaskReminderConfigDTO | null;
   const updatedTemplate: TaskPlanViewModel = {
     ...props.modelValue,
@@ -392,7 +392,7 @@ const reminderEnabled = computed({
   get: () =>
     (props.modelValue.reminderConfig as unknown as TaskReminderConfigDTO | null)?.enabled ?? false,
   set: (value: boolean) => {
-    updateTemplate((template) => {
+    updatePlan((template) => {
       const currentConfig = template.reminderConfig as unknown as TaskReminderConfigDTO | null;
       const newConfigDTO: TaskReminderConfigDTO = {
         enabled: value,
@@ -449,7 +449,7 @@ const removeTrigger = (index: number) => {
 
 // 更新触发器到模板
 const updateTriggers = () => {
-  updateTemplate((template) => {
+  updatePlan((template) => {
     const newConfigDTO: TaskReminderConfigDTO = {
       enabled: reminderEnabled.value,
       triggers: triggers.value.map((t) => ({

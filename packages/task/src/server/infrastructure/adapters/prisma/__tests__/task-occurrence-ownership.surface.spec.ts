@@ -3,12 +3,12 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Task instance ownership surface (stage-6 residual 124):
+ * Task occurrence ownership surface (stage-6 residual 124):
  * Residual 177 collapses bare findById dual method.
- * get/complete/skip/start/delete must never authorize by bare task instance
+ * get/complete/skip/start/delete must never authorize by bare task occurrence
  * primary key alone.
  */
-describe('task instance ownership surface', () => {
+describe('task occurrence ownership surface', () => {
   const port = readFileSync(
     resolve(__dirname, '../../../../domain/repositories/i-task-occurrence-repository.ts'),
     'utf8',
@@ -35,15 +35,15 @@ describe('task instance ownership surface', () => {
   const listByTemplate = readFileSync(
     resolve(
       __dirname,
-      '../../../../application/use-cases/queries/list-task-occurrences-by-template.use-case.ts',
+      '../../../../application/use-cases/queries/list-task-occurrences-by-plan.use-case.ts',
     ),
     'utf8',
   );
-  const getTemplate = readFileSync(
+  const getPlan = readFileSync(
     resolve(__dirname, '../../../../application/use-cases/queries/get-task-plan.use-case.ts'),
     'utf8',
   );
-  const completeInstance = readFileSync(
+  const completeOccurrence = readFileSync(
     resolve(
       __dirname,
       '../../../../application/use-cases/commands/complete-task-occurrence.use-case.ts',
@@ -61,15 +61,15 @@ describe('task instance ownership surface', () => {
     resolve(__dirname, '../../../schedule-projection-source.ts'),
     'utf8',
   );
-  const pauseTemplate = readFileSync(
+  const pausePlan = readFileSync(
     resolve(__dirname, '../../../../application/use-cases/commands/pause-task-plan.use-case.ts'),
     'utf8',
   );
-  const deleteTemplate = readFileSync(
+  const deletePlan = readFileSync(
     resolve(__dirname, '../../../../application/use-cases/commands/delete-task-plan.use-case.ts'),
     'utf8',
   );
-  const listTemplates = readFileSync(
+  const listPlans = readFileSync(
     resolve(__dirname, '../../../../application/use-cases/queries/list-task-plans.use-case.ts'),
     'utf8',
   );
@@ -93,36 +93,36 @@ describe('task instance ownership surface', () => {
     expect(powersync).not.toMatch(/async findById\(id: string\)/);
   });
 
-  it('findByTemplateId requires identityId (residual 133)', () => {
+  it('findByPlanId requires identityId (residual 133)', () => {
     expect(port).toContain(
-      'findByTemplateId(templateId: string, identityId: string): Promise<TaskOccurrence[]>;',
+      'findByPlanId(planId: string, identityId: string): Promise<TaskOccurrence[]>;',
     );
-    expect(prisma).toContain('where: { planId: templateId, identityId, deletedAt: null }');
-    expect(listByTemplate).toContain('findByTemplateId(templateId, identityId)');
-    expect(getTemplate).toContain('findByTemplateId(id, identityId)');
-    expect(completeInstance).toContain('reevaluateTaskPlanOutcome(');
-    expect(completeInstance).toContain('identityId');
-    expect(outcomeReevaluation).toContain('findByTemplateId(templateId, identityId)');
-    expect(projection).toContain('findByTemplateId(');
-    expect(projection).toContain('String(templateDTO.identityId)');
+    expect(prisma).toContain('where: { planId: planId, identityId, deletedAt: null }');
+    expect(listByTemplate).toContain('findByPlanId(planId, identityId)');
+    expect(getPlan).toContain('findByPlanId(id, identityId)');
+    expect(completeOccurrence).toContain('reevaluateTaskPlanOutcome(');
+    expect(completeOccurrence).toContain('identityId');
+    expect(outcomeReevaluation).toContain('findByPlanId(planId, identityId)');
+    expect(projection).toContain('findByPlanId(');
+    expect(projection).toContain('String(planDTO.identityId)');
   });
 
-  it('template-scoped instance queries require identityId (residual 134)', () => {
-    expect(port).toContain('deleteByTemplateId(templateId: string, identityId: string)');
-    expect(port).toContain('getTemplateStats(');
+  it('plan-scoped occurrence queries require identityId (residual 134)', () => {
+    expect(port).toContain('deleteByPlanId(planId: string, identityId: string)');
+    expect(port).toContain('getPlanStats(');
     expect(port).toContain('identityId: string');
-    expect(port).toContain('deleteIncompleteInstancesFrom(');
-    expect(prisma).toContain('where: { planId: templateId, identityId }');
-    expect(prisma).toMatch(/getTemplateStats\([\s\S]*identityId/);
-    expect(getTemplate).toMatch(
-      /getTemplateStats\([\s\S]*\[id\][\s\S]*identityId[\s\S]*windowStart[\s\S]*asOf/,
+    expect(port).toContain('deleteIncompleteOccurrencesFrom(');
+    expect(prisma).toContain('where: { planId: planId, identityId }');
+    expect(prisma).toMatch(/getPlanStats\([\s\S]*identityId/);
+    expect(getPlan).toMatch(
+      /getPlanStats\([\s\S]*\[id\][\s\S]*identityId[\s\S]*windowStart[\s\S]*asOf/,
     );
-    expect(listTemplates).toContain('getTemplateStats(');
-    expect(listTemplates).toContain('request.identityId');
-    expect(listTemplates).toContain('{ windowStart, asOf: asOfDate }');
-    expect(pauseTemplate).toContain('deleteIncompleteInstancesFrom(');
-    expect(pauseTemplate).toContain('identityId');
-    expect(deleteTemplate).toContain('deleteByTemplateId(id, identityId)');
+    expect(listPlans).toContain('getPlanStats(');
+    expect(listPlans).toContain('request.identityId');
+    expect(listPlans).toContain('{ windowStart, asOf: asOfDate }');
+    expect(pausePlan).toContain('deleteIncompleteOccurrencesFrom(');
+    expect(pausePlan).toContain('identityId');
+    expect(deletePlan).toContain('deleteByPlanId(id, identityId)');
   });
 
   it('prisma filters by id + identityId', () => {
@@ -140,30 +140,30 @@ describe('task instance ownership surface', () => {
     expect(deleteUseCase).toContain('delete(identityId, id)');
   });
 
-  it('module api wrappers pass identityId for instance mutations', () => {
+  it('module api wrappers pass identityId for occurrence mutations', () => {
     expect(module).toMatch(/completeTaskOccurrence:\s*\(id, identityId, input\)\s*=>/);
     expect(module).toMatch(/deleteTaskOccurrence:\s*\(id, identityId\)\s*=>/);
     expect(module).toMatch(/getTaskOccurrence:\s*\(id, identityId\)\s*=>/);
   });
 
-  it('HTTP and Electron instance get/delete pass identity context (Phase 4)', () => {
+  it('HTTP and Electron occurrence get/delete pass identity context (Phase 4)', () => {
     // Read/query routes keep expressAdapter with controller-side identity scope.
-    expect(routes).toContain('controller.getInstance(req.params!.id, ctx)');
+    expect(routes).toContain('controller.getOccurrence(req.params!.id, ctx)');
 
     // Phase 4: mutation routes bind contract invocation schemas through the
     // validation-aware registrar; the controller still receives the canonical
     // identity-bearing context.
     expect(routes).toContain('routeWithValidation');
-    expect(routes).toMatch(/controller\.deleteInstance\(data\.params\.id, ctx\)/);
-    expect(routes).toMatch(/controller\.completeInstance\(data\.params\.id, data\.body, ctx\)/);
+    expect(routes).toMatch(/controller\.deleteOccurrence\(data\.params\.id, ctx\)/);
+    expect(routes).toMatch(/controller\.completeOccurrence\(data\.params\.id, data\.body, ctx\)/);
     expect(electron).toContain('registerValidatedChannel');
     expect(electron).toMatch(
-      /INSTANCE_GET[\s\S]*instanceController\.getInstance\([\s\S]*requestContext/,
+      /OCCURRENCE_GET[\s\S]*instanceController\.getOccurrence\([\s\S]*requestContext/,
     );
     expect(electron).toMatch(
-      /INSTANCE_DELETE[\s\S]*instanceController\.deleteInstance\(data\.params\.id,[\s\S]*requestContext/,
+      /OCCURRENCE_DELETE[\s\S]*instanceController\.deleteOccurrence\(data\.params\.id,[\s\S]*requestContext/,
     );
-    expect(electron).not.toContain('instanceController.getInstance(payload?.id ?? payload),');
+    expect(electron).not.toContain('instanceController.getOccurrence(payload?.id ?? payload),');
   });
 
   it('port deleteMany requires identityId (residual 157)', () => {
@@ -174,7 +174,7 @@ describe('task instance ownership surface', () => {
     expect(prisma).toContain('async deleteMany(identityId: string, ids: string[])');
     expect(prisma).toContain('where: { id: { in: ids }, identityId }');
     expect(powersync).toContain(
-      'DELETE FROM task_instances WHERE identity_id = ? AND id IN (${placeholders})',
+      'DELETE FROM task_occurrences WHERE identity_id = ? AND id IN (${placeholders})',
     );
   });
 });

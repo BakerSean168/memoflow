@@ -16,7 +16,7 @@ import type {
  */
 export interface TaskPlanHistoryState {
   id: string;
-  templateId: string;
+  planId: string;
   action: string;
   changes: unknown;
   createdAt: Instant;
@@ -31,14 +31,14 @@ export interface TaskPlanHistoryState {
  * - 可变性
  */
 export class TaskPlanHistory extends Entity<string> {
-  private _templateId: string;
+  private _planId: string;
   private _action: string;
   private _changes: unknown;
   private _createdAt: Instant;
 
   private constructor(state: TaskPlanHistoryState) {
     super(state.id);
-    this._templateId = state.templateId;
+    this._planId = state.planId;
     this._action = state.action;
     this._changes = state.changes;
     this._createdAt = state.createdAt;
@@ -47,8 +47,8 @@ export class TaskPlanHistory extends Entity<string> {
   // Getters
 
 
-  public get templateId(): string {
-    return this._templateId;
+  public get planId(): string {
+    return this._planId;
   }
 
   public get action(): string {
@@ -69,7 +69,7 @@ export class TaskPlanHistory extends Entity<string> {
   public toServerDTO(): TaskPlanHistoryServerDTO {
     return {
       id: this.id,
-      templateId: this._templateId,
+      planId: this._planId,
       action: this._action,
       changes: this._changes,
       createdAt: this._createdAt,
@@ -79,7 +79,7 @@ export class TaskPlanHistory extends Entity<string> {
   public toClientDTO(): TaskPlanHistoryClientDTO {
     return {
       id: this.id,
-      templateId: this._templateId,
+      planId: this._planId,
       action: this._action,
       changes: this._changes,
       createdAt: this._createdAt,
@@ -97,13 +97,13 @@ export class TaskPlanHistory extends Entity<string> {
    * 🏭 业务工厂：创建新的历史记录
    */
   public static create(params: {
-    templateId: string;
+    planId: string;
     action: string;
     changes?: unknown;
   }): TaskPlanHistory {
     return new TaskPlanHistory({
       id: generateUUID(),
-      templateId: params.templateId,
+      planId: params.planId,
       action: params.action,
       changes: params.changes ?? null,
       createdAt: Date.now(),

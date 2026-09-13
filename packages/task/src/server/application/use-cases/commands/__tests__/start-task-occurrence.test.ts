@@ -21,7 +21,7 @@ describe('StartTaskOccurrenceUseCase', () => {
     useCase = new StartTaskOccurrenceUseCase(instanceRepo, TASK_TEST_OCCURRENCE_PROJECTION);
   });
 
-  it('should return NOT_FOUND when instance does not exist', async () => {
+  it('should return NOT_FOUND when occurrence does not exist', async () => {
     vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(null);
 
     const result = await useCase.execute('non-existent', 'identity-1');
@@ -30,39 +30,39 @@ describe('StartTaskOccurrenceUseCase', () => {
     expect(instanceRepo.save).not.toHaveBeenCalled();
   });
 
-  it('should start a Pending instance and return ok', async () => {
-    const instance = await aTaskOccurrence();
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+  it('should start a Pending occurrence and return ok', async () => {
+    const occurrence = await aTaskOccurrence();
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(instance.id, instance.identityId);
+    const result = await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(result).toBeOk();
-    expect(instanceRepo.save).toHaveBeenCalledWith(instance);
-    expect(instance.status).toBe('InProgress');
+    expect(instanceRepo.save).toHaveBeenCalledWith(occurrence);
+    expect(occurrence.status).toBe('InProgress');
   });
 
-  it('should return VALIDATION_ERROR when instance cannot be started', async () => {
-    // Create and complete an instance so it can't be started
-    const instance = await aTaskOccurrence();
-    instance.start();
-    instance.complete();
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+  it('should return VALIDATION_ERROR when occurrence cannot be started', async () => {
+    // Create and complete an occurrence so it can't be started
+    const occurrence = await aTaskOccurrence();
+    occurrence.start();
+    occurrence.complete();
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(instance.id, instance.identityId);
+    const result = await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(result).toBeErrorWithCode('VALIDATION_ERROR');
     expect(instanceRepo.save).not.toHaveBeenCalled();
   });
 
-  it('should return the instance client DTO on success', async () => {
-    const instance = await aTaskOccurrence();
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+  it('should return the occurrence client DTO on success', async () => {
+    const occurrence = await aTaskOccurrence();
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(instance.id, instance.identityId);
+    const result = await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data).toEqual(instance.toClientDTOAt(TASK_TEST_TIME_CONTEXT));
+      expect(result.data).toEqual(occurrence.toClientDTOAt(TASK_TEST_TIME_CONTEXT));
     }
   });
 });

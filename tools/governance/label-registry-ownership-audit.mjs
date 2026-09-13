@@ -23,7 +23,7 @@ const forbidden = [
   /\bsetTaskLabels\b/,
   /\bgoal_labels\b/,
   /\btask_labels\b/,
-  /\btask_template_id\b/,
+  /\btask_plan_id\b/,
 ];
 
 function productionSources(dir, out = []) {

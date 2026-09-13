@@ -37,7 +37,7 @@ import type { TaskRepositorySet } from './prisma';
 type TaskPowerSyncQueryable = IElectronDatabaseTransaction;
 
 /**
- * Creates a task module instance with PowerSync adapters.
+ * Creates a task module occurrence with PowerSync adapters.
  * 使用 PowerSync 适配器创建任务模块实例。
  *
  * Convenience root kept for in-package reuse / rollback; delegates to

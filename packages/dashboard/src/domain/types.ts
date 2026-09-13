@@ -32,7 +32,7 @@ export interface DashboardTaskOccurrenceRecord {
   id: string;
   templateId: string;
   status: string;
-  instanceDate: number;
+  occurrenceDate: number;
   actualEndTime: number | null;
   updatedAt: number;
   deletedAt: number | null;

@@ -3,7 +3,7 @@
 /**
  * Singleton Pattern Audit
  *
- * Scans packages for `getInstance()` usage to detect singleton/service-locator
+ * Scans packages for `getOccurrence()` usage to detect singleton/service-locator
  * patterns that should be replaced with explicit composition root injection.
  *
  * Existing singletons are allowlisted; this audit catches new introductions.
@@ -82,8 +82,8 @@ function walkDir(dir, relPath) {
       const fileRel = `${relPath}/${entry}`;
       if (ALLOWLIST.has(fileRel)) continue;
       const content = readFileSync(full, 'utf-8');
-      if (/\.getInstance\(\)/.test(content)) {
-        errors.push(`${fileRel}: contains .getInstance() — use explicit injection instead`);
+      if (/\.getOccurrence\(\)/.test(content)) {
+        errors.push(`${fileRel}: contains .getOccurrence() — use explicit injection instead`);
       }
     }
   }

@@ -58,7 +58,7 @@ export function useTaskOccurrences() {
 
   async function refreshTemplateProjection(templateId: string): Promise<void> {
     const result = await executeTaskOperation(
-      () => service.getTemplate(templateId),
+      () => service.getPlan(templateId),
       'task.error.loadTemplatesFailed',
     );
     if (result.ok) {
@@ -84,9 +84,9 @@ export function useTaskOccurrences() {
     store.setLoading(true);
     store.setError(null);
     try {
-      const payload = sanitizeForIpc(query) as Parameters<typeof service.listInstances>[0];
+      const payload = sanitizeForIpc(query) as Parameters<typeof service.listOccurrences>[0];
       const result = await executeTaskOperation(
-        () => service.listInstances(payload),
+        () => service.listOccurrences(payload),
         'task.error.loadInstancesFailed',
       );
 
@@ -105,7 +105,7 @@ export function useTaskOccurrences() {
     store.setError(null);
     try {
       const result = await executeTaskOperation(
-        () => service.listInstancesByDateRange(startDate, endDate),
+        () => service.listOccurrencesByDateRange(startDate, endDate),
         'task.error.loadInstancesFailed',
       );
 
@@ -119,9 +119,9 @@ export function useTaskOccurrences() {
     }
   }
 
-  async function startInstance(id: string) {
+  async function startOccurrence(id: string) {
     const result = await executeTaskOperation(
-      () => service.startInstance(id),
+      () => service.startOccurrence(id),
       'task.error.startFailed',
     );
     if (result.ok) {
@@ -130,9 +130,9 @@ export function useTaskOccurrences() {
     return null;
   }
 
-  async function completeInstance(id: string, request?: CompleteTaskOccurrenceReq) {
+  async function completeOccurrence(id: string, request?: CompleteTaskOccurrenceReq) {
     const result = await executeTaskOperation(
-      () => service.completeInstance(id, sanitizeForIpc(request)),
+      () => service.completeOccurrence(id, sanitizeForIpc(request)),
       'task.error.completeFailed',
     );
     if (result.ok) {
@@ -143,9 +143,9 @@ export function useTaskOccurrences() {
     return null;
   }
 
-  async function uncompleteInstance(id: string) {
+  async function uncompleteOccurrence(id: string) {
     const result = await executeTaskOperation(
-      () => service.uncompleteInstance(id),
+      () => service.uncompleteOccurrence(id),
       'task.error.uncompleteFailed',
     );
     if (result.ok) {
@@ -156,9 +156,9 @@ export function useTaskOccurrences() {
     return null;
   }
 
-  async function markInstanceMissed(id: string) {
+  async function markOccurrenceMissed(id: string) {
     const result = await executeTaskOperation(
-      () => service.markInstanceMissed(id),
+      () => service.markOccurrenceMissed(id),
       'task.error.markMissedFailed',
     );
     if (result.ok) {
@@ -169,9 +169,9 @@ export function useTaskOccurrences() {
     return null;
   }
 
-  async function rescheduleInstance(id: string, request: RescheduleTaskInput) {
+  async function rescheduleOccurrence(id: string, request: RescheduleTaskInput) {
     const result = await executeTaskOperation(
-      () => service.rescheduleInstance(id, sanitizeForIpc(request) as RescheduleTaskInput),
+      () => service.rescheduleOccurrence(id, sanitizeForIpc(request) as RescheduleTaskInput),
       'task.error.operationFailed',
     );
     if (result.ok) {
@@ -180,10 +180,10 @@ export function useTaskOccurrences() {
     return result;
   }
 
-  async function setChecklistItem(id: string, request: SetTaskOccurrenceChecklistItemReq) {
+  async function setOccurrenceChecklistItem(id: string, request: SetTaskOccurrenceChecklistItemReq) {
     const result = await executeTaskOperation(
       () =>
-        service.setChecklistItem(id, sanitizeForIpc(request) as SetTaskOccurrenceChecklistItemReq),
+        service.setOccurrenceChecklistItem(id, sanitizeForIpc(request) as SetTaskOccurrenceChecklistItemReq),
       'task.error.operationFailed',
     );
     if (result.ok) {
@@ -192,9 +192,9 @@ export function useTaskOccurrences() {
     return null;
   }
 
-  async function skipInstance(id: string) {
+  async function skipOccurrence(id: string) {
     const result = await executeTaskOperation(
-      () => service.skipInstance(id),
+      () => service.skipOccurrence(id),
       'task.error.skipFailed',
     );
     if (result.ok) {
@@ -208,12 +208,12 @@ export function useTaskOccurrences() {
   return {
     fetchInstances,
     fetchInstancesByDateRange,
-    startInstance,
-    completeInstance,
-    uncompleteInstance,
-    markInstanceMissed,
-    rescheduleInstance,
-    setChecklistItem,
-    skipInstance,
+    startOccurrence,
+    completeOccurrence,
+    uncompleteOccurrence,
+    markOccurrenceMissed,
+    rescheduleOccurrence,
+    setOccurrenceChecklistItem,
+    skipOccurrence,
   };
 }

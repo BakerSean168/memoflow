@@ -14,10 +14,10 @@ import type {
   CreateTaskPlanReq,
   CreateTaskPlanRes,
   UpdateTaskPlanReq,
-  GenerateInstancesReq,
+  GenerateOccurrencesReq,
   BindToGoalReq,
   AbandonTaskPlanReq,
-  TaskPlanInstancesQuery,
+  TaskPlanOccurrencesQuery,
   GetTaskWorkspaceReq,
   TaskPlanWorkspace,
 } from '@memoflow/contracts/task';
@@ -30,75 +30,75 @@ export class TaskPlanIpcAdapter implements ITaskPlanApiClient {
   }
 
   async createTaskPlan(request: CreateTaskPlanReq): Promise<Result<CreateTaskPlanRes>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_CREATE, request);
+    return this.ipcClient.invoke(TaskChannels.PLAN_CREATE, request);
   }
 
   async getTaskPlans(
     params?: TaskPlanListParams,
-  ): Promise<Result<{ templates: TaskPlanClientDTO[]; total: number }>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_LIST, params);
+  ): Promise<Result<{ plans: TaskPlanClientDTO[]; total: number }>> {
+    return this.ipcClient.invoke(TaskChannels.PLAN_LIST, params);
   }
 
-  async getTaskPlanById(id: string, includeChildren = false): Promise<Result<TaskPlanClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_GET, { id, includeChildren });
+  async getTaskPlanById(id: string): Promise<Result<TaskPlanClientDTO>> {
+    return this.ipcClient.invoke(TaskChannels.PLAN_GET, { id });
   }
 
   async updateTaskPlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlanClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_UPDATE, { id, request });
+    return this.ipcClient.invoke(TaskChannels.PLAN_UPDATE, { id, request });
   }
 
   async deleteTaskPlan(id: string): Promise<Result<void>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_DELETE, { id });
+    return this.ipcClient.invoke(TaskChannels.PLAN_DELETE, { id });
   }
 
   async activateTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_ACTIVATE, { id });
+    return this.ipcClient.invoke(TaskChannels.PLAN_ACTIVATE, { id });
   }
 
   async pauseTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_PAUSE, { id });
+    return this.ipcClient.invoke(TaskChannels.PLAN_PAUSE, { id });
   }
 
   async archiveTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_ARCHIVE, { id });
+    return this.ipcClient.invoke(TaskChannels.PLAN_ARCHIVE, { id });
   }
 
   async abandonTaskPlan(
     id: string,
     request?: AbandonTaskPlanReq,
   ): Promise<Result<TaskPlanClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_ABANDON, { id, request: request ?? {} });
+    return this.ipcClient.invoke(TaskChannels.PLAN_ABANDON, { id, request: request ?? {} });
   }
 
-  async generateInstances(
+  async generateOccurrences(
     planId: string,
-    request: GenerateInstancesReq,
+    request: GenerateOccurrencesReq,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_GENERATE_INSTANCES, {
+    return this.ipcClient.invoke(TaskChannels.PLAN_GENERATE_OCCURRENCES, {
       planId,
       request,
     });
   }
 
-  async getInstancesByDateRange(
+  async getOccurrencesByDateRange(
     planId: string,
-    query?: TaskPlanInstancesQuery,
+    query?: TaskPlanOccurrencesQuery,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_GET_INSTANCES, {
+    return this.ipcClient.invoke(TaskChannels.PLAN_GET_OCCURRENCES, {
       planId,
       ...query,
     });
   }
 
   async bindToGoal(planId: string, request: BindToGoalReq): Promise<Result<TaskPlanClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_BIND_GOAL, {
+    return this.ipcClient.invoke(TaskChannels.PLAN_BIND_GOAL, {
       planId,
       request,
     });
   }
 
   async unbindFromGoal(planId: string): Promise<Result<TaskPlanClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_UNBIND_GOAL, { planId });
+    return this.ipcClient.invoke(TaskChannels.PLAN_UNBIND_GOAL, { planId });
   }
 }
 

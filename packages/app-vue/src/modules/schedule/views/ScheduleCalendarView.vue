@@ -160,7 +160,7 @@ const task = useTask();
 
 const ownerCommands = createPlannerOwnerCommandRouter({
   schedule: { updateSchedule: schedule.updateCalendarEntry },
-  task: { rescheduleInstance: task.rescheduleInstance },
+  task: { rescheduleOccurrence: task.rescheduleOccurrence },
 });
 
 const plannerCalendarRef = ref<InstanceType<typeof PlannerCalendar> | null>(null);
@@ -238,7 +238,7 @@ function handleEventClick(event: CalendarEventItem): void {
 }
 
 async function handleCompleteTask(originalId: string): Promise<void> {
-  const result = await task.completeInstance(originalId);
+  const result = await task.completeOccurrence(originalId);
   if (result && windowStart.value && windowEnd.value) {
     await fetchForRange(windowStart.value, windowEnd.value);
   }

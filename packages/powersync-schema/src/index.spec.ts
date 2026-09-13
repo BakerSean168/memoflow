@@ -11,7 +11,7 @@ function getColumnType(tableName: keyof typeof PowerSyncAppSchema.props, columnN
 describe('PowerSyncAppSchema', () => {
   it('keeps the key sync tables in the exported schema', () => {
     expect(PowerSyncAppSchema.props).toHaveProperty('user_preference_records');
-    expect(PowerSyncAppSchema.props).toHaveProperty('task_templates');
+    expect(PowerSyncAppSchema.props).toHaveProperty('task_plans');
     expect(PowerSyncAppSchema.props).toHaveProperty('relations');
     expect(PowerSyncAppSchema.props).toHaveProperty('schedule_tasks');
     expect(PowerSyncAppSchema.props).toHaveProperty('notifications');
@@ -36,13 +36,13 @@ describe('PowerSyncAppSchema', () => {
   });
 
   it('preserves critical task relation and schedule column types', () => {
-    expect(getColumnType('task_templates', 'goal_id')).toBe('TEXT');
-    expect(getColumnType('task_templates', 'key_result_id')).toBe('TEXT');
-    expect(getColumnType('task_templates', 'goal_record_value')).toBe('REAL');
-    expect(getColumnType('task_templates', 'goal_progress_trigger')).toBe('TEXT');
-    expect(getColumnType('task_templates', 'goal_binding')).toBeUndefined();
-    expect(getColumnType('task_templates', 'schedule')).toBe('TEXT');
-    expect(getColumnType('task_templates', 'reminder_config')).toBe('TEXT');
+    expect(getColumnType('task_plans', 'goal_id')).toBe('TEXT');
+    expect(getColumnType('task_plans', 'key_result_id')).toBe('TEXT');
+    expect(getColumnType('task_plans', 'goal_record_value')).toBe('REAL');
+    expect(getColumnType('task_plans', 'goal_progress_trigger')).toBe('TEXT');
+    expect(getColumnType('task_plans', 'goal_binding')).toBeUndefined();
+    expect(getColumnType('task_plans', 'schedule')).toBe('TEXT');
+    expect(getColumnType('task_plans', 'reminder_config')).toBe('TEXT');
     for (const retired of [
       'time_config_type',
       'recurrence_rule_type',
@@ -50,7 +50,7 @@ describe('PowerSyncAppSchema', () => {
       'last_generated_date',
       'generate_ahead_days',
     ]) {
-      expect(getColumnType('task_templates', retired)).toBeUndefined();
+      expect(getColumnType('task_plans', retired)).toBeUndefined();
     }
     expect(getColumnType('schedule_tasks', 'payload')).toBe('TEXT');
     expect(getColumnType('schedule_tasks', 'enabled')).toBe('INTEGER');

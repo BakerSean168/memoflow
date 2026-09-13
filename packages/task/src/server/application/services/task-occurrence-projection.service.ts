@@ -17,36 +17,36 @@ export class TaskOccurrenceProjectionService {
   }
 
   projectWithContext(
-    instance: TaskOccurrence,
+    occurrence: TaskOccurrence,
     timeContext: TimeContext,
     now = Date.now(),
   ): TaskOccurrenceClientDTO {
-    return instance.toClientDTOAt(timeContext, now);
+    return occurrence.toClientDTOAt(timeContext, now);
   }
 
   projectManyWithContext(
-    instances: readonly TaskOccurrence[],
+    occurrences: readonly TaskOccurrence[],
     timeContext: TimeContext,
     now = Date.now(),
   ): TaskOccurrenceClientDTO[] {
-    return instances.map((instance) => instance.toClientDTOAt(timeContext, now));
+    return occurrences.map((occurrence) => occurrence.toClientDTOAt(timeContext, now));
   }
 
   async project(
     identityId: string,
-    instance: TaskOccurrence,
+    occurrence: TaskOccurrence,
     now = Date.now(),
   ): Promise<TaskOccurrenceClientDTO> {
     const timeContext = await this.getTimeContext(identityId);
-    return this.projectWithContext(instance, timeContext, now);
+    return this.projectWithContext(occurrence, timeContext, now);
   }
 
   async projectMany(
     identityId: string,
-    instances: readonly TaskOccurrence[],
+    occurrences: readonly TaskOccurrence[],
     now = Date.now(),
   ): Promise<TaskOccurrenceClientDTO[]> {
     const timeContext = await this.getTimeContext(identityId);
-    return this.projectManyWithContext(instances, timeContext, now);
+    return this.projectManyWithContext(occurrences, timeContext, now);
   }
 }

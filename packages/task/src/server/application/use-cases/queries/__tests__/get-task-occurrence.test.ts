@@ -17,7 +17,7 @@ describe('GetTaskOccurrenceUseCase', () => {
     useCase = new GetTaskOccurrenceUseCase(instanceRepo, TASK_TEST_OCCURRENCE_PROJECTION);
   });
 
-  it('should return null when instance does not exist', async () => {
+  it('should return null when occurrence does not exist', async () => {
     vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(null);
 
     const result = await useCase.execute('non-existent', 'identity-1');
@@ -28,16 +28,16 @@ describe('GetTaskOccurrenceUseCase', () => {
     }
   });
 
-  it('should return the instance client DTO when found', async () => {
-    const instance = await aTaskOccurrence();
-    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(instance);
+  it('should return the occurrence client DTO when found', async () => {
+    const occurrence = await aTaskOccurrence();
+    vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(instance.id, instance.identityId);
+    const result = await useCase.execute(occurrence.id, occurrence.identityId);
 
     expect(result).toBeOk();
     if (result.ok) {
       expect(result.data).toBeDefined();
-      expect(result.data!.id).toBe(instance.id);
+      expect(result.data!.id).toBe(occurrence.id);
     }
   });
 

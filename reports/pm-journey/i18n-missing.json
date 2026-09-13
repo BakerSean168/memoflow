@@ -14623,7 +14623,7 @@
    ]
   },
   {
-   "key": "task.management.deleteTemplate",
+   "key": "task.management.deletePlan",
    "zh": false,
    "en": false,
    "files": [

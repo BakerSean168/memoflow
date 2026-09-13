@@ -1,9 +1,8 @@
 import type { ComposerTranslation } from 'vue-i18n';
-import type { TaskPlanClientDTO, TaskPlanSchedule, TaskTimeConfigDTO } from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO, TaskPlanSchedule } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskPlanScheduleSchema } from '@memoflow/contracts/task';
 import type { TaskPlanViewModel } from '../components/types';
-import { formatHHmmParts } from '../../../shared/utils/format-hhmm-parts';
 import { formatProductDate } from '../../../shared/utils/product-time';
 
 type Translate = ComposerTranslation<Record<string, never>, string>;
@@ -36,53 +35,12 @@ const instanceStatusLabelKeys: Record<string, string> = {
   Missed: 'task.templateCard.instanceStatusMissed',
 };
 
-/** Residual 1297: HH:mm pad dual retired onto formatHHmmParts; null/clamp stay local. */
-function formatMinuteOfDay(minutes?: number | null): string {
-  if (minutes == null || !Number.isFinite(minutes)) return '-';
-  const safe = Math.max(0, Math.min(1439, minutes));
-  const hour = Math.floor(safe / 60);
-  const minute = safe % 60;
-  return formatHHmmParts(hour, minute);
-}
-
-type TaskTimeDisplayInput =
-  | {
-      timeType?: TaskTimeConfigDTO['timeType'] | string;
-      timePoint?: number | null;
-      timeRange?: { start: number; end: number } | null;
-    }
-  | null
-  | undefined;
-
-export function getTaskTimeTypeLabel(t: Translate, type?: string | null): string {
-  switch (type) {
-    case 'AllDay':
-      return t('task.timeConfig.allDay');
-    case 'TimePoint':
-      return t('task.timeConfig.timePoint');
-    case 'TimeRange':
-      return t('task.timeConfig.timeRange');
-    default:
-      return t('common.none');
-  }
-}
-
 export function getTaskOccurrenceStatusLabel(
   t: Translate,
-  status?: TaskPlanViewModel['singleInstanceStatus'],
+  status?: TaskPlanViewModel['singleOccurrenceStatus'],
 ): string {
   const statusKey = status ? instanceStatusLabelKeys[status] : undefined;
   return t(statusKey ?? 'task.templateCard.instanceStatusNotGenerated');
-}
-
-export function getTaskTimeValueDisplay(t: Translate, timeConfig?: TaskTimeDisplayInput): string {
-  if (!timeConfig) return t('common.none');
-  if (timeConfig.timeType === 'AllDay') return t('task.timeConfig.allDay');
-  if (timeConfig.timeType === 'TimePoint') return formatMinuteOfDay(timeConfig.timePoint);
-  if (timeConfig.timeType === 'TimeRange' && timeConfig.timeRange) {
-    return `${formatMinuteOfDay(timeConfig.timeRange.start)} - ${formatMinuteOfDay(timeConfig.timeRange.end)}`;
-  }
-  return t('common.none');
 }
 
 function scheduleDate(schedule: TaskPlanSchedule): string {
@@ -173,14 +131,14 @@ export function mapTaskPlanDtoToViewModel(dto: TaskPlanClientDTO, t: Translate):
     // native structuredClone cannot clone Vue Proxy objects.
     schedule: TaskPlanScheduleSchema.parse(dto.schedule),
     reminderConfig: (dto.reminderConfig as unknown as Record<string, unknown>) ?? null,
-    instanceCount: dto.instanceCount ?? 0,
-    completedInstanceCount: dto.completedInstanceCount ?? 0,
-    pendingInstanceCount: dto.pendingInstanceCount ?? 0,
-    dueInstanceCount: dto.dueInstanceCount ?? 0,
-    completedDueInstanceCount: dto.completedDueInstanceCount ?? 0,
+    occurrenceCount: dto.occurrenceCount ?? 0,
+    completedOccurrenceCount: dto.completedOccurrenceCount ?? 0,
+    pendingOccurrenceCount: dto.pendingOccurrenceCount ?? 0,
+    dueOccurrenceCount: dto.dueOccurrenceCount ?? 0,
+    completedDueOccurrenceCount: dto.completedDueOccurrenceCount ?? 0,
     completionWindowDays: dto.completionWindowDays ?? 30,
-    futurePendingInstanceCount: dto.futurePendingInstanceCount ?? 0,
-    singleInstanceStatus: dto.singleInstanceStatus ?? null,
+    futurePendingOccurrenceCount: dto.futurePendingOccurrenceCount ?? 0,
+    singleOccurrenceStatus: dto.singleOccurrenceStatus ?? null,
     completionRate: dto.completionRate ?? 0,
     formattedCreatedAt: dto.createdAt ? formatProductDate(dto.createdAt) : undefined,
   };

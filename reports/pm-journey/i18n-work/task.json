@@ -1154,7 +1154,7 @@
   ]
  },
  {
-  "key": "task.management.deleteTemplate",
+  "key": "task.management.deletePlan",
   "files": [
    "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
   ]

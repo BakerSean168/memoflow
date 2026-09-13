@@ -3,12 +3,12 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Task template ownership surface (stage-6 residual 123 + 140):
- * get/update/delete/actions and list-instances-by-template must never authorize
- * by bare task template primary key alone; folder/goal list filters are identity-scoped.
+ * Task plan ownership surface (stage-6 residual 123 + 140):
+ * get/update/delete/actions and list-occurrences-by-plan must never authorize
+ * by bare task plan primary key alone; folder/goal list filters are identity-scoped.
  * Residual 177 collapses bare findById dual method.
  */
-describe('task template ownership surface', () => {
+describe('task plan ownership surface', () => {
   const port = readFileSync(
     resolve(__dirname, '../../../../domain/repositories/i-task-plan-repository.ts'),
     'utf8',
@@ -54,7 +54,7 @@ describe('task template ownership surface', () => {
     expect(prisma).toContain('where: { id, identityId }');
     expect(prisma).toContain('deleteMany({');
     expect(prisma).toContain(
-      "throw new Error('Task template not found for the current identity.');",
+      "throw new Error('Task plan not found for the current identity.');",
     );
   });
 
@@ -65,32 +65,30 @@ describe('task template ownership surface', () => {
     expect(deleteUseCase).toContain('delete(identityId, id)');
   });
 
-  it('module api wrappers pass identityId for template mutations', () => {
+  it('module api wrappers pass identityId for plan mutations', () => {
     expect(module).toMatch(/updateTaskPlan:\s*\(id, identityId, input\)\s*=>/);
     expect(module).toMatch(/deleteTaskPlan:\s*\(id, identityId\)\s*=>/);
-    expect(module).toMatch(/getTaskPlan:\s*\(id, identityId, includeChildren\)\s*=>/);
+    expect(module).toMatch(/getTaskPlan:\s*\(id, identityId\)\s*=>/);
   });
 
-  it('HTTP and Electron template get/delete pass identity context (Phase 4)', () => {
+  it('HTTP and Electron plan get/delete pass identity context (Phase 4)', () => {
     // Read/query routes keep expressAdapter with controller-side identity scope.
-    expect(routes).toContain('controller.getTemplate(req.params!.id, ctx,');
+    expect(routes).toContain('controller.getPlan(req.params!.id, ctx)');
 
     // Phase 4: mutation routes bind contract invocation schemas through the
     // validation-aware registrar; the controller still receives the canonical
     // identity-bearing context (never a body identity).
     expect(routes).toContain('routeWithValidation');
-    expect(routes).toMatch(/controller\.deleteTemplate\(data\.params\.id, ctx\)/);
-    expect(routes).toMatch(/controller\.activateTemplate\(data\.params\.id, ctx\)/);
+    expect(routes).toMatch(/controller\.deletePlan\(data\.params\.id, ctx\)/);
+    expect(routes).toMatch(/controller\.activatePlan\(data\.params\.id, ctx\)/);
     expect(electron).toContain('registerValidatedChannel');
     expect(electron).toMatch(
-      /TEMPLATE_GET[\s\S]*templateController\.getTemplate\([\s\S]*requestContext/,
+      /PLAN_GET[\s\S]*templateController\.getPlan\([\s\S]*requestContext/,
     );
     expect(electron).toMatch(
-      /TEMPLATE_DELETE[\s\S]*templateController\.deleteTemplate\(data\.params\.id,[\s\S]*requestContext/,
+      /PLAN_DELETE[\s\S]*templateController\.deletePlan\(data\.params\.id,[\s\S]*requestContext/,
     );
-    expect(electron).not.toMatch(
-      /TEMPLATE_GET[\s\S]*templateController\.getTemplate\(\s*payload\?\.id \?\? payload,\s*payload\?\.includeChildren/,
-    );
+    expect(electron).not.toContain('includeChildren');
   });
 
   it('findByGoalId remains identity scoped while folder lookup is retired', () => {
@@ -121,7 +119,7 @@ describe('task template ownership surface', () => {
     expect(prisma).toContain('async deleteBatch(identityId: string, ids: string[])');
     expect(prisma).toContain('where: { id: { in: ids }, identityId }');
     expect(powersync).toContain(
-      'DELETE FROM task_templates WHERE identity_id = ? AND id IN (${placeholders})',
+      'DELETE FROM task_plans WHERE identity_id = ? AND id IN (${placeholders})',
     );
   });
 
@@ -135,13 +133,13 @@ describe('task template ownership surface', () => {
     expect(prisma).toContain('async restore(identityId: string, id: string)');
     expect(prisma).toContain('where: { id, identityId }');
     expect(prisma).toContain(
-      "throw new Error('Task template not found for the current identity.');",
+      "throw new Error('Task plan not found for the current identity.');",
     );
     expect(powersync).toContain(
-      'UPDATE task_templates SET deleted_at = ?, updated_at = ? WHERE id = ? AND identity_id = ?',
+      'UPDATE task_plans SET deleted_at = ?, updated_at = ? WHERE id = ? AND identity_id = ?',
     );
     expect(powersync).toContain(
-      'UPDATE task_templates SET deleted_at = NULL, archived_at = NULL, updated_at = ? WHERE id = ? AND identity_id = ?',
+      'UPDATE task_plans SET deleted_at = NULL, archived_at = NULL, updated_at = ? WHERE id = ? AND identity_id = ?',
     );
   });
 
@@ -155,6 +153,6 @@ describe('task template ownership surface', () => {
     expect(prisma).not.toContain('findByIdWithChildren');
     expect(powersync).not.toContain('findByIdWithChildren');
     expect(getUseCase).toContain('findByIdForIdentity(identityId, id)');
-    expect(getUseCase).toContain('instanceRepository.findByTemplateId(id, identityId)');
+    expect(getUseCase).toContain('occurrenceRepository.findByPlanId(id, identityId)');
   });
 });

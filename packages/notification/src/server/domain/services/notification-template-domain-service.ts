@@ -21,7 +21,7 @@ export class NotificationTemplateDomainService {
   /**
    * 创建新模板
    */
-  public async createTemplate(params: {
+  public async createPlan(params: {
     name: string;
     type: NotificationType;
     category: NotificationCategory;
@@ -57,14 +57,14 @@ export class NotificationTemplateDomainService {
   /**
    * 获取模板
    */
-  public async getTemplate(id: string): Promise<NotificationTemplate | null> {
+  public async getPlan(id: string): Promise<NotificationTemplate | null> {
     return await this.templateRepo.findById(id);
   }
 
   /**
    * 通过名称获取模板
    */
-  public async getTemplateByName(name: string): Promise<NotificationTemplate | null> {
+  public async getPlanByName(name: string): Promise<NotificationTemplate | null> {
     return await this.templateRepo.findByName(name);
   }
 
@@ -80,7 +80,7 @@ export class NotificationTemplateDomainService {
   /**
    * 获取分类模板
    */
-  public async getTemplatesByCategory(
+  public async getPlansByCategory(
     category: NotificationCategory,
     options?: { activeOnly?: boolean },
   ): Promise<NotificationTemplate[]> {
@@ -90,7 +90,7 @@ export class NotificationTemplateDomainService {
   /**
    * 获取类型模板
    */
-  public async getTemplatesByType(
+  public async getPlansByType(
     type: NotificationType,
     options?: { activeOnly?: boolean },
   ): Promise<NotificationTemplate[]> {
@@ -107,7 +107,7 @@ export class NotificationTemplateDomainService {
   /**
    * 更新模板配置
    */
-  public async updateTemplateConfig(
+  public async updatePlanConfig(
     id: string,
     template: Partial<NotificationTemplateConfigServerDTO>,
   ): Promise<NotificationTemplate> {
@@ -116,7 +116,7 @@ export class NotificationTemplateDomainService {
       throw new Error(`Template not found: ${id}`);
     }
 
-    templateEntity.updateTemplate(template);
+    templateEntity.updatePlan(template);
     await this.templateRepo.save(templateEntity);
 
     return templateEntity;
@@ -125,7 +125,7 @@ export class NotificationTemplateDomainService {
   /**
    * 激活模板
    */
-  public async activateTemplate(id: string): Promise<void> {
+  public async activatePlan(id: string): Promise<void> {
     const template = await this.templateRepo.findById(id);
     if (!template) {
       throw new Error(`Template not found: ${id}`);
@@ -148,7 +148,7 @@ export class NotificationTemplateDomainService {
   /**
    * 停用模板
    */
-  public async deactivateTemplate(id: string): Promise<void> {
+  public async deactivatePlan(id: string): Promise<void> {
     const template = await this.templateRepo.findById(id);
     if (!template) {
       throw new Error(`Template not found: ${id}`);
@@ -171,7 +171,7 @@ export class NotificationTemplateDomainService {
   /**
    * 删除模板
    */
-  public async deleteTemplate(id: string): Promise<void> {
+  public async deletePlan(id: string): Promise<void> {
     const template = await this.templateRepo.findById(id);
     if (!template) {
       throw new Error(`Template not found: ${id}`);

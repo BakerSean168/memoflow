@@ -105,7 +105,7 @@ describe('PowerSyncDataPortabilityImportStore', () => {
     );
 
     const insert = statements.find((statement) =>
-      statement.sql.includes('INSERT INTO task_templates'),
+      statement.sql.includes('INSERT INTO task_plans'),
     );
     expect(insert?.sql).toContain('schedule');
     expect(insert?.sql).toContain('reminder_config');
@@ -224,7 +224,7 @@ describe('PowerSyncDataPortabilityImportStore', () => {
       tx.createReminderResponse({
         id: 'response-1',
         identityId: 'identity-1',
-        templateId: 'template-1',
+        planId: 'template-1',
         action: 'dismiss',
         responseTime: 1_700_000_000,
         timestamp: '2024-03-01T00:00:00.000Z',

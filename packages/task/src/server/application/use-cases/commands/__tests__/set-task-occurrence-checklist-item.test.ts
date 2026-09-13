@@ -17,7 +17,7 @@ describe('SetTaskOccurrenceChecklistItemUseCase', () => {
     });
     useCase = new SetTaskOccurrenceChecklistItemUseCase(
       occurrenceRepository,
-      createInlineTaskWriteTransactionRunner({ instanceRepository: occurrenceRepository }),
+      createInlineTaskWriteTransactionRunner({ occurrenceRepository: occurrenceRepository }),
       TASK_TEST_OCCURRENCE_PROJECTION,
     );
   });

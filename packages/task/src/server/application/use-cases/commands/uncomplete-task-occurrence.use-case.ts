@@ -11,14 +11,14 @@ import type { TaskOccurrenceProjectionService } from '../../services/task-occurr
  * Uncomplete Task Instance Use Case
  *
  * R2-5b：与 complete 对齐，经由 TaskWriteTransactionRunner 提交——domain event
- * （task:instance-uncompleted）在事务内落 TaskGoalOutbox，撤销贡献与完成贡献
+ * （task:occurrence-uncompleted）在事务内落 TaskGoalOutbox，撤销贡献与完成贡献
  * 走同一条 durable 通道（不再只依赖 eventBus 直连）。
  */
 export class UncompleteTaskOccurrenceUseCase {
   private readonly transactionRunner: TaskWriteTransactionRunner;
 
   constructor(
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
     private readonly projection: TaskOccurrenceProjectionService,
   ) {
@@ -43,23 +43,23 @@ export class UncompleteTaskOccurrenceUseCase {
     identityId: string,
     timeContext: TimeContext,
   ): Promise<Result<TaskOccurrenceOperationRes>> {
-    const instance = await repositories.instanceRepository.findByIdForIdentity(identityId, id);
-    if (!instance) {
+    const occurrence = await repositories.occurrenceRepository.findByIdForIdentity(identityId, id);
+    if (!occurrence) {
       return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
     }
-    if (instance.status !== 'Completed') {
+    if (occurrence.status !== 'Completed') {
       return error('VALIDATION_ERROR', 'Only a completed task can be uncompleted');
     }
 
-    instance.uncomplete();
-    await repositories.instanceRepository.save(instance);
+    occurrence.uncomplete();
+    await repositories.occurrenceRepository.save(occurrence);
     await reevaluateTaskPlanOutcome(
       repositories,
       identityId,
-      String(instance.planId),
-      instance.id,
+      String(occurrence.planId),
+      occurrence.id,
       timeContext,
     );
-    return ok({ instance: this.projection.projectWithContext(instance, timeContext) });
+    return ok({ occurrence: this.projection.projectWithContext(occurrence, timeContext) });
   }
 }

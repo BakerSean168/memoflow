@@ -47,7 +47,7 @@ export class PowerSyncTaskBindingReadPort
   }> {
     const validated = GoalTaskBindingQueryInputSchema.parse(input);
     const rows = await this.db.getAll<{ count: number }>(
-      'SELECT COUNT(*) as count FROM task_templates WHERE identity_id = ? AND goal_id = ? AND deleted_at IS NULL',
+      'SELECT COUNT(*) as count FROM task_plans WHERE identity_id = ? AND goal_id = ? AND deleted_at IS NULL',
       [validated.identityId, validated.goalId],
     );
     const count = Number(rows[0]?.count ?? 0);
@@ -99,14 +99,14 @@ export class PowerSyncTaskBindingReadPort
     if (keyResultId !== null) params.push(keyResultId);
     const rows = await this.db.getAll<ContextRow>(
       `SELECT id, name, status, outcome, key_result_id, goal_record_value, goal_progress_trigger
-       FROM task_templates
+       FROM task_plans
        WHERE identity_id = ? AND goal_id = ?${keyResultClause} AND deleted_at IS NULL
        ORDER BY created_at DESC
        LIMIT ? OFFSET ?`,
       [...params, paging.limit, paging.offset],
     );
     const counts = await this.db.getAll<{ count: number }>(
-      `SELECT COUNT(*) as count FROM task_templates
+      `SELECT COUNT(*) as count FROM task_plans
        WHERE identity_id = ? AND goal_id = ?${keyResultClause} AND deleted_at IS NULL`,
       params,
     );
@@ -135,7 +135,7 @@ export class PowerSyncTaskBindingReadPort
            SUM(CASE WHEN status = 'Active' THEN 1 ELSE 0 END) as active,
            SUM(CASE WHEN outcome = 'Succeeded' THEN 1 ELSE 0 END) as completed,
            SUM(CASE WHEN key_result_id IS NULL THEN 1 ELSE 0 END) as goal_level
-         FROM task_templates
+         FROM task_plans
          WHERE identity_id = ? AND goal_id = ? AND deleted_at IS NULL`,
         [input.identityId, input.goalId],
       ),
@@ -144,7 +144,7 @@ export class PowerSyncTaskBindingReadPort
            key_result_id,
            COUNT(*) as total,
            SUM(CASE WHEN status = 'Active' THEN 1 ELSE 0 END) as active
-         FROM task_templates
+         FROM task_plans
          WHERE identity_id = ? AND goal_id = ? AND key_result_id IS NOT NULL AND deleted_at IS NULL
          GROUP BY key_result_id
          ORDER BY key_result_id ASC`,

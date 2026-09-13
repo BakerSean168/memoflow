@@ -19,16 +19,16 @@ export interface TaskPlanStatsWindow {
   asOf: Ymd;
 }
 
-export interface TaskPlanInstanceStats {
-  templateId: string;
-  instanceCount: number;
-  completedInstanceCount: number;
-  pendingInstanceCount: number;
-  dueInstanceCount: number;
-  completedDueInstanceCount: number;
+export interface TaskPlanOccurrenceStats {
+  planId: string;
+  occurrenceCount: number;
+  completedOccurrenceCount: number;
+  pendingOccurrenceCount: number;
+  dueOccurrenceCount: number;
+  completedDueOccurrenceCount: number;
   completionWindowDays: 30;
-  futurePendingInstanceCount: number;
-  singleInstanceStatus: TaskOccurrenceStatus | null;
+  futurePendingOccurrenceCount: number;
+  singleOccurrenceStatus: TaskOccurrenceStatus | null;
   completionRate: number;
 }
 
@@ -48,12 +48,12 @@ export interface ITaskOccurrenceRepository {
   /**
    * 保存任务实例
    */
-  save(instance: TaskOccurrence): Promise<void>;
+  save(occurrence: TaskOccurrence): Promise<void>;
 
   /**
    * 批量保存任务实例
    */
-  saveMany(instances: TaskOccurrence[]): Promise<void>;
+  saveMany(occurrences: TaskOccurrence[]): Promise<void>;
 
   /**
    * 根据 ID + identity 查找任务实例（唯一授权敏感读路径）
@@ -63,7 +63,7 @@ export interface ITaskOccurrenceRepository {
   /**
    * 根据模板 ID + identity 查找任务实例
    */
-  findByTemplateId(templateId: string, identityId: string): Promise<TaskOccurrence[]>;
+  findByPlanId(planId: string, identityId: string): Promise<TaskOccurrence[]>;
 
   /**
    * 根据用户 ID 查找任务实例
@@ -83,7 +83,7 @@ export interface ITaskOccurrenceRepository {
   /**
    * 查找过期的任务实例
    */
-  findOverdueInstances(identityId: string): Promise<TaskOccurrence[]>;
+  findOverdueOccurrences(identityId: string): Promise<TaskOccurrence[]>;
 
   /**
    * 删除任务实例（identity-scoped）
@@ -98,20 +98,20 @@ export interface ITaskOccurrenceRepository {
   /**
    * 删除模板的所有任务实例
    */
-  deleteByTemplateId(templateId: string, identityId: string): Promise<void>;
+  deleteByPlanId(planId: string, identityId: string): Promise<void>;
 
   /**
    * 统计模板的未过期实例数量
-   * @param templateId 模板 ID
+   * @param planId 模板 ID
    * @param fromDate 起始日期时间戳（默认为当前时间）
    */
-  countFutureInstances(templateId: string, identityId: string, fromDate?: Ymd): Promise<number>;
+  countFutureOccurrences(planId: string, identityId: string, fromDate?: Ymd): Promise<number>;
 
   /**
    * 根据模板 ID 和日期范围查找任务实例
    */
-  findByTemplateIdAndDateRange(
-    templateId: string,
+  findByPlanIdAndDateRange(
+    planId: string,
     identityId: string,
     startDate: Ymd,
     endDate: Ymd,
@@ -120,11 +120,11 @@ export interface ITaskOccurrenceRepository {
   /**
    * 批量统计模板实例聚合数据
    */
-  getTemplateStats(
-    templateIds: string[],
+  getPlanStats(
+    planIds: string[],
     identityId: string,
     window: TaskPlanStatsWindow,
-  ): Promise<Record<string, TaskPlanInstanceStats>>;
+  ): Promise<Record<string, TaskPlanOccurrenceStats>>;
 
   getStatusCountsForPlan(
     planId: string,
@@ -141,8 +141,8 @@ export interface ITaskOccurrenceRepository {
    * 删除模板从指定时点开始的未完成实例
    * 用于暂停模板时清理当前及未来无意义的实例
    */
-  deleteIncompleteInstancesFrom(
-    templateId: string,
+  deleteIncompleteOccurrencesFrom(
+    planId: string,
     identityId: string,
     fromDate: Ymd,
   ): Promise<number>;

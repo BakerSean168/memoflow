@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
   CreateTaskPlanSchema,
   ListTaskPlanFiltersSchema,
@@ -53,19 +55,34 @@ function validTemplateResponse() {
     estimatedMinutes: null,
     actualMinutes: null,
     comment: null,
-    instanceCount: 0,
-    completedInstanceCount: 0,
-    pendingInstanceCount: 0,
-    dueInstanceCount: 0,
-    completedDueInstanceCount: 0,
+    occurrenceCount: 0,
+    completedOccurrenceCount: 0,
+    pendingOccurrenceCount: 0,
+    dueOccurrenceCount: 0,
+    completedDueOccurrenceCount: 0,
     completionWindowDays: 30,
-    futurePendingInstanceCount: 0,
-    singleInstanceStatus: null,
+    futurePendingOccurrenceCount: 0,
+    singleOccurrenceStatus: null,
     completionRate: 0,
   };
 }
 
-describe('task template contracts', () => {
+describe('task plan contracts', () => {
+  it('keeps TaskPlan occurrence children out of every plan boundary', () => {
+    const client = readFileSync(resolve(__dirname, '../aggregates/task-plan-client.ts'), 'utf8');
+    const server = readFileSync(resolve(__dirname, '../aggregates/task-plan-server.ts'), 'utf8');
+    const domainClient = readFileSync(
+      resolve(__dirname, '../../../../../task/src/domain-client/aggregates/task-plan.ts'),
+      'utf8',
+    );
+    const request = readFileSync(resolve(__dirname, 'task-plan.dto.ts'), 'utf8');
+
+    expect(client).not.toMatch(/occurrences\?:/);
+    expect(server).not.toMatch(/occurrences\?:/);
+    expect(domainClient).not.toMatch(/occurrences\?:/);
+    expect(request).not.toContain('includeChildren');
+  });
+
   it('accepts a valid create payload', () => {
     expect(CreateTaskPlanSchema.safeParse(validCreatePayload()).success).toBe(true);
   });
@@ -136,7 +153,7 @@ describe('task template contracts', () => {
     expect(
       UpdateTaskPlanSchema.safeParse({
         name: 'Updated',
-        templateId: 'TaskPlanId_550e8400-e29b-41d4-a716-446655440000',
+        planId: 'TaskPlanId_550e8400-e29b-41d4-a716-446655440000',
       }).success,
     ).toBe(false);
   });
@@ -159,15 +176,15 @@ describe('task template contracts', () => {
     ).toBe(false);
   });
 
-  it('preserves template creation instance feedback', () => {
+  it('preserves plan creation occurrence feedback', () => {
     const parsed = CreateTaskPlanResponseSchema.parse({
-      template: validTemplateResponse(),
-      instanceCount: 7,
-      todayInstanceCreated: true,
+      plan: validTemplateResponse(),
+      occurrenceCount: 7,
+      todayOccurrenceCreated: true,
     });
 
-    expect(parsed.instanceCount).toBe(7);
-    expect(parsed.todayInstanceCreated).toBe(true);
+    expect(parsed.occurrenceCount).toBe(7);
+    expect(parsed.todayOccurrenceCreated).toBe(true);
   });
 
   it('keeps task schedule validation intact', () => {

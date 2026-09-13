@@ -1,7 +1,7 @@
 /**
  * TaskPlan Controller
  *
- * Encapsulates Zod validation and use case orchestration for task templates.
+ * Encapsulates Zod validation and use case orchestration for task plans.
  * Shared by both Express (HTTP) and IPC transport layers.
  *
  * Each method:
@@ -18,11 +18,11 @@ import type {
   TaskOccurrenceClientDTO,
   CreateTaskPlanInput,
   ListTaskPlanFilters,
-  TaskPlanInstancesQuery,
+  TaskPlanOccurrencesQuery,
   QueryTaskPlansInternal,
   CreateTaskPlanReq,
   UpdateTaskPlanReq,
-  GenerateInstancesReq,
+  GenerateOccurrencesReq,
   BindToGoalReq,
   AbandonTaskPlanReq,
 } from '@memoflow/contracts/task';
@@ -41,26 +41,26 @@ import type { AbandonTaskPlanUseCase } from '../application/use-cases/commands/a
 import type { GenerateTaskOccurrencesUseCase } from '../application/use-cases/commands/generate-task-occurrences.use-case';
 import type { BindTaskToGoalUseCase } from '../application/use-cases/commands/bind-task-to-goal.use-case';
 import type { UnbindTaskFromGoalUseCase } from '../application/use-cases/commands/unbind-task-from-goal.use-case';
-import type { ListTaskOccurrencesByTemplateUseCase } from '../application/use-cases/queries/list-task-occurrences-by-template.use-case';
+import type { ListTaskOccurrencesByPlanUseCase } from '../application/use-cases/queries/list-task-occurrences-by-plan.use-case';
 
 type TaskControllerFn<T extends (...args: never[]) => unknown> = (
   ...args: Parameters<T>
 ) => ReturnType<T>;
 
 export interface TaskPlanUseCases {
-  createTemplate: TaskControllerFn<CreateTaskPlanUseCase['execute']>;
-  getTemplate: TaskControllerFn<GetTaskPlanUseCase['execute']>;
-  listTemplates: TaskControllerFn<ListTaskPlansUseCase['execute']>;
-  updateTemplate: TaskControllerFn<UpdateTaskPlanUseCase['execute']>;
-  deleteTemplate: TaskControllerFn<DeleteTaskPlanUseCase['execute']>;
-  activateTemplate: TaskControllerFn<ActivateTaskPlanUseCase['execute']>;
-  pauseTemplate: TaskControllerFn<PauseTaskPlanUseCase['execute']>;
-  archiveTemplate: TaskControllerFn<ArchiveTaskPlanUseCase['execute']>;
+  createPlan: TaskControllerFn<CreateTaskPlanUseCase['execute']>;
+  getPlan: TaskControllerFn<GetTaskPlanUseCase['execute']>;
+  listPlans: TaskControllerFn<ListTaskPlansUseCase['execute']>;
+  updatePlan: TaskControllerFn<UpdateTaskPlanUseCase['execute']>;
+  deletePlan: TaskControllerFn<DeleteTaskPlanUseCase['execute']>;
+  activatePlan: TaskControllerFn<ActivateTaskPlanUseCase['execute']>;
+  pausePlan: TaskControllerFn<PauseTaskPlanUseCase['execute']>;
+  archivePlan: TaskControllerFn<ArchiveTaskPlanUseCase['execute']>;
   abandonPlan: TaskControllerFn<AbandonTaskPlanUseCase['execute']>;
-  generateInstances: TaskControllerFn<GenerateTaskOccurrencesUseCase['execute']>;
+  generateOccurrences: TaskControllerFn<GenerateTaskOccurrencesUseCase['execute']>;
   bindToGoal: TaskControllerFn<BindTaskToGoalUseCase['execute']>;
   unbindFromGoal: TaskControllerFn<UnbindTaskFromGoalUseCase['execute']>;
-  listInstancesByTemplate: TaskControllerFn<ListTaskOccurrencesByTemplateUseCase['execute']>;
+  listOccurrencesByPlan: TaskControllerFn<ListTaskOccurrencesByPlanUseCase['execute']>;
 }
 
 /**
@@ -86,10 +86,10 @@ export class TaskPlanController {
   }
 
   /**
-   * Create new task template (with Zod validation)
+   * Create new task plan (with Zod validation)
    * Identity is injected from Context, not from request payload
    */
-  async createTemplate(input: CreateTaskPlanReq, ctx: Context): Promise<Result<CreateTaskPlanRes>> {
+  async createPlan(input: CreateTaskPlanReq, ctx: Context): Promise<Result<CreateTaskPlanRes>> {
     // Assemble internal input with identityId from Context
     const createInput: CreateTaskPlanInput = {
       identityId: IdentityId.of(ctx.identityId),
@@ -103,7 +103,7 @@ export class TaskPlanController {
       completionPolicy: input.completionPolicy,
     };
 
-    const result = await this.useCases.createTemplate(createInput);
+    const result = await this.useCases.createPlan(createInput);
 
     if (!isOk(result)) {
       return result;
@@ -113,14 +113,13 @@ export class TaskPlanController {
   }
 
   /**
-   * Get template by ID
+   * Get plan by ID
    */
-  async getTemplate(
+  async getPlan(
     id: string,
     ctx: Context,
-    includeChildren = false,
   ): Promise<Result<TaskPlanClientDTO | null>> {
-    const result = await this.useCases.getTemplate(id, ctx.identityId, includeChildren);
+    const result = await this.useCases.getPlan(id, ctx.identityId);
 
     if (!isOk(result)) {
       return result as Result<TaskPlanClientDTO | null>;
@@ -130,35 +129,35 @@ export class TaskPlanController {
   }
 
   /**
-   * List templates for account
+   * List plans for account
    * Identity is injected from Context, not from request payload
    */
-  async listTemplates(
+  async listPlans(
     filters: ListTaskPlanFilters | undefined,
     ctx: Context,
-  ): Promise<Result<{ templates: TaskPlanClientDTO[]; total: number }>> {
-    const result = await this.useCases.listTemplates(this.toTemplateQuery(filters, ctx));
+  ): Promise<Result<{ plans: TaskPlanClientDTO[]; total: number }>> {
+    const result = await this.useCases.listPlans(this.toTemplateQuery(filters, ctx));
 
     if (!isOk(result)) {
-      return result as Result<{ templates: TaskPlanClientDTO[]; total: number }>;
+      return result as Result<{ plans: TaskPlanClientDTO[]; total: number }>;
     }
 
-    return ok({ templates: result.data.templates, total: result.data.total });
+    return ok({ plans: result.data.plans, total: result.data.total });
   }
 
   /**
-   * List templates together with the dependency edges between them.
+   * List plans together with the dependency edges between them.
    */
 
   /**
-   * Update template (with Zod validation)
+   * Update plan (with Zod validation)
    */
-  async updateTemplate(
+  async updatePlan(
     id: string,
     input: UpdateTaskPlanReq,
     ctx: Context,
   ): Promise<Result<TaskPlanClientDTO>> {
-    return await this.useCases.updateTemplate(id, ctx.identityId, {
+    return await this.useCases.updatePlan(id, ctx.identityId, {
       name: input.name,
       description: input.description,
       schedule: input.schedule,
@@ -171,10 +170,10 @@ export class TaskPlanController {
   }
 
   /**
-   * Delete template
+   * Delete plan
    */
-  async deleteTemplate(id: string, ctx: Context): Promise<Result<null>> {
-    const result = await this.useCases.deleteTemplate(id, ctx.identityId);
+  async deletePlan(id: string, ctx: Context): Promise<Result<null>> {
+    const result = await this.useCases.deletePlan(id, ctx.identityId);
     if (!isOk(result)) {
       return result as Result<null>;
     }
@@ -183,36 +182,36 @@ export class TaskPlanController {
   }
 
   /**
-   * Activate template
+   * Activate plan
    */
-  async activateTemplate(id: string, ctx: Context): Promise<Result<TaskPlanClientDTO>> {
-    const result = await this.useCases.activateTemplate(id, ctx.identityId);
+  async activatePlan(id: string, ctx: Context): Promise<Result<TaskPlanClientDTO>> {
+    const result = await this.useCases.activatePlan(id, ctx.identityId);
 
     if (!isOk(result)) {
       return result as Result<TaskPlanClientDTO>;
     }
 
-    return ok(result.data.template);
+    return ok(result.data.plan);
   }
 
   /**
-   * Pause template
+   * Pause plan
    */
-  async pauseTemplate(id: string, ctx: Context): Promise<Result<TaskPlanClientDTO>> {
-    const result = await this.useCases.pauseTemplate(id, ctx.identityId);
+  async pausePlan(id: string, ctx: Context): Promise<Result<TaskPlanClientDTO>> {
+    const result = await this.useCases.pausePlan(id, ctx.identityId);
 
     if (!isOk(result)) {
       return result as Result<TaskPlanClientDTO>;
     }
 
-    return ok(result.data.template);
+    return ok(result.data.plan);
   }
 
   /**
-   * Archive template
+   * Archive plan
    */
-  async archiveTemplate(id: string, ctx: Context): Promise<Result<TaskPlanClientDTO>> {
-    return await this.useCases.archiveTemplate(id, ctx.identityId);
+  async archivePlan(id: string, ctx: Context): Promise<Result<TaskPlanClientDTO>> {
+    return await this.useCases.archivePlan(id, ctx.identityId);
   }
 
   async abandonPlan(
@@ -224,25 +223,25 @@ export class TaskPlanController {
   }
 
   /**
-   * Generate instances for a template
+   * Generate occurrences for a plan
    */
-  async generateInstances(
+  async generateOccurrences(
     id: string,
-    input: GenerateInstancesReq,
+    input: GenerateOccurrencesReq,
     ctx: Context,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    return await this.useCases.generateInstances(id, ctx.identityId, input);
+    return await this.useCases.generateOccurrences(id, ctx.identityId, input);
   }
 
   /**
    * Get occurrences by plan ID
    */
-  async getInstancesByTemplate(
+  async getOccurrencesByPlan(
     planId: string,
     ctx: Context,
-    range?: TaskPlanInstancesQuery,
+    range?: TaskPlanOccurrencesQuery,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    const result = await this.useCases.listInstancesByTemplate(planId, ctx.identityId);
+    const result = await this.useCases.listOccurrencesByPlan(planId, ctx.identityId);
 
     if (!isOk(result)) {
       return result as Result<TaskOccurrenceClientDTO[]>;
@@ -253,12 +252,12 @@ export class TaskPlanController {
     }
 
     return ok(
-      result.data.filter((instance) => {
-        if (range.from != null && instance.dueAt < range.from) {
+      result.data.filter((occurrence) => {
+        if (range.from != null && occurrence.dueAt < range.from) {
           return false;
         }
 
-        if (range.to != null && instance.dueAt > range.to) {
+        if (range.to != null && occurrence.dueAt > range.to) {
           return false;
         }
 
@@ -268,7 +267,7 @@ export class TaskPlanController {
   }
 
   /**
-   * Bind template to goal
+   * Bind plan to goal
    */
   async bindToGoal(
     id: string,
@@ -279,7 +278,7 @@ export class TaskPlanController {
   }
 
   /**
-   * Unbind template from goal
+   * Unbind plan from goal
    */
   async unbindFromGoal(id: string, ctx: Context): Promise<Result<TaskPlanClientDTO>> {
     return await this.useCases.unbindFromGoal(id, ctx.identityId);

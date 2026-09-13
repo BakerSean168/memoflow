@@ -9,8 +9,8 @@ import { ResultErrorException } from '@memoflow/contracts/result';
  * 任务模板未找到错误
  */
 export class TaskPlanNotFoundError extends ResultErrorException {
-  constructor(templateId: string) {
-    super(`任务模板未找到：${templateId}`, 'task_template_not_found', undefined, undefined, 400);
+  constructor(planId: string) {
+    super(`任务模板未找到：${planId}`, 'task_plan_not_found', undefined, undefined, 400);
   }
 }
 
@@ -18,11 +18,11 @@ export class TaskPlanNotFoundError extends ResultErrorException {
  * 任务模板状态无效错误
  */
 export class InvalidTaskPlanStateError extends ResultErrorException {
-  constructor(message: string, context?: { templateId?: string; currentStatus?: string; attemptedAction?: string }) {
-    const contextStr = context ? ` (templateId: ${context.templateId}, status: ${context.currentStatus}, action: ${context.attemptedAction})` : '';
+  constructor(message: string, context?: { planId?: string; currentStatus?: string; attemptedAction?: string }) {
+    const contextStr = context ? ` (planId: ${context.planId}, status: ${context.currentStatus}, action: ${context.attemptedAction})` : '';
     super(
       `${message}${contextStr}`,
-      'invalid_task_template_state',
+      'invalid_task_plan_state',
       undefined,
       undefined,
       400,
@@ -34,23 +34,8 @@ export class InvalidTaskPlanStateError extends ResultErrorException {
  * 任务模板已归档错误
  */
 export class TaskPlanArchivedError extends ResultErrorException {
-  constructor(templateId: string) {
-    super(`任务模板已归档：${templateId}`, 'task_template_archived', undefined, undefined, 400);
-  }
-}
-
-/**
- * 重复规则未实现错误
- */
-export class RecurrenceRuleNotImplementedError extends ResultErrorException {
-  constructor(ruleType: string) {
-    super(
-      `重复规则未实现：${ruleType}`,
-      'recurrence_rule_not_implemented',
-      undefined,
-      undefined,
-      400,
-    );
+  constructor(planId: string) {
+    super(`任务模板已归档：${planId}`, 'task_plan_archived', undefined, undefined, 400);
   }
 }
 
@@ -98,11 +83,11 @@ export class InvalidDateRangeError extends ResultErrorException {
 /**
  * 实例生成失败错误
  */
-export class InstanceGenerationFailedError extends ResultErrorException {
-  constructor(templateId: string, reason?: string) {
+export class OccurrenceGenerationFailedError extends ResultErrorException {
+  constructor(planId: string, reason?: string) {
     super(
-      `任务实例生成失败：${templateId}${reason ? ` - ${reason}` : ''}`,
-      'instance_generation_failed',
+      `任务实例生成失败：${planId}${reason ? ` - ${reason}` : ''}`,
+      'occurrence_generation_failed',
       undefined,
       undefined,
       400,
@@ -114,8 +99,8 @@ export class InstanceGenerationFailedError extends ResultErrorException {
  * 任务实例未找到错误
  */
 export class TaskOccurrenceNotFoundError extends ResultErrorException {
-  constructor(instanceId: string) {
-    super(`任务实例未找到：${instanceId}`, 'task_instance_not_found', undefined, undefined, 400);
+  constructor(occurrenceId: string) {
+    super(`任务实例未找到：${occurrenceId}`, 'task_occurrence_not_found', undefined, undefined, 400);
   }
 }
 
@@ -123,10 +108,10 @@ export class TaskOccurrenceNotFoundError extends ResultErrorException {
  * 任务实例已完成错误
  */
 export class TaskOccurrenceAlreadyCompletedError extends ResultErrorException {
-  constructor(instanceId: string) {
+  constructor(occurrenceId: string) {
     super(
-      `任务实例已完成：${instanceId}`,
-      'task_instance_already_completed',
+      `任务实例已完成：${occurrenceId}`,
+      'task_occurrence_already_completed',
       undefined,
       undefined,
       400,

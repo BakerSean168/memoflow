@@ -49,8 +49,8 @@ describe('ListTaskPlansUseCase', () => {
 
   describe('filtering', () => {
     it('should filter by status when status is provided', async () => {
-      const template = aLoadedTaskPlan({ status: TaskPlanStatus.Active });
-      vi.mocked(templateRepo.findByStatus).mockResolvedValue([template]);
+      const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Active });
+      vi.mocked(templateRepo.findByStatus).mockResolvedValue([plan]);
 
       const result = await useCase.execute({
         identityId: testIdentityId,
@@ -60,7 +60,7 @@ describe('ListTaskPlansUseCase', () => {
       expect(result).toBeOk();
       expect(templateRepo.findByStatus).toHaveBeenCalledWith(testIdentityId, TaskPlanStatus.Active);
       if (result.ok) {
-        expect(result.data.templates).toHaveLength(1);
+        expect(result.data.plans).toHaveLength(1);
         expect(result.data.total).toBe(1);
       }
     });
@@ -98,8 +98,8 @@ describe('ListTaskPlansUseCase', () => {
     });
 
     it('delegates shared Label AND filtering to the repository', async () => {
-      const template = aOneTimeTask({ title: 'Work + AI' });
-      vi.mocked(templateRepo.findByLabelIdsAll).mockResolvedValue([template]);
+      const plan = aOneTimeTask({ title: 'Work + AI' });
+      vi.mocked(templateRepo.findByLabelIdsAll).mockResolvedValue([plan]);
 
       const result = await useCase.execute({
         identityId: testIdentityId,
@@ -111,21 +111,21 @@ describe('ListTaskPlansUseCase', () => {
         'label-work',
         'label-ai',
       ]);
-      expect(result.ok && result.data.templates.map((item) => item.name)).toEqual(['Work + AI']);
+      expect(result.ok && result.data.plans.map((item) => item.name)).toEqual(['Work + AI']);
     });
   });
 
-  it('should return empty list when no templates found', async () => {
+  it('should return empty list when no plans found', async () => {
     const result = await useCase.execute({ identityId: testIdentityId });
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.templates).toEqual([]);
+      expect(result.data.plans).toEqual([]);
       expect(result.data.total).toBe(0);
     }
   });
 
-  it('should return template client DTOs', async () => {
+  it('should return plan client DTOs', async () => {
     const template1 = aOneTimeTask({ title: 'Task A' });
     const template2 = aOneTimeTask({ title: 'Task B' });
     vi.mocked(templateRepo.findByIdentityId).mockResolvedValue([template1, template2]);
@@ -134,9 +134,9 @@ describe('ListTaskPlansUseCase', () => {
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.templates).toHaveLength(2);
-      expect(result.data.templates[0].name).toBe('Task A');
-      expect(result.data.templates[1].name).toBe('Task B');
+      expect(result.data.plans).toHaveLength(2);
+      expect(result.data.plans[0].name).toBe('Task A');
+      expect(result.data.plans[1].name).toBe('Task B');
       expect(result.data.total).toBe(2);
     }
   });

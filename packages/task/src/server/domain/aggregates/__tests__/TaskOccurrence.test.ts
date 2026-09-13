@@ -307,8 +307,7 @@ describe('TaskOccurrence canonical aggregate (TASK-7303)', () => {
       result: null,
     });
     for (const retired of [
-      'templateId',
-      'instanceDate',
+      'occurrenceDate',
       'timeConfig',
       'comment',
       'actualEndTime',
@@ -336,8 +335,7 @@ describe('TaskOccurrence canonical aggregate (TASK-7303)', () => {
       isOverdue: false,
     });
     for (const retired of [
-      'templateId',
-      'instanceDate',
+      'occurrenceDate',
       'timeConfig',
       'actualEndTime',
       'comment',

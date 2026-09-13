@@ -47,7 +47,7 @@ function makeInstance(
     id: 'i1',
     templateId: 't1',
     status: TaskOccurrenceStatus.Pending,
-    instanceDate: Date.now(),
+    occurrenceDate: Date.now(),
     actualEndTime: null,
     updatedAt: Date.now(),
     deletedAt: null,
@@ -196,22 +196,22 @@ describe('getDashboardData', () => {
         makeInstance({
           id: 'i1',
           status: TaskOccurrenceStatus.Pending,
-          instanceDate: todayMs + 1000,
+          occurrenceDate: todayMs + 1000,
         }),
         makeInstance({
           id: 'i2',
           status: TaskOccurrenceStatus.InProgress,
-          instanceDate: todayMs + 2000,
+          occurrenceDate: todayMs + 2000,
         }),
         makeInstance({
           id: 'i3',
           status: TaskOccurrenceStatus.Completed,
-          instanceDate: todayMs + 3000,
+          occurrenceDate: todayMs + 3000,
         }),
         makeInstance({
           id: 'i4',
           status: TaskOccurrenceStatus.Pending,
-          instanceDate: todayMs + 4000,
+          occurrenceDate: todayMs + 4000,
         }),
       ],
     });

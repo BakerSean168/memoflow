@@ -58,7 +58,7 @@ export function createMockTaskPlanRepository(): MockTaskPlanRepository {
 export interface MockTaskOccurrenceRepository {
   save: ReturnType<typeof vi.fn>;
   findById: ReturnType<typeof vi.fn>;
-  findByTemplateId: ReturnType<typeof vi.fn>;
+  findByPlanId: ReturnType<typeof vi.fn>;
   findByAccountId: ReturnType<typeof vi.fn>;
   findByDateRange: ReturnType<typeof vi.fn>;
   delete: ReturnType<typeof vi.fn>;
@@ -69,7 +69,7 @@ export function createMockTaskOccurrenceRepository(): MockTaskOccurrenceReposito
   return {
     save: vi.fn().mockResolvedValue(undefined),
     findById: vi.fn().mockResolvedValue(null),
-    findByTemplateId: vi.fn().mockResolvedValue([]),
+    findByPlanId: vi.fn().mockResolvedValue([]),
     findByAccountId: vi.fn().mockResolvedValue([]),
     findByDateRange: vi.fn().mockResolvedValue([]),
     delete: vi.fn().mockResolvedValue(undefined),

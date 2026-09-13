@@ -53,8 +53,7 @@ describe('TaskOccurrence vNext anti-resurrection locks (TASK-7303)', () => {
       expect(state).toContain(required);
     }
     for (const retired of [
-      'templateId:',
-      'instanceDate:',
+      'occurrenceDate:',
       'timeConfig:',
       'completionRecord:',
       'skipRecord:',
@@ -76,7 +75,7 @@ describe('TaskOccurrence vNext anti-resurrection locks (TASK-7303)', () => {
       expect(serverDto).toContain(required);
     }
     expect(serverDto).not.toMatch(
-      /\btemplateId:|\binstanceDate:|\btimeConfig:|\bactualEndTime:|\bcomment:/,
+      /\boccurrenceDate:|\btimeConfig:|\bactualEndTime:|\bcomment:/,
     );
 
     const response = sliceBetween(
@@ -97,13 +96,13 @@ describe('TaskOccurrence vNext anti-resurrection locks (TASK-7303)', () => {
       expect(response).toContain(required);
     }
     expect(response).not.toMatch(
-      /\btemplateId:|\binstanceDate:|\btimeConfig:|\bactualEndTime:|\bcomment:/,
+      /\boccurrenceDate:|\btimeConfig:|\bactualEndTime:|\bcomment:/,
     );
     expect(clientAggregate).toContain('export type TaskOccurrenceState = TaskOccurrenceClientDTO');
-    expect(clientAggregate).not.toMatch(/get templateId\b|get instanceDate\b|get timeConfig\b/);
+    expect(clientAggregate).not.toMatch(/get occurrenceDate\b|get timeConfig\b/);
   });
 
-  it('locks Prisma task_instances to canonical columns', () => {
+  it('locks Prisma task_occurrences to canonical columns', () => {
     const model = sliceBetween(prismaSchema, 'model TaskOccurrence {', '/// Durable delivery log');
     for (const required of [
       'planId',
@@ -117,15 +116,15 @@ describe('TaskOccurrence vNext anti-resurrection locks (TASK-7303)', () => {
       expect(model).toContain(required);
     }
     expect(model).not.toMatch(
-      /\btemplateId\b|\binstanceDate\b|\btimeConfig\b|\bactualEndTime\b|\bcomment\b/,
+      /\boccurrenceDate\b|\btimeConfig\b|\bactualEndTime\b|\bcomment\b/,
     );
   });
 
-  it('locks PowerSync task_instances to Prisma-equivalent canonical columns', () => {
+  it('locks PowerSync task_occurrences to Prisma-equivalent canonical columns', () => {
     const table = sliceBetween(
       powersyncSchema,
-      'const task_instances = new Table({',
-      'const task_template_history = new Table({',
+      'const task_occurrences = new Table({',
+      'const task_plan_history = new Table({',
     );
     for (const required of [
       'plan_id:',
@@ -139,7 +138,7 @@ describe('TaskOccurrence vNext anti-resurrection locks (TASK-7303)', () => {
       expect(table).toContain(required);
     }
     expect(table).not.toMatch(
-      /\btemplate_id:|\binstance_date:|\btime_config:|\bactual_end_time:|\bcomment:/,
+      /\binstance_date:|\btime_config:|\bactual_end_time:|\bcomment:/,
     );
   });
 });

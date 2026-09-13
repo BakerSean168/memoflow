@@ -9,23 +9,23 @@ import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
 import type { TaskOccurrenceProjectionService } from '../../services/task-occurrence-projection.service';
 
-export class ListTaskOccurrencesByTemplateUseCase {
+export class ListTaskOccurrencesByPlanUseCase {
   constructor(
-    private readonly instanceRepository: ITaskOccurrenceRepository,
-    private readonly templateRepository: ITaskPlanRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
+    private readonly planRepository: ITaskPlanRepository,
     private readonly projection: TaskOccurrenceProjectionService,
   ) {}
 
   async execute(
-    templateId: string,
+    planId: string,
     identityId: string,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    const template = await this.templateRepository.findByIdForIdentity(identityId, templateId);
-    if (!template) {
+    const plan = await this.planRepository.findByIdForIdentity(identityId, planId);
+    if (!plan) {
       return ok([]);
     }
 
-    const instances = await this.instanceRepository.findByTemplateId(templateId, identityId);
-    return ok(await this.projection.projectMany(identityId, instances));
+    const occurrences = await this.occurrenceRepository.findByPlanId(planId, identityId);
+    return ok(await this.projection.projectMany(identityId, occurrences));
   }
 }

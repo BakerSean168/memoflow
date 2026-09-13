@@ -2,8 +2,8 @@ import type { IdentityId, TaskPlanId } from '../../../../primitives';
 
 export interface TaskOccurrencesGeneratedEvent {
   identityId: IdentityId;
-  templateId: TaskPlanId;
-  templateTitle: string;
-  instanceCount: number;
+  planId: TaskPlanId;
+  planTitle: string;
+  occurrenceCount: number;
   strategy: 'full' | 'summary';
 }

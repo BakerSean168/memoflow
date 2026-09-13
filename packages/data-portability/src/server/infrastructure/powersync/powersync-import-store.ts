@@ -297,7 +297,7 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createTaskPlan(input: CreateTaskPlanInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO task_templates (id, identity_id, name, description, status, outcome, completion_policy, closed_at, archived_at, abandoned_reason, importance, schedule, reminder_config, goal_id, key_result_id, goal_record_value, goal_progress_trigger, checklist, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
+      `INSERT INTO task_plans (id, identity_id, name, description, status, outcome, completion_policy, closed_at, archived_at, abandoned_reason, importance, schedule, reminder_config, goal_id, key_result_id, goal_record_value, goal_progress_trigger, checklist, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [
         input.id,
         input.identityId,
@@ -324,7 +324,7 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createTaskOccurrence(input: CreateTaskOccurrenceInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO task_instances (id, plan_id, identity_id, occurrence_key, schedule_date, schedule_timing, importance_snapshot, status, actual_start_at, result, checklist_state, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
+      `INSERT INTO task_occurrences (id, plan_id, identity_id, occurrence_key, schedule_date, schedule_timing, importance_snapshot, status, actual_start_at, result, checklist_state, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [
         input.id,
         input.planId,

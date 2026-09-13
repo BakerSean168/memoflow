@@ -51,13 +51,13 @@ describe('DailyTodoWidget', () => {
         name: 'Close the daily loop',
       } as TaskPlanClientDTO,
     ]);
-    const completeInstance = vi.fn(async (id: string) => {
+    const completeOccurrence = vi.fn(async (id: string) => {
       instances.value = instances.value.map((instance) =>
         instance.id === id ? { ...instance, status: 'Completed' } : instance,
       );
       return instances.value.find((instance) => instance.id === id) ?? null;
     });
-    const uncompleteInstance = vi.fn(async (id: string) => {
+    const uncompleteOccurrence = vi.fn(async (id: string) => {
       instances.value = instances.value.map((instance) =>
         instance.id === id ? { ...instance, status: 'Pending' } : instance,
       );
@@ -70,8 +70,8 @@ describe('DailyTodoWidget', () => {
       isLoading: ref(false),
       fetchInstancesByDateRange: vi.fn().mockResolvedValue(undefined),
       fetchTemplates: vi.fn().mockResolvedValue(undefined),
-      completeInstance,
-      uncompleteInstance,
+      completeOccurrence,
+      uncompleteOccurrence,
     } as unknown as ReturnType<typeof useTask>);
 
     const wrapper = mount(DailyTodoWidget, {
@@ -102,7 +102,7 @@ describe('DailyTodoWidget', () => {
     await wrapper.get('button[title="标记完成"]').trigger('click');
     await flushPromises();
 
-    expect(completeInstance).toHaveBeenCalledWith('TaskOccurrenceId_today');
+    expect(completeOccurrence).toHaveBeenCalledWith('TaskOccurrenceId_today');
     expect(wrapper.emitted('completed')).toEqual([
       [expect.objectContaining({ id: 'TaskOccurrenceId_today', status: 'Completed' })],
     ]);
@@ -116,7 +116,7 @@ describe('DailyTodoWidget', () => {
     await undoButton.trigger('click');
     await flushPromises();
 
-    expect(uncompleteInstance).toHaveBeenCalledWith('TaskOccurrenceId_today');
+    expect(uncompleteOccurrence).toHaveBeenCalledWith('TaskOccurrenceId_today');
     expect(wrapper.text()).toContain('0/1');
     expect(wrapper.get('.h-full.rounded-full.bg-emerald-500').attributes('style')).toContain(
       'width: 0%',
@@ -133,8 +133,8 @@ describe('DailyTodoWidget', () => {
       isLoading: ref(false),
       fetchInstancesByDateRange,
       fetchTemplates,
-      completeInstance: vi.fn(),
-      uncompleteInstance: vi.fn(),
+      completeOccurrence: vi.fn(),
+      uncompleteOccurrence: vi.fn(),
     } as unknown as ReturnType<typeof useTask>);
 
     const wrapper = mount(DailyTodoWidget, {

@@ -13,10 +13,10 @@ import type {
   CreateTaskPlanReq,
   CreateTaskPlanRes,
   UpdateTaskPlanReq,
-  GenerateInstancesReq,
+  GenerateOccurrencesReq,
   BindToGoalReq,
   AbandonTaskPlanReq,
-  TaskPlanInstancesQuery,
+  TaskPlanOccurrencesQuery,
   GetTaskWorkspaceReq,
   TaskPlanWorkspace,
 } from '@memoflow/contracts/task';
@@ -31,21 +31,21 @@ export interface ITaskPlanApiClient {
   createTaskPlan(request: CreateTaskPlanReq): Promise<Result<CreateTaskPlanRes>>;
   getTaskPlans(
     params?: TaskPlanListParams,
-  ): Promise<Result<{ templates: TaskPlanClientDTO[]; total: number }>>;
-  getTaskPlanById(id: string, includeChildren?: boolean): Promise<Result<TaskPlanClientDTO>>;
+  ): Promise<Result<{ plans: TaskPlanClientDTO[]; total: number }>>;
+  getTaskPlanById(id: string): Promise<Result<TaskPlanClientDTO>>;
   updateTaskPlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlanClientDTO>>;
   deleteTaskPlan(id: string): Promise<Result<void>>;
   activateTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>>;
   pauseTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>>;
   archiveTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>>;
   abandonTaskPlan(id: string, request?: AbandonTaskPlanReq): Promise<Result<TaskPlanClientDTO>>;
-  generateInstances(
+  generateOccurrences(
     planId: string,
-    request: GenerateInstancesReq,
+    request: GenerateOccurrencesReq,
   ): Promise<Result<TaskOccurrenceClientDTO[]>>;
-  getInstancesByDateRange(
+  getOccurrencesByDateRange(
     planId: string,
-    query?: TaskPlanInstancesQuery,
+    query?: TaskPlanOccurrencesQuery,
   ): Promise<Result<TaskOccurrenceClientDTO[]>>;
   bindToGoal(planId: string, request: BindToGoalReq): Promise<Result<TaskPlanClientDTO>>;
   unbindFromGoal(planId: string): Promise<Result<TaskPlanClientDTO>>;

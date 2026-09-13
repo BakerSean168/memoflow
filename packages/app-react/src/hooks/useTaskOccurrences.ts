@@ -31,7 +31,7 @@ export function useTaskOccurrences(taskId: string | null) {
     setIsLoading(true);
     setError(null);
 
-    const result = await service.listInstances({ planId: taskId, limit: 20 });
+    const result = await service.listOccurrences({ planId: taskId, limit: 20 });
     if (!result.ok) {
       setInstances([]);
       setError(presentErrorMessage(result.error));
@@ -54,8 +54,8 @@ export function useTaskOccurrences(taskId: string | null) {
     await load();
   }
 
-  async function startInstance(id: string) {
-    const result = await service.startInstance(id);
+  async function startOccurrence(id: string) {
+    const result = await service.startOccurrence(id);
     if (!result.ok) {
       setError(presentErrorMessage(result.error));
       return false;
@@ -65,8 +65,8 @@ export function useTaskOccurrences(taskId: string | null) {
     return true;
   }
 
-  async function completeInstance(id: string) {
-    const result = await service.completeInstance(id);
+  async function completeOccurrence(id: string) {
+    const result = await service.completeOccurrence(id);
     if (!result.ok) {
       setError(presentErrorMessage(result.error));
       return false;
@@ -76,8 +76,8 @@ export function useTaskOccurrences(taskId: string | null) {
     return true;
   }
 
-  async function skipInstance(id: string) {
-    const result = await service.skipInstance(id);
+  async function skipOccurrence(id: string) {
+    const result = await service.skipOccurrence(id);
     if (!result.ok) {
       setError(presentErrorMessage(result.error));
       return false;
@@ -88,12 +88,12 @@ export function useTaskOccurrences(taskId: string | null) {
   }
 
   return {
-    completeInstance,
+    completeOccurrence,
     error,
     instances,
     isLoading,
     refresh,
-    skipInstance,
-    startInstance,
+    skipOccurrence,
+    startOccurrence,
   };
 }

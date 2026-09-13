@@ -1,5 +1,5 @@
 /**
- * useTaskPlanMutations — Task template server-state mutations (pilot authority, §3.4).
+ * useTaskPlanMutations — Task plan server-state mutations (pilot authority, §3.4).
  *
  * - create / single delete / batch delete：**server-confirmed**（不伪造临时 id、不猜测多
  *   projection；batch 保持逐项、首错停止、已成功项不回滚的 API 语义）；
@@ -36,12 +36,12 @@ import {
 } from './taskPlanCache';
 import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
 
-/** Feedback intent for create (plan §2.2: preserve instanceCount/todayInstanceCreated feedback). */
-export type CreateTemplateFeedbackIntent = 'plan' | 'quick';
+/** Feedback intent for create (plan §2.2: preserve occurrenceCount/todayOccurrenceCreated feedback). */
+export type CreatePlanFeedbackIntent = 'plan' | 'quick';
 
 /**
- * Create the Task template mutation set (create/update/delete/batch/activate/pause/archive).
- * 创建任务模板 mutation 集合。
+ * Create the Task plan mutation set (create/update/delete/batch/activate/pause/archive).
+ * 创建任务计划 mutation 集合。
  */
 export function useTaskPlanMutations() {
   const service = useStrictInject(TASK_SERVICE_KEY, 'TaskService');
@@ -75,28 +75,28 @@ export function useTaskPlanMutations() {
   }
 
   function createFeedbackKey(
-    feedbackIntent: CreateTemplateFeedbackIntent,
-    todayInstanceCreated: boolean,
+    feedbackIntent: CreatePlanFeedbackIntent,
+    todayOccurrenceCreated: boolean,
   ): string {
     if (feedbackIntent === 'quick') {
-      return todayInstanceCreated
+      return todayOccurrenceCreated
         ? 'task.error.createQuickTaskWithTodayInstanceSuccess'
         : 'task.error.createQuickTaskWithoutTodayInstanceSuccess';
     }
-    return todayInstanceCreated
-      ? 'task.error.createTemplateWithTodayInstanceSuccess'
-      : 'task.error.createTemplateWithoutTodayInstanceSuccess';
+    return todayOccurrenceCreated
+      ? 'task.error.createPlanWithTodayInstanceSuccess'
+      : 'task.error.createPlanWithoutTodayInstanceSuccess';
   }
 
-  const createTemplate = useMutation({
+  const createPlan = useMutation({
     mutationFn: async ({
       req,
     }: {
       req: CreateTaskPlanReq;
-      feedbackIntent?: CreateTemplateFeedbackIntent;
+      feedbackIntent?: CreatePlanFeedbackIntent;
     }) => {
       const result = await executeTaskOperation(
-        () => service.createTemplate(sanitizeForIpc(req)),
+        () => service.createPlan(sanitizeForIpc(req)),
         'task.error.createFailed',
       );
       return unwrap(result);
@@ -104,15 +104,15 @@ export function useTaskPlanMutations() {
     onMutate: () => ({ identityScope: resolveIdentityScope() }),
     onSuccess: (data, _vars, context) => {
       // Seed the detail key from the server response (plan §3.4).
-      // 用 server 返回的 template seed detail key（§3.4）。
+      // 用 server 返回的 plan seed detail key（§3.4）。
       patchTaskPlanEverywhere(
         runtime.queryClient,
         context!.identityScope,
-        data.template.toDTO(),
+        data.plan.toDTO(),
       );
       toast.success(
-        t(createFeedbackKey(_vars.feedbackIntent ?? 'plan', data.todayInstanceCreated), {
-          count: data.instanceCount,
+        t(createFeedbackKey(_vars.feedbackIntent ?? 'plan', data.todayOccurrenceCreated), {
+          count: data.occurrenceCount,
         }),
       );
     },
@@ -125,10 +125,10 @@ export function useTaskPlanMutations() {
     },
   });
 
-  const updateTemplate = useMutation({
+  const updatePlan = useMutation({
     mutationFn: async ({ id, req }: { id: string; req: UpdateTaskPlanReq }) => {
       const result = await executeTaskOperation(
-        () => service.updateTemplate(id, sanitizeForIpc(req)),
+        () => service.updatePlan(id, sanitizeForIpc(req)),
         'task.error.updateFailed',
       );
       return unwrap(result);
@@ -164,10 +164,10 @@ export function useTaskPlanMutations() {
     },
   });
 
-  const deleteTemplate = useMutation({
+  const deletePlan = useMutation({
     mutationFn: async (id: string) => {
       const result = await executeTaskOperation(
-        () => service.deleteTemplate(id),
+        () => service.deletePlan(id),
         'task.error.deleteFailed',
       );
       unwrap(result);
@@ -192,7 +192,7 @@ export function useTaskPlanMutations() {
   // resolves it into the variables — and mutationFn/onSettled read only that invocation's own
   // variables. No shared state, so concurrent batches with different identities cannot overwrite
   // each other's scope between begin and execution; execution never re-resolves the scope.
-  const deleteTemplates = useMutation({
+  const deletePlans = useMutation({
     mutationFn: async ({
       ids,
       identityScope,
@@ -203,7 +203,7 @@ export function useTaskPlanMutations() {
       let deleted = 0;
       for (const id of ids) {
         const result = await executeTaskOperation(
-          () => service.deleteTemplate(id),
+          () => service.deletePlan(id),
           'task.error.deleteFailed',
         );
         unwrap(result); // first failure stops the batch (partial success preserved)
@@ -275,20 +275,20 @@ export function useTaskPlanMutations() {
     });
   }
 
-  const activateTemplate = createStatusMutation(
-    (id) => service.activateTemplate(id),
+  const activatePlan = createStatusMutation(
+    (id) => service.activatePlan(id),
     'task.error.activateFailed',
     'task.error.activateSuccess',
     'Active',
   );
-  const pauseTemplate = createStatusMutation(
-    (id) => service.pauseTemplate(id),
+  const pausePlan = createStatusMutation(
+    (id) => service.pausePlan(id),
     'task.error.pauseFailed',
     'task.error.pauseSuccess',
     'Paused',
   );
-  const archiveTemplate = createStatusMutation(
-    (id) => service.archiveTemplate(id),
+  const archivePlan = createStatusMutation(
+    (id) => service.archivePlan(id),
     'task.error.archiveFailed',
     'task.error.archiveSuccess',
     'Closed',
@@ -296,45 +296,45 @@ export function useTaskPlanMutations() {
 
   // 视图兼容的 safe wrappers：失败返回 null/false（错误已由 onError/toast 报告），成功返回结果。
   // View-compatible safe wrappers: null/false on failure, resolved data on success.
-  async function createTemplateSafe(
+  async function createPlanSafe(
     req: CreateTaskPlanReq,
-    feedbackIntent: CreateTemplateFeedbackIntent = 'plan',
+    feedbackIntent: CreatePlanFeedbackIntent = 'plan',
   ) {
     try {
-      return await createTemplate.mutateAsync({ req, feedbackIntent });
+      return await createPlan.mutateAsync({ req, feedbackIntent });
     } catch {
       return null;
     }
   }
 
-  async function updateTemplateSafe(id: string, req: UpdateTaskPlanReq) {
+  async function updatePlanSafe(id: string, req: UpdateTaskPlanReq) {
     try {
-      return await updateTemplate.mutateAsync({ id, req });
+      return await updatePlan.mutateAsync({ id, req });
     } catch {
       return null;
     }
   }
 
-  async function deleteTemplateSafe(id: string): Promise<boolean> {
+  async function deletePlanSafe(id: string): Promise<boolean> {
     try {
-      await deleteTemplate.mutateAsync(id);
+      await deletePlan.mutateAsync(id);
       return true;
     } catch {
       return false;
     }
   }
 
-  async function deleteTemplatesSafe(ids: readonly string[]): Promise<boolean> {
+  async function deletePlansSafe(ids: readonly string[]): Promise<boolean> {
     if (ids.length === 0) return true;
     try {
-      await deleteTemplates.mutateAsync({ ids, identityScope: resolveIdentityScope() });
+      await deletePlans.mutateAsync({ ids, identityScope: resolveIdentityScope() });
       return true;
     } catch {
       return false;
     }
   }
 
-  async function statusSafe(mutation: typeof activateTemplate, id: string) {
+  async function statusSafe(mutation: typeof activatePlan, id: string) {
     try {
       return await mutation.mutateAsync(id);
     } catch {
@@ -344,30 +344,30 @@ export function useTaskPlanMutations() {
 
   return {
     // Raw mutations (optimistic lifecycle; used by tests / advanced callers).
-    createTemplate,
-    updateTemplate,
-    deleteTemplate,
-    deleteTemplates,
-    activateTemplate,
-    pauseTemplate,
-    archiveTemplate,
+    createPlan,
+    updatePlan,
+    deletePlan,
+    deletePlans,
+    activatePlan,
+    pausePlan,
+    archivePlan,
     // View-compatible safe wrappers.
-    createTemplateSafe,
-    updateTemplateSafe,
-    deleteTemplateSafe,
-    deleteTemplatesSafe,
-    activateTemplateSafe: (id: string) => statusSafe(activateTemplate, id),
-    pauseTemplateSafe: (id: string) => statusSafe(pauseTemplate, id),
-    archiveTemplateSafe: (id: string) => statusSafe(archiveTemplate, id),
+    createPlanSafe,
+    updatePlanSafe,
+    deletePlanSafe,
+    deletePlansSafe,
+    activatePlanSafe: (id: string) => statusSafe(activatePlan, id),
+    pausePlanSafe: (id: string) => statusSafe(pausePlan, id),
+    archivePlanSafe: (id: string) => statusSafe(archivePlan, id),
     isSaving: computed(
       () =>
-        createTemplate.isPending.value ||
-        updateTemplate.isPending.value ||
-        deleteTemplate.isPending.value ||
-        deleteTemplates.isPending.value ||
-        activateTemplate.isPending.value ||
-        pauseTemplate.isPending.value ||
-        archiveTemplate.isPending.value,
+        createPlan.isPending.value ||
+        updatePlan.isPending.value ||
+        deletePlan.isPending.value ||
+        deletePlans.isPending.value ||
+        activatePlan.isPending.value ||
+        pausePlan.isPending.value ||
+        archivePlan.isPending.value,
     ),
   };
 }

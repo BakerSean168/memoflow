@@ -67,7 +67,7 @@ const emit = defineEmits<{
 const { validate, validationErrors, isValid } = useBasicInfoValidation();
 const hasInteracted = ref(false);
 
-const updateTemplate = (updater: (template: TaskPlanViewModel) => void) => {
+const updatePlan = (updater: (template: TaskPlanViewModel) => void) => {
   const updatedTemplate: TaskPlanViewModel = {
     ...props.modelValue,
     labels: [...(props.modelValue.labels ?? [])],
@@ -81,7 +81,7 @@ const updateTemplate = (updater: (template: TaskPlanViewModel) => void) => {
 const title = computed({
   get: () => props.modelValue.title,
   set: (value: string) => {
-    updateTemplate((template) => {
+    updatePlan((template) => {
       template.title = value;
     });
   },
@@ -90,7 +90,7 @@ const title = computed({
 const description = computed({
   get: () => props.modelValue.description,
   set: (value: string) => {
-    updateTemplate((template) => {
+    updatePlan((template) => {
       template.description = value || '';
     });
   },

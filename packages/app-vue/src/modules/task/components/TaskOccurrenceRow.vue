@@ -156,11 +156,11 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  'open-plan': [templateId: string];
-  complete: [instanceId: string];
-  uncomplete: [instanceId: string];
-  missed: [instanceId: string];
-  skip: [instanceId: string];
+  'open-plan': [planId: string];
+  complete: [occurrenceId: string];
+  uncomplete: [occurrenceId: string];
+  missed: [occurrenceId: string];
+  skip: [occurrenceId: string];
   'checklist-change': [
     occurrenceId: string,
     definitionId: string,

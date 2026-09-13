@@ -29,7 +29,6 @@ updated: 2026-09-12T15:00:00+09:00
 | [`packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.ts`](../../../packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.ts) | Goal / KR 绑定选项 |
 | [`packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.vue`](../../../packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.vue) | TaskPlan 编辑表单 |
 | [`packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue`](../../../packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue) | TaskPlan 创建/编辑弹窗 |
-| [`packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue`](../../../packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue) | TaskOccurrence 展示卡片 |
 
 ## API、控制器与客户端适配器
 

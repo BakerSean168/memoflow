@@ -63,7 +63,7 @@ export function registerTaskOccurrenceRoutes(
     defaultSecurity: [{ bearerAuth: [] }],
   });
 
-  // GET /by-date-range — Get instances by date range (must be before /:id)
+  // GET /by-date-range — Get occurrences by date range (must be before /:id)
   r.route(
     {
       method: 'get',
@@ -78,13 +78,13 @@ export function registerTaskOccurrenceRoutes(
     },
     [auth],
     (req, ctx) =>
-      controller.getInstancesByDateRange(ctx.identityId, {
+      controller.getOccurrencesByDateRange(ctx.identityId, {
         startDate: parseTimestampQuery(req.query?.startDate, Date.now()),
         endDate: parseTimestampQuery(req.query?.endDate, Date.now() + 86400000 * 7),
       }),
   );
 
-  // GET / — List instances
+  // GET / — List occurrences
   r.route(
     {
       method: 'get',
@@ -102,13 +102,13 @@ export function registerTaskOccurrenceRoutes(
     },
     [auth],
     (req, ctx) =>
-      controller.listInstances(ctx.identityId, {
+      controller.listOccurrences(ctx.identityId, {
         planId: getFirstQueryValue(req.query?.planId),
         status: getFirstQueryValue(req.query?.status) as TaskOccurrenceStatus | undefined,
       }),
   );
 
-  // GET /:id — Get instance by ID
+  // GET /:id — Get occurrence by ID
   r.route(
     {
       method: 'get',
@@ -121,10 +121,10 @@ export function registerTaskOccurrenceRoutes(
       },
     },
     [auth],
-    (req, ctx) => controller.getInstance(req.params!.id, ctx),
+    (req, ctx) => controller.getOccurrence(req.params!.id, ctx),
   );
 
-  // POST /:id/complete — Complete instance
+  // POST /:id/complete — Complete occurrence
   r.routeWithValidation(
     {
       method: 'post',
@@ -148,10 +148,10 @@ export function registerTaskOccurrenceRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.completeInstance(data.params.id, data.body, ctx),
+    (data, ctx) => controller.completeOccurrence(data.params.id, data.body, ctx),
   );
 
-  // POST /:id/skip — Skip instance
+  // POST /:id/skip — Skip occurrence
   r.routeWithValidation(
     {
       method: 'post',
@@ -168,10 +168,10 @@ export function registerTaskOccurrenceRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.uncompleteInstance(data.params.id, ctx),
+    (data, ctx) => controller.uncompleteOccurrence(data.params.id, ctx),
   );
 
-  // POST /:id/skip — Skip instance
+  // POST /:id/skip — Skip occurrence
   r.routeWithValidation(
     {
       method: 'post',
@@ -195,7 +195,7 @@ export function registerTaskOccurrenceRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.skipInstance(data.params.id, data.body, ctx),
+    (data, ctx) => controller.skipOccurrence(data.params.id, data.body, ctx),
   );
 
   // POST /:id/missed — Explicitly record a Missed occurrence fact
@@ -222,7 +222,7 @@ export function registerTaskOccurrenceRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.markMissedInstance(data.params.id, data.body, ctx),
+    (data, ctx) => controller.markOccurrenceMissed(data.params.id, data.body, ctx),
   );
 
   // POST /:id/checklist — owner command for one occurrence checklist snapshot item
@@ -252,7 +252,7 @@ export function registerTaskOccurrenceRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.setChecklistItem(data.params.id, data.body, ctx),
+    (data, ctx) => controller.setOccurrenceChecklistItem(data.params.id, data.body, ctx),
   );
 
   // POST /:id/reschedule — owner command for this Task occurrence only
@@ -280,10 +280,10 @@ export function registerTaskOccurrenceRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.rescheduleInstance(data.params.id, data.body, ctx),
+    (data, ctx) => controller.rescheduleOccurrence(data.params.id, data.body, ctx),
   );
 
-  // POST /:id/start — Start instance
+  // POST /:id/start — Start occurrence
   r.routeWithValidation(
     {
       method: 'post',
@@ -300,10 +300,10 @@ export function registerTaskOccurrenceRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.startInstance(data.params.id, ctx),
+    (data, ctx) => controller.startOccurrence(data.params.id, ctx),
   );
 
-  // DELETE /:id — Delete instance
+  // DELETE /:id — Delete occurrence
   r.routeWithValidation(
     {
       method: 'delete',
@@ -320,7 +320,7 @@ export function registerTaskOccurrenceRoutes(
       },
     },
     [auth],
-    (data, ctx) => controller.deleteInstance(data.params.id, ctx),
+    (data, ctx) => controller.deleteOccurrence(data.params.id, ctx),
   );
 
   return router;

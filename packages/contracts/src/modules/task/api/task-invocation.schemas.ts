@@ -21,7 +21,7 @@ import { z } from 'zod';
 import { brandedId } from '../../../primitives';
 import type { TaskOccurrenceId, TaskPlanId } from '../../../primitives';
 import {
-  GenerateInstancesSchema,
+  GenerateOccurrencesSchema,
   TaskGoalBindingSchema,
   UpdateTaskPlanSchema,
   AbandonTaskPlanSchema,
@@ -50,28 +50,28 @@ export type TaskOccurrenceIdParams = z.infer<typeof TaskOccurrenceIdParamsSchema
 // Template mutations
 // ============================================================================
 
-/** PUT/PATCH /:id — update a template. 更新任务模板。 */
+/** PUT/PATCH /:id — update a plan. 更新任务模板。 */
 export const UpdateTaskPlanInvocationSchema = z.object({
   params: TaskPlanIdParamsSchema,
   body: UpdateTaskPlanSchema,
 });
 export type UpdateTaskPlanInvocation = z.infer<typeof UpdateTaskPlanInvocationSchema>;
 
-/** POST /:id/generate-instances — generate instances for a template. 为模板生成实例。 */
-export const GenerateInstancesInvocationSchema = z.object({
+/** POST /:id/generate-occurrences — generate occurrences for a plan. 为模板生成实例。 */
+export const GenerateOccurrencesInvocationSchema = z.object({
   params: TaskPlanIdParamsSchema,
-  body: GenerateInstancesSchema,
+  body: GenerateOccurrencesSchema,
 });
-export type GenerateInstancesInvocation = z.infer<typeof GenerateInstancesInvocationSchema>;
+export type GenerateOccurrencesInvocation = z.infer<typeof GenerateOccurrencesInvocationSchema>;
 
-/** POST /:id/bind-goal — bind a template to a goal. 绑定模板到目标。 */
+/** POST /:id/bind-goal — bind a plan to a goal. 绑定模板到目标。 */
 export const BindTaskToGoalInvocationSchema = z.object({
   params: TaskPlanIdParamsSchema,
   body: TaskGoalBindingSchema,
 });
 export type BindTaskToGoalInvocation = z.infer<typeof BindTaskToGoalInvocationSchema>;
 
-/** POST /:id/activate | /pause | /archive | /unbind-goal — id-only template commands. 模板 id-only 命令。 */
+/** POST /:id/activate | /pause | /archive | /unbind-goal — id-only plan commands. 模板 id-only 命令。 */
 export const TaskPlanIdCommandInvocationSchema = z.object({
   params: TaskPlanIdParamsSchema,
 });
@@ -88,7 +88,7 @@ export type AbandonTaskPlanInvocation = z.infer<typeof AbandonTaskPlanInvocation
 // Instance mutations
 // ============================================================================
 
-/** POST /:id/complete — complete an instance. 完成任务实例。 */
+/** POST /:id/complete — complete an occurrence. 完成任务实例。 */
 export const CompleteTaskOccurrenceInvocationSchema = z.object({
   params: TaskOccurrenceIdParamsSchema,
   body: CompleteTaskOccurrenceSchema,
@@ -97,7 +97,7 @@ export type CompleteTaskOccurrenceInvocation = z.infer<
   typeof CompleteTaskOccurrenceInvocationSchema
 >;
 
-/** POST /:id/skip — skip an instance. 跳过任务实例。 */
+/** POST /:id/skip — skip an occurrence. 跳过任务实例。 */
 export const SkipTaskOccurrenceInvocationSchema = z.object({
   params: TaskOccurrenceIdParamsSchema,
   body: SkipTaskOccurrenceSchema,
@@ -122,7 +122,7 @@ export type SetTaskOccurrenceChecklistItemInvocation = z.infer<
   typeof SetTaskOccurrenceChecklistItemInvocationSchema
 >;
 
-/** POST /:id/reschedule — mutate this occurrence's own time, never the template or Scheduler row. */
+/** POST /:id/reschedule — mutate this occurrence's own time, never the plan or Scheduler row. */
 export const RescheduleTaskOccurrenceInvocationSchema = z.object({
   params: TaskOccurrenceIdParamsSchema,
   body: RescheduleTaskBodySchema,
@@ -131,7 +131,7 @@ export type RescheduleTaskOccurrenceInvocation = z.infer<
   typeof RescheduleTaskOccurrenceInvocationSchema
 >;
 
-/** POST /:id/start | /uncomplete — id-only instance commands. 实例 id-only 命令。 */
+/** POST /:id/start | /uncomplete — id-only occurrence commands. 实例 id-only 命令。 */
 export const TaskOccurrenceIdCommandInvocationSchema = z.object({
   params: TaskOccurrenceIdParamsSchema,
 });

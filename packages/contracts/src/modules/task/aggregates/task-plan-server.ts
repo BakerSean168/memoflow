@@ -6,7 +6,6 @@ import type { TaskPlanId, IdentityId, TransferDate } from '../../../primitives';
 import type { TaskPlanStatus } from '../value-objects/task-plan-status';
 import type { TaskPlanOutcome } from '../value-objects/task-plan-outcome';
 import type { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-policy';
-import type { TaskOccurrenceServerDTO } from './task-occurrence-server';
 import type {
   TaskPlanSchedule,
   TaskReminderConfigDTO,
@@ -49,5 +48,4 @@ export interface TaskPlanServerDTO {
   createdAt: TransferDate;
   updatedAt: TransferDate;
   deletedAt: TransferDate | null;
-  instances?: TaskOccurrenceServerDTO[];
 }

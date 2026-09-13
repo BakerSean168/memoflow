@@ -9,21 +9,28 @@ import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import {
   DayOfWeek,
-  TaskType,
+  TaskPlanScheduleKind,
+  TaskRecurrenceEndKind,
+  TaskTimingKind,
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
   type ChecklistItemDefinitionDTO,
+  type TaskTiming,
+  type TaskRecurrence,
 } from '@memoflow/contracts/task';
 import { anIdentityId } from '@memoflow/test-utils/fixtures';
-import { createTimeContext, type TimeContext, type UserTimeContextPort } from '@memoflow/time';
+import {
+  createTimeContext,
+  createTimeFacade,
+  asHm,
+  type TimeContext,
+  type UserTimeContextPort,
+} from '@memoflow/time';
 import { TaskOccurrenceProjectionService } from '../server/application/services/task-occurrence-projection.service';
 import {
   TaskPlanId,
   TaskOccurrenceId,
-  TaskTimeConfig,
-  RecurrenceRule,
   TaskReminderConfig,
-  CompletionRecord,
   ChecklistItemDefinition,
   TaskPlanStatus,
   TaskPlanSchedule,
@@ -55,14 +62,62 @@ export interface OneTimeTaskOverrides {
   startDate?: number;
 }
 
+function hmForTest(minutes: number) {
+  return asHm(
+    `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`,
+  );
+}
+
+export function canonicalTaskPlanScheduleForTest(
+  kind: TaskPlanScheduleKind,
+  date: number | Date,
+  timing: TaskTiming,
+  recurrence: TaskRecurrence | null,
+  timeContext: TimeContext = TASK_TEST_TIME_CONTEXT,
+): TaskPlanSchedule {
+  const time = createTimeFacade({ context: timeContext });
+  const startYmd = time.calendar.toYmd(date instanceof Date ? date.getTime() : date);
+  if (kind === TaskPlanScheduleKind.OneTime) {
+    return TaskPlanSchedule.create({
+      kind: TaskPlanScheduleKind.OneTime,
+      date: startYmd,
+      timing,
+    });
+  }
+  if (!recurrence) throw new Error('Recurring test plan requires recurrence');
+  return TaskPlanSchedule.create({
+    kind: TaskPlanScheduleKind.Recurring,
+    startDate: startYmd,
+    timing,
+    recurrence,
+  });
+}
+
+export function canonicalTaskOccurrenceScheduleForTest(
+  occurrenceDate: number,
+  timing: TaskTiming,
+  timeContext: TimeContext = TASK_TEST_TIME_CONTEXT,
+): TaskOccurrenceScheduleSnapshot {
+  const time = createTimeFacade({ context: timeContext });
+  return TaskOccurrenceScheduleSnapshot.create({
+    date: time.calendar.toYmd(occurrenceDate),
+    timing,
+  });
+}
+
 export function aOneTimeTask(overrides: OneTimeTaskOverrides = {}): TaskPlan {
-  return TaskPlan.createOneTimeTask({
+  return TaskPlan.create({
     identityId: overrides.identityId ?? anIdentityId(),
     title: overrides.title ?? titleFor('Task'),
     description: overrides.description,
     importance: overrides.importance ?? ImportanceLevel.Moderate,
-    startDate: overrides.startDate ?? Date.now(),
-    timeContext: TASK_TEST_TIME_CONTEXT,
+    schedule: canonicalTaskPlanScheduleForTest(
+      TaskPlanScheduleKind.OneTime,
+      overrides.startDate ?? Date.now(),
+      anAllDayTiming(),
+      null,
+      TASK_TEST_TIME_CONTEXT,
+    ),
   });
 }
 
@@ -71,31 +126,30 @@ export interface RecurringTaskOverrides {
   title?: string;
   description?: string;
   importance?: ImportanceLevel;
-  timeConfig?: TaskTimeConfig;
-  recurrenceRule?: RecurrenceRule;
+  startDate?: number;
+  timing?: TaskTiming;
+  recurrence?: TaskRecurrence;
   reminderConfig?: TaskReminderConfig;
 }
 
 export function aRecurringTask(overrides: RecurringTaskOverrides = {}): TaskPlan {
-  return TaskPlan.createRecurringTask({
+  return TaskPlan.create({
     identityId: overrides.identityId ?? anIdentityId(),
     title: overrides.title ?? titleFor('Recurring Task'),
     description: overrides.description,
     importance: overrides.importance ?? ImportanceLevel.Moderate,
-    timeConfig: overrides.timeConfig ?? anAllDayTimeConfig(),
-    recurrenceRule: overrides.recurrenceRule ?? aDailyRecurrenceRule(),
+    schedule: canonicalTaskPlanScheduleForTest(
+      TaskPlanScheduleKind.Recurring,
+      overrides.startDate ?? Date.now(),
+      overrides.timing ?? anAllDayTiming(),
+      overrides.recurrence ?? aDailyRecurrence(),
+      TASK_TEST_TIME_CONTEXT,
+    ),
     reminderConfig: overrides.reminderConfig,
-    timeContext: TASK_TEST_TIME_CONTEXT,
   });
 }
 
-export function aTaskPlanState(
-  overrides: Partial<TaskPlanState> & {
-    taskType?: TaskType;
-    timeConfig?: TaskTimeConfig | null;
-    recurrenceRule?: RecurrenceRule | null;
-  } = {},
-): TaskPlanState {
+export function aTaskPlanState(overrides: Partial<TaskPlanState> = {}): TaskPlanState {
   const id = overrides.id ?? TaskPlanId.generate();
   const now = Date.now();
 
@@ -106,10 +160,11 @@ export function aTaskPlanState(
     description: overrides.description ?? null,
     schedule:
       overrides.schedule ??
-      TaskPlanSchedule.fromLegacy(
-        overrides.taskType ?? (overrides.recurrenceRule ? TaskType.Recurring : TaskType.OneTime),
-        overrides.timeConfig ?? anAllDayTimeConfig(),
-        overrides.recurrenceRule ?? null,
+      canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.OneTime,
+        now,
+        anAllDayTiming(),
+        null,
         TASK_TEST_TIME_CONTEXT,
       ),
     importance: overrides.importance ?? ImportanceLevel.Moderate,
@@ -134,10 +189,10 @@ export function aLoadedTaskPlan(overrides: Partial<TaskPlanState> = {}): TaskPla
 }
 
 export interface TaskOccurrenceOverrides {
-  templateId?: TaskPlanId;
+  planId?: TaskPlanId;
   identityId?: IdentityId;
-  instanceDate?: number;
-  timeConfig?: TaskTimeConfig;
+  occurrenceDate?: number;
+  timing?: TaskTiming;
   importance?: ImportanceLevel;
   checklistDefinition?: readonly ChecklistItemDefinitionDTO[];
   timeContext?: TimeContext;
@@ -145,38 +200,39 @@ export interface TaskOccurrenceOverrides {
 
 export async function aTaskOccurrence(overrides: TaskOccurrenceOverrides = {}) {
   const timeContext = overrides.timeContext ?? TASK_TEST_TIME_CONTEXT;
-  const instanceDate = overrides.instanceDate ?? Date.now();
-  const timeConfig = overrides.timeConfig ?? anAllDayTimeConfig();
+  const occurrenceDate = overrides.occurrenceDate ?? Date.now();
+  const timing = overrides.timing ?? anAllDayTiming();
   return TaskOccurrence.create({
-    planId: overrides.templateId ?? TaskPlanId.generate(),
+    planId: overrides.planId ?? TaskPlanId.generate(),
     identityId: overrides.identityId ?? anIdentityId(),
-    scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
-      instanceDate,
-      timeConfig,
-      timeContext,
-    ),
+    scheduleSnapshot: canonicalTaskOccurrenceScheduleForTest(occurrenceDate, timing, timeContext),
     importanceSnapshot: overrides.importance ?? ImportanceLevel.Moderate,
     checklistDefinition: overrides.checklistDefinition,
   });
 }
 
-export function anAllDayTimeConfig(startDate?: Date): TaskTimeConfig {
-  return TaskTimeConfig.createAllDay(startDate ?? new Date());
+export function anAllDayTiming(): TaskTiming {
+  return { kind: TaskTimingKind.AllDay };
 }
 
-export function aTimePointConfig(timePoint = 540, startDate?: Date): TaskTimeConfig {
-  return TaskTimeConfig.createTimePoint(startDate ?? new Date(), timePoint);
+export function aTimePointTiming(timePoint = 540): TaskTiming {
+  return { kind: TaskTimingKind.At, time: hmForTest(timePoint) };
 }
 
-export function aTimeRangeConfig(start = 540, end = 600, startDate?: Date): TaskTimeConfig {
-  return TaskTimeConfig.createTimeRange(startDate ?? new Date(), start, end);
+export function aTimeRangeTiming(start = 540, end = 600): TaskTiming {
+  return { kind: TaskTimingKind.Window, start: hmForTest(start), end: hmForTest(end) };
 }
 
-export function aDailyRecurrenceRule(interval = 1): RecurrenceRule {
-  return RecurrenceRule.createDaily(interval);
+export function aDailyRecurrence(interval = 1): TaskRecurrence {
+  return {
+    frequency: 'Daily',
+    interval,
+    byWeekday: [],
+    end: { kind: TaskRecurrenceEndKind.Never },
+  };
 }
 
-export function aWeeklyRecurrenceRule(
+export function aWeeklyRecurrence(
   daysOfWeek: DayOfWeek[] = [
     DayOfWeek.Monday,
     DayOfWeek.Tuesday,
@@ -185,8 +241,13 @@ export function aWeeklyRecurrenceRule(
     DayOfWeek.Friday,
   ],
   interval = 1,
-): RecurrenceRule {
-  return RecurrenceRule.createWeekly(daysOfWeek, interval);
+): TaskRecurrence {
+  return {
+    frequency: 'Weekly',
+    interval,
+    byWeekday: daysOfWeek,
+    end: { kind: TaskRecurrenceEndKind.Never },
+  };
 }
 
 export function aDisabledReminderConfig(): TaskReminderConfig {
@@ -195,17 +256,6 @@ export function aDisabledReminderConfig(): TaskReminderConfig {
 
 export function aRelativeReminder(value = 15, unit = 'Minutes' as const): TaskReminderConfig {
   return TaskReminderConfig.createRelativeReminder(value, unit);
-}
-
-export function aCompletionRecord(completedAt?: number): CompletionRecord {
-  return CompletionRecord.complete(completedAt);
-}
-
-export function aCompletionWithDuration(
-  durationMinutes = 30,
-  completedAt?: number,
-): CompletionRecord {
-  return CompletionRecord.completeWithDuration(durationMinutes, completedAt);
 }
 
 export function aChecklist(...titles: string[]): ChecklistItemDefinition[] {

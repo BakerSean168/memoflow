@@ -23,13 +23,13 @@ describe('GetTaskPlanUseCase', () => {
       findByIdForIdentity: vi.fn(),
     });
     instanceRepo = createMockRepo<ITaskOccurrenceRepository>({
-      findByTemplateId: vi.fn(),
+      findByPlanId: vi.fn(),
     });
-    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([]);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([]);
     useCase = new GetTaskPlanUseCase(templateRepo, instanceRepo, TASK_TEST_USER_TIME_CONTEXT_PORT);
   });
 
-  it('should return null when template does not exist', async () => {
+  it('should return null when plan does not exist', async () => {
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(null);
 
     const result = await useCase.execute('non-existent', 'identity-1');
@@ -40,44 +40,45 @@ describe('GetTaskPlanUseCase', () => {
     }
   });
 
-  it('should return the template client DTO when found', async () => {
-    const template = aOneTimeTask({ title: 'My Task' });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+  it('should return the plan client DTO when found', async () => {
+    const plan = aOneTimeTask({ title: 'My Task' });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeOk();
     if (result.ok) {
       expect(result.data).toBeDefined();
       expect(result.data!.name).toBe('My Task');
-      expect(result.data!.id).toBe(template.id);
+      expect(result.data!.id).toBe(plan.id);
     }
   });
 
-  it('should hydrate stats from instances when includeChildren is false', async () => {
-    const template = aOneTimeTask({ title: 'My Task' });
-    const pendingInstance = await aTaskOccurrence({ templateId: template.id as any });
-    const completedInstance = await aTaskOccurrence({ templateId: template.id as any });
+  it('hydrates stats from occurrences without embedding occurrence children', async () => {
+    const plan = aOneTimeTask({ title: 'My Task' });
+    const pendingInstance = await aTaskOccurrence({ planId: plan.id as any });
+    const completedInstance = await aTaskOccurrence({ planId: plan.id as any });
     completedInstance.complete();
 
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([
       pendingInstance,
       completedInstance,
     ]);
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeOk();
     if (result.ok && result.data) {
-      expect(result.data.instanceCount).toBe(2);
-      expect(result.data.completedInstanceCount).toBe(1);
+      expect(result.data.occurrenceCount).toBe(2);
+      expect(result.data.completedOccurrenceCount).toBe(1);
       expect(result.data.completionRate).toBe(50);
+      expect(result.data).not.toHaveProperty('occurrences');
     }
   });
 
   it('uses 30 Product Time calendar dates across spring-forward DST', async () => {
-    const template = aOneTimeTask({ title: 'DST Task' });
+    const plan = aOneTimeTask({ title: 'DST Task' });
     const timeContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });
     const userTimeContextPort = { getUserTimeContext: vi.fn().mockResolvedValue(timeContext) };
     const asOf = Date.parse('2026-03-09T03:30:00.000Z'); // Mar 8 23:30 local, after jump
@@ -87,60 +88,50 @@ describe('GetTaskPlanUseCase', () => {
       userTimeContextPort,
       () => asOf,
     );
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-    vi.mocked(instanceRepo.getTemplateStats).mockResolvedValue({});
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    vi.mocked(instanceRepo.getPlanStats).mockResolvedValue({});
 
-    await dstUseCase.execute(template.id, template.identityId);
+    await dstUseCase.execute(plan.id, plan.identityId);
 
-    expect(instanceRepo.getTemplateStats).toHaveBeenCalledWith([template.id], template.identityId, {
+    expect(instanceRepo.getPlanStats).toHaveBeenCalledWith([plan.id], plan.identityId, {
       windowStart: '2026-02-07',
       asOf: '2026-03-08',
     });
     expect(asOf - Date.parse('2026-02-07T05:00:00.000Z')).not.toBe(30 * 24 * 60 * 60 * 1000);
   });
 
-  it('should use findByIdForIdentity when includeChildren is false (default)', async () => {
-    const template = aOneTimeTask();
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+  it('uses findByIdForIdentity for the plan lookup', async () => {
+    const plan = aOneTimeTask();
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    await useCase.execute(template.id, template.identityId);
+    await useCase.execute(plan.id, plan.identityId);
 
-    expect(templateRepo.findByIdForIdentity).toHaveBeenCalledWith(template.identityId, template.id);
+    expect(templateRepo.findByIdForIdentity).toHaveBeenCalledWith(plan.identityId, plan.id);
   });
 
-  it('composes occurrence children from the occurrence repository without hydrating TaskPlan', async () => {
-    const template = aOneTimeTask();
-    const occurrence = await aTaskOccurrence({ templateId: template.id as any });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-    vi.mocked(instanceRepo.findByTemplateId).mockResolvedValue([occurrence]);
+  it('uses occurrence fallback only for stats when aggregate stats are unavailable', async () => {
+    const plan = aOneTimeTask();
+    const occurrence = await aTaskOccurrence({ planId: plan.id as any });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([occurrence]);
 
-    const result = await useCase.execute(template.id, template.identityId, true);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
-    expect(templateRepo.findByIdForIdentity).toHaveBeenCalledWith(template.identityId, template.id);
-    expect(instanceRepo.findByTemplateId).toHaveBeenCalledWith(template.id, template.identityId);
+    expect(templateRepo.findByIdForIdentity).toHaveBeenCalledWith(plan.identityId, plan.id);
+    expect(instanceRepo.findByPlanId).toHaveBeenCalledWith(plan.id, plan.identityId);
     expect(result).toBeOk();
     if (result.ok && result.data) {
-      expect(result.data.instances).toHaveLength(1);
-      expect(result.data.instanceCount).toBe(1);
+      expect(result.data.occurrenceCount).toBe(1);
+      expect(result.data).not.toHaveProperty('occurrences');
     }
   });
 
-  it('should pass includeChildren to toClientDTO', async () => {
-    const template = aOneTimeTask();
-    const spy = vi.spyOn(template, 'toClientDTOAt');
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+  it('calls toClientDTO without plan history', async () => {
+    const plan = aOneTimeTask();
+    const spy = vi.spyOn(plan, 'toClientDTOAt');
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    await useCase.execute(template.id, template.identityId, true);
-
-    expect(spy).toHaveBeenCalledWith(TASK_TEST_TIME_CONTEXT, true, expect.any(Number));
-  });
-
-  it('should call toClientDTO with false for default', async () => {
-    const template = aOneTimeTask();
-    const spy = vi.spyOn(template, 'toClientDTOAt');
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
-
-    await useCase.execute(template.id, template.identityId);
+    await useCase.execute(plan.id, plan.identityId);
 
     expect(spy).toHaveBeenCalledWith(TASK_TEST_TIME_CONTEXT, false, expect.any(Number));
   });

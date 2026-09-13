@@ -19,8 +19,8 @@ import type { TaskPlanUseCases } from './task-plan.controller';
  * 所有控制器用例接口的统一分组。
  */
 export interface TaskTransportHandlers {
-  readonly template: TaskPlanUseCases;
-  readonly instance: TaskOccurrenceUseCases;
+  readonly plan: TaskPlanUseCases;
+  readonly occurrence: TaskOccurrenceUseCases;
 }
 
 /**
@@ -34,25 +34,25 @@ export interface TaskTransportHandlers {
  */
 export function createTaskTransportHandlers(api: TaskApplicationPort): TaskTransportHandlers {
   return {
-    template: {
-      createTemplate: api.createTaskPlan,
-      getTemplate: api.getTaskPlan,
-      listTemplates: api.listTaskPlans,
-      updateTemplate: api.updateTaskPlan,
-      deleteTemplate: api.deleteTaskPlan,
-      activateTemplate: api.activateTaskPlan,
-      pauseTemplate: api.pauseTaskPlan,
-      archiveTemplate: api.archiveTaskPlan,
+    plan: {
+      createPlan: api.createTaskPlan,
+      getPlan: api.getTaskPlan,
+      listPlans: api.listTaskPlans,
+      updatePlan: api.updateTaskPlan,
+      deletePlan: api.deleteTaskPlan,
+      activatePlan: api.activateTaskPlan,
+      pausePlan: api.pauseTaskPlan,
+      archivePlan: api.archiveTaskPlan,
       abandonPlan: api.abandonTaskPlan,
-      generateInstances: api.generateTaskOccurrences,
+      generateOccurrences: api.generateTaskOccurrences,
       bindToGoal: api.bindTaskToGoal,
       unbindFromGoal: api.unbindTaskFromGoal,
-      listInstancesByTemplate: api.listTaskOccurrencesByTemplate,
+      listOccurrencesByPlan: api.listTaskOccurrencesByPlan,
     },
-    instance: {
+    occurrence: {
       getTaskOccurrence: api.getTaskOccurrence,
       listByAccount: api.listTaskOccurrencesByAccount,
-      listByTemplate: api.listTaskOccurrencesByTemplate,
+      listByTemplate: api.listTaskOccurrencesByPlan,
       listByStatus: api.listTaskOccurrencesByStatus,
       getByDateRange: api.getTaskOccurrencesByDateRange,
       complete: api.completeTaskOccurrence,
@@ -60,9 +60,9 @@ export function createTaskTransportHandlers(api: TaskApplicationPort): TaskTrans
       skip: api.skipTaskOccurrence,
       markMissed: api.markTaskOccurrenceMissed,
       start: api.startTaskOccurrence,
-      deleteInstance: api.deleteTaskOccurrence,
+      deleteOccurrence: api.deleteTaskOccurrence,
       reschedule: api.rescheduleTaskOccurrence,
-      setChecklistItem: api.setTaskOccurrenceChecklistItem,
+      setOccurrenceChecklistItem: api.setTaskOccurrenceChecklistItem,
     },
   };
 }

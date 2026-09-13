@@ -55,8 +55,8 @@ export class PowerSyncTaskOccurrenceMapper {
     });
   }
 
-  static toPersistence(instance: TaskOccurrence) {
-    const dto = instance.toPersistenceState();
+  static toPersistence(occurrence: TaskOccurrence) {
+    const dto = occurrence.toPersistenceState();
     return {
       id: String(dto.id),
       planId: String(dto.planId),

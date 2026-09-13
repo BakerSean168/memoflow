@@ -280,7 +280,7 @@ describe('Task occurrence portable contract', () => {
             planRef: undefined,
             scheduleSnapshot: undefined,
             templateRef: 'taskPlan:1',
-            instanceDate: '2026-09-13T00:00:00.000Z',
+            occurrenceDate: '2026-09-13T00:00:00.000Z',
             timeConfig: { type: 'AllDay' },
           },
         ],

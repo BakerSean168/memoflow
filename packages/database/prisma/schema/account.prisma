@@ -45,7 +45,6 @@ model Account {
   activityLedger                  ActivityLedger[]
   taskPlans                   TaskPlan[]
   taskOccurrences                   TaskOccurrence[]
-  taskStatistics                  TaskStatistic?
   userPreferenceRecords           UserPreferenceRecord[]
   notifications                   Notification[]
   aiConversations                 AiConversation[]

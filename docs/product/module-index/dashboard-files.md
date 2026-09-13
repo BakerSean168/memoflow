@@ -59,7 +59,6 @@ updated: 2026-07-22T00:00:00
 | 文件 | 说明 |
 | --- | --- |
 | [`packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.vue`](../../../packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.vue) | 嵌入的今日待办小组件 |
-| [`packages/app-vue/src/modules/task/components/widgets/TodayTasksWidget.vue`](../../../packages/app-vue/src/modules/task/components/widgets/TodayTasksWidget.vue) | 嵌入的今日任务小组件 |
 | [`packages/app-vue/src/modules/reminder/components/widgets/UpcomingRemindersWidget.vue`](../../../packages/app-vue/src/modules/reminder/components/widgets/UpcomingRemindersWidget.vue) | 嵌入的即将提醒小组件 |
 
 ## 测试入口

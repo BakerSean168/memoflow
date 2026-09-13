@@ -8,7 +8,7 @@
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import type {
   ITaskOccurrenceRepository,
-  TaskPlanInstanceStats,
+  TaskPlanOccurrenceStats,
 } from '../../../domain/repositories/i-task-occurrence-repository';
 import { TaskOccurrenceStatus } from '../../../domain/value-objects';
 import type { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
@@ -20,8 +20,8 @@ import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 
 export class GetTaskPlanUseCase {
   constructor(
-    private readonly templateRepository: ITaskPlanRepository,
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly planRepository: ITaskPlanRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     private readonly userTimeContextPort: UserTimeContextPort,
     private readonly now: () => number = Date.now,
   ) {}
@@ -29,10 +29,9 @@ export class GetTaskPlanUseCase {
   async execute(
     id: string,
     identityId: string,
-    includeChildren = false,
   ): Promise<Result<GetTaskPlanRes>> {
-    const template = await this.templateRepository.findByIdForIdentity(identityId, id);
-    if (!template) {
+    const plan = await this.planRepository.findByIdForIdentity(identityId, id);
+    if (!plan) {
       return ok(null);
     }
 
@@ -41,17 +40,17 @@ export class GetTaskPlanUseCase {
     const taskTime = createTimeFacade({ context: timeContext });
     const windowStart = taskTime.calendar.toYmd(taskTime.calendar.addDays(asOf, -29));
     const asOfDate = taskTime.calendar.toYmd(asOf);
-    const dto = template.toClientDTOAt(timeContext, includeChildren, asOf);
+    const dto = plan.toClientDTOAt(timeContext, false, asOf);
 
     let occurrences: TaskOccurrence[] | null = null;
     const loadOccurrences = async (): Promise<TaskOccurrence[]> => {
       if (occurrences === null) {
-        occurrences = (await this.instanceRepository.findByTemplateId(id, identityId)) ?? [];
+        occurrences = (await this.occurrenceRepository.findByPlanId(id, identityId)) ?? [];
       }
       return occurrences;
     };
 
-    let stats: TaskPlanInstanceStats | undefined = ((await this.instanceRepository.getTemplateStats(
+    let stats: TaskPlanOccurrenceStats | undefined = ((await this.occurrenceRepository.getPlanStats(
       [id],
       identityId,
       { windowStart, asOf: asOfDate },
@@ -61,60 +60,54 @@ export class GetTaskPlanUseCase {
       stats = this.calculateStats(id, await loadOccurrences(), windowStart, asOfDate);
     }
 
-    dto.instanceCount = stats.instanceCount;
-    dto.completedInstanceCount = stats.completedInstanceCount;
-    dto.pendingInstanceCount = stats.pendingInstanceCount;
-    dto.dueInstanceCount = stats.dueInstanceCount;
-    dto.completedDueInstanceCount = stats.completedDueInstanceCount;
+    dto.occurrenceCount = stats.occurrenceCount;
+    dto.completedOccurrenceCount = stats.completedOccurrenceCount;
+    dto.pendingOccurrenceCount = stats.pendingOccurrenceCount;
+    dto.dueOccurrenceCount = stats.dueOccurrenceCount;
+    dto.completedDueOccurrenceCount = stats.completedDueOccurrenceCount;
     dto.completionWindowDays = stats.completionWindowDays;
-    dto.futurePendingInstanceCount = stats.futurePendingInstanceCount;
-    dto.singleInstanceStatus = stats.singleInstanceStatus;
+    dto.futurePendingOccurrenceCount = stats.futurePendingOccurrenceCount;
+    dto.singleOccurrenceStatus = stats.singleOccurrenceStatus;
     dto.completionRate = stats.completionRate;
-
-    if (includeChildren) {
-      dto.instances = (await loadOccurrences()).map((occurrence) =>
-        occurrence.toClientDTOAt(timeContext, asOf),
-      );
-    }
 
     return ok(dto);
   }
 
   private calculateStats(
-    templateId: string,
+    planId: string,
     occurrences: TaskOccurrence[],
     windowStart: Ymd,
     asOf: Ymd,
-  ): TaskPlanInstanceStats {
-    const completedInstanceCount = occurrences.filter(
+  ): TaskPlanOccurrenceStats {
+    const completedOccurrenceCount = occurrences.filter(
       (occurrence) => occurrence.status === TaskOccurrenceStatus.Completed,
     ).length;
-    const pendingInstanceCount = occurrences.filter(
+    const pendingOccurrenceCount = occurrences.filter(
       (occurrence) => occurrence.status === TaskOccurrenceStatus.Pending,
     ).length;
     const dueOccurrences = occurrences.filter(
       (occurrence) => occurrence.scheduleDate >= windowStart && occurrence.scheduleDate <= asOf,
     );
-    const completedDueInstanceCount = dueOccurrences.filter(
+    const completedDueOccurrenceCount = dueOccurrences.filter(
       (occurrence) => occurrence.status === TaskOccurrenceStatus.Completed,
     ).length;
 
     return {
-      templateId,
-      instanceCount: occurrences.length,
-      completedInstanceCount,
-      pendingInstanceCount,
-      dueInstanceCount: dueOccurrences.length,
-      completedDueInstanceCount,
+      planId,
+      occurrenceCount: occurrences.length,
+      completedOccurrenceCount,
+      pendingOccurrenceCount,
+      dueOccurrenceCount: dueOccurrences.length,
+      completedDueOccurrenceCount,
       completionWindowDays: 30,
-      futurePendingInstanceCount: occurrences.filter(
+      futurePendingOccurrenceCount: occurrences.filter(
         (occurrence) =>
           occurrence.status === TaskOccurrenceStatus.Pending && occurrence.scheduleDate > asOf,
       ).length,
-      singleInstanceStatus: occurrences.length === 1 ? occurrences[0].status : null,
+      singleOccurrenceStatus: occurrences.length === 1 ? occurrences[0].status : null,
       completionRate:
         dueOccurrences.length > 0
-          ? Math.round((completedDueInstanceCount / dueOccurrences.length) * 100)
+          ? Math.round((completedDueOccurrenceCount / dueOccurrences.length) * 100)
           : 0,
     };
   }

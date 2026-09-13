@@ -180,9 +180,8 @@ export function restoreTaskPlanSnapshot(
 }
 
 /**
- * Map `UpdateTaskPlanReq` fields onto a DTO patch (optimistic merge). Values keep the
- * transport req shape (e.g. `TaskTimeConfigReq` vs DTO `TaskTimeConfigDTO`); the merge in
- * `mergeTaskPlanUpdate` casts back to the DTO so the cache stays a plain projection.
+ * Map `UpdateTaskPlanReq` fields onto a DTO patch (optimistic merge). The canonical
+ * `UpdateTaskPlanReq.schedule` field is the `TaskPlanSchedule` projection used by the plan cache.
  * 把 `UpdateTaskPlanReq` 字段映射为 DTO patch（optimistic 合并）。
  */
 export function mapUpdateToDtoPatch(req: UpdateTaskPlanReq): Record<string, unknown> {

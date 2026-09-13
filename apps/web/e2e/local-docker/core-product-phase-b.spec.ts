@@ -12,7 +12,7 @@ type TaskPlanCreation = {
 
 type TaskOccurrenceProjection = {
   id: string;
-  instanceDate: number;
+  occurrenceDate: number;
   status: 'Pending' | 'InProgress' | 'Completed' | 'Skipped' | 'Expired';
   importance: 'Vital' | 'Important' | 'Moderate' | 'Minor' | 'Trivial';
 };
@@ -113,22 +113,22 @@ test.describe('Local Docker core product Phase B', () => {
         },
       }),
     );
-    const initialInstances = await listInstances(
+    const initialInstances = await listOccurrences(
       page,
       headers,
       recurringCreation.template.id,
     );
     const editBoundary = Date.now();
     const todayPending = initialInstances.find(
-      (instance) => instance.status === 'Pending' && instance.instanceDate <= editBoundary,
+      (instance) => instance.status === 'Pending' && instance.occurrenceDate <= editBoundary,
     );
     const futurePending = initialInstances.find(
-      (instance) => instance.status === 'Pending' && instance.instanceDate > editBoundary,
+      (instance) => instance.status === 'Pending' && instance.occurrenceDate > editBoundary,
     );
     const futureToStart = initialInstances.find(
       (instance) =>
         instance.status === 'Pending' &&
-        instance.instanceDate > editBoundary &&
+        instance.occurrenceDate > editBoundary &&
         instance.id !== futurePending?.id,
     );
     expect(todayPending).toBeDefined();
@@ -160,7 +160,7 @@ test.describe('Local Docker core product Phase B', () => {
     await expect
       .poll(
         async () => {
-          const instances = await listInstances(page, headers, recurringCreation.template.id);
+          const instances = await listOccurrences(page, headers, recurringCreation.template.id);
           const byId = new Map(instances.map((instance) => [instance.id, instance]));
           return {
             today: byId.get(todayPending!.id)?.importance,
@@ -246,7 +246,7 @@ function waitForTemplateWrite(page: Page, method: 'POST' | 'PATCH') {
   );
 }
 
-async function listInstances(
+async function listOccurrences(
   page: Page,
   headers: Record<string, string>,
   templateId: string,

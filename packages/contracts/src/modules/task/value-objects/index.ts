@@ -2,10 +2,6 @@
  * Task Value Objects Export
  */
 
-// RecurrenceRule
-export type { RecurrenceRule, RecurrenceRuleDTO, RecurrenceConfigReq } from './recurrence-rule';
-export { RecurrenceConfigSchema } from './recurrence-rule';
-
 // TaskReminderConfig
 export type { TaskReminderConfig, TaskReminderConfigDTO } from './task-reminder-config';
 export { TaskReminderConfigSchema } from './task-reminder-config';
@@ -25,10 +21,6 @@ export {
 } from './task-goal-binding';
 export { TaskGoalBindingTrigger } from './task-goal-binding-trigger';
 export type { TaskGoalBindingTrigger as TaskGoalBindingTriggerValue } from './task-goal-binding-trigger';
-
-// TaskTimeConfig
-export type { TaskTimeConfig, TaskTimeConfigDTO, TaskTimeConfigReq } from './task-time-config';
-export { TaskTimeConfigSchema } from './task-time-config';
 
 // Task Plan vNext schedule algebra
 export {
@@ -65,9 +57,6 @@ export {
   TaskPlanChecklistSchema,
 } from './checklist-item-definition';
 
-// CompletionRecord
-export type { CompletionRecord, CompletionRecordDTO } from './completion-record';
-
 // Enums
 export { RecurrenceFrequency } from './recurrence-frequency';
 export { DayOfWeek } from './day-of-week';
@@ -83,7 +72,6 @@ export { TaskPlanCompletionPolicy } from './task-plan-completion-policy';
 export type { TaskPlanCompletionPolicy as TaskPlanCompletionPolicyValue } from './task-plan-completion-policy';
 export { TaskOccurrenceStatus } from './task-occurrence-status';
 export { TaskTimeType } from './task-time-type';
-export { TaskType } from './task-type';
 export type {
   ChecklistItemDefinition,
   ChecklistItemDefinitionDTO,

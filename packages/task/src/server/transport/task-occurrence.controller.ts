@@ -1,7 +1,7 @@
 /**
  * TaskOccurrence Controller
  *
- * Encapsulates Zod validation and use case orchestration for task instances.
+ * Encapsulates Zod validation and use case orchestration for task occurrences.
  * Shared by both Express (HTTP) and IPC transport layers.
  *
  * Each method:
@@ -30,7 +30,7 @@ import type { GetTaskOccurrenceUseCase } from '../application/use-cases/queries/
 import type { GetTaskOccurrencesByDateRangeUseCase } from '../application/use-cases/queries/get-task-occurrences-by-date-range.use-case';
 import type { ListTaskOccurrencesByAccountUseCase } from '../application/use-cases/queries/list-task-occurrences-by-account.use-case';
 import type { ListTaskOccurrencesByStatusUseCase } from '../application/use-cases/queries/list-task-occurrences-by-status.use-case';
-import type { ListTaskOccurrencesByTemplateUseCase } from '../application/use-cases/queries/list-task-occurrences-by-template.use-case';
+import type { ListTaskOccurrencesByPlanUseCase } from '../application/use-cases/queries/list-task-occurrences-by-plan.use-case';
 import type { SkipTaskOccurrenceUseCase } from '../application/use-cases/commands/skip-task-occurrence.use-case';
 import type { StartTaskOccurrenceUseCase } from '../application/use-cases/commands/start-task-occurrence.use-case';
 import type { MarkTaskOccurrenceMissedUseCase } from '../application/use-cases/commands/mark-task-occurrence-missed.use-case';
@@ -44,7 +44,7 @@ type TaskControllerFn<T extends (...args: never[]) => unknown> = (
 export interface TaskOccurrenceUseCases {
   getTaskOccurrence: TaskControllerFn<GetTaskOccurrenceUseCase['execute']>;
   listByAccount: TaskControllerFn<ListTaskOccurrencesByAccountUseCase['execute']>;
-  listByTemplate: TaskControllerFn<ListTaskOccurrencesByTemplateUseCase['execute']>;
+  listByTemplate: TaskControllerFn<ListTaskOccurrencesByPlanUseCase['execute']>;
   listByStatus: TaskControllerFn<ListTaskOccurrencesByStatusUseCase['execute']>;
   getByDateRange: TaskControllerFn<GetTaskOccurrencesByDateRangeUseCase['execute']>;
   complete: TaskControllerFn<CompleteTaskOccurrenceUseCase['execute']>;
@@ -52,9 +52,9 @@ export interface TaskOccurrenceUseCases {
   skip: TaskControllerFn<SkipTaskOccurrenceUseCase['execute']>;
   markMissed: TaskControllerFn<MarkTaskOccurrenceMissedUseCase['execute']>;
   start: TaskControllerFn<StartTaskOccurrenceUseCase['execute']>;
-  deleteInstance: TaskControllerFn<DeleteTaskOccurrenceUseCase['execute']>;
+  deleteOccurrence: TaskControllerFn<DeleteTaskOccurrenceUseCase['execute']>;
   reschedule: TaskControllerFn<RescheduleTaskOccurrenceUseCase['execute']>;
-  setChecklistItem: TaskControllerFn<SetTaskOccurrenceChecklistItemUseCase['execute']>;
+  setOccurrenceChecklistItem: TaskControllerFn<SetTaskOccurrenceChecklistItemUseCase['execute']>;
 }
 
 /**
@@ -67,16 +67,16 @@ export class TaskOccurrenceController {
   constructor(private readonly useCases: TaskOccurrenceUseCases) {}
 
   /**
-   * Get instance by ID
+   * Get occurrence by ID
    */
-  async getInstance(id: string, ctx: Context): Promise<Result<TaskOccurrenceClientDTO | null>> {
+  async getOccurrence(id: string, ctx: Context): Promise<Result<TaskOccurrenceClientDTO | null>> {
     return await this.useCases.getTaskOccurrence(id, ctx.identityId);
   }
 
   /**
-   * List instances for account
+   * List occurrences for account
    */
-  async listInstances(
+  async listOccurrences(
     identityId: string,
     filters?: {
       planId?: string;
@@ -93,9 +93,9 @@ export class TaskOccurrenceController {
   }
 
   /**
-   * Get instances by date range
+   * Get occurrences by date range
    */
-  async getInstancesByDateRange(
+  async getOccurrencesByDateRange(
     identityId: string,
     request: GetTaskOccurrencesByRangeReq,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
@@ -113,9 +113,9 @@ export class TaskOccurrenceController {
   }
 
   /**
-   * Complete instance (with Zod validation)
+   * Complete occurrence (with Zod validation)
    */
-  async completeInstance(
+  async completeOccurrence(
     id: string,
     input: CompleteTaskOccurrenceReq,
     ctx: Context,
@@ -125,22 +125,22 @@ export class TaskOccurrenceController {
       return result as Result<TaskOccurrenceClientDTO>;
     }
 
-    return ok(result.data.instance);
+    return ok(result.data.occurrence);
   }
 
-  async uncompleteInstance(id: string, ctx: Context): Promise<Result<TaskOccurrenceClientDTO>> {
+  async uncompleteOccurrence(id: string, ctx: Context): Promise<Result<TaskOccurrenceClientDTO>> {
     const result = await this.useCases.uncomplete(id, ctx.identityId);
     if (!isOk(result)) {
       return result as Result<TaskOccurrenceClientDTO>;
     }
 
-    return ok(result.data.instance);
+    return ok(result.data.occurrence);
   }
 
   /**
-   * Skip instance (with Zod validation)
+   * Skip occurrence (with Zod validation)
    */
-  async skipInstance(
+  async skipOccurrence(
     id: string,
     input: SkipTaskOccurrenceReq,
     ctx: Context,
@@ -150,11 +150,11 @@ export class TaskOccurrenceController {
       return result as Result<TaskOccurrenceClientDTO>;
     }
 
-    return ok(result.data.instance);
+    return ok(result.data.occurrence);
   }
 
   /** Explicitly records a Missed fact; never called from a clock/maintenance path. */
-  async markMissedInstance(
+  async markOccurrenceMissed(
     id: string,
     input: MarkTaskOccurrenceMissedReq,
     ctx: Context,
@@ -163,29 +163,29 @@ export class TaskOccurrenceController {
     if (!isOk(result)) {
       return result as Result<TaskOccurrenceClientDTO>;
     }
-    return ok(result.data.instance);
+    return ok(result.data.occurrence);
   }
 
   /**
-   * Start instance
+   * Start occurrence
    */
-  async startInstance(id: string, ctx: Context): Promise<Result<TaskOccurrenceClientDTO>> {
+  async startOccurrence(id: string, ctx: Context): Promise<Result<TaskOccurrenceClientDTO>> {
     return await this.useCases.start(id, ctx.identityId);
   }
 
   /** Toggle one checklist item on this occurrence snapshot only. */
-  async setChecklistItem(
+  async setOccurrenceChecklistItem(
     id: string,
     input: SetTaskOccurrenceChecklistItemReq,
     ctx: Context,
   ): Promise<Result<TaskOccurrenceClientDTO>> {
-    const result = await this.useCases.setChecklistItem(id, ctx.identityId, input);
+    const result = await this.useCases.setOccurrenceChecklistItem(id, ctx.identityId, input);
     if (!isOk(result)) return result as Result<TaskOccurrenceClientDTO>;
-    return ok(result.data.instance);
+    return ok(result.data.occurrence);
   }
 
   /** Reschedule this occurrence only; identity is always host-injected. */
-  async rescheduleInstance(
+  async rescheduleOccurrence(
     id: string,
     input: RescheduleTaskInput,
     ctx: Context,
@@ -194,10 +194,10 @@ export class TaskOccurrenceController {
   }
 
   /**
-   * Delete instance
+   * Delete occurrence
    */
-  async deleteInstance(id: string, ctx: Context): Promise<Result<null>> {
-    const result = await this.useCases.deleteInstance(id, ctx.identityId);
+  async deleteOccurrence(id: string, ctx: Context): Promise<Result<null>> {
+    const result = await this.useCases.deleteOccurrence(id, ctx.identityId);
     if (!isOk(result)) {
       return result as Result<null>;
     }

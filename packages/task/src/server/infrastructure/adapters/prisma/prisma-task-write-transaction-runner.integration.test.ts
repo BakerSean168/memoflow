@@ -2,16 +2,19 @@ import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vites
 import '@memoflow/test-utils/helpers/result-matchers';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import { TaskGoalBindingTrigger, TaskType } from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger, TaskPlanScheduleKind } from '@memoflow/contracts/task';
 import { eventBus } from '@memoflow/utils/domain';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
-import { TASK_TEST_TIME_CONTEXT, TASK_TEST_USER_TIME_CONTEXT_PORT } from '../../../../testing';
 import {
-  RecurrenceRule,
-  TaskOccurrenceScheduleSnapshot,
-  TaskPlanSchedule,
-  TaskTimeConfig,
+  canonicalTaskOccurrenceScheduleForTest,
+  canonicalTaskPlanScheduleForTest,
+  aDailyRecurrence,
+  anAllDayTiming,
+  TASK_TEST_TIME_CONTEXT,
+  TASK_TEST_USER_TIME_CONTEXT_PORT,
+} from '../../../../testing';
+import {
 } from '../../../domain/value-objects';
 import { createTaskPrismaModule } from '../../prisma';
 import {
@@ -35,26 +38,27 @@ async function seedPlanWithPropagationStates() {
     userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
   });
   const now = Date.now();
-  const template = TaskPlan.create({
+  const plan = TaskPlan.create({
     identityId,
     title: 'Propagation plan',
-    schedule: TaskPlanSchedule.fromLegacy(
-      TaskType.Recurring,
-      TaskTimeConfig.createAllDay(new Date(now - 2 * DAY_MS)),
-      RecurrenceRule.createDaily(1),
+    schedule: canonicalTaskPlanScheduleForTest(
+      TaskPlanScheduleKind.Recurring,
+      now - 2 * DAY_MS,
+      anAllDayTiming(),
+      aDailyRecurrence(),
       TASK_TEST_TIME_CONTEXT,
     ),
     importance: ImportanceLevel.Moderate,
   });
-  await module.taskPlanRepository.save(template);
+  await module.taskPlanRepository.save(plan);
 
-  const createInstance = (instanceDate: number) =>
+  const createInstance = (occurrenceDate: number) =>
     TaskOccurrence.create({
-      planId: template.id,
+      planId: plan.id,
       identityId,
-      scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
-        instanceDate,
-        TaskTimeConfig.createAllDay(new Date(instanceDate)),
+      scheduleSnapshot: canonicalTaskOccurrenceScheduleForTest(
+        occurrenceDate,
+        anAllDayTiming(),
         TASK_TEST_TIME_CONTEXT,
       ),
       importanceSnapshot: ImportanceLevel.Moderate,
@@ -69,7 +73,7 @@ async function seedPlanWithPropagationStates() {
     identityId,
     prisma,
     module,
-    template,
+    plan,
     pastPending,
     futurePending,
     futureInProgress,
@@ -96,13 +100,14 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     const prisma = await getPrisma();
     const runner = new PrismaTaskWriteTransactionRunner(prisma);
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
-    const template = TaskPlan.create({
+    const plan = TaskPlan.create({
       identityId,
-      title: 'Daily Review',
-      schedule: TaskPlanSchedule.fromLegacy(
-        TaskType.Recurring,
-        TaskTimeConfig.createAllDay(new Date()),
-        RecurrenceRule.createDaily(1),
+    title: 'Daily Review',
+    schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        Date.now(),
+        anAllDayTiming(),
+        aDailyRecurrence(),
         TASK_TEST_TIME_CONTEXT,
       ),
       importance: ImportanceLevel.Moderate,
@@ -110,8 +115,8 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
 
     let sentBeforeCommit = false;
 
-    await runner.run(async ({ templateRepository }) => {
-      await templateRepository.save(template);
+    await runner.run(async ({ planRepository }) => {
+      await planRepository.save(plan);
       sentBeforeCommit = dispatchSpy.mock.calls.length > 0;
     });
 
@@ -120,7 +125,7 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     // (aggregateId / occurredAt / optional idempotencyKey) as the 3rd arg.
     expect(dispatchSpy).toHaveBeenCalledWith(
       'task:created',
-      expect.objectContaining({ templateId: template.id }),
+      expect.objectContaining({ planId: plan.id }),
       expect.objectContaining({
         aggregateId: expect.any(String),
         occurredAt: expect.any(Date),
@@ -128,12 +133,12 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     );
 
     const saved = await prisma.taskPlan.findUnique({
-      where: { id: template.id },
+      where: { id: plan.id },
     });
     expect(saved).not.toBeNull();
   });
 
-  it('rolls back createTaskPrismaModule writes and publishes nothing when instance persistence fails', async () => {
+  it('rolls back createTaskPrismaModule writes and publishes nothing when occurrence persistence fails', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
 
@@ -148,11 +153,12 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
 
     const result = await module.api.createTaskPlan({
       identityId,
-      name: 'Daily Review',
-      schedule: TaskPlanSchedule.fromLegacy(
-        TaskType.Recurring,
-        TaskTimeConfig.createAllDay(new Date()),
-        RecurrenceRule.createDaily(1),
+    name: 'Daily Review',
+    schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        Date.now(),
+        anAllDayTiming(),
+        aDailyRecurrence(),
         TASK_TEST_TIME_CONTEXT,
       ).toDTO(),
       importance: ImportanceLevel.Moderate,
@@ -166,25 +172,25 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     module.dispose();
   });
 
-  it('propagates plan updates only to future pending instances through the production module', async () => {
+  it('propagates plan updates only to future pending occurrences through the production module', async () => {
     vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
-    const { identityId, prisma, module, template, pastPending, futurePending, futureInProgress } =
+    const { identityId, prisma, module, plan, pastPending, futurePending, futureInProgress } =
       await seedPlanWithPropagationStates();
 
-    const result = await module.api.updateTaskPlan(String(template.id), String(identityId), {
+    const result = await module.api.updateTaskPlan(String(plan.id), String(identityId), {
       name: 'Updated propagation plan',
       importance: ImportanceLevel.Important,
     });
 
     expect(result.ok).toBe(true);
     const savedTemplate = await prisma.taskPlan.findUniqueOrThrow({
-      where: { id: String(template.id) },
+      where: { id: String(plan.id) },
     });
-    const savedInstances = await module.taskOccurrenceRepository.findByTemplateId(
-      String(template.id),
+    const savedInstances = await module.taskOccurrenceRepository.findByPlanId(
+      String(plan.id),
       String(identityId),
     );
-    const savedById = new Map(savedInstances.map((instance) => [String(instance.id), instance]));
+    const savedById = new Map(savedInstances.map((occurrence) => [String(occurrence.id), occurrence]));
 
     expect(savedTemplate).toMatchObject({
       name: 'Updated propagation plan',
@@ -204,15 +210,15 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     module.dispose();
   });
 
-  it('rolls back future pending propagation when the template write fails', async () => {
+  it('rolls back future pending propagation when the plan write fails', async () => {
     vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
-    const { identityId, module, template, futurePending } = await seedPlanWithPropagationStates();
+    const { identityId, module, plan, futurePending } = await seedPlanWithPropagationStates();
     vi.spyOn(
       TaskPlanPrismaRepository.prototype as unknown as { persist: () => Promise<void> },
       'persist',
-    ).mockRejectedValueOnce(new Error('template persistence failed'));
+    ).mockRejectedValueOnce(new Error('plan persistence failed'));
 
-    const result = await module.api.updateTaskPlan(String(template.id), String(identityId), {
+    const result = await module.api.updateTaskPlan(String(plan.id), String(identityId), {
       name: 'Must roll back',
       importance: ImportanceLevel.Important,
     });
@@ -220,7 +226,7 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     expect(result).toBeErrorWithCode('INTERNAL_ERROR');
     const savedTemplate = await module.taskPlanRepository.findByIdForIdentity(
       String(identityId),
-      String(template.id),
+      String(plan.id),
     );
     const savedFuture = await module.taskOccurrenceRepository.findByIdForIdentity(
       String(identityId),
@@ -233,7 +239,7 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     module.dispose();
   });
 
-  it('rolls back template, instances, outbox and publishes no events when taskGoalOutbox append fails', async () => {
+  it('rolls back plan, occurrences, outbox and publishes no events when taskGoalOutbox append fails', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
     const prisma = await getPrisma();
@@ -268,10 +274,11 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     });
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
 
-    const createSchedule = TaskPlanSchedule.fromLegacy(
-      TaskType.Recurring,
-      TaskTimeConfig.createAllDay(new Date()),
-      RecurrenceRule.createDaily(1),
+  const createSchedule = canonicalTaskPlanScheduleForTest(
+      TaskPlanScheduleKind.Recurring,
+      Date.now(),
+      anAllDayTiming(),
+      aDailyRecurrence(),
       TASK_TEST_TIME_CONTEXT,
     );
     const createRes = await module.api.createTaskPlan({
@@ -288,12 +295,12 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     expect(createRes.ok).toBe(true);
     if (!createRes.ok) return;
 
-    const instances = await module.taskOccurrenceRepository.findByTemplateId(
-      createRes.data.template.id,
+    const occurrences = await module.taskOccurrenceRepository.findByPlanId(
+      createRes.data.plan.id,
       identityId,
     );
-    expect(instances.length).toBeGreaterThan(0);
-    const instanceId = String(instances[0].id);
+    expect(occurrences.length).toBeGreaterThan(0);
+    const occurrenceId = String(occurrences[0].id);
 
     dispatchSpy.mockClear();
 
@@ -327,17 +334,17 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
       });
     }) as never);
 
-    const result = await module.api.completeTaskOccurrence(instanceId, identityId);
+    const result = await module.api.completeTaskOccurrence(occurrenceId, identityId);
 
     expect(result).toBeErrorWithCode('INTERNAL_ERROR');
 
     const instanceInDb = await prisma.taskOccurrence.findUnique({
-      where: { id: instanceId },
+      where: { id: occurrenceId },
     });
     expect(instanceInDb?.status).toBe('Pending');
 
     const outboxCount = await prisma.taskGoalOutbox.count({
-      where: { taskOccurrenceId: instanceId },
+      where: { taskOccurrenceId: occurrenceId },
     });
     expect(outboxCount).toBe(0);
 

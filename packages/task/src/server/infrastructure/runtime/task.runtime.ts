@@ -21,10 +21,10 @@ const logger = createLogger('TaskRuntime');
 
 type TaskRuntimeEventMap = Pick<
   TaskEventMap,
-  | 'task:instance-generated'
-  | 'task:instance-completed'
-  | 'task:instance-skipped'
-  | 'task:instance-deleted'
+  | 'task:occurrence-generated'
+  | 'task:occurrence-completed'
+  | 'task:occurrence-skipped'
+  | 'task:occurrence-deleted'
 >;
 
 const taskEvents = createTypedEventSubscriber<TaskRuntimeEventMap>(eventBus);
@@ -34,20 +34,20 @@ const taskEvents = createTypedEventSubscriber<TaskRuntimeEventMap>(eventBus);
  * 模块传输层使用的运行时贡献契约。
  */
 const taskEventHandlers = {
-  'task:instance-generated': (event) => {
-    logger.info(`[Task] Instances generated for template: ${event.templateId}`, {
-      templateId: event.templateId,
-      instanceCount: event.instanceCount,
+  'task:occurrence-generated': (event) => {
+    logger.info(`[Task] Instances generated for plan: ${event.planId}`, {
+      planId: event.planId,
+      occurrenceCount: event.occurrenceCount,
       strategy: event.strategy,
     });
   },
-  'task:instance-completed': (event) => {
+  'task:occurrence-completed': (event) => {
     logger.info(`[Task] Instance completed: ${event.taskOccurrenceId}`);
   },
-  'task:instance-skipped': (event) => {
+  'task:occurrence-skipped': (event) => {
     logger.info(`[Task] Instance skipped: ${event.taskOccurrenceId}`);
   },
-  'task:instance-deleted': (event) => {
+  'task:occurrence-deleted': (event) => {
     logger.info(`[Task] Instance deleted: ${event.taskOccurrenceId}`);
   },
 } satisfies {
@@ -55,7 +55,7 @@ const taskEventHandlers = {
 };
 
 /**
- * Creates an instance-owned runtime contribution.
+ * Creates an occurrence-owned runtime contribution.
  * 创建实例级 runtime 贡献对象。
  *
  * Replaces the old global initialization pattern with an explicit start/stop lifecycle.
@@ -71,10 +71,10 @@ export function createTaskRuntimeContribution(): TaskModuleRuntimeContribution {
         return;
       }
 
-      taskEvents.on('task:instance-generated', taskEventHandlers['task:instance-generated']);
-      taskEvents.on('task:instance-completed', taskEventHandlers['task:instance-completed']);
-      taskEvents.on('task:instance-skipped', taskEventHandlers['task:instance-skipped']);
-      taskEvents.on('task:instance-deleted', taskEventHandlers['task:instance-deleted']);
+      taskEvents.on('task:occurrence-generated', taskEventHandlers['task:occurrence-generated']);
+      taskEvents.on('task:occurrence-completed', taskEventHandlers['task:occurrence-completed']);
+      taskEvents.on('task:occurrence-skipped', taskEventHandlers['task:occurrence-skipped']);
+      taskEvents.on('task:occurrence-deleted', taskEventHandlers['task:occurrence-deleted']);
 
       started = true;
       logger.info('[Task] Runtime contribution started');
@@ -85,10 +85,10 @@ export function createTaskRuntimeContribution(): TaskModuleRuntimeContribution {
         return;
       }
 
-      taskEvents.off('task:instance-generated', taskEventHandlers['task:instance-generated']);
-      taskEvents.off('task:instance-completed', taskEventHandlers['task:instance-completed']);
-      taskEvents.off('task:instance-skipped', taskEventHandlers['task:instance-skipped']);
-      taskEvents.off('task:instance-deleted', taskEventHandlers['task:instance-deleted']);
+      taskEvents.off('task:occurrence-generated', taskEventHandlers['task:occurrence-generated']);
+      taskEvents.off('task:occurrence-completed', taskEventHandlers['task:occurrence-completed']);
+      taskEvents.off('task:occurrence-skipped', taskEventHandlers['task:occurrence-skipped']);
+      taskEvents.off('task:occurrence-deleted', taskEventHandlers['task:occurrence-deleted']);
 
       started = false;
       logger.info('[Task] Runtime contribution stopped');

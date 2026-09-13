@@ -12,7 +12,7 @@ import { map as mapResult } from '@memoflow/contracts/result';
 import type {
   CreateTaskPlanReq,
   UpdateTaskPlanReq,
-  GenerateInstancesReq,
+  GenerateOccurrencesReq,
   BindToGoalReq,
   AbandonTaskPlanReq,
   CompleteTaskOccurrenceReq,
@@ -58,17 +58,16 @@ function taskPlanFromDTO(dto: TaskPlanClientDTO): TaskPlan {
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
     deletedAt: dto.deletedAt ? dto.deletedAt : null,
-    instanceCount: dto.instanceCount,
-    completedInstanceCount: dto.completedInstanceCount,
-    pendingInstanceCount: dto.pendingInstanceCount,
-    dueInstanceCount: dto.dueInstanceCount,
-    completedDueInstanceCount: dto.completedDueInstanceCount,
+    occurrenceCount: dto.occurrenceCount,
+    completedOccurrenceCount: dto.completedOccurrenceCount,
+    pendingOccurrenceCount: dto.pendingOccurrenceCount,
+    dueOccurrenceCount: dto.dueOccurrenceCount,
+    completedDueOccurrenceCount: dto.completedDueOccurrenceCount,
     completionWindowDays: dto.completionWindowDays,
-    futurePendingInstanceCount: dto.futurePendingInstanceCount,
-    singleInstanceStatus: dto.singleInstanceStatus,
+    futurePendingOccurrenceCount: dto.futurePendingOccurrenceCount,
+    singleOccurrenceStatus: dto.singleOccurrenceStatus,
     completionRate: dto.completionRate,
     history: dto.history,
-    instances: dto.instances,
   });
 }
 
@@ -92,86 +91,86 @@ export class TaskClientService implements TaskClientPort {
     private readonly instanceApi: ITaskOccurrenceApiClient,
   ) {
     this.getWorkspace = this.getWorkspace.bind(this);
-    this.createTemplate = this.createTemplate.bind(this);
-    this.listTemplates = this.listTemplates.bind(this);
-    this.getTemplate = this.getTemplate.bind(this);
-    this.updateTemplate = this.updateTemplate.bind(this);
-    this.deleteTemplate = this.deleteTemplate.bind(this);
-    this.activateTemplate = this.activateTemplate.bind(this);
-    this.pauseTemplate = this.pauseTemplate.bind(this);
-    this.archiveTemplate = this.archiveTemplate.bind(this);
+    this.createPlan = this.createPlan.bind(this);
+    this.listPlans = this.listPlans.bind(this);
+    this.getPlan = this.getPlan.bind(this);
+    this.updatePlan = this.updatePlan.bind(this);
+    this.deletePlan = this.deletePlan.bind(this);
+    this.activatePlan = this.activatePlan.bind(this);
+    this.pausePlan = this.pausePlan.bind(this);
+    this.archivePlan = this.archivePlan.bind(this);
     this.abandonPlan = this.abandonPlan.bind(this);
-    this.generateInstances = this.generateInstances.bind(this);
-    this.getInstancesByDateRange = this.getInstancesByDateRange.bind(this);
+    this.generateOccurrences = this.generateOccurrences.bind(this);
+    this.getOccurrencesByDateRange = this.getOccurrencesByDateRange.bind(this);
     this.bindToGoal = this.bindToGoal.bind(this);
     this.unbindFromGoal = this.unbindFromGoal.bind(this);
-    this.listInstances = this.listInstances.bind(this);
-    this.getInstance = this.getInstance.bind(this);
-    this.deleteInstance = this.deleteInstance.bind(this);
-    this.startInstance = this.startInstance.bind(this);
-    this.completeInstance = this.completeInstance.bind(this);
-    this.skipInstance = this.skipInstance.bind(this);
-    this.markInstanceMissed = this.markInstanceMissed.bind(this);
-    this.rescheduleInstance = this.rescheduleInstance.bind(this);
-    this.setChecklistItem = this.setChecklistItem.bind(this);
+    this.listOccurrences = this.listOccurrences.bind(this);
+    this.getOccurrence = this.getOccurrence.bind(this);
+    this.deleteOccurrence = this.deleteOccurrence.bind(this);
+    this.startOccurrence = this.startOccurrence.bind(this);
+    this.completeOccurrence = this.completeOccurrence.bind(this);
+    this.skipOccurrence = this.skipOccurrence.bind(this);
+    this.markOccurrenceMissed = this.markOccurrenceMissed.bind(this);
+    this.rescheduleOccurrence = this.rescheduleOccurrence.bind(this);
+    this.setOccurrenceChecklistItem = this.setOccurrenceChecklistItem.bind(this);
   }
 
   async getWorkspace(id: string, request?: GetTaskWorkspaceReq): Promise<Result<TaskPlanWorkspace>> {
     return this.templateApi.getWorkspace(id, request);
   }
 
-  // ===== Task Template Operations =====
+  // ===== Task Plan Operations =====
 
-  async createTemplate(
+  async createPlan(
     request: CreateTaskPlanReq,
-  ): Promise<Result<{ template: TaskPlan; instanceCount: number; todayInstanceCreated: boolean }>> {
+  ): Promise<Result<{ plan: TaskPlan; occurrenceCount: number; todayOccurrenceCreated: boolean }>> {
     const result = await this.templateApi.createTaskPlan(request);
     return mapResult(result, (data) => ({
-      template: taskPlanFromDTO(data.template),
-      instanceCount: data.instanceCount,
-      todayInstanceCreated: data.todayInstanceCreated,
+      plan: taskPlanFromDTO(data.plan),
+      occurrenceCount: data.occurrenceCount,
+      todayOccurrenceCreated: data.todayOccurrenceCreated,
     }));
   }
 
-  async listTemplates(
+  async listPlans(
     params?: TaskPlanListParams,
-  ): Promise<Result<{ templates: TaskPlan[]; total: number }>> {
+  ): Promise<Result<{ plans: TaskPlan[]; total: number }>> {
     const result = await this.templateApi.getTaskPlans(params);
     return mapResult(result, (data) => {
-      const templates = data.templates ?? [];
-      const total = data.total ?? templates.length;
+      const plans = data.plans ?? [];
+      const total = data.total ?? plans.length;
       return {
-        templates: templates.map((dto) => taskPlanFromDTO(dto)),
+        plans: plans.map((dto) => taskPlanFromDTO(dto)),
         total,
       };
     });
   }
 
-  async getTemplate(id: string): Promise<Result<TaskPlan>> {
+  async getPlan(id: string): Promise<Result<TaskPlan>> {
     const result = await this.templateApi.getTaskPlanById(id);
     return mapResult(result, (dto) => taskPlanFromDTO(dto));
   }
 
-  async updateTemplate(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlan>> {
+  async updatePlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlan>> {
     const result = await this.templateApi.updateTaskPlan(id, request);
     return mapResult(result, (dto) => taskPlanFromDTO(dto));
   }
 
-  async deleteTemplate(id: string): Promise<Result<void>> {
+  async deletePlan(id: string): Promise<Result<void>> {
     return this.templateApi.deleteTaskPlan(id);
   }
 
-  async activateTemplate(id: string): Promise<Result<TaskPlan>> {
+  async activatePlan(id: string): Promise<Result<TaskPlan>> {
     const result = await this.templateApi.activateTaskPlan(id);
     return mapResult(result, (dto) => taskPlanFromDTO(dto));
   }
 
-  async pauseTemplate(id: string): Promise<Result<TaskPlan>> {
+  async pausePlan(id: string): Promise<Result<TaskPlan>> {
     const result = await this.templateApi.pauseTaskPlan(id);
     return mapResult(result, (dto) => taskPlanFromDTO(dto));
   }
 
-  async archiveTemplate(id: string): Promise<Result<TaskPlan>> {
+  async archivePlan(id: string): Promise<Result<TaskPlan>> {
     const result = await this.templateApi.archiveTaskPlan(id);
     return mapResult(result, (dto) => taskPlanFromDTO(dto));
   }
@@ -181,20 +180,20 @@ export class TaskClientService implements TaskClientPort {
     return mapResult(result, (dto) => taskPlanFromDTO(dto));
   }
 
-  async generateInstances(
+  async generateOccurrences(
     planId: string,
-    request: GenerateInstancesReq,
+    request: GenerateOccurrencesReq,
   ): Promise<Result<TaskOccurrence[]>> {
-    const result = await this.templateApi.generateInstances(planId, request);
+    const result = await this.templateApi.generateOccurrences(planId, request);
     return mapResult(result, (dtos) => dtos.map((dto) => taskOccurrenceFromDTO(dto)));
   }
 
-  async getInstancesByDateRange(
+  async getOccurrencesByDateRange(
     planId: string,
     from: number,
     to: number,
   ): Promise<Result<TaskOccurrence[]>> {
-    const result = await this.templateApi.getInstancesByDateRange(planId, { from, to });
+    const result = await this.templateApi.getOccurrencesByDateRange(planId, { from, to });
     return mapResult(result, (dtos) => dtos.map((dto) => taskOccurrenceFromDTO(dto)));
   }
 
@@ -208,9 +207,9 @@ export class TaskClientService implements TaskClientPort {
     return mapResult(result, (dto) => taskPlanFromDTO(dto));
   }
 
-  // ===== Task Instance Operations =====
+  // ===== Task Occurrence Operations =====
 
-  async listInstances(params?: {
+  async listOccurrences(params?: {
     page?: number;
     limit?: number;
     planId?: string;
@@ -222,7 +221,7 @@ export class TaskClientService implements TaskClientPort {
     );
   }
 
-  async listInstancesByDateRange(from: number, to: number): Promise<Result<TaskOccurrence[]>> {
+  async listOccurrencesByDateRange(from: number, to: number): Promise<Result<TaskOccurrence[]>> {
     const request: GetTaskOccurrencesByRangeReq = {
       startDate: from,
       endDate: to,
@@ -233,21 +232,21 @@ export class TaskClientService implements TaskClientPort {
     );
   }
 
-  async getInstance(id: string): Promise<Result<TaskOccurrence>> {
+  async getOccurrence(id: string): Promise<Result<TaskOccurrence>> {
     const result = await this.instanceApi.getTaskOccurrenceById(id);
     return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
   }
 
-  async deleteInstance(id: string): Promise<Result<void>> {
+  async deleteOccurrence(id: string): Promise<Result<void>> {
     return this.instanceApi.deleteTaskOccurrence(id);
   }
 
-  async startInstance(id: string): Promise<Result<TaskOccurrence>> {
+  async startOccurrence(id: string): Promise<Result<TaskOccurrence>> {
     const result = await this.instanceApi.startTaskOccurrence(id);
     return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
   }
 
-  async completeInstance(
+  async completeOccurrence(
     id: string,
     request?: CompleteTaskOccurrenceReq,
   ): Promise<Result<TaskOccurrence>> {
@@ -255,17 +254,17 @@ export class TaskClientService implements TaskClientPort {
     return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
   }
 
-  async uncompleteInstance(id: string): Promise<Result<TaskOccurrence>> {
+  async uncompleteOccurrence(id: string): Promise<Result<TaskOccurrence>> {
     const result = await this.instanceApi.uncompleteTaskOccurrence(id);
     return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
   }
 
-  async skipInstance(id: string, request?: SkipTaskOccurrenceReq): Promise<Result<TaskOccurrence>> {
+  async skipOccurrence(id: string, request?: SkipTaskOccurrenceReq): Promise<Result<TaskOccurrence>> {
     const result = await this.instanceApi.skipTaskOccurrence(id, request);
     return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
   }
 
-  async markInstanceMissed(
+  async markOccurrenceMissed(
     id: string,
     request?: MarkTaskOccurrenceMissedReq,
   ): Promise<Result<TaskOccurrence>> {
@@ -273,7 +272,7 @@ export class TaskClientService implements TaskClientPort {
     return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
   }
 
-  async rescheduleInstance(
+  async rescheduleOccurrence(
     id: string,
     request: RescheduleTaskInput,
   ): Promise<Result<TaskOccurrence>> {
@@ -281,7 +280,7 @@ export class TaskClientService implements TaskClientPort {
     return mapResult(result, (dto) => taskOccurrenceFromDTO(dto));
   }
 
-  async setChecklistItem(
+  async setOccurrenceChecklistItem(
     id: string,
     request: SetTaskOccurrenceChecklistItemReq,
   ): Promise<Result<TaskOccurrence>> {

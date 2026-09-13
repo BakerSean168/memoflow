@@ -15,8 +15,8 @@ export interface LifecycleContext {
 
 function assertNotDeleted(ctx: LifecycleContext, action: string): void {
   if (ctx.props.deletedAt !== null) {
-    throw new InvalidTaskPlanStateError(`Cannot ${action} a deleted template`, {
-      templateId: ctx.id,
+    throw new InvalidTaskPlanStateError(`Cannot ${action} a deleted plan`, {
+      planId: ctx.id,
       currentStatus: ctx.props.status,
       attemptedAction: action,
     });
@@ -27,13 +27,13 @@ export function activate(ctx: LifecycleContext): void {
   assertNotDeleted(ctx, 'activate');
   if (ctx.props.status !== TaskPlanStatus.Paused || ctx.props.outcome !== TaskPlanOutcome.Open) {
     throw new InvalidTaskPlanStateError('Can only activate an open paused plan', {
-      templateId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'activate',
+      planId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'activate',
     });
   }
   ctx.props.status = TaskPlanStatus.Active;
   ctx.props.updatedAt = Date.now();
   ctx.addHistory('resumed');
-  ctx.publishDomainEvent<TaskEventMap['task:template-resumed']>('task:template-resumed', {
+  ctx.publishDomainEvent<TaskEventMap['task:plan-resumed']>('task:plan-resumed', {
     identityId: ctx.props.identityId,
     taskPlanId: ctx.id,
     resumedAt: ctx.props.updatedAt,
@@ -45,13 +45,13 @@ export function pause(ctx: LifecycleContext): void {
   assertNotDeleted(ctx, 'pause');
   if (ctx.props.status !== TaskPlanStatus.Active || ctx.props.outcome !== TaskPlanOutcome.Open) {
     throw new InvalidTaskPlanStateError('Can only pause an active open plan', {
-      templateId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'pause',
+      planId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'pause',
     });
   }
   ctx.props.status = TaskPlanStatus.Paused;
   ctx.props.updatedAt = Date.now();
   ctx.addHistory('paused');
-  ctx.publishDomainEvent<TaskEventMap['task:template-paused']>('task:template-paused', {
+  ctx.publishDomainEvent<TaskEventMap['task:plan-paused']>('task:plan-paused', {
     identityId: ctx.props.identityId,
     taskPlanId: ctx.id,
     pausedAt: ctx.props.updatedAt,
@@ -64,7 +64,7 @@ export function archive(ctx: LifecycleContext): void {
   assertNotDeleted(ctx, 'archive');
   if (ctx.props.archivedAt !== null) {
     throw new InvalidTaskPlanStateError('Template is already archived', {
-      templateId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'archive',
+      planId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'archive',
     });
   }
   ctx.props.archivedAt = Date.now();
@@ -76,7 +76,7 @@ export function archive(ctx: LifecycleContext): void {
 export function softDelete(ctx: LifecycleContext): void {
   if (ctx.props.deletedAt !== null) {
     throw new InvalidTaskPlanStateError('Template is already deleted', {
-      templateId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'softDelete',
+      planId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'softDelete',
     });
   }
   ctx.props.deletedAt = Date.now();
@@ -95,7 +95,7 @@ export function softDelete(ctx: LifecycleContext): void {
 export function restore(ctx: LifecycleContext): void {
   if (ctx.props.deletedAt === null && ctx.props.archivedAt === null) {
     throw new InvalidTaskPlanStateError('Template is neither deleted nor archived', {
-      templateId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'restore',
+      planId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'restore',
     });
   }
   ctx.props.deletedAt = null;
@@ -109,7 +109,7 @@ export function abandon(ctx: LifecycleContext, reason?: string): void {
   assertNotDeleted(ctx, 'abandon');
   if (ctx.props.status === TaskPlanStatus.Closed) {
     throw new InvalidTaskPlanStateError('Task plan is already closed', {
-      templateId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'abandon',
+      planId: ctx.id, currentStatus: ctx.props.status, attemptedAction: 'abandon',
     });
   }
   const now = Date.now();

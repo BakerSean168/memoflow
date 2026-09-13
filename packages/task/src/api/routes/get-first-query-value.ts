@@ -1,6 +1,6 @@
 /**
  * Residual 983: sole getFirstQueryValue helper for task API routes.
- * Instance + template routes import this; local duals retired.
+ * Instance + plan routes import this; local duals retired.
  * Express query values may be string | string[]; prefer first string entry.
  */
 

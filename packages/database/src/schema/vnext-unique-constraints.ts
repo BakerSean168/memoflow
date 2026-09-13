@@ -43,14 +43,14 @@ const UNIQUE_CONSTRAINTS: readonly UniqueConstraintSpec[] = [
     indexName: 'schedule_tasks_owner_scheduling_key_unique',
   },
   {
-    table: 'task_instances',
+    table: 'task_occurrences',
     columns: ['plan_id', 'occurrence_key'],
-    indexName: 'task_instances_plan_id_occurrence_key_key',
+    indexName: 'task_occurrences_plan_id_occurrence_key_key',
   },
   {
-    table: 'task_templates',
+    table: 'task_plans',
     columns: ['id', 'identity_id'],
-    indexName: 'task_templates_id_identity_id_key',
+    indexName: 'task_plans_id_identity_id_key',
   },
 ] as const;
 

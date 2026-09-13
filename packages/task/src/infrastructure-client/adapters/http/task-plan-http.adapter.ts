@@ -14,10 +14,10 @@ import type {
   CreateTaskPlanReq,
   CreateTaskPlanRes,
   UpdateTaskPlanReq,
-  GenerateInstancesReq,
+  GenerateOccurrencesReq,
   BindToGoalReq,
   AbandonTaskPlanReq,
-  TaskPlanInstancesQuery,
+  TaskPlanOccurrencesQuery,
   GetTaskWorkspaceReq,
   TaskPlanWorkspace,
 } from '@memoflow/contracts/task';
@@ -25,7 +25,7 @@ import type {
 /**
  * TaskPlanHttpAdapter
  *
- * HTTP implementation of the task template API client.
+ * HTTP implementation of the task plan API client.
  */
 export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
   private readonly baseUrl = '/task-plans';
@@ -44,14 +44,12 @@ export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
 
   async getTaskPlans(
     params?: TaskPlanListParams,
-  ): Promise<Result<{ templates: TaskPlanClientDTO[]; total: number }>> {
+  ): Promise<Result<{ plans: TaskPlanClientDTO[]; total: number }>> {
     return this.httpClient.get(this.baseUrl, { params });
   }
 
-  async getTaskPlanById(id: string, includeChildren = false): Promise<Result<TaskPlanClientDTO>> {
-    return this.httpClient.get(`${this.baseUrl}/${id}`, {
-      params: { includeChildren },
-    });
+  async getTaskPlanById(id: string): Promise<Result<TaskPlanClientDTO>> {
+    return this.httpClient.get(`${this.baseUrl}/${id}`);
   }
 
   async updateTaskPlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlanClientDTO>> {
@@ -87,18 +85,18 @@ export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
 
   // ===== Aggregate Control: Instance Management =====
 
-  async generateInstances(
+  async generateOccurrences(
     planId: string,
-    request: GenerateInstancesReq,
+    request: GenerateOccurrencesReq,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    return this.httpClient.post(`${this.baseUrl}/${planId}/generate-instances`, request);
+    return this.httpClient.post(`${this.baseUrl}/${planId}/generate-occurrences`, request);
   }
 
-  async getInstancesByDateRange(
+  async getOccurrencesByDateRange(
     planId: string,
-    query?: TaskPlanInstancesQuery,
+    query?: TaskPlanOccurrencesQuery,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    return this.httpClient.get(`${this.baseUrl}/${planId}/instances`, {
+    return this.httpClient.get(`${this.baseUrl}/${planId}/occurrences`, {
       params: query,
     });
   }

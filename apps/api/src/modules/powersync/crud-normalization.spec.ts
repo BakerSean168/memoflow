@@ -45,14 +45,14 @@ describe('normalizeCrudData', () => {
   });
 
   it('keeps JSON-looking text when the Prisma column is intentionally a string', () => {
-    expect(normalizeCrudData('task_templates', { tags: '["work"]' })).toEqual({
+    expect(normalizeCrudData('task_plans', { tags: '["work"]' })).toEqual({
       tags: '["work"]',
     });
   });
 
   it('maps expanded task-goal relation columns without reviving the JSON binding', () => {
     expect(
-      normalizeCrudData('task_templates', {
+      normalizeCrudData('task_plans', {
         goal_id: 'goal-1',
         key_result_id: 'kr-1',
         goal_record_value: 2.5,

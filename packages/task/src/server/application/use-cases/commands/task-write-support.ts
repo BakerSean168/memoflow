@@ -9,8 +9,8 @@ import { OptimisticConcurrencyError } from '../../../domain/errors/optimistic-co
 
 export interface TaskWriteRepositories {
   /** 完整事务（complete 等）需要模板读取；仅实例操作（uncomplete）可省略。 */
-  readonly templateRepository?: ITaskPlanRepository;
-  readonly instanceRepository: ITaskOccurrenceRepository;
+  readonly planRepository?: ITaskPlanRepository;
+  readonly occurrenceRepository: ITaskOccurrenceRepository;
 }
 
 export interface TaskWriteTransactionRunner {

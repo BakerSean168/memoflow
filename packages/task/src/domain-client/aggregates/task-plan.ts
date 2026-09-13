@@ -53,17 +53,16 @@ export interface TaskPlanState {
   createdAt: Instant;
   updatedAt: Instant;
   deletedAt: Instant | null;
-  instanceCount: number;
-  completedInstanceCount: number;
-  pendingInstanceCount: number;
-  dueInstanceCount: number;
-  completedDueInstanceCount: number;
+  occurrenceCount: number;
+  completedOccurrenceCount: number;
+  pendingOccurrenceCount: number;
+  dueOccurrenceCount: number;
+  completedDueOccurrenceCount: number;
   completionWindowDays: 30;
-  futurePendingInstanceCount: number;
-  singleInstanceStatus: TaskPlanClientDTO['singleInstanceStatus'];
+  futurePendingOccurrenceCount: number;
+  singleOccurrenceStatus: TaskPlanClientDTO['singleOccurrenceStatus'];
   completionRate: number;
   history?: unknown[];
-  instances?: unknown[];
 }
 
 export class TaskPlan extends AggregateRoot<TaskPlanId> {
@@ -152,36 +151,36 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     return v as Instant;
   }
 
-  get instanceCount(): number {
-    return this._props.instanceCount;
+  get occurrenceCount(): number {
+    return this._props.occurrenceCount;
   }
 
-  get completedInstanceCount(): number {
-    return this._props.completedInstanceCount;
+  get completedOccurrenceCount(): number {
+    return this._props.completedOccurrenceCount;
   }
 
-  get pendingInstanceCount(): number {
-    return this._props.pendingInstanceCount;
+  get pendingOccurrenceCount(): number {
+    return this._props.pendingOccurrenceCount;
   }
 
-  get dueInstanceCount(): number {
-    return this._props.dueInstanceCount;
+  get dueOccurrenceCount(): number {
+    return this._props.dueOccurrenceCount;
   }
 
-  get completedDueInstanceCount(): number {
-    return this._props.completedDueInstanceCount;
+  get completedDueOccurrenceCount(): number {
+    return this._props.completedDueOccurrenceCount;
   }
 
   get completionWindowDays(): 30 {
     return this._props.completionWindowDays;
   }
 
-  get futurePendingInstanceCount(): number {
-    return this._props.futurePendingInstanceCount;
+  get futurePendingOccurrenceCount(): number {
+    return this._props.futurePendingOccurrenceCount;
   }
 
-  get singleInstanceStatus(): TaskPlanClientDTO['singleInstanceStatus'] {
-    return this._props.singleInstanceStatus;
+  get singleOccurrenceStatus(): TaskPlanClientDTO['singleOccurrenceStatus'] {
+    return this._props.singleOccurrenceStatus;
   }
 
   get completionRate(): number {
@@ -190,10 +189,6 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
 
   get history(): unknown[] | undefined {
     return this._props.history ? [...this._props.history] : undefined;
-  }
-
-  get instances(): unknown[] | undefined {
-    return this._props.instances ? [...this._props.instances] : undefined;
   }
 
   // UI 计算属性
@@ -231,17 +226,16 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
       deletedAt: this._props.deletedAt ?? null,
-      instanceCount: this._props.instanceCount,
-      completedInstanceCount: this._props.completedInstanceCount,
-      pendingInstanceCount: this._props.pendingInstanceCount,
-      dueInstanceCount: this._props.dueInstanceCount,
-      completedDueInstanceCount: this._props.completedDueInstanceCount,
+      occurrenceCount: this._props.occurrenceCount,
+      completedOccurrenceCount: this._props.completedOccurrenceCount,
+      pendingOccurrenceCount: this._props.pendingOccurrenceCount,
+      dueOccurrenceCount: this._props.dueOccurrenceCount,
+      completedDueOccurrenceCount: this._props.completedDueOccurrenceCount,
       completionWindowDays: this._props.completionWindowDays,
-      futurePendingInstanceCount: this._props.futurePendingInstanceCount,
-      singleInstanceStatus: this._props.singleInstanceStatus,
+      futurePendingOccurrenceCount: this._props.futurePendingOccurrenceCount,
+      singleOccurrenceStatus: this._props.singleOccurrenceStatus,
       completionRate: this._props.completionRate,
       history: this._props.history ? [...this._props.history] : undefined,
-      instances: this._props.instances ? [...this._props.instances] : undefined,
     };
   }
 

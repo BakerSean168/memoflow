@@ -92,7 +92,7 @@ describe('initElectronFeatures DB_CHANGED pilot routing (Step 3)', () => {
     const { initElectronFeatures } = await import('./electron');
     initElectronFeatures({} as never);
 
-    emitDbChanged(['notifications', 'task_templates', 'rules', 'goals']);
+    emitDbChanged(['notifications', 'task_plans', 'rules', 'goals']);
 
     expect(dispatchedIntents()).toHaveLength(3);
     expect(dispatchedIntents()[0]).toEqual({

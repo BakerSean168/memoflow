@@ -131,7 +131,6 @@ import {
 import { ListTodo, ArrowRight, CheckCircle2, Check, Loader2 } from '@lucide/vue';
 import { useTask } from '../../composables/useTask';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
-import { formatHHmmParts } from '../../../../shared/utils/format-hhmm-parts';
 
 const emit = defineEmits<{
   (e: 'view-all'): void;
@@ -244,9 +243,9 @@ async function handleComplete(inst: TaskOccurrenceClientDTO) {
   completing.value = inst.id;
   try {
     if (inst.status === 'Completed') {
-      await task.uncompleteInstance(inst.id);
+      await task.uncompleteOccurrence(inst.id);
     } else {
-      const completed = await task.completeInstance(inst.id);
+      const completed = await task.completeOccurrence(inst.id);
       if (completed) {
         emit('completed', completed);
       }

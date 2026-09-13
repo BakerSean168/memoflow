@@ -22,7 +22,7 @@ function createMockUseCases(): TaskOccurrenceUseCases {
     skip: vi.fn(),
     markMissed: vi.fn(),
     start: vi.fn(),
-    deleteInstance: vi.fn(),
+    deleteOccurrence: vi.fn(),
   } as unknown as TaskOccurrenceUseCases;
 }
 
@@ -65,15 +65,15 @@ describe('TaskOccurrenceController', () => {
   });
 
   // =========================================================================
-  // getInstance
+  // getOccurrence
   // =========================================================================
-  describe('getInstance', () => {
+  describe('getOccurrence', () => {
     it('should call getTaskOccurrence use case with id', async () => {
       (useCases.getTaskOccurrence as ReturnType<typeof vi.fn>).mockResolvedValue(
         ok(FAKE_INSTANCE_DTO),
       );
 
-      await controller.getInstance('inst_abc123', ctx);
+      await controller.getOccurrence('inst_abc123', ctx);
 
       expect(useCases.getTaskOccurrence).toHaveBeenCalledWith('inst_abc123', TEST_IDENTITY_ID);
     });
@@ -82,15 +82,15 @@ describe('TaskOccurrenceController', () => {
       const expectedResult = ok(FAKE_INSTANCE_DTO);
       (useCases.getTaskOccurrence as ReturnType<typeof vi.fn>).mockResolvedValue(expectedResult);
 
-      const result = await controller.getInstance('inst_abc123', ctx);
+      const result = await controller.getOccurrence('inst_abc123', ctx);
 
       expect(result).toBe(expectedResult);
     });
 
-    it('should return null result when instance not found', async () => {
+    it('should return null result when occurrence not found', async () => {
       (useCases.getTaskOccurrence as ReturnType<typeof vi.fn>).mockResolvedValue(ok(null));
 
-      const result = await controller.getInstance('inst_nonexistent', ctx);
+      const result = await controller.getOccurrence('inst_nonexistent', ctx);
 
       expect(isOk(result)).toBe(true);
       if (isOk(result)) {
@@ -100,13 +100,13 @@ describe('TaskOccurrenceController', () => {
   });
 
   // =========================================================================
-  // listInstances — routing logic
+  // listOccurrences — routing logic
   // =========================================================================
-  describe('listInstances', () => {
+  describe('listOccurrences', () => {
     it('should call listByTemplate when planId is provided', async () => {
       (useCases.listByTemplate as ReturnType<typeof vi.fn>).mockResolvedValue(ok([]));
 
-      await controller.listInstances(TEST_IDENTITY_ID, { planId: 'tmpl_1' });
+      await controller.listOccurrences(TEST_IDENTITY_ID, { planId: 'tmpl_1' });
 
       expect(useCases.listByTemplate).toHaveBeenCalledWith('tmpl_1', TEST_IDENTITY_ID);
       expect(useCases.listByStatus).not.toHaveBeenCalled();
@@ -116,7 +116,7 @@ describe('TaskOccurrenceController', () => {
     it('should call listByStatus when status is provided (and no planId)', async () => {
       (useCases.listByStatus as ReturnType<typeof vi.fn>).mockResolvedValue(ok([]));
 
-      await controller.listInstances(TEST_IDENTITY_ID, { status: 'Pending' as any });
+      await controller.listOccurrences(TEST_IDENTITY_ID, { status: 'Pending' as any });
 
       expect(useCases.listByStatus).toHaveBeenCalledWith(TEST_IDENTITY_ID, 'Pending');
       expect(useCases.listByTemplate).not.toHaveBeenCalled();
@@ -126,7 +126,7 @@ describe('TaskOccurrenceController', () => {
     it('should call listByAccount when no filters are provided', async () => {
       (useCases.listByAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ok([]));
 
-      await controller.listInstances(TEST_IDENTITY_ID);
+      await controller.listOccurrences(TEST_IDENTITY_ID);
 
       expect(useCases.listByAccount).toHaveBeenCalledWith(TEST_IDENTITY_ID);
       expect(useCases.listByTemplate).not.toHaveBeenCalled();
@@ -136,7 +136,7 @@ describe('TaskOccurrenceController', () => {
     it('should prioritize planId over status', async () => {
       (useCases.listByTemplate as ReturnType<typeof vi.fn>).mockResolvedValue(ok([]));
 
-      await controller.listInstances(TEST_IDENTITY_ID, {
+      await controller.listOccurrences(TEST_IDENTITY_ID, {
         planId: 'tmpl_1',
         status: 'Pending' as any,
       });
@@ -148,22 +148,22 @@ describe('TaskOccurrenceController', () => {
     it('should call listByAccount when filters is empty object', async () => {
       (useCases.listByAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ok([]));
 
-      await controller.listInstances(TEST_IDENTITY_ID, {});
+      await controller.listOccurrences(TEST_IDENTITY_ID, {});
 
       expect(useCases.listByAccount).toHaveBeenCalledWith(TEST_IDENTITY_ID);
     });
   });
 
   // =========================================================================
-  // getInstancesByDateRange
+  // getOccurrencesByDateRange
   // =========================================================================
-  describe('getInstancesByDateRange', () => {
+  describe('getOccurrencesByDateRange', () => {
     it('should call getByDateRange use case with all parameters', async () => {
       (useCases.getByDateRange as ReturnType<typeof vi.fn>).mockResolvedValue(
         ok({ data: [FAKE_INSTANCE_DTO], total: 1 }),
       );
 
-      await controller.getInstancesByDateRange(TEST_IDENTITY_ID, {
+      await controller.getOccurrencesByDateRange(TEST_IDENTITY_ID, {
         startDate: 1000,
         endDate: 2000,
       });
@@ -175,7 +175,7 @@ describe('TaskOccurrenceController', () => {
       const useCaseError = fail({ code: 'VALIDATION_ERROR', message: 'Invalid range' });
       (useCases.getByDateRange as ReturnType<typeof vi.fn>).mockResolvedValue(useCaseError);
 
-      const result = await controller.getInstancesByDateRange(TEST_IDENTITY_ID, {
+      const result = await controller.getOccurrencesByDateRange(TEST_IDENTITY_ID, {
         startDate: 1000,
         endDate: 2000,
       });
@@ -186,12 +186,12 @@ describe('TaskOccurrenceController', () => {
       }
     });
 
-    it('should return ok with instances from use case result', async () => {
+    it('should return ok with occurrences from use case result', async () => {
       (useCases.getByDateRange as ReturnType<typeof vi.fn>).mockResolvedValue(
         ok({ data: [FAKE_INSTANCE_DTO], total: 1 }),
       );
 
-      const result = await controller.getInstancesByDateRange(TEST_IDENTITY_ID, {
+      const result = await controller.getOccurrencesByDateRange(TEST_IDENTITY_ID, {
         startDate: 1000,
         endDate: 2000,
       });
@@ -204,17 +204,17 @@ describe('TaskOccurrenceController', () => {
   });
 
   // =========================================================================
-  // completeInstance
+  // completeOccurrence
   // =========================================================================
-  describe('completeInstance', () => {
+  describe('completeOccurrence', () => {
     it('delegates parsed input to the use case (shape validation is adapter-owned)', async () => {
       // Phase 4: malformed shapes are rejected by the adapters before the
       // controller; the controller receives inferred input and delegates.
       (useCases.complete as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: FAKE_INSTANCE_DTO }),
+        ok({ occurrence: FAKE_INSTANCE_DTO }),
       );
 
-      const result = await controller.completeInstance('inst_1', { rating: 5 }, ctx);
+      const result = await controller.completeOccurrence('inst_1', { rating: 5 }, ctx);
 
       expect(useCases.complete).toHaveBeenCalledOnce();
       expect(isOk(result)).toBe(true);
@@ -222,10 +222,10 @@ describe('TaskOccurrenceController', () => {
 
     it('should accept empty object (all fields optional)', async () => {
       (useCases.complete as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: FAKE_INSTANCE_DTO }),
+        ok({ occurrence: FAKE_INSTANCE_DTO }),
       );
 
-      const result = await controller.completeInstance('inst_1', {}, ctx);
+      const result = await controller.completeOccurrence('inst_1', {}, ctx);
 
       expect(useCases.complete).toHaveBeenCalledWith('inst_1', TEST_IDENTITY_ID, {});
       expect(isOk(result)).toBe(true);
@@ -233,10 +233,10 @@ describe('TaskOccurrenceController', () => {
 
     it('should call complete use case with the parsed input', async () => {
       (useCases.complete as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: FAKE_INSTANCE_DTO }),
+        ok({ occurrence: FAKE_INSTANCE_DTO }),
       );
 
-      const result = await controller.completeInstance('inst_1', {}, ctx);
+      const result = await controller.completeOccurrence('inst_1', {}, ctx);
 
       expect(useCases.complete).toHaveBeenCalledWith('inst_1', TEST_IDENTITY_ID, {});
       expect(isOk(result)).toBe(true);
@@ -244,10 +244,10 @@ describe('TaskOccurrenceController', () => {
 
     it('should call complete use case with parsed data', async () => {
       (useCases.complete as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: FAKE_INSTANCE_DTO }),
+        ok({ occurrence: FAKE_INSTANCE_DTO }),
       );
 
-      await controller.completeInstance(
+      await controller.completeOccurrence(
         'inst_1',
         {
           duration: 30,
@@ -264,12 +264,12 @@ describe('TaskOccurrenceController', () => {
       });
     });
 
-    it('should unwrap result.data.instance', async () => {
+    it('should unwrap result.data.occurrence', async () => {
       (useCases.complete as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: FAKE_INSTANCE_DTO }),
+        ok({ occurrence: FAKE_INSTANCE_DTO }),
       );
 
-      const result = await controller.completeInstance('inst_1', {}, ctx);
+      const result = await controller.completeOccurrence('inst_1', {}, ctx);
 
       expect(isOk(result)).toBe(true);
       if (isOk(result)) {
@@ -281,7 +281,7 @@ describe('TaskOccurrenceController', () => {
       const useCaseError = fail({ code: 'NOT_FOUND', message: 'Instance not found' });
       (useCases.complete as ReturnType<typeof vi.fn>).mockResolvedValue(useCaseError);
 
-      const result = await controller.completeInstance('inst_1', {}, ctx);
+      const result = await controller.completeOccurrence('inst_1', {}, ctx);
 
       expect(isOk(result)).toBe(false);
       if (!isOk(result)) {
@@ -293,10 +293,10 @@ describe('TaskOccurrenceController', () => {
       // Phase 4: rating bounds are enforced by CompleteTaskOccurrenceSchema in the
       // adapters; the controller delegates parsed input to the use case.
       (useCases.complete as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: FAKE_INSTANCE_DTO }),
+        ok({ occurrence: FAKE_INSTANCE_DTO }),
       );
 
-      const result = await controller.completeInstance('inst_1', { rating: 5 }, ctx);
+      const result = await controller.completeOccurrence('inst_1', { rating: 5 }, ctx);
 
       expect(useCases.complete).toHaveBeenCalledOnce();
       expect(isOk(result)).toBe(true);
@@ -304,15 +304,15 @@ describe('TaskOccurrenceController', () => {
   });
 
   // =========================================================================
-  // skipInstance
+  // skipOccurrence
   // =========================================================================
-  describe('skipInstance', () => {
+  describe('skipOccurrence', () => {
     it('should call skip use case with the parsed input', async () => {
       (useCases.skip as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: FAKE_INSTANCE_DTO }),
+        ok({ occurrence: FAKE_INSTANCE_DTO }),
       );
 
-      const result = await controller.skipInstance('inst_1', {}, ctx);
+      const result = await controller.skipOccurrence('inst_1', {}, ctx);
 
       expect(useCases.skip).toHaveBeenCalledWith('inst_1', TEST_IDENTITY_ID, {});
       expect(isOk(result)).toBe(true);
@@ -320,10 +320,10 @@ describe('TaskOccurrenceController', () => {
 
     it('should accept empty object (reason is optional)', async () => {
       (useCases.skip as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: FAKE_INSTANCE_DTO }),
+        ok({ occurrence: FAKE_INSTANCE_DTO }),
       );
 
-      const result = await controller.skipInstance('inst_1', {}, ctx);
+      const result = await controller.skipOccurrence('inst_1', {}, ctx);
 
       expect(useCases.skip).toHaveBeenCalledWith('inst_1', TEST_IDENTITY_ID, {});
       expect(isOk(result)).toBe(true);
@@ -331,22 +331,22 @@ describe('TaskOccurrenceController', () => {
 
     it('should call skip use case with reason', async () => {
       (useCases.skip as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: FAKE_INSTANCE_DTO }),
+        ok({ occurrence: FAKE_INSTANCE_DTO }),
       );
 
-      await controller.skipInstance('inst_1', { reason: 'Too tired' }, ctx);
+      await controller.skipOccurrence('inst_1', { reason: 'Too tired' }, ctx);
 
       expect(useCases.skip).toHaveBeenCalledWith('inst_1', TEST_IDENTITY_ID, {
         reason: 'Too tired',
       });
     });
 
-    it('should unwrap result.data.instance', async () => {
+    it('should unwrap result.data.occurrence', async () => {
       (useCases.skip as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: FAKE_INSTANCE_DTO }),
+        ok({ occurrence: FAKE_INSTANCE_DTO }),
       );
 
-      const result = await controller.skipInstance('inst_1', {}, ctx);
+      const result = await controller.skipOccurrence('inst_1', {}, ctx);
 
       expect(isOk(result)).toBe(true);
       if (isOk(result)) {
@@ -358,7 +358,7 @@ describe('TaskOccurrenceController', () => {
       const useCaseError = fail({ code: 'NOT_FOUND', message: 'Not found' });
       (useCases.skip as ReturnType<typeof vi.fn>).mockResolvedValue(useCaseError);
 
-      const result = await controller.skipInstance('inst_1', {}, ctx);
+      const result = await controller.skipOccurrence('inst_1', {}, ctx);
 
       expect(isOk(result)).toBe(false);
     });
@@ -367,23 +367,23 @@ describe('TaskOccurrenceController', () => {
       // Phase 4: shape/type validation is enforced by SkipTaskOccurrenceSchema in
       // the adapters; the controller delegates parsed input to the use case.
       (useCases.skip as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: FAKE_INSTANCE_DTO }),
+        ok({ occurrence: FAKE_INSTANCE_DTO }),
       );
 
-      const result = await controller.skipInstance('inst_1', { reason: 'Too tired' }, ctx);
+      const result = await controller.skipOccurrence('inst_1', { reason: 'Too tired' }, ctx);
 
       expect(useCases.skip).toHaveBeenCalledOnce();
       expect(isOk(result)).toBe(true);
     });
   });
 
-  describe('markMissedInstance', () => {
-    it('delegates the explicit fact command and unwraps the instance', async () => {
+  describe('markOccurrenceMissed', () => {
+    it('delegates the explicit fact command and unwraps the occurrence', async () => {
       (useCases.markMissed as ReturnType<typeof vi.fn>).mockResolvedValue(
-        ok({ instance: { ...FAKE_INSTANCE_DTO, status: 'Missed' } }),
+        ok({ occurrence: { ...FAKE_INSTANCE_DTO, status: 'Missed' } }),
       );
 
-      const result = await controller.markMissedInstance(
+      const result = await controller.markOccurrenceMissed(
         'inst_1',
         { reason: 'No completion evidence' },
         ctx,
@@ -397,13 +397,13 @@ describe('TaskOccurrenceController', () => {
   });
 
   // =========================================================================
-  // startInstance
+  // startOccurrence
   // =========================================================================
-  describe('startInstance', () => {
+  describe('startOccurrence', () => {
     it('should call start use case with id', async () => {
       (useCases.start as ReturnType<typeof vi.fn>).mockResolvedValue(ok(FAKE_INSTANCE_DTO));
 
-      await controller.startInstance('inst_1', ctx);
+      await controller.startOccurrence('inst_1', ctx);
 
       expect(useCases.start).toHaveBeenCalledWith('inst_1', TEST_IDENTITY_ID);
     });
@@ -412,28 +412,28 @@ describe('TaskOccurrenceController', () => {
       const expectedResult = ok(FAKE_INSTANCE_DTO);
       (useCases.start as ReturnType<typeof vi.fn>).mockResolvedValue(expectedResult);
 
-      const result = await controller.startInstance('inst_1', ctx);
+      const result = await controller.startOccurrence('inst_1', ctx);
 
       expect(result).toBe(expectedResult);
     });
   });
 
   // =========================================================================
-  // deleteInstance
+  // deleteOccurrence
   // =========================================================================
-  describe('deleteInstance', () => {
-    it('should call deleteInstance use case with id', async () => {
-      (useCases.deleteInstance as ReturnType<typeof vi.fn>).mockResolvedValue(ok(undefined));
+  describe('deleteOccurrence', () => {
+    it('should call deleteOccurrence use case with id', async () => {
+      (useCases.deleteOccurrence as ReturnType<typeof vi.fn>).mockResolvedValue(ok(undefined));
 
-      await controller.deleteInstance('inst_1', ctx);
+      await controller.deleteOccurrence('inst_1', ctx);
 
-      expect(useCases.deleteInstance).toHaveBeenCalledWith('inst_1', TEST_IDENTITY_ID);
+      expect(useCases.deleteOccurrence).toHaveBeenCalledWith('inst_1', TEST_IDENTITY_ID);
     });
 
     it('should normalize success to ok(null)', async () => {
-      (useCases.deleteInstance as ReturnType<typeof vi.fn>).mockResolvedValue(ok(undefined));
+      (useCases.deleteOccurrence as ReturnType<typeof vi.fn>).mockResolvedValue(ok(undefined));
 
-      const result = await controller.deleteInstance('inst_1', ctx);
+      const result = await controller.deleteOccurrence('inst_1', ctx);
 
       expect(result).toEqual(ok(null));
     });

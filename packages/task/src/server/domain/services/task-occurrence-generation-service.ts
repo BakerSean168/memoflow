@@ -6,52 +6,50 @@
  */
 
 import { TaskPlan, TaskOccurrence } from '../aggregates';
-import * as instanceGeneration from '../aggregates/instance-generation.policy';
-import { TASK_INSTANCE_GENERATION_CONFIG } from '@memoflow/contracts/task';
+import * as occurrenceGeneration from '../aggregates/occurrence-generation.policy';
+import { TASK_OCCURRENCE_GENERATION_CONFIG } from '@memoflow/contracts/task';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
 
-const { TARGET_GENERATE_AHEAD_DAYS } = TASK_INSTANCE_GENERATION_CONFIG;
+const { TARGET_GENERATE_AHEAD_DAYS } = TASK_OCCURRENCE_GENERATION_CONFIG;
 
 export class TaskOccurrenceGenerationService {
   private buildContext(
-    template: TaskPlan,
+    plan: TaskPlan,
     timeContext: TimeContext,
-    existingInstances: readonly TaskOccurrence[] = [],
-  ): instanceGeneration.InstanceGenerationContext {
+    existingOccurrences: readonly TaskOccurrence[] = [],
+  ): occurrenceGeneration.OccurrenceGenerationContext {
     return {
-      planId: template.id,
-      identityId: template.identityId,
-      status: template.status,
-      taskType: template.taskType,
-      timeConfig: template.schedule.toLegacyTimeConfig(timeContext),
-      recurrenceRule: template.schedule.toLegacyRecurrenceRule(timeContext),
-      importance: template.importance,
-      checklistDefinition: template.checklist.map((item) => item.toDTO()),
-      existingInstances,
+      planId: plan.id,
+      identityId: plan.identityId,
+      status: plan.status,
+      schedule: plan.schedule.toDTO(),
+      importance: plan.importance,
+      checklistDefinition: plan.checklist.map((item) => item.toDTO()),
+      existingOccurrences,
       timeContext,
     };
   }
 
   /** Create one occurrence without transferring ownership to TaskPlan. */
   createOccurrence(
-    template: TaskPlan,
-    instanceDate: number,
+    plan: TaskPlan,
+    occurrenceDate: number,
     timeContext: TimeContext,
   ): TaskOccurrence {
-    return instanceGeneration.createInstanceFromTemplate(this.buildContext(template, timeContext), {
-      instanceDate,
+    return occurrenceGeneration.createOccurrenceFromPlan(this.buildContext(plan, timeContext), {
+      occurrenceDate,
     });
   }
 
   /** Evaluate one candidate against Plan schedule plus independently-owned facts. */
-  shouldGenerateInstance(
-    template: TaskPlan,
+  shouldGenerateOccurrence(
+    plan: TaskPlan,
     date: number,
     timeContext: TimeContext,
-    existingInstances: readonly TaskOccurrence[] = [],
+    existingOccurrences: readonly TaskOccurrence[] = [],
   ): boolean {
-    return instanceGeneration.shouldGenerateInstance(
-      this.buildContext(template, timeContext, existingInstances),
+    return occurrenceGeneration.shouldGenerateOccurrence(
+      this.buildContext(plan, timeContext, existingOccurrences),
       date,
     );
   }
@@ -63,14 +61,14 @@ export class TaskOccurrenceGenerationService {
    * that window is deliberate: the existing occurrence keys are the durable truth,
    * so a missing date anywhere inside the window can be repaired without a cursor.
    */
-  generateInstances(
-    template: TaskPlan,
+  generateOccurrences(
+    plan: TaskPlan,
     timeContext: TimeContext,
     options: {
       targetDate?: number;
       fromDate?: number;
       /** Existing independently-owned occurrences used for idempotent materialization. */
-      existingInstances?: readonly TaskOccurrence[];
+      existingOccurrences?: readonly TaskOccurrence[];
       /** Injectable instant for deterministic tests/runtime passes. */
       now?: number;
     } = {},
@@ -82,22 +80,22 @@ export class TaskOccurrenceGenerationService {
 
     if (fromDate > toDate) return [];
 
-    const result = instanceGeneration.generateInstances(
-      this.buildContext(template, timeContext, options.existingInstances ?? []),
+    const result = occurrenceGeneration.generateOccurrences(
+      this.buildContext(plan, timeContext, options.existingOccurrences ?? []),
       fromDate,
       toDate,
     );
 
-    if (result.instances.length > 0) {
-      template.publishDomainEvent('task:instance-generated', {
-        identityId: template.identityId,
-        templateId: template.id,
-        templateTitle: template.title,
-        instanceCount: result.instances.length,
-        strategy: result.instances.length <= 20 ? 'full' : 'summary',
+    if (result.occurrences.length > 0) {
+      plan.publishDomainEvent('task:occurrence-generated', {
+        identityId: plan.identityId,
+        planId: plan.id,
+        planTitle: plan.title,
+        occurrenceCount: result.occurrences.length,
+        strategy: result.occurrences.length <= 20 ? 'full' : 'summary',
       });
     }
 
-    return result.instances;
+    return result.occurrences;
   }
 }

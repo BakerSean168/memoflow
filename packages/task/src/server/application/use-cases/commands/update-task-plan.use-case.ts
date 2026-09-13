@@ -38,8 +38,8 @@ export class UpdateTaskPlanUseCase {
   private readonly transactionRunner: TaskWriteTransactionRunner;
 
   constructor(
-    private readonly templateRepository: ITaskPlanRepository,
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly planRepository: ITaskPlanRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
     private readonly userTimeContextPort: UserTimeContextPort,
     private readonly now: () => number = Date.now,
@@ -60,35 +60,35 @@ export class UpdateTaskPlanUseCase {
     try {
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
       return await this.transactionRunner.run(
-        async ({ templateRepository, instanceRepository }) => {
-          const template = await templateRepository!.findByIdForIdentity(identityId, id);
-          if (!template) {
+        async ({ planRepository, occurrenceRepository }) => {
+          const plan = await planRepository!.findByIdForIdentity(identityId, id);
+          if (!plan) {
             return error('NOT_FOUND', `TaskPlan ${id} not found`);
           }
 
           // R2-5a：期望版本校验（可选；不传则跳过，向后兼容）。
           if (
             request.expectedVersion !== undefined &&
-            request.expectedVersion !== template.version
+            request.expectedVersion !== plan.version
           ) {
             return error(
               'CONFLICT',
-              `TaskPlan ${id} version conflict: expected ${request.expectedVersion}, current ${template.version}`,
+              `TaskPlan ${id} version conflict: expected ${request.expectedVersion}, current ${plan.version}`,
             );
           }
 
           const nextSchedule =
             request.schedule === undefined
-              ? template.schedule
+              ? plan.schedule
               : TaskPlanSchedule.create(request.schedule);
           const scheduleChanged =
             request.schedule !== undefined &&
-            JSON.stringify(template.schedule.toDTO()) !== JSON.stringify(nextSchedule.toDTO());
+            JSON.stringify(plan.schedule.toDTO()) !== JSON.stringify(nextSchedule.toDTO());
           const importanceChanged =
-            request.importance !== undefined && request.importance !== template.importance;
+            request.importance !== undefined && request.importance !== plan.importance;
           const nextProgressTrigger =
             request.goalBinding === undefined
-              ? template.goalBinding?.contribution?.trigger
+              ? plan.goalBinding?.contribution?.trigger
               : request.goalBinding?.contribution?.trigger;
 
           if (
@@ -105,49 +105,49 @@ export class UpdateTaskPlanUseCase {
           const effectiveFromDate = createTimeFacade({ context: timeContext }).calendar.toYmd(
             effectiveFrom,
           );
-          const instances =
+          const occurrences =
             scheduleChanged || importanceChanged
-              ? await instanceRepository.findByTemplateId(id, identityId)
+              ? await occurrenceRepository.findByPlanId(id, identityId)
               : [];
-          const affectedPendingInstances = instances.filter(
-            (instance) =>
-              instance.status === TaskOccurrenceStatus.Pending &&
-              instance.scheduleDate > effectiveFromDate,
+          const affectedPendingInstances = occurrences.filter(
+            (occurrence) =>
+              occurrence.status === TaskOccurrenceStatus.Pending &&
+              occurrence.scheduleDate > effectiveFromDate,
           );
 
           if (request.name !== undefined) {
-            template.updateTitle(request.name);
+            plan.updateTitle(request.name);
           }
           if (request.description !== undefined) {
-            template.updateDescription(request.description ?? null);
+            plan.updateDescription(request.description ?? null);
           }
           if (scheduleChanged) {
-            template.updateSchedule(nextSchedule);
+            plan.updateSchedule(nextSchedule);
           }
           if (importanceChanged && request.importance !== undefined) {
-            template.updatePriority(request.importance);
+            plan.updatePriority(request.importance);
           }
           if (request.checklist !== undefined) {
-            template.updateChecklist(request.checklist);
+            plan.updateChecklist(request.checklist);
           }
           if (request.reminderConfig !== undefined) {
             const nextReminderConfig = request.reminderConfig
               ? TaskReminderConfig.fromDTO(request.reminderConfig)
               : null;
-            template.updateReminderConfig(nextReminderConfig);
+            plan.updateReminderConfig(nextReminderConfig);
           }
           if (
             request.completionPolicy !== undefined &&
-            request.completionPolicy !== template.completionPolicy
+            request.completionPolicy !== plan.completionPolicy
           ) {
-            template.updateCompletionPolicy(request.completionPolicy);
+            plan.updateCompletionPolicy(request.completionPolicy);
           }
           if (request.goalBinding !== undefined) {
-            if (template.goalBinding) {
-              template.unbindFromGoal();
+            if (plan.goalBinding) {
+              plan.unbindFromGoal();
             }
             if (request.goalBinding) {
-              template.bindToGoal(
+              plan.bindToGoal(
                 request.goalBinding.goalId,
                 request.goalBinding.keyResultId,
                 request.goalBinding.contribution ?? null,
@@ -156,61 +156,61 @@ export class UpdateTaskPlanUseCase {
           }
 
           if (scheduleChanged) {
-            const affectedIds = affectedPendingInstances.map((instance) => String(instance.id));
+            const affectedIds = affectedPendingInstances.map((occurrence) => String(occurrence.id));
             if (affectedIds.length > 0) {
-              await instanceRepository.deleteMany(identityId, affectedIds);
+              await occurrenceRepository.deleteMany(identityId, affectedIds);
             }
 
             const affectedIdSet = new Set(affectedIds);
-            const preservedInstances = instances.filter(
-              (instance) => !affectedIdSet.has(String(instance.id)),
+            const preservedInstances = occurrences.filter(
+              (occurrence) => !affectedIdSet.has(String(occurrence.id)),
             );
 
             const generationHorizon = affectedPendingInstances.reduce(
-              (latest, instance) =>
-                Math.max(latest, Number(instance.scheduledStartOfDayAt(timeContext))),
+              (latest, occurrence) =>
+                Math.max(latest, Number(occurrence.scheduledStartOfDayAt(timeContext))),
               effectiveFrom,
             );
-            if (template.status === TaskPlanStatus.Active && generationHorizon > effectiveFrom) {
-              const regenerated = this.generationService.generateInstances(template, timeContext, {
+            if (plan.status === TaskPlanStatus.Active && generationHorizon > effectiveFrom) {
+              const regenerated = this.generationService.generateOccurrences(plan, timeContext, {
                 fromDate: effectiveFrom,
                 targetDate: generationHorizon,
-                existingInstances: preservedInstances,
+                existingOccurrences: preservedInstances,
                 now: effectiveFrom,
               });
               if (regenerated.length > 0) {
-                await instanceRepository.saveMany(regenerated);
+                await occurrenceRepository.saveMany(regenerated);
               }
             }
           } else if (importanceChanged && request.importance !== undefined) {
-            const changedInstances = affectedPendingInstances.filter((instance) =>
-              instance.applyPlanProjection({
+            const changedInstances = affectedPendingInstances.filter((occurrence) =>
+              occurrence.applyPlanProjection({
                 effectiveFrom: effectiveFromDate,
                 importance: request.importance,
               }),
             );
             if (changedInstances.length > 0) {
-              await instanceRepository.saveMany(changedInstances);
+              await occurrenceRepository.saveMany(changedInstances);
             }
           }
 
           // R2-5a：编辑完成 → 递增版本（乐观锁）。
-          template.advanceVersion();
-          await templateRepository!.save(template);
+          plan.advanceVersion();
+          await planRepository!.save(plan);
           if (request.labelIds !== undefined) {
-            const labels = await templateRepository!.replaceLabels(
+            const labels = await planRepository!.replaceLabels(
               identityId,
               id,
               request.labelIds,
             );
-            template.hydrateLabels(labels);
+            plan.hydrateLabels(labels);
           }
-          return ok(template.toClientDTOAt(timeContext, false, effectiveFrom));
+          return ok(plan.toClientDTOAt(timeContext, false, effectiveFrom));
         },
       );
     } catch (caughtError) {
-      this.logger.error('Failed to update task template', { error: caughtError });
-      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to update task template'));
+      this.logger.error('Failed to update task plan', { error: caughtError });
+      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to update task plan'));
     }
   }
 }

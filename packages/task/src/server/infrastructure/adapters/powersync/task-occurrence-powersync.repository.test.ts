@@ -11,7 +11,7 @@ function ymd(value: string): Ymd {
 function fakeOccurrence(version = 1): TaskOccurrence {
   return {
     toPersistenceState: () => ({
-      id: 'instance-1',
+      id: 'occurrence-1',
       planId: 'plan-1',
       identityId: 'identity-a',
       occurrenceKey: 'plan-1:2026-08-28',
@@ -38,34 +38,34 @@ describe('PowerSyncTaskOccurrenceRepository canonical persistence', () => {
   it('uses Ymd schedule_date for rolling stats and future Pending projection', async () => {
     const getAll = vi.fn().mockResolvedValue([
       {
-        templateId: 'plan-a',
-        instanceCount: 4,
-        completedInstanceCount: 2,
-        pendingInstanceCount: 2,
-        dueInstanceCount: 2,
-        completedDueInstanceCount: 1,
-        futurePendingInstanceCount: 1,
-        singleInstanceStatus: null,
+        planId: 'plan-a',
+        occurrenceCount: 4,
+        completedOccurrenceCount: 2,
+        pendingOccurrenceCount: 2,
+        dueOccurrenceCount: 2,
+        completedDueOccurrenceCount: 1,
+        futurePendingOccurrenceCount: 1,
+        singleOccurrenceStatus: null,
       },
     ]);
     const repository = new PowerSyncTaskOccurrenceRepository({
       getAll,
     } as unknown as IElectronDatabaseTransaction);
 
-    const result = await repository.getTemplateStats(
+    const result = await repository.getPlanStats(
       ['plan-a', 'plan-without-occurrences'],
       'identity-a',
       { windowStart: ymd('2026-07-01'), asOf: ymd('2026-07-30') },
     );
 
     expect(result['plan-a']).toMatchObject({
-      instanceCount: 4,
-      completedDueInstanceCount: 1,
-      futurePendingInstanceCount: 1,
+      occurrenceCount: 4,
+      completedDueOccurrenceCount: 1,
+      futurePendingOccurrenceCount: 1,
       completionRate: 50,
     });
     expect(result['plan-without-occurrences']).toMatchObject({
-      instanceCount: 0,
+      occurrenceCount: 0,
       completionRate: 0,
     });
 
@@ -109,7 +109,7 @@ describe('PowerSyncTaskOccurrenceRepository canonical persistence', () => {
   });
 
   it('fences updates by identity + expected version while writing canonical columns', async () => {
-    const getOptional = vi.fn().mockResolvedValueOnce({ id: 'instance-1', version: 1 });
+    const getOptional = vi.fn().mockResolvedValueOnce({ id: 'occurrence-1', version: 1 });
     const execute = vi.fn().mockResolvedValue({ rowsAffected: 1 });
     const repository = new PowerSyncTaskOccurrenceRepository({
       getOptional,
@@ -125,13 +125,13 @@ describe('PowerSyncTaskOccurrenceRepository canonical persistence', () => {
     expect(sql).toContain('checklist_state = ?');
     expect(sql).not.toContain('time_config');
     expect(sql).toContain('WHERE id = ? AND identity_id = ? AND version = ?');
-    expect(params.slice(-3)).toEqual(['instance-1', 'identity-a', 1]);
+    expect(params.slice(-3)).toEqual(['occurrence-1', 'identity-a', 1]);
   });
 
   it('throws a concurrency conflict instead of overwriting a newer local row', async () => {
     const getOptional = vi
       .fn()
-      .mockResolvedValueOnce({ id: 'instance-1', version: 2 })
+      .mockResolvedValueOnce({ id: 'occurrence-1', version: 2 })
       .mockResolvedValueOnce({ version: 2 });
     const execute = vi.fn().mockResolvedValue({ rowsAffected: 0 });
     const repository = new PowerSyncTaskOccurrenceRepository({

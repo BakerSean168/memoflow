@@ -7,12 +7,12 @@ import { PrismaTaskBindingReadPort } from './prisma-task-binding-read-port';
 describe('PrismaTaskBindingReadPort', () => {
   beforeAll(async () => {
     const prisma = await getPrisma();
-    await prisma.$executeRawUnsafe('TRUNCATE task_templates CASCADE');
+    await prisma.$executeRawUnsafe('TRUNCATE task_plans CASCADE');
   });
 
   afterAll(async () => {
     const prisma = await getPrisma();
-    await prisma.$executeRawUnsafe('TRUNCATE task_templates CASCADE');
+    await prisma.$executeRawUnsafe('TRUNCATE task_plans CASCADE');
   });
 
   it('serves identity-scoped Goal/KR context including Goal-only links and summary', async () => {

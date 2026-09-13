@@ -16,18 +16,6 @@ export interface EditableTaskUI {
   selected: boolean;
 }
 
-export interface TaskTimeRangeViewModel {
-  start: number;
-  end: number;
-}
-
-export interface TaskTimeConfigViewModel {
-  timeType?: 'AllDay' | 'TimePoint' | 'TimeRange';
-  timePoint?: number | null;
-  timeRange?: TaskTimeRangeViewModel | null;
-  startDate?: string | Date | number;
-}
-
 export interface TaskGoalContributionViewModel {
   value: number;
   trigger: TaskGoalBindingTriggerValue;
@@ -82,14 +70,14 @@ export interface TaskPlanViewModel {
   checklist: ChecklistItemDefinitionDTO[];
   schedule: TaskPlanSchedule;
   reminderConfig?: Record<string, unknown> | null;
-  instanceCount?: number;
-  completedInstanceCount?: number;
-  pendingInstanceCount?: number;
-  dueInstanceCount?: number;
-  completedDueInstanceCount?: number;
+  occurrenceCount?: number;
+  completedOccurrenceCount?: number;
+  pendingOccurrenceCount?: number;
+  dueOccurrenceCount?: number;
+  completedDueOccurrenceCount?: number;
   completionWindowDays?: 30;
-  futurePendingInstanceCount?: number;
-  singleInstanceStatus?: 'Pending' | 'InProgress' | 'Completed' | 'Missed' | 'Skipped' | null;
+  futurePendingOccurrenceCount?: number;
+  singleOccurrenceStatus?: 'Pending' | 'InProgress' | 'Completed' | 'Missed' | 'Skipped' | null;
   completionRate?: number;
   formattedCreatedAt?: string;
 }
@@ -117,20 +105,6 @@ export interface TaskPlanFormEmits {
   'update:modelValue': [value: TaskPlanViewModel];
   'update:validation': [validation: TaskPlanFormValidationState];
   close: [];
-}
-
-export interface TaskOccurrenceViewModel {
-  id: string;
-  templateId?: string;
-  templateTitle?: string;
-  isCompleted: boolean;
-  statusText?: string;
-  instanceDate: string | Date;
-  instanceDateFormatted?: string;
-  note?: string;
-  actualEndTime?: string | Date | null;
-  timeConfig: TaskTimeConfigViewModel;
-  goalBinding?: TaskGoalBindingViewModel | null;
 }
 
 // ── 任务库列表过滤 / 视图模式（UI_PAGE_REDESIGN_PLAN §6）──

@@ -16,7 +16,7 @@ import { createTimeFacade } from '@memoflow/time';
  */
 export class GetTaskOccurrencesByDateRangeUseCase {
   constructor(
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     private readonly projection: TaskOccurrenceProjectionService,
   ) {}
 
@@ -27,15 +27,15 @@ export class GetTaskOccurrencesByDateRangeUseCase {
   ): Promise<Result<GetTaskOccurrencesByRangeRes>> {
     const timeContext = await this.projection.getTimeContext(identityId);
     const time = createTimeFacade({ context: timeContext });
-    const instances = await this.instanceRepository.findByDateRange(
+    const occurrences = await this.occurrenceRepository.findByDateRange(
       identityId,
       time.calendar.toYmd(startDate),
       time.calendar.toYmd(endDate),
     );
 
     return ok({
-      data: this.projection.projectManyWithContext(instances, timeContext),
-      total: instances.length,
+      data: this.projection.projectManyWithContext(occurrences, timeContext),
+      total: occurrences.length,
     });
   }
 }

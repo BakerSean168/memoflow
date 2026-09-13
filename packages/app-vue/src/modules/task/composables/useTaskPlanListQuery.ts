@@ -81,12 +81,12 @@ function useTaskPlanListQueryImpl({
     return {
       queryKey: taskPlanQueryKeys.list(identityScope, queryParams),
       queryFn: async () => {
-        const result = await service.listTemplates(
-          sanitizeForIpc(queryParams) as Parameters<typeof service.listTemplates>[0],
+        const result = await service.listPlans(
+          sanitizeForIpc(queryParams) as Parameters<typeof service.listPlans>[0],
         );
         const data = unwrap(result);
         return {
-          templates: (data.templates ?? []).map((template: { toDTO(): TaskPlanClientDTO }) =>
+          templates: (data.plans ?? []).map((template: { toDTO(): TaskPlanClientDTO }) =>
             template.toDTO(),
           ),
           total: data.total ?? 0,

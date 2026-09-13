@@ -1,9 +1,16 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { TASK_TEST_TIME_CONTEXT } from '../../../../testing';
+import {
+  aDailyRecurrence,
+  aWeeklyRecurrence,
+  aTimePointTiming,
+  canonicalTaskPlanScheduleForTest,
+  anAllDayTiming,
+  TASK_TEST_TIME_CONTEXT,
+} from '../../../../testing';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { TaskPlanScheduleKind, type TaskRecurrence, type TaskTiming } from '@memoflow/contracts/task';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
-import { RecurrenceRule, TaskTimeConfig } from '../../../domain/value-objects';
 import { TaskPlanPrismaRepository } from './task-plan-prisma.repository';
 import { TaskLabelOwnershipError } from '../../../domain/repositories/i-task-plan-repository';
 import {
@@ -12,6 +19,52 @@ import {
   getPrisma,
   seedAccount,
 } from '../../../../__tests__/integration-helpers';
+
+function createOneTimePlanForTest(params: {
+  identityId: IdentityId;
+  title: string;
+  description?: string;
+  importance?: ImportanceLevel;
+  startDate?: number;
+}) {
+  return TaskPlan.create({
+    identityId: params.identityId,
+    title: params.title,
+    description: params.description,
+    importance: params.importance,
+    schedule: canonicalTaskPlanScheduleForTest(
+      TaskPlanScheduleKind.OneTime,
+      params.startDate ?? Date.now(),
+      anAllDayTiming(),
+      null,
+      TASK_TEST_TIME_CONTEXT,
+    ),
+  });
+}
+
+function createRecurringPlanForTest(params: {
+  identityId: IdentityId;
+  title: string;
+  description?: string;
+  importance?: ImportanceLevel;
+  startDate?: number;
+  timing: TaskTiming;
+  recurrence: TaskRecurrence;
+}) {
+  return TaskPlan.create({
+    identityId: params.identityId,
+    title: params.title,
+    description: params.description,
+    importance: params.importance,
+    schedule: canonicalTaskPlanScheduleForTest(
+      TaskPlanScheduleKind.Recurring,
+      params.startDate ?? Date.now(),
+      params.timing,
+      params.recurrence,
+      TASK_TEST_TIME_CONTEXT,
+    ),
+  });
+}
 
 describe('TaskPlanPrismaRepository integration', () => {
   afterAll(async () => {
@@ -22,73 +75,67 @@ describe('TaskPlanPrismaRepository integration', () => {
     await cleanTaskTables();
   });
 
-  it('persists and loads a one-time task template by id', async () => {
+  it('persists and loads a one-time task plan by id', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
 
     const prisma = await getPrisma();
     const repository = new TaskPlanPrismaRepository(prisma);
 
-    // Create a one-time task template
+    // Create a one-time task plan
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const template = TaskPlan.createOneTimeTask({
+    const plan = createOneTimePlanForTest({
       identityId,
       title: 'Complete Project',
       description: 'Finish the quarterly project',
       importance: ImportanceLevel.Important,
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      startDate: tomorrow.getTime(),
     });
 
-    await repository.save(template);
+    await repository.save(plan);
 
-    const saved = await repository.findByIdForIdentity(identityId, template.id);
+    const saved = await repository.findByIdForIdentity(identityId, plan.id);
 
     expect(saved).not.toBeNull();
-    expect(saved?.id).toBe(template.id);
+    expect(saved?.id).toBe(plan.id);
     expect(saved?.identityId).toBe(identityId);
     expect(saved?.title).toBe('Complete Project');
-    expect(saved?.taskType).toBe('OneTime');
+    expect(saved?.schedule.kind).toBe(TaskPlanScheduleKind.OneTime);
   });
 
-  it('persists and loads a recurring task template by id', async () => {
+  it('persists and loads a recurring task plan by id', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
 
     const prisma = await getPrisma();
     const repository = new TaskPlanPrismaRepository(prisma);
 
-    const startDate = new Date();
-    startDate.setHours(9, 0, 0, 0);
+    const startDate = Date.now();
 
-    const timeConfig = TaskTimeConfig.createTimePoint(startDate, 9 * 60);
-
-    const recurrenceRule = RecurrenceRule.createWeekly([0], 1);
-
-    // Create a recurring task template
-    const template = TaskPlan.createRecurringTask({
+    // Create a recurring task plan
+    const plan = createRecurringPlanForTest({
       identityId,
       title: 'Weekly Review',
       description: 'Review the week',
       importance: ImportanceLevel.Moderate,
-      timeConfig,
-      recurrenceRule,
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      startDate,
+      timing: aTimePointTiming(9 * 60),
+      recurrence: aWeeklyRecurrence([0]),
     });
 
-    await repository.save(template);
+    await repository.save(plan);
 
-    const saved = await repository.findByIdForIdentity(identityId, template.id);
+    const saved = await repository.findByIdForIdentity(identityId, plan.id);
 
     expect(saved).not.toBeNull();
-    expect(saved?.id).toBe(template.id);
-    expect(saved?.taskType).toBe('Recurring');
+    expect(saved?.id).toBe(plan.id);
+    expect(saved?.schedule.kind).toBe(TaskPlanScheduleKind.Recurring);
     expect(saved?.schedule.recurrence).toBeDefined();
   });
 
-  it('lists templates by identity', async () => {
+  it('lists plans by identity', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
 
@@ -98,33 +145,31 @@ describe('TaskPlanPrismaRepository integration', () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const template1 = TaskPlan.createOneTimeTask({
+    const template1 = createOneTimePlanForTest({
       identityId,
       title: 'Task 1',
       importance: ImportanceLevel.Important,
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      startDate: tomorrow.getTime(),
     });
 
     const nextDay = new Date();
     nextDay.setDate(nextDay.getDate() + 2);
 
-    const template2 = TaskPlan.createOneTimeTask({
+    const template2 = createOneTimePlanForTest({
       identityId,
       title: 'Task 2',
       importance: ImportanceLevel.Minor,
-      dueDate: nextDay,
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      startDate: nextDay.getTime(),
     });
 
     await repository.save(template1);
     await repository.save(template2);
 
-    const templates = await repository.findByIdentityId(identityId);
+    const plans = await repository.findByIdentityId(identityId);
 
-    expect(templates).toHaveLength(2);
-    expect(templates.map((t) => t.id)).toContain(template1.id);
-    expect(templates.map((t) => t.id)).toContain(template2.id);
+    expect(plans).toHaveLength(2);
+    expect(plans.map((t) => t.id)).toContain(template1.id);
+    expect(plans.map((t) => t.id)).toContain(template2.id);
   });
 
   it('preserves task importance levels', async () => {
@@ -137,23 +182,22 @@ describe('TaskPlanPrismaRepository integration', () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const template = TaskPlan.createOneTimeTask({
+    const plan = createOneTimePlanForTest({
       identityId,
       title: 'Important Task',
       description: 'A high-importance task',
       importance: ImportanceLevel.Important,
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      startDate: tomorrow.getTime(),
     });
 
-    await repository.save(template);
-    const saved = await repository.findByIdForIdentity(identityId, template.id);
+    await repository.save(plan);
+    const saved = await repository.findByIdForIdentity(identityId, plan.id);
 
     expect(saved?.importance).toBe(ImportanceLevel.Important);
     expect(saved?.title).toBe('Important Task');
   });
 
-  it('updates existing template', async () => {
+  it('updates existing plan', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
 
@@ -163,24 +207,23 @@ describe('TaskPlanPrismaRepository integration', () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const template = TaskPlan.createOneTimeTask({
+    const plan = createOneTimePlanForTest({
       identityId,
       title: 'Original Title',
       importance: ImportanceLevel.Minor,
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      startDate: tomorrow.getTime(),
     });
 
-    await repository.save(template);
+    await repository.save(plan);
 
-    // Update the template
-    template.updateTitle('Updated Title');
+    // Update the plan
+    plan.updateTitle('Updated Title');
     // R2-5a 乐观锁契约：变更后由调用方递增版本。
-    template.advanceVersion();
+    plan.advanceVersion();
 
-    await repository.save(template);
+    await repository.save(plan);
 
-    const saved = await repository.findByIdForIdentity(identityId, template.id);
+    const saved = await repository.findByIdForIdentity(identityId, plan.id);
 
     expect(saved?.title).toBe('Updated Title');
   });
@@ -195,21 +238,20 @@ describe('TaskPlanPrismaRepository integration', () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const template = TaskPlan.createOneTimeTask({
+    const plan = createOneTimePlanForTest({
       identityId,
       title: 'To Delete',
       importance: ImportanceLevel.Moderate,
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      startDate: tomorrow.getTime(),
     });
 
-    await repository.save(template);
+    await repository.save(plan);
 
     // Soft delete
-    template.softDelete();
-    await repository.save(template);
+    plan.softDelete();
+    await repository.save(plan);
 
-    const saved = await repository.findByIdForIdentity(identityId, template.id);
+    const saved = await repository.findByIdForIdentity(identityId, plan.id);
 
     expect(saved?.deletedAt).not.toBeNull();
   });
@@ -224,18 +266,17 @@ describe('TaskPlanPrismaRepository integration', () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const template = TaskPlan.createOneTimeTask({
+    const plan = createOneTimePlanForTest({
       identityId,
       title: 'One-time Task',
       importance: ImportanceLevel.Moderate,
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      startDate: tomorrow.getTime(),
     });
 
-    await repository.save(template);
-    const saved = await repository.findByIdForIdentity(identityId, template.id);
+    await repository.save(plan);
+    const saved = await repository.findByIdForIdentity(identityId, plan.id);
 
-    expect(saved?.taskType).toBe('OneTime');
+    expect(saved?.schedule.kind).toBe(TaskPlanScheduleKind.OneTime);
     expect(saved?.schedule.recurrence).toBeNull();
   });
 
@@ -246,20 +287,16 @@ describe('TaskPlanPrismaRepository integration', () => {
     const prisma = await getPrisma();
     const repository = new TaskPlanPrismaRepository(prisma);
 
-    const startDate = new Date();
-    startDate.setHours(9, 0, 0, 0);
-    const timeConfig = TaskTimeConfig.createTimePoint(startDate, 9 * 60);
+    const startDate = Date.now();
 
-    const recurrenceRule = RecurrenceRule.createDaily(2);
-
-    const original = TaskPlan.createRecurringTask({
+    const original = createRecurringPlanForTest({
       identityId,
       title: 'Complex Recurring Task',
       description: 'A detailed recurring task',
       importance: ImportanceLevel.Moderate,
-      timeConfig,
-      recurrenceRule,
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      startDate,
+      timing: aTimePointTiming(9 * 60),
+      recurrence: aDailyRecurrence(2),
     });
 
     await repository.save(original);
@@ -268,7 +305,7 @@ describe('TaskPlanPrismaRepository integration', () => {
     expect(loaded).toBeDefined();
     expect(loaded?.title).toBe(original.title);
     expect(loaded?.description).toBe(original.description);
-    expect(loaded?.taskType).toBe(original.taskType);
+    expect(loaded?.schedule.kind).toBe(original.schedule.kind);
     expect(loaded?.importance).toBe(original.importance);
   });
 
@@ -279,19 +316,17 @@ describe('TaskPlanPrismaRepository integration', () => {
     await seedAccount({ id: otherIdentityId });
     const prisma = await getPrisma();
     const repository = new TaskPlanPrismaRepository(prisma);
-    const first = TaskPlan.createOneTimeTask({
+    const first = createOneTimePlanForTest({
       identityId,
       title: 'Work and AI',
       importance: ImportanceLevel.Important,
-      dueDate: new Date(Date.now() + 86400000),
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      startDate: Date.now() + 86400000,
     });
-    const second = TaskPlan.createOneTimeTask({
+    const second = createOneTimePlanForTest({
       identityId,
       title: 'Work only',
       importance: ImportanceLevel.Moderate,
-      dueDate: new Date(Date.now() + 2 * 86400000),
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      startDate: Date.now() + 2 * 86400000,
     });
     await repository.save(first);
     await repository.save(second);
@@ -322,7 +357,7 @@ describe('TaskPlanPrismaRepository integration', () => {
     const loaded = await repository.findByIdForIdentity(identityId, String(first.id));
     expect(loaded?.labels.map((label) => label.id).sort()).toEqual([ai.id, work.id].sort());
     const both = await repository.findByLabelIdsAll(identityId, [work.id, ai.id]);
-    expect(both.map((template) => String(template.id))).toEqual([String(first.id)]);
+    expect(both.map((plan) => String(plan.id))).toEqual([String(first.id)]);
     expect(both[0]?.labels.map((label) => label.id).sort()).toEqual([ai.id, work.id].sort());
     await expect(
       repository.replaceLabels(identityId, String(first.id), [foreign.id]),

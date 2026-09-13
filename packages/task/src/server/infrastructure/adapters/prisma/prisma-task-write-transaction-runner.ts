@@ -24,8 +24,8 @@ export class PrismaTaskWriteTransactionRunner implements TaskWriteTransactionRun
     let postCommitEvents: import('@memoflow/contracts/shared').IDomainEvent[] = [];
     const result = await this.prisma.$transaction(async (tx) => {
       const result = await work({
-        templateRepository: new TaskPlanPrismaRepository(tx, bufferedEventBus),
-        instanceRepository: new TaskOccurrencePrismaRepository(tx, bufferedEventBus),
+        planRepository: new TaskPlanPrismaRepository(tx, bufferedEventBus),
+        occurrenceRepository: new TaskOccurrencePrismaRepository(tx, bufferedEventBus),
       });
       const events = bufferedEventBus.drain();
       const goalOutbox: TaskGoalOutboxWriter = {

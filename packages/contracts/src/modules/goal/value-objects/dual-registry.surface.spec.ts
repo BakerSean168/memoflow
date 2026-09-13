@@ -24,6 +24,8 @@ import { describe, expect, it } from 'vitest';
     const taskVo = resolve(goalVo, '../../task/value-objects');
     const reminderVo = resolve(goalVo, '../../reminder/value-objects');
     const primitives = resolve(goalVo, '../../../primitives');
+    const taskPlanSchedule = readFileSync(resolve(taskVo, 'task-plan-schedule.ts'), 'utf8');
+    const taskOccurrenceResult = readFileSync(resolve(taskVo, 'task-occurrence-result.ts'), 'utf8');
 
     it('DomainDate type is gone from contracts primitives (ADR-037 T10)', () => {
       const index = readFileSync(resolve(primitives, 'index.ts'), 'utf8');
@@ -56,18 +58,20 @@ import { describe, expect, it } from 'vitest';
 
     it('keeps account calendar-day and task Instant transfer contracts explicit', () => {
       const profile = readFileSync(resolve(accountVo, 'account-profile.ts'), 'utf8');
-      const completion = readFileSync(resolve(taskVo, 'completion-record.ts'), 'utf8');
 
       expect(profile).toMatch(/export interface AccountProfile\b/);
       expect(profile).toMatch(/export interface AccountProfileDTO\b/);
       expect(profile).toContain('birthday: Ymd | null');
       expect(profile).not.toContain('DomainDate');
 
-      expect(completion).toMatch(/export interface CompletionRecord\b/);
-      expect(completion).toMatch(/export interface CompletionRecordDTO\b/);
-      expect(completion).toContain('completedAt: Instant');
-      expect(completion).toContain('completedAt: TransferDate');
-      expect(completion).not.toContain('DomainDate');
+      expect(existsSync(resolve(taskVo, 'recurrence-rule.ts'))).toBe(false);
+      expect(existsSync(resolve(taskVo, 'task-time-config.ts'))).toBe(false);
+      expect(taskPlanSchedule).toContain(
+        'export const TaskPlanScheduleSchema = z.discriminatedUnion',
+      );
+      expect(taskOccurrenceResult).toContain(
+        'export const TaskOccurrenceResultSchema = z.discriminatedUnion',
+      );
     });
 
     it('keeps transient ResponseMetrics as the residual 857 alias; residual 859 marker present', () => {
@@ -103,11 +107,9 @@ import { describe, expect, it } from 'vitest';
         'export type ChecklistItemDefinitionDTO = ChecklistItemDefinition',
       );
       expect(checklist).not.toMatch(/export interface ChecklistItemDefinitionDTO\b/);
-      // GoalTimeRange was retired by GOAL-7203; Task completion keeps its Instant transfer boundary.
       expect(existsSync(resolve(goalVo, 'goal-time-range.ts'))).toBe(false);
-      const completion = readFileSync(resolve(taskVo, 'completion-record.ts'), 'utf8');
-      expect(completion).toMatch(/export interface CompletionRecord\b/);
-      expect(completion).toMatch(/export interface CompletionRecordDTO\b/);
+      expect(existsSync(resolve(taskVo, 'recurrence-rule.ts'))).toBe(false);
+      expect(existsSync(resolve(taskVo, 'task-time-config.ts'))).toBe(false);
     });
   });
 }

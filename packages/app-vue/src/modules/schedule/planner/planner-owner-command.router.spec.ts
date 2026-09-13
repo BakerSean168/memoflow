@@ -40,13 +40,13 @@ function taskProjection(
 
 describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
   it('Fixture J routes Task 14:00 -> 16:00 to Task owner and reverts optimistic UI on conflict', async () => {
-    const rescheduleInstance = vi
+    const rescheduleOccurrence = vi
       .fn()
       .mockResolvedValue(
         fail({ code: 'CONFLICT', message: 'Task occurrence was changed elsewhere' }),
       );
     const router = createPlannerOwnerCommandRouter({
-      task: { rescheduleInstance },
+      task: { rescheduleOccurrence },
       time,
     });
     const projection = Object.freeze(taskProjection());
@@ -59,7 +59,7 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
       revert,
     });
 
-    expect(rescheduleInstance).toHaveBeenCalledWith('task-occurrence-1', {
+    expect(rescheduleOccurrence).toHaveBeenCalledWith('task-occurrence-1', {
       scheduleSnapshot: {
         date: '2026-08-27',
         timing: { kind: 'At', time: '16:00' },
@@ -76,8 +76,8 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
   });
 
   it('keeps the optimistic visual move when the Task owner accepts it', async () => {
-    const rescheduleInstance = vi.fn().mockResolvedValue(ok({}));
-    const router = createPlannerOwnerCommandRouter({ task: { rescheduleInstance }, time });
+    const rescheduleOccurrence = vi.fn().mockResolvedValue(ok({}));
+    const router = createPlannerOwnerCommandRouter({ task: { rescheduleOccurrence }, time });
     const revert = vi.fn();
 
     const outcome = await applyPlannerOptimisticMutation(router, {
@@ -204,10 +204,10 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
   });
 
   it('rejects cross-day Task time ranges rather than corrupting the occurrence schedule snapshot', async () => {
-    const rescheduleInstance = vi.fn();
+    const rescheduleOccurrence = vi.fn();
     const otherDay = asInstant(Number(dayStart) + 24 * 60 * 60_000 + 30 * 60_000);
     const router = createPlannerOwnerCommandRouter({
-      task: { rescheduleInstance },
+      task: { rescheduleOccurrence },
       time: {
         startOfDay: (instant) =>
           instant === otherDay ? asInstant(Number(dayStart) + 24 * 60 * 60_000) : dayStart,
@@ -222,6 +222,6 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
     });
 
     expect(outcome).toMatchObject({ status: 'invalid' });
-    expect(rescheduleInstance).not.toHaveBeenCalled();
+    expect(rescheduleOccurrence).not.toHaveBeenCalled();
   });
 });

@@ -10,23 +10,23 @@ import type { TaskOccurrenceProjectionService } from '../../services/task-occurr
 
 export class StartTaskOccurrenceUseCase {
   constructor(
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     private readonly projection: TaskOccurrenceProjectionService,
   ) {}
 
   async execute(id: string, identityId: string): Promise<Result<TaskOccurrenceClientDTO>> {
-    const instance = await this.instanceRepository.findByIdForIdentity(identityId, id);
-    if (!instance) {
+    const occurrence = await this.occurrenceRepository.findByIdForIdentity(identityId, id);
+    if (!occurrence) {
       return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
     }
 
-    if (!instance.canStart()) {
-      return error('VALIDATION_ERROR', 'Cannot start this task instance');
+    if (!occurrence.canStart()) {
+      return error('VALIDATION_ERROR', 'Cannot start this task occurrence');
     }
 
-    instance.start();
-    await this.instanceRepository.save(instance);
+    occurrence.start();
+    await this.occurrenceRepository.save(occurrence);
 
-    return ok(await this.projection.project(identityId, instance));
+    return ok(await this.projection.project(identityId, occurrence));
   }
 }

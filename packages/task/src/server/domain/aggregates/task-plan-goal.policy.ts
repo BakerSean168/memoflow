@@ -26,7 +26,7 @@ export function isFiniteTaskPlan(schedule: TaskPlanSchedule): boolean {
   return recurrence != null && recurrence.end.kind !== TaskRecurrenceEndKind.Never;
 }
 
-/** Binds the template to a goal. */
+/** Binds the plan to a goal. */
 export function bindToGoal(
   ctx: GoalOperationContext,
   goalId: string,
@@ -83,7 +83,7 @@ export function unbindFromGoal(ctx: GoalOperationContext): void {
   ctx.addHistory('goal_unbound', { oldGoalId, oldKeyResultId });
 }
 
-/** Checks whether the template is linked to a goal. */
+/** Checks whether the plan is linked to a goal. */
 export function isLinkedToGoal(props: TaskPlanProps): boolean {
   return props.goalBinding !== null;
 }

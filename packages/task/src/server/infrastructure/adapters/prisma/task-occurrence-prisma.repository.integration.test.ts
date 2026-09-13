@@ -3,9 +3,7 @@ import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskOccurrenceResultKind, TaskTimingKind } from '@memoflow/contracts/task';
 import { IdentityId } from '@memoflow/domain-shared';
 import { asYmd } from '@memoflow/time';
-import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
-import { TaskOccurrenceScheduleSnapshot } from '../../../domain/value-objects';
 import { TaskPlanPrismaRepository } from './task-plan-prisma.repository';
 import { TaskOccurrencePrismaRepository } from './task-occurrence-prisma.repository';
 import {
@@ -14,7 +12,10 @@ import {
   getPrisma,
   seedAccount,
 } from '../../../../__tests__/integration-helpers';
-import { TASK_TEST_TIME_CONTEXT } from '../../../../testing';
+import {
+  aOneTimeTask,
+  canonicalTaskOccurrenceScheduleForTest,
+} from '../../../../testing';
 
 function createOccurrence(params: {
   planId: Parameters<typeof TaskOccurrence.create>[0]['planId'];
@@ -24,12 +25,12 @@ function createOccurrence(params: {
   checklistDefinition?: Array<{ id: string; title: string; order: number }>;
 }) {
   return TaskOccurrence.create({
-    planId: params.planId,
-    identityId: params.identityId,
-    scheduleSnapshot: TaskOccurrenceScheduleSnapshot.create({
-      date: asYmd(params.date),
-      timing: { kind: TaskTimingKind.AllDay },
-    }),
+      planId: params.planId,
+      identityId: params.identityId,
+      scheduleSnapshot: canonicalTaskOccurrenceScheduleForTest(
+        Date.parse(`${params.date}T00:00:00.000Z`),
+        { kind: TaskTimingKind.AllDay },
+    ),
     importanceSnapshot: params.importance ?? ImportanceLevel.Moderate,
     checklistDefinition: params.checklistDefinition ?? [],
   });
@@ -44,12 +45,11 @@ async function seedPlan(params: {
   const prisma = await getPrisma();
   const repository = new TaskPlanPrismaRepository(prisma);
   const date = params.date ?? '2026-09-14';
-  const plan = TaskPlan.createOneTimeTask({
+  const plan = aOneTimeTask({
     identityId: params.identityId,
     title: params.title ?? 'Task occurrence integration',
     importance: params.importance ?? ImportanceLevel.Moderate,
-    dueDate: new Date(`${date}T00:00:00.000Z`),
-    timeContext: TASK_TEST_TIME_CONTEXT,
+    startDate: Date.parse(`${date}T00:00:00.000Z`),
   });
   await repository.save(plan);
   return { prisma, plan };
@@ -116,7 +116,7 @@ describe('TaskOccurrencePrismaRepository canonical integration', () => {
     const second = createOccurrence({ planId: plan.id, identityId, date: '2026-09-15' });
     await repository.saveMany([first, second]);
 
-    const occurrences = await repository.findByTemplateId(plan.id, String(identityId));
+    const occurrences = await repository.findByPlanId(plan.id, String(identityId));
 
     expect(occurrences).toHaveLength(2);
     expect(new Set(occurrences.map((item) => item.id))).toEqual(new Set([first.id, second.id]));
@@ -214,22 +214,22 @@ describe('TaskOccurrencePrismaRepository canonical integration', () => {
     await repository.saveMany([outsideWindowCompleted, dueCompleted, duePending, futurePending]);
 
     const stats = (
-      await repository.getTemplateStats([plan.id], String(identityId), {
+      await repository.getPlanStats([plan.id], String(identityId), {
         windowStart: asYmd('2026-07-01'),
         asOf: asYmd('2026-07-30'),
       })
     )[plan.id];
 
     expect(stats).toEqual({
-      templateId: plan.id,
-      instanceCount: 4,
-      completedInstanceCount: 2,
-      pendingInstanceCount: 2,
-      dueInstanceCount: 2,
-      completedDueInstanceCount: 1,
+      planId: plan.id,
+      occurrenceCount: 4,
+      completedOccurrenceCount: 2,
+      pendingOccurrenceCount: 2,
+      dueOccurrenceCount: 2,
+      completedDueOccurrenceCount: 1,
       completionWindowDays: 30,
-      futurePendingInstanceCount: 1,
-      singleInstanceStatus: null,
+      futurePendingOccurrenceCount: 1,
+      singleOccurrenceStatus: null,
       completionRate: 50,
     });
   });

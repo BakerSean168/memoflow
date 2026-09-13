@@ -371,19 +371,19 @@ const {
   refetch: refetchTemplates,
 } = useTaskPlanListQuery(taskListParams);
 const {
-  createTemplateSafe,
-  updateTemplateSafe,
-  archiveTemplateSafe,
-  deleteTemplateSafe,
+  createPlanSafe,
+  updatePlanSafe,
+  archivePlanSafe,
+  deletePlanSafe,
   isSaving,
 } = useTaskPlanMutations();
 const {
-  fetchInstances,
-  completeInstance,
-  uncompleteInstance,
-  markInstanceMissed,
-  skipInstance,
-  setChecklistItem,
+  fetchInstances: fetchOccurrencesMutation,
+  completeOccurrence: completeOccurrenceMutation,
+  uncompleteOccurrence: uncompleteOccurrenceMutation,
+  markOccurrenceMissed: markOccurrenceMissedMutation,
+  skipOccurrence: skipOccurrenceMutation,
+  setOccurrenceChecklistItem: setOccurrenceChecklistItemMutation,
 } = useTaskOccurrences();
 const taskStore = useTaskStore();
 const { instances, isLoading: instancesLoading, error: instancesError } = storeToRefs(taskStore);
@@ -483,7 +483,7 @@ const filteredPlans = computed(() =>
 );
 
 async function reloadSurface() {
-  await Promise.all([refetchTemplates(), fetchInstances({ page: 1, limit: 500 })]);
+  await Promise.all([refetchTemplates(), fetchOccurrencesMutation({ page: 1, limit: 500 })]);
 }
 
 function openCreateDialog() {
@@ -527,26 +527,26 @@ async function handleSubmit(vm: TaskPlanViewModel) {
   };
   const saved =
     dialogMode.value === 'edit' && vm.id
-      ? await updateTemplateSafe(vm.id, common)
-      : await createTemplateSafe(common);
+      ? await updatePlanSafe(vm.id, common)
+      : await createPlanSafe(common);
   if (saved) {
     closeDialog();
     await reloadSurface();
   }
 }
 async function archive(id: string) {
-  if (await archiveTemplateSafe(id)) await refetchTemplates();
+  if (await archivePlanSafe(id)) await refetchTemplates();
 }
 async function remove(vm: TaskPlanViewModel) {
   const confirmed = await useConfirm({
-    title: t('task.management.deleteTemplate'),
+    title: t('task.management.deletePlan'),
     description: t('task.management.confirmDelete', { name: vm.title }),
     confirmText: t('common.delete'),
     cancelText: t('common.cancel'),
     variant: 'destructive',
   });
   if (!confirmed) return;
-  if (await deleteTemplateSafe(vm.id)) await reloadSurface();
+  if (await deletePlanSafe(vm.id)) await reloadSurface();
 }
 async function runOccurrenceAction(id: string, action: (id: string) => Promise<unknown>) {
   busyOccurrenceId.value = id;
@@ -556,10 +556,10 @@ async function runOccurrenceAction(id: string, action: (id: string) => Promise<u
     busyOccurrenceId.value = null;
   }
 }
-const completeOccurrence = (id: string) => runOccurrenceAction(id, completeInstance);
-const uncompleteOccurrence = (id: string) => runOccurrenceAction(id, uncompleteInstance);
-const markOccurrenceMissed = (id: string) => runOccurrenceAction(id, markInstanceMissed);
-const skipOccurrence = (id: string) => runOccurrenceAction(id, skipInstance);
+const completeOccurrence = (id: string) => runOccurrenceAction(id, completeOccurrenceMutation);
+const uncompleteOccurrence = (id: string) => runOccurrenceAction(id, uncompleteOccurrenceMutation);
+const markOccurrenceMissed = (id: string) => runOccurrenceAction(id, markOccurrenceMissedMutation);
+const skipOccurrence = (id: string) => runOccurrenceAction(id, skipOccurrenceMutation);
 const setOccurrenceChecklistItem = (
   occurrenceId: string,
   definitionId: string,
@@ -567,7 +567,7 @@ const setOccurrenceChecklistItem = (
   expectedVersion: number,
 ) =>
   runOccurrenceAction(occurrenceId, (id) =>
-    setChecklistItem(id, { definitionId, completed, expectedVersion }),
+    setOccurrenceChecklistItemMutation(id, { definitionId, completed, expectedVersion }),
   );
 
 watch(
@@ -582,6 +582,6 @@ watch(
 );
 
 onMounted(() => {
-  void fetchInstances({ page: 1, limit: 500 });
+  void fetchOccurrencesMutation({ page: 1, limit: 500 });
 });
 </script>

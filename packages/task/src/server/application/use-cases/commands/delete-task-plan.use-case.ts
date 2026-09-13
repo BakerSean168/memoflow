@@ -1,7 +1,7 @@
 /**
  * Delete Task Template Use Case
  *
- * Removes the template and clears its generated instances in one write boundary.
+ * Removes the plan and clears its generated occurrences in one write boundary.
  */
 
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
@@ -22,8 +22,8 @@ export class DeleteTaskPlanUseCase {
   private readonly transactionRunner: TaskWriteTransactionRunner;
 
   constructor(
-    private readonly templateRepository: ITaskPlanRepository,
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly planRepository: ITaskPlanRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     transactionRunner: TaskWriteTransactionRunner,
   ) {
     if (!transactionRunner) {
@@ -34,27 +34,27 @@ export class DeleteTaskPlanUseCase {
 
   async execute(id: string, identityId: string, soft = false): Promise<Result<void>> {
     try {
-      return await this.transactionRunner.run(async ({ templateRepository, instanceRepository }) => {
-        const template = await templateRepository!.findByIdForIdentity(identityId, id);
-        if (!template) {
-          // Idempotent delete: if the template is already gone, treat it as success.
+      return await this.transactionRunner.run(async ({ planRepository, occurrenceRepository }) => {
+        const plan = await planRepository!.findByIdForIdentity(identityId, id);
+        if (!plan) {
+          // Idempotent delete: if the plan is already gone, treat it as success.
           return ok(undefined);
         }
 
-        template.softDelete();
-        await templateRepository!.save(template);
-        await instanceRepository.deleteByTemplateId(id, identityId);
+        plan.softDelete();
+        await planRepository!.save(plan);
+        await occurrenceRepository.deleteByPlanId(id, identityId);
 
         if (!soft) {
-          await templateRepository!.delete(identityId, id);
+          await planRepository!.delete(identityId, id);
         }
 
         return ok(undefined);
       });
     } catch (caughtError) {
-      this.logger.error('Failed to delete task template', { error: caughtError });
+      this.logger.error('Failed to delete task plan', { error: caughtError });
       return fail(
-        mapTaskWriteErrorToResultError(caughtError, 'Failed to delete task template'),
+        mapTaskWriteErrorToResultError(caughtError, 'Failed to delete task plan'),
       );
     }
   }

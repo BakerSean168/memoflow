@@ -91,8 +91,8 @@ describe('task occurrence presentation', () => {
 
     expect(
       getTaskOccurrencePosition(second, [other, second, first], {
-        instanceCount: 8,
-      } as Pick<TaskPlanClientDTO, 'instanceCount'>),
+        occurrenceCount: 8,
+      } as Pick<TaskPlanClientDTO, 'occurrenceCount'>),
     ).toEqual({ position: 2, total: 8 });
   });
 

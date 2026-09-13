@@ -12,18 +12,18 @@ describe('task schedule source ownership surface', () => {
 
   it('projection is identity-scoped and emits neutral SchedulingPort inputs', () => {
     expect(projection).toContain(
-      'buildTemplatePlan(templateId: string, identityId: string): Promise<TaskScheduleProjectionPlan>;',
+      'buildPlanProjection(planId: string, identityId: string): Promise<TaskScheduleProjectionPlan>;',
     );
     expect(projection).toContain(
-      'buildTemplateOwner(templateId: string, identityId: string): SchedulingOwner;',
+      'buildPlanOwner(planId: string, identityId: string): SchedulingOwner;',
     );
     expect(projection).toContain('ScheduledIntent<TaskReminderScheduledPayload>');
     expect(projection).toContain('SchedulingOwner');
     expect(projection).toContain("TASK_REMINDER_HANDLER_KEY = 'task.reminder.fire'");
-    expect(projection).toMatch(/findByIdForIdentity\(\s*identityId,\s*templateId,?\s*\)/);
-    expect(projection).not.toContain('findById(templateId)');
-    expect(projection).toContain('findByTemplateId(');
-    expect(projection).toContain('String(templateDTO.identityId)');
+    expect(projection).toMatch(/findByIdForIdentity\(\s*identityId,\s*planId,?\s*\)/);
+    expect(projection).not.toContain('findById(planId)');
+    expect(projection).toContain('findByPlanId(');
+    expect(projection).toContain('String(planDTO.identityId)');
     expect(projection).not.toContain('ScheduleTask');
     expect(projection).not.toContain('IScheduleTaskRepository');
     expect(projection).not.toContain('SourceModule');

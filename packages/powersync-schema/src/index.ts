@@ -173,7 +173,7 @@ const key_result_weight_snapshots = new Table({
 // Task
 // ──────────────────────────────────────────────
 
-const task_templates = new Table({
+const task_plans = new Table({
   identity_id: column.text,
   name: column.text,
   description: column.text,
@@ -197,7 +197,7 @@ const task_templates = new Table({
   deleted_at: column.text,
 });
 
-const task_instances = new Table({
+const task_occurrences = new Table({
   plan_id: column.text, // FK to TaskPlan
   identity_id: column.text,
   occurrence_key: column.text,
@@ -214,46 +214,12 @@ const task_instances = new Table({
   deleted_at: column.text,
 });
 
-const task_template_history = new Table({
+const task_plan_history = new Table({
   identity_id: column.text,
-  template_id: column.text, // FK
+  plan_id: column.text, // FK
   action: column.text,
   changes: column.text, // JSON
   created_at: column.text,
-});
-
-const task_statistics = new Table({
-  identity_id: column.text,
-  calculated_at: column.text,
-  template_total: column.integer,
-  template_active: column.integer,
-  template_paused: column.integer,
-  template_archived: column.integer,
-  template_one_time: column.integer,
-  template_recurring: column.integer,
-  instance_total: column.integer,
-  instance_today: column.integer,
-  instance_week: column.integer,
-  instance_month: column.integer,
-  instance_pending: column.integer,
-  instance_in_progress: column.integer,
-  instance_completed: column.integer,
-  instance_skipped: column.integer,
-  instance_missed: column.integer,
-  completion_today: column.integer,
-  completion_week: column.integer,
-  completion_month: column.integer,
-  completion_total: column.integer,
-  completion_avg_time: column.real,
-  completion_rate: column.real,
-  time_all_day: column.integer,
-  time_point: column.integer,
-  time_range: column.integer,
-  time_overdue: column.integer,
-  time_upcoming: column.integer,
-  distribution_by_importance: column.text, // JSON
-  distribution_by_urgency: column.text, // JSON
-  distribution_by_tag: column.text, // JSON
 });
 
 // ──────────────────────────────────────────────
@@ -277,7 +243,7 @@ const goal_labels = new Table({
 
 const task_labels = new Table({
   identity_id: column.text,
-  task_template_id: column.text,
+  task_plan_id: column.text,
   label_id: column.text,
 });
 
@@ -877,8 +843,8 @@ const ai_knowledge_index_entries_local = new Table(
 
 const task_goal_outbox = new Table({
   identity_id: column.text,
-  task_instance_id: column.text,
-  task_template_id: column.text,
+  task_occurrence_id: column.text,
+  task_plan_id: column.text,
   goal_id: column.text,
   key_result_id: column.text,
   payload: column.text,
@@ -1063,10 +1029,9 @@ export const PowerSyncAppSchema = new Schema({
   task_labels,
   relations,
   // Task
-  task_templates,
-  task_instances,
-  task_template_history,
-  task_statistics,
+  task_plans,
+  task_occurrences,
+  task_plan_history,
   // Schedule
   schedules,
   schedule_tasks,

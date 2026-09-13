@@ -12,7 +12,7 @@ import type { TimeContext } from '@memoflow/time';
 /** Owner command for one occurrence checklist snapshot item. */
 export class SetTaskOccurrenceChecklistItemUseCase {
   constructor(
-    private readonly instanceRepository: ITaskOccurrenceRepository,
+    private readonly occurrenceRepository: ITaskOccurrenceRepository,
     private readonly transactionRunner: TaskWriteTransactionRunner,
     private readonly projection: TaskOccurrenceProjectionService,
   ) {
@@ -41,7 +41,7 @@ export class SetTaskOccurrenceChecklistItemUseCase {
     timeContext: TimeContext,
     request: SetTaskOccurrenceChecklistItemReq,
   ): Promise<Result<TaskOccurrenceOperationRes>> {
-    const occurrence = await repositories.instanceRepository.findByIdForIdentity(identityId, id);
+    const occurrence = await repositories.occurrenceRepository.findByIdForIdentity(identityId, id);
     if (!occurrence) return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
 
     if (occurrence.version !== request.expectedVersion) {
@@ -64,9 +64,9 @@ export class SetTaskOccurrenceChecklistItemUseCase {
     if (item.completed !== request.completed) {
       if (request.completed) occurrence.completeChecklistItem(request.definitionId);
       else occurrence.uncompleteChecklistItem(request.definitionId);
-      await repositories.instanceRepository.save(occurrence);
+      await repositories.occurrenceRepository.save(occurrence);
     }
 
-    return ok({ instance: this.projection.projectWithContext(occurrence, timeContext) });
+    return ok({ occurrence: this.projection.projectWithContext(occurrence, timeContext) });
   }
 }

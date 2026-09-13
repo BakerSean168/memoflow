@@ -24,7 +24,7 @@ describe('GetTaskOccurrencesByDateRangeUseCase', () => {
     );
   });
 
-  it('should return empty data with total=0 when no instances in range', async () => {
+  it('should return empty data with total=0 when no occurrences in range', async () => {
     const identityId = anIdentityId();
     const startDate = Date.now();
     const endDate = startDate + 86400000;
@@ -38,7 +38,7 @@ describe('GetTaskOccurrencesByDateRangeUseCase', () => {
     }
   });
 
-  it('should return instance DTOs with correct total', async () => {
+  it('should return occurrence DTOs with correct total', async () => {
     const instance1 = await aTaskOccurrence();
     const instance2 = await aTaskOccurrence();
     const instance3 = await aTaskOccurrence();

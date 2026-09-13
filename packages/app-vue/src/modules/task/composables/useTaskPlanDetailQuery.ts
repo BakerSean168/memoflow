@@ -32,7 +32,7 @@ export function useTaskPlanDetailQuery(id: MaybeRefOrGetter<string | undefined |
     return {
       queryKey: taskPlanQueryKeys.detail(resolveIdentityScope(), templateId ?? ''),
       queryFn: async () => {
-        const result = await service.getTemplate(templateId as string);
+        const result = await service.getPlan(templateId as string);
         const dto = unwrap(result);
         return dto.toDTO() as TaskPlanClientDTO;
       },

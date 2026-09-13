@@ -22,7 +22,7 @@ describe('ArchiveTaskPlanUseCase', () => {
     useCase = new ArchiveTaskPlanUseCase(templateRepo, TASK_TEST_USER_TIME_CONTEXT_PORT);
   });
 
-  it('should return NOT_FOUND when template does not exist', async () => {
+  it('should return NOT_FOUND when plan does not exist', async () => {
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(null);
 
     const result = await useCase.execute('non-existent', 'identity-1');
@@ -31,34 +31,34 @@ describe('ArchiveTaskPlanUseCase', () => {
     expect(templateRepo.save).not.toHaveBeenCalled();
   });
 
-  it('should archive an active template', async () => {
-    const template = aOneTimeTask({ title: 'Archive me' });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+  it('should archive an active plan', async () => {
+    const plan = aOneTimeTask({ title: 'Archive me' });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeOk();
-    expect(template.status).toBe(TaskPlanStatus.Active);
-    expect(template.archivedAt).not.toBeNull();
-    expect(templateRepo.save).toHaveBeenCalledWith(template);
+    expect(plan.status).toBe(TaskPlanStatus.Active);
+    expect(plan.archivedAt).not.toBeNull();
+    expect(templateRepo.save).toHaveBeenCalledWith(plan);
   });
 
-  it('should archive a paused template', async () => {
-    const template = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+  it('should archive a paused plan', async () => {
+    const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Paused });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeOk();
-    expect(template.status).toBe(TaskPlanStatus.Paused);
-    expect(template.archivedAt).not.toBeNull();
+    expect(plan.status).toBe(TaskPlanStatus.Paused);
+    expect(plan.archivedAt).not.toBeNull();
   });
 
   it('should return the client DTO on success', async () => {
-    const template = aOneTimeTask({ title: 'My Task' });
-    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    const plan = aOneTimeTask({ title: 'My Task' });
+    vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
-    const result = await useCase.execute(template.id, template.identityId);
+    const result = await useCase.execute(plan.id, plan.identityId);
 
     expect(result).toBeOk();
     if (result.ok) {

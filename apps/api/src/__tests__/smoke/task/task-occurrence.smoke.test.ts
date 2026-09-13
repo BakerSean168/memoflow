@@ -53,7 +53,7 @@ async function makeFakeInstance(
   }> = {},
 ) {
   const instance = await aTaskOccurrence({
-    templateId: overrides.planId ?? FAKE_PLAN_ID,
+    planId: overrides.planId ?? FAKE_PLAN_ID,
     identityId: overrides.identityId ?? anIdentityId(TEST_IDENTITY_ID),
   });
 
@@ -135,14 +135,14 @@ describe('Task Instance API Smoke Tests', () => {
       vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(
         aOneTimeTask({ identityId: anIdentityId(TEST_IDENTITY_ID) }),
       );
-      vi.mocked(ctx.instanceRepo.findByTemplateId).mockResolvedValue([]);
+      vi.mocked(ctx.instanceRepo.findByPlanId).mockResolvedValue([]);
 
       const res = await request(ctx.app)
         .get(`/api/v1/task-occurrences?planId=${FAKE_PLAN_ID}`)
         .set('Authorization', `Bearer ${ctx.token}`);
 
       expect(res.status).toBe(200);
-      expect(ctx.instanceRepo.findByTemplateId).toHaveBeenCalled();
+      expect(ctx.instanceRepo.findByPlanId).toHaveBeenCalled();
     });
 
     it('should route to listByStatus when status filter is provided', async () => {

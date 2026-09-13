@@ -62,7 +62,7 @@ function createInstance(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function createTemplate(overrides: Record<string, unknown> = {}) {
+function createPlan(overrides: Record<string, unknown> = {}) {
   return {
     toServerDTO: vi.fn().mockReturnValue({
       id: PLAN_ID,
@@ -109,7 +109,7 @@ function createDeps(
 describe('createTaskReminderScheduledHandlerRegistration', () => {
   it('exposes the canonical handler key and payload version', () => {
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(createWriter(), createInstance(), createTemplate()),
+      createDeps(createWriter(), createInstance(), createPlan()),
     );
     expect(registration.handlerKey).toBe(TASK_REMINDER_HANDLER_KEY);
     expect(registration.payloadVersion).toBe(TASK_REMINDER_PAYLOAD_VERSION);
@@ -118,7 +118,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
   it('enqueues a durable NotificationRequested envelope aligned with the canonical idempotency key', async () => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(writer, createInstance(), createTemplate()),
+      createDeps(writer, createInstance(), createPlan()),
     );
     const result = (await registration.handler.execute(createContext())) as Extract<
       ScheduledHandlerResult,
@@ -159,7 +159,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
       createDeps(
         writer,
         createInstance(),
-        createTemplate({
+        createPlan({
           reminderConfig: {
             enabled: true,
             triggers: [
@@ -188,23 +188,23 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     expect(envelope.content.content).toBe('任务「Write Tests」已到达提醒时间。');
   });
 
-  it('skips when the instance no longer exists', async () => {
+  it('skips when the occurrence no longer exists', async () => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(writer, null, createTemplate()),
+      createDeps(writer, null, createPlan()),
     );
     const result = await registration.handler.execute(createContext());
     expect(result).toMatchObject({ status: 'skipped', reason: 'TASK_OCCURRENCE_NOT_FOUND' });
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
   });
 
-  it('skips a deleted instance', async () => {
+  it('skips a deleted occurrence', async () => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
       createDeps(
         writer,
         createInstance({ deletedAt: '2030-01-10T09:00:00.000Z' }),
-        createTemplate(),
+        createPlan(),
       ),
     );
     const result = await registration.handler.execute(createContext());
@@ -212,11 +212,11 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
   });
 
-  it('skips a completed or skipped instance', async () => {
+  it('skips a completed or skipped occurrence', async () => {
     for (const status of ['Completed', 'Skipped', 'Missed']) {
       const writer = createWriter();
       const registration = createTaskReminderScheduledHandlerRegistration(
-        createDeps(writer, createInstance({ status }), createTemplate()),
+        createDeps(writer, createInstance({ status }), createPlan()),
       );
       const result = await registration.handler.execute(createContext());
       expect(result).toMatchObject({
@@ -231,7 +231,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
   it('skips a stale occurrence recurrence mismatch', async () => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(writer, createInstance({ occurrenceKey: 'sk:v1:4:task:o:2-2' }), createTemplate()),
+      createDeps(writer, createInstance({ occurrenceKey: 'sk:v1:4:task:o:2-2' }), createPlan()),
     );
     const result = await registration.handler.execute(
       createContext({ payload: createPayload({ occurrenceKey: 'sk:v1:4:task:o:1-1' }) }),
@@ -240,7 +240,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
   });
 
-  it('skips when the template no longer exists', async () => {
+  it('skips when the plan no longer exists', async () => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
       createDeps(writer, createInstance(), null),
@@ -250,13 +250,13 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
   });
 
-  it('skips when the template is deleted', async () => {
+  it('skips when the plan is deleted', async () => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
       createDeps(
         writer,
         createInstance(),
-        createTemplate({ deletedAt: '2030-01-09T00:00:00.000Z' }),
+        createPlan({ deletedAt: '2030-01-09T00:00:00.000Z' }),
       ),
     );
     const result = await registration.handler.execute(createContext());
@@ -264,21 +264,21 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
   });
 
-  it('skips when the template is not Active', async () => {
+  it('skips when the plan is not Active', async () => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(writer, createInstance(), createTemplate({ status: 'Paused' })),
+      createDeps(writer, createInstance(), createPlan({ status: 'Paused' })),
     );
     const result = await registration.handler.execute(createContext());
     expect(result).toMatchObject({ status: 'skipped', reason: 'TASK_PLAN_UNAVAILABLE' });
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
   });
 
-  it('skips when the template reminders are disabled or empty', async () => {
+  it('skips when the plan reminders are disabled or empty', async () => {
     for (const reminderConfig of [{ enabled: false }, { enabled: true, triggers: [] }]) {
       const writer = createWriter();
       const registration = createTaskReminderScheduledHandlerRegistration(
-        createDeps(writer, createInstance(), createTemplate({ reminderConfig })),
+        createDeps(writer, createInstance(), createPlan({ reminderConfig })),
       );
       const result = await registration.handler.execute(createContext());
       expect(result).toMatchObject({ status: 'skipped', reason: 'TASK_PLAN_UNAVAILABLE' });
@@ -292,7 +292,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
       createDeps(
         writer,
         createInstance(),
-        createTemplate({
+        createPlan({
           reminderConfig: {
             enabled: true,
             triggers: [
@@ -312,7 +312,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
   it('skips when the reminder type changed since scheduling', async () => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(writer, createInstance(), createTemplate()),
+      createDeps(writer, createInstance(), createPlan()),
     );
     const result = await registration.handler.execute(
       createContext({
@@ -334,7 +334,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
       createDeps(
         writer,
         createInstance(),
-        createTemplate({
+        createPlan({
           reminderConfig: {
             enabled: true,
             triggers: [
@@ -363,13 +363,13 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
   });
 
-  it('fires an absolute reminder aligned with the current template trigger', async () => {
+  it('fires an absolute reminder aligned with the current plan trigger', async () => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
       createDeps(
         writer,
         createInstance(),
-        createTemplate({
+        createPlan({
           reminderConfig: {
             enabled: true,
             triggers: [
@@ -398,11 +398,11 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     expect(writer.enqueueNotificationRequested).toHaveBeenCalledTimes(1);
   });
 
-  it('skips when the payload occurrence is null but the instance moved to a newer occurrence', async () => {
+  it('skips when the payload occurrence is null but the occurrence moved to a newer occurrence', async () => {
     const writer = createWriter();
     const instanceOccurrence = 'sk:v1:4:task:o:2-1';
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(writer, createInstance({ occurrenceKey: instanceOccurrence }), createTemplate()),
+      createDeps(writer, createInstance({ occurrenceKey: instanceOccurrence }), createPlan()),
     );
     const result = await registration.handler.execute(
       createContext({ payload: createPayload({ occurrenceKey: null }) }),
@@ -415,11 +415,11 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
   });
 
-  it('skips when the payload pins an occurrence the instance no longer carries (drifted back to base)', async () => {
+  it('skips when the payload pins an occurrence the occurrence no longer carries (drifted back to base)', async () => {
     const writer = createWriter();
     const staleOccurrence = 'sk:v1:4:task:o:1-1';
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(writer, createInstance({ occurrenceKey: null }), createTemplate()),
+      createDeps(writer, createInstance({ occurrenceKey: null }), createPlan()),
     );
     const result = await registration.handler.execute(
       createContext({ payload: createPayload({ occurrenceKey: staleOccurrence }) }),
@@ -432,11 +432,11 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
   });
 
-  it('supports a fireable instance that carries its own new occurrence key', async () => {
+  it('supports a fireable occurrence that carries its own new occurrence key', async () => {
     const writer = createWriter();
     const occurrenceKey = 'sk:v1:4:task:o:3-1';
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(writer, createInstance({ occurrenceKey }), createTemplate()),
+      createDeps(writer, createInstance({ occurrenceKey }), createPlan()),
     );
     const result = await registration.handler.execute(
       createContext({ payload: createPayload({ occurrenceKey }) }),
@@ -449,7 +449,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     const writer = createWriter();
     writer.enqueueNotificationRequested.mockRejectedValueOnce(new Error('outbox unavailable'));
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(writer, createInstance(), createTemplate()),
+      createDeps(writer, createInstance(), createPlan()),
     );
     await expect(registration.handler.execute(createContext())).rejects.toThrow(
       'outbox unavailable',
@@ -458,7 +458,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
 
   it('propagates repository technical failures as retryable', async () => {
     const writer = createWriter();
-    const deps = createDeps(writer, createInstance(), createTemplate());
+    const deps = createDeps(writer, createInstance(), createPlan());
     deps.taskOccurrenceRepository.findByIdForIdentity.mockRejectedValueOnce(new Error('db down'));
     const registration = createTaskReminderScheduledHandlerRegistration(deps);
     await expect(registration.handler.execute(createContext())).rejects.toThrow('db down');
@@ -466,7 +466,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
 
   it('validates the versioned payload', () => {
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(createWriter(), createInstance(), createTemplate()),
+      createDeps(createWriter(), createInstance(), createPlan()),
     );
     expect(() => registration.validatePayload(createPayload())).not.toThrow();
     expect(() => registration.validatePayload({ ...createPayload(), occurrenceId: '' })).toThrow();

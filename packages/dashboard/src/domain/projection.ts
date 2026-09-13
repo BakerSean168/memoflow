@@ -65,7 +65,7 @@ export async function getDashboardData(
   );
   const liveTaskOccurrences = taskOccurrences.filter((instance) => instance.deletedAt === null);
   const todayTaskOccurrences = liveTaskOccurrences.filter((instance) =>
-    isWithinRange(instance.instanceDate, todayStart, todayEnd),
+    isWithinRange(instance.occurrenceDate, todayStart, todayEnd),
   );
   const completedToday = liveTaskOccurrences.filter((instance) => {
     if (instance.status !== TaskOccurrenceStatus.Completed) {
