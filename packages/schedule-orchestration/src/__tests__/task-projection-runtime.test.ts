@@ -5,16 +5,18 @@ import type {
   SchedulingPort,
   SchedulingReconcileReceipt,
 } from '@memoflow/contracts/schedule';
-import type {
-  TaskScheduleProjectionEventMap,
-  TaskScheduleProjectionSource,
-  TaskReminderScheduledPayload,
+import {
+  TASK_REMINDER_PAYLOAD_VERSION,
+  TASK_SCHEDULING_OWNER_TYPE,
+  type TaskScheduleProjectionEventMap,
+  type TaskScheduleProjectionSource,
+  type TaskReminderScheduledPayload,
 } from '@memoflow/task/schedule-projection';
 import type { Subscriber } from '@memoflow/utils/domain';
 import { createTaskProjectionRuntime } from '../runtime/task-projection-runtime';
 
 function owner(id = 'TaskPlanId_template'): SchedulingOwner {
-  return { identityId: 'IdentityId_schedule-owner', type: 'task.template', id };
+  return { identityId: 'IdentityId_schedule-owner', type: TASK_SCHEDULING_OWNER_TYPE, id };
 }
 
 function intent(key = 'intent-1'): ScheduledIntent<TaskReminderScheduledPayload> {
@@ -22,10 +24,10 @@ function intent(key = 'intent-1'): ScheduledIntent<TaskReminderScheduledPayload>
     schedulingKey: key,
     handlerKey: 'task.reminder.fire',
     runAt: Date.UTC(2030, 0, 10, 13, 30),
-    payloadVersion: 1,
+    payloadVersion: TASK_REMINDER_PAYLOAD_VERSION,
     payload: {
-      templateId: 'TaskPlanId_template',
-      instanceId: 'TaskOccurrenceId_instance',
+      planId: 'TaskPlanId_template',
+      occurrenceId: 'TaskOccurrenceId_instance',
       occurrenceKey: 'TaskPlanId_template:2030-01-10',
       taskTitle: 'Task',
       reminderType: 'Relative',
@@ -115,12 +117,12 @@ function sourceWithPlan(
 ): TaskScheduleProjectionSource {
   return {
     buildTemplatePlan: vi.fn(async (templateId, identityId) => ({
-      owner: { identityId, type: 'task.template', id: templateId },
+      owner: { identityId, type: TASK_SCHEDULING_OWNER_TYPE, id: templateId },
       desired: [intent()],
     })),
     buildTemplateOwner: vi.fn((templateId, identityId) => ({
       identityId,
-      type: 'task.template',
+      type: TASK_SCHEDULING_OWNER_TYPE,
       id: templateId,
     })),
     listTemplateRefs: vi.fn().mockResolvedValue([]),

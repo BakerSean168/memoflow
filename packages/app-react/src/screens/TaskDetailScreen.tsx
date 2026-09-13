@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { presentErrorMessage } from '@memoflow/http-client';
 
-import { getProductTime, formatProductDateTime, emptyKind } from '../utils/product-time';
+import { emptyKind, formatProductDateTime, formatProductYmd } from '../utils/product-time';
 
 import { useTaskOccurrences } from '../hooks/useTaskOccurrences';
 import { useTaskPlanDetail } from '../hooks/useTaskPlanDetail';
@@ -22,26 +22,12 @@ import {
   ThemedView,
 } from '@memoflow/ui-react-native';
 
-function formatTimeConfig(input: {
-  timeType: string;
-  timePoint: number | null;
-  timeRange?: { start: number; end: number } | null;
-}) {
-  if (input.timeType === 'AllDay') {
-    return 'All day';
-  }
-
-  if (input.timeType === 'TimePoint' && input.timePoint !== null) {
-    return `At ${getProductTime().format.hm(input.timePoint)}`;
-  }
-
-  if (input.timeType === 'TimeRange' && input.timeRange) {
-    const start = getProductTime().format.hm(input.timeRange.start);
-    const end = getProductTime().format.hm(input.timeRange.end);
-    return `${start} - ${end}`;
-  }
-
-  return input.timeType;
+function formatOccurrenceTiming(
+  timing: import('@memoflow/contracts/task').TaskOccurrenceClientDTO['scheduleSnapshot']['timing'],
+): string {
+  if (timing.kind === 'AllDay') return 'All day';
+  if (timing.kind === 'At') return `At ${timing.time}`;
+  return `${timing.start} - ${timing.end}`;
 }
 
 function formatPlanSchedule(schedule: import('@memoflow/contracts/task').TaskPlanSchedule): string {
@@ -315,7 +301,7 @@ export function TaskDetailScreen() {
                   >
                     <View style={styles.instanceHeader}>
                       <ThemedText type="smallBold">
-                        {formatProductDateTime(instance.instanceDate, emptyKind('notSet'))}
+                        {formatProductYmd(instance.scheduleSnapshot.date)}
                       </ThemedText>
                       <StatusPill
                         label={instance.status}
@@ -329,10 +315,12 @@ export function TaskDetailScreen() {
                       />
                     </View>
                     <ThemedText type="small" themeColor="textSecondary">
-                      {formatTimeConfig(instance.timeConfig)}
+                      {formatOccurrenceTiming(instance.scheduleSnapshot.timing)}
                     </ThemedText>
-                    {instance.comment ? (
-                      <ThemedText type="small">{instance.comment}</ThemedText>
+                    {instance.result?.kind === 'Completed' && instance.result.note ? (
+                      <ThemedText type="small">{instance.result.note}</ThemedText>
+                    ) : instance.result?.kind === 'Skipped' && instance.result.reason ? (
+                      <ThemedText type="small">{instance.result.reason}</ThemedText>
                     ) : null}
                     <View style={styles.actionRow}>
                       {instance.status === 'Pending' ? (

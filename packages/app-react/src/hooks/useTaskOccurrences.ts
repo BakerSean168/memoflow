@@ -1,39 +1,16 @@
 import { useEffect, useState } from 'react';
 
-import type { TaskOccurrenceStatus, TaskTimeConfigDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import type { TaskOccurrence } from '@memoflow/task/client';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
 import { useTaskService } from './useTaskService';
 
-export type TaskOccurrenceSummary = {
-  id: string;
-  templateId: string;
-  instanceDate: number;
-  status: TaskOccurrenceStatus;
-  timeConfig: TaskTimeConfigDTO;
-  actualStartTime: number | null;
-  actualEndTime: number | null;
-  comment: string | null;
-};
+export type TaskOccurrenceSummary = TaskOccurrenceClientDTO;
 
 function mapInstance(instance: TaskOccurrence): TaskOccurrenceSummary {
-  return {
-    id: String(instance.id),
-    templateId: String(instance.templateId),
-    instanceDate: instance.instanceDate,
-    status: instance.status,
-    timeConfig: {
-      timeType: instance.timeConfig.timeType,
-      startDate: instance.timeConfig.startDate ? instance.timeConfig.startDate : null,
-      timePoint: instance.timeConfig.timePoint,
-      timeRange: instance.timeConfig.timeRange ?? null,
-    },
-    actualStartTime: instance.actualStartTime ?? null,
-    actualEndTime: instance.actualEndTime ?? null,
-    comment: instance.comment,
-  };
+  return instance.toDTO();
 }
 
 export function useTaskOccurrences(taskId: string | null) {
@@ -54,7 +31,7 @@ export function useTaskOccurrences(taskId: string | null) {
     setIsLoading(true);
     setError(null);
 
-    const result = await service.listInstances({ templateId: taskId, limit: 20 });
+    const result = await service.listInstances({ planId: taskId, limit: 20 });
     if (!result.ok) {
       setInstances([]);
       setError(presentErrorMessage(result.error));
@@ -64,7 +41,7 @@ export function useTaskOccurrences(taskId: string | null) {
 
     const sorted = result.data
       .map((instance) => mapInstance(instance))
-      .sort((left, right) => right.instanceDate - left.instanceDate);
+      .sort((left, right) => right.scheduleSnapshot.date.localeCompare(left.scheduleSnapshot.date));
     setInstances(sorted);
     setIsLoading(false);
   }

@@ -1,30 +1,35 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
-import {
-  buildSchedulingKey,
-  SourceModule,
-} from '@memoflow/contracts/schedule';
+import { buildSchedulingKey, SourceModule } from '@memoflow/contracts/schedule';
 import {
   createHandlerRegistryScheduleTaskSourceExecutor,
   ScheduledHandlerRegistry,
   ScheduleTask,
   type ScheduleTaskExecutionResult,
 } from '@memoflow/scheduler';
-import type { TaskReminderScheduledPayload } from '@memoflow/task/schedule-projection';
+import {
+  TASK_REMINDER_PAYLOAD_VERSION,
+  TASK_SCHEDULING_OWNER_TYPE,
+  type TaskReminderScheduledPayload,
+} from '@memoflow/task/schedule-projection';
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 
 const IDENTITY = 'IdentityId_task-owner';
 const TEMPLATE_ID = 'TaskPlanId_template';
 const INSTANCE_ID = 'TaskOccurrenceId_instance-1';
 const OCCURRENCE_KEY = 'TaskPlanId_template:2030-01-10';
-const SINGLE_REMINDER_KEY = buildSchedulingKey('task.reminder', OCCURRENCE_KEY, 'relative:30:Minutes');
+const SINGLE_REMINDER_KEY = buildSchedulingKey(
+  'task.reminder',
+  OCCURRENCE_KEY,
+  'relative:30:Minutes',
+);
 const REMINDER_AT = Date.UTC(2030, 0, 10, 13, 30);
 const ANCHOR_AT = Date.UTC(2030, 0, 10, 14);
 
 function payload(): TaskReminderScheduledPayload {
   return {
-    templateId: TEMPLATE_ID,
-    instanceId: INSTANCE_ID,
+    planId: TEMPLATE_ID,
+    occurrenceId: INSTANCE_ID,
     occurrenceKey: OCCURRENCE_KEY,
     taskTitle: 'Exercise 30 minutes',
     reminderType: 'Relative',
@@ -59,12 +64,12 @@ function fixtureTask(): ScheduleTask {
       payload: {
         __memoflowScheduling: {
           schemaVersion: 1,
-          ownerType: 'task.template',
+          ownerType: TASK_SCHEDULING_OWNER_TYPE,
           ownerId: TEMPLATE_ID,
           schedulingKey: SINGLE_REMINDER_KEY,
           handlerKey: 'task.reminder.fire',
           originalRunAt: REMINDER_AT,
-          payloadVersion: 1,
+          payloadVersion: TASK_REMINDER_PAYLOAD_VERSION,
           sourceRevision: '1:1',
           fingerprint: 'fixture-d:1',
         },
@@ -81,7 +86,7 @@ function createInstance(overrides: Record<string, unknown> = {}) {
   return {
     id: INSTANCE_ID,
     identityId: IDENTITY,
-    templateId: TEMPLATE_ID,
+    planId: TEMPLATE_ID,
     occurrenceKey: OCCURRENCE_KEY,
     status: 'Pending',
     deletedAt: null,
@@ -98,7 +103,9 @@ function createTemplate(overrides: Record<string, unknown> = {}) {
       deletedAt: null,
       reminderConfig: {
         enabled: true,
-        triggers: [{ type: 'Relative', relativeValue: 30, relativeUnit: 'Minutes', absoluteTime: null }],
+        triggers: [
+          { type: 'Relative', relativeValue: 30, relativeUnit: 'Minutes', absoluteTime: null },
+        ],
       },
       ...overrides,
     }),
@@ -118,20 +125,22 @@ interface DurableWriterHarness {
  */
 function createDurableWriterHarness(): DurableWriterHarness {
   const rows = new Map<string, { operationId: string; idempotencyKey: string }>();
-  const enqueueNotificationRequested = vi.fn().mockImplementation(
-    async (input: { operationId: string; envelope: { idempotencyKey: string } }) => {
-      const existing = rows.get(input.envelope.idempotencyKey);
-      if (existing) {
-        return { ...existing, status: 'succeeded', identityId: IDENTITY };
-      }
-      const row = {
-        operationId: input.operationId,
-        idempotencyKey: input.envelope.idempotencyKey,
-      };
-      rows.set(input.envelope.idempotencyKey, row);
-      return { ...row, status: 'succeeded', identityId: IDENTITY };
-    },
-  );
+  const enqueueNotificationRequested = vi
+    .fn()
+    .mockImplementation(
+      async (input: { operationId: string; envelope: { idempotencyKey: string } }) => {
+        const existing = rows.get(input.envelope.idempotencyKey);
+        if (existing) {
+          return { ...existing, status: 'succeeded', identityId: IDENTITY };
+        }
+        const row = {
+          operationId: input.operationId,
+          idempotencyKey: input.envelope.idempotencyKey,
+        };
+        rows.set(input.envelope.idempotencyKey, row);
+        return { ...row, status: 'succeeded', identityId: IDENTITY };
+      },
+    );
   return {
     writer: { enqueueNotificationRequested } as unknown as NotificationRequestedWriterPort,
     enqueueNotificationRequested,
@@ -175,8 +184,8 @@ describe('task.reminder.fire through the neutral registry executor', () => {
     const first = executionResult(await executor.execute(task));
     expect(first.disposition).toBe('succeeded');
     expect(first.result).toMatchObject({
-      instanceId: INSTANCE_ID,
-      templateId: TEMPLATE_ID,
+      occurrenceId: INSTANCE_ID,
+      planId: TEMPLATE_ID,
       schedulingKey: SINGLE_REMINDER_KEY,
       handlerKey: 'task.reminder.fire',
       schedulingDisposition: 'succeeded',
