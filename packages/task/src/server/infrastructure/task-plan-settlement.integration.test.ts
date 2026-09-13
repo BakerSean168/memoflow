@@ -10,7 +10,12 @@ import {
 import { TaskPlan } from '../domain/aggregates/task-plan';
 import { TaskOccurrence } from '../domain/aggregates/task-occurrence';
 import { TASK_TEST_TIME_CONTEXT, TASK_TEST_USER_TIME_CONTEXT_PORT } from '../../testing';
-import { RecurrenceRule, TaskPlanSchedule, TaskTimeConfig } from '../domain/value-objects';
+import {
+  RecurrenceRule,
+  TaskOccurrenceScheduleSnapshot,
+  TaskPlanSchedule,
+  TaskTimeConfig,
+} from '../domain/value-objects';
 import { createTaskPrismaModule } from './prisma';
 import {
   cleanTaskTables,
@@ -82,13 +87,16 @@ async function seedFifteenOccurrencePlan(
 
   const instances: TaskOccurrence[] = [];
   for (let index = 0; index < 15; index += 1) {
+    const occurrenceDate = start + index * DAY_MS;
     const instance = TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
+      planId: template.id,
       identityId,
-      instanceDate: start + index * DAY_MS,
-      timeConfig: TaskTimeConfig.createAllDay(new Date(start + index * DAY_MS)),
-      importance: ImportanceLevel.Moderate,
+      scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
+        occurrenceDate,
+        TaskTimeConfig.createAllDay(new Date(occurrenceDate)),
+        TASK_TEST_TIME_CONTEXT,
+      ),
+      importanceSnapshot: ImportanceLevel.Moderate,
     });
     if (index < 14) instance.complete();
     instance.clearDomainEvents();

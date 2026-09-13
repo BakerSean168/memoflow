@@ -1,13 +1,15 @@
-import type {
-  ITaskOccurrenceRepository,
-  TaskPlanInstanceStats,
-} from '../../../domain/repositories/i-task-occurrence-repository';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
-import { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
-import { OptimisticConcurrencyError } from '../../../domain/errors/optimistic-concurrency.error';
 import type { TaskOccurrenceStatus } from '@memoflow/contracts/task';
 import { AggregateRepositoryBase, createEventBusAdapter, type IEventBus } from '@memoflow/patterns';
 import { eventBus } from '@memoflow/utils/domain';
+import { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
+import { OptimisticConcurrencyError } from '../../../domain/errors/optimistic-concurrency.error';
+import type {
+  ITaskOccurrenceRepository,
+  TaskPlanInstanceStats,
+  TaskPlanStatsWindow,
+} from '../../../domain/repositories/i-task-occurrence-repository';
 import {
   PowerSyncTaskOccurrenceMapper,
   type PowerSyncTaskOccurrenceRow,
@@ -33,46 +35,43 @@ export class PowerSyncTaskOccurrenceRepository
       [data.id],
     );
 
-    // TASK-2204: prevent a second desktop occurrence for the same plan/local day.
-    // Prisma also has a unique constraint; PowerSync schema has no portable unique-index
-    // declaration, so keep the deterministic occurrence key and enforce the same rule here.
-    if (!existing && data.occurrenceKey) {
-      const existingOccurrence = await this.db.getOptional<{ id: string }>(
-        'SELECT id FROM task_instances WHERE template_id = ? AND identity_id = ? AND occurrence_key = ? AND deleted_at IS NULL LIMIT 1',
-        [data.templateId, data.identityId, data.occurrenceKey],
+    if (!existing) {
+      const duplicate = await this.db.getOptional<{ id: string }>(
+        'SELECT id FROM task_instances WHERE plan_id = ? AND identity_id = ? AND occurrence_key = ? AND deleted_at IS NULL LIMIT 1',
+        [data.planId, data.identityId, data.occurrenceKey],
       );
-      if (existingOccurrence) return;
+      if (duplicate) return;
     }
 
     if (existing) {
       const expectedVersion = data.version - 1;
       const updated = await this.db.execute(
         `UPDATE task_instances
-         SET template_id = ?,
+         SET plan_id = ?,
              identity_id = ?,
-             instance_date = ?,
              occurrence_key = ?,
+             schedule_date = ?,
+             schedule_timing = ?,
+             importance_snapshot = ?,
              status = ?,
-             importance = ?,
-             time_config = ?,
-             actual_start_time = ?,
-             actual_end_time = ?,
-             comment = ?,
+             actual_start_at = ?,
+             result = ?,
+             checklist_state = ?,
              version = ?,
              updated_at = ?,
              deleted_at = ?
          WHERE id = ? AND identity_id = ? AND version = ?`,
         [
-          data.templateId,
+          data.planId,
           data.identityId,
-          data.instanceDate,
           data.occurrenceKey,
+          data.scheduleDate,
+          data.scheduleTiming,
+          data.importanceSnapshot,
           data.status,
-          data.importance,
-          data.timeConfig,
-          data.actualStartTime,
-          data.actualEndTime,
-          data.comment,
+          data.actualStartAt,
+          data.result,
+          data.checklistState,
           data.version,
           data.updatedAt,
           data.deletedAt,
@@ -88,42 +87,42 @@ export class PowerSyncTaskOccurrenceRepository
         );
         throw new OptimisticConcurrencyError(
           'TaskOccurrence',
-          String(data.id),
+          data.id,
           expectedVersion,
           current?.version ?? existing.version,
         );
       }
-    } else {
-      await this.db.execute(
-        `INSERT INTO task_instances (
-          id, template_id, identity_id, instance_date, occurrence_key, status, importance, time_config,
-          actual_start_time, actual_end_time, comment, version, created_at, updated_at, deleted_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          data.id,
-          data.templateId,
-          data.identityId,
-          data.instanceDate,
-          data.occurrenceKey,
-          data.status,
-          data.importance,
-          data.timeConfig,
-          data.actualStartTime,
-          data.actualEndTime,
-          data.comment,
-          data.version,
-          data.createdAt,
-          data.updatedAt,
-          data.deletedAt,
-        ],
-      );
+      return;
     }
+
+    await this.db.execute(
+      `INSERT INTO task_instances (
+        id, plan_id, identity_id, occurrence_key, schedule_date, schedule_timing,
+        importance_snapshot, status, actual_start_at, result, checklist_state,
+        version, created_at, updated_at, deleted_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        data.id,
+        data.planId,
+        data.identityId,
+        data.occurrenceKey,
+        data.scheduleDate,
+        data.scheduleTiming,
+        data.importanceSnapshot,
+        data.status,
+        data.actualStartAt,
+        data.result,
+        data.checklistState,
+        data.version,
+        data.createdAt,
+        data.updatedAt,
+        data.deletedAt,
+      ],
+    );
   }
 
   async saveMany(instances: TaskOccurrence[]): Promise<void> {
-    for (const instance of instances) {
-      await this.save(instance);
-    }
+    for (const instance of instances) await this.save(instance);
   }
 
   async findByIdForIdentity(identityId: string, id: string): Promise<TaskOccurrence | null> {
@@ -136,48 +135,48 @@ export class PowerSyncTaskOccurrenceRepository
 
   async findByTemplateId(templateId: string, identityId: string): Promise<TaskOccurrence[]> {
     return this.query(
-      'SELECT * FROM task_instances WHERE template_id = ? AND identity_id = ? AND deleted_at IS NULL ORDER BY instance_date DESC',
+      'SELECT * FROM task_instances WHERE plan_id = ? AND identity_id = ? AND deleted_at IS NULL ORDER BY schedule_date DESC',
       [templateId, identityId],
     );
   }
 
   async findByIdentityId(identityId: string): Promise<TaskOccurrence[]> {
     return this.query(
-      'SELECT * FROM task_instances WHERE identity_id = ? AND deleted_at IS NULL ORDER BY instance_date DESC',
+      'SELECT * FROM task_instances WHERE identity_id = ? AND deleted_at IS NULL ORDER BY schedule_date DESC',
       [identityId],
     );
   }
 
   async findByDateRange(
     identityId: string,
-    startDate: number,
-    endDate: number,
+    startDate: Ymd,
+    endDate: Ymd,
   ): Promise<TaskOccurrence[]> {
     return this.query(
-      `SELECT * FROM task_instances WHERE identity_id = ? AND instance_date >= ? AND instance_date <= ? AND deleted_at IS NULL ORDER BY instance_date ASC`,
-      [identityId, new Date(startDate).toISOString(), new Date(endDate).toISOString()],
+      'SELECT * FROM task_instances WHERE identity_id = ? AND schedule_date >= ? AND schedule_date <= ? AND deleted_at IS NULL ORDER BY schedule_date ASC',
+      [identityId, startDate, endDate],
     );
   }
 
   async findByStatus(identityId: string, status: TaskOccurrenceStatus): Promise<TaskOccurrence[]> {
     return this.query(
-      'SELECT * FROM task_instances WHERE identity_id = ? AND status = ? AND deleted_at IS NULL ORDER BY instance_date DESC',
+      'SELECT * FROM task_instances WHERE identity_id = ? AND status = ? AND deleted_at IS NULL ORDER BY schedule_date DESC',
       [identityId, status],
     );
   }
 
   async findOverdueInstances(identityId: string): Promise<TaskOccurrence[]> {
     return this.query(
-      `SELECT * FROM task_instances WHERE identity_id = ? AND status IN ('Pending', 'InProgress') AND instance_date < ? AND deleted_at IS NULL ORDER BY instance_date ASC`,
-      [identityId, new Date().toISOString()],
+      `SELECT * FROM task_instances
+       WHERE identity_id = ? AND status IN ('Pending', 'InProgress') AND deleted_at IS NULL
+       ORDER BY schedule_date ASC`,
+      [identityId],
     );
   }
 
   async delete(identityId: string, id: string): Promise<void> {
     const existing = await this.findByIdForIdentity(identityId, id);
-    if (!existing) {
-      throw new Error('Task instance not found for the current identity.');
-    }
+    if (!existing) throw new Error('Task occurrence not found for the current identity.');
     await this.db.execute('DELETE FROM task_instances WHERE id = ? AND identity_id = ?', [
       id,
       identityId,
@@ -194,7 +193,7 @@ export class PowerSyncTaskOccurrenceRepository
   }
 
   async deleteByTemplateId(templateId: string, identityId: string): Promise<void> {
-    await this.db.execute('DELETE FROM task_instances WHERE template_id = ? AND identity_id = ?', [
+    await this.db.execute('DELETE FROM task_instances WHERE plan_id = ? AND identity_id = ?', [
       templateId,
       identityId,
     ]);
@@ -203,11 +202,11 @@ export class PowerSyncTaskOccurrenceRepository
   async countFutureInstances(
     templateId: string,
     identityId: string,
-    fromDate: number = Date.now(),
+    fromDate: Ymd,
   ): Promise<number> {
     const row = await this.db.get<{ count: number }>(
-      'SELECT COUNT(*) as count FROM task_instances WHERE template_id = ? AND identity_id = ? AND instance_date >= ?',
-      [templateId, identityId, new Date(fromDate).toISOString()],
+      'SELECT COUNT(*) as count FROM task_instances WHERE plan_id = ? AND identity_id = ? AND schedule_date >= ? AND deleted_at IS NULL',
+      [templateId, identityId, fromDate],
     );
     return Number(row.count ?? 0);
   }
@@ -215,28 +214,22 @@ export class PowerSyncTaskOccurrenceRepository
   async findByTemplateIdAndDateRange(
     templateId: string,
     identityId: string,
-    startDate: number,
-    endDate: number,
+    startDate: Ymd,
+    endDate: Ymd,
   ): Promise<TaskOccurrence[]> {
     return this.query(
-      `SELECT * FROM task_instances WHERE template_id = ? AND identity_id = ? AND instance_date >= ? AND instance_date <= ? AND deleted_at IS NULL ORDER BY instance_date ASC`,
-      [templateId, identityId, new Date(startDate).toISOString(), new Date(endDate).toISOString()],
+      'SELECT * FROM task_instances WHERE plan_id = ? AND identity_id = ? AND schedule_date >= ? AND schedule_date <= ? AND deleted_at IS NULL ORDER BY schedule_date ASC',
+      [templateId, identityId, startDate, endDate],
     );
   }
 
   async getTemplateStats(
     templateIds: string[],
     identityId: string,
-    window: { windowStart: number; asOf: number },
+    window: TaskPlanStatsWindow,
   ): Promise<Record<string, TaskPlanInstanceStats>> {
-    if (templateIds.length === 0) {
-      return {};
-    }
-
+    if (templateIds.length === 0) return {};
     const placeholders = templateIds.map(() => '?').join(', ');
-    const completionWindowDays = 30 as const;
-    const windowStart = new Date(window.windowStart).toISOString();
-    const windowEnd = new Date(window.asOf).toISOString();
     const rows = await this.db.getAll<{
       templateId: string;
       instanceCount: number;
@@ -247,24 +240,30 @@ export class PowerSyncTaskOccurrenceRepository
       futurePendingInstanceCount: number;
       singleInstanceStatus: TaskOccurrenceStatus | null;
     }>(
-      `SELECT template_id as templateId,
+      `SELECT plan_id as templateId,
               COUNT(*) as instanceCount,
               SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completedInstanceCount,
               SUM(CASE WHEN status = 'Pending' THEN 1 ELSE 0 END) as pendingInstanceCount,
-              SUM(CASE WHEN instance_date >= ? AND instance_date <= ? THEN 1 ELSE 0 END) as dueInstanceCount,
-              SUM(CASE WHEN status = 'Completed' AND instance_date >= ? AND instance_date <= ? THEN 1 ELSE 0 END) as completedDueInstanceCount,
-              SUM(CASE WHEN status = 'Pending' AND instance_date > ? THEN 1 ELSE 0 END) as futurePendingInstanceCount,
+              SUM(CASE WHEN schedule_date >= ? AND schedule_date <= ? THEN 1 ELSE 0 END) as dueInstanceCount,
+              SUM(CASE WHEN status = 'Completed' AND schedule_date >= ? AND schedule_date <= ? THEN 1 ELSE 0 END) as completedDueInstanceCount,
+              SUM(CASE WHEN status = 'Pending' AND schedule_date > ? THEN 1 ELSE 0 END) as futurePendingInstanceCount,
               CASE WHEN COUNT(*) = 1 THEN MAX(status) ELSE NULL END as singleInstanceStatus
          FROM task_instances
-        WHERE template_id IN (${placeholders})
-          AND identity_id = ?
-          AND deleted_at IS NULL
-        GROUP BY template_id`,
-      [windowStart, windowEnd, windowStart, windowEnd, windowEnd, ...templateIds, identityId],
+        WHERE plan_id IN (${placeholders}) AND identity_id = ? AND deleted_at IS NULL
+        GROUP BY plan_id`,
+      [
+        window.windowStart,
+        window.asOf,
+        window.windowStart,
+        window.asOf,
+        window.asOf,
+        ...templateIds,
+        identityId,
+      ],
     );
 
+    const completionWindowDays = 30 as const;
     const stats: Record<string, TaskPlanInstanceStats> = {};
-
     for (const templateId of templateIds) {
       stats[templateId] = {
         templateId,
@@ -279,13 +278,9 @@ export class PowerSyncTaskOccurrenceRepository
         completionRate: 0,
       };
     }
-
     for (const row of rows) {
       const stat = stats[row.templateId];
-      if (!stat) {
-        continue;
-      }
-
+      if (!stat) continue;
       stat.instanceCount = Number(row.instanceCount ?? 0);
       stat.completedInstanceCount = Number(row.completedInstanceCount ?? 0);
       stat.pendingInstanceCount = Number(row.pendingInstanceCount ?? 0);
@@ -298,34 +293,26 @@ export class PowerSyncTaskOccurrenceRepository
           ? Math.round((stat.completedDueInstanceCount / stat.dueInstanceCount) * 100)
           : 0;
     }
-
     return stats;
   }
 
   async deleteIncompleteInstancesFrom(
     templateId: string,
     identityId: string,
-    fromDate: number,
+    fromDate: Ymd,
   ): Promise<number> {
     const before = await this.db.get<{ count: number }>(
-      `SELECT COUNT(*) as count
-         FROM task_instances
-        WHERE template_id = ?
-          AND identity_id = ?
-          AND instance_date >= ?
-          AND status IN ('Pending', 'InProgress')`,
-      [templateId, identityId, new Date(fromDate).toISOString()],
+      `SELECT COUNT(*) as count FROM task_instances
+       WHERE plan_id = ? AND identity_id = ? AND schedule_date >= ?
+         AND status IN ('Pending', 'InProgress')`,
+      [templateId, identityId, fromDate],
     );
-
     await this.db.execute(
       `DELETE FROM task_instances
-        WHERE template_id = ?
-          AND identity_id = ?
-          AND instance_date >= ?
-          AND status IN ('Pending', 'InProgress')`,
-      [templateId, identityId, new Date(fromDate).toISOString()],
+       WHERE plan_id = ? AND identity_id = ? AND schedule_date >= ?
+         AND status IN ('Pending', 'InProgress')`,
+      [templateId, identityId, fromDate],
     );
-
     return Number(before?.count ?? 0);
   }
 

@@ -5,7 +5,6 @@ import { TaskTimeConfig } from '../../../domain/value-objects/task-time-config';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import { mapTaskWriteErrorToResultError } from './task-write-support';
 
-
 /** Owner command for one TaskOccurrence. It never mutates TaskPlan or Scheduler persistence. */
 export class RescheduleTaskOccurrenceUseCase {
   constructor(
@@ -37,12 +36,13 @@ export class RescheduleTaskOccurrenceUseCase {
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
       const time = createTimeFacade({ context: timeContext });
       const targetDay = time.calendar.startOfDay(asInstant(request.newTime.startDate));
-      const targetKey = String(instance.templateId) + ":" + time.calendar.toYmd(targetDay);
+      const targetDate = time.calendar.toYmd(targetDay);
+      const targetKey = String(instance.planId) + ':' + targetDate;
       const siblings = await this.instanceRepository.findByTemplateIdAndDateRange(
-        String(instance.templateId),
+        String(instance.planId),
         identityId,
-        Number(targetDay),
-        Number(time.calendar.endOfDay(targetDay)),
+        targetDate,
+        targetDate,
       );
       const collision = siblings.find(
         (candidate) => candidate.id !== instance.id && candidate.occurrenceKey === targetKey,

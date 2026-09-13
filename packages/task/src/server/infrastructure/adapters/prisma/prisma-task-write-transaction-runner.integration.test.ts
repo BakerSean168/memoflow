@@ -7,7 +7,12 @@ import { eventBus } from '@memoflow/utils/domain';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
 import { TASK_TEST_TIME_CONTEXT, TASK_TEST_USER_TIME_CONTEXT_PORT } from '../../../../testing';
-import { RecurrenceRule, TaskPlanSchedule, TaskTimeConfig } from '../../../domain/value-objects';
+import {
+  RecurrenceRule,
+  TaskOccurrenceScheduleSnapshot,
+  TaskPlanSchedule,
+  TaskTimeConfig,
+} from '../../../domain/value-objects';
 import { createTaskPrismaModule } from '../../prisma';
 import {
   cleanTaskTables,
@@ -45,12 +50,14 @@ async function seedPlanWithPropagationStates() {
 
   const createInstance = (instanceDate: number) =>
     TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
+      planId: template.id,
       identityId,
-      instanceDate,
-      timeConfig: TaskTimeConfig.createAllDay(new Date(instanceDate)),
-      importance: ImportanceLevel.Moderate,
+      scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
+        instanceDate,
+        TaskTimeConfig.createAllDay(new Date(instanceDate)),
+        TASK_TEST_TIME_CONTEXT,
+      ),
+      importanceSnapshot: ImportanceLevel.Moderate,
     });
   const pastPending = createInstance(now - DAY_MS);
   const futurePending = createInstance(now + DAY_MS);
@@ -191,10 +198,14 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
       name: 'Updated propagation plan',
       importance: ImportanceLevel.Important,
     });
-    expect(savedById.get(String(futurePending.id))?.importance).toBe(ImportanceLevel.Important);
-    expect(savedById.get(String(pastPending.id))?.importance).toBe(ImportanceLevel.Moderate);
+    expect(savedById.get(String(futurePending.id))?.importanceSnapshot).toBe(
+      ImportanceLevel.Important,
+    );
+    expect(savedById.get(String(pastPending.id))?.importanceSnapshot).toBe(
+      ImportanceLevel.Moderate,
+    );
     expect(savedById.get(String(futureInProgress.id))).toMatchObject({
-      importance: ImportanceLevel.Moderate,
+      importanceSnapshot: ImportanceLevel.Moderate,
       status: 'InProgress',
     });
 
@@ -225,7 +236,7 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     );
     expect(savedTemplate?.title).toBe('Propagation plan');
     expect(savedTemplate?.importance).toBe(ImportanceLevel.Moderate);
-    expect(savedFuture?.importance).toBe(ImportanceLevel.Moderate);
+    expect(savedFuture?.importanceSnapshot).toBe(ImportanceLevel.Moderate);
 
     module.dispose();
   });

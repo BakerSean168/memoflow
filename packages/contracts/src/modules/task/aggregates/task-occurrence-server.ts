@@ -1,49 +1,30 @@
 /**
- * TaskOccurrence Aggregate Root - Server Interface
- * 任务实例聚合根
+ * TaskOccurrence canonical server DTO (ADR-071 / ADR-073).
  *
- * 【同步支持】
- * - deletedAt: 软删除时间戳
- * - version: 乐观锁版本号
- * - updatedAt: 最后更新时间（增量同步）
+ * This shape represents durable occurrence truth. Legacy Template/Instance
+ * presentation fields remain client-projection concerns until TASK-7306.
  */
 
+import type { IdentityId, TaskOccurrenceId, TaskPlanId, TransferDate } from '../../../primitives';
+import type { ImportanceLevel } from '../../../shared/value-objects/importance';
 import type {
-  TaskOccurrenceId,
-  TaskPlanId,
-  IdentityId,
-  TransferDate,
-} from '../../../primitives';
-import type { TaskOccurrenceStatus } from '../value-objects/task-occurrence-status';
-import { ImportanceLevel } from '../../../shared/value-objects/importance';
-import type {
-  TaskTimeConfigDTO,
+  TaskOccurrenceChecklistItem,
+  TaskOccurrenceResult,
+  TaskOccurrenceScheduleSnapshot,
+  TaskOccurrenceStatus,
 } from '../value-objects';
 
-// ============ DTO 定义 ============
-
-/**
- * TaskOccurrence Server DTO
- */
 export interface TaskOccurrenceServerDTO {
   id: TaskOccurrenceId;
-  templateId: TaskPlanId;
+  planId: TaskPlanId;
   identityId: IdentityId;
-
-  importance: ImportanceLevel;
-
+  occurrenceKey: string;
+  scheduleSnapshot: TaskOccurrenceScheduleSnapshot;
+  importanceSnapshot: ImportanceLevel;
   status: TaskOccurrenceStatus;
-  /** Derived read-model flag; never persisted. */
-  isOverdue: boolean;
-  actualStartTime: TransferDate | null;
-  actualEndTime: TransferDate | null;
-
-  instanceDate: TransferDate;
-  timeConfig: TaskTimeConfigDTO;
-
-  comment: string | null;
-
-  // 同步字段
+  actualStartAt: TransferDate | null;
+  result: TaskOccurrenceResult | null;
+  checklistState: TaskOccurrenceChecklistItem[];
   version: number;
   createdAt: TransferDate;
   updatedAt: TransferDate;

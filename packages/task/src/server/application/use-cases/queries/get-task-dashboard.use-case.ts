@@ -39,15 +39,15 @@ export class GetTaskDashboardUseCase {
     const now = this.now();
     const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
     const taskTime = createTimeFacade({ context: timeContext });
-    const todayStart = Number(taskTime.calendar.startOfDay(now));
-    const todayEnd = Number(taskTime.calendar.endOfDay(todayStart));
-    const upcomingEnd = Number(taskTime.calendar.endOfDay(taskTime.calendar.addDays(now, 7)));
+    const todayDate = taskTime.calendar.toYmd(now);
+    const tomorrow = taskTime.calendar.toYmd(taskTime.calendar.addDays(now, 1));
+    const upcomingEnd = taskTime.calendar.toYmd(taskTime.calendar.addDays(now, 7));
 
     const [todayOccurrences, overdueCandidates, upcoming, highPriority, totalActive, totalClosed] =
       await Promise.all([
-        this.occurrenceRepository.findByDateRange(identityId, todayStart, todayEnd),
+        this.occurrenceRepository.findByDateRange(identityId, todayDate, todayDate),
         this.occurrenceRepository.findByIdentityId(identityId),
-        this.occurrenceRepository.findByDateRange(identityId, todayEnd + 1, upcomingEnd),
+        this.occurrenceRepository.findByDateRange(identityId, tomorrow, upcomingEnd),
         this.getHighPriorityTasks(identityId, 5, timeContext, now),
         this.countTasks(identityId, { status: TaskPlanStatus.Active }),
         this.countTasks(identityId, { status: TaskPlanStatus.Closed }),
@@ -56,7 +56,9 @@ export class GetTaskDashboardUseCase {
     const overdue = overdueCandidates.filter((occurrence) =>
       occurrence.isOverdueAt(timeContext, now),
     );
-    const today = todayOccurrences.map((occurrence) => occurrence.toClientDTOAt(timeContext, now));
+    const todayDtos = todayOccurrences.map((occurrence) =>
+      occurrence.toClientDTOAt(timeContext, now),
+    );
     const overdueDtos = overdue.map((occurrence) => occurrence.toClientDTOAt(timeContext, now));
     const upcomingDtos = upcoming.map((occurrence) => occurrence.toClientDTOAt(timeContext, now));
     const completedToday = todayOccurrences.filter(
@@ -64,7 +66,7 @@ export class GetTaskDashboardUseCase {
     ).length;
 
     return ok({
-      todayTasks: today,
+      todayTasks: todayDtos,
       overdueTasks: overdueDtos,
       upcomingTasks: upcomingDtos,
       highPriorityTasks: highPriority,

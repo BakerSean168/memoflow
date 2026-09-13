@@ -1,25 +1,31 @@
+import type { Ymd } from '@memoflow/contracts/primitives';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
 
-/**
- * TaskOccurrence occurrence key (R2-1 / P0-03).
- *
- * Deterministic idempotency key: `{templateId}:{calendarDate}`. The calendar
- * date is always resolved from an explicit Product Time context; server host
- * timezone is never a business input.
- */
+/** Canonical deterministic occurrence identity: `{planId}:{scheduleDate}`. */
+export function buildTaskOccurrenceOccurrenceKeyFromDate(
+  planId: string,
+  scheduleDate: Ymd,
+): string {
+  return `${planId}:${scheduleDate}`;
+}
+
+/** Explicit-context compatibility helper for pre-TASK-7306 callers. */
 export function startOfLocalDay(value: number, timeContext: TimeContext): number {
   return createTimeFacade({ context: timeContext }).calendar.startOfDay(value);
 }
 
 /** Context-scoped YYYY-MM-DD (never ambient host-local). */
-export function toLocalDateKey(dayStartMs: number, timeContext: TimeContext): string {
+export function toLocalDateKey(dayStartMs: number, timeContext: TimeContext): Ymd {
   return createTimeFacade({ context: timeContext }).calendar.toYmd(dayStartMs);
 }
 
 export function buildTaskOccurrenceOccurrenceKey(
-  templateId: string,
-  instanceDate: number,
+  planId: string,
+  occurrenceDate: number,
   timeContext: TimeContext,
 ): string {
-  return `${templateId}:${toLocalDateKey(startOfLocalDay(instanceDate, timeContext), timeContext)}`;
+  return buildTaskOccurrenceOccurrenceKeyFromDate(
+    planId,
+    toLocalDateKey(startOfLocalDay(occurrenceDate, timeContext), timeContext),
+  );
 }

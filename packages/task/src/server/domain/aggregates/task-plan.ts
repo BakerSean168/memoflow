@@ -249,13 +249,14 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
 
   private getScheduleContext(timeContext: TimeContext): instanceGen.InstanceGenerationContext {
     return {
-      templateId: this.id,
+      planId: this.id,
       identityId: this._props.identityId,
       status: this._props.status,
       taskType: this.taskType,
       timeConfig: this._props.schedule.toLegacyTimeConfig(timeContext),
       recurrenceRule: this._props.schedule.toLegacyRecurrenceRule(timeContext),
       importance: this._props.importance,
+      checklistDefinition: this._props.checklist.map((item) => item.toDTO()),
       existingInstances: [],
       timeContext,
     };

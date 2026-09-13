@@ -342,19 +342,19 @@ class PowerSyncDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createTaskOccurrence(input: CreateTaskOccurrenceInput): Promise<void> {
     await this.tx.execute(
-      `INSERT INTO task_instances (id, template_id, identity_id, instance_date, occurrence_key, status, importance, time_config, actual_start_time, actual_end_time, comment, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
+      `INSERT INTO task_instances (id, plan_id, identity_id, occurrence_key, schedule_date, schedule_timing, importance_snapshot, status, actual_start_at, result, checklist_state, version, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, NULL)`,
       [
         input.id,
-        input.templateId,
+        input.planId,
         input.identityId,
-        input.instanceDate,
-        str(input.occurrenceKey),
+        input.occurrenceKey,
+        input.scheduleDate,
+        input.scheduleTiming,
+        input.importanceSnapshot,
         input.status,
-        input.importance,
-        input.timeConfig,
-        str(input.actualStartTime),
-        str(input.actualEndTime),
-        str(input.comment),
+        str(input.actualStartAt),
+        str(input.result),
+        input.checklistState,
         ...createdUpdated(input),
       ],
     );

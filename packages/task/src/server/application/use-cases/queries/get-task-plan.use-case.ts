@@ -13,6 +13,7 @@ import type {
 import { TaskOccurrenceStatus } from '../../../domain/value-objects';
 import type { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
 import type { GetTaskPlanRes } from '@memoflow/contracts/task';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
 import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
@@ -38,7 +39,8 @@ export class GetTaskPlanUseCase {
     const asOf = this.now();
     const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
     const taskTime = createTimeFacade({ context: timeContext });
-    const windowStart = Number(taskTime.calendar.startOfDay(taskTime.calendar.addDays(asOf, -29)));
+    const windowStart = taskTime.calendar.toYmd(taskTime.calendar.addDays(asOf, -29));
+    const asOfDate = taskTime.calendar.toYmd(asOf);
     const dto = template.toClientDTOAt(timeContext, includeChildren, asOf);
 
     let occurrences: TaskOccurrence[] | null = null;
@@ -52,11 +54,11 @@ export class GetTaskPlanUseCase {
     let stats: TaskPlanInstanceStats | undefined = ((await this.instanceRepository.getTemplateStats(
       [id],
       identityId,
-      { windowStart, asOf },
+      { windowStart, asOf: asOfDate },
     )) ?? {})[id];
 
     if (!stats) {
-      stats = this.calculateStats(id, await loadOccurrences(), windowStart, asOf);
+      stats = this.calculateStats(id, await loadOccurrences(), windowStart, asOfDate);
     }
 
     dto.instanceCount = stats.instanceCount;
@@ -81,8 +83,8 @@ export class GetTaskPlanUseCase {
   private calculateStats(
     templateId: string,
     occurrences: TaskOccurrence[],
-    windowStart: number,
-    asOf: number,
+    windowStart: Ymd,
+    asOf: Ymd,
   ): TaskPlanInstanceStats {
     const completedInstanceCount = occurrences.filter(
       (occurrence) => occurrence.status === TaskOccurrenceStatus.Completed,
@@ -91,7 +93,7 @@ export class GetTaskPlanUseCase {
       (occurrence) => occurrence.status === TaskOccurrenceStatus.Pending,
     ).length;
     const dueOccurrences = occurrences.filter(
-      (occurrence) => occurrence.instanceDate >= windowStart && occurrence.instanceDate <= asOf,
+      (occurrence) => occurrence.scheduleDate >= windowStart && occurrence.scheduleDate <= asOf,
     );
     const completedDueInstanceCount = dueOccurrences.filter(
       (occurrence) => occurrence.status === TaskOccurrenceStatus.Completed,
@@ -107,7 +109,7 @@ export class GetTaskPlanUseCase {
       completionWindowDays: 30,
       futurePendingInstanceCount: occurrences.filter(
         (occurrence) =>
-          occurrence.status === TaskOccurrenceStatus.Pending && occurrence.instanceDate > asOf,
+          occurrence.status === TaskOccurrenceStatus.Pending && occurrence.scheduleDate > asOf,
       ).length,
       singleInstanceStatus: occurrences.length === 1 ? occurrences[0].status : null,
       completionRate:

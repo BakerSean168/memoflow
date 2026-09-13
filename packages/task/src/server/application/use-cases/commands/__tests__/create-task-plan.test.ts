@@ -9,6 +9,7 @@ import { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { CreateTaskPlanUseCase } from '../create-task-plan.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
+import { createTimeFacade } from '@memoflow/time';
 
 const userTimeContextPort = {
   getUserTimeContext: vi.fn().mockResolvedValue(TASK_TEST_TIME_CONTEXT),
@@ -248,7 +249,13 @@ describe('CreateTaskPlanUseCase', () => {
     });
 
     it('reports when initial generation includes a today instance', async () => {
-      mockGenerateInstances.mockReturnValue([{ instanceDate: Date.now() }]);
+      mockGenerateInstances.mockReturnValue([
+        {
+          scheduleDate: createTimeFacade({ context: TASK_TEST_TIME_CONTEXT }).calendar.toYmd(
+            Date.now(),
+          ),
+        },
+      ]);
 
       const result = await useCase.execute(aCreateRequest());
 

@@ -141,56 +141,65 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
 
     if (sql.includes('INSERT INTO task_instances')) {
       const id = String(parameters?.[0]);
-      const templateId = String(parameters?.[1]);
+      const planId = String(parameters?.[1]);
       const identityId = String(parameters?.[2]);
-      const instanceDate = String(parameters?.[3]);
-      const occurrenceKey = parameters?.[4] == null ? null : String(parameters[4]);
-      const status = String(parameters?.[5]);
-      const importance = parameters?.[6] == null ? null : String(parameters[6]);
-      const timeConfig = String(parameters?.[7]);
+      const occurrenceKey = String(parameters?.[3]);
+      const scheduleDate = String(parameters?.[4]);
+      const scheduleTiming = String(parameters?.[5]);
+      const importanceSnapshot = String(parameters?.[6]);
+      const status = String(parameters?.[7]);
       state.instances.set(id, {
         id,
-        template_id: templateId,
+        plan_id: planId,
         identity_id: identityId,
-        instance_date: instanceDate,
         occurrence_key: occurrenceKey,
+        schedule_date: scheduleDate,
+        schedule_timing: scheduleTiming,
+        importance_snapshot: importanceSnapshot,
         status,
-        importance,
-        time_config: timeConfig,
-        actual_start_time: parameters?.[8] ?? null,
-        actual_end_time: parameters?.[9] ?? null,
-        comment: parameters?.[10] ?? null,
+        actual_start_at: parameters?.[8] ?? null,
+        result: parameters?.[9] ?? null,
+        checklist_state: parameters?.[10] ?? '[]',
         version: Number(parameters?.[11] ?? 1),
-        created_at: String(parameters?.[12] ?? instanceDate),
-        updated_at: String(parameters?.[13] ?? instanceDate),
+        created_at: String(parameters?.[12] ?? new Date().toISOString()),
+        updated_at: String(parameters?.[13] ?? new Date().toISOString()),
         deleted_at: parameters?.[14] ?? null,
       });
       return { rowsAffected: 1 };
     }
 
     if (sql.includes('UPDATE task_instances')) {
-      const id = String(parameters?.[(parameters?.length ?? 1) - 1]);
+      const id = String(parameters?.[13]);
       const existing = state.instances.get(id);
       if (existing) {
-        // Apply the status update (status follows occurrence_key in TASK-2204) so the
-        // rollback assertion is a REAL proof, not a vacuous one.
         const status =
-          parameters?.[4] == null
+          parameters?.[6] == null
             ? (existing as { status?: string }).status
-            : String(parameters[4]);
-        state.instances.set(id, { ...existing, status });
-      } else {
-        state.instances.set(id, { id, template_id: String(parameters?.[0]), status: 'Pending' });
+            : String(parameters[6]);
+        state.instances.set(id, {
+          ...existing,
+          plan_id: String(parameters?.[0]),
+          identity_id: String(parameters?.[1]),
+          occurrence_key: String(parameters?.[2]),
+          schedule_date: String(parameters?.[3]),
+          schedule_timing: String(parameters?.[4]),
+          importance_snapshot: String(parameters?.[5]),
+          status,
+          actual_start_at: parameters?.[7] ?? null,
+          result: parameters?.[8] ?? null,
+          checklist_state: parameters?.[9] ?? '[]',
+          version: Number(parameters?.[10] ?? 1),
+          updated_at: String(parameters?.[11] ?? new Date().toISOString()),
+          deleted_at: parameters?.[12] ?? null,
+        });
       }
       return { rowsAffected: 1 };
     }
 
-    if (sql.includes('DELETE FROM task_instances WHERE template_id = ?')) {
-      const templateId = String(parameters?.[0]);
+    if (sql.includes('DELETE FROM task_instances WHERE plan_id = ?')) {
+      const planId = String(parameters?.[0]);
       for (const [id, record] of state.instances.entries()) {
-        if (record.templateId === templateId) {
-          state.instances.delete(id);
-        }
+        if (String((record as any).plan_id) === planId) state.instances.delete(id);
       }
       return { rowsAffected: 1 };
     }
@@ -273,13 +282,13 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
 
     if (
       sql.includes(
-        'SELECT id FROM task_instances WHERE template_id = ? AND identity_id = ? AND occurrence_key = ?',
+        'SELECT id FROM task_instances WHERE plan_id = ? AND identity_id = ? AND occurrence_key = ?',
       )
     ) {
-      const [templateId, identityId, occurrenceKey] = (parameters ?? []).map(String);
+      const [planId, identityId, occurrenceKey] = (parameters ?? []).map(String);
       const match = Array.from(state.instances.values()).find(
         (row) =>
-          String((row as any).template_id) === templateId &&
+          String((row as any).plan_id) === planId &&
           String((row as any).identity_id) === identityId &&
           String((row as any).occurrence_key) === occurrenceKey &&
           (row as any).deleted_at == null,

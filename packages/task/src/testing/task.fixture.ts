@@ -26,6 +26,7 @@ import {
   ChecklistItemDefinition,
   TaskPlanStatus,
   TaskPlanSchedule,
+  TaskOccurrenceScheduleSnapshot,
 } from '../server/domain';
 import { TaskOccurrence, TaskPlan } from '../server/domain';
 import type { TaskPlanState } from '../server/domain';
@@ -145,13 +146,18 @@ export interface TaskOccurrenceOverrides {
 }
 
 export async function aTaskOccurrence(overrides: TaskOccurrenceOverrides = {}) {
+  const timeContext = overrides.timeContext ?? TASK_TEST_TIME_CONTEXT;
+  const instanceDate = overrides.instanceDate ?? Date.now();
+  const timeConfig = overrides.timeConfig ?? anAllDayTimeConfig();
   return TaskOccurrence.create({
-    templateId: overrides.templateId ?? TaskPlanId.generate(),
+    planId: overrides.templateId ?? TaskPlanId.generate(),
     identityId: overrides.identityId ?? anIdentityId(),
-    instanceDate: overrides.instanceDate ?? Date.now(),
-    timeConfig: overrides.timeConfig ?? anAllDayTimeConfig(),
-    importance: overrides.importance ?? ImportanceLevel.Moderate,
-    timeContext: overrides.timeContext ?? TASK_TEST_TIME_CONTEXT,
+    scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
+      instanceDate,
+      timeConfig,
+      timeContext,
+    ),
+    importanceSnapshot: overrides.importance ?? ImportanceLevel.Moderate,
   });
 }
 

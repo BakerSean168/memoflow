@@ -6,10 +6,13 @@
  */
 
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
+import type { Ymd } from '@memoflow/contracts/primitives';
+import type { ChecklistItemDefinitionDTO } from '@memoflow/contracts/task';
 import { TaskType } from '../value-objects';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { InvalidDateRangeError, InvalidTaskPlanStateError } from '../value-objects/task-errors';
 import type { RecurrenceRule, TaskTimeConfig } from '../value-objects';
+import { TaskOccurrenceScheduleSnapshot } from '../value-objects';
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { IdentityId } from '@memoflow/domain-shared';
 import type { TaskPlanId } from '../../domain/value-objects/task-plan-id';
@@ -22,14 +25,15 @@ import {
 
 /** Parameters for instance generation. */
 export interface InstanceGenerationContext {
-  templateId: TaskPlanId;
+  planId: TaskPlanId;
   identityId: IdentityId;
   status: TaskPlanStatus;
   taskType: TaskType;
   timeConfig: TaskTimeConfig | null;
   recurrenceRule: RecurrenceRule | null;
   importance: ImportanceLevel;
-  existingInstances: readonly { instanceDate: number; deletedAt: number | null }[];
+  checklistDefinition: readonly ChecklistItemDefinitionDTO[];
+  existingInstances: readonly { scheduleDate: Ymd; deletedAt: number | null }[];
   timeContext: TimeContext;
 }
 
@@ -57,33 +61,36 @@ export function createInstanceFromTemplate(
 ): TaskOccurrence {
   if (ctx.status !== TaskPlanStatus.Active) {
     throw new InvalidTaskPlanStateError('Can only create instances for active task plans', {
-      templateId: ctx.templateId,
+      templateId: ctx.planId,
       currentStatus: ctx.status,
       attemptedAction: 'createInstance',
     });
   }
   if (typeof params.instanceDate !== 'number' || isNaN(params.instanceDate)) {
     throw new InvalidTaskPlanStateError('instanceDate must be a valid number', {
-      templateId: ctx.templateId,
+      templateId: ctx.planId,
       currentStatus: ctx.status,
       attemptedAction: 'createInstance',
     });
   }
   if (!ctx.timeConfig) {
     throw new InvalidTaskPlanStateError('Template must have timeConfig to create instances', {
-      templateId: ctx.templateId,
+      templateId: ctx.planId,
       currentStatus: ctx.status,
       attemptedAction: 'createInstance',
     });
   }
 
   return TaskOccurrence.create({
-    templateId: ctx.templateId,
+    planId: ctx.planId,
     identityId: ctx.identityId,
-    instanceDate: params.instanceDate,
-    timeConfig: ctx.timeConfig,
-    importance: ctx.importance,
-    timeContext: ctx.timeContext,
+    scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
+      params.instanceDate,
+      ctx.timeConfig,
+      ctx.timeContext,
+    ),
+    importanceSnapshot: ctx.importance,
+    checklistDefinition: ctx.checklistDefinition,
   });
 }
 
@@ -98,7 +105,8 @@ function passesBusinessGenerationGuards(
   const alreadyGenerated = ctx.existingInstances.some(
     (instance) =>
       !instance.deletedAt &&
-      startOfLocalDay(instance.instanceDate, ctx.timeContext) === candidateDay,
+      createTimeFacade({ context: ctx.timeContext }).calendar.toYmd(candidateDay) ===
+        instance.scheduleDate,
   );
   if (alreadyGenerated) return false;
 
@@ -138,7 +146,7 @@ export function generateInstances(
   }
   if (ctx.status !== TaskPlanStatus.Active) {
     throw new InvalidTaskPlanStateError('Can only generate instances for active templates', {
-      templateId: ctx.templateId,
+      templateId: ctx.planId,
       currentStatus: ctx.status,
       attemptedAction: 'generateInstances',
     });
@@ -150,18 +158,23 @@ export function generateInstances(
     if (ctx.timeConfig?.startDate) {
       const targetDay = startOfLocalDay(ctx.timeConfig.startDate, ctx.timeContext);
       const alreadyGenerated = ctx.existingInstances.some(
-        (inst) => startOfLocalDay(inst.instanceDate, ctx.timeContext) === targetDay,
+        (inst) =>
+          createTimeFacade({ context: ctx.timeContext }).calendar.toYmd(targetDay) ===
+          inst.scheduleDate,
       );
 
       if (!alreadyGenerated) {
         instances.push(
           TaskOccurrence.create({
-            templateId: ctx.templateId,
+            planId: ctx.planId,
             identityId: ctx.identityId,
-            instanceDate: targetDay,
-            timeConfig: ctx.timeConfig,
-            importance: ctx.importance,
-            timeContext: ctx.timeContext,
+            scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
+              targetDay,
+              ctx.timeConfig,
+              ctx.timeContext,
+            ),
+            importanceSnapshot: ctx.importance,
+            checklistDefinition: ctx.checklistDefinition,
           }),
         );
       }
@@ -197,12 +210,15 @@ export function generateInstances(
 
       instances.push(
         TaskOccurrence.create({
-          templateId: ctx.templateId,
+          planId: ctx.planId,
           identityId: ctx.identityId,
-          instanceDate: candidateDay,
-          timeConfig: ctx.timeConfig,
-          importance: ctx.importance,
-          timeContext: ctx.timeContext,
+          scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
+            candidateDay,
+            ctx.timeConfig,
+            ctx.timeContext,
+          ),
+          importanceSnapshot: ctx.importance,
+          checklistDefinition: ctx.checklistDefinition,
         }),
       );
     }

@@ -10,12 +10,13 @@
 
 import type { TaskOccurrence } from '../aggregates';
 import type { TaskOccurrenceStatus } from '@memoflow/contracts/task';
+import type { Ymd } from '@memoflow/contracts/primitives';
 
 export interface TaskPlanStatsWindow {
   /** Inclusive start of the Product Time calendar-date window. */
-  windowStart: number;
+  windowStart: Ymd;
   /** Query instant; future/past classification is relative to this instant. */
-  asOf: number;
+  asOf: Ymd;
 }
 
 export interface TaskPlanInstanceStats {
@@ -63,7 +64,7 @@ export interface ITaskOccurrenceRepository {
   /**
    * 根据日期范围查找任务实例
    */
-  findByDateRange(identityId: string, startDate: number, endDate: number): Promise<TaskOccurrence[]>;
+  findByDateRange(identityId: string, startDate: Ymd, endDate: Ymd): Promise<TaskOccurrence[]>;
 
   /**
    * 根据状态查找任务实例
@@ -95,11 +96,7 @@ export interface ITaskOccurrenceRepository {
    * @param templateId 模板 ID
    * @param fromDate 起始日期时间戳（默认为当前时间）
    */
-  countFutureInstances(
-    templateId: string,
-    identityId: string,
-    fromDate?: number,
-  ): Promise<number>;
+  countFutureInstances(templateId: string, identityId: string, fromDate?: Ymd): Promise<number>;
 
   /**
    * 根据模板 ID 和日期范围查找任务实例
@@ -107,8 +104,8 @@ export interface ITaskOccurrenceRepository {
   findByTemplateIdAndDateRange(
     templateId: string,
     identityId: string,
-    startDate: number,
-    endDate: number,
+    startDate: Ymd,
+    endDate: Ymd,
   ): Promise<TaskOccurrence[]>;
 
   /**
@@ -127,6 +124,6 @@ export interface ITaskOccurrenceRepository {
   deleteIncompleteInstancesFrom(
     templateId: string,
     identityId: string,
-    fromDate: number,
+    fromDate: Ymd,
   ): Promise<number>;
 }

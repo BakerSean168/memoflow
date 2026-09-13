@@ -93,8 +93,8 @@ describe('GetTaskPlanUseCase', () => {
     await dstUseCase.execute(template.id, template.identityId);
 
     expect(instanceRepo.getTemplateStats).toHaveBeenCalledWith([template.id], template.identityId, {
-      windowStart: Date.parse('2026-02-07T05:00:00.000Z'),
-      asOf,
+      windowStart: '2026-02-07',
+      asOf: '2026-03-08',
     });
     expect(asOf - Date.parse('2026-02-07T05:00:00.000Z')).not.toBe(30 * 24 * 60 * 60 * 1000);
   });

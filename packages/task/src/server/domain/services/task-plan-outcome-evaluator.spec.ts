@@ -13,7 +13,12 @@ import {
 import { TaskPlan } from '../aggregates/task-plan';
 import { TaskOccurrence } from '../aggregates/task-occurrence';
 import { TaskPlanOutcomeEvaluator } from './task-plan-outcome-evaluator';
-import { RecurrenceRule, TaskPlanSchedule, TaskTimeConfig } from '../value-objects';
+import {
+  RecurrenceRule,
+  TaskOccurrenceScheduleSnapshot,
+  TaskPlanSchedule,
+  TaskTimeConfig,
+} from '../value-objects';
 import { aTaskPlanState, TASK_TEST_TIME_CONTEXT } from '../../../testing/task.fixture';
 import { asYmd, createTimeContext } from '@memoflow/time';
 
@@ -37,12 +42,14 @@ function fifteenDayPlan(policy = TaskPlanCompletionPolicy.AllowCorrection) {
   const base = Date.now() - 15 * 86_400_000;
   const instances = Array.from({ length: 15 }, (_, index) =>
     TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
+      planId: template.id,
       identityId: template.identityId,
-      instanceDate: base + index * 86_400_000,
-      timeConfig,
-      importance: ImportanceLevel.Moderate,
+      scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
+        base + index * 86_400_000,
+        timeConfig,
+        TASK_TEST_TIME_CONTEXT,
+      ),
+      importanceSnapshot: ImportanceLevel.Moderate,
     }),
   );
   return { template, instances };
@@ -145,12 +152,14 @@ describe('TaskPlanOutcomeEvaluator (TASK-2202)', () => {
     });
     const timeConfig = TaskTimeConfig.createAllDay(Date.parse('2026-03-08T05:00:00.000Z'));
     const instance = TaskOccurrence.create({
-      timeContext,
-      templateId: aTaskPlanState().id,
+      planId: aTaskPlanState().id,
       identityId: aTaskPlanState().identityId,
-      instanceDate: Date.parse('2026-03-08T05:00:00.000Z'),
-      timeConfig,
-      importance: ImportanceLevel.Moderate,
+      scheduleSnapshot: TaskOccurrenceScheduleSnapshot.fromLegacy(
+        Date.parse('2026-03-08T05:00:00.000Z'),
+        timeConfig,
+        timeContext,
+      ),
+      importanceSnapshot: ImportanceLevel.Moderate,
     });
     instance.complete();
 

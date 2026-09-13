@@ -97,7 +97,7 @@ describe('task instance ownership surface', () => {
     expect(port).toContain(
       'findByTemplateId(templateId: string, identityId: string): Promise<TaskOccurrence[]>;',
     );
-    expect(prisma).toContain('where: { templateId, identityId, deletedAt: null }');
+    expect(prisma).toContain('where: { planId: templateId, identityId, deletedAt: null }');
     expect(listByTemplate).toContain('findByTemplateId(templateId, identityId)');
     expect(getTemplate).toContain('findByTemplateId(id, identityId)');
     expect(completeInstance).toContain('reevaluateTaskPlanOutcome(');
@@ -112,14 +112,14 @@ describe('task instance ownership surface', () => {
     expect(port).toContain('getTemplateStats(');
     expect(port).toContain('identityId: string');
     expect(port).toContain('deleteIncompleteInstancesFrom(');
-    expect(prisma).toContain('where: { templateId, identityId }');
+    expect(prisma).toContain('where: { planId: templateId, identityId }');
     expect(prisma).toMatch(/getTemplateStats\([\s\S]*identityId/);
     expect(getTemplate).toMatch(
       /getTemplateStats\([\s\S]*\[id\][\s\S]*identityId[\s\S]*windowStart[\s\S]*asOf/,
     );
     expect(listTemplates).toContain('getTemplateStats(');
     expect(listTemplates).toContain('request.identityId');
-    expect(listTemplates).toContain('{ windowStart, asOf }');
+    expect(listTemplates).toContain('{ windowStart, asOf: asOfDate }');
     expect(pauseTemplate).toContain('deleteIncompleteInstancesFrom(');
     expect(pauseTemplate).toContain('identityId');
     expect(deleteTemplate).toContain('deleteByTemplateId(id, identityId)');
@@ -129,7 +129,7 @@ describe('task instance ownership surface', () => {
     expect(prisma).toContain('where: { id, identityId }');
     expect(prisma).toContain('deleteMany({');
     expect(prisma).toContain(
-      "throw new Error('Task instance not found for the current identity.');",
+      "throw new Error('Task occurrence not found for the current identity.');",
     );
   });
 

@@ -102,7 +102,7 @@ describe('projection from PowerSync-shaped rows', () => {
           keyResultId: 'kr-db-id',
           goalRecordValue: 2.5,
           goalProgressTrigger: 'EachCompletion',
-          checklist: '[{"title":"cover IPC","order":0}]',
+          checklist: '[{"id":"check-db-id","title":"cover IPC","order":0}]',
           reminderConfigEnabled: 1,
           reminderConfigTimeOffsetMinutes: 15,
           reminderConfigUnit: 'Minute',

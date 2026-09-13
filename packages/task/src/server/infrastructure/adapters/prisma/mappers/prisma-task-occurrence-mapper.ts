@@ -1,55 +1,51 @@
-/**
- * Prisma TaskOccurrence Mapper
- *
- * Maps between TaskOccurrence domain aggregate and Prisma model.
- * Handles Date/timestamp conversions for instance dates.
- */
-
 import type { TaskOccurrence as PrismaTaskOccurrence } from '@memoflow/database';
+import type { Ymd } from '@memoflow/contracts/primitives';
+import {
+  TaskOccurrenceChecklistItemSchema,
+  TaskOccurrenceResultSchema,
+  TaskOccurrenceStatus,
+  TaskTimingSchema,
+} from '@memoflow/contracts/task';
+import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import { IdentityId } from '@memoflow/domain-shared';
 import { toDateOrNull } from '@memoflow/utils/shared';
 import { TaskOccurrence } from '../../../../domain/aggregates/task-occurrence';
-import { TaskOccurrenceStatus } from '@memoflow/contracts/task';
 import { TaskOccurrenceId } from '../../../../domain/value-objects/task-occurrence-id';
 import { TaskPlanId } from '../../../../domain/value-objects/task-plan-id';
-import { IdentityId } from '@memoflow/domain-shared';
-import { TaskTimeConfig } from '../../../../domain/value-objects';
-import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import { TaskOccurrenceScheduleSnapshot } from '../../../../domain/value-objects/task-occurrence-schedule-snapshot';
 
-/** Prisma Date/DateTime → Instant (epoch ms). Required fields never null. */
-function requiredInstant(value: Date | string | number | null | undefined): number {
+function requiredInstant(value: Date | string | number): number {
   if (value instanceof Date) return value.getTime();
-  if (value == null) return Date.now();
-  const n = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(n) ? n : Date.now();
+  const parsed = typeof value === 'number' ? value : Date.parse(value);
+  if (!Number.isFinite(parsed)) throw new Error(`Invalid persisted instant: ${String(value)}`);
+  return parsed;
 }
 
-/** Prisma Date/DateTime → Instant | null. */
 function optionalInstant(value: Date | string | number | null | undefined): number | null {
   if (value == null) return null;
-  if (value instanceof Date) return value.getTime();
-  const n = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(n) ? n : null;
+  return requiredInstant(value);
 }
 
 export class PrismaTaskOccurrenceMapper {
-  /**
-   * Prisma record → TaskOccurrence aggregate root
-   */
   static toDomain(data: PrismaTaskOccurrence): TaskOccurrence {
+    const result = data.result ? TaskOccurrenceResultSchema.parse(JSON.parse(data.result)) : null;
+    const checklistState = TaskOccurrenceChecklistItemSchema.array().parse(
+      JSON.parse(data.checklistState || '[]'),
+    );
     return TaskOccurrence.load({
       id: TaskOccurrenceId.of(data.id),
-      templateId: TaskPlanId.of(data.templateId),
+      planId: TaskPlanId.of(data.planId),
       identityId: IdentityId.of(data.identityId),
-      instanceDate: data.instanceDate.getTime(),
-      occurrenceKey: data.occurrenceKey ?? null,
-      timeConfig: TaskTimeConfig.fromDTO(JSON.parse(data.timeConfig || '{}')),
-      importance: (data.importance || 'Moderate') as ImportanceLevel,
+      occurrenceKey: data.occurrenceKey,
+      scheduleSnapshot: TaskOccurrenceScheduleSnapshot.create({
+        date: data.scheduleDate as Ymd,
+        timing: TaskTimingSchema.parse(JSON.parse(data.scheduleTiming)),
+      }),
+      importanceSnapshot: data.importanceSnapshot as ImportanceLevel,
       status: data.status as TaskOccurrenceStatus,
-      completionRecord: null,
-      skipRecord: null,
-      actualStartTime: data.actualStartTime?.getTime() ?? null,
-      actualEndTime: data.actualEndTime?.getTime() ?? null,
-      note: data.comment ?? null,
+      actualStartAt: optionalInstant(data.actualStartAt),
+      result,
+      checklistState,
       version: data.version,
       createdAt: requiredInstant(data.createdAt),
       updatedAt: requiredInstant(data.updatedAt),
@@ -57,32 +53,25 @@ export class PrismaTaskOccurrenceMapper {
     });
   }
 
-  /**
-   * TaskOccurrence 聚合根 → Prisma write data
-   */
   static toPersistence(instance: TaskOccurrence) {
     const dto = instance.toPersistenceState();
     return {
-      templateId: dto.templateId,
+      planId: dto.planId,
       identityId: dto.identityId,
-      instanceDate: toDateOrNull(dto.instanceDate) ?? new Date(),
-      occurrenceKey: instance.occurrenceKey,
-      timeConfig:
-        typeof dto.timeConfig === 'string'
-          ? dto.timeConfig
-          : JSON.stringify(dto.timeConfig) || '{}',
-      importance: dto.importance || 'Moderate',
+      occurrenceKey: dto.occurrenceKey,
+      scheduleDate: dto.scheduleSnapshot.date,
+      scheduleTiming: JSON.stringify(dto.scheduleSnapshot.timing),
+      importanceSnapshot: dto.importanceSnapshot,
       status: dto.status,
-      actualStartTime: toDateOrNull(dto.actualStartTime),
-      actualEndTime: toDateOrNull(dto.actualEndTime),
-      comment: dto.comment ?? null,
+      actualStartAt: toDateOrNull(dto.actualStartAt),
+      result: dto.result ? JSON.stringify(dto.result) : null,
+      checklistState: JSON.stringify(dto.checklistState),
       version: dto.version,
+      updatedAt: new Date(dto.updatedAt),
+      deletedAt: toDateOrNull(dto.deletedAt),
     };
   }
 
-  /**
-   * Batch conversion: Prisma → Domain
-   */
   static toDomainList(rows: PrismaTaskOccurrence[]): TaskOccurrence[] {
     return rows.map((row) => PrismaTaskOccurrenceMapper.toDomain(row));
   }

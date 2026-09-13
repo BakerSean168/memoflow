@@ -214,16 +214,16 @@ const task_templates = new Table({
 });
 
 const task_instances = new Table({
-  template_id: column.text, // FK
+  plan_id: column.text, // FK to TaskPlan
   identity_id: column.text,
-  instance_date: column.text, // DateTime
-  occurrence_key: column.text, // Task vNext deterministic templateId:localDate identity
+  occurrence_key: column.text,
+  schedule_date: column.text, // Ymd
+  schedule_timing: column.text, // JSON: TaskTiming
+  importance_snapshot: column.text,
   status: column.text,
-  importance: column.text,
-  time_config: column.text, // JSON
-  actual_start_time: column.text,
-  actual_end_time: column.text,
-  comment: column.text,
+  actual_start_at: column.text,
+  result: column.text, // JSON: TaskOccurrenceResult
+  checklist_state: column.text, // JSON: TaskOccurrenceChecklistItem[]
   version: column.integer,
   created_at: column.text,
   updated_at: column.text,

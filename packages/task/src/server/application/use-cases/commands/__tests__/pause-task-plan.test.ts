@@ -39,9 +39,9 @@ describe('PauseTaskPlanUseCase', () => {
   });
 
   it('throws an error if transactionRunner is missing', () => {
-    expect(
-      () => new PauseTaskPlanUseCase(templateRepo, instanceRepo, undefined as any),
-    ).toThrow('TaskWriteTransactionRunner must be explicitly provided to PauseTaskPlanUseCase');
+    expect(() => new PauseTaskPlanUseCase(templateRepo, instanceRepo, undefined as any)).toThrow(
+      'TaskWriteTransactionRunner must be explicitly provided to PauseTaskPlanUseCase',
+    );
   });
 
   it('should return NOT_FOUND when template does not exist', async () => {
@@ -85,7 +85,7 @@ describe('PauseTaskPlanUseCase', () => {
     expect(instanceRepo.deleteIncompleteInstancesFrom).toHaveBeenCalledWith(
       template.id,
       template.identityId,
-      expect.any(Number),
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
     );
   });
 

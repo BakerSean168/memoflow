@@ -10387,6 +10387,16 @@
       ]
     },
     {
+      "path": "packages/task/src/server/domain/task-occurrence-vnext.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/server/domain/value-objects/__tests__/task-domain-value-objects.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11562,7 +11572,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 74
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -12003,7 +12013,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 74
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -12605,6 +12615,7 @@
       "packages/task/src/server/domain/task-domain-events-barrel.surface.spec.ts",
       "packages/task/src/server/domain/task-domain-simplification.surface.spec.ts",
       "packages/task/src/server/domain/task-goal-contribution-v2.surface.spec.ts",
+      "packages/task/src/server/domain/task-occurrence-vnext.surface.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-domain-value-objects.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-occurrence-occurrence-key.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-plan-id.spec.ts",
@@ -12641,7 +12652,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1092,
+    "unit": 1093,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

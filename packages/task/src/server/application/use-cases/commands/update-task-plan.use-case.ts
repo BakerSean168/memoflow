@@ -19,7 +19,7 @@ import {
 import type { Result } from '@memoflow/contracts/result';
 import { error, fail, ok } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
-import type { UserTimeContextPort } from '@memoflow/time';
+import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 import {
   mapTaskWriteErrorToResultError,
   type TaskWriteTransactionRunner,
@@ -102,6 +102,9 @@ export class UpdateTaskPlanUseCase {
           }
 
           const effectiveFrom = this.now();
+          const effectiveFromDate = createTimeFacade({ context: timeContext }).calendar.toYmd(
+            effectiveFrom,
+          );
           const instances =
             scheduleChanged || importanceChanged
               ? await instanceRepository.findByTemplateId(id, identityId)
@@ -109,7 +112,7 @@ export class UpdateTaskPlanUseCase {
           const affectedPendingInstances = instances.filter(
             (instance) =>
               instance.status === TaskOccurrenceStatus.Pending &&
-              instance.instanceDate > effectiveFrom,
+              instance.scheduleDate > effectiveFromDate,
           );
           const originalGenerationHorizon = template.lastGeneratedDate;
 
@@ -163,7 +166,9 @@ export class UpdateTaskPlanUseCase {
 
             const generationHorizon = Math.max(
               originalGenerationHorizon ?? 0,
-              ...affectedPendingInstances.map((instance) => instance.instanceDate),
+              ...affectedPendingInstances.map((instance) =>
+                Number(instance.scheduledStartOfDayAt(timeContext)),
+              ),
             );
             if (template.status === TaskPlanStatus.Active && generationHorizon > effectiveFrom) {
               const regenerated = this.generationService.generateInstances(template, timeContext, {
@@ -180,7 +185,7 @@ export class UpdateTaskPlanUseCase {
           } else if (importanceChanged && request.importance !== undefined) {
             const changedInstances = affectedPendingInstances.filter((instance) =>
               instance.applyPlanProjection({
-                effectiveFrom,
+                effectiveFrom: effectiveFromDate,
                 importance: request.importance,
               }),
             );

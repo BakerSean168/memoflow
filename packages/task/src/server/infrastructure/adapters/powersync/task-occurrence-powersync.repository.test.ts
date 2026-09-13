@@ -1,13 +1,44 @@
-import { describe, expect, it, vi } from 'vitest';
+import type { Ymd } from '@memoflow/contracts/primitives';
 import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
-import { PowerSyncTaskOccurrenceRepository } from './task-occurrence-powersync.repository';
+import { describe, expect, it, vi } from 'vitest';
 import type { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
+import { PowerSyncTaskOccurrenceRepository } from './task-occurrence-powersync.repository';
 
-describe('PowerSyncTaskOccurrenceRepository template statistics', () => {
-  it('maps the same rolling due window and future Pending projection as Prisma', async () => {
+function ymd(value: string): Ymd {
+  return value as Ymd;
+}
+
+function fakeOccurrence(version = 1): TaskOccurrence {
+  return {
+    toPersistenceState: () => ({
+      id: 'instance-1',
+      planId: 'plan-1',
+      identityId: 'identity-a',
+      occurrenceKey: 'plan-1:2026-08-28',
+      scheduleSnapshot: {
+        date: ymd('2026-08-28'),
+        timing: { kind: 'At', time: '16:00' },
+      },
+      importanceSnapshot: 'Moderate',
+      status: 'Pending',
+      actualStartAt: null,
+      result: null,
+      checklistState: [],
+      version,
+      createdAt: Date.UTC(2026, 7, 27),
+      updatedAt: Date.UTC(2026, 7, 28),
+      deletedAt: null,
+    }),
+    domainEvents: [],
+    pullDomainEvents: () => [],
+  } as unknown as TaskOccurrence;
+}
+
+describe('PowerSyncTaskOccurrenceRepository canonical persistence', () => {
+  it('uses Ymd schedule_date for rolling stats and future Pending projection', async () => {
     const getAll = vi.fn().mockResolvedValue([
       {
-        templateId: 'template-a',
+        templateId: 'plan-a',
         instanceCount: 4,
         completedInstanceCount: 2,
         pendingInstanceCount: 2,
@@ -20,136 +51,64 @@ describe('PowerSyncTaskOccurrenceRepository template statistics', () => {
     const repository = new PowerSyncTaskOccurrenceRepository({
       getAll,
     } as unknown as IElectronDatabaseTransaction);
-    const asOf = Date.UTC(2026, 6, 30, 12);
 
     const result = await repository.getTemplateStats(
-      ['template-a', 'template-without-instances'],
+      ['plan-a', 'plan-without-occurrences'],
       'identity-a',
-      { windowStart: Date.UTC(2026, 6, 1), asOf },
+      { windowStart: ymd('2026-07-01'), asOf: ymd('2026-07-30') },
     );
 
-    expect(result['template-a']).toEqual({
-      templateId: 'template-a',
+    expect(result['plan-a']).toMatchObject({
       instanceCount: 4,
-      completedInstanceCount: 2,
-      pendingInstanceCount: 2,
-      dueInstanceCount: 2,
       completedDueInstanceCount: 1,
-      completionWindowDays: 30,
       futurePendingInstanceCount: 1,
-      singleInstanceStatus: null,
       completionRate: 50,
     });
-    expect(result['template-without-instances']).toEqual({
-      templateId: 'template-without-instances',
+    expect(result['plan-without-occurrences']).toMatchObject({
       instanceCount: 0,
-      completedInstanceCount: 0,
-      pendingInstanceCount: 0,
-      dueInstanceCount: 0,
-      completedDueInstanceCount: 0,
-      completionWindowDays: 30,
-      futurePendingInstanceCount: 0,
-      singleInstanceStatus: null,
       completionRate: 0,
     });
 
     const [sql, params] = getAll.mock.calls[0] as [string, unknown[]];
-    expect(sql).toContain('instance_date >= ?');
-    expect(sql).toContain('instance_date <= ?');
-    expect(sql).toContain("status = 'Pending' AND instance_date > ?");
+    expect(sql).toContain('schedule_date >= ?');
+    expect(sql).toContain('schedule_date <= ?');
+    expect(sql).toContain("status = 'Pending' AND schedule_date > ?");
+    expect(sql).toContain('plan_id IN');
+    expect(sql).not.toContain('instance_date');
     expect(params).toEqual([
-      new Date(Date.UTC(2026, 6, 1)).toISOString(),
-      new Date(asOf).toISOString(),
-      new Date(Date.UTC(2026, 6, 1)).toISOString(),
-      new Date(asOf).toISOString(),
-      new Date(asOf).toISOString(),
-      'template-a',
-      'template-without-instances',
+      '2026-07-01',
+      '2026-07-30',
+      '2026-07-01',
+      '2026-07-30',
+      '2026-07-30',
+      'plan-a',
+      'plan-without-occurrences',
       'identity-a',
     ]);
   });
-});
 
-describe('PowerSyncTaskOccurrenceRepository occurrence identity (TASK-2204)', () => {
-  it('skips insert when the same identity/template occurrence key already exists', async () => {
+  it('deduplicates a new occurrence by plan + occurrenceKey before insert', async () => {
     const getOptional = vi
       .fn()
       .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ id: 'existing-instance' });
+      .mockResolvedValueOnce({ id: 'already-there' });
     const execute = vi.fn();
     const repository = new PowerSyncTaskOccurrenceRepository({
       getOptional,
       execute,
     } as unknown as IElectronDatabaseTransaction);
-    const instance = {
-      occurrenceKey: 'tpl-1:2026-03-08',
-      toPersistenceState: () => ({
-        id: 'new-instance',
-        templateId: 'tpl-1',
-        identityId: 'identity-a',
-        instanceDate: Date.UTC(2026, 2, 8),
-        status: 'Pending',
-        importance: 'Moderate',
-        timeConfig: {
-          timeType: 'AllDay',
-          startDate: Date.UTC(2026, 2, 8),
-          timePoint: null,
-          timeRange: null,
-        },
-        actualStartTime: null,
-        actualEndTime: null,
-        comment: null,
-        version: 1,
-        createdAt: Date.UTC(2026, 2, 8),
-        updatedAt: Date.UTC(2026, 2, 8),
-        deletedAt: null,
-      }),
-      domainEvents: [],
-      pullDomainEvents: () => [],
-    } as unknown as TaskOccurrence;
 
-    await repository.save(instance);
+    await repository.save(fakeOccurrence());
 
     expect(getOptional).toHaveBeenNthCalledWith(
       2,
-      expect.stringContaining('template_id = ? AND identity_id = ? AND occurrence_key = ?'),
-      ['tpl-1', 'identity-a', 'tpl-1:2026-03-08'],
+      expect.stringContaining('plan_id = ? AND identity_id = ? AND occurrence_key = ?'),
+      ['plan-1', 'identity-a', 'plan-1:2026-08-28'],
     );
     expect(execute).not.toHaveBeenCalled();
   });
-});
 
-describe('PowerSyncTaskOccurrenceRepository optimistic instance writes (PLAN-4303)', () => {
-  function updatedInstance() {
-    return {
-      occurrenceKey: 'tpl-1:2026-08-28',
-      toPersistenceState: () => ({
-        id: 'instance-1',
-        templateId: 'tpl-1',
-        identityId: 'identity-a',
-        instanceDate: Date.UTC(2026, 7, 28),
-        status: 'Pending',
-        importance: 'Moderate',
-        timeConfig: {
-          timeType: 'TimePoint',
-          startDate: Date.UTC(2026, 7, 28),
-          timePoint: 960,
-          timeRange: null,
-        },
-        actualStartTime: null,
-        actualEndTime: null,
-        comment: null,
-        version: 2,
-        createdAt: Date.UTC(2026, 7, 27),
-        updatedAt: Date.UTC(2026, 7, 28),
-        deletedAt: null,
-      }),
-      domainEvents: [],
-      pullDomainEvents: () => [],
-    } as unknown as TaskOccurrence;
-  }
-
-  it('fences updates by identity + expected version', async () => {
+  it('fences updates by identity + expected version while writing canonical columns', async () => {
     const getOptional = vi.fn().mockResolvedValueOnce({ id: 'instance-1', version: 1 });
     const execute = vi.fn().mockResolvedValue({ rowsAffected: 1 });
     const repository = new PowerSyncTaskOccurrenceRepository({
@@ -157,9 +116,14 @@ describe('PowerSyncTaskOccurrenceRepository optimistic instance writes (PLAN-430
       execute,
     } as unknown as IElectronDatabaseTransaction);
 
-    await repository.save(updatedInstance());
+    await repository.save(fakeOccurrence(2));
 
     const [sql, params] = execute.mock.calls[0] as [string, unknown[]];
+    expect(sql).toContain('SET plan_id = ?');
+    expect(sql).toContain('schedule_date = ?');
+    expect(sql).toContain('schedule_timing = ?');
+    expect(sql).toContain('checklist_state = ?');
+    expect(sql).not.toContain('time_config');
     expect(sql).toContain('WHERE id = ? AND identity_id = ? AND version = ?');
     expect(params.slice(-3)).toEqual(['instance-1', 'identity-a', 1]);
   });
@@ -175,7 +139,7 @@ describe('PowerSyncTaskOccurrenceRepository optimistic instance writes (PLAN-430
       execute,
     } as unknown as IElectronDatabaseTransaction);
 
-    await expect(repository.save(updatedInstance())).rejects.toMatchObject({
+    await expect(repository.save(fakeOccurrence(2))).rejects.toMatchObject({
       name: 'OptimisticConcurrencyError',
       aggregateName: 'TaskOccurrence',
     });

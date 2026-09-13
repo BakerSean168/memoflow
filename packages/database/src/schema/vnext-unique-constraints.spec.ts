@@ -9,7 +9,7 @@ const SHAPE_COLUMNS = new Map<string, string[]>([
   ['key_results', ['id', 'goal_id', 'identity_id']],
   ['notifications', ['identity_id', 'idempotency_key']],
   ['schedule_tasks', ['identity_id', 'owner_type', 'owner_id', 'scheduling_key']],
-  ['task_instances', ['template_id', 'occurrence_key']],
+  ['task_instances', ['plan_id', 'occurrence_key']],
   ['task_templates', ['id', 'identity_id']],
 ]);
 

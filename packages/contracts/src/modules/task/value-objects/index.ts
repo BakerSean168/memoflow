@@ -58,6 +58,8 @@ export { TaskOccurrenceResultKind, TaskOccurrenceResultSchema } from './task-occ
 export type { TaskOccurrenceResult } from './task-occurrence-result';
 export { TaskOccurrenceChecklistItemSchema } from './task-occurrence-checklist';
 export type { TaskOccurrenceChecklistItem } from './task-occurrence-checklist';
+export { TaskOccurrenceScheduleSnapshotSchema } from './task-occurrence-schedule-snapshot';
+export type { TaskOccurrenceScheduleSnapshot } from './task-occurrence-schedule-snapshot';
 export { ChecklistItemDefinitionSchema } from './checklist-item-definition';
 
 // CompletionRecord

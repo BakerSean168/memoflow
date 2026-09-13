@@ -1,13 +1,23 @@
 /** Task Module — Core vNext export projections. */
 import type { ExportContext } from '../../portable-runtime';
-import type { PortableTaskPlan, PortableTaskOccurrence } from '@memoflow/contracts/data-portability';
-import type { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
-import { parseJsonField, toDateString, resolveExportRef, resolveExportRefOrThrow } from './projection-helpers';
+import type {
+  PortableTaskPlan,
+  PortableTaskOccurrence,
+} from '@memoflow/contracts/data-portability';
+import {
+  TaskOccurrenceChecklistItemSchema,
+  TaskOccurrenceResultSchema,
+  TaskOccurrenceScheduleSnapshotSchema,
+  type TaskGoalBindingTrigger,
+} from '@memoflow/contracts/task';
+import {
+  parseJsonField,
+  toDateString,
+  resolveExportRef,
+  resolveExportRefOrThrow,
+} from './projection-helpers';
 
-export function projectTaskPlans(
-  templates: unknown[],
-  ctx: ExportContext,
-): PortableTaskPlan[] {
+export function projectTaskPlans(templates: unknown[], ctx: ExportContext): PortableTaskPlan[] {
   return templates.map((t) => {
     const entity = t as Record<string, unknown>;
     const ref = ctx.refAllocator.allocate('taskPlan');
@@ -38,13 +48,15 @@ export function projectTaskPlans(
     const flattenedRecurrence = entity.recurrenceRuleType
       ? {
           type: String(entity.recurrenceRuleType),
-          interval: entity.recurrenceRuleInterval == null ? 1 : Number(entity.recurrenceRuleInterval),
+          interval:
+            entity.recurrenceRuleInterval == null ? 1 : Number(entity.recurrenceRuleInterval),
           daysOfWeek: parseJsonField(entity.recurrenceRuleDaysOfWeek, []),
           endDate: entity.recurrenceRuleEndDate ?? null,
           count: entity.recurrenceRuleCount ?? null,
         }
       : null;
-    const recurrenceRule = parseJsonField(entity.recurrenceRule, flattenedRecurrence) ?? flattenedRecurrence;
+    const recurrenceRule =
+      parseJsonField(entity.recurrenceRule, flattenedRecurrence) ?? flattenedRecurrence;
     const flattenedTimeConfig = entity.timeConfigType
       ? {
           type: String(entity.timeConfigType),
@@ -56,18 +68,22 @@ export function projectTaskPlans(
           timeRangeEnd: entity.timeConfigTimeRangeEnd ?? null,
         }
       : {};
-    const flattenedReminder = entity.reminderConfigEnabled == null
-      ? null
-      : {
-          enabled: Boolean(entity.reminderConfigEnabled),
-          triggers: entity.reminderConfigTimeOffsetMinutes == null
-            ? []
-            : [{
-                relativeValue: Number(entity.reminderConfigTimeOffsetMinutes),
-                relativeUnit: String(entity.reminderConfigUnit ?? 'Minute'),
-                channel: entity.reminderConfigChannel ?? undefined,
-              }],
-        };
+    const flattenedReminder =
+      entity.reminderConfigEnabled == null
+        ? null
+        : {
+            enabled: Boolean(entity.reminderConfigEnabled),
+            triggers:
+              entity.reminderConfigTimeOffsetMinutes == null
+                ? []
+                : [
+                    {
+                      relativeValue: Number(entity.reminderConfigTimeOffsetMinutes),
+                      relativeUnit: String(entity.reminderConfigUnit ?? 'Minute'),
+                      channel: entity.reminderConfigChannel ?? undefined,
+                    },
+                  ],
+          };
 
     return {
       _ref: ref,
@@ -88,9 +104,27 @@ export function projectTaskPlans(
       goalRef: hasPortableBinding ? goalRef : null,
       keyResultRef: hasPortableBinding ? keyResultRef : null,
       contribution: hasPortableBinding ? contribution : null,
-      checklist: Array.isArray(entity.checklist)
+      checklist: (Array.isArray(entity.checklist)
         ? entity.checklist
-        : ((parseJsonField(entity.checklist, []) as unknown[]) ?? []),
+        : ((parseJsonField(entity.checklist, []) as unknown[]) ?? [])
+      ).map((item) => {
+        const value = item as { toDTO?: () => unknown } | Record<string, unknown>;
+        const definition =
+          value && typeof value === 'object' && typeof value.toDTO === 'function'
+            ? (value.toDTO() as Record<string, unknown>)
+            : (value as Record<string, unknown>);
+        const definitionId = String(definition.id ?? '');
+        if (!definitionId) {
+          throw new Error('EXPORT_VALIDATION_ERROR: Task checklist definition is missing identity');
+        }
+        const definitionRef = ctx.refAllocator.allocate('taskChecklistDefinition');
+        ctx.refToIdMap.set(definitionId, definitionRef);
+        return {
+          _ref: definitionRef,
+          title: String(definition.title ?? ''),
+          order: Number(definition.order ?? 0),
+        };
+      }),
       timeConfig: parseJsonField(entity.timeConfig, flattenedTimeConfig) ?? flattenedTimeConfig,
       recurrenceRule: recurrenceRule ?? null,
       reminderConfig: parseJsonField(entity.reminderConfig, flattenedReminder) ?? flattenedReminder,
@@ -110,17 +144,42 @@ export function projectTaskOccurrences(
     const entity = i as Record<string, unknown>;
     const ref = ctx.refAllocator.allocate('taskOccurrence');
     ctx.refToIdMap.set(String(entity.id), ref);
+
+    const semanticSnapshot = entity.scheduleSnapshot as
+      { toDTO?: () => unknown } | Record<string, unknown> | undefined;
+    const scheduleSnapshot = TaskOccurrenceScheduleSnapshotSchema.parse(
+      semanticSnapshot &&
+        typeof semanticSnapshot === 'object' &&
+        typeof semanticSnapshot.toDTO === 'function'
+        ? semanticSnapshot.toDTO()
+        : {
+            date: entity.scheduleDate,
+            timing: parseJsonField(entity.scheduleTiming),
+          },
+    );
+    const result =
+      entity.result == null
+        ? null
+        : TaskOccurrenceResultSchema.parse(parseJsonField(entity.result));
+    const checklistState = TaskOccurrenceChecklistItemSchema.array()
+      .parse(parseJsonField(entity.checklistState, []))
+      .map((item) => ({
+        definitionRef: resolveExportRefOrThrow(item.definitionId, ctx, 'task checklist definition'),
+        titleSnapshot: item.titleSnapshot,
+        orderSnapshot: item.orderSnapshot,
+        completed: item.completed,
+        completedAt: item.completedAt,
+      }));
+
     return {
       _ref: ref,
-      templateRef: resolveExportRefOrThrow(String(entity.templateId), ctx, 'task'),
-      instanceDate: toDateString(entity.instanceDate) ?? new Date(0).toISOString(),
-      occurrenceKey: entity.occurrenceKey as string | null | undefined,
-      timeConfig: parseJsonField(entity.timeConfig, {}) ?? {},
-      importance: String(entity.importance ?? 'moderate'),
+      planRef: resolveExportRefOrThrow(String(entity.planId), ctx, 'task'),
+      scheduleSnapshot,
+      importanceSnapshot: String(entity.importanceSnapshot),
       status: String(entity.status ?? 'Pending'),
-      actualStartTime: toDateString(entity.actualStartTime),
-      actualEndTime: toDateString(entity.actualEndTime),
-      note: (entity.comment ?? entity.note) as string | null | undefined,
+      actualStartAt: toDateString(entity.actualStartAt) ?? null,
+      result,
+      checklistState,
       createdAt: toDateString(entity.createdAt),
       updatedAt: toDateString(entity.updatedAt),
     };

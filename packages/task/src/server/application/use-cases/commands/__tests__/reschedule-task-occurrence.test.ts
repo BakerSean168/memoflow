@@ -54,8 +54,8 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
 
     expect(result).toBeOk();
     expect(instance.version).toBe(2);
-    expect(instance.instanceDate).toBe(Number(start));
-    expect(instance.timeConfig.toDTO()).toEqual(newTime);
+    expect(instance.scheduleDate).toBe(time.calendar.toYmd(start));
+    expect(instance.legacyTimeConfigAt(timeContext).toDTO()).toEqual(newTime);
     expect(repo.save).toHaveBeenCalledWith(instance);
   });
 

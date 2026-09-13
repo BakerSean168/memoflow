@@ -232,6 +232,64 @@ describe('PortableUserDataV2Schema', () => {
   });
 });
 
+describe('Task occurrence portable contract', () => {
+  const taskWithChecklist = {
+    ...validTask,
+    checklist: [{ _ref: 'taskChecklistDefinition:1', title: 'Run tests', order: 0 }],
+  };
+  const occurrence = {
+    _ref: 'taskOccurrence:1',
+    planRef: 'taskPlan:1',
+    scheduleSnapshot: { date: '2026-09-13', timing: { kind: 'AllDay' } },
+    importanceSnapshot: 'Moderate',
+    status: 'Completed',
+    actualStartAt: '2026-09-13T00:00:00.000Z',
+    result: {
+      kind: 'Completed',
+      recordedAt: 1789257600000,
+      actualDurationMinutes: 30,
+      note: null,
+      rating: null,
+    },
+    checklistState: [
+      {
+        definitionRef: 'taskChecklistDefinition:1',
+        titleSnapshot: 'Run tests',
+        orderSnapshot: 0,
+        completed: true,
+        completedAt: 1789259400000,
+      },
+    ],
+  };
+
+  it('accepts canonical plan/schedule/result/checklist refs', () => {
+    expect(
+      PortableTaskDataSchema.safeParse({
+        templates: [taskWithChecklist],
+        instances: [occurrence],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('rejects retired template/date/time-config occurrence fields', () => {
+    expect(
+      PortableTaskDataSchema.safeParse({
+        templates: [taskWithChecklist],
+        instances: [
+          {
+            ...occurrence,
+            planRef: undefined,
+            scheduleSnapshot: undefined,
+            templateRef: 'taskPlan:1',
+            instanceDate: '2026-09-13T00:00:00.000Z',
+            timeConfig: { type: 'AllDay' },
+          },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+});
+
 describe('Task Goal link / contribution portable contract', () => {
   it('supports both link-only and link+contribution Task plans', () => {
     expect(

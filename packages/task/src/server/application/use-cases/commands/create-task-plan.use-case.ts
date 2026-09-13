@@ -66,18 +66,16 @@ export class CreateTaskPlanUseCase {
     return ok({
       template: existing.toClientDTOAt(timeContext),
       instanceCount: instances.length,
-      todayInstanceCreated: instances.some(
-        (instance) =>
-          Number.isFinite(instance.instanceDate) &&
-          time.calendar.toYmd(instance.instanceDate) === today,
-      ),
+      todayInstanceCreated: instances.some((instance) => instance.scheduleDate === today),
     });
   }
 
   async execute(request: CreateTaskPlanInput): Promise<Result<CreateTaskPlanRes>> {
     let timeContext: TimeContext | null = null;
     try {
-      const resolvedTimeContext = await this.userTimeContextPort.getUserTimeContext(request.identityId);
+      const resolvedTimeContext = await this.userTimeContextPort.getUserTimeContext(
+        request.identityId,
+      );
       timeContext = resolvedTimeContext;
       return await this.transactionRunner.run(
         async ({ templateRepository, instanceRepository }) => {
@@ -154,11 +152,7 @@ export class CreateTaskPlanUseCase {
           const today = time.calendar.toYmd(Date.now());
           const generation = {
             instanceCount: instances.length,
-            todayInstanceCreated: instances.some(
-              (instance) =>
-                Number.isFinite(instance.instanceDate) &&
-                time.calendar.toYmd(instance.instanceDate) === today,
-            ),
+            todayInstanceCreated: instances.some((instance) => instance.scheduleDate === today),
           };
 
           return ok({

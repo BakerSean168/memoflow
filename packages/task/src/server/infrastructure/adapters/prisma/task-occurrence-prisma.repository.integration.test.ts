@@ -1,9 +1,11 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { TASK_TEST_TIME_CONTEXT } from '../../../../testing';
+import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { TaskOccurrenceResultKind, TaskTimingKind } from '@memoflow/contracts/task';
 import { IdentityId } from '@memoflow/domain-shared';
+import { asYmd } from '@memoflow/time';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
-import { TaskTimeConfig } from '../../../domain/value-objects';
 import { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
+import { TaskOccurrenceScheduleSnapshot } from '../../../domain/value-objects';
 import { TaskPlanPrismaRepository } from './task-plan-prisma.repository';
 import { TaskOccurrencePrismaRepository } from './task-occurrence-prisma.repository';
 import {
@@ -12,12 +14,48 @@ import {
   getPrisma,
   seedAccount,
 } from '../../../../__tests__/integration-helpers';
+import { TASK_TEST_TIME_CONTEXT } from '../../../../testing';
 
-function makeAllDayTimeConfig(startDate: Date): TaskTimeConfig {
-  return TaskTimeConfig.createAllDay(startDate);
+function createOccurrence(params: {
+  planId: Parameters<typeof TaskOccurrence.create>[0]['planId'];
+  identityId: IdentityId;
+  date: string;
+  importance?: ImportanceLevel;
+  checklistDefinition?: Array<{ id: string; title: string; order: number }>;
+}) {
+  return TaskOccurrence.create({
+    planId: params.planId,
+    identityId: params.identityId,
+    scheduleSnapshot: TaskOccurrenceScheduleSnapshot.create({
+      date: asYmd(params.date),
+      timing: { kind: TaskTimingKind.AllDay },
+    }),
+    importanceSnapshot: params.importance ?? ImportanceLevel.Moderate,
+    checklistDefinition: params.checklistDefinition ?? [],
+  });
 }
 
-describe('TaskOccurrencePrismaRepository integration', () => {
+async function seedPlan(params: {
+  identityId: IdentityId;
+  title?: string;
+  importance?: ImportanceLevel;
+  date?: string;
+}) {
+  const prisma = await getPrisma();
+  const repository = new TaskPlanPrismaRepository(prisma);
+  const date = params.date ?? '2026-09-14';
+  const plan = TaskPlan.createOneTimeTask({
+    identityId: params.identityId,
+    title: params.title ?? 'Task occurrence integration',
+    importance: params.importance ?? ImportanceLevel.Moderate,
+    dueDate: new Date(`${date}T00:00:00.000Z`),
+    timeContext: TASK_TEST_TIME_CONTEXT,
+  });
+  await repository.save(plan);
+  return { prisma, plan };
+}
+
+describe('TaskOccurrencePrismaRepository canonical integration', () => {
   afterAll(async () => {
     await disconnectPrisma();
   });
@@ -26,379 +64,164 @@ describe('TaskOccurrencePrismaRepository integration', () => {
     await cleanTaskTables();
   });
 
-  it('persists and loads a task instance by id', async () => {
+  it('persists and loads canonical occurrence truth by identity + id', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
-
-    const prisma = await getPrisma();
-    const templateRepository = new TaskPlanPrismaRepository(prisma);
-    const instanceRepository = new TaskOccurrencePrismaRepository(prisma);
-
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    // Create and save a template first
-    const template = TaskPlan.createOneTimeTask({
+    const { prisma, plan } = await seedPlan({ identityId });
+    const repository = new TaskOccurrencePrismaRepository(prisma);
+    const occurrence = createOccurrence({
+      planId: plan.id,
       identityId,
-      title: 'Test Task',
-      importance: 'Important',
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
-    });
-    await templateRepository.save(template);
-
-    // Create an instance from the template
-    const timeConfig = makeAllDayTimeConfig(tomorrow);
-
-    const instance = TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
-      identityId,
-      instanceDate: tomorrow.getTime(),
-      timeConfig,
-      importance: 'Important',
+      date: '2026-09-14',
+      importance: ImportanceLevel.Important,
+      checklistDefinition: [{ id: 'check-a', title: 'Prepare', order: 0 }],
     });
 
-    await instanceRepository.save(instance);
-
-    const saved = await instanceRepository.findByIdForIdentity(identityId, instance.id);
+    await repository.save(occurrence);
+    const saved = await repository.findByIdForIdentity(identityId, occurrence.id);
 
     expect(saved).not.toBeNull();
-    expect(saved?.id).toBe(instance.id);
-    expect(saved?.identityId).toBe(identityId);
-    expect(saved?.templateId).toBe(template.id);
+    expect(saved?.id).toBe(occurrence.id);
+    expect(saved?.planId).toBe(plan.id);
+    expect(saved?.scheduleDate).toBe('2026-09-14');
+    expect(saved?.occurrenceKey).toBe(`${plan.id}:2026-09-14`);
+    expect(saved?.importanceSnapshot).toBe(ImportanceLevel.Important);
+    expect(saved?.checklistState[0]).toMatchObject({
+      definitionId: 'check-a',
+      titleSnapshot: 'Prepare',
+      completed: false,
+    });
   });
 
-  it('lists instances by identity', async () => {
+  it('lists occurrences by identity in descending schedule-date order', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
+    const { prisma, plan } = await seedPlan({ identityId });
+    const repository = new TaskOccurrencePrismaRepository(prisma);
+    const first = createOccurrence({ planId: plan.id, identityId, date: '2026-09-14' });
+    const second = createOccurrence({ planId: plan.id, identityId, date: '2026-09-16' });
 
-    const prisma = await getPrisma();
-    const templateRepository = new TaskPlanPrismaRepository(prisma);
-    const instanceRepository = new TaskOccurrencePrismaRepository(prisma);
+    await repository.saveMany([first, second]);
+    const occurrences = await repository.findByIdentityId(identityId);
 
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const template = TaskPlan.createOneTimeTask({
-      identityId,
-      title: 'Test Task',
-      importance: 'Moderate',
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
-    });
-    await templateRepository.save(template);
-
-    const timeConfig = makeAllDayTimeConfig(tomorrow);
-
-    const instance1 = TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
-      identityId,
-      instanceDate: tomorrow.getTime(),
-      timeConfig,
-      importance: 'Moderate',
-    });
-
-    const nextDay = new Date();
-    nextDay.setDate(nextDay.getDate() + 2);
-
-    const instance2 = TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
-      identityId,
-      instanceDate: nextDay.getTime(),
-      timeConfig: makeAllDayTimeConfig(nextDay),
-      importance: 'Minor',
-    });
-
-    await instanceRepository.save(instance1);
-    await instanceRepository.save(instance2);
-
-    const instances = await instanceRepository.findByIdentityId(identityId);
-
-    expect(instances.length).toBeGreaterThanOrEqual(2);
-    expect(instances.map((i) => i.id)).toContain(instance1.id);
-    expect(instances.map((i) => i.id)).toContain(instance2.id);
+    expect(occurrences.map((item) => item.id)).toEqual([second.id, first.id]);
   });
 
-  it('lists instances by template id', async () => {
+  it('lists occurrences by Plan id without cross-owner leakage', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
+    const { prisma, plan } = await seedPlan({ identityId });
+    const repository = new TaskOccurrencePrismaRepository(prisma);
+    const first = createOccurrence({ planId: plan.id, identityId, date: '2026-09-14' });
+    const second = createOccurrence({ planId: plan.id, identityId, date: '2026-09-15' });
+    await repository.saveMany([first, second]);
 
-    const prisma = await getPrisma();
-    const templateRepository = new TaskPlanPrismaRepository(prisma);
-    const instanceRepository = new TaskOccurrencePrismaRepository(prisma);
+    const occurrences = await repository.findByTemplateId(plan.id, String(identityId));
 
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const template = TaskPlan.createOneTimeTask({
-      identityId,
-      title: 'Template for Instances',
-      importance: 'Important',
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
-    });
-    await templateRepository.save(template);
-
-    const timeConfig = makeAllDayTimeConfig(tomorrow);
-
-    const instance1 = TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
-      identityId,
-      instanceDate: tomorrow.getTime(),
-      timeConfig,
-      importance: 'Important',
-    });
-
-    const nextDay = new Date();
-    nextDay.setDate(nextDay.getDate() + 2);
-
-    const instance2 = TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
-      identityId,
-      instanceDate: nextDay.getTime(),
-      timeConfig: makeAllDayTimeConfig(nextDay),
-      importance: 'Important',
-    });
-
-    await instanceRepository.save(instance1);
-    await instanceRepository.save(instance2);
-
-    const instances = await instanceRepository.findByTemplateId(
-      template.id,
-      String(template.identityId),
-    );
-
-    expect(instances).toHaveLength(2);
-    expect(instances.map((i) => i.id)).toContain(instance1.id);
-    expect(instances.map((i) => i.id)).toContain(instance2.id);
+    expect(occurrences).toHaveLength(2);
+    expect(new Set(occurrences.map((item) => item.id))).toEqual(new Set([first.id, second.id]));
   });
 
-  it('updates instance status', async () => {
+  it('updates open execution state through optimistic concurrency', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
+    const { prisma, plan } = await seedPlan({ identityId });
+    const repository = new TaskOccurrencePrismaRepository(prisma);
+    const occurrence = createOccurrence({ planId: plan.id, identityId, date: '2026-09-14' });
+    await repository.save(occurrence);
 
-    const prisma = await getPrisma();
-    const templateRepository = new TaskPlanPrismaRepository(prisma);
-    const instanceRepository = new TaskOccurrencePrismaRepository(prisma);
-
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const template = TaskPlan.createOneTimeTask({
-      identityId,
-      title: 'Task to Update',
-      importance: 'Moderate',
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
-    });
-    await templateRepository.save(template);
-
-    const timeConfig = makeAllDayTimeConfig(tomorrow);
-
-    const instance = TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
-      identityId,
-      instanceDate: tomorrow.getTime(),
-      timeConfig,
-      importance: 'Moderate',
-    });
-
-    await instanceRepository.save(instance);
-
-    // Update status
-    instance.start();
-    await instanceRepository.save(instance);
-
-    const saved = await instanceRepository.findByIdForIdentity(identityId, instance.id);
+    occurrence.start(123_000);
+    await repository.save(occurrence);
+    const saved = await repository.findByIdForIdentity(identityId, occurrence.id);
 
     expect(saved?.status).toBe('InProgress');
+    expect(saved?.actualStartAt).toBe(123_000);
+    expect(saved?.version).toBe(2);
   });
 
-  it('marks instance as completed', async () => {
+  it('round-trips Completed Result instead of legacy comment/end-time columns', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
+    const { prisma, plan } = await seedPlan({ identityId });
+    const repository = new TaskOccurrencePrismaRepository(prisma);
+    const occurrence = createOccurrence({ planId: plan.id, identityId, date: '2026-09-14' });
+    occurrence.start(60_000);
+    occurrence.complete(undefined, 'done', 5, undefined, 181_000);
 
-    const prisma = await getPrisma();
-    const templateRepository = new TaskPlanPrismaRepository(prisma);
-    const instanceRepository = new TaskOccurrencePrismaRepository(prisma);
-
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const template = TaskPlan.createOneTimeTask({
-      identityId,
-      title: 'Task to Complete',
-      importance: 'Important',
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
-    });
-    await templateRepository.save(template);
-
-    const timeConfig = makeAllDayTimeConfig(tomorrow);
-
-    const instance = TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
-      identityId,
-      instanceDate: tomorrow.getTime(),
-      timeConfig,
-      importance: 'Important',
-    });
-
-    await instanceRepository.save(instance);
-
-    // Mark as completed
-    instance.complete();
-    await instanceRepository.save(instance);
-
-    const saved = await instanceRepository.findByIdForIdentity(identityId, instance.id);
+    await repository.save(occurrence);
+    const saved = await repository.findByIdForIdentity(identityId, occurrence.id);
 
     expect(saved?.status).toBe('Completed');
-    expect(saved?.actualEndTime).not.toBeNull();
+    expect(saved?.result).toEqual({
+      kind: TaskOccurrenceResultKind.Completed,
+      recordedAt: 181_000,
+      actualDurationMinutes: 2,
+      note: 'done',
+      rating: 5,
+    });
   });
 
-  it('deletes instance', async () => {
+  it('deletes only the owned occurrence', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
+    const { prisma, plan } = await seedPlan({ identityId });
+    const repository = new TaskOccurrencePrismaRepository(prisma);
+    const occurrence = createOccurrence({ planId: plan.id, identityId, date: '2026-09-14' });
+    await repository.save(occurrence);
 
-    const prisma = await getPrisma();
-    const templateRepository = new TaskPlanPrismaRepository(prisma);
-    const instanceRepository = new TaskOccurrencePrismaRepository(prisma);
+    await repository.delete(String(identityId), occurrence.id);
 
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const template = TaskPlan.createOneTimeTask({
-      identityId,
-      title: 'Task to Delete',
-      importance: 'Minor',
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
-    });
-    await templateRepository.save(template);
-
-    const timeConfig = makeAllDayTimeConfig(tomorrow);
-
-    const instance = TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
-      identityId,
-      instanceDate: tomorrow.getTime(),
-      timeConfig,
-      importance: 'Minor',
-    });
-
-    await instanceRepository.save(instance);
-
-    await instanceRepository.delete(String(identityId), instance.id);
-
-    const saved = await instanceRepository.findByIdForIdentity(identityId, instance.id);
-
-    expect(saved).toBeNull();
+    expect(await repository.findByIdForIdentity(identityId, occurrence.id)).toBeNull();
   });
 
-  it('round-trip: domain -> persistence -> domain preserves data integrity', async () => {
+  it('round-trips schedule snapshot, Result and checklist state losslessly', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
-
-    const prisma = await getPrisma();
-    const templateRepository = new TaskPlanPrismaRepository(prisma);
-    const instanceRepository = new TaskOccurrencePrismaRepository(prisma);
-
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const template = TaskPlan.createOneTimeTask({
+    const { prisma, plan } = await seedPlan({ identityId });
+    const repository = new TaskOccurrencePrismaRepository(prisma);
+    const original = createOccurrence({
+      planId: plan.id,
       identityId,
-      title: 'Complex Task',
-      description: 'A complex task',
-      importance: 'Important',
-      dueDate: tomorrow,
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      date: '2026-09-14',
+      importance: ImportanceLevel.Vital,
+      checklistDefinition: [{ id: 'check-a', title: 'Prepare', order: 0 }],
     });
-    await templateRepository.save(template);
+    original.completeChecklistItem('check-a', 100_000);
+    original.complete(12, 'evidence', 4, undefined, 200_000);
 
-    const timeConfig = makeAllDayTimeConfig(tomorrow);
+    await repository.save(original);
+    const loaded = await repository.findByIdForIdentity(String(identityId), original.id);
 
-    const original = TaskOccurrence.create({
-      timeContext: TASK_TEST_TIME_CONTEXT,
-      templateId: template.id,
-      identityId,
-      instanceDate: tomorrow.getTime(),
-      timeConfig,
-      importance: 'Important',
-    });
-
-    await instanceRepository.save(original);
-    const loaded = await instanceRepository.findByIdForIdentity(
-      String(original.identityId),
-      original.id,
-    );
-
-    expect(loaded).toBeDefined();
-    expect(loaded?.id).toBe(original.id);
-    expect(loaded?.templateId).toBe(original.templateId);
-    expect(loaded?.identityId).toBe(original.identityId);
-    expect(loaded?.importance).toBe(original.importance);
-    expect(loaded?.status).toBe(original.status);
+    expect(loaded?.toPersistenceState()).toEqual(original.toPersistenceState());
   });
 
-  it('calculates completion from due instances in the rolling 30-day window', async () => {
+  it('calculates completion stats from Ymd schedule windows', async () => {
     const identityId = IdentityId.generate();
     await seedAccount({ id: identityId });
+    const { prisma, plan } = await seedPlan({ identityId, date: '2026-07-31' });
+    const repository = new TaskOccurrencePrismaRepository(prisma);
 
-    const prisma = await getPrisma();
-    const templateRepository = new TaskPlanPrismaRepository(prisma);
-    const instanceRepository = new TaskOccurrencePrismaRepository(prisma);
-    const asOf = Date.UTC(2026, 6, 30, 12);
-    const day = 24 * 60 * 60 * 1000;
-    const template = TaskPlan.createOneTimeTask({
+    const outsideWindowCompleted = createOccurrence({
+      planId: plan.id,
       identityId,
-      title: 'Thirty day statistics',
-      importance: 'Moderate',
-      dueDate: new Date(asOf + day),
-      timeContext: TASK_TEST_TIME_CONTEXT,
+      date: '2026-06-29',
     });
-    await templateRepository.save(template);
-
-    const createInstance = (date: number) =>
-      TaskOccurrence.create({
-        timeContext: TASK_TEST_TIME_CONTEXT,
-        templateId: template.id,
-        identityId,
-        instanceDate: date,
-        timeConfig: makeAllDayTimeConfig(new Date(date)),
-        importance: 'Moderate',
-      });
-
-    const outsideWindowCompleted = createInstance(asOf - 31 * day);
     outsideWindowCompleted.complete();
-    const dueCompleted = createInstance(asOf - 20 * day);
+    const dueCompleted = createOccurrence({ planId: plan.id, identityId, date: '2026-07-10' });
     dueCompleted.complete();
-    const duePending = createInstance(asOf - 10 * day);
-    const futurePending = createInstance(asOf + day);
-    await instanceRepository.saveMany([
-      outsideWindowCompleted,
-      dueCompleted,
-      duePending,
-      futurePending,
-    ]);
+    const duePending = createOccurrence({ planId: plan.id, identityId, date: '2026-07-20' });
+    const futurePending = createOccurrence({ planId: plan.id, identityId, date: '2026-07-31' });
+    await repository.saveMany([outsideWindowCompleted, dueCompleted, duePending, futurePending]);
 
     const stats = (
-      await instanceRepository.getTemplateStats([template.id], String(identityId), {
-        windowStart: asOf - 30 * day,
-        asOf,
+      await repository.getTemplateStats([plan.id], String(identityId), {
+        windowStart: asYmd('2026-07-01'),
+        asOf: asYmd('2026-07-30'),
       })
-    )[template.id];
+    )[plan.id];
 
     expect(stats).toEqual({
-      templateId: template.id,
+      templateId: plan.id,
       instanceCount: 4,
       completedInstanceCount: 2,
       pendingInstanceCount: 2,

@@ -180,16 +180,16 @@ export interface CreateTaskPlanInput extends TimestampedImportInput {
 
 export interface CreateTaskOccurrenceInput extends TimestampedImportInput {
   id: string;
-  templateId: string;
+  planId: string;
   identityId: string;
-  instanceDate: string;
-  occurrenceKey: string | null;
+  occurrenceKey: string;
+  scheduleDate: string;
+  scheduleTiming: string;
+  importanceSnapshot: string;
   status: string;
-  importance: string;
-  timeConfig: string;
-  actualStartTime: string | null;
-  actualEndTime: string | null;
-  comment: string | null;
+  actualStartAt: string | null;
+  result: string | null;
+  checklistState: string;
 }
 
 // --- Schedule ---

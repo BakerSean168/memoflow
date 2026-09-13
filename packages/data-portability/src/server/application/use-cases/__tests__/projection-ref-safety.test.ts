@@ -16,8 +16,6 @@ function createExportContext(refs: Record<string, string> = {}): ExportContext {
 }
 
 describe('projection ref safety', () => {
-
-
   it('fails export when a goal record requires an unresolved key result ref', () => {
     const ctx = createExportContext();
 
@@ -29,7 +27,7 @@ describe('projection ref safety', () => {
     ).toThrow('EXPORT_VALIDATION_ERROR: Unresolved goal record reference to missing-key-result');
   });
 
-  it('fails export when a task instance requires an unresolved template ref', () => {
+  it('fails export when a task instance requires an unresolved plan ref', () => {
     const ctx = createExportContext();
 
     expect(() =>
@@ -37,15 +35,19 @@ describe('projection ref safety', () => {
         [
           {
             id: 'instance-db-id',
-            templateId: 'missing-template',
-            instanceDate: Date.now(),
-            importance: 'moderate',
-            status: 'pending',
+            planId: 'missing-plan',
+            scheduleDate: '2026-06-04',
+            scheduleTiming: JSON.stringify({ kind: 'AllDay' }),
+            importanceSnapshot: 'Moderate',
+            status: 'Pending',
+            actualStartAt: null,
+            result: null,
+            checklistState: [],
           },
         ],
         ctx,
       ),
-    ).toThrow('EXPORT_VALIDATION_ERROR: Unresolved task reference to missing-template');
+    ).toThrow('EXPORT_VALIDATION_ERROR: Unresolved task reference to missing-plan');
   });
 
   it('fails export when a resource requires an unresolved repository ref', () => {
@@ -68,7 +70,7 @@ describe('projection ref safety', () => {
     ).toThrow('EXPORT_VALIDATION_ERROR: Unresolved repository reference to missing-repository');
   });
 
-  it('fails export when a reminder response requires an unresolved template ref', () => {
+  it('fails export when a reminder response requires an unresolved plan ref', () => {
     const ctx = createExportContext();
 
     expect(() =>

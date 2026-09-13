@@ -6,7 +6,7 @@ tags:
   - refactor
 description: Task Plan / Occurrence 聚合边界、Schedule ADT、Result/Checklist、Reminder parity、Goal/Workspace 一次性收敛实施计划
 created: 2026-09-08T19:35:00+08:00
-updated: 2026-09-13T10:50:00+08:00
+updated: 2026-09-13T12:34:39+08:00
 ---
 
 # Task vNext Model Convergence
@@ -22,7 +22,7 @@ updated: 2026-09-13T10:50:00+08:00
 - old `TaskTemplate`/`TaskInstance` persistence and compatibility DTOs are deleted rather than translated;
 - no legacy round-trip fixture is required; fresh TaskPlan/TaskOccurrence round-trip remains required.
 
-**状态：ACTIVE / TASK-7302 complete; TASK-7303 next**
+**状态：ACTIVE / TASK-7303 complete; TASK-7304 next**
 **执行分支：** `feat/system-wide-vnext-convergence`（ticket worktree: `chatgpt/task-7302-7303-domain`）
 **上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）
 **基线：** Task Vitest 71 files / 717 tests PASS
@@ -87,6 +87,12 @@ TaskWorkspace  = Plan + Occurrences + Cross-module Context
 - checklist state；
 - dueAt/isOverdue derived；
 - correction semantics + Goal settlement regression。
+
+**TASK-7303 DONE（2026-09-13）：** TaskOccurrence durable truth 已收敛为 `planId + occurrenceKey + scheduleSnapshot(date:Ymd,timing) + importanceSnapshot + status + actualStartAt + result + checklistState + audit/version`。旧 `templateId / instanceDate / timeConfig / completionRecord / skipRecord / actualEndTime / comment` 已退出 aggregate/server/persistence truth；TASK-7306 之前 Web/Desktop 所需旧 client shape 仅由 `toClientDTOAt(timeContext)` 基于 canonical state 显式派生，不构成第二持久化真值。Completed/Missed/Skipped 统一使用 `TaskOccurrenceResult`，Pending/InProgress 强制 `result = null`；Missed/Skipped -> Completed 与 Completed -> Pending correction semantics 均保留，自动实际耗时修正为**分钟**。Plan checklist definition 在 materialize 时 snapshot 为 occurrence checklist state，历史 occurrence 不随 Plan 编辑回写。`dueAt/isOverdue` 使用 Product Time 从 Ymd + timing 派生，DST/wall-clock 不可解析时 fail closed，不使用 host/UTC fallback。Repository 的日期范围、future cutoff、rolling stats 统一改为 Ymd，消除“同一天 +1ms 被误判为 future”的旧歧义。
+
+为保证 schedule snapshot 可真实持久化，本票按 ADR-111 消耗了 **TASK-7305 的最小 occurrence persistence direct-cut slice**：Prisma/PowerSync `task_instances` 物理表名暂保留至 TASK-7309，但列已直接切为 `plan_id / occurrence_key / schedule_date / schedule_timing / importance_snapshot / actual_start_at / result / checklist_state`，无 backfill、dual-read/write 或 legacy reader；Prisma/PowerSync mapper/repository 同批切换，并新增 anti-resurrection lock。完整 TASK-7305 **仍保持 OPEN**，因为 TaskPlan schedule/reminder/runtime cursor 等旧物理列尚未完成 single-track cutover。
+
+本地验收：Task unit **74 files / 605 tests PASS**；真实 PostgreSQL integration **6 files / 31 tests PASS**（含 canonical round-trip、事务回滚、finite-plan Goal settlement）；Contracts **85 files / 580 tests PASS**；Data Portability **36 files / 148 tests PASS**；Database **10 files / 35 tests PASS**；PowerSync schema **1 file / 7 tests PASS**；Task build/typecheck PASS；Data Portability direct typecheck PASS；Contracts/Database/PowerSync schema direct typecheck PASS；Task lint **0 errors**（既有 warnings 保留）；Prisma schema validate PASS。Data Portability 的当前 business-backup occurrence 也同步 destructive-cut 为 `planRef + scheduleSnapshot + importanceSnapshot + result + checklistState`：Plan checklist definition 使用 portable `_ref`，Occurrence 使用 `definitionRef`，导入时为每轮备份恢复重新分配内部 definition ID 并保持 Plan↔Occurrence 对应；strict contract 明确拒绝旧 `templateRef / instanceDate / timeConfig` occurrence payload，不新增旧备份 compatibility reader。
 
 ### TASK-7304 — Occurrence materialization service
 
@@ -195,7 +201,7 @@ full CI exact-head
 - [x] ADR-071～075 frozen
 - [x] TASK-7301
 - [x] TASK-7302
-- [ ] TASK-7303
+- [x] TASK-7303
 - [ ] TASK-7304
 - [ ] TASK-7305
 - [ ] TASK-7306
@@ -204,4 +210,4 @@ full CI exact-head
 - [ ] TASK-7309
 - [ ] TASK-7310
 
-**Next:** TASK-7303 must converge TaskOccurrence to planId + schedule snapshot + Result/checklist truth. Because the current physical occurrence row still stores legacy `instanceDate + timeConfig`, TASK-7303 may consume the minimal ADR-111 direct-cutover slice of TASK-7305 needed to persist a truthful Product-Time schedule snapshot; do not synthesize Ymd with an implicit UTC fallback or reintroduce dual-read compatibility. TASK-7304 is partially advanced by this ticket (generation moved out of TaskPlan) but remains open until runtime cursor/product DTO cleanup is complete.
+**Next:** TASK-7304 closes the remaining occurrence-materialization runtime concerns: remove product-visible generation cursor/horizon residue, ensure finite-plan outcome does not depend on public `lastGeneratedDate`, and keep materialization exclusively service-owned. Then complete TASK-7305 for the remaining TaskPlan/reminder/schedule persistence single-track cutover. TASK-7303 already consumed only the minimum occurrence-row slice required for truthful Product-Time persistence; do not mark TASK-7305 complete until the remaining Plan persistence and parity work is deleted/validated.

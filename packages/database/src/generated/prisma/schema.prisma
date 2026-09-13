@@ -2239,41 +2239,29 @@ model TaskPlan {
 /// TaskOccurrence 聚合根 - 任务实例
 /// 从模板生成的具体任务实例，包含执行状态和时间追踪
 model TaskOccurrence {
-  // ============ 主键与外键 ============
-  id         String @id
-  templateId String @map("template_id")
-  identityId String @map("identity_id")
+  id                 String    @id
+  planId             String    @map("plan_id")
+  identityId         String    @map("identity_id")
+  occurrenceKey      String    @map("occurrence_key")
+  scheduleDate       String    @map("schedule_date") /// Ymd (YYYY-MM-DD)
+  scheduleTiming     String    @map("schedule_timing") /// JSON: TaskTiming
+  importanceSnapshot String    @default("Moderate") @map("importance_snapshot")
+  status             String /// TaskOccurrenceStatus
+  actualStartAt      DateTime? @map("actual_start_at")
+  result             String? /// JSON: TaskOccurrenceResult
+  checklistState     String    @default("[]") @map("checklist_state") /// JSON: TaskOccurrenceChecklistItem[]
+  version            Int       @default(1)
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  deletedAt          DateTime? @map("deleted_at")
 
-  // ============ 实例基本信息 ============
-  instanceDate  DateTime @map("instance_date")
-  occurrenceKey String?  @map("occurrence_key") /// R2-1 幂等键 templateId:localDate
-  status        String /// TaskOccurrenceStatus
-  importance    String   @default("moderate") /// ImportanceLevel
+  account Account  @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plan    TaskPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
-  // ============ 时间追踪 ============
-  timeConfig      String    @map("time_config") /// JSON: TaskTimeConfigDTO
-  actualStartTime DateTime? @map("actual_start_time")
-  actualEndTime   DateTime? @map("actual_end_time")
-
-  // ============ 备注 ============
-  comment String? /// 实例备注
-
-  // ============ 版本与审计 ============
-  version   Int       @default(1)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  // ============ 关系映射 ============
-  account  Account  @relation(fields: [identityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  template TaskPlan @relation(fields: [templateId], references: [id], onDelete: Cascade)
-
-  // R2-1：同一模板同一天最多一个实例（幂等键，防双宿主/并发重复生成）。
-  @@unique([templateId, occurrenceKey])
-  // ============ 索引优化 ============
-  @@index([templateId, instanceDate])
+  @@unique([planId, occurrenceKey])
+  @@index([planId, scheduleDate])
   @@index([identityId, status])
-  @@index([identityId, instanceDate])
+  @@index([identityId, scheduleDate])
   @@map("task_instances")
 }
 

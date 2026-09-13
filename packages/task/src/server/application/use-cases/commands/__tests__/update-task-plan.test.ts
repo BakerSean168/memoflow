@@ -246,13 +246,13 @@ describe('UpdateTaskPlanUseCase', () => {
     const pastPending = await aTaskOccurrence({
       templateId: template.id,
       identityId: template.identityId,
-      instanceDate: effectiveFrom - 1,
+      instanceDate: effectiveFrom - 86_400_000,
       importance: ImportanceLevel.Moderate,
     });
     const futurePending = await aTaskOccurrence({
       templateId: template.id,
       identityId: template.identityId,
-      instanceDate: effectiveFrom + 1,
+      instanceDate: effectiveFrom + 86_400_000,
       importance: ImportanceLevel.Moderate,
     });
     const boundaryPending = await aTaskOccurrence({
@@ -264,7 +264,7 @@ describe('UpdateTaskPlanUseCase', () => {
     const futureInProgress = await aTaskOccurrence({
       templateId: template.id,
       identityId: template.identityId,
-      instanceDate: effectiveFrom + 2,
+      instanceDate: effectiveFrom + 2 * 86_400_000,
       importance: ImportanceLevel.Moderate,
     });
     futureInProgress.start();
@@ -385,11 +385,17 @@ describe('UpdateTaskPlanUseCase', () => {
     const generated = vi.mocked(instanceRepo.saveMany).mock.calls[0]?.[0] ?? [];
     expect(generated.length).toBeGreaterThan(0);
     expect(generated.every((instance) => instance.status === 'Pending')).toBe(true);
-    expect(generated.every((instance) => instance.timeConfig.timePoint === 600)).toBe(true);
     expect(
-      generated.some((instance) => instance.instanceDate === futureInProgress.instanceDate),
+      generated.every(
+        (instance) =>
+          instance.scheduleSnapshot.timing.kind === 'At' &&
+          instance.scheduleSnapshot.timing.time === '10:00',
+      ),
+    ).toBe(true);
+    expect(
+      generated.some((instance) => instance.scheduleDate === futureInProgress.scheduleDate),
     ).toBe(false);
-    expect(futureInProgress.timeConfig.timePoint).toBe(540);
+    expect(futureInProgress.scheduleSnapshot.timing).toEqual({ kind: 'At', time: '09:00' });
   });
 
   it('does not expand the generation horizon when no future Pending instance exists', async () => {

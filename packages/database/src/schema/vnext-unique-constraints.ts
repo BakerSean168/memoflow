@@ -17,6 +17,7 @@ const EMPTY_TABLE_ADDABLE_TEXT_COLUMNS = new Set([
   'owner_id',
   'scheduling_key',
   'occurrence_key',
+  'plan_id',
 ]);
 
 const UNIQUE_CONSTRAINTS: readonly UniqueConstraintSpec[] = [
@@ -43,8 +44,8 @@ const UNIQUE_CONSTRAINTS: readonly UniqueConstraintSpec[] = [
   },
   {
     table: 'task_instances',
-    columns: ['template_id', 'occurrence_key'],
-    indexName: 'task_instances_template_id_occurrence_key_key',
+    columns: ['plan_id', 'occurrence_key'],
+    indexName: 'task_instances_plan_id_occurrence_key_key',
   },
   {
     table: 'task_templates',

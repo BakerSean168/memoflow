@@ -26,3 +26,4 @@ export { SkipRecord } from './skip-record';
 export * from './task-errors';
 
 export { TaskPlanSchedule } from './task-plan-schedule';
+export { TaskOccurrenceScheduleSnapshot } from './task-occurrence-schedule-snapshot';

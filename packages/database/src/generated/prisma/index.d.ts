@@ -120218,16 +120218,16 @@ export namespace Prisma {
 
   export type TaskOccurrenceMinAggregateOutputType = {
     id: string | null
-    templateId: string | null
+    planId: string | null
     identityId: string | null
-    instanceDate: Date | null
     occurrenceKey: string | null
+    scheduleDate: string | null
+    scheduleTiming: string | null
+    importanceSnapshot: string | null
     status: string | null
-    importance: string | null
-    timeConfig: string | null
-    actualStartTime: Date | null
-    actualEndTime: Date | null
-    comment: string | null
+    actualStartAt: Date | null
+    result: string | null
+    checklistState: string | null
     version: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -120236,16 +120236,16 @@ export namespace Prisma {
 
   export type TaskOccurrenceMaxAggregateOutputType = {
     id: string | null
-    templateId: string | null
+    planId: string | null
     identityId: string | null
-    instanceDate: Date | null
     occurrenceKey: string | null
+    scheduleDate: string | null
+    scheduleTiming: string | null
+    importanceSnapshot: string | null
     status: string | null
-    importance: string | null
-    timeConfig: string | null
-    actualStartTime: Date | null
-    actualEndTime: Date | null
-    comment: string | null
+    actualStartAt: Date | null
+    result: string | null
+    checklistState: string | null
     version: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -120254,16 +120254,16 @@ export namespace Prisma {
 
   export type TaskOccurrenceCountAggregateOutputType = {
     id: number
-    templateId: number
+    planId: number
     identityId: number
-    instanceDate: number
     occurrenceKey: number
+    scheduleDate: number
+    scheduleTiming: number
+    importanceSnapshot: number
     status: number
-    importance: number
-    timeConfig: number
-    actualStartTime: number
-    actualEndTime: number
-    comment: number
+    actualStartAt: number
+    result: number
+    checklistState: number
     version: number
     createdAt: number
     updatedAt: number
@@ -120282,16 +120282,16 @@ export namespace Prisma {
 
   export type TaskOccurrenceMinAggregateInputType = {
     id?: true
-    templateId?: true
+    planId?: true
     identityId?: true
-    instanceDate?: true
     occurrenceKey?: true
+    scheduleDate?: true
+    scheduleTiming?: true
+    importanceSnapshot?: true
     status?: true
-    importance?: true
-    timeConfig?: true
-    actualStartTime?: true
-    actualEndTime?: true
-    comment?: true
+    actualStartAt?: true
+    result?: true
+    checklistState?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -120300,16 +120300,16 @@ export namespace Prisma {
 
   export type TaskOccurrenceMaxAggregateInputType = {
     id?: true
-    templateId?: true
+    planId?: true
     identityId?: true
-    instanceDate?: true
     occurrenceKey?: true
+    scheduleDate?: true
+    scheduleTiming?: true
+    importanceSnapshot?: true
     status?: true
-    importance?: true
-    timeConfig?: true
-    actualStartTime?: true
-    actualEndTime?: true
-    comment?: true
+    actualStartAt?: true
+    result?: true
+    checklistState?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -120318,16 +120318,16 @@ export namespace Prisma {
 
   export type TaskOccurrenceCountAggregateInputType = {
     id?: true
-    templateId?: true
+    planId?: true
     identityId?: true
-    instanceDate?: true
     occurrenceKey?: true
+    scheduleDate?: true
+    scheduleTiming?: true
+    importanceSnapshot?: true
     status?: true
-    importance?: true
-    timeConfig?: true
-    actualStartTime?: true
-    actualEndTime?: true
-    comment?: true
+    actualStartAt?: true
+    result?: true
+    checklistState?: true
     version?: true
     createdAt?: true
     updatedAt?: true
@@ -120423,16 +120423,16 @@ export namespace Prisma {
 
   export type TaskOccurrenceGroupByOutputType = {
     id: string
-    templateId: string
+    planId: string
     identityId: string
-    instanceDate: Date
-    occurrenceKey: string | null
+    occurrenceKey: string
+    scheduleDate: string
+    scheduleTiming: string
+    importanceSnapshot: string
     status: string
-    importance: string
-    timeConfig: string
-    actualStartTime: Date | null
-    actualEndTime: Date | null
-    comment: string | null
+    actualStartAt: Date | null
+    result: string | null
+    checklistState: string
     version: number
     createdAt: Date
     updatedAt: Date
@@ -120460,129 +120460,129 @@ export namespace Prisma {
 
   export type TaskOccurrenceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    templateId?: boolean
+    planId?: boolean
     identityId?: boolean
-    instanceDate?: boolean
     occurrenceKey?: boolean
+    scheduleDate?: boolean
+    scheduleTiming?: boolean
+    importanceSnapshot?: boolean
     status?: boolean
-    importance?: boolean
-    timeConfig?: boolean
-    actualStartTime?: boolean
-    actualEndTime?: boolean
-    comment?: boolean
+    actualStartAt?: boolean
+    result?: boolean
+    checklistState?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["taskOccurrence"]>
 
   export type TaskOccurrenceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    templateId?: boolean
+    planId?: boolean
     identityId?: boolean
-    instanceDate?: boolean
     occurrenceKey?: boolean
+    scheduleDate?: boolean
+    scheduleTiming?: boolean
+    importanceSnapshot?: boolean
     status?: boolean
-    importance?: boolean
-    timeConfig?: boolean
-    actualStartTime?: boolean
-    actualEndTime?: boolean
-    comment?: boolean
+    actualStartAt?: boolean
+    result?: boolean
+    checklistState?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["taskOccurrence"]>
 
   export type TaskOccurrenceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    templateId?: boolean
+    planId?: boolean
     identityId?: boolean
-    instanceDate?: boolean
     occurrenceKey?: boolean
+    scheduleDate?: boolean
+    scheduleTiming?: boolean
+    importanceSnapshot?: boolean
     status?: boolean
-    importance?: boolean
-    timeConfig?: boolean
-    actualStartTime?: boolean
-    actualEndTime?: boolean
-    comment?: boolean
+    actualStartAt?: boolean
+    result?: boolean
+    checklistState?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["taskOccurrence"]>
 
   export type TaskOccurrenceSelectScalar = {
     id?: boolean
-    templateId?: boolean
+    planId?: boolean
     identityId?: boolean
-    instanceDate?: boolean
     occurrenceKey?: boolean
+    scheduleDate?: boolean
+    scheduleTiming?: boolean
+    importanceSnapshot?: boolean
     status?: boolean
-    importance?: boolean
-    timeConfig?: boolean
-    actualStartTime?: boolean
-    actualEndTime?: boolean
-    comment?: boolean
+    actualStartAt?: boolean
+    result?: boolean
+    checklistState?: boolean
     version?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type TaskOccurrenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "templateId" | "identityId" | "instanceDate" | "occurrenceKey" | "status" | "importance" | "timeConfig" | "actualStartTime" | "actualEndTime" | "comment" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["taskOccurrence"]>
+  export type TaskOccurrenceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "planId" | "identityId" | "occurrenceKey" | "scheduleDate" | "scheduleTiming" | "importanceSnapshot" | "status" | "actualStartAt" | "result" | "checklistState" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["taskOccurrence"]>
   export type TaskOccurrenceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }
   export type TaskOccurrenceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }
   export type TaskOccurrenceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
-    template?: boolean | TaskPlanDefaultArgs<ExtArgs>
+    plan?: boolean | TaskPlanDefaultArgs<ExtArgs>
   }
 
   export type $TaskOccurrencePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "TaskOccurrence"
     objects: {
       account: Prisma.$AccountPayload<ExtArgs>
-      template: Prisma.$TaskPlanPayload<ExtArgs>
+      plan: Prisma.$TaskPlanPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      templateId: string
+      planId: string
       identityId: string
-      instanceDate: Date
+      occurrenceKey: string
       /**
-       * R2-1 幂等键 templateId:localDate
+       * Ymd (YYYY-MM-DD)
        */
-      occurrenceKey: string | null
+      scheduleDate: string
+      /**
+       * JSON: TaskTiming
+       */
+      scheduleTiming: string
+      importanceSnapshot: string
       /**
        * TaskOccurrenceStatus
        */
       status: string
+      actualStartAt: Date | null
       /**
-       * ImportanceLevel
+       * JSON: TaskOccurrenceResult
        */
-      importance: string
+      result: string | null
       /**
-       * JSON: TaskTimeConfigDTO
+       * JSON: TaskOccurrenceChecklistItem[]
        */
-      timeConfig: string
-      actualStartTime: Date | null
-      actualEndTime: Date | null
-      /**
-       * 实例备注
-       */
-      comment: string | null
+      checklistState: string
       version: number
       createdAt: Date
       updatedAt: Date
@@ -120982,7 +120982,7 @@ export namespace Prisma {
   export interface Prisma__TaskOccurrenceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    template<T extends TaskPlanDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskPlanDefaultArgs<ExtArgs>>): Prisma__TaskPlanClient<$Result.GetResult<Prisma.$TaskPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    plan<T extends TaskPlanDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskPlanDefaultArgs<ExtArgs>>): Prisma__TaskPlanClient<$Result.GetResult<Prisma.$TaskPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -121013,16 +121013,16 @@ export namespace Prisma {
    */
   interface TaskOccurrenceFieldRefs {
     readonly id: FieldRef<"TaskOccurrence", 'String'>
-    readonly templateId: FieldRef<"TaskOccurrence", 'String'>
+    readonly planId: FieldRef<"TaskOccurrence", 'String'>
     readonly identityId: FieldRef<"TaskOccurrence", 'String'>
-    readonly instanceDate: FieldRef<"TaskOccurrence", 'DateTime'>
     readonly occurrenceKey: FieldRef<"TaskOccurrence", 'String'>
+    readonly scheduleDate: FieldRef<"TaskOccurrence", 'String'>
+    readonly scheduleTiming: FieldRef<"TaskOccurrence", 'String'>
+    readonly importanceSnapshot: FieldRef<"TaskOccurrence", 'String'>
     readonly status: FieldRef<"TaskOccurrence", 'String'>
-    readonly importance: FieldRef<"TaskOccurrence", 'String'>
-    readonly timeConfig: FieldRef<"TaskOccurrence", 'String'>
-    readonly actualStartTime: FieldRef<"TaskOccurrence", 'DateTime'>
-    readonly actualEndTime: FieldRef<"TaskOccurrence", 'DateTime'>
-    readonly comment: FieldRef<"TaskOccurrence", 'String'>
+    readonly actualStartAt: FieldRef<"TaskOccurrence", 'DateTime'>
+    readonly result: FieldRef<"TaskOccurrence", 'String'>
+    readonly checklistState: FieldRef<"TaskOccurrence", 'String'>
     readonly version: FieldRef<"TaskOccurrence", 'Int'>
     readonly createdAt: FieldRef<"TaskOccurrence", 'DateTime'>
     readonly updatedAt: FieldRef<"TaskOccurrence", 'DateTime'>
@@ -129219,16 +129219,16 @@ export namespace Prisma {
 
   export const TaskOccurrenceScalarFieldEnum: {
     id: 'id',
-    templateId: 'templateId',
+    planId: 'planId',
     identityId: 'identityId',
-    instanceDate: 'instanceDate',
     occurrenceKey: 'occurrenceKey',
+    scheduleDate: 'scheduleDate',
+    scheduleTiming: 'scheduleTiming',
+    importanceSnapshot: 'importanceSnapshot',
     status: 'status',
-    importance: 'importance',
-    timeConfig: 'timeConfig',
-    actualStartTime: 'actualStartTime',
-    actualEndTime: 'actualEndTime',
-    comment: 'comment',
+    actualStartAt: 'actualStartAt',
+    result: 'result',
+    checklistState: 'checklistState',
     version: 'version',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -138170,80 +138170,80 @@ export namespace Prisma {
     OR?: TaskOccurrenceWhereInput[]
     NOT?: TaskOccurrenceWhereInput | TaskOccurrenceWhereInput[]
     id?: StringFilter<"TaskOccurrence"> | string
-    templateId?: StringFilter<"TaskOccurrence"> | string
+    planId?: StringFilter<"TaskOccurrence"> | string
     identityId?: StringFilter<"TaskOccurrence"> | string
-    instanceDate?: DateTimeFilter<"TaskOccurrence"> | Date | string
-    occurrenceKey?: StringNullableFilter<"TaskOccurrence"> | string | null
+    occurrenceKey?: StringFilter<"TaskOccurrence"> | string
+    scheduleDate?: StringFilter<"TaskOccurrence"> | string
+    scheduleTiming?: StringFilter<"TaskOccurrence"> | string
+    importanceSnapshot?: StringFilter<"TaskOccurrence"> | string
     status?: StringFilter<"TaskOccurrence"> | string
-    importance?: StringFilter<"TaskOccurrence"> | string
-    timeConfig?: StringFilter<"TaskOccurrence"> | string
-    actualStartTime?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
-    actualEndTime?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
-    comment?: StringNullableFilter<"TaskOccurrence"> | string | null
+    actualStartAt?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
+    result?: StringNullableFilter<"TaskOccurrence"> | string | null
+    checklistState?: StringFilter<"TaskOccurrence"> | string
     version?: IntFilter<"TaskOccurrence"> | number
     createdAt?: DateTimeFilter<"TaskOccurrence"> | Date | string
     updatedAt?: DateTimeFilter<"TaskOccurrence"> | Date | string
     deletedAt?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    template?: XOR<TaskPlanScalarRelationFilter, TaskPlanWhereInput>
+    plan?: XOR<TaskPlanScalarRelationFilter, TaskPlanWhereInput>
   }
 
   export type TaskOccurrenceOrderByWithRelationInput = {
     id?: SortOrder
-    templateId?: SortOrder
+    planId?: SortOrder
     identityId?: SortOrder
-    instanceDate?: SortOrder
-    occurrenceKey?: SortOrderInput | SortOrder
+    occurrenceKey?: SortOrder
+    scheduleDate?: SortOrder
+    scheduleTiming?: SortOrder
+    importanceSnapshot?: SortOrder
     status?: SortOrder
-    importance?: SortOrder
-    timeConfig?: SortOrder
-    actualStartTime?: SortOrderInput | SortOrder
-    actualEndTime?: SortOrderInput | SortOrder
-    comment?: SortOrderInput | SortOrder
+    actualStartAt?: SortOrderInput | SortOrder
+    result?: SortOrderInput | SortOrder
+    checklistState?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
     account?: AccountOrderByWithRelationInput
-    template?: TaskPlanOrderByWithRelationInput
+    plan?: TaskPlanOrderByWithRelationInput
   }
 
   export type TaskOccurrenceWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    templateId_occurrenceKey?: TaskOccurrenceTemplateIdOccurrenceKeyCompoundUniqueInput
+    planId_occurrenceKey?: TaskOccurrencePlanIdOccurrenceKeyCompoundUniqueInput
     AND?: TaskOccurrenceWhereInput | TaskOccurrenceWhereInput[]
     OR?: TaskOccurrenceWhereInput[]
     NOT?: TaskOccurrenceWhereInput | TaskOccurrenceWhereInput[]
-    templateId?: StringFilter<"TaskOccurrence"> | string
+    planId?: StringFilter<"TaskOccurrence"> | string
     identityId?: StringFilter<"TaskOccurrence"> | string
-    instanceDate?: DateTimeFilter<"TaskOccurrence"> | Date | string
-    occurrenceKey?: StringNullableFilter<"TaskOccurrence"> | string | null
+    occurrenceKey?: StringFilter<"TaskOccurrence"> | string
+    scheduleDate?: StringFilter<"TaskOccurrence"> | string
+    scheduleTiming?: StringFilter<"TaskOccurrence"> | string
+    importanceSnapshot?: StringFilter<"TaskOccurrence"> | string
     status?: StringFilter<"TaskOccurrence"> | string
-    importance?: StringFilter<"TaskOccurrence"> | string
-    timeConfig?: StringFilter<"TaskOccurrence"> | string
-    actualStartTime?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
-    actualEndTime?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
-    comment?: StringNullableFilter<"TaskOccurrence"> | string | null
+    actualStartAt?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
+    result?: StringNullableFilter<"TaskOccurrence"> | string | null
+    checklistState?: StringFilter<"TaskOccurrence"> | string
     version?: IntFilter<"TaskOccurrence"> | number
     createdAt?: DateTimeFilter<"TaskOccurrence"> | Date | string
     updatedAt?: DateTimeFilter<"TaskOccurrence"> | Date | string
     deletedAt?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
     account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
-    template?: XOR<TaskPlanScalarRelationFilter, TaskPlanWhereInput>
-  }, "id" | "templateId_occurrenceKey">
+    plan?: XOR<TaskPlanScalarRelationFilter, TaskPlanWhereInput>
+  }, "id" | "planId_occurrenceKey">
 
   export type TaskOccurrenceOrderByWithAggregationInput = {
     id?: SortOrder
-    templateId?: SortOrder
+    planId?: SortOrder
     identityId?: SortOrder
-    instanceDate?: SortOrder
-    occurrenceKey?: SortOrderInput | SortOrder
+    occurrenceKey?: SortOrder
+    scheduleDate?: SortOrder
+    scheduleTiming?: SortOrder
+    importanceSnapshot?: SortOrder
     status?: SortOrder
-    importance?: SortOrder
-    timeConfig?: SortOrder
-    actualStartTime?: SortOrderInput | SortOrder
-    actualEndTime?: SortOrderInput | SortOrder
-    comment?: SortOrderInput | SortOrder
+    actualStartAt?: SortOrderInput | SortOrder
+    result?: SortOrderInput | SortOrder
+    checklistState?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -138260,16 +138260,16 @@ export namespace Prisma {
     OR?: TaskOccurrenceScalarWhereWithAggregatesInput[]
     NOT?: TaskOccurrenceScalarWhereWithAggregatesInput | TaskOccurrenceScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"TaskOccurrence"> | string
-    templateId?: StringWithAggregatesFilter<"TaskOccurrence"> | string
+    planId?: StringWithAggregatesFilter<"TaskOccurrence"> | string
     identityId?: StringWithAggregatesFilter<"TaskOccurrence"> | string
-    instanceDate?: DateTimeWithAggregatesFilter<"TaskOccurrence"> | Date | string
-    occurrenceKey?: StringNullableWithAggregatesFilter<"TaskOccurrence"> | string | null
+    occurrenceKey?: StringWithAggregatesFilter<"TaskOccurrence"> | string
+    scheduleDate?: StringWithAggregatesFilter<"TaskOccurrence"> | string
+    scheduleTiming?: StringWithAggregatesFilter<"TaskOccurrence"> | string
+    importanceSnapshot?: StringWithAggregatesFilter<"TaskOccurrence"> | string
     status?: StringWithAggregatesFilter<"TaskOccurrence"> | string
-    importance?: StringWithAggregatesFilter<"TaskOccurrence"> | string
-    timeConfig?: StringWithAggregatesFilter<"TaskOccurrence"> | string
-    actualStartTime?: DateTimeNullableWithAggregatesFilter<"TaskOccurrence"> | Date | string | null
-    actualEndTime?: DateTimeNullableWithAggregatesFilter<"TaskOccurrence"> | Date | string | null
-    comment?: StringNullableWithAggregatesFilter<"TaskOccurrence"> | string | null
+    actualStartAt?: DateTimeNullableWithAggregatesFilter<"TaskOccurrence"> | Date | string | null
+    result?: StringNullableWithAggregatesFilter<"TaskOccurrence"> | string | null
+    checklistState?: StringWithAggregatesFilter<"TaskOccurrence"> | string
     version?: IntWithAggregatesFilter<"TaskOccurrence"> | number
     createdAt?: DateTimeWithAggregatesFilter<"TaskOccurrence"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"TaskOccurrence"> | Date | string
@@ -148356,7 +148356,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTaskPlansInput
     keyResult?: KeyResultCreateNestedOneWithoutLinkedTaskPlansInput
-    instances?: TaskOccurrenceCreateNestedManyWithoutTemplateInput
+    instances?: TaskOccurrenceCreateNestedManyWithoutPlanInput
     history?: TaskPlanHistoryCreateNestedManyWithoutTemplateInput
     labelLinks?: TaskLabelCreateNestedManyWithoutTaskPlanInput
   }
@@ -148400,7 +148400,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutTemplateInput
+    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
     history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutTemplateInput
     labelLinks?: TaskLabelUncheckedCreateNestedManyWithoutTaskPlanInput
   }
@@ -148443,7 +148443,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTaskPlansNestedInput
     keyResult?: KeyResultUpdateOneWithoutLinkedTaskPlansNestedInput
-    instances?: TaskOccurrenceUpdateManyWithoutTemplateNestedInput
+    instances?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
     history?: TaskPlanHistoryUpdateManyWithoutTemplateNestedInput
     labelLinks?: TaskLabelUpdateManyWithoutTaskPlanNestedInput
   }
@@ -148487,7 +148487,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    instances?: TaskOccurrenceUncheckedUpdateManyWithoutTemplateNestedInput
+    instances?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
     history?: TaskPlanHistoryUncheckedUpdateManyWithoutTemplateNestedInput
     labelLinks?: TaskLabelUncheckedUpdateManyWithoutTaskPlanNestedInput
   }
@@ -148614,34 +148614,34 @@ export namespace Prisma {
 
   export type TaskOccurrenceCreateInput = {
     id: string
-    instanceDate: Date | string
-    occurrenceKey?: string | null
+    occurrenceKey: string
+    scheduleDate: string
+    scheduleTiming: string
+    importanceSnapshot?: string
     status: string
-    importance?: string
-    timeConfig: string
-    actualStartTime?: Date | string | null
-    actualEndTime?: Date | string | null
-    comment?: string | null
+    actualStartAt?: Date | string | null
+    result?: string | null
+    checklistState?: string
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTaskOccurrencesInput
-    template: TaskPlanCreateNestedOneWithoutInstancesInput
+    plan: TaskPlanCreateNestedOneWithoutInstancesInput
   }
 
   export type TaskOccurrenceUncheckedCreateInput = {
     id: string
-    templateId: string
+    planId: string
     identityId: string
-    instanceDate: Date | string
-    occurrenceKey?: string | null
+    occurrenceKey: string
+    scheduleDate: string
+    scheduleTiming: string
+    importanceSnapshot?: string
     status: string
-    importance?: string
-    timeConfig: string
-    actualStartTime?: Date | string | null
-    actualEndTime?: Date | string | null
-    comment?: string | null
+    actualStartAt?: Date | string | null
+    result?: string | null
+    checklistState?: string
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -148650,34 +148650,34 @@ export namespace Prisma {
 
   export type TaskOccurrenceUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    instanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    occurrenceKey?: NullableStringFieldUpdateOperationsInput | string | null
+    occurrenceKey?: StringFieldUpdateOperationsInput | string
+    scheduleDate?: StringFieldUpdateOperationsInput | string
+    scheduleTiming?: StringFieldUpdateOperationsInput | string
+    importanceSnapshot?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    importance?: StringFieldUpdateOperationsInput | string
-    timeConfig?: StringFieldUpdateOperationsInput | string
-    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    actualStartAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    result?: NullableStringFieldUpdateOperationsInput | string | null
+    checklistState?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTaskOccurrencesNestedInput
-    template?: TaskPlanUpdateOneRequiredWithoutInstancesNestedInput
+    plan?: TaskPlanUpdateOneRequiredWithoutInstancesNestedInput
   }
 
   export type TaskOccurrenceUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    templateId?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    instanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    occurrenceKey?: NullableStringFieldUpdateOperationsInput | string | null
+    occurrenceKey?: StringFieldUpdateOperationsInput | string
+    scheduleDate?: StringFieldUpdateOperationsInput | string
+    scheduleTiming?: StringFieldUpdateOperationsInput | string
+    importanceSnapshot?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    importance?: StringFieldUpdateOperationsInput | string
-    timeConfig?: StringFieldUpdateOperationsInput | string
-    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    actualStartAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    result?: NullableStringFieldUpdateOperationsInput | string | null
+    checklistState?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -148686,16 +148686,16 @@ export namespace Prisma {
 
   export type TaskOccurrenceCreateManyInput = {
     id: string
-    templateId: string
+    planId: string
     identityId: string
-    instanceDate: Date | string
-    occurrenceKey?: string | null
+    occurrenceKey: string
+    scheduleDate: string
+    scheduleTiming: string
+    importanceSnapshot?: string
     status: string
-    importance?: string
-    timeConfig: string
-    actualStartTime?: Date | string | null
-    actualEndTime?: Date | string | null
-    comment?: string | null
+    actualStartAt?: Date | string | null
+    result?: string | null
+    checklistState?: string
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -148704,14 +148704,14 @@ export namespace Prisma {
 
   export type TaskOccurrenceUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    instanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    occurrenceKey?: NullableStringFieldUpdateOperationsInput | string | null
+    occurrenceKey?: StringFieldUpdateOperationsInput | string
+    scheduleDate?: StringFieldUpdateOperationsInput | string
+    scheduleTiming?: StringFieldUpdateOperationsInput | string
+    importanceSnapshot?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    importance?: StringFieldUpdateOperationsInput | string
-    timeConfig?: StringFieldUpdateOperationsInput | string
-    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    actualStartAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    result?: NullableStringFieldUpdateOperationsInput | string | null
+    checklistState?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -148720,16 +148720,16 @@ export namespace Prisma {
 
   export type TaskOccurrenceUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    templateId?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    instanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    occurrenceKey?: NullableStringFieldUpdateOperationsInput | string | null
+    occurrenceKey?: StringFieldUpdateOperationsInput | string
+    scheduleDate?: StringFieldUpdateOperationsInput | string
+    scheduleTiming?: StringFieldUpdateOperationsInput | string
+    importanceSnapshot?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    importance?: StringFieldUpdateOperationsInput | string
-    timeConfig?: StringFieldUpdateOperationsInput | string
-    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    actualStartAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    result?: NullableStringFieldUpdateOperationsInput | string | null
+    checklistState?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -155395,23 +155395,23 @@ export namespace Prisma {
     version?: SortOrder
   }
 
-  export type TaskOccurrenceTemplateIdOccurrenceKeyCompoundUniqueInput = {
-    templateId: string
+  export type TaskOccurrencePlanIdOccurrenceKeyCompoundUniqueInput = {
+    planId: string
     occurrenceKey: string
   }
 
   export type TaskOccurrenceCountOrderByAggregateInput = {
     id?: SortOrder
-    templateId?: SortOrder
+    planId?: SortOrder
     identityId?: SortOrder
-    instanceDate?: SortOrder
     occurrenceKey?: SortOrder
+    scheduleDate?: SortOrder
+    scheduleTiming?: SortOrder
+    importanceSnapshot?: SortOrder
     status?: SortOrder
-    importance?: SortOrder
-    timeConfig?: SortOrder
-    actualStartTime?: SortOrder
-    actualEndTime?: SortOrder
-    comment?: SortOrder
+    actualStartAt?: SortOrder
+    result?: SortOrder
+    checklistState?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -155424,16 +155424,16 @@ export namespace Prisma {
 
   export type TaskOccurrenceMaxOrderByAggregateInput = {
     id?: SortOrder
-    templateId?: SortOrder
+    planId?: SortOrder
     identityId?: SortOrder
-    instanceDate?: SortOrder
     occurrenceKey?: SortOrder
+    scheduleDate?: SortOrder
+    scheduleTiming?: SortOrder
+    importanceSnapshot?: SortOrder
     status?: SortOrder
-    importance?: SortOrder
-    timeConfig?: SortOrder
-    actualStartTime?: SortOrder
-    actualEndTime?: SortOrder
-    comment?: SortOrder
+    actualStartAt?: SortOrder
+    result?: SortOrder
+    checklistState?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -155442,16 +155442,16 @@ export namespace Prisma {
 
   export type TaskOccurrenceMinOrderByAggregateInput = {
     id?: SortOrder
-    templateId?: SortOrder
+    planId?: SortOrder
     identityId?: SortOrder
-    instanceDate?: SortOrder
     occurrenceKey?: SortOrder
+    scheduleDate?: SortOrder
+    scheduleTiming?: SortOrder
+    importanceSnapshot?: SortOrder
     status?: SortOrder
-    importance?: SortOrder
-    timeConfig?: SortOrder
-    actualStartTime?: SortOrder
-    actualEndTime?: SortOrder
-    comment?: SortOrder
+    actualStartAt?: SortOrder
+    result?: SortOrder
+    checklistState?: SortOrder
     version?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -161590,10 +161590,10 @@ export namespace Prisma {
     connect?: KeyResultWhereUniqueInput
   }
 
-  export type TaskOccurrenceCreateNestedManyWithoutTemplateInput = {
-    create?: XOR<TaskOccurrenceCreateWithoutTemplateInput, TaskOccurrenceUncheckedCreateWithoutTemplateInput> | TaskOccurrenceCreateWithoutTemplateInput[] | TaskOccurrenceUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TaskOccurrenceCreateOrConnectWithoutTemplateInput | TaskOccurrenceCreateOrConnectWithoutTemplateInput[]
-    createMany?: TaskOccurrenceCreateManyTemplateInputEnvelope
+  export type TaskOccurrenceCreateNestedManyWithoutPlanInput = {
+    create?: XOR<TaskOccurrenceCreateWithoutPlanInput, TaskOccurrenceUncheckedCreateWithoutPlanInput> | TaskOccurrenceCreateWithoutPlanInput[] | TaskOccurrenceUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: TaskOccurrenceCreateOrConnectWithoutPlanInput | TaskOccurrenceCreateOrConnectWithoutPlanInput[]
+    createMany?: TaskOccurrenceCreateManyPlanInputEnvelope
     connect?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
   }
 
@@ -161611,10 +161611,10 @@ export namespace Prisma {
     connect?: TaskLabelWhereUniqueInput | TaskLabelWhereUniqueInput[]
   }
 
-  export type TaskOccurrenceUncheckedCreateNestedManyWithoutTemplateInput = {
-    create?: XOR<TaskOccurrenceCreateWithoutTemplateInput, TaskOccurrenceUncheckedCreateWithoutTemplateInput> | TaskOccurrenceCreateWithoutTemplateInput[] | TaskOccurrenceUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TaskOccurrenceCreateOrConnectWithoutTemplateInput | TaskOccurrenceCreateOrConnectWithoutTemplateInput[]
-    createMany?: TaskOccurrenceCreateManyTemplateInputEnvelope
+  export type TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput = {
+    create?: XOR<TaskOccurrenceCreateWithoutPlanInput, TaskOccurrenceUncheckedCreateWithoutPlanInput> | TaskOccurrenceCreateWithoutPlanInput[] | TaskOccurrenceUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: TaskOccurrenceCreateOrConnectWithoutPlanInput | TaskOccurrenceCreateOrConnectWithoutPlanInput[]
+    createMany?: TaskOccurrenceCreateManyPlanInputEnvelope
     connect?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
   }
 
@@ -161650,17 +161650,17 @@ export namespace Prisma {
     update?: XOR<XOR<KeyResultUpdateToOneWithWhereWithoutLinkedTaskPlansInput, KeyResultUpdateWithoutLinkedTaskPlansInput>, KeyResultUncheckedUpdateWithoutLinkedTaskPlansInput>
   }
 
-  export type TaskOccurrenceUpdateManyWithoutTemplateNestedInput = {
-    create?: XOR<TaskOccurrenceCreateWithoutTemplateInput, TaskOccurrenceUncheckedCreateWithoutTemplateInput> | TaskOccurrenceCreateWithoutTemplateInput[] | TaskOccurrenceUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TaskOccurrenceCreateOrConnectWithoutTemplateInput | TaskOccurrenceCreateOrConnectWithoutTemplateInput[]
-    upsert?: TaskOccurrenceUpsertWithWhereUniqueWithoutTemplateInput | TaskOccurrenceUpsertWithWhereUniqueWithoutTemplateInput[]
-    createMany?: TaskOccurrenceCreateManyTemplateInputEnvelope
+  export type TaskOccurrenceUpdateManyWithoutPlanNestedInput = {
+    create?: XOR<TaskOccurrenceCreateWithoutPlanInput, TaskOccurrenceUncheckedCreateWithoutPlanInput> | TaskOccurrenceCreateWithoutPlanInput[] | TaskOccurrenceUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: TaskOccurrenceCreateOrConnectWithoutPlanInput | TaskOccurrenceCreateOrConnectWithoutPlanInput[]
+    upsert?: TaskOccurrenceUpsertWithWhereUniqueWithoutPlanInput | TaskOccurrenceUpsertWithWhereUniqueWithoutPlanInput[]
+    createMany?: TaskOccurrenceCreateManyPlanInputEnvelope
     set?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
     disconnect?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
     delete?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
     connect?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
-    update?: TaskOccurrenceUpdateWithWhereUniqueWithoutTemplateInput | TaskOccurrenceUpdateWithWhereUniqueWithoutTemplateInput[]
-    updateMany?: TaskOccurrenceUpdateManyWithWhereWithoutTemplateInput | TaskOccurrenceUpdateManyWithWhereWithoutTemplateInput[]
+    update?: TaskOccurrenceUpdateWithWhereUniqueWithoutPlanInput | TaskOccurrenceUpdateWithWhereUniqueWithoutPlanInput[]
+    updateMany?: TaskOccurrenceUpdateManyWithWhereWithoutPlanInput | TaskOccurrenceUpdateManyWithWhereWithoutPlanInput[]
     deleteMany?: TaskOccurrenceScalarWhereInput | TaskOccurrenceScalarWhereInput[]
   }
 
@@ -161692,17 +161692,17 @@ export namespace Prisma {
     deleteMany?: TaskLabelScalarWhereInput | TaskLabelScalarWhereInput[]
   }
 
-  export type TaskOccurrenceUncheckedUpdateManyWithoutTemplateNestedInput = {
-    create?: XOR<TaskOccurrenceCreateWithoutTemplateInput, TaskOccurrenceUncheckedCreateWithoutTemplateInput> | TaskOccurrenceCreateWithoutTemplateInput[] | TaskOccurrenceUncheckedCreateWithoutTemplateInput[]
-    connectOrCreate?: TaskOccurrenceCreateOrConnectWithoutTemplateInput | TaskOccurrenceCreateOrConnectWithoutTemplateInput[]
-    upsert?: TaskOccurrenceUpsertWithWhereUniqueWithoutTemplateInput | TaskOccurrenceUpsertWithWhereUniqueWithoutTemplateInput[]
-    createMany?: TaskOccurrenceCreateManyTemplateInputEnvelope
+  export type TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput = {
+    create?: XOR<TaskOccurrenceCreateWithoutPlanInput, TaskOccurrenceUncheckedCreateWithoutPlanInput> | TaskOccurrenceCreateWithoutPlanInput[] | TaskOccurrenceUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: TaskOccurrenceCreateOrConnectWithoutPlanInput | TaskOccurrenceCreateOrConnectWithoutPlanInput[]
+    upsert?: TaskOccurrenceUpsertWithWhereUniqueWithoutPlanInput | TaskOccurrenceUpsertWithWhereUniqueWithoutPlanInput[]
+    createMany?: TaskOccurrenceCreateManyPlanInputEnvelope
     set?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
     disconnect?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
     delete?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
     connect?: TaskOccurrenceWhereUniqueInput | TaskOccurrenceWhereUniqueInput[]
-    update?: TaskOccurrenceUpdateWithWhereUniqueWithoutTemplateInput | TaskOccurrenceUpdateWithWhereUniqueWithoutTemplateInput[]
-    updateMany?: TaskOccurrenceUpdateManyWithWhereWithoutTemplateInput | TaskOccurrenceUpdateManyWithWhereWithoutTemplateInput[]
+    update?: TaskOccurrenceUpdateWithWhereUniqueWithoutPlanInput | TaskOccurrenceUpdateWithWhereUniqueWithoutPlanInput[]
+    updateMany?: TaskOccurrenceUpdateManyWithWhereWithoutPlanInput | TaskOccurrenceUpdateManyWithWhereWithoutPlanInput[]
     deleteMany?: TaskOccurrenceScalarWhereInput | TaskOccurrenceScalarWhereInput[]
   }
 
@@ -163369,7 +163369,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     deletedAt?: Date | string | null
     keyResult?: KeyResultCreateNestedOneWithoutLinkedTaskPlansInput
-    instances?: TaskOccurrenceCreateNestedManyWithoutTemplateInput
+    instances?: TaskOccurrenceCreateNestedManyWithoutPlanInput
     history?: TaskPlanHistoryCreateNestedManyWithoutTemplateInput
     labelLinks?: TaskLabelCreateNestedManyWithoutTaskPlanInput
   }
@@ -163412,7 +163412,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutTemplateInput
+    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
     history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutTemplateInput
     labelLinks?: TaskLabelUncheckedCreateNestedManyWithoutTaskPlanInput
   }
@@ -163429,32 +163429,32 @@ export namespace Prisma {
 
   export type TaskOccurrenceCreateWithoutAccountInput = {
     id: string
-    instanceDate: Date | string
-    occurrenceKey?: string | null
+    occurrenceKey: string
+    scheduleDate: string
+    scheduleTiming: string
+    importanceSnapshot?: string
     status: string
-    importance?: string
-    timeConfig: string
-    actualStartTime?: Date | string | null
-    actualEndTime?: Date | string | null
-    comment?: string | null
+    actualStartAt?: Date | string | null
+    result?: string | null
+    checklistState?: string
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    template: TaskPlanCreateNestedOneWithoutInstancesInput
+    plan: TaskPlanCreateNestedOneWithoutInstancesInput
   }
 
   export type TaskOccurrenceUncheckedCreateWithoutAccountInput = {
     id: string
-    templateId: string
-    instanceDate: Date | string
-    occurrenceKey?: string | null
+    planId: string
+    occurrenceKey: string
+    scheduleDate: string
+    scheduleTiming: string
+    importanceSnapshot?: string
     status: string
-    importance?: string
-    timeConfig: string
-    actualStartTime?: Date | string | null
-    actualEndTime?: Date | string | null
-    comment?: string | null
+    actualStartAt?: Date | string | null
+    result?: string | null
+    checklistState?: string
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -165681,16 +165681,16 @@ export namespace Prisma {
     OR?: TaskOccurrenceScalarWhereInput[]
     NOT?: TaskOccurrenceScalarWhereInput | TaskOccurrenceScalarWhereInput[]
     id?: StringFilter<"TaskOccurrence"> | string
-    templateId?: StringFilter<"TaskOccurrence"> | string
+    planId?: StringFilter<"TaskOccurrence"> | string
     identityId?: StringFilter<"TaskOccurrence"> | string
-    instanceDate?: DateTimeFilter<"TaskOccurrence"> | Date | string
-    occurrenceKey?: StringNullableFilter<"TaskOccurrence"> | string | null
+    occurrenceKey?: StringFilter<"TaskOccurrence"> | string
+    scheduleDate?: StringFilter<"TaskOccurrence"> | string
+    scheduleTiming?: StringFilter<"TaskOccurrence"> | string
+    importanceSnapshot?: StringFilter<"TaskOccurrence"> | string
     status?: StringFilter<"TaskOccurrence"> | string
-    importance?: StringFilter<"TaskOccurrence"> | string
-    timeConfig?: StringFilter<"TaskOccurrence"> | string
-    actualStartTime?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
-    actualEndTime?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
-    comment?: StringNullableFilter<"TaskOccurrence"> | string | null
+    actualStartAt?: DateTimeNullableFilter<"TaskOccurrence"> | Date | string | null
+    result?: StringNullableFilter<"TaskOccurrence"> | string | null
+    checklistState?: StringFilter<"TaskOccurrence"> | string
     version?: IntFilter<"TaskOccurrence"> | number
     createdAt?: DateTimeFilter<"TaskOccurrence"> | Date | string
     updatedAt?: DateTimeFilter<"TaskOccurrence"> | Date | string
@@ -170507,7 +170507,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTaskPlansInput
-    instances?: TaskOccurrenceCreateNestedManyWithoutTemplateInput
+    instances?: TaskOccurrenceCreateNestedManyWithoutPlanInput
     history?: TaskPlanHistoryCreateNestedManyWithoutTemplateInput
     labelLinks?: TaskLabelCreateNestedManyWithoutTaskPlanInput
   }
@@ -170548,7 +170548,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutTemplateInput
+    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
     history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutTemplateInput
     labelLinks?: TaskLabelUncheckedCreateNestedManyWithoutTaskPlanInput
   }
@@ -172870,7 +172870,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTaskPlansInput
     keyResult?: KeyResultCreateNestedOneWithoutLinkedTaskPlansInput
-    instances?: TaskOccurrenceCreateNestedManyWithoutTemplateInput
+    instances?: TaskOccurrenceCreateNestedManyWithoutPlanInput
     history?: TaskPlanHistoryCreateNestedManyWithoutTemplateInput
   }
 
@@ -172913,7 +172913,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutTemplateInput
+    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
     history?: TaskPlanHistoryUncheckedCreateNestedManyWithoutTemplateInput
   }
 
@@ -173135,7 +173135,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTaskPlansNestedInput
     keyResult?: KeyResultUpdateOneWithoutLinkedTaskPlansNestedInput
-    instances?: TaskOccurrenceUpdateManyWithoutTemplateNestedInput
+    instances?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
     history?: TaskPlanHistoryUpdateManyWithoutTemplateNestedInput
   }
 
@@ -173178,7 +173178,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    instances?: TaskOccurrenceUncheckedUpdateManyWithoutTemplateNestedInput
+    instances?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
     history?: TaskPlanHistoryUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
@@ -187925,16 +187925,16 @@ export namespace Prisma {
     create: XOR<KeyResultCreateWithoutLinkedTaskPlansInput, KeyResultUncheckedCreateWithoutLinkedTaskPlansInput>
   }
 
-  export type TaskOccurrenceCreateWithoutTemplateInput = {
+  export type TaskOccurrenceCreateWithoutPlanInput = {
     id: string
-    instanceDate: Date | string
-    occurrenceKey?: string | null
+    occurrenceKey: string
+    scheduleDate: string
+    scheduleTiming: string
+    importanceSnapshot?: string
     status: string
-    importance?: string
-    timeConfig: string
-    actualStartTime?: Date | string | null
-    actualEndTime?: Date | string | null
-    comment?: string | null
+    actualStartAt?: Date | string | null
+    result?: string | null
+    checklistState?: string
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -187942,30 +187942,30 @@ export namespace Prisma {
     account: AccountCreateNestedOneWithoutTaskOccurrencesInput
   }
 
-  export type TaskOccurrenceUncheckedCreateWithoutTemplateInput = {
+  export type TaskOccurrenceUncheckedCreateWithoutPlanInput = {
     id: string
     identityId: string
-    instanceDate: Date | string
-    occurrenceKey?: string | null
+    occurrenceKey: string
+    scheduleDate: string
+    scheduleTiming: string
+    importanceSnapshot?: string
     status: string
-    importance?: string
-    timeConfig: string
-    actualStartTime?: Date | string | null
-    actualEndTime?: Date | string | null
-    comment?: string | null
+    actualStartAt?: Date | string | null
+    result?: string | null
+    checklistState?: string
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
   }
 
-  export type TaskOccurrenceCreateOrConnectWithoutTemplateInput = {
+  export type TaskOccurrenceCreateOrConnectWithoutPlanInput = {
     where: TaskOccurrenceWhereUniqueInput
-    create: XOR<TaskOccurrenceCreateWithoutTemplateInput, TaskOccurrenceUncheckedCreateWithoutTemplateInput>
+    create: XOR<TaskOccurrenceCreateWithoutPlanInput, TaskOccurrenceUncheckedCreateWithoutPlanInput>
   }
 
-  export type TaskOccurrenceCreateManyTemplateInputEnvelope = {
-    data: TaskOccurrenceCreateManyTemplateInput | TaskOccurrenceCreateManyTemplateInput[]
+  export type TaskOccurrenceCreateManyPlanInputEnvelope = {
+    data: TaskOccurrenceCreateManyPlanInput | TaskOccurrenceCreateManyPlanInput[]
     skipDuplicates?: boolean
   }
 
@@ -188205,20 +188205,20 @@ export namespace Prisma {
     keyResultWeightSnapshots?: KeyResultWeightSnapshotUncheckedUpdateManyWithoutKeyResultNestedInput
   }
 
-  export type TaskOccurrenceUpsertWithWhereUniqueWithoutTemplateInput = {
+  export type TaskOccurrenceUpsertWithWhereUniqueWithoutPlanInput = {
     where: TaskOccurrenceWhereUniqueInput
-    update: XOR<TaskOccurrenceUpdateWithoutTemplateInput, TaskOccurrenceUncheckedUpdateWithoutTemplateInput>
-    create: XOR<TaskOccurrenceCreateWithoutTemplateInput, TaskOccurrenceUncheckedCreateWithoutTemplateInput>
+    update: XOR<TaskOccurrenceUpdateWithoutPlanInput, TaskOccurrenceUncheckedUpdateWithoutPlanInput>
+    create: XOR<TaskOccurrenceCreateWithoutPlanInput, TaskOccurrenceUncheckedCreateWithoutPlanInput>
   }
 
-  export type TaskOccurrenceUpdateWithWhereUniqueWithoutTemplateInput = {
+  export type TaskOccurrenceUpdateWithWhereUniqueWithoutPlanInput = {
     where: TaskOccurrenceWhereUniqueInput
-    data: XOR<TaskOccurrenceUpdateWithoutTemplateInput, TaskOccurrenceUncheckedUpdateWithoutTemplateInput>
+    data: XOR<TaskOccurrenceUpdateWithoutPlanInput, TaskOccurrenceUncheckedUpdateWithoutPlanInput>
   }
 
-  export type TaskOccurrenceUpdateManyWithWhereWithoutTemplateInput = {
+  export type TaskOccurrenceUpdateManyWithWhereWithoutPlanInput = {
     where: TaskOccurrenceScalarWhereInput
-    data: XOR<TaskOccurrenceUpdateManyMutationInput, TaskOccurrenceUncheckedUpdateManyWithoutTemplateInput>
+    data: XOR<TaskOccurrenceUpdateManyMutationInput, TaskOccurrenceUncheckedUpdateManyWithoutPlanInput>
   }
 
   export type TaskPlanHistoryUpsertWithWhereUniqueWithoutTemplateInput = {
@@ -188876,7 +188876,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     account: AccountCreateNestedOneWithoutTaskPlansInput
     keyResult?: KeyResultCreateNestedOneWithoutLinkedTaskPlansInput
-    instances?: TaskOccurrenceCreateNestedManyWithoutTemplateInput
+    instances?: TaskOccurrenceCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelCreateNestedManyWithoutTaskPlanInput
   }
 
@@ -188919,7 +188919,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
-    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutTemplateInput
+    instances?: TaskOccurrenceUncheckedCreateNestedManyWithoutPlanInput
     labelLinks?: TaskLabelUncheckedCreateNestedManyWithoutTaskPlanInput
   }
 
@@ -189114,7 +189114,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTaskPlansNestedInput
     keyResult?: KeyResultUpdateOneWithoutLinkedTaskPlansNestedInput
-    instances?: TaskOccurrenceUpdateManyWithoutTemplateNestedInput
+    instances?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUpdateManyWithoutTaskPlanNestedInput
   }
 
@@ -189157,7 +189157,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    instances?: TaskOccurrenceUncheckedUpdateManyWithoutTemplateNestedInput
+    instances?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
     labelLinks?: TaskLabelUncheckedUpdateManyWithoutTaskPlanNestedInput
   }
 
@@ -190431,15 +190431,15 @@ export namespace Prisma {
 
   export type TaskOccurrenceCreateManyAccountInput = {
     id: string
-    templateId: string
-    instanceDate: Date | string
-    occurrenceKey?: string | null
+    planId: string
+    occurrenceKey: string
+    scheduleDate: string
+    scheduleTiming: string
+    importanceSnapshot?: string
     status: string
-    importance?: string
-    timeConfig: string
-    actualStartTime?: Date | string | null
-    actualEndTime?: Date | string | null
-    comment?: string | null
+    actualStartAt?: Date | string | null
+    result?: string | null
+    checklistState?: string
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -191870,7 +191870,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     keyResult?: KeyResultUpdateOneWithoutLinkedTaskPlansNestedInput
-    instances?: TaskOccurrenceUpdateManyWithoutTemplateNestedInput
+    instances?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
     history?: TaskPlanHistoryUpdateManyWithoutTemplateNestedInput
     labelLinks?: TaskLabelUpdateManyWithoutTaskPlanNestedInput
   }
@@ -191913,7 +191913,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    instances?: TaskOccurrenceUncheckedUpdateManyWithoutTemplateNestedInput
+    instances?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
     history?: TaskPlanHistoryUncheckedUpdateManyWithoutTemplateNestedInput
     labelLinks?: TaskLabelUncheckedUpdateManyWithoutTaskPlanNestedInput
   }
@@ -191960,32 +191960,32 @@ export namespace Prisma {
 
   export type TaskOccurrenceUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    instanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    occurrenceKey?: NullableStringFieldUpdateOperationsInput | string | null
+    occurrenceKey?: StringFieldUpdateOperationsInput | string
+    scheduleDate?: StringFieldUpdateOperationsInput | string
+    scheduleTiming?: StringFieldUpdateOperationsInput | string
+    importanceSnapshot?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    importance?: StringFieldUpdateOperationsInput | string
-    timeConfig?: StringFieldUpdateOperationsInput | string
-    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    actualStartAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    result?: NullableStringFieldUpdateOperationsInput | string | null
+    checklistState?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    template?: TaskPlanUpdateOneRequiredWithoutInstancesNestedInput
+    plan?: TaskPlanUpdateOneRequiredWithoutInstancesNestedInput
   }
 
   export type TaskOccurrenceUncheckedUpdateWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    templateId?: StringFieldUpdateOperationsInput | string
-    instanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    occurrenceKey?: NullableStringFieldUpdateOperationsInput | string | null
+    planId?: StringFieldUpdateOperationsInput | string
+    occurrenceKey?: StringFieldUpdateOperationsInput | string
+    scheduleDate?: StringFieldUpdateOperationsInput | string
+    scheduleTiming?: StringFieldUpdateOperationsInput | string
+    importanceSnapshot?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    importance?: StringFieldUpdateOperationsInput | string
-    timeConfig?: StringFieldUpdateOperationsInput | string
-    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    actualStartAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    result?: NullableStringFieldUpdateOperationsInput | string | null
+    checklistState?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -191994,15 +191994,15 @@ export namespace Prisma {
 
   export type TaskOccurrenceUncheckedUpdateManyWithoutAccountInput = {
     id?: StringFieldUpdateOperationsInput | string
-    templateId?: StringFieldUpdateOperationsInput | string
-    instanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    occurrenceKey?: NullableStringFieldUpdateOperationsInput | string | null
+    planId?: StringFieldUpdateOperationsInput | string
+    occurrenceKey?: StringFieldUpdateOperationsInput | string
+    scheduleDate?: StringFieldUpdateOperationsInput | string
+    scheduleTiming?: StringFieldUpdateOperationsInput | string
+    importanceSnapshot?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    importance?: StringFieldUpdateOperationsInput | string
-    timeConfig?: StringFieldUpdateOperationsInput | string
-    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    actualStartAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    result?: NullableStringFieldUpdateOperationsInput | string | null
+    checklistState?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -193677,7 +193677,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     account?: AccountUpdateOneRequiredWithoutTaskPlansNestedInput
-    instances?: TaskOccurrenceUpdateManyWithoutTemplateNestedInput
+    instances?: TaskOccurrenceUpdateManyWithoutPlanNestedInput
     history?: TaskPlanHistoryUpdateManyWithoutTemplateNestedInput
     labelLinks?: TaskLabelUpdateManyWithoutTaskPlanNestedInput
   }
@@ -193718,7 +193718,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    instances?: TaskOccurrenceUncheckedUpdateManyWithoutTemplateNestedInput
+    instances?: TaskOccurrenceUncheckedUpdateManyWithoutPlanNestedInput
     history?: TaskPlanHistoryUncheckedUpdateManyWithoutTemplateNestedInput
     labelLinks?: TaskLabelUncheckedUpdateManyWithoutTaskPlanNestedInput
   }
@@ -195593,17 +195593,17 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type TaskOccurrenceCreateManyTemplateInput = {
+  export type TaskOccurrenceCreateManyPlanInput = {
     id: string
     identityId: string
-    instanceDate: Date | string
-    occurrenceKey?: string | null
+    occurrenceKey: string
+    scheduleDate: string
+    scheduleTiming: string
+    importanceSnapshot?: string
     status: string
-    importance?: string
-    timeConfig: string
-    actualStartTime?: Date | string | null
-    actualEndTime?: Date | string | null
-    comment?: string | null
+    actualStartAt?: Date | string | null
+    result?: string | null
+    checklistState?: string
     version?: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -195622,16 +195622,16 @@ export namespace Prisma {
     labelId: string
   }
 
-  export type TaskOccurrenceUpdateWithoutTemplateInput = {
+  export type TaskOccurrenceUpdateWithoutPlanInput = {
     id?: StringFieldUpdateOperationsInput | string
-    instanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    occurrenceKey?: NullableStringFieldUpdateOperationsInput | string | null
+    occurrenceKey?: StringFieldUpdateOperationsInput | string
+    scheduleDate?: StringFieldUpdateOperationsInput | string
+    scheduleTiming?: StringFieldUpdateOperationsInput | string
+    importanceSnapshot?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    importance?: StringFieldUpdateOperationsInput | string
-    timeConfig?: StringFieldUpdateOperationsInput | string
-    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    actualStartAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    result?: NullableStringFieldUpdateOperationsInput | string | null
+    checklistState?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -195639,34 +195639,34 @@ export namespace Prisma {
     account?: AccountUpdateOneRequiredWithoutTaskOccurrencesNestedInput
   }
 
-  export type TaskOccurrenceUncheckedUpdateWithoutTemplateInput = {
+  export type TaskOccurrenceUncheckedUpdateWithoutPlanInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    instanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    occurrenceKey?: NullableStringFieldUpdateOperationsInput | string | null
+    occurrenceKey?: StringFieldUpdateOperationsInput | string
+    scheduleDate?: StringFieldUpdateOperationsInput | string
+    scheduleTiming?: StringFieldUpdateOperationsInput | string
+    importanceSnapshot?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    importance?: StringFieldUpdateOperationsInput | string
-    timeConfig?: StringFieldUpdateOperationsInput | string
-    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    actualStartAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    result?: NullableStringFieldUpdateOperationsInput | string | null
+    checklistState?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type TaskOccurrenceUncheckedUpdateManyWithoutTemplateInput = {
+  export type TaskOccurrenceUncheckedUpdateManyWithoutPlanInput = {
     id?: StringFieldUpdateOperationsInput | string
     identityId?: StringFieldUpdateOperationsInput | string
-    instanceDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    occurrenceKey?: NullableStringFieldUpdateOperationsInput | string | null
+    occurrenceKey?: StringFieldUpdateOperationsInput | string
+    scheduleDate?: StringFieldUpdateOperationsInput | string
+    scheduleTiming?: StringFieldUpdateOperationsInput | string
+    importanceSnapshot?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    importance?: StringFieldUpdateOperationsInput | string
-    timeConfig?: StringFieldUpdateOperationsInput | string
-    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    comment?: NullableStringFieldUpdateOperationsInput | string | null
+    actualStartAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    result?: NullableStringFieldUpdateOperationsInput | string | null
+    checklistState?: StringFieldUpdateOperationsInput | string
     version?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

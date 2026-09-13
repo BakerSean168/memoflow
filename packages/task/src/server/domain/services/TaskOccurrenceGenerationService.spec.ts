@@ -16,7 +16,7 @@ import {
   aDailyRecurrenceRule,
   TASK_TEST_TIME_CONTEXT,
 } from '../../../testing';
-import { createTimeContext, createTimeFacade } from '@memoflow/time';
+import { createTimeContext } from '@memoflow/time';
 
 const DAY_MS = 86400000;
 
@@ -116,7 +116,6 @@ describe('TaskOccurrenceGenerationService', () => {
 
     it('advances the generation cursor by a Product Time calendar day across DST', () => {
       const timeContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });
-      const time = createTimeFacade({ context: timeContext });
       const lastGeneratedDate = Date.parse('2026-03-08T05:00:00.000Z');
       const template = aLoadedTaskPlan({
         taskType: TaskType.Recurring,
@@ -130,8 +129,10 @@ describe('TaskOccurrenceGenerationService', () => {
       });
 
       expect(instances.length).toBeGreaterThan(0);
-      expect(String(time.calendar.toYmd(instances[0].instanceDate))).toBe('2026-03-09');
-      expect(instances[0].instanceDate - lastGeneratedDate).toBe(23 * 60 * 60 * 1000);
+      expect(instances[0].scheduleDate).toBe('2026-03-09');
+      expect(Number(instances[0].scheduledStartOfDayAt(timeContext)) - lastGeneratedDate).toBe(
+        23 * 60 * 60 * 1000,
+      );
       expect(template.lastGeneratedDate).toBe(Date.parse('2026-03-12T04:00:00.000Z'));
     });
 

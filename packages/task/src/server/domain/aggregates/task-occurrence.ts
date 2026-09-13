@@ -1,405 +1,373 @@
-import type { Instant } from '@memoflow/contracts/primitives';
-/**
- * TaskOccurrence Aggregate Root (Server)
- *
- * Manages the full lifecycle of a task instance:
- * - State transitions (Pending -> InProgress -> Completed/Missed/Skipped)
- * - Execution time tracking (start time, end time, actual duration)
- * - Completion records (status, rating, notes)
- * - Skip records (reason, skip time)
- */
-
+import type { Instant, Ymd } from '@memoflow/contracts/primitives';
 import type {
-  TaskOccurrenceClientDTO,
-  TaskOccurrenceServerDTO,
+  ChecklistItemDefinitionDTO,
   TaskEventMap,
   TaskGoalBindingDTO,
+  TaskOccurrenceChecklistItem,
+  TaskOccurrenceClientDTO,
+  TaskOccurrenceResult,
+  TaskOccurrenceServerDTO,
 } from '@memoflow/contracts/task';
-import { TaskOccurrenceStatus, TaskTimeType as TimeType } from '@memoflow/contracts/task';
-import { TaskPlanId } from '../../domain/value-objects/task-plan-id';
-import { TaskOccurrenceId } from '../../domain/value-objects/task-occurrence-id';
-import { IdentityId } from '@memoflow/domain-shared';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
-import { AggregateRoot } from '@memoflow/utils/domain';
-import { TaskTimeConfig, CompletionRecord, SkipRecord } from '../value-objects';
-import { buildTaskOccurrenceOccurrenceKey } from '../value-objects/task-occurrence-occurrence-key';
 import {
-  asHm,
-  asInstant,
-  combineYmdHmWithTimeZone,
-  createTimeFacade,
-  type TimeContext,
-} from '@memoflow/time';
+  TaskOccurrenceChecklistItemSchema,
+  TaskOccurrenceResultKind,
+  TaskOccurrenceResultSchema,
+  TaskOccurrenceStatus,
+} from '@memoflow/contracts/task';
+import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { IdentityId } from '@memoflow/domain-shared';
+import { createTimeFacade, type TimeContext } from '@memoflow/time';
+import { AggregateRoot } from '@memoflow/utils/domain';
+import { TaskOccurrenceId } from '../../domain/value-objects/task-occurrence-id';
+import { TaskPlanId } from '../../domain/value-objects/task-plan-id';
+import { TaskOccurrenceScheduleSnapshot, TaskTimeConfig } from '../value-objects';
+import { buildTaskOccurrenceOccurrenceKeyFromDate } from '../value-objects/task-occurrence-occurrence-key';
 
-function minuteOfDayToHm(minute: number): ReturnType<typeof asHm> {
-  const hours = Math.floor(minute / 60);
-  const minutes = minute % 60;
-  return asHm(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`);
-}
-
-/**
- * Internal props interface for TaskOccurrence
- */
 export interface TaskOccurrenceState {
   id: TaskOccurrenceId;
-  templateId: TaskPlanId;
+  planId: TaskPlanId;
   identityId: IdentityId;
-  instanceDate: number;
-  /** R2-1：确定性幂等键 `templateId:localDate`；数据库唯一约束防重复生成。 */
-  occurrenceKey: string | null;
-  timeConfig: TaskTimeConfig;
-  importance: ImportanceLevel;
+  occurrenceKey: string;
+  scheduleSnapshot: TaskOccurrenceScheduleSnapshot;
+  importanceSnapshot: ImportanceLevel;
   status: TaskOccurrenceStatus;
-  completionRecord: CompletionRecord | null;
-  skipRecord: SkipRecord | null;
-  actualStartTime: number | null;
-  actualEndTime: number | null;
-  note: string | null;
+  actualStartAt: Instant | null;
+  result: TaskOccurrenceResult | null;
+  checklistState: TaskOccurrenceChecklistItem[];
   createdAt: Instant;
   updatedAt: Instant;
   version: number;
   deletedAt: Instant | null;
 }
 
-/** TaskOccurrence aggregate root. */
+function cloneResult(result: TaskOccurrenceResult | null): TaskOccurrenceResult | null {
+  return result ? structuredClone(result) : null;
+}
+
+function resultNote(result: TaskOccurrenceResult | null): string | null {
+  if (!result) return null;
+  if (result.kind === TaskOccurrenceResultKind.Completed) return result.note ?? null;
+  return result.reason ?? null;
+}
+
+function validateStatusResultInvariant(
+  status: TaskOccurrenceStatus,
+  result: TaskOccurrenceResult | null,
+): void {
+  if (status === TaskOccurrenceStatus.Completed) {
+    if (result?.kind !== TaskOccurrenceResultKind.Completed) {
+      throw new Error('Completed TaskOccurrence requires a Completed result');
+    }
+    return;
+  }
+  if (status === TaskOccurrenceStatus.Missed) {
+    if (result?.kind !== TaskOccurrenceResultKind.Missed) {
+      throw new Error('Missed TaskOccurrence requires a Missed result');
+    }
+    return;
+  }
+  if (status === TaskOccurrenceStatus.Skipped) {
+    if (result?.kind !== TaskOccurrenceResultKind.Skipped) {
+      throw new Error('Skipped TaskOccurrence requires a Skipped result');
+    }
+    return;
+  }
+  if (result !== null) {
+    throw new Error('Pending/InProgress TaskOccurrence cannot carry a terminal result');
+  }
+}
+
+/** TaskOccurrence aggregate root. Execution/reality facts only. */
 export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
   private _props: TaskOccurrenceState;
 
-  // ===== 2. Constructor (Private) =====
   private constructor(state: TaskOccurrenceState) {
     super(state.id);
     if (!Object.values(TaskOccurrenceStatus).includes(state.status)) {
       throw new Error(`Invalid persisted TaskOccurrenceStatus: ${String(state.status)}`);
     }
-    this._props = state;
+    validateStatusResultInvariant(state.status, state.result);
+    this._props = {
+      ...state,
+      result: state.result ? TaskOccurrenceResultSchema.parse(state.result) : null,
+      checklistState: state.checklistState.map((item) =>
+        TaskOccurrenceChecklistItemSchema.parse(item),
+      ),
+    };
   }
 
-  // ===== 3. Public Properties (Getters) =====
-  public get templateId(): TaskPlanId {
-    return this._props.templateId;
+  get planId(): TaskPlanId {
+    return this._props.planId;
   }
 
-  public get identityId(): IdentityId {
+  /** Transitional semantic alias for pre-TASK-7306 application code. Not persisted. */
+  get templateId(): TaskPlanId {
+    return this._props.planId;
+  }
+
+  get identityId(): IdentityId {
     return this._props.identityId;
   }
 
-  public get instanceDate(): number {
-    return this._props.instanceDate;
-  }
-
-  public get occurrenceKey(): string | null {
+  get occurrenceKey(): string {
     return this._props.occurrenceKey;
   }
 
-  public get timeConfig(): TaskTimeConfig {
-    return this._props.timeConfig;
+  get scheduleSnapshot(): TaskOccurrenceScheduleSnapshot {
+    return this._props.scheduleSnapshot;
   }
 
-  public get importance(): ImportanceLevel {
-    return this._props.importance;
+  get scheduleDate(): Ymd {
+    return this._props.scheduleSnapshot.date;
   }
 
-  /**
-   * Canonical completion-window end for this occurrence.
-   * `timePoint` / `timeRange` are local-day minutes, never epoch timestamps.
-   * The recurrence/generation path supplies `instanceDate` as the occurrence-day anchor.
-   */
-
-  public dueDateAt(timeContext: TimeContext): number | null {
-    const taskTime = createTimeFacade({ context: timeContext });
-    const dayStart = taskTime.calendar.startOfDay(asInstant(this._props.instanceDate));
-    if (this._props.timeConfig.timeType === TimeType.AllDay) {
-      return taskTime.calendar.endOfDay(dayStart);
-    }
-
-    const minute =
-      this._props.timeConfig.timeType === TimeType.TimePoint
-        ? this._props.timeConfig.timePoint
-        : this._props.timeConfig.timeRange?.end;
-    if (minute == null) return null;
-
-    const day = taskTime.calendar.toYmd(dayStart);
-    return combineYmdHmWithTimeZone(day, minuteOfDayToHm(minute), taskTime.context.timeZone);
+  get importanceSnapshot(): ImportanceLevel {
+    return this._props.importanceSnapshot;
   }
 
-  public get status(): TaskOccurrenceStatus {
+  /** Transitional semantic alias for consumers awaiting TASK-7306. */
+  get importance(): ImportanceLevel {
+    return this._props.importanceSnapshot;
+  }
+
+  get status(): TaskOccurrenceStatus {
     return this._props.status;
   }
 
-  public get completionRecord(): CompletionRecord | null {
-    return this._props.completionRecord;
+  get actualStartAt(): Instant | null {
+    return this._props.actualStartAt;
   }
 
-  public get skipRecord(): SkipRecord | null {
-    return this._props.skipRecord;
+  get result(): TaskOccurrenceResult | null {
+    return cloneResult(this._props.result);
   }
 
-  public get actualStartTime(): number | null {
-    return this._props.actualStartTime;
+  get checklistState(): TaskOccurrenceChecklistItem[] {
+    return this._props.checklistState.map((item) => ({ ...item }));
   }
 
-  public get actualEndTime(): number | null {
-    return this._props.actualEndTime;
+  get createdAt(): Instant {
+    return this._props.createdAt;
   }
 
-  public get note(): string | null {
-    return this._props.note;
+  get updatedAt(): Instant {
+    return this._props.updatedAt;
   }
 
-  public get createdAt(): Instant {
-    const v = this._props.createdAt;
-    return v as Instant;
-  }
-
-  public get updatedAt(): Instant {
-    const v = this._props.updatedAt;
-    return v as Instant;
-  }
-
-  public get version(): number {
+  get version(): number {
     return this._props.version;
   }
 
-  /** R2-5a：状态变更后递增版本（乐观锁）。 */
+  get deletedAt(): Instant | null {
+    return this._props.deletedAt;
+  }
+
+  scheduledStartOfDayAt(timeContext: TimeContext): Instant {
+    const time = createTimeFacade({ context: timeContext });
+    const ymd = time.codec.parseYmd(this._props.scheduleSnapshot.date, { onInvalid: 'throw' });
+    if (!ymd) throw new Error(`Invalid TaskOccurrence date: ${this._props.scheduleSnapshot.date}`);
+    return time.codec.startOfYmd(ymd);
+  }
+
+  legacyTimeConfigAt(timeContext: TimeContext): TaskTimeConfig {
+    return this._props.scheduleSnapshot.toLegacyTimeConfig(timeContext);
+  }
+
+  dueDateAt(timeContext: TimeContext): number {
+    return this._props.scheduleSnapshot.dueAt(timeContext);
+  }
+
   private advanceVersion(): void {
     this._props.version += 1;
   }
 
-  public get deletedAt(): Instant | null {
-    const v = this._props.deletedAt;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  // ===== Business Methods =====
-
-  /** Starts the task. */
-  public start(): void {
-    if (!this.canStart()) {
-      throw new Error('Cannot start task in current state');
-    }
-
+  start(now = Date.now()): void {
+    if (!this.canStart()) throw new Error('Cannot start task in current state');
     this._props.status = TaskOccurrenceStatus.InProgress;
-    this._props.actualStartTime = Date.now();
-    this._props.updatedAt = Date.now();
+    this._props.actualStartAt = now as Instant;
+    this._props.updatedAt = now as Instant;
     this.advanceVersion();
   }
 
-  /**
-   * Completes the task.
-   *
-   * `goalContext` 由 Task 应用层在调用前填充模板绑定与标题，使
-   * EachCompletion 事件自包含。PlanCompletion eligibility 不属于 occurrence
-   * event；它由 Task Plan outcome transition 单独发布。
-   */
-  public complete(
-    actualDuration?: number,
+  complete(
+    actualDurationMinutes?: number,
     note?: string,
     rating?: number,
-    goalContext?: {
-      taskTitle: string;
-      goalBinding: TaskGoalBindingDTO | null;
-    },
+    goalContext?: { taskTitle: string; goalBinding: TaskGoalBindingDTO | null },
+    now = Date.now(),
   ): void {
-    if (!this.canComplete()) {
-      throw new Error('Cannot complete task in current state');
-    }
+    if (!this.canComplete()) throw new Error('Cannot complete task in current state');
 
-    const now = Date.now();
-    const previousStatus = this._props.status;
-    this._props.status = TaskOccurrenceStatus.Completed;
-    this._props.actualEndTime = now;
-    this._props.skipRecord = null;
-    if (
-      note === undefined &&
-      (previousStatus === TaskOccurrenceStatus.Missed ||
-        previousStatus === TaskOccurrenceStatus.Skipped)
-    ) {
-      this._props.note = null;
-    }
-
-    // Create completion record
-    this._props.completionRecord = CompletionRecord.create({
-      completedAt: now,
-      actualDuration:
-        actualDuration ?? (this._props.actualStartTime ? now - this._props.actualStartTime : null),
+    const derivedDuration =
+      actualDurationMinutes ??
+      (this._props.actualStartAt == null
+        ? null
+        : Math.max(0, Math.round((now - Number(this._props.actualStartAt)) / 60_000)));
+    const result = TaskOccurrenceResultSchema.parse({
+      kind: TaskOccurrenceResultKind.Completed,
+      recordedAt: now,
+      actualDurationMinutes: derivedDuration,
       note: note ?? null,
       rating: rating ?? null,
     });
 
-    if (note) {
-      this._props.note = note;
-    }
-
-    this._props.updatedAt = now;
+    this._props.status = TaskOccurrenceStatus.Completed;
+    this._props.result = result;
+    this._props.updatedAt = now as Instant;
     this.advanceVersion();
 
-    // Trigger domain event（payload 自包含，供 Goal 等跨模块订阅方直接消费）
     this.addDomainEvent<TaskEventMap['task:instance-completed']>('task:instance-completed', {
       identityId: this._props.identityId,
       taskOccurrenceId: this.id,
-      taskPlanId: this._props.templateId,
+      taskPlanId: this._props.planId,
       completedAt: now,
       taskTitle: goalContext?.taskTitle ?? '',
       goalBinding: goalContext?.goalBinding ?? null,
     });
   }
 
-  /** Returns a completed instance to Pending and identifies the contribution to reverse. */
-  public uncomplete(): void {
+  uncomplete(now = Date.now()): void {
     if (this._props.status !== TaskOccurrenceStatus.Completed) {
       throw new Error('Only a completed task can be uncompleted');
     }
-
-    const now = Date.now();
     this._props.status = TaskOccurrenceStatus.Pending;
-    this._props.completionRecord = null;
-    this._props.actualEndTime = null;
-    this._props.updatedAt = now;
+    this._props.result = null;
+    this._props.updatedAt = now as Instant;
     this.advanceVersion();
-
     this.addDomainEvent<TaskEventMap['task:instance-uncompleted']>('task:instance-uncompleted', {
       identityId: this._props.identityId,
       taskOccurrenceId: this.id,
-      taskPlanId: this._props.templateId,
+      taskPlanId: this._props.planId,
       uncompletedAt: now,
     });
   }
 
-  /** Skips the task. */
-  public skip(reason?: string): void {
-    if (!this.canSkip()) {
-      throw new Error('Cannot skip task in current state');
-    }
-
-    const now = Date.now();
+  skip(reason?: string, now = Date.now()): void {
+    if (!this.canSkip()) throw new Error('Cannot skip task in current state');
     this._props.status = TaskOccurrenceStatus.Skipped;
-
-    // Create skip record
-    this._props.skipRecord = SkipRecord.create({
-      skippedAt: now,
+    this._props.result = TaskOccurrenceResultSchema.parse({
+      kind: TaskOccurrenceResultKind.Skipped,
+      recordedAt: now,
       reason: reason ?? null,
     });
-
-    if (reason) {
-      this._props.note = reason;
-    }
-
-    this._props.updatedAt = now;
+    this._props.updatedAt = now as Instant;
     this.advanceVersion();
-
     this.addDomainEvent<TaskEventMap['task:instance-skipped']>('task:instance-skipped', {
       identityId: this._props.identityId,
       taskOccurrenceId: this.id,
-      taskPlanId: this._props.templateId,
+      taskPlanId: this._props.planId,
       skippedAt: now,
       reason: reason ?? null,
     });
   }
 
-  /** Records an explicit Missed fact. Time passing never calls this method implicitly. */
-  public markMissed(reason?: string): void {
-    if (!this.canMarkMissed()) {
-      throw new Error('Cannot mark task missed in current state');
-    }
-
-    const now = Date.now();
+  markMissed(reason?: string, now = Date.now()): void {
+    if (!this.canMarkMissed()) throw new Error('Cannot mark task missed in current state');
     this._props.status = TaskOccurrenceStatus.Missed;
-    this._props.actualEndTime = null;
-    if (reason !== undefined) {
-      this._props.note = reason;
-    }
-    this._props.updatedAt = now;
+    this._props.result = TaskOccurrenceResultSchema.parse({
+      kind: TaskOccurrenceResultKind.Missed,
+      recordedAt: now,
+      reason: reason ?? null,
+    });
+    this._props.updatedAt = now as Instant;
     this.advanceVersion();
   }
 
-  /** Planner/user-owned occurrence reschedule; never mutates the TaskPlan. */
-  public reschedule(newTime: TaskTimeConfig, timeContext: TimeContext, now = Date.now()): boolean {
-    if (!this.canReschedule()) {
-      throw new Error('Cannot reschedule task in current state');
-    }
-    if (newTime.startDate == null) {
-      throw new Error('Rescheduled task requires startDate');
-    }
+  reschedule(newTime: TaskTimeConfig, timeContext: TimeContext, now = Date.now()): boolean {
+    if (!this.canReschedule()) throw new Error('Cannot reschedule task in current state');
+    if (newTime.startDate == null) throw new Error('Rescheduled task requires startDate');
 
-    const taskTime = createTimeFacade({ context: timeContext });
-    const nextInstanceDate = taskTime.calendar.startOfDay(asInstant(newTime.startDate));
-    const normalizedTime = newTime.setStartDate(asInstant(nextInstanceDate));
-    const current = this._props.timeConfig.toDTO();
-    const next = normalizedTime.toDTO();
-    if (
-      this._props.instanceDate === Number(nextInstanceDate) &&
-      JSON.stringify(current) === JSON.stringify(next)
-    ) {
+    const next = TaskOccurrenceScheduleSnapshot.fromLegacy(newTime.startDate, newTime, timeContext);
+    if (JSON.stringify(next.toDTO()) === JSON.stringify(this._props.scheduleSnapshot.toDTO())) {
       return false;
     }
 
     const previousDueDate = this.dueDateAt(timeContext);
-    this._props.instanceDate = Number(nextInstanceDate);
-    this._props.occurrenceKey = buildTaskOccurrenceOccurrenceKey(
-      String(this._props.templateId),
-      Number(nextInstanceDate),
-      timeContext,
+    this._props.scheduleSnapshot = next;
+    this._props.occurrenceKey = buildTaskOccurrenceOccurrenceKeyFromDate(
+      String(this._props.planId),
+      next.date,
     );
-    this._props.timeConfig = normalizedTime;
-    this._props.updatedAt = asInstant(now);
+    this._props.updatedAt = now as Instant;
     this.advanceVersion();
     const newDueDate = this.dueDateAt(timeContext);
-    if (previousDueDate == null || newDueDate == null) {
-      throw new Error('Rescheduled task must have a canonical due date');
-    }
     this.addDomainEvent<TaskEventMap['task:rescheduled']>('task:rescheduled', {
       identityId: this._props.identityId,
       taskOccurrenceId: this.id,
-      taskPlanId: this._props.templateId,
+      taskPlanId: this._props.planId,
       previousDueDate,
       newDueDate,
     });
     return true;
   }
 
-  public canReschedule(): boolean {
+  canReschedule(): boolean {
     return (
       this._props.status === TaskOccurrenceStatus.Pending ||
       this._props.status === TaskOccurrenceStatus.InProgress
     );
   }
 
-  /** Applies template-owned fields only while this is an unstarted future instance. */
-  public applyPlanProjection(params: {
-    effectiveFrom: number;
-    timeConfig?: TaskTimeConfig;
+  applyPlanProjection(params: {
+    effectiveFrom: Ymd;
+    timing?: ReturnType<TaskOccurrenceScheduleSnapshot['toDTO']>['timing'];
     importance?: ImportanceLevel;
   }): boolean {
     if (
       this._props.status !== TaskOccurrenceStatus.Pending ||
-      this._props.instanceDate <= params.effectiveFrom
+      this._props.scheduleSnapshot.date <= params.effectiveFrom
     ) {
       return false;
     }
 
     let changed = false;
-    if (params.timeConfig !== undefined) {
-      this._props.timeConfig = params.timeConfig;
+    if (params.timing !== undefined) {
+      this._props.scheduleSnapshot = TaskOccurrenceScheduleSnapshot.create({
+        date: this._props.scheduleSnapshot.date,
+        timing: params.timing,
+      });
       changed = true;
     }
-    if (params.importance !== undefined && params.importance !== this._props.importance) {
-      this._props.importance = params.importance;
+    if (params.importance !== undefined && params.importance !== this._props.importanceSnapshot) {
+      this._props.importanceSnapshot = params.importance;
       changed = true;
     }
     if (changed) {
-      this._props.updatedAt = Date.now();
+      this._props.updatedAt = Date.now() as Instant;
       this.advanceVersion();
     }
     return changed;
   }
 
-  /** Business state check methods. */
-  public canStart(): boolean {
+  completeChecklistItem(definitionId: string, now = Date.now()): void {
+    const item = this._props.checklistState.find(
+      (candidate) => candidate.definitionId === definitionId,
+    );
+    if (!item) throw new Error(`Checklist item ${definitionId} not found`);
+    if (item.completed) return;
+    item.completed = true;
+    item.completedAt = now;
+    this._props.updatedAt = now as Instant;
+    this.advanceVersion();
+  }
+
+  uncompleteChecklistItem(definitionId: string, now = Date.now()): void {
+    const item = this._props.checklistState.find(
+      (candidate) => candidate.definitionId === definitionId,
+    );
+    if (!item) throw new Error(`Checklist item ${definitionId} not found`);
+    if (!item.completed) return;
+    item.completed = false;
+    item.completedAt = null;
+    this._props.updatedAt = now as Instant;
+    this.advanceVersion();
+  }
+
+  canStart(): boolean {
     return this._props.status === TaskOccurrenceStatus.Pending;
   }
 
-  public canComplete(): boolean {
+  canComplete(): boolean {
     return (
       this._props.status === TaskOccurrenceStatus.Pending ||
       this._props.status === TaskOccurrenceStatus.InProgress ||
@@ -408,187 +376,131 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     );
   }
 
-  public canSkip(): boolean {
+  canSkip(): boolean {
     return (
       this._props.status === TaskOccurrenceStatus.Pending ||
       this._props.status === TaskOccurrenceStatus.InProgress
     );
   }
 
-  public canMarkMissed(): boolean {
+  canMarkMissed(): boolean {
     return (
       this._props.status === TaskOccurrenceStatus.Pending ||
       this._props.status === TaskOccurrenceStatus.InProgress
     );
   }
 
-  /** Derived only: clock movement never mutates persisted occurrence status. */
-  public isOverdueAt(timeContext: TimeContext, now = Date.now()): boolean {
+  isOverdueAt(timeContext: TimeContext, now = Date.now()): boolean {
     if (
       this._props.status !== TaskOccurrenceStatus.Pending &&
       this._props.status !== TaskOccurrenceStatus.InProgress
     ) {
       return false;
     }
-
-    const dueAt = this.dueDateAt(timeContext);
-    return dueAt !== null && now > dueAt;
+    return now > this.dueDateAt(timeContext);
   }
 
-  // ===== 6. Serialization =====
-  /** Raw context-free state for persistence adapters; derived read fields are excluded. */
-  public toPersistenceState() {
+  toPersistenceState(): TaskOccurrenceServerDTO {
     return {
       id: this.id.toString() as TaskOccurrenceId,
-      templateId: this._props.templateId.toString() as TaskPlanId,
+      planId: this._props.planId.toString() as TaskPlanId,
       identityId: this._props.identityId.toString() as IdentityId,
-      instanceDate: this._props.instanceDate,
-      timeConfig: this._props.timeConfig.toDTO(),
-      importance: this._props.importance,
+      occurrenceKey: this._props.occurrenceKey,
+      scheduleSnapshot: this._props.scheduleSnapshot.toDTO(),
+      importanceSnapshot: this._props.importanceSnapshot,
       status: this._props.status,
-      actualStartTime: this._props.actualStartTime,
-      actualEndTime: this._props.actualEndTime,
-      comment: this._props.note,
-      createdAt: this._props.createdAt,
-      updatedAt: this._props.updatedAt,
-      version: this._props.version,
-      deletedAt: this._props.deletedAt ?? null,
-    };
-  }
-
-  public toServerDTOAt(timeContext: TimeContext, now = Date.now()): TaskOccurrenceServerDTO {
-    return {
-      id: this.id.toString() as TaskOccurrenceId,
-      templateId: this._props.templateId.toString() as TaskPlanId,
-      identityId: this._props.identityId.toString() as IdentityId,
-      instanceDate: this._props.instanceDate,
-      timeConfig: this._props.timeConfig.toDTO(),
-      importance: this._props.importance,
-      status: this._props.status,
-      isOverdue: this.isOverdueAt(timeContext, now),
-      actualStartTime: this._props.actualStartTime,
-      actualEndTime: this._props.actualEndTime,
-      comment: this._props.note,
-      createdAt: this._props.createdAt,
-      updatedAt: this._props.updatedAt,
-      version: this._props.version,
-      deletedAt: this._props.deletedAt ? this._props.deletedAt : null,
-    };
-  }
-
-  public toClientDTOAt(timeContext: TimeContext, now = Date.now()): TaskOccurrenceClientDTO {
-    return {
-      id: this.id.toString() as TaskOccurrenceId,
-      templateId: this._props.templateId.toString() as TaskPlanId,
-      identityId: this._props.identityId.toString() as IdentityId,
-      instanceDate: this._props.instanceDate,
-      timeConfig: this._props.timeConfig.toDTO(),
-      importance: this._props.importance,
-      status: this._props.status,
-      isOverdue: this.isOverdueAt(timeContext, now),
-      actualStartTime: this._props.actualStartTime,
-      actualEndTime: this._props.actualEndTime,
-      comment: this._props.note,
+      actualStartAt: this._props.actualStartAt,
+      result: cloneResult(this._props.result),
+      checklistState: this.checklistState,
       version: this._props.version,
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,
-      deletedAt: this._props.deletedAt ?? null,
+      deletedAt: this._props.deletedAt,
     };
   }
 
-  // ===== 4. Factory Methods =====
+  toServerDTO(): TaskOccurrenceServerDTO {
+    return this.toPersistenceState();
+  }
+
+  /** Compatibility wrapper retained only until callers migrate from the old signature. */
+  toServerDTOAt(_timeContext: TimeContext): TaskOccurrenceServerDTO {
+    return this.toServerDTO();
+  }
 
   /**
-   * Factory method: creates a new task instance.
-   *
-   * Note: does not publish domain events.
-   * Reminders are managed by ScheduleTask.
+   * Temporary TASK-7306 client projection. Legacy fields are derived from canonical
+   * state with an explicit Product Time context and are not persisted in the aggregate.
    */
-  public static create(params: {
-    templateId: TaskPlanId;
-    identityId: IdentityId;
-    instanceDate: number;
-    timeConfig: TaskTimeConfig;
-    importance: ImportanceLevel;
-    timeContext: TimeContext;
-  }): TaskOccurrence {
-    if (!params.templateId) {
-      throw new Error('Template ID is required');
-    }
-    if (!params.identityId) {
-      throw new Error('Identity ID is required');
-    }
-    if (!Number.isFinite(params.instanceDate)) {
-      throw new Error('Instance date must be a valid timestamp');
-    }
-    if (!params.timeConfig) {
-      throw new Error('Time configuration is required');
-    }
+  toClientDTOAt(timeContext: TimeContext, now = Date.now()): TaskOccurrenceClientDTO {
+    const instanceDate = Number(this.scheduledStartOfDayAt(timeContext));
+    const timeConfig = this.legacyTimeConfigAt(timeContext).toDTO();
+    const actualEndTime =
+      this._props.result?.kind === TaskOccurrenceResultKind.Completed
+        ? this._props.result.recordedAt
+        : null;
+    return {
+      id: this.id.toString() as TaskOccurrenceId,
+      templateId: this._props.planId.toString() as TaskPlanId,
+      identityId: this._props.identityId.toString() as IdentityId,
+      instanceDate,
+      timeConfig,
+      importance: this._props.importanceSnapshot,
+      status: this._props.status,
+      isOverdue: this.isOverdueAt(timeContext, now),
+      actualStartTime: this._props.actualStartAt,
+      actualEndTime,
+      comment: resultNote(this._props.result),
+      version: this._props.version,
+      createdAt: this._props.createdAt,
+      updatedAt: this._props.updatedAt,
+      deletedAt: this._props.deletedAt,
+    };
+  }
 
-    const now = Date.now();
-    const instance = new TaskOccurrence({
+  static create(params: {
+    planId: TaskPlanId;
+    identityId: IdentityId;
+    scheduleSnapshot: TaskOccurrenceScheduleSnapshot;
+    importanceSnapshot: ImportanceLevel;
+    checklistDefinition?: readonly ChecklistItemDefinitionDTO[];
+  }): TaskOccurrence {
+    if (!params.planId) throw new Error('Plan ID is required');
+    if (!params.identityId) throw new Error('Identity ID is required');
+
+    const now = Date.now() as Instant;
+    const checklistState = (params.checklistDefinition ?? []).map((definition) =>
+      TaskOccurrenceChecklistItemSchema.parse({
+        definitionId: definition.id,
+        titleSnapshot: definition.title,
+        orderSnapshot: definition.order,
+        completed: false,
+        completedAt: null,
+      }),
+    );
+
+    return new TaskOccurrence({
       id: TaskOccurrenceId.generate(),
-      templateId: params.templateId,
+      planId: params.planId,
       identityId: params.identityId,
-      instanceDate: params.instanceDate,
-      occurrenceKey: buildTaskOccurrenceOccurrenceKey(
-        String(params.templateId),
-        params.instanceDate,
-        params.timeContext,
+      occurrenceKey: buildTaskOccurrenceOccurrenceKeyFromDate(
+        String(params.planId),
+        params.scheduleSnapshot.date,
       ),
-      timeConfig: params.timeConfig,
-      importance: params.importance,
+      scheduleSnapshot: params.scheduleSnapshot,
+      importanceSnapshot: params.importanceSnapshot,
       status: TaskOccurrenceStatus.Pending,
-      completionRecord: null,
-      skipRecord: null,
-      actualStartTime: null,
-      actualEndTime: null,
-      note: null,
+      actualStartAt: null,
+      result: null,
+      checklistState,
       createdAt: now,
       updatedAt: now,
       version: 1,
       deletedAt: null,
     });
-
-    return instance;
   }
 
-  /** Factory method: restores an aggregate from persisted state. */
-  public static load(state: TaskOccurrenceState): TaskOccurrence {
+  static load(state: TaskOccurrenceState): TaskOccurrence {
     return new TaskOccurrence(state);
-  }
-
-  // ===== Helper Methods =====
-
-  private getStatusText(): string {
-    const statusMap: Record<TaskOccurrenceStatus, string> = {
-      Pending: '待完成',
-      InProgress: '进行中',
-      Completed: '已完成',
-      Missed: '已错过',
-      Skipped: '已豁免',
-    };
-    return statusMap[this._props.status];
-  }
-
-  private getStatusColor(): string {
-    const colorMap: Record<TaskOccurrenceStatus, string> = {
-      Pending: 'blue',
-      InProgress: 'orange',
-      Completed: 'green',
-      Missed: 'red',
-      Skipped: 'gray',
-    };
-    return colorMap[this._props.status];
-  }
-
-  private formatDuration(ms: number): string {
-    const hours = Math.floor(ms / 3600000);
-    const minutes = Math.floor((ms % 3600000) / 60000);
-
-    if (hours > 0) {
-      return `${hours}小时${minutes}分钟`;
-    }
-    return `${minutes}分钟`;
   }
 }

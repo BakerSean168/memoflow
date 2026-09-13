@@ -4,7 +4,7 @@ import type {
   TaskReminderType,
   TaskPlanServerDTO,
 } from '@memoflow/contracts/task';
-import { TaskOccurrenceStatus, TaskTimeType } from '@memoflow/contracts/task';
+import { TaskOccurrenceStatus } from '@memoflow/contracts/task';
 import type {
   ScheduledIntent,
   SchedulingOwner,
@@ -12,6 +12,7 @@ import type {
 } from '@memoflow/contracts/schedule';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '../domain';
+import type { TaskOccurrence } from '../domain/aggregates/task-occurrence';
 import {
   asHm,
   combineYmdHmWithTimeZone,
@@ -120,30 +121,16 @@ function minuteOfDayToHm(minute: number) {
   return asHm(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`);
 }
 
-function getInstanceAnchorTime(
-  instance: {
-    instanceDate: number;
-    timeConfig: {
-      timeType: string;
-      timePoint: number | null;
-      timeRange?: { start: number; end: number } | null;
-    };
-  },
-  timeContext: TimeContext,
-): number {
-  const time = createTimeFacade({ context: timeContext });
-  const day = time.calendar.toYmd(instance.instanceDate);
+function getInstanceAnchorTime(instance: TaskOccurrence, timeContext: TimeContext): number {
+  const day = instance.scheduleDate;
+  const timing = instance.scheduleSnapshot.timing;
   const minute =
-    instance.timeConfig.timeType === TaskTimeType.TimePoint
-      ? (instance.timeConfig.timePoint ?? DEFAULT_ALL_DAY_REMINDER_MINUTES)
-      : instance.timeConfig.timeType === TaskTimeType.TimeRange
-        ? (instance.timeConfig.timeRange?.start ?? DEFAULT_ALL_DAY_REMINDER_MINUTES)
+    timing.kind === 'At'
+      ? Number(timing.time.slice(0, 2)) * 60 + Number(timing.time.slice(3, 5))
+      : timing.kind === 'Window'
+        ? Number(timing.start.slice(0, 2)) * 60 + Number(timing.start.slice(3, 5))
         : DEFAULT_ALL_DAY_REMINDER_MINUTES;
-  const anchor = combineYmdHmWithTimeZone(
-    day,
-    minuteOfDayToHm(minute),
-    timeContext.timeZone,
-  );
+  const anchor = combineYmdHmWithTimeZone(day, minuteOfDayToHm(minute), timeContext.timeZone);
   if (anchor == null) {
     throw new Error(`Could not resolve Task reminder anchor ${day} ${minuteOfDayToHm(minute)}`);
   }
@@ -151,14 +138,7 @@ function getInstanceAnchorTime(
 }
 
 function calculateReminderAt(
-  instance: {
-    instanceDate: number;
-    timeConfig: {
-      timeType: string;
-      timePoint: number | null;
-      timeRange?: { start: number; end: number } | null;
-    };
-  },
+  instance: TaskOccurrence,
   trigger: {
     type: TaskReminderType;
     absoluteTime: number | null;
@@ -263,10 +243,7 @@ export function createTaskScheduleProjectionSource(deps: {
 
     async buildTemplatePlan(templateId, identityId) {
       const owner = taskOwner(templateId, identityId);
-      const template = await deps.taskPlanRepository.findByIdForIdentity(
-        identityId,
-        templateId,
-      );
+      const template = await deps.taskPlanRepository.findByIdForIdentity(identityId, templateId);
       if (!template) {
         return { owner, desired: [] };
       }

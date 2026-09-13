@@ -20,13 +20,14 @@ export class TaskOccurrenceGenerationService {
     existingInstances: readonly TaskOccurrence[] = [],
   ): instanceGeneration.InstanceGenerationContext {
     return {
-      templateId: template.id,
+      planId: template.id,
       identityId: template.identityId,
       status: template.status,
       taskType: template.taskType,
       timeConfig: template.schedule.toLegacyTimeConfig(timeContext),
       recurrenceRule: template.schedule.toLegacyRecurrenceRule(timeContext),
       importance: template.importance,
+      checklistDefinition: template.checklist.map((item) => item.toDTO()),
       existingInstances,
       timeContext,
     };

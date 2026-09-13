@@ -32,16 +32,11 @@ describe('GetTaskDashboardUseCase', () => {
       findByIdentityId: vi.fn().mockResolvedValue([]),
     });
     userTimeContextPort = {
-      getUserTimeContext: vi.fn().mockResolvedValue(
-        createTimeContext({ timeZone: 'Asia/Shanghai', weekStartsOn: 1 }),
-      ),
+      getUserTimeContext: vi
+        .fn()
+        .mockResolvedValue(createTimeContext({ timeZone: 'Asia/Shanghai', weekStartsOn: 1 })),
     };
-    useCase = new GetTaskDashboardUseCase(
-      planRepo,
-      occurrenceRepo,
-      userTimeContextPort,
-      () => NOW,
-    );
+    useCase = new GetTaskDashboardUseCase(planRepo, occurrenceRepo, userTimeContextPort, () => NOW);
   });
 
   it('reads today/upcoming/overdue from occurrence truth, not plan due state', async () => {
@@ -54,7 +49,6 @@ describe('GetTaskDashboardUseCase', () => {
     expect(planRepo.countTasks).toHaveBeenCalledWith(identityId, { status: TaskPlanStatus.Closed });
   });
 
-
   it('derives business-day boundaries from the canonical identity time context', async () => {
     await useCase.execute(identityId);
 
@@ -62,17 +56,17 @@ describe('GetTaskDashboardUseCase', () => {
     expect(occurrenceRepo.findByDateRange).toHaveBeenNthCalledWith(
       1,
       identityId,
-      Date.parse('2026-09-07T16:00:00.000Z'),
-      Date.parse('2026-09-08T15:59:59.999Z'),
+      '2026-09-08',
+      '2026-09-08',
     );
   });
 
   it('does not extend the seven-day window by one local date across spring-forward DST', async () => {
     const dstNow = Date.parse('2026-03-08T04:30:00.000Z'); // Mar 7 23:30 America/New_York
     userTimeContextPort = {
-      getUserTimeContext: vi.fn().mockResolvedValue(
-        createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 }),
-      ),
+      getUserTimeContext: vi
+        .fn()
+        .mockResolvedValue(createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 })),
     };
     useCase = new GetTaskDashboardUseCase(
       planRepo,
@@ -86,8 +80,8 @@ describe('GetTaskDashboardUseCase', () => {
     expect(occurrenceRepo.findByDateRange).toHaveBeenNthCalledWith(
       2,
       identityId,
-      Date.parse('2026-03-08T05:00:00.000Z'),
-      Date.parse('2026-03-15T03:59:59.999Z'),
+      '2026-03-08',
+      '2026-03-14',
     );
   });
 
@@ -110,10 +104,12 @@ describe('GetTaskDashboardUseCase', () => {
 
   it('does not mark a later-today time-point occurrence overdue at local noon', async () => {
     const todayStart = Date.parse('2026-09-07T16:00:00.000Z'); // Sep 8 00:00 Asia/Shanghai
+    const shanghai = createTimeContext({ timeZone: 'Asia/Shanghai', weekStartsOn: 1 });
     const laterToday = await aTaskOccurrence({
       identityId,
       instanceDate: todayStart,
       timeConfig: aTimePointConfig(18 * 60, new Date(todayStart)),
+      timeContext: shanghai,
     });
     vi.mocked(occurrenceRepo.findByIdentityId).mockResolvedValue([laterToday]);
 

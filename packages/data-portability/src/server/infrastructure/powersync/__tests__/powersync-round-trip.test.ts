@@ -113,7 +113,22 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(goalRecord.key_result_id).toBe(keyResult.id);
     expect(taskPlan.goal_id).toBe(goal.id);
     expect(taskPlan.key_result_id).toBe(keyResult.id);
-    expect(taskOccurrence.template_id).toBe(taskPlan.id);
+    expect(taskOccurrence.plan_id).toBe(taskPlan.id);
+    expect(taskOccurrence.schedule_date).toBe('2026-06-04');
+    expect(JSON.parse(String(taskOccurrence.schedule_timing))).toEqual({
+      kind: 'At',
+      time: '09:00',
+    });
+    const importedPlanChecklist = JSON.parse(String(taskPlan.checklist)) as Array<{ id: string }>;
+    const importedOccurrenceChecklist = JSON.parse(
+      String(taskOccurrence.checklist_state),
+    ) as Array<{
+      definitionId: string;
+    }>;
+    expect(importedPlanChecklist).toHaveLength(1);
+    expect(importedOccurrenceChecklist).toHaveLength(1);
+    expect(importedOccurrenceChecklist[0]?.definitionId).toBe(importedPlanChecklist[0]?.id);
+    expect(importedPlanChecklist[0]?.id).not.toBe('check-a');
     expect(scheduleTask.source_entity_id).toBe(taskPlan.id);
     expect(reminderTemplate).not.toHaveProperty('reminder_group_id');
     expect(routineProfile.id).toBe(reminderGroup.id);
@@ -699,7 +714,7 @@ function seedProfile(identityUuid: string): SeedTables {
         importance: 'high',
         color: null,
         tags: JSON.stringify(['qa']),
-        checklist: JSON.stringify([{ title: 'run tests', checked: true }]),
+        checklist: JSON.stringify([{ id: 'check-a', title: 'run tests', order: 0 }]),
         time_config_type: 'FixedTime',
         time_config_start_time: null,
         time_config_end_time: null,
@@ -731,16 +746,30 @@ function seedProfile(identityUuid: string): SeedTables {
     task_instances: [
       {
         id: 'task-occurrence-a',
-        template_id: 'task-plan-a',
+        plan_id: 'task-plan-a',
         identity_id: identityUuid,
-        instance_date: now,
         occurrence_key: 'task-plan-a:2026-06-04',
+        schedule_date: '2026-06-04',
+        schedule_timing: JSON.stringify({ kind: 'At', time: '09:00' }),
+        importance_snapshot: 'Important',
         status: 'Completed',
-        importance: 'high',
-        time_config: JSON.stringify({ type: 'FixedTime', timePoint: 540 }),
-        actual_start_time: now,
-        actual_end_time: later,
-        comment: 'done',
+        actual_start_at: now,
+        result: JSON.stringify({
+          kind: 'Completed',
+          recordedAt: Date.parse(later),
+          actualDurationMinutes: 60,
+          note: 'done',
+          rating: null,
+        }),
+        checklist_state: JSON.stringify([
+          {
+            definitionId: 'check-a',
+            titleSnapshot: 'run tests',
+            orderSnapshot: 0,
+            completed: true,
+            completedAt: Date.parse(later),
+          },
+        ]),
         version: 1,
         created_at: now,
         updated_at: later,

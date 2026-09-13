@@ -1,260 +1,181 @@
+import type { TaskOccurrence as PrismaTaskOccurrence } from '@memoflow/database';
+import { TaskOccurrenceResultKind, TaskOccurrenceStatus } from '@memoflow/contracts/task';
 import { describe, expect, it } from 'vitest';
 import { aPrefixedUuid } from '@memoflow/test-utils/fixtures';
 import { PrismaTaskOccurrenceMapper } from './prisma-task-occurrence-mapper';
-import type { TaskOccurrence as PrismaTaskOccurrence } from '@memoflow/database';
-import { TaskOccurrence } from '../../../../domain/aggregates/task-occurrence';
 
-describe('PrismaTaskOccurrenceMapper', () => {
-  const INSTANCE_ID_1 = aPrefixedUuid('ITaskOccurrenceId', 'task-occurrence-1');
-  const INSTANCE_ID_2 = aPrefixedUuid('ITaskOccurrenceId', 'task-occurrence-2');
-  const INSTANCE_ID_3 = aPrefixedUuid('ITaskOccurrenceId', 'task-occurrence-3');
-  const TEMPLATE_ID_1 = aPrefixedUuid('ITaskPlanId', 'task-plan-1');
-  const TEMPLATE_ID_2 = aPrefixedUuid('ITaskPlanId', 'task-plan-2');
-  const TEMPLATE_ID_3 = aPrefixedUuid('ITaskPlanId', 'task-plan-3');
-  const IDENTITY_ID_1 = aPrefixedUuid('IdentityId', 'task-occurrence-owner-1');
-  const IDENTITY_ID_2 = aPrefixedUuid('IdentityId', 'task-occurrence-owner-2');
-  const IDENTITY_ID_3 = aPrefixedUuid('IdentityId', 'task-occurrence-owner-3');
+const OCCURRENCE_ID = aPrefixedUuid('ITaskOccurrenceId', 'occurrence-1');
+const PLAN_ID = aPrefixedUuid('ITaskPlanId', 'plan-1');
+const IDENTITY_ID = aPrefixedUuid('IdentityId', 'owner-1');
 
-  const createMinimalRow = (): PrismaTaskOccurrence => ({
-    id: INSTANCE_ID_1,
-    templateId: TEMPLATE_ID_1,
-    identityId: IDENTITY_ID_1,
-    instanceDate: new Date('2024-03-15T00:00:00Z'),
-    timeConfig: JSON.stringify({ timeType: 'Flexible', startDate: null, timePoint: null, timeRange: null }),
-    importance: 'Moderate',
-    priority: null,
-    status: 'Pending',
-    actualStartTime: null,
-    actualEndTime: null,
-    comment: null,
+function pendingRow(overrides: Partial<PrismaTaskOccurrence> = {}): PrismaTaskOccurrence {
+  return {
+    id: OCCURRENCE_ID,
+    planId: PLAN_ID,
+    identityId: IDENTITY_ID,
+    occurrenceKey: `${PLAN_ID}:2026-03-09`,
+    scheduleDate: '2026-03-09',
+    scheduleTiming: JSON.stringify({ kind: 'At', time: '09:30' }),
+    importanceSnapshot: 'Moderate',
+    status: TaskOccurrenceStatus.Pending,
+    actualStartAt: null,
+    result: null,
+    checklistState: JSON.stringify([
+      {
+        definitionId: 'check-a',
+        titleSnapshot: 'Prepare notes',
+        orderSnapshot: 0,
+        completed: false,
+        completedAt: null,
+      },
+    ]),
     version: 1,
-    createdAt: new Date('2024-03-01T00:00:00Z'),
-    updatedAt: new Date('2024-03-01T00:00:00Z'),
+    createdAt: new Date('2026-03-01T00:00:00.000Z'),
+    updatedAt: new Date('2026-03-01T00:00:00.000Z'),
     deletedAt: null,
-  });
-
-  const createFullRow = (): PrismaTaskOccurrence => ({
-    id: INSTANCE_ID_2,
-    templateId: TEMPLATE_ID_2,
-    identityId: IDENTITY_ID_2,
-    instanceDate: new Date('2024-04-10T08:30:00Z'),
-    timeConfig: JSON.stringify({
-      timeType: 'FixedTime',
-      timePoint: '09:00',
-      startDate: 1710000000000,
-    }),
-    importance: 'Important',
-    priority: 1,
-    status: 'Completed',
-    actualStartTime: new Date('2024-04-10T09:00:00Z'),
-    actualEndTime: new Date('2024-04-10T10:30:00Z'),
-    comment: 'Task completed on time',
-    version: 3,
-    createdAt: new Date('2024-02-01T12:00:00Z'),
-    updatedAt: new Date('2024-04-10T10:30:00Z'),
-    deletedAt: null,
-  });
-
-  /** Creates a TaskOccurrence aggregate from a Prisma row for use with toPersistence */
-  const createTestAggregate = (rowOverrides?: Partial<PrismaTaskOccurrence>): TaskOccurrence => {
-    const row = { ...createMinimalRow(), ...rowOverrides };
-    return PrismaTaskOccurrenceMapper.toDomain(row);
+    ...overrides,
   };
+}
 
-  describe('toDomain', () => {
-    it('maps minimal Prisma row to domain aggregate', () => {
-      const row = createMinimalRow();
-      const domain = PrismaTaskOccurrenceMapper.toDomain(row);
+function completedRow(overrides: Partial<PrismaTaskOccurrence> = {}): PrismaTaskOccurrence {
+  return pendingRow({
+    status: TaskOccurrenceStatus.Completed,
+    actualStartAt: new Date('2026-03-09T13:30:00.000Z'),
+    result: JSON.stringify({
+      kind: TaskOccurrenceResultKind.Completed,
+      recordedAt: Date.parse('2026-03-09T14:00:00.000Z'),
+      actualDurationMinutes: 30,
+      note: 'done',
+      rating: 5,
+    }),
+    checklistState: JSON.stringify([
+      {
+        definitionId: 'check-a',
+        titleSnapshot: 'Prepare notes',
+        orderSnapshot: 0,
+        completed: true,
+        completedAt: Date.parse('2026-03-09T13:45:00.000Z'),
+      },
+    ]),
+    version: 3,
+    updatedAt: new Date('2026-03-09T14:00:00.000Z'),
+    ...overrides,
+  });
+}
 
-      expect(domain.id).toBe(INSTANCE_ID_1);
-      expect(domain.templateId).toBe(TEMPLATE_ID_1);
-      expect(domain.identityId).toBe(IDENTITY_ID_1);
-      expect(domain.instanceDate).toBe(row.instanceDate.getTime());
-      expect(domain.importance).toBe('Moderate');
-      expect(domain.status).toBe('Pending');
-      expect(domain.actualStartTime).toBeNull();
-      expect(domain.actualEndTime).toBeNull();
-      expect(domain.note).toBeNull();
-      expect(domain.version).toBe(1);
-      expect(domain.createdAt).toBe(row.createdAt.getTime());
-      expect(domain.updatedAt).toBe(row.updatedAt.getTime());
+describe('PrismaTaskOccurrenceMapper canonical persistence', () => {
+  it('maps the canonical pending row to domain truth', () => {
+    const domain = PrismaTaskOccurrenceMapper.toDomain(pendingRow());
+
+    expect(domain.id).toBe(OCCURRENCE_ID);
+    expect(domain.planId).toBe(PLAN_ID);
+    expect(domain.identityId).toBe(IDENTITY_ID);
+    expect(domain.occurrenceKey).toBe(`${PLAN_ID}:2026-03-09`);
+    expect(domain.scheduleDate).toBe('2026-03-09');
+    expect(domain.scheduleSnapshot.timing).toEqual({ kind: 'At', time: '09:30' });
+    expect(domain.importanceSnapshot).toBe('Moderate');
+    expect(domain.status).toBe(TaskOccurrenceStatus.Pending);
+    expect(domain.actualStartAt).toBeNull();
+    expect(domain.result).toBeNull();
+    expect(domain.checklistState).toHaveLength(1);
+  });
+
+  it('maps Completed Result/checklist facts without legacy comment/end-time reconstruction', () => {
+    const row = completedRow();
+    const domain = PrismaTaskOccurrenceMapper.toDomain(row);
+
+    expect(domain.status).toBe(TaskOccurrenceStatus.Completed);
+    expect(domain.actualStartAt).toBe(row.actualStartAt!.getTime());
+    expect(domain.result).toEqual({
+      kind: TaskOccurrenceResultKind.Completed,
+      recordedAt: Date.parse('2026-03-09T14:00:00.000Z'),
+      actualDurationMinutes: 30,
+      note: 'done',
+      rating: 5,
     });
-
-    it('maps full Prisma row with all fields to domain', () => {
-      const row = createFullRow();
-      const domain = PrismaTaskOccurrenceMapper.toDomain(row);
-
-      expect(domain.id).toBe(INSTANCE_ID_2);
-      expect(domain.templateId).toBe(TEMPLATE_ID_2);
-      expect(domain.identityId).toBe(IDENTITY_ID_2);
-      expect(domain.instanceDate).toBe(row.instanceDate.getTime());
-      expect(domain.importance).toBe('Important');
-      expect(domain.status).toBe('Completed');
-      expect(domain.actualStartTime).toBe(row.actualStartTime!.getTime());
-      expect(domain.actualEndTime).toBe(row.actualEndTime!.getTime());
-      expect(domain.note).toBe('Task completed on time');
-      expect(domain.version).toBe(3);
-    });
-
-    it('parses JSON timeConfig correctly', () => {
-      const row = createFullRow();
-      const domain = PrismaTaskOccurrenceMapper.toDomain(row);
-
-      const timeConfig = domain.timeConfig;
-      expect(timeConfig.timeType).toBe('FixedTime');
-      expect(timeConfig.timePoint).toBe('09:00');
-    });
-
-    it('handles empty timeConfig JSON', () => {
-      const row = createMinimalRow();
-      const domain = PrismaTaskOccurrenceMapper.toDomain(row);
-
-      expect(domain.timeConfig).toBeDefined();
-    });
-
-    it('defaults importance to "Moderate" when missing', () => {
-      const row: PrismaTaskOccurrence = {
-        ...createMinimalRow(),
-        importance: null as any,
-      };
-      const domain = PrismaTaskOccurrenceMapper.toDomain(row);
-      expect(domain.importance).toBe('Moderate');
-    });
-
-    it('converts timestamps to milliseconds', () => {
-      const row = createFullRow();
-      const domain = PrismaTaskOccurrenceMapper.toDomain(row);
-
-      expect(domain.createdAt).toBe(row.createdAt.getTime());
-      expect(domain.updatedAt).toBe(row.updatedAt.getTime());
-      expect(domain.instanceDate).toBe(row.instanceDate.getTime());
-      expect(domain.actualStartTime).toBe(row.actualStartTime!.getTime());
-      expect(domain.actualEndTime).toBe(row.actualEndTime!.getTime());
-    });
-
-    it('maps comment to note field', () => {
-      const row = createFullRow();
-      const domain = PrismaTaskOccurrenceMapper.toDomain(row);
-      expect(domain.note).toBe(row.comment);
-    });
-
-    it('handles all task statuses', () => {
-      const statuses = ['Pending', 'InProgress', 'Completed', 'Skipped'] as const;
-
-      for (const status of statuses) {
-        const row: PrismaTaskOccurrence = {
-          ...createMinimalRow(),
-          status: status as any,
-        };
-        const domain = PrismaTaskOccurrenceMapper.toDomain(row);
-        expect(domain.status).toBe(status);
-      }
+    expect(domain.checklistState[0]).toMatchObject({
+      definitionId: 'check-a',
+      completed: true,
     });
   });
 
-  describe('toPersistence', () => {
-    it('converts minimal aggregate to persistence format', () => {
-      const aggregate = createTestAggregate({
-        id: INSTANCE_ID_3,
-        templateId: TEMPLATE_ID_3,
-        identityId: IDENTITY_ID_3,
-        instanceDate: new Date('2024-05-01T00:00:00Z'),
-        importance: 'Minor',
-        status: 'Pending',
-        version: 1,
-      });
-
-      const persistence = PrismaTaskOccurrenceMapper.toPersistence(aggregate);
-
-      expect(persistence.templateId).toBe(TEMPLATE_ID_3);
-      expect(persistence.identityId).toBe(IDENTITY_ID_3);
-      expect(persistence.importance).toBe('Minor');
-      expect(persistence.status).toBe('Pending');
-      expect(persistence.actualStartTime).toBeNull();
-      expect(persistence.actualEndTime).toBeNull();
-      expect(persistence.comment).toBeNull();
-      expect(persistence.version).toBe(1);
-    });
-
-    it('converts full aggregate with all fields to persistence', () => {
-      const aggregate = createTestAggregate(createFullRow());
-
-      const persistence = PrismaTaskOccurrenceMapper.toPersistence(aggregate);
-
-      expect(persistence.templateId).toBe(TEMPLATE_ID_2);
-      expect(persistence.importance).toBe('Important');
-      expect(persistence.status).toBe('Completed');
-      expect(persistence.comment).toBe('Task completed on time');
-      expect(persistence.version).toBe(3);
-    });
-
-    it('stringifies timeConfig as JSON', () => {
-      const aggregate = createTestAggregate(createFullRow());
-
-      const persistence = PrismaTaskOccurrenceMapper.toPersistence(aggregate);
-
-      expect(typeof persistence.timeConfig).toBe('string');
-      const parsed = JSON.parse(persistence.timeConfig);
-      expect(parsed.timeType).toBe('FixedTime');
-    });
-
-    it('defaults timeConfig to empty JSON object for minimal aggregate', () => {
-      const aggregate = createTestAggregate();
-
-      const persistence = PrismaTaskOccurrenceMapper.toPersistence(aggregate);
-
-      expect(typeof persistence.timeConfig).toBe('string');
-      expect(JSON.parse(persistence.timeConfig)).toEqual({ timeType: 'Flexible', startDate: null, timePoint: null, timeRange: null });
-    });
-
-    it('converts timestamp numbers to Date objects for time fields', () => {
-      const aggregate = createTestAggregate(createFullRow());
-
-      const persistence = PrismaTaskOccurrenceMapper.toPersistence(aggregate);
-
-      expect(persistence.actualStartTime).toEqual(new Date('2024-04-10T09:00:00Z'));
-      expect(persistence.actualEndTime).toEqual(new Date('2024-04-10T10:30:00Z'));
-    });
-
-    it('defaults importance to "Moderate" when missing', () => {
-      const aggregate = createTestAggregate({
-        importance: null as any,
-      });
-
-      const persistence = PrismaTaskOccurrenceMapper.toPersistence(aggregate);
-
-      expect(persistence.importance).toBe('Moderate');
-    });
+  it('rejects malformed schedule timing instead of silently inventing a fallback', () => {
+    expect(() =>
+      PrismaTaskOccurrenceMapper.toDomain(
+        pendingRow({ scheduleTiming: JSON.stringify({ kind: 'At', time: '99:99' }) }),
+      ),
+    ).toThrow();
   });
 
-  describe('Round-trip: toDomain -> toPersistence', () => {
-    it('preserves task instance data after toDomain then toPersistence', () => {
-      const originalRow = createFullRow();
-      const aggregate = PrismaTaskOccurrenceMapper.toDomain(originalRow);
-      const persistence = PrismaTaskOccurrenceMapper.toPersistence(aggregate);
-
-      expect(persistence.templateId).toBe(originalRow.templateId);
-      expect(persistence.identityId).toBe(originalRow.identityId);
-      expect(persistence.status).toBe(originalRow.status);
-      expect(persistence.importance).toBe(originalRow.importance);
-      expect(persistence.version).toBe(originalRow.version);
-    });
+  it('rejects a persisted status/result contradiction', () => {
+    expect(() =>
+      PrismaTaskOccurrenceMapper.toDomain(
+        pendingRow({
+          status: TaskOccurrenceStatus.Completed,
+          result: null,
+        }),
+      ),
+    ).toThrow(/Completed.*result/);
   });
 
-  describe('toDomainList', () => {
-    it('maps empty list', () => {
-      const result = PrismaTaskOccurrenceMapper.toDomainList([]);
-      expect(result).toEqual([]);
-    });
+  it('serializes canonical persistence columns', () => {
+    const domain = PrismaTaskOccurrenceMapper.toDomain(completedRow());
+    const persistence = PrismaTaskOccurrenceMapper.toPersistence(domain);
 
-    it('maps multiple rows preserving order', () => {
-      const rows = [createMinimalRow(), createFullRow(), createMinimalRow()];
-      const domains = PrismaTaskOccurrenceMapper.toDomainList(rows);
-
-      expect(domains).toHaveLength(3);
-      expect(domains[0].id).toBe(INSTANCE_ID_1);
-      expect(domains[1].id).toBe(INSTANCE_ID_2);
-      expect(domains[2].id).toBe(INSTANCE_ID_1);
+    expect(persistence).toMatchObject({
+      planId: PLAN_ID,
+      identityId: IDENTITY_ID,
+      occurrenceKey: `${PLAN_ID}:2026-03-09`,
+      scheduleDate: '2026-03-09',
+      importanceSnapshot: 'Moderate',
+      status: TaskOccurrenceStatus.Completed,
+      version: 3,
     });
+    expect(JSON.parse(persistence.scheduleTiming)).toEqual({ kind: 'At', time: '09:30' });
+    expect(JSON.parse(persistence.result!)).toMatchObject({
+      kind: TaskOccurrenceResultKind.Completed,
+      actualDurationMinutes: 30,
+    });
+    expect(JSON.parse(persistence.checklistState)).toHaveLength(1);
+    expect(persistence.actualStartAt).toEqual(new Date('2026-03-09T13:30:00.000Z'));
+  });
+
+  it('does not serialize retired occurrence persistence fields', () => {
+    const persistence = PrismaTaskOccurrenceMapper.toPersistence(
+      PrismaTaskOccurrenceMapper.toDomain(pendingRow()),
+    );
+    for (const retired of [
+      'templateId',
+      'instanceDate',
+      'timeConfig',
+      'importance',
+      'actualStartTime',
+      'actualEndTime',
+      'comment',
+    ]) {
+      expect(persistence).not.toHaveProperty(retired);
+    }
+  });
+
+  it('round-trips canonical persistence facts', () => {
+    const original = completedRow();
+    const persistence = PrismaTaskOccurrenceMapper.toPersistence(
+      PrismaTaskOccurrenceMapper.toDomain(original),
+    );
+
+    expect(persistence.planId).toBe(original.planId);
+    expect(persistence.scheduleDate).toBe(original.scheduleDate);
+    expect(JSON.parse(persistence.scheduleTiming)).toEqual(JSON.parse(original.scheduleTiming));
+    expect(JSON.parse(persistence.result!)).toEqual(JSON.parse(original.result!));
+    expect(JSON.parse(persistence.checklistState)).toEqual(JSON.parse(original.checklistState));
+  });
+
+  it('maps lists preserving order', () => {
+    const rows = [
+      pendingRow(),
+      completedRow({ id: aPrefixedUuid('ITaskOccurrenceId', 'occurrence-2') }),
+    ];
+    const domains = PrismaTaskOccurrenceMapper.toDomainList(rows);
+    expect(domains.map((item) => String(item.id))).toEqual(rows.map((item) => item.id));
   });
 });

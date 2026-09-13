@@ -94,14 +94,13 @@ export class ListTaskPlansUseCase {
     const asOf = this.now();
     const timeContext = await this.userTimeContextPort.getUserTimeContext(request.identityId);
     const taskTime = createTimeFacade({ context: timeContext });
-    const windowStart = Number(
-      taskTime.calendar.startOfDay(taskTime.calendar.addDays(asOf, -29)),
-    );
+    const windowStart = taskTime.calendar.toYmd(taskTime.calendar.addDays(asOf, -29));
+    const asOfDate = taskTime.calendar.toYmd(asOf);
     const statsByTemplateId =
       (await this.instanceRepository.getTemplateStats(
         templates.map((template) => template.id),
         request.identityId,
-        { windowStart, asOf },
+        { windowStart, asOf: asOfDate },
       )) ?? {};
 
     return ok({
