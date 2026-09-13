@@ -22,8 +22,8 @@ updated: 2026-09-13T16:42:00+08:00
 - old `TaskTemplate`/`TaskInstance` persistence and compatibility DTOs are deleted rather than translated;
 - no legacy round-trip fixture is required; fresh TaskPlan/TaskOccurrence round-trip remains required.
 
-**状态：ACTIVE / TASK-7306 complete; TASK-7307 next**
-**执行分支：** `feat/system-wide-vnext-convergence`（ticket worktree: `chatgpt/task-7306-application`）
+**状态：ACTIVE / TASK-7307 complete; TASK-7308 next**
+**执行分支：** `feat/system-wide-vnext-convergence`（next ticket worktree: `delegated/task-7308-context`）
 **上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）
 **基线：** Task Vitest 71 files / 717 tests PASS
 
@@ -148,6 +148,8 @@ Scheduling reminder payload 升为 canonical Plan/Occurrence vocabulary 与 v2 p
 - reminder multi-trigger 与 persistence parity；
 - Task Detail 改 TaskPlanWorkspace。
 
+**TASK-7307 DONE（2026-09-13）：** user-facing Task UI 已收敛到 TaskPlan / TaskOccurrence vocabulary；create/edit 改为 property-chip first，Goal-only link 可用，Plan checklist definition 与 occurrence checklist mutation 已接通，multi-trigger reminder 保持 persistence parity，Task Detail 已演进为 TaskPlanWorkspace-facing surface。Reviewer repair 进一步锁定 ADR-073 stable checklist identity（duplicate definition id 在 contract + domain 双层拒绝）并要求 occurrence checklist owner command 强制 `expectedVersion`。Task 全套 **599 tests PASS**，app-vue Task **82 tests PASS**，Contracts Task focused **45 tests PASS**，Task / app-vue / Contracts typecheck PASS；最终 head `50f86db6d05`。
+
 ### TASK-7308 — Context read model
 
 - TaskPlanWorkspace：labels + Goal/KR + occurrence summary + recent occurrences + linked notes；
@@ -227,9 +229,9 @@ full CI exact-head
 - [x] TASK-7304
 - [x] TASK-7305
 - [x] TASK-7306
-- [ ] TASK-7307
+- [x] TASK-7307
 - [ ] TASK-7308
 - [ ] TASK-7309
 - [ ] TASK-7310
 
-**Next:** TASK-7307 is now the sole next Task dependency: converge the user-facing Task UI on TaskPlan/TaskOccurrence wording and interaction, make create/edit property-chip first, expose Goal-only links and checklist definition/occurrence interactions, preserve multi-trigger reminder parity, and evolve Task Detail into TaskPlanWorkspace. TASK-7306 has completed the application/transport/Planner/AI cutover; do not reintroduce legacy occurrence DTOs, `newTime` reschedule bodies, or `templateId` public query aliases while implementing UI convergence.
+**Next:** TASK-7308 is now the sole next Task dependency: compose the TaskPlanWorkspace context read model from labels + Goal/KR + occurrence summary + recent occurrences + linked notes. Linked notes must use ADR-090 `KnowledgeDocumentRef`; do not persist path-derived durable relations, do not move context into the Task aggregate, and preserve ADR-069 shared Relation single ownership.
