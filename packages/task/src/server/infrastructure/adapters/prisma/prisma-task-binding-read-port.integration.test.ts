@@ -79,6 +79,12 @@ describe('PrismaTaskBindingReadPort', () => {
       ],
     });
 
+    const persistedSchedule = {
+      kind: 'OneTime',
+      date: '2026-09-13',
+      timing: { kind: 'AllDay' },
+    } as const;
+
     await prisma.taskPlan.createMany({
       data: [
         {
@@ -87,6 +93,7 @@ describe('PrismaTaskBindingReadPort', () => {
           name: 'Goal only',
           status: 'Active',
           outcome: 'Open',
+          schedule: persistedSchedule,
           goalId: goalA,
           keyResultId: null,
           createdAt: createdAt(1),
@@ -98,6 +105,7 @@ describe('PrismaTaskBindingReadPort', () => {
           name: 'KR active',
           status: 'Active',
           outcome: 'Open',
+          schedule: persistedSchedule,
           goalId: goalA,
           keyResultId: keyResultA,
           createdAt: createdAt(2),
@@ -109,6 +117,7 @@ describe('PrismaTaskBindingReadPort', () => {
           name: 'KR completed',
           status: 'Closed',
           outcome: 'Succeeded',
+          schedule: persistedSchedule,
           goalId: goalA,
           keyResultId: keyResultA,
           goalRecordValue: 2,
@@ -122,6 +131,7 @@ describe('PrismaTaskBindingReadPort', () => {
           name: 'Other goal',
           status: 'Active',
           outcome: 'Open',
+          schedule: persistedSchedule,
           goalId: goalB,
           keyResultId: keyResultB,
           createdAt: createdAt(4),
@@ -133,6 +143,7 @@ describe('PrismaTaskBindingReadPort', () => {
           name: 'Soft deleted',
           status: 'Active',
           outcome: 'Open',
+          schedule: persistedSchedule,
           goalId: goalA,
           keyResultId: keyResultA,
           createdAt: createdAt(5),
@@ -145,6 +156,7 @@ describe('PrismaTaskBindingReadPort', () => {
           name: 'Foreign',
           status: 'Active',
           outcome: 'Open',
+          schedule: persistedSchedule,
           goalId: foreignGoal,
           keyResultId: foreignKeyResult,
           createdAt: createdAt(6),

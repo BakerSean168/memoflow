@@ -6052,6 +6052,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/database/src/schema/task-plan-canonical-persistence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/database/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/database/src/schema/task-shared-label-migration.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11894,7 +11902,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 10
+      "fileCount": 11
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",
@@ -12652,7 +12660,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1093,
+    "unit": 1094,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,

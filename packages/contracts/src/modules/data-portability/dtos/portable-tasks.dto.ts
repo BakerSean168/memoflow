@@ -5,6 +5,8 @@ import { TaskGoalBindingTrigger } from '../../task/value-objects/task-goal-bindi
 import {
   TaskOccurrenceResultSchema,
   TaskOccurrenceScheduleSnapshotSchema,
+  TaskPlanScheduleSchema,
+  TaskReminderConfigSchema,
 } from '../../task/value-objects';
 
 export const PortableTaskContributionSchema = z
@@ -42,7 +44,6 @@ export const PortableTaskPlanSchema = z
     _ref: PortableRefSchema,
     title: z.string(),
     description: z.string().nullable().optional(),
-    taskType: z.string(),
     importance: z.string(),
     tags: z.array(z.string()),
     color: z.string().nullable().optional(),
@@ -56,9 +57,8 @@ export const PortableTaskPlanSchema = z
     keyResultRef: PortableRefSchema.nullable().optional(),
     contribution: PortableTaskContributionSchema.nullable().optional(),
     checklist: z.array(PortableTaskChecklistDefinitionSchema),
-    timeConfig: z.unknown(),
-    recurrenceRule: z.unknown().nullable().optional(),
-    reminderConfig: z.unknown().nullable().optional(),
+    schedule: TaskPlanScheduleSchema,
+    reminderConfig: TaskReminderConfigSchema.nullable().optional(),
     createdAt: IsoDateString.optional(),
     updatedAt: IsoDateString.optional(),
   })

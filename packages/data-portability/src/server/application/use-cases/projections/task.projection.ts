@@ -8,6 +8,8 @@ import {
   TaskOccurrenceChecklistItemSchema,
   TaskOccurrenceResultSchema,
   TaskOccurrenceScheduleSnapshotSchema,
+  TaskPlanScheduleSchema,
+  TaskReminderConfigSchema,
   type TaskGoalBindingTrigger,
 } from '@memoflow/contracts/task';
 import {
@@ -45,51 +47,31 @@ export function projectTaskPlans(templates: unknown[], ctx: ExportContext): Port
           trigger: semanticContribution.trigger as TaskGoalBindingTrigger,
         }
       : physicalContribution;
-    const flattenedRecurrence = entity.recurrenceRuleType
-      ? {
-          type: String(entity.recurrenceRuleType),
-          interval:
-            entity.recurrenceRuleInterval == null ? 1 : Number(entity.recurrenceRuleInterval),
-          daysOfWeek: parseJsonField(entity.recurrenceRuleDaysOfWeek, []),
-          endDate: entity.recurrenceRuleEndDate ?? null,
-          count: entity.recurrenceRuleCount ?? null,
-        }
-      : null;
-    const recurrenceRule =
-      parseJsonField(entity.recurrenceRule, flattenedRecurrence) ?? flattenedRecurrence;
-    const flattenedTimeConfig = entity.timeConfigType
-      ? {
-          type: String(entity.timeConfigType),
-          startTime: entity.timeConfigStartTime ?? null,
-          endTime: entity.timeConfigEndTime ?? null,
-          durationMinutes: entity.timeConfigDurationMinutes ?? null,
-          timePoint: entity.timeConfigTimePoint ?? null,
-          timeRangeStart: entity.timeConfigTimeRangeStart ?? null,
-          timeRangeEnd: entity.timeConfigTimeRangeEnd ?? null,
-        }
-      : {};
-    const flattenedReminder =
-      entity.reminderConfigEnabled == null
-        ? null
-        : {
-            enabled: Boolean(entity.reminderConfigEnabled),
-            triggers:
-              entity.reminderConfigTimeOffsetMinutes == null
-                ? []
-                : [
-                    {
-                      relativeValue: Number(entity.reminderConfigTimeOffsetMinutes),
-                      relativeUnit: String(entity.reminderConfigUnit ?? 'Minute'),
-                      channel: entity.reminderConfigChannel ?? undefined,
-                    },
-                  ],
-          };
+    const semanticSchedule = entity.schedule as
+      { toDTO?: () => unknown } | Record<string, unknown> | string | undefined;
+    const scheduleCandidate =
+      semanticSchedule &&
+      typeof semanticSchedule === 'object' &&
+      typeof semanticSchedule.toDTO === 'function'
+        ? semanticSchedule.toDTO()
+        : parseJsonField(semanticSchedule, semanticSchedule);
+    const schedule = TaskPlanScheduleSchema.parse(scheduleCandidate);
+
+    const semanticReminder = entity.reminderConfig as
+      { toDTO?: () => unknown } | Record<string, unknown> | string | null | undefined;
+    const reminderCandidate =
+      semanticReminder &&
+      typeof semanticReminder === 'object' &&
+      typeof semanticReminder.toDTO === 'function'
+        ? semanticReminder.toDTO()
+        : parseJsonField(semanticReminder, semanticReminder);
+    const reminderConfig =
+      reminderCandidate == null ? null : TaskReminderConfigSchema.parse(reminderCandidate);
 
     return {
       _ref: ref,
       title: String(entity.name ?? entity.title ?? ''),
       description: entity.description as string | null | undefined,
-      taskType: String(entity.taskType ?? (recurrenceRule ? 'Recurring' : 'OneTime')),
       importance: String(entity.importance ?? 'moderate'),
       tags: Array.isArray(entity.tags)
         ? entity.tags.map(String)
@@ -125,9 +107,8 @@ export function projectTaskPlans(templates: unknown[], ctx: ExportContext): Port
           order: Number(definition.order ?? 0),
         };
       }),
-      timeConfig: parseJsonField(entity.timeConfig, flattenedTimeConfig) ?? flattenedTimeConfig,
-      recurrenceRule: recurrenceRule ?? null,
-      reminderConfig: parseJsonField(entity.reminderConfig, flattenedReminder) ?? flattenedReminder,
+      schedule,
+      reminderConfig,
       createdAt: toDateString(entity.createdAt),
       updatedAt: toDateString(entity.updatedAt),
     };

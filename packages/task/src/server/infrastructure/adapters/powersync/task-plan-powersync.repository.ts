@@ -97,22 +97,8 @@ export class PowerSyncTaskPlanRepository
       ['archived_at', data.archivedAt],
       ['abandoned_reason', data.abandonedReason],
       ['importance', data.importance],
-      ['time_config_type', data.timeConfigType],
-      ['time_config_start_time', data.timeConfigStartTime],
-      ['time_config_end_time', data.timeConfigEndTime],
-      ['time_config_duration_minutes', data.timeConfigDurationMinutes],
-      ['time_config_time_point', data.timeConfigTimePoint],
-      ['time_config_time_range_start', data.timeConfigTimeRangeStart],
-      ['time_config_time_range_end', data.timeConfigTimeRangeEnd],
-      ['recurrence_rule_type', data.recurrenceRuleType],
-      ['recurrence_rule_interval', data.recurrenceRuleInterval],
-      ['recurrence_rule_days_of_week', data.recurrenceRuleDaysOfWeek],
-      ['recurrence_rule_end_date', data.recurrenceRuleEndDate],
-      ['recurrence_rule_count', data.recurrenceRuleCount],
-      ['reminder_config_enabled', data.reminderConfigEnabled],
-      ['reminder_config_time_offset_minutes', data.reminderConfigTimeOffsetMinutes],
-      ['reminder_config_unit', data.reminderConfigUnit],
-      ['reminder_config_channel', data.reminderConfigChannel],
+      ['schedule', data.schedule],
+      ['reminder_config', data.reminderConfig],
       ['goal_id', data.goalId],
       ['key_result_id', data.keyResultId],
       ['goal_record_value', data.goalRecordValue],
@@ -249,7 +235,7 @@ export class PowerSyncTaskPlanRepository
   async findActiveRecurringPlansForMaterialization(): Promise<TaskPlan[]> {
     const rows = await this.db.getAll<PowerSyncTaskPlanRow>(
       `SELECT * FROM task_templates
-       WHERE recurrence_rule_type IS NOT NULL AND status = 'Active' AND deleted_at IS NULL
+       WHERE json_extract(schedule, '$.kind') = 'Recurring' AND status = 'Active' AND deleted_at IS NULL
        ORDER BY updated_at ASC`,
       [],
     );
@@ -345,7 +331,11 @@ export class PowerSyncTaskPlanRepository
   ): Promise<TaskPlan[]> {
     const clauses = ['identity_id = ?', 'deleted_at IS NULL'];
     const params: unknown[] = [identityId];
-    clauses.push(oneTime ? 'recurrence_rule_type IS NULL' : 'recurrence_rule_type IS NOT NULL');
+    clauses.push(
+      oneTime
+        ? "json_extract(schedule, '$.kind') = 'OneTime'"
+        : "json_extract(schedule, '$.kind') = 'Recurring'",
+    );
     const where = this.buildFilters(clauses, params, filters);
     let sql = `SELECT * FROM task_templates WHERE ${where.clauses.join(' AND ')} ORDER BY created_at DESC`;
     if (filters?.limit) {

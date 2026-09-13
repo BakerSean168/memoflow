@@ -132,7 +132,28 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
 
   async createTaskPlan(input: CreateTaskPlanInput): Promise<void> {
     await this.tx.taskPlan.create({
-      data: input as unknown as Prisma.TaskPlanUncheckedCreateInput,
+      data: {
+        id: input.id,
+        identityId: input.identityId,
+        name: input.name,
+        description: input.description,
+        status: input.status,
+        outcome: input.outcome,
+        completionPolicy: input.completionPolicy,
+        closedAt: input.closedAt,
+        archivedAt: input.archivedAt,
+        abandonedReason: input.abandonedReason,
+        importance: input.importance,
+        schedule: input.schedule as Prisma.InputJsonValue,
+        reminderConfig: input.reminderConfig,
+        goalId: input.goalId,
+        keyResultId: input.keyResultId,
+        goalRecordValue: input.goalRecordValue,
+        goalProgressTrigger: input.goalProgressTrigger,
+        checklist: input.checklist,
+        createdAt: input.createdAt,
+        updatedAt: input.updatedAt,
+      },
     });
   }
 
@@ -204,7 +225,6 @@ class PrismaDataPortabilityImportTx implements DataPortabilityImportTx {
       data: input as Prisma.ReminderResponseUncheckedCreateInput,
     });
   }
-
 
   // --- AI ---
 

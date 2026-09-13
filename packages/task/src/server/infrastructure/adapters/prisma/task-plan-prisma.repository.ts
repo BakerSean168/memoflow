@@ -274,7 +274,7 @@ export class TaskPlanPrismaRepository
   async findActiveRecurringPlansForMaterialization(): Promise<TaskPlan[]> {
     const data = await this.db.taskPlan.findMany({
       where: {
-        recurrenceRuleType: { not: null },
+        schedule: { path: ['kind'], equals: 'Recurring' },
         status: 'Active',
         deletedAt: null,
       },
@@ -315,7 +315,7 @@ export class TaskPlanPrismaRepository
     const data = await this.db.taskPlan.findMany({
       where: {
         identityId,
-        recurrenceRuleType: null,
+        schedule: { path: ['kind'], equals: 'OneTime' },
         deletedAt: null,
         ...(filters?.status ? { status: filters.status } : {}),
       },
@@ -333,7 +333,7 @@ export class TaskPlanPrismaRepository
     const data = await this.db.taskPlan.findMany({
       where: {
         identityId,
-        recurrenceRuleType: { not: null },
+        schedule: { path: ['kind'], equals: 'Recurring' },
         deletedAt: null,
         ...(filters?.status ? { status: filters.status } : {}),
       },

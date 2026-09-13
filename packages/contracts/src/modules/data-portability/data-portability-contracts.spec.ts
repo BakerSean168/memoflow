@@ -56,7 +56,6 @@ const validGoal = {
 const validTask = {
   _ref: 'taskPlan:1',
   title: 'Write tests',
-  taskType: 'OneTime',
   importance: 'moderate',
   tags: [],
   status: 'Active',
@@ -66,7 +65,7 @@ const validTask = {
   keyResultRef: 'keyResult:1',
   contribution: { value: 2.5, trigger: 'EachCompletion' },
   checklist: [],
-  timeConfig: {},
+  schedule: { kind: 'OneTime', date: '2026-09-13', timing: { kind: 'AllDay' } },
 };
 
 describe('parseUserDataExportEnvelope V2', () => {
@@ -285,6 +284,25 @@ describe('Task occurrence portable contract', () => {
             timeConfig: { type: 'AllDay' },
           },
         ],
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('Task plan portable persistence boundary', () => {
+  it('rejects retired taskType/timeConfig/recurrenceRule plan fields', () => {
+    expect(
+      PortableTaskDataSchema.safeParse({
+        templates: [
+          {
+            ...validTask,
+            schedule: undefined,
+            taskType: 'OneTime',
+            timeConfig: { type: 'AllDay' },
+            recurrenceRule: null,
+          },
+        ],
+        instances: [],
       }).success,
     ).toBe(false);
   });

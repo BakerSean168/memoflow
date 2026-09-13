@@ -22,8 +22,8 @@ updated: 2026-09-13T13:13:39+08:00
 - old `TaskTemplate`/`TaskInstance` persistence and compatibility DTOs are deleted rather than translated;
 - no legacy round-trip fixture is required; fresh TaskPlan/TaskOccurrence round-trip remains required.
 
-**状态：ACTIVE / TASK-7304 complete; TASK-7305 next**
-**执行分支：** `feat/system-wide-vnext-convergence`（ticket worktree: `chatgpt/task-7304-materialization`）
+**状态：ACTIVE / TASK-7305 complete; TASK-7306 next**
+**执行分支：** `feat/system-wide-vnext-convergence`（ticket worktree: `chatgpt/task-7305-persistence`）
 **上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）
 **基线：** Task Vitest 71 files / 717 tests PASS
 
@@ -118,6 +118,14 @@ Prisma/PowerSync TaskPlan mapper 已停止读取/写入 cursor；当前 Data Por
 - 删除旧 reminder/time/recurrence 展开列；
 - migration fixture + round-trip parity。
 
+**TASK-7305 DONE（2026-09-13）：** TaskPlan persistence 已完成 ADR-111 destructive single-track cutover。PostgreSQL/Prisma 以 `schedule Json` 作为唯一 scheduling truth，并以 `reminder_config` 完整 JSON 保存 multi-trigger reminder；PowerSync 同步使用 `schedule` / `reminder_config` JSON text，现有 `checklist` 继续保存带 stable definition id 的完整 JSON。Recurring/OneTime repository 查询不再依赖 shadow discriminator：Prisma 直接以 JSON path 查询 `schedule.kind`，PowerSync 以 `json_extract(schedule, '$.kind')` 查询。TaskOccurrence canonical row 已由 TASK-7303 完成，本票不再重建第二条 occurrence persistence 轨道。
+
+本票物理删除 TaskPlan **18 个 retired columns**：7 个 `time_config_*`、5 个 `recurrence_rule_*`、4 个展开 `reminder_config_*`，以及 `last_generated_date / generate_ahead_days` 两个死 cursor 列。Prisma mapper、PowerSync mapper/repository、PowerSync transaction test double、Data Portability Prisma/PowerSync import store 同批切换；不存在 backfill、dual-read/write、legacy decoder 或 runtime compatibility fallback。Portable TaskPlan 同步收敛为 canonical `schedule + reminderConfig`，strict contract 明确拒绝旧 `taskType / timeConfig / recurrenceRule` backup shape；PowerSync export/import/repeated-import round-trip 证明新形状可迁移且不会复活旧列。
+
+为防止回流，Database schema test 锁定 `schedule Json + reminder_config` 并逐项禁止 18 个旧物理列；PowerSync schema test 同步锁定 canonical TEXT columns 与旧列不存在；Data Portability SQL/round-trip tests 进一步断言旧列不再出现在写入和恢复结果中。真实 PostgreSQL integration 不仅在共享 test DB destructive-sync 后 **6 files / 31 tests PASS**，还在独立临时空数据库从零创建 extension + `db push` 后再次 **6/31 PASS（direct Vitest RC=0）**，随后临时库已删除，证明 closure 不依赖历史 schema/row residue。
+
+本地验收：Task unit **74 files / 590 tests PASS**（旧 expanded-column mapper compatibility tests 被删除并替换为 canonical mapper/fail-closed tests）；PostgreSQL integration **6/31 PASS**，fresh DB **6/31 PASS**；Contracts **85/581 PASS**；Data Portability **36/148 PASS**；Database **11/37 PASS**；PowerSync schema **1/7 PASS**；Prisma validate PASS；Task / Contracts / Data Portability direct typecheck PASS；Task build PASS；Data Portability direct build PASS；Task lint **0 errors / 52 warnings**，受影响 Contracts/Data Portability/Database/PowerSync lint **0 errors**。Production persistence residual scan 对 retired TaskPlan physical symbols **0 命中**；剩余字符串仅存在于 anti-resurrection assertions。
+
 ### TASK-7306 — Application / HTTP / IPC / AI cutover
 
 - Create/Update/Query 迁移到 Plan/Occurrence contract；
@@ -211,11 +219,11 @@ full CI exact-head
 - [x] TASK-7302
 - [x] TASK-7303
 - [x] TASK-7304
-- [ ] TASK-7305
+- [x] TASK-7305
 - [ ] TASK-7306
 - [ ] TASK-7307
 - [ ] TASK-7308
 - [ ] TASK-7309
 - [ ] TASK-7310
 
-**Next:** TASK-7305 is now the sole next Task dependency: complete the remaining TaskPlan persistence single-track cutover across Prisma + PowerSync, persist canonical schedule/reminder/checklist truth, and physically delete the dead flattened time/recurrence/reminder columns plus `last_generated_date / generate_ahead_days`. TASK-7303 already landed the canonical occurrence-row slice and TASK-7304 removed runtime cursor ownership; do not retain compatibility readers/backfill because ADR-111 requires destructive cutover. After fresh DB/PowerSync/portable parity is proven, proceed to TASK-7306 application/HTTP/IPC/AI cutover.
+**Next:** TASK-7306 is now the sole next Task dependency: switch Create/Update/Query, HTTP/IPC, Planner/Scheduling projections and AI Task draft consumers to the canonical TaskPlan/TaskOccurrence contract, then delete legacy QueryValidator status/dueDate and compatibility DTO surfaces. TASK-7305 has completed Prisma/PowerSync single-track persistence with fresh-DB and portable round-trip proof; do not reintroduce persistence adapters while cutting application consumers over.

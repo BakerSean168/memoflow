@@ -118513,27 +118513,11 @@ export namespace Prisma {
   }
 
   export type TaskPlanAvgAggregateOutputType = {
-    timeConfigDurationMinutes: number | null
-    timeConfigTimePoint: number | null
-    timeConfigTimeRangeStart: number | null
-    timeConfigTimeRangeEnd: number | null
-    recurrenceRuleInterval: number | null
-    recurrenceRuleCount: number | null
-    reminderConfigTimeOffsetMinutes: number | null
-    generateAheadDays: number | null
     goalRecordValue: number | null
     version: number | null
   }
 
   export type TaskPlanSumAggregateOutputType = {
-    timeConfigDurationMinutes: number | null
-    timeConfigTimePoint: number | null
-    timeConfigTimeRangeStart: number | null
-    timeConfigTimeRangeEnd: number | null
-    recurrenceRuleInterval: number | null
-    recurrenceRuleCount: number | null
-    reminderConfigTimeOffsetMinutes: number | null
-    generateAheadDays: number | null
     goalRecordValue: number | null
     version: number | null
   }
@@ -118550,24 +118534,7 @@ export namespace Prisma {
     archivedAt: Date | null
     abandonedReason: string | null
     importance: string | null
-    timeConfigType: string | null
-    timeConfigStartTime: Date | null
-    timeConfigEndTime: Date | null
-    timeConfigDurationMinutes: number | null
-    timeConfigTimePoint: number | null
-    timeConfigTimeRangeStart: number | null
-    timeConfigTimeRangeEnd: number | null
-    recurrenceRuleType: string | null
-    recurrenceRuleInterval: number | null
-    recurrenceRuleDaysOfWeek: string | null
-    recurrenceRuleEndDate: Date | null
-    recurrenceRuleCount: number | null
-    reminderConfigEnabled: boolean | null
-    reminderConfigTimeOffsetMinutes: number | null
-    reminderConfigUnit: string | null
-    reminderConfigChannel: string | null
-    lastGeneratedDate: Date | null
-    generateAheadDays: number | null
+    reminderConfig: string | null
     goalId: string | null
     keyResultId: string | null
     goalRecordValue: number | null
@@ -118591,24 +118558,7 @@ export namespace Prisma {
     archivedAt: Date | null
     abandonedReason: string | null
     importance: string | null
-    timeConfigType: string | null
-    timeConfigStartTime: Date | null
-    timeConfigEndTime: Date | null
-    timeConfigDurationMinutes: number | null
-    timeConfigTimePoint: number | null
-    timeConfigTimeRangeStart: number | null
-    timeConfigTimeRangeEnd: number | null
-    recurrenceRuleType: string | null
-    recurrenceRuleInterval: number | null
-    recurrenceRuleDaysOfWeek: string | null
-    recurrenceRuleEndDate: Date | null
-    recurrenceRuleCount: number | null
-    reminderConfigEnabled: boolean | null
-    reminderConfigTimeOffsetMinutes: number | null
-    reminderConfigUnit: string | null
-    reminderConfigChannel: string | null
-    lastGeneratedDate: Date | null
-    generateAheadDays: number | null
+    reminderConfig: string | null
     goalId: string | null
     keyResultId: string | null
     goalRecordValue: number | null
@@ -118632,24 +118582,8 @@ export namespace Prisma {
     archivedAt: number
     abandonedReason: number
     importance: number
-    timeConfigType: number
-    timeConfigStartTime: number
-    timeConfigEndTime: number
-    timeConfigDurationMinutes: number
-    timeConfigTimePoint: number
-    timeConfigTimeRangeStart: number
-    timeConfigTimeRangeEnd: number
-    recurrenceRuleType: number
-    recurrenceRuleInterval: number
-    recurrenceRuleDaysOfWeek: number
-    recurrenceRuleEndDate: number
-    recurrenceRuleCount: number
-    reminderConfigEnabled: number
-    reminderConfigTimeOffsetMinutes: number
-    reminderConfigUnit: number
-    reminderConfigChannel: number
-    lastGeneratedDate: number
-    generateAheadDays: number
+    schedule: number
+    reminderConfig: number
     goalId: number
     keyResultId: number
     goalRecordValue: number
@@ -118664,27 +118598,11 @@ export namespace Prisma {
 
 
   export type TaskPlanAvgAggregateInputType = {
-    timeConfigDurationMinutes?: true
-    timeConfigTimePoint?: true
-    timeConfigTimeRangeStart?: true
-    timeConfigTimeRangeEnd?: true
-    recurrenceRuleInterval?: true
-    recurrenceRuleCount?: true
-    reminderConfigTimeOffsetMinutes?: true
-    generateAheadDays?: true
     goalRecordValue?: true
     version?: true
   }
 
   export type TaskPlanSumAggregateInputType = {
-    timeConfigDurationMinutes?: true
-    timeConfigTimePoint?: true
-    timeConfigTimeRangeStart?: true
-    timeConfigTimeRangeEnd?: true
-    recurrenceRuleInterval?: true
-    recurrenceRuleCount?: true
-    reminderConfigTimeOffsetMinutes?: true
-    generateAheadDays?: true
     goalRecordValue?: true
     version?: true
   }
@@ -118701,24 +118619,7 @@ export namespace Prisma {
     archivedAt?: true
     abandonedReason?: true
     importance?: true
-    timeConfigType?: true
-    timeConfigStartTime?: true
-    timeConfigEndTime?: true
-    timeConfigDurationMinutes?: true
-    timeConfigTimePoint?: true
-    timeConfigTimeRangeStart?: true
-    timeConfigTimeRangeEnd?: true
-    recurrenceRuleType?: true
-    recurrenceRuleInterval?: true
-    recurrenceRuleDaysOfWeek?: true
-    recurrenceRuleEndDate?: true
-    recurrenceRuleCount?: true
-    reminderConfigEnabled?: true
-    reminderConfigTimeOffsetMinutes?: true
-    reminderConfigUnit?: true
-    reminderConfigChannel?: true
-    lastGeneratedDate?: true
-    generateAheadDays?: true
+    reminderConfig?: true
     goalId?: true
     keyResultId?: true
     goalRecordValue?: true
@@ -118742,24 +118643,7 @@ export namespace Prisma {
     archivedAt?: true
     abandonedReason?: true
     importance?: true
-    timeConfigType?: true
-    timeConfigStartTime?: true
-    timeConfigEndTime?: true
-    timeConfigDurationMinutes?: true
-    timeConfigTimePoint?: true
-    timeConfigTimeRangeStart?: true
-    timeConfigTimeRangeEnd?: true
-    recurrenceRuleType?: true
-    recurrenceRuleInterval?: true
-    recurrenceRuleDaysOfWeek?: true
-    recurrenceRuleEndDate?: true
-    recurrenceRuleCount?: true
-    reminderConfigEnabled?: true
-    reminderConfigTimeOffsetMinutes?: true
-    reminderConfigUnit?: true
-    reminderConfigChannel?: true
-    lastGeneratedDate?: true
-    generateAheadDays?: true
+    reminderConfig?: true
     goalId?: true
     keyResultId?: true
     goalRecordValue?: true
@@ -118783,24 +118667,8 @@ export namespace Prisma {
     archivedAt?: true
     abandonedReason?: true
     importance?: true
-    timeConfigType?: true
-    timeConfigStartTime?: true
-    timeConfigEndTime?: true
-    timeConfigDurationMinutes?: true
-    timeConfigTimePoint?: true
-    timeConfigTimeRangeStart?: true
-    timeConfigTimeRangeEnd?: true
-    recurrenceRuleType?: true
-    recurrenceRuleInterval?: true
-    recurrenceRuleDaysOfWeek?: true
-    recurrenceRuleEndDate?: true
-    recurrenceRuleCount?: true
-    reminderConfigEnabled?: true
-    reminderConfigTimeOffsetMinutes?: true
-    reminderConfigUnit?: true
-    reminderConfigChannel?: true
-    lastGeneratedDate?: true
-    generateAheadDays?: true
+    schedule?: true
+    reminderConfig?: true
     goalId?: true
     keyResultId?: true
     goalRecordValue?: true
@@ -118911,24 +118779,8 @@ export namespace Prisma {
     archivedAt: Date | null
     abandonedReason: string | null
     importance: string
-    timeConfigType: string | null
-    timeConfigStartTime: Date | null
-    timeConfigEndTime: Date | null
-    timeConfigDurationMinutes: number | null
-    timeConfigTimePoint: number | null
-    timeConfigTimeRangeStart: number | null
-    timeConfigTimeRangeEnd: number | null
-    recurrenceRuleType: string | null
-    recurrenceRuleInterval: number | null
-    recurrenceRuleDaysOfWeek: string | null
-    recurrenceRuleEndDate: Date | null
-    recurrenceRuleCount: number | null
-    reminderConfigEnabled: boolean | null
-    reminderConfigTimeOffsetMinutes: number | null
-    reminderConfigUnit: string | null
-    reminderConfigChannel: string | null
-    lastGeneratedDate: Date | null
-    generateAheadDays: number | null
+    schedule: JsonValue
+    reminderConfig: string | null
     goalId: string | null
     keyResultId: string | null
     goalRecordValue: number | null
@@ -118971,24 +118823,8 @@ export namespace Prisma {
     archivedAt?: boolean
     abandonedReason?: boolean
     importance?: boolean
-    timeConfigType?: boolean
-    timeConfigStartTime?: boolean
-    timeConfigEndTime?: boolean
-    timeConfigDurationMinutes?: boolean
-    timeConfigTimePoint?: boolean
-    timeConfigTimeRangeStart?: boolean
-    timeConfigTimeRangeEnd?: boolean
-    recurrenceRuleType?: boolean
-    recurrenceRuleInterval?: boolean
-    recurrenceRuleDaysOfWeek?: boolean
-    recurrenceRuleEndDate?: boolean
-    recurrenceRuleCount?: boolean
-    reminderConfigEnabled?: boolean
-    reminderConfigTimeOffsetMinutes?: boolean
-    reminderConfigUnit?: boolean
-    reminderConfigChannel?: boolean
-    lastGeneratedDate?: boolean
-    generateAheadDays?: boolean
+    schedule?: boolean
+    reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
     goalRecordValue?: boolean
@@ -119018,24 +118854,8 @@ export namespace Prisma {
     archivedAt?: boolean
     abandonedReason?: boolean
     importance?: boolean
-    timeConfigType?: boolean
-    timeConfigStartTime?: boolean
-    timeConfigEndTime?: boolean
-    timeConfigDurationMinutes?: boolean
-    timeConfigTimePoint?: boolean
-    timeConfigTimeRangeStart?: boolean
-    timeConfigTimeRangeEnd?: boolean
-    recurrenceRuleType?: boolean
-    recurrenceRuleInterval?: boolean
-    recurrenceRuleDaysOfWeek?: boolean
-    recurrenceRuleEndDate?: boolean
-    recurrenceRuleCount?: boolean
-    reminderConfigEnabled?: boolean
-    reminderConfigTimeOffsetMinutes?: boolean
-    reminderConfigUnit?: boolean
-    reminderConfigChannel?: boolean
-    lastGeneratedDate?: boolean
-    generateAheadDays?: boolean
+    schedule?: boolean
+    reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
     goalRecordValue?: boolean
@@ -119061,24 +118881,8 @@ export namespace Prisma {
     archivedAt?: boolean
     abandonedReason?: boolean
     importance?: boolean
-    timeConfigType?: boolean
-    timeConfigStartTime?: boolean
-    timeConfigEndTime?: boolean
-    timeConfigDurationMinutes?: boolean
-    timeConfigTimePoint?: boolean
-    timeConfigTimeRangeStart?: boolean
-    timeConfigTimeRangeEnd?: boolean
-    recurrenceRuleType?: boolean
-    recurrenceRuleInterval?: boolean
-    recurrenceRuleDaysOfWeek?: boolean
-    recurrenceRuleEndDate?: boolean
-    recurrenceRuleCount?: boolean
-    reminderConfigEnabled?: boolean
-    reminderConfigTimeOffsetMinutes?: boolean
-    reminderConfigUnit?: boolean
-    reminderConfigChannel?: boolean
-    lastGeneratedDate?: boolean
-    generateAheadDays?: boolean
+    schedule?: boolean
+    reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
     goalRecordValue?: boolean
@@ -119104,24 +118908,8 @@ export namespace Prisma {
     archivedAt?: boolean
     abandonedReason?: boolean
     importance?: boolean
-    timeConfigType?: boolean
-    timeConfigStartTime?: boolean
-    timeConfigEndTime?: boolean
-    timeConfigDurationMinutes?: boolean
-    timeConfigTimePoint?: boolean
-    timeConfigTimeRangeStart?: boolean
-    timeConfigTimeRangeEnd?: boolean
-    recurrenceRuleType?: boolean
-    recurrenceRuleInterval?: boolean
-    recurrenceRuleDaysOfWeek?: boolean
-    recurrenceRuleEndDate?: boolean
-    recurrenceRuleCount?: boolean
-    reminderConfigEnabled?: boolean
-    reminderConfigTimeOffsetMinutes?: boolean
-    reminderConfigUnit?: boolean
-    reminderConfigChannel?: boolean
-    lastGeneratedDate?: boolean
-    generateAheadDays?: boolean
+    schedule?: boolean
+    reminderConfig?: boolean
     goalId?: boolean
     keyResultId?: boolean
     goalRecordValue?: boolean
@@ -119133,7 +118921,7 @@ export namespace Prisma {
     deletedAt?: boolean
   }
 
-  export type TaskPlanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "status" | "outcome" | "completionPolicy" | "closedAt" | "archivedAt" | "abandonedReason" | "importance" | "timeConfigType" | "timeConfigStartTime" | "timeConfigEndTime" | "timeConfigDurationMinutes" | "timeConfigTimePoint" | "timeConfigTimeRangeStart" | "timeConfigTimeRangeEnd" | "recurrenceRuleType" | "recurrenceRuleInterval" | "recurrenceRuleDaysOfWeek" | "recurrenceRuleEndDate" | "recurrenceRuleCount" | "reminderConfigEnabled" | "reminderConfigTimeOffsetMinutes" | "reminderConfigUnit" | "reminderConfigChannel" | "lastGeneratedDate" | "generateAheadDays" | "goalId" | "keyResultId" | "goalRecordValue" | "goalProgressTrigger" | "checklist" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["taskPlan"]>
+  export type TaskPlanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "name" | "description" | "status" | "outcome" | "completionPolicy" | "closedAt" | "archivedAt" | "abandonedReason" | "importance" | "schedule" | "reminderConfig" | "goalId" | "keyResultId" | "goalRecordValue" | "goalProgressTrigger" | "checklist" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["taskPlan"]>
   export type TaskPlanInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
     keyResult?: boolean | TaskPlan$keyResultArgs<ExtArgs>
@@ -119181,33 +118969,14 @@ export namespace Prisma {
        * ImportanceLevel
        */
       importance: string
-      timeConfigType: string | null
-      timeConfigStartTime: Date | null
-      timeConfigEndTime: Date | null
-      timeConfigDurationMinutes: number | null
       /**
-       * 时间点（分钟数，如 540 = 9:00）
+       * TaskPlanSchedule canonical JSON
        */
-      timeConfigTimePoint: number | null
+      schedule: Prisma.JsonValue
       /**
-       * 时间段开始（分钟数）
+       * JSON: TaskReminderConfig
        */
-      timeConfigTimeRangeStart: number | null
-      /**
-       * 时间段结束（分钟数）
-       */
-      timeConfigTimeRangeEnd: number | null
-      recurrenceRuleType: string | null
-      recurrenceRuleInterval: number | null
-      recurrenceRuleDaysOfWeek: string | null
-      recurrenceRuleEndDate: Date | null
-      recurrenceRuleCount: number | null
-      reminderConfigEnabled: boolean | null
-      reminderConfigTimeOffsetMinutes: number | null
-      reminderConfigUnit: string | null
-      reminderConfigChannel: string | null
-      lastGeneratedDate: Date | null
-      generateAheadDays: number | null
+      reminderConfig: string | null
       goalId: string | null
       keyResultId: string | null
       goalRecordValue: number | null
@@ -119659,24 +119428,8 @@ export namespace Prisma {
     readonly archivedAt: FieldRef<"TaskPlan", 'DateTime'>
     readonly abandonedReason: FieldRef<"TaskPlan", 'String'>
     readonly importance: FieldRef<"TaskPlan", 'String'>
-    readonly timeConfigType: FieldRef<"TaskPlan", 'String'>
-    readonly timeConfigStartTime: FieldRef<"TaskPlan", 'DateTime'>
-    readonly timeConfigEndTime: FieldRef<"TaskPlan", 'DateTime'>
-    readonly timeConfigDurationMinutes: FieldRef<"TaskPlan", 'Int'>
-    readonly timeConfigTimePoint: FieldRef<"TaskPlan", 'Int'>
-    readonly timeConfigTimeRangeStart: FieldRef<"TaskPlan", 'Int'>
-    readonly timeConfigTimeRangeEnd: FieldRef<"TaskPlan", 'Int'>
-    readonly recurrenceRuleType: FieldRef<"TaskPlan", 'String'>
-    readonly recurrenceRuleInterval: FieldRef<"TaskPlan", 'Int'>
-    readonly recurrenceRuleDaysOfWeek: FieldRef<"TaskPlan", 'String'>
-    readonly recurrenceRuleEndDate: FieldRef<"TaskPlan", 'DateTime'>
-    readonly recurrenceRuleCount: FieldRef<"TaskPlan", 'Int'>
-    readonly reminderConfigEnabled: FieldRef<"TaskPlan", 'Boolean'>
-    readonly reminderConfigTimeOffsetMinutes: FieldRef<"TaskPlan", 'Int'>
-    readonly reminderConfigUnit: FieldRef<"TaskPlan", 'String'>
-    readonly reminderConfigChannel: FieldRef<"TaskPlan", 'String'>
-    readonly lastGeneratedDate: FieldRef<"TaskPlan", 'DateTime'>
-    readonly generateAheadDays: FieldRef<"TaskPlan", 'Int'>
+    readonly schedule: FieldRef<"TaskPlan", 'Json'>
+    readonly reminderConfig: FieldRef<"TaskPlan", 'String'>
     readonly goalId: FieldRef<"TaskPlan", 'String'>
     readonly keyResultId: FieldRef<"TaskPlan", 'String'>
     readonly goalRecordValue: FieldRef<"TaskPlan", 'Float'>
@@ -129185,24 +128938,8 @@ export namespace Prisma {
     archivedAt: 'archivedAt',
     abandonedReason: 'abandonedReason',
     importance: 'importance',
-    timeConfigType: 'timeConfigType',
-    timeConfigStartTime: 'timeConfigStartTime',
-    timeConfigEndTime: 'timeConfigEndTime',
-    timeConfigDurationMinutes: 'timeConfigDurationMinutes',
-    timeConfigTimePoint: 'timeConfigTimePoint',
-    timeConfigTimeRangeStart: 'timeConfigTimeRangeStart',
-    timeConfigTimeRangeEnd: 'timeConfigTimeRangeEnd',
-    recurrenceRuleType: 'recurrenceRuleType',
-    recurrenceRuleInterval: 'recurrenceRuleInterval',
-    recurrenceRuleDaysOfWeek: 'recurrenceRuleDaysOfWeek',
-    recurrenceRuleEndDate: 'recurrenceRuleEndDate',
-    recurrenceRuleCount: 'recurrenceRuleCount',
-    reminderConfigEnabled: 'reminderConfigEnabled',
-    reminderConfigTimeOffsetMinutes: 'reminderConfigTimeOffsetMinutes',
-    reminderConfigUnit: 'reminderConfigUnit',
-    reminderConfigChannel: 'reminderConfigChannel',
-    lastGeneratedDate: 'lastGeneratedDate',
-    generateAheadDays: 'generateAheadDays',
+    schedule: 'schedule',
+    reminderConfig: 'reminderConfig',
     goalId: 'goalId',
     keyResultId: 'keyResultId',
     goalRecordValue: 'goalRecordValue',
@@ -137945,24 +137682,8 @@ export namespace Prisma {
     archivedAt?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
     abandonedReason?: StringNullableFilter<"TaskPlan"> | string | null
     importance?: StringFilter<"TaskPlan"> | string
-    timeConfigType?: StringNullableFilter<"TaskPlan"> | string | null
-    timeConfigStartTime?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    timeConfigEndTime?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    timeConfigDurationMinutes?: IntNullableFilter<"TaskPlan"> | number | null
-    timeConfigTimePoint?: IntNullableFilter<"TaskPlan"> | number | null
-    timeConfigTimeRangeStart?: IntNullableFilter<"TaskPlan"> | number | null
-    timeConfigTimeRangeEnd?: IntNullableFilter<"TaskPlan"> | number | null
-    recurrenceRuleType?: StringNullableFilter<"TaskPlan"> | string | null
-    recurrenceRuleInterval?: IntNullableFilter<"TaskPlan"> | number | null
-    recurrenceRuleDaysOfWeek?: StringNullableFilter<"TaskPlan"> | string | null
-    recurrenceRuleEndDate?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    recurrenceRuleCount?: IntNullableFilter<"TaskPlan"> | number | null
-    reminderConfigEnabled?: BoolNullableFilter<"TaskPlan"> | boolean | null
-    reminderConfigTimeOffsetMinutes?: IntNullableFilter<"TaskPlan"> | number | null
-    reminderConfigUnit?: StringNullableFilter<"TaskPlan"> | string | null
-    reminderConfigChannel?: StringNullableFilter<"TaskPlan"> | string | null
-    lastGeneratedDate?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    generateAheadDays?: IntNullableFilter<"TaskPlan"> | number | null
+    schedule?: JsonFilter<"TaskPlan">
+    reminderConfig?: StringNullableFilter<"TaskPlan"> | string | null
     goalId?: StringNullableFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableFilter<"TaskPlan"> | string | null
     goalRecordValue?: FloatNullableFilter<"TaskPlan"> | number | null
@@ -137991,24 +137712,8 @@ export namespace Prisma {
     archivedAt?: SortOrderInput | SortOrder
     abandonedReason?: SortOrderInput | SortOrder
     importance?: SortOrder
-    timeConfigType?: SortOrderInput | SortOrder
-    timeConfigStartTime?: SortOrderInput | SortOrder
-    timeConfigEndTime?: SortOrderInput | SortOrder
-    timeConfigDurationMinutes?: SortOrderInput | SortOrder
-    timeConfigTimePoint?: SortOrderInput | SortOrder
-    timeConfigTimeRangeStart?: SortOrderInput | SortOrder
-    timeConfigTimeRangeEnd?: SortOrderInput | SortOrder
-    recurrenceRuleType?: SortOrderInput | SortOrder
-    recurrenceRuleInterval?: SortOrderInput | SortOrder
-    recurrenceRuleDaysOfWeek?: SortOrderInput | SortOrder
-    recurrenceRuleEndDate?: SortOrderInput | SortOrder
-    recurrenceRuleCount?: SortOrderInput | SortOrder
-    reminderConfigEnabled?: SortOrderInput | SortOrder
-    reminderConfigTimeOffsetMinutes?: SortOrderInput | SortOrder
-    reminderConfigUnit?: SortOrderInput | SortOrder
-    reminderConfigChannel?: SortOrderInput | SortOrder
-    lastGeneratedDate?: SortOrderInput | SortOrder
-    generateAheadDays?: SortOrderInput | SortOrder
+    schedule?: SortOrder
+    reminderConfig?: SortOrderInput | SortOrder
     goalId?: SortOrderInput | SortOrder
     keyResultId?: SortOrderInput | SortOrder
     goalRecordValue?: SortOrderInput | SortOrder
@@ -138041,24 +137746,8 @@ export namespace Prisma {
     archivedAt?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
     abandonedReason?: StringNullableFilter<"TaskPlan"> | string | null
     importance?: StringFilter<"TaskPlan"> | string
-    timeConfigType?: StringNullableFilter<"TaskPlan"> | string | null
-    timeConfigStartTime?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    timeConfigEndTime?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    timeConfigDurationMinutes?: IntNullableFilter<"TaskPlan"> | number | null
-    timeConfigTimePoint?: IntNullableFilter<"TaskPlan"> | number | null
-    timeConfigTimeRangeStart?: IntNullableFilter<"TaskPlan"> | number | null
-    timeConfigTimeRangeEnd?: IntNullableFilter<"TaskPlan"> | number | null
-    recurrenceRuleType?: StringNullableFilter<"TaskPlan"> | string | null
-    recurrenceRuleInterval?: IntNullableFilter<"TaskPlan"> | number | null
-    recurrenceRuleDaysOfWeek?: StringNullableFilter<"TaskPlan"> | string | null
-    recurrenceRuleEndDate?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    recurrenceRuleCount?: IntNullableFilter<"TaskPlan"> | number | null
-    reminderConfigEnabled?: BoolNullableFilter<"TaskPlan"> | boolean | null
-    reminderConfigTimeOffsetMinutes?: IntNullableFilter<"TaskPlan"> | number | null
-    reminderConfigUnit?: StringNullableFilter<"TaskPlan"> | string | null
-    reminderConfigChannel?: StringNullableFilter<"TaskPlan"> | string | null
-    lastGeneratedDate?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    generateAheadDays?: IntNullableFilter<"TaskPlan"> | number | null
+    schedule?: JsonFilter<"TaskPlan">
+    reminderConfig?: StringNullableFilter<"TaskPlan"> | string | null
     goalId?: StringNullableFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableFilter<"TaskPlan"> | string | null
     goalRecordValue?: FloatNullableFilter<"TaskPlan"> | number | null
@@ -138087,24 +137776,8 @@ export namespace Prisma {
     archivedAt?: SortOrderInput | SortOrder
     abandonedReason?: SortOrderInput | SortOrder
     importance?: SortOrder
-    timeConfigType?: SortOrderInput | SortOrder
-    timeConfigStartTime?: SortOrderInput | SortOrder
-    timeConfigEndTime?: SortOrderInput | SortOrder
-    timeConfigDurationMinutes?: SortOrderInput | SortOrder
-    timeConfigTimePoint?: SortOrderInput | SortOrder
-    timeConfigTimeRangeStart?: SortOrderInput | SortOrder
-    timeConfigTimeRangeEnd?: SortOrderInput | SortOrder
-    recurrenceRuleType?: SortOrderInput | SortOrder
-    recurrenceRuleInterval?: SortOrderInput | SortOrder
-    recurrenceRuleDaysOfWeek?: SortOrderInput | SortOrder
-    recurrenceRuleEndDate?: SortOrderInput | SortOrder
-    recurrenceRuleCount?: SortOrderInput | SortOrder
-    reminderConfigEnabled?: SortOrderInput | SortOrder
-    reminderConfigTimeOffsetMinutes?: SortOrderInput | SortOrder
-    reminderConfigUnit?: SortOrderInput | SortOrder
-    reminderConfigChannel?: SortOrderInput | SortOrder
-    lastGeneratedDate?: SortOrderInput | SortOrder
-    generateAheadDays?: SortOrderInput | SortOrder
+    schedule?: SortOrder
+    reminderConfig?: SortOrderInput | SortOrder
     goalId?: SortOrderInput | SortOrder
     keyResultId?: SortOrderInput | SortOrder
     goalRecordValue?: SortOrderInput | SortOrder
@@ -138136,24 +137809,8 @@ export namespace Prisma {
     archivedAt?: DateTimeNullableWithAggregatesFilter<"TaskPlan"> | Date | string | null
     abandonedReason?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
     importance?: StringWithAggregatesFilter<"TaskPlan"> | string
-    timeConfigType?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
-    timeConfigStartTime?: DateTimeNullableWithAggregatesFilter<"TaskPlan"> | Date | string | null
-    timeConfigEndTime?: DateTimeNullableWithAggregatesFilter<"TaskPlan"> | Date | string | null
-    timeConfigDurationMinutes?: IntNullableWithAggregatesFilter<"TaskPlan"> | number | null
-    timeConfigTimePoint?: IntNullableWithAggregatesFilter<"TaskPlan"> | number | null
-    timeConfigTimeRangeStart?: IntNullableWithAggregatesFilter<"TaskPlan"> | number | null
-    timeConfigTimeRangeEnd?: IntNullableWithAggregatesFilter<"TaskPlan"> | number | null
-    recurrenceRuleType?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
-    recurrenceRuleInterval?: IntNullableWithAggregatesFilter<"TaskPlan"> | number | null
-    recurrenceRuleDaysOfWeek?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
-    recurrenceRuleEndDate?: DateTimeNullableWithAggregatesFilter<"TaskPlan"> | Date | string | null
-    recurrenceRuleCount?: IntNullableWithAggregatesFilter<"TaskPlan"> | number | null
-    reminderConfigEnabled?: BoolNullableWithAggregatesFilter<"TaskPlan"> | boolean | null
-    reminderConfigTimeOffsetMinutes?: IntNullableWithAggregatesFilter<"TaskPlan"> | number | null
-    reminderConfigUnit?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
-    reminderConfigChannel?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
-    lastGeneratedDate?: DateTimeNullableWithAggregatesFilter<"TaskPlan"> | Date | string | null
-    generateAheadDays?: IntNullableWithAggregatesFilter<"TaskPlan"> | number | null
+    schedule?: JsonWithAggregatesFilter<"TaskPlan">
+    reminderConfig?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
     goalId?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableWithAggregatesFilter<"TaskPlan"> | string | null
     goalRecordValue?: FloatNullableWithAggregatesFilter<"TaskPlan"> | number | null
@@ -148329,24 +147986,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -148373,24 +148014,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
     goalRecordValue?: number | null
@@ -148416,24 +148041,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -148460,24 +148069,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -148504,24 +148097,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
     goalRecordValue?: number | null
@@ -148544,24 +148121,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -148583,24 +148144,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -155258,24 +154803,8 @@ export namespace Prisma {
     archivedAt?: SortOrder
     abandonedReason?: SortOrder
     importance?: SortOrder
-    timeConfigType?: SortOrder
-    timeConfigStartTime?: SortOrder
-    timeConfigEndTime?: SortOrder
-    timeConfigDurationMinutes?: SortOrder
-    timeConfigTimePoint?: SortOrder
-    timeConfigTimeRangeStart?: SortOrder
-    timeConfigTimeRangeEnd?: SortOrder
-    recurrenceRuleType?: SortOrder
-    recurrenceRuleInterval?: SortOrder
-    recurrenceRuleDaysOfWeek?: SortOrder
-    recurrenceRuleEndDate?: SortOrder
-    recurrenceRuleCount?: SortOrder
-    reminderConfigEnabled?: SortOrder
-    reminderConfigTimeOffsetMinutes?: SortOrder
-    reminderConfigUnit?: SortOrder
-    reminderConfigChannel?: SortOrder
-    lastGeneratedDate?: SortOrder
-    generateAheadDays?: SortOrder
+    schedule?: SortOrder
+    reminderConfig?: SortOrder
     goalId?: SortOrder
     keyResultId?: SortOrder
     goalRecordValue?: SortOrder
@@ -155288,14 +154817,6 @@ export namespace Prisma {
   }
 
   export type TaskPlanAvgOrderByAggregateInput = {
-    timeConfigDurationMinutes?: SortOrder
-    timeConfigTimePoint?: SortOrder
-    timeConfigTimeRangeStart?: SortOrder
-    timeConfigTimeRangeEnd?: SortOrder
-    recurrenceRuleInterval?: SortOrder
-    recurrenceRuleCount?: SortOrder
-    reminderConfigTimeOffsetMinutes?: SortOrder
-    generateAheadDays?: SortOrder
     goalRecordValue?: SortOrder
     version?: SortOrder
   }
@@ -155312,24 +154833,7 @@ export namespace Prisma {
     archivedAt?: SortOrder
     abandonedReason?: SortOrder
     importance?: SortOrder
-    timeConfigType?: SortOrder
-    timeConfigStartTime?: SortOrder
-    timeConfigEndTime?: SortOrder
-    timeConfigDurationMinutes?: SortOrder
-    timeConfigTimePoint?: SortOrder
-    timeConfigTimeRangeStart?: SortOrder
-    timeConfigTimeRangeEnd?: SortOrder
-    recurrenceRuleType?: SortOrder
-    recurrenceRuleInterval?: SortOrder
-    recurrenceRuleDaysOfWeek?: SortOrder
-    recurrenceRuleEndDate?: SortOrder
-    recurrenceRuleCount?: SortOrder
-    reminderConfigEnabled?: SortOrder
-    reminderConfigTimeOffsetMinutes?: SortOrder
-    reminderConfigUnit?: SortOrder
-    reminderConfigChannel?: SortOrder
-    lastGeneratedDate?: SortOrder
-    generateAheadDays?: SortOrder
+    reminderConfig?: SortOrder
     goalId?: SortOrder
     keyResultId?: SortOrder
     goalRecordValue?: SortOrder
@@ -155353,24 +154857,7 @@ export namespace Prisma {
     archivedAt?: SortOrder
     abandonedReason?: SortOrder
     importance?: SortOrder
-    timeConfigType?: SortOrder
-    timeConfigStartTime?: SortOrder
-    timeConfigEndTime?: SortOrder
-    timeConfigDurationMinutes?: SortOrder
-    timeConfigTimePoint?: SortOrder
-    timeConfigTimeRangeStart?: SortOrder
-    timeConfigTimeRangeEnd?: SortOrder
-    recurrenceRuleType?: SortOrder
-    recurrenceRuleInterval?: SortOrder
-    recurrenceRuleDaysOfWeek?: SortOrder
-    recurrenceRuleEndDate?: SortOrder
-    recurrenceRuleCount?: SortOrder
-    reminderConfigEnabled?: SortOrder
-    reminderConfigTimeOffsetMinutes?: SortOrder
-    reminderConfigUnit?: SortOrder
-    reminderConfigChannel?: SortOrder
-    lastGeneratedDate?: SortOrder
-    generateAheadDays?: SortOrder
+    reminderConfig?: SortOrder
     goalId?: SortOrder
     keyResultId?: SortOrder
     goalRecordValue?: SortOrder
@@ -155383,14 +154870,6 @@ export namespace Prisma {
   }
 
   export type TaskPlanSumOrderByAggregateInput = {
-    timeConfigDurationMinutes?: SortOrder
-    timeConfigTimePoint?: SortOrder
-    timeConfigTimeRangeStart?: SortOrder
-    timeConfigTimeRangeEnd?: SortOrder
-    recurrenceRuleInterval?: SortOrder
-    recurrenceRuleCount?: SortOrder
-    reminderConfigTimeOffsetMinutes?: SortOrder
-    generateAheadDays?: SortOrder
     goalRecordValue?: SortOrder
     version?: SortOrder
   }
@@ -163343,24 +162822,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -163385,24 +162848,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
     goalRecordValue?: number | null
@@ -165631,24 +165078,8 @@ export namespace Prisma {
     archivedAt?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
     abandonedReason?: StringNullableFilter<"TaskPlan"> | string | null
     importance?: StringFilter<"TaskPlan"> | string
-    timeConfigType?: StringNullableFilter<"TaskPlan"> | string | null
-    timeConfigStartTime?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    timeConfigEndTime?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    timeConfigDurationMinutes?: IntNullableFilter<"TaskPlan"> | number | null
-    timeConfigTimePoint?: IntNullableFilter<"TaskPlan"> | number | null
-    timeConfigTimeRangeStart?: IntNullableFilter<"TaskPlan"> | number | null
-    timeConfigTimeRangeEnd?: IntNullableFilter<"TaskPlan"> | number | null
-    recurrenceRuleType?: StringNullableFilter<"TaskPlan"> | string | null
-    recurrenceRuleInterval?: IntNullableFilter<"TaskPlan"> | number | null
-    recurrenceRuleDaysOfWeek?: StringNullableFilter<"TaskPlan"> | string | null
-    recurrenceRuleEndDate?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    recurrenceRuleCount?: IntNullableFilter<"TaskPlan"> | number | null
-    reminderConfigEnabled?: BoolNullableFilter<"TaskPlan"> | boolean | null
-    reminderConfigTimeOffsetMinutes?: IntNullableFilter<"TaskPlan"> | number | null
-    reminderConfigUnit?: StringNullableFilter<"TaskPlan"> | string | null
-    reminderConfigChannel?: StringNullableFilter<"TaskPlan"> | string | null
-    lastGeneratedDate?: DateTimeNullableFilter<"TaskPlan"> | Date | string | null
-    generateAheadDays?: IntNullableFilter<"TaskPlan"> | number | null
+    schedule?: JsonFilter<"TaskPlan">
+    reminderConfig?: StringNullableFilter<"TaskPlan"> | string | null
     goalId?: StringNullableFilter<"TaskPlan"> | string | null
     keyResultId?: StringNullableFilter<"TaskPlan"> | string | null
     goalRecordValue?: FloatNullableFilter<"TaskPlan"> | number | null
@@ -170481,24 +169912,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -170523,24 +169938,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -172843,24 +172242,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -172886,24 +172269,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
     goalRecordValue?: number | null
@@ -173108,24 +172475,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -173151,24 +172502,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -188395,24 +187730,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -188438,24 +187757,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
     goalRecordValue?: number | null
@@ -188633,24 +187936,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -188676,24 +187963,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -188849,24 +188120,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -188892,24 +188147,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
     goalRecordValue?: number | null
@@ -189087,24 +188326,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -189130,24 +188353,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -190400,24 +189607,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalId?: string | null
     keyResultId?: string | null
     goalRecordValue?: number | null
@@ -191844,24 +191035,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -191886,24 +191061,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -191929,24 +191088,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalId?: NullableStringFieldUpdateOperationsInput | string | null
     keyResultId?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
@@ -193590,24 +192733,8 @@ export namespace Prisma {
     archivedAt?: Date | string | null
     abandonedReason?: string | null
     importance?: string
-    timeConfigType?: string | null
-    timeConfigStartTime?: Date | string | null
-    timeConfigEndTime?: Date | string | null
-    timeConfigDurationMinutes?: number | null
-    timeConfigTimePoint?: number | null
-    timeConfigTimeRangeStart?: number | null
-    timeConfigTimeRangeEnd?: number | null
-    recurrenceRuleType?: string | null
-    recurrenceRuleInterval?: number | null
-    recurrenceRuleDaysOfWeek?: string | null
-    recurrenceRuleEndDate?: Date | string | null
-    recurrenceRuleCount?: number | null
-    reminderConfigEnabled?: boolean | null
-    reminderConfigTimeOffsetMinutes?: number | null
-    reminderConfigUnit?: string | null
-    reminderConfigChannel?: string | null
-    lastGeneratedDate?: Date | string | null
-    generateAheadDays?: number | null
+    schedule: JsonNullValueInput | InputJsonValue
+    reminderConfig?: string | null
     goalRecordValue?: number | null
     goalProgressTrigger?: string | null
     checklist?: string | null
@@ -193651,24 +192778,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -193693,24 +192804,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null
@@ -193734,24 +192829,8 @@ export namespace Prisma {
     archivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     abandonedReason?: NullableStringFieldUpdateOperationsInput | string | null
     importance?: StringFieldUpdateOperationsInput | string
-    timeConfigType?: NullableStringFieldUpdateOperationsInput | string | null
-    timeConfigStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    timeConfigDurationMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimePoint?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeStart?: NullableIntFieldUpdateOperationsInput | number | null
-    timeConfigTimeRangeEnd?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleType?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleInterval?: NullableIntFieldUpdateOperationsInput | number | null
-    recurrenceRuleDaysOfWeek?: NullableStringFieldUpdateOperationsInput | string | null
-    recurrenceRuleEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recurrenceRuleCount?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigEnabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    reminderConfigTimeOffsetMinutes?: NullableIntFieldUpdateOperationsInput | number | null
-    reminderConfigUnit?: NullableStringFieldUpdateOperationsInput | string | null
-    reminderConfigChannel?: NullableStringFieldUpdateOperationsInput | string | null
-    lastGeneratedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    generateAheadDays?: NullableIntFieldUpdateOperationsInput | number | null
+    schedule?: JsonNullValueInput | InputJsonValue
+    reminderConfig?: NullableStringFieldUpdateOperationsInput | string | null
     goalRecordValue?: NullableFloatFieldUpdateOperationsInput | number | null
     goalProgressTrigger?: NullableStringFieldUpdateOperationsInput | string | null
     checklist?: NullableStringFieldUpdateOperationsInput | string | null

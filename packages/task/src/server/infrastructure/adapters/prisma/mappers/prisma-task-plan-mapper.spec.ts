@@ -1,360 +1,204 @@
 import { describe, expect, it } from 'vitest';
 import { aPrefixedUuid } from '@memoflow/test-utils/fixtures';
-import { PrismaTaskPlanMapper } from './prisma-task-plan-mapper';
 import type { TaskPlan as PrismaTaskPlan } from '@memoflow/database';
-import { TaskPlan } from '../../../../domain/aggregates/task-plan';
-import { TASK_TEST_TIME_CONTEXT } from '../../../../../testing';
+import { PrismaTaskPlanMapper } from './prisma-task-plan-mapper';
 
-describe('PrismaTaskPlanMapper', () => {
-  const legacyTimeConfig = (domain: TaskPlan) =>
-    domain.schedule.toLegacyTimeConfig(TASK_TEST_TIME_CONTEXT);
-  const legacyRecurrenceRule = (domain: TaskPlan) =>
-    domain.schedule.toLegacyRecurrenceRule(TASK_TEST_TIME_CONTEXT);
-  const TEMPLATE_ID_1 = aPrefixedUuid('ITaskPlanId', 'task-plan-1');
-  const TEMPLATE_ID_2 = aPrefixedUuid('ITaskPlanId', 'task-plan-2');
-  const TEMPLATE_ID_3 = aPrefixedUuid('ITaskPlanId', 'task-plan-3');
-  const IDENTITY_ID_1 = aPrefixedUuid('IdentityId', 'task-plan-owner-1');
-  const IDENTITY_ID_2 = aPrefixedUuid('IdentityId', 'task-plan-owner-2');
-  const IDENTITY_ID_3 = aPrefixedUuid('IdentityId', 'task-plan-owner-3');
-  const GOAL_ID_1 = aPrefixedUuid('GoalId', 'goal-1');
-  const KEY_RESULT_ID_1 = aPrefixedUuid('KeyResultId', 'key-result-1');
+const TEMPLATE_ID = aPrefixedUuid('ITaskPlanId', 'task-plan-canonical');
+const IDENTITY_ID = aPrefixedUuid('IdentityId', 'task-plan-owner');
+const GOAL_ID = aPrefixedUuid('GoalId', 'goal');
+const KEY_RESULT_ID = aPrefixedUuid('KeyResultId', 'key-result');
 
-  const createMinimalRow = (): PrismaTaskPlan => ({
-    id: TEMPLATE_ID_1,
-    identityId: IDENTITY_ID_1,
-    name: 'Simple Task',
+const oneTimeSchedule = {
+  kind: 'OneTime',
+  date: '2026-09-13',
+  timing: { kind: 'AllDay' },
+} as const;
+
+const recurringSchedule = {
+  kind: 'Recurring',
+  startDate: '2026-09-14',
+  timing: { kind: 'Window', start: '09:00', end: '17:00' },
+  recurrence: {
+    frequency: 'Weekly',
+    interval: 1,
+    byWeekday: [1, 3],
+    end: { kind: 'Count', count: 8 },
+  },
+} as const;
+
+const reminderConfig = {
+  enabled: true,
+  triggers: [
+    {
+      type: 'Relative',
+      absoluteTime: null,
+      relativeValue: 15,
+      relativeUnit: 'Minutes',
+    },
+    {
+      type: 'Relative',
+      absoluteTime: null,
+      relativeValue: 1,
+      relativeUnit: 'Hours',
+    },
+  ],
+} as const;
+
+function minimalRow(overrides: Partial<PrismaTaskPlan> = {}): PrismaTaskPlan {
+  return {
+    id: TEMPLATE_ID,
+    identityId: IDENTITY_ID,
+    name: 'Canonical Task',
     description: null,
-    importance: 'Moderate',
     status: 'Active',
-    version: 1,
-    createdAt: new Date('2024-01-01T00:00:00Z'),
-    updatedAt: new Date('2024-01-01T00:00:00Z'),
-    deletedAt: null,
-    // Time config fields
-    timeConfigType: 'AllDay',
-    timeConfigStartTime: new Date('2024-01-01T00:00:00Z'),
-    timeConfigEndTime: null,
-    timeConfigDurationMinutes: null,
-    timeConfigTimePoint: null,
-    timeConfigTimeRangeStart: null,
-    timeConfigTimeRangeEnd: null,
-    // Recurrence fields
-    recurrenceRuleType: null,
-    recurrenceRuleInterval: null,
-    recurrenceRuleDaysOfWeek: null,
-    recurrenceRuleDayOfMonth: null,
-    recurrenceRuleMonthOfYear: null,
-    recurrenceRuleEndDate: null,
-    recurrenceRuleCount: null,
-    // Reminder fields
-    reminderConfigEnabled: null,
-    reminderConfigTimeOffsetMinutes: null,
-    reminderConfigUnit: null,
-    reminderConfigChannel: null,
-    // Other fields
+    outcome: 'Open',
+    completionPolicy: 'AllowCorrection',
+    closedAt: null,
+    archivedAt: null,
+    abandonedReason: null,
+    importance: 'Moderate',
+    schedule: oneTimeSchedule,
+    reminderConfig: null,
     goalId: null,
     keyResultId: null,
     goalRecordValue: null,
     goalProgressTrigger: null,
     checklist: null,
-    lastGeneratedDate: null,
-    generateAheadDays: null,
-  });
-
-  const createFullRow = (): PrismaTaskPlan => ({
-    id: TEMPLATE_ID_2,
-    identityId: IDENTITY_ID_2,
-    name: 'Complex Recurring Task',
-    description: 'A task with full configuration',
-    importance: 'Important',
-    status: 'Active',
-    version: 2,
-    createdAt: new Date('2024-02-01T10:30:45Z'),
-    updatedAt: new Date('2024-02-15T14:45:30Z'),
+    version: 1,
+    createdAt: new Date('2026-09-13T00:00:00.000Z'),
+    updatedAt: new Date('2026-09-13T00:00:00.000Z'),
     deletedAt: null,
-    // Time config fields
-    timeConfigType: 'TimeRange',
-    timeConfigStartTime: new Date('2024-03-01T00:00:00Z'),
-    timeConfigEndTime: null,
-    timeConfigDurationMinutes: 60,
-    timeConfigTimePoint: null,
-    timeConfigTimeRangeStart: 540,
-    timeConfigTimeRangeEnd: 1020,
-    // Recurrence fields
-    recurrenceRuleType: 'Daily',
-    recurrenceRuleInterval: 1,
-    recurrenceRuleDaysOfWeek: JSON.stringify([]),
-    recurrenceRuleDayOfMonth: null,
-    recurrenceRuleMonthOfYear: null,
-    recurrenceRuleEndDate: new Date('2024-12-31T00:00:00Z'),
-    recurrenceRuleCount: null,
-    // Reminder fields
-    reminderConfigEnabled: true,
-    reminderConfigTimeOffsetMinutes: 15,
-    reminderConfigUnit: 'Minutes',
-    reminderConfigChannel: 'PUSH',
-    // Other fields
-    goalId: GOAL_ID_1,
-    keyResultId: KEY_RESULT_ID_1,
-    goalRecordValue: 2,
-    goalProgressTrigger: 'EachCompletion',
-    checklist: JSON.stringify([
-      { title: 'Step 1', order: 1 },
-      { title: 'Step 2', order: 2 },
-    ]),
-    lastGeneratedDate: new Date('2024-02-29T00:00:00Z'),
-    generateAheadDays: 7,
+    ...overrides,
+  } as PrismaTaskPlan;
+}
+
+describe('PrismaTaskPlanMapper canonical persistence', () => {
+  it('hydrates a one-time canonical schedule directly from Prisma JSON', () => {
+    const plan = PrismaTaskPlanMapper.toDomain(minimalRow());
+    expect(plan.schedule.toDTO()).toEqual(oneTimeSchedule);
+    expect(plan.reminderConfig).toBeNull();
   });
 
-  /** Creates a TaskPlan aggregate from a Prisma row for use with toPersistence */
-  const createTestAggregate = (rowOverrides?: Partial<PrismaTaskPlan>): TaskPlan => {
-    const row = { ...createMinimalRow(), ...rowOverrides };
-    return PrismaTaskPlanMapper.toDomain(row);
-  };
+  it('hydrates a recurring schedule without flattened recurrence columns', () => {
+    const plan = PrismaTaskPlanMapper.toDomain(minimalRow({ schedule: recurringSchedule }));
+    expect(plan.schedule.toDTO()).toEqual(recurringSchedule);
+    expect(plan.schedule.isRecurring).toBe(true);
+  });
 
-  describe('toDomain', () => {
-    it('maps minimal Prisma row to domain aggregate', () => {
-      const row = createMinimalRow();
-      const domain = PrismaTaskPlanMapper.toDomain(row);
+  it('round-trips the full multi-trigger reminder config as one JSON value', () => {
+    const row = minimalRow({ reminderConfig: JSON.stringify(reminderConfig) });
+    const plan = PrismaTaskPlanMapper.toDomain(row);
+    expect(plan.reminderConfig?.toDTO()).toEqual(reminderConfig);
+    expect(PrismaTaskPlanMapper.toPersistence(plan).reminderConfig).toBe(
+      JSON.stringify(reminderConfig),
+    );
+  });
 
-      expect(domain.id).toBe(TEMPLATE_ID_1);
-      expect(domain.title).toBe('Simple Task');
-      expect(domain.description).toBeNull();
-      expect(domain.importance).toBe('Moderate');
-      expect(domain.status).toBe('Active');
-      expect(domain.version).toBe(1);
-      expect(legacyTimeConfig(domain).timeType).toBe('AllDay');
-      expect(legacyRecurrenceRule(domain)).toBeNull();
-      expect(domain.reminderConfig).toBeNull();
-      expect(domain.goalBinding).toBeNull();
-      expect(domain.checklist).toEqual([]);
+  it('round-trips stable checklist definition identities', () => {
+    const checklist = [
+      { id: 'check-a', title: 'First', order: 0 },
+      { id: 'check-b', title: 'Second', order: 1 },
+    ];
+    const plan = PrismaTaskPlanMapper.toDomain(
+      minimalRow({ checklist: JSON.stringify(checklist) }),
+    );
+    expect(plan.checklist.map((item) => item.toDTO())).toEqual(checklist);
+    expect(JSON.parse(PrismaTaskPlanMapper.toPersistence(plan).checklist ?? '[]')).toEqual(
+      checklist,
+    );
+  });
+
+  it('round-trips Goal/KR contribution relation columns', () => {
+    const plan = PrismaTaskPlanMapper.toDomain(
+      minimalRow({
+        goalId: GOAL_ID,
+        keyResultId: KEY_RESULT_ID,
+        goalRecordValue: 2,
+        goalProgressTrigger: 'EachCompletion',
+      }),
+    );
+    expect(plan.goalBinding?.toDTO()).toEqual({
+      goalId: GOAL_ID,
+      keyResultId: KEY_RESULT_ID,
+      contribution: { value: 2, trigger: 'EachCompletion' },
     });
-
-    it('maps full Prisma row with all fields to domain', () => {
-      const row = createFullRow();
-      const domain = PrismaTaskPlanMapper.toDomain(row);
-
-      expect(domain.id).toBe(TEMPLATE_ID_2);
-      expect(domain.title).toBe('Complex Recurring Task');
-      expect(domain.toServerDTO()).not.toHaveProperty('lastGeneratedDate');
-      expect(domain.toServerDTO()).not.toHaveProperty('generateAheadDays');
-      expect(domain.description).toBe('A task with full configuration');
-      expect(domain.importance).toBe('Important');
-      expect(domain.status).toBe('Active');
-      expect(domain.version).toBe(2);
-    });
-
-    it('parses timeConfig when present', () => {
-      const row = createFullRow();
-      const domain = PrismaTaskPlanMapper.toDomain(row);
-
-      expect(legacyTimeConfig(domain)).toBeDefined();
-      expect(legacyTimeConfig(domain).timeType).toBe('TimeRange');
-      expect(legacyTimeConfig(domain).timeRange).toEqual({ start: 540, end: 1020 });
-    });
-
-    it('returns null timeConfig when not configured', () => {
-      const row = createMinimalRow();
-      const domain = PrismaTaskPlanMapper.toDomain(row);
-
-      expect(legacyTimeConfig(domain).timeType).toBe('AllDay');
-    });
-
-    it('parses recurrenceRule when present', () => {
-      const row = createFullRow();
-      const domain = PrismaTaskPlanMapper.toDomain(row);
-
-      expect(legacyRecurrenceRule(domain)).toBeDefined();
-      expect(legacyRecurrenceRule(domain)?.frequency).toBe('Daily');
-      expect(legacyRecurrenceRule(domain)?.interval).toBe(1);
-      expect(legacyRecurrenceRule(domain)?.daysOfWeek).toEqual([]);
-    });
-
-    it('returns null recurrenceRule when not configured', () => {
-      const row = createMinimalRow();
-      const domain = PrismaTaskPlanMapper.toDomain(row);
-
-      expect(legacyRecurrenceRule(domain)).toBeNull();
-    });
-
-    it('parses reminderConfig when enabled', () => {
-      const row = createFullRow();
-      const domain = PrismaTaskPlanMapper.toDomain(row);
-
-      expect(domain.reminderConfig).toBeDefined();
-      expect(domain.reminderConfig?.enabled).toBe(true);
-      expect(domain.reminderConfig?.triggers).toBeDefined();
-      expect(domain.reminderConfig?.triggers[0].relativeValue).toBe(15);
-      expect(domain.reminderConfig?.triggers[0].relativeUnit).toBe('Minutes');
-    });
-
-    it('returns null reminderConfig when disabled', () => {
-      const row = createMinimalRow();
-      const domain = PrismaTaskPlanMapper.toDomain(row);
-
-      expect(domain.reminderConfig).toBeNull();
-    });
-
-    it('reconstructs goal binding from relation columns', () => {
-      const row = createFullRow();
-      const domain = PrismaTaskPlanMapper.toDomain(row);
-
-      expect(domain.goalBinding).toBeDefined();
-      expect(domain.goalBinding?.toDTO()).toEqual({
-        goalId: GOAL_ID_1,
-        keyResultId: KEY_RESULT_ID_1,
-        contribution: { value: 2, trigger: 'EachCompletion' },
-      });
-    });
-
-    it('parses checklist from JSON', () => {
-      const row = createFullRow();
-      const domain = PrismaTaskPlanMapper.toDomain(row);
-
-      expect(domain.checklist).toHaveLength(2);
-      expect(domain.checklist[0].title).toBe('Step 1');
-      expect(domain.checklist[1].title).toBe('Step 2');
-    });
-
-    it('returns empty checklist when not configured', () => {
-      const row = createMinimalRow();
-      const domain = PrismaTaskPlanMapper.toDomain(row);
-
-      expect(domain.checklist).toEqual([]);
+    expect(PrismaTaskPlanMapper.toPersistence(plan)).toMatchObject({
+      goalId: GOAL_ID,
+      keyResultId: KEY_RESULT_ID,
+      goalRecordValue: 2,
+      goalProgressTrigger: 'EachCompletion',
     });
   });
 
-  describe('toPersistence', () => {
-    it('converts minimal aggregate to persistence format', () => {
-      const aggregate = createTestAggregate({
-        id: TEMPLATE_ID_3,
-        identityId: IDENTITY_ID_3,
-        name: 'New Task',
-        importance: 'Minor',
-      });
-
-      const persistence = PrismaTaskPlanMapper.toPersistence(aggregate);
-
-      expect(persistence.name).toBe('New Task');
-      expect(persistence.description).toBeNull();
-      expect(persistence.importance).toBe('Minor');
-      expect(persistence.timeConfigType).toBe('AllDay');
-      expect(persistence.recurrenceRuleType).toBeNull();
-      expect(persistence.reminderConfigEnabled).toBeNull();
-      expect(persistence.goalId).toBeNull();
-      expect(persistence.keyResultId).toBeNull();
-      expect(persistence.goalRecordValue).toBeNull();
-      expect(persistence.goalProgressTrigger).toBeNull();
-      expect(persistence.checklist).toBeNull();
-    });
-
-    it('writes canonical calendar dates as UTC-midnight compatibility values', () => {
-      const aggregate = createTestAggregate({
-        timeConfigStartTime: new Date('2026-03-08T00:00:00.000Z'),
-        recurrenceRuleType: 'Daily',
-        recurrenceRuleInterval: 1,
-        recurrenceRuleDaysOfWeek: JSON.stringify([]),
-        recurrenceRuleEndDate: new Date('2026-03-09T00:00:00.000Z'),
-      });
-
-      expect(String(aggregate.schedule.calendarDate)).toBe('2026-03-08');
-      expect(aggregate.schedule.recurrence?.end).toEqual({ kind: 'Until', date: '2026-03-09' });
-
-      const persistence = PrismaTaskPlanMapper.toPersistence(aggregate);
-      expect(persistence.timeConfigStartTime?.toISOString()).toBe('2026-03-08T00:00:00.000Z');
-      expect(persistence.recurrenceRuleEndDate?.toISOString()).toBe('2026-03-09T00:00:00.000Z');
-    });
-
-    it('converts full aggregate with all fields to persistence', () => {
-      const aggregate = createTestAggregate(createFullRow());
-
-      const persistence = PrismaTaskPlanMapper.toPersistence(aggregate);
-
-      expect(persistence.name).toBe('Complex Recurring Task');
-      expect(persistence.importance).toBe('Important');
-      expect(persistence.timeConfigType).toBe('TimeRange');
-      expect(persistence.timeConfigTimeRangeStart).toBe(540);
-      expect(persistence.timeConfigTimeRangeEnd).toBe(1020);
-      expect(persistence.recurrenceRuleType).toBe('Daily');
-      expect(persistence.recurrenceRuleInterval).toBe(1);
-      expect(persistence.reminderConfigEnabled).toBe(true);
-      expect(persistence.reminderConfigTimeOffsetMinutes).toBe(15);
-      expect(persistence).not.toHaveProperty('lastGeneratedDate');
-      expect(persistence).not.toHaveProperty('generateAheadDays');
-    });
-
-    it('serializes checklist and expands the goal binding', () => {
-      const aggregate = createTestAggregate(createFullRow());
-
-      const persistence = PrismaTaskPlanMapper.toPersistence(aggregate);
-
-      expect(persistence.goalId).toBe(GOAL_ID_1);
-      expect(persistence.keyResultId).toBe(KEY_RESULT_ID_1);
-      expect(persistence.goalRecordValue).toBe(2);
-      expect(persistence.goalProgressTrigger).toBe('EachCompletion');
-      expect(typeof persistence.checklist).toBe('string');
-    });
-
-    it('stringifies JSON for recurrence days of week', () => {
-      const aggregate = createTestAggregate({
-        recurrenceRuleType: 'Weekly',
-        recurrenceRuleInterval: 1,
-        recurrenceRuleDaysOfWeek: JSON.stringify([1, 3, 5]),
-      });
-
-      const persistence = PrismaTaskPlanMapper.toPersistence(aggregate);
-
-      expect(typeof persistence.recurrenceRuleDaysOfWeek).toBe('string');
-      expect(JSON.parse(persistence.recurrenceRuleDaysOfWeek!)).toEqual([1, 3, 5]);
-    });
-
-    it('handles empty checklist correctly', () => {
-      const aggregate = createTestAggregate({ checklist: null });
-
-      const persistence = PrismaTaskPlanMapper.toPersistence(aggregate);
-
-      expect(persistence.checklist).toBeNull();
-    });
-
-    it('handles null fields correctly', () => {
-      const aggregate = createTestAggregate();
-
-      const persistence = PrismaTaskPlanMapper.toPersistence(aggregate);
-
-      expect(persistence.description).toBeNull();
-      expect(persistence.timeConfigType).toBe('AllDay');
-      expect(persistence.goalId).toBeNull();
+  it('preserves lifecycle/audit fields', () => {
+    const closedAt = new Date('2026-09-20T10:00:00.000Z');
+    const archivedAt = new Date('2026-09-21T10:00:00.000Z');
+    const deletedAt = new Date('2026-09-22T10:00:00.000Z');
+    const plan = PrismaTaskPlanMapper.toDomain(
+      minimalRow({
+        status: 'Closed',
+        outcome: 'Abandoned',
+        completionPolicy: 'StrictNoBackfill',
+        closedAt,
+        archivedAt,
+        abandonedReason: 'stopped',
+        deletedAt,
+        version: 7,
+      }),
+    );
+    expect(plan.toServerDTO()).toMatchObject({
+      status: 'Closed',
+      outcome: 'Abandoned',
+      completionPolicy: 'StrictNoBackfill',
+      closedAt: closedAt.getTime(),
+      archivedAt: archivedAt.getTime(),
+      abandonedReason: 'stopped',
+      deletedAt: deletedAt.getTime(),
+      version: 7,
     });
   });
 
-  describe('Round-trip: toDomain -> toPersistence', () => {
-    it('preserves task template data integrity', () => {
-      const originalRow = createFullRow();
-      const aggregate = PrismaTaskPlanMapper.toDomain(originalRow);
-      const persistence = PrismaTaskPlanMapper.toPersistence(aggregate);
-
-      expect(persistence.name).toBe(originalRow.name);
-      expect(persistence.description).toBe(originalRow.description);
-      expect(persistence.importance).toBe(originalRow.importance);
-      expect(persistence.status).toBe(originalRow.status);
-      expect(persistence.version).toBe(originalRow.version);
-    });
+  it('writes only canonical scheduling/reminder properties', () => {
+    const plan = PrismaTaskPlanMapper.toDomain(
+      minimalRow({ schedule: recurringSchedule, reminderConfig: JSON.stringify(reminderConfig) }),
+    );
+    const persistence = PrismaTaskPlanMapper.toPersistence(plan) as Record<string, unknown>;
+    expect(persistence.schedule).toEqual(recurringSchedule);
+    expect(persistence.reminderConfig).toBe(JSON.stringify(reminderConfig));
+    for (const legacy of [
+      'timeConfigType',
+      'timeConfigStartTime',
+      'recurrenceRuleType',
+      'recurrenceRuleInterval',
+      'reminderConfigEnabled',
+      'lastGeneratedDate',
+      'generateAheadDays',
+    ]) {
+      expect(persistence).not.toHaveProperty(legacy);
+    }
   });
 
-  describe('toDomainList', () => {
-    it('maps empty list', () => {
-      const result = PrismaTaskPlanMapper.toDomainList([]);
-      expect(result).toEqual([]);
-    });
+  it('maps lists without changing order', () => {
+    const secondId = aPrefixedUuid('ITaskPlanId', 'task-plan-second');
+    const rows = [minimalRow(), minimalRow({ id: secondId, name: 'Second' })];
+    expect(PrismaTaskPlanMapper.toDomainList(rows).map((plan) => plan.id)).toEqual([
+      TEMPLATE_ID,
+      secondId,
+    ]);
+  });
 
-    it('maps multiple rows preserving order', () => {
-      const rows = [createMinimalRow(), createFullRow(), createMinimalRow()];
-      const domains = PrismaTaskPlanMapper.toDomainList(rows);
+  it('fails closed when canonical schedule JSON is absent or malformed', () => {
+    expect(() =>
+      PrismaTaskPlanMapper.toDomain({ ...minimalRow(), schedule: undefined } as never),
+    ).toThrow();
+    expect(() =>
+      PrismaTaskPlanMapper.toDomain({ ...minimalRow(), schedule: { kind: 'Legacy' } } as never),
+    ).toThrow();
+  });
 
-      expect(domains).toHaveLength(3);
-      expect(domains[0].id).toBe(TEMPLATE_ID_1);
-      expect(domains[1].id).toBe(TEMPLATE_ID_2);
-      expect(domains[2].id).toBe(TEMPLATE_ID_1);
-    });
+  it('fails closed when reminder JSON is invalid instead of flattening a fallback', () => {
+    expect(() =>
+      PrismaTaskPlanMapper.toDomain(minimalRow({ reminderConfig: '{not-json' })),
+    ).toThrow();
   });
 });

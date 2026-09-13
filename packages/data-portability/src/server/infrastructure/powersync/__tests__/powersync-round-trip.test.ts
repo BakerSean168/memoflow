@@ -115,6 +115,18 @@ describe('PowerSync desktop data portability round trip', () => {
     expect(goalRecord.key_result_id).toBe(keyResult.id);
     expect(taskPlan.goal_id).toBe(goal.id);
     expect(taskPlan.key_result_id).toBe(keyResult.id);
+    expect(JSON.parse(String(taskPlan.schedule))).toEqual({
+      kind: 'OneTime',
+      date: '2026-06-04',
+      timing: { kind: 'At', time: '09:00' },
+    });
+    expect(JSON.parse(String(taskPlan.reminder_config))).toMatchObject({
+      enabled: true,
+      triggers: [{ type: 'Relative', relativeValue: 15, relativeUnit: 'Minutes' }],
+    });
+    expect(taskPlan).not.toHaveProperty('time_config_type');
+    expect(taskPlan).not.toHaveProperty('recurrence_rule_type');
+    expect(taskPlan).not.toHaveProperty('reminder_config_enabled');
     expect(taskOccurrence.plan_id).toBe(taskPlan.id);
     expect(taskOccurrence.schedule_date).toBe('2026-06-04');
     expect(JSON.parse(String(taskOccurrence.schedule_timing))).toEqual({
@@ -714,27 +726,23 @@ function seedProfile(identityUuid: string): SeedTables {
         archived_at: null,
         abandoned_reason: null,
         importance: 'high',
-        color: null,
-        tags: JSON.stringify(['qa']),
         checklist: JSON.stringify([{ id: 'check-a', title: 'run tests', order: 0 }]),
-        time_config_type: 'FixedTime',
-        time_config_start_time: null,
-        time_config_end_time: null,
-        time_config_duration_minutes: null,
-        time_config_time_point: 540,
-        time_config_time_range_start: null,
-        time_config_time_range_end: null,
-        recurrence_rule_type: null,
-        recurrence_rule_interval: null,
-        recurrence_rule_days_of_week: null,
-        recurrence_rule_end_date: null,
-        recurrence_rule_count: null,
-        reminder_config_enabled: 1,
-        reminder_config_time_offset_minutes: 15,
-        reminder_config_unit: 'Minute',
-        reminder_config_channel: 'Desktop',
-        last_generated_date: null,
-        generate_ahead_days: 14,
+        schedule: JSON.stringify({
+          kind: 'OneTime',
+          date: '2026-06-04',
+          timing: { kind: 'At', time: '09:00' },
+        }),
+        reminder_config: JSON.stringify({
+          enabled: true,
+          triggers: [
+            {
+              type: 'Relative',
+              absoluteTime: null,
+              relativeValue: 15,
+              relativeUnit: 'Minutes',
+            },
+          ],
+        }),
         goal_id: 'goal-a',
         key_result_id: 'kr-a',
         goal_record_value: 1,

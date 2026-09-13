@@ -184,24 +184,8 @@ const task_templates = new Table({
   archived_at: column.text,
   abandoned_reason: column.text,
   importance: column.text,
-  time_config_type: column.text,
-  time_config_start_time: column.text,
-  time_config_end_time: column.text,
-  time_config_duration_minutes: column.integer,
-  time_config_time_point: column.integer,
-  time_config_time_range_start: column.integer,
-  time_config_time_range_end: column.integer,
-  recurrence_rule_type: column.text,
-  recurrence_rule_interval: column.integer,
-  recurrence_rule_days_of_week: column.text,
-  recurrence_rule_end_date: column.text,
-  recurrence_rule_count: column.integer,
-  reminder_config_enabled: column.integer, // boolean
-  reminder_config_time_offset_minutes: column.integer,
-  reminder_config_unit: column.text,
-  reminder_config_channel: column.text,
-  last_generated_date: column.text,
-  generate_ahead_days: column.integer,
+  schedule: column.text, // JSON: TaskPlanSchedule
+  reminder_config: column.text, // JSON: TaskReminderConfig
   goal_id: column.text, // FK via key_result_id relation
   key_result_id: column.text, // FK
   goal_record_value: column.real,

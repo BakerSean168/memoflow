@@ -67,7 +67,7 @@ describe('PowerSyncDataPortabilityImportStore', () => {
     expect(insert?.parameters).toContain('2024-01-02T00:00:00.000Z');
   });
 
-  it('converts booleans to integers and arrays to JSON for task templates', async () => {
+  it('writes canonical TaskPlan schedule/reminder JSON without legacy flattened columns', async () => {
     const { db, statements } = createFakeDb();
     const store = new PowerSyncDataPortabilityImportStore(db);
 
@@ -84,37 +84,34 @@ describe('PowerSyncDataPortabilityImportStore', () => {
         archivedAt: null,
         abandonedReason: null,
         importance: 'moderate',
-        color: null,
-        tags: JSON.stringify(['qa']),
-        timeConfigType: 'FixedTime',
-        timeConfigStartTime: null,
-        timeConfigEndTime: null,
-        timeConfigDurationMinutes: null,
-        timeConfigTimePoint: 540,
-        timeConfigTimeRangeStart: null,
-        timeConfigTimeRangeEnd: null,
-        recurrenceRuleType: null,
-        recurrenceRuleInterval: null,
-        recurrenceRuleDaysOfWeek: null,
-        recurrenceRuleEndDate: null,
-        recurrenceRuleCount: null,
-        reminderConfigEnabled: true,
-        reminderConfigTimeOffsetMinutes: 15,
-        reminderConfigUnit: 'Minute',
-        reminderConfigChannel: 'system',
+        schedule: { kind: 'OneTime', date: '2026-09-13', timing: { kind: 'At', time: '09:00' } },
+        reminderConfig: JSON.stringify({
+          enabled: true,
+          triggers: [
+            {
+              type: 'Relative',
+              absoluteTime: null,
+              relativeValue: 15,
+              relativeUnit: 'Minutes',
+            },
+          ],
+        }),
         goalId: 'goal-1',
         keyResultId: 'kr-1',
         goalRecordValue: 2.5,
         goalProgressTrigger: 'EachCompletion',
-        checklist: JSON.stringify([{ title: 'cover IPC', order: 0 }]),
+        checklist: JSON.stringify([{ id: 'check-a', title: 'cover IPC', order: 0 }]),
       }),
     );
 
     const insert = statements.find((statement) =>
       statement.sql.includes('INSERT INTO task_templates'),
     );
-    expect(insert?.sql).toContain('time_config_type');
-    expect(insert?.sql).toContain('reminder_config_enabled');
+    expect(insert?.sql).toContain('schedule');
+    expect(insert?.sql).toContain('reminder_config');
+    expect(insert?.sql).not.toContain('time_config_');
+    expect(insert?.sql).not.toContain('recurrence_rule_');
+    expect(insert?.sql).not.toContain('reminder_config_enabled');
     expect(insert?.sql).toContain('goal_id');
     expect(insert?.sql).toContain('key_result_id');
     expect(insert?.sql).toContain('goal_record_value');
@@ -124,12 +121,18 @@ describe('PowerSyncDataPortabilityImportStore', () => {
     expect(insert?.sql).not.toContain('last_generated_date');
     expect(insert?.sql).not.toContain('generate_ahead_days');
     expect(insert?.sql).not.toContain('timeConfigType');
-    expect(insert?.parameters).toContain(JSON.stringify(['qa']));
+    expect(insert?.parameters).toContain(
+      JSON.stringify({
+        kind: 'OneTime',
+        date: '2026-09-13',
+        timing: { kind: 'At', time: '09:00' },
+      }),
+    );
     expect(insert?.parameters).toContain('goal-1');
     expect(insert?.parameters).toContain('kr-1');
     expect(insert?.parameters).toContain(2.5);
     expect(insert?.parameters).toContain('EachCompletion');
-    expect(insert?.parameters).toContain(1);
+    expect(insert?.parameters?.some((value) => String(value).includes('relativeValue'))).toBe(true);
   });
 
   it('updates singleton rows instead of inserting when they already exist', async () => {

@@ -149,20 +149,12 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     const result = await module.api.createTaskPlan({
       identityId,
       name: 'Daily Review',
-      taskType: TaskType.Recurring,
-      timeConfig: {
-        timeType: 'AllDay',
-        startDate: Date.now(),
-        timePoint: null,
-        timeRange: null,
-      },
-      recurrenceRule: {
-        frequency: 'Daily',
-        interval: 1,
-        daysOfWeek: [],
-        endDate: null,
-        occurrences: null,
-      },
+      schedule: TaskPlanSchedule.fromLegacy(
+        TaskType.Recurring,
+        TaskTimeConfig.createAllDay(new Date()),
+        RecurrenceRule.createDaily(1),
+        TASK_TEST_TIME_CONTEXT,
+      ).toDTO(),
       importance: ImportanceLevel.Moderate,
     });
 

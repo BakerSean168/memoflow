@@ -82,7 +82,7 @@ describe('projection from PowerSync-shaped rows', () => {
     expect(JSON.stringify({ goals, records })).not.toContain('kr-db-id');
   });
 
-  it('exports task templates from flattened persistence fields', () => {
+  it('exports task templates from canonical schedule/reminder persistence', () => {
     const ctx = createExportContext({
       'goal-db-id': 'goal:1',
       'kr-db-id': 'keyResult:1',
@@ -95,17 +95,33 @@ describe('projection from PowerSync-shaped rows', () => {
           name: 'Write tests',
           status: 'active',
           importance: 'moderate',
-          tags: '["qa"]',
-          recurrenceRuleType: 'Daily',
-          recurrenceRuleInterval: 1,
+          schedule: JSON.stringify({
+            kind: 'Recurring',
+            startDate: '2026-09-13',
+            timing: { kind: 'AllDay' },
+            recurrence: {
+              frequency: 'Daily',
+              interval: 1,
+              byWeekday: [],
+              end: { kind: 'Never' },
+            },
+          }),
           goalId: 'goal-db-id',
           keyResultId: 'kr-db-id',
           goalRecordValue: 2.5,
           goalProgressTrigger: 'EachCompletion',
           checklist: '[{"id":"check-db-id","title":"cover IPC","order":0}]',
-          reminderConfigEnabled: 1,
-          reminderConfigTimeOffsetMinutes: 15,
-          reminderConfigUnit: 'Minute',
+          reminderConfig: JSON.stringify({
+            enabled: true,
+            triggers: [
+              {
+                type: 'Relative',
+                absoluteTime: null,
+                relativeValue: 15,
+                relativeUnit: 'Minutes',
+              },
+            ],
+          }),
         },
       ],
       ctx,
@@ -113,15 +129,26 @@ describe('projection from PowerSync-shaped rows', () => {
 
     expect(templates[0]).toMatchObject({
       title: 'Write tests',
-      taskType: 'Recurring',
-      tags: ['qa'],
+      schedule: {
+        kind: 'Recurring',
+        startDate: '2026-09-13',
+        timing: { kind: 'AllDay' },
+      },
+      tags: [],
       goalRef: 'goal:1',
       keyResultRef: 'keyResult:1',
       contribution: { value: 2.5, trigger: 'EachCompletion' },
       checklist: [{ title: 'cover IPC', order: 0 }],
       reminderConfig: {
         enabled: true,
-        triggers: [{ relativeValue: 15, relativeUnit: 'Minute' }],
+        triggers: [
+          {
+            type: 'Relative',
+            absoluteTime: null,
+            relativeValue: 15,
+            relativeUnit: 'Minutes',
+          },
+        ],
       },
     });
     expect(templates[0]).not.toHaveProperty('goalBinding');
@@ -149,6 +176,12 @@ describe('projection from PowerSync-shaped rows', () => {
           goalRecordValue: null,
           goalProgressTrigger: null,
           checklist: '[]',
+          schedule: JSON.stringify({
+            kind: 'OneTime',
+            date: '2026-09-13',
+            timing: { kind: 'AllDay' },
+          }),
+          reminderConfig: null,
         },
       ],
       ctx,

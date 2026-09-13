@@ -41,7 +41,17 @@ describe('PowerSyncAppSchema', () => {
     expect(getColumnType('task_templates', 'goal_record_value')).toBe('REAL');
     expect(getColumnType('task_templates', 'goal_progress_trigger')).toBe('TEXT');
     expect(getColumnType('task_templates', 'goal_binding')).toBeUndefined();
-    expect(getColumnType('task_templates', 'reminder_config_enabled')).toBe('INTEGER');
+    expect(getColumnType('task_templates', 'schedule')).toBe('TEXT');
+    expect(getColumnType('task_templates', 'reminder_config')).toBe('TEXT');
+    for (const retired of [
+      'time_config_type',
+      'recurrence_rule_type',
+      'reminder_config_enabled',
+      'last_generated_date',
+      'generate_ahead_days',
+    ]) {
+      expect(getColumnType('task_templates', retired)).toBeUndefined();
+    }
     expect(getColumnType('schedule_tasks', 'payload')).toBe('TEXT');
     expect(getColumnType('schedule_tasks', 'enabled')).toBe('INTEGER');
   });

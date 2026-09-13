@@ -2175,31 +2175,9 @@ model TaskPlan {
   abandonedReason  String?   @map("abandoned_reason")
   importance       String    @default("moderate") /// ImportanceLevel
 
-  // ============ 时间配置（展开值对象） ============
-  timeConfigType            String?   @map("time_config_type")
-  timeConfigStartTime       DateTime? @map("time_config_start_time")
-  timeConfigEndTime         DateTime? @map("time_config_end_time")
-  timeConfigDurationMinutes Int?      @map("time_config_duration_minutes")
-  timeConfigTimePoint       Int?      @map("time_config_time_point") /// 时间点（分钟数，如 540 = 9:00）
-  timeConfigTimeRangeStart  Int?      @map("time_config_time_range_start") /// 时间段开始（分钟数）
-  timeConfigTimeRangeEnd    Int?      @map("time_config_time_range_end") /// 时间段结束（分钟数）
-
-  // ============ 重复规则（展开值对象） ============
-  recurrenceRuleType       String?   @map("recurrence_rule_type")
-  recurrenceRuleInterval   Int?      @map("recurrence_rule_interval")
-  recurrenceRuleDaysOfWeek String?   @map("recurrence_rule_days_of_week")
-  recurrenceRuleEndDate    DateTime? @map("recurrence_rule_end_date")
-  recurrenceRuleCount      Int?      @map("recurrence_rule_count")
-
-  // ============ 提醒配置（展开值对象） ============
-  reminderConfigEnabled           Boolean? @map("reminder_config_enabled")
-  reminderConfigTimeOffsetMinutes Int?     @map("reminder_config_time_offset_minutes")
-  reminderConfigUnit              String?  @map("reminder_config_unit")
-  reminderConfigChannel           String?  @map("reminder_config_channel")
-
-  // ============ 循环任务生成 ============
-  lastGeneratedDate DateTime? @map("last_generated_date")
-  generateAheadDays Int?      @map("generate_ahead_days")
+  // ============ Canonical scheduling/reminder truth ============
+  schedule       Json /// TaskPlanSchedule canonical JSON
+  reminderConfig String? @map("reminder_config") /// JSON: TaskReminderConfig
 
   // ============ Goal 绑定（展开的关系值对象） ============
   goalId              String? @map("goal_id")
