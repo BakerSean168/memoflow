@@ -64,7 +64,7 @@ export class DesktopGoalPlanMutationAdapter implements GoalPlanMutationPort {
       identityId: context.identityId as IdentityId,
     });
     if (!result.ok) return result;
-    return ok({ taskId: String(result.data.template.id) });
+    return ok({ taskId: String(result.data.plan.id) });
   }
 
   async createKnowledgeDocument(

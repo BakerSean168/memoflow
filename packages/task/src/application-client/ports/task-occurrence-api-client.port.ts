@@ -1,7 +1,7 @@
 /**
- * Task Instance API Client Port
+ * Task Occurrence API Client Port
  *
- * Transport-agnostic interface for Task Instance API operations.
+ * Transport-agnostic interface for Task Occurrence API operations.
  * Implementations: HTTP adapters (web), IPC adapters (desktop)
  */
 

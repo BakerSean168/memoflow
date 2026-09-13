@@ -16,14 +16,14 @@ export class PlannerAIReadAdapter implements IAIPlannerReadPort {
     startTime: number,
     endTime: number,
   ): Promise<AIPlannerTaskItem[]> {
-    const [instances, templates] = await Promise.all([
+    const [instances, plans] = await Promise.all([
       this.taskApplicationPort.getTaskOccurrencesByDateRange(identityId, startTime, endTime),
       this.taskApplicationPort.listTaskPlans({ identityId: IdentityId.of(identityId) }),
     ]);
     const instanceData = unwrap(instances).data;
-    const templateData = unwrap(templates).templates;
+    const planData = unwrap(plans).plans;
     const titles = new Map(
-      templateData.map((template) => [String(template.id), template.name] as const),
+      planData.map((plan) => [String(plan.id), plan.name] as const),
     );
     return instanceData.map((instance) => ({
       id: String(instance.id),

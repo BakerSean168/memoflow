@@ -1,5 +1,5 @@
 /**
- * Task Template HTTP Adapter
+ * Task Plan HTTP Adapter
  *
  * HTTP implementation of ITaskPlanApiClient.
  * Uses IResultHttpClient for making HTTP requests.
@@ -36,7 +36,7 @@ export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
     return this.httpClient.get(`/tasks/${planId}/workspace`, { params: request });
   }
 
-  // ===== Task Template CRUD =====
+  // ===== Task Plan CRUD =====
 
   async createTaskPlan(request: CreateTaskPlanReq): Promise<Result<CreateTaskPlanRes>> {
     return this.httpClient.post(this.baseUrl, request);
@@ -62,7 +62,7 @@ export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
 
   // ===== Special Query Methods =====
 
-  // ===== Task Template State Management =====
+  // ===== Task Plan State Management =====
 
   async activateTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>> {
     return this.httpClient.post(`${this.baseUrl}/${id}/activate`);
@@ -83,7 +83,7 @@ export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
     return this.httpClient.post(`${this.baseUrl}/${id}/abandon`, request ?? {});
   }
 
-  // ===== Aggregate Control: Instance Management =====
+  // ===== Aggregate Control: Occurrence Management =====
 
   async generateOccurrences(
     planId: string,

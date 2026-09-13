@@ -36,7 +36,7 @@ export function registerTaskRoutes(
 ): Router {
   const router = Router();
 
-  // Task Templates: /api/task-plans
+  // Task Plans: /api/task-plans
   const templateRouter = registerTaskPlanRoutes(
     controllers.templateController,
     middleware,
@@ -44,7 +44,7 @@ export function registerTaskRoutes(
   );
   router.use('/task-plans', templateRouter);
 
-  // Task Instances: /api/task-occurrences
+  // Task Occurrences: /api/task-occurrences
   const instanceRouter = registerTaskOccurrenceRoutes(
     controllers.instanceController,
     middleware,

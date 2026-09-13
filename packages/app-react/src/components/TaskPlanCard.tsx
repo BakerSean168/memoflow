@@ -50,9 +50,9 @@ export function TaskPlanCard({
       </View>
 
       <View style={styles.metricGrid}>
-        <Metric label="Instances" value={String(template.instanceCount)} />
-        <Metric label="Pending" value={String(template.pendingInstanceCount)} />
-        <Metric label="Completed" value={String(template.completedInstanceCount)} />
+        <Metric label="Instances" value={String(template.occurrenceCount)} />
+        <Metric label="Pending" value={String(template.pendingOccurrenceCount)} />
+        <Metric label="Completed" value={String(template.completedOccurrenceCount)} />
         <Metric label="Completion" value={`${Math.round(template.completionRate)}%`} />
       </View>
 

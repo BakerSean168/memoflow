@@ -57,8 +57,10 @@ describe('Product date presentation boundary', () => {
   it('keeps Task date formatting behind the canonical presentation and Product Time helpers', () => {
     expect(taskPresentation).toContain('formatProductDate');
     expect(taskPresentation).toContain('formattedCreatedAt');
-    expect(taskDetail).toContain('formatProductDate');
+    expect(taskPresentation).toContain('getTaskPlanScheduleDate');
+    expect(taskDetail).toContain('getTaskPlanScheduleDate');
     expect(taskDetail).not.toMatch(/function formatDate\b/);
+    expect(taskDetail).not.toContain('formatProductDate');
     expect(taskDetail).not.toContain('new Date(');
     expect(taskDetail).not.toContain('toLocaleDateString');
   });

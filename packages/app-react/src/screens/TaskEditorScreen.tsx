@@ -210,7 +210,7 @@ export function TaskEditorScreen() {
       return;
     }
 
-    router.replace(`../${String(result.data.template.id)}`);
+    router.replace(`../${String(result.data.plan.id)}`);
   }
 
   return (
@@ -355,7 +355,7 @@ export function TaskEditorScreen() {
               label={template.status}
               tone={template.status === 'Active' ? 'success' : 'warning'}
             />
-            <StatusPill label={`${template.pendingInstanceCount} pending`} tone="textSecondary" />
+            <StatusPill label={`${template.pendingOccurrenceCount} pending`} tone="textSecondary" />
             <StatusPill label={`${Math.round(template.completionRate)}% done`} tone="tint" />
           </View>
         </SectionCard>

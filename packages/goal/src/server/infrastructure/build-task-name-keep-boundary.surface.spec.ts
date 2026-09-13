@@ -44,7 +44,7 @@ describe('buildIntentName keep-boundary (residual 1177)', () => {
     expect(task).toContain('observability:');
     expect(task).not.toContain('ScheduleTask');
     const body = task.match(/function buildIntentName\([\s\S]*?\n\}/)?.[0] ?? '';
-    expect(body).toContain('template.name');
+    expect(body).toContain('plan.name');
     expect(body).toContain('relativeValue');
     expect(body).not.toContain('RemainingDays');
     expect(body).not.toContain('剩余');
@@ -62,7 +62,7 @@ describe('buildIntentName keep-boundary (residual 1177)', () => {
       return `${goalName} · 进度 ${trigger.value}% 提醒`;
     }
     function taskBuildIntentName(
-      templateName: string,
+      planName: string,
       trigger: {
         type: 'Relative' | 'Absolute';
         relativeValue: number | null;
@@ -78,9 +78,9 @@ describe('buildIntentName keep-boundary (residual 1177)', () => {
               ? '天'
               : '';
       if (trigger.type === 'Relative' && trigger.relativeValue !== null && trigger.relativeUnit) {
-        return `${templateName} · 提前 ${trigger.relativeValue}${unitLabel} 提醒`;
+        return `${planName} · 提前 ${trigger.relativeValue}${unitLabel} 提醒`;
       }
-      return `${templateName} · 定时提醒`;
+      return `${planName} · 定时提醒`;
     }
     expect(goalBuildIntentName('读完书', { type: 'RemainingDays', value: 3 })).toBe(
       '读完书 · 剩余 3 天提醒',

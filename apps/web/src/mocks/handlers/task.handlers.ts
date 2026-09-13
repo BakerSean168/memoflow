@@ -7,12 +7,12 @@ import {
 } from '@memoflow/contracts/mocks';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
-const TEMPLATES = `${API_BASE}/task-plans`;
-const INSTANCES = `${API_BASE}/task-occurrences`;
+const PLANS = `${API_BASE}/task-plans`;
+const OCCURRENCES = `${API_BASE}/task-occurrences`;
 
 export const taskMockRoutes = {
-  templates: TEMPLATES,
-  instances: INSTANCES,
+  plans: PLANS,
+  occurrences: OCCURRENCES,
 };
 
 type MockTaskPlanOverrides = NonNullable<Parameters<typeof createMockTaskPlan>[0]>;
@@ -26,32 +26,33 @@ const toTaskPlanId = (value: string | readonly string[] | undefined): TaskPlanId
 const toTaskOccurrenceId = (value: string | readonly string[] | undefined): TaskOccurrenceId =>
   (Array.isArray(value) ? value[0] : (value ?? '')) as TaskOccurrenceId;
 export const taskHandlers = [
-  http.get(TEMPLATES, () => {
-    const templates = createMockTaskPlanList(10);
+  http.get(PLANS, () => {
+    const plans = createMockTaskPlanList(10);
     return HttpResponse.json({
       ok: true,
       code: 200,
       message: 'Success',
-      data: { templates, total: templates.length },
+      data: { plans, total: plans.length },
       timestamp: Date.now(),
     });
   }),
 
-  http.post(TEMPLATES, async ({ request }) => {
+  http.post(PLANS, async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>;
+    const plan = createMockTaskPlan({ name: body.name as string });
     return HttpResponse.json(
       {
         ok: true,
         code: 200,
         message: 'Created',
-        data: createMockTaskPlan({ name: body.name as string }),
+        data: { plan, occurrenceCount: 0, todayOccurrenceCreated: false },
         timestamp: Date.now(),
       },
       { status: 201 },
     );
   }),
 
-  http.get(INSTANCES, () => {
+  http.get(OCCURRENCES, () => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -61,7 +62,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.post(`${INSTANCES}/:id/start`, ({ params }) => {
+  http.post(`${OCCURRENCES}/:id/start`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -71,7 +72,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.post(`${INSTANCES}/:id/complete`, ({ params }) => {
+  http.post(`${OCCURRENCES}/:id/complete`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -81,7 +82,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.post(`${INSTANCES}/:id/missed`, ({ params }) => {
+  http.post(`${OCCURRENCES}/:id/missed`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -91,7 +92,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.post(`${INSTANCES}/:id/skip`, ({ params }) => {
+  http.post(`${OCCURRENCES}/:id/skip`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -101,7 +102,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.get(`${INSTANCES}/:id`, ({ params }) => {
+  http.get(`${OCCURRENCES}/:id`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -111,7 +112,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.delete(`${INSTANCES}/:id`, () => {
+  http.delete(`${OCCURRENCES}/:id`, () => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -121,7 +122,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.get(`${TEMPLATES}/:id/instances`, ({ params }) => {
+  http.get(`${PLANS}/:id/occurrences`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -131,7 +132,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.post(`${TEMPLATES}/:id/generate-instances`, ({ params }) => {
+  http.post(`${PLANS}/:id/generate-occurrences`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -141,7 +142,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.post(`${TEMPLATES}/:id/activate`, ({ params }) => {
+  http.post(`${PLANS}/:id/activate`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -151,7 +152,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.post(`${TEMPLATES}/:id/pause`, ({ params }) => {
+  http.post(`${PLANS}/:id/pause`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -161,7 +162,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.post(`${TEMPLATES}/:id/archive`, ({ params }) => {
+  http.post(`${PLANS}/:id/archive`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -175,7 +176,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.post(`${TEMPLATES}/:id/bind-goal`, ({ params }) => {
+  http.post(`${PLANS}/:id/bind-goal`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -185,7 +186,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.post(`${TEMPLATES}/:id/unbind-goal`, ({ params }) => {
+  http.post(`${PLANS}/:id/unbind-goal`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -195,7 +196,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.get(`${TEMPLATES}/:id`, ({ params }) => {
+  http.get(`${PLANS}/:id`, ({ params }) => {
     return HttpResponse.json({
       ok: true,
       code: 200,
@@ -205,7 +206,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.patch(`${TEMPLATES}/:id`, async ({ params, request }) => {
+  http.patch(`${PLANS}/:id`, async ({ params, request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({
       ok: true,
@@ -216,7 +217,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.put(`${TEMPLATES}/:id`, async ({ params, request }) => {
+  http.put(`${PLANS}/:id`, async ({ params, request }) => {
     const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({
       ok: true,
@@ -227,7 +228,7 @@ export const taskHandlers = [
     });
   }),
 
-  http.delete(`${TEMPLATES}/:id`, () => {
+  http.delete(`${PLANS}/:id`, () => {
     return HttpResponse.json({
       ok: true,
       code: 200,

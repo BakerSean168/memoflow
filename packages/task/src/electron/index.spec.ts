@@ -86,8 +86,8 @@ function createFakeInstance() {
   const api = createApiStub();
   const start = vi.fn(async () => {});
   const dispose = vi.fn(async () => {});
-  const occurrence: TaskModuleInstance = { api, start, dispose } as TaskModuleInstance;
-  return { occurrence, api, start, dispose };
+  const instance: TaskModuleInstance = { api, start, dispose } as TaskModuleInstance;
+  return { instance, api, start, dispose };
 }
 
 function createFakeContext(): IElectronModuleContext {
@@ -113,7 +113,7 @@ describe('createTaskElectronModule IPC lifecycle', () => {
   beforeEach(() => {
     fake = createFakeInstance();
     context = createFakeContext();
-    moduleDef = createTaskElectronModule({ occurrence: fake.occurrence });
+    moduleDef = createTaskElectronModule({ instance: fake.instance });
   });
 
   afterEach(() => {

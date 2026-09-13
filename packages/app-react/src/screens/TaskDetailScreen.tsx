@@ -275,9 +275,9 @@ export function TaskDetailScreen() {
             description="执行统计后续还会继续接实例详情，这里先给摘要。"
           >
             <View style={styles.metricGrid}>
-              <MetricBox label="Instances" value={String(template.instanceCount)} />
-              <MetricBox label="Pending" value={String(template.pendingInstanceCount)} />
-              <MetricBox label="Completed" value={String(template.completedInstanceCount)} />
+              <MetricBox label="Instances" value={String(template.occurrenceCount)} />
+              <MetricBox label="Pending" value={String(template.pendingOccurrenceCount)} />
+              <MetricBox label="Completed" value={String(template.completedOccurrenceCount)} />
               <MetricBox label="Completion" value={`${Math.round(template.completionRate)}%`} />
             </View>
           </SectionCard>

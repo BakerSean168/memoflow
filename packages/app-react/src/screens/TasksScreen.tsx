@@ -53,7 +53,7 @@ export function TasksScreen() {
   } = useTaskPlans({ goalId, keyResultId });
 
   const activeCount = templates.filter((item) => item.status === TaskPlanStatus.Active).length;
-  const totalPending = templates.reduce((sum, item) => sum + item.pendingInstanceCount, 0);
+  const totalPending = templates.reduce((sum, item) => sum + item.pendingOccurrenceCount, 0);
   const actionSections = [
     {
       title: 'Tasks',

@@ -258,8 +258,8 @@ describe('task transport parity (Phase 4) — production registrations', () => {
   }
 
   async function buildIpc(port: TaskApplicationPort) {
-    const occurrence = { api: port, start: vi.fn(), dispose: vi.fn() };
-    const moduleDef = createTaskElectronModule({ occurrence });
+    const instance = { api: port, start: vi.fn(), dispose: vi.fn() };
+    const moduleDef = createTaskElectronModule({ instance });
     const context = {
       db: {},
       auth: { requireRequestContext: async () => fixtureContext },

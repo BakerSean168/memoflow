@@ -1,7 +1,7 @@
 /**
- * Task Template API Client Port
+ * Task Plan API Client Port
  *
- * Transport-agnostic interface for Task Template API operations.
+ * Transport-agnostic interface for Task Plan API operations.
  * Implementations: HTTP adapters (web), IPC adapters (desktop)
  */
 

@@ -1,5 +1,5 @@
 /**
- * Task Instance HTTP Adapter
+ * Task Occurrence HTTP Adapter
  *
  * HTTP implementation of ITaskOccurrenceApiClient.
  * Uses IResultHttpClient for making HTTP requests.
@@ -28,7 +28,7 @@ export class TaskOccurrenceHttpAdapter implements ITaskOccurrenceApiClient {
 
   constructor(private readonly httpClient: IResultHttpClient) {}
 
-  // ===== Task Instance CRUD =====
+  // ===== Task Occurrence CRUD =====
 
   async getTaskOccurrences(params?: {
     page?: number;
@@ -55,7 +55,7 @@ export class TaskOccurrenceHttpAdapter implements ITaskOccurrenceApiClient {
     return this.httpClient.delete(`${this.baseUrl}/${id}`);
   }
 
-  // ===== Task Instance State Management =====
+  // ===== Task Occurrence State Management =====
 
   async startTaskOccurrence(id: string): Promise<Result<TaskOccurrenceClientDTO>> {
     return this.httpClient.post(`${this.baseUrl}/${id}/start`);

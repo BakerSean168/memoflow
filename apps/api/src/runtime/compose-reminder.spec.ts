@@ -223,7 +223,7 @@ describe('composeReminder assembly order', () => {
     // createPlan to the executor use case carrying the frozen predicate.
     expect(composed.applicationPort).toBe(instance.api);
     expect(composed.executorReminderPort).not.toBe(instance.api);
-    expect(composed.executorReminderPort.createPlan).not.toBe(instance.api.createPlan);
+    expect(composed.executorReminderPort.createTemplate).not.toBe(instance.api.createTemplate);
     expect(composed.executorReminderPort.listPlans).toBe(instance.api.listPlans);
   });
 });

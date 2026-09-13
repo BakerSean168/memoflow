@@ -18,15 +18,15 @@ export type TaskPlanSummary = {
   outcome: TaskPlanClientDTO['outcome'];
   archivedAt: number | null;
   importance: ImportanceLevel;
-  instanceCount: number;
-  completedInstanceCount: number;
-  pendingInstanceCount: number;
+  occurrenceCount: number;
+  completedOccurrenceCount: number;
+  pendingOccurrenceCount: number;
   completionRate: number;
-  dueInstanceCount: number;
-  completedDueInstanceCount: number;
+  dueOccurrenceCount: number;
+  completedDueOccurrenceCount: number;
   completionWindowDays: 30;
-  futurePendingInstanceCount: number;
-  singleInstanceStatus: TaskPlanClientDTO['singleInstanceStatus'];
+  futurePendingOccurrenceCount: number;
+  singleOccurrenceStatus: TaskPlanClientDTO['singleOccurrenceStatus'];
   labels: LabelClientDTO[];
   updatedAt: number;
   goalBinding: TaskPlanClientDTO['goalBinding'];
@@ -49,15 +49,15 @@ function mapTemplate(template: TaskPlan): TaskPlanSummary {
     outcome: template.outcome,
     archivedAt: template.archivedAt,
     importance: template.importance,
-    instanceCount: template.instanceCount,
-    completedInstanceCount: template.completedInstanceCount,
-    pendingInstanceCount: template.pendingInstanceCount,
+    occurrenceCount: template.occurrenceCount,
+    completedOccurrenceCount: template.completedOccurrenceCount,
+    pendingOccurrenceCount: template.pendingOccurrenceCount,
     completionRate: template.completionRate,
-    dueInstanceCount: template.dueInstanceCount,
-    completedDueInstanceCount: template.completedDueInstanceCount,
+    dueOccurrenceCount: template.dueOccurrenceCount,
+    completedDueOccurrenceCount: template.completedDueOccurrenceCount,
     completionWindowDays: template.completionWindowDays,
-    futurePendingInstanceCount: template.futurePendingInstanceCount,
-    singleInstanceStatus: template.singleInstanceStatus,
+    futurePendingOccurrenceCount: template.futurePendingOccurrenceCount,
+    singleOccurrenceStatus: template.singleOccurrenceStatus,
     labels: template.labels,
     updatedAt: template.updatedAt,
     goalBinding: template.goalBinding ? { ...template.goalBinding } : null,
@@ -77,7 +77,7 @@ function sortTemplates(templates: TaskPlanSummary[], sortBy: TaskSortOption) {
   next.sort((left, right) => {
     if (sortBy === 'pending') {
       return (
-        right.pendingInstanceCount - left.pendingInstanceCount || right.updatedAt - left.updatedAt
+        right.pendingOccurrenceCount - left.pendingOccurrenceCount || right.updatedAt - left.updatedAt
       );
     }
     if (sortBy === 'completion') {
@@ -114,7 +114,7 @@ export function useTaskPlans(
       setIsLoading(false);
       return;
     }
-    setTemplates(result.data.templates.map(mapTemplate));
+    setTemplates(result.data.plans.map(mapTemplate));
     setError(null);
     setIsLoading(false);
   }
@@ -143,7 +143,7 @@ export function useTaskPlans(
         setIsLoading(false);
         return;
       }
-      setTemplates(result.data.templates.map(mapTemplate));
+      setTemplates(result.data.plans.map(mapTemplate));
       setError(null);
       setIsLoading(false);
     }

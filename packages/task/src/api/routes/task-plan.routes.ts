@@ -1,5 +1,5 @@
 /**
- * Task Template Routes — Unified Route + OpenAPI Registration
+ * Task Plan Routes — Unified Route + OpenAPI Registration
  *
  * 路由定义与 OpenAPI 文档在同一处注册，消除"双重记账"问题。
  * Follows ADR-021/022 split-route pattern.
@@ -91,7 +91,7 @@ export function registerTaskPlanRoutes(
 
   const r = new RouteRegistrar(router, openApiRegistry ?? null, {
     basePath: '/api/v1/task-plans',
-    defaultTags: ['Task Template'],
+    defaultTags: ['Task Plan'],
     defaultSecurity: [{ bearerAuth: [] }],
   });
 
@@ -100,7 +100,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'post',
       path: '/',
-      summary: '创建任务模板',
+      summary: '创建任务计划',
       request: { body: { content: { 'application/json': { schema: CreateTaskPlanSchema } } } },
       responses: {
         201: successResponse(CreateTaskPlanResponseSchema, '创建成功'),
@@ -118,7 +118,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'get',
       path: '/',
-      summary: '获取任务模板列表',
+      summary: '获取任务计划列表',
       request: {
         query: ListTaskPlanFiltersSchema,
       },
@@ -137,7 +137,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'get',
       path: '/:id',
-      summary: '获取任务模板详情',
+      summary: '获取任务计划详情',
       request: { params: z.object({ id: brandedId<TaskPlanId>() }) },
       responses: {
         200: successResponse(TaskPlanResponseSchema, '获取成功'),
@@ -153,7 +153,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'put',
       path: '/:id',
-      summary: '更新任务模板',
+      summary: '更新任务计划',
       request: {
         params: UpdateTaskPlanInvocationSchema.shape.params,
         body: {
@@ -180,7 +180,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'patch',
       path: '/:id',
-      summary: '更新任务模板',
+      summary: '更新任务计划',
       request: {
         params: UpdateTaskPlanInvocationSchema.shape.params,
         body: {
@@ -207,7 +207,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'delete',
       path: '/:id',
-      summary: '删除任务模板',
+      summary: '删除任务计划',
       request: { params: TaskPlanIdCommandInvocationSchema.shape.params },
       responses: {
         200: successResponse(z.null(), '删除成功'),
@@ -227,7 +227,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'post',
       path: '/:id/activate',
-      summary: '激活任务模板',
+      summary: '激活任务计划',
       request: { params: TaskPlanIdCommandInvocationSchema.shape.params },
       responses: {
         200: successResponse(TaskPlanResponseSchema, '激活成功'),
@@ -270,7 +270,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'post',
       path: '/:id/pause',
-      summary: '暂停任务模板',
+      summary: '暂停任务计划',
       request: { params: TaskPlanIdCommandInvocationSchema.shape.params },
       responses: {
         200: successResponse(TaskPlanResponseSchema, '暂停成功'),
@@ -290,7 +290,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'post',
       path: '/:id/archive',
-      summary: '归档任务模板',
+      summary: '归档任务计划',
       request: { params: TaskPlanIdCommandInvocationSchema.shape.params },
       responses: {
         200: successResponse(TaskPlanResponseSchema, '归档成功'),
@@ -310,7 +310,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'post',
       path: '/:id/generate-occurrences',
-      summary: '为模板生成任务实例',
+      summary: '为任务计划生成发生项',
       request: {
         params: GenerateOccurrencesInvocationSchema.shape.params,
         body: {
@@ -335,7 +335,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'get',
       path: '/:id/occurrences',
-      summary: '获取模板的任务实例列表',
+      summary: '获取任务计划的发生项列表',
       request: {
         params: z.object({ id: brandedId<TaskPlanId>() }),
         query: TaskPlanOccurrencesQuerySchema,
@@ -359,7 +359,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'post',
       path: '/:id/bind-goal',
-      summary: '绑定任务模板到目标',
+      summary: '绑定任务计划到目标',
       request: {
         params: BindTaskToGoalInvocationSchema.shape.params,
         body: {
@@ -384,7 +384,7 @@ export function registerTaskPlanRoutes(
     {
       method: 'post',
       path: '/:id/unbind-goal',
-      summary: '解除任务模板与目标的绑定',
+      summary: '解除任务计划与目标的绑定',
       request: { params: TaskPlanIdCommandInvocationSchema.shape.params },
       responses: {
         200: successResponse(TaskPlanResponseSchema, '解绑成功'),

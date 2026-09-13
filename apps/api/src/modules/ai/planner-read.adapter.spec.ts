@@ -46,7 +46,7 @@ function fixture() {
     ),
     listTaskPlans: vi.fn(async () =>
       ok({
-        templates: [
+        plans: [
           { id: 'plan-1', name: 'Write draft' },
           { id: 'plan-2', name: 'Review notes' },
         ],

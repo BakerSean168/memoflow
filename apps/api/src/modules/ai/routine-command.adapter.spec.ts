@@ -13,8 +13,8 @@ const context: ExecutionContext = {
 
 describe('RoutineAICommandAdapter', () => {
   it('maps a WallClock method preset into the existing Reminder application mutation', async () => {
-    const createPlan = vi.fn(async () => ok({ id: 'ReminderTemplateId_1', name: '20-20-20' } as never));
-    const adapter = new RoutineAICommandAdapter({ createPlan } as never, {} as never);
+    const createTemplate = vi.fn(async () => ok({ id: 'ReminderTemplateId_1', name: '20-20-20' } as never));
+    const adapter = new RoutineAICommandAdapter({ createTemplate } as never, {} as never);
 
     await expect(adapter.createRoutine({
       context,
@@ -23,7 +23,7 @@ describe('RoutineAICommandAdapter', () => {
       profileIds: ['work'],
     })).resolves.toMatchObject({ kind: 'routine', status: 'created' });
 
-    expect(createPlan).toHaveBeenCalledWith(
+    expect(createTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Eye break',
         type: 'Recurring',

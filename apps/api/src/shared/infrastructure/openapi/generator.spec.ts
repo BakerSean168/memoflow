@@ -322,7 +322,7 @@ const TASK_LEDGER: LedgerRow[] = [
   {
     module: 'task',
     method: 'post',
-    path: '/api/v1/task-plans/{id}/generate-instances',
+    path: '/api/v1/task-plans/{id}/generate-occurrences',
     status: 200,
     hasBody: true,
     hasParams: true,

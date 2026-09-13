@@ -124,7 +124,7 @@ export function HomeScreen() {
                   </ThemedText>
                   <View style={styles.previewMetaRow}>
                     <StatusPill label={template.status} tone={template.status === 'Active' ? 'success' : 'warning'} />
-                    <StatusPill label={`${template.pendingInstanceCount} pending`} tone="textSecondary" />
+                    <StatusPill label={`${template.pendingOccurrenceCount} pending`} tone="textSecondary" />
                   </View>
                 </ThemedView>
               ))}

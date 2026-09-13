@@ -1,5 +1,5 @@
 /**
- * Task Instance Routes — Unified Route + OpenAPI Registration
+ * Task Occurrence Routes — Unified Route + OpenAPI Registration
  *
  * 路由定义与 OpenAPI 文档在同一处注册，消除"双重记账"问题。
  * Follows ADR-021/022 split-route pattern.
@@ -59,7 +59,7 @@ export function registerTaskOccurrenceRoutes(
 
   const r = new RouteRegistrar(router, openApiRegistry ?? null, {
     basePath: '/api/v1/task-occurrences',
-    defaultTags: ['Task Instance'],
+    defaultTags: ['Task Occurrence'],
     defaultSecurity: [{ bearerAuth: [] }],
   });
 
@@ -68,7 +68,7 @@ export function registerTaskOccurrenceRoutes(
     {
       method: 'get',
       path: '/by-date-range',
-      summary: '按日期范围获取任务实例',
+      summary: '按日期范围获取任务发生项',
       request: {
         query: GetTaskOccurrencesByRangeSchema,
       },
@@ -89,7 +89,7 @@ export function registerTaskOccurrenceRoutes(
     {
       method: 'get',
       path: '/',
-      summary: '获取任务实例列表',
+      summary: '获取任务发生项列表',
       request: {
         query: z.object({
           planId: brandedId<TaskPlanId>().optional(),
@@ -113,7 +113,7 @@ export function registerTaskOccurrenceRoutes(
     {
       method: 'get',
       path: '/:id',
-      summary: '获取任务实例详情',
+      summary: '获取任务发生项详情',
       request: { params: z.object({ id: brandedId<TaskOccurrenceId>() }) },
       responses: {
         200: successResponse(TaskOccurrenceResponseSchema, '获取成功'),
@@ -129,7 +129,7 @@ export function registerTaskOccurrenceRoutes(
     {
       method: 'post',
       path: '/:id/complete',
-      summary: '完成任务实例',
+      summary: '完成任务发生项',
       request: {
         params: CompleteTaskOccurrenceInvocationSchema.shape.params,
         body: {
@@ -156,7 +156,7 @@ export function registerTaskOccurrenceRoutes(
     {
       method: 'post',
       path: '/:id/uncomplete',
-      summary: '撤销完成任务实例',
+      summary: '撤销完成任务发生项',
       request: { params: TaskOccurrenceIdCommandInvocationSchema.shape.params },
       responses: {
         200: successResponse(TaskOccurrenceResponseSchema, '撤销完成成功'),
@@ -176,7 +176,7 @@ export function registerTaskOccurrenceRoutes(
     {
       method: 'post',
       path: '/:id/skip',
-      summary: '跳过任务实例',
+      summary: '跳过任务发生项',
       request: {
         params: SkipTaskOccurrenceInvocationSchema.shape.params,
         body: {
@@ -203,7 +203,7 @@ export function registerTaskOccurrenceRoutes(
     {
       method: 'post',
       path: '/:id/missed',
-      summary: '明确记录任务实例为 Missed',
+      summary: '明确记录任务发生项为 Missed',
       request: {
         params: MarkTaskOccurrenceMissedInvocationSchema.shape.params,
         body: {
@@ -260,7 +260,7 @@ export function registerTaskOccurrenceRoutes(
     {
       method: 'post',
       path: '/:id/reschedule',
-      summary: '重新安排任务实例时间',
+      summary: '重新安排任务发生项时间',
       request: {
         params: RescheduleTaskOccurrenceInvocationSchema.shape.params,
         body: {
@@ -288,7 +288,7 @@ export function registerTaskOccurrenceRoutes(
     {
       method: 'post',
       path: '/:id/start',
-      summary: '开始任务实例',
+      summary: '开始任务发生项',
       request: { params: TaskOccurrenceIdCommandInvocationSchema.shape.params },
       responses: {
         200: successResponse(TaskOccurrenceResponseSchema, '开始成功'),
@@ -308,7 +308,7 @@ export function registerTaskOccurrenceRoutes(
     {
       method: 'delete',
       path: '/:id',
-      summary: '删除任务实例',
+      summary: '删除任务发生项',
       request: { params: TaskOccurrenceIdCommandInvocationSchema.shape.params },
       responses: {
         200: successResponse(z.null(), '删除成功'),
