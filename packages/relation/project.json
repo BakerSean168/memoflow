@@ -8,7 +8,7 @@
     "build": {
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/packages/relation/dist"],
-      "dependsOn": ["contracts:build", "database:build"],
+      "dependsOn": ["^build"],
       "options": {
         "command": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsup --clean=false",
         "cwd": "packages/relation"
