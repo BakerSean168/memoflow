@@ -250,9 +250,7 @@ describe('TaskOccurrence canonical aggregate (TASK-7303)', () => {
   it('reschedules only occurrence reality and rotates the deterministic occurrence key', () => {
     const planId = TaskPlanId.generate();
     const occurrence = makeOccurrence({ planId, scheduleSnapshot: snapshot('2026-03-09') });
-    const next = occurrence
-      .legacyTimeConfigAt(UTC)
-      .setStartDate(Date.parse('2026-03-10T00:00:00Z'));
+    const next = snapshot('2026-03-10');
 
     expect(occurrence.reschedule(next, UTC, 123)).toBe(true);
     expect(occurrence.scheduleDate).toBe('2026-03-10');
@@ -321,18 +319,31 @@ describe('TaskOccurrence canonical aggregate (TASK-7303)', () => {
     }
   });
 
-  it('derives the temporary legacy client projection only with explicit Product Time', () => {
+  it('projects canonical client truth plus Product-Time dueAt/isOverdue', () => {
     const occurrence = makeOccurrence({
       scheduleSnapshot: snapshot('2026-03-09', { kind: TaskTimingKind.At, time: '09:30' }),
     });
     occurrence.skip('waived', 20_000);
     const dto = occurrence.toClientDTOAt(UTC, 10_000);
 
-    expect(dto.templateId).toBe(occurrence.planId);
-    expect(dto.instanceDate).toBe(Date.parse('2026-03-09T00:00:00.000Z'));
-    expect(dto.timeConfig).toMatchObject({ timeType: 'TimePoint', timePoint: 570 });
-    expect(dto.comment).toBe('waived');
-    expect(dto.actualEndTime).toBeNull();
+    expect(dto).toMatchObject({
+      planId: occurrence.planId,
+      occurrenceKey: `${occurrence.planId}:2026-03-09`,
+      scheduleSnapshot: { date: '2026-03-09', timing: { kind: 'At', time: '09:30' } },
+      importanceSnapshot: ImportanceLevel.Important,
+      result: { kind: 'Skipped', recordedAt: 20_000, reason: 'waived' },
+      dueAt: Date.parse('2026-03-09T09:30:00.000Z'),
+      isOverdue: false,
+    });
+    for (const retired of [
+      'templateId',
+      'instanceDate',
+      'timeConfig',
+      'actualEndTime',
+      'comment',
+    ]) {
+      expect(dto).not.toHaveProperty(retired);
+    }
   });
 
   it('round-trips canonical state through load', () => {

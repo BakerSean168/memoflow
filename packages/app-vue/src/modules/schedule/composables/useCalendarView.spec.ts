@@ -6,66 +6,68 @@ import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contr
 import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '@memoflow/contracts/primitives';
 
 function makeTemplate(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {
+  const now = Date.now();
   return {
     id: 'tpl-1' as TaskPlanId,
     identityId: 'acc-1' as IdentityId,
     name: 'Morning Task',
     description: null,
-    timeConfig: {
-      timeType: 'AllDay',
-      startDate: null,
-      timePoint: null,
-      timeRange: null,
-    },
-    recurrenceRule: null,
+    schedule: {
+      kind: 'OneTime',
+      startDate: '2026-03-18',
+      timing: { kind: 'AllDay' },
+      recurrence: null,
+    } as TaskPlanClientDTO['schedule'],
     reminderConfig: null,
     importance: 'Moderate',
     goalBinding: null,
-    tags: [],
-    color: null,
+    labels: [],
     status: 'Active',
-    lastGeneratedDate: null,
-    generateAheadDays: null,
+    outcome: 'InProgress',
+    completionPolicy: 'Manual',
+    closedAt: null,
+    archivedAt: null,
+    abandonedReason: null,
     version: 1,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    createdAt: now,
+    updatedAt: now,
     deletedAt: null,
-    startDate: null,
-    dueDate: null,
-    completedAt: null,
-    estimatedMinutes: null,
-    actualMinutes: null,
-    comment: null,
     instanceCount: 0,
     completedInstanceCount: 0,
     pendingInstanceCount: 0,
+    dueInstanceCount: 0,
+    completedDueInstanceCount: 0,
+    completionWindowDays: 30,
+    futurePendingInstanceCount: 0,
+    singleInstanceStatus: null,
     completionRate: 0,
     history: [],
     instances: [],
     ...overrides,
-  };
+  } as TaskPlanClientDTO;
 }
 
 function makeInstance(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
+  const now = Date.now();
   return {
     id: 'inst-1' as TaskOccurrenceId,
-    templateId: 'tpl-1' as TaskPlanId,
+    planId: 'tpl-1' as TaskPlanId,
     identityId: 'acc-1' as IdentityId,
-    instanceDate: Date.UTC(2026, 2, 18, 0, 0, 0, 0),
-    timeConfig: {
-      timeType: 'AllDay',
-      startDate: null,
-      timePoint: null,
-      timeRange: null,
+    occurrenceKey: 'tpl-1:2026-03-18',
+    scheduleSnapshot: {
+      date: '2026-03-18' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+      timing: { kind: 'AllDay' },
     },
-    importance: 'Moderate',
+    importanceSnapshot: 'Moderate',
     status: 'Pending',
-    actualStartTime: null,
-    actualEndTime: null,
-    comment: null,
+    actualStartAt: null,
+    result: null,
+    checklistState: [],
+    dueAt: Date.UTC(2026, 2, 18, 23, 59, 59, 999),
+    isOverdue: false,
     version: 1,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    createdAt: now,
+    updatedAt: now,
     deletedAt: null,
     ...overrides,
   };
@@ -101,12 +103,11 @@ describe('useCalendarView helpers', () => {
     const [event] = taskOccurrencesToEvents(
       [
         makeInstance({
-          timeConfig: {
-            timeType: 'TimeRange',
-            startDate: null,
-            timePoint: null,
-            timeRange: { start: 9 * 60, end: 10 * 60 + 30 },
+          scheduleSnapshot: {
+            date: '2026-03-18' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+            timing: { kind: 'Window', start: '09:00', end: '10:30' },
           },
+          dueAt: Date.UTC(2026, 2, 18, 10, 30),
         }),
       ],
       [makeTemplate()],

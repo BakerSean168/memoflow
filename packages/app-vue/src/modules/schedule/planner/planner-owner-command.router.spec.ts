@@ -17,7 +17,6 @@ const at17 = asInstant(Number(dayStart) + 17 * 60 * 60_000);
 const time: PlannerMutationTimePort = {
   startOfDay: () => dayStart,
   toYmd: () => asYmd('2026-08-27'),
-  startOfYmd: () => dayStart,
 };
 
 function taskProjection(
@@ -33,7 +32,7 @@ function taskProjection(
     allDay: false as const,
     displayMetadata: { semantic: 'task-occurrence' as const, status: 'Pending' },
     editableCapabilities: { move: true, resize: false },
-    ownerCommandTarget: { ownerType: 'task.instance' as const, ownerId: 'task-occurrence-1' },
+    ownerCommandTarget: { ownerType: 'task.occurrence' as const, ownerId: 'task-occurrence-1' },
     revision: 3,
     ...overrides,
   };
@@ -61,11 +60,9 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
     });
 
     expect(rescheduleInstance).toHaveBeenCalledWith('task-occurrence-1', {
-      newTime: {
-        timeType: 'TimePoint',
-        startDate: Number(dayStart),
-        timePoint: 16 * 60,
-        timeRange: null,
+      scheduleSnapshot: {
+        date: '2026-08-27',
+        timing: { kind: 'At', time: '16:00' },
       },
       expectedVersion: 3,
     });
@@ -90,7 +87,7 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
       revert,
     });
 
-    expect(outcome).toEqual({ status: 'applied', ownerType: 'task.instance' });
+    expect(outcome).toEqual({ status: 'applied', ownerType: 'task.occurrence' });
     expect(revert).not.toHaveBeenCalled();
   });
 
@@ -127,13 +124,9 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
 
   it('routes an exact-day Goal target move to Goal owner and never turns it into a Scheduler mutation', async () => {
     const updateGoal = vi.fn().mockResolvedValue(ok({}));
-    const nextDayStart = asInstant(Number(dayStart) + 24 * 60 * 60_000);
     const router = createPlannerOwnerCommandRouter({
       goal: { updateGoal },
-      time: {
-        ...time,
-        startOfYmd: (ymd) => (ymd === asYmd('2026-08-28') ? nextDayStart : dayStart),
-      },
+      time,
     });
     const projection: Extract<CalendarEventProjection, { sourceType: 'goal' }> = {
       identityId: 'identity-1',
@@ -210,7 +203,7 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
     expect(revert).toHaveBeenCalledTimes(1);
   });
 
-  it('rejects cross-day Task time ranges rather than corrupting TaskTimeConfig', async () => {
+  it('rejects cross-day Task time ranges rather than corrupting the occurrence schedule snapshot', async () => {
     const rescheduleInstance = vi.fn();
     const otherDay = asInstant(Number(dayStart) + 24 * 60 * 60_000 + 30 * 60_000);
     const router = createPlannerOwnerCommandRouter({
@@ -219,7 +212,6 @@ describe('PlannerOwnerCommandRouter (PLAN-4303)', () => {
         startOfDay: (instant) =>
           instant === otherDay ? asInstant(Number(dayStart) + 24 * 60 * 60_000) : dayStart,
         toYmd: (instant) => (instant === otherDay ? asYmd('2026-08-28') : asYmd('2026-08-27')),
-        startOfYmd: () => dayStart,
       },
     });
 

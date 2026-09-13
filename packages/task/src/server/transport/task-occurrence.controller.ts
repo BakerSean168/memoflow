@@ -76,12 +76,12 @@ export class TaskOccurrenceController {
   async listInstances(
     identityId: string,
     filters?: {
-      templateId?: string;
+      planId?: string;
       status?: TaskOccurrenceStatus;
     },
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    if (filters?.templateId) {
-      return await this.useCases.listByTemplate(filters.templateId, identityId);
+    if (filters?.planId) {
+      return await this.useCases.listByTemplate(filters.planId, identityId);
     } else if (filters?.status) {
       return await this.useCases.listByStatus(identityId, filters.status);
     } else {

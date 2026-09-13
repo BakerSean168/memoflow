@@ -26,7 +26,7 @@ function failure(
   error: Pick<ResultError, 'code' | 'message' | 'failure'>,
 ): TaskPlanExecutionFailure {
   return {
-    operation: 'task_template',
+    operation: 'task_plan',
     code: String(error.code),
     message: error.message,
     retryable: retryableFailure(error as ResultError),
@@ -97,7 +97,7 @@ export class ApplyTaskPlanService {
     const expectedTaskId = taskWorkflowEntityId({
       workflowRunId,
       revision: draft.revision,
-      kind: 'task_template',
+      kind: 'task_plan',
     });
     // Idempotency: if the prior receipt already applied this exact entity, do not
     // call the mutation port again.
@@ -135,7 +135,7 @@ export class ApplyTaskPlanService {
           taskIds: [],
           failures: [
             {
-              operation: 'task_template',
+              operation: 'task_plan',
               code: 'VALIDATION_ERROR',
               message: cause instanceof Error ? cause.message : 'Invalid task plan',
               retryable: false,
@@ -148,7 +148,7 @@ export class ApplyTaskPlanService {
       if (result.ok) {
         if (result.data.taskId !== expectedTaskId) {
           failures.push({
-            operation: 'task_template',
+            operation: 'task_plan',
             code: 'AI_WORKFLOW_MUTATION_ID_MISMATCH',
             message: 'Task application port returned an unexpected deterministic entity ID',
             retryable: false,

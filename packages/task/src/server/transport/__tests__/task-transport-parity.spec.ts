@@ -185,18 +185,17 @@ const validSkip = { reason: 'Too tired' };
 const malformedSkip = { reason: 42 };
 
 const validReschedule = {
-  newTime: {
-    timeType: 'TimePoint' as const,
-    startDate: 1_787_860_800_000,
-    timePoint: 16 * 60,
-    timeRange: null,
+  scheduleSnapshot: {
+    date: '2026-08-28',
+    timing: { kind: 'At' as const, time: '16:00' },
   },
   expectedVersion: 3,
 };
 const malformedReschedule = {
+  // TASK-7306 anti-resurrection: the old TaskTimeConfig command shape is rejected.
   newTime: {
     timeType: 'TimePoint' as const,
-    startDate: null,
+    startDate: 1_787_860_800_000,
     timePoint: 16 * 60,
     timeRange: null,
   },
@@ -445,10 +444,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
           httpKey: 'template POST /:id/generate-instances',
           ipcChannel: TaskChannels.TEMPLATE_GENERATE_INSTANCES,
           httpReq: { params: { id: TEMPLATE_ID }, body: validGenerate },
-          ipcArgs: { templateId: TEMPLATE_ID, request: validGenerate },
+          ipcArgs: { planId: TEMPLATE_ID, request: validGenerate },
           validInvocation: { params: { id: TEMPLATE_ID }, body: validGenerate },
           malformedHttpReq: { params: { id: TEMPLATE_ID }, body: malformedGenerate },
-          malformedIpcArgs: { templateId: TEMPLATE_ID, request: malformedGenerate },
+          malformedIpcArgs: { planId: TEMPLATE_ID, request: malformedGenerate },
           assertPort: (port) => {
             const mock = port.generateTaskOccurrences as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
@@ -465,10 +464,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
           httpKey: 'template POST /:id/bind-goal',
           ipcChannel: TaskChannels.TEMPLATE_BIND_GOAL,
           httpReq: { params: { id: TEMPLATE_ID }, body: validBindGoal },
-          ipcArgs: { templateId: TEMPLATE_ID, request: validBindGoal },
+          ipcArgs: { planId: TEMPLATE_ID, request: validBindGoal },
           validInvocation: { params: { id: TEMPLATE_ID }, body: validBindGoal },
           malformedHttpReq: { params: { id: TEMPLATE_ID }, body: malformedBindGoal },
-          malformedIpcArgs: { templateId: TEMPLATE_ID, request: malformedBindGoal },
+          malformedIpcArgs: { planId: TEMPLATE_ID, request: malformedBindGoal },
           assertPort: (port) => {
             const mock = port.bindTaskToGoal as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
@@ -485,10 +484,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
           httpKey: 'template POST /:id/unbind-goal',
           ipcChannel: TaskChannels.TEMPLATE_UNBIND_GOAL,
           httpReq: { params: { id: TEMPLATE_ID } },
-          ipcArgs: { templateId: TEMPLATE_ID },
+          ipcArgs: { planId: TEMPLATE_ID },
           validInvocation: { params: { id: TEMPLATE_ID } },
           malformedHttpReq: { params: { id: 'bad' } },
-          malformedIpcArgs: { templateId: 'bad' },
+          malformedIpcArgs: { planId: 'bad' },
           assertPort: (port) => {
             const mock = port.unbindTaskFromGoal as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);
@@ -612,10 +611,10 @@ describe('task transport parity (Phase 4) — production registrations', () => {
           httpKey: 'instance POST /:id/reschedule',
           ipcChannel: TaskChannels.INSTANCE_RESCHEDULE,
           httpReq: { params: { id: INSTANCE_ID }, body: validReschedule },
-          ipcArgs: { instanceId: INSTANCE_ID, ...validReschedule },
+          ipcArgs: { occurrenceId: INSTANCE_ID, ...validReschedule },
           validInvocation: { params: { id: INSTANCE_ID }, body: validReschedule },
           malformedHttpReq: { params: { id: INSTANCE_ID }, body: malformedReschedule },
-          malformedIpcArgs: { instanceId: INSTANCE_ID, ...malformedReschedule },
+          malformedIpcArgs: { occurrenceId: INSTANCE_ID, ...malformedReschedule },
           assertPort: (port) => {
             const mock = port.rescheduleTaskOccurrence as ReturnType<typeof vi.fn>;
             expect(mock).toHaveBeenCalledTimes(2);

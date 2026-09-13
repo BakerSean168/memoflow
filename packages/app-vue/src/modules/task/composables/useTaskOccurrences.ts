@@ -75,7 +75,7 @@ export function useTaskOccurrences() {
   ): Promise<TaskOccurrenceDTO> {
     const dto = entity.toDTO();
     store.updateInstance(dto);
-    await refreshTemplateProjection(String(dto.templateId));
+    await refreshTemplateProjection(String(dto.planId));
     return dto;
   }
 

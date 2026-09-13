@@ -226,7 +226,7 @@ describe('AI vNext runtime contracts', () => {
         retryable: true,
         failures: [
           {
-            operation: 'task_template',
+            operation: 'task_plan',
             code: 'SERVICE_UNAVAILABLE',
             message: 'internal persistence detail',
             retryable: true,
@@ -240,7 +240,7 @@ describe('AI vNext runtime contracts', () => {
     expect(parsed.kind).toBe('task.create');
     expect(parsed.suspension?.type).toBe('recovery_required');
     if (parsed.suspension?.type === 'recovery_required') {
-      expect(parsed.suspension.failures[0]?.operation).toBe('task_template');
+      expect(parsed.suspension.failures[0]?.operation).toBe('task_plan');
     }
   });
 

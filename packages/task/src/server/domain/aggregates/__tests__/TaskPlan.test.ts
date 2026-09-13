@@ -677,7 +677,7 @@ describe('TaskPlan Aggregate', () => {
           TASK_TEST_TIME_CONTEXT,
         );
 
-        expect(occurrence.templateId).toBe(template.id);
+        expect(occurrence.planId).toBe(template.id);
         expect(Reflect.get(template, 'instances')).toBeUndefined();
         expect(Reflect.get(template, 'createInstance')).toBeUndefined();
         expect(Reflect.get(template, 'addInstance')).toBeUndefined();

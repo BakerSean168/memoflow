@@ -41,7 +41,6 @@ describe('GenerateTaskOccurrencesUseCase (TASK-2204)', () => {
 
   it('filters already persisted occurrence days before returning generated DTOs', async () => {
     const start = Date.UTC(2026, 0, 1, 0, 0, 0);
-    const secondDay = Date.UTC(2026, 0, 2, 0, 0, 0);
     const timeConfig = anAllDayTimeConfig(new Date(start));
     const template = aLoadedTaskPlan({
       taskType: TaskType.Recurring,
@@ -64,7 +63,7 @@ describe('GenerateTaskOccurrencesUseCase (TASK-2204)', () => {
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.map((instance) => instance.instanceDate)).toEqual([secondDay]);
+      expect(result.data.map((instance) => instance.scheduleSnapshot.date)).toEqual(['2026-01-02']);
     }
     expect(instanceRepo.saveMany).toHaveBeenCalledTimes(1);
     expect(vi.mocked(instanceRepo.saveMany).mock.calls[0][0]).toHaveLength(1);

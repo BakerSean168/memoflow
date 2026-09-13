@@ -6,7 +6,7 @@ tags:
   - refactor
 description: Task Plan / Occurrence 聚合边界、Schedule ADT、Result/Checklist、Reminder parity、Goal/Workspace 一次性收敛实施计划
 created: 2026-09-08T19:35:00+08:00
-updated: 2026-09-13T13:13:39+08:00
+updated: 2026-09-13T16:42:00+08:00
 ---
 
 # Task vNext Model Convergence
@@ -22,8 +22,8 @@ updated: 2026-09-13T13:13:39+08:00
 - old `TaskTemplate`/`TaskInstance` persistence and compatibility DTOs are deleted rather than translated;
 - no legacy round-trip fixture is required; fresh TaskPlan/TaskOccurrence round-trip remains required.
 
-**状态：ACTIVE / TASK-7305 complete; TASK-7306 next**
-**执行分支：** `feat/system-wide-vnext-convergence`（ticket worktree: `chatgpt/task-7305-persistence`）
+**状态：ACTIVE / TASK-7306 complete; TASK-7307 next**
+**执行分支：** `feat/system-wide-vnext-convergence`（ticket worktree: `chatgpt/task-7306-application`）
 **上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）
 **基线：** Task Vitest 71 files / 717 tests PASS
 
@@ -133,6 +133,12 @@ Prisma/PowerSync TaskPlan mapper 已停止读取/写入 cursor；当前 Data Por
 - AI Task draft 使用同一 schedule/goal link contract；
 - 删除 legacy QueryValidator status/dueDate surface。
 
+**TASK-7306 DONE（2026-09-13）：** application / HTTP / IPC / Planner / Scheduling / AI consumer 已统一切到 canonical `TaskPlan / TaskOccurrence` contract。`TaskOccurrenceClientDTO` 不再输出 `templateId / instanceDate / timeConfig / actualEndTime / comment`，而是直接暴露 `planId + scheduleSnapshot + importanceSnapshot + result + checklistState + dueAt/isOverdue`；公开 occurrence list filter 从 `templateId` 改为 `planId`。Reschedule command 同步 destructive-cut 为 `occurrenceId + scheduleSnapshot`，旧 `instanceId / newTime: TaskTimeConfig` body 由 strict schema 明确拒绝；Planner drag/drop 直接产生 canonical schedule snapshot，不再重建 legacy time config。TaskPlan HTTP/IPC/client 的 generate/range/bind/unbind 参数也统一为 `planId`；底层 `TEMPLATE_*` channel / repository legacy symbol 留给 TASK-7309 最终删除，不再作为新 JSON contract 暴露。
+
+Scheduling reminder payload 升为 canonical Plan/Occurrence vocabulary 与 v2 payload，owner target 使用 `task.plan` / `task.occurrence`；AI Planner read port 改读 `planId + scheduleDate/scheduleSnapshot`，standalone Task apply receipt/deterministic kind 从 `task_template` 收敛为 `task_plan`，AI Task draft 继续复用同一 `CreateTaskPlanReq.schedule + goalBinding` contract。无人消费的 `TaskQueryValidator` 与 completion-toggle legacy surface 已直接删除。Dashboard 仅作为待 Phase-5 退休的 consumer projection 适配 canonical occurrence，不把旧 DTO 重新引入 Task authority；Vue Planner/Task views、capsule、Daily Todo、Occurrence row/composable 已直接消费 `scheduleSnapshot / planId / result / dueAt`。
+
+本地 exact-worktree 验收：Task **74 files / 590 tests PASS**；Contracts **85 / 581 PASS**；app-vue **207 / 806 PASS**；Task lint **0 errors / 52 existing warnings**；Task / app-vue / Web / API / Desktop direct typecheck PASS；Task / Contracts / app-vue / AI build PASS；TaskOccurrence HTTP smoke **32/32 PASS**，TaskPlan HTTP smoke **29/29 PASS**；HTTP/IPC parity **17/17 PASS**，Electron Task transport **10/10 PASS**；Planner focused tests PASS。Anti-resurrection locks 拒绝 legacy occurrence DTO、legacy `newTime` reschedule body 与旧 query alias；没有新增 compatibility reader/adapter。
+
 ### TASK-7307 — UI convergence
 
 - Product wording Template/Instance -> Plan/Occurrence/Task；
@@ -220,10 +226,10 @@ full CI exact-head
 - [x] TASK-7303
 - [x] TASK-7304
 - [x] TASK-7305
-- [ ] TASK-7306
+- [x] TASK-7306
 - [ ] TASK-7307
 - [ ] TASK-7308
 - [ ] TASK-7309
 - [ ] TASK-7310
 
-**Next:** TASK-7306 is now the sole next Task dependency: switch Create/Update/Query, HTTP/IPC, Planner/Scheduling projections and AI Task draft consumers to the canonical TaskPlan/TaskOccurrence contract, then delete legacy QueryValidator status/dueDate and compatibility DTO surfaces. TASK-7305 has completed Prisma/PowerSync single-track persistence with fresh-DB and portable round-trip proof; do not reintroduce persistence adapters while cutting application consumers over.
+**Next:** TASK-7307 is now the sole next Task dependency: converge the user-facing Task UI on TaskPlan/TaskOccurrence wording and interaction, make create/edit property-chip first, expose Goal-only links and checklist definition/occurrence interactions, preserve multi-trigger reminder parity, and evolve Task Detail into TaskPlanWorkspace. TASK-7306 has completed the application/transport/Planner/AI cutover; do not reintroduce legacy occurrence DTOs, `newTime` reschedule bodies, or `templateId` public query aliases while implementing UI convergence.

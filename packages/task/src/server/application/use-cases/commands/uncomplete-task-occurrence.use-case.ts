@@ -2,10 +2,7 @@ import type { TaskOccurrenceOperationRes } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { error, ok } from '@memoflow/contracts/result';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
-import {
-  type TaskWriteRepositories,
-  type TaskWriteTransactionRunner,
-} from './task-write-support';
+import { type TaskWriteRepositories, type TaskWriteTransactionRunner } from './task-write-support';
 import { reevaluateTaskPlanOutcome } from './task-plan-outcome-reevaluation';
 import type { TimeContext } from '@memoflow/time';
 import type { TaskOccurrenceProjectionService } from '../../services/task-occurrence-projection.service';
@@ -26,7 +23,9 @@ export class UncompleteTaskOccurrenceUseCase {
     private readonly projection: TaskOccurrenceProjectionService,
   ) {
     if (!transactionRunner) {
-      throw new Error('TaskWriteTransactionRunner must be explicitly provided to UncompleteTaskOccurrenceUseCase');
+      throw new Error(
+        'TaskWriteTransactionRunner must be explicitly provided to UncompleteTaskOccurrenceUseCase',
+      );
     }
     this.transactionRunner = transactionRunner;
   }
@@ -57,7 +56,7 @@ export class UncompleteTaskOccurrenceUseCase {
     await reevaluateTaskPlanOutcome(
       repositories,
       identityId,
-      String(instance.templateId),
+      String(instance.planId),
       instance.id,
       timeContext,
     );

@@ -43,7 +43,6 @@ import { describe, expect, it } from 'vitest';
   });
 }
 
-
 // --- merged from task-goal-binding-dual.surface.spec.ts ---
 {
   /**
@@ -99,7 +98,9 @@ import { describe, expect, it } from 'vitest';
 
     it('exports one ADR-056 link schema with nested contribution and the reminder schema', () => {
       expect(binding).toMatch(/export const TaskGoalLinkSchema = z\s*\.object\(\{/);
-      expect(binding).toContain('contribution: GoalContributionRuleSchema.nullable().optional().default(null)');
+      expect(binding).toContain(
+        'contribution: GoalContributionRuleSchema.nullable().optional().default(null)',
+      );
       expect(binding).toContain('export const TaskGoalBindingSchema = TaskGoalLinkSchema');
       expect(binding).not.toContain('goalRecordValue:');
       expect(binding).not.toContain('progressTrigger:');
@@ -134,7 +135,6 @@ import { describe, expect, it } from 'vitest';
   });
 }
 
-
 // --- merged from task-occurrence-schedule-task-client-dto-dual.surface.spec.ts ---
 {
   /**
@@ -156,15 +156,27 @@ import { describe, expect, it } from 'vitest';
     const taskSchemas = readFileSync(resolve(taskApi, 'response-schemas.ts'), 'utf8');
     const scheduleSchemas = readFileSync(resolve(scheduleApi, 'response-schemas.ts'), 'utf8');
 
-
     it('owns TaskOccurrenceClientDTO as z.infer of TaskOccurrenceResponseSchema', () => {
-      expect(instance).toContain('Residual 831');
+      expect(instance).toContain('TASK-7306');
       expect(instance).toContain(
         'export type TaskOccurrenceClientDTO = z.infer<typeof TaskOccurrenceResponseSchema>',
       );
       expect(instance).not.toMatch(/export interface TaskOccurrenceClientDTO\b/);
       expect(taskSchemas).toContain('export const TaskOccurrenceResponseSchema = z.object({');
-      expect(taskSchemas).toContain('timeConfig: TaskTimeConfigSchema');
+      for (const required of [
+        'planId: brandedId<TaskPlanId>()',
+        'occurrenceKey: z.string().min(1)',
+        'scheduleSnapshot: TaskOccurrenceScheduleSnapshotSchema',
+        'importanceSnapshot: z.enum(ImportanceLevel)',
+        'result: TaskOccurrenceResultSchema.nullable()',
+        'checklistState: z.array(TaskOccurrenceChecklistItemSchema)',
+        'dueAt: z.number()',
+      ]) {
+        expect(taskSchemas).toContain(required);
+      }
+      expect(taskSchemas).not.toMatch(
+        /\btemplateId: brandedId<TaskPlanId>|\binstanceDate: z\.number|\btimeConfig: TaskTimeConfigSchema|\bactualEndTime:|\bcomment:/,
+      );
       const instRoutes = readFileSync(
         resolve(taskApi, '../../../../../task/src/api/routes/task-occurrence.routes.ts'),
         'utf8',

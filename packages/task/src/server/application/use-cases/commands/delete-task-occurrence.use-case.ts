@@ -23,7 +23,7 @@ export class DeleteTaskOccurrenceUseCase {
       taskEvents.send('task:instance-deleted', {
         identityId: instance.identityId,
         taskOccurrenceId: instance.id,
-        taskPlanId: instance.templateId,
+        taskPlanId: instance.planId,
         deletedAt: Date.now(),
       });
     }

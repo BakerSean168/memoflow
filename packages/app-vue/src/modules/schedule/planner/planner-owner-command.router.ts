@@ -3,8 +3,8 @@ import type { ScheduleClientPort } from '@memoflow/schedule/client';
 import type { TaskClientPort } from '@memoflow/task/client';
 import type { Result } from '@memoflow/contracts/result';
 import type { CalendarEventProjection, PlannerEventRange } from '@memoflow/contracts/schedule';
-import type { RescheduleTaskInput, TaskTimeConfigDTO } from '@memoflow/contracts/task';
-import type { Instant, Ymd } from '@memoflow/time';
+import type { RescheduleTaskInput } from '@memoflow/contracts/task';
+import { asHm, type Hm, type Instant, type Ymd } from '@memoflow/time';
 import { getProductTime } from '../../../shared/utils/product-time';
 
 const MINUTE_MS = 60_000;
@@ -31,13 +31,11 @@ export type PlannerMutationOutcome =
 export interface PlannerMutationTimePort {
   readonly toYmd: (instant: Instant) => Ymd;
   readonly startOfDay: (instant: Instant) => Instant;
-  readonly startOfYmd: (ymd: Ymd) => Instant;
 }
 
 export const defaultPlannerMutationTimePort: PlannerMutationTimePort = {
   toYmd: (instant) => getProductTime().calendar.toYmd(instant),
   startOfDay: (instant) => getProductTime().calendar.startOfDay(instant),
-  startOfYmd: (ymd) => getProductTime().codec.startOfYmd(ymd),
 };
 
 export interface RoutinePlannerOwnerCommandPort {
@@ -87,44 +85,52 @@ function minutesFromDayStart(time: PlannerMutationTimePort, instant: Instant): n
   return Number.isInteger(minutes) && minutes >= 0 && minutes <= 1439 ? minutes : null;
 }
 
+function minuteOfDayToHm(minutes: number): Hm {
+  const hour = Math.floor(minutes / 60);
+  const minute = minutes % 60;
+  return asHm(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`);
+}
+
 function taskRescheduleInput(
   projection: Extract<CalendarEventProjection, { sourceType: 'task' }>,
   nextRange: PlannerEventRange,
   time: PlannerMutationTimePort,
 ): RescheduleTaskInput | null {
-  let newTime: TaskTimeConfigDTO;
   if (nextRange.allDay) {
-    newTime = {
-      timeType: 'AllDay',
-      startDate: Number(time.startOfYmd(nextRange.start)),
-      timePoint: null,
-      timeRange: null,
+    return {
+      scheduleSnapshot: { date: nextRange.start, timing: { kind: 'AllDay' } },
+      expectedVersion: projection.revision,
     };
-  } else {
-    const dayStart = time.startOfDay(nextRange.start);
-    const startMinute = minutesFromDayStart(time, nextRange.start);
-    if (startMinute == null) return null;
-
-    if (nextRange.end == null) {
-      newTime = {
-        timeType: 'TimePoint',
-        startDate: Number(dayStart),
-        timePoint: startMinute,
-        timeRange: null,
-      };
-    } else {
-      if (time.toYmd(nextRange.start) !== time.toYmd(nextRange.end)) return null;
-      const endMinute = minutesFromDayStart(time, nextRange.end);
-      if (endMinute == null || endMinute <= startMinute) return null;
-      newTime = {
-        timeType: 'TimeRange',
-        startDate: Number(dayStart),
-        timePoint: null,
-        timeRange: { start: startMinute, end: endMinute },
-      };
-    }
   }
-  return { newTime, expectedVersion: projection.revision };
+
+  const date = time.toYmd(nextRange.start);
+  const startMinute = minutesFromDayStart(time, nextRange.start);
+  if (startMinute == null) return null;
+
+  if (nextRange.end == null) {
+    return {
+      scheduleSnapshot: {
+        date,
+        timing: { kind: 'At', time: minuteOfDayToHm(startMinute) },
+      },
+      expectedVersion: projection.revision,
+    };
+  }
+
+  if (date !== time.toYmd(nextRange.end)) return null;
+  const endMinute = minutesFromDayStart(time, nextRange.end);
+  if (endMinute == null || endMinute <= startMinute) return null;
+  return {
+    scheduleSnapshot: {
+      date,
+      timing: {
+        kind: 'Window',
+        start: minuteOfDayToHm(startMinute),
+        end: minuteOfDayToHm(endMinute),
+      },
+    },
+    expectedVersion: projection.revision,
+  };
 }
 
 export function createPlannerOwnerCommandRouter(
@@ -169,7 +175,8 @@ export function createPlannerOwnerCommandRouter(
           if (!input) {
             return {
               status: 'invalid',
-              message: 'Task Planner range cannot be represented by TaskTimeConfig',
+              message:
+                'Task Planner range cannot be represented by a TaskOccurrence schedule snapshot',
             };
           }
           return resultOutcome(

@@ -14,13 +14,28 @@ const PassThroughStub = defineComponent({
 });
 
 function createInstance(status: TaskOccurrenceClientDTO['status']): TaskOccurrenceClientDTO {
+  const now = Date.now();
   return {
-    id: 'TaskOccurrenceId_today',
-    templateId: 'TaskPlanId_today',
-    instanceDate: Date.now(),
+    id: 'TaskOccurrenceId_today' as TaskOccurrenceClientDTO['id'],
+    planId: 'TaskPlanId_today' as TaskOccurrenceClientDTO['planId'],
+    identityId: 'IdentityId_today' as TaskOccurrenceClientDTO['identityId'],
+    occurrenceKey: 'TaskPlanId_today:today',
+    scheduleSnapshot: {
+      date: '2026-09-13' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+      timing: { kind: 'AllDay' },
+    },
+    importanceSnapshot: 'Moderate',
     status,
-    timeConfig: { timeType: 'AllDay', startDate: null, timePoint: null, timeRange: null },
-  } as TaskOccurrenceClientDTO;
+    actualStartAt: null,
+    result: null,
+    checklistState: [],
+    dueAt: now,
+    isOverdue: false,
+    version: 1,
+    createdAt: now,
+    updatedAt: now,
+    deletedAt: null,
+  };
 }
 
 describe('DailyTodoWidget', () => {
@@ -28,7 +43,7 @@ describe('DailyTodoWidget', () => {
     vi.clearAllMocks();
   });
 
-  it('refreshes the home progress and completed statistics after completing today\'s task', async () => {
+  it("refreshes the home progress and completed statistics after completing today's task", async () => {
     const instances = ref<TaskOccurrenceClientDTO[]>([createInstance('Pending')]);
     const templates = ref<TaskPlanClientDTO[]>([
       {

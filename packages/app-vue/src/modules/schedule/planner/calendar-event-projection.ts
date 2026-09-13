@@ -11,16 +11,12 @@ import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contr
 import { asInstant, type Instant, type Ymd } from '@memoflow/time';
 import { getProductTime } from '../../../shared/utils/product-time';
 
-const MINUTE_MS = 60_000;
-
 export interface PlannerProductTimePort {
-  toYmd(instant: Instant): Ymd;
-  startOfDay(instant: Instant): Instant;
+  combine(date: Ymd, hm: string): Instant | null;
 }
 
 export const defaultPlannerProductTimePort: PlannerProductTimePort = {
-  toYmd: (instant) => getProductTime().calendar.toYmd(instant),
-  startOfDay: (instant) => getProductTime().calendar.startOfDay(instant),
+  combine: (date, hm) => getProductTime().input.combine(date, hm) as Instant | null,
 };
 
 export interface RoutineWallClockPlannerOccurrence {
@@ -43,10 +39,6 @@ export interface PlannerReadProjectionInput {
   readonly goals: readonly GoalClientDTO[];
   readonly routineOccurrences: readonly RoutineWallClockPlannerOccurrence[];
   readonly time?: PlannerProductTimePort;
-}
-
-function addMinutes(start: Instant, minutes: number): Instant {
-  return asInstant(Number(start) + minutes * MINUTE_MS);
 }
 
 export function projectCalendarEntry(
@@ -75,6 +67,25 @@ export function projectCalendarEntry(
   };
 }
 
+function taskResultSubtitle(result: TaskOccurrenceClientDTO['result']): string | null {
+  if (result == null) return null;
+  return result.kind === 'Completed' ? (result.note ?? null) : (result.reason ?? null);
+}
+
+function requireTaskWallClockInstant(
+  occurrence: TaskOccurrenceClientDTO,
+  time: PlannerProductTimePort,
+  hm: string,
+): Instant {
+  const resolved = time.combine(occurrence.scheduleSnapshot.date, hm);
+  if (resolved == null) {
+    throw new TypeError(
+      `Task occurrence '${occurrence.id}' wall-clock time '${occurrence.scheduleSnapshot.date} ${hm}' does not resolve`,
+    );
+  }
+  return resolved;
+}
+
 export function projectTaskOccurrence(
   occurrence: TaskOccurrenceClientDTO,
   template: TaskPlanClientDTO | undefined,
@@ -82,8 +93,8 @@ export function projectTaskOccurrence(
 ): TaskCalendarEventProjection | null {
   if (occurrence.deletedAt != null) return null;
 
-  const anchor = asInstant(Number(occurrence.instanceDate));
   const editable = occurrence.status === 'Pending' || occurrence.status === 'InProgress';
+  const timing = occurrence.scheduleSnapshot.timing;
   const base = {
     identityId: String(occurrence.identityId),
     sourceType: 'task' as const,
@@ -91,49 +102,41 @@ export function projectTaskOccurrence(
     title: template?.name ?? String(occurrence.id),
     displayMetadata: {
       semantic: 'task-occurrence' as const,
-      subtitle: occurrence.comment,
+      subtitle: taskResultSubtitle(occurrence.result),
       tone: occurrence.isOverdue ? ('warning' as const) : ('default' as const),
       status: occurrence.status,
     },
     editableCapabilities: { move: editable, resize: false },
     ownerCommandTarget: {
-      ownerType: 'task.instance' as const,
+      ownerType: 'task.occurrence' as const,
       ownerId: String(occurrence.id),
     },
     revision: occurrence.version,
   };
 
-  if (occurrence.timeConfig.timeType === 'AllDay') {
+  if (timing.kind === 'AllDay') {
     return {
       ...base,
       allDay: true,
-      start: time.toYmd(anchor),
+      start: occurrence.scheduleSnapshot.date,
       end: null,
     };
   }
 
-  const dayStart = time.startOfDay(anchor);
-  if (occurrence.timeConfig.timeType === 'TimePoint') {
-    if (occurrence.timeConfig.timePoint == null) {
-      throw new TypeError(`Task occurrence '${occurrence.id}' is TimePoint without timePoint`);
-    }
+  if (timing.kind === 'At') {
     return {
       ...base,
       allDay: false,
-      start: addMinutes(dayStart, occurrence.timeConfig.timePoint),
+      start: requireTaskWallClockInstant(occurrence, time, timing.time),
       end: null,
     };
   }
 
-  const range = occurrence.timeConfig.timeRange;
-  if (!range || range.start >= range.end) {
-    throw new TypeError(`Task occurrence '${occurrence.id}' has an invalid TimeRange`);
-  }
   return {
     ...base,
     allDay: false,
-    start: addMinutes(dayStart, range.start),
-    end: addMinutes(dayStart, range.end),
+    start: requireTaskWallClockInstant(occurrence, time, timing.start),
+    end: requireTaskWallClockInstant(occurrence, time, timing.end),
   };
 }
 
@@ -231,7 +234,7 @@ export function projectPlannerReadModel(
     ...input.taskOccurrences.flatMap((occurrence) => {
       const event = projectTaskOccurrence(
         occurrence,
-        templateById.get(String(occurrence.templateId)),
+        templateById.get(String(occurrence.planId)),
         time,
       );
       return event ? [event] : [];

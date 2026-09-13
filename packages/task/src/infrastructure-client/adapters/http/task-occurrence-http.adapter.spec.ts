@@ -47,11 +47,9 @@ describe('TaskOccurrenceHttpAdapter', () => {
     } as any;
     const adapter = new TaskOccurrenceHttpAdapter(httpClient);
     const request = {
-      newTime: {
-        timeType: 'TimePoint' as const,
-        startDate: 1_787_860_800_000,
-        timePoint: 16 * 60,
-        timeRange: null,
+      scheduleSnapshot: {
+        date: '2026-08-28' as const,
+        timing: { kind: 'At' as const, time: '16:00' as const },
       },
       expectedVersion: 4,
     };
@@ -73,6 +71,8 @@ describe('TaskOccurrenceHttpAdapter', () => {
 
     await adapter.uncompleteTaskOccurrence('TaskOccurrenceId_123');
 
-    expect(httpClient.post).toHaveBeenCalledWith('/task-occurrences/TaskOccurrenceId_123/uncomplete');
+    expect(httpClient.post).toHaveBeenCalledWith(
+      '/task-occurrences/TaskOccurrenceId_123/uncomplete',
+    );
   });
 });

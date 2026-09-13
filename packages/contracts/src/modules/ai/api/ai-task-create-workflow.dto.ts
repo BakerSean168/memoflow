@@ -132,7 +132,7 @@ export type TaskClarificationState = z.infer<typeof TaskClarificationStateSchema
 
 export const TaskPlanExecutionFailureSchema = z
   .object({
-    operation: z.enum(['task_template']),
+    operation: z.enum(['task_plan']),
     index: z.number().int().nonnegative().optional(),
     code: z.string().min(1),
     message: z.string(),

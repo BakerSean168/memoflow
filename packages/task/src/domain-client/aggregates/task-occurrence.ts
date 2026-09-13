@@ -1,164 +1,87 @@
-import type { IdentityId, Instant, TaskOccurrenceId, TaskPlanId } from '@memoflow/contracts/primitives';
 /**
  * TaskOccurrence Aggregate Root - Domain Client
- * 任务实例聚合根 - 领域客户端
  *
- * 【规范说明】
- * - Private constructor with params object
- * - Public getters via this._props.xxx
- * - Static load(state: TaskOccurrenceState): TaskOccurrence
- * - Instance toDTO(): TaskOccurrenceClientDTO
+ * TASK-7306: client state mirrors canonical TaskOccurrence transport.
  */
 
-import type {
-  TaskOccurrenceClientDTO,
-  TaskTimeConfig,
-  TaskTimeConfigDTO,
-  TaskOccurrenceStatus,
-} from '@memoflow/contracts/task';
-import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { TaskOccurrenceId } from '@memoflow/contracts/primitives';
+import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import { AggregateRoot } from '@memoflow/utils/domain';
 
-export interface TaskOccurrenceState {
-  id: TaskOccurrenceId;
-  templateId: TaskPlanId;
-  identityId: IdentityId;
-  instanceDate: Instant;
-  timeConfig: TaskTimeConfig;
-  importance: ImportanceLevel | undefined;
-  status: TaskOccurrenceStatus;
-  isOverdue: boolean;
-  actualStartTime: Instant | null;
-  actualEndTime: Instant | null;
-  comment: string | null;
-  version: number;
-  createdAt: Instant;
-  updatedAt: Instant;
-  deletedAt: Instant | null;
-}
+export type TaskOccurrenceState = TaskOccurrenceClientDTO;
 
 export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
-  // ================= 1. Props =================
   private readonly _props: TaskOccurrenceState;
 
-  // ================= 2. Constructor (Private) =================
   private constructor(props: TaskOccurrenceState) {
     super(props.id);
-    this._props = props;
+    this._props = structuredClone(props);
   }
 
-  // ================= 3. Getters =================
-  get templateId(): TaskPlanId {
-    return this._props.templateId;
+  get planId() {
+    return this._props.planId;
   }
-
-  get identityId(): IdentityId {
+  get identityId() {
     return this._props.identityId;
   }
-
-  get instanceDate(): Instant {
-    const v = this._props.instanceDate;
-    return v as Instant;
+  get occurrenceKey() {
+    return this._props.occurrenceKey;
   }
-
-  get timeConfig(): TaskTimeConfig {
-    return this._props.timeConfig;
+  get scheduleSnapshot() {
+    return structuredClone(this._props.scheduleSnapshot);
   }
-
-  get importance(): ImportanceLevel | undefined {
-    return this._props.importance;
+  get scheduleDate() {
+    return this._props.scheduleSnapshot.date;
   }
-
-
-  get status(): TaskOccurrenceStatus {
+  get importanceSnapshot() {
+    return this._props.importanceSnapshot;
+  }
+  get status() {
     return this._props.status;
   }
-
-  get isOverdue(): boolean {
+  get actualStartAt() {
+    return this._props.actualStartAt;
+  }
+  get result() {
+    return this._props.result ? structuredClone(this._props.result) : null;
+  }
+  get checklistState() {
+    return structuredClone(this._props.checklistState);
+  }
+  get dueAt() {
+    return this._props.dueAt;
+  }
+  get isOverdue() {
     return this._props.isOverdue;
   }
-
-  get actualStartTime(): Instant | null {
-    const v = this._props.actualStartTime;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  get actualEndTime(): Instant | null {
-    const v = this._props.actualEndTime;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  get comment(): string | null {
-    return this._props.comment;
-  }
-
-  get version(): number {
+  get version() {
     return this._props.version;
   }
-
-  get createdAt(): Instant {
-    const v = this._props.createdAt;
-    return v as Instant;
+  get createdAt() {
+    return this._props.createdAt;
+  }
+  get updatedAt() {
+    return this._props.updatedAt;
+  }
+  get deletedAt() {
+    return this._props.deletedAt;
   }
 
-  get updatedAt(): Instant {
-    const v = this._props.updatedAt;
-    return v as Instant;
-  }
-
-  get deletedAt(): Instant | null {
-    const v = this._props.deletedAt;
-    if (v == null) return null;
-    return v as Instant;
-  }
-
-  // UI 计算属性
   get isDeleted(): boolean {
     return this._props.deletedAt !== null;
   }
-
   get isCompleted(): boolean {
     return this._props.status === 'Completed';
   }
-
   get isSkipped(): boolean {
     return this._props.status === 'Skipped';
   }
 
-  // ================= 4. Factory Methods =================
-  public static load(state: TaskOccurrenceState): TaskOccurrence {
+  static load(state: TaskOccurrenceState): TaskOccurrence {
     return new TaskOccurrence(state);
   }
 
-  // ================= 5. DTO Conversion =================
-  public toDTO(): TaskOccurrenceClientDTO {
-    return {
-      id: String(this.id) as TaskOccurrenceClientDTO['id'],
-      templateId: String(this._props.templateId) as TaskOccurrenceClientDTO['templateId'],
-      identityId: String(this._props.identityId) as TaskOccurrenceClientDTO['identityId'],
-      instanceDate: this._props.instanceDate,
-      timeConfig: this.serializeTimeConfig(this._props.timeConfig),
-      importance: this._props.importance,
-      status: this._props.status,
-      isOverdue: this._props.isOverdue,
-      actualStartTime: this._props.actualStartTime ?? null,
-      actualEndTime: this._props.actualEndTime ?? null,
-      comment: this._props.comment,
-      version: this._props.version,
-      createdAt: this._props.createdAt,
-      updatedAt: this._props.updatedAt,
-      deletedAt: this._props.deletedAt ?? null,
-    };
-  }
-
-  private serializeTimeConfig(config: TaskTimeConfig): TaskTimeConfigDTO {
-    return {
-      timeType: config.timeType,
-      startDate: config.startDate ? Number(config.startDate) : null,
-      timePoint: config.timePoint,
-      timeRange: config.timeRange,
-    };
+  toDTO(): TaskOccurrenceClientDTO {
+    return structuredClone(this._props);
   }
 }

@@ -19,13 +19,16 @@ const userTimeContextPort = {
 
 function target(dayOffset = 1, minute = 16 * 60) {
   const start = time.calendar.startOfDay(asInstant(Date.now() + dayOffset * 86_400_000));
+  const hour = Math.floor(minute / 60);
+  const min = minute % 60;
   return {
     start,
-    newTime: {
-      timeType: 'TimePoint' as const,
-      startDate: Number(start),
-      timePoint: minute,
-      timeRange: null,
+    scheduleSnapshot: {
+      date: time.calendar.toYmd(start),
+      timing: {
+        kind: 'At' as const,
+        time: `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}` as never,
+      },
     },
   };
 }
@@ -45,17 +48,20 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
       save: vi.fn().mockResolvedValue(undefined),
     });
     const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
-    const { start, newTime } = target(1, 16 * 60);
+    const { start, scheduleSnapshot } = target(1, 16 * 60);
 
     const result = await useCase.execute(instance.id, String(identityId), {
-      newTime,
+      scheduleSnapshot,
       expectedVersion: 1,
     });
 
     expect(result).toBeOk();
     expect(instance.version).toBe(2);
     expect(instance.scheduleDate).toBe(time.calendar.toYmd(start));
-    expect(instance.legacyTimeConfigAt(timeContext).toDTO()).toEqual(newTime);
+    expect(instance.scheduleSnapshot.toDTO()).toEqual({
+      date: time.calendar.toYmd(start),
+      timing: { kind: 'At', time: '16:00' },
+    });
     expect(repo.save).toHaveBeenCalledWith(instance);
   });
 
@@ -70,7 +76,7 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
     const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
 
     const result = await useCase.execute(instance.id, String(identityId), {
-      newTime: target().newTime,
+      scheduleSnapshot: target().scheduleSnapshot,
       expectedVersion: 99,
     });
 
@@ -84,7 +90,7 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
     const identityId = anIdentityId();
     const templateId = aTaskPlanId();
     const source = await aTaskOccurrence({ identityId, templateId });
-    const { start, newTime } = target();
+    const { start, scheduleSnapshot } = target();
     const collision = await aTaskOccurrence({
       identityId,
       templateId,
@@ -100,7 +106,7 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
     const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
 
     const result = await useCase.execute(source.id, String(identityId), {
-      newTime,
+      scheduleSnapshot,
       expectedVersion: source.version,
     });
 
@@ -120,7 +126,7 @@ describe('RescheduleTaskOccurrenceUseCase (PLAN-4303)', () => {
     const useCase = new RescheduleTaskOccurrenceUseCase(repo, userTimeContextPort);
 
     const result = await useCase.execute(instance.id, String(identityId), {
-      newTime: target().newTime,
+      scheduleSnapshot: target().scheduleSnapshot,
       expectedVersion: instance.version,
     });
 

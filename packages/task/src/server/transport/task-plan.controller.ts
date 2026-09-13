@@ -235,14 +235,14 @@ export class TaskPlanController {
   }
 
   /**
-   * Get instances by template ID
+   * Get occurrences by plan ID
    */
   async getInstancesByTemplate(
-    templateId: string,
+    planId: string,
     ctx: Context,
     range?: TaskPlanInstancesQuery,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    const result = await this.useCases.listInstancesByTemplate(templateId, ctx.identityId);
+    const result = await this.useCases.listInstancesByTemplate(planId, ctx.identityId);
 
     if (!isOk(result)) {
       return result as Result<TaskOccurrenceClientDTO[]>;
@@ -254,11 +254,11 @@ export class TaskPlanController {
 
     return ok(
       result.data.filter((instance) => {
-        if (range.from != null && instance.instanceDate < range.from) {
+        if (range.from != null && instance.dueAt < range.from) {
           return false;
         }
 
-        if (range.to != null && instance.instanceDate > range.to) {
+        if (range.to != null && instance.dueAt > range.to) {
           return false;
         }
 

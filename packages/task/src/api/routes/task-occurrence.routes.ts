@@ -91,7 +91,7 @@ export function registerTaskOccurrenceRoutes(
       summary: '获取任务实例列表',
       request: {
         query: z.object({
-          templateId: brandedId<TaskPlanId>().optional(),
+          planId: brandedId<TaskPlanId>().optional(),
           status: z.string().optional(),
         }),
       },
@@ -102,7 +102,7 @@ export function registerTaskOccurrenceRoutes(
     [auth],
     (req, ctx) =>
       controller.listInstances(ctx.identityId, {
-        templateId: getFirstQueryValue(req.query?.templateId),
+        planId: getFirstQueryValue(req.query?.planId),
         status: getFirstQueryValue(req.query?.status) as TaskOccurrenceStatus | undefined,
       }),
   );
@@ -179,7 +179,9 @@ export function registerTaskOccurrenceRoutes(
       request: {
         params: SkipTaskOccurrenceInvocationSchema.shape.params,
         body: {
-          content: { 'application/json': { schema: SkipTaskOccurrenceInvocationSchema.shape.body } },
+          content: {
+            'application/json': { schema: SkipTaskOccurrenceInvocationSchema.shape.body },
+          },
         },
       },
       responses: {

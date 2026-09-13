@@ -44,7 +44,6 @@ export type CreateTaskPlanRes = {
 
 export const UpdateTaskPlanSchema = z
   .object({
-    templateId: brandedId<TaskPlanId>().optional(),
     name: z.string().min(1).optional(),
     description: z.string().optional().nullable(),
     schedule: TaskPlanScheduleSchema.optional(),

@@ -132,6 +132,12 @@ describe('task template contracts', () => {
         unexpected: true,
       }).success,
     ).toBe(false);
+    expect(
+      UpdateTaskPlanSchema.safeParse({
+        name: 'Updated',
+        templateId: 'TaskPlanId_550e8400-e29b-41d4-a716-446655440000',
+      }).success,
+    ).toBe(false);
   });
 
   it('rejects invalid task response enum fields', () => {

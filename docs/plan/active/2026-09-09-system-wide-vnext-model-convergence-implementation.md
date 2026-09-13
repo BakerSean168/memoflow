@@ -688,7 +688,7 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, and Goal `GOAL-7202..7211` are complete; the Goal plan is archived with both exact-head delivery gates green. Current dependency-ready implementation work is:
 
-1. `TASK-7306` — Task persistence single-track cutover is complete with Prisma/PowerSync/portable/fresh-DB parity; now switch Create/Update/Query, HTTP/IPC, Planner/Scheduling projections and AI Task draft consumers to the canonical TaskPlan/TaskOccurrence contracts, then delete legacy QueryValidator/compatibility DTO surfaces;
+1. `TASK-7307` — Task application/HTTP/IPC/Planner/Scheduling/AI cutover is complete; now converge user-facing Task UI on TaskPlan/TaskOccurrence wording and interaction, property-chip-first create/edit, Goal-only links, checklist interactions, reminder parity and TaskPlanWorkspace-facing detail;
 2. `SETTING-9210` — five-layer review, exact-head CI/build, docs integrity and Setting plan archive;
 3. continue `PORT-1601/1602` owner capability registration as surviving owner models stabilize; execute final V2 deletion only when V3 preserves all required product coverage.
 

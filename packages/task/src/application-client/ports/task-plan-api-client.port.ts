@@ -29,27 +29,21 @@ export interface ITaskPlanApiClient {
   getTaskPlans(
     params?: TaskPlanListParams,
   ): Promise<Result<{ templates: TaskPlanClientDTO[]; total: number }>>;
-  getTaskPlanById(
-    id: string,
-    includeChildren?: boolean,
-  ): Promise<Result<TaskPlanClientDTO>>;
-  updateTaskPlan(
-    id: string,
-    request: UpdateTaskPlanReq,
-  ): Promise<Result<TaskPlanClientDTO>>;
+  getTaskPlanById(id: string, includeChildren?: boolean): Promise<Result<TaskPlanClientDTO>>;
+  updateTaskPlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlanClientDTO>>;
   deleteTaskPlan(id: string): Promise<Result<void>>;
   activateTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>>;
   pauseTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>>;
   archiveTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>>;
   abandonTaskPlan(id: string, request?: AbandonTaskPlanReq): Promise<Result<TaskPlanClientDTO>>;
   generateInstances(
-    templateId: string,
+    planId: string,
     request: GenerateInstancesReq,
   ): Promise<Result<TaskOccurrenceClientDTO[]>>;
   getInstancesByDateRange(
-    templateId: string,
+    planId: string,
     query?: TaskPlanInstancesQuery,
   ): Promise<Result<TaskOccurrenceClientDTO[]>>;
-  bindToGoal(templateId: string, request: BindToGoalReq): Promise<Result<TaskPlanClientDTO>>;
-  unbindFromGoal(templateId: string): Promise<Result<TaskPlanClientDTO>>;
+  bindToGoal(planId: string, request: BindToGoalReq): Promise<Result<TaskPlanClientDTO>>;
+  unbindFromGoal(planId: string): Promise<Result<TaskPlanClientDTO>>;
 }

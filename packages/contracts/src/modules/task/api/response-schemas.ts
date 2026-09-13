@@ -14,12 +14,14 @@ import {
   TaskReminderConfigSchema,
   TaskPlanScheduleSchema,
 } from './task-plan.dto';
-import { TaskTimeConfigSchema } from '../value-objects/task-time-config';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { TaskOccurrenceStatus } from '../value-objects/task-occurrence-status';
 import { TaskPlanStatus } from '../value-objects/task-plan-status';
 import { TaskPlanOutcome } from '../value-objects/task-plan-outcome';
 import { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-policy';
+import { TaskOccurrenceScheduleSnapshotSchema } from '../value-objects/task-occurrence-schedule-snapshot';
+import { TaskOccurrenceResultSchema } from '../value-objects/task-occurrence-result';
+import { TaskOccurrenceChecklistItemSchema } from '../value-objects/task-occurrence-checklist';
 
 // ============ TaskPlan Response Schema ============
 
@@ -67,20 +69,21 @@ export const TaskPlanListResponseSchema = z.object({
 
 // ============ TaskOccurrence Response Schema ============
 
-// Residual 831: TaskOccurrenceClientDTO dual retired — sole TaskOccurrenceResponseSchema + z.infer
-// (semantic type is z.infer alias in aggregates/task-occurrence-client.ts).
+// TASK-7306: transport exposes the same canonical occurrence truth as the server
+// aggregate. `dueAt` / `isOverdue` are explicit Product-Time read projections only.
 export const TaskOccurrenceResponseSchema = z.object({
   id: brandedId<TaskOccurrenceId>(),
-  templateId: brandedId<TaskPlanId>(),
+  planId: brandedId<TaskPlanId>(),
   identityId: brandedId<IdentityId>(),
-  instanceDate: z.number(),
-  timeConfig: TaskTimeConfigSchema,
-  importance: z.enum(ImportanceLevel).optional(),
+  occurrenceKey: z.string().min(1),
+  scheduleSnapshot: TaskOccurrenceScheduleSnapshotSchema,
+  importanceSnapshot: z.enum(ImportanceLevel),
   status: z.enum(TaskOccurrenceStatus),
+  actualStartAt: z.number().nullable(),
+  result: TaskOccurrenceResultSchema.nullable(),
+  checklistState: z.array(TaskOccurrenceChecklistItemSchema),
+  dueAt: z.number(),
   isOverdue: z.boolean(),
-  actualStartTime: z.number().nullable(),
-  actualEndTime: z.number().nullable(),
-  comment: z.string().nullable(),
   version: z.number(),
   createdAt: z.number(),
   updatedAt: z.number(),

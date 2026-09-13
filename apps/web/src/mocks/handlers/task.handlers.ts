@@ -126,7 +126,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Success',
-      data: createMockTaskOccurrenceList(5, { templateId: toTaskPlanId(params.id) }),
+      data: createMockTaskOccurrenceList(5, { planId: toTaskPlanId(params.id) }),
       timestamp: Date.now(),
     });
   }),
@@ -136,7 +136,7 @@ export const taskHandlers = [
       ok: true,
       code: 200,
       message: 'Generated',
-      data: createMockTaskOccurrenceList(3, { templateId: toTaskPlanId(params.id) }),
+      data: createMockTaskOccurrenceList(3, { planId: toTaskPlanId(params.id) }),
       timestamp: Date.now(),
     });
   }),
@@ -236,5 +236,4 @@ export const taskHandlers = [
       timestamp: Date.now(),
     });
   }),
-
 ];

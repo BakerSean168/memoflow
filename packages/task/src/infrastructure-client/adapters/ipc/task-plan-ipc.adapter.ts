@@ -33,25 +33,17 @@ export class TaskPlanIpcAdapter implements ITaskPlanApiClient {
     return this.ipcClient.invoke(TaskChannels.TEMPLATE_LIST, params);
   }
 
-
-  async getTaskPlanById(
-    id: string,
-    includeChildren = false,
-  ): Promise<Result<TaskPlanClientDTO>> {
+  async getTaskPlanById(id: string, includeChildren = false): Promise<Result<TaskPlanClientDTO>> {
     return this.ipcClient.invoke(TaskChannels.TEMPLATE_GET, { id, includeChildren });
   }
 
-  async updateTaskPlan(
-    id: string,
-    request: UpdateTaskPlanReq,
-  ): Promise<Result<TaskPlanClientDTO>> {
+  async updateTaskPlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlanClientDTO>> {
     return this.ipcClient.invoke(TaskChannels.TEMPLATE_UPDATE, { id, request });
   }
 
   async deleteTaskPlan(id: string): Promise<Result<void>> {
     return this.ipcClient.invoke(TaskChannels.TEMPLATE_DELETE, { id });
   }
-
 
   async activateTaskPlan(id: string): Promise<Result<TaskPlanClientDTO>> {
     return this.ipcClient.invoke(TaskChannels.TEMPLATE_ACTIVATE, { id });
@@ -65,42 +57,42 @@ export class TaskPlanIpcAdapter implements ITaskPlanApiClient {
     return this.ipcClient.invoke(TaskChannels.TEMPLATE_ARCHIVE, { id });
   }
 
-  async abandonTaskPlan(id: string, request?: AbandonTaskPlanReq): Promise<Result<TaskPlanClientDTO>> {
+  async abandonTaskPlan(
+    id: string,
+    request?: AbandonTaskPlanReq,
+  ): Promise<Result<TaskPlanClientDTO>> {
     return this.ipcClient.invoke(TaskChannels.TEMPLATE_ABANDON, { id, request: request ?? {} });
   }
 
   async generateInstances(
-    templateId: string,
+    planId: string,
     request: GenerateInstancesReq,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
     return this.ipcClient.invoke(TaskChannels.TEMPLATE_GENERATE_INSTANCES, {
-      templateId,
+      planId,
       request,
     });
   }
 
   async getInstancesByDateRange(
-    templateId: string,
+    planId: string,
     query?: TaskPlanInstancesQuery,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
     return this.ipcClient.invoke(TaskChannels.TEMPLATE_GET_INSTANCES, {
-      templateId,
+      planId,
       ...query,
     });
   }
 
-  async bindToGoal(
-    templateId: string,
-    request: BindToGoalReq,
-  ): Promise<Result<TaskPlanClientDTO>> {
+  async bindToGoal(planId: string, request: BindToGoalReq): Promise<Result<TaskPlanClientDTO>> {
     return this.ipcClient.invoke(TaskChannels.TEMPLATE_BIND_GOAL, {
-      templateId,
+      planId,
       request,
     });
   }
 
-  async unbindFromGoal(templateId: string): Promise<Result<TaskPlanClientDTO>> {
-    return this.ipcClient.invoke(TaskChannels.TEMPLATE_UNBIND_GOAL, { templateId });
+  async unbindFromGoal(planId: string): Promise<Result<TaskPlanClientDTO>> {
+    return this.ipcClient.invoke(TaskChannels.TEMPLATE_UNBIND_GOAL, { planId });
   }
 }
 

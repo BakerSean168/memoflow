@@ -245,12 +245,21 @@ describe('task-occurrence route contracts', () => {
     expect(bodySchema.safeParse({ reason: 'Deferred until tomorrow' }).success).toBe(true);
   });
 
-  it('POST /{id}/reschedule requires owner time + expectedVersion', () => {
+  it('POST /{id}/reschedule requires canonical occurrence schedule + expectedVersion', () => {
     const registry = new TestOpenApiRegistry();
     registerAll(registry);
 
     const route = getRegisteredRoute(registry, 'post', `${BASE}/{id}/reschedule`);
     const bodySchema = getJsonBodySchema(route);
+    expect(
+      bodySchema.safeParse({
+        scheduleSnapshot: {
+          date: '2026-08-28',
+          timing: { kind: 'At', time: '16:00' },
+        },
+        expectedVersion: 3,
+      }).success,
+    ).toBe(true);
     expect(
       bodySchema.safeParse({
         newTime: {
@@ -261,20 +270,12 @@ describe('task-occurrence route contracts', () => {
         },
         expectedVersion: 3,
       }).success,
-    ).toBe(true);
-    expect(
-      bodySchema.safeParse({
-        newTime: { timeType: 'TimePoint', startDate: null, timePoint: 16 * 60, timeRange: null },
-        expectedVersion: 3,
-      }).success,
     ).toBe(false);
     expect(
       bodySchema.safeParse({
-        newTime: {
-          timeType: 'TimePoint',
-          startDate: Date.now(),
-          timePoint: 16 * 60,
-          timeRange: null,
+        scheduleSnapshot: {
+          date: '2026-08-28',
+          timing: { kind: 'At', time: '16:00' },
         },
       }).success,
     ).toBe(false);

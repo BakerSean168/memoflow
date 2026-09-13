@@ -69,7 +69,9 @@ export function createMockTaskOccurrence(
   overrides: Partial<TaskOccurrenceClientDTO> = {},
 ): TaskOccurrenceClientDTO {
   const now = Date.now();
-  const instanceDate = faker.date.soon({ days: 7 }).getTime();
+  const scheduledAt = faker.date.soon({ days: 7 }).getTime();
+  const id = faker.string.uuid() as TaskOccurrenceId;
+  const planId = faker.string.uuid() as TaskPlanId;
   const status = faker.helpers.arrayElement([
     'Pending',
     'InProgress',
@@ -77,19 +79,33 @@ export function createMockTaskOccurrence(
     'Missed',
     'Skipped',
   ] as const);
+  const result =
+    status === 'Completed'
+      ? {
+          kind: 'Completed' as const,
+          recordedAt: now,
+          actualDurationMinutes: null,
+          note: null,
+          rating: null,
+        }
+      : status === 'Missed'
+        ? { kind: 'Missed' as const, recordedAt: now, reason: null }
+        : status === 'Skipped'
+          ? { kind: 'Skipped' as const, recordedAt: now, reason: null }
+          : null;
 
   return {
-    id: faker.string.uuid() as TaskOccurrenceId,
-    templateId: faker.string.uuid() as TaskPlanId,
+    id,
+    planId,
     identityId: faker.string.uuid() as IdentityId,
-    instanceDate,
-    timeConfig: {
-      timeType: 'AllDay',
-      startDate: instanceDate,
-      timePoint: null,
-      timeRange: null,
+    occurrenceKey: `${String(planId)}:${new Date(scheduledAt).toISOString().slice(0, 10)}`,
+    scheduleSnapshot: {
+      date: new Date(scheduledAt)
+        .toISOString()
+        .slice(0, 10) as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+      timing: { kind: 'AllDay' },
     },
-    importance: faker.helpers.arrayElement([
+    importanceSnapshot: faker.helpers.arrayElement([
       'Vital',
       'Important',
       'Moderate',
@@ -97,15 +113,16 @@ export function createMockTaskOccurrence(
       'Trivial',
     ] as const),
     status,
+    actualStartAt: null,
+    result,
+    checklistState: [],
+    dueAt: scheduledAt,
     isOverdue: false,
-    actualStartTime: null,
-    actualEndTime: null,
     version: 1,
     createdAt: now - faker.number.int({ min: 0, max: 7 * 24 * 60 * 60 * 1000 }),
     updatedAt: now,
     deletedAt: null,
     ...overrides,
-    comment: overrides.comment ?? null,
   };
 }
 

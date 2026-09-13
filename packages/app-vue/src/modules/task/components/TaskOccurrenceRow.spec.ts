@@ -19,29 +19,43 @@ const i18n = createI18n({
 const day = new Date(2026, 7, 28).getTime();
 
 function instance(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
+  const status = overrides.status ?? 'Pending';
+  const defaultResult =
+    status === 'Completed'
+      ? {
+          kind: 'Completed' as const,
+          recordedAt: day + 10 * 60 * 60_000,
+          actualDurationMinutes: null,
+          note: null,
+          rating: null,
+        }
+      : status === 'Missed'
+        ? { kind: 'Missed' as const, recordedAt: day + 10 * 60 * 60_000, reason: null }
+        : status === 'Skipped'
+          ? { kind: 'Skipped' as const, recordedAt: day + 10 * 60 * 60_000, reason: null }
+          : null;
   return {
-    id: 'occurrence-1',
-    templateId: 'plan-1',
-    identityId: 'identity-1',
-    instanceDate: day,
-    timeConfig: {
-      timeType: 'TimePoint',
-      startDate: day,
-      timePoint: 9 * 60,
-      timeRange: null,
+    id: 'occurrence-1' as TaskOccurrenceClientDTO['id'],
+    planId: 'plan-1' as TaskOccurrenceClientDTO['planId'],
+    identityId: 'identity-1' as TaskOccurrenceClientDTO['identityId'],
+    occurrenceKey: 'plan-1:2026-08-28',
+    scheduleSnapshot: {
+      date: '2026-08-28' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+      timing: { kind: 'At', time: '09:00' },
     },
-    importance: 'Moderate',
-    status: 'Pending',
+    importanceSnapshot: 'Moderate',
+    status,
+    actualStartAt: null,
+    result: defaultResult,
+    checklistState: [],
+    dueAt: day + 9 * 60 * 60_000,
     isOverdue: false,
-    actualStartTime: null,
-    actualEndTime: null,
-    comment: null,
     version: 1,
     createdAt: day,
     updatedAt: day,
     deletedAt: null,
     ...overrides,
-  } as TaskOccurrenceClientDTO;
+  };
 }
 
 const template = {

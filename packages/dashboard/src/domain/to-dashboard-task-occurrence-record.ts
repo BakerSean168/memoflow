@@ -9,29 +9,31 @@
 
 import type { DashboardTaskOccurrenceRecord } from './types';
 
-/** Duck-typed task instance fields required by the dashboard projection record. */
+/** Canonical TaskOccurrence fields required by the temporary Dashboard projection. */
 export interface DashboardTaskOccurrenceSource {
   id: string | number;
-  templateId: string | number;
+  planId: string | number;
   status: string;
-  instanceDate: number;
-  actualEndTime: number | null;
+  dueAt: number;
+  result: { kind: string; recordedAt: number } | null;
   updatedAt: number;
   deletedAt: number | null;
   isOverdue: boolean;
 }
 
 export function toDashboardTaskOccurrenceRecord(
-  instance: DashboardTaskOccurrenceSource,
+  occurrence: DashboardTaskOccurrenceSource,
 ): DashboardTaskOccurrenceRecord {
   return {
-    id: String(instance.id),
-    templateId: String(instance.templateId),
-    status: instance.status,
-    instanceDate: instance.instanceDate,
-    actualEndTime: instance.actualEndTime,
-    updatedAt: instance.updatedAt,
-    deletedAt: instance.deletedAt,
-    isOverdue: () => instance.isOverdue,
+    id: String(occurrence.id),
+    templateId: String(occurrence.planId),
+    status: occurrence.status,
+    // Dashboard is a temporary legacy read model. Feed it the Product-Time dueAt
+    // projection rather than resurrecting TaskOccurrence.instanceDate.
+    instanceDate: occurrence.dueAt,
+    actualEndTime: occurrence.result?.kind === 'Completed' ? occurrence.result.recordedAt : null,
+    updatedAt: occurrence.updatedAt,
+    deletedAt: occurrence.deletedAt,
+    isOverdue: () => occurrence.isOverdue,
   };
 }

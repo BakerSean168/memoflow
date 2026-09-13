@@ -20,7 +20,7 @@ import { createTimeFacade, type TimeContext } from '@memoflow/time';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { TaskOccurrenceId } from '../../domain/value-objects/task-occurrence-id';
 import { TaskPlanId } from '../../domain/value-objects/task-plan-id';
-import { TaskOccurrenceScheduleSnapshot, TaskTimeConfig } from '../value-objects';
+import { TaskOccurrenceScheduleSnapshot } from '../value-objects';
 import { buildTaskOccurrenceOccurrenceKeyFromDate } from '../value-objects/task-occurrence-occurrence-key';
 
 export interface TaskOccurrenceState {
@@ -42,12 +42,6 @@ export interface TaskOccurrenceState {
 
 function cloneResult(result: TaskOccurrenceResult | null): TaskOccurrenceResult | null {
   return result ? structuredClone(result) : null;
-}
-
-function resultNote(result: TaskOccurrenceResult | null): string | null {
-  if (!result) return null;
-  if (result.kind === TaskOccurrenceResultKind.Completed) return result.note ?? null;
-  return result.reason ?? null;
 }
 
 function validateStatusResultInvariant(
@@ -100,11 +94,6 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     return this._props.planId;
   }
 
-  /** Transitional semantic alias for pre-TASK-7306 application code. Not persisted. */
-  get templateId(): TaskPlanId {
-    return this._props.planId;
-  }
-
   get identityId(): IdentityId {
     return this._props.identityId;
   }
@@ -122,11 +111,6 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
   }
 
   get importanceSnapshot(): ImportanceLevel {
-    return this._props.importanceSnapshot;
-  }
-
-  /** Transitional semantic alias for consumers awaiting TASK-7306. */
-  get importance(): ImportanceLevel {
     return this._props.importanceSnapshot;
   }
 
@@ -167,10 +151,6 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     const ymd = time.codec.parseYmd(this._props.scheduleSnapshot.date, { onInvalid: 'throw' });
     if (!ymd) throw new Error(`Invalid TaskOccurrence date: ${this._props.scheduleSnapshot.date}`);
     return time.codec.startOfYmd(ymd);
-  }
-
-  legacyTimeConfigAt(timeContext: TimeContext): TaskTimeConfig {
-    return this._props.scheduleSnapshot.toLegacyTimeConfig(timeContext);
   }
 
   dueDateAt(timeContext: TimeContext): number {
@@ -273,11 +253,15 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     this.advanceVersion();
   }
 
-  reschedule(newTime: TaskTimeConfig, timeContext: TimeContext, now = Date.now()): boolean {
+  reschedule(
+    next: TaskOccurrenceScheduleSnapshot,
+    timeContext: TimeContext,
+    now = Date.now(),
+  ): boolean {
     if (!this.canReschedule()) throw new Error('Cannot reschedule task in current state');
-    if (newTime.startDate == null) throw new Error('Rescheduled task requires startDate');
-
-    const next = TaskOccurrenceScheduleSnapshot.fromLegacy(newTime.startDate, newTime, timeContext);
+    // Resolve the new wall-clock fact before mutating aggregate state. Invalid/DST-gap
+    // snapshots fail closed without leaving an in-memory partial mutation behind.
+    next.dueAt(timeContext);
     if (JSON.stringify(next.toDTO()) === JSON.stringify(this._props.scheduleSnapshot.toDTO())) {
       return false;
     }
@@ -428,33 +412,12 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     return this.toServerDTO();
   }
 
-  /**
-   * Temporary TASK-7306 client projection. Legacy fields are derived from canonical
-   * state with an explicit Product Time context and are not persisted in the aggregate.
-   */
+  /** Canonical transport projection plus Product-Time derived read fields. */
   toClientDTOAt(timeContext: TimeContext, now = Date.now()): TaskOccurrenceClientDTO {
-    const instanceDate = Number(this.scheduledStartOfDayAt(timeContext));
-    const timeConfig = this.legacyTimeConfigAt(timeContext).toDTO();
-    const actualEndTime =
-      this._props.result?.kind === TaskOccurrenceResultKind.Completed
-        ? this._props.result.recordedAt
-        : null;
     return {
-      id: this.id.toString() as TaskOccurrenceId,
-      templateId: this._props.planId.toString() as TaskPlanId,
-      identityId: this._props.identityId.toString() as IdentityId,
-      instanceDate,
-      timeConfig,
-      importance: this._props.importanceSnapshot,
-      status: this._props.status,
+      ...this.toPersistenceState(),
+      dueAt: this.dueDateAt(timeContext),
       isOverdue: this.isOverdueAt(timeContext, now),
-      actualStartTime: this._props.actualStartAt,
-      actualEndTime,
-      comment: resultNote(this._props.result),
-      version: this._props.version,
-      createdAt: this._props.createdAt,
-      updatedAt: this._props.updatedAt,
-      deletedAt: this._props.deletedAt,
     };
   }
 

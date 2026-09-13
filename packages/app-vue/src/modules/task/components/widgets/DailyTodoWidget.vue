@@ -87,7 +87,7 @@
                 class="flex-1 min-w-0 text-xs text-foreground truncate"
                 :class="{ 'line-through text-muted-foreground': inst.status === 'Completed' }"
               >
-                {{ templateName(inst.templateId) }}
+                {{ templateName(inst.planId) }}
               </span>
 
               <!-- Time label -->
@@ -184,7 +184,7 @@ const isLoading = computed(() => task.isLoading.value);
 // ── Derive today's instances ──
 const todayInstances = computed<TaskOccurrenceClientDTO[]>(() => {
   return (task.instances.value ?? []).filter((inst) => {
-    return isTodayMs(inst.instanceDate);
+    return isTodayMs(inst.dueAt);
   });
 });
 
@@ -196,11 +196,7 @@ const sortedInstances = computed(() => {
   const done = todayInstances.value.filter(
     (i) => i.status === 'Completed' || i.status === 'Skipped' || i.status === 'Missed',
   );
-  const byTime = (a: TaskOccurrenceClientDTO, b: TaskOccurrenceClientDTO) => {
-    const ta = a.timeConfig?.timeRange?.start ?? a.timeConfig?.timePoint ?? 0;
-    const tb = b.timeConfig?.timeRange?.start ?? b.timeConfig?.timePoint ?? 0;
-    return (ta ?? 0) - (tb ?? 0);
-  };
+  const byTime = (a: TaskOccurrenceClientDTO, b: TaskOccurrenceClientDTO) => a.dueAt - b.dueAt;
   return [...active.sort(byTime), ...done.sort(byTime)];
 });
 
@@ -224,21 +220,10 @@ function templateName(templateId: string): string {
 }
 
 // ── Time label ──
-/** Residual 1297: minutes-of-day HH:mm dual retired onto formatHHmmParts sole. */
 function timeLabel(inst: TaskOccurrenceClientDTO): string {
-  const fmt = (minutes: number) => {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return formatHHmmParts(h, m);
-  };
-  const tr = inst.timeConfig?.timeRange;
-  if (tr && typeof tr.start === 'number') {
-    return fmt(tr.start);
-  }
-  const tp = inst.timeConfig?.timePoint;
-  if (typeof tp === 'number') {
-    return fmt(tp);
-  }
+  const timing = inst.scheduleSnapshot.timing;
+  if (timing.kind === 'At') return timing.time;
+  if (timing.kind === 'Window') return timing.start;
   return '全天';
 }
 

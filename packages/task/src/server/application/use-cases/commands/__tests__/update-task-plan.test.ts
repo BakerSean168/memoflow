@@ -291,10 +291,10 @@ describe('UpdateTaskPlanUseCase', () => {
     });
 
     expect(result).toBeOk();
-    expect(pastPending.importance).toBe(ImportanceLevel.Moderate);
-    expect(boundaryPending.importance).toBe(ImportanceLevel.Moderate);
-    expect(futurePending.importance).toBe(ImportanceLevel.Vital);
-    expect(futureInProgress.importance).toBe(ImportanceLevel.Moderate);
+    expect(pastPending.importanceSnapshot).toBe(ImportanceLevel.Moderate);
+    expect(boundaryPending.importanceSnapshot).toBe(ImportanceLevel.Moderate);
+    expect(futurePending.importanceSnapshot).toBe(ImportanceLevel.Vital);
+    expect(futureInProgress.importanceSnapshot).toBe(ImportanceLevel.Moderate);
     expect(instanceRepo.saveMany).toHaveBeenCalledWith([futurePending]);
     expect(instanceRepo.deleteMany).not.toHaveBeenCalled();
   });

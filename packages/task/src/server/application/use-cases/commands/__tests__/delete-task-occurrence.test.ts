@@ -67,7 +67,7 @@ describe('DeleteTaskOccurrenceUseCase', () => {
     expect(taskEventSend).toHaveBeenCalledWith('task:instance-deleted', {
       identityId: instance.identityId,
       taskOccurrenceId: instance.id,
-      taskPlanId: instance.templateId,
+      taskPlanId: instance.planId,
       deletedAt: expect.any(Number),
     });
   });

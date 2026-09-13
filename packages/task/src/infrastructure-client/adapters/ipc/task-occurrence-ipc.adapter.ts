@@ -23,7 +23,7 @@ export class TaskOccurrenceIpcAdapter implements ITaskOccurrenceApiClient {
   async getTaskOccurrences(params?: {
     page?: number;
     limit?: number;
-    templateId?: string;
+    planId?: string;
     status?: string;
   }): Promise<Result<TaskOccurrenceClientDTO[]>> {
     return this.ipcClient.invoke(TaskChannels.INSTANCE_LIST, params);
@@ -77,13 +77,15 @@ export class TaskOccurrenceIpcAdapter implements ITaskOccurrenceApiClient {
     request: RescheduleTaskInput,
   ): Promise<Result<TaskOccurrenceClientDTO>> {
     return this.ipcClient.invoke(TaskChannels.INSTANCE_RESCHEDULE, {
-      instanceId: id,
-      newTime: request.newTime,
+      occurrenceId: id,
+      scheduleSnapshot: request.scheduleSnapshot,
       expectedVersion: request.expectedVersion,
     });
   }
 }
 
-export function createTaskOccurrenceIpcAdapter(ipcClient: IResultIpcClient): TaskOccurrenceIpcAdapter {
+export function createTaskOccurrenceIpcAdapter(
+  ipcClient: IResultIpcClient,
+): TaskOccurrenceIpcAdapter {
   return new TaskOccurrenceIpcAdapter(ipcClient);
 }

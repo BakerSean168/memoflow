@@ -32,7 +32,7 @@ export class TaskOccurrenceHttpAdapter implements ITaskOccurrenceApiClient {
   async getTaskOccurrences(params?: {
     page?: number;
     limit?: number;
-    templateId?: string;
+    planId?: string;
     status?: string;
   }): Promise<Result<TaskOccurrenceClientDTO[]>> {
     return this.httpClient.get(this.baseUrl, { params });

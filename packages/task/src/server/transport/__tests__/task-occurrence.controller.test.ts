@@ -2,7 +2,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ok, fail, isOk } from '@memoflow/contracts/result';
 import { anIdentityId } from '../../../testing';
 import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
-import { TaskOccurrenceController, type TaskOccurrenceUseCases } from '../task-occurrence.controller';
+import {
+  TaskOccurrenceController,
+  type TaskOccurrenceUseCases,
+} from '../task-occurrence.controller';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -26,23 +29,26 @@ function createMockUseCases(): TaskOccurrenceUseCases {
 const TEST_IDENTITY_ID = anIdentityId();
 
 const FAKE_INSTANCE_DTO: TaskOccurrenceClientDTO = {
-  id: 'inst_abc123',
-  templateId: 'tmpl_abc123',
+  id: 'TaskOccurrenceId_550e8400-e29b-41d4-a716-446655440000' as TaskOccurrenceClientDTO['id'],
+  planId: 'TaskPlanId_550e8400-e29b-41d4-a716-446655440001' as TaskOccurrenceClientDTO['planId'],
   identityId: TEST_IDENTITY_ID,
-  instanceDate: 1000,
-  timeConfig: { timeType: 'AllDay', startDate: null, timePoint: null, timeRange: null },
-  importance: 'Moderate',
-  priority: 1,
+  occurrenceKey: 'TaskPlanId_550e8400-e29b-41d4-a716-446655440001:2026-09-13',
+  scheduleSnapshot: {
+    date: '2026-09-13' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+    timing: { kind: 'AllDay' },
+  },
+  importanceSnapshot: 'Moderate',
   status: 'Pending',
+  actualStartAt: null,
+  result: null,
+  checklistState: [],
+  dueAt: 1_757_721_600_000,
   isOverdue: false,
-  actualStartTime: null,
-  actualEndTime: null,
-  comment: null,
   version: 1,
-  createdAt: 1000,
-  updatedAt: 1000,
+  createdAt: 1_000,
+  updatedAt: 1_000,
   deletedAt: null,
-} as unknown as TaskOccurrenceClientDTO;
+};
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -97,17 +103,17 @@ describe('TaskOccurrenceController', () => {
   // listInstances — routing logic
   // =========================================================================
   describe('listInstances', () => {
-    it('should call listByTemplate when templateId is provided', async () => {
+    it('should call listByTemplate when planId is provided', async () => {
       (useCases.listByTemplate as ReturnType<typeof vi.fn>).mockResolvedValue(ok([]));
 
-      await controller.listInstances(TEST_IDENTITY_ID, { templateId: 'tmpl_1' });
+      await controller.listInstances(TEST_IDENTITY_ID, { planId: 'tmpl_1' });
 
       expect(useCases.listByTemplate).toHaveBeenCalledWith('tmpl_1', TEST_IDENTITY_ID);
       expect(useCases.listByStatus).not.toHaveBeenCalled();
       expect(useCases.listByAccount).not.toHaveBeenCalled();
     });
 
-    it('should call listByStatus when status is provided (and no templateId)', async () => {
+    it('should call listByStatus when status is provided (and no planId)', async () => {
       (useCases.listByStatus as ReturnType<typeof vi.fn>).mockResolvedValue(ok([]));
 
       await controller.listInstances(TEST_IDENTITY_ID, { status: 'Pending' as any });
@@ -127,11 +133,11 @@ describe('TaskOccurrenceController', () => {
       expect(useCases.listByStatus).not.toHaveBeenCalled();
     });
 
-    it('should prioritize templateId over status', async () => {
+    it('should prioritize planId over status', async () => {
       (useCases.listByTemplate as ReturnType<typeof vi.fn>).mockResolvedValue(ok([]));
 
       await controller.listInstances(TEST_IDENTITY_ID, {
-        templateId: 'tmpl_1',
+        planId: 'tmpl_1',
         status: 'Pending' as any,
       });
 
@@ -383,11 +389,9 @@ describe('TaskOccurrenceController', () => {
         ctx,
       );
 
-      expect(useCases.markMissed).toHaveBeenCalledWith(
-        'inst_1',
-        TEST_IDENTITY_ID,
-        { reason: 'No completion evidence' },
-      );
+      expect(useCases.markMissed).toHaveBeenCalledWith('inst_1', TEST_IDENTITY_ID, {
+        reason: 'No completion evidence',
+      });
       expect(isOk(result)).toBe(true);
     });
   });

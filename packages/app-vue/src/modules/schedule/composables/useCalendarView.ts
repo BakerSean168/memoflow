@@ -154,8 +154,7 @@ export function formatScheduleCapsuleLabel(
 function plannerProductTimePort(): PlannerProductTimePort {
   const time = getProductTime();
   return {
-    toYmd: (instant) => time.calendar.toYmd(instant),
-    startOfDay: (instant) => time.calendar.startOfDay(instant),
+    combine: (date, hm) => time.input.combine(date, hm),
   };
 }
 
@@ -201,7 +200,7 @@ export function taskOccurrencesToEvents(
   return instances.flatMap((instance) => {
     const projection = projectTaskOccurrence(
       instance,
-      templateMap.get(String(instance.templateId)),
+      templateMap.get(String(instance.planId)),
       time,
     );
     return projection ? [projectionToLegacyCalendarEvent(projection)] : [];

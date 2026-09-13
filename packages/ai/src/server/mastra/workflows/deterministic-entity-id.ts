@@ -62,10 +62,10 @@ export function goalWorkflowMutationRequestId(input: {
   );
 }
 
-export type TaskWorkflowEntityKind = 'task_template';
+export type TaskWorkflowEntityKind = 'task_plan';
 
 const taskPrefixByKind: Readonly<Record<TaskWorkflowEntityKind, string>> = {
-  task_template: ID_PREFIXES.TaskPlanId,
+  task_plan: ID_PREFIXES.TaskPlanId,
 };
 
 /** Deterministic identity for the standalone `task.create` Workflow. */

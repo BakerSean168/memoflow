@@ -31,7 +31,12 @@ describe('task handlers contracts', () => {
     const httpClient = createHttpClientSpy();
     const adapter = new TaskOccurrenceHttpAdapter(httpClient);
 
-    await adapter.getTaskOccurrences({ page: 1, limit: 10, templateId: 'template-1', status: 'Pending' });
+    await adapter.getTaskOccurrences({
+      page: 1,
+      limit: 10,
+      planId: 'template-1',
+      status: 'Pending',
+    });
     await adapter.getTaskOccurrenceById('instance-1');
     await adapter.startTaskOccurrence('instance-1');
     await adapter.completeTaskOccurrence('instance-1', { duration: 30, note: 'done', rating: 5 });

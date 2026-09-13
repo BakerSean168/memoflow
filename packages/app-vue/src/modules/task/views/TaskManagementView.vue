@@ -246,7 +246,7 @@
               v-for="occurrence in visibleOccurrences"
               :key="occurrence.id"
               :occurrence="occurrence"
-              :template="templateById.get(String(occurrence.templateId))!"
+              :template="templateById.get(String(occurrence.planId))!"
               :position="occurrencePositions.get(String(occurrence.id))"
               :busy="busyOccurrenceId === String(occurrence.id)"
               @open-plan="openTaskDetail"
@@ -436,7 +436,7 @@ const visibleOccurrences = computed(() =>
   sortTaskOccurrences(
     surfaceOccurrences.value.filter(
       (occurrence) =>
-        templateMatchesFilters(String(occurrence.templateId)) &&
+        templateMatchesFilters(String(occurrence.planId)) &&
         (statusFilter.value === 'all' || occurrence.status === statusFilter.value),
     ),
     occurrenceSort.value,
@@ -451,7 +451,7 @@ const occurrencePositions = computed(
         getTaskOccurrencePosition(
           occurrence,
           instances.value,
-          templateById.value.get(String(occurrence.templateId)),
+          templateById.value.get(String(occurrence.planId)),
         ),
       ]),
     ),

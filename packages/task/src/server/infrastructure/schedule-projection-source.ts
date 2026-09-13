@@ -23,12 +23,12 @@ import {
 
 const DEFAULT_ALL_DAY_REMINDER_MINUTES = 9 * 60;
 export const TASK_REMINDER_HANDLER_KEY = 'task.reminder.fire';
-export const TASK_REMINDER_PAYLOAD_VERSION = 1;
-export const TASK_SCHEDULING_OWNER_TYPE = 'task.template';
+export const TASK_REMINDER_PAYLOAD_VERSION = 2;
+export const TASK_SCHEDULING_OWNER_TYPE = 'task.plan';
 
 export interface TaskReminderScheduledPayload {
-  readonly templateId: string;
-  readonly instanceId: string;
+  readonly planId: string;
+  readonly occurrenceId: string;
   readonly occurrenceKey: string | null;
   readonly taskTitle: string;
   readonly reminderType: TaskReminderType;
@@ -286,8 +286,8 @@ export function createTaskScheduleProjectionSource(deps: {
             runAt: reminderAt,
             payloadVersion: TASK_REMINDER_PAYLOAD_VERSION,
             payload: {
-              templateId: templateDTO.id,
-              instanceId: instance.id,
+              planId: templateDTO.id,
+              occurrenceId: instance.id,
               occurrenceKey: instance.occurrenceKey,
               taskTitle: templateDTO.name,
               reminderType: trigger.type,

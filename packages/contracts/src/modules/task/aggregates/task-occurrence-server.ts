@@ -1,8 +1,8 @@
 /**
  * TaskOccurrence canonical server DTO (ADR-071 / ADR-073).
  *
- * This shape represents durable occurrence truth. Legacy Template/Instance
- * presentation fields remain client-projection concerns until TASK-7306.
+ * This shape represents durable occurrence truth. TASK-7306 aligned HTTP/IPC/client
+ * transport to the same Plan/Occurrence vocabulary; legacy client projection fields are retired.
  */
 
 import type { IdentityId, TaskOccurrenceId, TaskPlanId, TransferDate } from '../../../primitives';

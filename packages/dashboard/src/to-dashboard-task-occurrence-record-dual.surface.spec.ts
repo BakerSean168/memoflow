@@ -14,10 +14,7 @@ import {
  */
 describe('toDashboardTaskOccurrenceRecord dual retired (residual 1156)', () => {
   const dir = __dirname;
-  const sole = readFileSync(
-    resolve(dir, 'domain/to-dashboard-task-occurrence-record.ts'),
-    'utf8',
-  );
+  const sole = readFileSync(resolve(dir, 'domain/to-dashboard-task-occurrence-record.ts'), 'utf8');
   const api = readFileSync(
     resolve(dir, '../../../apps/api/src/modules/dashboard/dashboard-read-service.ts'),
     'utf8',
@@ -31,10 +28,12 @@ describe('toDashboardTaskOccurrenceRecord dual retired (residual 1156)', () => {
   it('owns sole toDashboardTaskOccurrenceRecord helper body', () => {
     expect(sole).toContain('Residual 1156');
     expect(sole).toMatch(/export function toDashboardTaskOccurrenceRecord\b/);
-    expect(sole).toContain('String(instance.id)');
-    expect(sole).toContain('String(instance.templateId)');
-    expect(sole).toContain('updatedAt: instance.updatedAt');
-    expect(sole).toContain('isOverdue: () => instance.isOverdue');
+    expect(sole).toContain('String(occurrence.id)');
+    expect(sole).toContain('String(occurrence.planId)');
+    expect(sole).toContain('instanceDate: occurrence.dueAt');
+    expect(sole).toContain("occurrence.result?.kind === 'Completed'");
+    expect(sole).toContain('updatedAt: occurrence.updatedAt');
+    expect(sole).toContain('isOverdue: () => occurrence.isOverdue');
     expect(index).toContain('toDashboardTaskOccurrenceRecord');
   });
 
@@ -53,10 +52,10 @@ describe('toDashboardTaskOccurrenceRecord dual retired (residual 1156)', () => {
   it('runtime: maps duck-typed task instance to dashboard record', () => {
     const source: DashboardTaskOccurrenceSource = {
       id: 42,
-      templateId: 'tpl-1',
-      status: 'completed',
-      instanceDate: 1_700_000_000_000,
-      actualEndTime: 1_700_000_100_000,
+      planId: 'tpl-1',
+      status: 'Completed',
+      dueAt: 1_700_000_000_000,
+      result: { kind: 'Completed', recordedAt: 1_700_000_100_000 },
       updatedAt: Date.parse('2024-01-02T03:04:05.000Z'),
       deletedAt: null,
       isOverdue: false,
@@ -64,7 +63,7 @@ describe('toDashboardTaskOccurrenceRecord dual retired (residual 1156)', () => {
     const record = toDashboardTaskOccurrenceRecord(source);
     expect(record.id).toBe('42');
     expect(record.templateId).toBe('tpl-1');
-    expect(record.status).toBe('completed');
+    expect(record.status).toBe('Completed');
     expect(record.instanceDate).toBe(1_700_000_000_000);
     expect(record.actualEndTime).toBe(1_700_000_100_000);
     expect(record.updatedAt).toBe(Date.parse('2024-01-02T03:04:05.000Z'));

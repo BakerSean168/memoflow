@@ -286,7 +286,7 @@ const busyOccurrenceId = ref<string | null>(null);
 const isLoading = computed(() => templateLoading.value || instancesLoading.value);
 const loadError = computed(() => templateError.value || Boolean(instancesError.value));
 const templateOccurrences = computed(() =>
-  instances.value.filter((occurrence) => String(occurrence.templateId) === id.value),
+  instances.value.filter((occurrence) => String(occurrence.planId) === id.value),
 );
 const sortedOccurrences = computed(() =>
   sortTaskOccurrences(templateOccurrences.value, 'time', () => viewModel.value?.title ?? ''),

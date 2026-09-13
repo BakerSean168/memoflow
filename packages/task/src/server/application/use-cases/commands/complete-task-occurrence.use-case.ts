@@ -4,7 +4,10 @@
 
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
-import type { CompleteTaskOccurrenceReq, TaskOccurrenceOperationRes } from '@memoflow/contracts/task';
+import type {
+  CompleteTaskOccurrenceReq,
+  TaskOccurrenceOperationRes,
+} from '@memoflow/contracts/task';
 import { TaskOccurrenceStatus } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error, fail } from '@memoflow/contracts/result';
@@ -36,7 +39,9 @@ export class CompleteTaskOccurrenceUseCase {
     private readonly projection: TaskOccurrenceProjectionService,
   ) {
     if (!transactionRunner) {
-      throw new Error('TaskWriteTransactionRunner must be explicitly provided to CompleteTaskOccurrenceUseCase');
+      throw new Error(
+        'TaskWriteTransactionRunner must be explicitly provided to CompleteTaskOccurrenceUseCase',
+      );
     }
     this.transactionRunner = transactionRunner;
   }
@@ -53,9 +58,7 @@ export class CompleteTaskOccurrenceUseCase {
       );
     } catch (caughtError) {
       this.logger.error('Failed to complete task instance', { error: caughtError });
-      return fail(
-        mapTaskWriteErrorToResultError(caughtError, 'Failed to complete task instance'),
-      );
+      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to complete task instance'));
     }
   }
 
@@ -83,7 +86,7 @@ export class CompleteTaskOccurrenceUseCase {
 
     const template = await repositories.templateRepository!.findByIdForIdentity(
       identityId,
-      String(instance.templateId),
+      String(instance.planId),
     );
     const goalContext = {
       taskTitle: template?.title ?? '',
@@ -96,7 +99,7 @@ export class CompleteTaskOccurrenceUseCase {
     await reevaluateTaskPlanOutcome(
       repositories,
       identityId,
-      String(instance.templateId),
+      String(instance.planId),
       instance.id,
       timeContext,
     );
@@ -105,6 +108,4 @@ export class CompleteTaskOccurrenceUseCase {
       instance: this.projection.projectWithContext(instance, timeContext),
     });
   }
-
-
 }

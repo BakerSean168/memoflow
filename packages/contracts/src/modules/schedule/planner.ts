@@ -22,7 +22,7 @@ export interface PlannerEditableCapabilities {
 
 export type PlannerOwnerCommandTarget =
   | { readonly ownerType: 'schedule.calendar-entry'; readonly ownerId: string }
-  | { readonly ownerType: 'task.instance'; readonly ownerId: string }
+  | { readonly ownerType: 'task.occurrence'; readonly ownerId: string }
   | { readonly ownerType: 'goal.goal'; readonly ownerId: string }
   | { readonly ownerType: 'routine.routine'; readonly ownerId: string };
 
@@ -68,7 +68,7 @@ export type ScheduleCalendarEventProjection = CalendarEventProjectionFor<
 
 export type TaskCalendarEventProjection = CalendarEventProjectionFor<
   'task',
-  Extract<PlannerOwnerCommandTarget, { ownerType: 'task.instance' }>
+  Extract<PlannerOwnerCommandTarget, { ownerType: 'task.occurrence' }>
 >;
 
 export type GoalCalendarEventProjection = CalendarEventProjectionFor<

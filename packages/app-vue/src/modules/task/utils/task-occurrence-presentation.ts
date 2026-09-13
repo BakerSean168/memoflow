@@ -1,12 +1,6 @@
 import type { ComposerTranslation } from 'vue-i18n';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
-import {
-  endOfDayMs,
-  formatProductDate,
-  formatProductHm,
-  isTodayMs,
-  startOfDayMs,
-} from '../../../shared/utils/product-time';
+import { endOfDayMs, formatProductYmd, isTodayMs } from '../../../shared/utils/product-time';
 
 export type TaskOccurrenceSurface = 'today' | 'upcoming';
 export type TaskOccurrenceSort = 'time' | 'status' | 'title';
@@ -21,15 +15,7 @@ const STATUS_ORDER: Readonly<Record<TaskOccurrenceClientDTO['status'], number>> 
 };
 
 export function getTaskOccurrenceDueAt(instance: TaskOccurrenceClientDTO): number {
-  const dayStart = startOfDayMs(instance.instanceDate);
-  const time = instance.timeConfig;
-  if (time.timeType === 'TimePoint' && typeof time.timePoint === 'number') {
-    return dayStart + time.timePoint * 60_000;
-  }
-  if (time.timeType === 'TimeRange' && time.timeRange) {
-    return dayStart + time.timeRange.end * 60_000;
-  }
-  return endOfDayMs(dayStart);
+  return instance.dueAt;
 }
 
 export function isTaskOccurrenceOverdue(
@@ -48,9 +34,9 @@ export function isTaskOccurrenceOnSurface(
   now = Date.now(),
 ): boolean {
   if (surface === 'upcoming') {
-    return instance.instanceDate > endOfDayMs(now);
+    return instance.dueAt > endOfDayMs(now);
   }
-  return isTodayMs(instance.instanceDate) || isTaskOccurrenceOverdue(instance, now);
+  return isTodayMs(instance.dueAt) || isTaskOccurrenceOverdue(instance, now);
 }
 
 export function getTaskOccurrenceStatusLabel(
@@ -68,19 +54,16 @@ export function getTaskOccurrenceScheduleLabel(
   t: ComposerTranslation,
   instance: TaskOccurrenceClientDTO,
 ): string {
-  const date = formatProductDate(instance.instanceDate);
-  const time = instance.timeConfig;
-  if (time.timeType === 'TimePoint' && typeof time.timePoint === 'number') {
-    return t('task.occurrence.scheduleAt', {
-      date,
-      time: formatProductHm(startOfDayMs(instance.instanceDate) + time.timePoint * 60_000),
-    });
+  const date = formatProductYmd(instance.scheduleSnapshot.date);
+  const timing = instance.scheduleSnapshot.timing;
+  if (timing.kind === 'At') {
+    return t('task.occurrence.scheduleAt', { date, time: timing.time });
   }
-  if (time.timeType === 'TimeRange' && time.timeRange) {
+  if (timing.kind === 'Window') {
     return t('task.occurrence.scheduleRange', {
       date,
-      start: formatProductHm(startOfDayMs(instance.instanceDate) + time.timeRange.start * 60_000),
-      end: formatProductHm(startOfDayMs(instance.instanceDate) + time.timeRange.end * 60_000),
+      start: timing.start,
+      end: timing.end,
     });
   }
   return t('task.occurrence.scheduleAllDay', { date });
@@ -92,12 +75,12 @@ export function getTaskOccurrencePosition(
   template?: Pick<TaskPlanClientDTO, 'instanceCount'> | null,
 ): { position: number; total: number } | null {
   const siblings = allInstances
-    .filter((candidate) => candidate.templateId === instance.templateId)
+    .filter((candidate) => candidate.planId === instance.planId)
     .slice()
     .sort((left, right) =>
-      left.instanceDate === right.instanceDate
+      left.dueAt === right.dueAt
         ? String(left.id).localeCompare(String(right.id))
-        : left.instanceDate - right.instanceDate,
+        : left.dueAt - right.dueAt,
     );
   const index = siblings.findIndex((candidate) => candidate.id === instance.id);
   if (index < 0) return null;
@@ -110,7 +93,7 @@ export function getTaskOccurrencePosition(
 export function sortTaskOccurrences(
   occurrences: readonly TaskOccurrenceClientDTO[],
   sort: TaskOccurrenceSort,
-  titleFor: (templateId: string) => string,
+  titleFor: (planId: string) => string,
 ): TaskOccurrenceClientDTO[] {
   return occurrences.slice().sort((left, right) => {
     if (sort === 'status') {
@@ -118,9 +101,7 @@ export function sortTaskOccurrences(
       if (byStatus !== 0) return byStatus;
     }
     if (sort === 'title') {
-      const byTitle = titleFor(String(left.templateId)).localeCompare(
-        titleFor(String(right.templateId)),
-      );
+      const byTitle = titleFor(String(left.planId)).localeCompare(titleFor(String(right.planId)));
       if (byTitle !== 0) return byTitle;
     }
     return getTaskOccurrenceDueAt(left) - getTaskOccurrenceDueAt(right);

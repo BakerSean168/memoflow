@@ -76,7 +76,7 @@ describe('task schedule projection source -> ScheduledIntent', () => {
       expect(dependencies.findById).not.toHaveBeenCalled();
       expect(plan.owner).toEqual({
         identityId: String(identityId),
-        type: 'task.template',
+        type: 'task.plan',
         id: template.id,
       });
       expect(plan.desired).toHaveLength(1);
@@ -85,8 +85,8 @@ describe('task schedule projection source -> ScheduledIntent', () => {
         payloadVersion: TASK_REMINDER_PAYLOAD_VERSION,
         runAt: Date.parse('2030-01-10T13:30:00.000Z'),
         payload: {
-          templateId: template.id,
-          instanceId: instance.id,
+          planId: template.id,
+          occurrenceId: instance.id,
           occurrenceKey: instance.occurrenceKey,
           taskTitle: 'Thesis defense',
           reminderType: 'Relative',
@@ -149,9 +149,9 @@ describe('task schedule projection source -> ScheduledIntent', () => {
           reminderTime: Date.parse('2030-03-09T14:00:00.000Z'),
         },
       });
-      expect(
-        plan.desired[0]!.payload.anchorTime - plan.desired[0]!.payload.reminderTime,
-      ).toBe(23 * 60 * 60 * 1000);
+      expect(plan.desired[0]!.payload.anchorTime - plan.desired[0]!.payload.reminderTime).toBe(
+        23 * 60 * 60 * 1000,
+      );
     } finally {
       vi.useRealTimers();
     }
@@ -232,7 +232,7 @@ describe('task schedule projection source -> ScheduledIntent', () => {
     const plan = await source.buildTemplatePlan('TaskPlanId_missing', 'identity-1');
 
     expect(plan).toEqual({
-      owner: { identityId: 'identity-1', type: 'task.template', id: 'TaskPlanId_missing' },
+      owner: { identityId: 'identity-1', type: 'task.plan', id: 'TaskPlanId_missing' },
       desired: [],
     });
   });

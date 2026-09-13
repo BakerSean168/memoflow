@@ -42,20 +42,13 @@ export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
     return this.httpClient.get(this.baseUrl, { params });
   }
 
-
-  async getTaskPlanById(
-    id: string,
-    includeChildren = false,
-  ): Promise<Result<TaskPlanClientDTO>> {
+  async getTaskPlanById(id: string, includeChildren = false): Promise<Result<TaskPlanClientDTO>> {
     return this.httpClient.get(`${this.baseUrl}/${id}`, {
       params: { includeChildren },
     });
   }
 
-  async updateTaskPlan(
-    id: string,
-    request: UpdateTaskPlanReq,
-  ): Promise<Result<TaskPlanClientDTO>> {
+  async updateTaskPlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlanClientDTO>> {
     return this.httpClient.patch(`${this.baseUrl}/${id}`, request);
   }
 
@@ -64,7 +57,6 @@ export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
   }
 
   // ===== Special Query Methods =====
-
 
   // ===== Task Template State Management =====
 
@@ -80,47 +72,45 @@ export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
     return this.httpClient.post(`${this.baseUrl}/${id}/archive`);
   }
 
-  async abandonTaskPlan(id: string, request?: AbandonTaskPlanReq): Promise<Result<TaskPlanClientDTO>> {
+  async abandonTaskPlan(
+    id: string,
+    request?: AbandonTaskPlanReq,
+  ): Promise<Result<TaskPlanClientDTO>> {
     return this.httpClient.post(`${this.baseUrl}/${id}/abandon`, request ?? {});
   }
 
   // ===== Aggregate Control: Instance Management =====
 
   async generateInstances(
-    templateId: string,
+    planId: string,
     request: GenerateInstancesReq,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    return this.httpClient.post(`${this.baseUrl}/${templateId}/generate-instances`, request);
+    return this.httpClient.post(`${this.baseUrl}/${planId}/generate-instances`, request);
   }
 
   async getInstancesByDateRange(
-    templateId: string,
+    planId: string,
     query?: TaskPlanInstancesQuery,
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
-    return this.httpClient.get(`${this.baseUrl}/${templateId}/instances`, {
+    return this.httpClient.get(`${this.baseUrl}/${planId}/instances`, {
       params: query,
     });
   }
 
   // ===== Aggregate Control: Goal Binding Management =====
 
-  async bindToGoal(
-    templateId: string,
-    request: BindToGoalReq,
-  ): Promise<Result<TaskPlanClientDTO>> {
-    return this.httpClient.post(`${this.baseUrl}/${templateId}/bind-goal`, request);
+  async bindToGoal(planId: string, request: BindToGoalReq): Promise<Result<TaskPlanClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${planId}/bind-goal`, request);
   }
 
-  async unbindFromGoal(templateId: string): Promise<Result<TaskPlanClientDTO>> {
-    return this.httpClient.post(`${this.baseUrl}/${templateId}/unbind-goal`);
+  async unbindFromGoal(planId: string): Promise<Result<TaskPlanClientDTO>> {
+    return this.httpClient.post(`${this.baseUrl}/${planId}/unbind-goal`);
   }
 }
 
 /**
  * Factory function to create TaskPlanHttpAdapter
  */
-export function createTaskPlanHttpAdapter(
-  httpClient: IResultHttpClient,
-): TaskPlanHttpAdapter {
+export function createTaskPlanHttpAdapter(httpClient: IResultHttpClient): TaskPlanHttpAdapter {
   return new TaskPlanHttpAdapter(httpClient);
 }

@@ -327,14 +327,14 @@ export function createTaskElectronModule(
           (data, requestContext) =>
             templateController.generateInstances(data.params.id, data.body, requestContext),
           (args) => ({
-            params: { id: (args as { templateId?: string }).templateId },
+            params: { id: (args as { planId?: string }).planId },
             body: (args as { request?: unknown }).request,
           }),
         );
         installed.push(TaskChannels.TEMPLATE_GENERATE_INSTANCES);
         ipcMain.handle(TaskChannels.TEMPLATE_GET_INSTANCES, (_, payload) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            return templateController.getInstancesByTemplate(payload?.templateId, requestContext, {
+            return templateController.getInstancesByTemplate(payload?.planId, requestContext, {
               from: payload?.from,
               to: payload?.to,
             });
@@ -348,7 +348,7 @@ export function createTaskElectronModule(
           (data, requestContext) =>
             templateController.bindToGoal(data.params.id, data.body, requestContext),
           (args) => ({
-            params: { id: (args as { templateId?: string }).templateId },
+            params: { id: (args as { planId?: string }).planId },
             body: (args as { request?: unknown }).request,
           }),
         );
@@ -359,15 +359,15 @@ export function createTaskElectronModule(
           TaskPlanIdCommandInvocationSchema,
           (data, requestContext) =>
             templateController.unbindFromGoal(data.params.id, requestContext),
-          (args) => ({ params: { id: (args as { templateId?: string }).templateId } }),
+          (args) => ({ params: { id: (args as { planId?: string }).planId } }),
         );
         installed.push(TaskChannels.TEMPLATE_UNBIND_GOAL);
 
         // --- Instance channels ---
         ipcMain.handle(TaskChannels.INSTANCE_LIST, (_, params) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            if (params?.templateId) {
-              return handlers.instance.listByTemplate(params.templateId, requestContext.identityId);
+            if (params?.planId) {
+              return handlers.instance.listByTemplate(params.planId, requestContext.identityId);
             }
 
             if (params?.status) {
@@ -466,17 +466,13 @@ export function createTaskElectronModule(
           (data, requestContext) =>
             instanceController.rescheduleInstance(data.params.id, data.body, requestContext),
           (args) => {
-            const wire = args as {
-              instanceId?: unknown;
-              newTime?: unknown;
-              expectedVersion?: unknown;
-            };
+            const wire = args as Record<string, unknown> & { occurrenceId?: unknown };
+            const { occurrenceId, ...body } = wire;
             return {
-              params: { id: wire.instanceId },
-              body: {
-                newTime: wire.newTime,
-                expectedVersion: wire.expectedVersion,
-              },
+              params: { id: occurrenceId },
+              // Preserve the raw IPC body so the shared strict schema reports the
+              // same unknown/malformed fields as HTTP instead of silently dropping them.
+              body,
             };
           },
         );

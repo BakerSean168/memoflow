@@ -19,10 +19,10 @@ const goalStart = asYmd('2026-09-01');
 const goalTarget = asYmd('2026-09-30');
 
 const time: PlannerProductTimePort = {
-  startOfDay: (instant) => instant,
-  toYmd: (instant) => {
-    if (instant === taskDay) return asYmd('2026-08-28');
-    throw new Error(`Unexpected Instant ${instant}`);
+  combine: (date, hm) => {
+    if (date !== asYmd('2026-08-28')) throw new Error(`Unexpected Ymd ${date}`);
+    const [hour, minute] = hm.split(':').map(Number);
+    return asInstant(Number(taskDay) + (hour * 60 + minute) * 60_000);
   },
 };
 
@@ -45,27 +45,24 @@ function calendarEntry(): CalendarEntryClientDTO {
 
 function taskOccurrence(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
   return {
-    id: 'task-occurrence-1',
-    templateId: 'task-plan-1',
-    identityId: 'identity-1',
-    instanceDate: Number(taskDay),
-    timeConfig: {
-      timeType: 'AllDay',
-      startDate: Number(taskDay),
-      timePoint: null,
-      timeRange: null,
-    },
+    id: 'task-occurrence-1' as TaskOccurrenceClientDTO['id'],
+    planId: 'task-plan-1' as TaskOccurrenceClientDTO['planId'],
+    identityId: 'identity-1' as TaskOccurrenceClientDTO['identityId'],
+    occurrenceKey: 'task-plan-1:2026-08-28',
+    scheduleSnapshot: { date: asYmd('2026-08-28'), timing: { kind: 'AllDay' } },
+    importanceSnapshot: 'Moderate',
     status: 'Pending',
+    actualStartAt: null,
+    result: null,
+    checklistState: [],
+    dueAt: Number(taskDay) + 86_400_000 - 1,
     isOverdue: false,
-    actualStartTime: null,
-    actualEndTime: null,
-    comment: null,
     version: 3,
     createdAt: Number(taskDay),
     updatedAt: Number(taskDay),
     deletedAt: null,
     ...overrides,
-  } as TaskOccurrenceClientDTO;
+  };
 }
 
 const taskPlan = {
@@ -138,19 +135,18 @@ describe('CalendarEventProjection (PLAN-4302)', () => {
       allDay: true,
       start: '2026-08-28',
       editableCapabilities: { move: true, resize: false },
-      ownerCommandTarget: { ownerType: 'task.instance', ownerId: 'task-occurrence-1' },
+      ownerCommandTarget: { ownerType: 'task.occurrence', ownerId: 'task-occurrence-1' },
     });
     if (!allDay.allDay) throw new Error('Expected all-day task');
     expectTypeOf(allDay.start).toEqualTypeOf<Ymd>();
 
     const timed = projectTaskOccurrence(
       taskOccurrence({
-        timeConfig: {
-          timeType: 'TimeRange',
-          startDate: Number(taskDay),
-          timePoint: null,
-          timeRange: { start: 14 * 60, end: 15 * 60 + 30 },
+        scheduleSnapshot: {
+          date: asYmd('2026-08-28'),
+          timing: { kind: 'Window', start: '14:00', end: '15:30' },
         },
+        dueAt: Number(taskDay) + (15 * 60 + 30) * 60_000,
       }),
       taskPlan,
       time,

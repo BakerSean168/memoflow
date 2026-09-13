@@ -13,7 +13,6 @@ const dayStart = asInstant(Date.parse('2026-08-27T00:00:00.000Z'));
 const time: PlannerMutationTimePort = {
   startOfDay: () => dayStart,
   toYmd: () => asYmd('2026-08-27'),
-  startOfYmd: () => dayStart,
 };
 
 function projection(): Extract<CalendarEventProjection, { sourceType: 'task' }> {
@@ -27,7 +26,7 @@ function projection(): Extract<CalendarEventProjection, { sourceType: 'task' }> 
     allDay: false,
     displayMetadata: { semantic: 'task-occurrence', status: 'Pending' },
     editableCapabilities: { move: true, resize: false },
-    ownerCommandTarget: { ownerType: 'task.instance', ownerId: 'task-1' },
+    ownerCommandTarget: { ownerType: 'task.occurrence', ownerId: 'task-1' },
     revision: 6,
   };
 }
@@ -60,7 +59,7 @@ describe('FullCalendar Planner owner mutation bridge (PLAN-4303)', () => {
       'task-1',
       expect.objectContaining({
         expectedVersion: 6,
-        newTime: expect.objectContaining({ timeType: 'TimePoint', timePoint: 16 * 60 }),
+        scheduleSnapshot: { date: '2026-08-27', timing: { kind: 'At', time: '16:00' } },
       }),
     );
     expect(outcome.status).toBe('conflict');

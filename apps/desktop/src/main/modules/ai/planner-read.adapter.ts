@@ -11,20 +11,26 @@ export class DesktopPlannerAIReadAdapter implements IAIPlannerReadPort {
     private readonly taskApplicationPort: TaskApplicationPort,
   ) {}
 
-  private async taskItems(identityId: string, startTime: number, endTime: number): Promise<AIPlannerTaskItem[]> {
+  private async taskItems(
+    identityId: string,
+    startTime: number,
+    endTime: number,
+  ): Promise<AIPlannerTaskItem[]> {
     const [instances, templates] = await Promise.all([
       this.taskApplicationPort.getTaskOccurrencesByDateRange(identityId, startTime, endTime),
       this.taskApplicationPort.listTaskPlans({ identityId: IdentityId.of(identityId) }),
     ]);
     const instanceData = unwrap(instances).data;
     const templateData = unwrap(templates).templates;
-    const titles = new Map(templateData.map((template) => [String(template.id), template.name] as const));
+    const titles = new Map(
+      templateData.map((template) => [String(template.id), template.name] as const),
+    );
     return instanceData.map((instance) => ({
       id: String(instance.id),
-      templateId: String(instance.templateId),
-      title: titles.get(String(instance.templateId)) ?? 'Untitled task',
-      instanceDate: instance.instanceDate,
-      dueDate: null,
+      planId: String(instance.planId),
+      title: titles.get(String(instance.planId)) ?? 'Untitled task',
+      scheduleDate: instance.scheduleSnapshot.date,
+      dueAt: instance.dueAt,
       status: String(instance.status),
     }));
   }
@@ -50,7 +56,9 @@ export class DesktopPlannerAIReadAdapter implements IAIPlannerReadPort {
   }
 
   async getConflicts(input: Parameters<IAIPlannerReadPort['getConflicts']>[0]) {
-    const entries = (await this.getWindowSummary(input)).calendar.filter((entry) => entry.hasConflict);
+    const entries = (await this.getWindowSummary(input)).calendar.filter(
+      (entry) => entry.hasConflict,
+    );
     return {
       startTime: input.startTime,
       endTime: input.endTime,
@@ -62,8 +70,11 @@ export class DesktopPlannerAIReadAdapter implements IAIPlannerReadPort {
   async getUpcomingTasks(input: Parameters<IAIPlannerReadPort['getUpcomingTasks']>[0]) {
     const items = await this.taskItems(input.identityId, input.startTime, input.endTime);
     return items
-      .filter((item) => item.status !== 'Completed' && item.status !== 'Skipped' && item.status !== 'Missed')
-      .sort((a, b) => a.instanceDate - b.instanceDate)
+      .filter(
+        (item) =>
+          item.status !== 'Completed' && item.status !== 'Skipped' && item.status !== 'Missed',
+      )
+      .sort((a, b) => a.dueAt - b.dueAt)
       .slice(0, input.limit ?? 20);
   }
 }

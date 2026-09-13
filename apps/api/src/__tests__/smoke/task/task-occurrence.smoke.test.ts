@@ -35,7 +35,7 @@ vi.mock('@memoflow/utils', async (importOriginal) => {
 // Helpers
 // ============================================================================
 
-const FAKE_TEMPLATE_ID = aTaskPlanId();
+const FAKE_PLAN_ID = aTaskPlanId();
 
 // Well-formed UUID that does not exist — passes :id param validation (branded UUID
 // format) so the route reaches the not-found path instead of failing validation.
@@ -47,13 +47,13 @@ const NON_EXISTENT_ID = '00000000-0000-0000-0000-000000000000';
  */
 async function makeFakeInstance(
   overrides: Partial<{
-    templateId: typeof FAKE_TEMPLATE_ID;
+    planId: typeof FAKE_PLAN_ID;
     identityId: ReturnType<typeof anIdentityId>;
     status: string;
   }> = {},
 ) {
   const instance = await aTaskOccurrence({
-    templateId: overrides.templateId ?? FAKE_TEMPLATE_ID,
+    templateId: overrides.planId ?? FAKE_PLAN_ID,
     identityId: overrides.identityId ?? anIdentityId(TEST_IDENTITY_ID),
   });
 
@@ -128,17 +128,17 @@ describe('Task Instance API Smoke Tests', () => {
       expect(res.body.ok).toBe(true);
       expect(res.body.data).toHaveLength(1);
       expect(res.body.data[0].status).toBe('Pending');
-      expect(res.body.data[0].importance).toBe('Moderate');
+      expect(res.body.data[0].importanceSnapshot).toBe('Moderate');
     });
 
-    it('should route to listByTemplate when templateId filter is provided', async () => {
+    it('should route to listByTemplate when planId filter is provided', async () => {
       vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(
         aOneTimeTask({ identityId: anIdentityId(TEST_IDENTITY_ID) }),
       );
       vi.mocked(ctx.instanceRepo.findByTemplateId).mockResolvedValue([]);
 
       const res = await request(ctx.app)
-        .get(`/api/v1/task-occurrences?templateId=${FAKE_TEMPLATE_ID}`)
+        .get(`/api/v1/task-occurrences?planId=${FAKE_PLAN_ID}`)
         .set('Authorization', `Bearer ${ctx.token}`);
 
       expect(res.status).toBe(200);
@@ -192,17 +192,17 @@ describe('Task Instance API Smoke Tests', () => {
       expect(res.body.data[0].id).toBeDefined();
     });
 
-    it('should pass query params as numbers to use case', async () => {
+    it('should resolve epoch query params into canonical Ymd repository bounds', async () => {
       const res = await request(ctx.app)
         .get('/api/v1/task-occurrences/by-date-range?startDate=1704067200000&endDate=1704153600000')
         .set('Authorization', `Bearer ${ctx.token}`);
 
       expect(res.status).toBe(200);
-      // The route handler converts query strings to Number()
+      // Transport accepts epoch milliseconds; Product Time converts them to Ymd before persistence.
       expect(ctx.instanceRepo.findByDateRange).toHaveBeenCalledWith(
         TEST_IDENTITY_ID,
-        1704067200000,
-        1704153600000,
+        '2024-01-01',
+        '2024-01-02',
       );
     });
   });
@@ -239,7 +239,7 @@ describe('Task Instance API Smoke Tests', () => {
       expect(res.body.ok).toBe(true);
       expect(res.body.data).toBeDefined();
       expect(res.body.data.status).toBe('Pending');
-      expect(res.body.data.templateId).toBeDefined();
+      expect(res.body.data.planId).toBeDefined();
     });
   });
 
@@ -382,7 +382,7 @@ describe('Task Instance API Smoke Tests', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
       expect(res.body.data.status).toBe('Pending');
-      expect(res.body.data.actualEndTime).toBeNull();
+      expect(res.body.data.result).toBeNull();
       expect(ctx.instanceRepo.save).toHaveBeenCalled();
     });
 

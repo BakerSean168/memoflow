@@ -19,7 +19,7 @@ export interface ITaskOccurrenceApiClient {
   getTaskOccurrences(params?: {
     page?: number;
     limit?: number;
-    templateId?: string;
+    planId?: string;
     status?: string;
   }): Promise<Result<TaskOccurrenceClientDTO[]>>;
   getTaskOccurrencesByDateRange(

@@ -18,9 +18,7 @@ export interface TaskClientPort {
   // Task Template Operations
   createTemplate(
     request: CreateTaskPlanReq,
-  ): Promise<
-    Result<{ template: TaskPlan; instanceCount: number; todayInstanceCreated: boolean }>
-  >;
+  ): Promise<Result<{ template: TaskPlan; instanceCount: number; todayInstanceCreated: boolean }>>;
   listTemplates(
     params?: TaskPlanListParams,
   ): Promise<Result<{ templates: TaskPlan[]; total: number }>>;
@@ -32,29 +30,32 @@ export interface TaskClientPort {
   archiveTemplate(id: string): Promise<Result<TaskPlan>>;
   abandonPlan(id: string, request?: AbandonTaskPlanReq): Promise<Result<TaskPlan>>;
   generateInstances(
-    templateId: string,
+    planId: string,
     request: GenerateInstancesReq,
   ): Promise<Result<TaskOccurrence[]>>;
   getInstancesByDateRange(
-    templateId: string,
+    planId: string,
     from: number,
     to: number,
   ): Promise<Result<TaskOccurrence[]>>;
-  bindToGoal(templateId: string, request: BindToGoalReq): Promise<Result<TaskPlan>>;
-  unbindFromGoal(templateId: string): Promise<Result<TaskPlan>>;
+  bindToGoal(planId: string, request: BindToGoalReq): Promise<Result<TaskPlan>>;
+  unbindFromGoal(planId: string): Promise<Result<TaskPlan>>;
 
   // Task Instance Operations
   listInstances(params?: {
     page?: number;
     limit?: number;
-    templateId?: string;
+    planId?: string;
     status?: string;
   }): Promise<Result<TaskOccurrence[]>>;
   listInstancesByDateRange(from: number, to: number): Promise<Result<TaskOccurrence[]>>;
   getInstance(id: string): Promise<Result<TaskOccurrence>>;
   deleteInstance(id: string): Promise<Result<void>>;
   startInstance(id: string): Promise<Result<TaskOccurrence>>;
-  completeInstance(id: string, request?: CompleteTaskOccurrenceReq): Promise<Result<TaskOccurrence>>;
+  completeInstance(
+    id: string,
+    request?: CompleteTaskOccurrenceReq,
+  ): Promise<Result<TaskOccurrence>>;
   uncompleteInstance(id: string): Promise<Result<TaskOccurrence>>;
   skipInstance(id: string, request?: SkipTaskOccurrenceReq): Promise<Result<TaskOccurrence>>;
   markInstanceMissed(

@@ -22,8 +22,6 @@ import type {
   GetTaskOccurrencesByRangeReq,
   TaskOccurrenceClientDTO,
   TaskPlanClientDTO,
-  TaskTimeConfig,
-  TaskTimeConfigDTO,
   TaskReminderConfig,
   TaskGoalBinding,
   TaskGoalBindingDTO,
@@ -71,32 +69,7 @@ function taskPlanFromDTO(dto: TaskPlanClientDTO): TaskPlan {
 }
 
 function taskOccurrenceFromDTO(dto: TaskOccurrenceClientDTO): TaskOccurrence {
-  return TaskOccurrence.load({
-    id: dto.id,
-    templateId: dto.templateId,
-    identityId: dto.identityId,
-    instanceDate: dto.instanceDate,
-    timeConfig: parseTimeConfig(dto.timeConfig),
-    importance: dto.importance,
-    status: dto.status,
-    isOverdue: dto.isOverdue,
-    actualStartTime: dto.actualStartTime ? dto.actualStartTime : null,
-    actualEndTime: dto.actualEndTime ? dto.actualEndTime : null,
-    comment: dto.comment,
-    version: dto.version,
-    createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
-    deletedAt: dto.deletedAt ? dto.deletedAt : null,
-  });
-}
-
-function parseTimeConfig(dto: TaskTimeConfigDTO): TaskTimeConfig {
-  return {
-    timeType: dto.timeType,
-    startDate: dto.startDate ? dto.startDate : null,
-    timePoint: dto.timePoint,
-    timeRange: dto.timeRange,
-  };
+  return TaskOccurrence.load(dto);
 }
 
 function parseGoalBinding(dto: TaskGoalBindingDTO): TaskGoalBinding {
@@ -199,29 +172,29 @@ export class TaskClientService implements TaskClientPort {
   }
 
   async generateInstances(
-    templateId: string,
+    planId: string,
     request: GenerateInstancesReq,
   ): Promise<Result<TaskOccurrence[]>> {
-    const result = await this.templateApi.generateInstances(templateId, request);
+    const result = await this.templateApi.generateInstances(planId, request);
     return mapResult(result, (dtos) => dtos.map((dto) => taskOccurrenceFromDTO(dto)));
   }
 
   async getInstancesByDateRange(
-    templateId: string,
+    planId: string,
     from: number,
     to: number,
   ): Promise<Result<TaskOccurrence[]>> {
-    const result = await this.templateApi.getInstancesByDateRange(templateId, { from, to });
+    const result = await this.templateApi.getInstancesByDateRange(planId, { from, to });
     return mapResult(result, (dtos) => dtos.map((dto) => taskOccurrenceFromDTO(dto)));
   }
 
-  async bindToGoal(templateId: string, request: BindToGoalReq): Promise<Result<TaskPlan>> {
-    const result = await this.templateApi.bindToGoal(templateId, request);
+  async bindToGoal(planId: string, request: BindToGoalReq): Promise<Result<TaskPlan>> {
+    const result = await this.templateApi.bindToGoal(planId, request);
     return mapResult(result, (dto) => taskPlanFromDTO(dto));
   }
 
-  async unbindFromGoal(templateId: string): Promise<Result<TaskPlan>> {
-    const result = await this.templateApi.unbindFromGoal(templateId);
+  async unbindFromGoal(planId: string): Promise<Result<TaskPlan>> {
+    const result = await this.templateApi.unbindFromGoal(planId);
     return mapResult(result, (dto) => taskPlanFromDTO(dto));
   }
 
@@ -230,7 +203,7 @@ export class TaskClientService implements TaskClientPort {
   async listInstances(params?: {
     page?: number;
     limit?: number;
-    templateId?: string;
+    planId?: string;
     status?: string;
   }): Promise<Result<TaskOccurrence[]>> {
     const result = await this.instanceApi.getTaskOccurrences(params);

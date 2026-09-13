@@ -11,6 +11,14 @@ function sliceBetween(source: string, start: string, end: string): string {
 
 describe('TaskOccurrence vNext anti-resurrection locks (TASK-7303)', () => {
   const aggregate = readFileSync(resolve(__dirname, 'aggregates/task-occurrence.ts'), 'utf8');
+  const responseSchemas = readFileSync(
+    resolve(__dirname, '../../../../contracts/src/modules/task/api/response-schemas.ts'),
+    'utf8',
+  );
+  const clientAggregate = readFileSync(
+    resolve(__dirname, '../../domain-client/aggregates/task-occurrence.ts'),
+    'utf8',
+  );
   const serverDto = readFileSync(
     resolve(
       __dirname,
@@ -57,7 +65,7 @@ describe('TaskOccurrence vNext anti-resurrection locks (TASK-7303)', () => {
     }
   });
 
-  it('keeps the server DTO canonical even while TASK-7306 client projection is transitional', () => {
+  it('keeps server and transport DTOs canonical after TASK-7306 cutover', () => {
     for (const required of [
       'planId:',
       'scheduleSnapshot:',
@@ -70,6 +78,29 @@ describe('TaskOccurrence vNext anti-resurrection locks (TASK-7303)', () => {
     expect(serverDto).not.toMatch(
       /\btemplateId:|\binstanceDate:|\btimeConfig:|\bactualEndTime:|\bcomment:/,
     );
+
+    const response = sliceBetween(
+      responseSchemas,
+      'export const TaskOccurrenceResponseSchema = z.object({',
+      '// ============ Inferred response aliases',
+    );
+    for (const required of [
+      'planId:',
+      'occurrenceKey:',
+      'scheduleSnapshot:',
+      'importanceSnapshot:',
+      'result:',
+      'checklistState:',
+      'dueAt:',
+      'isOverdue:',
+    ]) {
+      expect(response).toContain(required);
+    }
+    expect(response).not.toMatch(
+      /\btemplateId:|\binstanceDate:|\btimeConfig:|\bactualEndTime:|\bcomment:/,
+    );
+    expect(clientAggregate).toContain('export type TaskOccurrenceState = TaskOccurrenceClientDTO');
+    expect(clientAggregate).not.toMatch(/get templateId\b|get instanceDate\b|get timeConfig\b/);
   });
 
   it('locks Prisma task_instances to canonical columns', () => {

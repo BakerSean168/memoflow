@@ -43,11 +43,42 @@ const i18n = createI18n({
 });
 
 function instance(status: TaskOccurrenceClientDTO['status']): TaskOccurrenceClientDTO {
+  const now = Date.now();
+  const result =
+    status === 'Completed'
+      ? {
+          kind: 'Completed' as const,
+          recordedAt: now,
+          actualDurationMinutes: null,
+          note: null,
+          rating: null,
+        }
+      : status === 'Missed'
+        ? { kind: 'Missed' as const, recordedAt: now, reason: null }
+        : status === 'Skipped'
+          ? { kind: 'Skipped' as const, recordedAt: now, reason: null }
+          : null;
   return {
-    id: 'instance-a',
-    templateId: 'template-a',
+    id: 'instance-a' as TaskOccurrenceClientDTO['id'],
+    planId: 'template-a' as TaskOccurrenceClientDTO['planId'],
+    identityId: 'identity-1' as TaskOccurrenceClientDTO['identityId'],
+    occurrenceKey: 'template-a:2026-09-13',
+    scheduleSnapshot: {
+      date: '2026-09-13' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+      timing: { kind: 'AllDay' },
+    },
+    importanceSnapshot: 'Moderate',
     status,
-  } as TaskOccurrenceClientDTO;
+    actualStartAt: null,
+    result,
+    checklistState: [],
+    dueAt: now,
+    isOverdue: false,
+    version: 1,
+    createdAt: now,
+    updatedAt: now,
+    deletedAt: null,
+  };
 }
 
 function template(completionRate: number): TaskPlanClientDTO {
