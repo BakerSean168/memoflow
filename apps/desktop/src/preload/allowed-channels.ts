@@ -17,6 +17,7 @@ import {
   SettingChannels,
   SystemChannels,
   TaskChannels,
+  TaskWorkspaceChannels,
   WindowChannels,
 } from '@memoflow/contracts/electron';
 import { GovernanceChannels } from '@memoflow/contracts/governance';
@@ -50,6 +51,7 @@ export const ALLOWED_CHANNELS = [
   ...Object.values(SystemChannels),
   ...Object.values(GoalChannels),
   ...Object.values(TaskChannels),
+  ...Object.values(TaskWorkspaceChannels),
   ...Object.values(ScheduleChannels),
   ...Object.values(ReminderChannels),
   ...Object.values(RoutineChannels),

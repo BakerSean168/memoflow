@@ -34,5 +34,8 @@ export {
   type CreateTaskPrismaModuleOptions,
   type ITaskPlanRepository,
   type ITaskOccurrenceRepository,
+  TaskWorkspaceQueryService,
+  type TaskWorkspaceApplicationPort,
+  type TaskWorkspaceQueryServiceDependencies,
 } from './server';
 export type { TaskWriteTransactionRunner } from './server/application/use-cases/commands/task-write-support';

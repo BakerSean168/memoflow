@@ -26,6 +26,8 @@ import type {
   TaskReminderConfig,
   TaskGoalBinding,
   TaskGoalBindingDTO,
+  GetTaskWorkspaceReq,
+  TaskPlanWorkspace,
 } from '@memoflow/contracts/task';
 import type { ITaskPlanApiClient, TaskPlanListParams } from './ports/task-plan-api-client.port';
 import type { ITaskOccurrenceApiClient } from './ports/task-occurrence-api-client.port';
@@ -89,6 +91,7 @@ export class TaskClientService implements TaskClientPort {
     private readonly templateApi: ITaskPlanApiClient,
     private readonly instanceApi: ITaskOccurrenceApiClient,
   ) {
+    this.getWorkspace = this.getWorkspace.bind(this);
     this.createTemplate = this.createTemplate.bind(this);
     this.listTemplates = this.listTemplates.bind(this);
     this.getTemplate = this.getTemplate.bind(this);
@@ -111,6 +114,10 @@ export class TaskClientService implements TaskClientPort {
     this.markInstanceMissed = this.markInstanceMissed.bind(this);
     this.rescheduleInstance = this.rescheduleInstance.bind(this);
     this.setChecklistItem = this.setChecklistItem.bind(this);
+  }
+
+  async getWorkspace(id: string, request?: GetTaskWorkspaceReq): Promise<Result<TaskPlanWorkspace>> {
+    return this.templateApi.getWorkspace(id, request);
   }
 
   // ===== Task Template Operations =====

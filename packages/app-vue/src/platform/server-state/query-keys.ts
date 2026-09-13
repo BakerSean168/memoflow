@@ -137,6 +137,8 @@ export const taskPlanQueryKeys = {
     [...taskPlanQueryKeys.identity(identityScope), 'detail'] as const,
   detail: (identityScope: string, id: string) =>
     [...taskPlanQueryKeys.details(identityScope), id] as const,
+  workspace: (identityScope: string, id: string, recentLimit = 5) =>
+    [...taskPlanQueryKeys.detail(identityScope, id), 'workspace', recentLimit] as const,
 };
 
 // ─── Governance ───────────────────────────────────────────────────────────────

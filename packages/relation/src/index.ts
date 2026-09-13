@@ -10,6 +10,8 @@ export {
   GoalKnowledgeService,
   type KnowledgeDocumentRefResolver,
 } from './application/goal-knowledge-service';
+export { TaskKnowledgeService } from './application/task-knowledge-service';
+export type { TaskKnowledgeEdgeListReq, TaskKnowledgeEdgePage } from '@memoflow/contracts/relation';
 export { PrismaRelationRepository } from './infrastructure/prisma/prisma-relation.repository';
 export { PowerSyncRelationRepository } from './infrastructure/powersync/powersync-relation.repository';
 export { PrismaGoalRelationCleanupCapability } from './infrastructure/prisma/prisma-goal-relation-cleanup';

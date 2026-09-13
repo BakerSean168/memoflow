@@ -32,6 +32,15 @@ export interface TaskPlanInstanceStats {
   completionRate: number;
 }
 
+export interface TaskOccurrenceStatusCounts {
+  total: number;
+  completed: number;
+  missed: number;
+  skipped: number;
+  pending: number;
+  inProgress: number;
+}
+
 /**
  * TaskOccurrence 仓储接口
  */
@@ -116,6 +125,17 @@ export interface ITaskOccurrenceRepository {
     identityId: string,
     window: TaskPlanStatsWindow,
   ): Promise<Record<string, TaskPlanInstanceStats>>;
+
+  getStatusCountsForPlan(
+    planId: string,
+    identityId: string,
+  ): Promise<TaskOccurrenceStatusCounts>;
+
+  findRecentByPlan(
+    planId: string,
+    identityId: string,
+    limit: number,
+  ): Promise<TaskOccurrence[]>;
 
   /**
    * 删除模板从指定时点开始的未完成实例

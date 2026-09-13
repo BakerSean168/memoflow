@@ -72,10 +72,12 @@ import { createSchedulePrismaRepositories } from '@memoflow/schedule';
 import { createSchedulerPrismaRepositories } from '@memoflow/scheduler';
 import { createScheduleOrchestrationModule } from '@memoflow/schedule-orchestration';
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
+import { TaskWorkspaceQueryService } from '@memoflow/task';
 import { createTaskPrismaScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import { createRoutinePrismaScheduleExecutionDeps } from '@memoflow/reminder/schedule-execution';
 import { createRoutinePrismaScheduleProjectionSource } from '@memoflow/reminder/schedule-projection';
 import { composeTask } from './runtime/compose-task';
+import { composeTaskWorkspaceApiModule } from './modules/task/task-workspace.module.js';
 // 基础设施模块（直接在 API 内部定义）
 import { composePowerSyncApiModule } from './modules/powersync/module.js';
 import { composeDashboardApiModule } from './modules/dashboard/module.js';
@@ -83,6 +85,7 @@ import { composeLabelApiModule } from './modules/label/module.js';
 import { LabelService, PrismaLabelRepository } from '@memoflow/label';
 import {
   GoalKnowledgeService,
+  TaskKnowledgeService,
   PrismaRelationRepository,
   PrismaGoalRelationCleanupCapability,
 } from '@memoflow/relation';
@@ -299,6 +302,7 @@ async function bootstrap(): Promise<void> {
     relationRepository,
     repositoryApiModule.knowledgeDocumentRefResolver,
   );
+  const taskKnowledgeService = new TaskKnowledgeService(relationRepository);
   const goalComposed = composeGoal({
     db: prisma,
     taskBindingReadPort: taskGoalContextReadPort,
@@ -342,6 +346,15 @@ async function bootstrap(): Promise<void> {
   const labelApiModule = composeLabelApiModule({ service: labelService });
   const goalKnowledgeApiModule = composeGoalKnowledgeApiModule({ service: goalKnowledgeService });
   const goalWorkspaceApiModule = composeGoalWorkspaceApiModule({ port: goalWorkspaceService });
+  const taskWorkspaceService = new TaskWorkspaceQueryService({
+    taskPlanRepository: taskComposed.taskPlanRepository,
+    taskOccurrenceRepository: taskComposed.taskOccurrenceRepository,
+    userTimeContextPort: settingApiModule.userTimeContextPort,
+    goalReadPort: goalComposed.applicationPort,
+    knowledgeRelationReadPort: taskKnowledgeService,
+    knowledgeContextReadPort: repositoryApiModule.knowledgeDocumentWorkspaceResolver,
+  });
+  const taskWorkspaceApiModule = composeTaskWorkspaceApiModule(taskWorkspaceService);
   const dashboardApiModule = composeDashboardApiModule({
     dashboardReadPort: new PrismaDashboardReadPort(prisma, settingApiModule.userTimeContextPort),
     activityLedgerRuntime: createActivityLedgerRecorder(new PrismaActivityLedgerWriter(prisma)),
@@ -357,6 +370,7 @@ async function bootstrap(): Promise<void> {
     .register(scheduleApiModule.schedulerModule) // ✅ Temporal Engine diagnostics/runtime
     .register(settingApiModule) // ✅ 设置模块 (runtime composer)
     .register(taskComposed.module) // ✅ 任务模块
+    .register(taskWorkspaceApiModule) // ✅ Task Workspace read composition
     .register(aiApiModule) // ✅ AI 模块 (runtime composer)
     .register(goalComposed.module) // ✅ 目标模块
     .register(goalWorkspaceApiModule) // ✅ Goal Workspace read composition

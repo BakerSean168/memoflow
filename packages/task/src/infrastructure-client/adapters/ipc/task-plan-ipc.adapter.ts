@@ -6,7 +6,7 @@
  */
 
 import type { Result } from '@memoflow/contracts/result';
-import { TaskChannels } from '@memoflow/contracts/electron';
+import { TaskChannels, TaskWorkspaceChannels } from '@memoflow/contracts/electron';
 import type { ITaskPlanApiClient, IResultIpcClient, TaskPlanListParams } from '../types';
 import type {
   TaskPlanClientDTO,
@@ -18,10 +18,16 @@ import type {
   BindToGoalReq,
   AbandonTaskPlanReq,
   TaskPlanInstancesQuery,
+  GetTaskWorkspaceReq,
+  TaskPlanWorkspace,
 } from '@memoflow/contracts/task';
 
 export class TaskPlanIpcAdapter implements ITaskPlanApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}
+
+  async getWorkspace(planId: string, request?: GetTaskWorkspaceReq): Promise<Result<TaskPlanWorkspace>> {
+    return this.ipcClient.invoke(TaskWorkspaceChannels.GET, { planId, ...request });
+  }
 
   async createTaskPlan(request: CreateTaskPlanReq): Promise<Result<CreateTaskPlanRes>> {
     return this.ipcClient.invoke(TaskChannels.TEMPLATE_CREATE, request);

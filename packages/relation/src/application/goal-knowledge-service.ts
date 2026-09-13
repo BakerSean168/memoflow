@@ -81,6 +81,7 @@ export class GoalKnowledgeService {
     });
   }
 
+
   async listForGoal(
     identityId: string,
     request: GoalKnowledgeListReq,

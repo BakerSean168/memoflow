@@ -12,3 +12,4 @@ export * from './task-invocation.schemas';
 export * from './response-schemas';
 
 export * from './task-goal-context.dto';
+export * from './task-workspace.dto';

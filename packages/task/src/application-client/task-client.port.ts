@@ -10,12 +10,15 @@ import type {
   SkipTaskOccurrenceReq,
   RescheduleTaskInput,
   SetTaskOccurrenceChecklistItemReq,
+  GetTaskWorkspaceReq,
+  TaskPlanWorkspace,
 } from '@memoflow/contracts/task';
 import type { TaskPlanListParams } from './ports/task-plan-api-client.port';
 import type { TaskPlan } from '../domain-client/aggregates/task-plan';
 import type { TaskOccurrence } from '../domain-client/aggregates/task-occurrence';
 
 export interface TaskClientPort {
+  getWorkspace(id: string, request?: GetTaskWorkspaceReq): Promise<Result<TaskPlanWorkspace>>;
   // Task Template Operations
   createTemplate(
     request: CreateTaskPlanReq,

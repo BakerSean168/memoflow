@@ -9,6 +9,7 @@ import type {
   ITaskOccurrenceRepository,
   TaskPlanInstanceStats,
   TaskPlanStatsWindow,
+  TaskOccurrenceStatusCounts,
 } from '../../../domain/repositories/i-task-occurrence-repository';
 import { PrismaTaskOccurrenceMapper } from './mappers/prisma-task-occurrence-mapper';
 
@@ -257,6 +258,34 @@ export class TaskOccurrencePrismaRepository
           : 0;
     }
     return stats;
+  }
+
+  async getStatusCountsForPlan(planId: string, identityId: string): Promise<TaskOccurrenceStatusCounts> {
+    const grouped = await this.db.taskOccurrence.groupBy({
+      by: ['status'],
+      where: { planId, identityId, deletedAt: null },
+      _count: { _all: true },
+    });
+    const counts: TaskOccurrenceStatusCounts = { total: 0, completed: 0, missed: 0, skipped: 0, pending: 0, inProgress: 0 };
+    for (const row of grouped) {
+      const count = row._count._all;
+      counts.total += count;
+      if (row.status === 'Completed') counts.completed = count;
+      if (row.status === 'Missed') counts.missed = count;
+      if (row.status === 'Skipped') counts.skipped = count;
+      if (row.status === 'Pending') counts.pending = count;
+      if (row.status === 'InProgress') counts.inProgress = count;
+    }
+    return counts;
+  }
+
+  async findRecentByPlan(planId: string, identityId: string, limit: number): Promise<TaskOccurrence[]> {
+    const rows = await this.db.taskOccurrence.findMany({
+      where: { planId, identityId, deletedAt: null },
+      orderBy: [{ scheduleDate: 'desc' }, { updatedAt: 'desc' }],
+      take: limit,
+    });
+    return rows.map((row) => this.mapToEntity(row));
   }
 
   async deleteIncompleteInstancesFrom(

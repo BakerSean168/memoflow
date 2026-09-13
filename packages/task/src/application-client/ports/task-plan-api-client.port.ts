@@ -17,6 +17,8 @@ import type {
   BindToGoalReq,
   AbandonTaskPlanReq,
   TaskPlanInstancesQuery,
+  GetTaskWorkspaceReq,
+  TaskPlanWorkspace,
 } from '@memoflow/contracts/task';
 
 export interface TaskPlanListParams extends Record<string, unknown>, ListTaskPlanFilters {
@@ -25,6 +27,7 @@ export interface TaskPlanListParams extends Record<string, unknown>, ListTaskPla
 }
 
 export interface ITaskPlanApiClient {
+  getWorkspace(planId: string, request?: GetTaskWorkspaceReq): Promise<Result<TaskPlanWorkspace>>;
   createTaskPlan(request: CreateTaskPlanReq): Promise<Result<CreateTaskPlanRes>>;
   getTaskPlans(
     params?: TaskPlanListParams,

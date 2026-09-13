@@ -18,6 +18,8 @@ import type {
   BindToGoalReq,
   AbandonTaskPlanReq,
   TaskPlanInstancesQuery,
+  GetTaskWorkspaceReq,
+  TaskPlanWorkspace,
 } from '@memoflow/contracts/task';
 
 /**
@@ -29,6 +31,10 @@ export class TaskPlanHttpAdapter implements ITaskPlanApiClient {
   private readonly baseUrl = '/task-plans';
 
   constructor(private readonly httpClient: IResultHttpClient) {}
+
+  async getWorkspace(planId: string, request?: GetTaskWorkspaceReq): Promise<Result<TaskPlanWorkspace>> {
+    return this.httpClient.get(`/tasks/${planId}/workspace`, { params: request });
+  }
 
   // ===== Task Template CRUD =====
 

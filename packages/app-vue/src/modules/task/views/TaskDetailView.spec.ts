@@ -16,10 +16,13 @@ describe('TaskDetailView occurrence correction and plan settings', () => {
     expect(source).toContain('@save="saveEdit"');
   });
 
-  it('shows generated occurrences with repeat position and correction commands', () => {
+  it('shows workspace occurrences and correction commands without inventing bounded positions', () => {
     expect(source).toContain('data-testid="task-detail-occurrences"');
     expect(source).toContain('<TaskOccurrenceRow');
-    expect(source).toContain('getTaskOccurrencePosition');
+    expect(source).toContain('executionSummary');
+    expect(source).toContain('linkedNotes');
+    expect(source).not.toContain('fetchInstances({ page: 1, limit: 500 })');
+    expect(source).not.toContain('getTaskOccurrencePosition');
     for (const operation of [
       'completeInstance',
       'uncompleteInstance',
@@ -29,6 +32,7 @@ describe('TaskDetailView occurrence correction and plan settings', () => {
     ]) {
       expect(source).toContain(operation);
     }
+    expect(source).toContain('refetchWorkspace');
   });
 
   it('does not resurrect dependency or graph state', () => {
