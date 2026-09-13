@@ -2,7 +2,7 @@
 tags: [plan, active, vnext, system-wide, convergence]
 description: MemoFlow 全模块模型收敛唯一执行顺序、destructive cutover、验证与最终删除计划
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-09T11:15:00+09:00
+updated: 2026-09-13T10:12:00+08:00
 ---
 
 # MemoFlow System-wide vNext Model Convergence — Implementation Plan
@@ -492,7 +492,7 @@ Core outputs:
 
 **GOAL-7210 DONE:** The last duplicate Goal/KR product tracks are destructively retired. Canonical persistence/portable truth was already vNext, so no fake migration was introduced; instead the public legacy `GoalTemplate` OKR catalog/template recommendation UI and standalone pre-durable AI-KR generation chain were deleted, stale GoalFolder/status-rule/Importance/Motivation/Feasibility/due/overdue locale truth was removed, and PowerSync test schemas now mirror canonical `summary + target_kind + target_end_date`. Product/ADR/current docs describe GoalPlanDraft V2 rather than a temporary V1 compatibility path. `core-vnext-architecture-lock` now audits Goal/KR owners plus AI GoalPlan, API/Desktop mutation adapters, Prisma source/generated schema, PowerSync and Data Portability, with explicit rejection for Goal legacy due-time, identity fields, KR V2 measurement vocabulary and retired GoalTemplate tracks. Owner-scoped repository scans are zero-hit for retired Goal/KR production truth while valid Task `dueDate/isOverdue` paths remain. Closure evidence: Goal 84/474, Contracts 85/578, AI 79/425, Data Portability 36/148, Vue Goal+i18n 15/51, PowerSync 7/7, Governance tools 19/139 and core-vNext lock 6/6 PASS; the lock audits 2082 production source files; cross-surface typechecks and Web/Desktop production builds PASS; test inventory is current at 1266 files; `docs:check` and full `governance:check` PASS. GOAL-7211 is now dependency-ready.
 
-**GOAL-7211 ARCHIVED / FINAL CI PENDING:** Five-layer review closed with P0/P1 = 0. After three delivery repair passes, PR #340 exact head `a6c9d622f0b79285ffe3994a38c243b1bc389586` passed CI run `34730694318` end to end: Scope/Static/Governance/Build/Typecheck/Unit/Verification, all four Web Flow shards, and all Governance/Validate/Web Flow/Boundary/Integration/Coverage/Performance Oracles were SUCCESS. The Goal module plan has therefore moved to archive. Per its delivery contract, GOAL-7211 becomes DONE only after this archive-head commit passes the same required CI gate.
+**GOAL-7211 DONE:** Five-layer review closed with P0/P1 = 0. After three delivery repair passes, PR #340 exact head `a6c9d622f0b79285ffe3994a38c243b1bc389586` passed CI run `34730694318` end to end. The archived head `4101ff3e52c6d02873b46eccbead2abf05f05467` then passed final CI run `34731400439` with Scope/Static/Governance/Build/Typecheck/Unit/Verification, all four Web Flow shards, Delivery Observation, and all Governance/Validate/Web Flow/Boundary/Integration/Coverage/Performance Oracles SUCCESS. The Goal module plan is archived and no Goal vNext closure gate remains.
 
 ## TASK lane — continue Task plan from clean checkpoint
 
@@ -686,7 +686,7 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 ## 7. Immediate next tickets
 
-TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, and Goal `GOAL-7202..7210` are complete. Goal `GOAL-7211` is archived and awaiting only its final archive-head CI gate. Current dependency-ready implementation work is:
+TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, and Goal `GOAL-7202..7211` are complete; the Goal plan is archived with both exact-head delivery gates green. Current dependency-ready implementation work is:
 
 1. `TASK-7302` + `TASK-7303` — converge TaskPlan and TaskOccurrence aggregates, then continue the Task vNext dependency chain;
 2. `SETTING-9210` — five-layer review, exact-head CI/build, docs integrity and Setting plan archive;

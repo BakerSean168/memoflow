@@ -11,7 +11,7 @@ tags:
   - migration
 description: Goal vNext 产品模型、KR Measurement V3、Task/Knowledge Context、AI Plan 与 Linear-style UI 的一次性收敛实施计划
 created: 2026-09-08T17:55:00+08:00
-updated: 2026-09-13T09:09:00+08:00
+updated: 2026-09-13T10:12:00+08:00
 status: archived
 ---
 
@@ -716,7 +716,9 @@ Recurrence UNTIL
 
 **Local verification ledger at implementation head `72934633222`:** Goal 84 files / 474 tests; Contracts 85 / 578; AI 79 / 425; Data Portability 36 / 148; App-Vue Goal+i18n 15 / 51; PowerSync schema 7 / 7; Governance tools 19 / 139; Relation unit 12 / 12; Relation PostgreSQL 3 / 3; Goal PostgreSQL 18 / 18; Task PostgreSQL 31 / 31; focused Workspace/Relation transport 14 / 14. Cross-surface typechecks and Web/Desktop production builds PASS.
 
-**First exact-head delivery gate: PASS.** PR #340 run `34730694318` on head `a6c9d622f0b79285ffe3994a38c243b1bc389586` completed SUCCESS with Scope Detector, Static Analysis, Governance, Build, Typecheck, Unit Tests, Verification Children, all four Web Flow shards, Governance/Validate/Web Flow Oracles, and Boundary/Integration/Coverage/Performance Oracles all green. This evidence authorizes archival. GOAL-7211 remains **ARCHIVED / FINAL ARCHIVE-HEAD CI PENDING** until this archive commit itself passes the same required gate.
+**First exact-head delivery gate: PASS.** PR #340 run `34730694318` on head `a6c9d622f0b79285ffe3994a38c243b1bc389586` completed SUCCESS with Scope Detector, Static Analysis, Governance, Build, Typecheck, Unit Tests, Verification Children, all four Web Flow shards, Governance/Validate/Web Flow Oracles, and Boundary/Integration/Coverage/Performance Oracles all green. This evidence authorized archival.
+
+**Final archive-head delivery gate: PASS.** PR #340 run `34731400439` on archive head `4101ff3e52c6d02873b46eccbead2abf05f05467` completed SUCCESS with the same end-to-end delivery matrix, including Delivery Observation and all four Web Flow shards. GOAL-7211 is therefore DONE and archived; no Goal vNext closure gate remains.
 
 **Resolved first-PR finding:** PR #340 run `34701316259` on head `cdb3f39a380` exposed one P1 delivery blocker in `schedule-orchestration` test fixtures: two Goal reminder fixtures still constructed payload v1 / `dueDate` even though production had already moved to `GOAL_REMINDER_PAYLOAD_VERSION = 2` with `GoalTimeframe target`. No production fallback was restored. Both fixtures now use the exported payload version, canonical Ymd/GoalTimeframe values, and the actual reminder instant; focused `schedule-orchestration:typecheck` plus the full package test suite (9 files / 34 tests) PASS. Unresolved P0/P1 remains zero; a new exact-head PR run is required.
 
@@ -793,7 +795,7 @@ GOAL-7207  DONE — GoalWorkspaceReadModel + bounded owner composition
 GOAL-7208  DONE — GoalPlanDraft V2 + deterministic multi-owner apply/retry
 GOAL-7209  DONE — property-chip create/edit + Workspace UI + React/Mobile parity
 GOAL-7210  DONE — destructive legacy-track retirement + expanded anti-resurrection locks
-GOAL-7211  ARCHIVED / FINAL CI PENDING — P0/P1 = 0; first exact-head PR CI green
+GOAL-7211  DONE — P0/P1 = 0; first exact-head and final archive-head PR CI both green
 ```
 
-GOAL-7201 froze the design package; GOAL-7202～7210 are implemented production truth. GOAL-7211 local five-layer review is complete with P0/P1 = 0 and the first exact-head PR gate is green; this archived plan now awaits only the final archive-head CI gate before DONE becomes effective.
+GOAL-7201 froze the design package; GOAL-7202～7210 are implemented production truth. GOAL-7211 local five-layer review is complete with P0/P1 = 0; both the first exact-head gate and final archive-head gate are green, so the Goal vNext convergence plan is fully DONE and archived.
