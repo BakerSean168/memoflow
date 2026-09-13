@@ -141,6 +141,38 @@ describe('task-plan route contracts', () => {
     expect(bodySchema.safeParse({}).success).toBe(false);
   });
 
+  it('POST / and PATCH /{id} accept Plan checklist definitions and reject malformed items', () => {
+    const registry = new TestOpenApiRegistry();
+    registerAll(registry);
+
+    const createRoute = getRegisteredRoute(registry, 'post', BASE);
+    const createBody = getJsonBodySchema(createRoute);
+    const validChecklist = [{ id: 'check-1', title: 'Prepare evidence', order: 0 }];
+    expect(
+      createBody.safeParse({
+        name: 'My Task',
+        importance: 'Important',
+        schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
+        checklist: validChecklist,
+      }).success,
+    ).toBe(true);
+    expect(
+      createBody.safeParse({
+        name: 'My Task',
+        importance: 'Important',
+        schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
+        checklist: [{ id: 'check-1', title: '', order: 0 }],
+      }).success,
+    ).toBe(false);
+
+    const patchRoute = getRegisteredRoute(registry, 'patch', `${BASE}/{id}`);
+    const patchBody = getJsonBodySchema(patchRoute);
+    expect(patchBody.safeParse({ checklist: validChecklist }).success).toBe(true);
+    expect(patchBody.safeParse({ checklist: [{ id: '', title: 'No id', order: 0 }] }).success).toBe(
+      false,
+    );
+  });
+
   it('GET / list uses TaskPlanListResponseSchema', () => {
     const registry = new TestOpenApiRegistry();
     registerAll(registry);

@@ -241,7 +241,6 @@ import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { TaskReminderConfigDTO } from '@memoflow/contracts/task';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
-import { formatProductDate } from '../../../shared/utils/product-time';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskPlanDialog from '../components/dialogs/TaskPlanDialog.vue';
 import type { TaskPlanViewModel } from '../components/types';

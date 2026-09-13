@@ -396,6 +396,8 @@ const intervalHint = computed(() => {
       return t('task.recurrence.intervalHintMonth');
     case RecurrenceFrequency.Yearly:
       return t('task.recurrence.intervalHintYear');
+    default:
+      return '';
   }
 });
 const hasRecurrence = computed(() => recurrenceEnabled.value);

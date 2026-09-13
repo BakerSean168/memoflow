@@ -1,15 +1,10 @@
 import type { ComposerTranslation } from 'vue-i18n';
-import type {
-  TaskPlanClientDTO,
-  TaskPlanSchedule,
-  TaskTimeConfigDTO,
-  TaskTimeConfigReq,
-} from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO, TaskPlanSchedule, TaskTimeConfigDTO } from '@memoflow/contracts/task';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import { TaskPlanScheduleSchema } from '@memoflow/contracts/task';
-import type { TaskPlanViewModel, TaskTimeConfigViewModel } from '../components/types';
+import type { TaskPlanViewModel } from '../components/types';
 import { formatHHmmParts } from '../../../shared/utils/format-hhmm-parts';
-import { formatProductDate, getProductTime } from '../../../shared/utils/product-time';
+import { formatProductDate } from '../../../shared/utils/product-time';
 
 type Translate = ComposerTranslation<Record<string, never>, string>;
 
@@ -59,11 +54,6 @@ type TaskTimeDisplayInput =
   | null
   | undefined;
 
-type TaskTimePayloadInput =
-  | Pick<TaskTimeConfigViewModel, 'timeType' | 'timePoint' | 'timeRange' | 'startDate'>
-  | null
-  | undefined;
-
 export function getTaskTimeTypeLabel(t: Translate, type?: string | null): string {
   switch (type) {
     case 'AllDay':
@@ -93,23 +83,6 @@ export function getTaskTimeValueDisplay(t: Translate, timeConfig?: TaskTimeDispl
     return `${formatMinuteOfDay(timeConfig.timeRange.start)} - ${formatMinuteOfDay(timeConfig.timeRange.end)}`;
   }
   return t('common.none');
-}
-
-export function toTaskTimeConfigPayload(timeConfig?: TaskTimePayloadInput): TaskTimeConfigReq {
-  const timeType = timeConfig?.timeType ?? 'AllDay';
-  const startDate = timeConfig?.startDate;
-
-  return {
-    timeType,
-    startDate:
-      startDate instanceof Date
-        ? startDate.getTime()
-        : typeof startDate === 'number'
-          ? startDate
-          : null,
-    timePoint: timeType === 'TimePoint' ? (timeConfig?.timePoint ?? null) : null,
-    timeRange: timeType === 'TimeRange' ? (timeConfig?.timeRange ?? null) : null,
-  };
 }
 
 function scheduleDate(schedule: TaskPlanSchedule): string {
