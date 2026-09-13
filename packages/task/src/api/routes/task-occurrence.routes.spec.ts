@@ -267,6 +267,12 @@ describe('task-occurrence route contracts', () => {
       bodySchema.safeParse({ definitionId: 'check-1', completed: 'yes', expectedVersion: 3 })
         .success,
     ).toBe(false);
+    // expectedVersion is required on this new occurrence write surface.
+    expect(bodySchema.safeParse({ definitionId: 'check-1', completed: true }).success).toBe(false);
+    expect(
+      bodySchema.safeParse({ definitionId: 'check-1', completed: true, expectedVersion: 0 })
+        .success,
+    ).toBe(false);
   });
 
   it('POST /{id}/reschedule requires canonical occurrence schedule + expectedVersion', () => {

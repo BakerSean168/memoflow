@@ -33,7 +33,10 @@ import type { TaskPlanProps, TaskPlanState } from './task-plan.state';
 import * as instanceGen from './instance-generation.policy';
 import * as goalPolicy from './task-plan-goal.policy';
 import * as lifecyclePolicy from './task-plan-lifecycle.policy';
-import { InvalidTaskPlanStateError } from '../value-objects/task-errors';
+import {
+  InvalidTaskPlanStateError,
+  DuplicateChecklistItemIdError,
+} from '../value-objects/task-errors';
 
 /** TaskPlan aggregate root. */
 export class TaskPlan extends AggregateRoot<TaskPlanId> {
@@ -366,11 +369,27 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
     });
   }
 
-  /** Replaces the Plan-owned checklist definition. Existing occurrence snapshots are not rewritten. */
-  public updateChecklist(items: ReadonlyArray<{ id: string; title: string; order: number }>): void {
-    const next = items
+  /**
+   * Builds the Plan-owned checklist definition. Definition ids are stable
+   * identity (ADR-073), so duplicates are rejected for every caller.
+   */
+  private static toChecklistDefinitions(
+    items: ReadonlyArray<{ id: string; title: string; order: number }>,
+  ): ChecklistItemDefinition[] {
+    const definitions = items
       .map((item) => ChecklistItemDefinition.fromDTO(item))
       .sort((left, right) => left.order - right.order);
+    const seen = new Set<string>();
+    for (const item of definitions) {
+      if (seen.has(item.id)) throw new DuplicateChecklistItemIdError(item.id);
+      seen.add(item.id);
+    }
+    return definitions;
+  }
+
+  /** Replaces the Plan-owned checklist definition. Existing occurrence snapshots are not rewritten. */
+  public updateChecklist(items: ReadonlyArray<{ id: string; title: string; order: number }>): void {
+    const next = TaskPlan.toChecklistDefinitions(items);
     const oldChecklist = this._props.checklist.map((item) => item.toDTO());
     const nextChecklist = next.map((item) => item.toDTO());
     if (JSON.stringify(oldChecklist) === JSON.stringify(nextChecklist)) return;
@@ -692,7 +711,7 @@ export class TaskPlan extends AggregateRoot<TaskPlanId> {
             contribution: params.goalBinding.contribution ?? null,
           })
         : null,
-      checklist: (params.checklist ?? []).map((item) => ChecklistItemDefinition.fromDTO(item)),
+      checklist: TaskPlan.toChecklistDefinitions(params.checklist ?? []),
       schedule: params.schedule,
       reminderConfig: params.reminderConfig ?? null,
       createdAt: now,

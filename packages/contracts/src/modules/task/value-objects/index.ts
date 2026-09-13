@@ -60,7 +60,10 @@ export { TaskOccurrenceChecklistItemSchema } from './task-occurrence-checklist';
 export type { TaskOccurrenceChecklistItem } from './task-occurrence-checklist';
 export { TaskOccurrenceScheduleSnapshotSchema } from './task-occurrence-schedule-snapshot';
 export type { TaskOccurrenceScheduleSnapshot } from './task-occurrence-schedule-snapshot';
-export { ChecklistItemDefinitionSchema } from './checklist-item-definition';
+export {
+  ChecklistItemDefinitionSchema,
+  TaskPlanChecklistSchema,
+} from './checklist-item-definition';
 
 // CompletionRecord
 export type { CompletionRecord, CompletionRecordDTO } from './completion-record';
@@ -84,4 +87,5 @@ export { TaskType } from './task-type';
 export type {
   ChecklistItemDefinition,
   ChecklistItemDefinitionDTO,
+  TaskPlanChecklist,
 } from './checklist-item-definition';

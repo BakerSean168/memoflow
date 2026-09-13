@@ -424,8 +424,8 @@ const noop = () => undefined;
 
 watch(
   id,
-  (templateId) => {
-    if (templateId) void fetchInstances({ page: 1, limit: 500, planId: templateId });
+  (planId) => {
+    if (planId) void fetchInstances({ page: 1, limit: 500, planId });
   },
   { immediate: true },
 );

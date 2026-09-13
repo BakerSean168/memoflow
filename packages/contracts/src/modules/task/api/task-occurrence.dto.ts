@@ -60,7 +60,7 @@ export const SetTaskOccurrenceChecklistItemSchema = z
   .object({
     definitionId: z.string().min(1),
     completed: z.boolean(),
-    expectedVersion: z.number().int().positive().optional(),
+    expectedVersion: z.number().int().positive(),
   })
   .strict();
 

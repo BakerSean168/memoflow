@@ -171,6 +171,21 @@ describe('task-plan route contracts', () => {
     expect(patchBody.safeParse({ checklist: [{ id: '', title: 'No id', order: 0 }] }).success).toBe(
       false,
     );
+
+    // ADR-073: definition ids are stable identity — duplicates are rejected on write.
+    const duplicated = [
+      { id: 'check-1', title: 'Prepare evidence', order: 0 },
+      { id: 'check-1', title: 'Duplicate identity', order: 1 },
+    ];
+    expect(
+      createBody.safeParse({
+        name: 'My Task',
+        importance: 'Important',
+        schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
+        checklist: duplicated,
+      }).success,
+    ).toBe(false);
+    expect(patchBody.safeParse({ checklist: duplicated }).success).toBe(false);
   });
 
   it('GET / list uses TaskPlanListResponseSchema', () => {

@@ -39,6 +39,7 @@ import { TASK_TEST_TIME_CONTEXT } from '../../../../testing';
 import {
   InvalidTaskPlanStateError,
   InvalidGoalBindingError,
+  DuplicateChecklistItemIdError,
 } from '../../value-objects/task-errors';
 
 // ─── Helpers ───────────────────────────────────────────────────────
@@ -392,6 +393,25 @@ describe('TaskPlan Aggregate', () => {
           goalId: null,
         });
       });
+
+      it('should reject duplicate checklist definition ids', () => {
+        expect(() =>
+          TaskPlan.create({
+            identityId: makeIdentityId(),
+            title: 'Checklisted task',
+            schedule: TaskPlanSchedule.fromLegacy(
+              TaskType.OneTime,
+              makeAllDayTimeConfig(),
+              null,
+              TASK_TEST_TIME_CONTEXT,
+            ),
+            checklist: [
+              { id: 'check-1', title: 'Prepare evidence', order: 0 },
+              { id: 'check-1', title: 'Duplicate identity', order: 1 },
+            ],
+          }),
+        ).toThrow(DuplicateChecklistItemIdError);
+      });
     });
 
     describe('load()', () => {
@@ -660,6 +680,29 @@ describe('TaskPlan Aggregate', () => {
         template.updateDescription('Something');
         template.updateDescription(null);
         expect(template.description).toBeNull();
+      });
+    });
+
+    describe('updateChecklist()', () => {
+      it('should replace definitions and order them by order', () => {
+        template.updateChecklist([
+          { id: 'check-2', title: 'Review draft', order: 1 },
+          { id: 'check-1', title: 'Prepare evidence', order: 0 },
+        ]);
+
+        expect(template.checklist.map((item) => item.id)).toEqual(['check-1', 'check-2']);
+      });
+
+      it('should throw for duplicate definition ids and keep prior definitions', () => {
+        template.updateChecklist([{ id: 'check-1', title: 'Prepare evidence', order: 0 }]);
+
+        expect(() =>
+          template.updateChecklist([
+            { id: 'check-1', title: 'Prepare evidence', order: 0 },
+            { id: 'check-1', title: 'Duplicate identity', order: 1 },
+          ]),
+        ).toThrow(DuplicateChecklistItemIdError);
+        expect(template.checklist.map((item) => item.id)).toEqual(['check-1']);
       });
     });
 

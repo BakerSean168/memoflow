@@ -55,6 +55,21 @@ export class RecurrenceRuleNotImplementedError extends ResultErrorException {
 }
 
 /**
+ * 检查清单项 ID 重复错误（定义 ID 是稳定身份，见 ADR-073）
+ */
+export class DuplicateChecklistItemIdError extends ResultErrorException {
+  constructor(duplicateId: string) {
+    super(
+      `检查清单项 ID 重复：${duplicateId}`,
+      'duplicate_checklist_item_id',
+      undefined,
+      undefined,
+      400,
+    );
+  }
+}
+
+/**
  * 目标绑定无效错误
  */
 export class InvalidGoalBindingError extends ResultErrorException {

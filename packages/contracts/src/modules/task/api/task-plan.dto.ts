@@ -8,7 +8,7 @@ import { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-
 import { TaskReminderConfigSchema } from '../value-objects/task-reminder-config';
 import { TaskGoalBindingSchema } from '../value-objects/task-goal-binding';
 import { TaskPlanScheduleSchema } from '../value-objects/task-plan-schedule';
-import { ChecklistItemDefinitionSchema } from '../value-objects/checklist-item-definition';
+import { TaskPlanChecklistSchema } from '../value-objects/checklist-item-definition';
 
 // Residual 739: TaskReminderConfigSchema / TaskGoalBindingSchema owned by value-objects
 // (semantic DTOs are z.infer aliases). Re-export for OpenAPI/route consumers.
@@ -27,7 +27,7 @@ export const CreateTaskPlanSchema = z
     importance: z.enum(ImportanceLevel),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
     goalBinding: TaskGoalBindingSchema.optional().nullable(),
-    checklist: z.array(ChecklistItemDefinitionSchema).max(100).optional(),
+    checklist: TaskPlanChecklistSchema.optional(),
     completionPolicy: z.enum(TaskPlanCompletionPolicy).optional(),
   })
   .strict();
@@ -53,7 +53,7 @@ export const UpdateTaskPlanSchema = z
     importance: z.enum(ImportanceLevel).optional(),
     labelIds: z.array(z.string().min(1)).max(50).optional(),
     goalBinding: TaskGoalBindingSchema.optional().nullable(),
-    checklist: z.array(ChecklistItemDefinitionSchema).max(100).optional(),
+    checklist: TaskPlanChecklistSchema.optional(),
     completionPolicy: z.enum(TaskPlanCompletionPolicy).optional(),
     /** R2-5a：乐观锁期望版本（可选；提供时校验，旧客户端可不传）。 */
     expectedVersion: z.number().int().positive().optional(),

@@ -44,7 +44,7 @@ export class SetTaskOccurrenceChecklistItemUseCase {
     const occurrence = await repositories.instanceRepository.findByIdForIdentity(identityId, id);
     if (!occurrence) return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
 
-    if (request.expectedVersion !== undefined && occurrence.version !== request.expectedVersion) {
+    if (occurrence.version !== request.expectedVersion) {
       return error(
         'CONFLICT',
         `TaskOccurrence ${id} version conflict: expected ${request.expectedVersion}, current ${occurrence.version}`,
