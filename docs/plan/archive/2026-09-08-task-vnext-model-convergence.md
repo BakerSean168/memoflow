@@ -1,17 +1,18 @@
 ---
 tags:
   - plan
-  - active
+  - archive
   - task
   - refactor
 description: Task Plan / Occurrence 聚合边界、Schedule ADT、Result/Checklist、Reminder parity、Goal/Workspace 一次性收敛实施计划
 created: 2026-09-08T19:35:00+08:00
-updated: 2026-09-13T17:00:00+08:00
+updated: 2026-09-14T10:54:47+08:00
+status: archived
 ---
 
-# Task vNext Model Convergence
+# Task vNext Model Convergence — Archived Plan
 
-> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](../active/2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
 >
 > **ADR-111 zero-legacy-data override:** 本文中所有仅用于保存当前旧数据/旧备份/旧客户端的 migration、backfill、compatibility reader/adapter、dual-read/write、redirect window、before/after old-data parity 要求均已被 ADR-111 supersede。领域目标与行为验收继续有效；实施时直接切 current consumers、删除旧 surface、reset/reseed persistence。
 
@@ -22,7 +23,7 @@ updated: 2026-09-13T17:00:00+08:00
 - old `TaskTemplate`/`TaskInstance` persistence and compatibility DTOs are deleted rather than translated;
 - no legacy round-trip fixture is required; fresh TaskPlan/TaskOccurrence round-trip remains required.
 
-**状态：ACTIVE / TASK-7309 complete; TASK-7310 exact-head CI pending**
+**状态：ARCHIVED / TASK-7310 FINAL ARCHIVE-HEAD CI PENDING**
 **执行分支：** `feat/system-wide-vnext-convergence`（next ticket worktree: `delegated/task-7309-legacy`）
 **上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）
 **基线：** Task Vitest 71 files / 717 tests PASS
@@ -205,7 +206,9 @@ focused Planner/Scheduler/Goal settlement tests
 full CI exact-head
 ```
 
-**TASK-7310 local five-layer review：PASS / P0=0 / P1=0.** Layers: contract correctness; aggregate boundary; behavioral completeness; persistence/transport parity; plan/docs truth. Local evidence: Task unit **76 files / 602 tests PASS**; Task integration **6/31 PASS**; App-Vue Task **26/83 PASS**; Contracts **87/585 PASS**; Database **11/37 PASS**; PowerSync schema **1/7 PASS**; Schedule Orchestration **9/34 PASS**; Planner focused **5/12 PASS**; Goal outbox **1/4 PASS**; Goal settlement integration **1/3 PASS**; Prisma validate **PASS**; Task/contracts/database/app-vue/powersync-schema typecheck **PASS** and schedule-orchestration typecheck **PASS**; lint **0 errors** (historical warnings remain); `git diff --check` **PASS**. Full CI and implementation-head acceptance remain pending.
+**TASK-7310 local five-layer review：PASS / P0=0 / P1=0.** Layers: contract correctness; aggregate boundary; behavioral completeness; persistence/transport parity; plan/docs truth. Local evidence: Task unit **76 files / 602 tests PASS**; Task integration **6/31 PASS**; App-Vue Task **26/83 PASS**; Contracts **87/585 PASS**; Database **11/37 PASS**; PowerSync schema **1/7 PASS**; Schedule Orchestration **9/34 PASS**; Planner focused **5/12 PASS**; Goal outbox **1/4 PASS**; Goal settlement integration **1/3 PASS**; Prisma validate **PASS**; Task/contracts/database/app-vue/powersync-schema typecheck **PASS** and schedule-orchestration typecheck **PASS**; lint **0 errors** (historical warnings remain); `git diff --check` **PASS**.
+
+**First exact-head delivery gate: PASS.** PR #340 exact head `2465c1b0506aac7a7fe832389eca7b7cc178538b` passed CI run `34799711173` with overall SUCCESS. The successful matrix includes Scope Detector, Build, Typecheck, Static Analysis, Unit Tests, Governance, Verification Children, all Web Flow Shards 1/4 through 4/4, Governance/Validate/Web Flow/Boundary/Integration/Coverage/Performance Oracles, and Delivery Observation. This evidence authorizes archival. TASK-7310 is not DONE until this archive-head commit passes the required CI gate.
 
 ## 5. Dependency order
 
@@ -240,4 +243,4 @@ full CI exact-head
 - [x] TASK-7309
 - [ ] TASK-7310
 
-**Next:** TASK-7310 exact-head CI/review/archive: push the first exact implementation head to existing PR #340 and require full exact-head CI. Archive only after that gate passes. Until then, preserve the accepted TaskPlanWorkspace composition and do not claim full CI green or implementation-head acceptance.
+**Next:** TASK-7310 archive-head CI is the only remaining gate. The first exact implementation head is green and the plan is archived; do not claim TASK-7310 DONE or invent a final archive-head SHA/run until this archive-head commit passes the required CI. Preserve the accepted TaskPlanWorkspace composition.

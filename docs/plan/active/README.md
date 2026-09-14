@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-13T13:13:39+08:00
+updated: 2026-09-14T10:54:47+08:00
 ---
 
 # Active Plans
@@ -13,15 +13,20 @@ updated: 2026-09-13T13:13:39+08:00
 
 ## 当前计划
 
-当前有 5 个仍在推进中的 active plan。
+当前有 4 个仍在推进中的 active plan。
 
 | 计划                                                                                                      | 当前状态                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Task vNext Model Convergence](./2026-09-08-task-vnext-model-convergence.md)                              | **ACTIVE / TASK-7309 complete; TASK-7310 first exact-head CI pending** — destructive legacy deletion and canonical Plan/Occurrence cutover complete; local five-layer review **PASS, P0=0, P1=0**. Compact ledger: Task 76/602, integration 6/31, App-Vue Task 26/83, Contracts 87/585, Database 11/37, PowerSync 1/7, Schedule Orchestration 9/34, Planner 5/12, Goal outbox 1/4, Goal settlement 1/3; Prisma validate/typechecks/lint/diff-check PASS. Next: push first exact implementation head to PR #340 and require full exact-head CI before archive. |
 | [Setting vNext Model Convergence](./2026-09-08-setting-vnext-model-convergence.md)                        | **ACTIVE / implementation complete, closure pending** — `SETTING-9202～9209` 已完成 canonical preferences、Notification/device ownership、Settings Hub、V3 preference portability 与 legacy persistence/protocol/client 删除；仅剩 `SETTING-9210` 五层 review / exact-head CI / archive。                                                                                                                                                                                                                                                     |
 | [AI vNext Model Convergence](./2026-09-09-ai-vnext-model-convergence.md)                                  | **ACTIVE / design frozen** — 保留 Mastra 单一 runtime，收敛 Conversation shell、Provider Secret/Model Capability、AI Context、Knowledge stable identity、Workflow Draft/Apply、ExecutionRecord；`AI-9601` 文档完成，其余 production implementation 未开始。                                                                                                                                                                                                                                                                                   |
 | [Time + Label vNext Model Convergence](./2026-09-09-time-label-vnext-model-convergence.md)                | **ACTIVE / local closure complete** — `TIME-1201～1206` 与 `LABEL-1301～1305` 已全部完成，anti-resurrection governance 已接入；`FOUNDATION-1401` 本地五层终审完成，仅剩提交后的 exact-head required CI delivery gate。                                                                                                                                                                                                                                                                                                                        |
 | [System-wide vNext Model Convergence](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) | **ACTIVE / canonical execution order** — ADR-067～111 统一 ownership review 已通过；ADR-111 明确零旧数据 destructive cutover，协调所有 module subplan 的依赖、共享 schema 单写者、直接删除与最终 exact-head closure。                                                                                                                                                                                                                                                                                                                         |
+
+## 本轮已归档（2026-09-14）
+
+| 计划                                                                                  | 结果                                                                                                                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Task vNext Model Convergence](../archive/2026-09-08-task-vnext-model-convergence.md) | `TASK-7301～7309` 完成；`TASK-7310` 五层 review P0/P1 = 0，PR #340 首个 exact head `2465c1b0506`、run `34799711173` 全绿，矩阵覆盖 Scope Detector、Build、Typecheck、Static Analysis、Unit Tests、Governance、Verification Children、Web Flow Shards 1/4～4/4、各 Oracles 与 Delivery Observation。计划已归档；最终 archive-head CI pending。 |
 
 ## 本轮已归档（2026-09-13）
 

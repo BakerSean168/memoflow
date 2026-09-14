@@ -3,9 +3,9 @@ tags:
   - product
   - module
   - task
-description: Task 模块当前事实与 Task vNext Plan/Occurrence/Workspace 目标模型
+description: Task 模块当前事实与 canonical TaskPlan/TaskOccurrence/TaskWorkspace 模型
 created: 2026-06-02T00:00:00
-updated: 2026-09-12T14:00:00+08:00
+updated: 2026-09-14T10:54:47+08:00
 ---
 
 # Task 模块说明
@@ -14,7 +14,7 @@ updated: 2026-09-12T14:00:00+08:00
 
 Task 负责 **Action + Execution**。
 
-当前已实现版本仍以 `TaskTemplate` / `TaskInstance` 作为代码名，但产品语义已经是 Task Plan / Task Occurrence。2026-09-08 起，ADR-071～075 已冻结下一轮 canonical model：正式把 domain/public language 收敛为 `TaskPlan` / `TaskOccurrence`，并删除历史 OneTime 双轨字段。
+当前实现的 canonical truth 是 `TaskPlan` / `TaskOccurrence` / `TaskWorkspace`。ADR-071～075 已实现，domain/public language、persistence 与 workspace composition 均以该模型为准。
 
 ## 2. 当前已实现能力
 
@@ -32,12 +32,12 @@ Task 负责 **Action + Execution**。
 
 已退休且不得恢复：TaskFolder、parent/subtask hierarchy、TaskDependency、DAG、CriticalPath、dynamic priority、Task string tags、自定义 Task color、Expired 持久状态。
 
-## 3. 下一版 accepted target design
+## 3. Current canonical design
 
 详见：
 
 - [Task vNext Plan / Occurrence / Workspace](../task-vnext-plan-occurrence-workspace.md)
-- [Task vNext active plan](../../plan/active/2026-09-08-task-vnext-model-convergence.md)
+- [Task vNext archived plan](../../plan/archive/2026-09-08-task-vnext-model-convergence.md)
 - ADR-071～075
 
 核心目标：
@@ -67,22 +67,9 @@ TaskWorkspace  = Plan + Occurrences + Context
 - actual execution timing；
 - dueAt/isOverdue derived。
 
-## 4. 当前待删除残差
+## 4. Retired legacy surfaces
 
-当前代码仍有一批不是可靠 persistence truth 的 `TaskTemplate` OneTime 字段：
-
-```text
-startDate
-dueDate
-completedAt
-estimatedMinutes
-actualMinutes
-note
-```
-
-Prisma/PowerSync load path 会把它们置 null；本轮 vNext 会删除，而不是继续修补第二条时间/完成轨道。
-
-当前 reminder domain 支持多个 trigger，但 persistence 只保存第一条 relative trigger；本轮改为完整 policy round-trip。
+旧 `TaskTemplate` OneTime 字段（`startDate`、`dueDate`、`completedAt`、`estimatedMinutes`、`actualMinutes`、`note`）与 first-trigger-only reminder persistence 已由 TASK-7309 及更早的 parity work 移除，均已退出 Prisma/PowerSync 与 domain/public truth。历史计划、迁移记录与 anti-resurrection tests 中仍可能保留旧名称作为历史证据；canonical reminder policy 现在保持完整 multi-trigger round-trip。
 
 ## 5. Goal / Note Context
 
