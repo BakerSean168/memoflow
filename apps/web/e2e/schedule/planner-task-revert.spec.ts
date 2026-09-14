@@ -28,8 +28,9 @@ test.describe('Planner owner-command acceptance', () => {
     });
 
     const creation = await expectApiData<{
-      template: { id: string };
-      todayInstanceCreated: boolean;
+      plan: { id: string };
+      occurrenceCount: number;
+      todayOccurrenceCreated: boolean;
     }>(
       await page.request.post(`${API_CONFIG.API_PREFIX}/task-plans`, {
         data: {
@@ -47,7 +48,7 @@ test.describe('Planner owner-command acceptance', () => {
         },
       }),
     );
-    expect(creation.todayInstanceCreated).toBe(true);
+    expect(creation.todayOccurrenceCreated).toBe(true);
 
     await page.goto('/schedule/calendar', { waitUntil: 'domcontentloaded' });
     await expect(page.getByTestId('schedule-calendar-view')).toBeVisible({
@@ -100,7 +101,10 @@ test.describe('Planner owner-command acceptance', () => {
     await requestPromise;
 
     await expect.poll(() => reschedulePayload, { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT }).toMatchObject({
-      newTime: { timeType: 'TimePoint', timePoint: 16 * 60 },
+      scheduleSnapshot: {
+        date: taskDate,
+        timing: { kind: 'At', time: '16:00' },
+      },
     });
 
     await expect

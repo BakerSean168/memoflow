@@ -146,7 +146,7 @@ test.describe('Local Docker core product Phase A', () => {
     );
     await page.getByTestId('task-dialog-save-button').click();
     const creation = await expectApiData<{
-      template: {
+      plan: {
         id: string;
         goalBinding: {
           goalId: string;
@@ -154,10 +154,11 @@ test.describe('Local Docker core product Phase A', () => {
           contribution: { value: number; trigger: string } | null;
         } | null;
       };
-      todayInstanceCreated: boolean;
+      occurrenceCount: number;
+      todayOccurrenceCreated: boolean;
     }>(await createResponsePromise);
-    expect(creation.todayInstanceCreated).toBe(true);
-    expect(creation.template.goalBinding).toEqual({
+    expect(creation.todayOccurrenceCreated).toBe(true);
+    expect(creation.plan.goalBinding).toEqual({
       goalId: primary.id,
       keyResultId: primary.keyResultId,
       contribution: { value: 1, trigger: 'EachCompletion' },
@@ -171,7 +172,7 @@ test.describe('Local Docker core product Phase A', () => {
     await expect(taskCard).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     await taskCard.getByText(taskName, { exact: true }).click();
 
-    await page.waitForURL(new RegExp(`/tasks/${creation.template.id}$`), {
+    await page.waitForURL(new RegExp(`/tasks/${creation.plan.id}$`), {
       timeout: TIMEOUT_CONFIG.NAVIGATION,
     });
     await expect(page.getByTestId('task-plan-overview')).toContainText('已绑定 Goal');
@@ -184,16 +185,16 @@ test.describe('Local Docker core product Phase A', () => {
       .filter({ has: page.getByText(taskName, { exact: true }) });
     await expect(taskItem).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
     await expect(taskItem).toHaveAttribute('data-task-status', 'Pending');
-    const instanceId = await taskItem.getAttribute('data-task-occurrence-id');
-    expect(instanceId).toBeTruthy();
-    const completeButton = page.getByTestId(`complete-today-task-${instanceId}`);
+    const occurrenceId = await taskItem.getAttribute('data-task-occurrence-id');
+    expect(occurrenceId).toBeTruthy();
+    const completeButton = page.getByTestId(`complete-today-task-${occurrenceId}`);
 
     await completeButton.click();
     await expect(taskItem).toHaveAttribute('data-task-status', 'Completed');
     await expectGoalContribution(page, headers, primary, { currentValue: 1, recordCount: 1 });
 
     const repeatedCompletion = await page.request.post(
-      `${API_CONFIG.FULL_URL}/task-occurrences/${instanceId}/complete`,
+      `${API_CONFIG.FULL_URL}/task-occurrences/${occurrenceId}/complete`,
       { headers },
     );
     expect(repeatedCompletion.ok(), await repeatedCompletion.text()).toBe(true);
@@ -323,7 +324,7 @@ async function createTaskPlanWithContext(
   );
   await page.getByTestId('task-dialog-save-button').click();
   const creation = await expectApiData<{
-    template: {
+    plan: {
       id: string;
       goalBinding: {
         goalId: string;
@@ -331,13 +332,14 @@ async function createTaskPlanWithContext(
         contribution: { value: number; trigger: string } | null;
       } | null;
     };
-    todayInstanceCreated: boolean;
+    occurrenceCount: number;
+    todayOccurrenceCreated: boolean;
   }>(await responsePromise);
-  expect(creation.todayInstanceCreated).toBe(true);
+  expect(creation.todayOccurrenceCreated).toBe(true);
   await expect(page.getByTestId('task-plan-dialog')).toBeHidden({
     timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
   });
-  return creation.template;
+  return creation.plan;
 }
 
 async function showTodayOverview(page: Page): Promise<void> {

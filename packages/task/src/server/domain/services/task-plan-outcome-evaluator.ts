@@ -3,12 +3,13 @@ import {
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
   TaskRecurrenceEndKind,
+  RecurrenceFrequency,
   type TaskPlanOutcomeValue,
 } from '@memoflow/contracts/task';
 import type { Ymd } from '@memoflow/contracts/primitives';
 import type { TaskPlan } from '../aggregates/task-plan';
-import { createTimeFacade, type TimeContext } from '@memoflow/time';
-import { nextRecurrenceDate, recurrenceDatesBetween } from '../aggregates/task-recurrence-date.adapter';
+import { addYmdDays, createTimeFacade, type TimeContext } from '@memoflow/time';
+import { recurrenceDatesBetween } from '../aggregates/task-recurrence-date.adapter';
 
 export interface TaskPlanOccurrenceFact {
   scheduleDate: Ymd;
@@ -26,7 +27,18 @@ export class TaskPlanOutcomeEvaluator {
     if (plan.outcome === TaskPlanOutcome.Abandoned) return TaskPlanOutcome.Abandoned;
     if (!this.isFinite(plan)) return TaskPlanOutcome.Open;
 
-    const relevant = occurrences.filter((occurrence) => occurrence.deletedAt === null);
+    const actualDates = new Set<string>();
+    let hasDeletedOccurrence = false;
+    for (const occurrence of occurrences) {
+      if (occurrence.deletedAt !== null) {
+        hasDeletedOccurrence = true;
+      } else if (plan.schedule.isRecurring) {
+        actualDates.add(occurrence.scheduleDate);
+      }
+    }
+    const relevant = hasDeletedOccurrence
+      ? occurrences.filter((occurrence) => occurrence.deletedAt === null)
+      : occurrences;
     if (relevant.length === 0) return TaskPlanOutcome.Open;
 
     if (
@@ -36,19 +48,18 @@ export class TaskPlanOutcomeEvaluator {
       return TaskPlanOutcome.Failed;
     }
 
-    if (!this.isScopeFullyKnown(plan, relevant, timeContext)) return TaskPlanOutcome.Open;
-
-    // Skipped is a waiver: it is excluded from required completion scope.
-    const required = relevant.filter(
-      (occurrence) => occurrence.status !== TaskOccurrenceStatus.Skipped,
-    );
-    if (required.some((occurrence) => occurrence.status === TaskOccurrenceStatus.Missed)) {
+    if (!this.isScopeFullyKnown(plan, relevant, actualDates, timeContext)) {
       return TaskPlanOutcome.Open;
     }
-    if (required.every((occurrence) => occurrence.status === TaskOccurrenceStatus.Completed)) {
-      return TaskPlanOutcome.Succeeded;
+
+    // Skipped is a waiver: it is excluded from required completion scope.
+    let allRequiredCompleted = true;
+    for (const occurrence of relevant) {
+      if (occurrence.status === TaskOccurrenceStatus.Skipped) continue;
+      if (occurrence.status === TaskOccurrenceStatus.Missed) return TaskPlanOutcome.Open;
+      if (occurrence.status !== TaskOccurrenceStatus.Completed) allRequiredCompleted = false;
     }
-    return TaskPlanOutcome.Open;
+    return allRequiredCompleted ? TaskPlanOutcome.Succeeded : TaskPlanOutcome.Open;
   }
 
   private isFinite(plan: TaskPlan): boolean {
@@ -60,13 +71,13 @@ export class TaskPlanOutcomeEvaluator {
   private isScopeFullyKnown(
     plan: TaskPlan,
     occurrences: readonly TaskPlanOccurrenceFact[],
+    actualDates: ReadonlySet<string>,
     timeContext: TimeContext,
   ): boolean {
     if (!plan.schedule.isRecurring) return occurrences.length >= 1;
     const recurrence = plan.schedule.recurrence;
     if (!recurrence) return false;
 
-    const actualDates = new Set(occurrences.map((occurrence) => String(occurrence.scheduleDate)));
     const time = createTimeFacade({ context: timeContext });
     const startYmd = time.codec.parseYmd(plan.schedule.calendarDate, { onInvalid: 'throw' });
     if (!startYmd) return false;
@@ -75,18 +86,42 @@ export class TaskPlanOutcomeEvaluator {
 
     let expectedDates: Set<string>;
     if (recurrence.end.kind === TaskRecurrenceEndKind.Count) {
-      expectedDates = new Set<string>();
-      let cursor = startAt - 1;
-      for (let index = 0; index < recurrence.end.count; index += 1) {
-        const next = nextRecurrenceDate(
+      if (actualDates.size < recurrence.end.count) return false;
+      if (recurrence.frequency === RecurrenceFrequency.Daily) {
+        if (recurrence.interval === 1) {
+          const lastExpectedYmd = addYmdDays(startYmd, recurrence.end.count - 1);
+          let inRangeCount = 0;
+          for (const date of actualDates) {
+            if (date >= startYmd && date <= lastExpectedYmd) inRangeCount += 1;
+          }
+          return inRangeCount === recurrence.end.count;
+        }
+
+        let expectedYmd = startYmd;
+        for (let index = 0; index < recurrence.end.count; index += 1) {
+          if (!actualDates.has(expectedYmd)) return false;
+          expectedYmd = addYmdDays(expectedYmd, recurrence.interval);
+        }
+        return true;
+      } else {
+        const maxActualYmd = [...actualDates].reduce((max, date) => (date > max ? date : max));
+        const maxActualDate = time.codec.parseYmd(maxActualYmd);
+        if (!maxActualDate) return false;
+        const generatedDates = recurrenceDatesBetween(
           recurrence,
           plan.schedule.calendarDate,
-          cursor,
+          startAt,
+          Number(time.calendar.endOfDay(time.codec.startOfYmd(maxActualDate))),
           timeContext,
-        );
-        if (next == null) return false;
-        expectedDates.add(String(time.calendar.toYmd(next)));
-        cursor = next;
+        ).map((date) => String(time.calendar.toYmd(date)));
+        const generatedDateSet = new Set(generatedDates);
+        if (
+          generatedDates.length !== recurrence.end.count ||
+          generatedDateSet.size !== recurrence.end.count
+        ) {
+          return false;
+        }
+        expectedDates = generatedDateSet;
       }
     } else if (recurrence.end.kind === TaskRecurrenceEndKind.Until) {
       const endYmd = time.codec.parseYmd(recurrence.end.date, { onInvalid: 'throw' });

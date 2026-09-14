@@ -1,20 +1,14 @@
 import { expect, test, type APIResponse, type Locator, type Page } from '@playwright/test';
+import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
 import { API_CONFIG, TIMEOUT_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 
 const password = 'Test123456!';
 
 type TaskPlanCreation = {
-  template: { id: string };
-  instanceCount: number;
-  todayInstanceCreated: boolean;
-};
-
-type TaskOccurrenceProjection = {
-  id: string;
-  occurrenceDate: number;
-  status: 'Pending' | 'InProgress' | 'Completed' | 'Skipped' | 'Expired';
-  importance: 'Vital' | 'Important' | 'Moderate' | 'Minor' | 'Trivial';
+  plan: { id: string };
+  occurrenceCount: number;
+  todayOccurrenceCreated: boolean;
 };
 
 test.describe('Local Docker core product Phase B', () => {
@@ -113,28 +107,29 @@ test.describe('Local Docker core product Phase B', () => {
         },
       }),
     );
-    const initialInstances = await listOccurrences(
+    const initialOccurrences = await listOccurrences(
       page,
       headers,
-      recurringCreation.template.id,
+      recurringCreation.plan.id,
     );
-    const editBoundary = Date.now();
-    const todayPending = initialInstances.find(
-      (instance) => instance.status === 'Pending' && instance.occurrenceDate <= editBoundary,
+    const todayPending = initialOccurrences.find(
+      (occurrence) =>
+        occurrence.status === 'Pending' && occurrence.scheduleSnapshot.date === recurringStartDate,
     );
-    const futurePending = initialInstances.find(
-      (instance) => instance.status === 'Pending' && instance.occurrenceDate > editBoundary,
+    const futurePending = initialOccurrences.find(
+      (occurrence) =>
+        occurrence.status === 'Pending' && occurrence.scheduleSnapshot.date > recurringStartDate,
     );
-    const futureToStart = initialInstances.find(
-      (instance) =>
-        instance.status === 'Pending' &&
-        instance.occurrenceDate > editBoundary &&
-        instance.id !== futurePending?.id,
+    const futureToStart = initialOccurrences.find(
+      (occurrence) =>
+        occurrence.status === 'Pending' &&
+        occurrence.scheduleSnapshot.date > recurringStartDate &&
+        occurrence.id !== futurePending?.id,
     );
     expect(todayPending).toBeDefined();
     expect(futurePending).toBeDefined();
     expect(futureToStart).toBeDefined();
-    await expectApiData<TaskOccurrenceProjection>(
+    await expectApiData<TaskOccurrenceClientDTO>(
       await page.request.post(`${API_CONFIG.FULL_URL}/task-occurrences/${futureToStart!.id}/start`, {
         headers,
       }),
@@ -160,12 +155,12 @@ test.describe('Local Docker core product Phase B', () => {
     await expect
       .poll(
         async () => {
-          const instances = await listOccurrences(page, headers, recurringCreation.template.id);
-          const byId = new Map(instances.map((instance) => [instance.id, instance]));
+          const occurrences = await listOccurrences(page, headers, recurringCreation.plan.id);
+          const byId = new Map(occurrences.map((occurrence) => [occurrence.id, occurrence]));
           return {
-            today: byId.get(todayPending!.id)?.importance,
-            futurePending: byId.get(futurePending!.id)?.importance,
-            futureStarted: byId.get(futureToStart!.id)?.importance,
+            today: byId.get(todayPending!.id)?.importanceSnapshot,
+            futurePending: byId.get(futurePending!.id)?.importanceSnapshot,
+            futureStarted: byId.get(futureToStart!.id)?.importanceSnapshot,
             futureStartedStatus: byId.get(futureToStart!.id)?.status,
           };
         },
@@ -249,10 +244,10 @@ function waitForTemplateWrite(page: Page, method: 'POST' | 'PATCH') {
 async function listOccurrences(
   page: Page,
   headers: Record<string, string>,
-  templateId: string,
-): Promise<TaskOccurrenceProjection[]> {
-  return expectApiData<TaskOccurrenceProjection[]>(
-    await page.request.get(`${API_CONFIG.FULL_URL}/task-occurrences?templateId=${templateId}`, {
+  planId: string,
+): Promise<TaskOccurrenceClientDTO[]> {
+  return expectApiData<TaskOccurrenceClientDTO[]>(
+    await page.request.get(`${API_CONFIG.FULL_URL}/task-occurrences?planId=${planId}`, {
       headers,
     }),
   );

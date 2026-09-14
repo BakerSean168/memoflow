@@ -5,6 +5,7 @@ import {
   TaskPlanOutcome,
   TaskPlanStatus,
   TaskPlanScheduleKind,
+  TaskOccurrenceStatus,
   TaskRecurrenceEndKind,
   RecurrenceFrequency,
   TaskTimingKind,
@@ -53,6 +54,32 @@ function fifteenDayPlan(policy = TaskPlanCompletionPolicy.AllowCorrection) {
     }),
   );
   return { plan, occurrences };
+}
+
+function countPlan(count = 3, interval = 1) {
+  return TaskPlan.load(
+    aTaskPlanState({
+      schedule: TaskPlanSchedule.create({
+        kind: TaskPlanScheduleKind.Recurring,
+        startDate: asYmd('2026-03-01'),
+        timing: { kind: TaskTimingKind.AllDay },
+        recurrence: {
+          frequency: RecurrenceFrequency.Daily,
+          interval,
+          byWeekday: [],
+          end: { kind: TaskRecurrenceEndKind.Count, count },
+        },
+      }),
+    }),
+  );
+}
+
+function completedFact(date: string, deletedAt: number | null = null) {
+  return {
+    scheduleDate: asYmd(date),
+    status: TaskOccurrenceStatus.Completed,
+    deletedAt,
+  };
 }
 
 describe('TaskPlanOutcomeEvaluator (TASK-2202)', () => {
@@ -178,6 +205,82 @@ describe('TaskPlanOutcomeEvaluator (TASK-2202)', () => {
         TASK_TEST_TIME_CONTEXT,
       ),
     ).toBe(TaskPlanOutcome.Succeeded);
+  });
+
+  it('keeps Count Open when a canonical date is missing behind a later extra fact', () => {
+    const plan = countPlan();
+
+    expect(
+      evaluator.evaluate(
+        plan,
+        [completedFact('2026-03-01'), completedFact('2026-03-02'), completedFact('2026-03-04')],
+        TASK_TEST_TIME_CONTEXT,
+      ),
+    ).toBe(TaskPlanOutcome.Open);
+    expect(
+      evaluator.evaluate(
+        plan,
+        [
+          completedFact('2026-03-01'),
+          completedFact('2026-03-02'),
+          completedFact('2026-03-05'),
+        ],
+        TASK_TEST_TIME_CONTEXT,
+      ),
+    ).toBe(TaskPlanOutcome.Open);
+  });
+
+  it('allows a complete Count scope to succeed with a later extra fact', () => {
+    const plan = countPlan();
+
+    expect(
+      evaluator.evaluate(
+        plan,
+        [
+          completedFact('2026-03-01'),
+          completedFact('2026-03-02'),
+          completedFact('2026-03-03'),
+          completedFact('2026-03-04'),
+        ],
+        TASK_TEST_TIME_CONTEXT,
+      ),
+    ).toBe(TaskPlanOutcome.Succeeded);
+  });
+
+  it('ignores a deleted later Count fact when determining the recurrence bound', () => {
+    const plan = countPlan();
+
+    expect(
+      evaluator.evaluate(
+        plan,
+        [
+          completedFact('2026-03-01'),
+          completedFact('2026-03-02'),
+          completedFact('2026-03-03'),
+          completedFact('2026-03-04', 1),
+        ],
+        TASK_TEST_TIME_CONTEXT,
+      ),
+    ).toBe(TaskPlanOutcome.Succeeded);
+  });
+
+  it('uses Daily Count interval days as the canonical date scope', () => {
+    const plan = countPlan(3, 2);
+
+    expect(
+      evaluator.evaluate(
+        plan,
+        [completedFact('2026-03-01'), completedFact('2026-03-03'), completedFact('2026-03-05')],
+        TASK_TEST_TIME_CONTEXT,
+      ),
+    ).toBe(TaskPlanOutcome.Succeeded);
+    expect(
+      evaluator.evaluate(
+        plan,
+        [completedFact('2026-03-01'), completedFact('2026-03-03'), completedFact('2026-03-06')],
+        TASK_TEST_TIME_CONTEXT,
+      ),
+    ).toBe(TaskPlanOutcome.Open);
   });
 
   it('requires every expected Until recurrence date instead of trusting a generation cursor', () => {

@@ -24,25 +24,25 @@ test.describe('Task Plan CRUD Operations', () => {
     });
   });
 
-  test('should create a new task template', async ({ page }) => {
-    const templateTitle = `E2E Task Template ${Date.now()}`;
+  test('should create a new task plan', async ({ page }) => {
+    const planTitle = `E2E Task Plan ${Date.now()}`;
 
-    const creation = await createTaskPlan(page, templateTitle);
+    const creation = await createTaskPlan(page, planTitle);
 
-    await expect(taskCardByTitle(page, templateTitle)).toBeVisible();
-    await expect(taskCardByTitle(page, templateTitle)).toContainText(/已启用中|Active/i);
-    expect(creation.instanceCount).toBeGreaterThanOrEqual(0);
-    expect(typeof creation.todayInstanceCreated).toBe('boolean');
+    await expect(taskCardByTitle(page, planTitle)).toBeVisible();
+    await expect(taskCardByTitle(page, planTitle)).toContainText(/已启用中|Active/i);
+    expect(creation.occurrenceCount).toBeGreaterThanOrEqual(0);
+    expect(typeof creation.todayOccurrenceCreated).toBe('boolean');
     await expect(
       page.getByText(
-        creation.todayInstanceCreated
+        creation.todayOccurrenceCreated
           ? /任务计划已创建，并生成今日待办任务|Task plan created and today's to-do generated/i
           : /任务计划已创建，今天不会生成待办任务|Task plan created with no to-do due today/i,
       ),
     ).toBeVisible();
   });
 
-  test('should display task template list', async ({ page }) => {
+  test('should display task plan list', async ({ page }) => {
     await expect(page.getByTestId('task-management-view')).toBeVisible();
     await expect(page.getByTestId('task-surface-today')).toBeVisible();
     await expect(page.getByTestId('task-surface-upcoming')).toBeVisible();
@@ -50,7 +50,7 @@ test.describe('Task Plan CRUD Operations', () => {
     await expect(page.getByTestId('create-task-plan-button')).toBeVisible();
   });
 
-  test('should edit an existing task template', async ({ page }) => {
+  test('should edit an existing task plan', async ({ page }) => {
     const originalTitle = `E2E Edit Task ${Date.now()}`;
     const updatedTitle = `${originalTitle} Updated`;
 
@@ -74,7 +74,7 @@ test.describe('Task Plan CRUD Operations', () => {
     const patchResponse = await patchResponsePromise;
     expect(
       patchResponse.ok(),
-      `Expected task template update to succeed, got ${patchResponse.status()}`,
+      `Expected task plan update to succeed, got ${patchResponse.status()}`,
     ).toBeTruthy();
 
     await expect(page.getByTestId('task-plan-dialog')).toBeHidden({
@@ -84,19 +84,19 @@ test.describe('Task Plan CRUD Operations', () => {
     await expect(taskCardByTitle(page, originalTitle)).toHaveCount(0);
   });
 
-  test('should delete a task template', async ({ page }) => {
-    const templateTitle = `E2E Delete Task ${Date.now()}`;
+  test('should delete a task plan', async ({ page }) => {
+    const planTitle = `E2E Delete Task ${Date.now()}`;
 
-    await createTaskPlan(page, templateTitle);
+    await createTaskPlan(page, planTitle);
 
-    const card = taskCardByTitle(page, templateTitle);
+    const card = taskCardByTitle(page, planTitle);
     await card.getByRole('button', { name: /^(删除|Delete)$/ }).click();
 
     const confirmDialog = page.getByRole('alertdialog');
     await expect(confirmDialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     await page.getByTestId('global-confirm-confirm').click();
 
-    await expect(taskCardByTitle(page, templateTitle)).toHaveCount(0);
+    await expect(taskCardByTitle(page, planTitle)).toHaveCount(0);
   });
 
   test('should require a title before allowing save', async ({ page }) => {
@@ -189,7 +189,7 @@ async function createTaskPlan(page: Page, title: string) {
       !response.url().includes('/activate') &&
       !response.url().includes('/pause') &&
       !response.url().includes('/archive') &&
-      !response.url().includes('/generate-instances') &&
+      !response.url().includes('/generate-occurrences') &&
       !response.url().includes('/bind-goal') &&
       !response.url().includes('/unbind-goal'),
     { timeout: TIMEOUT_CONFIG.ELEMENT_WAIT },
@@ -199,13 +199,14 @@ async function createTaskPlan(page: Page, title: string) {
   if (!createResponse.ok()) {
     const body = await createResponse.text();
     throw new Error(
-      `Task template create failed: ${createResponse.status()} ${body.slice(0, 500)}`,
+      `Task plan create failed: ${createResponse.status()} ${body.slice(0, 500)}`,
     );
   }
   const responseBody = (await createResponse.json()) as {
-    data?: { instanceCount?: number; todayInstanceCreated?: boolean };
-    instanceCount?: number;
-    todayInstanceCreated?: boolean;
+    data?: { plan: { id: string }; occurrenceCount: number; todayOccurrenceCreated: boolean };
+    plan: { id: string };
+    occurrenceCount: number;
+    todayOccurrenceCreated: boolean;
   };
   const creation = responseBody.data ?? responseBody;
 
@@ -215,8 +216,9 @@ async function createTaskPlan(page: Page, title: string) {
   await page.getByTestId('task-surface-plans').click();
   await expect(taskCardByTitle(page, title)).toBeVisible();
   return {
-    instanceCount: creation.instanceCount ?? 0,
-    todayInstanceCreated: creation.todayInstanceCreated ?? false,
+    plan: creation.plan,
+    occurrenceCount: creation.occurrenceCount,
+    todayOccurrenceCreated: creation.todayOccurrenceCreated,
   };
 }
 

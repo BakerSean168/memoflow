@@ -65,8 +65,9 @@ test.describe('Task completion closed loop', () => {
     const keyResultId = keyResultReceipt.affectedEntityIds.keyResultIds[0];
     expect(keyResultId).toBeTruthy();
     const creation = await expectApiData<{
-      template: { id: string };
-      todayInstanceCreated: boolean;
+      plan: { id: string };
+      occurrenceCount: number;
+      todayOccurrenceCreated: boolean;
     }>(
       await page.request.post(`${API_CONFIG.API_PREFIX}/task-plans`, {
         headers,
@@ -89,7 +90,7 @@ test.describe('Task completion closed loop', () => {
         },
       }),
     );
-    expect(creation.todayInstanceCreated).toBe(true);
+    expect(creation.todayOccurrenceCreated).toBe(true);
 
     await page.reload({ waitUntil: 'domcontentloaded' });
     const todoWidget = page.getByTestId('daily-todo-widget');
