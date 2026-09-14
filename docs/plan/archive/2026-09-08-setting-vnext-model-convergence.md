@@ -7,7 +7,7 @@ tags:
   - refactor
 description: Setting vNext — Settings Hub ownership、UserPreference、Product Time Context、Device/Feature/Consent、Persistence/PowerSync/Portability 单轨收敛实施计划
 created: 2026-09-08T23:26:00+08:00
-updated: 2026-09-14T13:06:51+08:00
+updated: 2026-09-14T13:24:05+08:00
 ---
 
 # Setting vNext Model Convergence
@@ -28,7 +28,7 @@ The preference ownership model remains valid, but all legacy-data precedence/bac
 
 Migration-oriented subsections below are retained only as historical reasoning and are superseded for execution by this block and the system-wide plan.
 
-**状态：ARCHIVED / SETTING-9210 FINAL ARCHIVE-HEAD CI PENDING — SETTING-9201~9209 DONE; first exact-head CI PASS**
+**状态：DONE / ARCHIVED — SETTING-9201~9210 all complete; both exact-head delivery gates PASS**
 **设计分支：** `docs/setting-vnext-model`
 **当前源码 truth：** `packages/setting` + `packages/account` + `packages/notification` + Desktop/PowerSync 现状
 **目标 ADR：** ADR-092～095
@@ -777,11 +777,11 @@ legacy UserSetting cloud events
 
 ### SETTING-9210 — Five-layer review / exact-head CI / docs truth / archive
 
-**状态：ARCHIVED / FINAL ARCHIVE-HEAD CI PENDING**
+**状态：DONE — 2026-09-14**
 
 **Local review evidence (2026-09-14):** five-layer review completed with `P0=0 / P1=0` after repairing only the unused `scheduledIdleHandle` dead code and stale target/current documentation wording. Contract and module tests passed: Setting `16 files / 91 tests`, Data Portability `36 / 148`, PowerSync schema `1 / 7`; Setting typecheck plus dependencies, Data Portability typecheck plus dependencies, Vue/React app typechecks plus dependencies, and contracts typecheck passed. Focused Vue Setting `18 / 69`, Notification `9 / 40`, Reminder `3 / 41`, Time/host-timezone `5 / 25`, and Account retirement lock `1 / 2` passed. Prisma validate/generate normalization passed with a clean tree; focused lint had `0 errors`.
 
-First exact-head delivery gate: **PASS**. PR #340 exact head `f94de6de6645232380c469fbc72813af46e401ff` passed CI run `34804907664` end to end. This evidence authorizes archival. The final archive-head CI gate is still pending, so `SETTING-9210` is not marked DONE yet.
+Both delivery gates are **PASS**. PR #340 first exact head `f94de6de6645232380c469fbc72813af46e401ff` passed CI run `34804907664` end to end. Archived head `3a79b4b5eb67bd7103851c89e8af073498023373` then passed final CI run `34808509548`, including Scope, Governance, Static, Typecheck, Unit, Build, Verification Children, all four Web Flow shards, Boundary/Integration/Coverage/Performance/Validate/Web Flow Oracles, and Delivery Observation. `SETTING-9210` is closed.
 
 #### Goal
 
@@ -940,10 +940,10 @@ SETTING-9206  DONE — 2026-09-10
 SETTING-9207  DONE — 2026-09-10
 SETTING-9208  DONE — 2026-09-10
 SETTING-9209  DONE — 2026-09-10
-SETTING-9210  ARCHIVED — first exact-head PASS; final archive-head CI pending
+SETTING-9210  DONE — first exact-head + archive-head CI both PASS
 ```
 
-SETTING-9202/9203 已完成 canonical presentation/regional HTTP/IPC/UI 与 Product Time cutover，并完成 `Account.settings` retirement；fake/dead legacy categories 已由 `SETTING-9205` 退休；device/local profile scope 与 persistence 已由 `SETTING-9206` 收敛；Settings Hub owner composition 与 React/Mobile Notification owner parity 已由 `SETTING-9207` 收敛；Preferences V3-only portability 已由 `SETTING-9208` 收敛；legacy persistence/protocol/client hard deletion 已由 `SETTING-9209` 完成。Setting 主体实现与本地五层 review 已完成；首个 exact-head CI 已全绿。当前只剩 archive-head required CI 与最终 evidence 回填。
+SETTING-9202/9203 已完成 canonical presentation/regional HTTP/IPC/UI 与 Product Time cutover，并完成 `Account.settings` retirement；fake/dead legacy categories 已由 `SETTING-9205` 退休；device/local profile scope 与 persistence 已由 `SETTING-9206` 收敛；Settings Hub owner composition 与 React/Mobile Notification owner parity 已由 `SETTING-9207` 收敛；Preferences V3-only portability 已由 `SETTING-9208` 收敛；legacy persistence/protocol/client hard deletion 已由 `SETTING-9209` 完成。Setting 主体实现与五层 review 已完成；首个 exact-head 与 archive-head required CI 均全绿，Setting vNext 已正式归档闭环。
 
 ## 10. Definition of Done
 

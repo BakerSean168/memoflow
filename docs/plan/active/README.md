@@ -25,7 +25,7 @@ updated: 2026-09-14T13:06:51+08:00
 
 | 计划                                                                                  | 结果                                                                                                                                                                                                                                                                            |
 | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Setting vNext Model Convergence](../archive/2026-09-08-setting-vnext-model-convergence.md) | `SETTING-9201～9209` DONE；`SETTING-9210` 五层 review P0/P1 = 0。PR #340 首个 exact head `f94de6de664` / run `34804907664` 全绿；archive head final CI pending。 |
+| [Setting vNext Model Convergence](../archive/2026-09-08-setting-vnext-model-convergence.md) | `SETTING-9201～9210` 全部 DONE；五层 review P0/P1 = 0。PR #340 首个 exact head `f94de6de664` / run `34804907664` 与 archive head `3a79b4b5eb6` / run `34808509548` 两道 gate 均全绿，Setting vNext 已正式归档闭环。 |
 | [Task vNext Model Convergence](../archive/2026-09-08-task-vnext-model-convergence.md) | `TASK-7301～7310` 全部 DONE；`TASK-7310` 五层 review P0/P1 = 0。PR #340 首个 exact head `2465c1b0506` / run `34799711173` 与 archive head `7101589ac25` / run `34800927772` 两道 gate 均全绿，Task vNext 已正式归档闭环。 |
 
 ## 本轮已归档（2026-09-13）
