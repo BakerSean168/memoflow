@@ -15,10 +15,8 @@ export function usePresentationBootstrap() {
 
   let loadingPromise: Promise<void> | null = null;
   let scheduledLoad: ReturnType<typeof globalThis.setTimeout> | null = null;
-  let scheduledIdleHandle: number | null = null;
   const browserWindow = globalThis as unknown as {
     requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
-    cancelIdleCallback?: (handle: number) => void;
   };
 
   function scheduleLoadUserPreferences() {
@@ -26,12 +24,11 @@ export function usePresentationBootstrap() {
 
     const run = () => {
       scheduledLoad = null;
-      scheduledIdleHandle = null;
       void loadUserPreferences();
     };
 
     if (browserWindow.requestIdleCallback) {
-      scheduledIdleHandle = browserWindow.requestIdleCallback(run, { timeout: 3000 });
+      browserWindow.requestIdleCallback(run, { timeout: 3000 });
       return;
     }
     scheduledLoad = globalThis.setTimeout(run, 0);

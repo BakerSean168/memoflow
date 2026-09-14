@@ -9,10 +9,12 @@ tags:
   - vnext
 description: Setting vNext 产品设计：Settings Hub 作为多 capability 管理入口、User Preference/Module/Device/System scope 与真实可执行设置 UI
 created: 2026-09-08T23:26:00+08:00
-updated: 2026-09-08T23:26:00+08:00
+updated: 2026-09-14T11:48:17+08:00
 ---
 
 # Setting vNext — Settings Hub
+
+> **Implementation status (2026-09-14):** `SETTING-9203~9209` 已实现；六组 Settings Hub、canonical presentation/regional preferences、device-local notification surface 与 V3 standalone preference portability 均为当前 truth。`SETTING-9210` local five-layer review 已完成，first exact-head CI gate pending；尚未归档。
 
 > **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
 
@@ -24,7 +26,7 @@ updated: 2026-09-08T23:26:00+08:00
 
 ## 2. Product goals
 
-Setting vNext 要做到：
+当前 canonical Settings Hub 应做到：
 
 1. 用户只看到真实会生效的设置；
 2. 一个设置只有一个 owner；
@@ -37,7 +39,7 @@ Setting vNext 要做到：
 
 ## 3. 页面信息架构
 
-目标 Settings Hub：
+当前 Settings Hub：
 
 ```text
 Settings
@@ -128,7 +130,7 @@ Settings
 
 ## 5. General — Appearance
 
-目标内容保持极简：
+当前内容保持极简：
 
 ```text
 Appearance
@@ -154,7 +156,7 @@ presentation.theme
 
 ## 6. General — Language & Region
 
-目标：
+当前内容：
 
 ```text
 Language & Region
@@ -255,7 +257,7 @@ AI provider secret/default model 由 AI owner 管理，不重新放回 `UserSett
 
 这一页要把 user-level delivery 和 current-device presentation 视觉分组。
 
-目标：
+当前结构：
 
 ```text
 Notifications
@@ -333,7 +335,7 @@ Share optional usage analytics
 
 ## 11. Data
 
-目标分成两个层次。
+当前分成两个层次。
 
 ### 11.1 Preferences portability
 

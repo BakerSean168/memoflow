@@ -5,7 +5,7 @@ tags:
   - setting
 description: 设置模块 canonical vNext 相关文件索引
 created: 2026-06-02T00:00:00
-updated: 2026-09-10T15:35:00+09:00
+updated: 2026-09-14T11:48:17+08:00
 ---
 
 # 设置模块文件索引
@@ -74,7 +74,7 @@ updated: 2026-09-10T15:35:00+09:00
 | [`packages/setting/src/server/preferences/preference-portability.spec.ts`](../../../packages/setting/src/server/preferences/preference-portability.spec.ts) | `preferences@3` behavior |
 | [`packages/data-portability/src/server/infrastructure/powersync/__tests__/powersync-round-trip.test.ts`](../../../packages/data-portability/src/server/infrastructure/powersync/__tests__/powersync-round-trip.test.ts) | full backup round-trip through canonical Setting records |
 
-## Target / execution truth
+## Canonical / execution truth
 
 - [`ADR-092`](../../architecture/adr/ADR-092-settings-hub-and-preference-ownership-boundary.md)
 - [`ADR-093`](../../architecture/adr/ADR-093-user-preference-profile-and-product-time-context.md)

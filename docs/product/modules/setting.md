@@ -3,9 +3,9 @@ tags:
   - product
   - module
   - setting
-description: 设置模块当前功能资产说明与 Setting vNext target-design 入口
+description: 设置模块当前 canonical Setting vNext 功能资产与 owner 边界说明
 created: 2026-06-02T00:00:00
-updated: 2026-09-10T15:40:00+09:00
+updated: 2026-09-14T11:48:17+08:00
 ---
 
 # 设置模块说明
@@ -157,9 +157,9 @@ theme
 - Data Portability 负责跨模块 export/import orchestration；
 - `@memoflow/time` 已有 TimeZoneId/TimeStyle/Recurrence 能力，不需要 Setting 自建时间库。
 
-## 10. 已采纳的 Setting vNext 方向
+## 10. 当前 canonical Setting vNext ownership
 
-目标将收敛为：
+当前 canonical model 为：
 
 ```text
 Settings Hub
@@ -176,7 +176,7 @@ UserPreferenceProfile
     └── weekStartsOn
 ```
 
-其他当前字段的目标 owner：
+其他字段的 canonical owner：
 
 ```text
 Notification channel/QuietHours -> Notification
@@ -190,13 +190,13 @@ feature/experiment              -> future Feature evaluator
 usage analytics consent         -> future explicit Consent owner
 ```
 
-详细 target 见 [Setting vNext Settings Hub](../setting-vnext-settings-hub.md)。
+详细 current ownership 与 scope 见 [Setting vNext Settings Hub](../setting-vnext-settings-hub.md)。
 
 ## 11. 已解决债务与剩余实施优先级
 
 `SETTING-9203~9209` 已解决：Account/Notification shadow、fake categories、Desktop device-local ownership、Settings Hub composition、V3 preference portability，以及 legacy giant-tree persistence/protocol/client 的最终删除。
 
-当前 Setting 自身只剩 `SETTING-9210` 的五层 review / exact-head CI / docs archive。跨模块 Data Portability 仍需继续注册其他 surviving owner capabilities；在 PORT-1603 前，V2 full-backup envelope 的 `settings` singleton 仍存在，但它现在只是 canonical `UserPreferenceProfile` adapter，读写 `user_preference_records`，不再依赖任何 legacy Setting model/table。
+Setting implementation and local five-layer review are closed; it now awaits the first exact-head delivery gate before archive. 跨模块 Data Portability 仍需继续注册其他 surviving owner capabilities；`PORT-1603` remains independent cross-module portability work. 在 PORT-1603 前，V2 full-backup envelope 的 `settings` singleton 仍存在，但它现在只是 canonical `UserPreferenceProfile` adapter，读写 `user_preference_records`，不再依赖任何 legacy Setting model/table。
 
 实施真值见 [Setting vNext active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md)，并受 ADR-111 zero-legacy-data destructive cutover policy 约束。
 
