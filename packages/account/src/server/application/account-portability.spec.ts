@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { PortableAccountProfileV3Schema } from '@memoflow/contracts/account';
+import { PreferencePortablePayloadV3Schema } from '@memoflow/contracts/setting';
 import type { PortableCapabilityExecutionContext } from '@memoflow/contracts/data-portability';
 import type { Instant } from '@memoflow/contracts/primitives';
 import { createTimeContext, type Clock, type UserTimeContextPort } from '@memoflow/time';
@@ -14,6 +15,11 @@ const context = {
   identityId,
   references: {} as PortableCapabilityExecutionContext['references'],
 } satisfies PortableCapabilityExecutionContext;
+
+const importedPreferences = PreferencePortablePayloadV3Schema.parse({
+  presentation: { theme: 'light', language: 'en-US' },
+  regional: { timeZone: 'Asia/Tokyo', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 },
+});
 
 function createFixture() {
   const account = Account.create({
@@ -111,14 +117,29 @@ describe('AccountProfilePortableCapability', () => {
     expect(save).not.toHaveBeenCalled();
   });
 
-  it('uses the identity time zone when resolving today', async () => {
+  it('uses the imported preferences time zone for dry-run and apply birthday validation', async () => {
     const { capability, userTimeContextPort } = createFixture();
-    vi.mocked(userTimeContextPort.getUserTimeContext).mockResolvedValue(
-      createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 }),
-    );
+    const hostTimeContext = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
+    vi.mocked(userTimeContextPort.getUserTimeContext).mockResolvedValue(hostTimeContext);
+    const importContext = {
+      ...context,
+      importedCapabilityPayloads: new Map<string, unknown>([['preferences', importedPreferences]]),
+    } satisfies PortableCapabilityExecutionContext;
     const localToday = { ...target, birthday: '2026-09-10' };
 
-    await expect(capability.apply(localToday, context)).resolves.toMatchObject({ updated: 1 });
+    await expect(capability.dryRun(localToday, importContext)).resolves.toMatchObject({
+      updated: 1,
+    });
+    await expect(capability.apply(localToday, importContext)).resolves.toMatchObject({
+      updated: 1,
+    });
+    expect(userTimeContextPort.getUserTimeContext).not.toHaveBeenCalled();
+  });
+
+  it('declares preferences as an explicit portability dependency', () => {
+    const { capability } = createFixture();
+
+    expect(capability.dependsOn).toEqual(['preferences']);
   });
 
   it('fails closed instead of creating a host account during import', async () => {

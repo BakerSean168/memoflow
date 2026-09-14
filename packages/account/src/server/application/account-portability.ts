@@ -7,7 +7,13 @@ import {
   PortableAccountProfileV3Schema,
   type PortableAccountProfileV3,
 } from '@memoflow/contracts/account';
-import { instantToYmdInTimeZone, type Clock, type UserTimeContextPort } from '@memoflow/time';
+import { PreferencePortablePayloadV3Schema } from '@memoflow/contracts/setting';
+import {
+  instantToYmdInTimeZone,
+  type Clock,
+  type TimeZoneId,
+  type UserTimeContextPort,
+} from '@memoflow/time';
 import type { IAccountRepository } from '../domain/repositories/i-account-repository';
 import { AccountProfile } from '../domain/value-objects/account-profile';
 
@@ -29,6 +35,7 @@ function profilesEqual(
 export class AccountProfilePortableCapability implements PortableCapability<PortableAccountProfileV3> {
   readonly key = 'account-profile' as const;
   readonly schemaVersion = 3;
+  readonly dependsOn = ['preferences'] as const;
   readonly payloadSchema = PortableAccountProfileV3Schema;
 
   constructor(
@@ -49,7 +56,7 @@ export class AccountProfilePortableCapability implements PortableCapability<Port
     payload: PortableAccountProfileV3,
     context: PortableCapabilityExecutionContext,
   ): Promise<PortableCapabilityReceipt> {
-    const { target } = await this.validateTarget(payload, context.identityId, this.clock.now());
+    const { target } = await this.validateTarget(payload, context, this.clock.now());
     const account = await this.requireHostAccount(context.identityId);
     const current = PortableAccountProfileV3Schema.parse(account.profile.toDTO());
     return profilesEqual(current, target)
@@ -63,7 +70,7 @@ export class AccountProfilePortableCapability implements PortableCapability<Port
   ): Promise<PortableCapabilityReceipt> {
     const now = this.clock.now();
     const account = await this.requireHostAccount(context.identityId);
-    const { target, profile } = await this.validateTarget(payload, context.identityId, now);
+    const { target, profile } = await this.validateTarget(payload, context, now);
     const current = PortableAccountProfileV3Schema.parse(account.profile.toDTO());
     if (profilesEqual(current, target)) {
       return { created: 0, updated: 0, skipped: 1, warnings: [] };
@@ -76,17 +83,29 @@ export class AccountProfilePortableCapability implements PortableCapability<Port
 
   private async validateTarget(
     payload: PortableAccountProfileV3,
-    identityId: string,
+    context: PortableCapabilityExecutionContext,
     now: ReturnType<Clock['now']>,
   ): Promise<{ target: PortableAccountProfileV3; profile: AccountProfile }> {
     const target = PortableAccountProfileV3Schema.parse(payload);
     let profile = AccountProfile.create(target);
     if (target.birthday != null) {
-      const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
-      const today = instantToYmdInTimeZone(now, timeContext.timeZone);
+      const timeZone = await this.resolveImportTimeZone(context);
+      const today = instantToYmdInTimeZone(now, timeZone);
       profile = profile.setBirthday(target.birthday, today);
     }
     return { target, profile };
+  }
+
+  private async resolveImportTimeZone(
+    context: PortableCapabilityExecutionContext,
+  ): Promise<TimeZoneId> {
+    const importedPreferences = context.importedCapabilityPayloads?.get('preferences');
+    if (importedPreferences !== undefined) {
+      const preferences = PreferencePortablePayloadV3Schema.parse(importedPreferences);
+      return preferences.regional.timeZone;
+    }
+    const timeContext = await this.userTimeContextPort.getUserTimeContext(context.identityId);
+    return timeContext.timeZone;
   }
 
   private async requireHostAccount(identityId: string) {

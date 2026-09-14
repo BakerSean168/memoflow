@@ -5,10 +5,7 @@ import {
   PortableCapabilityCoordinator,
   type PortableCapabilityCoordinatorOptions,
 } from '../../portable-capability-coordinator';
-import {
-  PortableCapabilityRegistry,
-  type PortableCapability,
-} from '../../portable-capability';
+import { PortableCapabilityRegistry, type PortableCapability } from '../../portable-capability';
 import { PortableReferenceRegistry } from '../../portable-reference-registry';
 
 const options: PortableCapabilityCoordinatorOptions = {
@@ -210,6 +207,38 @@ describe('PortableCapabilityCoordinator', () => {
     });
   });
 
+  it('passes all imported payloads to dry-run and apply capabilities', async () => {
+    const observed: unknown[] = [];
+    const preferences = simpleCapability('goals', [], {
+      async dryRun() {
+        return { created: 0, updated: 0, skipped: 0, warnings: [] };
+      },
+    });
+    const account = simpleCapability('tasks', [], {
+      dependsOn: ['goals'],
+      async dryRun(_payload, context) {
+        observed.push(context.importedCapabilityPayloads?.get('goals'));
+        return { created: 0, updated: 0, skipped: 0, warnings: [] };
+      },
+      async apply(_payload, context) {
+        observed.push(context.importedCapabilityPayloads?.get('goals'));
+        return { created: 0, updated: 0, skipped: 0, warnings: [] };
+      },
+    });
+    const coordinator = createCoordinator(preferences, account);
+    const content = JSON.stringify(
+      envelope([
+        { key: 'tasks', schemaVersion: 1, payload: { key: 'tasks' } },
+        { key: 'goals', schemaVersion: 1, payload: { key: 'goals' } },
+      ]),
+    );
+
+    await coordinator.dryRun(content, 'target-user', 'dry-batch');
+    await coordinator.apply(content, 'target-user', 'apply-batch');
+
+    expect(observed).toEqual([{ key: 'goals' }, { key: 'goals' }]);
+  });
+
   it('applies roots before dependents so cross-capability refs can resolve', async () => {
     const observed: string[] = [];
     const refSchema = z.object({ ref: z.literal('goals:1') }).strict();
@@ -313,6 +342,8 @@ describe('PortableCapabilityCoordinator', () => {
   it('rejects invalid JSON and empty host identity', async () => {
     const coordinator = createCoordinator();
     expect(() => coordinator.decode('{bad json')).toThrow('Portable V3 content is not valid JSON');
-    await expect(coordinator.export('')).rejects.toThrow('Portable host identity must be non-empty');
+    await expect(coordinator.export('')).rejects.toThrow(
+      'Portable host identity must be non-empty',
+    );
   });
 });

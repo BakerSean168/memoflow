@@ -144,6 +144,7 @@ export class PortableCapabilityCoordinator {
       identityId,
       batchId,
       references,
+      importedCapabilityPayloads: new Map([...byKey].map(([key, entry]) => [key, entry.payload])),
     };
     const entries: PortableCapabilityReceiptEntry[] = [];
 

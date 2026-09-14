@@ -1,13 +1,16 @@
 import type { z } from 'zod';
-import type {
-  PortableCapabilityKey,
-  PortableReferenceV3,
-} from './dtos/portable-v3.dto';
+import type { PortableCapabilityKey, PortableReferenceV3 } from './dtos/portable-v3.dto';
 
 /** Operation-local portable reference seam exposed to owner capabilities. */
 export interface PortableReferencePort {
-  declareExportReference(capabilityKey: PortableCapabilityKey, sourceKey: string): PortableReferenceV3;
-  resolveExportReference(capabilityKey: PortableCapabilityKey, sourceKey: string): PortableReferenceV3;
+  declareExportReference(
+    capabilityKey: PortableCapabilityKey,
+    sourceKey: string,
+  ): PortableReferenceV3;
+  resolveExportReference(
+    capabilityKey: PortableCapabilityKey,
+    sourceKey: string,
+  ): PortableReferenceV3;
   bindImportedReference(portableRef: PortableReferenceV3, targetKey: string): void;
   resolveImportedReference(portableRef: PortableReferenceV3): string;
 }
@@ -17,6 +20,7 @@ export interface PortableCapabilityExecutionContext {
   readonly identityId: string;
   readonly batchId?: string;
   readonly references: PortableReferencePort;
+  readonly importedCapabilityPayloads?: ReadonlyMap<PortableCapabilityKey, unknown>;
 }
 
 /** Owner-level import/export receipt aggregated by Data Portability. */
