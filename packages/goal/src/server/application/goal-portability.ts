@@ -29,12 +29,20 @@ function stableUuid(seed: string): string {
   return `${raw.slice(0, 8)}-${raw.slice(8, 12)}-${raw.slice(12, 16)}-${raw.slice(16, 20)}-${raw.slice(20)}`;
 }
 
-function deterministicGoalId(batchId: string, ref: PortableReferenceV3): string {
-  return `IGoalId_${stableUuid(`portable:${batchId}:goal:${ref}`)}`;
+function deterministicGoalId(
+  identityId: string,
+  batchId: string,
+  ref: PortableReferenceV3,
+): string {
+  return `IGoalId_${stableUuid(`portable:${identityId}:${batchId}:goal:${ref}`)}`;
 }
 
-function deterministicKeyResultId(batchId: string, ref: PortableReferenceV3): string {
-  return `IKeyResultId_${stableUuid(`portable:${batchId}:key-result:${ref}`)}`;
+function deterministicKeyResultId(
+  identityId: string,
+  batchId: string,
+  ref: PortableReferenceV3,
+): string {
+  return `IKeyResultId_${stableUuid(`portable:${identityId}:${batchId}:key-result:${ref}`)}`;
 }
 
 function requireBatchId(context: PortableCapabilityExecutionContext): string {
@@ -111,7 +119,9 @@ function assertExistingGoalMatchesPortableDefinition(
   for (const [index, portableKeyResult] of goal.keyResults.entries()) {
     const current = existingKeyResults[index];
     if (!current) conflict(`keyResults[${index}]`);
-    if (current.id !== deterministicKeyResultId(batchId, portableKeyResult.ref)) {
+    if (
+      current.id !== deterministicKeyResultId(existing.identityId, batchId, portableKeyResult.ref)
+    ) {
       conflict(`keyResults[${index}].id`);
     }
     if (current.title !== portableKeyResult.title) conflict(`keyResults[${index}].title`);
@@ -268,7 +278,7 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
     let created = 0;
     let skipped = 0;
     for (const goal of target.goals) {
-      const id = deterministicGoalId(batchId, goal.ref);
+      const id = deterministicGoalId(context.identityId, batchId, goal.ref);
       const current = await this.portability.getGoalSnapshot(id, context.identityId);
       if (current) {
         const labelIds = goal.labelRefs.map((ref) =>
@@ -301,7 +311,7 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
     let skipped = 0;
 
     for (const goal of target.goals) {
-      const id = deterministicGoalId(batchId, goal.ref);
+      const id = deterministicGoalId(context.identityId, batchId, goal.ref);
       const labelIds = goal.labelRefs.map((ref) =>
         context.references.resolveImportedReference(ref),
       );
@@ -323,7 +333,7 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
         reminderConfig: goal.reminderConfig,
         labelIds,
         initialKeyResults: goal.keyResults.map((keyResult) => ({
-          id: deterministicKeyResultId(batchId, keyResult.ref) as never,
+          id: deterministicKeyResultId(context.identityId, batchId, keyResult.ref) as never,
           title: keyResult.title,
           description: keyResult.description,
           calculationMethod: keyResult.calculationMethod,
@@ -352,7 +362,7 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
       for (const keyResult of goal.keyResults) {
         context.references.bindImportedReference(
           keyResult.ref,
-          deterministicKeyResultId(batchId, keyResult.ref),
+          deterministicKeyResultId(context.identityId, batchId, keyResult.ref),
         );
       }
       receipt = await transitionGoal(this.api, goal, context, receipt);

@@ -139,9 +139,9 @@ function portabilityFromApi(api: GoalApplicationPort): GoalPortabilityApplicatio
     startDate: model.startDate,
     target: model.target,
     archivedAt: model.archivedAt,
-    deletedAt: model.deletedAt,
-    sortOrder: model.sortOrder,
-    createdAt: model.createdAt,
+    deletedAt: model.deletedAt ?? null,
+    sortOrder: model.sortOrder ?? 0,
+    createdAt: model.createdAt ?? 1,
     reminderConfig: model.reminderConfig,
     labels: model.labels,
     keyResults: model.keyResults.map((keyResult) => ({
