@@ -1,7 +1,7 @@
 /**
- * Task Template API Smoke Tests
+ * Task Plan API Smoke Tests
  *
- * Tests the full HTTP pipeline for task template endpoints:
+ * Tests the full HTTP pipeline for task plan endpoints:
  *   Supertest -> Express -> Auth MW -> expressAdapter -> Controller -> Use Case -> Mock Repo
  *
  * Each endpoint is tested for:
@@ -40,7 +40,7 @@ vi.mock('@memoflow/utils', async (importOriginal) => {
  * Create a real TaskPlan aggregate via the domain factory method.
  * Uses proper value object classes so toClientDTO() works correctly.
  */
-function makeFakeTemplate(overrides: Record<string, unknown> = {}) {
+function makeFakePlan(overrides: Record<string, unknown> = {}) {
   return aOneTimeTask({
     identityId: anIdentityId(TEST_IDENTITY_ID),
     title: 'Smoke Test Task',
@@ -48,7 +48,7 @@ function makeFakeTemplate(overrides: Record<string, unknown> = {}) {
   });
 }
 
-/** Valid HTTP request body for creating a template (uses API field names) */
+/** Valid HTTP request body for creating a plan (uses API field names) */
 const VALID_CREATE_BODY = {
   name: 'Smoke Task',
   schedule: { kind: 'OneTime', date: '2026-09-08', timing: { kind: 'AllDay' } },
@@ -63,7 +63,7 @@ const NON_EXISTENT_ID = '00000000-0000-0000-0000-000000000000';
 // Tests
 // ============================================================================
 
-describe('Task Template API Smoke Tests', () => {
+describe('Task Plan API Smoke Tests', () => {
   let ctx: SmokeTestApp;
 
   beforeEach(() => {
@@ -71,7 +71,7 @@ describe('Task Template API Smoke Tests', () => {
   });
 
   // =========================================================================
-  // POST /api/v1/task-plans -- Create template
+  // POST /api/v1/task-plans -- Create plan
   // =========================================================================
   describe('POST /api/v1/task-plans', () => {
     it('should return 401 without auth token', async () => {
@@ -110,11 +110,13 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.status).toBe(201);
       expect(res.body.ok).toBe(true);
       expect(res.body.data).toBeDefined();
-      expect(res.body.data.template.name).toBe('Smoke Task');
+      expect(res.body.data.plan.name).toBe('Smoke Task');
       // toClientDTO() does not include taskType — verify key fields only
-      expect(res.body.data.template.status).toBe('Active');
-      expect(res.body.data.template.id).toBeDefined();
-      expect(res.body.data.template.identityId).toBe(TEST_IDENTITY_ID);
+      expect(res.body.data.plan.status).toBe('Active');
+      expect(res.body.data.plan.id).toBeDefined();
+      expect(res.body.data.plan.identityId).toBe(TEST_IDENTITY_ID);
+      expect(res.body.data.occurrenceCount).toEqual(expect.any(Number));
+      expect(res.body.data.todayOccurrenceCreated).toEqual(expect.any(Boolean));
     });
 
     it('should return 400 with invalid body (missing name)', async () => {
@@ -128,7 +130,7 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.body.error.code).toBe('VALIDATION_ERROR');
     });
 
-    it('should call templateRepository.save on successful creation', async () => {
+    it('should save the plan on successful creation', async () => {
       await request(ctx.app)
         .post('/api/v1/task-plans')
         .set('Authorization', `Bearer ${ctx.token}`)
@@ -139,7 +141,7 @@ describe('Task Template API Smoke Tests', () => {
   });
 
   // =========================================================================
-  // GET /api/v1/task-plans -- List templates
+  // GET /api/v1/task-plans -- List plans
   // =========================================================================
   describe('GET /api/v1/task-plans', () => {
     it('should return 401 without auth token', async () => {
@@ -157,14 +159,14 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
       expect(res.body.data).toEqual({
-        templates: [],
+        plans: [],
         total: 0,
       });
     });
 
-    it('should return templates from repository', async () => {
-      const template = makeFakeTemplate();
-      vi.mocked(ctx.templateRepo.findByIdentityId).mockResolvedValue([template]);
+    it('should return plans from repository', async () => {
+      const plan = makeFakePlan();
+      vi.mocked(ctx.templateRepo.findByIdentityId).mockResolvedValue([plan]);
 
       const res = await request(ctx.app)
         .get('/api/v1/task-plans')
@@ -172,9 +174,9 @@ describe('Task Template API Smoke Tests', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
-      expect(res.body.data.templates).toHaveLength(1);
+      expect(res.body.data.plans).toHaveLength(1);
       expect(res.body.data.total).toBe(1);
-      expect(res.body.data.templates[0].name).toBe('Smoke Test Task');
+      expect(res.body.data.plans[0].name).toBe('Smoke Test Task');
     });
 
     it('should pass status filter to repository', async () => {
@@ -191,7 +193,7 @@ describe('Task Template API Smoke Tests', () => {
   });
 
   // =========================================================================
-  // GET /api/v1/task-plans/:id -- Get template by ID
+  // GET /api/v1/task-plans/:id -- Get plan by ID
   // =========================================================================
   describe('GET /api/v1/task-plans/:id', () => {
     it('should return 401 without auth token', async () => {
@@ -200,7 +202,7 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.status).toBe(401);
     });
 
-    it('should return 200 with null when template not found', async () => {
+    it('should return 200 with null when plan not found', async () => {
       const res = await request(ctx.app)
         .get('/api/v1/task-plans/some-uuid')
         .set('Authorization', `Bearer ${ctx.token}`);
@@ -210,12 +212,12 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.body.data).toBeNull();
     });
 
-    it('should return 200 with template when found', async () => {
-      const template = makeFakeTemplate();
-      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    it('should return 200 with plan when found', async () => {
+      const plan = makeFakePlan();
+      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
       const res = await request(ctx.app)
-        .get(`/api/v1/task-plans/${template.id}`)
+        .get(`/api/v1/task-plans/${plan.id}`)
         .set('Authorization', `Bearer ${ctx.token}`);
 
       expect(res.status).toBe(200);
@@ -225,13 +227,13 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.body.data.importance).toBe('Moderate');
       expect(ctx.templateRepo.findByIdForIdentity).toHaveBeenCalledWith(
         TEST_IDENTITY_ID,
-        template.id,
+        plan.id,
       );
     });
   });
 
   // =========================================================================
-  // PUT /api/v1/task-plans/:id -- Update template
+  // PUT /api/v1/task-plans/:id -- Update plan
   // =========================================================================
   describe('PUT /api/v1/task-plans/:id', () => {
     it('should return 401 without auth token', async () => {
@@ -243,7 +245,7 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.body.ok).toBe(false);
     });
 
-    it('should return 404 when template not found', async () => {
+    it('should return 404 when plan not found', async () => {
       const res = await request(ctx.app)
         .put(`/api/v1/task-plans/${NON_EXISTENT_ID}`)
         .set('Authorization', `Bearer ${ctx.token}`)
@@ -254,12 +256,12 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.body.error.code).toBe('NOT_FOUND');
     });
 
-    it('should return 200 when template updated', async () => {
-      const template = makeFakeTemplate();
-      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    it('should return 200 when plan updated', async () => {
+      const plan = makeFakePlan();
+      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
       const res = await request(ctx.app)
-        .put(`/api/v1/task-plans/${template.id}`)
+        .put(`/api/v1/task-plans/${plan.id}`)
         .set('Authorization', `Bearer ${ctx.token}`)
         .send({ name: 'Updated Name' });
 
@@ -269,7 +271,7 @@ describe('Task Template API Smoke Tests', () => {
       expect(ctx.templateRepo.save).toHaveBeenCalled();
     });
 
-    it('should return 404 with empty body (no fields to update, template not found)', async () => {
+    it('should return 404 with empty body (no fields to update, plan not found)', async () => {
       // UpdateTaskPlanSchema allows empty partial — all fields optional.
       // The use case proceeds with the identity-scoped lookup, which returns null → NOT_FOUND.
       const res = await request(ctx.app)
@@ -283,7 +285,7 @@ describe('Task Template API Smoke Tests', () => {
   });
 
   // =========================================================================
-  // DELETE /api/v1/task-plans/:id -- Delete template
+  // DELETE /api/v1/task-plans/:id -- Delete plan
   // =========================================================================
   describe('DELETE /api/v1/task-plans/:id', () => {
     it('should return 401 without auth token', async () => {
@@ -293,7 +295,7 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.body.ok).toBe(false);
     });
 
-    it('should return 200 even when template not found (idempotent delete)', async () => {
+    it('should return 200 even when plan not found (idempotent delete)', async () => {
       // DeleteTaskPlan.execute() returns ok({ success: true }) when not found
       const res = await request(ctx.app)
         .delete(`/api/v1/task-plans/${NON_EXISTENT_ID}`)
@@ -303,21 +305,21 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.body.ok).toBe(true);
     });
 
-    it('should return 200 when template deleted', async () => {
-      const template = makeFakeTemplate();
-      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    it('should return 200 when plan deleted', async () => {
+      const plan = makeFakePlan();
+      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
       const res = await request(ctx.app)
-        .delete(`/api/v1/task-plans/${template.id}`)
+        .delete(`/api/v1/task-plans/${plan.id}`)
         .set('Authorization', `Bearer ${ctx.token}`);
 
       expect(res.status).toBe(200);
-      expect(ctx.templateRepo.delete).toHaveBeenCalledWith(TEST_IDENTITY_ID, template.id);
+      expect(ctx.templateRepo.delete).toHaveBeenCalledWith(TEST_IDENTITY_ID, plan.id);
     });
   });
 
   // =========================================================================
-  // POST /api/v1/task-plans/:id/activate -- Activate template
+  // POST /api/v1/task-plans/:id/activate -- Activate plan
   // =========================================================================
   describe('POST /api/v1/task-plans/:id/activate', () => {
     it('should return 401 without auth token', async () => {
@@ -327,7 +329,7 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.body.ok).toBe(false);
     });
 
-    it('should return 404 when template not found', async () => {
+    it('should return 404 when plan not found', async () => {
       const res = await request(ctx.app)
         .post(`/api/v1/task-plans/${NON_EXISTENT_ID}/activate`)
         .set('Authorization', `Bearer ${ctx.token}`);
@@ -336,14 +338,14 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.body.ok).toBe(false);
     });
 
-    it('should return 200 and activate template', async () => {
-      const template = makeFakeTemplate();
-      template.pause(); // put it in Paused state first
-      template.clearDomainEvents();
-      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    it('should return 200 and activate plan', async () => {
+      const plan = makeFakePlan();
+      plan.pause(); // put it in Paused state first
+      plan.clearDomainEvents();
+      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
       const res = await request(ctx.app)
-        .post(`/api/v1/task-plans/${template.id}/activate`)
+        .post(`/api/v1/task-plans/${plan.id}/activate`)
         .set('Authorization', `Bearer ${ctx.token}`);
 
       expect(res.status).toBe(200);
@@ -353,7 +355,7 @@ describe('Task Template API Smoke Tests', () => {
   });
 
   // =========================================================================
-  // POST /api/v1/task-plans/:id/pause -- Pause template
+  // POST /api/v1/task-plans/:id/pause -- Pause plan
   // =========================================================================
   describe('POST /api/v1/task-plans/:id/pause', () => {
     it('should return 401 without auth token', async () => {
@@ -363,7 +365,7 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.body.ok).toBe(false);
     });
 
-    it('should return 404 when template not found', async () => {
+    it('should return 404 when plan not found', async () => {
       const res = await request(ctx.app)
         .post(`/api/v1/task-plans/${NON_EXISTENT_ID}/pause`)
         .set('Authorization', `Bearer ${ctx.token}`);
@@ -371,13 +373,13 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.status).toBe(404);
     });
 
-    it('should return 200 and pause template', async () => {
-      const template = makeFakeTemplate();
-      template.clearDomainEvents();
-      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    it('should return 200 and pause plan', async () => {
+      const plan = makeFakePlan();
+      plan.clearDomainEvents();
+      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
       const res = await request(ctx.app)
-        .post(`/api/v1/task-plans/${template.id}/pause`)
+        .post(`/api/v1/task-plans/${plan.id}/pause`)
         .set('Authorization', `Bearer ${ctx.token}`);
 
       expect(res.status).toBe(200);
@@ -387,7 +389,7 @@ describe('Task Template API Smoke Tests', () => {
   });
 
   // =========================================================================
-  // POST /api/v1/task-plans/:id/archive -- Archive template
+  // POST /api/v1/task-plans/:id/archive -- Archive plan
   // =========================================================================
   describe('POST /api/v1/task-plans/:id/archive', () => {
     it('should return 401 without auth token', async () => {
@@ -397,7 +399,7 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.body.ok).toBe(false);
     });
 
-    it('should return 404 when template not found', async () => {
+    it('should return 404 when plan not found', async () => {
       const res = await request(ctx.app)
         .post(`/api/v1/task-plans/${NON_EXISTENT_ID}/archive`)
         .set('Authorization', `Bearer ${ctx.token}`);
@@ -405,13 +407,13 @@ describe('Task Template API Smoke Tests', () => {
       expect(res.status).toBe(404);
     });
 
-    it('should return 200 and archive template', async () => {
-      const template = makeFakeTemplate();
-      template.clearDomainEvents();
-      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(template);
+    it('should return 200 and archive plan', async () => {
+      const plan = makeFakePlan();
+      plan.clearDomainEvents();
+      vi.mocked(ctx.templateRepo.findByIdForIdentity).mockResolvedValue(plan);
 
       const res = await request(ctx.app)
-        .post(`/api/v1/task-plans/${template.id}/archive`)
+        .post(`/api/v1/task-plans/${plan.id}/archive`)
         .set('Authorization', `Bearer ${ctx.token}`);
 
       expect(res.status).toBe(200);
