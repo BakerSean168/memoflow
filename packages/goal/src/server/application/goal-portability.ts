@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import type {
+  GoalClientDTO,
   GoalMutationReceipt,
   GoalPortableDefinitionV3,
   GoalPortablePayloadV3,
@@ -58,6 +59,83 @@ function requireResult<T>(result: Result<T>, operation: string): T {
   throw new Error(`${operation}: ${result.error.code}: ${result.error.message}`);
 }
 
+function stableJson(value: unknown): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
+  const record = value as Record<string, unknown>;
+  return `{${Object.keys(record)
+    .sort()
+    .map((key) => `${JSON.stringify(key)}:${stableJson(record[key])}`)
+    .join(',')}}`;
+}
+
+function sameStringSet(left: readonly string[], right: readonly string[]): boolean {
+  const a = [...new Set(left)].sort();
+  const b = [...new Set(right)].sort();
+  return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
+function assertExistingGoalMatchesPortableDefinition(
+  existing: GoalClientDTO,
+  goal: GoalPortableDefinitionV3,
+  batchId: string,
+  resolvedLabelIds: readonly string[],
+): void {
+  const conflict = (field: string): never => {
+    throw new Error(
+      `goals@3 deterministic target conflicts with portable definition ${goal.ref}: ${field}`,
+    );
+  };
+
+  if (existing.name !== goal.name) conflict('name');
+  if (existing.summary !== goal.summary) conflict('summary');
+  if (existing.startDate !== goal.startDate) conflict('startDate');
+  if (stableJson(existing.target) !== stableJson(goal.target)) conflict('target');
+  if (stableJson(existing.reminderConfig) !== stableJson(goal.reminderConfig)) {
+    conflict('reminderConfig');
+  }
+  if (
+    !sameStringSet(
+      existing.labels.map((label) => label.id),
+      resolvedLabelIds,
+    )
+  ) {
+    conflict('labels');
+  }
+
+  const existingKeyResults = [...(existing.keyResults ?? [])].sort((a, b) => a.order - b.order);
+  if (existingKeyResults.length !== goal.keyResults.length) conflict('keyResults.length');
+
+  for (const [index, portableKeyResult] of goal.keyResults.entries()) {
+    const current = existingKeyResults[index];
+    if (!current) conflict(`keyResults[${index}]`);
+    if (current.id !== deterministicKeyResultId(batchId, portableKeyResult.ref)) {
+      conflict(`keyResults[${index}].id`);
+    }
+    if (current.title !== portableKeyResult.title) conflict(`keyResults[${index}].title`);
+    if (current.description !== portableKeyResult.description) {
+      conflict(`keyResults[${index}].description`);
+    }
+    if (current.progress.aggregationMethod !== portableKeyResult.calculationMethod) {
+      conflict(`keyResults[${index}].calculationMethod`);
+    }
+    if (current.progress.initialValue !== portableKeyResult.initialValue) {
+      conflict(`keyResults[${index}].initialValue`);
+    }
+    if (current.progress.currentValue !== portableKeyResult.currentValue) {
+      conflict(`keyResults[${index}].currentValue`);
+    }
+    if (current.progress.targetValue !== portableKeyResult.targetValue) {
+      conflict(`keyResults[${index}].targetValue`);
+    }
+    if (stableJson(current.target) !== stableJson(portableKeyResult.target)) {
+      conflict(`keyResults[${index}].target`);
+    }
+    if (current.progress.unit !== portableKeyResult.unit) conflict(`keyResults[${index}].unit`);
+    if (current.weight !== portableKeyResult.weight) conflict(`keyResults[${index}].weight`);
+  }
+}
+
 async function transitionGoal(
   api: GoalApplicationPort,
   goal: GoalPortableDefinitionV3,
@@ -67,6 +145,24 @@ async function transitionGoal(
   let current = receipt;
   const goalId = current.goalId;
   const identityId = context.identityId;
+
+  const currentStatus = current.readModel.status;
+  const allowedPrefixes: Record<GoalStatus, readonly GoalStatus[]> = {
+    [GoalStatus.Planned]: [GoalStatus.Planned],
+    [GoalStatus.InProgress]: [GoalStatus.Planned, GoalStatus.InProgress],
+    [GoalStatus.Completed]: [GoalStatus.Planned, GoalStatus.InProgress, GoalStatus.Completed],
+    [GoalStatus.Abandoned]: [GoalStatus.Planned, GoalStatus.InProgress, GoalStatus.Abandoned],
+  };
+  if (!allowedPrefixes[goal.status].includes(currentStatus)) {
+    throw new Error(
+      `goals@3 deterministic target lifecycle conflicts with portable goal ${goal.ref}: ${currentStatus} cannot converge to ${goal.status}`,
+    );
+  }
+  if (!goal.archived && current.readModel.archivedAt !== null) {
+    throw new Error(
+      `goals@3 deterministic target lifecycle conflicts with portable goal ${goal.ref}: archived target cannot converge to unarchived`,
+    );
+  }
 
   if (goal.status === GoalStatus.InProgress && current.readModel.status === GoalStatus.Planned) {
     current = requireResult(
@@ -199,14 +295,19 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
 
     for (const goal of target.goals) {
       const id = deterministicGoalId(batchId, goal.ref);
-      const existing = await this.api.getGoal(id, context.identityId, true);
-      if (existing.ok) skipped += 1;
-      else if (existing.error.code === 'NOT_FOUND') created += 1;
-      else requireResult(existing, 'inspect portable goal');
-
       const labelIds = goal.labelRefs.map((ref) =>
         context.references.resolveImportedReference(ref),
       );
+      const existing = await this.api.getGoal(id, context.identityId, true);
+      if (existing.ok) {
+        assertExistingGoalMatchesPortableDefinition(existing.data, goal, batchId, labelIds);
+        skipped += 1;
+      } else if (existing.error.code === 'NOT_FOUND') {
+        created += 1;
+      } else {
+        requireResult(existing, 'inspect portable goal');
+      }
+
       let receipt = requireResult(
         await this.api.createGoal(
           {

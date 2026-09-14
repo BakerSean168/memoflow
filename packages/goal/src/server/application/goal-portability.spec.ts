@@ -47,6 +47,80 @@ function referenceContext() {
   };
 }
 
+function portableGoalPayload(status: GoalStatus = GoalStatus.Planned) {
+  return {
+    goals: [
+      {
+        ref: 'goals:1' as PortableReferenceV3,
+        name: 'Ship vNext',
+        summary: null,
+        status,
+        startDate: null,
+        target: null,
+        reminderConfig: null,
+        archived: false,
+        labelRefs: ['labels:1' as PortableReferenceV3],
+        keyResults: [
+          {
+            ref: 'goals:2' as PortableReferenceV3,
+            title: 'Finish cutover',
+            description: null,
+            calculationMethod: KeyResultCalculationMethod.Sum,
+            initialValue: 0,
+            currentValue: 50,
+            targetValue: 100,
+            target: null,
+            unit: '%',
+            weight: 3,
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function readModelFromCreateInput(
+  createInput: Parameters<GoalApplicationPort['createGoal']>[0],
+  overrides: Record<string, unknown> = {},
+) {
+  const keyResult = createInput.initialKeyResults[0];
+  return {
+    ...receipt().readModel,
+    id: createInput.id,
+    name: createInput.name,
+    summary: createInput.summary ?? null,
+    startDate: createInput.startDate ?? null,
+    target: createInput.target ?? null,
+    reminderConfig: createInput.reminderConfig ?? null,
+    labels: [{ id: 'label-host-1' }],
+    keyResults: [
+      {
+        id: keyResult.id,
+        title: keyResult.title,
+        description: keyResult.description,
+        progress: {
+          initialValue: keyResult.initialValue,
+          currentValue: keyResult.currentValue,
+          targetValue: keyResult.targetValue,
+          aggregationMethod: keyResult.calculationMethod,
+          unit: keyResult.unit,
+        },
+        target: keyResult.target,
+        progressPercentage: 50,
+        isCompleted: false,
+        weight: keyResult.weight,
+        order: 0,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    ],
+    totalKeyResults: 1,
+    ...overrides,
+  };
+}
+
+type ReplayReadModel = ReturnType<typeof readModelFromCreateInput>;
+
 function receipt(overrides: Record<string, unknown> = {}) {
   return {
     goalId: 'IGoalId_11111111-1111-5111-8111-111111111111',
@@ -236,5 +310,183 @@ describe('GoalPortableCapability', () => {
     expect(api.activateGoal).toHaveBeenCalledWith(created.goalId, 'identity-1', 1);
     expect(imports.get('goals:1')).toBe(created.goalId);
     expect(imports.get('goals:2')).toMatch(/^IKeyResultId_[0-9a-f-]{36}$/);
+  });
+
+  it('treats a semantically identical deterministic Goal as replay and resumes lifecycle', async () => {
+    const seedApi = {
+      getGoal: vi.fn().mockResolvedValue(error('NOT_FOUND', 'missing')),
+      createGoal: vi.fn().mockImplementation(async (input) =>
+        ok(
+          receipt({
+            goalId: input.id,
+            readModel: readModelFromCreateInput(input),
+          }),
+        ),
+      ),
+    } as unknown as GoalApplicationPort;
+    const seedContext = referenceContext().context;
+    await new GoalPortableCapability(seedApi).apply(portableGoalPayload(), seedContext);
+    const createInput = (seedApi.createGoal as ReturnType<typeof vi.fn>).mock.calls[0]![0];
+
+    const existing = readModelFromCreateInput(createInput, {
+      status: GoalStatus.Planned,
+      version: 7,
+      updatedAt: 999,
+    });
+    const replayReceipt = receipt({
+      goalId: createInput.id,
+      goalVersion: 7,
+      readModel: existing,
+    });
+    const active = receipt({
+      goalId: createInput.id,
+      goalVersion: 8,
+      readModel: { ...existing, status: GoalStatus.InProgress, version: 8 },
+    });
+    const replayApi = {
+      getGoal: vi.fn().mockResolvedValue(ok(existing)),
+      createGoal: vi.fn().mockResolvedValue(ok(replayReceipt)),
+      activateGoal: vi.fn().mockResolvedValue(ok(active)),
+    } as unknown as GoalApplicationPort;
+    const { context, imports } = referenceContext();
+
+    const result = await new GoalPortableCapability(replayApi).apply(
+      portableGoalPayload(GoalStatus.InProgress),
+      context,
+    );
+
+    expect(result).toMatchObject({ created: 0, updated: 0, skipped: 1 });
+    expect(replayApi.createGoal).toHaveBeenCalledOnce();
+    expect(replayApi.activateGoal).toHaveBeenCalledWith(createInput.id, 'identity-1', 7);
+    expect(imports.get('goals:1')).toBe(createInput.id);
+    expect(imports.get('goals:2')).toBe(createInput.initialKeyResults[0].id);
+  });
+
+  it.each([
+    ['name', (existing: ReplayReadModel) => ({ ...existing, name: 'Drifted Goal' })],
+    ['labels', (existing: ReplayReadModel) => ({ ...existing, labels: [{ id: 'other-label' }] })],
+    [
+      'key result',
+      (existing: ReplayReadModel) => ({
+        ...existing,
+        keyResults: [{ ...existing.keyResults[0]!, title: 'Drifted KR' }],
+      }),
+    ],
+    [
+      'key result identity',
+      (existing: ReplayReadModel) => ({
+        ...existing,
+        keyResults: [
+          { ...existing.keyResults[0]!, id: 'IKeyResultId_ffffffff-ffff-5fff-8fff-ffffffffffff' },
+        ],
+      }),
+    ],
+  ])('fails closed when deterministic replay drifts in %s', async (_label, mutate) => {
+    const seedApi = {
+      getGoal: vi.fn().mockResolvedValue(error('NOT_FOUND', 'missing')),
+      createGoal: vi.fn().mockImplementation(async (input) =>
+        ok(
+          receipt({
+            goalId: input.id,
+            readModel: readModelFromCreateInput(input),
+          }),
+        ),
+      ),
+    } as unknown as GoalApplicationPort;
+    await new GoalPortableCapability(seedApi).apply(
+      portableGoalPayload(),
+      referenceContext().context,
+    );
+    const createInput = (seedApi.createGoal as ReturnType<typeof vi.fn>).mock.calls[0]![0];
+    const existing = mutate(readModelFromCreateInput(createInput));
+    const replayApi = {
+      getGoal: vi.fn().mockResolvedValue(ok(existing)),
+      createGoal: vi.fn(),
+      activateGoal: vi.fn(),
+    } as unknown as GoalApplicationPort;
+
+    await expect(
+      new GoalPortableCapability(replayApi).apply(
+        portableGoalPayload(GoalStatus.InProgress),
+        referenceContext().context,
+      ),
+    ).rejects.toThrow('goals@3 deterministic target conflicts with portable definition goals:1');
+    expect(replayApi.createGoal).not.toHaveBeenCalled();
+    expect(replayApi.activateGoal).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [GoalStatus.Planned, GoalStatus.Completed],
+    [GoalStatus.InProgress, GoalStatus.Completed],
+    [GoalStatus.Completed, GoalStatus.Abandoned],
+    [GoalStatus.Abandoned, GoalStatus.Completed],
+  ])(
+    'fails closed when existing lifecycle %s cannot converge to target %s',
+    async (target, existingStatus) => {
+      const seedApi = {
+        getGoal: vi.fn().mockResolvedValue(error('NOT_FOUND', 'missing')),
+        createGoal: vi
+          .fn()
+          .mockImplementation(async (input) =>
+            ok(receipt({ goalId: input.id, readModel: readModelFromCreateInput(input) })),
+          ),
+      } as unknown as GoalApplicationPort;
+      await new GoalPortableCapability(seedApi).apply(
+        portableGoalPayload(),
+        referenceContext().context,
+      );
+      const createInput = (seedApi.createGoal as ReturnType<typeof vi.fn>).mock.calls[0]![0];
+      const existing = readModelFromCreateInput(createInput, { status: existingStatus });
+      const replayApi = {
+        getGoal: vi.fn().mockResolvedValue(ok(existing)),
+        createGoal: vi
+          .fn()
+          .mockResolvedValue(
+            ok(receipt({ goalId: createInput.id, goalVersion: 9, readModel: existing })),
+          ),
+        activateGoal: vi.fn(),
+        completeGoal: vi.fn(),
+        abandonGoal: vi.fn(),
+      } as unknown as GoalApplicationPort;
+
+      await expect(
+        new GoalPortableCapability(replayApi).apply(
+          portableGoalPayload(target),
+          referenceContext().context,
+        ),
+      ).rejects.toThrow('goals@3 deterministic target lifecycle conflicts');
+    },
+  );
+
+  it('fails closed when replay would need to unarchive an existing deterministic Goal', async () => {
+    const seedApi = {
+      getGoal: vi.fn().mockResolvedValue(error('NOT_FOUND', 'missing')),
+      createGoal: vi
+        .fn()
+        .mockImplementation(async (input) =>
+          ok(receipt({ goalId: input.id, readModel: readModelFromCreateInput(input) })),
+        ),
+    } as unknown as GoalApplicationPort;
+    await new GoalPortableCapability(seedApi).apply(
+      portableGoalPayload(),
+      referenceContext().context,
+    );
+    const createInput = (seedApi.createGoal as ReturnType<typeof vi.fn>).mock.calls[0]![0];
+    const existing = readModelFromCreateInput(createInput, { archivedAt: 123 });
+    const replayApi = {
+      getGoal: vi.fn().mockResolvedValue(ok(existing)),
+      createGoal: vi
+        .fn()
+        .mockResolvedValue(
+          ok(receipt({ goalId: createInput.id, goalVersion: 9, readModel: existing })),
+        ),
+    } as unknown as GoalApplicationPort;
+
+    await expect(
+      new GoalPortableCapability(replayApi).apply(
+        portableGoalPayload(),
+        referenceContext().context,
+      ),
+    ).rejects.toThrow('archived target cannot converge to unarchived');
   });
 });
