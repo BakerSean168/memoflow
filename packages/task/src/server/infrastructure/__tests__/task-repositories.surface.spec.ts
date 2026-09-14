@@ -63,6 +63,10 @@ describe('task repository factories surface', () => {
     expect(typeof prismaInstance.dispose).toBe('function');
     const typed: TaskModuleInstance = prismaInstance;
     expect(typeof typed.api.createTaskPlan).toBe('function');
+    expect(typeof typed.canonicalRestore.restore).toBe('function');
+    expect(typed.portableCapability.key).toBe('tasks');
+    expect(typed.portableCapability.schemaVersion).toBe(3);
+    expect(typed.portableCapability.dependsOn).toEqual(['labels', 'goals']);
 
     const powerSyncInstance = createTaskPowerSyncModule(fakeElectronDb, {
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
@@ -70,6 +74,9 @@ describe('task repository factories surface', () => {
     expect(powerSyncInstance).toHaveProperty('api');
     expect(typeof powerSyncInstance.start).toBe('function');
     expect(typeof powerSyncInstance.dispose).toBe('function');
+    expect(typeof powerSyncInstance.canonicalRestore.restore).toBe('function');
+    expect(powerSyncInstance.portableCapability.key).toBe('tasks');
+    expect(powerSyncInstance.portableCapability.dependsOn).toEqual(['labels', 'goals']);
   });
 
   it('does not leak concrete adapter classes through the root barrel', async () => {

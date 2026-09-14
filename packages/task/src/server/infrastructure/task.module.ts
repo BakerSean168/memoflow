@@ -45,6 +45,11 @@ import { SetTaskOccurrenceChecklistItemUseCase } from '../application/use-cases/
 import type { TaskWriteTransactionRunner } from '../application/use-cases/commands/task-write-support';
 import type { TaskApplicationPort } from '../application';
 import { TaskOccurrenceProjectionService } from '../application/services/task-occurrence-projection.service';
+import { TaskCanonicalRestoreService } from '../application/services/task-canonical-restore.service';
+import {
+  createTaskPortableCapability,
+  type TaskPortableCapability,
+} from '../application/task-portability';
 import { createLogger } from '@memoflow/utils/logger';
 import type { UserTimeContextPort } from '@memoflow/time';
 
@@ -150,6 +155,8 @@ export interface TaskModuleUseCases {
 export interface TaskModuleInstance {
   readonly taskPlanRepository: ITaskPlanRepository;
   readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
+  readonly canonicalRestore: TaskCanonicalRestoreService;
+  readonly portableCapability: TaskPortableCapability;
   readonly useCases: TaskModuleUseCases;
   readonly api: TaskApplicationPort;
   start(): void;
@@ -348,6 +355,12 @@ export function createTaskModule(dependencies: TaskModuleDependencies): TaskModu
     ...normalizeRuntimeContributions(dependencies.runtimeContributions),
   ];
   const useCases = createTaskUseCases(dependencies);
+  const canonicalRestore = new TaskCanonicalRestoreService(dependencies.taskWriteTransactionRunner);
+  const portableCapability = createTaskPortableCapability(
+    taskPlanRepository,
+    taskOccurrenceRepository,
+    canonicalRestore,
+  );
   let started = false;
 
   // The API facade simply exposes the assembled use cases.
@@ -397,6 +410,8 @@ export function createTaskModule(dependencies: TaskModuleDependencies): TaskModu
   return {
     taskPlanRepository,
     taskOccurrenceRepository,
+    canonicalRestore,
+    portableCapability,
     useCases,
     api,
     async start(): Promise<void> {
