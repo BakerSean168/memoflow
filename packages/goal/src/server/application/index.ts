@@ -90,3 +90,5 @@ export type {
   GoalWorkspaceKnowledgeProjection,
   GoalWorkspaceKnowledgeContextReadPort,
 } from './ports/goal-workspace-read.ports';
+
+export { GoalPortableCapability, createGoalPortableCapability } from './goal-portability';

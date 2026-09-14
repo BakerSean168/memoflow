@@ -1,6 +1,7 @@
 /** Shared personal classification contract (ADR-054 / ADR-103). */
 import { z } from 'zod';
 import type { Instant } from '../../primitives/instant';
+import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
 
 /** Canonical Shared Label RGB color. Runtime contract is exactly #RRGGBB. */
 export type LabelColor = `#${string}`;
@@ -71,3 +72,41 @@ export interface ListLabelsQuery {
   readonly search?: string | null;
   readonly limit?: number;
 }
+
+/** Owner-owned payload for the `labels@3` portability capability. */
+export const LabelPortableItemV3Schema = z
+  .object({
+    ref: PortableReferenceV3Schema,
+    name: z.string().trim().min(1).max(50),
+    color: LabelColorSchema.nullable(),
+  })
+  .strict();
+export type LabelPortableItemV3 = z.infer<typeof LabelPortableItemV3Schema>;
+
+export const LabelPortablePayloadV3Schema = z
+  .object({ labels: z.array(LabelPortableItemV3Schema).max(500) })
+  .strict()
+  .superRefine((payload, ctx) => {
+    const names = new Set<string>();
+    const refs = new Set<string>();
+    payload.labels.forEach((label, index) => {
+      const normalized = label.name.trim().toLocaleLowerCase();
+      if (names.has(normalized)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['labels', index, 'name'],
+          message: `Duplicate portable label name: ${label.name}`,
+        });
+      }
+      if (refs.has(label.ref)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['labels', index, 'ref'],
+          message: `Duplicate portable label ref: ${label.ref}`,
+        });
+      }
+      names.add(normalized);
+      refs.add(label.ref);
+    });
+  });
+export type LabelPortablePayloadV3 = z.infer<typeof LabelPortablePayloadV3Schema>;

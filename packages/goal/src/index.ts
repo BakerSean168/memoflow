@@ -23,6 +23,8 @@ export {
   createGoalPowerSyncDeletionTransactionRunner,
   createGoalRuntimeContribution,
   createGoalEventListenersRuntime,
+  createGoalPortableCapability,
+  GoalPortableCapability,
   createGoalUseCases,
   GoalWorkspaceQueryService,
   normalizeGoalRuntimeContributions,

@@ -11,5 +11,9 @@ export { normalizeLabelName, validateLabelName, normalizeLabelColor } from './do
 export type { LabelRecord, NewLabelRecord } from './domain/label';
 export type { LabelListOptions, LabelRepository } from './domain/label-repository';
 export { LabelService, type LabelServiceOptions } from './application/label-service';
+export {
+  LabelPortableCapability,
+  createLabelPortableCapability,
+} from './application/label-portability';
 export { PrismaLabelRepository } from './infrastructure/prisma/prisma-label.repository';
 export { PowerSyncLabelRepository } from './infrastructure/powersync/powersync-label.repository';

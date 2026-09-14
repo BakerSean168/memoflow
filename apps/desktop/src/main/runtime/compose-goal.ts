@@ -58,6 +58,7 @@ import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import {
   createGoalEventListenersRuntime,
   createGoalModule,
+  createGoalPortableCapability,
   createGoalPowerSyncRepositories,
   createGoalPowerSyncDeletionTransactionRunner,
   createGoalRuntimeContribution,
@@ -106,6 +107,8 @@ export interface ComposeGoalResult {
   readonly module: GoalElectronModuleDef;
   /** Canonical transport-neutral application port from the SAME module instance. */
   readonly applicationPort: GoalApplicationPort;
+  /** Owner-provided V3 data portability capability from the same module instance. */
+  readonly portableCapability: ReturnType<typeof createGoalPortableCapability>;
   /** Instance-bound repository view for desktop consumers (dashboard/AI). 供 desktop 消费者（dashboard/AI）使用的 instance-bound repository view。 */
   readonly repositories: {
     readonly goalRepository: IGoalRepository;
@@ -179,6 +182,7 @@ export function composeGoal(dependencies: ComposeGoalDependencies): ComposeGoalR
   return {
     module: createGoalElectronModule({ instance }),
     applicationPort: instance.api,
+    portableCapability: createGoalPortableCapability(instance.api),
     repositories: {
       goalRepository,
       goalRecordRepository,
