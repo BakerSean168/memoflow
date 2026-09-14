@@ -373,7 +373,9 @@ async function registerBusinessModules(
   const goalWorkspaceElectronModule = createGoalWorkspaceElectronModule({
     port: goalWorkspaceService,
   });
-  const taskWorkspaceElectronModule = createTaskWorkspaceElectronModule({ port: taskWorkspaceService });
+  const taskWorkspaceElectronModule = createTaskWorkspaceElectronModule({
+    port: taskWorkspaceService,
+  });
 
   const dashboardRepositories: DashboardReadDependencies = {
     goalRepository: goalComposed.repositories.goalRepository,
@@ -516,6 +518,7 @@ async function registerBusinessModules(
   const dataPortabilityElectronModule = composeDataPortability({
     db,
     portableCapabilities: [
+      accountComposed.portableCapability,
       settingElectronModule.portableCapability,
       notificationComposed.module.portableCapability,
     ],

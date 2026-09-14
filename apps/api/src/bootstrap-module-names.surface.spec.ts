@@ -13,7 +13,7 @@ describe('api bootstrap module names (elegance E5b)', () => {
   const server = readFileSync(resolve(dir, 'server.ts'), 'utf8');
 
   it('example registers composed handles; no retired account module alias in bootstrap', () => {
-    expect(bootstrap).toContain('.register(accountApiModule)');
+    expect(bootstrap).toContain('.register(accountApiModule.module)');
     expect(bootstrap).toContain('Residual E5b');
     // Ban the historical fake module name in docs/example (E5 dead-domain).
     expect(bootstrap).not.toMatch(/LegacyAccountModule/);
@@ -22,8 +22,10 @@ describe('api bootstrap module names (elegance E5b)', () => {
 
   it('server wires account through composeAccount as the account API module', () => {
     expect(server).toContain("from './runtime/compose-account'");
-    expect(server).toMatch(/composeAccount\(\{\s*db: prisma,\s*cloudAuth,\s*clock: createSystemClock\(\),?\s*\}/);
-    expect(server).toContain('.register(accountApiModule)');
+    expect(server).toMatch(
+      /composeAccount\(\{\s*db: prisma,\s*cloudAuth,\s*clock: createSystemClock\(\),?\s*\}/,
+    );
+    expect(server).toContain('.register(accountApiModule.module)');
     expect(server).not.toMatch(/LegacyAccountModule/);
   });
 });

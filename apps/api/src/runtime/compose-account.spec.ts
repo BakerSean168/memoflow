@@ -124,12 +124,15 @@ describe('composeAccount assembly order', () => {
     expect(createAccountApiModule).toHaveBeenCalledWith({ instance });
   });
 
-  it('returns a module handle with name Account plus register and destroy', () => {
-    const handle = composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
+  it('returns the pure module handle plus the Account-owned portability capability', () => {
+    const composed = composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
 
-    expect(handle).toMatchObject({ name: 'Account' });
-    expect(typeof handle.register).toBe('function');
-    expect(typeof handle.destroy).toBe('function');
+    expect(composed.module).toMatchObject({ name: 'Account' });
+    expect(typeof composed.module.register).toBe('function');
+    expect(typeof composed.module.destroy).toBe('function');
+    expect(composed.portableCapability).toBe(
+      createAccountModule.mock.results[0].value.portableCapability,
+    );
   });
 });
 
@@ -155,7 +158,7 @@ describe('composeAccount structural registration', () => {
   });
 
   it('mounts /accounts on the router and starts the owned instance', () => {
-    const handle = composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
+    const composed = composeAccount({ db: fakeDb, cloudAuth: fakeCloudAuth, clock: fakeClock });
 
     const instance = createAccountModule.mock.results[0].value;
     const startSpy = vi.spyOn(instance, 'start');
@@ -171,12 +174,12 @@ describe('composeAccount structural registration', () => {
       openApiRegistry: undefined,
     };
 
-    expect(() => handle.register(context)).not.toThrow();
+    expect(() => composed.module.register(context)).not.toThrow();
     expect(routerUse).toHaveBeenCalledWith('/accounts', expect.anything());
 
     expect(startSpy).toHaveBeenCalledTimes(1);
 
-    handle.destroy?.();
+    composed.module.destroy?.();
     expect(disposeSpy).toHaveBeenCalledTimes(1);
   });
 });

@@ -233,6 +233,7 @@ async function bootstrap(): Promise<void> {
   const dataPortabilityApiModule = composeDataPortability({
     db: prisma,
     portableCapabilities: [
+      accountApiModule.portableCapability,
       settingApiModule.portableCapability,
       notificationApiModule.module.portableCapability,
     ],
@@ -362,7 +363,7 @@ async function bootstrap(): Promise<void> {
   const app = await bootstrapper
     // === 核心：白名单注册 ===
     .register(governanceApiModule) // ✅ 治理模块 (runtime composer)
-    .register(accountApiModule) // ✅ 账户模块 (runtime composer)
+    .register(accountApiModule.module) // ✅ 账户模块 (runtime composer)
     .register(notificationApiModule.module) // ✅ 通知模块 (runtime composer)
     .register(reminderComposed.module) // ✅ 提醒模块 (runtime composer)
     .register(repositoryApiModule) // ✅ 仓库模块 (runtime composer)

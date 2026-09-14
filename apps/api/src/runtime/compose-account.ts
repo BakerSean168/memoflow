@@ -91,16 +91,24 @@ export interface ComposeAccountDependencies {
  * 4. createAccountApiModule({ instance }) —— 把实例绑定到 IApiModule handle
  *    （只负责 transport 与生命周期）。
  *
- * The returned handle is already fully bound: ApiBootstrapper.register() must
- * be called with it once, and its destroy() disposes the owned instance.
+ * The returned composition exposes the pure transport handle separately from
+ * the Account-owned V3 portability capability. The host registers `module`
+ * once and passes `portableCapability` to Data Portability; the transport handle
+ * itself stays free of cross-feature concerns.
  *
- * 返回的 handle 已完全绑定：ApiBootstrapper.register() 必须恰好注册一次，
- * 其 destroy() 会 dispose 所属实例。
+ * 返回的组合对象将纯 transport handle 与 Account 自有的 V3 portability capability
+ * 分开暴露。宿主只注册一次 `module`，并把 `portableCapability` 交给 Data Portability；
+ * transport handle 本身不承载跨 feature 关注点。
  *
  * @param dependencies - ComposeAccountDependencies with the runtime Prisma client and CloudAuth port.
- * @returns AccountApiModuleDef — an already-bound IApiModule-compatible handle.
+ * @returns ComposedAccountApi — the pure API module plus Account-owned portability capability.
  */
-export function composeAccount(dependencies: ComposeAccountDependencies): AccountApiModuleDef {
+export interface ComposedAccountApi {
+  readonly module: AccountApiModuleDef;
+  readonly portableCapability: ReturnType<typeof createAccountModule>['portableCapability'];
+}
+
+export function composeAccount(dependencies: ComposeAccountDependencies): ComposedAccountApi {
   const repositories = createAccountPrismaRepositories({
     db: dependencies.db,
     clock: dependencies.clock,
@@ -121,5 +129,8 @@ export function composeAccount(dependencies: ComposeAccountDependencies): Accoun
     auditRepository: repositories.auditRepository,
   });
 
-  return createAccountApiModule({ instance });
+  return {
+    module: createAccountApiModule({ instance }),
+    portableCapability: instance.portableCapability,
+  };
 }

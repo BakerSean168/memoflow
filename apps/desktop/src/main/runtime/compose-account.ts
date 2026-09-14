@@ -83,6 +83,8 @@ export interface ComposeAccountDesktopDependencies {
 export interface ComposedAccountDesktop {
   /** Already-bound IElectronModule-compatible handle. 已绑定的兼容 IElectronModule 的 handle。 */
   readonly module: AccountElectronModuleDef;
+  /** Account-owned Data Portability V3 capability. */
+  readonly portableCapability: ReturnType<typeof createAccountModule>['portableCapability'];
   /** Instance-bound account repository for desktop consumers. 供 desktop 消费者使用的 instance-bound 账户 repository。 */
   readonly repositories: {
     readonly accountRepository: IAccountRepository;
@@ -158,6 +160,7 @@ export function composeAccount(
       syncOptions: dependencies.syncOptions,
       profileSync,
     }),
+    portableCapability: instance.portableCapability,
     repositories: {
       accountRepository,
     },
