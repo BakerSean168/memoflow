@@ -29,6 +29,7 @@ export {
   GoalWorkspaceQueryService,
   normalizeGoalRuntimeContributions,
   type GoalApplicationPort,
+  type GoalPortabilityApplicationPort,
   type GoalWorkspaceKnowledgeContextReadPort,
   type GoalWorkspaceKnowledgeProjection,
   type GoalWorkspaceKnowledgeRelationReadPort,

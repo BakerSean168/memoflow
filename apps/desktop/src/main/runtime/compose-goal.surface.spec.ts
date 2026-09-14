@@ -48,7 +48,9 @@ describe('goal desktop runtime composer surface', () => {
     expect(composer).toContain('relationCleanupFactory');
     expect(composer).toContain('repositories');
     expect(composer).toContain('createGoalPortableCapability');
-    expect(composer).toContain('portableCapability: createGoalPortableCapability(instance.api)');
+    expect(composer).toContain(
+      'portableCapability: createGoalPortableCapability(instance.api, instance.portability)',
+    );
     expect(composer).toContain("from '@memoflow/goal/electron'");
     expect(composer).not.toMatch(/@memoflow\/goal\/server/);
     expect(composer).not.toMatch(/@memoflow\/goal\/infrastructure/);

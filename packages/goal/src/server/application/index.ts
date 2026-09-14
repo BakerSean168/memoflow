@@ -67,6 +67,13 @@ export {
 export * from './errors/weight-snapshot-errors';
 
 export type { GoalApplicationPort } from './goal.application.port';
+export type {
+  GoalPortabilityApplicationPort,
+  GoalPortabilityCreateInput,
+  GoalPortabilityKeyResultInput,
+  GoalPortabilityKeyResult,
+  GoalPortabilitySnapshot,
+} from './goal-portability.application.port';
 
 export { GoalReviewContextBuilder } from './services/goal-review-context-builder';
 

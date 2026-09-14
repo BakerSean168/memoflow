@@ -1,23 +1,24 @@
 import { createHash } from 'node:crypto';
 import type {
-  GoalClientDTO,
   GoalMutationReceipt,
   GoalPortableDefinitionV3,
   GoalPortablePayloadV3,
 } from '@memoflow/contracts/goal';
-import { GoalPortablePayloadV3Schema, GoalStatus, GoalSystemView } from '@memoflow/contracts/goal';
+import { GoalPortablePayloadV3Schema, GoalStatus } from '@memoflow/contracts/goal';
 import type {
   PortableCapability,
   PortableCapabilityExecutionContext,
   PortableCapabilityReceipt,
   PortableReferenceV3,
 } from '@memoflow/contracts/data-portability';
-import type { IdentityId } from '@memoflow/contracts/primitives';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { GoalApplicationPort } from './goal.application.port';
-
-const PAGE_SIZE = 100;
+import type {
+  GoalPortabilityApplicationPort,
+  GoalPortabilityCreateInput,
+  GoalPortabilitySnapshot,
+} from './goal-portability.application.port';
 
 function stableUuid(seed: string): string {
   const hex = createHash('sha256').update(seed, 'utf8').digest('hex').slice(0, 32).split('');
@@ -76,11 +77,12 @@ function sameStringSet(left: readonly string[], right: readonly string[]): boole
 }
 
 function assertExistingGoalMatchesPortableDefinition(
-  existing: GoalClientDTO,
+  existing: GoalPortabilitySnapshot,
   goal: GoalPortableDefinitionV3,
   batchId: string,
   resolvedLabelIds: readonly string[],
 ): void {
+  assertLifecycleCanConverge(existing, goal);
   const conflict = (field: string): never => {
     throw new Error(
       `goals@3 deterministic target conflicts with portable definition ${goal.ref}: ${field}`,
@@ -103,7 +105,7 @@ function assertExistingGoalMatchesPortableDefinition(
     conflict('labels');
   }
 
-  const existingKeyResults = [...(existing.keyResults ?? [])].sort((a, b) => a.order - b.order);
+  const existingKeyResults = [...existing.keyResults].sort((a, b) => a.sortOrder - b.sortOrder);
   if (existingKeyResults.length !== goal.keyResults.length) conflict('keyResults.length');
 
   for (const [index, portableKeyResult] of goal.keyResults.entries()) {
@@ -125,6 +127,9 @@ function assertExistingGoalMatchesPortableDefinition(
     if (current.progress.currentValue !== portableKeyResult.currentValue) {
       conflict(`keyResults[${index}].currentValue`);
     }
+    if (current.progress.trackingBaseValue !== portableKeyResult.trackingBaseValue) {
+      conflict(`keyResults[${index}].trackingBaseValue`);
+    }
     if (current.progress.targetValue !== portableKeyResult.targetValue) {
       conflict(`keyResults[${index}].targetValue`);
     }
@@ -133,6 +138,38 @@ function assertExistingGoalMatchesPortableDefinition(
     }
     if (current.progress.unit !== portableKeyResult.unit) conflict(`keyResults[${index}].unit`);
     if (current.weight !== portableKeyResult.weight) conflict(`keyResults[${index}].weight`);
+  }
+}
+
+function assertLifecycleCanConverge(
+  existing: Pick<GoalPortabilitySnapshot, 'status' | 'archivedAt' | 'deletedAt'>,
+  goal: GoalPortableDefinitionV3,
+): void {
+  if (existing.deletedAt !== null) {
+    throw new Error(
+      `goals@3 deterministic target lifecycle conflicts with portable goal ${goal.ref}: deleted target cannot be replayed`,
+    );
+  }
+  const allowedPrefixes: Record<GoalStatus, readonly GoalStatus[]> = {
+    [GoalStatus.Planned]: [GoalStatus.Planned],
+    [GoalStatus.InProgress]: [GoalStatus.Planned, GoalStatus.InProgress],
+    [GoalStatus.Completed]: [GoalStatus.Planned, GoalStatus.InProgress, GoalStatus.Completed],
+    [GoalStatus.Abandoned]: [GoalStatus.Planned, GoalStatus.InProgress, GoalStatus.Abandoned],
+  };
+  if (!allowedPrefixes[goal.status].includes(existing.status)) {
+    throw new Error(
+      `goals@3 deterministic target lifecycle conflicts with portable goal ${goal.ref}: ${existing.status} cannot converge to ${goal.status}`,
+    );
+  }
+  if (existing.archivedAt !== null && existing.status !== goal.status) {
+    throw new Error(
+      `goals@3 deterministic target lifecycle conflicts with portable goal ${goal.ref}: archived goal cannot change status`,
+    );
+  }
+  if (!goal.archived && existing.archivedAt !== null) {
+    throw new Error(
+      `goals@3 deterministic target lifecycle conflicts with portable goal ${goal.ref}: archived target cannot converge to unarchived`,
+    );
   }
 }
 
@@ -145,116 +182,79 @@ async function transitionGoal(
   let current = receipt;
   const goalId = current.goalId;
   const identityId = context.identityId;
-
   const currentStatus = current.readModel.status;
-  const allowedPrefixes: Record<GoalStatus, readonly GoalStatus[]> = {
-    [GoalStatus.Planned]: [GoalStatus.Planned],
-    [GoalStatus.InProgress]: [GoalStatus.Planned, GoalStatus.InProgress],
-    [GoalStatus.Completed]: [GoalStatus.Planned, GoalStatus.InProgress, GoalStatus.Completed],
-    [GoalStatus.Abandoned]: [GoalStatus.Planned, GoalStatus.InProgress, GoalStatus.Abandoned],
+  const step = async (
+    operation: (
+      id: string,
+      identity: string,
+      version: number,
+    ) => Promise<Result<GoalMutationReceipt>>,
+    name: string,
+  ) => {
+    current = requireResult(await operation(goalId, identityId, current.goalVersion), name);
   };
-  if (!allowedPrefixes[goal.status].includes(currentStatus)) {
-    throw new Error(
-      `goals@3 deterministic target lifecycle conflicts with portable goal ${goal.ref}: ${currentStatus} cannot converge to ${goal.status}`,
-    );
-  }
-  if (!goal.archived && current.readModel.archivedAt !== null) {
-    throw new Error(
-      `goals@3 deterministic target lifecycle conflicts with portable goal ${goal.ref}: archived target cannot converge to unarchived`,
-    );
-  }
 
-  if (goal.status === GoalStatus.InProgress && current.readModel.status === GoalStatus.Planned) {
-    current = requireResult(
-      await api.activateGoal(goalId, identityId, current.goalVersion),
-      'activate portable goal',
-    );
+  if (goal.status === GoalStatus.InProgress && currentStatus === GoalStatus.Planned) {
+    await step(api.activateGoal, 'activate portable goal');
   } else if (goal.status === GoalStatus.Completed) {
-    if (current.readModel.status === GoalStatus.Planned) {
-      current = requireResult(
-        await api.activateGoal(goalId, identityId, current.goalVersion),
-        'activate portable goal before completion',
-      );
+    if (currentStatus === GoalStatus.Planned) {
+      await step(api.activateGoal, 'activate portable goal before completion');
     }
     if (current.readModel.status !== GoalStatus.Completed) {
-      current = requireResult(
-        await api.completeGoal(goalId, identityId, current.goalVersion),
-        'complete portable goal',
-      );
+      await step(api.completeGoal, 'complete portable goal');
     }
-  } else if (
-    goal.status === GoalStatus.Abandoned &&
-    current.readModel.status !== GoalStatus.Abandoned
-  ) {
-    current = requireResult(
-      await api.abandonGoal(goalId, identityId, current.goalVersion),
-      'abandon portable goal',
-    );
+  } else if (goal.status === GoalStatus.Abandoned && currentStatus !== GoalStatus.Abandoned) {
+    await step(api.abandonGoal, 'abandon portable goal');
   }
 
   if (goal.archived && current.readModel.archivedAt === null) {
-    current = requireResult(
-      await api.archiveGoal(goalId, identityId, current.goalVersion),
-      'archive portable goal',
-    );
+    await step(api.archiveGoal, 'archive portable goal');
   }
   return current;
 }
 
-/** Goal-owned definition/KR capability. Goal history remains a later PORT-1610 capability. */
 export class GoalPortableCapability implements PortableCapability<GoalPortablePayloadV3> {
   readonly key = 'goals' as const;
   readonly schemaVersion = 3;
   readonly dependsOn = ['labels'] as const;
   readonly payloadSchema = GoalPortablePayloadV3Schema;
 
-  constructor(private readonly api: GoalApplicationPort) {}
+  constructor(
+    private readonly api: GoalApplicationPort,
+    private readonly portability: GoalPortabilityApplicationPort,
+  ) {}
 
   async export(context: PortableCapabilityExecutionContext): Promise<GoalPortablePayloadV3> {
     const goals: GoalPortablePayloadV3['goals'] = [];
-    let page = 1;
-    while (true) {
-      const result = requireResult(
-        await this.api.listGoals({
-          identityId: context.identityId as IdentityId,
-          systemView: GoalSystemView.All,
-          page,
-          pageSize: PAGE_SIZE,
-          includeKeyResults: true,
-          includeReviews: false,
-        }),
-        'list portable goals',
-      );
-      for (const goal of result.data) {
-        const goalRef = context.references.declareExportReference(this.key, goal.id);
-        goals.push({
-          ref: goalRef,
-          name: goal.name,
-          summary: goal.summary,
-          status: goal.status,
-          startDate: goal.startDate,
-          target: goal.target,
-          reminderConfig: goal.reminderConfig,
-          archived: goal.archivedAt !== null,
-          labelRefs: goal.labels.map((label) =>
-            context.references.resolveExportReference('labels', label.id),
-          ),
-          keyResults: (goal.keyResults ?? []).map((keyResult) => ({
-            ref: context.references.declareExportReference('goals', keyResult.id),
-            title: keyResult.title,
-            description: keyResult.description,
-            calculationMethod: keyResult.progress.aggregationMethod,
-            initialValue: keyResult.progress.initialValue,
-            currentValue: keyResult.progress.currentValue,
-            targetValue: keyResult.progress.targetValue,
-            target: keyResult.target,
-            unit: keyResult.progress.unit,
-            weight: keyResult.weight,
-          })),
-        });
-      }
-      if (!result.pagination.hasMore) break;
-      page += 1;
+    const snapshots = await this.portability.listGoalSnapshots(context.identityId);
+    for (const goal of snapshots) {
+      const goalRef = context.references.declareExportReference(this.key, goal.id);
+      goals.push({
+        ref: goalRef,
+        name: goal.name,
+        summary: goal.summary,
+        status: goal.status,
+        startDate: goal.startDate,
+        target: goal.target,
+        reminderConfig: goal.reminderConfig,
+        archived: goal.archivedAt !== null,
+        labelRefs: goal.labels.map((label) =>
+          context.references.resolveExportReference('labels', label.id),
+        ),
+        keyResults: goal.keyResults.map((keyResult) => ({
+          ref: context.references.declareExportReference('goals', keyResult.id),
+          title: keyResult.title,
+          description: keyResult.description,
+          calculationMethod: keyResult.progress.aggregationMethod,
+          initialValue: keyResult.progress.initialValue,
+          currentValue: keyResult.progress.currentValue,
+          trackingBaseValue: keyResult.progress.trackingBaseValue,
+          targetValue: keyResult.progress.targetValue,
+          target: keyResult.target,
+          unit: keyResult.progress.unit,
+          weight: keyResult.weight,
+        })),
+      });
     }
     return { goals };
   }
@@ -269,10 +269,17 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
     let skipped = 0;
     for (const goal of target.goals) {
       const id = deterministicGoalId(batchId, goal.ref);
-      const current = await this.api.getGoal(id, context.identityId, true);
-      if (current.ok) skipped += 1;
-      else if (current.error.code === 'NOT_FOUND') created += 1;
-      else requireResult(current, 'inspect portable goal');
+      const current = await this.portability.getGoalSnapshot(id, context.identityId);
+      if (current) {
+        const labelIds = goal.labelRefs.map((ref) =>
+          context.references.resolveImportedReference(ref),
+        );
+        assertExistingGoalMatchesPortableDefinition(current, goal, batchId, labelIds);
+        assertLifecycleCanConverge(current, goal);
+        skipped += 1;
+      } else {
+        created += 1;
+      }
     }
     return {
       created,
@@ -298,43 +305,48 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
       const labelIds = goal.labelRefs.map((ref) =>
         context.references.resolveImportedReference(ref),
       );
-      const existing = await this.api.getGoal(id, context.identityId, true);
-      if (existing.ok) {
-        assertExistingGoalMatchesPortableDefinition(existing.data, goal, batchId, labelIds);
+      const existing = await this.portability.getGoalSnapshot(id, context.identityId);
+      if (existing) {
+        assertExistingGoalMatchesPortableDefinition(existing, goal, batchId, labelIds);
+        assertLifecycleCanConverge(existing, goal);
         skipped += 1;
-      } else if (existing.error.code === 'NOT_FOUND') {
-        created += 1;
       } else {
-        requireResult(existing, 'inspect portable goal');
+        created += 1;
       }
 
+      const input: GoalPortabilityCreateInput = {
+        id: id as never,
+        name: goal.name,
+        summary: goal.summary ?? undefined,
+        startDate: goal.startDate ?? undefined,
+        target: goal.target ?? undefined,
+        reminderConfig: goal.reminderConfig,
+        labelIds,
+        initialKeyResults: goal.keyResults.map((keyResult) => ({
+          id: deterministicKeyResultId(batchId, keyResult.ref) as never,
+          title: keyResult.title,
+          description: keyResult.description,
+          calculationMethod: keyResult.calculationMethod,
+          initialValue: keyResult.initialValue,
+          currentValue: keyResult.currentValue,
+          trackingBaseValue: keyResult.trackingBaseValue,
+          targetValue: keyResult.targetValue,
+          target: keyResult.target,
+          unit: keyResult.unit,
+          weight: keyResult.weight,
+        })),
+      };
       let receipt = requireResult(
-        await this.api.createGoal(
-          {
-            id: id as never,
-            name: goal.name,
-            summary: goal.summary ?? undefined,
-            startDate: goal.startDate ?? undefined,
-            target: goal.target ?? undefined,
-            reminderConfig: goal.reminderConfig,
-            labelIds,
-            initialKeyResults: goal.keyResults.map((keyResult) => ({
-              id: deterministicKeyResultId(batchId, keyResult.ref) as never,
-              title: keyResult.title,
-              description: keyResult.description,
-              calculationMethod: keyResult.calculationMethod,
-              initialValue: keyResult.initialValue,
-              currentValue: keyResult.currentValue,
-              targetValue: keyResult.targetValue,
-              target: keyResult.target,
-              unit: keyResult.unit,
-              weight: keyResult.weight,
-            })),
-          },
-          systemContext(context, goal.ref),
-        ),
+        await this.portability.createGoalForPortability(input, systemContext(context, goal.ref)),
         'create portable goal',
       );
+
+      const committed = await this.portability.getGoalSnapshot(id, context.identityId);
+      if (!committed) {
+        throw new Error(`goals@3 portable goal was not persisted: ${goal.ref}`);
+      }
+      assertExistingGoalMatchesPortableDefinition(committed, goal, batchId, labelIds);
+      assertLifecycleCanConverge(committed, goal);
 
       context.references.bindImportedReference(goal.ref, receipt.goalId);
       for (const keyResult of goal.keyResults) {
@@ -357,6 +369,9 @@ export class GoalPortableCapability implements PortableCapability<GoalPortablePa
   }
 }
 
-export function createGoalPortableCapability(api: GoalApplicationPort): GoalPortableCapability {
-  return new GoalPortableCapability(api);
+export function createGoalPortableCapability(
+  api: GoalApplicationPort,
+  portability: GoalPortabilityApplicationPort,
+): GoalPortableCapability {
+  return new GoalPortableCapability(api, portability);
 }

@@ -7,6 +7,11 @@ import type {
 import { GoalStatus, KeyResultCalculationMethod } from '@memoflow/contracts/goal';
 import { error, ok } from '@memoflow/contracts/result';
 import type { GoalApplicationPort } from './goal.application.port';
+import type {
+  GoalPortabilityApplicationPort,
+  GoalPortabilityCreateInput,
+  GoalPortabilitySnapshot,
+} from './goal-portability.application.port';
 import { GoalPortableCapability } from './goal-portability';
 
 function referenceContext() {
@@ -68,6 +73,7 @@ function portableGoalPayload(status: GoalStatus = GoalStatus.Planned) {
             calculationMethod: KeyResultCalculationMethod.Sum,
             initialValue: 0,
             currentValue: 50,
+            trackingBaseValue: 40,
             targetValue: 100,
             target: null,
             unit: '%',
@@ -101,6 +107,7 @@ function readModelFromCreateInput(
         progress: {
           initialValue: keyResult.initialValue,
           currentValue: keyResult.currentValue,
+          trackingBaseValue: keyResult.trackingBaseValue ?? keyResult.currentValue,
           targetValue: keyResult.targetValue,
           aggregationMethod: keyResult.calculationMethod,
           unit: keyResult.unit,
@@ -120,6 +127,66 @@ function readModelFromCreateInput(
 }
 
 type ReplayReadModel = ReturnType<typeof readModelFromCreateInput>;
+
+function portabilityFromApi(api: GoalApplicationPort): GoalPortabilityApplicationPort {
+  const snapshots = new Map<string, GoalPortabilitySnapshot>();
+  const toSnapshot = (model: ReplayReadModel): GoalPortabilitySnapshot => ({
+    id: model.id as never,
+    identityId: model.identityId as never,
+    name: model.name,
+    summary: model.summary,
+    status: model.status,
+    startDate: model.startDate,
+    target: model.target,
+    archivedAt: model.archivedAt,
+    deletedAt: model.deletedAt,
+    sortOrder: model.sortOrder,
+    createdAt: model.createdAt,
+    reminderConfig: model.reminderConfig,
+    labels: model.labels,
+    keyResults: model.keyResults.map((keyResult) => ({
+      id: keyResult.id as never,
+      title: keyResult.title,
+      description: keyResult.description,
+      progress: keyResult.progress as never,
+      target: keyResult.target,
+      weight: keyResult.weight,
+      sortOrder: keyResult.order,
+      createdAt: keyResult.createdAt,
+      updatedAt: keyResult.updatedAt,
+    })),
+  });
+  return {
+    async listGoalSnapshots(identityId) {
+      const result = await api.listGoals({
+        identityId: identityId as never,
+        systemView: 'all' as never,
+        page: 1,
+        pageSize: 100,
+        includeKeyResults: true,
+        includeReviews: false,
+      });
+      if (!result.ok) throw new Error(result.error.message);
+      return result.data.data.map((model) => toSnapshot(model as unknown as ReplayReadModel));
+    },
+    async getGoalSnapshot(id, identityId) {
+      const existing = snapshots.get(id);
+      if (existing) return existing;
+      const result = await api.getGoal(id, identityId, true);
+      if (!result.ok) return null;
+      const snapshot = toSnapshot(result.data as unknown as ReplayReadModel);
+      snapshots.set(id, snapshot);
+      return snapshot;
+    },
+    async createGoalForPortability(input: GoalPortabilityCreateInput, cx) {
+      const result = await api.createGoal(input, cx);
+      if (result.ok) {
+        snapshots.set(input.id as string, toSnapshot(readModelFromCreateInput(input)));
+      }
+      return result;
+    },
+  };
+}
 
 function receipt(overrides: Record<string, unknown> = {}) {
   return {
@@ -184,6 +251,7 @@ describe('GoalPortableCapability', () => {
                   progress: {
                     initialValue: 0,
                     currentValue: 50,
+                    trackingBaseValue: 40,
                     targetValue: 100,
                     aggregationMethod: KeyResultCalculationMethod.Sum,
                     unit: '%',
@@ -209,7 +277,7 @@ describe('GoalPortableCapability', () => {
     } as unknown as GoalApplicationPort;
     const { context } = referenceContext();
 
-    const payload = await new GoalPortableCapability(api).export(context);
+    const payload = await new GoalPortableCapability(api, portabilityFromApi(api)).export(context);
 
     expect(payload.goals[0]).toMatchObject({
       ref: 'goals:1',
@@ -230,13 +298,13 @@ describe('GoalPortableCapability', () => {
       .mockResolvedValueOnce(error('NOT_FOUND', 'missing'))
       .mockResolvedValueOnce(ok(receipt().readModel));
     const api = { getGoal } as unknown as GoalApplicationPort;
-    const capability = new GoalPortableCapability(api);
+    const capability = new GoalPortableCapability(api, portabilityFromApi(api));
     const { context } = referenceContext();
     const payload = {
       goals: [
         {
           ref: 'goals:1' as PortableReferenceV3,
-          name: 'A',
+          name: 'Ship vNext',
           summary: null,
           status: GoalStatus.Planned,
           startDate: null,
@@ -268,7 +336,7 @@ describe('GoalPortableCapability', () => {
     } as unknown as GoalApplicationPort;
     const { context, imports } = referenceContext();
 
-    const result = await new GoalPortableCapability(api).apply(
+    const result = await new GoalPortableCapability(api, portabilityFromApi(api)).apply(
       {
         goals: [
           {
@@ -289,6 +357,7 @@ describe('GoalPortableCapability', () => {
                 calculationMethod: KeyResultCalculationMethod.Sum,
                 initialValue: 0,
                 currentValue: 50,
+                trackingBaseValue: 40,
                 targetValue: 100,
                 target: null,
                 unit: '%',
@@ -325,7 +394,10 @@ describe('GoalPortableCapability', () => {
       ),
     } as unknown as GoalApplicationPort;
     const seedContext = referenceContext().context;
-    await new GoalPortableCapability(seedApi).apply(portableGoalPayload(), seedContext);
+    await new GoalPortableCapability(seedApi, portabilityFromApi(seedApi)).apply(
+      portableGoalPayload(),
+      seedContext,
+    );
     const createInput = (seedApi.createGoal as ReturnType<typeof vi.fn>).mock.calls[0]![0];
 
     const existing = readModelFromCreateInput(createInput, {
@@ -333,6 +405,7 @@ describe('GoalPortableCapability', () => {
       version: 7,
       updatedAt: 999,
     });
+    existing.keyResults[0]!.progress.trackingBaseValue = 40;
     const replayReceipt = receipt({
       goalId: createInput.id,
       goalVersion: 7,
@@ -350,7 +423,7 @@ describe('GoalPortableCapability', () => {
     } as unknown as GoalApplicationPort;
     const { context, imports } = referenceContext();
 
-    const result = await new GoalPortableCapability(replayApi).apply(
+    const result = await new GoalPortableCapability(replayApi, portabilityFromApi(replayApi)).apply(
       portableGoalPayload(GoalStatus.InProgress),
       context,
     );
@@ -393,7 +466,7 @@ describe('GoalPortableCapability', () => {
         ),
       ),
     } as unknown as GoalApplicationPort;
-    await new GoalPortableCapability(seedApi).apply(
+    await new GoalPortableCapability(seedApi, portabilityFromApi(seedApi)).apply(
       portableGoalPayload(),
       referenceContext().context,
     );
@@ -406,7 +479,7 @@ describe('GoalPortableCapability', () => {
     } as unknown as GoalApplicationPort;
 
     await expect(
-      new GoalPortableCapability(replayApi).apply(
+      new GoalPortableCapability(replayApi, portabilityFromApi(replayApi)).apply(
         portableGoalPayload(GoalStatus.InProgress),
         referenceContext().context,
       ),
@@ -431,7 +504,7 @@ describe('GoalPortableCapability', () => {
             ok(receipt({ goalId: input.id, readModel: readModelFromCreateInput(input) })),
           ),
       } as unknown as GoalApplicationPort;
-      await new GoalPortableCapability(seedApi).apply(
+      await new GoalPortableCapability(seedApi, portabilityFromApi(seedApi)).apply(
         portableGoalPayload(),
         referenceContext().context,
       );
@@ -450,7 +523,7 @@ describe('GoalPortableCapability', () => {
       } as unknown as GoalApplicationPort;
 
       await expect(
-        new GoalPortableCapability(replayApi).apply(
+        new GoalPortableCapability(replayApi, portabilityFromApi(replayApi)).apply(
           portableGoalPayload(target),
           referenceContext().context,
         ),
@@ -467,7 +540,7 @@ describe('GoalPortableCapability', () => {
           ok(receipt({ goalId: input.id, readModel: readModelFromCreateInput(input) })),
         ),
     } as unknown as GoalApplicationPort;
-    await new GoalPortableCapability(seedApi).apply(
+    await new GoalPortableCapability(seedApi, portabilityFromApi(seedApi)).apply(
       portableGoalPayload(),
       referenceContext().context,
     );
@@ -483,7 +556,7 @@ describe('GoalPortableCapability', () => {
     } as unknown as GoalApplicationPort;
 
     await expect(
-      new GoalPortableCapability(replayApi).apply(
+      new GoalPortableCapability(replayApi, portabilityFromApi(replayApi)).apply(
         portableGoalPayload(),
         referenceContext().context,
       ),

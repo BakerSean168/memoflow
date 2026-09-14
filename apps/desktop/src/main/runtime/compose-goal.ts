@@ -182,7 +182,7 @@ export function composeGoal(dependencies: ComposeGoalDependencies): ComposeGoalR
   return {
     module: createGoalElectronModule({ instance }),
     applicationPort: instance.api,
-    portableCapability: createGoalPortableCapability(instance.api),
+    portableCapability: createGoalPortableCapability(instance.api, instance.portability),
     repositories: {
       goalRepository,
       goalRecordRepository,

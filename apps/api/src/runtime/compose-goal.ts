@@ -161,7 +161,7 @@ export function composeGoal(dependencies: ComposeGoalDependencies): ComposedGoal
   return {
     module: createGoalApiModule({ instance }),
     applicationPort: instance.api,
-    portableCapability: createGoalPortableCapability(instance.api),
+    portableCapability: createGoalPortableCapability(instance.api, instance.portability),
     repositories: { goalRepository, goalRecordRepository },
   };
 }

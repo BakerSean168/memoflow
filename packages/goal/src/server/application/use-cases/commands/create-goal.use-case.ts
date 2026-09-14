@@ -22,10 +22,16 @@ import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
 import { createLogger } from '@memoflow/utils/logger';
 import type { GoalWriteTransactionRunner } from './goal-write-support';
+import type {
+  GoalPortabilityApplicationPort,
+  GoalPortabilityCreateInput,
+  GoalPortabilitySnapshot,
+} from '../../goal-portability.application.port';
+import { createGoalPortabilitySnapshot } from '../../goal-portability.application.port';
 /**
  * Create Goal Use Case
  */
-export class CreateGoalUseCase {
+export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
   private readonly logger = createLogger('CreateGoalUseCase');
 
   constructor(
@@ -35,6 +41,35 @@ export class CreateGoalUseCase {
   ) {}
 
   async execute(input: CreateGoalReq, cx: ExecutionContext): Promise<Result<GoalMutationReceipt>> {
+    return this.executeInternal(input, cx);
+  }
+
+  async listGoalSnapshots(identityId: string): Promise<GoalPortabilitySnapshot[]> {
+    const goals = await this.goalRepository.findByIdentityId(identityId, {
+      includeChildren: true,
+      systemView: 'all',
+    });
+    return goals.map(createGoalPortabilitySnapshot);
+  }
+
+  async getGoalSnapshot(id: string, identityId: string): Promise<GoalPortabilitySnapshot | null> {
+    const goal = await this.goalRepository.findByIdForIdentity(identityId, id, {
+      includeChildren: true,
+    });
+    return goal ? createGoalPortabilitySnapshot(goal) : null;
+  }
+
+  async createGoalForPortability(
+    input: GoalPortabilityCreateInput,
+    cx: ExecutionContext,
+  ): Promise<Result<GoalMutationReceipt>> {
+    return this.executeInternal(input, cx);
+  }
+
+  private async executeInternal(
+    input: CreateGoalReq | GoalPortabilityCreateInput,
+    cx: ExecutionContext,
+  ): Promise<Result<GoalMutationReceipt>> {
     // 1. 验证输入
     if (!input.name?.trim()) {
       return error('VALIDATION_ERROR', 'Name is required');
@@ -78,6 +113,11 @@ export class CreateGoalUseCase {
           ...keyResult,
           id: keyResult.id ? KeyResultId.of(keyResult.id) : undefined,
           aggregationMethod: keyResult.calculationMethod,
+          trackingBaseValue:
+            'trackingBaseValue' in keyResult
+              ? (keyResult as GoalPortabilityCreateInput['initialKeyResults'][number])
+                  .trackingBaseValue
+              : undefined,
         });
       }
 

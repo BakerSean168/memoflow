@@ -15,6 +15,7 @@ export const GoalPortableKeyResultV3Schema = z
     calculationMethod: z.enum(KeyResultCalculationMethod),
     initialValue: z.number(),
     currentValue: z.number(),
+    trackingBaseValue: z.number(),
     targetValue: z.number(),
     target: GoalTimeframeSchema.nullable(),
     unit: z.string().max(20).nullable(),
