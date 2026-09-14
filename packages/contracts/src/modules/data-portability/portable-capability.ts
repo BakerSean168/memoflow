@@ -41,6 +41,7 @@ export interface PortableCapability<TPayload> {
   readonly dependsOn?: readonly PortableCapabilityKey[];
   readonly payloadSchema: z.ZodType<TPayload>;
   export(context: PortableCapabilityExecutionContext): Promise<TPayload | null>;
+  validateImport?(payload: TPayload, context: PortableCapabilityExecutionContext): Promise<void>;
   dryRun(
     payload: TPayload,
     context: PortableCapabilityExecutionContext,

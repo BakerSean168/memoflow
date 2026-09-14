@@ -142,6 +142,20 @@ describe('AccountProfilePortableCapability', () => {
     expect(capability.dependsOn).toEqual(['preferences']);
   });
 
+  it('validates the host account and birthday before the preferences dependency applies', async () => {
+    const { capability, save } = createFixture();
+    const invalidContext = {
+      ...context,
+      importedCapabilityPayloads: new Map<string, unknown>([['preferences', importedPreferences]]),
+    } satisfies PortableCapabilityExecutionContext;
+    const futureBirthday = { ...target, birthday: '2026-09-11' };
+
+    await expect(capability.validateImport(futureBirthday, invalidContext)).rejects.toThrow(
+      'Birthday cannot be in the future',
+    );
+    expect(save).not.toHaveBeenCalled();
+  });
+
   it('fails closed instead of creating a host account during import', async () => {
     const repository: IAccountRepository = {
       save: vi.fn(async () => undefined),
@@ -153,6 +167,9 @@ describe('AccountProfilePortableCapability', () => {
       getUserTimeContext: async () => createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 }),
     });
 
+    await expect(capability.validateImport(target, context)).rejects.toThrow(
+      'requires an existing host account',
+    );
     await expect(capability.apply(target, context)).rejects.toThrow(
       'requires an existing host account',
     );

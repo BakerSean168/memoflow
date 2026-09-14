@@ -17,6 +17,10 @@ export interface RegisteredPortableCapability {
   readonly schemaVersion: number;
   readonly dependsOn: readonly PortableCapabilityKey[];
   validatePayload(payload: unknown): unknown;
+  validateImportValidated(
+    payload: unknown,
+    context: PortableCapabilityExecutionContext,
+  ): Promise<void>;
   exportValidated(context: PortableCapabilityExecutionContext): Promise<unknown | null>;
   dryRunValidated(
     payload: unknown,
@@ -77,6 +81,10 @@ export class PortableCapabilityRegistry {
       validatePayload(payload) {
         return parsePayload(payload);
       },
+      async validateImportValidated(payload, context) {
+        const parsedPayload = parsePayload(payload);
+        await capability.validateImport?.(parsedPayload, context);
+      },
       async exportValidated(context) {
         const payload = await capability.export(context);
         return payload === null ? null : parsePayload(payload);
@@ -120,7 +128,9 @@ export class PortableCapabilityRegistry {
       temporary.add(key);
       for (const dependency of capability.dependsOn) {
         if (options.requireExplicitDependencies && !explicit.has(dependency)) {
-          throw new Error(`Portable capability ${key} requires missing payload dependency ${dependency}`);
+          throw new Error(
+            `Portable capability ${key} requires missing payload dependency ${dependency}`,
+          );
         }
         visit(dependency, [...path, key]);
       }

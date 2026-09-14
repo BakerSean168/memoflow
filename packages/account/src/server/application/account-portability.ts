@@ -52,6 +52,14 @@ export class AccountProfilePortableCapability implements PortableCapability<Port
     return PortableAccountProfileV3Schema.parse(account.profile.toDTO());
   }
 
+  async validateImport(
+    payload: PortableAccountProfileV3,
+    context: PortableCapabilityExecutionContext,
+  ): Promise<void> {
+    await this.requireHostAccount(context.identityId);
+    await this.validateTarget(payload, context, this.clock.now());
+  }
+
   async dryRun(
     payload: PortableAccountProfileV3,
     context: PortableCapabilityExecutionContext,

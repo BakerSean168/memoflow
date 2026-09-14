@@ -310,6 +310,34 @@ describe('PortableCapabilityCoordinator', () => {
     expect(calls).toEqual([]);
   });
 
+  it('validates mutation-dependent owner rules before applying any capability', async () => {
+    const calls: string[] = [];
+    const preferences = simpleCapability('goals', calls, {
+      async apply() {
+        calls.push('apply:preferences');
+        return { created: 0, updated: 1, skipped: 0, warnings: [] };
+      },
+    });
+    const account = simpleCapability('tasks', calls, {
+      dependsOn: ['goals'],
+      async validateImport() {
+        throw new Error('account import validation failed');
+      },
+    });
+    const coordinator = createCoordinator(preferences, account);
+    const content = JSON.stringify(
+      envelope([
+        { key: 'goals', schemaVersion: 1, payload: { key: 'goals' } },
+        { key: 'tasks', schemaVersion: 1, payload: { key: 'tasks' } },
+      ]),
+    );
+
+    await expect(coordinator.apply(content, 'target-user', 'apply-batch')).rejects.toThrow(
+      'account import validation failed',
+    );
+    expect(calls).toEqual([]);
+  });
+
   it('rejects missing payload dependencies, unknown capabilities, and dependency cycles', async () => {
     const calls: string[] = [];
     const tasks = simpleCapability('tasks', calls, { dependsOn: ['goals'] });
