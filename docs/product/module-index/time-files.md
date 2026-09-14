@@ -35,6 +35,6 @@ updated: 2026-09-09T00:00:00+08:00
 - `docs/architecture/time-label-vnext-foundations.md`
 - `docs/architecture/adr/ADR-100-product-time-context-and-timezone-aware-calendar.md`
 - `docs/architecture/adr/ADR-101-product-time-presentation-and-compatibility-surface.md`
-- `docs/plan/active/2026-09-09-time-label-vnext-model-convergence.md`
+- `docs/plan/archive/2026-09-09-time-label-vnext-model-convergence.md`
 
-TIME-1201/1202 已进入生产实现；TIME-1203..1206 与 Label lane 仍以 active plan 为准。
+TIME-1201～1206 与 Label lane 已全部完成；FOUNDATION-1401 首道 exact-head CI 全绿，归档计划中的 archive-head gate 为最终 delivery truth。

@@ -97,4 +97,4 @@ Persistence mappers
 - [Time vNext current-system map](../../analysis/2026-09-09-time-vnext-current-system-map.md)
 - [Time + Label vNext foundations](../../architecture/time-label-vnext-foundations.md)
 - [Time/Label reuse ledger](../../analysis/2026-09-09-time-label-reference-and-reuse-ledger.md)
-- [Shared foundations active plan](../../plan/active/2026-09-09-time-label-vnext-model-convergence.md)
+- [Shared foundations archived plan](../../plan/archive/2026-09-09-time-label-vnext-model-convergence.md)

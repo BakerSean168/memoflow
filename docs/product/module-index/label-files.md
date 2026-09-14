@@ -32,6 +32,6 @@ updated: 2026-09-09T00:00:00+08:00
 - `docs/architecture/time-label-vnext-foundations.md`
 - `docs/architecture/adr/ADR-102-label-registry-and-owner-assignment-boundary.md`
 - `docs/architecture/adr/ADR-103-label-identity-normalization-time-and-color-contract.md`
-- `docs/plan/active/2026-09-09-time-label-vnext-model-convergence.md`
+- `docs/plan/archive/2026-09-09-time-label-vnext-model-convergence.md`
 
-这些 target docs 尚未表示 assignment ownership 已经迁移。
+Goal/Task assignment ownership 已完成迁移；Shared Label 现在仅拥有 registry。FOUNDATION-1401 首道 exact-head CI 全绿，归档计划中的 archive-head gate 为最终 delivery truth。

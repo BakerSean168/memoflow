@@ -1,19 +1,19 @@
 ---
 tags:
   - plan
-  - active
+  - archive
   - time
   - label
   - foundation
   - refactor
 description: Time + Label vNext Foundations——timezone-aware Product Time 与 pure Shared Label Registry 单轨收敛实施计划
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T23:24:35+08:00
+updated: 2026-09-14T13:51:36+08:00
 ---
 
 # Time + Label vNext Model Convergence
 
-> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](./2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
+> **System-wide execution-order notice (2026-09-09):** 本文继续作为模块内部 ticket/验收细节真值；跨模块执行顺序、共享 schema 单写者与 destructive cutover gate 由 [`2026-09-09-system-wide-vnext-model-convergence-implementation.md`](../active/2026-09-09-system-wide-vnext-model-convergence-implementation.md) 统一协调。
 >
 > **ADR-111 zero-legacy-data override:** 本文中所有仅用于保存当前旧数据/旧备份/旧客户端的 migration、backfill、compatibility reader/adapter、dual-read/write、redirect window、before/after old-data parity 要求均已被 ADR-111 supersede。领域目标与行为验收继续有效；实施时直接切 current consumers、删除旧 surface、reset/reseed persistence。
 
@@ -24,7 +24,7 @@ updated: 2026-09-09T23:24:35+08:00
 - `LABEL-1303/1304` move assignment ownership directly to Goal/Task; no temporary assignment compatibility seam;
 - `LABEL-1305` chooses the target color contract from current UI requirements; no existing-value data migration is required.
 
-**状态：ACTIVE — FOUNDATION-1401 current-head review complete / first exact-head CI pending**
+**状态：ARCHIVED / FOUNDATION-1401 FINAL ARCHIVE-HEAD CI PENDING — first exact-head CI PASS**
 **设计分支：** `docs/time-label-vnext-model-convergence`
 **目标 ADR：** ADR-100～103
 **关联 ADR：** ADR-037、ADR-054、ADR-072、ADR-076～083、ADR-088、ADR-093、ADR-098
@@ -493,7 +493,7 @@ resolveNames
 
 ### FOUNDATION-1401 — Five-layer review, governance and closure
 
-**状态：REVIEW COMPLETE — 2026-09-14 / FIRST EXACT-HEAD CI PENDING**
+**状态：ARCHIVED / FINAL ARCHIVE-HEAD CI PENDING — 2026-09-14**
 
 **Goal:** Time/Label new model成为代码真值后完成系统级 closure。
 
@@ -551,7 +551,7 @@ resolveNames
 
 **2026-09-14 current-head re-review:** no new P0/P1 was found after the Goal/Task/Knowledge convergence commits that touched shared Time/Label seams. Time remains `10 files / 52 tests PASS` under both `TZ=UTC` and `TZ=Asia/Tokyo`; Label unit `5 / 17` and PostgreSQL integration `1 / 3` PASS; Time/Label typecheck and lint PASS. `product-time-surface-audit`, `date-fns-import-audit`, `label-registry-ownership-audit`, and `label-primitive-audit` all PASS. Current production source has no legacy TimeStyle adapter and no Goal/Task assignment surface in `@memoflow/label`. Product docs were corrected from future/target wording to implemented truth.
 
-**Remaining delivery gate:** the refreshed closure state must be committed/pushed and required CI must pass on that exact head before archival. `FOUNDATION-1401` is therefore REVIEW COMPLETE, not yet DONE.
+**Delivery evidence:** first exact-head gate is **PASS**. PR #340 exact head `40f0b0a1efaa6e8f7b38df0da6e8912a13d73b68` passed required CI run `34809651084` end to end, authorizing archival. The final archive-head CI gate is still pending, so `FOUNDATION-1401` is archived but not yet marked DONE.
 
 ## 6. Dependency graph
 
@@ -585,10 +585,10 @@ LABEL-1302 DONE — pure Shared Label Registry
 LABEL-1303 DONE — Goal-owned GoalLabel assignment/query
 LABEL-1304 DONE — Task-owned TaskLabel assignment/query
 LABEL-1305 DONE — Instant/Clock/normalization/typed color primitives
-FOUNDATION-1401 REVIEW COMPLETE — first exact-head CI pending
+FOUNDATION-1401 ARCHIVED — first exact-head PASS; final archive-head CI pending
 ```
 
-Time lane（TIME-1201～1206）与 Label lane（LABEL-1301～1305）均已闭合并接入 anti-resurrection governance；FOUNDATION-1401 已在 2026-09-14 当前 head 复审并保持 P0/P1=0。剩余为提交后的首道 exact-head required CI、archive-head CI 与最终 evidence 回填。
+Time lane（TIME-1201～1206）与 Label lane（LABEL-1301～1305）均已闭合并接入 anti-resurrection governance；FOUNDATION-1401 当前复审保持 P0/P1=0，首道 exact-head `40f0b0a1efaa` / run `34809651084` 已全绿并授权归档。当前只剩 archive-head required CI 与最终 evidence 回填。
 
 ## 8. Definition of Done
 
