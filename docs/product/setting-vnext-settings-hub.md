@@ -14,7 +14,7 @@ updated: 2026-09-14T11:48:17+08:00
 
 # Setting vNext — Settings Hub
 
-> **Implementation status (2026-09-14):** `SETTING-9203~9209` 已实现；六组 Settings Hub、canonical presentation/regional preferences、device-local notification surface 与 V3 standalone preference portability 均为当前 truth。`SETTING-9210` local five-layer review 已完成，first exact-head CI gate pending；尚未归档。
+> **Implementation status (2026-09-14):** `SETTING-9203~9209` 已实现；六组 Settings Hub、canonical presentation/regional preferences、device-local notification surface 与 V3 standalone preference portability 均为当前 truth。`SETTING-9210` local five-layer review 已完成，first exact-head `f94de6de664` / run `34804907664` 已全绿；计划已归档，final archive-head CI pending。
 
 > **ADR-111 cutover policy (2026-09-09):** 当前没有需要保留的 MemoFlow 旧业务数据，也不要求兼容旧客户端/旧备份。本文历史推演中仅为旧数据保存设计的 migration/backfill/compatibility window 不再执行；目标模型和真实行为不变量继续有效。实施采用 direct canonical cutover + old-surface deletion + reset/reseed。
 

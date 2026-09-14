@@ -81,4 +81,4 @@ updated: 2026-09-14T11:48:17+08:00
 - [`ADR-094`](../../architecture/adr/ADR-094-device-preference-feature-policy-and-consent-boundary.md)
 - [`ADR-095`](../../architecture/adr/ADR-095-preference-persistence-sync-migration-and-portability.md)
 - [`ADR-111`](../../architecture/adr/ADR-111-zero-legacy-data-destructive-cutover-policy.md)
-- [`Setting vNext active plan`](../../plan/active/2026-09-08-setting-vnext-model-convergence.md)
+- [`Setting vNext archived plan`](../../plan/archive/2026-09-08-setting-vnext-model-convergence.md)

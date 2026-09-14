@@ -690,7 +690,7 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, Goal `GOAL-7202..7211`, and Task `TASK-7301..7310` are complete; the Goal and Task plans are archived with both exact-head delivery gates green. Current dependency-ready implementation work is:
 
-1. `SETTING-9210` — five-layer review, exact-head CI/build, docs integrity and Setting plan archive;
-2. `PORT-1601/1602` — continue owner capability registration as surviving owner models stabilize; execute final V2 deletion only when V3 preserves all required product coverage.
+1. `SETTING-9210` — implementation and five-layer review are complete; first exact-head CI `f94de6de664` / run `34804907664` is green and the plan is archived. Only the archive-head delivery gate remains.
+2. `PORT-1601/1602` — current dependency-ready implementation work: continue owner capability registration as surviving owner models stabilize; execute final V2 deletion only when V3 preserves all required product coverage.
 
 `SETTING-9209` deliberately kept the current V2 full-backup envelope's `settings` singleton as a strict canonical UserPreferenceProfile adapter while deleting all legacy Setting persistence/protocol/client code. Therefore PORT-1603 remains independent cross-module work rather than a reason to retain `user_settings`.

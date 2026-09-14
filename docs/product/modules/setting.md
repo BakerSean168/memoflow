@@ -198,7 +198,7 @@ usage analytics consent         -> future explicit Consent owner
 
 Setting implementation and local five-layer review are closed; it now awaits the first exact-head delivery gate before archive. 跨模块 Data Portability 仍需继续注册其他 surviving owner capabilities；`PORT-1603` remains independent cross-module portability work. 在 PORT-1603 前，V2 full-backup envelope 的 `settings` singleton 仍存在，但它现在只是 canonical `UserPreferenceProfile` adapter，读写 `user_preference_records`，不再依赖任何 legacy Setting model/table。
 
-实施真值见 [Setting vNext active plan](../../plan/active/2026-09-08-setting-vnext-model-convergence.md)，并受 ADR-111 zero-legacy-data destructive cutover policy 约束。
+实施真值见 [Setting vNext archived plan](../../plan/archive/2026-09-08-setting-vnext-model-convergence.md)，并受 ADR-111 zero-legacy-data destructive cutover policy 约束。
 
 ## 12. 相关资料
 
