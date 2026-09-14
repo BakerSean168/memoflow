@@ -112,7 +112,7 @@ describe('API host Task -> Goal restart recovery', () => {
     if (!createdTask.ok) return;
 
     const taskOccurrence = await prisma.taskOccurrence.findFirstOrThrow({
-      where: { planId: createdTask.data.template.id },
+      where: { planId: createdTask.data.plan.id },
     });
     const fixturePath = path.resolve(__dirname, 'fixtures/complete-task-and-exit.ts');
     const tsxPath = path.resolve(__dirname, '../../../../../node_modules/tsx/dist/cli.mjs');

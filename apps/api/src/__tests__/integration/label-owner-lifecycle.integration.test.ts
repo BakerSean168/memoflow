@@ -27,7 +27,13 @@ describe('API host Shared Label owner lifecycle', () => {
       data: { id: goalId, identityId, name: 'Goal', status: 'InProgress' },
     });
     await prisma.taskPlan.create({
-      data: { id: taskPlanId, identityId, name: 'Task', status: 'Active' },
+      data: {
+        id: taskPlanId,
+        identityId,
+        name: 'Task',
+        status: 'Active',
+        schedule: { kind: 'OneTime', date: '2026-09-14', timing: { kind: 'AllDay' } },
+      },
     });
 
     const labels = new LabelService(new PrismaLabelRepository(prisma), {

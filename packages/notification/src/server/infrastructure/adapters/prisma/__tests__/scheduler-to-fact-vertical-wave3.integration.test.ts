@@ -1,10 +1,11 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomUUID } from 'crypto';
 import { createTimeContext } from '@memoflow/time';
-import type {
-  ScheduledIntent,
-  ScheduledInvocationContext,
-  SchedulingOwner,
+import {
+  buildSchedulingKey,
+  type ScheduledIntent,
+  type ScheduledInvocationContext,
+  type SchedulingOwner,
 } from '@memoflow/contracts/schedule';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
 import {
@@ -32,6 +33,11 @@ import {
 } from '@memoflow/goal/schedule-execution';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { GOAL_REMINDER_PAYLOAD_VERSION } from '@memoflow/goal/schedule-projection';
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import {
+  TASK_REMINDER_PAYLOAD_VERSION,
+  TASK_SCHEDULING_OWNER_TYPE,
+} from '@memoflow/task/schedule-projection';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   ROUTINE_WALLCLOCK_HANDLER_KEY,
@@ -66,11 +72,18 @@ import {
   seedAccount,
 } from '@memoflow/test-utils/setup/integration-helpers';
 
+const FIXTURE_D_OCCURRENCE_KEY = 'TaskPlanId_wave3-d:2026-08-10';
+
 const FIXTURE_D = {
-  templateId: 'TaskPlanId_wave3-d',
-  instanceId: 'TaskOccurrenceId_wave3-d',
+  planId: 'TaskPlanId_wave3-d',
+  occurrenceId: 'TaskOccurrenceId_wave3-d',
+  occurrenceKey: FIXTURE_D_OCCURRENCE_KEY,
   runAt: Date.parse('2026-08-10T08:45:00.000Z'),
-  schedulingKey: 'TaskOccurrenceId_wave3-d|2026-08-10T08:45:00.000Z',
+  schedulingKey: buildSchedulingKey(
+    'task.reminder',
+    FIXTURE_D_OCCURRENCE_KEY,
+    'relative:1:Days',
+  ),
   anchorTime: 1_704_000_000_000,
 } as const;
 
@@ -170,14 +183,14 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
   }
 
   it('D: Task projection persisted -> Scheduler wake -> task.reminder.fire -> Notification Fact', async () => {
-    const templateId = FIXTURE_D.templateId;
-    const instanceId = FIXTURE_D.instanceId;
-    const owner: SchedulingOwner = { identityId, type: 'task.template', id: templateId };
+    const planId = FIXTURE_D.planId;
+    const occurrenceId = FIXTURE_D.occurrenceId;
+    const owner: SchedulingOwner = { identityId, type: TASK_SCHEDULING_OWNER_TYPE, id: planId };
     const reminderTime = FIXTURE_D.anchorTime - 24 * 60 * 60 * 1000;
     const payload = {
-      templateId,
-      instanceId,
-      occurrenceKey: null,
+      planId,
+      occurrenceId,
+      occurrenceKey: FIXTURE_D.occurrenceKey,
       taskTitle: 'Ship R07',
       reminderType: TaskReminderType.Relative,
       reminderValue: 1,
@@ -190,7 +203,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
       schedulingKey: FIXTURE_D.schedulingKey,
       handlerKey: 'task.reminder.fire',
       runAt: FIXTURE_D.runAt,
-      payloadVersion: 1,
+      payloadVersion: TASK_REMINDER_PAYLOAD_VERSION,
       payload,
     };
 
@@ -198,7 +211,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     const repo = await reconcileOwner(owner, [intent]);
 
     // The stale-owner enumeration surface observes the persisted Task owner.
-    const owners = (await repo.listSchedulingOwners?.('task.template')) ?? [];
+    const owners = (await repo.listSchedulingOwners?.(TASK_SCHEDULING_OWNER_TYPE)) ?? [];
     expect(owners).toContainEqual(owner);
     const persisted = await repo.findBySchedulingOwner(owner);
     expect(persisted).toHaveLength(1);
@@ -210,10 +223,10 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
       createTaskReminderScheduledHandlerRegistration({
         taskOccurrenceRepository: {
           findByIdForIdentity: async () => ({
-            id: instanceId,
+            id: occurrenceId,
             identityId,
-            templateId,
-            occurrenceKey: null,
+            planId,
+            occurrenceKey: FIXTURE_D.occurrenceKey,
             status: TaskOccurrenceStatus.Pending,
             deletedAt: null,
           }),
@@ -221,7 +234,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
         taskPlanRepository: {
           findByIdForIdentity: async () => ({
             toServerDTO: () => ({
-              id: templateId,
+              id: planId,
               identityId,
               name: 'Ship R07',
               status: TaskPlanStatus.Active,
@@ -265,7 +278,7 @@ describe('Wave 3 vertical: persisted projection -> Scheduler wake -> handler -> 
     expect(fact.type).toBe(NotificationType.Reminder);
     expect(fact.category).toBe(NotificationCategory.Task);
     expect(fact.relatedEntityType).toBe(RelatedEntityType.Task);
-    expect(fact.relatedEntityId).toBe(instanceId);
+    expect(fact.relatedEntityId).toBe(occurrenceId);
     expect(
       await prisma.notification.count({
         where: { identityId, idempotencyKey: shared.idempotencyKey! },
