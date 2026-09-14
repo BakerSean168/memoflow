@@ -4,7 +4,7 @@ tags:
   - active
 description: 进行中的计划目录与当前状态
 created: 2026-04-26T00:00:00
-updated: 2026-09-14T10:54:47+08:00
+updated: 2026-09-14T11:10:04+08:00
 ---
 
 # Active Plans
@@ -26,7 +26,7 @@ updated: 2026-09-14T10:54:47+08:00
 
 | 计划                                                                                  | 结果                                                                                                                                                                                                                                                                            |
 | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Task vNext Model Convergence](../archive/2026-09-08-task-vnext-model-convergence.md) | `TASK-7301～7309` 完成；`TASK-7310` 五层 review P0/P1 = 0，PR #340 首个 exact head `2465c1b0506`、run `34799711173` 全绿，矩阵覆盖 Scope Detector、Build、Typecheck、Static Analysis、Unit Tests、Governance、Verification Children、Web Flow Shards 1/4～4/4、各 Oracles 与 Delivery Observation。计划已归档；最终 archive-head CI pending。 |
+| [Task vNext Model Convergence](../archive/2026-09-08-task-vnext-model-convergence.md) | `TASK-7301～7310` 全部 DONE；`TASK-7310` 五层 review P0/P1 = 0。PR #340 首个 exact head `2465c1b0506` / run `34799711173` 与 archive head `7101589ac25` / run `34800927772` 两道 gate 均全绿，Task vNext 已正式归档闭环。 |
 
 ## 本轮已归档（2026-09-13）
 

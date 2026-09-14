@@ -6,7 +6,7 @@ tags:
   - refactor
 description: Task Plan / Occurrence 聚合边界、Schedule ADT、Result/Checklist、Reminder parity、Goal/Workspace 一次性收敛实施计划
 created: 2026-09-08T19:35:00+08:00
-updated: 2026-09-14T10:54:47+08:00
+updated: 2026-09-14T11:10:04+08:00
 status: archived
 ---
 
@@ -23,7 +23,7 @@ status: archived
 - old `TaskTemplate`/`TaskInstance` persistence and compatibility DTOs are deleted rather than translated;
 - no legacy round-trip fixture is required; fresh TaskPlan/TaskOccurrence round-trip remains required.
 
-**状态：ARCHIVED / TASK-7310 FINAL ARCHIVE-HEAD CI PENDING**
+**状态：ARCHIVED / TASK-7310 DONE**
 **执行分支：** `feat/system-wide-vnext-convergence`（next ticket worktree: `delegated/task-7309-legacy`）
 **上游设计依赖：** Goal vNext ADR-069（Goal-level Task link / context）；Repository ADR-090（linked notes stable `KnowledgeDocumentId`）
 **基线：** Task Vitest 71 files / 717 tests PASS
@@ -208,7 +208,9 @@ full CI exact-head
 
 **TASK-7310 local five-layer review：PASS / P0=0 / P1=0.** Layers: contract correctness; aggregate boundary; behavioral completeness; persistence/transport parity; plan/docs truth. Local evidence: Task unit **76 files / 602 tests PASS**; Task integration **6/31 PASS**; App-Vue Task **26/83 PASS**; Contracts **87/585 PASS**; Database **11/37 PASS**; PowerSync schema **1/7 PASS**; Schedule Orchestration **9/34 PASS**; Planner focused **5/12 PASS**; Goal outbox **1/4 PASS**; Goal settlement integration **1/3 PASS**; Prisma validate **PASS**; Task/contracts/database/app-vue/powersync-schema typecheck **PASS** and schedule-orchestration typecheck **PASS**; lint **0 errors** (historical warnings remain); `git diff --check` **PASS**.
 
-**First exact-head delivery gate: PASS.** PR #340 exact head `2465c1b0506aac7a7fe832389eca7b7cc178538b` passed CI run `34799711173` with overall SUCCESS. The successful matrix includes Scope Detector, Build, Typecheck, Static Analysis, Unit Tests, Governance, Verification Children, all Web Flow Shards 1/4 through 4/4, Governance/Validate/Web Flow/Boundary/Integration/Coverage/Performance Oracles, and Delivery Observation. This evidence authorizes archival. TASK-7310 is not DONE until this archive-head commit passes the required CI gate.
+**First exact-head delivery gate: PASS.** PR #340 exact head `2465c1b0506aac7a7fe832389eca7b7cc178538b` passed CI run `34799711173` with overall SUCCESS. The successful matrix includes Scope Detector, Build, Typecheck, Static Analysis, Unit Tests, Governance, Verification Children, all Web Flow Shards 1/4 through 4/4, Governance/Validate/Web Flow/Boundary/Integration/Coverage/Performance Oracles, and Delivery Observation. This evidence authorized archival.
+
+**Final archive-head delivery gate: PASS.** PR #340 archive head `7101589ac25b96ab878246b97ed2e72da2fc1662` passed CI run `34800927772` with overall SUCCESS. The successful matrix includes Scope Detector, Governance, Static Analysis, Typecheck, Unit Tests, Verification Children, Build, Governance Oracle, Web Flow Shards 1/4, 2/4, 3/4, and 4/4, Boundary Oracle, Integration Oracle, Performance Oracle, Coverage Oracle, Validate Oracle, Delivery Observation, and Web Flow Oracle. TASK-7310 is therefore DONE and archived; no Task vNext closure gate remains.
 
 ## 5. Dependency order
 
@@ -241,6 +243,6 @@ full CI exact-head
 - [x] TASK-7307
 - [x] TASK-7308
 - [x] TASK-7309
-- [ ] TASK-7310
+- [x] TASK-7310
 
-**Next:** TASK-7310 archive-head CI is the only remaining gate. The first exact implementation head is green and the plan is archived; do not claim TASK-7310 DONE or invent a final archive-head SHA/run until this archive-head commit passes the required CI. Preserve the accepted TaskPlanWorkspace composition.
+Both exact-head delivery gates are green, so Task vNext is fully DONE and archived. Future execution order lives in the system-wide plan; preserve the accepted TaskPlanWorkspace composition.

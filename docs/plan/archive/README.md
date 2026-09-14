@@ -4,7 +4,7 @@ tags:
   - archive
 description: 归档计划目录
 created: 2026-04-26T00:00:00
-updated: 2026-09-14T10:54:47+08:00
+updated: 2026-09-14T11:10:04+08:00
 ---
 
 # Archived Plans
@@ -27,7 +27,7 @@ updated: 2026-09-14T10:54:47+08:00
 
 | 日期       | 计划                                                                                                     | 结果                                                                                                                                                                                            |
 | ---------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-09-14 | [Task vNext Model Convergence](./2026-09-08-task-vnext-model-convergence.md)                             | `TASK-7301～7309` 完成；`TASK-7310` 五层 review P0/P1 = 0，PR #340 首个 exact head `2465c1b0506` run `34799711173` 全绿；Scope/Build/Typecheck/Static/Unit/Governance/Verification、Web Flow Shards 1/4～4/4、各 Oracles 与 Delivery Observation 均成功；最终 archive-head CI pending |
+| 2026-09-14 | [Task vNext Model Convergence](./2026-09-08-task-vnext-model-convergence.md)                             | `TASK-7301～7310` 全部 DONE；`TASK-7310` 五层 review P0/P1 = 0，PR #340 首个 exact head `2465c1b0506` / run `34799711173` 与 archive head `7101589ac25` / run `34800927772` 两道 exact-head gate 均全绿，最终闭环完成 |
 | 2026-09-13 | [Goal vNext Model Convergence](./2026-09-08-goal-vnext-model-convergence.md)                             | `GOAL-7201～7211` 全部 DONE；五层 review P0/P1 = 0，PR #340 head `a6c9d622f0b` run `34730694318` 与 archive head `4101ff3e52c` run `34731400439` 两道 exact-head gate 均全绿                    |
 | 2026-09-08 | [MemoFlow Core vNext — Unified Refactor Orchestration](./2026-08-25-core-vnext-orchestration.md)         | Goal/Task/Routine/Planner/Scheduler/Notification/EventBus 重构与 residual 全闭环；HARD-7101~7105 完成，PR #338 exact-head CI 19/19 全绿并合入 `088a9f16499`                                     |
 | 2026-09-06 | [MemoFlow Delivery Platform V3](./2026-09-02-delivery-platform-v3.md)                                    | Phase 1–4 完成；exact candidate/staging/release/production authority、v0.13.3 live rollout、retain-split timing、Action pinning、macOS trust capability 与 final CI/Coverage observation 全闭环 |

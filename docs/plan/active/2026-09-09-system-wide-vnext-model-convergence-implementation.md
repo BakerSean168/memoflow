@@ -2,7 +2,7 @@
 tags: [plan, active, vnext, system-wide, convergence]
 description: MemoFlow 全模块模型收敛唯一执行顺序、destructive cutover、验证与最终删除计划
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-14T10:54:47+08:00
+updated: 2026-09-14T11:10:04+08:00
 ---
 
 # MemoFlow System-wide vNext Model Convergence — Implementation Plan
@@ -494,7 +494,7 @@ Core outputs:
 
 **GOAL-7211 DONE:** Five-layer review closed with P0/P1 = 0. After three delivery repair passes, PR #340 exact head `a6c9d622f0b79285ffe3994a38c243b1bc389586` passed CI run `34730694318` end to end. The archived head `4101ff3e52c6d02873b46eccbead2abf05f05467` then passed final CI run `34731400439` with Scope/Static/Governance/Build/Typecheck/Unit/Verification, all four Web Flow shards, Delivery Observation, and all Governance/Validate/Web Flow/Boundary/Integration/Coverage/Performance Oracles SUCCESS. The Goal module plan is archived and no Goal vNext closure gate remains.
 
-## TASK lane — archived Task plan / final archive-head gate pending
+## TASK lane — archived / closure complete
 
 Use the archived Task plan (`../archive/2026-09-08-task-vnext-model-convergence.md`) as scoped implementation/review evidence. The TaskPlan/TaskOccurrence/schedule checkpoint is canonical; do not resume from legacy templates.
 
@@ -507,7 +507,7 @@ Core outputs:
 - Goal link contribution semantics;
 - Workspace composition.
 
-**TASK-7310 ARCHIVED / FINAL CI PENDING:** Local five-layer review is PASS with P0/P1 = 0. PR #340 exact head `2465c1b0506aac7a7fe832389eca7b7cc178538b` passed CI run `34799711173` with overall SUCCESS: Scope Detector, Build, Typecheck, Static Analysis, Unit Tests, Governance, Verification Children, Web Flow Shards 1/4 through 4/4, Governance/Validate/Web Flow/Boundary/Integration/Coverage/Performance Oracles, and Delivery Observation all succeeded. The Task plan is archived under the first exact-head delivery evidence; TASK-7310 is not DONE until the final archive-head CI gate passes.
+**TASK-7310 DONE:** Local five-layer review is PASS with P0/P1 = 0. PR #340 first exact head `2465c1b0506aac7a7fe832389eca7b7cc178538b` passed CI run `34799711173` with overall SUCCESS. Archive head `7101589ac25b96ab878246b97ed2e72da2fc1662` then passed final delivery CI run `34800927772` with overall SUCCESS: Scope Detector, Governance, Static Analysis, Typecheck, Unit Tests, Verification Children, Build, Governance Oracle, Web Flow Shards 1/4 through 4/4, Boundary Oracle, Integration Oracle, Performance Oracle, Coverage Oracle, Validate Oracle, Delivery Observation, and Web Flow Oracle all succeeded. The Task plan is archived and no Task vNext closure gate remains.
 
 ---
 
@@ -688,7 +688,7 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 ## 7. Immediate next tickets
 
-TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, and Goal `GOAL-7202..7211` are complete; the Goal plan is archived with both exact-head delivery gates green. TASK-7310 is archived pending only its final archive-head CI gate. Current dependency-ready implementation work is:
+TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9209`, Goal `GOAL-7202..7211`, and Task `TASK-7301..7310` are complete; the Goal and Task plans are archived with both exact-head delivery gates green. Current dependency-ready implementation work is:
 
 1. `SETTING-9210` — five-layer review, exact-head CI/build, docs integrity and Setting plan archive;
 2. `PORT-1601/1602` — continue owner capability registration as surviving owner models stabilize; execute final V2 deletion only when V3 preserves all required product coverage.
