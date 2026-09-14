@@ -514,11 +514,20 @@ test('production watcher commits atomic state and a replay does not rerun migrat
     const second = run(fixture);
     assert.equal(second.status, 0, second.stderr);
     assert.match(second.stdout, /already deployed production release/u);
+    assert.match(second.stdout, /fast_path=state\+live-runtime; skipped component pulls/u);
     const stateAfter = fs.readFileSync(statePath, 'utf8');
     assert.equal(stateAfter, stateBefore);
     const logAfter = fs.readFileSync(fixture.log, 'utf8');
+    const replayLog = logAfter.slice(logBefore.length);
     const migratorAfter = (logAfter.match(/run --rm --no-deps migrator/gu) ?? []).length;
     assert.equal(migratorAfter, 1);
+    assert.match(replayLog, /^pull .*memoflow-production-runtime:production-selected$/mu);
+    assert.doesNotMatch(
+      replayLog,
+      /^pull .*\/memoflow-(?:api|web|migrator|postgres|redis|powersync|caddy)@sha256:/mu,
+    );
+    assert.doesNotMatch(replayLog, /^create /mu);
+    assert.doesNotMatch(replayLog, /^cp /mu);
   } finally {
     fs.rmSync(fixture.root, { recursive: true, force: true });
   }
