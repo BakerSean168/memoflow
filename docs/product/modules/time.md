@@ -6,7 +6,7 @@ tags:
   - foundation
 description: Product Time foundation 当前能力与 Time vNext 收敛边界
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-14T13:12:43+08:00
 ---
 
 # Time Foundation 模块说明
@@ -38,7 +38,7 @@ RecurrenceEnginePort
 - `TimeFacade`；
 - date-fns engine boundary；
 - branded `TimeZoneId`、`TimeZoneSource` 与 validated `TimeContext` boundary；
-- `TimePresentationStyle` 已建立；legacy `TimeStyle` adapter 是 ADR-111 下待立即删除的实现残留，不再承担兼容职责；
+- `TimePresentationStyle` 已建立；legacy mixed `TimeStyle` adapter/surface 已由 TIME-1206 删除；
 - `TimeFacade.context/presentation/withContext/withPresentation`；
 - locale/timezone-aware `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` presentation；
 - semantic `dateStyle: short|medium|long` 与 `timeStyle: 12h|24h`；
@@ -65,7 +65,7 @@ Instant | number canonical APIs
   -> Instant canonical + boundary compatibility
 ```
 
-TIME-1201/1202/1203/1204 已实施；canonical Calendar/Input/Codec 已使用显式 TimeContext 与共享 wall-clock resolver，Format 也已经按 locale + IANA timezone + semantic date/time style 渲染。跨模块 UserTimeContext 注入与 legacy Date/number/TimeStyle surface 由 TIME-1205/1206 继续直接删除。
+TIME-1201～1206 已全部实施：canonical Calendar/Input/Codec 使用显式 TimeContext 与共享 wall-clock resolver；Format 按 locale + IANA timezone + semantic date/time style 渲染；跨模块 UserTimeContext 注入已完成，legacy Date/number/mixed TimeStyle surface 已删除并由 governance 防回归。
 
 ## 4. Primary consumers
 

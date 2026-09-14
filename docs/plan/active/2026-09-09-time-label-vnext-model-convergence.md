@@ -24,7 +24,7 @@ updated: 2026-09-09T23:24:35+08:00
 - `LABEL-1303/1304` move assignment ownership directly to Goal/Task; no temporary assignment compatibility seam;
 - `LABEL-1305` chooses the target color contract from current UI requirements; no existing-value data migration is required.
 
-**状态：ACTIVE — local closure complete / exact-head CI pending**
+**状态：ACTIVE — FOUNDATION-1401 current-head review complete / first exact-head CI pending**
 **设计分支：** `docs/time-label-vnext-model-convergence`
 **目标 ADR：** ADR-100～103
 **关联 ADR：** ADR-037、ADR-054、ADR-072、ADR-076～083、ADR-088、ADR-093、ADR-098
@@ -493,7 +493,7 @@ resolveNames
 
 ### FOUNDATION-1401 — Five-layer review, governance and closure
 
-**状态：LOCAL CLOSURE COMPLETE — 2026-09-09 / exact-head CI pending**
+**状态：REVIEW COMPLETE — 2026-09-14 / FIRST EXACT-HEAD CI PENDING**
 
 **Goal:** Time/Label new model成为代码真值后完成系统级 closure。
 
@@ -549,7 +549,9 @@ resolveNames
 - Layer 4 / lint：终审发现并删除 Task 4 个 TIME-1206 stale symbols，并把 App Vue 11 个 reactive dependency reads从 bare expression改为 `void productTimeRevision.value`；Task/App Vue lint恢复 0 errors，行为回归仍分别 `678/678` 与 `48/48`；
 - Layer 5 / build：Time、Label、Goal、Task、Reminder、Notification、Setting、Schedule、schedule-orchestration、App Vue 共 10 个影响域 production build PASS；Task/Notification/Setting/Schedule typecheck 与 App Vue direct `vue-tsc` PASS。
 
-**Remaining delivery gate:** 当前工作树尚未形成可引用的提交 SHA，因此不能声称 exact-head required CI green。FOUNDATION-1401 的本地五层 closure 已完成；正式 `DONE` 只在 convergence changes提交/推送后、required CI 对该 exact HEAD 全绿时落账。
+**2026-09-14 current-head re-review:** no new P0/P1 was found after the Goal/Task/Knowledge convergence commits that touched shared Time/Label seams. Time remains `10 files / 52 tests PASS` under both `TZ=UTC` and `TZ=Asia/Tokyo`; Label unit `5 / 17` and PostgreSQL integration `1 / 3` PASS; Time/Label typecheck and lint PASS. `product-time-surface-audit`, `date-fns-import-audit`, `label-registry-ownership-audit`, and `label-primitive-audit` all PASS. Current production source has no legacy TimeStyle adapter and no Goal/Task assignment surface in `@memoflow/label`. Product docs were corrected from future/target wording to implemented truth.
+
+**Remaining delivery gate:** the refreshed closure state must be committed/pushed and required CI must pass on that exact head before archival. `FOUNDATION-1401` is therefore REVIEW COMPLETE, not yet DONE.
 
 ## 6. Dependency graph
 
@@ -583,10 +585,10 @@ LABEL-1302 DONE — pure Shared Label Registry
 LABEL-1303 DONE — Goal-owned GoalLabel assignment/query
 LABEL-1304 DONE — Task-owned TaskLabel assignment/query
 LABEL-1305 DONE — Instant/Clock/normalization/typed color primitives
-FOUNDATION-1401 LOCAL CLOSURE COMPLETE — exact-head CI pending
+FOUNDATION-1401 REVIEW COMPLETE — first exact-head CI pending
 ```
 
-Time lane（TIME-1201～1206）与 Label lane（LABEL-1301～1305）均已闭合并接入 anti-resurrection governance；FOUNDATION-1401 本地五层终审已完成。剩余仅为提交后的 exact-head required CI delivery gate。
+Time lane（TIME-1201～1206）与 Label lane（LABEL-1301～1305）均已闭合并接入 anti-resurrection governance；FOUNDATION-1401 已在 2026-09-14 当前 head 复审并保持 P0/P1=0。剩余为提交后的首道 exact-head required CI、archive-head CI 与最终 evidence 回填。
 
 ## 8. Definition of Done
 

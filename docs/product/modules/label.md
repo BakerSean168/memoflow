@@ -6,7 +6,7 @@ tags:
   - foundation
 description: Shared Label Registry 当前能力与 Label vNext ownership 收敛边界
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-09T00:00:00+08:00
+updated: 2026-09-14T13:12:43+08:00
 ---
 
 # Label Foundation 模块说明
@@ -44,7 +44,7 @@ Task
 = TaskLabel assignment owner
 ```
 
-因此会逐步从 Label package 移走：
+这些 owner-specific assignment surface 已从 Label package 移走：
 
 ```text
 GoalLabelAssignmentCommand
@@ -53,7 +53,7 @@ replace/list/findGoal...
 replace/list/findTask...
 ```
 
-Registry 继续保留 AI-friendly `resolveNames()`，并优化为 batch normalized lookup。
+Registry 仅保留 AI-friendly `resolveNames()` 等 registry 能力，并使用 batch normalized lookup；Goal/Task assignment 由各自 owner 独立实现。
 
 ## 4. Shared vs owner semantics
 
