@@ -8,7 +8,7 @@ tags:
   - refactor
 description: Time + Label vNext Foundations——timezone-aware Product Time 与 pure Shared Label Registry 单轨收敛实施计划
 created: 2026-09-09T00:00:00+08:00
-updated: 2026-09-14T13:51:36+08:00
+updated: 2026-09-14T14:05:55+08:00
 ---
 
 # Time + Label vNext Model Convergence
@@ -24,7 +24,7 @@ updated: 2026-09-14T13:51:36+08:00
 - `LABEL-1303/1304` move assignment ownership directly to Goal/Task; no temporary assignment compatibility seam;
 - `LABEL-1305` chooses the target color contract from current UI requirements; no existing-value data migration is required.
 
-**状态：ARCHIVED / FOUNDATION-1401 FINAL ARCHIVE-HEAD CI PENDING — first exact-head CI PASS**
+**状态：DONE / ARCHIVED — FOUNDATION-1401 complete; both exact-head delivery gates PASS**
 **设计分支：** `docs/time-label-vnext-model-convergence`
 **目标 ADR：** ADR-100～103
 **关联 ADR：** ADR-037、ADR-054、ADR-072、ADR-076～083、ADR-088、ADR-093、ADR-098
@@ -493,7 +493,7 @@ resolveNames
 
 ### FOUNDATION-1401 — Five-layer review, governance and closure
 
-**状态：ARCHIVED / FINAL ARCHIVE-HEAD CI PENDING — 2026-09-14**
+**状态：DONE — 2026-09-14**
 
 **Goal:** Time/Label new model成为代码真值后完成系统级 closure。
 
@@ -551,7 +551,7 @@ resolveNames
 
 **2026-09-14 current-head re-review:** no new P0/P1 was found after the Goal/Task/Knowledge convergence commits that touched shared Time/Label seams. Time remains `10 files / 52 tests PASS` under both `TZ=UTC` and `TZ=Asia/Tokyo`; Label unit `5 / 17` and PostgreSQL integration `1 / 3` PASS; Time/Label typecheck and lint PASS. `product-time-surface-audit`, `date-fns-import-audit`, `label-registry-ownership-audit`, and `label-primitive-audit` all PASS. Current production source has no legacy TimeStyle adapter and no Goal/Task assignment surface in `@memoflow/label`. Product docs were corrected from future/target wording to implemented truth.
 
-**Delivery evidence:** first exact-head gate is **PASS**. PR #340 exact head `40f0b0a1efaa6e8f7b38df0da6e8912a13d73b68` passed required CI run `34809651084` end to end, authorizing archival. The final archive-head CI gate is still pending, so `FOUNDATION-1401` is archived but not yet marked DONE.
+**Delivery evidence:** both exact-head gates are **PASS**. PR #340 first exact head `40f0b0a1efaa6e8f7b38df0da6e8912a13d73b68` passed required CI run `34809651084` end to end, authorizing archival. Archive head `95721d3a256494805d2bc0d358852f8357f99629` then passed final CI run `34811284555`, including Scope, Governance, Static, Typecheck, Unit, Build, Verification Children, all four Web Flow shards, Boundary/Integration/Coverage/Performance/Validate/Web Flow Oracles, and Delivery Observation. `FOUNDATION-1401` is closed.
 
 ## 6. Dependency graph
 
@@ -585,10 +585,10 @@ LABEL-1302 DONE — pure Shared Label Registry
 LABEL-1303 DONE — Goal-owned GoalLabel assignment/query
 LABEL-1304 DONE — Task-owned TaskLabel assignment/query
 LABEL-1305 DONE — Instant/Clock/normalization/typed color primitives
-FOUNDATION-1401 ARCHIVED — first exact-head PASS; final archive-head CI pending
+FOUNDATION-1401 DONE — both exact-head delivery gates PASS
 ```
 
-Time lane（TIME-1201～1206）与 Label lane（LABEL-1301～1305）均已闭合并接入 anti-resurrection governance；FOUNDATION-1401 当前复审保持 P0/P1=0，首道 exact-head `40f0b0a1efaa` / run `34809651084` 已全绿并授权归档。当前只剩 archive-head required CI 与最终 evidence 回填。
+Time lane（TIME-1201～1206）与 Label lane（LABEL-1301～1305）均已闭合并接入 anti-resurrection governance；FOUNDATION-1401 最终复审 P0/P1=0。首道 exact-head `40f0b0a1efaa` / run `34809651084` 与 archive head `95721d3a256` / run `34811284555` 两道 required CI 均全绿，Time + Label vNext 已正式闭环。
 
 ## 8. Definition of Done
 

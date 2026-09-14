@@ -688,7 +688,7 @@ Plus affected integration/E2E, PowerSync parity, fresh Prisma bootstrap/reset ch
 
 ## 7. Immediate next tickets
 
-TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9210`, Goal `GOAL-7202..7211`, and Task `TASK-7301..7310` are complete. Setting, Goal, and Task have both exact-head delivery gates green; Time+Label first exact head `40f0b0a1efaa` / run `34809651084` is green and the plan is archived, with only its archive-head gate pending. Current dependency-ready implementation work is:
+TIME-1201..1206, LABEL-1301..1305, Knowledge `KNOW-2001..2003`, Governance `GOV-1901..1904`, Setting `SETTING-9202..9210`, Goal `GOAL-7202..7211`, and Task `TASK-7301..7310` are complete. Setting, Goal, Task, and Time+Label all have both exact-head delivery gates green; Time+Label first exact head `40f0b0a1efaa` / run `34809651084` and archive head `95721d3a256` / run `34811284555` are both green. Current dependency-ready implementation work is:
 
 1. `ROUTINE-2201` — converge the already-landed Routine vNext foundation into the sole public/write model and destructively retire legacy ReminderTemplate/Group tracks.
 2. `PORT-1601/1602` — continue owner capability registration as surviving owner models stabilize; execute final V2 deletion only when V3 preserves all required product coverage.

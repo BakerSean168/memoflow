@@ -37,4 +37,4 @@ updated: 2026-09-09T00:00:00+08:00
 - `docs/architecture/adr/ADR-101-product-time-presentation-and-compatibility-surface.md`
 - `docs/plan/archive/2026-09-09-time-label-vnext-model-convergence.md`
 
-TIME-1201～1206 与 Label lane 已全部完成；FOUNDATION-1401 首道 exact-head CI 全绿，归档计划中的 archive-head gate 为最终 delivery truth。
+TIME-1201～1206 与 Label lane 已全部完成；FOUNDATION-1401 两道 exact-head CI 已全绿，Time + Label vNext 已正式归档闭环。
