@@ -10,7 +10,8 @@ import {
   type CloudAuthRevocationPort,
   type AccountClosureEventPublisher,
 } from '../application';
-import type { Clock, UserTimeContextPort } from '@memoflow/time';
+import type { Clock } from '@memoflow/time';
+import type { UserTimeContextPort } from '@memoflow/time';
 import type { AccountApplicationPort } from '../application';
 import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 import {
