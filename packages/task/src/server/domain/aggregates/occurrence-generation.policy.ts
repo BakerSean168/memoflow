@@ -119,9 +119,11 @@ export function generateOccurrences(
   }
 
   const time = createTimeFacade({ context: ctx.timeContext });
+  const fromDay = startOfLocalDay(fromDate, ctx.timeContext);
+  const rangeEnd = time.calendar.endOfDay(startOfLocalDay(toDate, ctx.timeContext));
   if (ctx.schedule.kind === TaskPlanScheduleKind.OneTime) {
     const targetDay = ymdStart(ctx.schedule.date, ctx.timeContext);
-    if (targetDay < fromDate || targetDay > toDate || hasOccurrenceOnDate(ctx, targetDay)) {
+    if (targetDay < fromDay || targetDay > rangeEnd || hasOccurrenceOnDate(ctx, targetDay)) {
       return { occurrences: [] };
     }
     return {
@@ -140,8 +142,6 @@ export function generateOccurrences(
     };
   }
 
-  const fromDay = startOfLocalDay(fromDate, ctx.timeContext);
-  const rangeEnd = time.calendar.endOfDay(startOfLocalDay(toDate, ctx.timeContext));
   const maxOccurrences =
     ctx.schedule.recurrence.end.kind === 'Count' ? ctx.schedule.recurrence.end.count : null;
   const existingCount = ctx.existingOccurrences.filter((occurrence) => !occurrence.deletedAt).length;

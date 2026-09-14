@@ -80,6 +80,32 @@ describe('PrismaTaskOccurrenceMapper canonical persistence', () => {
     expect(domain.checklistState).toHaveLength(1);
   });
 
+  it('maps persisted string and number instants', () => {
+    const domain = PrismaTaskOccurrenceMapper.toDomain(
+      pendingRow({
+        createdAt: '2026-03-01T00:00:00.000Z' as unknown as Date,
+        updatedAt: Date.parse('2026-03-02T00:00:00.000Z') as unknown as Date,
+      }),
+    );
+
+    expect(domain.createdAt).toBe(Date.parse('2026-03-01T00:00:00.000Z'));
+    expect(domain.updatedAt).toBe(Date.parse('2026-03-02T00:00:00.000Z'));
+  });
+
+  it('falls back to an empty checklist for empty persisted state', () => {
+    const domain = PrismaTaskOccurrenceMapper.toDomain(pendingRow({ checklistState: '' }));
+
+    expect(domain.checklistState).toEqual([]);
+  });
+
+  it('rejects an invalid required persisted instant', () => {
+    expect(() =>
+      PrismaTaskOccurrenceMapper.toDomain(
+        pendingRow({ createdAt: 'not-a-date' as unknown as Date }),
+      ),
+    ).toThrow(/Invalid persisted instant/);
+  });
+
   it('maps Completed Result/checklist facts without legacy comment/end-time reconstruction', () => {
     const row = completedRow();
     const domain = PrismaTaskOccurrenceMapper.toDomain(row);

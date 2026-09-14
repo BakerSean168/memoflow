@@ -3,6 +3,7 @@ import { TaskPlanScheduleKind, TaskRecurrenceEndKind } from '@memoflow/contracts
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import {
   aLoadedTaskPlan,
+  aOneTimeTask,
   aRecurringTask,
   aDailyRecurrence,
   anAllDayTiming,
@@ -45,6 +46,25 @@ describe('TaskOccurrenceGenerationService', () => {
 
     expect(occurrences.length).toBeGreaterThan(0);
     expect(occurrences.length).toBeLessThanOrEqual(11);
+  });
+
+  it('materializes a one-time task for today from midday and remains idempotent', () => {
+    const midday = Date.now() + 12 * 60 * 60 * 1000;
+    const plan = aOneTimeTask({ startDate: midday });
+    const firstPass = service.generateOccurrences(plan, TASK_TEST_TIME_CONTEXT, {
+      fromDate: midday,
+      targetDate: midday + DAY_MS,
+    });
+
+    expect(firstPass).toHaveLength(1);
+    expect(firstPass[0].scheduleDate).toBe('2025-06-15');
+    expect(
+      service.generateOccurrences(plan, TASK_TEST_TIME_CONTEXT, {
+        fromDate: midday,
+        targetDate: midday + DAY_MS,
+        existingOccurrences: firstPass,
+      }),
+    ).toEqual([]);
   });
 
   it('caps materialization by the finite recurrence count', () => {
