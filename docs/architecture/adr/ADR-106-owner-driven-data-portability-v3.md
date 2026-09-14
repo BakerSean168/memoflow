@@ -2,12 +2,12 @@
 tags: [adr, data-portability, backup, import, migration]
 description: Data Portability V3 采用 owner-driven capability registry 与 versioned manifest
 created: 2026-09-09T00:31:00+08:00
-updated: 2026-09-09T00:31:00+08:00
+updated: 2026-09-14T00:00:00+08:00
 ---
 
 # ADR-106: Owner-driven Data Portability V3
 
-**状态：** 已采纳，部分实施（V3 framework + preferences@3 owner 已落地；full cutover pending）
+**状态：** 已采纳，部分实施（V3 framework + account-profile@3、preferences@3、notification-delivery-preferences@3 owner 已落地；full cutover pending）
 **日期：** 2026-09-09
 
 ## Problem
@@ -50,8 +50,9 @@ goal@3
 task@3
 routine@2
 knowledge@2
+account-profile@3
 preferences@3
-notification-preferences@2
+notification-delivery-preferences@3
 ```
 
 Data Portability 只通过统一 `PortableCapability` interface 编排。

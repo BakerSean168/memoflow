@@ -2132,6 +2132,16 @@
       ]
     },
     {
+      "path": "packages/account/src/server/application/account-portability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/account/src/server/application/services/__tests__/account-closure-coordinator.integration.spec.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -11516,7 +11526,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 27
+      "fileCount": 28
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -11915,7 +11925,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 27
+      "fileCount": 28
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -12201,6 +12211,7 @@
       "packages/account/src/electron/account-electron.surface.spec.ts",
       "packages/account/src/electron/desktop-account-profile-sync.spec.ts",
       "packages/account/src/electron/index.spec.ts",
+      "packages/account/src/server/application/account-portability.spec.ts",
       "packages/account/src/server/application/services/__tests__/account-closure-coordinator.spec.ts",
       "packages/account/src/server/application/use-cases/commands/__tests__/close-account.test.ts",
       "packages/account/src/server/application/use-cases/commands/__tests__/update-account-profile.test.ts",
@@ -12731,7 +12742,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1102,
+    "unit": 1103,
     "integration": 38,
     "smoke": 3,
     "boundary-ipc": 9,
